@@ -67,36 +67,11 @@ dtype_limits
 
 __version__ = '0.20.0.dev0'
 
-submodules = [
-    'color',
-    'data',
-    'draw',
-    'exposure',
-    'feature',
-    'filters',
-    'future',
-    'graph',
-    'io',
-    'measure',
-    'metrics',
-    'morphology',
-    'registration',
-    'restoration',
-    'segmentation',
-    'transform',
-    'util',
-]
-
 from ._shared.version_requirements import ensure_python_version
-ensure_python_version((3, 7))
+ensure_python_version((3, 8))
 
-from ._shared import lazy
-__getattr__, __lazy_dir__, _ = lazy.attach(
-    __name__,
-    submodules,
-    submod_attrs={'data': ['data_dir']}
-)
-
+import lazy_loader as lazy
+__getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
 
 def __dir__():
     return __lazy_dir__() + ['__version__']
@@ -124,9 +99,9 @@ def _raise_build_error(e):
         # Picking up the local install: this will work only if the
         # install is an 'inplace build'
         msg = _INPLACE_MSG
-    raise ImportError("""%s
-It seems that scikit-image has not been built correctly.
-%s""" % (e, msg))
+    raise ImportError(
+        f"{e}\nIt seems that scikit-image has not been built correctly.\n{msg}"
+    )
 
 
 try:
@@ -149,16 +124,22 @@ else:
     except ImportError as e:
         _raise_build_error(e)
 
-    # All skimage root imports go here
-    from .util.dtype import (img_as_float32,
-                             img_as_float64,
-                             img_as_float,
-                             img_as_int,
-                             img_as_uint,
-                             img_as_ubyte,
-                             img_as_bool,
-                             dtype_limits)
+    # Legacy imports into the root namespace; not advertised in __all__
+    from .util.dtype import (
+        dtype_limits,
+        img_as_float32,
+        img_as_float64,
+        img_as_float,
+        img_as_int,
+        img_as_uint,
+        img_as_ubyte,
+        img_as_bool
+    )
+
     from .util.lookfor import lookfor
+
+    from .data import data_dir
+
 
 if 'dev' in __version__:
     # Append last commit date and hash to dev version information, if available

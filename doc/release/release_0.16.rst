@@ -185,7 +185,7 @@ Deprecations
 - The function `skimage.transform.match_histogram` is deprecated in favor of
   `skimage.exposure.match_histogram` (#4107)
 - The parameter ``neighbors`` of `skimage.morphology.convex_hull_object` is
-  deprecated. 
+  deprecated.
 - The `skimage.transform.randon_tranform` function will convert input image
   of integer type to float by default in 0.18. To preserve current behaviour,
   set the new argument ``preserve_range`` to True. (#4131)
@@ -196,7 +196,7 @@ Documentation improvements
 
 - DOC: Improve the documentation of transform.resize with respect to the anti_aliasing_sigma parameter (#3911)
 - Fix URL for stain deconvolution reference (#3862)
-- Fix doc for denoise guassian (#3869)
+- Fix doc for denoise gaussian (#3869)
 - DOC: various enhancements (cross links, gallery, ref...), mainly for corner detection (#3996)
 - [DOC] clarify that the inertia_tensor may be nD in documentation (#4013)
 - [DOC] How to test and write benchmarks (#4016)
@@ -421,4 +421,3 @@ Reviewers for this release
 - Sebastian Berg
 - Stefan van der Walt
 - Uwe Schmidt
-

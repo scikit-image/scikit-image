@@ -1,16 +1,3 @@
-"""
-`reconstruction_loop` originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-
-Updated by Gregory Lee (April, 2022):
-    - added a 64-bit integer variant for large images
-
-"""
 cimport numpy as cnp
 cimport cython
 cnp.import_array()

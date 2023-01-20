@@ -1,7 +1,6 @@
 import numpy as np
 
-from skimage._shared.testing import (assert_array_almost_equal, assert_equal,
-                                     expected_warnings)
+from skimage._shared.testing import (assert_array_almost_equal, assert_equal)
 from skimage import color, data, img_as_float
 from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel
@@ -106,9 +105,8 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
-                                   dtype=dtype, multichannel=True)
+    cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
+                               dtype=dtype, channel_axis=-1)
 
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 

@@ -190,8 +190,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
 
 
 @utils.channel_as_last_axis()
-@utils.deprecate_multichannel_kwarg(multichannel_position=2)
-def inpaint_biharmonic(image, mask, multichannel=False, *,
+def inpaint_biharmonic(image, mask, *,
                        split_into_regions=False, channel_axis=None):
     """Inpaint masked points in image with biharmonic equations.
 
@@ -203,10 +202,6 @@ def inpaint_biharmonic(image, mask, multichannel=False, *,
         Array of pixels to be inpainted. Have to be the same shape as one
         of the 'image' channels. Unknown pixels have to be represented with 1,
         known pixels - with 0.
-    multichannel : boolean, optional
-        If True, the last `image` dimension is considered as a color channel,
-        otherwise as spatial. This argument is deprecated: specify
-        `channel_axis` instead.
     split_into_regions : boolean, optional
         If True, inpainting is performed on a region-by-region basis. This is
         likely to be slower, but will have reduced memory requirements.

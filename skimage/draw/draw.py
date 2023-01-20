@@ -925,6 +925,9 @@ def _rectangle_slice(start, end=None, extent=None):
     top_left = np.minimum(start, end)
     bottom_right = np.maximum(start, end)
 
+    top_left = np.round(top_left).astype(int)
+    bottom_right = np.round(bottom_right).astype(int)
+
     if extent is None:
         bottom_right += 1
 

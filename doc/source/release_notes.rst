@@ -3,7 +3,7 @@
 
 .. contents:: |nbsp|
 
-Release notes
-=============
+Latest release notes
+====================
 
 .. include:: ../release/_release_notes_for_docs.rst

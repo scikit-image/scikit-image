@@ -2,18 +2,14 @@ import numpy as np
 import pytest
 
 from skimage._shared.testing import expected_warnings, test_parallel
-from skimage.feature import (graycomatrix,
-                             graycoprops,
-                             greycomatrix,
-                             greycoprops,
-                             local_binary_pattern,
-                             multiblock_lbp)
+from skimage.feature import (graycomatrix, graycoprops,
+                             local_binary_pattern, multiblock_lbp)
 from skimage.transform import integral_image
 
 
 class TestGLCM():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[0, 0, 1, 1],
                                [0, 0, 1, 1],
                                [0, 2, 2, 2],
@@ -162,22 +158,6 @@ class TestGLCM():
         dissimilarity = graycoprops(result, 'dissimilarity')
         np.testing.assert_almost_equal(dissimilarity[0, 0], 0.418, decimal=3)
 
-    def test_greycomatrix_and_greycoprops_deprecations(self):
-        expected = graycomatrix(self.image, [1], [0, np.pi / 2], 4,
-                                normed=True, symmetric=True)
-        with expected_warnings(["Function ``greycomatrix``"]):
-            result = greycomatrix(self.image, [1], [0, np.pi / 2], 4,
-                                  normed=True, symmetric=True)
-        np.testing.assert_array_equal(expected, result)
-
-        result = np.round(result, 3)
-        dissimilarity_expected = graycoprops(result, 'dissimilarity')
-        with expected_warnings(["Function ``greycoprops``"]):
-            dissimilarity_result = greycoprops(result, 'dissimilarity')
-        np.testing.assert_array_equal(
-            dissimilarity_expected, dissimilarity_result
-        )
-
     def test_dissimilarity_2(self):
         result = graycomatrix(self.image, [1, 3], [np.pi / 2], 4,
                               normed=True, symmetric=True)
@@ -225,14 +205,14 @@ class TestGLCM():
 
 class TestLBP():
 
-    def setup(self):
+    def setup_method(self):
         self.image = np.array([[255,   6, 255,   0,  141,   0],
                                [ 48, 250, 204, 166,  223,  63],
                                [  8,   0, 159,  50,  255,  30],
                                [167, 255,  63,  40,  128, 255],
                                [  0, 255,  30,  34,  255,  24],
                                [146, 241, 255,   0,  189, 126]],
-                              dtype='double')
+                              dtype=np.uint8)
 
     @test_parallel()
     def test_default(self):
@@ -247,6 +227,20 @@ class TestLBP():
 
     def test_ror(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'ror')
+        ref = np.array([[  0, 127,   0, 255,   3, 255],
+                        [ 31,   0,   5,  51,   1,   7],
+                        [119, 255,   3, 127,   0,  63],
+                        [  3,   1,  31,  63,  31,   0],
+                        [255,   1, 255,  95,   0, 127],
+                        [  3,   5,   0, 255,   1,   3]])
+        np.testing.assert_array_equal(lbp, ref)
+
+    @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+    def test_float_warning(self, dtype):
+        image = self.image.astype(dtype)
+        msg = "Applying `local_binary_pattern` to floating-point images"
+        with expected_warnings([msg]):
+            lbp = local_binary_pattern(image, 8, 1, 'ror')
         ref = np.array([[  0, 127,   0, 255,   3, 255],
                         [ 31,   0,   5,  51,   1,   7],
                         [119, 255,   3, 127,   0,  63],
@@ -278,7 +272,9 @@ class TestLBP():
 
         # Use P=4 to avoid interpolation effects
         P, R = 4, 1
-        lbp = local_binary_pattern(image, P, R, 'var')
+        msg = "Applying `local_binary_pattern` to floating-point images"
+        with expected_warnings([msg]):
+            lbp = local_binary_pattern(image, P, R, 'var')
 
         # Take central part to avoid border effect.
         lbp = lbp[5:-5, 5:-5]

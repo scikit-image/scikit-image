@@ -5,10 +5,15 @@ on:
 
 name: Build docs
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    permissions:
+      contents: write # for Git to git push
     name: Build docs
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -26,7 +31,7 @@ jobs:
           python -m pip install -r requirements/docs.txt
       - name: Install package
         run: |
-          python -m pip install .
+          python -m pip install -vv --no-build-isolation .
       - name: Push docs
         run: |
           eval "$(ssh-agent -s)"

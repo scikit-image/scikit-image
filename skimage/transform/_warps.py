@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.lib import NumpyVersion
 import scipy
 from scipy import ndimage as ndi
 
@@ -11,8 +10,7 @@ from ..measure import block_reduce
 from .._shared.utils import (get_bound_method_class, safe_as_int, warn,
                              convert_to_float, _to_ndimage_mode,
                              _validate_interpolation_order,
-                             channel_as_last_axis,
-                             deprecate_multichannel_kwarg)
+                             channel_as_last_axis)
 
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -118,6 +116,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         to downsampling. It is crucial to filter when downsampling
         the image to avoid aliasing artifacts. If not specified, it is set to
         True when downsampling an image whose data type is not bool.
+        It is also set to False when using nearest neighbor interpolation
+        (``order`` == 0) with integer input data type.
     anti_aliasing_sigma : {float, tuple of floats}, optional
         Standard deviation for Gaussian filtering used when anti-aliasing.
         By default, this value is chosen as (s - 1) / 2 where s is the
@@ -150,8 +150,10 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = image.astype(np.float32)
 
     if anti_aliasing is None:
-        anti_aliasing = (not input_type == bool and
-                         any(x < y for x, y in zip(output_shape, input_shape)))
+        anti_aliasing = (
+            not input_type == bool and
+            not (np.issubdtype(input_type, np.integer) and order == 0) and
+            any(x < y for x, y in zip(output_shape, input_shape)))
 
     if input_type == bool and anti_aliasing:
         raise ValueError("anti_aliasing must be False for boolean images")
@@ -181,56 +183,9 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
         image = ndi.gaussian_filter(image, anti_aliasing_sigma,
                                     cval=cval, mode=ndi_mode)
 
-    if NumpyVersion(scipy.__version__) >= '1.6.0':
-        # The grid_mode kwarg was introduced in SciPy 1.6.0
-        zoom_factors = [1 / f for f in factors]
-        out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
-                       cval=cval, grid_mode=True)
-
-    # TODO: Remove the fallback code below once SciPy >= 1.6.0 is required.
-
-    # 2-dimensional interpolation
-    elif len(output_shape) == 2 or (len(output_shape) == 3 and
-                                    output_shape[2] == input_shape[2]):
-        rows = output_shape[0]
-        cols = output_shape[1]
-        input_rows = input_shape[0]
-        input_cols = input_shape[1]
-        if rows == 1 and cols == 1:
-            tform = AffineTransform(translation=(input_cols / 2.0 - 0.5,
-                                                 input_rows / 2.0 - 0.5))
-        else:
-            # 3 control points necessary to estimate exact AffineTransform
-            src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-            dst_corners = np.zeros(src_corners.shape, dtype=np.float64)
-            # take into account that 0th pixel is at position (0.5, 0.5)
-            dst_corners[:, 0] = factors[1] * (src_corners[:, 0] + 0.5) - 0.5
-            dst_corners[:, 1] = factors[0] * (src_corners[:, 1] + 0.5) - 0.5
-
-            tform = AffineTransform()
-            tform.estimate(src_corners, dst_corners)
-
-        # Make sure the transform is exactly metric, to ensure fast warping.
-        tform.params[2] = (0, 0, 1)
-        tform.params[0, 1] = 0
-        tform.params[1, 0] = 0
-
-        # clip outside of warp to clip w.r.t input values, not filtered values.
-        out = warp(image, tform, output_shape=output_shape, order=order,
-                   mode=mode, cval=cval, clip=False,
-                   preserve_range=preserve_range)
-
-    else:  # n-dimensional interpolation
-
-        coord_arrays = [factors[i] * (np.arange(d) + 0.5) - 0.5
-                        for i, d in enumerate(output_shape)]
-
-        coord_map = np.array(np.meshgrid(*coord_arrays,
-                                         sparse=False,
-                                         indexing='ij'))
-
-        out = ndi.map_coordinates(image, coord_map, order=order,
-                                  mode=ndi_mode, cval=cval)
+    zoom_factors = [1 / f for f in factors]
+    out = ndi.zoom(image, zoom_factors, order=order, mode=ndi_mode,
+                   cval=cval, grid_mode=True)
 
     _clip_warp_output(img_bounds, out, mode, cval, clip)
 
@@ -238,9 +193,8 @@ def resize(image, output_shape, order=None, mode='reflect', cval=0, clip=True,
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg(multichannel_position=7)
 def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
-            preserve_range=False, multichannel=False,
+            preserve_range=False,
             anti_aliasing=None, anti_aliasing_sigma=None, *,
             channel_axis=None):
     """Scale image by a certain factor.
@@ -284,10 +238,6 @@ def rescale(image, scale, order=None, mode='reflect', cval=0, clip=True,
         image is converted according to the conventions of `img_as_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. This argument is deprecated:
-        specify `channel_axis` instead.
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
         to down-scaling. It is crucial to filter when down-sampling
@@ -1062,9 +1012,8 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
 
 @channel_as_last_axis()
-@deprecate_multichannel_kwarg()
 def warp_polar(image, center=None, *, radius=None, output_shape=None,
-               scaling='linear', multichannel=False, channel_axis=None,
+               scaling='linear', channel_axis=None,
                **kwargs):
     """Remap image to polar or log-polar coordinates space.
 
@@ -1084,11 +1033,6 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
     scaling : {'linear', 'log'}, optional
         Specify whether the image warp is polar or log-polar. Defaults to
         'linear'.
-    multichannel : bool, optional
-        Whether the image is a 3-D array in which the third axis is to be
-        interpreted as multiple channels. If set to `False` (default), only 2-D
-        arrays are accepted. This argument is deprecated: specify
-        `channel_axis` instead.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds

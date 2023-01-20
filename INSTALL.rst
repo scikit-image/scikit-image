@@ -91,11 +91,11 @@ install packages and are using a
 <https://stackoverflow.com/questions/41573587/what-is-the-difference-between-venv-pyvenv-pyenv-virtualenv-virtualenvwrappe>`_\
 ).
 
-While it is possible to use pip without a virtual environment, it is not advised: 
-virtual environments create a clean Python environment that does not interfere 
+While it is possible to use pip without a virtual environment, it is not advised:
+virtual environments create a clean Python environment that does not interfere
 with any existing system installation, can be easily removed, and contain only
 the package versions your application needs. They help avoid a common
-challenge known as 
+challenge known as
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
 To install the current ``scikit-image`` you'll need at least Python 3.6. If
@@ -108,6 +108,7 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
+To access the full selection of demo datasets, use ``scikit-image[data]``.
 To include a selection of other scientific Python packages that expand
 ``scikit-image``'s capabilities to include, e.g., parallel processing, you
 can install the package ``scikit-image[optional]``:
@@ -166,7 +167,8 @@ Downloading all demo datasets
 Some of the data used in our examples is hosted online and is not installed
 by default by the procedures explained above. Data are downloaded once, at the
 first call, but this requires an internet connection. If you prefer downloading
-all the demo datasets to be able to work offline, you can run this command:
+all the demo datasets to be able to work offline, ensure that package ``pooch``
+is installed and then run this command:
 
 .. code-block:: sh
 
@@ -300,11 +302,11 @@ When using ``venv``, you may find the following bash commands useful:
   # Make sure that pip is up to date
   pip install --upgrade pip
   # Install all development and runtime dependencies of scikit-image
-  pip install -r <(cat requirements/*.txt)
+  pip install -r requirements.txt
   # Build and install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
 
@@ -326,11 +328,11 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install major development and runtime dependencies of scikit-image
-  conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
+  conda install --file requirements/default.txt --file requirements/build.txt --file requirements/test.txt
   # Install scikit-image from source
-  pip install -e . -vv
+  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
-  pytest skimage
+  pytest --pyargs skimage
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -465,6 +467,19 @@ Full requirements list
 .. include:: ../../requirements/docs.txt
    :literal:
 
+**Developer Requirements**
+
+.. include:: ../../requirements/developer.txt
+   :literal:
+
+**Data Requirements**
+
+The full selection of demo datasets is only available with the
+following installed:
+
+.. include:: ../../requirements/data.txt
+   :literal:
+
 **Optional Requirements**
 
 You can use ``scikit-image`` with the basic requirements listed above, but some
@@ -488,18 +503,6 @@ functionality is only available with the following installed:
 .. include:: ../../requirements/optional.txt
   :literal:
 
-
-**Extra Requirements**
-
-These requirements have been included as a convenience, but are not widely
-installable through PyPI on our supported platforms. As such, we keep them in
-a separate list for more advanced members of our community to install.
-
-* `imread <https://pythonhosted.org/imread/>`__
-    Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
-
-.. include:: ../../requirements/extras.txt
-  :literal:
 
 Help with contributor installation
 ------------------------------------------------------------------------------

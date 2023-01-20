@@ -47,18 +47,24 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     mode : str, optional
         One of the following strings, selecting the type of noise to add:
 
-        - 'gaussian'  Gaussian-distributed additive noise.
-        - 'localvar'  Gaussian-distributed additive noise, with specified
-                      local variance at each point of `image`.
-        - 'poisson'   Poisson-distributed noise generated from the data.
-        - 'salt'      Replaces random pixels with 1.
-        - 'pepper'    Replaces random pixels with 0 (for unsigned images) or
-                      -1 (for signed images).
-        - 's&p'       Replaces random pixels with either 1 or `low_val`, where
-                      `low_val` is 0 for unsigned images or -1 for signed
-                      images.
-        - 'speckle'   Multiplicative noise using out = image + n*image, where
-                      n is Gaussian noise with specified mean & variance.
+        'gaussian' (default)
+            Gaussian-distributed additive noise.
+        'localvar'
+            Gaussian-distributed additive noise, with specified local variance
+            at each point of `image`.
+        'poisson'
+            Poisson-distributed noise generated from the data.
+        'salt'
+            Replaces random pixels with 1.
+        'pepper'
+            Replaces random pixels with 0 (for unsigned images) or -1 (for
+            signed images).
+        's&p'
+            Replaces random pixels with either 1 or `low_val`, where `low_val`
+            is 0 for unsigned images or -1 for signed images.
+        'speckle'
+            Multiplicative noise using ``out = image + n * image``, where ``n``
+            is Gaussian noise with specified mean & variance.
     seed : {None, int, `numpy.random.Generator`}, optional
         If `seed` is None the `numpy.random.Generator` singleton is
         used.
@@ -159,8 +165,10 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     for key in kwargs:
         if key not in allowedkwargs[allowedtypes[mode]]:
-            raise ValueError('%s keyword not in allowed keywords %s' %
-                             (key, allowedkwargs[allowedtypes[mode]]))
+            raise ValueError(
+                f"{key} keyword not in allowed keywords "
+                f"{allowedkwargs[allowedtypes[mode]]}"
+            )
 
     # Set kwarg defaults
     for kw in allowedkwargs[allowedtypes[mode]]:

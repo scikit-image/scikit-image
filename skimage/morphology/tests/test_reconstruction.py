@@ -1,14 +1,4 @@
-"""
-These tests are originally part of CellProfiler, code licensed under both GPL and BSD licenses.
-
-Website: http://www.cellprofiler.org
-Copyright (c) 2003-2009 Massachusetts Institute of Technology
-Copyright (c) 2009-2011 Broad Institute
-All rights reserved.
-Original author: Lee Kamentsky
-"""
 import math
-
 import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal
@@ -161,16 +151,3 @@ def test_offset_not_none():
     assert_array_almost_equal(
         reconstruction(seed, mask, method='dilation',
                        footprint=np.ones(3), offset=np.array([0])), expected)
-
-
-def test_deprecated_import():
-    msg = "Importing from skimage.morphology.greyreconstruct is deprecated."
-    with expected_warnings([msg + r"|\A\Z"]):
-        from skimage.morphology.greyreconstruct import reconstruction
-
-
-def test_selem_kwarg_deprecation():
-    seed = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
-    mask = np.array([0, 8, 6, 8, 8, 8, 8, 4, 4, 0])
-    with expected_warnings(["`selem` is a deprecated argument name"]):
-        reconstruction(seed, mask, method='dilation', selem=np.ones(3))

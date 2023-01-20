@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type, deprecate_kwarg
+from .._shared.utils import _supported_float_type
 from . import uft
 
 
@@ -16,16 +16,16 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
-       Input degraded image
+    image : ndarray
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        Point Spread Function. This is assumed to be the impulse
        response (input image space) if the data-type is real, or the
        transfer function (Fourier space) if the data-type is
        complex. There is no constraints on the shape of the impulse
-       response. The transfer function must be of shape `(M, N)` if
-       `is_real is True`, `(M, N // 2 + 1)` otherwise (see
-       `np.fft.rfftn`).
+       response. The transfer function must be of shape
+       `(N1, N2, ..., ND)` if `is_real is True`,
+       `(N1, N2, ..., ND // 2 + 1)` otherwise (see `np.fft.rfftn`).
     balance : float
        The regularisation parameter value that tunes the balance
        between the data adequacy that improve frequency restoration
@@ -128,10 +128,10 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
                                            balance * np.abs(reg) ** 2)
     if is_real:
-        deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
+        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
                              shape=image.shape)
     else:
-        deconv = uft.uifft2(wiener_filter * uft.ufft2(image))
+        deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
     if clip:
         deconv[deconv > 1] = 1
@@ -243,18 +243,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://hal.archives-ouvertes.fr/hal-00674508
     """
-
-    if user_params is not None:
-        for s in ('max', 'min'):
-            if (s + '_iter') in user_params:
-                warning_msg = (
-                    f'`{s}_iter` is a deprecated key for `user_params`. '
-                    f'It will be removed in version 1.0. '
-                    f'Use `{s}_num_iter` instead.'
-                )
-                warnings.warn(warning_msg, FutureWarning)
-                user_params[s + '_num_iter'] = user_params.pop(s + '_iter')
-
     params = {'threshold': 1e-4, 'max_num_iter': 200,
               'min_num_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
@@ -366,15 +354,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-@deprecate_kwarg({'iterations': 'num_iter'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     """Richardson-Lucy deconvolution.
 
     Parameters
     ----------
     image : ndarray
-       Input degraded image (can be N dimensional).
+       Input degraded image (can be n-dimensional).
     psf : ndarray
        The point spread function.
     num_iter : int, optional

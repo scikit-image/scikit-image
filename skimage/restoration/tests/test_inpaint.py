@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage import data, img_as_float
 from skimage._shared import testing
-from skimage._shared.testing import assert_allclose, expected_warnings
+from skimage._shared.testing import assert_allclose
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.metrics import mean_squared_error, normalized_root_mse
@@ -71,33 +71,6 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
          [0., 0.0625, 0.25000000, 0.5625000, 1.00000000]]
     )
     assert_allclose(ref, out, rtol=1e-5)
-
-
-def test_inpaint_biharmonic_2d_color_deprecated():
-    img = img_as_float(data.astronaut()[:64, :64])
-
-    mask = np.zeros(img.shape[:2], dtype=bool)
-    mask[8:16, :16] = 1
-    img_defect = img * ~mask[..., np.newaxis]
-    mse_defect = mean_squared_error(img, img_defect)
-
-    # providing multichannel argument positionally also warns
-    channel_warning = "`multichannel` is a deprecated argument"
-    matrix_warning = "the matrix subclass is not the recommended way"
-    with expected_warnings([channel_warning + '|' + matrix_warning]):
-        img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
-                                                  multichannel=True)
-    mse_restored = mean_squared_error(img, img_restored)
-
-    assert mse_restored < 0.01 * mse_defect
-
-    # providing multichannel argument positionally also warns
-    channel_warning = "Providing the `multichannel` argument"
-    with expected_warnings([channel_warning + '|' + matrix_warning]):
-        img_restored = inpaint.inpaint_biharmonic(img_defect, mask, True)
-    mse_restored = mean_squared_error(img, img_restored)
-
-    assert mse_restored < 0.01 * mse_defect
 
 
 @testing.parametrize('split_into_regions', [False, True])
@@ -170,7 +143,7 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
     rstate = np.random.default_rng(0)
     for radius in [0, 2, 4]:
         # larger defects are less common
-        thresh = 3.25 + 0.25 * radius  # larger defects less commmon
+        thresh = 3.25 + 0.25 * radius  # larger defects less common
         tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
         if radius > 0:
             tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))

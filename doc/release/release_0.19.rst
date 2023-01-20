@@ -283,7 +283,7 @@ Documentation
 - Single out docs-only PRs in review process.
 - Use matplotlib's infinite axline to demonstrate hough transform.
 - Clarify disk documentation inconsistency regarding 'shape'.
-- docs: fix simple typo, convertions -> conversions.
+- docs: fix simple typo, conversions -> conversions.
 - Fixes to linspace in example.
 - Minor fixes to Hough line transform code and examples.
 - Added 1/2 pixel bounds to extent of displayed images in several examples.
@@ -562,7 +562,7 @@ Newly introduced deprecations:
   ``skimage.segmentation.clear_border``
 - The ``input`` argument of ``skimage.measure.label`` has been renamed
   ``label_image``. The old name is deprecated.
-- standardize on ``num_iter`` for paramters describing the number of iterations
+- standardize on ``num_iter`` for parameters describing the number of iterations
   and ``max_num_iter`` for parameters specifying an iteration limit. Functions
   where the old argument names have now been deprecated are::
 

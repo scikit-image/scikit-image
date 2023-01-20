@@ -6,20 +6,9 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
-from packaging import version
 
 import numpy as np
-from PIL import Image, __version__ as pil_version
-
-# Check CVE-2021-27921 and others
-if version.parse(pil_version) < version.parse('8.1.2'):
-    from warnings import warn
-    warn('Your installed pillow version is < 8.1.2. '
-         'Several security issues (CVE-2021-27921, '
-         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
-         'and more) have been fixed in pillow 8.1.2 or higher. '
-         'We recommend to upgrade this library.',
-         stacklevel=2)
+from PIL import Image
 
 from tifffile import TiffFile
 
@@ -106,7 +95,7 @@ def _is_multipattern(input_pattern):
     return is_multipattern
 
 
-class ImageCollection(object):
+class ImageCollection:
     """Load and manage a collection of image files.
 
     Parameters
@@ -263,7 +252,7 @@ class ImageCollection(object):
                 try:
                     im = Image.open(fname)
                     im.seek(0)
-                except (IOError, OSError):
+                except OSError:
                     continue
                 i = 0
                 while True:
@@ -358,8 +347,7 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError("There are only %s images in the collection"
-                             % num)
+            raise IndexError(f"There are only {num} images in the collection")
         return n
 
     def __iter__(self):
@@ -447,39 +435,36 @@ class MultiImage(ImageCollection):
 
     Notes
     -----
-    The object that is returned can be used as a list of image-data objects,
-    where each entry in the list represents one image. In this regard it is
-    very similar to `ImageCollection`, but the two differ in the treatment
-    of multi-frame images.
+    `MultiImage` returns a list of image-data arrays. In this
+    regard, it is very similar to `ImageCollection`, but the two differ in
+    their treatment of multi-frame images.
 
     For a TIFF image containing N frames of size WxH, `MultiImage` stores
-    all frames of that image as a single entry of shape `(N, W, H)` in the
-    list. `ImageCollection` instead creates N entries of shape `(W, H)`.
+    all frames of that image as a single element of shape `(N, W, H)` in the
+    list. `ImageCollection` instead creates N elements of shape `(W, H)`.
 
-    For an animated GIF image, `MultiImage` in the current implementation
-    will only read one frame, while `ImageCollection` by default will read
-    all of them.
+    For an animated GIF image, `MultiImage` reads only the first frame, while
+    `ImageCollection` reads all frames by default.
 
     Examples
     --------
     >>> from skimage import data_dir
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
-    >>> img = MultiImage(multipage_tiff)
-    >>> len(img) # img contains one file
+    >>> multi_img = MultiImage(multipage_tiff)
+    >>> len(multi_img)  # multi_img contains one element
     1
-    >>> img[0].shape # this image contains two frames of size (15, 10)
+    >>> multi_img[0].shape  # this element is a two-frame image of shape:
     (2, 15, 10)
 
-    >>> ic = ImageCollection(multipage_tiff)
-    >>> len(ic) # ic contains two images
+    >>> image_col = ImageCollection(multipage_tiff)
+    >>> len(image_col)  # image_col contains two elements
     2
-    >>> for frame in ic:
-    ...     print (frame.shape)
+    >>> for frame in image_col:
+    ...     print(frame.shape)  # each element is a frame of shape (15, 10)
     ...
     (15, 10)
     (15, 10)
-
     """
 
     def __init__(self, filename, conserve_memory=True, dtype=None,
@@ -488,7 +473,7 @@ class MultiImage(ImageCollection):
         from ._io import imread
 
         self._filename = filename
-        super(MultiImage, self).__init__(filename, conserve_memory,
+        super().__init__(filename, conserve_memory,
                                          load_func=imread, **imread_kwargs)
 
     @property

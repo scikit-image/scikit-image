@@ -207,6 +207,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
 def _preprocess(labels):
 
     label_values, inv_idx = np.unique(labels, return_inverse=True)
+    if max(label_values) <= 0:
+        raise ValueError('No seeds provided in label image: please ensure '
+                         'it contains at least one positive value')
 
     if not (label_values == 0).any():
         warn('Random walker only segments unlabeled areas, where '
@@ -260,9 +263,8 @@ def _preprocess(labels):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-@utils.deprecate_multichannel_kwarg(multichannel_position=6)
 def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, spacing=None,
+                  return_full_prob=False, spacing=None,
                   *, prob_tol=1e-3, channel_axis=None):
     """Random walker algorithm for segmentation from markers.
 
@@ -300,7 +302,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
           less memory-consuming than the brute force method for large images,
           but it is quite slow.
         - 'cg_j' (conjugate gradient with Jacobi preconditionner): the
-          Jacobi preconditionner is applyed during the Conjugate
+          Jacobi preconditionner is applied during the Conjugate
           gradient method iterations. This may accelerate the
           convergence of the 'cg' method.
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
@@ -314,10 +316,6 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
-    multichannel : bool, optional
-        If True, input data is parsed as multichannel data (see 'data' above
-        for proper input format in this case). This argument is deprecated:
-        specify `channel_axis` instead.
     return_full_prob : bool, optional
         If True, the probability that a pixel belongs to each of the
         labels will be returned, instead of only the most likely

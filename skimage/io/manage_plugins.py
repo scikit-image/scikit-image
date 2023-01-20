@@ -118,8 +118,7 @@ def _scan_plugins():
 
         for p in provides:
             if p not in plugin_store:
-                print("Plugin `%s` wants to provide non-existent `%s`."
-                      " Ignoring." % (name, p))
+                print(f"Plugin `{name}` wants to provide non-existent `{p}`. Ignoring.")
 
         # Add plugins that provide 'imread' as provider of 'imread_collection'.
         need_to_add_collection = ('imread_collection' not in valid_provides and
@@ -183,15 +182,15 @@ def call_plugin(kind, *args, **kwargs):
 
     """
     if kind not in plugin_store:
-        raise ValueError('Invalid function (%s) requested.' % kind)
+        raise ValueError(f'Invalid function ({kind}) requested.')
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        msg = ("No suitable plugin registered for %s.\n\n"
+        msg = (f"No suitable plugin registered for {kind}.\n\n"
                "You may load I/O plugins with the `skimage.io.use_plugin` "
                "command.  A list of all available plugins are shown in the "
                "`skimage.io` docstring.")
-        raise RuntimeError(msg % kind)
+        raise RuntimeError(msg)
 
     plugin = kwargs.pop('plugin', None)
     if plugin is None:
@@ -201,8 +200,7 @@ def call_plugin(kind, *args, **kwargs):
         try:
             func = [f for (p, f) in plugin_funcs if p == plugin][0]
         except IndexError:
-            raise RuntimeError('Could not find the plugin "%s" for %s.' %
-                               (plugin, kind))
+            raise RuntimeError(f'Could not find the plugin "{plugin}" for {kind}.')
 
     return func(*args, **kwargs)
 
@@ -239,8 +237,7 @@ def use_plugin(name, kind=None):
         kind = plugin_store.keys()
     else:
         if kind not in plugin_provides[name]:
-            raise RuntimeError("Plugin %s does not support `%s`." %
-                               (name, kind))
+            raise RuntimeError(f"Plugin {name} does not support `{kind}`.")
 
         if kind == 'imshow':
             kind = [kind, '_app_show']
@@ -251,7 +248,7 @@ def use_plugin(name, kind=None):
 
     for k in kind:
         if k not in plugin_store:
-            raise RuntimeError("'%s' is not a known plugin function." % k)
+            raise RuntimeError(f"'{k}' is not a known plugin function.")
 
         funcs = plugin_store[k]
 
@@ -287,7 +284,7 @@ def _load(plugin):
     if plugin in find_available_plugins(loaded=True):
         return
     if plugin not in plugin_module_name:
-        raise ValueError("Plugin %s not found." % plugin)
+        raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
         plugin_module = __import__('skimage.io._plugins.' + modname,
@@ -298,8 +295,7 @@ def _load(plugin):
         if p == 'imread_collection':
             _inject_imread_collection_if_needed(plugin_module)
         elif not hasattr(plugin_module, p):
-            print("Plugin %s does not provide %s as advertised.  Ignoring." %
-                  (plugin, p))
+            print(f"Plugin {plugin} does not provide {p} as advertised.  Ignoring.")
             continue
 
         store = plugin_store[p]
@@ -325,7 +321,7 @@ def plugin_info(plugin):
     try:
         return plugin_meta_data[plugin]
     except KeyError:
-        raise ValueError('No information on plugin "%s"' % plugin)
+        raise ValueError(f'No information on plugin "{plugin}"')
 
 
 def plugin_order():

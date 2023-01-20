@@ -21,7 +21,7 @@ def hausdorff_distance(image0, image1, method="standard"):
     -------
     distance : float
         The Hausdorff distance between coordinates of nonzero pixels in
-        ``image0`` and ``image1``, using the Euclidian distance.
+        ``image0`` and ``image1``, using the Euclidean distance.
 
     Notes
     -----

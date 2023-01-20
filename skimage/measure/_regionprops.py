@@ -136,6 +136,19 @@ OBJECT_COLUMNS = [col for col, dtype in COL_DTYPES.items() if dtype == object]
 
 PROP_VALS = set(PROPS.values())
 
+_require_intensity_image = (
+    'image_intensity',
+    'intensity_max',
+    'intensity_mean',
+    'intensity_min',
+    'moments_weighted',
+    'moments_weighted_central',
+    'centroid_weighted',
+    'centroid_weighted_local',
+    'moments_weighted_hu',
+    'moments_weighted_normalized',
+)
+
 
 def _infer_number_of_required_args(func):
     """Infer the number of required arguments for a function
@@ -219,8 +232,9 @@ def only2d(method):
     @wraps(method)
     def func2d(self, *args, **kwargs):
         if self._ndim > 2:
-            raise NotImplementedError('Property %s is not implemented for '
-                                      '3D images' % method.__name__)
+            raise NotImplementedError(
+                f"Property {method.__name__} is not implemented for 3D images"
+            )
         return method(self, *args, **kwargs)
     return func2d
 
@@ -228,9 +242,9 @@ def only2d(method):
 def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
 
-    Paramters
+    Parameters
     ---------
-    inertia_tensor_eigvals : seqeunce of float
+    inertia_tensor_eigvals : sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
     Returns
@@ -319,6 +333,11 @@ class RegionProperties:
             }
 
     def __getattr__(self, attr):
+        if self._intensity_image is None and attr in _require_intensity_image:
+            raise AttributeError(
+                f"Attribute '{attr}' unavailable when `intensity_image` "
+                f"has not been specified."
+            )
         if attr in self._extra_properties:
             func = self._extra_properties[attr]
             n_args = _infer_number_of_required_args(func)
@@ -345,6 +364,14 @@ class RegionProperties:
                     f'be 1 or 2, but {attr} takes {n_args} arguments.'
                 )
         elif attr in PROPS and attr.lower() == attr:
+            if (
+                self._intensity_image is None
+                and PROPS[attr] in _require_intensity_image
+            ):
+                raise AttributeError(
+                    f"Attribute '{attr}' unavailable when `intensity_image` "
+                    f"has not been specified."
+            )
             # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
         else:
@@ -678,17 +705,7 @@ class RegionProperties:
         props = PROP_VALS
 
         if self._intensity_image is None:
-            unavailable_props = ('image_intensity',
-                                 'intensity_max',
-                                 'intensity_mean',
-                                 'intensity_min',
-                                 'moments_weighted',
-                                 'moments_weighted_central',
-                                 'centroid_weighted',
-                                 'centroid_weighted_local',
-                                 'moments_weighted_hu',
-                                 'moments_weighted_normalized')
-
+            unavailable_props = _require_intensity_image
             props = props.difference(unavailable_props)
 
         return iter(sorted(props))
@@ -905,7 +922,7 @@ def regionprops_table(label_image, intensity_image=None,
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
@@ -1023,7 +1040,7 @@ def regionprops_table(label_image, intensity_image=None,
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                coordinates=None, *, extra_properties=None, spacing=None):
+                *, extra_properties=None, spacing=None):
     r"""Measure properties of labeled image regions.
 
     Parameters
@@ -1049,25 +1066,12 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-    coordinates : DEPRECATED
-        This argument is deprecated and will be removed in a future version
-        of scikit-image.
-
-        See :ref:`Coordinate conventions <numpy-images-coordinate-conventions>`
-        for more details.
-
-        .. deprecated:: 0.16.0
-            Use "rc" coordinates everywhere. It may be sufficient to call
-            ``numpy.transpose`` on your label image to get the same values as
-            0.15 and earlier. However, for some properties, the transformation
-            will be less trivial. For example, the new orientation is
-            :math:`\frac{\pi}{2}` plus the old orientation.
     extra_properties : Iterable of callables
         Add extra property computation functions that are not included with
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property wil not be visible and a UserWarning is
+        property the extra property will not be visible and a UserWarning is
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
@@ -1283,29 +1287,13 @@ def regionprops(label_image, intensity_image=None, cache=True,
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
                     'Non-integer image types are ambiguous: '
-                    'use skimage.measure.label to label the connected'
-                    'components of label_image,'
-                    'or label_image.astype(np.uint8) to interpret'
+                    'use skimage.measure.label to label the connected '
+                    'components of label_image, '
+                    'or label_image.astype(np.uint8) to interpret '
                     'the True values as a single label.')
         else:
             raise TypeError(
                     'Non-integer label_image types are ambiguous')
-
-    if coordinates is not None:
-        if coordinates == 'rc':
-            msg = ('The coordinates keyword argument to skimage.measure.'
-                   'regionprops is deprecated. All features are now computed '
-                   'in rc (row-column) coordinates. Please remove '
-                   '`coordinates="rc"` from all calls to regionprops before '
-                   'updating scikit-image.')
-            warn(msg, stacklevel=2, category=FutureWarning)
-        else:
-            msg = ('Values other than "rc" for the "coordinates" argument '
-                   'to skimage.measure.regionprops are no longer supported. '
-                   'You should update your code to use "rc" coordinates and '
-                   'stop using the "coordinates" argument, or use skimage '
-                   'version 0.15.x or earlier.')
-            raise ValueError(msg)
 
     regions = []
 

@@ -1,19 +1,12 @@
 """Convex Hull."""
 from itertools import product
 import numpy as np
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, QhullError
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
 from .._shared.utils import warn
-
-try:
-    # Should be public API of scipy spatial once #15003 is released
-    # see https://github.com/scipy/scipy/pull/15003
-    from scipy.spatial import QhullError
-except ImportError:
-    from scipy.spatial.qhull import QhullError
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
@@ -77,7 +70,8 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     return coords_in_hull
 
 
-def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
+def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
+                      include_borders=True):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -95,6 +89,8 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
         Tolerance when determining whether a point is inside the hull. Due
         to numerical floating point errors, a tolerance of 0 can result in
         some points erroneously being classified as being outside the hull.
+    include_borders: bool, optional
+        If ``False``, vertices/edges are excluded from the final hull mask.
 
     Returns
     -------
@@ -152,7 +148,10 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10):
 
     # If 2D, use fast Cython function to locate convex hull pixels
     if ndim == 2:
-        mask = grid_points_in_poly(image.shape, vertices)
+        labels = grid_points_in_poly(image.shape, vertices, binarize=False)
+        # If include_borders is True, we include vertices (2) and edge
+        # points (3) in the mask, otherwise only the inside of the hull (1)
+        mask = labels >= 1 if include_borders else labels == 1
     else:
         gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
                                 (ndim, -1))

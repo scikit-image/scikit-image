@@ -6,15 +6,12 @@ connected to a given seed point with a different value.
 
 import numpy as np
 
-from .._shared.utils import deprecate_kwarg
 from ..util import crop
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
 from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
                     _set_border_values,)
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def flood_fill(image, seed_point, new_value, *, footprint=None,
                connectivity=None, tolerance=None, in_place=False):
     """Perform flood filling on an image.
@@ -112,8 +109,6 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
     return image
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def flood(image, seed_point, *, footprint=None, connectivity=None,
           tolerance=None):
     """Mask corresponding to a flood fill.
@@ -135,7 +130,7 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
         are considered as part of the neighborhood (fully connected).
     connectivity : int, optional
         A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is larger or
+        Adjacent pixels whose squared distance from the center is less than or
         equal to `connectivity` are considered neighbors. Ignored if
         `footprint` is not None.
     tolerance : float or int, optional

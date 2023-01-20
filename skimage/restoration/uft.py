@@ -405,7 +405,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     func = fft.rfftn if is_real else fft.fftn
     out = func(irpadded, axes=(range(-dim, 0)))
 
-    # TODO: remove .astype call onces SciPy >= 1.4 is required
+    # TODO: remove .astype call once SciPy >= 1.4 is required
     cplx_dtype = np.promote_types(irpadded_dtype, np.complex64)
     return out.astype(cplx_dtype, copy=False)
 

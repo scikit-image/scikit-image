@@ -1,16 +1,14 @@
-scikit-image Code of Conduct
-============================
+# scikit-image Code of Conduct
 
 scikit-image adopts the [SciPy code of conduct][scipy_coc].
 
 [scipy_coc]: https://github.com/scipy/scipy/blob/master/doc/source/dev/conduct/code_of_conduct.rst
 
-Introduction
-------------
+## Introduction
 
 This code of conduct applies to all spaces managed by the scikit-image project,
 including all public and private forums, issue trackers, wikis, blogs,
-Twitter, and any other communication channel used by our community.  The scikit-image
+Twitter, and any other communication channel used by our community. The scikit-image
 project does not organise in-person events, however events related to our
 community should have a code of conduct similar in spirit to this one.
 
@@ -24,9 +22,7 @@ understanding of a collaborative, shared environment and goals. Please try to
 follow this code in spirit as much as in letter, to create a friendly and
 productive environment that enriches the surrounding community.
 
-
-Specific Guidelines
--------------------
+## Specific Guidelines
 
 We strive to:
 
@@ -54,9 +50,9 @@ We strive to:
    problems later, so we encourage questions, although we may direct them to
    the appropriate forum. We will try hard to be responsive and helpful.
 
-5. Be careful in the words that we choose.  We are careful and respectful in
+5. Be careful in the words that we choose. We are careful and respectful in
    our communication and we take responsibility for our own speech. Be kind to
-   others. Do not insult or put down other participants.  We will not accept
+   others. Do not insult or put down other participants. We will not accept
    harassment or other exclusionary behaviour, such as:
 
    - Violent threats or language directed against another person.
@@ -71,9 +67,7 @@ We strive to:
    - Repeated harassment of others. In general, if someone asks you to stop, then stop.
    - Advocating for, or encouraging, any of the above behaviour.
 
-
-Diversity Statement
--------------------
+## Diversity Statement
 
 The scikit-image project welcomes and encourages participation by everyone. We are
 committed to being a community that everyone enjoys being part of. Although
@@ -87,7 +81,6 @@ national origin, neurotype, phenotype, political beliefs, profession, race,
 religion, sexual orientation, socioeconomic status, subculture and technical
 ability, to the extent that these do not conflict with this code of conduct.
 
-
 Though we welcome people fluent in all languages, scikit-image development is
 conducted in English.
 
@@ -95,12 +88,10 @@ Standards for behaviour in the scikit-image community are detailed in the Code o
 Conduct above. Participants in our community should uphold these standards
 in all their interactions and help others to do so as well (see next section).
 
-
-Reporting Guidelines
---------------------
+## Reporting Guidelines
 
 We know that it is painfully common for internet communication to start at or
-devolve into obvious and flagrant abuse.  We also recognize that sometimes
+devolve into obvious and flagrant abuse. We also recognize that sometimes
 people may have a bad day, or be unaware of some of the guidelines in this Code
 of Conduct. Please keep this in mind when deciding on how to respond to a
 breach of this Code.
@@ -126,15 +117,13 @@ considering your report. Alternatively, if for any reason you feel
 uncomfortable making a report to the committee, then you can also contact:
 
 - Any member of the {ref}`scikit-image Steering Council <governance>`, or
-- Senior [NumFOCUS staff](https://numfocus.org/code-of-conduct#persons-responsible): 
+- Senior [NumFOCUS staff](https://numfocus.org/code-of-conduct#persons-responsible):
   <conduct@numfocus.org>.
 
+## Incident reporting resolution & Code of Conduct enforcement
 
-Incident reporting resolution & Code of Conduct enforcement
------------------------------------------------------------
-
-*This section summarizes the most important points, more details can be found
-in the* {ref}`reporting manual <CoC_reporting_manual>`.
+_This section summarizes the most important points, more details can be found
+in the_ {ref}`reporting manual <CoC_reporting_manual>`.
 
 We will investigate and respond to all complaints. The scikit-image Code of Conduct
 Committee and the scikit-image Steering Committee (if involved) will protect the
@@ -158,9 +147,7 @@ report will be:
 The committee will respond to any report as soon as possible, and at most
 within 72 hours.
 
-
-Endnotes
---------
+## Endnotes
 
 We are thankful to the groups behind the following documents, from which we
 drew content and inspiration:

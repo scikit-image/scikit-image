@@ -165,7 +165,7 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class GeometricTransform(object):
+class GeometricTransform:
     """Base class for geometric transformations.
 
     """
@@ -997,7 +997,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self._tesselation.vertices:
+        for tri in self._tesselation.simplices:
             affine = AffineTransform(dimensionality=ndim)
             success &= affine.estimate(src[tri, :], dst[tri, :])
             self.affines.append(affine)
@@ -1007,7 +1007,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
         self.inverse_affines = []
-        for tri in self._inverse_tesselation.vertices:
+        for tri in self._inverse_tesselation.simplices:
             affine = AffineTransform(dimensionality=ndim)
             success &= affine.estimate(dst[tri, :], src[tri, :])
             self.inverse_affines.append(affine)
@@ -1039,7 +1039,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self._tesselation.vertices)):
+        for index in range(len(self._tesselation.simplices)):
             # affine transform for triangle
             affine = self.affines[index]
             # all coordinates within triangle
@@ -1074,7 +1074,7 @@ class PiecewiseAffineTransform(GeometricTransform):
         # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self._inverse_tesselation.vertices)):
+        for index in range(len(self._inverse_tesselation.simplices)):
             # affine transform for triangle
             affine = self.inverse_affines[index]
             # all coordinates within triangle
@@ -1651,8 +1651,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     """
     ttype = ttype.lower()
     if ttype not in TRANSFORMS:
-        raise ValueError('the transformation type \'%s\' is not'
-                         'implemented' % ttype)
+        raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
     tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
     tform.estimate(src, dst, *args, **kwargs)

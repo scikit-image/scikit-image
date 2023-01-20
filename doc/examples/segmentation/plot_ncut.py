@@ -14,7 +14,7 @@ References
 """
 
 from skimage import data, segmentation, color
-from skimage.future import graph
+from skimage import graph
 from matplotlib import pyplot as plt
 
 

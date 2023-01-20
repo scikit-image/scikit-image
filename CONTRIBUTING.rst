@@ -44,14 +44,64 @@ Here's the long and short of it:
      - ``upstream``, which refers to the ``scikit-image`` repository
      - ``origin``, which refers to your personal fork
 
+   * Next, you need to set up your build environment.
+     Here are instructions for two popular environment managers:
+
+     * ``venv`` (pip based)
+
+       ::
+
+         # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+         # One common convention is to place it inside an ``envs`` directory under your home directory:
+         mkdir ~/envs
+         python -m venv ~/envs/skimage-dev
+         # Activate it
+         source ~/envs/skimage-dev/bin/activate
+         # Install main development and runtime dependencies
+         pip install -r requirements.txt
+         # Install build dependencies of scikit-image
+         pip install -r requirements/build.txt
+         # Build scikit-image from source
+         ./dev.py build
+         # Test your installation
+         ./dev.py test
+         # Try the new version in IPython
+         ./dev.py ipython
+
+     * ``conda`` (Anaconda or Miniconda)
+
+       ::
+
+         # Create a conda environment named ``skimage-dev``
+         conda create --name skimage-dev
+         # Activate it
+         conda activate skimage-dev
+         # Install main development and runtime dependencies
+         conda install -c conda-forge --file requirements.txt
+         # Install build dependencies of scikit-image
+         conda install -c conda-forge --file requirements/build.txt
+         # Build scikit-image from source
+         ./dev.py build
+         # Test your installation
+         ./dev.py test
+         # Try the new version in IPython
+         ./dev.py ipython
+
+   * For more information about building and using the dev.py package, see ``meson.md``.
+
+   * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
+     when you do a ``git commit``::
+
+       pre-commit install
+
 .. note::
 
     Although our code is hosted on `github
-    <https://github.com/scikit-image/>`_, our dataset is stored on `gitlab
+    <https://github.com/scikit-image/>`_, our datasets are stored on `gitlab
     <https://gitlab.com/scikit-image/data>`_ and fetched with `pooch
-    <https://github.com/fatiando/pooch>`_. New data must be submitted on
+    <https://github.com/fatiando/pooch>`_. New datasets must be submitted on
     gitlab. Once merged, the data registry ``skimage/data/_registry.py``
-    in the main codebase on github must be updated.
+    in the main Github repository can be updated.
 
 2. Develop your contribution:
 
@@ -117,7 +167,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 5. Document changes
 
    If your change introduces any API modifications, please update
-   ``doc/source/api_changes.txt``.
+   ``doc/release/release_dev.rst``.
 
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.
@@ -152,11 +202,7 @@ Which displays a message like::
 
 Inside the conflicted file, you'll find sections like these::
 
-   <<<<<<< HEAD
    The way the text looks in your branch
-   =======
-   The way the text looks in the main branch
-   >>>>>>> main
 
 Choose one version of the text that should be kept, and delete the
 rest::
@@ -206,7 +252,7 @@ Stylistic Guidelines
 --------------------
 
 * Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <https://www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+  <https://www.python.org/dev/peps/pep-0008/>`__.
 
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
@@ -264,7 +310,7 @@ To measure the test coverage, install
 `pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
 (using ``pip install pytest-cov``) and then run::
 
-  $ make coverage
+  $ ./dev.py coverage
 
 This will print a report with one line for each file in `skimage`,
 detailing the test coverage::
@@ -279,20 +325,18 @@ detailing the test coverage::
 Building docs
 -------------
 
-To build docs, run ``make`` from the ``doc`` directory. ``make help`` lists
-all targets. For example, to build the HTML documentation, you can run:
+To build the HTML documentation, you can run:
 
 .. code:: sh
 
-    make html
+    ./dev.py docs
 
 Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
 To rebuild a full clean documentation, run:
 
 .. code:: sh
 
-    make clean
-    make html
+    ./dev.py docs --clean
 
 Requirements
 ~~~~~~~~~~~~
@@ -462,7 +506,8 @@ optimized for. A historical view of our snapshots can be found on
 at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
 
 In this section we will review how to setup the benchmarks,
-and three commands ``asv dev``, ``asv run`` and ``asv continuous``.
+and three commands ``./dev.py asv -- dev``, ``./dev.py asv -- run`` and
+``./dev.py asv -- continuous``.
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -480,7 +525,7 @@ If you are using conda, then the command::
 
 is more appropriate. Once installed, it is useful to run the command::
 
-  asv machine
+  ./dev.py asv -- machine
 
 To let airspeed velocity know more information about your machine.
 
@@ -551,7 +596,7 @@ Testing the benchmarks locally
 Prior to running the true benchmark, it is often worthwhile to test that the
 code is free of typos. To do so, you may use the command::
 
-  asv dev -b TransformSuite
+  ./dev.py asv -- dev -b TransformSuite
 
 Where the ``TransformSuite`` above will be run once in your current environment
 to test that everything is in order.
@@ -566,7 +611,7 @@ features. The command ``asv run -E existing`` will specify that you wish to run
 the benchmark in your existing environment. This will save a significant amount
 of time since building scikit-image can be a time consuming task::
 
-  asv run -E existing -b TransformSuite
+  ./dev.py asv -- run -E existing -b TransformSuite
 
 Comparing results to main
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -575,7 +620,7 @@ Often, the goal of a PR is to compare the results of the modifications in terms
 speed to a snapshot of the code that is in the main branch of the
 ``scikit-image`` repository. The command ``asv continuous`` is of help here::
 
-  asv continuous main -b TransformSuite
+  ./dev.py asv -- continuous main -b TransformSuite
 
 This call will build out the environments specified in the ``asv.conf.json``
 file and compare the performance of the benchmark between your current commit
@@ -583,7 +628,7 @@ and the code in the main branch.
 
 The output may look something like::
 
-  $ asv continuous main -b TransformSuite
+  $ ./dev.py asv -- continuous main -b TransformSuite
   · Creating environments
   · Discovering benchmarks
   ·· Uninstalling from conda-py3.7-cython-numpy1.15-scipy
@@ -602,11 +647,10 @@ It is also possible to get a comparison of results for two specific revisions
 for which benchmark results have previously been run via the `asv compare`
 command::
 
-    asv compare v0.14.5 v0.17.2
+    ./dev.py asv -- compare v0.14.5 v0.17.2
 
 Finally, one can also run ASV benchmarks only for a specific commit hash or
 release tag by appending ``^!`` to the commit or tag name. For example to run
 the skimage.filter module benchmarks on release v0.17.2::
 
-    asv run -b Filter v0.17.2^!
-    
+    ./dev.py asv -- run -b Filter v0.17.2^!
