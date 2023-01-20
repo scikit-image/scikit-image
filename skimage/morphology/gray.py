@@ -42,8 +42,9 @@ def _shift_footprint(footprint, shift_x, shift_y):
     ----------
     footprint : 2D array, shape (M, N)
         The input footprint.
-    shift_x, shift_y : bool
-        Whether to move `footprint` along each axis.
+    shift_x, shift_y : bool or None
+        Whether to move `footprint` along each axis. If `None`, the
+        array is not modified along that dimension.
 
     Returns
     -------
@@ -54,14 +55,14 @@ def _shift_footprint(footprint, shift_x, shift_y):
         # do nothing for 1D or 3D or higher footprints
         return footprint
     m, n = footprint.shape
-    if m % 2 == 0:
+    if shift_x is not None and m % 2 == 0:
         extra_row = np.zeros((1, n), footprint.dtype)
         if shift_x:
             footprint = np.vstack((footprint, extra_row))
         else:
             footprint = np.vstack((extra_row, footprint))
         m += 1
-    if n % 2 == 0:
+    if shift_y is not None and n % 2 == 0:
         extra_col = np.zeros((m, 1), footprint.dtype)
         if shift_y:
             footprint = np.hstack((footprint, extra_col))
@@ -70,61 +71,8 @@ def _shift_footprint(footprint, shift_x, shift_y):
     return footprint
 
 
-def pad_for_eccentric_footprints(func):
-    """Pad input images for certain morphological operations.
-
-    Parameters
-    ----------
-    func : callable
-        A morphological function, either opening or closing, that
-        supports eccentric footprints. Its parameters must
-        include at least `image`, `footprint`, and `out`.
-
-    Returns
-    -------
-    func_out : callable
-        The same function, but correctly padding the input image before
-        applying the input function.
-
-    See Also
-    --------
-    opening, closing.
-    """
-    @functools.wraps(func)
-    def func_out(image, footprint, out=None, *args, **kwargs):
-        pad_widths = []
-        padding = False
-        if out is None:
-            out = np.empty_like(image)
-        if _footprint_is_sequence(footprint):
-            # Note: in practice none of our built-in footprint sequences will
-            #       require padding (all are symmetric and have odd sizes)
-            footprint_shape = _shape_from_sequence(footprint)
-        else:
-            footprint_shape = footprint.shape
-        for axis_len in footprint_shape:
-            if axis_len % 2 == 0:
-                axis_pad_width = axis_len - 1
-                padding = True
-            else:
-                axis_pad_width = 0
-            pad_widths.append((axis_pad_width,) * 2)
-        if padding:
-            image = np.pad(image, pad_widths, mode='edge')
-            out_temp = np.empty_like(image)
-        else:
-            out_temp = out
-        out_temp = func(image, footprint, out=out_temp, *args, **kwargs)
-        if padding:
-            out[:] = crop(out_temp, pad_widths)
-        else:
-            out = out_temp
-        return out
-    return func_out
-
-
 @default_footprint
-def erosion(image, footprint=None, out=None, shift_x=True, shift_y=True):
+def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -144,9 +92,9 @@ def erosion(image, footprint=None, out=None, shift_x=True, shift_y=True):
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        shift footprint about center point. This only affects
-        eccentric footprints (i.e. footprint with even numbered
-        sides).
+        Shift footprint about center point. This only affects 2D footprints
+        with even-numbered sides. These two parameters are deprecated, see the
+        note below.
 
     Returns
     -------
@@ -168,6 +116,11 @@ def erosion(image, footprint=None, out=None, shift_x=True, shift_y=True):
     computational cost. Most of the builtin footprints such as
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    The `shift_x` and `shift_y` parameters are deprecated and should no longer
+    be used. Instead, create an odd-sized footprint by padding the even-sized
+    array with zeros. This allows you to better control the exact shift of the
+    footprint.
 
     Examples
     --------
@@ -202,7 +155,7 @@ def erosion(image, footprint=None, out=None, shift_x=True, shift_y=True):
 
 
 @default_footprint
-def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
+def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -223,9 +176,9 @@ def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
-        Shift footprint about center point. This only affects 2D
-        eccentric footprints (i.e., footprints with even-numbered
-        sides).
+        Shift footprint about center point. This only affects 2D footprints
+        with even-numbered sides. These two parameters are deprecated, see the
+        note below.
 
     Returns
     -------
@@ -247,6 +200,11 @@ def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
     computational cost. Most of the builtin footprints such as
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    The `shift_x` and `shift_y` parameters are deprecated and should no longer
+    be used. Instead, create an odd-sized footprint by padding the even-sized
+    array with zeros. This allows you to better control the exact shift of the
+    footprint.
 
     Examples
     --------
@@ -270,7 +228,6 @@ def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
         out = np.empty_like(image)
 
     if _footprint_is_sequence(footprint):
-        # shift and invert (see comment below) each footprint
         footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
                            for fp, n in footprint)
         return _iterate_gray_func(ndi.grey_dilation, image, footprints, out)
@@ -282,7 +239,6 @@ def dilation(image, footprint=None, out=None, shift_x=True, shift_y=True):
 
 
 @default_footprint
-@pad_for_eccentric_footprints
 def opening(image, footprint=None, out=None):
     """Return grayscale morphological opening of an image.
 
@@ -345,7 +301,6 @@ def opening(image, footprint=None, out=None):
 
 
 @default_footprint
-@pad_for_eccentric_footprints
 def closing(image, footprint=None, out=None):
     """Return grayscale morphological closing of an image.
 
