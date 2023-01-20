@@ -6,6 +6,7 @@ python_sources = [
   'test_heap.py',
   'test_mcp.py',
   'test_pixel_graph.py',
+  'test_rag.py',
   'test_spath.py'
 ]
 

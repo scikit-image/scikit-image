@@ -7,8 +7,6 @@ from skimage._shared.utils import _supported_float_type
 from skimage.data import camera
 from skimage.filters.lpi_filter import LPIFilter2D, filter_inverse, wiener
 
-have_scipy_fft = np.lib.NumpyVersion(scipy.__version__) >= '1.4.0'
-
 
 class TestLPIFilter2D:
 
@@ -32,13 +30,7 @@ class TestLPIFilter2D:
     )
     def test_filter_inverse(self, dtype):
         img = self.img.astype(dtype, copy=False)
-
-        if have_scipy_fft:
-            # scipy.fft will preserve single precision
-            expected_dtype = _supported_float_type(dtype)
-        else:
-            # numpy FFTs will convert to double precision
-            expected_dtype = np.float64
+        expected_dtype = _supported_float_type(dtype)
 
         F = self.f(img)
         assert F.dtype == expected_dtype
@@ -63,12 +55,7 @@ class TestLPIFilter2D:
     def test_wiener(self, dtype):
 
         img = self.img.astype(dtype, copy=False)
-        if have_scipy_fft:
-            # scipy.fft will preserve single precision
-            expected_dtype = _supported_float_type(dtype)
-        else:
-            # numpy FFTs will convert to double precision
-            expected_dtype = np.float64
+        expected_dtype = _supported_float_type(dtype)
 
         F = self.f(img)
         assert F.dtype == expected_dtype

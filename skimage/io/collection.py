@@ -6,20 +6,9 @@ from glob import glob
 import re
 from collections.abc import Sequence
 from copy import copy
-from packaging import version
 
 import numpy as np
-from PIL import Image, __version__ as pil_version
-
-# Check CVE-2021-27921 and others
-if version.parse(pil_version) < version.parse('8.1.2'):
-    from warnings import warn
-    warn('Your installed pillow version is < 8.1.2. '
-         'Several security issues (CVE-2021-27921, '
-         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
-         'and more) have been fixed in pillow 8.1.2 or higher. '
-         'We recommend to upgrade this library.',
-         stacklevel=2)
+from PIL import Image
 
 from tifffile import TiffFile
 

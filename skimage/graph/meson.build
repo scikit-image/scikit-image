@@ -1,5 +1,6 @@
 extensions = [
   '_mcp',
+  '_ncut_cy',
   '_spath',
   'heap'
 ]
@@ -17,6 +18,10 @@ endforeach
 python_sources = [
   '__init__.py',
   '_graph.py',
+  '_graph_cut.py',
+  '_graph_merge.py',
+  '_ncut.py',
+  '_rag.py',
   'mcp.py',
   'spath.py'
 ]

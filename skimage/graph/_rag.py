@@ -4,8 +4,8 @@ from scipy import ndimage as ndi
 from scipy import sparse
 import math
 
-from ... import measure, segmentation, util, color
-from ..._shared.version_requirements import require
+from .. import measure, segmentation, util, color
+from .._shared.version_requirements import require
 
 
 def _edge_generator_from_csr(csr_matrix):
@@ -207,7 +207,7 @@ class RAG(nx.Graph):
             self.add_node(new)
 
         for neighbor in neighbors:
-            data = weight_func(self, src, new, neighbor, *extra_arguments,
+            data = weight_func(self, src, dst, neighbor, *extra_arguments,
                                **extra_keywords)
             self.add_edge(neighbor, new, attr_dict=data)
 
@@ -341,8 +341,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
     Examples
     --------
-    >>> from skimage import data, segmentation
-    >>> from skimage.future import graph
+    >>> from skimage import data, segmentation, graph
     >>> img = data.astronaut()
     >>> labels = segmentation.slic(img)
     >>> rag = graph.rag_mean_color(img, labels)
@@ -406,8 +405,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
     Examples
     --------
-    >>> from skimage import data, segmentation, filters, color
-    >>> from skimage.future import graph
+    >>> from skimage import data, segmentation, filters, color, graph
     >>> img = data.chelsea()
     >>> labels = segmentation.slic(img)
     >>> edge_map = filters.sobel(color.rgb2gray(img))
@@ -488,8 +486,7 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
 
     Examples
     --------
-    >>> from skimage import data, segmentation
-    >>> from skimage.future import graph
+    >>> from skimage import data, segmentation, graph
     >>> import matplotlib.pyplot as plt
     >>>
     >>> img = data.coffee()

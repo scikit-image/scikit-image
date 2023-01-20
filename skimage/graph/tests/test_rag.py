@@ -1,6 +1,7 @@
+import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
-from skimage.future import graph
+from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
 
@@ -13,7 +14,7 @@ def max_edge(g, src, dst, n):
 
 
 def test_rag_merge():
-    g = graph.rag.RAG()
+    g = graph.RAG()
 
     for i in range(5):
         g.add_node(i, {'labels': [i]})
@@ -44,6 +45,34 @@ def test_rag_merge():
     n = g.merge_nodes(3, 4, in_place=False)
     assert sorted(g.nodes[n]['labels']) == list(range(5))
     assert list(g.edges()) == []
+
+
+@pytest.mark.parametrize(
+    "in_place", [True, False],
+)
+def test_rag_merge_gh5360(in_place):
+    # Add another test case covering the gallery example plot_rag.py.
+    # See bug report at gh-5360.
+    g = graph.RAG()
+    g.add_edge(1, 2, weight=10)
+    g.add_edge(2, 3, weight=20)
+    g.add_edge(3, 4, weight=30)
+    g.add_edge(4, 1, weight=40)
+    g.add_edge(1, 3, weight=50)
+    for n in g.nodes():
+        g.nodes[n]['labels'] = [n]
+    gc = g.copy()
+
+    # New node ID is chosen if in_place=False
+    merged_id = 3 if in_place is True else 5
+
+    g.merge_nodes(1, 3, in_place=in_place)
+    assert g.adj[merged_id][2]['weight'] == 10
+    assert g.adj[merged_id][4]['weight'] == 30
+
+    gc.merge_nodes(1, 3, weight_func=max_edge, in_place=in_place)
+    assert gc.adj[merged_id][2]['weight'] == 20
+    assert gc.adj[merged_id][4]['weight'] == 40
 
 
 def test_threshold_cut():

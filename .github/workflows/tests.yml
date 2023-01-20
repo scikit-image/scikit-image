@@ -115,11 +115,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              if [[ "${EXTRA_DEPS}" == "1" ]]; then
-              # Extra deps need compilation, and it may not always be possible to
-              # compile them easily on all platforms
-                  pip install -r ./requirements/extras.txt
-              fi
           fi
           source tools/github/script.sh
 
@@ -198,7 +193,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              pip install -r ./requirements/extras.txt
           fi
           source tools/github/script.sh
 

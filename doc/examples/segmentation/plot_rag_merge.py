@@ -11,7 +11,7 @@ until no highly similar region pairs remain.
 """
 
 from skimage import data, io, segmentation, color
-from skimage.future import graph
+from skimage import graph
 import numpy as np
 
 

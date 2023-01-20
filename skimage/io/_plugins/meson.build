@@ -28,7 +28,6 @@ python_sources = [
 ini_files = [
   'fits_plugin.ini',
   'gdal_plugin.ini',
-  'gtk_plugin.ini',
   'imageio_plugin.ini',
   'imread_plugin.ini',
   'matplotlib_plugin.ini',
