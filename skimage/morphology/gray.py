@@ -2,6 +2,7 @@
 Grayscale morphological operations
 """
 import functools
+import warnings
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -15,11 +16,11 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
 
 
 def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
-    """Helper to call `binary_func` for each footprint in a sequence.
+    """Helper to call ``binary_func`` for each footprint in a sequence.
 
     binary_func is a binary morphology function that accepts "footprint",
     "output" and "mode" keyword arguments
-    (e.g. `scipy.ndimage.grey_erosion`).
+    (e.g. ``scipy.ndimage.grey_erosion``).
     """
     fp, num_iter = footprints[0]
     gray_func(image, footprint=fp, output=out)
@@ -34,7 +35,7 @@ def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
 
 
 def _shift_footprint(footprint, shift_x, shift_y):
-    """Shift the binary image `footprint` in the left and/or up.
+    """Shift the binary image ``footprint`` in the left and/or up.
 
     This only affects 2D footprints with even number of rows
     or columns.
@@ -44,7 +45,7 @@ def _shift_footprint(footprint, shift_x, shift_y):
     footprint : 2D array, shape (M, N)
         The input footprint.
     shift_x, shift_y : bool or None
-        Whether to move `footprint` along each axis. If `None`, the
+        Whether to move ``footprint`` along each axis. If ``None``, the
         array is not modified along that dimension.
 
     Returns
@@ -52,6 +53,13 @@ def _shift_footprint(footprint, shift_x, shift_y):
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
         The shifted footprint.
     """
+    if shift_x is not None or shift_y is not None:
+        warning_msg = ("`shift_x` and `shift_y` are deprecated arguments. "
+                       "They will be removed in a future version. Please see "
+                       "the documentation to `skimage.morphology.dilation` or"
+                       "`skimage.morphology.erosion` for more information.")
+        warnings.warn(warning_msg, FutureWarning, stacklevel=3)
+
     if footprint.ndim != 2:
         # do nothing for 1D or 3D or higher footprints
         return footprint
@@ -95,26 +103,36 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
         Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated, see the
-        note below.
+        with even-numbered sides. These two parameters are deprecated, and
+        should not longer be used. Instead, create an odd-sized footprint by
+        padding the even-sized array with zeros. This allows you to better
+        control the exact shift of the footprint.
+
+        .. versionchanged:: 0.20
+            Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
+            removed in a future version.
+
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype, which causes them to not influence the
-        result. Default is `None`.
+        result. Default is ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    eroded : array, same shape as `image`
+    eroded : array, same shape as ``image``
         The result of the morphological erosion.
 
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
-    lower algorithm complexity makes the `skimage.filters.rank.minimum`
+    lower algorithm complexity makes the ``skimage.filters.rank.minimum``
     function more efficient for larger images and footprints.
 
     The footprint can also be a provided as a sequence of 2-tuples where the
@@ -126,11 +144,6 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     computational cost. Most of the builtin footprints such as
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
-
-    The `shift_x` and `shift_y` parameters are deprecated and should no longer
-    be used. Instead, create an odd-sized footprint by padding the even-sized
-    array with zeros. This allows you to better control the exact shift of the
-    footprint.
 
     Examples
     --------
@@ -199,27 +212,37 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
         Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated, see the
-        note below.
+        with even-numbered sides. These two parameters are deprecated, and
+        should not longer be used. Instead, create an odd-sized footprint by
+        padding the even-sized array with zeros. This allows you to better
+        control the exact shift of the footprint.
+
+        .. versionchanged:: 0.20
+            Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
+            removed in a future version.
+
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         minimum for the image's dtype, which causes them to not influence the
-        result. Default is `None`.
+        result. Default is ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    dilated : uint8 array, same shape and type as `image`
+    dilated : uint8 array, same shape and type as ``image``
         The result of the morphological dilation.
 
     Notes
     -----
-    For `uint8` (and `uint16` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the `skimage.filters.rank.maximum` function more
-    efficient for larger images and footprints.
+    For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the lower
+    algorithm complexity makes the ``skimage.filters.rank.maximum`` function
+    more efficient for larger images and footprints.
 
     The footprint can also be a provided as a sequence of 2-tuples where the
     first element of each 2-tuple is a footprint ndarray and the second element
@@ -231,10 +254,14 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
-    The `shift_x` and `shift_y` parameters are deprecated and should no longer
-    be used. Instead, create an odd-sized footprint by padding the even-sized
-    array with zeros. This allows you to better control the exact shift of the
-    footprint.
+    The dilation mirrors the footprint, whereas the erosion does not. This
+    allows their composition to form a closing or opening. The mirroring is
+    only noticeable for footprints that are not mirror symmetric.
+
+    .. versionchanged:: 0.20
+        In 0.19, the dilation did not mirror the footprint. Consequently, the
+        opening and closing operations were not correct for footprints that
+        were not mirror symmetric.
 
     Examples
     --------
@@ -301,18 +328,21 @@ def opening(image, footprint=None, out=None, mode=None, cval=0.0):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        `None`.
+        ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    opening : array, same shape and type as `image`
+    opening : array, same shape and type as ``image``
         The result of the morphological opening.
 
     Notes
@@ -372,18 +402,21 @@ def closing(image, footprint=None, out=None, mode=None, cval=0.0):
         The array to store the result of the morphology. If None,
         a new array will be allocated.
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        `None`.
+        ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    closing : array, same shape and type as `image`
+    closing : array, same shape and type as ``image``
         The result of the morphological closing.
 
     Notes
@@ -442,18 +475,21 @@ def white_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        `None`.
+        ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    out : array, same shape and type as `image`
+    out : array, same shape and type as ``image``
         The result of the morphological white top hat.
 
     Notes
@@ -534,18 +570,21 @@ def black_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The `mode` parameter determines how the array borders are handled.
-        If `None`, pixels outside the image domain are assumed to be the
+        The ``mode`` parameter determines how the array borders are handled.
+        If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        `None`.
+        ``None``.
     cval : scalar, optional
-        Value to fill past edges of input if `mode` is 'constant'. Default
+        Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
+
+        .. versionadded:: 0.20
+            ``mode`` and ``cval`` were added in 0.20.
 
     Returns
     -------
-    out : array, same shape and type as `image`
+    out : array, same shape and type as ``image``
         The result of the morphological black top hat.
 
     Notes
