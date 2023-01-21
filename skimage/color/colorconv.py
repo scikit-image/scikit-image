@@ -1045,7 +1045,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in XYZ color space. Same dimensions as input.
+        The image in XYZ color space, of same shape as input.
 
     Raises
     ------
@@ -1168,7 +1168,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in RGB format. Same dimensions as input.
+        The image in sRGB color space, of same shape as input.
 
     Raises
     ------
@@ -1177,7 +1177,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Notes
     -----
-    This function uses lab2xyz and xyz2rgb.
+    This function uses :func:`~.lab2xyz` and :func:`~.xyz2rgb`.
     The CIE XYZ tristimulus values are x_ref = 95.047, y_ref = 100., and
     z_ref = 108.883. See function :func:`~.get_xyz_coords` for a list of
     supported illuminants.
