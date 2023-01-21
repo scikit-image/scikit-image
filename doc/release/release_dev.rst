@@ -68,6 +68,8 @@ New features and improvements
   (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
 - Support array-likes consistently in ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``GeometricTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``, ``ProjectiveTransform``, ``SimilarityTransform``, ``estimate_transform``, and ``matrix_transform`` in ``skimage.transform``
   (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
+- Add parameters ``mode`` and ``cval`` to ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology``; these parameters set the boundary condition
+  (`#6665 <https://github.com/scikit-image/scikit-image/issues/6665>`_).
 
 Performance
 ~~~~~~~~~~~
@@ -131,6 +133,12 @@ Changes and new deprecations
   (`#6612 <https://github.com/scikit-image/scikit-image/pull/6612>`_).
 - Automatic detection of the color channel is deprecated in ``skimage.filters.gaussian`` and a warning is emitted if the parameter ``channel_axis`` is not set explicitly
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Parameters ``shift_x`` and ``shift_y`` in ``skimage.morphology.erosion`` and ``skimage.morphology.dilation`` are deprecated and a warning is emitted if they are given.
+  (`#6676 <https://github.com/scikit-image/scikit-image/issues/6676>`_).
+- ``skimage.morphology.dilation`` now always mirrors the footprint, this is noticeable only for non-mirror-symmetric footprints
+  (`#6676 <https://github.com/scikit-image/scikit-image/issues/6676>`_).
+- The default boundary condition for ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology`` was ``'reflect'``, now it is ``None``, which ignores pixels outside the image
+  (`#6665 <https://github.com/scikit-image/scikit-image/issues/6665>`_).
 
 Completed deprecations
 ----------------------
@@ -217,6 +225,10 @@ Bug fixes
   (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_).
 - Fix automatic detection of the color channel in ``skimage.filters.gaussian`` (this behavior is deprecated, see new deprecations)
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- ``skimage.morphology.closing`` and ``skimage.morphology.opening`` were not extensive and anti-extensive, respectively, if the footprint was not mirror symmetric
+  (`#6676 <https://github.com/scikit-image/scikit-image/issues/6676>`_).
+- Functions in ``skimage.morphology.gray`` now do exactly the same thing (with default arguments) as the equivalent functions in ``skimage.morphology.binary`` if given a binary input image
+  (`#6676 <https://github.com/scikit-image/scikit-image/issues/6676>`_).
 
 Documentation
 -------------

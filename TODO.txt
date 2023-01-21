@@ -25,7 +25,13 @@ Version 0.21
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
 
+Version 0.23
+------------
+* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
+  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
+  function ``_shift_footprint``.
+
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
-  to (sparse) matricies (instead of arrays).
+  to (sparse) matrices (instead of arrays).
