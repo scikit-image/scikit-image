@@ -1661,16 +1661,18 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 
 @channel_as_last_axis()
 def lab2lch(lab, *, channel_axis=-1):
-    """CIE-LAB to CIE-LCH color space conversion.
+    """Convert image in CIE-LAB to CIE-LCh color space.
 
-    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+    CIE-LCh is the cylindrical representation of CIE-LAB (Cartesian).
 
     Parameters
     ----------
     lab : (..., 3, ...) array_like
-        The N-D image in CIE-LAB format. The last (``N+1``-th) dimension must
-        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
-        color channels. Subsequent elements are copied.
+        The input image in CIE-LAB color space.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
+        The L* values range from 0 to 100;
+        the a* and b* values range from -128 to 127.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.
@@ -1681,16 +1683,21 @@ def lab2lch(lab, *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in LCH format, in a N-D array with same shape as input `lab`.
+        The image in CIE-LCh color space, of same shape as input.
 
     Raises
     ------
     ValueError
-        If `lch` does not have at least 3 color channels (i.e. l, a, b).
+        If `lab` does not have at least 3 channels (i.e., L*, a*, and b*).
 
     Notes
     -----
-    The Hue is expressed as an angle between ``(0, 2*pi)``
+    The h channel (i.e., hue) is expressed as an angle in range ``(0, 2*pi)``.
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
+    .. [2] https://en.wikipedia.org/wiki/HCL_color_space
 
     Examples
     --------
