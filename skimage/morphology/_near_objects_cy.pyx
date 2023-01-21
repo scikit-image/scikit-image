@@ -10,7 +10,7 @@
 import numpy as np
 cimport numpy as cnp
 
-from _shared.fused_numerics cimport np_real_numeric
+from .._shared.fused_numerics cimport np_real_numeric
 
 # Must be defined to use QueueWithHistory
 ctypedef Py_ssize_t QueueItem
