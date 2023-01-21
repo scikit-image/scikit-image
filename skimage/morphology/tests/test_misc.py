@@ -252,9 +252,9 @@ class Test_remove_near_objects:
         # First 3 objects are only just to close, last one is just far enough
         d = int(np.floor(minimal_distance))
         image = np.zeros(d * 3 + 2, dtype=dtype)
-        image[[0, d, 2 * d, 3 * d + 1]] = -1  # Negative values are objects
+        image[[0, d, 2 * d, 3 * d + 1]] = 1
         desired = np.zeros_like(image, dtype=dtype)
-        desired[[0, 2 * d, 3 * d + 1]] = -1
+        desired[[0, 2 * d, 3 * d + 1]] = 1
 
         result = remove_near_objects(image, minimal_distance=minimal_distance)
         assert result.dtype == desired.dtype
