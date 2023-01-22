@@ -236,3 +236,17 @@ def test_ball_series_approximation_unavailable():
     # ValueError if radius is too large (only precomputed up to radius=100)
     with pytest.raises(ValueError):
         footprints.ball(radius=10000, decomposition="sequence")
+
+
+def test_mirror_footprint():
+    footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    expected_res = np.array([[1, 1, 0], [1, 1, 0], [0, 0, 0]], dtype=np.uint8)
+    actual_res = footprints.mirror_footprint(footprint)
+    assert_equal(expected_res, actual_res)
+
+
+def test_pad_footprint():
+    footprint = np.array([[0, 0], [1, 1], [1, 1]], np.uint8)
+    expected_res = np.array([[0, 0, 0], [1, 1, 0], [1, 1, 0]], dtype=np.uint8)
+    actual_res = footprints.pad_footprint(footprint, right=True)
+    assert_equal(expected_res, actual_res)
