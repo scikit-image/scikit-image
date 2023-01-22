@@ -6,7 +6,7 @@ import functools
 import numpy as np
 from scipy import ndimage as ndi
 
-from .footprints import _footprint_is_sequence
+from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
 from .misc import default_footprint
 
 
@@ -32,7 +32,8 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
-def binary_erosion(image, footprint=None, out=None):
+def binary_erosion(image, footprint=None, out=None, mirror=False,
+                   border_value=True):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -54,6 +55,17 @@ def binary_erosion(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    mirror : bool, optional
+        Mirror the footprint along each dimension. Default is ``False``.
+
+        .. versionadded:: 0.20
+            ``mirror_footprint`` was added in 0.20.
+
+    border_value : int (cast to 0 or 1), optional
+        Value at the border in the output array. Default is ``True``.
+
+        .. versionadded:: 0.20
+            ``border_value`` was added in 0.20.
 
     Returns
     -------
@@ -73,6 +85,9 @@ def binary_erosion(image, footprint=None, out=None):
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
+    For even-sized footprints, ``binary_erosion`` and ``erosion`` produce an
+    output that differs: the one is shifted by one pixel compared to the other.
+
     See also
     --------
     skimage.morphology.isotropic_erosion
@@ -81,17 +96,22 @@ def binary_erosion(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
+    footprint = pad_footprint(footprint, right=True)
+    if mirror:
+        footprint = mirror_footprint(footprint)
+
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_erosion, image, footprint, out,
-                                    True)
+                                    border_value)
 
     ndi.binary_erosion(image, structure=footprint, output=out,
-                       border_value=True)
+                       border_value=border_value)
     return out
 
 
 @default_footprint
-def binary_dilation(image, footprint=None, out=None):
+def binary_dilation(image, footprint=None, out=None, mirror=True,
+                    border_value=False):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -113,6 +133,17 @@ def binary_dilation(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    mirror : bool, optional
+        Mirror the footprint along each dimension. Default is ``True``.
+
+        .. versionadded:: 0.20
+            ``mirror_footprint`` was added in 0.20.
+
+    border_value : int (cast to 0 or 1), optional
+        Value at the border in the output array. Default is ``False``.
+
+        .. versionadded:: 0.20
+            ``border_value`` was added in 0.20.
 
     Returns
     -------
@@ -132,6 +163,10 @@ def binary_dilation(image, footprint=None, out=None):
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
+    For non-symmetric footprints, ``binary_dilation`` and ``dilation`` produce
+    an output that differs: ``binary_dilation`` mirrors the footprint, whereas
+    ``dilation`` does not (by default).
+
     See also
     --------
     skimage.morphology.isotropic_dilation
@@ -140,12 +175,17 @@ def binary_dilation(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
+    footprint = pad_footprint(footprint, right=True)
+    if not mirror:
+        # Note that `ndi.binary_dilation` mirrors the footprint.
+        footprint = mirror_footprint(footprint)
+
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_dilation, image, footprint, out,
-                                    False)
+                                    border_value)
 
     ndi.binary_dilation(image, structure=footprint, output=out,
-                        border_value=False)
+                        border_value=border_value)
     return out
 
 
