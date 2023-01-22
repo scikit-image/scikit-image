@@ -3,6 +3,7 @@ python_sources = [
   'test_block.py',
   'test_blur_effect.py',
   'test_ccomp.py',
+  'test_colocalization.py',
   'test_entropy.py',
   'test_find_contours.py',
   'test_fit.py',
@@ -12,7 +13,7 @@ python_sources = [
   'test_pnpoly.py',
   'test_polygon.py',
   'test_profile.py',
-  'test_regionprops.py'
+  'test_regionprops.py',
 ]
 
 py3.install_sources(
