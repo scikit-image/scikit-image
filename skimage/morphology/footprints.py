@@ -959,3 +959,98 @@ def star(a, dtype=np.uint8):
     footprint[footprint > 0] = 1
 
     return footprint.astype(dtype)
+
+
+def _mirror_footprint(footprint):
+    """Mirror the footprint. Internal helper function.
+
+    Parameters
+    ----------
+    footprint : array
+        The input footprint.
+
+    Returns
+    -------
+    inverted : array, same size and type as `footprint`
+        The footprint, mirrored.
+    """
+    footprint = np.asarray(footprint)
+    return footprint[(slice(None, None, -1),) * footprint.ndim]
+
+
+def mirror_footprint(footprint):
+    """Mirror the footprint.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+
+    Returns
+    -------
+    inverted : ndarray or tuple
+        The footprint, mirrored.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    >>> mirror_footprint(footprint)
+    array([[1, 1, 0],
+           [1, 1, 0],
+           [0, 0, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((_mirror_footprint(fp), n) for fp, n in footprint)
+    return _mirror_footprint(footprint)
+
+
+def _pad_footprint(footprint, right=True):
+    """Pads the footprint to an odd size. Internal helper function.
+
+    Parameters
+    ----------
+    footprint : ndarray
+        The input footprint or sequence of footprints
+    right : bool, optional
+        If ``True``, pads on the right side, otherwise pads on the left.
+
+    Returns
+    -------
+    padded : ndarray, same type as `footprint`
+        The footprint, padded to an odd size.
+    """
+    footprint = np.asarray(footprint)
+    padding = []
+    for sz in footprint.shape:
+        padding.append(((0, 1) if right else (1, 0)) if sz % 2 == 0 else (0, 0))
+    return np.pad(footprint, padding)
+
+
+def pad_footprint(footprint, right=True):
+    """Pads the footprint to an odd size.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+    right : bool, optional
+        If ``True``, pads on the right side, otherwise pads on the left.
+
+    Returns
+    -------
+    padded : ndarray or tuple
+        The footprint, padded to an odd size.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0], [1, 1], [1, 1]], np.uint8)
+    >>> pad_footprint(footprint)
+    array([[0, 0, 0],
+           [1, 1, 0],
+           [1, 1, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((_pad_footprint(fp, right), n) for fp, n in footprint)
+    return _pad_footprint(footprint, right)

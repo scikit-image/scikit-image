@@ -6,7 +6,8 @@ from .isotropic import (isotropic_erosion, isotropic_dilation,
                         isotropic_opening, isotropic_closing)
 from .footprints import (ball, cube, diamond, disk, ellipse,
                          footprint_from_sequence, octagon, octahedron,
-                         rectangle, square, star)
+                         rectangle, square, star, mirror_footprint,
+                         pad_footprint)
 from ..measure._label import label
 from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
 from .convex_hull import convex_hull_image, convex_hull_object
@@ -52,9 +53,11 @@ __all__ = ['area_closing',
            'max_tree',
            'max_tree_local_maxima',
            'medial_axis',
+           'mirror_footprint',
            'octagon',
            'octahedron',
            'opening',
+           'pad_footprint',
            'reconstruction',
            'rectangle',
            'remove_small_holes',
