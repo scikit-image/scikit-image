@@ -1,14 +1,13 @@
 """
 Grayscale morphological operations
 """
-import functools
 import warnings
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from ..util import crop
-from .footprints import _footprint_is_sequence, _shape_from_sequence
+from .footprints import (_footprint_is_sequence, _shape_from_sequence,
+                         mirror_footprint, pad_footprint)
 from .misc import default_footprint
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
@@ -53,25 +52,19 @@ def _shift_footprint(footprint, shift_x, shift_y):
     out : 2D array, shape (M + int(shift_x), N + int(shift_y))
         The shifted footprint.
     """
-    if shift_x is not None or shift_y is not None:
-        warning_msg = ("`shift_x` and `shift_y` are deprecated arguments. "
-                       "They will be removed in a future version. Please see "
-                       "the documentation to `skimage.morphology.dilation` or"
-                       "`skimage.morphology.erosion` for more information.")
-        warnings.warn(warning_msg, FutureWarning, stacklevel=3)
-
+    footprint = np.asarray(footprint)
     if footprint.ndim != 2:
         # do nothing for 1D or 3D or higher footprints
         return footprint
     m, n = footprint.shape
-    if shift_x is not None and m % 2 == 0:
+    if m % 2 == 0:
         extra_row = np.zeros((1, n), footprint.dtype)
         if shift_x:
             footprint = np.vstack((footprint, extra_row))
         else:
             footprint = np.vstack((extra_row, footprint))
         m += 1
-    if shift_y is not None and n % 2 == 0:
+    if n % 2 == 0:
         extra_col = np.zeros((m, 1), footprint.dtype)
         if shift_y:
             footprint = np.hstack((footprint, extra_col))
@@ -80,9 +73,29 @@ def _shift_footprint(footprint, shift_x, shift_y):
     return footprint
 
 
+def _shift_footprints(footprint, shift_x, shift_y):
+    """Shifts the footprints, whether it's a single array or a sequence.
+
+    See ``__shift_footprint``, which is called for each array in the sequence.
+    """
+    if shift_x is None and shift_y is None:
+        return footprint
+
+    warning_msg = ("`shift_x` and `shift_y` are deprecated arguments. "
+                   "They will be removed in a future version. Please see "
+                   "the documentation to `skimage.morphology.dilation` or"
+                   "`skimage.morphology.erosion` for more information.")
+    warnings.warn(warning_msg, FutureWarning, stacklevel=4)
+
+    if _footprint_is_sequence(footprint):
+        return tuple((_shift_footprint(fp, shift_x, shift_y), n)
+                     for fp, n in footprint)
+    return _shift_footprint(footprint, shift_x, shift_y)
+
+
 @default_footprint
 def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
-            mode=None, cval=0.0):
+            mirror=False, mode="reflect", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -103,20 +116,24 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
         Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated, and
-        should not longer be used. Instead, create an odd-sized footprint by
-        padding the even-sized array with zeros. This allows you to better
-        control the exact shift of the footprint.
+        with even-numbered sides. These two parameters are deprecated in
+        favor of ``mirror``.
 
         .. versionchanged:: 0.20
             Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
             removed in a future version.
 
+    mirror : bool, optional
+        Mirror the footprint along each dimension. Default is ``False``.
+
+        .. versionadded:: 0.20
+            ``mirror`` was added in 0.20.
+
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are handled.
         If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype, which causes them to not influence the
-        result. Default is ``None``.
+        result. Default is ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
@@ -144,6 +161,9 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     computational cost. Most of the builtin footprints such as
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
+
+    For even-sized footprints, ``binary_erosion`` and ``erosion`` produce an
+    output that differs: the one is shifted by one pixel compared to the other.
 
     Examples
     --------
@@ -175,14 +195,15 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
         else:
             cval = np.inf
 
+    footprint = _shift_footprints(footprint, shift_x, shift_y)
+    footprint = pad_footprint(footprint, right=False)
+    if mirror:
+        footprint = mirror_footprint(footprint)
+
     if _footprint_is_sequence(footprint):
-        footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
-                           for fp, n in footprint)
-        return _iterate_gray_func(ndi.grey_erosion, image, footprints, out,
+        return _iterate_gray_func(ndi.grey_erosion, image, footprint, out,
                                   mode, cval)
 
-    footprint = np.array(footprint)
-    footprint = _shift_footprint(footprint, shift_x, shift_y)
     ndi.grey_erosion(image, footprint=footprint, output=out, mode=mode,
                      cval=cval)
     return out
@@ -190,7 +211,7 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
 @default_footprint
 def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
-             mode=None, cval=0.0):
+             mirror=False, mode="reflect", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -212,20 +233,24 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
         passed, a new array will be allocated.
     shift_x, shift_y : bool, optional
         Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated, and
-        should not longer be used. Instead, create an odd-sized footprint by
-        padding the even-sized array with zeros. This allows you to better
-        control the exact shift of the footprint.
+        with even-numbered sides. These two parameters are deprecated in
+        favor of ``mirror``.
 
         .. versionchanged:: 0.20
             Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
             removed in a future version.
 
+    mirror : bool, optional
+        Mirror the footprint along each dimension. Default is ``False``.
+
+        .. versionadded:: 0.20
+            ``mirror`` was added in 0.20.
+
     mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are handled.
         If ``None``, pixels outside the image domain are assumed to be the
         minimum for the image's dtype, which causes them to not influence the
-        result. Default is ``None``.
+        result. Default is ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
@@ -254,14 +279,9 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     ``skimage.morphology.disk`` provide an option to automatically generate a
     footprint sequence of this type.
 
-    The dilation mirrors the footprint, whereas the erosion does not. This
-    allows their composition to form a closing or opening. The mirroring is
-    only noticeable for footprints that are not mirror symmetric.
-
-    .. versionchanged:: 0.20
-        In 0.19, the dilation did not mirror the footprint. Consequently, the
-        opening and closing operations were not correct for footprints that
-        were not mirror symmetric.
+    For non-symmetric footprints, ``binary_dilation`` and ``dilation`` produce
+    an output that differs: ``binary_dilation`` mirrors the footprint, whereas
+    ``dilation`` does not (by default).
 
     Examples
     --------
@@ -293,21 +313,23 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
         else:
             cval = -np.inf
 
+    footprint = _shift_footprints(footprint, shift_x, shift_y)
+    footprint = pad_footprint(footprint, right=False)
+    if not mirror:
+        # Note that `ndi.grey_dilation` mirrors the footprint.
+        footprint = mirror_footprint(footprint)
+
     if _footprint_is_sequence(footprint):
-        footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
-                           for fp, n in footprint)
-        return _iterate_gray_func(ndi.grey_dilation, image, footprints, out,
+        return _iterate_gray_func(ndi.grey_dilation, image, footprint, out,
                                   mode, cval)
 
-    footprint = np.array(footprint)
-    footprint = _shift_footprint(footprint, shift_x, shift_y)
     ndi.grey_dilation(image, footprint=footprint, output=out, mode=mode,
                       cval=cval)
     return out
 
 
 @default_footprint
-def opening(image, footprint=None, out=None, mode=None, cval=0.0):
+def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
@@ -332,7 +354,7 @@ def opening(image, footprint=None, out=None, mode=None, cval=0.0):
         If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        ``None``.
+        ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
@@ -375,13 +397,15 @@ def opening(image, footprint=None, out=None, mode=None, cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    footprint = pad_footprint(footprint, right=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
-    out = dilation(eroded, footprint, out=out, mode=mode, cval=cval)
+    out = dilation(eroded, footprint, out=out, mirror=True, mode=mode,
+                   cval=cval)
     return out
 
 
 @default_footprint
-def closing(image, footprint=None, out=None, mode=None, cval=0.0):
+def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
@@ -406,7 +430,7 @@ def closing(image, footprint=None, out=None, mode=None, cval=0.0):
         If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        ``None``.
+        ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
@@ -449,13 +473,14 @@ def closing(image, footprint=None, out=None, mode=None, cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    dilated = dilation(image, footprint, mode=mode, cval=cval)
+    footprint = pad_footprint(footprint, right=False)
+    dilated = dilation(image, footprint, mirror=True, mode=mode, cval=cval)
     out = erosion(dilated, footprint, out=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def white_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
+def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -479,7 +504,7 @@ def white_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
         If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        ``None``.
+        ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
@@ -549,7 +574,7 @@ def white_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
 
 
 @default_footprint
-def black_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
+def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -574,7 +599,7 @@ def black_tophat(image, footprint=None, out=None, mode=None, cval=0.0):
         If ``None``, pixels outside the image domain are assumed to be the
         maximum for the image's dtype in the erosion, and minimum in the
         dilation, which causes them to not influence the result. Default is
-        ``None``.
+        ``'reflect'``.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
         is 0.0.
