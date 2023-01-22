@@ -13,7 +13,7 @@ python_sources = [
   'test_pnpoly.py',
   'test_polygon.py',
   'test_profile.py',
-  'test_regionprops.py',
+  'test_regionprops.py'
 ]
 
 py3.install_sources(
