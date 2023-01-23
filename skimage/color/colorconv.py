@@ -986,8 +986,8 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
-    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
@@ -1065,7 +1065,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
     """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
@@ -1232,7 +1232,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     Examples
@@ -1324,7 +1324,7 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELUV
     """
     arr = _prepare_colorarray(luv, channel_axis=-1).copy()
@@ -1390,9 +1390,8 @@ def rgb2luv(rgb, *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
-    .. [3] https://en.wikipedia.org/wiki/CIELUV
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
     """
     return xyz2luv(rgb2xyz(rgb))
 
@@ -1696,7 +1695,7 @@ def lab2lch(lab, *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/HCL_color_space
 
     Examples
