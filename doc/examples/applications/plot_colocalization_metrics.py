@@ -20,7 +20,7 @@ area?
 # Imagine that we are trying to determine the subcellular localization of a
 # protein - is it located more in the nucleus or cytoplasm compared to a
 # control?
-
+#
 # We begin by segmenting the nucleus of a sample image as described in another
 # `example <https://scikit-image.org/docs/stable/auto_examples/applications/plot_fluorescence_nuclear_envelope.html>`_
 # and assume that whatever is not in the nucleus is in the cytoplasm.
@@ -111,11 +111,12 @@ measure.intersection_coeff(proteinA_seg, nucleus_seg)
 
 measure.manders_coloc_coeff(proteinA, nucleus_seg)
 
+#####################################################################
 # After choosing a co-occurence metric, we can apply the same process to
 # control images. If no control images are available, the Costes method could
 # be used to compare the MCC value of the original image with that of the
 # randomly scrambled image. Information about this method is given in [1]_.
-
+#
 # .. [1] J. S. Aaron, A. B. Taylor and T.-L. Chew, Image co-localization –
 #        co-occurrence versus correlation. J Cell Sci 1 February 2018
 #        131 (3): jcs211847. doi: https://doi.org/10.1242/jcs.211847
@@ -166,4 +167,3 @@ print(f"PCC: {pcc:0.3g}, p-val: {pval:0.3g}")
 # <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html>`_
 # might give a more accurate measure of the non-linear relationship in that
 # case.
-plt.show()
