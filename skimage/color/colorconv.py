@@ -1662,7 +1662,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 def lab2lch(lab, *, channel_axis=-1):
     """Convert image in CIE-LAB to CIE-LCh color space.
 
-    CIE-LCh is the cylindrical representation of CIE-LAB (Cartesian).
+    CIE-LCh is the cylindrical representation of the CIE-LAB (Cartesian) color space.
 
     Parameters
     ----------
