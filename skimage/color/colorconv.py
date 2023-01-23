@@ -1063,6 +1063,10 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     z_ref = 108.883. See function :func:`~.get_xyz_coords` for a list of
     supported illuminants.
 
+    See Also
+    --------
+    xyz2lab
+
     References
     ----------
     .. [1] http://www.easyrgb.com/en/math.php
@@ -1181,6 +1185,10 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     The CIE XYZ tristimulus values are x_ref = 95.047, y_ref = 100., and
     z_ref = 108.883. See function :func:`~.get_xyz_coords` for a list of
     supported illuminants.
+
+    See Also
+    --------
+    rgb2lab
 
     References
     ----------
@@ -1693,6 +1701,10 @@ def lab2lch(lab, *, channel_axis=-1):
     Notes
     -----
     The h channel (i.e., hue) is expressed as an angle in range ``(0, 2*pi)``.
+
+    See Also
+    --------
+    lch2lab
 
     References
     ----------
