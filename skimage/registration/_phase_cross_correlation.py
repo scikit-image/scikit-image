@@ -124,10 +124,10 @@ def _disambiguate_shift(reference_image, moving_image, shifts):
     one with the highest cross-correlation.
 
     The strategy we use is to perform the shift on the moving image *using the
-    'grid-wrap' mode* in `scipy.ndimage`. The original image borders then
-    define $2^n$ quadrants, which we cross-correlate with the reference image
-    in turn using slicing. The entire operation is thus $O(2^n + m)$, where
-    $m$ is the number of pixels in the image (and typically dominates).
+    'grid-wrap' mode* in `scipy.ndimage`. The moving image's original borders
+    then define $2^n$ quadrants, which we cross-correlate with the reference
+    image in turn using slicing. The entire operation is thus $O(2^n + m)$,
+    where $m$ is the number of pixels in the image (and typically dominates).
 
     Parameters
     ----------
