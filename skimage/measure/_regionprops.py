@@ -1078,7 +1078,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     offset : array-like of int, shape `(label_image.ndim,)`, optional
         Coordinates of the origin ("top-left" corner) of the label image.
         Normally this is ([0, ]0, 0), but it might be different if one wants
-        to obtain regionprops of subvolumes within a much larger volume.
+        to obtain regionprops of subvolumes within a larger volume.
 
     Returns
     -------
