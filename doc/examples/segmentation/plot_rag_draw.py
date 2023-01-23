@@ -8,7 +8,7 @@ the `rag_draw` method.
 """
 
 from skimage import data, segmentation
-from skimage.future import graph
+from skimage import graph
 from matplotlib import pyplot as plt
 
 

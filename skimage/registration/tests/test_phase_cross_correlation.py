@@ -1,3 +1,6 @@
+import warnings
+import re
+
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
@@ -165,6 +168,52 @@ def test_4d_input_subpixel():
                                                        upsample_factor=10,
                                                        space="fourier")
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
+
+
+@pytest.mark.parametrize("return_error", [True, False, "always"])
+@pytest.mark.parametrize("reference_mask", [None, True])
+def test_phase_cross_correlation_deprecation(return_error, reference_mask):
+    # For now, assert that phase_cross_correlation raises a warning that
+    # returning only shifts is deprecated. In skimage 0.21, this test should be
+    # updated for the deprecation of the return_error parameter.
+    should_warn = (
+        return_error is False
+        or (return_error != "always" and reference_mask is True)
+    )
+
+    reference_image = np.ones((10, 10))
+    moving_image = np.ones_like(reference_image)
+    if reference_mask is True:
+        # moving_mask defaults to reference_mask, passing moving_mask only is
+        # not supported, so we don't need to test it
+        reference_mask = np.ones_like(reference_image)
+
+    if should_warn:
+        msg = (
+            "In scikit-image 0.21, phase_cross_correlation will start "
+            "returning a tuple or 3 items (shift, error, phasediff) always. "
+            "To enable the new return behavior and silence this warning, use "
+            "return_error='always'."
+        )
+        with pytest.warns(FutureWarning, match=re.escape(msg)):
+            out = phase_cross_correlation(
+                reference_image=reference_image,
+                moving_image=moving_image,
+                return_error=return_error,
+                reference_mask=reference_mask,
+            )
+        assert not isinstance(out, tuple)
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            out = phase_cross_correlation(
+                reference_image=reference_image,
+                moving_image=moving_image,
+                return_error=return_error,
+                reference_mask=reference_mask,
+            )
+        assert isinstance(out, tuple)
+        assert len(out) == 3
 
 
 def test_mismatch_upsampled_region_size():

@@ -21,7 +21,7 @@ except ImportError:
         phase_cross_correlation = None
 
 
-class RegistrationSuite(object):
+class RegistrationSuite:
     """Benchmark for registration routines in scikit-image."""
     param_names = ["dtype"]
     params = [(np.float32, np.float64)]

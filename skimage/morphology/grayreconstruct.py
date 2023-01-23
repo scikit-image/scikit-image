@@ -1,12 +1,10 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type, deprecate_kwarg
+from .._shared.utils import _supported_float_type
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
 
 
-@deprecate_kwarg(kwarg_mapping={'selem': 'footprint'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """Perform a morphological reconstruction of an image.
 
@@ -155,7 +153,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
         pad_value = np.max(seed)
     else:
         raise ValueError("Reconstruction method can be one of 'erosion' "
-                         "or 'dilation'. Got '%s'." % method)
+                         f"or 'dilation'. Got '{method}'.")
     float_dtype = _supported_float_type(mask.dtype)
     images = np.full(dims, pad_value, dtype=float_dtype)
     images[(0, *inside_slices)] = seed

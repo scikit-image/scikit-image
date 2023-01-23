@@ -210,9 +210,6 @@ def hough_line(image, theta=None):
     Apply the Hough transform:
 
     >>> out, angles, d = hough_line(img)
-
-    .. plot:: hough_tf.py
-
     """
     if image.ndim != 2:
         raise ValueError('The input image `image` must be 2D.')

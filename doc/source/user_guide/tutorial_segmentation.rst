@@ -168,4 +168,3 @@ We can now label all the coins one by one using ``ndi.label``::
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_009.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html
    :align: center
-

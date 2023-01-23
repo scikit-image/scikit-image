@@ -398,13 +398,13 @@ fig.colorbar(ax[0].imshow(p8, cmap=plt.cm.gray), ax=ax[0])
 ax[0].set_title('Original')
 
 fig.colorbar(ax[1].imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax[1])
-ax[1].set_title('Local Otsu ($r=%d$)' % radius)
+ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 ax[2].imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
-ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
+ax[2].set_title('Original >= local Otsu')
 
 ax[3].imshow(glob_otsu, cmap=plt.cm.gray)
-ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
     a.axis('off')
@@ -437,13 +437,13 @@ fig.colorbar(ax[0].imshow(brain[slice_index], cmap=plt.cm.gray), ax=ax[0])
 ax[0].set_title('Original')
 
 fig.colorbar(ax[1].imshow(t_loc_otsu[slice_index], cmap=plt.cm.gray), ax=ax[1])
-ax[1].set_title('Local Otsu ($r=%d$)' % radius)
+ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 ax[2].imshow(brain[slice_index] >= t_loc_otsu[slice_index], cmap=plt.cm.gray)
-ax[2].set_title('Original >= local Otsu' % t_glob_otsu)
+ax[2].set_title('Original >= local Otsu')
 
 ax[3].imshow(glob_otsu[slice_index], cmap=plt.cm.gray)
-ax[3].set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
     a.axis('off')
@@ -469,7 +469,7 @@ ax[0].imshow(m, cmap=plt.cm.gray)
 ax[0].set_title('Original')
 
 ax[1].imshow(m >= t, cmap=plt.cm.gray)
-ax[1].set_title('Local Otsu ($r=%d$)' % radius)
+ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 for a in ax:
     a.axis('off')
@@ -490,8 +490,8 @@ from skimage.filters.rank import maximum, minimum, gradient
 
 noisy_image = img_as_ubyte(data.camera())
 
-closing = maximum(minimum(noisy_image, disk(5)), disk(5))
-opening = minimum(maximum(noisy_image, disk(5)), disk(5))
+opening = maximum(minimum(noisy_image, disk(5)), disk(5))
+closing = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results

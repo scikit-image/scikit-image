@@ -7,8 +7,8 @@
 
 import numpy as np
 cimport numpy as cnp
-cimport safe_openmp as openmp
-from safe_openmp cimport have_openmp
+from . cimport safe_openmp as openmp
+from .safe_openmp cimport have_openmp
 from libc.stdlib cimport malloc, free
 from libcpp.vector cimport vector
 from skimage._shared.transform cimport integrate
@@ -909,7 +909,9 @@ cdef class Cascade:
                 feature_number = int(internal_nodes[0])
                 # list() is for Python3 fix here
                 lut_array = list(map(lambda x: int(x), internal_nodes[1:]))
-                lut = np.asarray(lut_array, dtype='uint32')
+                # Cast via astype to avoid warning about integer wraparound.
+                # see: https://github.com/scikit-image/scikit-image/issues/6638
+                lut = np.asarray(lut_array).astype(np.uint32)
 
                 # Copy array to the main LUT array
                 for i in range(8):

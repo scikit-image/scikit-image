@@ -118,7 +118,7 @@ class DeconvolutionSuite:
                                     **rl_iter_kwarg)
 
 
-class RollingBall(object):
+class RollingBall:
     """Benchmark Rolling Ball algorithm."""
 
     timeout = 120
@@ -171,7 +171,7 @@ class RollingBall(object):
     time_rollingball_threads.param_names = ["threads"]
 
 
-class Inpaint(object):
+class Inpaint:
     """Benchmark inpainting algorithm."""
 
     def setup(self):

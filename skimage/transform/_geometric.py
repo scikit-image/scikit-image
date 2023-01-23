@@ -165,7 +165,7 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class GeometricTransform(object):
+class GeometricTransform:
     """Base class for geometric transformations.
 
     """
@@ -1651,8 +1651,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     """
     ttype = ttype.lower()
     if ttype not in TRANSFORMS:
-        raise ValueError('the transformation type \'%s\' is not'
-                         'implemented' % ttype)
+        raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
     tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
     tform.estimate(src, dst, *args, **kwargs)

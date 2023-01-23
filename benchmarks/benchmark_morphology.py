@@ -10,7 +10,7 @@ import skimage
 from skimage import data, morphology, util
 
 
-class Skeletonize3d(object):
+class Skeletonize3d:
 
     def setup(self, *args):
         try:
@@ -51,7 +51,7 @@ class Skeletonize3d(object):
 # For binary morphology all functions ultimately are based on a single erosion
 # function in the scipy.ndimage C code, so only benchmark binary_erosion here.
 
-class BinaryMorphology2D(object):
+class BinaryMorphology2D:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
@@ -112,7 +112,7 @@ class BinaryMorphology2D(object):
         morphology.binary_erosion(self.image, self.footprint)
 
 
-class BinaryMorphology3D(object):
+class BinaryMorphology3D:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
@@ -151,6 +151,27 @@ class BinaryMorphology3D(object):
         morphology.binary_erosion(self.image, self.footprint)
 
 
+class IsotropicMorphology2D:
+
+    # skip rectangle as roughly equivalent to square
+    param_names = ["shape", "radius"]
+    params = [
+        ((512, 512),),
+        (1, 3, 5, 15, 25, 40),
+    ]
+
+    def setup(self, shape, radius):
+        rng = np.random.default_rng(123)
+        # Make an image that is mostly True, with random isolated False areas
+        # (so it will not become fully False for any of the footprints).
+        self.image = rng.standard_normal(shape) < 3.5
+
+    def time_erosion(
+        self, shape, radius, *args
+    ):
+        morphology.isotropic_erosion(self.image, radius)
+
+
 # Repeat the same footprint tests for grayscale morphology
 # just need to call morphology.erosion instead of morphology.binary_erosion
 
@@ -170,7 +191,7 @@ class GrayMorphology3D(BinaryMorphology3D):
         morphology.erosion(self.image, self.footprint)
 
 
-class GrayReconstruction(object):
+class GrayReconstruction:
 
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "dtype"]
@@ -221,7 +242,7 @@ class GrayReconstruction(object):
         morphology.reconstruction(self.seed, self.mask)
 
 
-class LocalMaxima(object):
+class LocalMaxima:
 
     param_names = ["connectivity", "allow_borders"]
     params = [(1, 2), (False, True)]

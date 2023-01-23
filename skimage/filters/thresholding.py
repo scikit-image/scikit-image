@@ -8,7 +8,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, deprecate_kwarg, warn
+from .._shared.utils import _supported_float_type, warn
 from .._shared.version_requirements import require
 from ..exposure import histogram
 from ..filters._multiotsu import (_get_multiotsu_thresh_indices,
@@ -81,7 +81,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
         try:
             ax[i].imshow(func(image, **_kwargs), cmap=plt.cm.gray)
         except Exception as e:
-            ax[i].text(0.5, 0.5, "%s" % type(e).__name__,
+            ax[i].text(0.5, 0.5, f"{type(e).__name__}",
                        ha="center", va="center", transform=ax[i].transAxes)
         i += 1
         if verbose:
@@ -763,8 +763,6 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
     return threshold
 
 
-@deprecate_kwarg({'max_iter': 'max_num_iter'}, removed_version="1.0",
-                 deprecated_version="0.19")
 def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 

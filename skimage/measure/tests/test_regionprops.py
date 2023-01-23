@@ -13,6 +13,7 @@ from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
+                                          _require_intensity_image,
                                           euler_number, perimeter,
                                           perimeter_crofton, regionprops,
                                           regionprops_table)
@@ -669,8 +670,7 @@ def test_perimeter():
     per = regionprops(SAMPLE, spacing=(2, 2))[0].perimeter
     assert_almost_equal(per, 2 * target_per)
 
-    with expected_warnings(["`neighbourhood` is a deprecated argument name"]):
-        per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
+    per = perimeter(SAMPLE.astype('double'), neighborhood=8)
     assert_almost_equal(per, 46.8284271247)
 
     with testing.raises(NotImplementedError):
@@ -1094,13 +1094,6 @@ def test_column_dtypes_correct():
             )
 
 
-def test_deprecated_coords_argument():
-    with expected_warnings(['coordinates keyword argument']):
-        regionprops(SAMPLE, coordinates='rc')
-    with pytest.raises(ValueError):
-        regionprops(SAMPLE, coordinates='xy')
-
-
 def pixelcount(regionmask):
     """a short test for an extra property"""
     return np.sum(regionmask)
@@ -1128,6 +1121,18 @@ def test_extra_properties_intensity():
                          extra_properties=(intensity_median,)
                          )[0]
     assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+
+
+@pytest.mark.parametrize('intensity_prop', _require_intensity_image)
+def test_intensity_image_required(intensity_prop):
+    region = regionprops(SAMPLE)[0]
+    with pytest.raises(AttributeError) as e:
+        getattr(region, intensity_prop)
+    expected_error = (
+        f"Attribute '{intensity_prop}' unavailable when `intensity_image` has "
+        f"not been specified."
+    )
+    assert expected_error == str(e.value)
 
 
 def test_extra_properties_no_intensity_provided():

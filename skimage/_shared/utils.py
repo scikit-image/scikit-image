@@ -6,7 +6,6 @@ from collections.abc import Iterable
 
 import numpy as np
 import scipy
-from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
@@ -190,7 +189,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
         desc = [f'Deprecated in favor of `{new_arg}`.',
-                f'',
+                '',
                 f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg,
@@ -284,72 +283,6 @@ class deprecate_kwarg(_DecoratorBaseClass):
         if func.__doc__ is not None:
             newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
                                               self.deprecated_version)
-            fixed_func.__doc__ = newdoc
-        return fixed_func
-
-
-class deprecate_multichannel_kwarg(deprecate_kwarg):
-    """Decorator for deprecating multichannel keyword in favor of channel_axis.
-
-    Parameters
-    ----------
-    removed_version : str
-        The package version in which the deprecated argument will be
-        removed.
-
-    """
-
-    def __init__(self, removed_version='1.0', multichannel_position=None):
-        super().__init__(
-            kwarg_mapping={'multichannel': 'channel_axis'},
-            deprecated_version='0.19',
-            warning_msg=None,
-            removed_version=removed_version)
-        self.position = multichannel_position
-
-    def __call__(self, func):
-
-        stack_rank = _get_stack_rank(func)
-
-        @functools.wraps(func)
-        def fixed_func(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
-
-            if self.position is not None and len(args) > self.position:
-                warning_msg = (
-                    "Providing the `multichannel` argument positionally to "
-                    "{func_name} is deprecated. Use the `channel_axis` kwarg "
-                    "instead."
-                )
-                warnings.warn(warning_msg.format(func_name=func.__name__),
-                              FutureWarning,
-                              stacklevel=stacklevel)
-                if 'channel_axis' in kwargs:
-                    raise ValueError(
-                        "Cannot provide both a `channel_axis` kwarg and a "
-                        "positional `multichannel` value."
-                    )
-                else:
-                    channel_axis = -1 if args[self.position] else None
-                    kwargs['channel_axis'] = channel_axis
-
-            if 'multichannel' in kwargs:
-                #  warn that the function interface has changed:
-                warnings.warn(self.warning_msg.format(
-                    old_arg='multichannel', func_name=func.__name__,
-                    new_arg='channel_axis'), FutureWarning,
-                    stacklevel=stacklevel)
-
-                # multichannel = True -> last axis corresponds to channels
-                convert = {True: -1, False: None}
-                kwargs['channel_axis'] = convert[kwargs.pop('multichannel')]
-
-            # Call the function with the fixed arguments
-            return func(*args, **kwargs)
-
-        if func.__doc__ is not None:
-            newdoc = docstring_add_deprecated(
-                func, {'multichannel': 'channel_axis'}, '0.19')
             fixed_func.__doc__ = newdoc
         return fixed_func
 
@@ -457,14 +390,12 @@ class deprecated:
 
         alt_msg = ''
         if self.alt_func is not None:
-            alt_msg = ' Use ``%s`` instead.' % self.alt_func
+            alt_msg = f' Use ``{self.alt_func}`` instead.'
         rmv_msg = ''
         if self.removed_version is not None:
-            rmv_msg = (' and will be removed in version %s' %
-                       self.removed_version)
+            rmv_msg = f' and will be removed in version {self.removed_version}'
 
-        msg = ('Function ``%s`` is deprecated' % func.__name__ +
-               rmv_msg + '.' + alt_msg)
+        msg = f'Function ``{func.__name__}`` is deprecated{rmv_msg}.{alt_msg}'
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -563,9 +494,10 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def check_shape_equality(im1, im2):
-    """Raise an error if the shape do not match."""
-    if not im1.shape == im2.shape:
+def check_shape_equality(*images):
+    """Check that all images have the same shape"""
+    image0 = images[0]
+    if not all(image0.shape == image.shape for image in images[1:]):
         raise ValueError('Input images must have the same dimensions.')
     return
 
@@ -723,8 +655,8 @@ def _validate_interpolation_order(image_dtype, order):
     if image_dtype == bool and order != 0:
         raise ValueError(
             "Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitly "
-             "cast input image to another data type.")
+            "with bool data type. Please set order to 0 or explicitly "
+            "cast input image to another data type.")
 
     return order
 
@@ -745,10 +677,10 @@ def _to_ndimage_mode(mode):
                                  wrap='wrap')
     if mode not in mode_translation_dict:
         raise ValueError(
-            (f"Unknown mode: '{mode}', or cannot translate mode. The "
+            f"Unknown mode: '{mode}', or cannot translate mode. The "
              f"mode should be one of 'constant', 'edge', 'symmetric', "
              f"'reflect', or 'wrap'. See the documentation of numpy.pad for "
-             f"more info."))
+             f"more info.")
     return _fix_ndimage_mode(mode_translation_dict[mode])
 
 
@@ -756,9 +688,7 @@ def _fix_ndimage_mode(mode):
     # SciPy 1.6.0 introduced grid variants of constant and wrap which
     # have less surprising behavior for images. Use these when available
     grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
-    if NumpyVersion(scipy.__version__) >= '1.6.0':
-        mode = grid_modes.get(mode, mode)
-    return mode
+    return grid_modes.get(mode, mode)
 
 
 new_float_type = {
@@ -808,3 +738,23 @@ def _supported_float_type(input_dtype, allow_complex=False):
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
     return image
+
+
+def as_binary_ndarray(array, *, variable_name):
+    """Return `array` as a numpy.ndarray of dtype bool.
+
+    Raises
+    ------
+    ValueError:
+        An error including the given `variable_name` if `array` can not be
+        safely cast to a boolean array.
+    """
+    array = np.asarray(array)
+    if array.dtype != bool:
+        if np.any((array != 1) & (array != 0)):
+            raise ValueError(
+                f"{variable_name} array is not of dtype boolean or "
+                f"contains values other than 0 and 1 so cannot be "
+                f"safely cast to boolean array."
+            )
+    return np.asarray(array, dtype=bool)

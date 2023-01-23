@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
 
-from skimage._shared.testing import expected_warnings
 from skimage.feature import multiscale_basic_features
 
 
@@ -27,9 +26,8 @@ def test_multiscale_basic_features_rgb(edges, texture):
     img = np.zeros((20, 20, 3))
     img[:10] = 1
     img += 0.05 * np.random.randn(*img.shape)
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        features = multiscale_basic_features(img, edges=edges, texture=texture,
-                                             multichannel=True)
+    features = multiscale_basic_features(img, edges=edges, texture=texture,
+                                         channel_axis=-1)
 
     n_sigmas = 6
     intensity = True
@@ -37,29 +35,6 @@ def test_multiscale_basic_features_rgb(edges, texture):
         3 * n_sigmas * (int(intensity) + int(edges) + 2 * int(texture))
     )
     assert features.shape[:-1] == img.shape[:-1]
-
-
-def test_multiscale_basic_features_deprecated_multichannel():
-    img = np.zeros((10, 10, 5))
-    img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
-    n_sigmas = 2
-    with expected_warnings(["`multichannel` is a deprecated argument"]):
-        features = multiscale_basic_features(img, sigma_min=1, sigma_max=2,
-                                             multichannel=True)
-    assert features.shape[-1] == 5 * n_sigmas * 4
-    assert features.shape[:-1] == img.shape[:-1]
-
-    # repeat prior test, but check for positional multichannel warning
-    with expected_warnings(["Providing the `multichannel` argument"]):
-        multiscale_basic_features(img, True, sigma_min=1, sigma_max=2)
-    assert features.shape[-1] == 5 * n_sigmas * 4
-    assert features.shape[:-1] == img.shape[:-1]
-
-    # Consider last axis as spatial dimension
-    features = multiscale_basic_features(img, sigma_min=1, sigma_max=2)
-    assert features.shape[-1] == n_sigmas * 5
-    assert features.shape[:-1] == img.shape
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2])

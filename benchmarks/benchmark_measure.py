@@ -16,14 +16,14 @@ def init_regionprops_data():
     return label_image, intensity_image
 
 
-class RegionpropsTableIndividual(object):
+class RegionpropsTableIndividual:
 
     param_names = ['prop']
     params = sorted(list(PROP_VALS))
 
     def setup(self, prop):
         try:
-            from skimage.measure import regionprops_table
+            from skimage.measure import regionprops_table  # noqa
         except ImportError:
             # regionprops_table was introduced in scikit-image v0.16.0
             raise NotImplementedError("regionprops_table unavailable")
@@ -36,14 +36,14 @@ class RegionpropsTableIndividual(object):
     # omit peakmem tests to save time (memory usage was minimal)
 
 
-class RegionpropsTableAll(object):
+class RegionpropsTableAll:
 
     param_names = ['cache']
     params = (False, True)
 
     def setup(self, cache):
         try:
-            from skimage.measure import regionprops_table
+            from skimage.measure import regionprops_table  # noqa
         except ImportError:
             # regionprops_table was introduced in scikit-image v0.16.0
             raise NotImplementedError("regionprops_table unavailable")
@@ -54,3 +54,30 @@ class RegionpropsTableAll(object):
                                   properties=PROP_VALS, cache=cache)
 
     # omit peakmem tests to save time (memory usage was minimal)
+
+
+class MomentsSuite:
+    params = ([(64, 64), (4096, 2048), (32, 32, 32), (256, 256, 192)],
+              [np.uint8, np.float32, np.float64],
+              [1, 2, 3])
+    param_names = ['shape', 'dtype', 'order']
+
+    """Benchmark for filter routines in scikit-image."""
+    def setup(self, shape, dtype, *args):
+        rng = np.random.default_rng(1234)
+        if np.dtype(dtype).kind in 'iu':
+            self.image = rng.integers(0, 256, shape, dtype=dtype)
+        else:
+            self.image = rng.standard_normal(shape, dtype=dtype)
+
+    def time_moments_raw(self, shape, dtype, order):
+        measure.moments(self.image)
+
+    def time_moments_central(self, shape, dtype, order):
+        measure.moments_central(self.image)
+
+    def peakmem_reference(self, shape, dtype, order):
+        pass
+
+    def peakmem_moments_central(self, shape, dtype, order):
+        measure.moments_central(self.image)
