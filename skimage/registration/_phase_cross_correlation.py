@@ -215,9 +215,9 @@ def phase_cross_correlation(reference_image, moving_image, *,
     disambiguate : bool
         The shift returned by this function is only accurate *modulo* the
         image shape, due to the periodic nature of the Fourier transform. If
-        this is set to ``True``, the *real* space cross-correlation is
-        computed for each possible shift, and the shift with the highest
-        cross-correlation of the overlapping area is returned.
+        this parameter is set to ``True``, the *real* space cross-correlation
+        is computed for each possible shift, and the shift with the highest
+        cross-correlation within the overlapping area is returned.
     return_error : bool, {"always"}, optional
         Returns error and phase difference if "always" is given. If False, or
         either ``reference_mask`` or ``moving_mask`` are given, only the shift
@@ -248,7 +248,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
     shift : ndarray
         Shift vector (in pixels) required to register ``moving_image``
         with ``reference_image``. Axis ordering is consistent with
-        numpy (e.g. Z, Y, X)
+        the axis order of the input array.
     error : float
         Translation invariant normalized RMS error between
         ``reference_image`` and ``moving_image``. For masked cross-correlation
