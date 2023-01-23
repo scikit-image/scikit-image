@@ -1710,6 +1710,7 @@ def lab2lch(lab, *, channel_axis=-1):
     ----------
     .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/HCL_color_space
+    .. [3] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
