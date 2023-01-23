@@ -1696,7 +1696,7 @@ def lab2lch(lab, *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/HCL_color_space
 
     Examples
