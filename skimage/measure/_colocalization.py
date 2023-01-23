@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import pearsonr
 
-from .._shared.utils import check_shape_equality, is_binary_ndarray
+from .._shared.utils import check_shape_equality, as_binary_ndarray
 
 __all__ = ['pearson_corr_coeff',
            'manders_coloc_coeff',
@@ -83,7 +83,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
     image0 = np.asarray(image0)
     image1 = np.asarray(image1)
     if mask is not None:
-        mask = is_binary_ndarray(mask)
+        mask = as_binary_ndarray(mask, variable_name="mask")
         check_shape_equality(image0, image1, mask)
         image0 = image0[mask]
         image1 = image1[mask]
@@ -160,9 +160,9 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
 
     """
     image0 = np.asarray(image0)
-    image1_mask = is_binary_ndarray(image1_mask, "image1_mask")
+    image1_mask = as_binary_ndarray(image1_mask, variable_name="image1_mask")
     if mask is not None:
-        mask = is_binary_ndarray(mask)
+        mask = as_binary_ndarray(mask, variable_name="mask")
         check_shape_equality(image0, image1_mask, mask)
         image0 = image0[mask]
         image1_mask = image1_mask[mask]
@@ -246,7 +246,7 @@ def manders_overlap_coeff(image0, image1, mask=None):
     image0 = np.asarray(image0)
     image1 = np.asarray(image1)
     if mask is not None:
-        mask = is_binary_ndarray(mask)
+        mask = as_binary_ndarray(mask, variable_name="mask")
         check_shape_equality(image0, image1, mask)
         image0 = image0[mask]
         image1 = image1[mask]
@@ -286,10 +286,10 @@ def intersection_coeff(image0_mask, image1_mask, mask=None):
         Fraction of `image0_mask` that overlaps with `image1_mask`.
 
     """
-    image0_mask = is_binary_ndarray(image0_mask, "image0_mask")
-    image1_mask = is_binary_ndarray(image1_mask, "image1_mask")
+    image0_mask = as_binary_ndarray(image0_mask, variable_name="image0_mask")
+    image1_mask = as_binary_ndarray(image1_mask, variable_name="image1_mask")
     if mask is not None:
-        mask = is_binary_ndarray(mask)
+        mask = as_binary_ndarray(mask, variable_name="mask")
         check_shape_equality(image0_mask, image1_mask, mask)
         image0_mask = image0_mask[mask]
         image1_mask = image1_mask[mask]

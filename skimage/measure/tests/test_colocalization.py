@@ -8,40 +8,40 @@ def test_invalid_input():
     # images are not same size
     img1 = np.array([[i + j for j in range(4)] for i in range(4)])
     img2 = np.ones((3, 5, 6))
-    mask = np.array([[i <= 1 for j in range(5)] for i in range(5)])
-    non_binary_mask = np.array([[2 for j in range(4)] for i in range(4)])
+    mask = np.array([[i <= 1 for i in range(5)] for _ in range(5)])
+    non_binary_mask = np.array([[2 for __ in range(4)] for _ in range(4)])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         pearson_corr_coeff(img1, img1, mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         pearson_corr_coeff(img1, img2)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         pearson_corr_coeff(img1, img1, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         pearson_corr_coeff(img1, img1, non_binary_mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         manders_coloc_coeff(img1, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         manders_coloc_coeff(img1, non_binary_mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         manders_coloc_coeff(img1, img1 > 0, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         manders_coloc_coeff(img1, img1 > 0, non_binary_mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         manders_overlap_coeff(img1, img1, mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         manders_overlap_coeff(img1, img2)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         manders_overlap_coeff(img1, img1, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         manders_overlap_coeff(img1, img1, non_binary_mask)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         intersection_coeff(img1 > 2, img2 > 1, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         intersection_coeff(img1, img2)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=". must have the same dimensions"):
         intersection_coeff(img1 > 2, img1 > 1, mask)
-    with pytest.raises(Warning):
+    with pytest.raises(ValueError, match=". array is not of dtype boolean"):
         intersection_coeff(img1 > 2, img1 > 1, non_binary_mask)
 
 
