@@ -113,7 +113,7 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     return np.sqrt(np.abs(error))
 
 
-def _disambiguate_shift(reference_image, moving_image, shifts):
+def _disambiguate_shift(reference_image, moving_image, shift):
     """Determine the correct real-space shift based on periodic shift.
 
     When determining a translation shift from phase cross-correlation in
@@ -136,24 +136,25 @@ def _disambiguate_shift(reference_image, moving_image, shifts):
     moving_image : numpy array
         The moving image: applying the shift to this image overlays it on the
         reference image. Must be the same shape as the reference image.
-    shifts : tuple of float
-        The shifts to apply to each axis of the moving image, *modulo* image
-        size. The length of ``shifts`` must be equal to ``moving_image.ndim``.
+    shift : tuple of float
+        The shift to apply to each axis of the moving image, *modulo* image
+        size. The length of ``shift`` must be equal to ``moving_image.ndim``.
 
     Returns
     -------
     real_shift : tuple of float
-        The shifts disambiguated in real space.
+        The shift disambiguated in real space.
     """
     shape = reference_image.shape
-    positive_shifts = [shift % s for shift, s in zip(shifts, shape)]
-    negative_shifts = [shift - s for shift, s in zip(positive_shifts, shape)]
-    subpixel = np.any(np.array(shifts) % 1 != 0)
+    positive_shift = [shift_i % s for shift_i, s in zip(shift, shape)]
+    negative_shift = [shift_i - s
+                      for shift_i, s in zip(positive_shift, shape)]
+    subpixel = np.any(np.array(shift) % 1 != 0)
     interp_order = 3 if subpixel else 0
     shifted = ndi.shift(
-            moving_image, shifts, mode='grid-wrap', order=interp_order
+            moving_image, shift, mode='grid-wrap', order=interp_order
             )
-    indices = np.round(positive_shifts).astype(int)
+    indices = np.round(positive_shift).astype(int)
     splits_per_dim = [(slice(0, i), slice(i, None)) for i in indices]
     max_corr = -1.0
     max_slice = None
@@ -168,7 +169,7 @@ def _disambiguate_shift(reference_image, moving_image, shifts):
             max_slice = test_slice
     real_shift_acc = []
     for sl, pos_shift, neg_shift in zip(
-            max_slice, positive_shifts, negative_shifts
+            max_slice, positive_shift, negative_shift
             ):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
     if not subpixel:
@@ -212,15 +213,15 @@ def phase_cross_correlation(reference_image, moving_image, *,
         used if any of ``reference_mask`` or ``moving_mask`` is not
         None.
     disambiguate : bool
-        The shifts returned by this function are only accurate *modulo* the
+        The shift returned by this function is only accurate *modulo* the
         image shape, due to the periodic nature of the Fourier transform. If
         this is set to ``True``, the *real* space cross-correlation is
         computed for each possible shift, and the shift with the highest
         cross-correlation of the overlapping area is returned.
     return_error : bool, {"always"}, optional
         Returns error and phase difference if "always" is given. If False, or
-        either ``reference_mask`` or ``moving_mask`` are given, only shifts are
-        returned.
+        either ``reference_mask`` or ``moving_mask`` are given, only the shift
+        is returned.
     reference_mask : ndarray
         Boolean mask for ``reference_image``. The mask should evaluate
         to ``True`` (or 1) on valid pixels. ``reference_mask`` should
@@ -244,7 +245,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
     Returns
     -------
-    shifts : ndarray
+    shift : ndarray
         Shift vector (in pixels) required to register ``moving_image``
         with ``reference_image``. Axis ordering is consistent with
         numpy (e.g. Z, Y, X)
@@ -306,16 +307,16 @@ def phase_cross_correlation(reference_image, moving_image, *,
         )
 
     if (reference_mask is not None) or (moving_mask is not None):
-        shifts = _masked_phase_cross_correlation(
+        shift = _masked_phase_cross_correlation(
             reference_image, moving_image,
             reference_mask, moving_mask,
             overlap_ratio
         )
         if return_error == "always":
-            return shifts, np.nan, np.nan
+            return shift, np.nan, np.nan
         else:
             warn_return_error()
-            return shifts
+            return shift
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
@@ -345,12 +346,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
     # Locate maximum
     maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
                               cross_correlation.shape)
-    midpoints = np.array([np.fix(axis_size / 2) for axis_size in shape])
+    midpoint = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
     float_dtype = image_product.real.dtype
 
-    shifts = np.stack(maxima).astype(float_dtype, copy=False)
-    shifts[shifts > midpoints] -= np.array(shape)[shifts > midpoints]
+    shift = np.stack(maxima).astype(float_dtype, copy=False)
+    shift[shift > midpoint] -= np.array(shape)[shift > midpoint]
 
     if upsample_factor == 1:
         if return_error:
@@ -363,12 +364,12 @@ def phase_cross_correlation(reference_image, moving_image, *,
     else:
         # Initial shift estimate in upsampled grid
         upsample_factor = np.array(upsample_factor, dtype=float_dtype)
-        shifts = np.round(shifts * upsample_factor) / upsample_factor
+        shift = np.round(shift * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         # Matrix multiply DFT around the current shift estimate
-        sample_region_offset = dftshift - shifts*upsample_factor
+        sample_region_offset = dftshift - shift*upsample_factor
         cross_correlation = _upsampled_dft(image_product.conj(),
                                            upsampled_region_size,
                                            upsample_factor,
@@ -381,7 +382,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
         maxima = np.stack(maxima).astype(float_dtype, copy=False)
         maxima -= dftshift
 
-        shifts += maxima / upsample_factor
+        shift += maxima / upsample_factor
 
         if return_error:
             src_amp = np.sum(np.real(src_freq * src_freq.conj()))
@@ -391,13 +392,13 @@ def phase_cross_correlation(reference_image, moving_image, *,
     # effect. We set to zero.
     for dim in range(src_freq.ndim):
         if shape[dim] == 1:
-            shifts[dim] = 0
+            shift[dim] = 0
 
     if disambiguate:
         if space.lower() != 'real':
             reference_image = ifftn(reference_image)
             moving_image = ifftn(moving_image)
-        shifts = _disambiguate_shift(reference_image, moving_image, shifts)
+        shift = _disambiguate_shift(reference_image, moving_image, shift)
 
     if return_error:
         # Redirect user to masked_phase_cross_correlation if NaNs are observed
@@ -410,8 +411,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
                 "reference_mask=~np.isnan(reference_image), "
                 "moving_mask=~np.isnan(moving_image))")
 
-        return shifts, _compute_error(CCmax, src_amp, target_amp),\
+        return shift, _compute_error(CCmax, src_amp, target_amp),\
             _compute_phasediff(CCmax)
     else:
         warn_return_error()
-        return shifts
+        return shift
