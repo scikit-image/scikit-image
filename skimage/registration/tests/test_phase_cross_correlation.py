@@ -248,8 +248,8 @@ def test_disambiguate_2d(shift0, shift1):
     slice1 = tuple(slice(o, o+450) for o in origin1)
     reference = image[slice0]
     moving = image[slice1]
-    computed_shift = phase_cross_correlation(
-            reference, moving, disambiguate=True, return_error=False
+    computed_shift, _, _ = phase_cross_correlation(
+            reference, moving, disambiguate=True, return_error='always'
             )
     np.testing.assert_equal(shift, computed_shift)
 
@@ -262,7 +262,7 @@ def test_disambiguate_zero_shift():
     scenario.
     """
     image = camera()
-    computed_shift = phase_cross_correlation(
-            image, image, disambiguate=True, return_error=False
+    computed_shift, _, _ = phase_cross_correlation(
+            image, image, disambiguate=True, return_error='always'
             )
     assert computed_shift == (0, 0)
