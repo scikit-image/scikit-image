@@ -438,7 +438,10 @@ class RegionProperties:
     @property
     def coords(self):
         indices = np.argwhere(self.image)
-        return indices + self.offset
+        object_offset = np.array([
+                self.slice[i].start for i in range(self._ndim)
+                ])
+        return object_offset + indices + self._offset
 
     @property
     @only2d
