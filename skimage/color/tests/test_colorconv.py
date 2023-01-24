@@ -20,7 +20,7 @@ from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2xyz, xyz2rgb,
-                           rgb2hed, hed2rgb,
+                           stain_color_matrix,
                            separate_stains,
                            combine_stains,
                            rgb2rgbcie, rgbcie2rgb,
@@ -230,43 +230,40 @@ class TestColorconv():
 
         assert_array_almost_equal(round_trip, img_rgb)
 
-    # HED<->RGB roundtrip with ubyte image
-    def test_hed_rgb_roundtrip(self):
-        img_in = img_as_ubyte(self.img_stains)
-        img_out = rgb2hed(hed2rgb(img_in))
+    # HD<->RGB roundtrip with ubyte image
+    def test_hd_rgb_roundtrip(self):
+        img_in = img_as_ubyte(self.img_stains[:,:,0:2])
+        m = stain_color_matrix(('Hematoxylin', 'DAB'))
+        img_out = combine_stains(img_in, m)
+        img_out = separate_stains(img_out, m)
         assert_equal(img_as_ubyte(img_out), img_in)
 
-    # HED<->RGB roundtrip with float image
+    # HD<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
-    def test_hed_rgb_float_roundtrip(self, channel_axis):
-        img_in = self.img_stains
+    def test_hd_rgb_float_roundtrip(self, channel_axis):
+        img_in = self.img_stains[:,:,0:2]
         img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)
-        img_out = rgb2hed(
-            hed2rgb(img_in, channel_axis=channel_axis),
-            channel_axis=channel_axis
-        )
+        m = stain_color_matrix(('Hematoxylin', 'DAB'))
+        img_out = combine_stains(img_in, m, channel_axis=channel_axis)
+        img_out = separate_stains(img_out, m, channel_axis=channel_axis)
         assert_array_almost_equal(img_out, img_in)
 
     # BRO<->RGB roundtrip with ubyte image
     def test_bro_rgb_roundtrip(self):
-        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
         img_in = img_as_ubyte(self.img_stains)
-        img_out = combine_stains(img_in, rgb_from_bro)
-        img_out = separate_stains(img_out, bro_from_rgb)
+        m = stain_color_matrix(('Aniline Blue', 'Azocarmine', 'Orange-G'))
+        img_out = combine_stains(img_in, m)
+        img_out = separate_stains(img_out, m)
         assert_equal(img_as_ubyte(img_out), img_in)
 
     # BRO<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
     def test_bro_rgb_roundtrip_float(self, channel_axis):
-        from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
         img_in = self.img_stains
         img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)
-        img_out = combine_stains(
-            img_in, rgb_from_bro, channel_axis=channel_axis
-        )
-        img_out = separate_stains(
-            img_out, bro_from_rgb, channel_axis=channel_axis
-        )
+        m = stain_color_matrix(('Aniline Blue', 'Azocarmine', 'Orange-G'))
+        img_out = combine_stains(img_in, m, channel_axis=channel_axis)
+        img_out = separate_stains(img_out, m, channel_axis=channel_axis)
         assert_array_almost_equal(img_out, img_in)
 
     # RGB to RGB CIE
@@ -897,7 +894,6 @@ def test_nD_gray_conversion(func, shape):
 
 @pytest.mark.parametrize("func", [rgb2hsv, hsv2rgb,
                                   rgb2xyz, xyz2rgb,
-                                  rgb2hed, hed2rgb,
                                   rgb2rgbcie, rgbcie2rgb,
                                   xyz2lab, lab2xyz,
                                   lab2rgb, rgb2lab,
