@@ -61,7 +61,7 @@ from ._rank_order import rank_order
 from ._sparse import correlate_sparse
 from ._unsharp_mask import unsharp_mask
 from ._window import window
-from .edges import (
+from ._edges import (
     farid,
     farid_h,
     farid_v,
@@ -79,9 +79,9 @@ from .edges import (
     sobel_h,
     sobel_v,
 )
-from .lpi_filter import LPIFilter2D, filter_inverse, wiener
-from .ridges import frangi, hessian, meijering, sato
-from .thresholding import (
+from ._lpi_filter import LPIFilter2D, filter_inverse, wiener
+from ._ridges import frangi, hessian, meijering, sato
+from ._thresholding import (
     apply_hysteresis_threshold,
     threshold_isodata,
     threshold_li,

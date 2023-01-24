@@ -3,7 +3,7 @@
 import numpy as np
 
 from skimage import data, filters, color
-from skimage.filters.thresholding import threshold_li
+from skimage.filters import threshold_li
 
 
 class FiltersSuite:
