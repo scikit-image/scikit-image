@@ -11,6 +11,7 @@ __all__ = [
     "farid",
     "farid_h",
     "farid_v",
+    "filter_forward",
     "filter_inverse",
     "frangi",
     "gabor",
@@ -79,7 +80,7 @@ from ._edges import (
     sobel_h,
     sobel_v,
 )
-from ._lpi_filter import LPIFilter2D, filter_inverse, wiener
+from ._lpi_filter import LPIFilter2D, filter_forward, filter_inverse, wiener
 from ._ridges import frangi, hessian, meijering, sato
 from ._thresholding import (
     apply_hysteresis_threshold,
