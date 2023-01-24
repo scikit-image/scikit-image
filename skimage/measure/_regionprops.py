@@ -431,9 +431,11 @@ class RegionProperties:
 
     @property
     def coords_scaled(self):
-        indices = np.nonzero(self.image)
-        return np.vstack([(indices[i] + self.slice[i].start) * s
-                          for i, s in zip(range(self._ndim), self._spacing)]).T
+        indices = np.argwhere(self.image)
+        object_offset = np.array([
+                self.slice[i].start for i in range(self._ndim)
+                ])
+        return (object_offset + indices) * self._spacing + self._offset
 
     @property
     def coords(self):
