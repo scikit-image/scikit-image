@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-import scipy
 from numpy.testing import assert_, assert_equal
 
 from skimage._shared.utils import _supported_float_type
