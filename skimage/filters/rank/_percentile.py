@@ -23,8 +23,8 @@ References
 """
 
 from ..._shared.utils import check_nD
-from . import percentile_cy
-from .generic import _preprocess_input
+from . import _percentile_cy
+from ._generic import _preprocess_input
 
 __all__ = ['autolevel_percentile', 'gradient_percentile',
            'mean_percentile', 'subtract_mean_percentile',
@@ -79,7 +79,7 @@ def autolevel_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._autolevel,
+    return _apply(_percentile_cy._autolevel,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -115,7 +115,7 @@ def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._gradient,
+    return _apply(_percentile_cy._gradient,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -151,7 +151,7 @@ def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._mean,
+    return _apply(_percentile_cy._mean,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -187,7 +187,7 @@ def subtract_mean_percentile(image, footprint, out=None, mask=None,
 
     """
 
-    return _apply(percentile_cy._subtract_mean,
+    return _apply(_percentile_cy._subtract_mean,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -227,7 +227,7 @@ def enhance_contrast_percentile(image, footprint, out=None, mask=None,
 
     """
 
-    return _apply(percentile_cy._enhance_contrast,
+    return _apply(_percentile_cy._enhance_contrast,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -265,7 +265,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._percentile,
+    return _apply(_percentile_cy._percentile,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=0.)
 
@@ -304,7 +304,7 @@ def pop_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._pop,
+    return _apply(_percentile_cy._pop,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -343,7 +343,7 @@ def sum_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._sum,
+    return _apply(_percentile_cy._sum,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
@@ -381,6 +381,6 @@ def threshold_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(percentile_cy._threshold,
+    return _apply(_percentile_cy._threshold,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=0)

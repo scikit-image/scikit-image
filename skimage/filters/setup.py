@@ -11,26 +11,26 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('filters', parent_package, top_path)
 
-    cython(['rank/core_cy.pyx',
-            'rank/core_cy_3d.pyx',
-            'rank/generic_cy.pyx',
-            'rank/percentile_cy.pyx',
-            'rank/bilateral_cy.pyx',
+    cython(['rank/_core_cy.pyx',
+            'rank/_core_cy_3d.pyx',
+            'rank/_generic_cy.pyx',
+            'rank/_percentile_cy.pyx',
+            'rank/_bilateral_cy.pyx',
             '_multiotsu.pyx'], working_path=base_path)
 
-    config.add_extension('rank.core_cy', sources=['rank/core_cy.c'],
+    config.add_extension('rank._core_cy', sources=['rank/_core_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('rank.core_cy_3d', sources=['rank/core_cy_3d.c'],
+    config.add_extension('rank._core_cy_3d', sources=['rank/_core_cy_3d.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_multiotsu', sources=['_multiotsu.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('rank.generic_cy', sources=['rank/generic_cy.c'],
+    config.add_extension('rank._generic_cy', sources=['rank/_generic_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
-        'rank.percentile_cy', sources=['rank/percentile_cy.c'],
+        'rank._percentile_cy', sources=['rank/_percentile_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
-        'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
+        'rank._bilateral_cy', sources=['rank/_bilateral_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
 
     return config
