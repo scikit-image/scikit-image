@@ -304,7 +304,9 @@ class RegionProperties:
             multichannel = False
 
         self.label = label
-        self.offset = offset or np.zeros((label_image.ndim,), dtype=int)
+        if offset is None:
+            offset = np.zeros((label_image.ndim,), dtype=int)
+        self._offset = np.array(offset)
 
         self._slice = slice
         self.slice = slice
