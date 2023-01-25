@@ -490,8 +490,8 @@ from skimage.filters.rank import maximum, minimum, gradient
 
 noisy_image = img_as_ubyte(data.camera())
 
-closing = maximum(minimum(noisy_image, disk(5)), disk(5))
-opening = minimum(maximum(noisy_image, disk(5)), disk(5))
+opening = maximum(minimum(noisy_image, disk(5)), disk(5))
+closing = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results

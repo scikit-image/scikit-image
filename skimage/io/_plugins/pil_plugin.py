@@ -1,20 +1,9 @@
 __all__ = ['imread', 'imsave']
 
 import numpy as np
-from packaging import version
-from PIL import Image, __version__ as pil_version
+from PIL import Image
 
 from ...util import img_as_ubyte, img_as_uint
-
-# Check CVE-2021-27921 and others
-if version.parse(pil_version) < version.parse('8.1.2'):
-    from warnings import warn
-    warn('Your installed pillow version is < 8.1.2. '
-         'Several security issues (CVE-2021-27921, '
-         'CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, '
-         'and more) have been fixed in pillow 8.1.2 or higher. '
-         'We recommend to upgrade this library.',
-         stacklevel=2)
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):

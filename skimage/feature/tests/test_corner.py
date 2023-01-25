@@ -114,13 +114,14 @@ def test_hessian_matrix(dtype):
     square[2, 2] = 4
     Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
                                    use_gaussian_derivatives=False)
+
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (Hrr, Hrc, Hcc))
-    assert_almost_equal(Hrr, np.array([[0, 0,  0, 0, 0],
+    assert_almost_equal(Hrr, np.array([[0, 0,  2, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [2, 0, -2, 0, 2],
+                                       [0, 0, -2, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0,  0, 0, 0]]))
+                                       [0, 0,  2, 0, 0]]))
 
     assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
                                        [0,  1, 0, -1, 0],
@@ -128,16 +129,35 @@ def test_hessian_matrix(dtype):
                                        [0, -1, 0,  1, 0],
                                        [0,  0, 0,  0, 0]]))
 
-    assert_almost_equal(Hcc, np.array([[0, 0,  2, 0, 0],
+    assert_almost_equal(Hcc, np.array([[0, 0,  0, 0, 0],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0, -2, 0, 0],
+                                       [2, 0, -2, 0, 2],
                                        [0, 0,  0, 0, 0],
-                                       [0, 0,  2, 0, 0]]))
+                                       [0, 0,  0, 0, 0]]))
 
     with expected_warnings(["use_gaussian_derivatives currently defaults"]):
         # FutureWarning warning when use_gaussian_derivatives is not
         # specified.
         hessian_matrix(square, sigma=0.1, order='rc')
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_order(use_gaussian_derivatives):
+    square = np.zeros((5, 5), dtype=float)
+    square[2, 2] = 4
+
+    Hxx, Hxy, Hyy = hessian_matrix(
+        square, sigma=0.1, order="xy",
+        use_gaussian_derivatives=use_gaussian_derivatives)
+
+    Hrr, Hrc, Hcc = hessian_matrix(
+        square, sigma=0.1, order="rc",
+        use_gaussian_derivatives=use_gaussian_derivatives)
+
+    # verify results are equivalent, just reversed in order
+    assert_array_equal(Hxx, Hcc)
+    assert_array_equal(Hxy, Hrc)
+    assert_array_equal(Hyy, Hrr)
 
 
 def test_hessian_matrix_3d():
@@ -146,11 +166,33 @@ def test_hessian_matrix_3d():
     Hs = hessian_matrix(cube, sigma=0.1, order='rc',
                         use_gaussian_derivatives=False)
     assert len(Hs) == 6, (f"incorrect number of Hessian images ({len(Hs)}) for 3D")
+    # This test didn't catch the fix in gh-6624 (passes with and without) ...
     assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
                                                   [0,  1,  0, -1,  0],
                                                   [0,  0,  0,  0,  0],
                                                   [0, -1,  0,  1,  0],
                                                   [0,  0,  0,  0,  0]]))
+    # ... so we add another test that fails for the not-fixed hessian_matrix
+    assert_almost_equal(Hs[0][:, 2, :], np.array([[0,  0,  2,  0,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0,  0, -2,  0,  0],
+                                                  [0,  0,  0,  0,  0],
+                                                  [0,  0,  2,  0,  0]]))
+
+
+@pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
+def test_hessian_matrix_3d_xy(use_gaussian_derivatives):
+
+    img = np.ones((5, 5, 5))
+
+    # order="xy" is only permitted for 2D
+    with pytest.raises(ValueError):
+        hessian_matrix(img, sigma=0.1, order="xy",
+                       use_gaussian_derivatives=use_gaussian_derivatives)
+
+    with pytest.raises(ValueError):
+        hessian_matrix(img, sigma=0.1, order='nonexistant',
+                       use_gaussian_derivatives=use_gaussian_derivatives)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
