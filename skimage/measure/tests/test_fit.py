@@ -234,6 +234,20 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 
+def test_ellipse_model_estimate_from_far_shifted_data():
+    data = np.array([
+        [1541.221, 1254.780], [1541.848, 1255.290], [1543.009, 1255.535],
+        [1544.150, 1255.395], [1544.962, 1254.945], [1545.777, 1253.922],
+        [1545.943, 1253.000], [1545.786, 1252.063], [1545.103, 1250.892],
+        [1543.986, 1250.374], [1543.140, 1250.401], [1541.968, 1250.959],
+        [1541.094, 1252.049], [1540.765, 1252.968], [1540.799, 1254.069],
+        [1541.221, 1254.780]
+    ])
+    # estimate parameters of far shifted data
+    model = EllipseModel()
+    assert model.estimate(data)
+
+
 @xfail(condition=arch32,
        reason=('Known test failure on 32-bit platforms. See links for '
                'details: '
