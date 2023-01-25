@@ -428,6 +428,10 @@ class EllipseModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
+        # shift data
+        origin = data.mean(axis=0)
+        data = data - origin
+
         x = data[:, 0]
         y = data[:, 1]
 
@@ -494,6 +498,10 @@ class EllipseModel(BaseModel):
 
         self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
         self.params = [float(np.real(x)) for x in self.params]
+
+        # shift back the result
+        self.params[0] += origin[0]
+        self.params[1] += origin[1]
         return True
 
     def residuals(self, data):
