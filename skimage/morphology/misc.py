@@ -2,7 +2,12 @@
 import numpy as np
 import functools
 from scipy import ndimage as ndi
+from scipy.spatial import cKDTree
+
 from .._shared.utils import warn
+from ._util import _resolve_neighborhood, _raveled_offsets_and_distances
+from ._near_objects_cy import _remove_near_objects
+
 
 # Our function names don't exactly correspond to ndimages.
 # This dictionary translates from our names to scipy's.
@@ -80,6 +85,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     -------
     out : ndarray, same shape and type as input `ar`
         The input array with small connected components removed.
+
+    See Also
+    --------
+    skimage.morphology.remove_near_objects
 
     Examples
     --------
@@ -218,4 +227,163 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
 
     np.logical_not(out, out=out)
 
+    return out
+
+
+def remove_near_objects(
+    image,
+    minimal_distance,
+    *,
+    priority=None,
+    p_norm=2,
+    footprint=None,
+    connectivity=None,
+    out=None,
+):
+    """Remove objects until a minimal distance is ensured.
+
+    Iterates over all objects (connected pixels that aren't zero or ``False``)
+    inside an image and removes neighboring objects until all remaining ones
+    are more than a minimal distance from each other.
+
+    Parameters
+    ----------
+    image : ndarray
+        An n-dimensional array.
+    minimal_distance : int or float
+        Objects whose distance is not greater than this value are considered
+        to close. Must be positive.
+    priority : ndarray, optional
+        An array matching `image` in shape that gives a priority for each
+        object in `image`. Objects with a lower value are removed first until
+        all remaining objects fulfill the distance requirement. If not given,
+        objects with a lower number of samples are removed first.
+    p_norm : int or float, optional
+        The Minkowski p-norm used to calculate the distance between objects.
+        Defaults to 2 which corresponds to the Euclidean distance.
+    footprint : ndarray, optional
+        The footprint (structuring element) used to determine the neighborhood
+        of each evaluated pixel (``True`` denotes a connected pixel). It must
+        be a boolean array and have the same number of dimensions as `image`.
+        If neither `footprint` nor `connectivity` are given, all adjacent
+        pixels are considered as part of the neighborhood.
+    connectivity : int, optional
+        A number used to determine the neighborhood of each evaluated pixel.
+        Adjacent pixels whose squared distance from the center is less than or
+        equal to `connectivity` are considered neighbors. Ignored if
+        `footprint` is not None.
+    out : ndarray, optional
+        Array of the same shape and dtype as `image`, into which the output is
+        placed. Its memory layout must be C-contiguous. By default, a new array
+        is created.
+
+    Returns
+    -------
+    out : ndarray
+        Array of the same shape as `image` for which objects that violate the
+        `minimal_distance` condition were removed.
+
+    See Also
+    --------
+    skimage.morphology.remove_small_objects
+
+    Notes
+    -----
+    In case the `priority` assigns the same value to different objects the
+    function falls back to an object's label id as returned by
+    ``scipy.ndimage.label(image, selem)`` [1]_.
+
+    NaNs are treated as != 0 and thus are considered objects (or part of one).
+
+    Setting `p_norm` to 1 will calculate the distance between objects as the
+    Manhatten distance while ``np.inf`` corresponds to the Chebyshev distance.
+
+    References
+    ----------
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
+
+    Examples
+    --------
+    >>> from skimage.morphology import remove_near_objects
+    >>> remove_near_objects(np.array([True, False, True]), 2)
+    array([False, False,  True])
+    >>> image = np.array(
+    ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+    ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ...      [0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0],
+    ...      [2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
+    ... )
+    >>> remove_near_objects(image, minimal_distance=3, priority=image)
+    array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+           [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+           [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]])
+    """
+    if minimal_distance < 0:
+        raise ValueError(
+            f"minimal_distance must be >= 0, was {minimal_distance}"
+        )
+    if out is None:
+        out = image.copy(order="C")
+
+    footprint = _resolve_neighborhood(footprint, connectivity, out.ndim)
+    neighbor_offsets, _ = _raveled_offsets_and_distances(
+        out.shape, footprint=footprint, center=((1,) * out.ndim)
+    )
+
+    # Label objects, only samples where labels != 0 are evaluated
+    labels = np.empty_like(out, dtype=np.intp)
+    ndi.label(out, footprint, output=labels)
+
+    if priority is None:
+        bins = np.bincount(labels.ravel())
+        priority = bins[labels.ravel()]  # Replace label id with bin count
+    elif out.shape != priority.shape:
+        raise ValueError(
+            "priority must have same shape as image: "
+            f"{priority.shape} != {out.shape}"
+        )
+    else:
+        priority = priority.ravel()
+
+    # Safely ignore points that don't lie on an objects surface
+    # This reduces the size of the KDTree and the number of points that
+    # need to be evaluated
+    labels[ndi.binary_erosion(labels, structure=footprint)] = 0
+    labels = labels.reshape(-1)
+    raveled_indices = np.nonzero(labels)[0]
+
+    # Use stable sort to make sorting behavior more transparent in the likely
+    # event that objects have the same priority
+    sort = np.argsort(priority[raveled_indices], kind="mergesort")[::-1]
+    raveled_indices = raveled_indices[sort]
+
+    indices = np.unravel_index(raveled_indices, out.shape)
+    kdtree = cKDTree(
+        data=np.asarray(indices, dtype=np.float64).transpose(),
+        balanced_tree=True,
+    )
+
+    # Raise error if raveling is not possible without copying
+    out_raveled = out.view()
+    out_raveled.shape = (out.size,)
+
+    _remove_near_objects(
+        image=out_raveled,
+        labels=labels,
+        raveled_indices=raveled_indices,
+        neighbor_offsets=neighbor_offsets,
+        kdtree=kdtree,
+        minimal_distance=minimal_distance,
+        p_norm=p_norm,
+        shape=out.shape,
+    )
     return out

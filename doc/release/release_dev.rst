@@ -41,6 +41,8 @@ New features and improvements
 - Add isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
   These functions return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
   (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
+- Add ``skimage.morphology.remove_near_objects``, a function that can remove objects until a minimal distance between remaining ones is ensured
+  (`#4165 <https://github.com/scikit-image/scikit-image/pull/4165>`_).
 - Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).

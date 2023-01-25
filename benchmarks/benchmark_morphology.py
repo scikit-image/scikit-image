@@ -7,7 +7,7 @@ import numpy as np
 from numpy.lib import NumpyVersion as Version
 
 import skimage
-from skimage import data, morphology, util
+from skimage import color, data, morphology, util
 
 
 class Skeletonize3d:
@@ -268,4 +268,43 @@ class LocalMaxima:
         morphology.local_maxima(
             self.image, connectivity=connectivity,
             allow_borders=allow_borders
+        )
+
+
+class RemoveNearObjects:
+
+    param_names = ["minimal_distance"]
+    params = [5, 100]
+
+    def setup(self, *args):
+        image = data.hubble_deep_field()
+        image = color.rgb2gray(image)
+        self.objects = image > 0.18  # Chosen with threshold_li
+
+    def time_remove_near_objects(self, minimal_distance):
+        morphology.remove_near_objects(
+            self.objects, minimal_distance=minimal_distance
+        )
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        Peakmem benchmarks measure the maximum amount of RAM used by a
+        function. However, this maximum also includes the memory used
+        during the setup routine (as of asv 0.2.1; see [1]_).
+        Measuring an empty peakmem function might allow us to disambiguate
+        between the memory used by setup and the memory used by target (see
+        other ``peakmem_`` functions below).
+
+        References
+        ----------
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_remove_near_objects(self, minimal_distance):
+        morphology.remove_near_objects(
+            self.objects,
+            minimal_distance=minimal_distance,
+            priority=self.objects,
         )

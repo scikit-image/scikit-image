@@ -12,6 +12,7 @@ extensions = [
   '_flood_fill_cy',
   '_grayreconstruct',
   '_max_tree',
+  '_near_objects_cy',
   '_skeletonize_cy'
 ]
 
