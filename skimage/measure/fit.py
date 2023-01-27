@@ -433,6 +433,13 @@ class EllipseModel(BaseModel):
         origin = data.mean(axis=0)
         data = data - origin
         scale = data.std()
+        # take care of too low scale values
+        fmin = np.nextafter(0, 1, dtype=float_type)
+        eps = np.spacing(1, dtype=float_type)
+        delta = fmin / eps
+        if scale < delta:
+            # data is a cluster not an ellipse
+            return False
         data /= scale
 
         x = data[:, 0]
