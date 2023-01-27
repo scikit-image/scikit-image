@@ -390,8 +390,9 @@ def autolevel(image, footprint, out=None, mask=None,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def equalize(image, footprint, out=None, mask=None,
