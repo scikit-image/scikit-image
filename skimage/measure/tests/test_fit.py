@@ -235,17 +235,17 @@ def test_ellipse_model_estimate_from_data():
 
 
 def test_ellipse_model_estimate_from_far_shifted_data():
-    data = np.array([
-        [1541.221, 1254.780], [1541.848, 1255.290], [1543.009, 1255.535],
-        [1544.150, 1255.395], [1544.962, 1254.945], [1545.777, 1253.922],
-        [1545.943, 1253.000], [1545.786, 1252.063], [1545.103, 1250.892],
-        [1543.986, 1250.374], [1543.140, 1250.401], [1541.968, 1250.959],
-        [1541.094, 1252.049], [1540.765, 1252.968], [1540.799, 1254.069],
-        [1541.221, 1254.780]
+    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5])
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
     ])
-    # estimate parameters of far shifted data
+    data = EllipseModel().predict_xy(angles, params=params)
     model = EllipseModel()
+    # assert that far shifted data can be estimated
     assert model.estimate(data)
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
 
 
 @xfail(condition=arch32,

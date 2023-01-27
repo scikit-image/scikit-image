@@ -428,9 +428,12 @@ class EllipseModel(BaseModel):
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
-        # shift data
+        # normalize value range to avoid misfitting due to numeric errors if
+        # the relative distanceses are small compared to absolute distances
         origin = data.mean(axis=0)
         data = data - origin
+        scale = data.std()
+        data /= scale
 
         x = data[:, 0]
         y = data[:, 1]
@@ -496,12 +499,12 @@ class EllipseModel(BaseModel):
         if a > c:
             phi += 0.5 * np.pi
 
-        self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
-        self.params = [float(np.real(x)) for x in self.params]
+        # revert normalization and set params
+        params = np.nan_to_num([x0, y0, width, height, phi]).real
+        params[:4] *= scale
+        params[:2] += origin
+        self.params = [float(x) for x in params]
 
-        # shift back the result
-        self.params[0] += origin[0]
-        self.params[1] += origin[1]
         return True
 
     def residuals(self, data):
