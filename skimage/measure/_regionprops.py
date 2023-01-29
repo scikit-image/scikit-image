@@ -116,6 +116,7 @@ COL_DTYPES = {
     'intensity_max': float,
     'intensity_mean': float,
     'intensity_min': float,
+    'intensity_std': float,
     'label': int,
     'moments': float,
     'moments_central': float,
@@ -141,6 +142,7 @@ _require_intensity_image = (
     'intensity_max',
     'intensity_mean',
     'intensity_min',
+    'intensity_std',
     'moments_weighted',
     'moments_weighted_central',
     'centroid_weighted',
@@ -547,6 +549,11 @@ class RegionProperties:
     def intensity_min(self):
         vals = self.image_intensity[self.image]
         return np.min(vals, axis=0).astype(np.float64, copy=False)
+
+    @property
+    def intensity_std(self):
+        vals = self.image_intensity[self.image]
+        return np.std(vals)
 
     @property
     def axis_major_length(self):
