@@ -63,6 +63,7 @@ PROPS = {
     'mean_intensity': 'intensity_mean',
     'MinIntensity': 'intensity_min',
     'min_intensity': 'intensity_min',
+    'std_intensity': 'intensity_std',
     'MinorAxisLength': 'axis_minor_length',
     'minor_axis_length': 'axis_minor_length',
     'Moments': 'moments',
