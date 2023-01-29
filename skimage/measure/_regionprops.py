@@ -1182,6 +1182,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Value with the mean intensity in the region.
     **intensity_min** : float
         Value with the least intensity in the region.
+    **intensity_std** : float
+        Standard deviation of the intensity in the region.
     **label** : int
         The label in the labeled input image.
     **moments** : (3, 3) ndarray
