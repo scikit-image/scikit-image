@@ -34,6 +34,7 @@ PROPS = {
     'ConvexImage': 'image_convex',
     'convex_image': 'image_convex',
     'Coordinates': 'coords',
+    'Aspect_ratio': 'aspect_ratio',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter_area',
     'equivalent_diameter': 'equivalent_diameter_area',
