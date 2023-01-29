@@ -102,6 +102,7 @@ COL_DTYPES = {
     'centroid_weighted': float,
     'centroid_weighted_local': float,
     'coords': object,
+    'circularity': float,
     'eccentricity': float,
     'equivalent_diameter_area': float,
     'euler_number': int,
@@ -444,6 +445,11 @@ class RegionProperties:
                 self.slice[i].start for i in range(self._ndim)
                 ])
         return object_offset + indices + self._offset
+
+    @property
+    @only2d
+    def circularity(self):
+        return 4 * np.pi * self.area / pow(self.perimeter, 2)
 
     @property
     @only2d
@@ -1136,6 +1142,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
         Coordinate list ``(row, col)``of the region scaled by ``spacing``.
     **coords** : (N, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
+    **circularity** : float
+        Ratio of the circumference of the region to the circumference of a
+        circle with the same area. A value of 1.0 indicates a perfect circle.
+        Values lower than 1.0 indicate an extended perimeter.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the
         region. The eccentricity is the ratio of the focal distance

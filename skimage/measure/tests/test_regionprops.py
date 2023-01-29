@@ -379,6 +379,11 @@ def test_slice():
     assert_equal(result, expected)
 
 
+def test_circularity():
+    val = regionprops(SAMPLE)[0].circularity
+    assert_almost_equal(val, 0.29641327260486866)
+
+
 def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
     assert_almost_equal(eps, 0.814629313427)
