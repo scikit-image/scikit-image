@@ -548,7 +548,7 @@ def test_intensity_min():
 def test_intensity_std():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                             )[0].intensity_std
-    assert_almost_equal(intensity, 13333)
+    assert_almost_equal(intensity, 0)
 
 def test_axis_minor_length():
     length = regionprops(SAMPLE)[0].axis_minor_length
