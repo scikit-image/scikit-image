@@ -23,7 +23,7 @@ def main():
                 if req.startswith('git+http'):
                     req = req.split('/')[-1]
                 else:
-                    req = re.split('<|>|=|!|;', req)[0]
+                    req = re.split('<|>|=|!|;|~', req)[0]
 
                 try:
                     # use pkg_resources to reliably get the version at install
