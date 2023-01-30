@@ -282,6 +282,15 @@ class CircleModel(BaseModel):
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
+        # normalize value range to avoid misfitting due to numeric errors if
+        # the relative distanceses are small compared to absolute distances
+        origin = data.mean(axis=0)
+        data = data - origin
+        scale = data.std()
+        # take care of too low scale values
+        if scale < np.finfo(float_type).tiny:
+            # data is a cluster not a circle
+            return False
 
         # Adapted from a spherical estimator covered in a blog post by Charles
         # Jeckel (see also reference 1 above):
@@ -300,6 +309,10 @@ class CircleModel(BaseModel):
         distances = spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances ** 2))
 
+        # revert normalization and set params
+        center *= scale
+        r *= scale
+        center += origin
         self.params = tuple(center) + (r,)
 
         return True
@@ -434,10 +447,7 @@ class EllipseModel(BaseModel):
         data = data - origin
         scale = data.std()
         # take care of too low scale values
-        fmin = np.nextafter(0, 1, dtype=float_type)
-        eps = np.spacing(1, dtype=float_type)
-        delta = fmin / eps
-        if scale < delta:
+        if scale < np.finfo(float_type).tiny:
             # data is a cluster not an ellipse
             return False
         data /= scale
