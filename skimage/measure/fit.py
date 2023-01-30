@@ -520,7 +520,7 @@ class EllipseModel(BaseModel):
         params = np.nan_to_num([x0, y0, width, height, phi]).real
         params[:4] *= scale
         params[:2] += origin
-        self.params = [float(x) for x in params]
+        self.params = tuple(float(p) for p in params)
 
         return True
 
