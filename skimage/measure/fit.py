@@ -291,6 +291,7 @@ class CircleModel(BaseModel):
         if scale < np.finfo(float_type).tiny:
             # data is a cluster not a circle
             return False
+        data /= scale
 
         # Adapted from a spherical estimator covered in a blog post by Charles
         # Jeckel (see also reference 1 above):
