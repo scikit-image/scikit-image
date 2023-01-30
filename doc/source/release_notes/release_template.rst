@@ -1,3 +1,5 @@
+:orphan:
+
 Announcement: scikit-image 0.X.0
 ================================
 

@@ -79,7 +79,7 @@ When reviewing, focus on the following:
    not to review tests, but please do so.
 
 5. **Licensing:** New contributions should be available under the same license
-   as or be compatible with {doc}`scikit-image's license <license>`.
+   as or be compatible with {doc}`scikit-image's license <../license>`.
    Examples of BSD-compatible licenses are the [MIT License][mit_license] and
    [Apache License 2.0][apache_2-2]. When in doubt, ask the team for help.
    If you, the contributor, are not the copyright holder of the submitted

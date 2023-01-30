@@ -51,6 +51,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "doi_role",
     "numpydoc",
+    "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
 ]

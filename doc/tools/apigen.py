@@ -504,4 +504,9 @@ class ApiDocWriter:
             w('.. toctree::\n')
             w('   :maxdepth: 2\n\n')
             for f in self.written_modules:
-                w(f'   {os.path.join(relpath, f)}\n')
+                w(f'   {os.path.join(relpath, f)}\n\n')
+
+            w('----------------------\n\n')
+            w('.. toctree::\n')
+            w('   :maxdepth: 1\n\n')
+            w(f'   ../license\n')

@@ -362,7 +362,7 @@ testing framework, with tests located in the various
 
 Our testing requirements are listed below:
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 
@@ -449,27 +449,27 @@ Full requirements list
 ----------------------
 **Build Requirements**
 
-.. include:: ../../requirements/build.txt
+.. include:: ../../../requirements/build.txt
    :literal:
 
 **Runtime Requirements**
 
-.. include:: ../../requirements/default.txt
+.. include:: ../../../requirements/default.txt
    :literal:
 
 **Test Requirements**
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 **Documentation Requirements**
 
-.. include:: ../../requirements/docs.txt
+.. include:: ../../../requirements/docs.txt
    :literal:
 
 **Developer Requirements**
 
-.. include:: ../../requirements/developer.txt
+.. include:: ../../../requirements/developer.txt
    :literal:
 
 **Data Requirements**
@@ -477,7 +477,7 @@ Full requirements list
 The full selection of demo datasets is only available with the
 following installed:
 
-.. include:: ../../requirements/data.txt
+.. include:: ../../../requirements/data.txt
    :literal:
 
 **Optional Requirements**
@@ -500,7 +500,7 @@ functionality is only available with the following installed:
     The ``dask`` module is used to speed up certain functions.
 
 
-.. include:: ../../requirements/optional.txt
+.. include:: ../../../requirements/optional.txt
   :literal:
 
 

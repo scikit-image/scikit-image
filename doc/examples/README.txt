@@ -1,7 +1,7 @@
 .. _examples_gallery:
 
-General examples
--------------------
+Examples
+========
 
 General-purpose and introductory examples for scikit-image.
 
