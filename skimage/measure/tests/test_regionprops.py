@@ -888,6 +888,14 @@ def test_moments_weighted_normalized():
     assert_almost_equal(wnu[3, 3], -0.0011057191)
 
 
+def test_offset_features():
+    props = regionprops(SAMPLE)[0]
+    offset = np.array([1024, 2048])
+    props_offset = regionprops(SAMPLE, offset=offset)[0]
+
+    assert_allclose(props.centroid, props_offset.centroid - offset)
+
+
 def test_label_sequence():
     a = np.empty((2, 2), dtype=int)
     a[:, :] = 2

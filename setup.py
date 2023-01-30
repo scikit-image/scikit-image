@@ -142,9 +142,6 @@ def parse_requirements_file(filename):
 
 
 INSTALL_REQUIRES = parse_requirements_file('requirements/default.txt')
-# The `requirements/extras.txt` file is explicitly omitted because
-# it contains requirements that do not have wheels uploaded to pip
-# for the platforms we wish to support.
 extras_require = {
     dep: parse_requirements_file('requirements/' + dep + '.txt')
     for dep in ['docs', 'optional', 'test', 'data']
@@ -235,6 +232,7 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: 3.11',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',

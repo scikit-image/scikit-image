@@ -1,6 +1,5 @@
 import numpy as np
 import scipy
-from packaging import version
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -8,16 +7,7 @@ from skimage._shared.testing import xfail, arch32
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
-# older versions of scipy raise a warning with new NumPy because they use
-# numpy.rank() instead of arr.ndim or numpy.linalg.matrix_rank.
-SCIPY_RANK_WARNING = r'numpy.linalg.matrix_rank|\A\Z'
 PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
-PYAMG_OR_SCIPY_WARNING = SCIPY_RANK_WARNING + '|' + PYAMG_MISSING_WARNING
-
-if version.parse(scipy.__version__) < version.parse('1.3'):
-    NUMPY_MATRIX_WARNING = 'matrix subclass'
-else:
-    NUMPY_MATRIX_WARNING = None
 
 
 def make_2d_syntheticdata(lx, ly=None):
@@ -75,21 +65,16 @@ def test_2d_bf(dtype):
 
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        labels_bf = random_walker(data, labels, beta=beta, mode='bf')
+    labels_bf = random_walker(data, labels, beta=beta, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        full_prob_bf = random_walker(data, labels, beta=beta, mode='bf',
-                                     return_full_prob=True)
+    full_prob_bf = random_walker(data, labels, beta=beta, mode='bf', return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
     # Now test with more than two labels
     labels[55, 80] = 3
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        full_prob_bf = random_walker(data, labels, beta=beta, mode='bf',
-                                     return_full_prob=True)
+    full_prob_bf = random_walker(data, labels, beta=beta, mode='bf', return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert len(full_prob_bf) == 3
@@ -102,13 +87,11 @@ def test_2d_cg(dtype):
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         full_prob = random_walker(data, labels, beta=90, mode='cg',
                                   return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
@@ -122,9 +105,7 @@ def test_2d_cg_mg(dtype):
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    anticipated_warnings = [
-        f'scipy.sparse.sparsetools|{PYAMG_OR_SCIPY_WARNING}',
-        NUMPY_MATRIX_WARNING]
+    anticipated_warnings = [f'scipy.sparse.sparsetools|{PYAMG_MISSING_WARNING}']
     with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
@@ -143,15 +124,11 @@ def test_2d_cg_j(dtype):
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        labels_cg = random_walker(data, labels, beta=90, mode='cg_j')
+    labels_cg = random_walker(data, labels, beta=90, mode='cg_j')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        full_prob = random_walker(data, labels, beta=90, mode='cg_j',
-                                  return_full_prob=True)
-    assert (full_prob[1, 25:45, 40:60]
-            >= full_prob[0, 25:45, 40:60]).all()
+    full_prob = random_walker(data, labels, beta=90, mode='cg_j', return_full_prob=True)
+    assert (full_prob[1, 25:45, 40:60] >= full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
 
 
@@ -161,7 +138,7 @@ def test_types():
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    with expected_warnings([PYAMG_OR_SCIPY_WARNING, NUMPY_MATRIX_WARNING]):
+    with expected_warnings([PYAMG_MISSING_WARNING]):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
@@ -172,8 +149,7 @@ def test_reorder_labels():
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[labels == 2] = 4
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
 
@@ -184,8 +160,7 @@ def test_2d_inactive():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels[10:20, 10:20] = -1
     labels[46:50, 33:38] = -2
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        labels = random_walker(data, labels, beta=90)
+    labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
 
@@ -213,8 +188,7 @@ def test_3d(dtype):
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data.astype(dtype, copy=False)
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -227,8 +201,7 @@ def test_3d_inactive():
     old_labels = np.copy(labels)
     labels[5:25, 26:29, 26:29] = -1
     after_labels = np.copy(labels)
-    with expected_warnings(['"cg" mode|CObject type' + '|'
-                            + SCIPY_RANK_WARNING, NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode|CObject type']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -243,16 +216,14 @@ def test_multispectral_2d(dtype, channel_axis):
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
 
     data = np.moveaxis(data, -1, channel_axis)
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING,
+    with expected_warnings(['"cg" mode',
                             'The probability range is outside']):
         multi_labels = random_walker(data, labels, mode='cg',
                                      channel_axis=channel_axis)
     data = np.moveaxis(data, channel_axis, -1)
 
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
@@ -265,12 +236,10 @@ def test_multispectral_3d(dtype):
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data.astype(dtype, copy=False)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         multi_labels = random_walker(data, labels, mode='cg', channel_axis=-1)
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
@@ -298,8 +267,7 @@ def test_spacing_0():
                  lz // 4 - small_l // 8] = 2
 
     # Test with `spacing` kwarg
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                      spacing=(1., 1., 0.5))
 
@@ -334,8 +302,7 @@ def test_spacing_1():
 
     # Test with `spacing` kwarg
     # First, anisotropic along Y
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
                                      spacing=(1., 2., 1.))
     assert (labels_aniso[13:17, 26:34, 13:17] == 2).all()
@@ -357,8 +324,7 @@ def test_spacing_1():
                   lz // 2 - small_l // 4] = 2
 
     # Anisotropic along X
-    with expected_warnings(['"cg" mode' + '|' + SCIPY_RANK_WARNING,
-                            NUMPY_MATRIX_WARNING]):
+    with expected_warnings(['"cg" mode']):
         labels_aniso2 = random_walker(data_aniso,
                                       labels_aniso2,
                                       mode='cg', spacing=(2., 1., 1.))
@@ -411,8 +377,7 @@ def test_length2_spacing():
     labels = np.zeros((10, 10), dtype=np.uint8)
     labels[2, 4] = 1
     labels[6, 8] = 4
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        random_walker(img, labels, spacing=(1., 2.))
+    random_walker(img, labels, spacing=(1., 2.))
 
 
 def test_bad_inputs():
@@ -461,12 +426,10 @@ def test_isolated_seeds():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
+    with expected_warnings(['The probability range is outside']):
         res = random_walker(a, mask)
     assert res[1, 1] == 1
-    with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
+    with expected_warnings(['The probability range is outside']):
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
@@ -485,12 +448,10 @@ def test_isolated_area():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
+    with expected_warnings(['The probability range is outside']):
         res = random_walker(a, mask)
     assert res[1, 1] == 0
-    with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
+    with expected_warnings(['The probability range is outside']):
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 0
     assert res[1, 1, 1] == 0
@@ -508,25 +469,21 @@ def test_prob_tol():
     mask[4, 4] = 2
     mask[6, 6] = 1
 
-    with expected_warnings([NUMPY_MATRIX_WARNING,
-                            'The probability range is outside']):
+    with expected_warnings(['The probability range is outside']):
         res = random_walker(a, mask, return_full_prob=True)
 
     # Lower beta, no warning is expected.
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        res = random_walker(a, mask, return_full_prob=True, beta=10)
+    res = random_walker(a, mask, return_full_prob=True, beta=10)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
     # Being more prob_tol tolerant, no warning is expected.
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
+    res = random_walker(a, mask, return_full_prob=True, prob_tol=1e-1)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 
     # Reduced tol, no warning is expected.
-    with expected_warnings([NUMPY_MATRIX_WARNING]):
-        res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
+    res = random_walker(a, mask, return_full_prob=True, tol=1e-9)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
 

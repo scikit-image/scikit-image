@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -115,11 +115,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              if [[ "${EXTRA_DEPS}" == "1" ]]; then
-              # Extra deps need compilation, and it may not always be possible to
-              # compile them easily on all platforms
-                  pip install -r ./requirements/extras.txt
-              fi
           fi
           source tools/github/script.sh
 
@@ -135,14 +130,14 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
         include:
           - python-version: "3.9"
             OPTIONAL_DEPS: 0
-          - python-version: "3.11-dev"
+          - python-version: "3.11"
             OPTIONAL_DEPS: 0
             BUILD_DOCS: 0
         exclude:
@@ -150,7 +145,7 @@ jobs:
           - python-version: "3.9"
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.11 wheels
-          - python-version: "3.11-dev"
+          - python-version: "3.11"
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 1
     env:
@@ -198,7 +193,6 @@ jobs:
           touch ${MPL_DIR}/matplotlibrc
           if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
               pip install -r ./requirements/optional.txt
-              pip install -r ./requirements/extras.txt
           fi
           source tools/github/script.sh
 

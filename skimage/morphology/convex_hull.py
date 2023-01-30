@@ -1,19 +1,12 @@
 """Convex Hull."""
 from itertools import product
 import numpy as np
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, QhullError
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
 from .._shared.utils import warn
-
-try:
-    # Should be public API of scipy spatial once #15003 is released
-    # see https://github.com/scipy/scipy/pull/15003
-    from scipy.spatial import QhullError
-except ImportError:
-    from scipy.spatial.qhull import QhullError
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 

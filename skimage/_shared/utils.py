@@ -6,7 +6,6 @@ from collections.abc import Iterable
 
 import numpy as np
 import scipy
-from numpy.lib import NumpyVersion
 
 from ._warnings import all_warnings, warn
 
@@ -190,7 +189,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
         desc = [f'Deprecated in favor of `{new_arg}`.',
-                f'',
+                '',
                 f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg,
@@ -495,9 +494,10 @@ def safe_as_int(val, atol=1e-3):
     return np.round(val).astype(np.int64)
 
 
-def check_shape_equality(im1, im2):
-    """Raise an error if the shape do not match."""
-    if not im1.shape == im2.shape:
+def check_shape_equality(*images):
+    """Check that all images have the same shape"""
+    image0 = images[0]
+    if not all(image0.shape == image.shape for image in images[1:]):
         raise ValueError('Input images must have the same dimensions.')
     return
 
@@ -655,8 +655,8 @@ def _validate_interpolation_order(image_dtype, order):
     if image_dtype == bool and order != 0:
         raise ValueError(
             "Input image dtype is bool. Interpolation is not defined "
-             "with bool data type. Please set order to 0 or explicitly "
-             "cast input image to another data type.")
+            "with bool data type. Please set order to 0 or explicitly "
+            "cast input image to another data type.")
 
     return order
 
@@ -688,9 +688,7 @@ def _fix_ndimage_mode(mode):
     # SciPy 1.6.0 introduced grid variants of constant and wrap which
     # have less surprising behavior for images. Use these when available
     grid_modes = {'constant': 'grid-constant', 'wrap': 'grid-wrap'}
-    if NumpyVersion(scipy.__version__) >= '1.6.0':
-        mode = grid_modes.get(mode, mode)
-    return mode
+    return grid_modes.get(mode, mode)
 
 
 new_float_type = {
@@ -740,3 +738,23 @@ def _supported_float_type(input_dtype, allow_complex=False):
 def identity(image, *args, **kwargs):
     """Returns the first argument unmodified."""
     return image
+
+
+def as_binary_ndarray(array, *, variable_name):
+    """Return `array` as a numpy.ndarray of dtype bool.
+
+    Raises
+    ------
+    ValueError:
+        An error including the given `variable_name` if `array` can not be
+        safely cast to a boolean array.
+    """
+    array = np.asarray(array)
+    if array.dtype != bool:
+        if np.any((array != 1) & (array != 0)):
+            raise ValueError(
+                f"{variable_name} array is not of dtype boolean or "
+                f"contains values other than 0 and 1 so cannot be "
+                f"safely cast to boolean array."
+            )
+    return np.asarray(array, dtype=bool)

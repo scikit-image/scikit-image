@@ -175,6 +175,10 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
+    if image.ndim > 2 and order == "xy":
+        raise ValueError("order='xy' is only supported for 2D images.")
+    if order not in ["rc", "xy"]:
+        raise ValueError(f"unrecognized order: {order}")
 
     if np.isscalar(sigma):
         sigma = (sigma,) * image.ndim
@@ -211,7 +215,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
 
     # 2.) apply the derivative along another axis as well
     axes = range(ndim)
-    if order == 'rc':
+    if order == 'xy':
         axes = reversed(axes)
     H_elems = [gaussian_(gradients[ax0], order=orders[ax1])
                for ax0, ax1 in combinations_with_replacement(axes, 2)]
@@ -245,10 +249,11 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     order : {'rc', 'xy'}, optional
-        This parameter allows for the use of reverse or forward order of
-        the image axes in gradient computation. 'rc' indicates the use of
-        the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
-        usage of the last axis initially (Hxx, Hxy, Hyy)
+        For 2D images, this parameter allows for the use of reverse or forward
+        order of the image axes in gradient computation. 'rc' indicates the use
+        of the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
+        usage of the last axis initially (Hxx, Hxy, Hyy). Images with higher
+        dimension must always use 'rc' order.
     use_gaussian_derivatives : boolean, optional
         Indicates whether the Hessian is computed by convolving with Gaussian
         derivatives, or by a simple finite-difference operation.
@@ -297,6 +302,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
+    if image.ndim > 2 and order == "xy":
+        raise ValueError("order='xy' is only supported for 2D images.")
+    if order not in ["rc", "xy"]:
+        raise ValueError(f"unrecognized order: {order}")
 
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
@@ -314,7 +323,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     gradients = np.gradient(gaussian_filtered)
     axes = range(image.ndim)
 
-    if order == 'rc':
+    if order == 'xy':
         axes = reversed(axes)
 
     H_elems = [np.gradient(gradients[ax0], axis=ax1)

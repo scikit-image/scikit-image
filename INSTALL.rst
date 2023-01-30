@@ -328,7 +328,7 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install major development and runtime dependencies of scikit-image
-  conda install `for i in requirements/{default,build,test}.txt; do echo -n " --file $i "; done`
+  conda install --file requirements/default.txt --file requirements/build.txt --file requirements/test.txt
   # Install scikit-image from source
   pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
   # Test your installation
@@ -503,18 +503,6 @@ functionality is only available with the following installed:
 .. include:: ../../requirements/optional.txt
   :literal:
 
-
-**Extra Requirements**
-
-These requirements have been included as a convenience, but are not widely
-installable through PyPI on our supported platforms. As such, we keep them in
-a separate list for more advanced members of our community to install.
-
-* `imread <https://pythonhosted.org/imread/>`__
-    Optional I/O plugin providing most standard `formats <https://pythonhosted.org//imread/formats.html>`__.
-
-.. include:: ../../requirements/extras.txt
-  :literal:
 
 Help with contributor installation
 ------------------------------------------------------------------------------
