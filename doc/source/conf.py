@@ -132,16 +132,28 @@ if _has_optipng():
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# https://pydata-sphinx-theme.readthedocs.io/en/latest/user_guide/branding.html
 
-html_theme = "scikit-image"
-html_theme_path = ["themes"]
-html_title = f"skimage v{version} docs"
+html_theme = "pydata_sphinx_theme"
 html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
+html_logo = "_static/logo.png"
+
+html_theme_options = {
+    "github_url": "https://github.com/scikit-image/scikit-image",
+    "icon_links": [
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/scikit-image/",
+            "icon": "fa-solid fa-box",
+        },
+    ]
+}
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-    "**": ["searchbox.html", "navigation.html", "localtoc.html", "versions.html"],
+    # "**": ["sidebar-nav-bs", "sidebar-ethical-ads"],
+    "auto_examples/index": []  # Hide sidebar in example gallery
 }
 
 # Output file base name for HTML help builder.
