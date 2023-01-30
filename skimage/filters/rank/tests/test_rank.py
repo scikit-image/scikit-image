@@ -86,8 +86,7 @@ def test_1d_input_raises_error(func):
     image = np.arange(10)
     footprint = disk(3)
     with pytest.raises(
-        ValueError,
-        match='input image should be a 2-dimensional or 3-dimensional array;'
+        ValueError, match='`image` must have 2 or 3 dimensions, got 1'
     ):
         func(image, footprint)
 

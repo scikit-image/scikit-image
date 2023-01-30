@@ -385,7 +385,7 @@ def autolevel(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._autolevel, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
@@ -438,13 +438,14 @@ def equalize(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._equalize, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def gradient(image, footprint, out=None, mask=None,
@@ -490,13 +491,14 @@ def gradient(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._gradient, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._gradient_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def maximum(image, footprint, out=None, mask=None,
@@ -551,13 +553,14 @@ def maximum(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._maximum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._maximum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def mean(image, footprint, out=None, mask=None,
@@ -603,13 +606,14 @@ def mean(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._mean, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def geometric_mean(image, footprint, out=None, mask=None,
@@ -660,13 +664,14 @@ def geometric_mean(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._geometric_mean, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._geometric_mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def subtract_mean(image, footprint, out=None, mask=None,
@@ -720,13 +725,14 @@ def subtract_mean(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._subtract_mean, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._subtract_mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def median(image, footprint=None, out=None, mask=None,
@@ -780,13 +786,14 @@ def median(image, footprint=None, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._median, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._median_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def minimum(image, footprint, out=None, mask=None,
@@ -841,13 +848,14 @@ def minimum(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._minimum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._minimum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def modal(image, footprint, out=None, mask=None,
@@ -895,13 +903,14 @@ def modal(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._modal, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._modal_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def enhance_contrast(image, footprint, out=None, mask=None,
@@ -951,13 +960,14 @@ def enhance_contrast(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._enhance_contrast_3D,
                                           image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def pop(image, footprint, out=None, mask=None,
@@ -1010,13 +1020,14 @@ def pop(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._pop, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._pop_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def sum(image, footprint, out=None, mask=None,
@@ -1069,13 +1080,14 @@ def sum(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._sum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._sum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def threshold(image, footprint, out=None, mask=None,
@@ -1128,13 +1140,14 @@ def threshold(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._threshold, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._threshold_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def noise_filter(image, footprint, out=None, mask=None,
@@ -1196,7 +1209,7 @@ def noise_filter(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._noise_filter, image,
                                        footprint_cpy, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
         centre_c = int(footprint.shape[1] / 2) + shift_x
@@ -1210,8 +1223,9 @@ def noise_filter(image, footprint, out=None, mask=None,
                                           mask=mask, shift_x=shift_x,
                                           shift_y=shift_y, shift_z=shift_z)
 
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def entropy(image, footprint, out=None, mask=None,
@@ -1266,14 +1280,15 @@ def entropy(image, footprint, out=None, mask=None,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
                                        out_dtype=np.float64)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z,
                                           out_dtype=np.float64)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def otsu(image, footprint, out=None, mask=None,
@@ -1325,13 +1340,14 @@ def otsu(image, footprint, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._otsu, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
 
 
 def windowed_histogram(image, footprint, out=None, mask=None,
@@ -1432,10 +1448,11 @@ def majority(image, footprint, *, out=None, mask=None,
         return _apply_scalar_per_pixel(generic_cy._majority, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
-    if np_image.ndim == 3:
+    elif np_image.ndim == 3:
         return _apply_scalar_per_pixel_3D(generic_cy._majority_3D,
                                           image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
-    raise ValueError('input image should be a 2-dimensional or 3-dimensional array; '
-                    f'got {np_image.ndim}-dimensional array.')
+    raise ValueError(
+        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
+    )
