@@ -3,7 +3,11 @@
 Examples
 ========
 
-General-purpose and introductory examples for scikit-image.
+A gallery of examples and that showcase how scikit-image can be used. Some
+examples demonstrate the use of the API in general and some demonstrate specific
+applications in tutorial form.
 
-The `narrative documentation <../user_guide.html>`_ introduces
-conventions and basic image manipulations.
+.. hint::
+
+    Check out our `<../user_guides/index.html>`_  for a good narrative
+    introduction to key library conventions and basic image manipulation.
