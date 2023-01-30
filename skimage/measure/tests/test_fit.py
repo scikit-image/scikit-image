@@ -159,6 +159,21 @@ def test_circle_model_insufficient_data():
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
 
 
+def test_circle_model_estimate_from_small_scale_data():
+    params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float128)
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
+    ], dtype=np.float128)
+    data = CircleModel().predict_xy(angles, params=params)
+
+    model = CircleModel()
+    # assert that far small scale data can be estimated
+    assert model.estimate(data.astype(np.float64))
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
+
+
 def test_ellipse_model_invalid_input():
     with testing.raises(ValueError):
         EllipseModel().estimate(np.empty((5, 3)))
@@ -235,15 +250,15 @@ def test_ellipse_model_estimate_from_data():
 
 
 def test_ellipse_model_estimate_from_far_shifted_data():
-    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5])
+    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float128)
     angles = np.array([
         0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
         3.183, 3.969, 4.840, 5.387, 5.792, 6.139
-    ])
+    ], dtype=np.float128)
     data = EllipseModel().predict_xy(angles, params=params)
     model = EllipseModel()
     # assert that far shifted data can be estimated
-    assert model.estimate(data)
+    assert model.estimate(data.astype(np.float64))
     # test whether the predicted parameters are close to the original ones
     assert_almost_equal(params, model.params)
 
