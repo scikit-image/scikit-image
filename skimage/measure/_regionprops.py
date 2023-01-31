@@ -288,7 +288,8 @@ class RegionProperties:
     """
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, *, extra_properties=None, spacing=None):
+                 cache_active, *, extra_properties=None, spacing=None,
+                 offset=None):
 
         if intensity_image is not None:
             ndim = label_image.ndim
@@ -303,6 +304,9 @@ class RegionProperties:
             multichannel = False
 
         self.label = label
+        if offset is None:
+            offset = np.zeros((label_image.ndim,), dtype=int)
+        self._offset = np.array(offset)
 
         self._slice = slice
         self.slice = slice
@@ -427,15 +431,19 @@ class RegionProperties:
 
     @property
     def coords_scaled(self):
-        indices = np.nonzero(self.image)
-        return np.vstack([(indices[i] + self.slice[i].start) * s
-                          for i, s in zip(range(self._ndim), self._spacing)]).T
+        indices = np.argwhere(self.image)
+        object_offset = np.array([
+                self.slice[i].start for i in range(self._ndim)
+                ])
+        return (object_offset + indices) * self._spacing + self._offset
 
     @property
     def coords(self):
-        indices = np.nonzero(self.image)
-        return np.vstack([indices[i] + self.slice[i].start
-                          for i in range(self._ndim)]).T
+        indices = np.argwhere(self.image)
+        object_offset = np.array([
+                self.slice[i].start for i in range(self._ndim)
+                ])
+        return object_offset + indices + self._offset
 
     @property
     @only2d
@@ -1040,7 +1048,7 @@ def regionprops_table(label_image, intensity_image=None,
 
 
 def regionprops(label_image, intensity_image=None, cache=True,
-                *, extra_properties=None, spacing=None):
+                *, extra_properties=None, spacing=None, offset=None):
     r"""Measure properties of labeled image regions.
 
     Parameters
@@ -1077,6 +1085,10 @@ def regionprops(label_image, intensity_image=None, cache=True,
         accept the intensity image as the second argument.
     spacing: tuple of float, shape (ndim, )
         The pixel spacing along each axis of the image.
+    offset : array-like of int, shape `(label_image.ndim,)`, optional
+        Coordinates of the origin ("top-left" corner) of the label image.
+        Normally this is ([0, ]0, 0), but it might be different if one wants
+        to obtain regionprops of subvolumes within a larger volume.
 
     Returns
     -------
@@ -1295,6 +1307,15 @@ def regionprops(label_image, intensity_image=None, cache=True,
             raise TypeError(
                     'Non-integer label_image types are ambiguous')
 
+    if offset is None:
+        offset_arr = np.zeros((label_image.ndim,), dtype=int)
+    else:
+        offset_arr = np.asarray(offset)
+        if offset_arr.ndim != 1 or offset_arr.size != label_image.ndim:
+            raise ValueError('Offset should be an array-like of integers '
+                             'of shape (label_image.ndim,); '
+                             f'{offset} was provided.')
+
     regions = []
 
     objects = ndi.find_objects(label_image)
@@ -1305,7 +1326,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
         label = i + 1
 
         props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache, spacing=spacing, extra_properties=extra_properties)
+                                 cache, spacing=spacing, extra_properties=extra_properties,
+                                 offset=offset_arr)
         regions.append(props)
 
     return regions
