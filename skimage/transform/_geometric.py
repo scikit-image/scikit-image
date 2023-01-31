@@ -816,10 +816,11 @@ class AffineTransform(ProjectiveTransform):
     Has the following form::
 
         X = a0*x + a1*y + a2 =
-          = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
+          = sx*x*cos(rotation) - sy*y*(tan(shear) * sin(rotation) + sin(rotation)) + a2
+
 
         Y = b0*x + b1*y + b2 =
-          = sx*x*sin(rotation) + sy*y*cos(rotation + shear) + b2
+          = sx*x*sin(rotation) - sy*y*(tan(shear) * sin(rotation) - cos(rotation)) + b2
 
     where ``sx`` and ``sy`` are scale factors in the x and y directions,
     and the homogeneous transformation matrix is::
@@ -910,9 +911,9 @@ class AffineTransform(ProjectiveTransform):
                 sx, sy = scale
 
             self.params = np.array([
-                [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
-                [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
-                [                      0,                                0, 1]
+                [sx * math.cos(rotation), -sy * (math.tan(shear) * math.cos(rotation) + math.sin(rotation)), 0],
+                [sx * math.sin(rotation), -sy * (math.tan(shear) * math.sin(rotation) - math.cos(rotation)), 0],
+                [                      0,                                                                 0, 1]
             ])
             self.params[0:2, 2] = translation
         else:
@@ -921,7 +922,12 @@ class AffineTransform(ProjectiveTransform):
 
     @property
     def scale(self):
-        return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dimensionality]
+        if self.dimensionality != 2:
+            return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dimensionality]
+        else:
+            ss = np.sum(self.params ** 2, axis=0)[:self.dimensionality]
+            ss[1] = ss[1] / (math.tan(self.shear)**2 + 1)
+            return np.sqrt(ss)
 
     @property
     def rotation(self):

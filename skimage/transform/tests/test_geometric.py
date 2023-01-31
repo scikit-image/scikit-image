@@ -261,6 +261,19 @@ def test_affine_init():
                         AffineTransform(scale=(0.5, 0.5)).scale)
 
 
+def test_affine_shear():
+    shear = 0.1
+    # expected horizontal shear transform
+    expected = np.array([
+        [1, -np.tan(shear), 0],
+        [0,                1, 0],
+        [0,                0, 1]
+    ])
+
+    tform = AffineTransform(shear=shear)
+    assert_almost_equal(tform.params, expected)
+
+
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform()
     assert tform.estimate(SRC, DST)
