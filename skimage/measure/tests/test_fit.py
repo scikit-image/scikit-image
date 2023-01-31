@@ -153,10 +153,11 @@ def test_circle_model_insufficient_data():
         model.estimate(np.array([[1, 2], [3, 4]]))
 
     with expected_warnings(warning_message):
-        model.estimate(np.ones((6, 2)))
-
-    with expected_warnings(warning_message):
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
+
+    warning_message = ["Cannot resolve circle in data."]
+    with expected_warnings(warning_message):
+        model.estimate(np.ones((6, 2)))
 
 
 def test_circle_model_estimate_from_small_scale_data():
@@ -166,7 +167,6 @@ def test_circle_model_estimate_from_small_scale_data():
         3.183, 3.969, 4.840, 5.387, 5.792, 6.139
     ], dtype=np.float128)
     data = CircleModel().predict_xy(angles, params=params)
-
     model = CircleModel()
     # assert that far small scale data can be estimated
     assert model.estimate(data.astype(np.float64))
@@ -271,7 +271,9 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
-    assert not model.estimate(np.ones((5, 2)))
+    warning_message = ["Cannot resolve ellipse in data."]
+    with expected_warnings(warning_message):
+        assert not model.estimate(np.ones((6, 2)))
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 

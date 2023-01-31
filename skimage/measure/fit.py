@@ -287,9 +287,8 @@ class CircleModel(BaseModel):
         origin = data.mean(axis=0)
         data = data - origin
         scale = data.std()
-        # take care of too low scale values
         if scale < np.finfo(float_type).tiny:
-            # data is a cluster not a circle
+            warn("Cannot resolve circle in data.")
             return False
         data /= scale
 
@@ -447,9 +446,8 @@ class EllipseModel(BaseModel):
         origin = data.mean(axis=0)
         data = data - origin
         scale = data.std()
-        # take care of too low scale values
         if scale < np.finfo(float_type).tiny:
-            # data is a cluster not an ellipse
+            warn("Cannot resolve ellipse in data.")
             return False
         data /= scale
 
