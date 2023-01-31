@@ -58,15 +58,15 @@ def binary_erosion(image, footprint=None, out=None, mirror=False,
     mirror : bool, optional
         Mirror the footprint along each dimension. Default is ``False``.
 
-        .. versionadded:: 0.20
-            ``mirror`` was added in 0.20.
+        .. versionadded:: 0.21
+            `mirror` was added in 0.21.
 
     border_value : bool or None, optional
         Value at the border in the output array. ``None`` is the same as
         ``True``. Default is ``True``.
 
-        .. versionadded:: 0.20
-            ``border_value`` was added in 0.20.
+        .. versionadded:: 0.21
+            `border_value` was added in 0.21.
 
     Returns
     -------
@@ -83,11 +83,12 @@ def binary_erosion(image, footprint=None, out=None, mirror=False,
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
-    For even-sized footprints, ``binary_erosion`` and ``erosion`` produce an
-    output that differs: the one is shifted by one pixel compared to the other.
+    For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
+    :func:`skimage.morphology.erosion` produce an output that differs: the one
+    is shifted by one pixel compared to the other.
 
     See also
     --------
@@ -140,15 +141,15 @@ def binary_dilation(image, footprint=None, out=None, mirror=True,
     mirror : bool, optional
         Mirror the footprint along each dimension. Default is ``True``.
 
-        .. versionadded:: 0.20
-            ``mirror`` was added in 0.20.
+        .. versionadded:: 0.21
+            `mirror` was added in 0.21.
 
     border_value : bool or None, optional
         Value at the border in the output array. ``None`` is the same as
         ``False``. Default is ``False``.
 
-        .. versionadded:: 0.20
-            ``border_value`` was added in 0.20.
+        .. versionadded:: 0.21
+            `border_value` was added in 0.21.
 
     Returns
     -------
@@ -165,12 +166,13 @@ def binary_dilation(image, footprint=None, out=None, mirror=True,
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
-    For non-symmetric footprints, ``binary_dilation`` and ``dilation`` produce
-    an output that differs: ``binary_dilation`` mirrors the footprint, whereas
-    ``dilation`` does not (by default).
+    For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
+    and :func:`skimage.morphology.dilation` produce an output that differs:
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not (by
+    default).
 
     See also
     --------
@@ -226,8 +228,8 @@ def binary_opening(image, footprint=None, out=None, border_value=None):
         erosion and ``False`` for the dilation, causing pixels outside the
         image not to influence the results. Default is ``None``.
 
-        .. versionadded:: 0.20
-            ``border_value`` was added in 0.20.
+        .. versionadded:: 0.21
+            `border_value` was added in 0.21.
 
     Returns
     -------
@@ -243,7 +245,7 @@ def binary_opening(image, footprint=None, out=None, border_value=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
     See also
@@ -285,8 +287,8 @@ def binary_closing(image, footprint=None, out=None, border_value=None):
         erosion and ``False`` for the dilation, causing pixels outside the
         image not to influence the results. Default is ``None``.
 
-        .. versionadded:: 0.20
-            ``border_value`` was added in 0.20.
+        .. versionadded:: 0.21
+            `border_value` was added in 0.21.
 
     Returns
     -------
@@ -302,7 +304,7 @@ def binary_closing(image, footprint=None, out=None, border_value=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
     See also

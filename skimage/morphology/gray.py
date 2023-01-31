@@ -15,11 +15,10 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
 
 
 def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
-    """Helper to call ``binary_func`` for each footprint in a sequence.
+    """Helper to call `gray_func` for each footprint in a sequence.
 
-    binary_func is a binary morphology function that accepts "footprint",
-    "output" and "mode" keyword arguments
-    (e.g. ``scipy.ndimage.grey_erosion``).
+    `gray_func` is a morphology function that accepts `footprint`, `output`,
+    `mode` and `cval` keyword arguments (e.g. `scipy.ndimage.grey_erosion`).
     """
     fp, num_iter = footprints[0]
     gray_func(image, footprint=fp, output=out)
@@ -34,7 +33,7 @@ def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
 
 
 def _shift_footprint(footprint, shift_x, shift_y):
-    """Shift the binary image ``footprint`` in the left and/or up.
+    """Shift the binary image `footprint` in the left and/or up.
 
     This only affects 2D footprints with even number of rows
     or columns.
@@ -44,7 +43,7 @@ def _shift_footprint(footprint, shift_x, shift_y):
     footprint : 2D array, shape (M, N)
         The input footprint.
     shift_x, shift_y : bool or None
-        Whether to move ``footprint`` along each axis. If ``None``, the
+        Whether to move `footprint` along each axis. If ``None``, the
         array is not modified along that dimension.
 
     Returns
@@ -76,21 +75,41 @@ def _shift_footprint(footprint, shift_x, shift_y):
 def _shift_footprints(footprint, shift_x, shift_y):
     """Shifts the footprints, whether it's a single array or a sequence.
 
-    See ``__shift_footprint``, which is called for each array in the sequence.
+    See `_shift_footprint`, which is called for each array in the sequence.
     """
     if shift_x is None and shift_y is None:
         return footprint
 
-    warning_msg = ("`shift_x` and `shift_y` are deprecated arguments. "
-                   "They will be removed in a future version. Please see "
-                   "the documentation to `skimage.morphology.dilation` or"
-                   "`skimage.morphology.erosion` for more information.")
+    warning_msg = ("The parameters `shift_x` and `shift_y` are deprecated "
+                   "since v0.21 and will be removed in v0.24. Please use the "
+                   "new parameter `mirror` instead.")
     warnings.warn(warning_msg, FutureWarning, stacklevel=4)
 
     if _footprint_is_sequence(footprint):
         return tuple((_shift_footprint(fp, shift_x, shift_y), n)
                      for fp, n in footprint)
     return _shift_footprint(footprint, shift_x, shift_y)
+
+
+def _handle_mode_and_cval(dtype, mode, cval):
+    """Sets the mode and cval parameters for 'max' and 'min'."""
+    if mode == "max":
+        mode = "constant"
+        if np.issubdtype(dtype, bool):
+            cval = True
+        elif np.issubdtype(dtype, np.integer):
+            cval = np.iinfo(dtype).max
+        else:
+            cval = np.inf
+    elif mode == "min":
+        mode = "constant"
+        if np.issubdtype(dtype, bool):
+            cval = False
+        elif np.issubdtype(dtype, np.integer):
+            cval = np.iinfo(dtype).min
+        else:
+            cval = -np.inf
+    return mode, cval
 
 
 @default_footprint
@@ -114,42 +133,42 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool, optional
-        Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated in
-        favor of ``mirror``.
-
-        .. versionchanged:: 0.20
-            Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
-            removed in a future version.
-
     mirror : bool, optional
         Mirror the footprint along each dimension. Default is ``False``.
 
-        .. versionadded:: 0.20
-            ``mirror`` was added in 0.20.
+        .. versionadded:: 0.21
+            `mirror` was added in 0.21.
 
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        maximum for the image's dtype, which causes them to not influence the
-        result. Default is ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'max' or 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype, which causes them to not
+        influence the result. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    eroded : array, same shape as ``image``
+    eroded : array, same shape as `image`
         The result of the morphological erosion.
+
+    Other Parameters
+    ----------------
+    shift_x, shift_y : DEPRECATED
+        Deprecated in favour of `mirror`.
+
+        .. deprecated:: 0.21
 
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
-    lower algorithm complexity makes the ``skimage.filters.rank.minimum``
+    lower algorithm complexity makes the :func:`skimage.filters.rank.minimum`
     function more efficient for larger images and footprints.
 
     The footprint can also be a provided as a sequence of 2-tuples where the
@@ -159,11 +178,12 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
-    For even-sized footprints, ``binary_erosion`` and ``erosion`` produce an
-    output that differs: the one is shifted by one pixel compared to the other.
+    For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
+    :func:`skimage.morphology.erosion` produce an output that differs: the one
+    is shifted by one pixel compared to the other.
 
     Examples
     --------
@@ -186,14 +206,9 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     if out is None:
         out = np.empty_like(image)
 
-    if mode is None:
-        mode = "constant"
-        if np.issubdtype(out.dtype, bool):
-            cval = True
-        elif np.issubdtype(out.dtype, np.integer):
-            cval = np.iinfo(image.dtype).max
-        else:
-            cval = np.inf
+    if mode == "ignore":
+        mode = "max"
+    mode, cval = _handle_mode_and_cval(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)
@@ -231,43 +246,43 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     out : ndarray, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    shift_x, shift_y : bool, optional
-        Shift footprint about center point. This only affects 2D footprints
-        with even-numbered sides. These two parameters are deprecated in
-        favor of ``mirror``.
-
-        .. versionchanged:: 0.20
-            Parameters ``shift_x`` and ``shift_y`` are deprecated and will be
-            removed in a future version.
-
     mirror : bool, optional
         Mirror the footprint along each dimension. Default is ``False``.
 
-        .. versionadded:: 0.20
-            ``mirror`` was added in 0.20.
+        .. versionadded:: 0.21
+            `mirror` was added in 0.21.
 
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        minimum for the image's dtype, which causes them to not influence the
-        result. Default is ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'min' or 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype, which causes them to not
+        influence the result. Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    dilated : uint8 array, same shape and type as ``image``
+    dilated : uint8 array, same shape and type as `image`
         The result of the morphological dilation.
+
+    Other Parameters
+    ----------------
+    shift_x, shift_y : DEPRECATED
+        Deprecated in favour of `mirror`.
+
+        .. deprecated:: 0.21
 
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the ``skimage.filters.rank.maximum`` function
-    more efficient for larger images and footprints.
+    algorithm complexity makes the :func:`skimage.filters.rank.maximum`
+    function more efficient for larger images and footprints.
 
     The footprint can also be a provided as a sequence of 2-tuples where the
     first element of each 2-tuple is a footprint ndarray and the second element
@@ -276,12 +291,13 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
-    For non-symmetric footprints, ``binary_dilation`` and ``dilation`` produce
-    an output that differs: ``binary_dilation`` mirrors the footprint, whereas
-    ``dilation`` does not (by default).
+    For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
+    and :func:`skimage.morphology.dilation` produce an output that differs:
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not (by
+    default).
 
     Examples
     --------
@@ -304,19 +320,15 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     if out is None:
         out = np.empty_like(image)
 
-    if mode is None:
-        mode = "constant"
-        if np.issubdtype(out.dtype, bool):
-            cval = False
-        elif np.issubdtype(out.dtype, np.integer):
-            cval = np.iinfo(image.dtype).min
-        else:
-            cval = -np.inf
+    if mode == "ignore":
+        mode = "min"
+    mode, cval = _handle_mode_and_cval(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)
     if not mirror:
-        # Note that `ndi.grey_dilation` mirrors the footprint.
+        # Note that `ndi.grey_dilation` mirrors the footprint and this
+        # additional inversion should be removed in skimage2, see gh-6676.
         footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
@@ -349,22 +361,24 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        maximum for the image's dtype in the erosion, and minimum in the
-        dilation, which causes them to not influence the result. Default is
-        ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype in the erosion, and minimum
+        in the dilation, which causes them to not influence the result.
+        Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    opening : array, same shape and type as ``image``
+    opening : array, same shape and type as `image`
         The result of the morphological opening.
 
     Notes
@@ -376,8 +390,8 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
     Examples
     --------
@@ -425,22 +439,24 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        maximum for the image's dtype in the erosion, and minimum in the
-        dilation, which causes them to not influence the result. Default is
-        ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed
+        to be the maximum for the image's dtype in the erosion, and minimum
+        in the dilation, which causes them to not influence the result.
+        Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    closing : array, same shape and type as ``image``
+    closing : array, same shape and type as `image`
         The result of the morphological closing.
 
     Notes
@@ -452,8 +468,8 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
     Examples
     --------
@@ -499,22 +515,21 @@ def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        maximum for the image's dtype in the erosion, and minimum in the
-        dilation, which causes them to not influence the result. Default is
-        ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'. See :func:`skimage.morphology.opening`.
+        Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    out : array, same shape and type as ``image``
+    out : array, same shape and type as `image`
         The result of the morphological white top hat.
 
     Notes
@@ -526,8 +541,8 @@ def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
     See Also
     --------
@@ -594,22 +609,21 @@ def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     out : ndarray, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    mode : {None, 'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are handled.
-        If ``None``, pixels outside the image domain are assumed to be the
-        maximum for the image's dtype in the erosion, and minimum in the
-        dilation, which causes them to not influence the result. Default is
-        ``'reflect'``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
+        'max', 'min', or 'ignore'. See :func:`skimage.morphology.closing`.
+        Default is 'reflect'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.20
-            ``mode`` and ``cval`` were added in 0.20.
+        .. versionadded:: 0.21
+            `mode` and `cval` were added in 0.21.
 
     Returns
     -------
-    out : array, same shape and type as ``image``
+    out : array, same shape and type as `image`
         The result of the morphological black top hat.
 
     Notes
@@ -621,8 +635,8 @@ def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
-    footprint sequence of this type.
+    :func:`skimage.morphology.disk` provide an option to automatically generate
+    a footprint sequence of this type.
 
     See Also
     --------

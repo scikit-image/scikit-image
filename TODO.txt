@@ -25,7 +25,7 @@ Version 0.21
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
 
-Version 0.23
+Version 0.24
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
