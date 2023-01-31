@@ -266,8 +266,8 @@ def test_affine_shear():
     # expected horizontal shear transform
     expected = np.array([
         [1, -np.tan(shear), 0],
-        [0,                1, 0],
-        [0,                0, 1]
+        [0,              1, 0],
+        [0,              0, 1]
     ])
 
     tform = AffineTransform(shear=shear)
