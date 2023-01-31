@@ -852,7 +852,6 @@ class AffineTransform(ProjectiveTransform):
         X = a0*x + a1*y + a2 =
           = sx*x*cos(rotation) - sy*y*(tan(shear) * sin(rotation) + sin(rotation)) + a2
 
-
         Y = b0*x + b1*y + b2 =
           = sx*x*sin(rotation) - sy*y*(tan(shear) * sin(rotation) - cos(rotation)) + b2
 
