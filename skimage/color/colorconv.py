@@ -1739,16 +1739,20 @@ def _cart2polar_2pi(x, y):
 
 @channel_as_last_axis()
 def lch2lab(lch, *, channel_axis=-1):
-    """CIE-LCH to CIE-LAB color space conversion.
+    """Convert image in CIE-LCh to CIE-LAB color space.
 
-    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+    CIE-LCh is the cylindrical representation of the CIE-LAB (Cartesian) color
+    space.
 
     Parameters
     ----------
     lch : (..., 3, ...) array_like
-        The N-D image in CIE-LCH format. The last (``N+1``-th) dimension must
-        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
-        color channels.  Subsequent elements are copied.
+        The input image in CIE-LCh color space.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
+        The L* values range from 0 to 100;
+        the C values range from 0 to 100;
+        the h values range from 0 to ``2*pi``.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.
@@ -1759,12 +1763,26 @@ def lch2lab(lch, *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in LAB format, with same shape as input `lch`.
+        The image in CIE-LAB format, of same shape as input.
 
     Raises
     ------
     ValueError
-        If `lch` does not have at least 3 color channels (i.e. l, c, h).
+        If `lch` does not have at least 3 channels (i.e., L*, C, and h).
+
+    Notes
+    -----
+    The h channel (i.e., hue) is expressed as an angle in range ``(0, 2*pi)``.
+
+    See Also
+    --------
+    lab2lch
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/HCL_color_space
+    .. [3] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
