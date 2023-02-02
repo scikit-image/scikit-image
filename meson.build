@@ -4,7 +4,7 @@ project(
   # Note that the git commit hash cannot be added dynamically here
   # That only happens when importing from a git repository.
   # See `skimage/__init__.py`
-  version: '0.20.0.dev0',
+  version: run_command('skimage/_build_utils/version.py', check: true).stdout().strip(),
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
   default_options: [
