@@ -29,16 +29,10 @@ elif cc.get_id() == 'msvc'
   endif
 endif
 
-# TODO: the below -Wno flags are all needed to silence warnings in
-# f2py-generated code. This should be fixed in f2py itself.
 _global_c_args = cc.get_supported_arguments(
-  '-Wno-unused-but-set-variable',
   '-Wno-unused-function',
-  '-Wno-conversion',
-  '-Wno-misleading-indentation',
-  '-Wno-incompatible-pointer-types',
 )
-add_project_arguments(_global_c_args, language : 'c')
+add_project_arguments(_global_c_args, language: ['c', 'cpp'])
 
 # We need -lm for all C code (assuming it uses math functions, which is safe to
 # assume for scikit-image). For C++ it isn't needed, because libstdc++/libc++ is

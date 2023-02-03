@@ -4,7 +4,6 @@
 #cython: wraparound=False
 
 import numpy as np
-from warnings import warn
 
 cimport numpy as cnp
 cnp.import_array()
