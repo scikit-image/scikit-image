@@ -71,9 +71,9 @@ def test_imread_separate_channels(explicit_kwargs):
     # To avoid pending changes to tifffile defaults, we must specify this is an
     # RGB image with separate planes (i.e., channel_axis=0).
     if explicit_kwargs:
-        kwargs = {'photometric': 'RGB', 'planarconfig': 'SEPARATE'}
+        pass
     else:
-        kwargs = {}
+        pass
 
     imsave(fname, x)
     img = imread(fname)

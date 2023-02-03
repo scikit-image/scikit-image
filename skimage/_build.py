@@ -46,7 +46,9 @@ def cython(pyx_files, working_path=''):
     try:
         from Cython import __version__
         if version.parse(__version__) < version.parse(CYTHON_VERSION):
-            raise RuntimeError(f'Cython >= {CYTHON_VERSION} needed to build scikit-image')
+            raise RuntimeError(
+                f'Cython >= {CYTHON_VERSION} needed to build scikit-image'
+            )
 
         from Cython.Build import cythonize
     except ImportError:

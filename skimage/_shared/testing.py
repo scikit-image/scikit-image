@@ -11,11 +11,13 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 from numpy import testing
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_array_less, assert_array_almost_equal_nulp,
-                           assert_equal, TestCase, assert_allclose,
-                           assert_almost_equal, assert_, assert_warns,
-                           assert_no_warnings)
+from numpy.testing import (
+    TestCase, assert_, assert_warns, assert_no_warnings,
+    assert_equal, assert_almost_equal,
+    assert_array_equal, assert_allclose,
+    assert_array_almost_equal, assert_array_almost_equal_nulp,
+    assert_array_less
+)
 
 import warnings
 
@@ -24,15 +26,17 @@ from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
 
-
-SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
-
 import pytest
+
+
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
+
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
@@ -205,8 +209,6 @@ def setup_test():
     warnings.simplefilter('default')
 
     if _error_on_warnings:
-        from scipy import signal, ndimage, special, optimize, linalg
-        from scipy.io import loadmat
 
         np.random.seed(0)
 
@@ -319,7 +321,7 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.start()
 
-                result = func(*args, **kwargs)
+                func(*args, **kwargs)
 
                 for thread in threads:
                     thread.join()

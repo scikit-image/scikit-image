@@ -87,3 +87,28 @@ package = 'skimage'
 "Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
 "Documentation" = [".devpy/cmds.py:docs"]
 "Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
+
+[tool.ruff]
+line-length = 88
+select = ["F", "E", "W", "UP"]
+ignore = ["E501", "E741", "E712"]
+exclude = [
+    ".git",
+    ".ruff_cache",
+    "build",
+    "build-install",
+    "dist",
+    "doc/source/auto_examples"
+]
+target-version = "py38"
+# Allow unused variables when underscore-prefixed.
+#dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.per-file-ignores]
+"**/__init__.py" = ["E402", "F401", "F403", "F405"]
+"**/__init__.pyi" = ["E402", "F401", "F403", "F405"]
+"skimage/_shared/testing.py" = ["F401"]
+"doc/examples/**/*.py" = ["E402"]
+
+[tools.ruff.pydocstyle]
+convention = "numpy"

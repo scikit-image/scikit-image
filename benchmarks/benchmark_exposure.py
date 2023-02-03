@@ -23,18 +23,18 @@ class ExposureSuite:
         # note that this is not needed as asv does this kind of averaging by
         # default, but this loop remains here to maintain benchmark continuity
         for i in range(10):
-            result = exposure.equalize_hist(self.image)
+            exposure.equalize_hist(self.image)
 
     def time_equalize_adapthist(self):
-        result = exposure.equalize_adapthist(self.image, clip_limit=0.03)
+        exposure.equalize_adapthist(self.image, clip_limit=0.03)
 
     def time_rescale_intensity(self):
-        result = exposure.rescale_intensity(self.image,
+        exposure.rescale_intensity(self.image,
                                             in_range=(self.p2, self.p98))
     def time_histogram(self):
         # Running it 10 times to achieve significant performance time.
         for i in range(10):
-            result = exposure.histogram(self.image)
+            exposure.histogram(self.image)
 
     def time_gamma_adjust_u8(self):
         for i in range(10):
