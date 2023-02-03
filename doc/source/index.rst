@@ -12,6 +12,9 @@ image processing routines in `Python`_.
 .. _scipy.ndimage: https://docs.scipy.org/doc/scipy/reference/ndimage.html
 .. _Python: https://www.python.org
 
+Quick links
+-----------
+
 .. grid:: 2
     :gutter: 4
 
@@ -20,7 +23,7 @@ image processing routines in `Python`_.
         :link-type: any
 
         New to scikit-image? See our installation guide and then let our
-        user guides introduce library's main concepts.
+        user guides introduce the library's main concepts.
 
     .. grid-item-card:: :octicon:`image` Browse examples...
         :link: auto_examples/index
@@ -29,7 +32,7 @@ image processing routines in `Python`_.
         Start browsing now! Short and long, general and specific examples that
         demonstrate how scikit-image can be used.
 
-    .. grid-item-card:: :octicon:`comment-discussion` Get help...
+    .. grid-item-card:: :octicon:`comment-discussion` Get help... :octicon:`link-external`
         :link: https://forum.image.sc/tag/scikit-image
 
         Need help with a particular image analysis task? Ask us and a large
@@ -57,9 +60,18 @@ image processing routines in `Python`_.
         Get to know the project and the community. Learn where we are going and
         how we work together.
 
+    .. grid-item-card:: :octicon:`milestone` SKIPs...
+        :link: project/index
+        :link-type: any
+
+        scikit-image proposals, documents describing major changes to the
+        library.
+
+Site layout
+-----------
+
 .. toctree::
     :maxdepth: 1
-    :caption: Site content
 
     user_guides/index
     auto_examples/index

@@ -139,6 +139,8 @@ html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
 html_logo = "_static/logo.png"
 
+html_css_files = ['theme_overrides.css']
+
 html_theme_options = {
     "github_url": "https://github.com/scikit-image/scikit-image",
     "icon_links": [

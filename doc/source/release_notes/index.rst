@@ -5,6 +5,7 @@ Release notes
     :maxdepth: 1
 
     release_dev
+    release_0.20
     release_0.19
     release_0.18
     release_0.17
