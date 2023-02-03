@@ -21,7 +21,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    cnp.float64_t p0, cnp.float64_t p1,
                                    Py_ssize_t s0, Py_ssize_t s1) nogil:
 
-    cdef Py_ssize_t i, imin, imax, delta
+    cdef Py_ssize_t i, imin = 0, imax = 0, delta
 
     if pop:
         for i in range(n_bins - 1, -1, -1):
@@ -68,7 +68,7 @@ cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
                                   cnp.float64_t p0, cnp.float64_t p1,
                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
 
-    cdef Py_ssize_t i, imin, imax
+    cdef Py_ssize_t i, imin = 0, imax = 0
 
     if pop:
         for i in range(n_bins - 1, -1, -1):
@@ -225,7 +225,7 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
                                           cnp.float64_t p1, Py_ssize_t s0,
                                           Py_ssize_t s1) nogil:
 
-    cdef Py_ssize_t i, imin, imax
+    cdef Py_ssize_t i, imin = 0, imax = 0
 
     if pop:
         for i in range(n_bins - 1, -1, -1):
@@ -391,7 +391,6 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
                                   cnp.float64_t p0, cnp.float64_t p1,
                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
     cdef Py_ssize_t i
-    cdef Py_ssize_t max_i
     cdef cnp.float64_t scale
     if pop:
         scale = 1.0 / pop
