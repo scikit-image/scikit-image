@@ -750,7 +750,6 @@ cdef class Cascade:
 
                     if result:
 
-                        new_detection = Detection()
                         new_detection.r = current_row
                         new_detection.c = current_col
                         new_detection.width = current_width
