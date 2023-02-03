@@ -106,7 +106,8 @@ cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
         new_data = <Heapitem *>realloc(<void *>heap.data,
                         <Py_ssize_t>(heap.space * sizeof(Heapitem)))
         if not new_data:
-            raise MemoryError()
+            with gil:
+                raise MemoryError()
         heap.data = new_data
 
         # If necessary, correct all stored pointers:
@@ -117,7 +118,8 @@ cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
         new_ptrs = <Heapitem **>realloc(<void *>heap.ptrs,
                     <Py_ssize_t>(heap.space * sizeof(Heapitem *)))
         if not new_ptrs:
-            raise MemoryError()
+            with gil:
+                raise MemoryError()
         heap.ptrs = new_ptrs
 
         # Initialize newly allocated pointer storage:
