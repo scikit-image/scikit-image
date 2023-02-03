@@ -88,25 +88,43 @@ cdef inline void heappop(Heap *heap, Heapitem *dest) nogil:
 #
 # Note: heap ordering is the same as python heapq, i.e., smallest first.
 ##################################################
-cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
+cdef inline int heappush(Heap *heap, Heapitem *new_elem) nogil except -1:
 
     cdef Py_ssize_t child = heap.items
     cdef Py_ssize_t parent
     cdef Py_ssize_t k
+    cdef Heapitem *original_data_ptr
     cdef Heapitem *new_data
+    cdef Heapitem **new_ptr
 
     # grow if necessary
     if heap.items == heap.space:
-      heap.space = heap.space * 2
-      new_data = <Heapitem*>realloc(<void*>heap.data,
-                    <Py_ssize_t>(heap.space * sizeof(Heapitem)))
-      heap.ptrs = <Heapitem**>realloc(<void*>heap.ptrs,
+        heap.space = heap.space * 2
+
+        # Original pointer to silence compiler warnings about use-after-free:
+        original_data_ptr = heap.data
+        new_data = <Heapitem *>realloc(<void *>heap.data,
+                        <Py_ssize_t>(heap.space * sizeof(Heapitem)))
+        if not new_data:
+            with gil:
+                raise MemoryError()
+        heap.data = new_data
+
+        # If necessary, correct all stored pointers:
+        if original_data_ptr != heap.data:
+            for k in range(heap.items):
+                heap.ptrs[k] = heap.data + (heap.ptrs[k] - original_data_ptr)
+
+        new_ptrs = <Heapitem **>realloc(<void *>heap.ptrs,
                     <Py_ssize_t>(heap.space * sizeof(Heapitem *)))
-      for k in range(heap.items):
-          heap.ptrs[k] = new_data + (heap.ptrs[k] - heap.data)
-      for k in range(heap.items, heap.space):
-          heap.ptrs[k] = new_data + k
-      heap.data = new_data
+        if not new_ptrs:
+            with gil:
+                raise MemoryError()
+        heap.ptrs = new_ptrs
+
+        # Initialize newly allocated pointer storage:
+        for k in range(heap.items, heap.space):
+            heap.ptrs[k] = new_data + k
 
     # insert new data at child
     heap.ptrs[child][0] = new_elem[0]
@@ -121,3 +139,5 @@ cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
             child = parent
         else:
             break
+
+    return 0
