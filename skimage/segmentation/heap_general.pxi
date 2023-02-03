@@ -88,7 +88,7 @@ cdef inline void heappop(Heap *heap, Heapitem *dest) nogil:
 #
 # Note: heap ordering is the same as python heapq, i.e., smallest first.
 ##################################################
-cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
+cdef inline int heappush(Heap *heap, Heapitem *new_elem) nogil except -1:
 
     cdef Py_ssize_t child = heap.items
     cdef Py_ssize_t parent
@@ -139,3 +139,5 @@ cdef inline void heappush(Heap *heap, Heapitem *new_elem) nogil:
             child = parent
         else:
             break
+
+    return 0
