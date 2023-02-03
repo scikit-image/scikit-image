@@ -1,3 +1,39 @@
+[project]
+name = "scikit-image"
+license = {file = "LICENSE.txt"}
+description = "Image processing in Python"
+requires-python = ">=3.8"
+readme = "README.md"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: C',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3 :: Only',
+    "Topic :: Software Development :: Libraries",
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+dynamic = ['version']
+dependencies = []
+maintainers = [
+  {name = 'scikit-image developers', email = 'skimage-core@discuss.scientific-python.org'}
+]
+
+[project.optional-dependencies]
+
 [project.urls]
 homepage = "https://scikit-image.org"
 documentation = "https://scikit-image.org/docs/stable"
@@ -8,13 +44,15 @@ tracker = "https://github.com/scikit-image/scikit-image/issues"
 [build-system]
 build-backend = "mesonpy"
 requires = [
-    "meson-python @ git+https://github.com/mesonbuild/meson-python@babdf709618fbeeaf59634bc2b4331ca5f7924ce",
+    # Also update `requirements/build.txt`
+
+    "meson-python>=0.13.0rc0",
     # `wheel` is needed for non-isolated builds, given that `meson-python`
     # doesn't list it as a runtime requirement (at least in 0.10.0)
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
     "wheel",
     "setuptools<=65.5",
-    "packaging",
+    "packaging>=20.0",
     "Cython>=0.29.24",
     "pythran",
     "lazy_loader>=0.1",
