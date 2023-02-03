@@ -1,4 +1,24 @@
-[project]
+import os
+
+
+def parse_requirements_file(filename):
+    with open(filename) as fid:
+        requires = [l.strip() for l in fid.readlines() if not l.startswith("#")]
+
+    return requires
+
+
+dependencies = {
+    dep: parse_requirements_file("requirements/" + dep + ".txt")
+    for dep in ["build", "data", "default", "developer", "docs", "optional", "test"]
+}
+
+def list_deps(target):
+    return f"""{newline.join(f'    "{dep}",' for dep in dependencies[target])}"""
+
+filename = "pyproject.toml"
+newline = "\n"
+project = """[project]
 name = "scikit-image"
 license = {file = "LICENSE.txt"}
 description = "Image processing in Python"
@@ -30,73 +50,43 @@ classifiers = [
     'Operating System :: MacOS',
 ]
 dynamic = ['version']
-dependencies = [
+"""
+project_dependencies = f"""dependencies = [
     # TODO: update to "pin-compatible" once possible, see
     # https://github.com/FFY00/meson-python/issues/29
-    "numpy>=1.21.1",
-    "scipy>=1.8,<1.9.2; python_version<='3.9'",
-    "scipy>=1.8; python_version>'3.9'",
-    "networkx>=2.8",
-    "pillow>=9.0.1",
-    "imageio>=2.4.1",
-    "tifffile>=2019.7.26",
-    "PyWavelets>=1.1.1",
-    "packaging>=20.0",
-    "lazy_loader>=0.1",
+{list_deps("default")}
 ]
+"""
 
+project_optional_dependencies = f"""
 [project.optional-dependencies]
 data = [
-    "pooch>=1.3.0",
+{list_deps("data")}
 ]
 developer = [
-    "pre-commit",
+{list_deps("developer")}
 ]
 docs = [
-    "sphinx>=5.2",
-    "sphinx-gallery>=0.11",
-    "numpydoc>=1.5",
-    "sphinx-copybutton",
-    "pytest-runner",
-    "scikit-learn",
-    "matplotlib>=3.6",
-    "dask[array]>=2022.9.2",
-    "pandas>=1.5",
-    "seaborn>=0.11",
-    "pooch>=1.6",
-    "tifffile>=2022.8.12",
-    "myst-parser",
-    "ipywidgets",
-    "plotly>=5.10",
-    "kaleido",
+{list_deps("docs")}
 ]
 optional = [
-    "SimpleITK",
-    "astropy>=3.1.2",
-    "cloudpickle>=0.2.1",
-    "dask[array]>=1.0.0,!=2.17.0",
-    "matplotlib>=3.3",
-    "pooch>=1.3.0",
-    "pyamg",
+{list_deps("optional")}
 ]
 test = [
-    "asv",
-    "codecov",
-    "matplotlib>=3.3",
-    "pooch>=1.3.0",
-    "pytest>=5.2.0",
-    "pytest-cov>=2.7.0",
-    "pytest-localserver",
-    "pytest-faulthandler",
+{list_deps("test")}
 ]
+"""
 
+project_footer = """
 [project.urls]
 homepage = "https://scikit-image.org"
 documentation = "https://scikit-image.org/docs/stable"
 source = "https://github.com/scikit-image/scikit-image"
 download = "https://pypi.org/project/scikit-image/#files"
 tracker = "https://github.com/scikit-image/scikit-image/issues"
+"""
 
+build = """
 [build-system]
 build-backend = "mesonpy"
 requires = [
@@ -141,3 +131,12 @@ package = 'skimage'
 "Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
 "Documentation" = [".devpy/cmds.py:docs"]
 "Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
+"""
+
+# os.makedirs(os.path.dirname(filename), exist_ok=True)
+with open(filename, "w") as file:
+    file.write(project)
+    file.write(project_dependencies)
+    file.write(project_optional_dependencies)
+    file.write(project_footer)
+    file.write(build)
