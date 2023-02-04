@@ -298,7 +298,8 @@ def test_ransac_geometric():
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
-    assert np.all(np.nonzero(inliers == False)[0] == outliers)
+    assert tuple(np.nonzero(np.atleast_1d(inliers == False))[0]) == outliers
+
 
 
 def test_ransac_is_data_valid():
