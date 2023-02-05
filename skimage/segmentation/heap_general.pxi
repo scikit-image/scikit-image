@@ -1,4 +1,5 @@
 from libc.stdlib cimport free, malloc, realloc
+from libc.stdint cimport uintptr_t
 
 
 cdef struct Heap:
@@ -93,27 +94,29 @@ cdef inline int heappush(Heap *heap, Heapitem *new_elem) nogil except -1:
     cdef Py_ssize_t child = heap.items
     cdef Py_ssize_t parent
     cdef Py_ssize_t k
-    cdef Heapitem *original_data_ptr
     cdef Heapitem *new_data
     cdef Heapitem **new_ptr
+    cdef uintptr_t original_data_ptr
 
     # grow if necessary
     if heap.items == heap.space:
         heap.space = heap.space * 2
 
         # Original pointer to silence compiler warnings about use-after-free:
-        original_data_ptr = heap.data
+        original_data_ptr = <uintptr_t>heap.data
         new_data = <Heapitem *>realloc(<void *>heap.data,
                         <Py_ssize_t>(heap.space * sizeof(Heapitem)))
         if not new_data:
             with gil:
                 raise MemoryError()
-        heap.data = new_data
 
         # If necessary, correct all stored pointers:
-        if original_data_ptr != heap.data:
+        if new_data != heap.data:
             for k in range(heap.items):
-                heap.ptrs[k] = heap.data + (heap.ptrs[k] - original_data_ptr)
+                # Calculate new pointers, `uintptr_t` avoids compiler warnings.
+                heap.ptrs[k] = <Heapitem *>(<uintptr_t>new_data + (
+                        <uintptr_t>heap.ptrs[k] - original_data_ptr))
+        heap.data = new_data
 
         new_ptrs = <Heapitem **>realloc(<void *>heap.ptrs,
                     <Py_ssize_t>(heap.space * sizeof(Heapitem *)))
