@@ -4,7 +4,6 @@ from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
 from skimage import data, color, morphology
-from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray
 
