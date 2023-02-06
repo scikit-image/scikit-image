@@ -59,7 +59,7 @@ def cut_cost(cut, W):
         The total weight of crossing edges.
     """
     cdef cnp.ndarray[cnp.uint8_t, cast = True] cut_mask = np.array(cut)
-    cdef Py_ssize_t num_rows, num_cols
+    cdef Py_ssize_t num_cols
     cdef cnp.int32_t row, col
     cdef cnp.int32_t[:] indices = W.indices
     cdef cnp.int32_t[:] indptr = W.indptr
@@ -67,7 +67,6 @@ def cut_cost(cut, W):
     cdef cnp.int32_t row_index
     cdef cnp.float64_t cost = 0
 
-    num_rows = W.shape[0]
     num_cols = W.shape[1]
 
     for col in range(num_cols):

@@ -4,7 +4,6 @@
 Cython implementation of a binary min heap.
 """
 # cython specific imports
-import cython
 from libc.stdlib cimport malloc, free
 
 cdef extern from "pyport.h":

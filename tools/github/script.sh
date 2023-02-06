@@ -16,14 +16,7 @@ if [[ ${WITHOUT_POOCH} == "1" ]]; then
   pip uninstall pooch -y
 fi
 
-# When installing from sdist
-# We can't run it in the git directory since there is a folder called `skimage`
-# in there. pytest will crawl that instead of the module we installed and want to test
-if [[ ${INSTALL_FROM_SDIST} == "1" ]]; then
-  (cd .. && python -c "import skimage; skimage.test()")
-else
-  (cd .. && pytest $TEST_ARGS --pyargs skimage)
-fi
+(cd .. && pytest $TEST_ARGS --pyargs skimage)
 
 if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples

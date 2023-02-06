@@ -4,11 +4,10 @@
 #cython: wraparound=False
 
 import numpy as np
-
 cimport numpy as cnp
-from libc.stdlib cimport malloc, free
 
 cnp.import_array()
+
 
 cdef inline dtype_t _max(dtype_t a, dtype_t b) nogil:
     return a if a >= b else b
@@ -83,7 +82,7 @@ cdef void _core(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.float
         mask_data = &mask[0, 0]
 
     # define local variable types
-    cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
+    cdef Py_ssize_t r, c, rr, cc, s, even_row
 
     # number of pixels actually inside the neighborhood (cnp.float64_t)
     cdef cnp.float64_t pop = 0

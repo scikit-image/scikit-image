@@ -4,7 +4,7 @@ project(
   # Note that the git commit hash cannot be added dynamically here
   # That only happens when importing from a git repository.
   # See `skimage/__init__.py`
-  version: '0.20.0.dev0',
+  version: run_command('skimage/_build_utils/version.py', check: true).stdout().strip(),
   license: 'BSD-3',
   meson_version: '>= 0.63.0',
   default_options: [
@@ -29,16 +29,10 @@ elif cc.get_id() == 'msvc'
   endif
 endif
 
-# TODO: the below -Wno flags are all needed to silence warnings in
-# f2py-generated code. This should be fixed in f2py itself.
 _global_c_args = cc.get_supported_arguments(
-  '-Wno-unused-but-set-variable',
   '-Wno-unused-function',
-  '-Wno-conversion',
-  '-Wno-misleading-indentation',
-  '-Wno-incompatible-pointer-types',
 )
-add_project_arguments(_global_c_args, language : 'c')
+add_project_arguments(_global_c_args, language: ['c', 'cpp'])
 
 # We need -lm for all C code (assuming it uses math functions, which is safe to
 # assume for scikit-image). For C++ it isn't needed, because libstdc++/libc++ is

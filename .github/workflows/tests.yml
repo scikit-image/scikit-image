@@ -176,7 +176,6 @@ jobs:
         run: |
           set -ex
           source tools/github/before_install.sh
-          pip install -U pip setuptools<=65.5 wheel
           python setup.py sdist
           pip install -vv --no-build-isolation .;
 

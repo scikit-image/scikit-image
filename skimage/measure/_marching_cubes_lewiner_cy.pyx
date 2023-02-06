@@ -22,7 +22,6 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 # Cython specific imports
 import numpy as np
 cimport numpy as cnp
-import cython
 cnp.import_array()
 
 # Enable low level memory management
@@ -379,7 +378,7 @@ cdef class Cell:
     def get_faces(self):
         faces = np.empty((self._faceCount,), np.int32)
         cdef int [:] faces_ = faces
-        cdef int i, j
+        cdef int i
         for i in range(self._faceCount):
             faces_[i] = self._faces[i]
         return faces
@@ -387,7 +386,7 @@ cdef class Cell:
     def get_values(self):
         values = np.empty((self._vertexCount,), np.float32)
         cdef cnp.float32_t [:] values_ = values
-        cdef int i, j
+        cdef int i
         for i in range(self._vertexCount):
             values_[i] = self._values[i]
         return values
@@ -611,7 +610,6 @@ cdef class Cell:
         # Init indices, both are corrected below
         cdef int i = self.nx * self.y + self.x  # Index of cube to get vertex at
         cdef int j = 0 # Vertex number for that cell
-        cdef int vi_ = vi
 
         cdef int *faceLayer
 
@@ -956,7 +954,7 @@ def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
     # Typedef variables
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
-    cdef int case, config, subconfig
+    cdef int case, config
     cdef bint no_mask = mask is None
     # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
@@ -1288,7 +1286,7 @@ cdef int test_face(Cell cell, int face):
         absFace *= -1
 
     # Get values of corners A B C D
-    cdef cnp.float64_t A, B, C, D
+    cdef cnp.float64_t A=0, B=0, C=0, D=0
     if absFace == 1:
         A, B, C, D = cell.v0, cell.v4, cell.v5, cell.v1
     elif absFace == 2:
