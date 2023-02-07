@@ -1108,7 +1108,7 @@ def _euler_rotation(axis, angle):
     # We then embed the 2-axis rotation matrix into the full matrix.
     Ri[row, row] = Ri[col, col] = np.cos(angle)
     Ri[row, col] = np.sin(angle)
-    Ri[col, row]
+    Ri[col, row] = -Ri[row, col]
     return Ri
 
 
