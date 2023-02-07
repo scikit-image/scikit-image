@@ -297,19 +297,24 @@ def local_binary_pattern(image, P, R, method='default'):
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : {'default', 'ror', 'uniform', 'nri_uniform', 'var'}
+    method : str {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
         Method to determine the pattern:
-        * 'default': original local binary pattern which is gray scale but not
+        ``default``
+            Original local binary pattern which is grayscale invariant but not
             rotation invariant.
-        * 'ror': extension of default implementation which is gray scale and
+        ``ror``
+            Extension of default pattern which is grayscale invariant and
             rotation invariant.
-        * 'uniform': improved rotation invariance with uniform patterns and
-            finer quantization of the angular space which is gray scale and
-            rotation invariant.
-        * 'nri_uniform': non rotation-invariant uniform patterns variant
-            which is only gray scale invariant [2]_, [3]_.
-        * 'var': rotation invariant variance measures of the contrast of local
-            image texture which is rotation but not gray scale invariant.
+        ``uniform``
+            Uniform pattern which is grayscale invariant and rotation
+            invariant, offering finer quantization of the angular space.
+            For details, see [1]_.
+        ``nri_uniform``
+            Variant of uniform pattern which is grayscale invariant but not
+            rotation invariant. For details, see [2]_ and [3]_.
+        ``var``
+            Variance of local image texture (related to contrast)
+            which is rotation invariant but not grayscale invariant.
 
     Returns
     -------
