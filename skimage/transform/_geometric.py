@@ -1097,7 +1097,7 @@ def _euler_rotation(axis, angle):
 
     Returns
     -------
-    Ri : array of float, shape (3, 3)
+    R : array of float, shape (3, 3)
         The rotation matrix along axis `axis`.
     """
     R = np.eye(3)
