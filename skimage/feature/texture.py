@@ -333,7 +333,7 @@ def local_binary_pattern(image, P, R, method='default'):
            Local Binary Patterns: Application to Face Recognition",
            IEEE Transactions on Pattern Analysis and Machine Intelligence,
            vol. 28, no. 12, pp. 2037-2041, Dec. 2006
-           :DOI:`10.1109/TPAMI.2006.244.`
+           :DOI:`10.1109/TPAMI.2006.244`
     """
     check_nD(image, 2)
 
