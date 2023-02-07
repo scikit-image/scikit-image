@@ -286,7 +286,7 @@ def graycoprops(P, prop='contrast'):
 def local_binary_pattern(image, P, R, method='default'):
     """Compute the local binary patterns (LBP) of an image.
 
-    LBP is typically used for texture classification.
+    LBP is a visual descriptor often used in texture classification.
 
     Parameters
     ----------
