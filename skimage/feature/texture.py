@@ -299,6 +299,7 @@ def local_binary_pattern(image, P, R, method='default'):
         Radius of circle (spatial resolution of the operator).
     method : str {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
         Method to determine the pattern:
+
         ``default``
             Original local binary pattern which is grayscale invariant but not
             rotation invariant.
