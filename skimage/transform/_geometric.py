@@ -1100,16 +1100,16 @@ def _euler_rotation(axis, angle):
     Ri : array of float, shape (3, 3)
         The rotation matrix along axis `axis`.
     """
-    R = np.eye(3)
+    Ri = np.eye(3)
     # We need the row and column other than the rotation axis,
     # in the right order:
-    i = (axis + 2) % 3
-    j = (axis - 2) % 3
+    row = (axis + 2) % 3
+    col = (axis - 2) % 3
     # We then embed the 2-axis rotation matrix into the full matrix.
-    R[i, i] = R[j, j] = np.cos(angle)
-    R[i, j] = np.sin(angle)
-    R[j, i] = -R[i, j]
-    return R
+    Ri[row, row] = Ri[col, col] = np.cos(angle)
+    Ri[row, col] = np.sin(angle)
+    Ri[col, row]
+    return Ri
 
 
 def _euler_rotation_matrix(angles, axes=None):
