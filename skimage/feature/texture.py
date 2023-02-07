@@ -284,22 +284,21 @@ def graycoprops(P, prop='contrast'):
 
 
 def local_binary_pattern(image, P, R, method='default'):
-    """Gray scale and rotation invariant LBP (Local Binary Patterns).
+    """Compute the local binary patterns (LBP) of an image.
 
-    LBP is an invariant descriptor that can be used for texture classification.
+    LBP is typically used for texture classification.
 
     Parameters
     ----------
-    image : (N, M) array
-        Graylevel image.
+    image : (M, N) array
+        2D grayscale image.
     P : int
         Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : {'default', 'ror', 'uniform', 'var'}
-        Method to determine the pattern.
-
+    method : {'default', 'ror', 'uniform', 'nri_uniform', 'var'}
+        Method to determine the pattern:
         * 'default': original local binary pattern which is gray scale but not
             rotation invariant.
         * 'ror': extension of default implementation which is gray scale and
@@ -314,7 +313,7 @@ def local_binary_pattern(image, P, R, method='default'):
 
     Returns
     -------
-    output : (N, M) array
+    output : (M, N) array
         LBP image.
 
     References
