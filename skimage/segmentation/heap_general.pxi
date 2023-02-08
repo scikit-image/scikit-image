@@ -1,5 +1,4 @@
 from libc.stdlib cimport free, malloc, realloc
-from libc.stdint cimport uintptr_t
 
 
 cdef struct Heap:
@@ -96,27 +95,35 @@ cdef inline int heappush(Heap *heap, Heapitem *new_elem) nogil except -1:
     cdef Py_ssize_t k
     cdef Heapitem *new_data
     cdef Heapitem **new_ptr
-    cdef uintptr_t original_data_ptr
+    cdef size_t *as_offset_ptr
 
     # grow if necessary
     if heap.items == heap.space:
         heap.space = heap.space * 2
 
-        # Original pointer to silence compiler warnings about use-after-free:
-        original_data_ptr = <uintptr_t>heap.data
+        # Newer GCCs are too smart and warn that doing anything with dangling
+        # pointers is technically unsafe (which is unlikely relevant on our
+        # target hardware).  There are two solutions to this in principle:
+        #   * Use only offsets to begin with.
+        #   * Store offsets before reallocating and then recalculate pointers
+        # This does the second.  On error, the pointers are kept as offsets
+        # because they should not be used anyway.
+        # We assume `sizeof/align(size_t) <= sizeof/alignof(Heapitem *)`
+        for k in range(heap.items):
+            as_offset_ptr = <size_t *>&heap.ptrs[k]
+            as_offset_ptr[0] = <size_t>(heap.ptrs[k] - heap.data)
+
         new_data = <Heapitem *>realloc(<void *>heap.data,
                         <Py_ssize_t>(heap.space * sizeof(Heapitem)))
         if not new_data:
             with gil:
                 raise MemoryError()
-
-        # If necessary, correct all stored pointers:
-        if new_data != heap.data:
-            for k in range(heap.items):
-                # Calculate new pointers, `uintptr_t` avoids compiler warnings.
-                heap.ptrs[k] = <Heapitem *>(<uintptr_t>new_data + (
-                        <uintptr_t>heap.ptrs[k] - original_data_ptr))
         heap.data = new_data
+
+        # Recalculate pointers from offsets:
+        for k in range(heap.items):
+            as_offset_ptr = <size_t *>&heap.ptrs[k]
+            heap.ptrs[k] = heap.data + as_offset_ptr[0]
 
         new_ptrs = <Heapitem **>realloc(<void *>heap.ptrs,
                     <Py_ssize_t>(heap.space * sizeof(Heapitem *)))
