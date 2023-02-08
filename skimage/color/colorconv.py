@@ -1073,7 +1073,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
 def _lab2xyz(lab, illuminant, observer, *, channel_axis=-1):
     """
-    Like lab2xyz, but return the invalid pixels in the z channel
+    Like lab2xyz, but return the invalid pixels in the Z channel
     as a separate array for correct warning propagation.
     """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
@@ -1194,8 +1194,8 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
     if n_invalid != 0:
         warn(
-            "Color conversion from LAB to RGB via negative Z values. "
-            "{n_invalid} z-values have been clipped to zero.",
+            "Color conversion from CIE-LAB to sRGB with negative Z values. "
+            "{n_invalid} Z-values have been clipped to zero.",
             stacklevel=3,
         )
 
