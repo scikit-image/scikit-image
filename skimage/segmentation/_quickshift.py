@@ -9,7 +9,7 @@ from ._quickshift_cy import _quickshift_cython
 
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, random_seed=42,
-               *, channel_axis=-1):
+               *, channel_axis=-1, subset=False, subset_idxs=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -83,5 +83,6 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     segment_mask = _quickshift_cython(
         image, kernel_size=kernel_size, max_dist=max_dist,
-        return_tree=return_tree, random_seed=random_seed)
+        return_tree=return_tree, random_seed=random_seed,
+        subset=subset, subset_idxs=subset_idxs)
     return segment_mask

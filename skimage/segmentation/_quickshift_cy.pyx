@@ -6,7 +6,7 @@
 import numpy as np
 cimport numpy as cnp
 
-from .._shared.fused_numerics cimport np_floats
+from .._shared.fused_numerics cimport np_floats, np_ints
 
 from libc.math cimport exp, sqrt, ceil
 from libc.float cimport DBL_MAX
@@ -15,9 +15,9 @@ cnp.import_array()
 
 
 def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
-                       np_floats max_dist, bint return_tree, int random_seed):
-    """Segments image using quickshift clustering in Color-(x,y) space.
-
+                       np_floats max_dist, bint return_tree, int random_seed,
+                       bool subset, np_ints[:, :] subset_idxs):
+    """
     Produces an oversegmentation of the image using the quickshift mode-seeking
     algorithm.
 
@@ -90,17 +90,31 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
     with nogil:
         current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
+            # Check if row is in the image subset
+            if subset and r not in subset_idxs:
+                current_pixel_ptr += channels * width
+                continue
+
             r_min = max(r - kernel_width, 0)
             r_max = min(r + kernel_width + 1, height)
             for c in range(width):
+                # Check if (r, c) is in the image subset
+                if subset and not np.any(np.equal(np.array([[r, c]]), subset_idxs).all(1)):
+                    current_pixel_ptr += channels
+                    continue
+
                 c_min = max(c - kernel_width, 0)
                 c_max = min(c + kernel_width + 1, width)
                 for r_ in range(r_min, r_max):
                     for c_ in range(c_min, c_max):
+                        # Check if (r_, c_) is in the image subset
+                        if subset and not np.any(np.equal(np.array([[r_, c_]]), subset_idxs).all(1)):
+                            continue
+
                         dist = 0
                         for channel in range(channels):
                             t = (current_pixel_ptr[channel] -
-                                 image[r_, c_, channel])
+                                image[r_, c_, channel])
                             dist += t * t
                         t = r - r_
                         dist += t * t
@@ -112,15 +126,31 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         # find nearest node with higher density
         current_pixel_ptr = &image[0, 0, 0]
         for r in range(height):
+            # Check if row is in the image subset
+            if subset and r not in subset_idxs:
+                current_pixel_ptr += channels * width
+                parent[r, :] = np.empty((width)).fill(-1)
+                continue
+
             r_min = max(r - kernel_width, 0)
             r_max = min(r + kernel_width + 1, height)
             for c in range(width):
+                # Check if (r, c) is in the image subset
+                if subset and not np.any(np.equal(np.array([[r, c]]), subset_idxs).all(1)):
+                    current_pixel_ptr += channels
+                    parent[r, c] = -1
+                    continue
+
                 current_density = densities[r, c]
                 closest = DBL_MAX
                 c_min = max(c - kernel_width, 0)
                 c_max = min(c + kernel_width + 1, width)
                 for r_ in range(r_min, r_max):
                     for c_ in range(c_min, c_max):
+                        # Check if (r_, c_) is in the image subset
+                        if subset and not np.any(np.equal(np.array([[r_, c_]]), subset_idxs).all(1)):
+                            continue
+
                         if densities[r_, c_] > current_density:
                             dist = 0
                             # We compute the distances twice since otherwise
@@ -128,7 +158,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
                             # (width * height * windowsize**2)
                             for channel in range(channels):
                                 t = (current_pixel_ptr[channel] -
-                                     image[r_, c_, channel])
+                                    image[r_, c_, channel])
                                 dist += t * t
                             t = r - r_
                             dist += t * t
@@ -137,6 +167,10 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
                             if dist < closest:
                                 closest = dist
                                 parent[r, c] = r_ * width + c_
+                # note that closest will never be zero, as dist being zero could only happen 
+                # when finding the distance from a pixel to itself. But the density at a pixel will never
+                # be greater than itself
+                # So if dist_parent[r, c] == 0, we know (r, c) is not in the image subset
                 dist_parent[r, c] = sqrt(closest)
                 current_pixel_ptr += channels
 
@@ -149,6 +183,8 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
     old = np.zeros_like(parent_flat)
 
     # flatten forest (mark each pixel with root of corresponding tree)
+    # set parent_flat[k] to parent_flat[parent_flat[k]]
+    # so then if this doesn't change, we know we've found the root parent of a cluster
     while (old != parent_flat).any():
         old = parent_flat
         parent_flat = parent_flat[parent_flat]
