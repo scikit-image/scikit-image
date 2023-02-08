@@ -821,8 +821,16 @@ class AffineTransform(ProjectiveTransform):
         Y = b0*x + b1*y + b2 =
           = sx*x*sin(rotation) - sy*y*(tan(shear) * sin(rotation) - cos(rotation)) + b2
 
-    where ``sx`` and ``sy`` are scale factors in the x and y directions,
-    and the homogeneous transformation matrix is::
+    where ``sx`` and ``sy`` are scale factors in the x and y directions.
+
+    This is equivalent to applying the operations in the following order:
+
+    1. Scale
+    2. Shear(x-dimension)
+    3. Rotate
+    4. Translate
+
+    The homogeneous transformation matrix is::
 
         [[a0  a1  a2]
          [b0  b1  b2]
@@ -870,6 +878,12 @@ class AffineTransform(ProjectiveTransform):
     ------
     ValueError
         If both ``matrix`` and any of the other parameters are provided.
+
+    References
+    ----------
+    .. [1] Wikipedia, "Image transformation" section of "Affine transformation":
+           <https://en.wikipedia.org/wiki/Affine_transformation>
+
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
@@ -909,12 +923,17 @@ class AffineTransform(ProjectiveTransform):
             else:
                 sx, sy = scale
 
-            self.params = np.array([
-                [sx * math.cos(rotation), -sy * (math.tan(shear) * math.cos(rotation) + math.sin(rotation)), 0],
-                [sx * math.sin(rotation), -sy * (math.tan(shear) * math.sin(rotation) - math.cos(rotation)), 0],
-                [                      0,                                                                 0, 1]
-            ])
-            self.params[0:2, 2] = translation
+            a0 = sx * math.cos(rotation)
+            a1 = -sy * (
+                math.tan(shear) * math.cos(rotation) + math.sin(rotation)
+            )
+            a2 = translation[0]
+            b0 = sx * math.sin(rotation)
+            b1 = -sy * (
+                math.tan(shear) * math.sin(rotation) - math.cos(rotation)
+            )
+            b2 = translation[1]
+            self.params = np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
         else:
             # default to an identity transform
             self.params = np.eye(dimensionality + 1)
@@ -924,9 +943,9 @@ class AffineTransform(ProjectiveTransform):
         if self.dimensionality != 2:
             return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dimensionality]
         else:
-            ss = np.sum(self.params ** 2, axis=0)[:self.dimensionality]
+            ss = np.sum(self.params ** 2, axis=0)
             ss[1] = ss[1] / (math.tan(self.shear)**2 + 1)
-            return np.sqrt(ss)
+            return np.sqrt(ss)[:self.dimensionality]
 
     @property
     def rotation(self):
