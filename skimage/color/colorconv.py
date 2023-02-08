@@ -1065,16 +1065,29 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
     .. [2] https://en.wikipedia.org/wiki/Lab_color_space
     """
-    xyz, n_invalid = _lab2xyz(lab, illuminant, observer, channel_axis=channel_axis)
-    if n_invalid:
-        warn(f"Color data out of range: Z < 0 in {n_invalid} pixels", stacklevel=3)
+    xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
+    if n_invalid != 0:
+        warn(
+            "Conversion from CIE-LAB to XYZ color space resulted in "
+            f"{n_invalid} negative Z values that have been clipped to zero",
+            stacklevel=3,
+        )
     return xyz
 
 
-def _lab2xyz(lab, illuminant, observer, *, channel_axis=-1):
-    """
-    Like lab2xyz, but return the invalid pixels in the Z channel
-    as a separate array for correct warning propagation.
+def _lab2xyz(lab, illuminant, observer):
+    """Convert CIE-LAB to XYZ color space.
+
+    Internal function for :func:`~.lab2xyz` and others. In addition to the
+    converted image, return the number of invalid pixels in the Z channel for
+    correct warning propagation.
+
+    Returns
+    -------
+    out : (..., 3, ...) ndarray
+        The image in XYZ format. Same dimensions as input.
+    n_invalid : int
+        Number of invalid pixels in the Z channel after conversion.
     """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
 
@@ -1085,8 +1098,8 @@ def _lab2xyz(lab, illuminant, observer, *, channel_axis=-1):
 
     invalid = np.atleast_1d(z < 0).nonzero()
     n_invalid = invalid[0].size
-    if n_invalid:
-        # warning will be emitted by caller.
+    if n_invalid != 0:
+        # Warning should be emitted by caller
         z[invalid] = 0
 
     out = np.stack([x, y, z], axis=-1)
@@ -1194,11 +1207,10 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
     if n_invalid != 0:
         warn(
-            "Color conversion from CIE-LAB to sRGB with negative Z values. "
-            "{n_invalid} Z-values have been clipped to zero.",
+            "Conversion from CIE-LAB, via XYZ to sRGB color space resulted in "
+            f"{n_invalid} negative Z values that have been clipped to zero",
             stacklevel=3,
         )
-
     return xyz2rgb(xyz)
 
 
