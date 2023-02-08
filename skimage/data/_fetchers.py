@@ -936,7 +936,7 @@ def coffee():
 
     This photograph is courtesy of Pikolo Espresso Bar.
     It contains several elliptical shapes as well as varying texture (smooth
-    porcelain to course wood grain).
+    porcelain to coarse wood grain).
 
     Notes
     -----
