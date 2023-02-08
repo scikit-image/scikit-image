@@ -2,7 +2,6 @@
 # cython: boundscheck=False
 # cython: nonecheck=False
 # cython: wraparound=False
-# distutils: language = c++
 
 
 import numpy as np
