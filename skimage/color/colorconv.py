@@ -1072,6 +1072,30 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
     """
+    xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
+    if n_invalid != 0:
+        warn(
+            "Conversion from CIE-LAB to XYZ color space resulted in "
+            f"{n_invalid} negative Z values that have been clipped to zero",
+            stacklevel=3,
+        )
+    return xyz
+
+
+def _lab2xyz(lab, illuminant, observer):
+    """Convert CIE-LAB to XYZ color space.
+
+    Internal function for :func:`~.lab2xyz` and others. In addition to the
+    converted image, return the number of invalid pixels in the Z channel for
+    correct warning propagation.
+
+    Returns
+    -------
+    out : (..., 3, ...) ndarray
+        The image in XYZ format. Same dimensions as input.
+    n_invalid : int
+        Number of invalid pixels in the Z channel after conversion.
+    """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
 
     L, a, b = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -1079,10 +1103,10 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     x = (a / 500.) + y
     z = y - (b / 200.)
 
-    if np.any(z < 0):
-        invalid = np.nonzero(z < 0)
-        warn(f'Color data out of range: Z < 0 in {invalid[0].size} pixels',
-             stacklevel=3)
+    invalid = np.atleast_1d(z < 0).nonzero()
+    n_invalid = invalid[0].size
+    if n_invalid != 0:
+        # Warning should be emitted by caller
         z[invalid] = 0
 
     out = np.stack([x, y, z], axis=-1)
@@ -1094,7 +1118,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     # rescale to the reference white (illuminant)
     xyz_ref_white = get_xyz_coords(illuminant, observer)
     out *= xyz_ref_white
-    return out
+    return out, n_invalid
 
 
 @channel_as_last_axis()
@@ -1195,7 +1219,14 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
     .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
     """
-    return xyz2rgb(lab2xyz(lab, illuminant, observer))
+    xyz, n_invalid = _lab2xyz(lab, illuminant, observer)
+    if n_invalid != 0:
+        warn(
+            "Conversion from CIE-LAB, via XYZ to sRGB color space resulted in "
+            f"{n_invalid} negative Z values that have been clipped to zero",
+            stacklevel=3,
+        )
+    return xyz2rgb(xyz)
 
 
 @channel_as_last_axis()
