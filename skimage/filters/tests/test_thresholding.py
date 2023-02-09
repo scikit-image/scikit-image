@@ -396,10 +396,11 @@ def test_li_pathological_arrays():
     d = np.array([0, 0, 1, 0, 0, 1, 0.5, 1])
     e = np.array([1, 1])
     f = np.array([1, 2])
+    f = np.array([0, 254, 255], dtype='uint8')
+    f = np.array([0, 1, 255], dtype='uint8')
+    f = np.array([0.1, 0.8, 0.9])
     arrays = [a, b, c, d, e, f]
-    with np.errstate(divide='ignore'):
-        # ignoring "divide by zero encountered in log" error from np.log(0)
-        thresholds = [threshold_li(arr) for arr in arrays]
+    thresholds = [threshold_li(arr) for arr in arrays]
     assert np.all(np.isfinite(thresholds))
 
 
