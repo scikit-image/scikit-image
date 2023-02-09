@@ -155,7 +155,10 @@ def test_circle_model_insufficient_data():
     with expected_warnings(warning_message):
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
 
-    warning_message = ["Cannot resolve circle in data."]
+    warning_message = [
+        "Standard deviation of data is too small to estimate "
+        "circle with meaningfull precision."
+    ]
     with expected_warnings(warning_message):
         model.estimate(np.ones((6, 2)))
 
@@ -273,7 +276,10 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
-    warning_message = ["Cannot resolve ellipse in data."]
+    warning_message = [
+        "Standard deviation of data is too small to estimate "
+        "ellipse with meaningfull precision."
+    ]
     with expected_warnings(warning_message):
         assert not model.estimate(np.ones((6, 2)))
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
