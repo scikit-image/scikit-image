@@ -288,7 +288,10 @@ class CircleModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn("Cannot resolve circle in data.")
+            warn(
+                "Standard deviation of data is too small to estimate "
+                "circle with meaningfull precision."
+            )
             return False
         data /= scale
 
@@ -412,7 +415,7 @@ class EllipseModel(BaseModel):
     """
 
     def estimate(self, data):
-        """Estimate circle model from data using total least squares.
+        """Estimate ellipse model from data using total least squares.
 
         Parameters
         ----------
@@ -447,7 +450,10 @@ class EllipseModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn("Cannot resolve ellipse in data.")
+            warn(
+                "Standard deviation of data is too small to estimate "
+                "ellipse with meaningfull precision."
+            )
             return False
         data /= scale
 
