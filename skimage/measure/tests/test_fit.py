@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (arch32, assert_almost_equal, skipif,
+from skimage._shared.testing import (arch32, assert_almost_equal,
                                      assert_array_less, assert_equal, xfail)
 from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
 from skimage.measure.fit import _dynamic_max_trials
@@ -163,13 +163,12 @@ def test_circle_model_insufficient_data():
         model.estimate(np.ones((6, 2)))
 
 
-@skipif(not hasattr(np, "float128"), reason="no quad precision available")
 def test_circle_model_estimate_from_small_scale_data():
-    params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float128)
+    params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float64)
     angles = np.array([
         0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
         3.183, 3.969, 4.840, 5.387, 5.792, 6.139
-    ], dtype=np.float128)
+    ], dtype=np.float64)
     data = CircleModel().predict_xy(angles, params=params)
     model = CircleModel()
     # assert that far small scale data can be estimated
@@ -253,13 +252,12 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 
-@skipif(not hasattr(np, "float128"), reason="no quad precision available")
 def test_ellipse_model_estimate_from_far_shifted_data():
-    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float128)
+    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float64)
     angles = np.array([
         0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
         3.183, 3.969, 4.840, 5.387, 5.792, 6.139
-    ], dtype=np.float128)
+    ], dtype=np.float64)
     data = EllipseModel().predict_xy(angles, params=params)
     model = EllipseModel()
     # assert that far shifted data can be estimated
