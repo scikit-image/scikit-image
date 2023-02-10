@@ -57,6 +57,8 @@ For Python 2.7, please install the 0.14.x Long Term Support release using:
 # machinery.
 builtins.__SKIMAGE_SETUP__ = True
 
+# ignore EAGER_IMPORT environment variable during build
+os.environ.pop("EAGER_IMPORT", None)
 
 # Support for openmp
 
