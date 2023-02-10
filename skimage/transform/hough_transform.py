@@ -3,6 +3,7 @@ from scipy.spatial import cKDTree
 
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
+from ._hough_transform_ridge import directed_ridge_detector
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -375,6 +376,51 @@ def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,
             cx_sorted[should_keep],
             cy_sorted[should_keep],
             r_sorted[should_keep])
+
+
+def hough_ridge(image, sigma=1.8, curv_thresh=-25, radii=[7, 85],
+                hough_thresh=[3, 0.33 * 2 * np.pi], delta_r=3):
+    """Perform a circle Hough transform, direction aided, based on the ridge
+    binary image.
+
+    Parameters
+    ----------
+    sigma : float
+        Binarizing parameter, related to GX1920 full resolution; 10ms exp,
+        gain13.
+    curv_thresh : float
+    radii : list
+        Minimum and maximum radii for the Hough transform.
+    hough_thresh : list
+        Thresholds for the Hough transform: vote_thresh and circle_thresh.
+    delta_r : float
+        Half-thickness of the ring to fit to an ellipse.
+
+    References
+    ----------
+    [1] Afik, E. Robust and highly performant ring detection algorithm for 3d
+        particle tracking using 2d microscope imaging. Sci. Rep. 5,
+        13584; doi: 10.1038/srep13584 (2015).
+    """
+    detected_rings = directed_ridge_detector(image,
+                                             sigma,
+                                             curv_thresh,
+                                             radii,
+                                             hough_thresh,
+                                             delta_r)
+    # ridge_hough = RidgeHoughTransform(image)
+    # ridge_hough.params['sigma'] = sigma
+    # ridge_hough.params['Rmin'] = r_min
+    # ridge_hough.params['Rmax'] = r_max
+    # ridge_hough.params['curv_thresh'] = curv_thresh
+    # ridge_hough.params['circle_thresh'] = circle_thresh
+    # ridge_hough.params['vote_thresh'] = vote_thresh
+    # ridge_hough.params['delta_r'] = delta_r
+    # ridge_hough.ring_detector_preproc(image, sigma)
+    # ridge_hough.rings_detection()
+    # detected_rings = ridge_hough.output['rings']
+
+    return detected_rings
 
 
 def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
