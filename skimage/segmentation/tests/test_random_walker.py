@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -198,9 +197,7 @@ def test_3d_inactive():
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
-    old_labels = np.copy(labels)
     labels[5:25, 26:29, 26:29] = -1
-    after_labels = np.copy(labels)
     with expected_warnings(['"cg" mode|CObject type']):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
@@ -224,7 +221,7 @@ def test_multispectral_2d(dtype, channel_axis):
 
     assert data[..., 0].shape == labels.shape
     with expected_warnings(['"cg" mode']):
-        single_labels = random_walker(data[..., 0], labels, mode='cg')
+        random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
 
@@ -493,7 +490,7 @@ def test_umfpack_import():
     UmfpackContext = random_walker_segmentation.UmfpackContext
     try:
         # when scikit-umfpack is installed UmfpackContext should not be None
-        import scikits.umfpack
+        import scikits.umfpack  # noqa: F401
         assert UmfpackContext is not None
     except ImportError:
         assert UmfpackContext is None

@@ -284,37 +284,42 @@ def graycoprops(P, prop='contrast'):
 
 
 def local_binary_pattern(image, P, R, method='default'):
-    """Gray scale and rotation invariant LBP (Local Binary Patterns).
+    """Compute the local binary patterns (LBP) of an image.
 
-    LBP is an invariant descriptor that can be used for texture classification.
+    LBP is a visual descriptor often used in texture classification.
 
     Parameters
     ----------
-    image : (N, M) array
-        Graylevel image.
+    image : (M, N) array
+        2D grayscale image.
     P : int
         Number of circularly symmetric neighbor set points (quantization of
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : {'default', 'ror', 'uniform', 'var'}
-        Method to determine the pattern.
+    method : str {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
+        Method to determine the pattern:
 
-        * 'default': original local binary pattern which is gray scale but not
+        ``default``
+            Original local binary pattern which is grayscale invariant but not
             rotation invariant.
-        * 'ror': extension of default implementation which is gray scale and
+        ``ror``
+            Extension of default pattern which is grayscale invariant and
             rotation invariant.
-        * 'uniform': improved rotation invariance with uniform patterns and
-            finer quantization of the angular space which is gray scale and
-            rotation invariant.
-        * 'nri_uniform': non rotation-invariant uniform patterns variant
-            which is only gray scale invariant [2]_, [3]_.
-        * 'var': rotation invariant variance measures of the contrast of local
-            image texture which is rotation but not gray scale invariant.
+        ``uniform``
+            Uniform pattern which is grayscale invariant and rotation
+            invariant, offering finer quantization of the angular space.
+            For details, see [1]_.
+        ``nri_uniform``
+            Variant of uniform pattern which is grayscale invariant but not
+            rotation invariant. For details, see [2]_ and [3]_.
+        ``var``
+            Variance of local image texture (related to contrast)
+            which is rotation invariant but not grayscale invariant.
 
     Returns
     -------
-    output : (N, M) array
+    output : (M, N) array
         LBP image.
 
     References
@@ -333,7 +338,7 @@ def local_binary_pattern(image, P, R, method='default'):
            Local Binary Patterns: Application to Face Recognition",
            IEEE Transactions on Pattern Analysis and Machine Intelligence,
            vol. 28, no. 12, pp. 2037-2041, Dec. 2006
-           :DOI:`10.1109/TPAMI.2006.244.`
+           :DOI:`10.1109/TPAMI.2006.244`
     """
     check_nD(image, 2)
 

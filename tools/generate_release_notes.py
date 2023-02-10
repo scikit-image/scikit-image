@@ -33,14 +33,12 @@ import os
 import argparse
 from datetime import datetime
 from collections import OrderedDict
-import string
 from warnings import warn
 
 from github import Github
 try:
     from tqdm import tqdm
 except ImportError:
-    from warnings import warn
     warn('tqdm not installed. This script takes approximately 5 minutes '
          'to run. To view live progressbars, please install tqdm. '
          'Otherwise, be patient.')

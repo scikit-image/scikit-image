@@ -174,7 +174,7 @@ if __name__ == "__main__":
         # if not, some commands are still viable.
         # note: this must be kept in sync with pyproject.toml
         from numpy.distutils.core import setup
-        import cython
+        import cython  # noqa: F401
         extra = {'configuration': configuration}
         cmdclass['build_ext'] = ConditionalOpenMP
     except ImportError:
@@ -232,6 +232,7 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: 3.11',
             'Programming Language :: Python :: 3 :: Only',
             'Topic :: Scientific/Engineering',
             'Operating System :: Microsoft :: Windows',

@@ -110,7 +110,7 @@ model.estimate(src, dst)
 # robustly estimate affine transform model with RANSAC
 model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
                                residual_threshold=2, max_trials=100)
-outliers = inliers == False
+outliers = (inliers == False)
 
 
 # compare "true" and estimated transform parameters

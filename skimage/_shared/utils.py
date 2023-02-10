@@ -5,7 +5,6 @@ import warnings
 from collections.abc import Iterable
 
 import numpy as np
-import scipy
 
 from ._warnings import all_warnings, warn
 
