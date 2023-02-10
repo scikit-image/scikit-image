@@ -14,3 +14,4 @@ myst-parser
 ipywidgets
 plotly>=5.10
 kaleido
+line_profiler
