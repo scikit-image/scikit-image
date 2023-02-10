@@ -239,11 +239,20 @@ def test_ellipse_model_estimate_from_data():
                'details: '
                'https://github.com/scikit-image/scikit-image/issues/3091 '
                'https://github.com/scikit-image/scikit-image/issues/2670'))
-def test_ellipse_model_estimate_failers():
+@testing.parametrize('epsilon', 10.**np.arange(-4, -20, -1))
+def test_ellipse_model_estimate_failers(epsilon):
+    # This test is known to return true on 32 bit machines with epsilon = 0
+    # Setting the value of espilon to a small number causes it return true
+    # on 64 machiens too.
+    # Unfortunately, it seems to depend on the version of python that is used
+    # Therefore, test for many cases for different values of epsilon.
+
     # estimate parameters of real data
     model = EllipseModel()
     assert not model.estimate(np.ones((5, 2)))
-    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    assert not model.estimate(np.array([[50, 80],
+                                        [51, 81],
+                                        [52, 80 + epsilon]]))
 
 
 def test_ellipse_model_residuals():

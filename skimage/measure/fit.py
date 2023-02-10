@@ -450,6 +450,12 @@ class EllipseModel(BaseModel):
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
             return False
 
+        # While S3 might be well conditioned enough to take an inverse
+        # M might not be well conditioned.
+        # Wikipedia says you loose log2(cond(M)) digits of precision
+        if math.log2(np.linalg.cond(M)) > 12:
+            return False
+
         # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
         # from this equation [eqn. 28]
         eig_vals, eig_vecs = np.linalg.eig(M)
