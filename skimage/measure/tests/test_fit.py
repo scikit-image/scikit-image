@@ -157,7 +157,7 @@ def test_circle_model_insufficient_data():
 
     warning_message = [
         "Standard deviation of data is too small to estimate "
-        "circle with meaningfull precision."
+        "circle with meaningful precision."
     ]
     with expected_warnings(warning_message):
         model.estimate(np.ones((6, 2)))
@@ -278,7 +278,7 @@ def test_ellipse_model_estimate_failers():
     model = EllipseModel()
     warning_message = [
         "Standard deviation of data is too small to estimate "
-        "ellipse with meaningfull precision."
+        "ellipse with meaningful precision."
     ]
     with expected_warnings(warning_message):
         assert not model.estimate(np.ones((6, 2)))
