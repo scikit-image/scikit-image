@@ -28,15 +28,6 @@ from types import BuiltinFunctionType, FunctionType, ModuleType
 DEBUG = True
 
 
-def _gallery_example_exists(full_uri: str) -> bool:
-    """Check whether a gallery example exists for `full_uri`."""
-    file_path = Path(f"source/api/{full_uri}.examples")
-    if not file_path.exists():
-        return False
-    file_size = file_path.stat().st_size
-    return file_size != 0
-
-
 class ApiDocWriter:
     ''' Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format'''
@@ -308,9 +299,7 @@ class ApiDocWriter:
             # must NOT exclude from index to keep cross-refs working
             full_f = uri + '.' + f
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
-            if _gallery_example_exists(full_f):
-                ad += "    .. rubric:: Gallery examples\n\n"
-                ad += f'    .. minigallery:: {full_f}\n\n'
+            ad += f'    .. minigallery:: {full_f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -320,9 +309,7 @@ class ApiDocWriter:
                   '\n' \
                   '  .. automethod:: __init__\n\n'
             full_c = uri + '.' + c
-            if _gallery_example_exists(full_c):
-                ad += "    .. rubric:: Gallery examples\n\n"
-                ad += f'    .. minigallery:: {full_c}\n\n'
+            ad += f'    .. minigallery:: {full_c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
