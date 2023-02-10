@@ -89,8 +89,10 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> img2[53:73, 53:73] = square
     >>> detector_extractor1 = ORB(n_keypoints=5)
     >>> detector_extractor2 = ORB(n_keypoints=5)
-    >>> detector_extractor1.detect_and_extract(img1)
-    >>> detector_extractor2.detect_and_extract(img2)
+    >>> detector_extractor1.detect_and_extract(img1) #doctest: +ELLIPSIS
+    <skimage.feature.orb.ORB object at 0x...>
+    >>> detector_extractor2.detect_and_extract(img2) #doctest: +ELLIPSIS
+    <skimage.feature.orb.ORB object at 0x...>
     >>> matches = match_descriptors(detector_extractor1.descriptors,
     ...                             detector_extractor2.descriptors)
     >>> matches
@@ -213,6 +215,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.scales = scales[best_indices]
             self.orientations = orientations[best_indices]
             self.responses = responses[best_indices]
+            
+        return self
 
     def _extract_octave(self, octave_image, keypoints, orientations):
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
@@ -278,6 +282,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         self.descriptors = np.vstack(descriptors_list).view(bool)
         self.mask_ = np.hstack(mask_list)
+        
+        return self
 
     def detect_and_extract(self, image):
         """Detect oriented FAST keypoints and extract rBRIEF descriptors.
@@ -354,3 +360,5 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.orientations = orientations[best_indices]
             self.responses = responses[best_indices]
             self.descriptors = descriptors[best_indices]
+            
+        return self

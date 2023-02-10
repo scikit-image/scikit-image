@@ -294,3 +294,5 @@ class CENSURE(FeatureDetector):
 
         self.keypoints = keypoints[cumulative_mask]
         self.scales = scales[cumulative_mask]
+        
+        return self
