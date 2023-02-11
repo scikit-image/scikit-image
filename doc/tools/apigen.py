@@ -20,7 +20,6 @@ is an MIT-licensed project.
 # Stdlib imports
 import os
 import re
-from pathlib import Path
 
 from types import BuiltinFunctionType, FunctionType, ModuleType
 
@@ -478,4 +477,4 @@ class ApiDocWriter:
             w('----------------------\n\n')
             w('.. toctree::\n')
             w('   :maxdepth: 1\n\n')
-            w(f'   ../license\n')
+            w('   ../license\n')
