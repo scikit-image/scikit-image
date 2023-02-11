@@ -290,7 +290,9 @@ class CircleModel(BaseModel):
         if scale < np.finfo(float_type).tiny:
             warn(
                 "Standard deviation of data is too small to estimate "
-                "circle with meaningful precision."
+                "circle with meaningful precision.",
+                category=RuntimeWarning,
+                stacklevel=2,
             )
             return False
         data /= scale
@@ -452,7 +454,9 @@ class EllipseModel(BaseModel):
         if scale < np.finfo(float_type).tiny:
             warn(
                 "Standard deviation of data is too small to estimate "
-                "ellipse with meaningful precision."
+                "ellipse with meaningful precision.",
+                category=RuntimeWarning,
+                stacklevel=2,
             )
             return False
         data /= scale
