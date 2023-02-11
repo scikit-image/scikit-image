@@ -143,14 +143,25 @@ html_css_files = ['theme_overrides.css']
 
 html_theme_options = {
     "github_url": "https://github.com/scikit-image/scikit-image",
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    # Omit `theme-switcher` as long as logo has white background
+    "navbar_end": ["navbar-icon-links"],
     "icon_links": [
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/scikit-image/",
             "icon": "fa-solid fa-box",
         },
-    ]
+    ],
+    "switcher": {
+        # "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
+        "json_url": "_static/version_switcher.json",
+        "version_match": version,
+    }
 }
+
+if 'dev' in version:
+    html_theme_options["switcher"]["version_match"] = "dev"
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
