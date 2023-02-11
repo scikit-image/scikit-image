@@ -5,7 +5,8 @@ scikit-image's documentation
 
 Welcome! `scikit-image`_ is an image processing toolbox which builds on
 `numpy`_, `scipy.ndimage`_ and other libraries to provide a versatile set of
-image processing routines in `Python`_.
+image processing routines in `Python`_. Our project and community is guided by
+the :doc:`project/code_of_conduct`.
 
 .. _scikit-image: https://scikit-image.org
 .. _numpy: https://numpy.org
@@ -16,21 +17,20 @@ Quick links
 -----------
 
 .. grid:: 2
-    :gutter: 4
+    :gutter: 3
 
     .. grid-item-card::  :octicon:`rocket` Get started...
         :link: user_guides/install
         :link-type: any
 
-        New to scikit-image? See our installation guide and then let our
-        user guides introduce the library's main concepts.
+        New to scikit-image? Start with our installation guide and learn the
+        scikit-image's key concepts.
 
-    .. grid-item-card:: :octicon:`image` Browse examples...
+    .. grid-item-card:: :octicon:`image` Examples...
         :link: auto_examples/index
         :link-type: any
 
-        Start browsing now! Short and long, general and specific examples that
-        demonstrate how scikit-image can be used.
+        Browse our gallery of introductory generic and domain-specific examples.
 
     .. grid-item-card:: :octicon:`comment-discussion` Get help... :octicon:`link-external`
         :link: https://forum.image.sc/tag/scikit-image
@@ -42,9 +42,8 @@ Quick links
         :link: api/api
         :link-type: any
 
-        All the details. A detailed description of every object that is part of
-        scikit-image's public Python API. Assumes an understanding of the key
-        concepts.
+        A detailed description of scikit-image's public Python API. Assumes an
+        understanding of the key concepts.
 
     .. grid-item-card:: :octicon:`tools` Contribute...
         :link: project/contribute
@@ -53,7 +52,14 @@ Quick links
         Saw a typo? Found a bug? Want to improve a function? Learn how to
         contribute to scikit-image!
 
-    .. grid-item-card:: :octicon:`people` Get to know us...
+    .. grid-item-card:: :octicon:`history` Release notes...
+        :link: release_notes/index
+        :link-type: any
+
+        Upgrading from a previous version? See what's new and changed between
+        each release of scikit-image.
+
+    .. grid-item-card:: :octicon:`people` About us...
         :link: project/index
         :link-type: any
 
@@ -67,8 +73,8 @@ Quick links
         scikit-image proposals, documents describing major changes to the
         library.
 
-Site layout
------------
+Navigation
+----------
 
 .. toctree::
     :maxdepth: 1
@@ -78,3 +84,6 @@ Site layout
     api/api
     release_notes/index
     project/index
+
+See also our site-wide :ref:`genindex` our
+:ref:`search this documentation <search>`.
