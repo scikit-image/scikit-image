@@ -60,7 +60,7 @@ file = 'LICENSE.txt'
 build = [
     'meson-python>=0.13.0rc0',
     'wheel',
-    'setuptools>=65.6',
+    'setuptools<=65.5',
     'packaging>=20.0',
     'ninja',
     'Cython>=0.29.24',
@@ -131,7 +131,7 @@ build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.13.0rc0',
     'wheel',
-    'setuptools>=65.6',
+    'setuptools<=65.5',
     'packaging>=20.0',
     'Cython>=0.29.24',
     'pythran',
