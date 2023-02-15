@@ -1,5 +1,5 @@
 # Also update `tools/pyproject.toml.in`, [build-system] -> requires
-meson-python>=0.13.0rc0
+meson-python @ git+https://github.com/mesonbuild/meson-python.git@main
 wheel
 setuptools>=67
 packaging>=20
