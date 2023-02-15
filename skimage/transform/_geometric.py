@@ -815,18 +815,20 @@ class AffineTransform(ProjectiveTransform):
 
     Has the following form::
 
-        X = a0*x + a1*y + a2 =
-          = sx*x*cos(rotation) - sy*y*(tan(shear) * sin(rotation) + sin(rotation)) + a2
+        X = a0*x + a1*y + a2
+          = sx*x*(cos(rotation) + tan(shear_y) sin(rotation)) -
+            sy*y*(tan(shear_x) * sin(rotation) + sin(rotation)) + a2
 
-        Y = b0*x + b1*y + b2 =
-          = sx*x*sin(rotation) - sy*y*(tan(shear) * sin(rotation) - cos(rotation)) + b2
+        Y = b0*x + b1*y + b2
+          = sx*x*(sin(rotation) - tan(shear_y) cos(rotation)) -
+            sy*y*(tan(shear_x) * sin(rotation) - cos(rotation)) + b2
 
     where ``sx`` and ``sy`` are scale factors in the x and y directions.
 
     This is equivalent to applying the operations in the following order:
 
     1. Scale
-    2. Shear(x-dimension)
+    2. Shear
     3. Rotate
     4. Translate
 
@@ -860,9 +862,11 @@ class AffineTransform(ProjectiveTransform):
     rotation : float, optional
         Rotation angle in counter-clockwise direction as radians. Only
         available for 2D.
-    shear : float, optional
-        Shear angle in counter-clockwise direction as radians. Only available
-        for 2D.
+    shear : {shear as float or (shear_x, shear_y) as array, list or tuple}, optional
+        Shear angle in counter-clockwise direction as radians.
+        If a single value, it will be assigned only to the shear_x,
+        and the shear_y remains zero (ex. `shear_x, shear_y = shear, 0`).
+        Only available for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
@@ -923,14 +927,24 @@ class AffineTransform(ProjectiveTransform):
             else:
                 sx, sy = scale
 
-            a0 = sx * math.cos(rotation)
+            if np.isscalar(shear):
+                shear_x, shear_y = (shear, 0)
+            else:
+                shear_x, shear_y = shear
+
+            a0 = sx * (
+                math.cos(rotation) + math.tan(shear_y) * math.sin(rotation)
+            )
             a1 = -sy * (
-                math.tan(shear) * math.cos(rotation) + math.sin(rotation)
+                math.tan(shear_x) * math.cos(rotation) + math.sin(rotation)
             )
             a2 = translation[0]
-            b0 = sx * math.sin(rotation)
+
+            b0 = sx * (
+                math.sin(rotation) - math.tan(shear_y) * math.cos(rotation)
+            )
             b1 = -sy * (
-                math.tan(shear) * math.sin(rotation) - math.cos(rotation)
+                math.tan(shear_x) * math.sin(rotation) - math.cos(rotation)
             )
             b2 = translation[1]
             self.params = np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
