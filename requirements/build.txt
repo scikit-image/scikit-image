@@ -1,8 +1,8 @@
 # Also update `tools/pyproject.toml.in`, [build-system] -> requires
 meson-python>=0.13.0rc0
 wheel
-setuptools<=65.5
-packaging>=20.0
+setuptools>=67
+packaging>=20
 ninja
 Cython>=0.29.24
 pythran

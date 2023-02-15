@@ -131,8 +131,8 @@ build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.13.0rc0',
     'wheel',
-    'setuptools>=65.6',
-    'packaging>=20.0',
+    'setuptools>=67',
+    'packaging>=20',
     'Cython>=0.29.24',
     'pythran',
     'lazy_loader>=0.1',
