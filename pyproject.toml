@@ -58,7 +58,7 @@ file = 'LICENSE.txt'
 
 [project.optional-dependencies]
 build = [
-    'meson-python @ git+https://github.com/mesonbuild/meson-python.git@main',
+    'meson-python @ git+https://github.com/mesonbuild/meson-python.git@657747ab2e8394c86b69f4b0bc3aa080ef1c08a4',
     'wheel',
     'setuptools>=67',
     'packaging>=20',
@@ -129,7 +129,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python @ git+https://github.com/mesonbuild/meson-python.git@main',
+    'meson-python @ git+https://github.com/mesonbuild/meson-python.git@657747ab2e8394c86b69f4b0bc3aa080ef1c08a4',
     'wheel',
     'setuptools>=67',
     'packaging>=20',
