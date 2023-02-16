@@ -805,8 +805,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
         data = (data, )
     num_samples = len(data[0])
 
-    if not (0 < min_samples < num_samples):
-        raise ValueError(f"`min_samples` must be in range (0, {num_samples})")
+    if not (0 < min_samples <= num_samples):
+        raise ValueError(f"`min_samples` must be in range (0, {num_samples}]")
 
     if residual_threshold < 0:
         raise ValueError("`residual_threshold` must be greater than zero")
