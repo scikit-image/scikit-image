@@ -46,7 +46,7 @@ build-backend = "mesonpy"
 requires = [
     # Also update `requirements/build.txt`
 
-    "meson-python>=0.13.0rc0",
+    "meson-python @ git+https://github.com/mesonbuild/meson-python.git@657747ab2e8394c86b69f4b0bc3aa080ef1c08a4",
     # `wheel` is needed for non-isolated builds, given that `meson-python`
     # doesn't list it as a runtime requirement (at least in 0.10.0)
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
