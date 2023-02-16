@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from . import uft
 
 

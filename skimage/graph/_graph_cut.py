@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
-from ..._shared.utils import deprecate_kwarg
+from .._shared.utils import deprecate_kwarg
 from . import _ncut, _ncut_cy
 
 
