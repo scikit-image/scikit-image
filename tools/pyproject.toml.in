@@ -110,5 +110,13 @@ target-version = "py38"
 "skimage/_shared/testing.py" = ["F401"]
 "doc/examples/**/*.py" = ["E402"]
 
-[tools.ruff.pydocstyle]
+[tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.pytest]
+python_files = ["benchmark_*.py", "test_*.py"]
+python_classes = ["Test*", "*Suite"]
+python_functions = ["time_*", "test_*", "peakmem_*"]
+
+[tool.coverage.run]
+omit = ["*/tests/*"]
