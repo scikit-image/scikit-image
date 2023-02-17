@@ -80,21 +80,21 @@ jobs:
           PYTHON="$(python.pythonLocation)\\python.exe"
 
           # Update pip
-          $PYTHON -m pip install -U pip "setuptools>=67" wheel
+          $PYTHON -m pip install -U pip
+
+          # Check that we have the expected version and architecture for Python
+          $PYTHON --version
+          $PYTHON -m pip --version
+          $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
 
           # print out the pip cache dir followed by the variable defined above
           # to confirm that they match
           $PYTHON -m pip cache dir
           echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
-          # Check that we have the expected version and architecture for Python
-          $PYTHON --version
-          $PYTHON -m pip --version
-          $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-          $PYTHON -m pip list
-
           # Install the build and runtime dependencies of the project
           $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
+          $PYTHON -m pip list
 
           # Disable C99 complex if PyWavelets needs to be built from source.
           # The compiler used will be MSVC, but C99 may be detected improperly
@@ -111,7 +111,7 @@ jobs:
           fi
 
           # Compile the package and build the wheel
-          $PYTHON setup.py bdist_wheel
+          $PYTHON -m build --no-isolation --skip-dependency-check --wheel
 
           # Install the generated wheel package
           ls dist

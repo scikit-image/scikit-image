@@ -83,7 +83,7 @@ requires = [
 package = 'skimage'
 
 [tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test"]
+"Build" = ["devpy.build", "devpy.test", ".devpy/cmds.py:sdist"]
 "Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
 "Documentation" = [".devpy/cmds.py:docs"]
 "Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
