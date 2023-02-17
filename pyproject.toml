@@ -80,7 +80,10 @@ default = [
     'packaging>=20.0',
     'lazy_loader>=0.1',
 ]
-developer = ['pre-commit']
+developer = [
+    'pre-commit',
+    'rtoml',
+]
 docs = [
     'sphinx>=5.2',
     'sphinx-gallery>=0.11',
