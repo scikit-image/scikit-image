@@ -51,6 +51,7 @@ dependencies = [
 
 [[project.maintainers]]
 name = 'scikit-image developers'
+email = 'skimage-core@discuss.scientific-python.org'
 
 [project.license]
 file = 'LICENSE.txt'
