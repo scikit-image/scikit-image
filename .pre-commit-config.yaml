@@ -32,3 +32,11 @@ repos:
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
+
+  - repo: local
+    hooks:
+      - id: pyproject.toml
+        name: pyproject.toml
+        language: system
+        entry: python tools/generate_pyproject.toml.py
+        files: pyproject.toml
