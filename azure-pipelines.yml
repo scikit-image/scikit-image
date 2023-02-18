@@ -12,10 +12,6 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
-        Python38:
-          PYTHON_VERSION: "3.8"
-          ARCH: "x86"
-          PIP_FLAGS: ""
         Python38-x64:
           PYTHON_VERSION: "3.8"
           ARCH: "x64"
@@ -29,7 +25,7 @@ jobs:
           PIP_FLAGS: "--pre"
         Python39:
           PYTHON_VERSION: "3.9"
-          ARCH: "x86"
+          ARCH: "x64"
           PIP_FLAGS: ""
         Python39-x64:
           PYTHON_VERSION: "3.9"
