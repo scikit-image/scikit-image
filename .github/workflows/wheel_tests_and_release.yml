@@ -277,7 +277,7 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           source tools/github/before_install.sh
-          python -m build --no-isolation --sdist .
+          python -m build --no-isolation --skip-dependency-check --sdist .
           ls -la ${{ github.workspace }}/dist
           # We prefer to release wheels before source because otherwise there is a
           # small window during which users who pip install scikit-image will require compilation.

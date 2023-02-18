@@ -87,7 +87,7 @@ jobs:
           set -ex
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
               pip uninstall cython -y
-              python -m build --no-isolation --sdist .
+              python -m build --no-isolation --skip-dependency-check --sdist .
               pip install dist/scikit_image-*.tar.gz
           else
               pip install -vv --no-build-isolation .;
