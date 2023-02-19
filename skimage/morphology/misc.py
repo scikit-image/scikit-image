@@ -394,13 +394,15 @@ def remove_near_objects(
     # Safely ignore points that don't lie on an object's surface
     # This reduces the size of the KDTree and the number of points that
     # need to be evaluated
-    footprint = np.ones((3,) * out.ndim, dtype=out.dtype)
-    surfaces = out * footprint.sum()
-    surfaces -= ndi.convolve(out, footprint)  # edges are non-zero
+    # footprint = np.ones((3,) * out.ndim, dtype=out.dtype)
+    # surfaces = out * footprint.sum()
+    # surfaces -= ndi.convolve(out, footprint)  # edges are non-zero
+    #
+    # # Create index, that will define the iteration order of pixels later.
+    # indices = np.nonzero(surfaces.ravel())[0]
+    # del surfaces
 
-    # Create index, that will define the iteration order of pixels later.
-    indices = np.nonzero(surfaces.ravel())[0]
-    del surfaces
+    indices = np.nonzero(out.ravel())[0]
     # Sort by label ID first, so that IDs of the same object are contiguous
     # in the sorted index. This allows fast discovery of the whole object by
     # simple iteration up or down the index!

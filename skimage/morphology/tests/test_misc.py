@@ -416,4 +416,25 @@ class Test_remove_near_objects:
             remove_near_objects(labels, minimal_distance=2, out=labels)
 
     def test_negative_label_ids(self):
-        pass
+        labels = np.array([[ 1,  1, -1,  2,  2,  2],
+                           [ 1,  1,  3,  2,  2,  2],
+                           [ 1,  1,  1,  2,  2,  2],
+                           [ 3,  3,  3,  3,  3,  3]])
+        with pytest.raises(ValueError):
+            remove_near_objects(
+                labels, minimal_distance=1, priority=np.ones(4)
+            )
+
+    def test_objects_with_inside(self):
+        labels = np.array([[1, 1, 1, 2, 2, 2],
+                           [1, 1, 1, 2, 2, 2],
+                           [1, 1, 1, 2, 2, 2],
+                           [3, 3, 3, 3, 3, 3]])
+        desired = np.array([[0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0],
+                            [3, 3, 3, 3, 3, 3]])
+        result = remove_near_objects(
+            labels, minimal_distance=1, priority=np.arange(4)
+        )
+        assert_array_equal(result, desired)
