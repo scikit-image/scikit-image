@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+import scipy.ndimage as ndi
+
 from skimage.morphology import (
     remove_small_objects,
     remove_small_holes,
@@ -15,19 +17,15 @@ test_image = np.array([[0, 0, 0, 1, 0],
                        [1, 1, 1, 0, 0],
                        [1, 1, 1, 0, 1]], bool)
 
-# Dtypes supported by remove_near_objects
+# Dtypes supported by the `label_image` parameter in `remove_near_objects`
 supported_dtypes = [
-    bool,
     np.uint8,
     np.uint16,
     np.uint32,
-    np.uint64,
     np.int8,
     np.int16,
     np.int32,
     np.int64,
-    np.float32,
-    np.float64,
 ]
 
 
@@ -251,17 +249,19 @@ class Test_remove_near_objects:
     def test_minimal_distance_1d(self, minimal_distance, dtype):
         # First 3 objects are only just to close, last one is just far enough
         d = int(np.floor(minimal_distance))
-        image = np.zeros(d * 3 + 2, dtype=dtype)
-        image[[0, d, 2 * d, 3 * d + 1]] = 1
-        desired = np.zeros_like(image, dtype=dtype)
-        desired[[0, 2 * d, 3 * d + 1]] = 1
+        labels = np.zeros(d * 3 + 2, dtype=dtype)
+        labels[[0, d, 2 * d, 3 * d + 1]] = 1
+        labels, _ = ndi.label(labels, output=dtype)
+        desired = labels.copy()
+        desired[d] = 0
 
-        result = remove_near_objects(image, minimal_distance=minimal_distance)
+        result = remove_near_objects(labels, minimal_distance=minimal_distance)
         assert result.dtype == desired.dtype
         assert_array_equal(result, desired)
 
-    def test_handcrafted_2d(self):
-        priority = np.array(
+    @pytest.mark.parametrize("dtype", supported_dtypes)
+    def test_handcrafted_2d(self, dtype):
+        label = np.array(
             [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
              [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
              [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -270,22 +270,23 @@ class Test_remove_near_objects:
              [2, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]],
-            dtype=np.uint8,
+            dtype=dtype,
         )
+        priority = np.arange(10)
         desired = np.array(
-            [[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-             [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
-             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+             [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
+             [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]],
-            dtype=bool,
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]],
+            dtype=dtype,
         )
-
-        image = priority.astype(bool)
-        result = remove_near_objects(image, minimal_distance=3, priority=priority)
+        result = remove_near_objects(
+            label, minimal_distance=3, priority=priority
+        )
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("ndim", [1, 2, 3, 4, 5])
@@ -293,139 +294,126 @@ class Test_remove_near_objects:
         shape = (5,) * ndim
         a = np.ones(shape, dtype=np.uint8)
         a[-2, ...] = 0
-        desired = a.astype(bool)
-        desired[-2:, ...] = False
-        image = a.astype(bool)
+        labels, _ = ndi.label(a)
+        desired = labels.copy()
+        desired[-2:, ...] = 0
 
-        result = remove_near_objects(image, minimal_distance=2)
+        result = remove_near_objects(labels, minimal_distance=2)
         assert_array_equal(result, desired)
 
-    @pytest.mark.parametrize("value", [True, False])
-    def test_constant(self, value):
-        image = np.empty((10, 10), dtype=bool)
-        image.fill(value)
+    @pytest.mark.parametrize("value", [1, 0])
+    @pytest.mark.parametrize("dtype", supported_dtypes)
+    def test_constant(self, value, dtype):
+        labels = np.empty((10, 10), dtype=dtype)
+        labels.fill(value)
 
-        result = remove_near_objects(image, minimal_distance=3)
-        assert_array_equal(image, result)
+        result = remove_near_objects(labels, minimal_distance=3)
+        assert_array_equal(labels, result)
 
     def test_empty(self):
-        image = np.empty((3, 3, 0), dtype=np.bool_)
-        result = remove_near_objects(image, minimal_distance=3)
-        assert_equal(image, result)
+        labels = np.empty((3, 3, 0), dtype=int)
+        result = remove_near_objects(labels, minimal_distance=3)
+        assert_equal(labels, result)
 
     def test_priority(self):
-        image = np.array([[0, 0, 1], [0, 0, 0], [1, 0, 0]], dtype=bool)
+        labels = np.array([0, 1, 4, 1])
 
-        # Default priority is reverse row-major (C-style) order
-        result = remove_near_objects(image, minimal_distance=3)
-        desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
+        # Object with more samples takes precedence
+        result = remove_near_objects(labels, minimal_distance=3)
+        desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
-        # Assigning priority with equal values shows same order
-        priority = np.array([[0, 0, 2], [0, 0, 0], [2, 0, 0]], dtype=int)
-        result = remove_near_objects(image, minimal_distance=3, priority=priority)
-        desired = np.array([[0, 0, 0], [0, 0, 0], [1, 0, 0]], dtype=bool)
+        # Assigning priority with equal values, sorts by higher label ID second
+        priority = np.array([0, 1, 1, 1, 1])
+        result = remove_near_objects(labels, minimal_distance=3, priority=priority)
+        desired = np.array([0, 0, 4, 0])
         assert_array_equal(result, desired)
 
-        # But given a priority that order can be overuled
-        priority = np.array([[0, 0, 2], [0, 0, 0], [1, 0, 0]], dtype=int)
-        result = remove_near_objects(image, minimal_distance=3, priority=priority)
-        desired = np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]], dtype=bool)
+        # But given a different priority that order can be overruled
+        priority = np.array([0, 1, 1, 1, -1])
+        result = remove_near_objects(labels, minimal_distance=3, priority=priority)
+        desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
     def test_out(self):
-        image = np.array([True, False, True])
-        image_copy = image.copy()
-        desired = np.array([False, False, True], dtype=bool)
+        labels = np.array([1, 0, 2])
+        labels_copy = labels.copy()
+        desired = np.array([0, 0, 2])
 
         # By default, input image is not modified
-        remove_near_objects(image, minimal_distance=2)
-        assert_array_equal(image, image_copy)
+        remove_near_objects(labels, minimal_distance=2)
+        assert_array_equal(labels, labels_copy)
 
-        remove_near_objects(image, minimal_distance=2, out=image)
-        assert_array_equal(image, desired)
+        remove_near_objects(labels, minimal_distance=2, out=labels)
+        assert_array_equal(labels, desired)
 
-        image_fortran = np.array(image, order="F", copy=True)
-        remove_near_objects(image, minimal_distance=2, out=image_fortran)
-        assert_array_equal(image_fortran, desired)
+        label_fortran = np.array(labels, order="F", copy=True)
+        remove_near_objects(labels, minimal_distance=2, out=label_fortran)
+        assert_array_equal(label_fortran, desired)
 
     @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
     def test_negative_minimal_distance(self, minimal_distance):
-        image = np.array([True, False, True])
+        labels = np.array([1, 0, 2])
         with pytest.raises(ValueError, match="must be >= 0"):
-            remove_near_objects(image, minimal_distance=minimal_distance)
-
-    def test_non_zero(self):
-        # Check an object with different values is recognized as one as long
-        # as they aren't zero
-        image = np.array([1, 0, 0, -1, 2, 99, -10])
-        desired = np.array([1, 0, 0, 0, 0, 0, 0])
-        priority = np.arange(image.size)[::-1]
-        result = remove_near_objects(image, minimal_distance=3, priority=priority)
-        assert_array_equal(result, desired)
-
-    def test_diagonal_selem(self):
-        # Given a constant image and a diagonal structuring element, two
-        # objects are detected similar to black and white on a checkerboard
-        footprint = np.array([[1, 0, 1], [0, 0, 0], [1, 0, 1]], dtype=bool)
-        image = np.ones((100, 50))
-        desired = np.array([[1, 0] * 25, [0, 1] * 25] * 50, dtype=image.dtype)
-
-        result = remove_near_objects(image, minimal_distance=1, footprint=footprint)
-        assert_array_equal(result, desired)
-
-    def test_nan(self):
-        # Check that NaNs are treated as objects
-        image = np.array([np.nan, np.nan, np.nan, 0, np.nan, np.nan, np.nan])
-        desired = np.array([0, 0, 0, 0, np.nan, np.nan, np.nan])
-        result = remove_near_objects(image, minimal_distance=2)
-        assert_array_equal(result, desired)
+            remove_near_objects(labels, minimal_distance=minimal_distance)
 
     def test_p_norm(self):
-        image = np.array([[2, 0], [0, 1]])
+        labels = np.array([[2, 0], [0, 1]])
         removed = np.array([[2, 0], [0, 0]])
 
         # p_norm=2, default (Euclidean distance)
-        result = remove_near_objects(
-            image, minimal_distance=1.4, connectivity=1, priority=image
-        )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, minimal_distance=np.sqrt(2), connectivity=1, priority=image
-        )
+        result = remove_near_objects(labels, minimal_distance=1.4)
+        assert_array_equal(result, labels)
+        result = remove_near_objects(labels, minimal_distance=np.sqrt(2))
         assert_array_equal(result, removed)
 
         # p_norm=1 (Manhatten distance)
         result = remove_near_objects(
-            image, minimal_distance=1.9, p_norm=1, connectivity=1, priority=image
+            labels, minimal_distance=1.9, p_norm=1,
         )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, minimal_distance=2, p_norm=1, connectivity=1, priority=image
-        )
+        assert_array_equal(result, labels)
+        result = remove_near_objects(labels, minimal_distance=2, p_norm=1)
         assert_array_equal(result, removed)
 
         # p_norm=np.inf (Chebyshev distance)
         result = remove_near_objects(
-            image,
-            minimal_distance=0.9,
-            p_norm=np.inf,
-            connectivity=1,
-            priority=image,
+            labels, minimal_distance=0.9, p_norm=np.inf
         )
-        assert_array_equal(result, image)
-        result = remove_near_objects(
-            image, minimal_distance=1, p_norm=np.inf, connectivity=1, priority=image
-        )
+        assert_array_equal(result, labels)
+        result = remove_near_objects(labels, minimal_distance=1, p_norm=np.inf)
         assert_array_equal(result, removed)
 
-    def test_wrong_priority_shape(self):
-        image = np.zeros((10, 10))
-        priority = np.ones((10, 9))
-        with pytest.raises(ValueError, match="priority.*shape"):
-            remove_near_objects(image, minimal_distance=3, priority=priority)
+    @pytest.mark.parametrize(
+        "shape", [(0,), ]
+    )
+    def test_priority_shape(self, shape):
+        remove_near_objects(
+            np.array([0, 0, 0]), minimal_distance=3, priority=np.ones((0,))
+        )
+        remove_near_objects(
+            np.array([0, 0, 0]), minimal_distance=3, priority=np.ones((1,))
+        )
+
+        error_msg = (
+            r"shape of `priority` must be \(np\.amax\(label_image\) \+ 1,\)"
+        )
+        with pytest.raises(ValueError, match=error_msg):
+            remove_near_objects(
+                np.array([1, 0, 0]), minimal_distance=3, priority=np.ones((0,))
+            )
+        with pytest.raises(ValueError, match=error_msg):
+            remove_near_objects(
+                np.array([1, 0, 0]), minimal_distance=3, priority=np.ones((1,))
+            )
+        with pytest.raises(ValueError, match=error_msg):
+            remove_near_objects(
+                np.array([1, 0, 0]), minimal_distance=3, priority=np.ones((1,))
+            )
 
     def test_noncontiguous(self):
-        image = np.zeros(12)[::2]
+        labels = np.zeros(12, dtype=int)[::2]
         with pytest.raises(ValueError, match="ndarray is not C-contiguous"):
-            remove_near_objects(image, minimal_distance=2, out=image)
+            remove_near_objects(labels, minimal_distance=2, out=labels)
+
+    def test_negative_label_ids(self):
+        pass

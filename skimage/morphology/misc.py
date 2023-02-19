@@ -5,8 +5,7 @@ from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
 from .._shared.utils import warn
-from ._util import _resolve_neighborhood, _raveled_offsets_and_distances
-from ._near_objects_cy import _remove_near_objects
+from ._misc_cy import _remove_near_objects
 
 
 # Our function names don't exactly correspond to ndimages.
@@ -230,48 +229,98 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     return out
 
 
+def _max_priority(label_image, *, priority_image):
+    """Find maximum priority for each label.
+
+    If the priority is given as an array with the same shape as `label_image`,
+    it's not guaranteed that each pixel of an object holds the same priority
+    value. This function finds the highest priority for each labeled object
+    and returns it.
+
+    Parameters
+    ----------
+    label_image : ndarray of integers
+        An n-dimensional array of containing objects, e.g. as returned by
+        :func:`~.label`. A value of zero denotes is considered background, all
+        other object IDs must be positive integers.
+    priority_image : ndarray
+        An array with the same shape as `label_image`. The priority of each
+        object is derived from the corresponding pixels. If an object's pixels
+        are assigned different priorities the hightest takes precedence.
+
+    Returns
+    -------
+    priority : ndarray
+        A 1-dimensional array of length
+        :func:`np.amax(label_image) <numpy.amax>` that contains the priority for
+        each object ID at the respective index.
+
+    Examples
+    --------
+    >>> label_image = np.array([[0, 1, 2], [2, 9, 9]])
+    >>> priority_image = np.array([[5, 3, 1], [9, 2, 7]], dtype=np.uint8)
+    >>> _max_priority(label_image, priority_image=priority_image)
+    array([3, 9, 7, 0, 0, 0, 0, 0, 7], dtype=uint8)
+    """
+    unique_ids, inverse = np.unique(label_image.ravel(), return_inverse=True)
+    max_id = unique_ids[-1]
+
+    # New array to hold maximum priority for each label ID, fill it with the
+    # smallest possible value of that dtype to ensure that real priorities
+    # take precedence.
+    priority = np.empty((max_id + 1,), dtype=priority_image.dtype)
+    if np.issubdtype(priority.dtype, np.floating):
+        min_value = np.finfo(priority.dtype).min
+    else:
+        min_value = np.iinfo(priority.dtype).min
+    priority.fill(min_value)
+
+    # Store max priority at the label positions corresponding to `unique_ids`.
+    # Equivalent to np.maximum(priority[inverse], priority_image.ravel()) while
+    # taking into account elements that are indexed by inverse more than once.
+    np.maximum.at(priority, inverse, priority_image.ravel())
+    # Max priority is now stored at positions corresponding to values in
+    # `unique_ids`, but we want the position correspond to the index of the
+    # label ID.
+    priority[unique_ids] = priority[:len(unique_ids)]
+
+    return priority
+
+
 def remove_near_objects(
-    image,
+    label_image,
     minimal_distance,
     *,
     priority=None,
     p_norm=2,
-    footprint=None,
-    connectivity=None,
     out=None,
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that aren't zero or ``False``)
-    inside an image and removes neighboring objects until all remaining ones
-    are more than a minimal distance from each other.
+    Iterates over all objects (connected pixels that aren't zero) inside an
+    image and removes neighboring objects until all remaining ones are more than
+    a minimal distance from each other.
 
     Parameters
     ----------
-    image : ndarray
-        An n-dimensional array.
+    label_image : ndarray of integers
+        An n-dimensional array of containing objects, e.g. as returned by
+        :func:`~.label`. A value of zero denotes is considered background, all
+        other object IDs must be integers.
     minimal_distance : int or float
         Objects whose distance is not greater than this value are considered
         to close. Must be positive.
     priority : ndarray, optional
-        An array matching `image` in shape that gives a priority for each
-        object in `image`. Objects with a lower value are removed first until
-        all remaining objects fulfill the distance requirement. If not given,
-        objects with a lower number of samples are removed first.
+        Defines the priority with which objects that are to close to each other
+        are removed. Expects a 1-dimensional array of length
+        :func:`np.amax(label_image) + 1 <numpy.amax>` that contains the priority
+        for each object ID at the respective index. Objects with a lower value
+        are removed first until all remaining objects fulfill the distance
+        requirement. If not given, priority is derived form the number of
+        samples of an object.
     p_norm : int or float, optional
         The Minkowski p-norm used to calculate the distance between objects.
         Defaults to 2 which corresponds to the Euclidean distance.
-    footprint : ndarray, optional
-        The footprint (structuring element) used to determine the neighborhood
-        of each evaluated pixel (``True`` denotes a connected pixel). It must
-        be a boolean array and have the same number of dimensions as `image`.
-        If neither `footprint` nor `connectivity` are given, all adjacent
-        pixels are considered as part of the neighborhood.
-    connectivity : int, optional
-        A number used to determine the neighborhood of each evaluated pixel.
-        Adjacent pixels whose squared distance from the center is less than or
-        equal to `connectivity` are considered neighbors. Ignored if
-        `footprint` is not None.
     out : ndarray, optional
         Array of the same shape and dtype as `image`, into which the output is
         placed. Its memory layout must be C-contiguous. By default, a new array
@@ -280,8 +329,8 @@ def remove_near_objects(
     Returns
     -------
     out : ndarray
-        Array of the same shape as `image` for which objects that violate the
-        `minimal_distance` condition were removed.
+        Array of the same shape as `label_image` for which objects that violate
+        the `minimal_distance` condition were removed.
 
     See Also
     --------
@@ -289,12 +338,6 @@ def remove_near_objects(
 
     Notes
     -----
-    In case the `priority` assigns the same value to different objects the
-    function falls back to an object's label id as returned by
-    ``scipy.ndimage.label(image, selem)`` [1]_.
-
-    NaNs are treated as != 0 and thus are considered objects (or part of one).
-
     Setting `p_norm` to 1 will calculate the distance between objects as the
     Manhatten distance while ``np.inf`` corresponds to the Chebyshev distance.
 
@@ -304,10 +347,10 @@ def remove_near_objects(
 
     Examples
     --------
-    >>> from skimage.morphology import remove_near_objects
-    >>> remove_near_objects(np.array([True, False, True]), 2)
+    >>> import skimage as ski
+    >>> ski.morphology.remove_near_objects(np.array([True, False, True]), 2)
     array([False, False,  True])
-    >>> image = np.array(
+    >>> label_image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -317,7 +360,9 @@ def remove_near_objects(
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
-    >>> remove_near_objects(image, minimal_distance=3, priority=image)
+    >>> ski.morphology.remove_near_objects(
+    ...     label_image, minimal_distance=3
+    ... )
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
            [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
            [0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0],
@@ -331,44 +376,52 @@ def remove_near_objects(
         raise ValueError(
             f"minimal_distance must be >= 0, was {minimal_distance}"
         )
+    if not np.issubdtype(label_image.dtype, np.integer):
+        raise ValueError(
+            f"`label_image` must be of integer dtype, got {label_image.dtype}"
+        )
+
     if out is None:
-        out = image.copy(order="C")
-
-    footprint = _resolve_neighborhood(footprint, connectivity, out.ndim)
-    neighbor_offsets, _ = _raveled_offsets_and_distances(
-        out.shape, footprint=footprint, center=((1,) * out.ndim)
-    )
-
-    # Label objects, only samples where labels != 0 are evaluated
-    labels = np.empty_like(out, dtype=np.intp)
-    ndi.label(out, footprint, output=labels)
+        out = label_image.copy(order="C")
+    else:
+        out[:] = label_image
 
     if priority is None:
-        bins = np.bincount(labels.ravel())
-        priority = bins[labels.ravel()]  # Replace label id with bin count
-    elif out.shape != priority.shape:
-        raise ValueError(
-            "priority must have same shape as image: "
-            f"{priority.shape} != {out.shape}"
-        )
-    else:
-        priority = priority.ravel()
+        priority = np.bincount(out.ravel())
+        # Priority value for the background (ID 0) is not expected
+        priority = priority
 
-    # Safely ignore points that don't lie on an objects surface
+    # TODO Safely ignore points that don't lie on an object's surface
     # This reduces the size of the KDTree and the number of points that
     # need to be evaluated
-    labels[ndi.binary_erosion(labels, structure=footprint)] = 0
-    labels = labels.reshape(-1)
-    raveled_indices = np.nonzero(labels)[0]
+    # out[ndi.binary_erosion(out, structure=footprint)] = 0
 
-    # Use stable sort to make sorting behavior more transparent in the likely
-    # event that objects have the same priority
-    sort = np.argsort(priority[raveled_indices], kind="mergesort")[::-1]
-    raveled_indices = raveled_indices[sort]
+    # Create index, that will define the iteration order of pixels later
+    indices = np.nonzero(out.ravel())[0]
+    # Sort by label ID first, so that IDs of the same object are contiguous
+    # in the sorted index. This allows fast discovery of the whole object by
+    # simple iteration up or down the index!
+    indices = indices[np.argsort(out.ravel()[indices])]
+    try:
+        # Sort by priority second using a stable sort to preserve the contiguous
+        # sorting of objects. Because each pixel in an object has the same
+        # priority we don't need to worry about separating objects.
+        indices = indices[
+            np.argsort(priority[out.ravel()[indices]], kind="stable")[::-1]
+        ]
+    except IndexError as error:
+        expected_shape = (np.amax(out) + 1,)
+        if priority.shape != expected_shape:
+            raise ValueError(
+                "shape of `priority` must be (np.amax(label_image) + 1,), "
+                f"expected {expected_shape}, got {priority.shape} instead"
+            ) from error
+        else:
+            raise
 
-    indices = np.unravel_index(raveled_indices, out.shape)
+    unraveled_indices = np.unravel_index(indices, label_image.shape)
     kdtree = cKDTree(
-        data=np.asarray(indices, dtype=np.float64).transpose(),
+        data=np.asarray(unraveled_indices, dtype=np.float64).transpose(),
         balanced_tree=True,
     )
 
@@ -377,13 +430,11 @@ def remove_near_objects(
     out_raveled.shape = (out.size,)
 
     _remove_near_objects(
-        image=out_raveled,
-        labels=labels,
-        raveled_indices=raveled_indices,
-        neighbor_offsets=neighbor_offsets,
+        labels=out_raveled,
+        indices=indices,
         kdtree=kdtree,
         minimal_distance=minimal_distance,
         p_norm=p_norm,
-        shape=out.shape,
+        shape=label_image.shape,
     )
     return out

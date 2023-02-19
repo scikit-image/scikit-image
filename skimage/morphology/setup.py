@@ -14,7 +14,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_skeletonize_cy.pyx',
             '_convex_hull.pyx',
             '_grayreconstruct.pyx',
-            '_near_objects_cy.pyx',
+            '_misc_cy.pyx',
             '_extrema_cy.pyx'], working_path=base_path)
     # _skeletonize_3d uses c++, so it must be cythonized separately
     cython(['_skeletonize_3d_cy.pyx.in'], working_path=base_path)
@@ -41,7 +41,7 @@ def configuration(parent_package='', top_path=None):
     # add precomputed footprint decomposition data
     config.add_data_files('ball_decompositions.npy',
                           'disk_decompositions.npy')
-    config.add_extension('_near_objects_cy', sources=['_near_objects_cy.c'],
+    config.add_extension('_misc_cy', sources=['_misc_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

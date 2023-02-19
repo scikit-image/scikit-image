@@ -5,6 +5,7 @@ See "Writing benchmarks" in the asv docs for more information.
 
 import numpy as np
 from numpy.lib import NumpyVersion as Version
+import scipy.ndimage
 
 import skimage
 from skimage import color, data, morphology, util
@@ -279,11 +280,12 @@ class RemoveNearObjects:
     def setup(self, *args):
         image = data.hubble_deep_field()
         image = color.rgb2gray(image)
-        self.objects = image > 0.18  # Chosen with threshold_li
+        objects = image > 0.18  # Chosen with threshold_li
+        self.labels, _ = scipy.ndimage.label(objects)
 
     def time_remove_near_objects(self, minimal_distance):
         morphology.remove_near_objects(
-            self.objects, minimal_distance=minimal_distance
+            self.labels, minimal_distance=minimal_distance
         )
 
     def peakmem_reference(self, *args):
@@ -304,7 +306,5 @@ class RemoveNearObjects:
 
     def peakmem_remove_near_objects(self, minimal_distance):
         morphology.remove_near_objects(
-            self.objects,
-            minimal_distance=minimal_distance,
-            priority=self.objects,
+            self.labels, minimal_distance=minimal_distance,
         )
