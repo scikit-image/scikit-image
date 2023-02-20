@@ -418,23 +418,10 @@ Platform-specific notes
 
 **Windows**
 
-If you experience the error ``Error:unable to find vcvarsall.bat`` it means
-that your computer does not have recommended compilers for Python. You can
-either download and install Windows compilers from `here`_  or use
-`MinGW compilers`_ . If using `MinGW`, make sure to correctly configure
-``distutils`` by modifying (or create, if not existing) the configuration file
-``distutils.cfg`` (located for example at
-``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
-
-  [build]
-   compiler=mingw32
-
 A run-through of the compilation process for Windows is included in
 our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
-.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
-.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
 **Debian and Ubuntu**
 

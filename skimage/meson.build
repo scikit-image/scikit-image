@@ -66,6 +66,15 @@ cpp_args_pythran = [
   '-DPYTHRAN_BLAS_NONE'
 ]
 
+# Deal with M_PI & friends; add `use_math_defines` to c_args
+# Cython doesn't always get this correctly itself
+# explicitly add the define as a compiler flag for Cython-generated code.
+if is_windows
+  use_math_defines = ['-D_USE_MATH_DEFINES']
+else
+  use_math_defines = []
+endif
+
 # Don't use the deprecated NumPy C API. Define this to a fixed version instead of
 # NPY_API_VERSION in order not to break compilation for released SciPy versions
 # when NumPy introduces a new deprecation. Use in a meson.build file::
@@ -79,7 +88,6 @@ numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  '_build.py',
   'conftest.py'
 ]
 
@@ -105,7 +113,7 @@ c_undefined_ok = ['-Wno-maybe-uninitialized']
 # (Suppress warning messages emitted by #warning directives).
 # Replace with numpy_nodepr_api after Cython 3.0 is out
 _cpp_Wno_cpp = cpp.get_supported_arguments('-Wno-cpp')
-cython_c_args += [_cpp_Wno_cpp]
+cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
 
 subdir('_shared')

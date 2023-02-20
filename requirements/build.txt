@@ -7,4 +7,7 @@ ninja
 Cython>=0.29.24
 pythran
 numpy>=1.21.1
+
+# Developer UI
 git+https://github.com/scientific-python/devpy
+build

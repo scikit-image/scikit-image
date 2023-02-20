@@ -21,6 +21,7 @@ def parse_requirements_file(filename):
 
     with open(filename) as fid:
         requires = [l.strip() for l in fid.readlines() if not l.startswith("#")]
+        requires = [l for l in requires if l]
         requires = [l for l in requires if not any(pkg in l for pkg in excluded_pkgs)]
 
     return requires

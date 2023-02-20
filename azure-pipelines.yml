@@ -12,10 +12,6 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
-        Python38:
-          PYTHON_VERSION: "3.8"
-          ARCH: "x86"
-          PIP_FLAGS: ""
         Python38-x64:
           PYTHON_VERSION: "3.8"
           ARCH: "x64"
@@ -29,7 +25,7 @@ jobs:
           PIP_FLAGS: "--pre"
         Python39:
           PYTHON_VERSION: "3.9"
-          ARCH: "x86"
+          ARCH: "x64"
           PIP_FLAGS: ""
         Python39-x64:
           PYTHON_VERSION: "3.9"
@@ -72,33 +68,26 @@ jobs:
         # https://github.com/scikit-image/scikit-image/issues/6048
         continueOnError: true
 
-      - script: |
-          choco install --$(ARCH) -y llvm
-          set PATH=C:\Program Files\LLVM\bin;%PATH%
-          set PATH=C:\Program Files (x86)\LLVM\bin;%PATH%
-          echo '##vso[task.setvariable variable=PATH]%PATH%'
-        displayName: "Install clang-cl"
-
       - bash: |
           set -ex
           PYTHON="$(python.pythonLocation)\\python.exe"
 
           # Update pip
-          $PYTHON -m pip install -U pip "setuptools>=67" wheel
+          $PYTHON -m pip install -U pip
+
+          # Check that we have the expected version and architecture for Python
+          $PYTHON --version
+          $PYTHON -m pip --version
+          $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
 
           # print out the pip cache dir followed by the variable defined above
           # to confirm that they match
           $PYTHON -m pip cache dir
           echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
-          # Check that we have the expected version and architecture for Python
-          $PYTHON --version
-          $PYTHON -m pip --version
-          $PYTHON -c "import struct; print('Void pointer width is', struct.calcsize('P') * 8)"
-          $PYTHON -m pip list
-
           # Install the build and runtime dependencies of the project
           $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
+          $PYTHON -m pip list
 
           # Disable C99 complex if PyWavelets needs to be built from source.
           # The compiler used will be MSVC, but C99 may be detected improperly
@@ -114,8 +103,33 @@ jobs:
               export CXXFLAGS="-m32"
           fi
 
+          ## To list all installed packages:
+          # choco list --localonly
+
+          # Remove other gcc compilers
+
+          ## This would be the best way to uninstall, but is SLOW:
+          # choco uninstall llvm mingw rtools strawberryperl -x
+
+          # Remove mingw gcc
+          rm /c/ProgramData/Chocolatey/bin/gcc
+          rm /c/ProgramData/Chocolatey/bin/g++
+          rm /c/ProgramData/Chocolatey/bin/c++
+          # Remove perl gcc
+          rm -rf /c/Strawberry
+
+          which ccache || true
+          which c++ || true
+
+          ## Uncomment the next line, and you'll remain with only MSVC.
+          # rm -rf "/c/Program Files/LLVM"
+          ## We're compiling with clang for now because MSVC 19 and
+          ## Pythran don't play well together.
+
+          which clang || true
+
           # Compile the package and build the wheel
-          $PYTHON setup.py bdist_wheel
+          $PYTHON -m build --no-isolation --skip-dependency-check --wheel
 
           # Install the generated wheel package
           ls dist
