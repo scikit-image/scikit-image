@@ -26,6 +26,10 @@ This release also completes the transition to indicating multi-channel images
 with the more flexible ``channel_axis`` parameter as well as a many other
 deprecations to make scikit-image's API more consistent and expressive.
 
+Finally, in preparation for the removal of `distutils` in the upcoming Python 3.12
+release, we have replaced our old build system using `setup.py` and `distutils` to
+a future-ready system using `pyproject.toml` and `meson`.
+
 This release now supports Python 3.8-3.11.
 
 New features and improvements
