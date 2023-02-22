@@ -504,6 +504,131 @@ CI & automation
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
+Other Pull Requests
+~~~~~~~~~~~~~~~~~~~
+- Add offset to regionprops
+  (`#3706 <https://github.com/scikit-image/scikit-image/pull/3706>`_).
+- Add (interactive) slice explorer in plotly.
+  (`#4953 <https://github.com/scikit-image/scikit-image/pull/4953>`_).
+- Add colocalization metrics
+  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
+- Support float input to skimage.draw.rectangle() [#4283]
+  (`#4283 <https://github.com/scikit-image/scikit-image/pull/4283>`_).
+- Prepare release notes for v0.20.0
+  (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_).
+- Emit warning for proper stacklevel in lab2rgb.
+  (`#6616 <https://github.com/scikit-image/scikit-image/pull/6616>`_).
+- Add flag to phase cross correlation to disambiguate periodic shifts
+  (`#6617 <https://github.com/scikit-image/scikit-image/pull/6617>`_).
+- Fix the order of return values for `hessian_matrix`
+  (`#6624 <https://github.com/scikit-image/scikit-image/pull/6624>`_).
+- Fix doc build on CircleCI and add ccache
+  (`#6646 <https://github.com/scikit-image/scikit-image/pull/6646>`_).
+- Remove thumbnail_size in config since sphinx-gallery>=0.9.0.
+  (`#6647 <https://github.com/scikit-image/scikit-image/pull/6647>`_).
+- remove warnings and unnecessary messages
+  (`#6656 <https://github.com/scikit-image/scikit-image/pull/6656>`_).
+- Add verification to image argument dimension on skimage.filters.rank module
+  (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
+- Build wheels on CI via branch rather than tag
+  (`#6668 <https://github.com/scikit-image/scikit-image/pull/6668>`_).
+- Add more test cases to test_downsize
+  (`#6669 <https://github.com/scikit-image/scikit-image/pull/6669>`_).
+- Use meson-python main branch
+  (`#6671 <https://github.com/scikit-image/scikit-image/pull/6671>`_).
+- Simplify installation instructions for conda
+  (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
+- Do not build wheels on pushes to main
+  (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
+- Move `future.graph` to `skimage.graph`
+  (`#6674 <https://github.com/scikit-image/scikit-image/pull/6674>`_).
+- Fix venv instructions
+  (`#6675 <https://github.com/scikit-image/scikit-image/pull/6675>`_).
+- Simplify QhullError import
+  (`#6677 <https://github.com/scikit-image/scikit-image/pull/6677>`_).
+- Remove old scipy cruft
+  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_).
+- Ensure running on Python 3.8 or greater
+  (`#6679 <https://github.com/scikit-image/scikit-image/pull/6679>`_).
+- Remove old references to imread package
+  (`#6680 <https://github.com/scikit-image/scikit-image/pull/6680>`_).
+- Remove old scipy cruft
+  (`#6681 <https://github.com/scikit-image/scikit-image/pull/6681>`_).
+- Remove pillow cruft (and a few other cleanups)
+  (`#6683 <https://github.com/scikit-image/scikit-image/pull/6683>`_).
+- Advise users about removal of `future.graph.ncut`
+  (`#6685 <https://github.com/scikit-image/scikit-image/pull/6685>`_).
+- Remove leftover `gtk_plugin.ini`
+  (`#6686 <https://github.com/scikit-image/scikit-image/pull/6686>`_).
+- Document L*a*b* range in two colorspace conversion functions.
+  (`#6688 <https://github.com/scikit-image/scikit-image/pull/6688>`_).
+- Fix `graph.RAG.merge_nodes` for in-place merging
+  (`#6692 <https://github.com/scikit-image/scikit-image/pull/6692>`_).
+- Document L*a*b* range in lab2lch function.
+  (`#6697 <https://github.com/scikit-image/scikit-image/pull/6697>`_).
+- Keep deprecated functions available in `skimage.filters`
+  (`#6701 <https://github.com/scikit-image/scikit-image/pull/6701>`_).
+- Prep 0.20.0rc0
+  (`#6706 <https://github.com/scikit-image/scikit-image/pull/6706>`_).
+- Python 3.11 released
+  (`#6709 <https://github.com/scikit-image/scikit-image/pull/6709>`_).
+- Loosen tests for scipy 1.10
+  (`#6715 <https://github.com/scikit-image/scikit-image/pull/6715>`_).
+- Specify C flag only if supported by compiler
+  (`#6716 <https://github.com/scikit-image/scikit-image/pull/6716>`_).
+- Use before install script for releases
+  (`#6718 <https://github.com/scikit-image/scikit-image/pull/6718>`_).
+- Document range of L*Ch values in lch2lab function.
+  (`#6719 <https://github.com/scikit-image/scikit-image/pull/6719>`_).
+- meson: extract version info from __init__.py
+  (`#6723 <https://github.com/scikit-image/scikit-image/pull/6723>`_).
+- Fix Cython errors/warnings
+  (`#6725 <https://github.com/scikit-image/scikit-image/pull/6725>`_).
+- Generate pyproject deps from requirements
+  (`#6726 <https://github.com/scikit-image/scikit-image/pull/6726>`_).
+- BUG: Fix heap growing memory error and silence compiler warning
+  (`#6727 <https://github.com/scikit-image/scikit-image/pull/6727>`_).
+- Fix compliation warning about struct initialization in `Cascade.detect_multi_scale`
+  (`#6728 <https://github.com/scikit-image/scikit-image/pull/6728>`_).
+- Use Ruff for linting
+  (`#6729 <https://github.com/scikit-image/scikit-image/pull/6729>`_).
+- Use test that can fail for sdist
+  (`#6731 <https://github.com/scikit-image/scikit-image/pull/6731>`_).
+- Fix fstring
+  (`#6733 <https://github.com/scikit-image/scikit-image/pull/6733>`_).
+- MAINT: Use `uintptr_t` to calculate new heap ptr positions
+  (`#6734 <https://github.com/scikit-image/scikit-image/pull/6734>`_).
+- Fix docstring for local_binary_pattern.
+  (`#6736 <https://github.com/scikit-image/scikit-image/pull/6736>`_).
+- Bite the bullet: remove distutils and setup.py
+  (`#6738 <https://github.com/scikit-image/scikit-image/pull/6738>`_).
+- Fix typo in photo description.
+  (`#6740 <https://github.com/scikit-image/scikit-image/pull/6740>`_).
+- DOC: missing backtick
+  (`#6741 <https://github.com/scikit-image/scikit-image/pull/6741>`_).
+- Build macosx/py38 wheel natively
+  (`#6743 <https://github.com/scikit-image/scikit-image/pull/6743>`_).
+- Remove circleci url check
+  (`#6749 <https://github.com/scikit-image/scikit-image/pull/6749>`_).
+- CI Set MACOSX_DEPLOYMENT_TARGET=10.9 for Wheels
+  (`#6750 <https://github.com/scikit-image/scikit-image/pull/6750>`_).
+- Require setuptools 65.6+
+  (`#6751 <https://github.com/scikit-image/scikit-image/pull/6751>`_).
+- Use meson-python developer version
+  (`#6753 <https://github.com/scikit-image/scikit-image/pull/6753>`_).
+- Require setuptools 67+
+  (`#6754 <https://github.com/scikit-image/scikit-image/pull/6754>`_).
+- Add temporary workaround until new meson-python release
+  (`#6757 <https://github.com/scikit-image/scikit-image/pull/6757>`_).
+- Remove setup.cfg; use pyproject.toml instead
+  (`#6758 <https://github.com/scikit-image/scikit-image/pull/6758>`_).
+- Update pyproject
+  (`#6759 <https://github.com/scikit-image/scikit-image/pull/6759>`_).
+- Update action to use new environment file
+  (`#6762 <https://github.com/scikit-image/scikit-image/pull/6762>`_).
+- Autogenerate pyproject.toml
+  (`#6763 <https://github.com/scikit-image/scikit-image/pull/6763>`_).
+
 Backported 0.19.x (remove before merging!)
 ------------------------------------------
 .. Kept as a reference for now. This makes it easy to quickly parse PR numbers that are returned by generate_release_notes.py not (yet) included in this document.
@@ -553,26 +678,28 @@ Backported 0.19.x (remove before merging!)
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-66 authors added to this release [alphabetical by first name or login]
+72 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
+- =
 - Adeel Hassan
 - Albert Y. Shih
-- AleixBP
-- Alex (sashashura)
+- AleixBP (AleixBP)
+- Alex
 - Alexandr Kalinin
 - Alexandre de Siqueira
 - Antony Lee
 - Balint Varga
 - Ben Greiner
-- bsmietanka
+- bsmietanka (bsmietanka)
 - Chris Roat
 - Chris Wood
+- Daria
 - Dave Mellert
 - Dudu Lasry
 - Elena Pascal
 - Eli Schwartz
 - Fabian Schneider
-- forgeRW
+- forgeRW (forgeRW)
 - Frank A. Krueger
 - Gregory Lee
 - Gus Becker
@@ -584,54 +711,60 @@ Backported 0.19.x (remove before merging!)
 - Jan-Lukas Wynen
 - Jarrod Millman
 - Jeremy Muhlich
-- johnthagen
+- johnthagen (johnthagen)
 - Joshua Newton
 - Juan DF
 - Juan Nunez-Iglesias
 - Judd Storrs
-- kwikwag
 - Larry Bradley
 - Lars Grüter
-- lihaitao (li1127217ye)
+- lihaitao
 - Lucas Johnson
-- maldil
+- Malinda
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
 - Marvin Albert
-- Matthew Brett
 - Matthias Bussonnier
 - Miles Lucas
+- Nathan Chan
 - Naveen
+- OBgoneSouth (OBgoneSouth)
 - Oren Amsalem
-- Preston Buscay
+- pbuscay (Preston Buscay)
 - Peter Sobolewski
-- Peter Bell
+- peterbell10 (peterbell10)
 - Ray Bell
+- Riadh
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
-- samtygier
+- samtygier (samtygier)
 - Sandeep N Menon
 - Sanghyeok Hyun
+- Sebastian Berg
 - Sebastian Wallkötter
 - Simon-Martin Schröder
 - Stefan van der Walt
 - Teemu Kumpumäki
-- Thomas Voigtmann
+- Thanushi Peiris
+- thvoigtmann (Thomas Voigtmann)
+- thvoigtmann (thvoigtmann)
 - Tim-Oliver Buchholz
 - Tyler Reddy
 
-37 reviewers added to this release [alphabetical by first name or login]
+43 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Abhijeet Parida
 - Albert Y. Shih
-- Alex (sashashura)
+- Alex
 - Alexandre de Siqueira
 - Antony Lee
 - Ben Greiner
-- Carlo
+- Carlo Dri
 - Chris Roat
+- Daniele Nicolodi
+- Daria
 - Dudu Lasry
 - Eli Schwartz
 - François Boulogne
@@ -644,11 +777,12 @@ Backported 0.19.x (remove before merging!)
 - Juan DF
 - Juan Nunez-Iglesias
 - Lars Grüter
-- maldil
+- Malinda
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
 - Marvin Albert
+- Matthias Bussonnier
 - Oren Amsalem
 - Ralf Gommers
 - Riadh Fezzani
@@ -656,8 +790,10 @@ Backported 0.19.x (remove before merging!)
 - Robin Thibaut
 - Sandeep N Menon
 - Sanghyeok Hyun
+- Sebastian Berg
 - Sebastian Wallkötter
 - Simon-Martin Schröder
 - Stefan van der Walt
-- Thomas Voigtmann
+- Thanushi Peiris
+- thvoigtmann
 - Tim-Oliver Buchholz
