@@ -27,7 +27,7 @@ with the more flexible ``channel_axis`` parameter as well as a many other
 deprecations to make scikit-image's API more consistent and expressive.
 
 Finally, in preparation for the removal of `distutils` in the upcoming Python 3.12
-release, we have replaced our old build system using `setup.py` and `distutils` to
+release, we have replaced our old build system using `setup.py` and `distutils` with
 a future-ready system using `pyproject.toml` and `meson`.
 
 This release now supports Python 3.8-3.11.
@@ -516,8 +516,6 @@ Other Pull Requests
   (`#4953 <https://github.com/scikit-image/scikit-image/pull/4953>`_).
 - Add colocalization metrics
   (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
-- Support float input to skimage.draw.rectangle() [#4283]
-  (`#4283 <https://github.com/scikit-image/scikit-image/pull/4283>`_).
 - Prepare release notes for v0.20.0
   (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_).
 - Emit warning for proper stacklevel in lab2rgb.
@@ -682,13 +680,12 @@ Backported 0.19.x (remove before merging!)
 - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
   (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-72 authors added to this release [alphabetical by first name or login]
+71 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
-- =
 - Adeel Hassan
 - Albert Y. Shih
 - AleixBP (AleixBP)
-- Alex
+- Alex (sashashura)
 - Alexandr Kalinin
 - Alexandre de Siqueira
 - Antony Lee
