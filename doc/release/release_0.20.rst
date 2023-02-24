@@ -126,9 +126,9 @@ Changes and new deprecations
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
 - Return ``False`` in ``skimage.measure.CircleModel.estimate`` instead of warning if the model is under-determined
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
-- Rename ``skimage.filter.inverse`` to ``skimage.filter.inverse_filter``.
-  ``skimage.filter.inverse`` is deprecated and will be removed in the next release
-  (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_).
+- Rename ``skimage.filters.inverse`` to ``skimage.filters.inverse_filter``.
+  ``skimage.filters.inverse`` is deprecated and will be removed in the next release
+  (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_, `#6701 <https://github.com/scikit-image/scikit-image/pull/6701>`_).
 - Update minimal supported dependencies to ``numpy>=1.20``
   (`#6565 <https://github.com/scikit-image/scikit-image/pull/6565>`_).
 - Update minimal supported dependencies to ``scipy>=1.8``
@@ -205,6 +205,8 @@ Completed deprecations
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
 - Remove deprecated submodule ``skimage.morphology.selem``; use ``skimage.morphology.footprints`` instead
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated ``skimage.future.graph.ncut`` (it was replaced by ``skimage.graph.cut_normalized``)
+  (`#6685 <https://github.com/scikit-image/scikit-image/pull/6685>`_).
 
 Bug fixes
 ---------
@@ -243,6 +245,8 @@ Bug fixes
 - Fix misleading exception in functions in ``skimage.filters.rank`` that did
   not mention that 2D images are also supported
   (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
+- Fix in-place merging of wheights in ``skimage.graph.RAG.merge_nodes``
+  (`#6692 <https://github.com/scikit-image/scikit-image/pull/6692>`_).
 
 Documentation
 -------------
@@ -313,6 +317,8 @@ Improved & updated
   (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_).
 - Don't use confusing loop in installation instructions for conda
   (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
+- Document value ranges of L*a*b* and L*Ch in ``lab2xyz``, ``rgb2lab``, ``lab2lch``, and ``lch2lab`` in ``skimage.color``
+  (`#6688 <https://github.com/scikit-image/scikit-image/pull/6688>`_, `#6697 <https://github.com/scikit-image/scikit-image/pull/6697>`_, `#6719 <https://github.com/scikit-image/scikit-image/pull/6719>`_).
 
 Fixes, spelling & minor tweaks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -493,7 +499,25 @@ Maintenance
 - Simplify QhullError import
   (`#6677 <https://github.com/scikit-image/scikit-image/pull/6677>`_).
 - Remove old SciPy cruft
-  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_).
+  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_, `#6681 <https://github.com/scikit-image/scikit-image/pull/6681>`_).
+- Remove old references to imread package
+  (`#6680 <https://github.com/scikit-image/scikit-image/pull/6680>`_).
+- Remove pillow cruft (and a few other cleanups)
+  (`#6683 <https://github.com/scikit-image/scikit-image/pull/6683>`_).
+- Remove leftover ``gtk_plugin.ini``
+  (`#6686 <https://github.com/scikit-image/scikit-image/pull/6686>`_).
+- Prepare v0.20.0rc0
+  (`#6706 <https://github.com/scikit-image/scikit-image/pull/6706>`_).
+- Remove pre-release suffix for for Python 3.11
+  (`#6709 <https://github.com/scikit-image/scikit-image/pull/6709>`_).
+- Loosen tests for SciPy 1.10
+  (`#6715 <https://github.com/scikit-image/scikit-image/pull/6715>`_).
+- Specify C flag only if supported by compiler
+  (`#6716 <https://github.com/scikit-image/scikit-image/pull/6716>`_).
+- Extract version info from ``skimage/__init__.py`` in ``skimage/meson.build``
+  (`#6723 <https://github.com/scikit-image/scikit-image/pull/6723>`_).
+- Fix Cython errors/warnings
+  (`#6725 <https://github.com/scikit-image/scikit-image/pull/6725>`_).
 
 Benchmarks
 ~~~~~~~~~~
@@ -550,45 +574,13 @@ CI & automation
   (`#6668 <https://github.com/scikit-image/scikit-image/pull/6668>`_).
 - Do not build wheels on pushes to main
   (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
+- Use ``tools/github/before_install.sh`` wheels workflow
+  (`#6718 <https://github.com/scikit-image/scikit-image/pull/6718>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
 Other Pull Requests
 -------------------
-- Remove old references to imread package
-  (`#6680 <https://github.com/scikit-image/scikit-image/pull/6680>`_).
-- Remove old scipy cruft
-  (`#6681 <https://github.com/scikit-image/scikit-image/pull/6681>`_).
-- Remove pillow cruft (and a few other cleanups)
-  (`#6683 <https://github.com/scikit-image/scikit-image/pull/6683>`_).
-- Advise users about removal of `future.graph.ncut`
-  (`#6685 <https://github.com/scikit-image/scikit-image/pull/6685>`_).
-- Remove leftover `gtk_plugin.ini`
-  (`#6686 <https://github.com/scikit-image/scikit-image/pull/6686>`_).
-- Document L*a*b* range in two colorspace conversion functions.
-  (`#6688 <https://github.com/scikit-image/scikit-image/pull/6688>`_).
-- Fix `graph.RAG.merge_nodes` for in-place merging
-  (`#6692 <https://github.com/scikit-image/scikit-image/pull/6692>`_).
-- Document L*a*b* range in lab2lch function.
-  (`#6697 <https://github.com/scikit-image/scikit-image/pull/6697>`_).
-- Keep deprecated functions available in `skimage.filters`
-  (`#6701 <https://github.com/scikit-image/scikit-image/pull/6701>`_).
-- Prep 0.20.0rc0
-  (`#6706 <https://github.com/scikit-image/scikit-image/pull/6706>`_).
-- Python 3.11 released
-  (`#6709 <https://github.com/scikit-image/scikit-image/pull/6709>`_).
-- Loosen tests for scipy 1.10
-  (`#6715 <https://github.com/scikit-image/scikit-image/pull/6715>`_).
-- Specify C flag only if supported by compiler
-  (`#6716 <https://github.com/scikit-image/scikit-image/pull/6716>`_).
-- Use before install script for releases
-  (`#6718 <https://github.com/scikit-image/scikit-image/pull/6718>`_).
-- Document range of L*Ch values in lch2lab function.
-  (`#6719 <https://github.com/scikit-image/scikit-image/pull/6719>`_).
-- meson: extract version info from __init__.py
-  (`#6723 <https://github.com/scikit-image/scikit-image/pull/6723>`_).
-- Fix Cython errors/warnings
-  (`#6725 <https://github.com/scikit-image/scikit-image/pull/6725>`_).
 - Generate pyproject deps from requirements
   (`#6726 <https://github.com/scikit-image/scikit-image/pull/6726>`_).
 - BUG: Fix heap growing memory error and silence compiler warning
