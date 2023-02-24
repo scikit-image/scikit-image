@@ -50,6 +50,8 @@ New features and improvements
 - Add isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
   These functions return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
   (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
+- Add new colocalization metrics ``pearson_corr_coeff``, ``manders_coloc_coeff``, ``manders_overlap_coeff`` and ``intersection_coeff`` to ``skimage.measure``
+  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
 - Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
@@ -67,6 +69,10 @@ New features and improvements
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
 - Add new parameter ``include_borders`` to ``skimage.measure.convex_hull_image`` to optionally exclude vertices or edges from the final hull mask
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
+- Add new parameter ``offsets`` to ``skimage.measure.regionprops`` that optionally allows specifying the coordinates of the origin and affects the properties ``coords_scaled`` and ``coords``
+  (`#3706 <https://github.com/scikit-image/scikit-image/pull/3706>`_).
+- Add new parameter ``disambiguate`` to ``skimage.registration.phase_cross_correlation`` to optionally disambiguate periodic shifts
+  (`#6617 <https://github.com/scikit-image/scikit-image/pull/6617>`_).
 - Support n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
   (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
 - Support n-dimensional images in ``skimage.restoration.wiener``
@@ -76,7 +82,7 @@ New features and improvements
 - Allow footprints with non-adjacent pixels as neighbors in ``skimage.morphology.flood_fill``
   (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
 - Support array-likes consistently in ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``GeometricTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``, ``ProjectiveTransform``, ``SimilarityTransform``, ``estimate_transform``, and ``matrix_transform`` in ``skimage.transform``
-  (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
+  (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_).
 
 Performance
 ~~~~~~~~~~~
@@ -226,6 +232,10 @@ Bug fixes
   (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_).
 - Fix automatic detection of the color channel in ``skimage.filters.gaussian`` (this behavior is deprecated, see new deprecations)
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Fix stacklevel of warning in ``skimage.color.lab2rgb``
+  (`#6616 <https://github.com/scikit-image/scikit-image/pull/6616>`_).
+- Fix the order of return values for ``skimage.feature.hessian_matrix`` and raise an error if ``order='xy'`` is requested for images with more than 2 dimensions
+  (`#6624 <https://github.com/scikit-image/scikit-image/pull/6624>`_).
 
 Documentation
 -------------
@@ -241,6 +251,8 @@ New
   (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
 - Add gallery example "Track solidification of a metallic alloy"
   (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_).
+- Add gallery example "Colocalization metrics"
+  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
 - Add support page (``.github/SUPPORT.md``) to help users from GitHub find appropriate support resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
@@ -254,6 +266,8 @@ Improved & updated
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt gallery example "Build image pyramids" to more diversified shaped images and downsample factors
   (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
+- Adapt gallery example "Explore 3D images (of cells)" with interactive slice explorer using plotly
+  (`#4953 <https://github.com/scikit-image/scikit-image/pull/4953>`_).
 - Clarify meaning of the ``weights`` term and rewrite docstrings of ``skimage.restoration.denoise_tv_bregman`` and ``skimage.restoration.denoise_tv_chambolle``
   (`#6544 <https://github.com/scikit-image/scikit-image/pull/6544>`_).
 - Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
@@ -357,6 +371,8 @@ Governance & planning
 
 Maintenance
 ~~~~~~~~~~~
+- Prepare release notes for v0.20.0
+  (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_, `#6766 <https://github.com/scikit-image/scikit-image/pull/6766>`_).
 - Add and test alternative build system based on Meson as an alternative to the deprecated distutils system
   (`#6536 <https://github.com/scikit-image/scikit-image/pull/6536>`_).
 - Use ``cnp.float32_t`` and ``cnp.float64_t`` over ``float`` and ``double`` in Cython code
@@ -510,20 +526,6 @@ CI & automation
 
 Other Pull Requests
 ~~~~~~~~~~~~~~~~~~~
-- Add offset to regionprops
-  (`#3706 <https://github.com/scikit-image/scikit-image/pull/3706>`_).
-- Add (interactive) slice explorer in plotly.
-  (`#4953 <https://github.com/scikit-image/scikit-image/pull/4953>`_).
-- Add colocalization metrics
-  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
-- Prepare release notes for v0.20.0
-  (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_).
-- Emit warning for proper stacklevel in lab2rgb.
-  (`#6616 <https://github.com/scikit-image/scikit-image/pull/6616>`_).
-- Add flag to phase cross correlation to disambiguate periodic shifts
-  (`#6617 <https://github.com/scikit-image/scikit-image/pull/6617>`_).
-- Fix the order of return values for `hessian_matrix`
-  (`#6624 <https://github.com/scikit-image/scikit-image/pull/6624>`_).
 - Fix doc build on CircleCI and add ccache
   (`#6646 <https://github.com/scikit-image/scikit-image/pull/6646>`_).
 - Remove thumbnail_size in config since sphinx-gallery>=0.9.0.
