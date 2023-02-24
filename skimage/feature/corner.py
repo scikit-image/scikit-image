@@ -175,8 +175,6 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0,
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
-    if image.ndim > 2 and order == "xy":
-        raise ValueError("order='xy' is only supported for 2D images.")
     if order not in ["rc", "xy"]:
         raise ValueError(f"unrecognized order: {order}")
 
@@ -303,7 +301,13 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0, order='rc',
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     if image.ndim > 2 and order == "xy":
-        raise ValueError("order='xy' is only supported for 2D images.")
+        warn(
+            "Using order='xy' for images with more than 2 dimensions is "
+            "deprecated since v0.20 and will raise an error in a future "
+            "version.",
+            category=FutureWarning,
+            stacklevel=2
+        )
     if order not in ["rc", "xy"]:
         raise ValueError(f"unrecognized order: {order}")
 

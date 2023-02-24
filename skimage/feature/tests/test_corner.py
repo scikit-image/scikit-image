@@ -185,10 +185,16 @@ def test_hessian_matrix_3d_xy(use_gaussian_derivatives):
 
     img = np.ones((5, 5, 5))
 
-    # order="xy" is only permitted for 2D
-    with pytest.raises(ValueError):
-        hessian_matrix(img, sigma=0.1, order="xy",
-                       use_gaussian_derivatives=use_gaussian_derivatives)
+    # order="xy" is deprecated for images with more than 2 dimensions
+    msg = "order='xy' for images with more than 2 dimensions is deprecated"
+    with pytest.warns(FutureWarning, match=msg) as record:
+        hessian_matrix(
+            img,
+            sigma=0.1,
+            order="xy",
+            use_gaussian_derivatives=use_gaussian_derivatives
+        )
+    assert record[0].filename == __file__, "wrong stacklevel"
 
     with pytest.raises(ValueError):
         hessian_matrix(img, sigma=0.1, order='nonexistant',
