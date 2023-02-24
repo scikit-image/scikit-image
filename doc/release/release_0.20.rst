@@ -111,6 +111,8 @@ Performance
 
 Changes and new deprecations
 ----------------------------
+- Set Python 3.8 as the minimal supported version
+  (`#6679 <https://github.com/scikit-image/scikit-image/pull/6679>`_).
 - Rewrite ``skimage.filters.meijering``, ``skimage.filters.sato``,
   ``skimage.filters.frangi``, and ``skimage.filters.hessian`` to match the published algorithms more closely.
   This change is backward incompatible and will lead to different output values compared to the previous implementation.
@@ -118,6 +120,8 @@ Changes and new deprecations
   The filters will now be correctly set to zero whenever one of the Hessian eigenvalues has a sign which is incompatible with a ridge of the desired polarity.
   The gamma constant of the Frangi filter is now set adaptively based on the maximum Hessian norm
   (`#6446 <https://github.com/scikit-image/scikit-image/pull/6446>`_).
+- Move functions in ``skimage.future.graph`` to ``skimage.graph``. This affects ``cut_threshold``, ``cut_normalized``, ``merge_hierarchical``, ``rag_mean_color``, ``RAG``, ``show_rag``, and ``rag_boundary``
+  (`#6674 <https://github.com/scikit-image/scikit-image/pull/6674>`_).
 - Return ``False`` in ``skimage.measure.LineModelND.estimate`` instead of raising an error if the model is under-determined
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
 - Return ``False`` in ``skimage.measure.CircleModel.estimate`` instead of warning if the model is under-determined
@@ -236,6 +240,9 @@ Bug fixes
   (`#6616 <https://github.com/scikit-image/scikit-image/pull/6616>`_).
 - Fix the order of return values for ``skimage.feature.hessian_matrix`` and raise an error if ``order='xy'`` is requested for images with more than 2 dimensions
   (`#6624 <https://github.com/scikit-image/scikit-image/pull/6624>`_).
+- Fix misleading exception in functions in ``skimage.filters.rank`` that did
+  not mention that 2D images are also supported
+  (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
 
 Documentation
 -------------
@@ -304,6 +311,8 @@ Improved & updated
   (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_).
 - Clarify dependency on ``scikit-image[data]`` and pooch in ``INSTALL.rst``
   (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_).
+- Don't use confusing loop in installation instructions for conda
+  (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
 
 Fixes, spelling & minor tweaks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -359,6 +368,10 @@ Fixes, spelling & minor tweaks
   (`#6652 <https://github.com/scikit-image/scikit-image/pull/6652>`_).
 - Get rid of numpy deprecation warning in gallery example ``in plot_log_gamma.py``
   (`#6655 <https://github.com/scikit-image/scikit-image/pull/6655>`_).
+- Remove warnings and unnecessary messages in gallery example "Tinting gray-scale images"
+  (`#6656 <https://github.com/scikit-image/scikit-image/pull/6656>`_).
+- Update the contribution guide to recommend creating the virtualenv outside the source tree
+  (`#6675 <https://github.com/scikit-image/scikit-image/pull/6675>`_).
 
 Other and development related updates
 -------------------------------------
@@ -471,6 +484,16 @@ Maintenance
   (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
 - Organize ``dev.py`` commands into sections
   (`#6629 <https://github.com/scikit-image/scikit-image/pull/6629>`_).
+- Remove thumbnail_size in config since sphinx-gallery>=0.9.0
+  (`#6647 <https://github.com/scikit-image/scikit-image/pull/6647>`_).
+- Add new test cases for ``skimage.transform.resize``
+  (`#6669 <https://github.com/scikit-image/scikit-image/pull/6669>`_).
+- Use meson-python main branch
+  (`#6671 <https://github.com/scikit-image/scikit-image/pull/6671>`_).
+- Simplify QhullError import
+  (`#6677 <https://github.com/scikit-image/scikit-image/pull/6677>`_).
+- Remove old SciPy cruft
+  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_).
 
 Benchmarks
 ~~~~~~~~~~
@@ -521,39 +544,17 @@ CI & automation
   (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_).
 - Build Python 3.11 wheels
   (`#6581 <https://github.com/scikit-image/scikit-image/pull/6581>`_).
+- Fix doc build on CircleCI and add ccache
+  (`#6646 <https://github.com/scikit-image/scikit-image/pull/6646>`_).
+- Build wheels on CI via branch rather than tag
+  (`#6668 <https://github.com/scikit-image/scikit-image/pull/6668>`_).
+- Do not build wheels on pushes to main
+  (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
 
 .. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
 Other Pull Requests
-~~~~~~~~~~~~~~~~~~~
-- Fix doc build on CircleCI and add ccache
-  (`#6646 <https://github.com/scikit-image/scikit-image/pull/6646>`_).
-- Remove thumbnail_size in config since sphinx-gallery>=0.9.0.
-  (`#6647 <https://github.com/scikit-image/scikit-image/pull/6647>`_).
-- remove warnings and unnecessary messages
-  (`#6656 <https://github.com/scikit-image/scikit-image/pull/6656>`_).
-- Add verification to image argument dimension on skimage.filters.rank module
-  (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
-- Build wheels on CI via branch rather than tag
-  (`#6668 <https://github.com/scikit-image/scikit-image/pull/6668>`_).
-- Add more test cases to test_downsize
-  (`#6669 <https://github.com/scikit-image/scikit-image/pull/6669>`_).
-- Use meson-python main branch
-  (`#6671 <https://github.com/scikit-image/scikit-image/pull/6671>`_).
-- Simplify installation instructions for conda
-  (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
-- Do not build wheels on pushes to main
-  (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
-- Move `future.graph` to `skimage.graph`
-  (`#6674 <https://github.com/scikit-image/scikit-image/pull/6674>`_).
-- Fix venv instructions
-  (`#6675 <https://github.com/scikit-image/scikit-image/pull/6675>`_).
-- Simplify QhullError import
-  (`#6677 <https://github.com/scikit-image/scikit-image/pull/6677>`_).
-- Remove old scipy cruft
-  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_).
-- Ensure running on Python 3.8 or greater
-  (`#6679 <https://github.com/scikit-image/scikit-image/pull/6679>`_).
+-------------------
 - Remove old references to imread package
   (`#6680 <https://github.com/scikit-image/scikit-image/pull/6680>`_).
 - Remove old scipy cruft
