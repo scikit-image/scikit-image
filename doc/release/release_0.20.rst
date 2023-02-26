@@ -670,7 +670,7 @@ CI & automation
     - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
       (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-71 authors added to this release [alphabetical by first name or login]
+70 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
@@ -709,24 +709,24 @@ CI & automation
 - Judd Storrs
 - Larry Bradley
 - Lars Grüter
-- lihaitao
+- lihaitao (li1127217ye)
 - Lucas Johnson
-- Malinda
+- Malinda (maldil)
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
 - Marvin Albert
+- Matthew Brett
 - Matthias Bussonnier
 - Miles Lucas
 - Nathan Chan
 - Naveen
 - OBgoneSouth (OBgoneSouth)
 - Oren Amsalem
-- pbuscay (Preston Buscay)
+- Preston Buscay
 - Peter Sobolewski
-- peterbell10 (peterbell10)
+- Peter Bell
 - Ray Bell
-- Riadh
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
@@ -739,16 +739,15 @@ CI & automation
 - Stefan van der Walt
 - Teemu Kumpumäki
 - Thanushi Peiris
-- thvoigtmann (Thomas Voigtmann)
-- thvoigtmann (thvoigtmann)
+- Thomas Voigtmann
 - Tim-Oliver Buchholz
 - Tyler Reddy
 
-43 reviewers added to this release [alphabetical by first name or login]
+42 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Abhijeet Parida
 - Albert Y. Shih
-- Alex
+- Alex (sashashura)
 - Alexandre de Siqueira
 - Antony Lee
 - Ben Greiner
@@ -768,7 +767,7 @@ CI & automation
 - Juan DF
 - Juan Nunez-Iglesias
 - Lars Grüter
-- Malinda
+- Malinda (maldil)
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
@@ -786,5 +785,5 @@ CI & automation
 - Simon-Martin Schröder
 - Stefan van der Walt
 - Thanushi Peiris
-- thvoigtmann
+- Thomas Voigtmann
 - Tim-Oliver Buchholz
