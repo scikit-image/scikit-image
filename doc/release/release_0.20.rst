@@ -137,6 +137,8 @@ Changes and new deprecations
   (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_).
 - Update minimal supported dependency to ``pillow>=9.0.1``
   (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
+- Update minimal supported dependency to ``setuptools 67``
+  (`#6754 <https://github.com/scikit-image/scikit-image/pull/6754>`_).
 - Update optional, minimal supported dependency to ``matplotlib>=3.3``
   (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
 - Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
@@ -247,6 +249,10 @@ Bug fixes
   (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
 - Fix in-place merging of wheights in ``skimage.graph.RAG.merge_nodes``
   (`#6692 <https://github.com/scikit-image/scikit-image/pull/6692>`_).
+- Fix growing memory error and silence compiler warning in internal ``heappush`` function
+  (`#6727 <https://github.com/scikit-image/scikit-image/pull/6727>`_).
+- Fix compiliation warning about struct initialization in `Cascade.detect_multi_scale`
+  (`#6728 <https://github.com/scikit-image/scikit-image/pull/6728>`_).
 
 Documentation
 -------------
@@ -319,6 +325,8 @@ Improved & updated
   (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
 - Document value ranges of L*a*b* and L*Ch in ``lab2xyz``, ``rgb2lab``, ``lab2lch``, and ``lch2lab`` in ``skimage.color``
   (`#6688 <https://github.com/scikit-image/scikit-image/pull/6688>`_, `#6697 <https://github.com/scikit-image/scikit-image/pull/6697>`_, `#6719 <https://github.com/scikit-image/scikit-image/pull/6719>`_).
+- Use more consistent style in docstring of ``skimage.feature.local_binary_pattern``
+  (`#6736 <https://github.com/scikit-image/scikit-image/pull/6736>`_).
 
 Fixes, spelling & minor tweaks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -378,6 +386,10 @@ Fixes, spelling & minor tweaks
   (`#6656 <https://github.com/scikit-image/scikit-image/pull/6656>`_).
 - Update the contribution guide to recommend creating the virtualenv outside the source tree
   (`#6675 <https://github.com/scikit-image/scikit-image/pull/6675>`_).
+- Fix typo in docstring of ``skimage.data.coffee``
+  (`#6740 <https://github.com/scikit-image/scikit-image/pull/6740>`_).
+- Add missing backtick in docstring of ``skimage.graph.merge_nodes``
+  (`#6741 <https://github.com/scikit-image/scikit-image/pull/6741>`_).
 
 Other and development related updates
 -------------------------------------
@@ -518,6 +530,20 @@ Maintenance
   (`#6723 <https://github.com/scikit-image/scikit-image/pull/6723>`_).
 - Fix Cython errors/warnings
   (`#6725 <https://github.com/scikit-image/scikit-image/pull/6725>`_).
+- Generate pyproject deps from requirements
+  (`#6726 <https://github.com/scikit-image/scikit-image/pull/6726>`_).
+- MAINT: Use ``uintptr_t`` to calculate new heap ptr positions
+  (`#6734 <https://github.com/scikit-image/scikit-image/pull/6734>`_).
+- Bite the bullet: remove distutils and setup.py
+  (`#6738 <https://github.com/scikit-image/scikit-image/pull/6738>`_).
+- Use meson-python developer version
+  (`#6753 <https://github.com/scikit-image/scikit-image/pull/6753>`_).
+- Require ``setuptools`` 65.6+
+  (`#6751 <https://github.com/scikit-image/scikit-image/pull/6751>`_).
+- Remove ``setup.cfg``, use ``pyproject.toml`` instead
+  (`#6758 <https://github.com/scikit-image/scikit-image/pull/6758>`_).
+- Update ``pyproject.toml`` to use ``meson-python>=0.13.0rc0``
+  (`#6759 <https://github.com/scikit-image/scikit-image/pull/6759>`_).
 
 Benchmarks
 ~~~~~~~~~~
@@ -576,55 +602,26 @@ CI & automation
   (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
 - Use ``tools/github/before_install.sh`` wheels workflow
   (`#6718 <https://github.com/scikit-image/scikit-image/pull/6718>`_).
-
-.. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
-
-Other Pull Requests
--------------------
-- Generate pyproject deps from requirements
-  (`#6726 <https://github.com/scikit-image/scikit-image/pull/6726>`_).
-- BUG: Fix heap growing memory error and silence compiler warning
-  (`#6727 <https://github.com/scikit-image/scikit-image/pull/6727>`_).
-- Fix compliation warning about struct initialization in `Cascade.detect_multi_scale`
-  (`#6728 <https://github.com/scikit-image/scikit-image/pull/6728>`_).
 - Use Ruff for linting
   (`#6729 <https://github.com/scikit-image/scikit-image/pull/6729>`_).
 - Use test that can fail for sdist
   (`#6731 <https://github.com/scikit-image/scikit-image/pull/6731>`_).
-- Fix fstring
+- Fix fstring in ``skimage._shared._warnings.expected_warnings``
   (`#6733 <https://github.com/scikit-image/scikit-image/pull/6733>`_).
-- MAINT: Use `uintptr_t` to calculate new heap ptr positions
-  (`#6734 <https://github.com/scikit-image/scikit-image/pull/6734>`_).
-- Fix docstring for local_binary_pattern.
-  (`#6736 <https://github.com/scikit-image/scikit-image/pull/6736>`_).
-- Bite the bullet: remove distutils and setup.py
-  (`#6738 <https://github.com/scikit-image/scikit-image/pull/6738>`_).
-- Fix typo in photo description.
-  (`#6740 <https://github.com/scikit-image/scikit-image/pull/6740>`_).
-- DOC: missing backtick
-  (`#6741 <https://github.com/scikit-image/scikit-image/pull/6741>`_).
 - Build macosx/py38 wheel natively
   (`#6743 <https://github.com/scikit-image/scikit-image/pull/6743>`_).
-- Remove circleci url check
+- Remove CircleCI URL check
   (`#6749 <https://github.com/scikit-image/scikit-image/pull/6749>`_).
 - CI Set MACOSX_DEPLOYMENT_TARGET=10.9 for Wheels
   (`#6750 <https://github.com/scikit-image/scikit-image/pull/6750>`_).
-- Require setuptools 65.6+
-  (`#6751 <https://github.com/scikit-image/scikit-image/pull/6751>`_).
-- Use meson-python developer version
-  (`#6753 <https://github.com/scikit-image/scikit-image/pull/6753>`_).
-- Require setuptools 67+
-  (`#6754 <https://github.com/scikit-image/scikit-image/pull/6754>`_).
 - Add temporary workaround until new meson-python release
   (`#6757 <https://github.com/scikit-image/scikit-image/pull/6757>`_).
-- Remove setup.cfg; use pyproject.toml instead
-  (`#6758 <https://github.com/scikit-image/scikit-image/pull/6758>`_).
-- Update pyproject
-  (`#6759 <https://github.com/scikit-image/scikit-image/pull/6759>`_).
 - Update action to use new environment file
   (`#6762 <https://github.com/scikit-image/scikit-image/pull/6762>`_).
 - Autogenerate pyproject.toml
   (`#6763 <https://github.com/scikit-image/scikit-image/pull/6763>`_).
+
+.. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
 
 Backported 0.19.x (remove before merging!)
 ------------------------------------------
