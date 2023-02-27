@@ -256,24 +256,26 @@ This directory contains the following files:
     scikit-image
     ├── asv.conf.json
     ├── azure-pipelines.yml
-    ├── benchmarks
+    ├── benchmarks/
+    ├── CITATION.bib
     ├── CODE_OF_CONDUCT.md
     ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
-    ├── doc
+    ├── dev.py
+    ├── doc/
     ├── INSTALL.rst
     ├── LICENSE.txt
-    ├── Makefile
     ├── MANIFEST.in
+    ├── meson.build
+    ├── meson.md
+    ├── pyproject.toml
     ├── README.md
     ├── RELEASE.txt
-    ├── requirements
+    ├── requirements/
     ├── requirements.txt
-    ├── setup.cfg
-    ├── setup.py
-    ├── skimage
+    ├── skimage/
     ├── TODO.txt
-    ├── tools
+    └── tools/
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
