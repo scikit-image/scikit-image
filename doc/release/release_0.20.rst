@@ -390,6 +390,8 @@ Fixes, spelling & minor tweaks
   (`#6740 <https://github.com/scikit-image/scikit-image/pull/6740>`_).
 - Add missing backtick in docstring of ``skimage.graph.merge_nodes``
   (`#6741 <https://github.com/scikit-image/scikit-image/pull/6741>`_).
+- Fix typo in ``skimage.metrics.variation_of_information``
+  (`#6768 <https://github.com/scikit-image/scikit-image/pull/6768>`_).
 
 Other and development related updates
 -------------------------------------
@@ -670,7 +672,7 @@ CI & automation
     - Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
       (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
 
-70 authors added to this release [alphabetical by first name or login]
+71 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
@@ -678,6 +680,7 @@ CI & automation
 - Alex (sashashura)
 - Alexandr Kalinin
 - Alexandre de Siqueira
+- Amin (MOAMSA)
 - Antony Lee
 - Balint Varga
 - Ben Greiner
