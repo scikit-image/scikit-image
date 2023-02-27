@@ -312,8 +312,8 @@ venv
   ./dev.py build
   # Test your installation
   ./dev.py test
-  # Install docs dependencies of scikit-image
-  pip install -r requirements/docs.txt
+  # Build docs
+  ./dev.py docs
   # Try the new version in IPython
   ./dev.py ipython
 
@@ -342,8 +342,8 @@ before you get started.
   ./dev.py build
   # Test your installation
   ./dev.py test
-  # Install docs dependencies of scikit-image
-  conda install -c conda-forge --file requirements/docs.txt
+  # Build docs
+  ./dev.py docs
   # Try the new version in IPython
   ./dev.py ipython
 
