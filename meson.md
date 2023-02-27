@@ -1,5 +1,8 @@
 # Building with Meson
 
+We are assuming that you have a default Python environment already configured on
+your computer and that you intend to install `scikit-image` inside of it.
+
 ### Developer build
 
 Install the `dev.py` tool:
