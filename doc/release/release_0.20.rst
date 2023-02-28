@@ -1,37 +1,37 @@
 Announcement: scikit-image 0.20.0 (unreleased)
 ==============================================
 
-scikit-image is an image processing toolbox built on SciPy that includes algorithms
-for segmentation, geometric transformations, color space manipulation,
-analysis, filtering, morphology, feature detection, and more.
+scikit-image is an image processing toolbox built on SciPy that
+includes algorithms for segmentation, geometric transformations, color
+space manipulation, analysis, filtering, morphology, feature
+detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 With this release, many of the functions in ``skimage.measure`` now support
-anisotropic images with different voxel spacings which can be specified with
-the new parameter ``spacing``.
+anisotropic images with different voxel spacings.
 
-Support for footprint decomposition was added to several functions in
-``skimage.morphology``. By decomposing a footprint into several smaller ones
-with the new ``decomposition`` parameter, morphological operations can
-potentially be sped up significantly.
+Many performance improvements were made, such as support for footprint
+decomposition in ``skimage.morphology``
 
-In addition a good number of performance improvements have been included.
+Four new gallery examples were added to the documentation, including
+the new interactive example "Track solidification of a metallic
+alloy".
 
-4 new gallery examples were added to our documentation; checkout the new
-interactive example "Track solidification of a metallic alloy".
+This release completes the transition to a more flexible
+``channel_axis`` parameter for indicating multi-channel images, and
+includes several other deprecations that make the API more consistent and
+expressive.
 
-This release also completes the transition to indicating multi-channel images
-with the more flexible ``channel_axis`` parameter as well as a many other
-deprecations to make scikit-image's API more consistent and expressive.
+Finally, in preparation for the removal of `distutils` in the upcoming
+Python 3.12 release, we replaced our build system with `meson` and a
+static `pyproject.toml` specification.
 
-This release now supports Python 3.8-3.11.
+This release supports Python 3.8–3.11.
 
 New features and improvements
 -----------------------------
-.. Anything new or improved - including performance - that is covered by our API.
-
 - Support footprint decomposition to several footprint generating and consuming functions in ``skimage.morphology``.
   By decomposing a footprint into several smaller ones, morphological operations can potentially be sped up.
   The decomposed footprint can be generated with the new ``decomposition`` parameter of the functions ``rectangle``, ``diamond``, ``disk``, ``cube``, ``octahedron``, ``ball``, and ``octagon`` in ``skimage.morphology``.
@@ -46,6 +46,8 @@ New features and improvements
 - Add isotropic binary morphological operators ``isotropic_closing``, ``isotropic_dilation``, ``isotropic_erosion``, and ``isotropic_opening`` in ``skimage.morphology``.
   These functions return the same results as their non-isotropic counterparts but perform faster for large circular structuring elements
   (`#6492 <https://github.com/scikit-image/scikit-image/pull/6492>`_).
+- Add new colocalization metrics ``pearson_corr_coeff``, ``manders_coloc_coeff``, ``manders_overlap_coeff`` and ``intersection_coeff`` to ``skimage.measure``
+  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
 - Support the Modified Hausdorff Distance (MHD) metric in ``skimage.metrics.hausdorff_distance`` via the new parameter ``method``.
   The MHD can be more robust against outliers than the directed Hausdorff Distance (HD)
   (`#5581 <https://github.com/scikit-image/scikit-image/pull/5581>`_).
@@ -63,6 +65,10 @@ New features and improvements
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
 - Add new parameter ``include_borders`` to ``skimage.measure.convex_hull_image`` to optionally exclude vertices or edges from the final hull mask
   (`#6515 <https://github.com/scikit-image/scikit-image/pull/6515>`_).
+- Add new parameter ``offsets`` to ``skimage.measure.regionprops`` that optionally allows specifying the coordinates of the origin and affects the properties ``coords_scaled`` and ``coords``
+  (`#3706 <https://github.com/scikit-image/scikit-image/pull/3706>`_).
+- Add new parameter ``disambiguate`` to ``skimage.registration.phase_cross_correlation`` to optionally disambiguate periodic shifts
+  (`#6617 <https://github.com/scikit-image/scikit-image/pull/6617>`_).
 - Support n-dimensional images in ``skimage.filters.farid`` (Farid & Simoncelli filter)
   (`#6257 <https://github.com/scikit-image/scikit-image/pull/6257>`_).
 - Support n-dimensional images in ``skimage.restoration.wiener``
@@ -72,10 +78,10 @@ New features and improvements
 - Allow footprints with non-adjacent pixels as neighbors in ``skimage.morphology.flood_fill``
   (`#6236 <https://github.com/scikit-image/scikit-image/pull/6236>`_).
 - Support array-likes consistently in ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``GeometricTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``, ``ProjectiveTransform``, ``SimilarityTransform``, ``estimate_transform``, and ``matrix_transform`` in ``skimage.transform``
-  (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_)
+  (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_).
 
 Performance
-~~~~~~~~~~~
+^^^^^^^^^^^
 - Improve performance (~2x speedup) of ``skimage.feature.canny`` by porting a part of its implementation to Cython
   (`#6387 <https://github.com/scikit-image/scikit-image/pull/6387>`_).
 - Improve performance (~2x speedup) of ``skimage.feature.hessian_matrix_eigvals`` and 2D ``skimage.feature.structure_tensor_eigenvalues``
@@ -101,6 +107,8 @@ Performance
 
 Changes and new deprecations
 ----------------------------
+- Set Python 3.8 as the minimal supported version
+  (`#6679 <https://github.com/scikit-image/scikit-image/pull/6679>`_).
 - Rewrite ``skimage.filters.meijering``, ``skimage.filters.sato``,
   ``skimage.filters.frangi``, and ``skimage.filters.hessian`` to match the published algorithms more closely.
   This change is backward incompatible and will lead to different output values compared to the previous implementation.
@@ -108,13 +116,15 @@ Changes and new deprecations
   The filters will now be correctly set to zero whenever one of the Hessian eigenvalues has a sign which is incompatible with a ridge of the desired polarity.
   The gamma constant of the Frangi filter is now set adaptively based on the maximum Hessian norm
   (`#6446 <https://github.com/scikit-image/scikit-image/pull/6446>`_).
+- Move functions in ``skimage.future.graph`` to ``skimage.graph``. This affects ``cut_threshold``, ``cut_normalized``, ``merge_hierarchical``, ``rag_mean_color``, ``RAG``, ``show_rag``, and ``rag_boundary``
+  (`#6674 <https://github.com/scikit-image/scikit-image/pull/6674>`_).
 - Return ``False`` in ``skimage.measure.LineModelND.estimate`` instead of raising an error if the model is under-determined
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
 - Return ``False`` in ``skimage.measure.CircleModel.estimate`` instead of warning if the model is under-determined
   (`#6453 <https://github.com/scikit-image/scikit-image/pull/6453>`_).
-- Rename ``skimage.filter.inverse`` to ``skimage.filter.inverse_filter``.
-  ``skimage.filter.inverse`` is deprecated and will be removed in the next release
-  (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_).
+- Rename ``skimage.filters.inverse`` to ``skimage.filters.inverse_filter``.
+  ``skimage.filters.inverse`` is deprecated and will be removed in the next release
+  (`#6418 <https://github.com/scikit-image/scikit-image/pull/6418>`_, `#6701 <https://github.com/scikit-image/scikit-image/pull/6701>`_).
 - Update minimal supported dependencies to ``numpy>=1.20``
   (`#6565 <https://github.com/scikit-image/scikit-image/pull/6565>`_).
 - Update minimal supported dependencies to ``scipy>=1.8``
@@ -123,6 +133,8 @@ Changes and new deprecations
   (`#6564 <https://github.com/scikit-image/scikit-image/pull/6564>`_).
 - Update minimal supported dependency to ``pillow>=9.0.1``
   (`#6402 <https://github.com/scikit-image/scikit-image/pull/6402>`_).
+- Update minimal supported dependency to ``setuptools 67``
+  (`#6754 <https://github.com/scikit-image/scikit-image/pull/6754>`_).
 - Update optional, minimal supported dependency to ``matplotlib>=3.3``
   (`#6383 <https://github.com/scikit-image/scikit-image/pull/6383>`_).
 - Warn for non-integer image inputs to ``skimage.feature.local_binary_pattern``.
@@ -191,11 +203,11 @@ Completed deprecations
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
 - Remove deprecated submodule ``skimage.morphology.selem``; use ``skimage.morphology.footprints`` instead
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Remove deprecated ``skimage.future.graph.ncut`` (it was replaced by ``skimage.graph.cut_normalized``)
+  (`#6685 <https://github.com/scikit-image/scikit-image/pull/6685>`_).
 
 Bug fixes
 ---------
-.. Only fixes to unexpected behavior in our public API. Exclude things such as fixes to the CI or documentation.
-
 - Fix round-off error in ``skimage.exposure.adjust_gamma``
   (`#6285 <https://github.com/scikit-image/scikit-image/pull/6285>`_).
 - Round and convert output coordinates of ``skimage.draw.rectangle`` to ``int`` even if the input coordinates use ``float``.
@@ -222,13 +234,25 @@ Bug fixes
   (`#6263 <https://github.com/scikit-image/scikit-image/pull/6263>`_).
 - Fix automatic detection of the color channel in ``skimage.filters.gaussian`` (this behavior is deprecated, see new deprecations)
   (`#6583 <https://github.com/scikit-image/scikit-image/pull/6583>`_).
+- Fix stacklevel of warning in ``skimage.color.lab2rgb``
+  (`#6616 <https://github.com/scikit-image/scikit-image/pull/6616>`_).
+- Fix the order of return values for ``skimage.feature.hessian_matrix`` and raise an error if ``order='xy'`` is requested for images with more than 2 dimensions
+  (`#6624 <https://github.com/scikit-image/scikit-image/pull/6624>`_).
+- Fix misleading exception in functions in ``skimage.filters.rank`` that did
+  not mention that 2D images are also supported
+  (`#6666 <https://github.com/scikit-image/scikit-image/pull/6666>`_).
+- Fix in-place merging of wheights in ``skimage.graph.RAG.merge_nodes``
+  (`#6692 <https://github.com/scikit-image/scikit-image/pull/6692>`_).
+- Fix growing memory error and silence compiler warning in internal ``heappush`` function
+  (`#6727 <https://github.com/scikit-image/scikit-image/pull/6727>`_).
+- Fix compiliation warning about struct initialization in `Cascade.detect_multi_scale`
+  (`#6728 <https://github.com/scikit-image/scikit-image/pull/6728>`_).
 
 Documentation
 -------------
-.. Everything regarding the documentation that is visible to users.
 
 New
-~~~
+^^^
 - Add gallery example "Decompose flat footprints (structuring elements)"
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
@@ -237,6 +261,8 @@ New
   (`#6431 <https://github.com/scikit-image/scikit-image/pull/6431>`_).
 - Add gallery example "Track solidification of a metallic alloy"
   (`#6469 <https://github.com/scikit-image/scikit-image/pull/6469>`_).
+- Add gallery example "Colocalization metrics"
+  (`#6189 <https://github.com/scikit-image/scikit-image/pull/6189>`_).
 - Add support page (``.github/SUPPORT.md``) to help users from GitHub find appropriate support resources
   (`#6171 <https://github.com/scikit-image/scikit-image/pull/6171>`_, `#6575 <https://github.com/scikit-image/scikit-image/pull/6575>`_).
 - Add ``CITATION.bib`` to repository to help with citing scikit-image
@@ -245,11 +271,13 @@ New
   (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
 
 Improved & updated
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 - Improve gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt gallery example "Build image pyramids" to more diversified shaped images and downsample factors
   (`#6293 <https://github.com/scikit-image/scikit-image/pull/6293>`_).
+- Adapt gallery example "Explore 3D images (of cells)" with interactive slice explorer using plotly
+  (`#4953 <https://github.com/scikit-image/scikit-image/pull/4953>`_).
 - Clarify meaning of the ``weights`` term and rewrite docstrings of ``skimage.restoration.denoise_tv_bregman`` and ``skimage.restoration.denoise_tv_chambolle``
   (`#6544 <https://github.com/scikit-image/scikit-image/pull/6544>`_).
 - Describe the behavior of ``skimage.io.MultiImage`` more precisely in its docstring
@@ -286,9 +314,15 @@ Improved & updated
   (`#6599 <https://github.com/scikit-image/scikit-image/pull/6599>`_).
 - Clarify dependency on ``scikit-image[data]`` and pooch in ``INSTALL.rst``
   (`#6619 <https://github.com/scikit-image/scikit-image/pull/6619>`_).
+- Don't use confusing loop in installation instructions for conda
+  (`#6672 <https://github.com/scikit-image/scikit-image/pull/6672>`_).
+- Document value ranges of L*a*b* and L*Ch in ``lab2xyz``, ``rgb2lab``, ``lab2lch``, and ``lch2lab`` in ``skimage.color``
+  (`#6688 <https://github.com/scikit-image/scikit-image/pull/6688>`_, `#6697 <https://github.com/scikit-image/scikit-image/pull/6697>`_, `#6719 <https://github.com/scikit-image/scikit-image/pull/6719>`_).
+- Use more consistent style in docstring of ``skimage.feature.local_binary_pattern``
+  (`#6736 <https://github.com/scikit-image/scikit-image/pull/6736>`_).
 
 Fixes, spelling & minor tweaks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Remove deprecated reference and use ``skimage.measure.marching_cubes`` in gallery example "Marching Cubes"
   (`#6377 <https://github.com/scikit-image/scikit-image/pull/6377>`_).
 - List only the two primary OS-independent methods of installing scikit-image
@@ -341,18 +375,29 @@ Fixes, spelling & minor tweaks
   (`#6652 <https://github.com/scikit-image/scikit-image/pull/6652>`_).
 - Get rid of numpy deprecation warning in gallery example ``in plot_log_gamma.py``
   (`#6655 <https://github.com/scikit-image/scikit-image/pull/6655>`_).
+- Remove warnings and unnecessary messages in gallery example "Tinting gray-scale images"
+  (`#6656 <https://github.com/scikit-image/scikit-image/pull/6656>`_).
+- Update the contribution guide to recommend creating the virtualenv outside the source tree
+  (`#6675 <https://github.com/scikit-image/scikit-image/pull/6675>`_).
+- Fix typo in docstring of ``skimage.data.coffee``
+  (`#6740 <https://github.com/scikit-image/scikit-image/pull/6740>`_).
+- Add missing backtick in docstring of ``skimage.graph.merge_nodes``
+  (`#6741 <https://github.com/scikit-image/scikit-image/pull/6741>`_).
+- Fix typo in ``skimage.metrics.variation_of_information``
+  (`#6768 <https://github.com/scikit-image/scikit-image/pull/6768>`_).
 
 Other and development related updates
 -------------------------------------
-.. Everything invisible to a user of scikit-image or not covered in the above section. These changes probably not interesting to users.
 
 Governance & planning
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 - Add draft of SKIP 4 "Transitioning to scikit-image 2.0"
   (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_, `#6353 <https://github.com/scikit-image/scikit-image/pull/6353>`_).
 
 Maintenance
-~~~~~~~~~~~
+^^^^^^^^^^^
+- Prepare release notes for v0.20.0
+  (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_, `#6766 <https://github.com/scikit-image/scikit-image/pull/6766>`_).
 - Add and test alternative build system based on Meson as an alternative to the deprecated distutils system
   (`#6536 <https://github.com/scikit-image/scikit-image/pull/6536>`_).
 - Use ``cnp.float32_t`` and ``cnp.float64_t`` over ``float`` and ``double`` in Cython code
@@ -451,9 +496,51 @@ Maintenance
   (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
 - Organize ``dev.py`` commands into sections
   (`#6629 <https://github.com/scikit-image/scikit-image/pull/6629>`_).
+- Remove thumbnail_size in config since sphinx-gallery>=0.9.0
+  (`#6647 <https://github.com/scikit-image/scikit-image/pull/6647>`_).
+- Add new test cases for ``skimage.transform.resize``
+  (`#6669 <https://github.com/scikit-image/scikit-image/pull/6669>`_).
+- Use meson-python main branch
+  (`#6671 <https://github.com/scikit-image/scikit-image/pull/6671>`_).
+- Simplify QhullError import
+  (`#6677 <https://github.com/scikit-image/scikit-image/pull/6677>`_).
+- Remove old SciPy cruft
+  (`#6678 <https://github.com/scikit-image/scikit-image/pull/6678>`_, `#6681 <https://github.com/scikit-image/scikit-image/pull/6681>`_).
+- Remove old references to imread package
+  (`#6680 <https://github.com/scikit-image/scikit-image/pull/6680>`_).
+- Remove pillow cruft (and a few other cleanups)
+  (`#6683 <https://github.com/scikit-image/scikit-image/pull/6683>`_).
+- Remove leftover ``gtk_plugin.ini``
+  (`#6686 <https://github.com/scikit-image/scikit-image/pull/6686>`_).
+- Prepare v0.20.0rc0
+  (`#6706 <https://github.com/scikit-image/scikit-image/pull/6706>`_).
+- Remove pre-release suffix for for Python 3.11
+  (`#6709 <https://github.com/scikit-image/scikit-image/pull/6709>`_).
+- Loosen tests for SciPy 1.10
+  (`#6715 <https://github.com/scikit-image/scikit-image/pull/6715>`_).
+- Specify C flag only if supported by compiler
+  (`#6716 <https://github.com/scikit-image/scikit-image/pull/6716>`_).
+- Extract version info from ``skimage/__init__.py`` in ``skimage/meson.build``
+  (`#6723 <https://github.com/scikit-image/scikit-image/pull/6723>`_).
+- Fix Cython errors/warnings
+  (`#6725 <https://github.com/scikit-image/scikit-image/pull/6725>`_).
+- Generate pyproject deps from requirements
+  (`#6726 <https://github.com/scikit-image/scikit-image/pull/6726>`_).
+- MAINT: Use ``uintptr_t`` to calculate new heap ptr positions
+  (`#6734 <https://github.com/scikit-image/scikit-image/pull/6734>`_).
+- Bite the bullet: remove distutils and setup.py
+  (`#6738 <https://github.com/scikit-image/scikit-image/pull/6738>`_).
+- Use meson-python developer version
+  (`#6753 <https://github.com/scikit-image/scikit-image/pull/6753>`_).
+- Require ``setuptools`` 65.6+
+  (`#6751 <https://github.com/scikit-image/scikit-image/pull/6751>`_).
+- Remove ``setup.cfg``, use ``pyproject.toml`` instead
+  (`#6758 <https://github.com/scikit-image/scikit-image/pull/6758>`_).
+- Update ``pyproject.toml`` to use ``meson-python>=0.13.0rc0``
+  (`#6759 <https://github.com/scikit-image/scikit-image/pull/6759>`_).
 
 Benchmarks
-~~~~~~~~~~
+^^^^^^^^^^
 - Add benchmarks for ``morphology.local_maxima``
   (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_).
 - Add benchmarks for ``skimage.morphology.reconstruction``
@@ -462,7 +549,7 @@ Benchmarks
   (`#6511 <https://github.com/scikit-image/scikit-image/pull/6511>`_).
 
 CI & automation
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 - Add Github ``actions/stale`` to label "dormant" issues and PRs
   (`#6506 <https://github.com/scikit-image/scikit-image/pull/6506>`_, `#6546 <https://github.com/scikit-image/scikit-image/pull/6546>`_, `#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_).
 - Fix the autogeneration of API docs for lazy loaded subpackages
@@ -501,78 +588,55 @@ CI & automation
   (`#6626 <https://github.com/scikit-image/scikit-image/pull/6626>`_).
 - Build Python 3.11 wheels
   (`#6581 <https://github.com/scikit-image/scikit-image/pull/6581>`_).
+- Fix doc build on CircleCI and add ccache
+  (`#6646 <https://github.com/scikit-image/scikit-image/pull/6646>`_).
+- Build wheels on CI via branch rather than tag
+  (`#6668 <https://github.com/scikit-image/scikit-image/pull/6668>`_).
+- Do not build wheels on pushes to main
+  (`#6673 <https://github.com/scikit-image/scikit-image/pull/6673>`_).
+- Use ``tools/github/before_install.sh`` wheels workflow
+  (`#6718 <https://github.com/scikit-image/scikit-image/pull/6718>`_).
+- Use Ruff for linting
+  (`#6729 <https://github.com/scikit-image/scikit-image/pull/6729>`_).
+- Use test that can fail for sdist
+  (`#6731 <https://github.com/scikit-image/scikit-image/pull/6731>`_).
+- Fix fstring in ``skimage._shared._warnings.expected_warnings``
+  (`#6733 <https://github.com/scikit-image/scikit-image/pull/6733>`_).
+- Build macosx/py38 wheel natively
+  (`#6743 <https://github.com/scikit-image/scikit-image/pull/6743>`_).
+- Remove CircleCI URL check
+  (`#6749 <https://github.com/scikit-image/scikit-image/pull/6749>`_).
+- CI Set MACOSX_DEPLOYMENT_TARGET=10.9 for Wheels
+  (`#6750 <https://github.com/scikit-image/scikit-image/pull/6750>`_).
+- Add temporary workaround until new meson-python release
+  (`#6757 <https://github.com/scikit-image/scikit-image/pull/6757>`_).
+- Update action to use new environment file
+  (`#6762 <https://github.com/scikit-image/scikit-image/pull/6762>`_).
+- Autogenerate pyproject.toml
+  (`#6763 <https://github.com/scikit-image/scikit-image/pull/6763>`_).
 
-.. Add multiscale structural similarity (`#6470 <https://github.com/scikit-image/scikit-image/pull/6470>`_) -> accidental empty merge, continued in #6487
-
-Backported 0.19.x (remove before merging!)
-------------------------------------------
-.. Kept as a reference for now. This makes it easy to quickly parse PR numbers that are returned by generate_release_notes.py not (yet) included in this document.
-
-- hough_line_peaks fix for corner case with optimal angle=0 (`#6271 <https://github.com/scikit-image/scikit-image/pull/6271>`_)
-- Fix for error in 'Using Polar and Log-Polar Transformations for Registration' (#6304) (`#6306 <https://github.com/scikit-image/scikit-image/pull/6306>`_)
-- Fix issue with newer versions of matplotlib in manual segmentation (`#6328 <https://github.com/scikit-image/scikit-image/pull/6328>`_)
-- warp/rotate: fixed a bug with clipping when cval is not in the input range (`#6335 <https://github.com/scikit-image/scikit-image/pull/6335>`_)
-- avoid warnings about change to v3 API from imageio (`#6343 <https://github.com/scikit-image/scikit-image/pull/6343>`_)
-- Fix smoothed image computation when mask is None in canny (`#6348 <https://github.com/scikit-image/scikit-image/pull/6348>`_)
-- Fix channel_axis default for cycle_spin (`#6352 <https://github.com/scikit-image/scikit-image/pull/6352>`_)
-- remove use of deprecated kwargs from `test_tifffile_kwarg_passthrough` (`#6355 <https://github.com/scikit-image/scikit-image/pull/6355>`_)
-- In newer PIL, palette may contain <256 entries (`#6405 <https://github.com/scikit-image/scikit-image/pull/6405>`_)
-- Fix computation of histogram bins for multichannel integer-valued images (`#6413 <https://github.com/scikit-image/scikit-image/pull/6413>`_)
-- Skip tests requiring fetched data (`#6089 <https://github.com/scikit-image/scikit-image/pull/6089>`_)
-- Preserve backwards compatibility for `channel_axis` parameter in transform functions (`#6095 <https://github.com/scikit-image/scikit-image/pull/6095>`_)
-- restore non-underscore functions in skimage.data (`#6097 <https://github.com/scikit-image/scikit-image/pull/6097>`_)
-- forward port of #6098 (fix MacOS arm64 wheels and Windows Python 3.10 AMD64 wheel) (`#6101 <https://github.com/scikit-image/scikit-image/pull/6101>`_)
-- make rank filter test comparisons robust across architectures (`#6103 <https://github.com/scikit-image/scikit-image/pull/6103>`_)
-- pass a specific random_state into ransac in test_ransac_geometric (`#6105 <https://github.com/scikit-image/scikit-image/pull/6105>`_)
-- Add linker flags to strip debug symbols during wheel building (`#6109 <https://github.com/scikit-image/scikit-image/pull/6109>`_)
-- relax test condition to make it more robust to variable CI load (`#6114 <https://github.com/scikit-image/scikit-image/pull/6114>`_)
-- respect SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL setting in tests.yml (`#6118 <https://github.com/scikit-image/scikit-image/pull/6118>`_)
-- bump deprecated Azure windows environment (`#6130 <https://github.com/scikit-image/scikit-image/pull/6130>`_)
-- Update user warning message for viewer module. (`#6133 <https://github.com/scikit-image/scikit-image/pull/6133>`_)
-- fix phase_cross_correlation typo (`#6139 <https://github.com/scikit-image/scikit-image/pull/6139>`_)
-- Fix channel_axis handling in pyramid_gaussian and pyramid_laplace (`#6145 <https://github.com/scikit-image/scikit-image/pull/6145>`_)
-- deprecate n_iter_max (should be max_num_iter) (`#6148 <https://github.com/scikit-image/scikit-image/pull/6148>`_)
-- specify python version used by mybinder.org for gallery demos (`#6152 <https://github.com/scikit-image/scikit-image/pull/6152>`_)
-- Fix unintended change to output dtype of match_histograms (`#6169 <https://github.com/scikit-image/scikit-image/pull/6169>`_)
-- Fix decorators warnings stacklevel (`#6183 <https://github.com/scikit-image/scikit-image/pull/6183>`_)
-- Fix SIFT wrong octave indices + typo (`#6184 <https://github.com/scikit-image/scikit-image/pull/6184>`_)
-- Fix issue6190 - inconsistent default parameters in pyramids.py (`#6191 <https://github.com/scikit-image/scikit-image/pull/6191>`_)
-- Always set params to nan when ProjectiveTransform.estimate fails (`#6207 <https://github.com/scikit-image/scikit-image/pull/6207>`_)
-- PiecewiseAffineTransform.estimate return should reflect underlying transforms (`#6211 <https://github.com/scikit-image/scikit-image/pull/6211>`_)
-- EuclideanTransform.estimate should return False when NaNs are present (`#6214 <https://github.com/scikit-image/scikit-image/pull/6214>`_)
-- Allow the output_shape argument to be any iterable for resize and resize_local_mean (`#6219 <https://github.com/scikit-image/scikit-image/pull/6219>`_)
-- Update filename in testing instructions. (`#6223 <https://github.com/scikit-image/scikit-image/pull/6223>`_)
-- Fix calculation of Z normal in marching cubes (`#6227 <https://github.com/scikit-image/scikit-image/pull/6227>`_)
-- Remove redundant testing on Appveyor (`#6229 <https://github.com/scikit-image/scikit-image/pull/6229>`_)
-- Update imports/refs from deprecated scipy.ndimage.filters namespace (`#6231 <https://github.com/scikit-image/scikit-image/pull/6231>`_)
-- Include Cython sources via package_data (`#6232 <https://github.com/scikit-image/scikit-image/pull/6232>`_)
-- DOC: fix SciPy intersphinx (`#6239 <https://github.com/scikit-image/scikit-image/pull/6239>`_)
-- Fix bug in SLIC superpixels with `enforce_connectivity=True` and `start_label > 0` (`#6242 <https://github.com/scikit-image/scikit-image/pull/6242>`_)
-- Fowardport PR #6249 on branch main (update MacOS libomp installation in wheel building script) (`#6250 <https://github.com/scikit-image/scikit-image/pull/6250>`_)
-- Ignore sparse matrix deprecation warning (`#6261 <https://github.com/scikit-image/scikit-image/pull/6261>`_)
-- Add a textbook-like tutorial on measuring fluorescence at the nuclear envelope of a cell
-  (`#5262 <https://github.com/scikit-image/scikit-image/pull/5262>`_).
-
-66 authors added to this release [alphabetical by first name or login]
-----------------------------------------------------------------------
+71 authors contributed to this release [alphabetical by first name or login]
+----------------------------------------------------------------------------
 - Adeel Hassan
 - Albert Y. Shih
-- AleixBP
+- AleixBP (AleixBP)
 - Alex (sashashura)
 - Alexandr Kalinin
 - Alexandre de Siqueira
+- Amin (MOAMSA)
 - Antony Lee
 - Balint Varga
 - Ben Greiner
-- bsmietanka
+- bsmietanka (bsmietanka)
 - Chris Roat
 - Chris Wood
+- Daria
 - Dave Mellert
 - Dudu Lasry
 - Elena Pascal
 - Eli Schwartz
 - Fabian Schneider
-- forgeRW
+- forgeRW (forgeRW)
 - Frank A. Krueger
 - Gregory Lee
 - Gus Becker
@@ -584,17 +648,16 @@ Backported 0.19.x (remove before merging!)
 - Jan-Lukas Wynen
 - Jarrod Millman
 - Jeremy Muhlich
-- johnthagen
+- johnthagen (johnthagen)
 - Joshua Newton
 - Juan DF
 - Juan Nunez-Iglesias
 - Judd Storrs
-- kwikwag
 - Larry Bradley
 - Lars Grüter
 - lihaitao (li1127217ye)
 - Lucas Johnson
-- maldil
+- Malinda (maldil)
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
@@ -602,7 +665,9 @@ Backported 0.19.x (remove before merging!)
 - Matthew Brett
 - Matthias Bussonnier
 - Miles Lucas
+- Nathan Chan
 - Naveen
+- OBgoneSouth (OBgoneSouth)
 - Oren Amsalem
 - Preston Buscay
 - Peter Sobolewski
@@ -611,27 +676,31 @@ Backported 0.19.x (remove before merging!)
 - Riadh Fezzani
 - Robin Thibaut
 - Ross Barnowski
-- samtygier
+- samtygier (samtygier)
 - Sandeep N Menon
 - Sanghyeok Hyun
+- Sebastian Berg
 - Sebastian Wallkötter
 - Simon-Martin Schröder
 - Stefan van der Walt
 - Teemu Kumpumäki
+- Thanushi Peiris
 - Thomas Voigtmann
 - Tim-Oliver Buchholz
 - Tyler Reddy
 
-37 reviewers added to this release [alphabetical by first name or login]
-------------------------------------------------------------------------
+42 reviewers contributed to this release [alphabetical by first name or login]
+------------------------------------------------------------------------------
 - Abhijeet Parida
 - Albert Y. Shih
 - Alex (sashashura)
 - Alexandre de Siqueira
 - Antony Lee
 - Ben Greiner
-- Carlo
+- Carlo Dri
 - Chris Roat
+- Daniele Nicolodi
+- Daria
 - Dudu Lasry
 - Eli Schwartz
 - François Boulogne
@@ -644,11 +713,12 @@ Backported 0.19.x (remove before merging!)
 - Juan DF
 - Juan Nunez-Iglesias
 - Lars Grüter
-- maldil
+- Malinda (maldil)
 - Marianne Corvellec
 - Mark Harfouche
 - Martijn Courteaux
 - Marvin Albert
+- Matthias Bussonnier
 - Oren Amsalem
 - Ralf Gommers
 - Riadh Fezzani
@@ -656,8 +726,10 @@ Backported 0.19.x (remove before merging!)
 - Robin Thibaut
 - Sandeep N Menon
 - Sanghyeok Hyun
+- Sebastian Berg
 - Sebastian Wallkötter
 - Simon-Martin Schröder
 - Stefan van der Walt
+- Thanushi Peiris
 - Thomas Voigtmann
 - Tim-Oliver Buchholz
