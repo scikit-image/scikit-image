@@ -81,7 +81,7 @@ New features and improvements
   (`#6270 <https://github.com/scikit-image/scikit-image/pull/6270>`_).
 
 Performance
-~~~~~~~~~~~
+^^^^^^^^^^^
 - Improve performance (~2x speedup) of ``skimage.feature.canny`` by porting a part of its implementation to Cython
   (`#6387 <https://github.com/scikit-image/scikit-image/pull/6387>`_).
 - Improve performance (~2x speedup) of ``skimage.feature.hessian_matrix_eigvals`` and 2D ``skimage.feature.structure_tensor_eigenvalues``
@@ -248,8 +248,11 @@ Bug fixes
 - Fix compiliation warning about struct initialization in `Cascade.detect_multi_scale`
   (`#6728 <https://github.com/scikit-image/scikit-image/pull/6728>`_).
 
+Documentation
+-------------
+
 New
-~~~
+^^^
 - Add gallery example "Decompose flat footprints (structuring elements)"
   (`#6151 <https://github.com/scikit-image/scikit-image/pull/6151>`_).
 - Add gallery example "Butterworth Filters" and improve docstring of ``skimage.filters.butterworth``
@@ -268,7 +271,7 @@ New
   (`#6600 <https://github.com/scikit-image/scikit-image/pull/6600>`_).
 
 Improved & updated
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 - Improve gallery example "Measure perimeters with different estimators"
   (`#6200 <https://github.com/scikit-image/scikit-image/pull/6200>`_, `#6121 <https://github.com/scikit-image/scikit-image/pull/6121>`_).
 - Adapt gallery example "Build image pyramids" to more diversified shaped images and downsample factors
@@ -319,7 +322,7 @@ Improved & updated
   (`#6736 <https://github.com/scikit-image/scikit-image/pull/6736>`_).
 
 Fixes, spelling & minor tweaks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Remove deprecated reference and use ``skimage.measure.marching_cubes`` in gallery example "Marching Cubes"
   (`#6377 <https://github.com/scikit-image/scikit-image/pull/6377>`_).
 - List only the two primary OS-independent methods of installing scikit-image
@@ -383,13 +386,16 @@ Fixes, spelling & minor tweaks
 - Fix typo in ``skimage.metrics.variation_of_information``
   (`#6768 <https://github.com/scikit-image/scikit-image/pull/6768>`_).
 
+Other and development related updates
+-------------------------------------
+
 Governance & planning
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 - Add draft of SKIP 4 "Transitioning to scikit-image 2.0"
   (`#6339 <https://github.com/scikit-image/scikit-image/pull/6339>`_, `#6353 <https://github.com/scikit-image/scikit-image/pull/6353>`_).
 
 Maintenance
-~~~~~~~~~~~
+^^^^^^^^^^^
 - Prepare release notes for v0.20.0
   (`#6556 <https://github.com/scikit-image/scikit-image/pull/6556>`_, `#6766 <https://github.com/scikit-image/scikit-image/pull/6766>`_).
 - Add and test alternative build system based on Meson as an alternative to the deprecated distutils system
@@ -534,7 +540,7 @@ Maintenance
   (`#6759 <https://github.com/scikit-image/scikit-image/pull/6759>`_).
 
 Benchmarks
-~~~~~~~~~~
+^^^^^^^^^^
 - Add benchmarks for ``morphology.local_maxima``
   (`#3255 <https://github.com/scikit-image/scikit-image/pull/3255>`_).
 - Add benchmarks for ``skimage.morphology.reconstruction``
@@ -543,7 +549,7 @@ Benchmarks
   (`#6511 <https://github.com/scikit-image/scikit-image/pull/6511>`_).
 
 CI & automation
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 - Add Github ``actions/stale`` to label "dormant" issues and PRs
   (`#6506 <https://github.com/scikit-image/scikit-image/pull/6506>`_, `#6546 <https://github.com/scikit-image/scikit-image/pull/6546>`_, `#6552 <https://github.com/scikit-image/scikit-image/pull/6552>`_).
 - Fix the autogeneration of API docs for lazy loaded subpackages
