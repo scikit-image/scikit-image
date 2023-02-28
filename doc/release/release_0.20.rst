@@ -1,5 +1,5 @@
-Announcement: scikit-image 0.20.0 (unreleased)
-==============================================
+Announcement: scikit-image 0.20.0
+=================================
 
 scikit-image is an image processing toolbox built on SciPy that
 includes algorithms for segmentation, geometric transformations, color
