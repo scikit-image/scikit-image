@@ -144,8 +144,13 @@ html_css_files = ['theme_overrides.css']
 html_theme_options = {
     "github_url": "https://github.com/scikit-image/scikit-image",
     "navbar_start": ["navbar-logo", "version-switcher"],
-    # Omit `theme-switcher` as long as logo has white background
-    "navbar_end": ["navbar-icon-links"],
+    "logo": {
+        "alt_text": (
+            "scikit-image's logo, showing a snake's head overlayed with green "
+            "and orange"
+        ),
+        "text": "scikit-image"
+    },
     "icon_links": [
         {
             "name": "PyPI",
