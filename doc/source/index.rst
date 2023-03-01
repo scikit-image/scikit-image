@@ -20,7 +20,7 @@ Quick links
     :gutter: 3
 
     .. grid-item-card::  :octicon:`rocket` Get started...
-        :link: user_guides/install
+        :link: user_guide/install
         :link-type: any
 
         New to scikit-image? Start with our installation guide and learn the
@@ -79,7 +79,7 @@ Navigation
 .. toctree::
     :maxdepth: 1
 
-    user_guides/index
+    user_guide/index
     auto_examples/index
     api/api
     release_notes/index
