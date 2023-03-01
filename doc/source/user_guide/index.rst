@@ -5,6 +5,7 @@ User guide
 
 .. toctree::
    :maxdepth: 1
+   :numbered:
 
    install
    getting_started
