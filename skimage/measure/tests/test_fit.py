@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -153,10 +154,31 @@ def test_circle_model_insufficient_data():
         model.estimate(np.array([[1, 2], [3, 4]]))
 
     with expected_warnings(warning_message):
-        model.estimate(np.ones((6, 2)))
-
-    with expected_warnings(warning_message):
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
+
+    warning_message = (
+        "Standard deviation of data is too small to estimate "
+        "circle with meaningful precision."
+    )
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.ones((6, 2)))
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__
+
+
+def test_circle_model_estimate_from_small_scale_data():
+    params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float64)
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
+    ], dtype=np.float64)
+    data = CircleModel().predict_xy(angles, params=params)
+    model = CircleModel()
+    # assert that far small scale data can be estimated
+    assert model.estimate(data.astype(np.float64))
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
 
 
 def test_ellipse_model_invalid_input():
@@ -234,6 +256,20 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 
+def test_ellipse_model_estimate_from_far_shifted_data():
+    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float64)
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
+    ], dtype=np.float64)
+    data = EllipseModel().predict_xy(angles, params=params)
+    model = EllipseModel()
+    # assert that far shifted data can be estimated
+    assert model.estimate(data.astype(np.float64))
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
+
+
 @xfail(condition=arch32,
        reason=('Known test failure on 32-bit platforms. See links for '
                'details: '
@@ -242,7 +278,16 @@ def test_ellipse_model_estimate_from_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
-    assert not model.estimate(np.ones((5, 2)))
+    warning_message = (
+        "Standard deviation of data is too small to estimate "
+        "ellipse with meaningful precision."
+    )
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.ones((6, 2)))
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__
+
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 
