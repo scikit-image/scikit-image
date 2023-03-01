@@ -65,3 +65,10 @@ def coverage(build_dir):
     """📊 Generate coverage report
     """
     util.run(['python', '-m', 'devpy', 'test', '--build-dir', build_dir, '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+
+
+@click.command()
+def sdist():
+    """📦 Build a source distribution in `dist/`.
+    """
+    util.run(['python', '-m', 'build', '.', '--sdist'])

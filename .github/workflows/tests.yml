@@ -86,9 +86,8 @@ jobs:
           source tools/github/before_install.sh
           set -ex
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-              pip uninstall cython -y
-              python setup.py sdist
-              pip install dist/scikit-image-*.tar.gz
+              python -m build --no-isolation --skip-dependency-check --sdist .
+              pip install dist/scikit_image-*.tar.gz
           else
               pip install -vv --no-build-isolation .;
           fi

@@ -45,7 +45,8 @@ def test_blob_dog(dtype, threshold_type):
         threshold=threshold,
         threshold_rel=threshold_rel,
     )
-    radius = lambda x: r2 * x[2]
+    def radius(x):
+        return r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 5
     ratio_thresh = 0.25
@@ -230,7 +231,8 @@ def test_blob_log(dtype, threshold_type):
     blobs = blob_log(img, min_sigma=5, max_sigma=20, threshold=threshold,
                      threshold_rel=threshold_rel)
 
-    radius = lambda x: r2 * x[2]
+    def radius(x):
+        return r2 * x[2]
     s = sorted(blobs, key=radius)
     thresh = 3
 
@@ -412,7 +414,8 @@ def test_blob_doh(dtype, threshold_type):
         threshold=threshold,
         threshold_rel=threshold_rel)
 
-    radius = lambda x: x[2]
+    def radius(x):
+        return x[2]
     s = sorted(blobs, key=radius)
     thresh = 4
 
@@ -460,7 +463,8 @@ def test_blob_doh_log_scale():
         log_scale=True,
         threshold=.05)
 
-    radius = lambda x: x[2]
+    def radius(x):
+        return x[2]
     s = sorted(blobs, key=radius)
     thresh = 10
 

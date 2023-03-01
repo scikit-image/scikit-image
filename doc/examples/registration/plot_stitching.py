@@ -119,9 +119,9 @@ for idx, (im, trfm, (ax0, ax1)) in enumerate(zip(img_list, trfm_list,
     ax1.imshow(transform.warp(im, trfm), cmap="gray", vmin=0, vmax=1)
 
     if idx == 0:
-        ax0.set_title(f"Tilted images")
+        ax0.set_title("Tilted images")
         ax0.set_ylabel(f"Reference Image\n(PSNR={psnr_ref:.2f})")
-        ax1.set_title(f"Registered images")
+        ax1.set_title("Registered images")
 
     ax0.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
     ax1.set_axis_off()

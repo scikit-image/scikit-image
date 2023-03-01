@@ -172,7 +172,7 @@ class RAG(nx.Graph):
             Nodes to be merged.
         weight_func : callable, optional
             Function to decide the attributes of edges incident on the new
-            node. For each neighbor `n` for `src and `dst`, `weight_func` will
+            node. For each neighbor `n` for `src` and `dst`, `weight_func` will
             be called as follows: `weight_func(src, dst, n, *extra_arguments,
             **extra_keywords)`. `src`, `dst` and `n` are IDs of vertices in the
             RAG object which is in turn a subclass of `networkx.Graph`. It is

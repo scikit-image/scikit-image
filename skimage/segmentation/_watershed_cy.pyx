@@ -1,6 +1,5 @@
 """watershed.pyx - cython implementation of guts of watershed
 """
-import numpy as np
 from libc.math cimport sqrt
 
 cimport numpy as cnp

@@ -41,7 +41,6 @@ as they do not posses the desired shape.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from scipy import ndimage as ndi
 from skimage.feature import shape_index
 from skimage.draw import disk
