@@ -1,3 +1,5 @@
+""" Utilities for color conversion, color labeling, and color difference calculations."""
+
 from .colorconv import (convert_colorspace,
                         rgba2rgb,
                         rgb2hsv,
