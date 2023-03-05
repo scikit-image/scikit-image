@@ -1,4 +1,3 @@
-# Importing necessary libraries
 from functools import partial
 
 import numpy as np
@@ -19,7 +18,7 @@ assert_allclose = partial(np.testing.assert_allclose, atol=1e-8)
 @adapt_rgb(each_channel)
 def edges_each(image):
     """
-    Applies Sobel edge detection to an RGB image, using each color channel
+    Apply Sobel edge detection to an RGB image, using each color channel
     independently.
 
     Parameters
@@ -39,7 +38,7 @@ def edges_each(image):
 @adapt_rgb(each_channel)
 def smooth_each(image, sigma):
     """
-    Applies Gaussian smoothing to an RGB image, using each color channel
+    Apply Gaussian smoothing to an RGB image, using each color channel
     independently.
 
     Parameters
@@ -52,8 +51,6 @@ def smooth_each(image, sigma):
     Returns
     -------
     result : ndarray
-        Smoothed version of the input image, with each color channel processed
-        independently.
     """
     return filters.gaussian(image, sigma)
 
@@ -61,22 +58,20 @@ def smooth_each(image, sigma):
 @adapt_rgb(each_channel)
 def mask_each(image, mask):
     """
-    Applies a binary mask to an RGB image, with each color channel processed
-    independently.
-
-    Pixels where `mask` is True will be set to zero.
+    Apply a binary mask to an RGB image, setting pixels where the mask
+    is True to zero in each color channel.
 
     Parameters
     ----------
     image : ndarray
         Input RGB image.
-    mask : ndarray, bool
+    mask : ndarray
         Boolean mask to apply to the image.
 
     Returns
     -------
     result : ndarray
-        Copy of the input image with masked pixels set to zero.
+    
     """
     result = image.copy()
     result[mask] = 0
@@ -86,7 +81,7 @@ def mask_each(image, mask):
 @adapt_rgb(hsv_value)
 def edges_hsv(image):
     """
-    Applies Sobel edge detection to an RGB image, after converting to HSV and
+    Apply Sobel edge detection to an RGB image, after converting to HSV and
     using the value channel.
 
     Parameters
@@ -97,8 +92,7 @@ def edges_hsv(image):
     Returns
     -------
     result : ndarray
-        Edge map of the input image, with the value channel of the HSV image
-        processed.
+    
     """
     return filters.sobel(image)
 
@@ -106,7 +100,7 @@ def edges_hsv(image):
 @adapt_rgb(hsv_value)
 def smooth_hsv(image, sigma):
     """
-    Applies Gaussian smoothing to an RGB image, after converting to HSV and
+    Apply Gaussian smoothing to an RGB image, after converting to HSV and
     using the value channel.
 
     Parameters
@@ -119,8 +113,7 @@ def smooth_hsv(image, sigma):
     Returns
     -------
     result : ndarray
-        Smoothed version of the input image, with the value channel of the HSV
-        image processed.
+       
     """
     return filters.gaussian(image, sigma)
 
@@ -128,9 +121,8 @@ def smooth_hsv(image, sigma):
 @adapt_rgb(hsv_value)
 def edges_hsv_uint(image):
     """
-    Applies Sobel edge detection to an RGB image, after converting to HSV and
-    using the value channel. The output is converted to unsigned 16-bit integer
-    format.
+    Applies Sobel edge detection to the value channel of an HSV converted RGB 
+    image and output it in 16-bit integer format.
 
     Parameters
     ----------
@@ -139,9 +131,8 @@ def edges_hsv_uint(image):
 
     Returns
     -------
-    result : ndarray, uint16
-        Edge map of the input image, with the value channel of the HSV image
-        processed and converted to unsigned 16-bit integer format.
+    result : ndarray
+
     """
     return img_as_uint(filters.sobel(image))
 
