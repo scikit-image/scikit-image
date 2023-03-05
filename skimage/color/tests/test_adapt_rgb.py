@@ -60,7 +60,7 @@ def smooth_each(image, sigma):
 
 @adapt_rgb(each_channel)
 def mask_each(image, mask):
-        """
+    """
     Applies a binary mask to an RGB image, with each color channel processed
     independently.
 
