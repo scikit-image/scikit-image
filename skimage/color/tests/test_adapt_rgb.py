@@ -155,7 +155,7 @@ def test_gray_scale_image():
 
 
 def test_each_channel():
-     """Test that edges are correctly detected in each color channel of an RGB image."""
+    """Test that edges are correctly detected in each color channel of an RGB image."""
         
     filtered = edges_each(COLOR_IMAGE)
     for i, channel in enumerate(np.rollaxis(filtered, axis=-1)):
@@ -179,7 +179,7 @@ def test_each_channel_with_asymmetric_kernel():
 
 
 def test_hsv_value():
-     """Test that edges are correctly detected in the value component of the HSV representation of an RGB image."""
+    """Test that edges are correctly detected in the value component of the HSV representation of an RGB image."""
         
     filtered = edges_hsv(COLOR_IMAGE)
     value = color.rgb2hsv(COLOR_IMAGE)[:, :, 2]
