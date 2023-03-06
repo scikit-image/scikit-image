@@ -335,7 +335,9 @@ before you get started.
   # Activate it
   conda activate skimage-dev
   # Install main development and runtime dependencies
-  conda install -c conda-forge --file requirements.txt
+  conda install -c conda-forge --file requirements/default.txt
+  conda install -c conda-forge --file requirements/test.txt
+  conda install -c conda-forge --file requirements/developer.txt
   # Install build dependencies of scikit-image
   conda install -c conda-forge --file requirements/build.txt
   # Build scikit-image from source
