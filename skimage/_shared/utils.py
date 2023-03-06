@@ -161,7 +161,7 @@ def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
     Parameters
-    ---------
+    ----------
     func : function
         The function whose docstring we wish to update.
     kwarg_mapping : dict
