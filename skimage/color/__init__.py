@@ -1,4 +1,6 @@
-"""Utilities for color conversion, color labeling, and color difference calculations."""
+"""Utilities for color conversion, color labeling, and color difference
+calculations.
+"""
 
 from .colorconv import (convert_colorspace,
                         rgba2rgb,
