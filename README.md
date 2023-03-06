@@ -43,9 +43,7 @@ Every time you modify Cython files, also run:
 $ python setup.py build_ext -i  # Build binary extensions
 ```
 
-## License (Modified BSD)
-
-[https://github.com/scikit-image/scikit-image/blob/main/LICENSE.txt] (LICENSE.txt)
+## [License (Modified BSD)](https://github.com/scikit-image/scikit-image/blob/main/LICENSE.txt)
 
 ## Citation
 
