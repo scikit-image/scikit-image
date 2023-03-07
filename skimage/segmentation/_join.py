@@ -3,7 +3,7 @@ import numpy as np
 from ..util._map_array import map_array, ArrayMap
 
 
-def join_segmentations(s1, s2):
+def join_segmentations(s1, s2, return_mapping: bool = False):
     """Return the join of the two input segmentations.
 
     The join J of S1 and S2 is defined as the segmentation in which two
@@ -14,11 +14,17 @@ def join_segmentations(s1, s2):
     ----------
     s1, s2 : numpy arrays
         s1 and s2 are label fields of the same shape.
+    return_mapping : bool, optional
+        If true, return mappings for joined segmentation labels to the original labels.
 
     Returns
     -------
     j : numpy array
         The join segmentation of s1 and s2.
+    labels1_map : ArrayMap, optional
+        Mapping from labels of the joined segmentation j to labels of s1.
+    labels2_map : ArrayMap, optional
+        Mapping from labels of the joined segmentation j to labels of s2.
 
     Examples
     --------
@@ -33,15 +39,30 @@ def join_segmentations(s1, s2):
     array([[0, 1, 3, 2],
            [0, 5, 3, 2],
            [4, 5, 5, 3]])
+    >>> join_segmentations(s1, s2, return_mapping=True)
+    (array([[0, 1, 3, 2],
+           [0, 5, 3, 2],
+           [4, 5, 5, 3]]), ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 0, 1, 1, 2, 2])), ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 1, 0, 1, 0, 1])))
     """
     if s1.shape != s2.shape:
         raise ValueError("Cannot join segmentations of different shape. "
                          f"s1.shape: {s1.shape}, s2.shape: {s2.shape}")
-    s1 = relabel_sequential(s1)[0]
-    s2 = relabel_sequential(s2)[0]
-    j = (s2.max() + 1) * s1 + s2
-    j = relabel_sequential(j)[0]
-    return j
+    # Reindex input label images
+    s1, _, backward_map1 = relabel_sequential(s1)
+    s2, _, backward_map2 = relabel_sequential(s2)
+    # Create joined label image
+    factor = s2.max() + 1
+    j = factor * s1 + s2
+    labels_joined = np.unique(j)
+    j, _, backward_map_joined = relabel_sequential(j)
+    if not return_mapping:
+        return j
+    # Determine label mapping
+    assert np.all(backward_map_joined.out_values == labels_joined)
+    labels1_reindexed, labels2_reindexed = np.divmod(labels_joined, factor)
+    labels1_map = ArrayMap(backward_map_joined.in_values, backward_map1[labels1_reindexed])
+    labels2_map = ArrayMap(backward_map_joined.in_values, backward_map2[labels2_reindexed])
+    return j, labels1_map, labels2_map
 
 
 def relabel_sequential(label_field, offset=1):
