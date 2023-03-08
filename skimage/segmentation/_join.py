@@ -39,10 +39,13 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     array([[0, 1, 3, 2],
            [0, 5, 3, 2],
            [4, 5, 5, 3]])
-    >>> join_segmentations(s1, s2, return_mapping=True)
-    (array([[0, 1, 3, 2],
-           [0, 5, 3, 2],
-           [4, 5, 5, 3]]), ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 0, 1, 1, 2, 2])), ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 1, 0, 1, 0, 1])))
+    >>> j, m1, m2 = join_segmentations(s1, s2, return_mapping=True)
+    >>> m1
+    ArrayMap(array([0, 1, 2, 3, 4, 5]), array([0, 0, 1, 1, 2, 2]))
+    >>> np.all(m1[j] == s1)
+    True
+    >>> np.all(m2[j] == s2)
+    True
     """
     if s1.shape != s2.shape:
         raise ValueError("Cannot join segmentations of different shape. "
