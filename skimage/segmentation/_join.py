@@ -21,9 +21,9 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     -------
     j : numpy array
         The join segmentation of s1 and s2.
-    labels1_map : ArrayMap, optional
+    map_j_to_s1 : ArrayMap, optional
         Mapping from labels of the joined segmentation j to labels of s1.
-    labels2_map : ArrayMap, optional
+    map_j_to_s2 : ArrayMap, optional
         Mapping from labels of the joined segmentation j to labels of s2.
 
     Examples
@@ -48,20 +48,20 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
         raise ValueError("Cannot join segmentations of different shape. "
                          f"s1.shape: {s1.shape}, s2.shape: {s2.shape}")
     # Reindex input label images
-    s1, _, backward_map1 = relabel_sequential(s1)
-    s2, _, backward_map2 = relabel_sequential(s2)
+    s1_relabeled, _, backward_map1 = relabel_sequential(s1)
+    s2_relabeled, _, backward_map2 = relabel_sequential(s2)
     # Create joined label image
     factor = s2.max() + 1
-    j = factor * s1 + s2
-    labels_joined = np.unique(j)
-    j, _, backward_map_joined = relabel_sequential(j)
+    j_initial = factor * s1_relabeled + s2_relabeled
+    labels_j = np.unique(j_initial)
+    j, _, map_j_to_j_initial = relabel_sequential(j_initial)
     if not return_mapping:
         return j
     # Determine label mapping
-    labels1_reindexed, labels2_reindexed = np.divmod(labels_joined, factor)
-    labels1_map = ArrayMap(backward_map_joined.in_values, backward_map1[labels1_reindexed])
-    labels2_map = ArrayMap(backward_map_joined.in_values, backward_map2[labels2_reindexed])
-    return j, labels1_map, labels2_map
+    labels_s1_relabeled, labels_s2_relabeled = np.divmod(labels_j, factor)
+    map_j_to_s1 = ArrayMap(map_j_to_j_initial.in_values, backward_map1[labels_s1_relabeled])
+    map_j_to_s2 = ArrayMap(map_j_to_j_initial.in_values, backward_map2[labels_s2_relabeled])
+    return j, map_j_to_s1, map_j_to_s2
 
 
 def relabel_sequential(label_field, offset=1):
