@@ -1,8 +1,4 @@
-"""Utilities for generating coordinates of a bezier curve, circle, ellipse, rectangle, 
-generating ellipsoid, 
-calculating surface-area and volume of ellipsoid, 
-drawing lines, 
-setting pixel color at a coordinate.
+"""Utilities for generating coordinates of different shapes and curves.
 """
 from .draw import (ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
