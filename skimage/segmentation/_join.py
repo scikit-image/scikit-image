@@ -58,7 +58,6 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     if not return_mapping:
         return j
     # Determine label mapping
-    assert np.all(backward_map_joined.out_values == labels_joined)
     labels1_reindexed, labels2_reindexed = np.divmod(labels_joined, factor)
     labels1_map = ArrayMap(backward_map_joined.in_values, backward_map1[labels1_reindexed])
     labels2_map = ArrayMap(backward_map_joined.in_values, backward_map2[labels2_reindexed])
