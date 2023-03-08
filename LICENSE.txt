@@ -53,7 +53,8 @@ Copyright: 2020 Broad Institute
 License: BSD-3-Clause
 
 File: skimage/exposure/_adapthist.py
-License: GraphicsGems-EULA
+Copyright: 1994 Karel Zuiderveld
+License: BSD-3-Clause
 
 Function: skimage/morphology/_skeletonize_cy.pyx:_skeletonize_loop
 Copyright: 2003-2009 Massachusetts Institute of Technology
