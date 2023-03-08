@@ -5,45 +5,19 @@
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://skimage.zulipchat.com)
 
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
+- **Documentation:** [https://scikit-image.org/docs/stable/](https://scikit-image.org/docs/stable/)
 - **User forum:** [https://forum.image.sc/tag/scikit-image](https://forum.image.sc/tag/scikit-image)
 - **Developer forum:** [https://discuss.scientific-python.org/c/contributor/skimage](https://discuss.scientific-python.org/c/contributor/skimage)
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
-- **Benchmarks:** [https://pandas.pydata.org/speed/scikit-image/](https://pandas.pydata.org/speed/scikit-image/)
 
-## Installation from binaries
+## Installation
 
 - **pip:** `pip install scikit-image`
 - **conda:** `conda install -c conda-forge scikit-image`
 
 Also see [installing `scikit-image`](INSTALL.rst).
 
-## Installation from source
-
-Install dependencies using:
-
-```
-pip install -r requirements.txt
-```
-
-Then, install scikit-image using:
-
-```
-$ pip install .
-```
-
-If you plan to develop the package, you may run it directly from source:
-
-```
-$ pip install -e .  # Do this once to add package to Python path
-```
-
-Every time you modify Cython files, also run:
-
-```
-$ python setup.py build_ext -i  # Build binary extensions
-```
-
-## License & copyright
+## License
 
 See [LICENSE.txt](https://github.com/scikit-image/scikit-image/blob/main/LICENSE.txt).
 
