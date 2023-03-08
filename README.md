@@ -10,6 +10,10 @@
 - **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
 - **Benchmarks:** [https://pandas.pydata.org/speed/scikit-image/](https://pandas.pydata.org/speed/scikit-image/)
 
+## Contributors Guide
+
+[Contributor's Guide](https://github.com/scikit-image/scikit-image/blob/main/CONTRIBUTING.rst) - Hey Contributors if you are new to scikit-image, you can refer this guide so as to set up an environment in your system and start with your contributions.
+
 ## Installation from binaries
 
 - **pip:** `pip install scikit-image`
