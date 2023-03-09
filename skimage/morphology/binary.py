@@ -31,10 +31,10 @@ def _iterate_binary_func(binary_func, image, footprint, out):
 # axis.
 @default_footprint
 def binary_erosion(image, footprint=None, out=None):
-    """Return fast binary morphological erosion of an image.
+    """Computes fast binary morphological erosion of a binary image.
 
     This function returns the same result as grayscale erosion but performs
-    faster for binary images.
+    faster for binary images(where pixels are representated as 0 or 1).
 
     Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
     pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
@@ -68,14 +68,38 @@ def binary_erosion(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    ``skimage.morphology.rectangle`` provide an option to automatically generate a
     footprint sequence of this type.
 
     See also
     --------
     skimage.morphology.isotropic_erosion
 
+    Examples
+    --------
+    >>> from skimage.morphology import binary_erosion, rectangle
+    >>> import numpy as np
+    >>> import random
+    >>> random.seed(42)
+    >>> img_arr = np.random.random((5,5))
+    # Create binary input img_arr with threshold 0.5
+    >>> img_arr[img_arr <= 0.5] = 0
+    >>> img_arr[img_arr > 0.5] = 1
+    >>> img_arr
+    array([[0., 0., 0., 0., 0.],
+           [0., 0., 1., 0., 0.],
+           [1., 1., 0., 0., 0.],
+           [0., 1., 0., 1., 1.],
+           [1., 0., 0., 1., 1.]])
+    # Erosion with rectangular builtin footprint of size (1,3)
+    >>> binary_erosion(img_arr, rectangle(1,3))
+    array([[False, False, False, False, False],
+           [False, False, False, False, False],
+           [ True, False, False, False, False],
+           [False, False, False, False,  True],
+           [False, False, False, False,  True]], dtype=bool)
     """
+
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
