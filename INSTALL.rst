@@ -337,7 +337,7 @@ before you get started.
   # Install main development and runtime dependencies
   conda install -c conda-forge --file requirements/default.txt
   conda install -c conda-forge --file requirements/test.txt
-  conda install -c conda-forge --file requirements/developer.txt
+  conda install -c conda-forge pre-commit
   # Install build dependencies of scikit-image
   conda install -c conda-forge --file requirements/build.txt
   # Build scikit-image from source
