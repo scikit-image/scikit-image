@@ -1,6 +1,6 @@
-"""
-Binary morphological operations
-"""
+"""Binary morphological operations."""
+
+
 import functools
 
 import numpy as np
@@ -83,7 +83,9 @@ def binary_erosion(image, footprint=None, out=None):
     ...                   [0.67655663, 0.60348734, 0.53515797, 0.2783413],
     ...                   [0.13057965, 0.16200207, 0.7672486, 0.85375919],
     ...                   [0.90988515, 0.13132731, 0.81991366, 0.48774375]])
-    # Create binary input img_arr with threshold 0.5
+
+    Create binary input image with threshold 0.5
+
     >>> img_arr[img_arr <= 0.5] = 0
     >>> img_arr[img_arr > 0.5] = 1
     >>> img_arr
@@ -91,11 +93,13 @@ def binary_erosion(image, footprint=None, out=None):
            [1., 1., 1., 0.],
            [0., 0., 1., 1.],
            [1., 0., 1., 0.]])
-    # Erosion with rectangular builtin footprint of size (1,3)
+
+    Erosion with rectangular builtin footprint of size (1,3)
+
     >>> binary_erosion(img_arr, rectangle(1,3))
     array([[False, False, False, False],
-           [True,  True, False, False],
-           [False, False, False,  True],
+           [True, True, False, False],
+           [False, False, False, True],
            [False, False, False, False]], dtype=bool)
     """
 
