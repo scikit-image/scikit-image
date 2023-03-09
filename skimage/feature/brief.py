@@ -137,7 +137,7 @@ class BRIEF(DescriptorExtractor):
         self.mask = None
 
     def extract(self, image, keypoints):
-        """Extract BRIEF binary descriptors for given keypoints in image.
+        """Compute binary descriptors corresponding to given keypoints in image.
 
         Parameters
         ----------
