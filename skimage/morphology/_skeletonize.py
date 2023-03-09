@@ -73,7 +73,8 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
+    if method not in {'zhang', 'lee', None}:
+        raise ValueError('Invalid method name.')
     if image.ndim == 2 and (method is None or method == 'zhang'):
         skeleton = skeletonize_2d(image.astype(bool, copy=False))
     elif image.ndim == 3 and method == 'zhang':
