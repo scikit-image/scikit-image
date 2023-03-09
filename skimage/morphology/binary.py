@@ -79,25 +79,24 @@ def binary_erosion(image, footprint=None, out=None):
     --------
     >>> from skimage.morphology import binary_erosion, rectangle
     >>> import numpy as np
-    >>> import random
-    >>> random.seed(42)
-    >>> img_arr = np.random.random((5,5))
+    >>> img_arr=np.array([[0.38974566, 0.63459201, 0.99398074, 0.07565564],
+    ...:                  [0.67655663, 0.60348734, 0.53515797, 0.2783413 ],
+    ...:                  [0.13057965, 0.16200207, 0.7672486 , 0.85375919],
+    ...:                  [0.90988515, 0.13132731, 0.81991366, 0.48774375]])
     # Create binary input img_arr with threshold 0.5
     >>> img_arr[img_arr <= 0.5] = 0
     >>> img_arr[img_arr > 0.5] = 1
     >>> img_arr
-    array([[0., 0., 0., 0., 0.],
-           [0., 0., 1., 0., 0.],
-           [1., 1., 0., 0., 0.],
-           [0., 1., 0., 1., 1.],
-           [1., 0., 0., 1., 1.]])
+    array([[0., 1., 1., 0.],
+           [1., 1., 1., 0.],
+           [0., 0., 1., 1.],
+           [1., 0., 1., 0.]])
     # Erosion with rectangular builtin footprint of size (1,3)
     >>> binary_erosion(img_arr, rectangle(1,3))
-    array([[False, False, False, False, False],
-           [False, False, False, False, False],
-           [ True, False, False, False, False],
-           [False, False, False, False,  True],
-           [False, False, False, False,  True]], dtype=bool)
+    array([[False, False, False, False],
+           [True,  True, False, False],
+           [False, False, False,  True],
+           [False, False, False, False]], dtype=bool)
     """
 
     if out is None:
