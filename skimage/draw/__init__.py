@@ -1,4 +1,4 @@
-"""Utilities for generating coordinates of different shapes and curves.
+"""Functionality for generating coordinates of different shapes and curves.
 """
 from .draw import (ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
