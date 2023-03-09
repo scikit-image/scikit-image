@@ -1,3 +1,11 @@
+"""Collection of utilities to carryout nonlinear operations
+related to the shape or morphology of features in images.
+
+This operations are particularly suited of binary images
+(where pixels are represented as 0 oe 1), although it can
+be extend to grayscale images.
+"""
+
 from .binary import (binary_closing, binary_dilation, binary_erosion,
                      binary_opening)
 from .gray import (black_tophat, closing, dilation, erosion, opening,
