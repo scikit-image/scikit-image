@@ -1,8 +1,8 @@
-"""a Collection of utility functions for partitioning
+"""A Collection of utility functions for partitioning
 images into distinct regions that corresponds to
 different objects or parts of objects.
 
-These functions simplify/change the representation of an 
+These functions change the representation of an 
 image into something more meaningful and easier to analyze.
 """
 from ._expand_labels import expand_labels
