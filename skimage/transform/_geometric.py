@@ -465,8 +465,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     Examples
     --------
-    >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3),
-                                                translation=np.array([0, 0, 1]))
+    >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3), translation=np.array([0, 0, 1]))
     >>> tform_matrix.params
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
@@ -525,8 +524,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Examples
         --------
-        >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3),
-                                                    translation=np.array([0, 0, 1]))
+        >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3), translation=np.array([0, 0, 1]))
         >>> src = np.array([[ 1.839035,  1.924743],
                             [ 0.543582,  0.375221],
                             [ 0.47324 ,  0.142522],
