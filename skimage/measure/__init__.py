@@ -1,3 +1,8 @@
+"""A collection of utilities to compute properties such
+as surface area, labelling, central moments, centroid, perimeter, Euler
+number, etc., needed to describe shapes of regions obtained from images.
+"""
+
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes, mesh_surface_area
 from ._regionprops import (regionprops, perimeter,
