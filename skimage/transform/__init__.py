@@ -19,22 +19,11 @@ image to increase its resolution.
 - Resize
 - Rescale
 
-Image Filtering and Enhancement: These transforms modify the intensity
-values of an image to enhance certain features or remove noise. They are
-useful for tasks such as edge detection, noise reduction, and contrast
-enhancement.
-
-- Thresholding
-- Local filters
-- Denoising filters
-- Sharpening filters
-
 Feature Detection and Extraction: These transforms identify and extract
 specific features or patterns in an image. They are useful for tasks
 such as object detection, image segmentation, and feature matching.
 
 - Hough transforms
-- Seam carving
 - Pyramid transforms
 - Radon transforms
 
