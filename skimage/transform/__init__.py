@@ -1,6 +1,34 @@
-"""Utilities to perform various transforms
+"""Utilities to perform various transforms.
 
 The following transforms are available:
+
+Geometric Transformations: These transforms change the shape or position of an image. They are useful for tasks such as image registration, alignment, and geometric correction.
+- AffineTransform
+- ProjectiveTransform
+- PiecewiseAffineTransform
+- SimilarityTransform
+
+Image Resizing and Rescaling: These transforms change the size or resolution of an image. They are useful for tasks such as down-sampling an image to reduce its size or up-sampling an image to increase its resolution.
+- Resize
+- Rescale
+
+Image Filtering and Enhancement: These transforms modify the intensity values of an image to enhance certain features or remove noise. They are useful for tasks such as edge detection, noise reduction, and contrast enhancement.
+- Thresholding
+- Local filters
+- Denoising filters
+- Sharpening filters
+
+Feature Detection and Extraction: These transforms identify and extract specific features or patterns in an image. They are useful for tasks such as object detection, image segmentation, and feature matching.
+- Hough transforms
+- Seam carving
+- Pyramid transforms
+- Radon transforms
+
+Image Transformation: These transforms change the appearance of an image without changing its content. They are useful for tasks such as creating image mosaics, applying artistic effects, and visualizing image data.
+- Warp transforms
+- Inverse transforms
+
+For more information on each transform, see their respective docstrings.
 
 """
 
