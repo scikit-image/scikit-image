@@ -471,7 +471,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
            [ 0.,  0.,  0.]])
-
+           
     """
 
     def __init__(self, rotation=None, translation=None, matrix=None,
