@@ -1,9 +1,10 @@
-"""Collection of utility functions for partitioning
+"""a Collection of utility functions for partitioning
 images into distinct regions that corresponds to
 different objects or parts of objects.
+
+These functions simplify/change the representation of an 
+image into something more meaningful and easier to analyze.
 """
-
-
 from ._expand_labels import expand_labels
 from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
