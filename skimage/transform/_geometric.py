@@ -1186,8 +1186,21 @@ class EuclideanTransform(ProjectiveTransform):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
-    """
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import EuclideanTransform
+    >>> from skimage import data
+    >>> img = data.chelsea()
+    >>> rows, cols = img.shape[:2]
+    >>> src_points = np.float32([[0,0], [cols-1,0], [0,rows-1]])
+    >>> dst_points = np.float32([[0,0], [int(0.6*(cols-1)),0], [int(0.4*(cols-1)),rows-1]])
+    >>> euclidean = EuclideanTransform(dimensionality=3)
+    >>> euclidean.estimate(src_points, dst_points)
+    True
+
+    """
     def __init__(self, matrix=None, rotation=None, translation=None,
                  *, dimensionality=2):
         params_given = rotation is not None or translation is not None
