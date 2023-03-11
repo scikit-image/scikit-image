@@ -332,7 +332,7 @@ before you get started.
   conda install -c conda-forge --file requirements/test.txt
   conda install -c conda-forge pre-commit
   # Install build dependencies of scikit-image
-  conda install -c conda-forge --file requirements/build.txt
+  pip install -r requirements/build.txt
   # Build scikit-image from source
   ./dev.py build
   # Test your installation
