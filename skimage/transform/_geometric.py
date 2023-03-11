@@ -563,7 +563,7 @@ class ProjectiveTransform(GeometricTransform):
        [b0 b1 b2]
        [c0 c1 1 ]].
 
-    E.g., to rotate by theta degrees clockwise, the matrix should be::
+    E.g., to rotate by theta degrees clockwise, the matrix should be:
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
