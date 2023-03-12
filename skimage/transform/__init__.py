@@ -1,35 +1,37 @@
 """This module includes tools to transform images and volumetric data.
 
-- Geometric Transformations: These transforms change the shape or position
- of an image. They are useful for tasks such as image registration,
+- Geometric Transformations:
+ These transforms change the shape or position of an image.
+ They are useful for tasks such as image registration,
  alignment, and geometric correction.
  Examples: `~skimage.transform.AffineTransform`,
  `~skimage.transform.ProjectiveTransform`,
  `~skimage.transform.EuclideanTransform` etc.
 
-- Image Resizing and Rescaling: These transforms change the size or
- resolution of an image. They are useful for tasks such as
- down-sampling an image to reduce its size or up-sampling an
- image to increase its resolution.
+- Image Resizing and Rescaling:
+ These transforms change the size or resolution of an image.
+ They are useful for tasks such as down-sampling an image to
+ reduce its size or up-sampling an image to increase its resolution.
  Examples: :func:`~skimage.transform.resize`,
  :func:`~skimage.transform.rescale`, etc.
 
-- Feature Detection and Extraction: These transforms identify and
- extract specific features or patterns in an image. They are useful
- for tasks s object detection, image segmentation, and
- feature matching
- Examples: Hough transforms, Pyramid Transforms, Radon transforms etc.
+- Feature Detection and Extraction:
+ These transforms identify and extract specific features or
+ patterns in an image. They are useful for tasks s object detection,
+ image segmentation, and  feature matching
+ Examples: `~skimage.transform.hough_circle` and other Hough transforms,
+'~skimage.transform.pyramid_expand` and other Pyramid Transforms,
+`~skimage.transform.radon` and other Radon transforms, etc.
 
 - Image Transformation: These transforms change the appearance of an
  image without changing its content. They are useful for tasks such a
  creating image mosaics, applying artistic effects, and visualizing
  image data.
- Examples: Wrap transform, Inverse transforms etc.
+ Examples:`~skimage.transform.warp`,Inverse transforms etc.
 
 The following transforms are available:
 
 """
-
 
 from .hough_transform import (hough_line, hough_line_peaks,
                               probabilistic_hough_line, hough_circle,
