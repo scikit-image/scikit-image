@@ -1,8 +1,10 @@
 """
-Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
-Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
+Adapted from "Contrast Limited Adaptive Histogram Equalization" by Karel
+Zuiderveld, Graphics Gems IV, Academic Press, 1994.
 
 http://tog.acm.org/resources/GraphicsGems/
+
+Relicensed with permission of the author under the Modified BSD license.
 """
 import math
 import numbers

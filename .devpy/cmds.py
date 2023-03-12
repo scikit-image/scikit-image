@@ -3,17 +3,15 @@ import shutil
 import sys
 
 import click
+from devpy.cmds import meson
 from devpy import util
 
 
 @click.command()
 @click.option(
-    "--build-dir", default="build", help="Build directory; default is `$PWD/build`"
-)
-@click.option(
     "--clean", is_flag=True, help="Clean previously built docs before building"
 )
-def docs(build_dir, clean=False):
+def docs(clean=False):
     """📖 Build documentation
     """
     if clean:
@@ -22,7 +20,7 @@ def docs(build_dir, clean=False):
             print(f"Removing `{doc_dir}`")
             shutil.rmtree(doc_dir)
 
-    site_path = util.get_site_packages(build_dir)
+    site_path = meson._get_site_packages()
     if site_path is None:
         print("No built scikit-image found; run `./dev.py build` first.")
         sys.exit(1)
@@ -35,11 +33,8 @@ def docs(build_dir, clean=False):
 
 
 @click.command()
-@click.option(
-    "--build-dir", default="build", help="Build directory; default is `$PWD/build`"
-)
 @click.argument("asv_args", nargs=-1)
-def asv(build_dir, asv_args):
+def asv(asv_args):
     """🏃 Run `asv` to collect benchmarks
 
     ASV_ARGS are passed through directly to asv, e.g.:
@@ -48,7 +43,7 @@ def asv(build_dir, asv_args):
 
     Please see CONTRIBUTING.txt
     """
-    site_path = util.get_site_packages(build_dir)
+    site_path = meson._get_site_packages()
     if site_path is None:
         print("No built scikit-image found; run `./dev.py build` first.")
         sys.exit(1)
@@ -58,13 +53,10 @@ def asv(build_dir, asv_args):
 
 
 @click.command()
-@click.option(
-    "--build-dir", default="build", help="Build directory; default is `$PWD/build`"
-)
-def coverage(build_dir):
+def coverage():
     """📊 Generate coverage report
     """
-    util.run(['python', '-m', 'devpy', 'test', '--build-dir', build_dir, '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+    util.run(['python', '-m', 'devpy', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
 
 
 @click.command()
