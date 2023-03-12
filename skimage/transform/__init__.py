@@ -3,31 +3,31 @@
 - Geometric Transformations:
  These transforms change the shape or position of an image.
  They are useful for tasks such as image registration,
- alignment, and geometric correction.
+ alignment, and geometric correction.<br>
  Examples: `~skimage.transform.AffineTransform`,
  `~skimage.transform.ProjectiveTransform`,
- `~skimage.transform.EuclideanTransform` etc.
+ `~skimage.transform.EuclideanTransform`.
 
 - Image Resizing and Rescaling:
- These transforms change the size or resolution of an image.
+ These transforms change the size or resolution of an image.<br>
  They are useful for tasks such as down-sampling an image to
  reduce its size or up-sampling an image to increase its resolution.
  Examples: :func:`~skimage.transform.resize`,
- :func:`~skimage.transform.rescale`, etc.
+ :func:`~skimage.transform.rescale`.
 
 - Feature Detection and Extraction:
  These transforms identify and extract specific features or
  patterns in an image. They are useful for tasks s object detection,
- image segmentation, and  feature matching
+ image segmentation, and  feature matching.<br>
  Examples: `~skimage.transform.hough_circle` and other Hough transforms,
-'~skimage.transform.pyramid_expand` and other Pyramid Transforms,
-`~skimage.transform.radon` and other Radon transforms, etc.
+ '~skimage.transform.pyramid_expand` and other Pyramid Transforms,
+ `~skimage.transform.radon` and other Radon transforms.
 
-- Image Transformation: These transforms change the appearance of an
- image without changing its content. They are useful for tasks such a
- creating image mosaics, applying artistic effects, and visualizing
- image data.
- Examples:`~skimage.transform.warp`,Inverse transforms etc.
+- Image Transformation:
+ These transforms change the appearance of an image without changing its
+ content. They are useful for tasks such a creating image mosaics,
+ applying artistic effects, and visualizing image data.
+ Examples:`~skimage.transform.warp`, Inverse transforms.
 
 The following transforms are available:
 
