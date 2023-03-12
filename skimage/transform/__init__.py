@@ -1,40 +1,33 @@
 """Utilities to perform various transforms.
 
-The following transforms are available:
+This module includes tools to transform images and volumetric data
+such as:
 
-Geometric Transformations: These transforms change the shape or position
+- Geometric Transformations to change the shape or position
 of an image. They are useful for tasks such as image registration,
 alignment, and geometric correction.
+Examples: Affine transform,  Projective trasnform, Eucliidean
+transform etc.
 
-- AffineTransform
-- ProjectiveTransform
-- PiecewiseAffineTransform
-- SimilarityTransform
-
-Image Resizing and Rescaling: These transforms change the size or
+- Image Resizing and Rescaling to change the size or
 resolution of an image. They are useful for tasks such as
 down-sampling an image to reduce its size or up-sampling an
 image to increase its resolution.
+Examples: Resize ,Rescale etc.
 
-- Resize
-- Rescale
+- Feature Detection and Extraction: These transforms identify and
+extract specific features or patterns in an image. They are useful
+for tasks such as object detection, image segmentation, and
+feature matching.
+Examples: Hough transforms, Pyramid Transforms, Radon tranforms etc.
 
-Feature Detection and Extraction: These transforms identify and extract
-specific features or patterns in an image. They are useful for tasks
-such as object detection, image segmentation, and feature matching.
+- Image Transformation: These transforms change the appearance of an
+image without changing its content. They are useful for tasks such as
+creating image mosaics, applying artistic effects, and visualizing
+image data.
+Examples: Wrap transform, Inverse transforms etc.
 
-- Hough transforms
-- Pyramid transforms
-- Radon transforms
-
-Image Transformation: These transforms change the appearance of an image
-without changing its content. They are useful for tasks such as creating
-image mosaics, applying artistic effects, and visualizing image data.
-
-- Warp transforms
-- Inverse transforms
-
-For more information on each transform, see their respective docstrings.
+For more information on each transform, see their respective docstrings
 
 """
 
