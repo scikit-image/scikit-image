@@ -963,14 +963,14 @@ class PiecewiseAffineTransform(GeometricTransform):
     --------
     >>> from numpy import np
     >>> from skimage.transform import PiecewiseAffineTransform
-    >>> frim skimage import data
-
+    >>> from skimage import data
     >>> img = data.camera()
-    >>> rows, cols = img.shape[0], img.shape[1]
-    >>> src_cols = np.linspace(0, cols, 30)
-    >>> src_rows = np.linspace(0, rows, 15)
-    >>> src_rows, src_cols = np.meshgrid(src_rows, src_cols)
-    >>> src = np.dstack([src_cols.flat, src_rows.flat])[0]
+    >>> rows, cols = img.shape[:2]
+    >>> src_points = np.float32([[0,0], [0,rows-1], [cols/2,0], [cols/2,rows-1]])
+    >>> dst_points = np.float32([[0,100], [0,rows-101], [cols/2,0], [cols/2,rows-1]])
+    >>> tform = PiecewiseAffineTransform()
+    >>> tform.estimate(src, dst)
+    True
     """
 
     def __init__(self):
