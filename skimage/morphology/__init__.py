@@ -1,9 +1,10 @@
-"""Collection of utilities to carryout nonlinear operations
-related to the shape or morphology of features in images.
+"""Collection of operators to carryout nonlinear operations
+related to the form or shape of features in images. The key
+operators are dilation and erosion.
 
-This operations are particularly suited of binary images
+This operations are particularly suited for binary images
 (where pixels are represented as 0 or 1), although it can
-be extend to grayscale images.
+be extended to images of all types.
 """
 
 from .binary import (binary_closing, binary_dilation, binary_erosion,
