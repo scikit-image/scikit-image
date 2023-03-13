@@ -971,8 +971,8 @@ class PiecewiseAffineTransform(GeometricTransform):
     >>> tform = PiecewiseAffineTransform()
     >>> tform.estimate(src, dst)
     True
-    """
 
+    """
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
