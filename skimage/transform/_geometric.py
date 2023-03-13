@@ -959,6 +959,18 @@ class PiecewiseAffineTransform(GeometricTransform):
     inverse_affines : list of AffineTransform objects
         Inverse affine transformations for each triangle in the mesh.
 
+    Examples
+    --------
+    >>> from numpy import np
+    >>> from skimage.transform import PiecewiseAffineTransform
+    >>> frim skimage import data
+
+    >>> img = data.camera()
+    >>> rows, cols = img.shape[0], img.shape[1]
+    >>> src_cols = np.linspace(0, cols, 30)
+    >>> src_rows = np.linspace(0, rows, 15)
+    >>> src_rows, src_cols = np.meshgrid(src_rows, src_cols)
+    >>> src = np.dstack([src_cols.flat, src_rows.flat])[0]
     """
 
     def __init__(self):
