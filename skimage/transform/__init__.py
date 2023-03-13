@@ -3,7 +3,7 @@
 - Geometric Transformations:
  These transforms change the shape or position of an image.
  They are useful for tasks such as image registration,
- alignment, and geometric correction.<br>
+ alignment, and geometric correction.
  Examples: `~skimage.transform.AffineTransform`,
  `~skimage.transform.ProjectiveTransform`,
  `~skimage.transform.EuclideanTransform`.
@@ -20,7 +20,7 @@
  patterns in an image. They are useful for tasks s object detection,
  image segmentation, and  feature matching.<br>
  Examples: `~skimage.transform.hough_circle` and other Hough transforms,
- '~skimage.transform.pyramid_expand` and other Pyramid Transforms,
+ `~skimage.transform.pyramid_expand` and other Pyramid Transforms,
  `~skimage.transform.radon` and other Radon transforms.
 
 - Image Transformation:
