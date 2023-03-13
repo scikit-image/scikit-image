@@ -25,7 +25,6 @@ def main():
                 # Get the name of the package
                 if req.startswith('git+http'):
                     req = req.split('/')[-1]
-
                 req = re.split('[<|>|=|!|;@]', req)[0]
 
                 try:
