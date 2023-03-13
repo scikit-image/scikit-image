@@ -744,7 +744,8 @@ class RegionProperties:
 _RegionProperties = RegionProperties
 
 
-def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
+def _props_to_dict(regions, properties=('label', 'bbox'), separator='-',
+                   errors='raise', fill_value=None):
     """Convert image region properties list into a column dictionary.
 
     Parameters
@@ -767,6 +768,12 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
+    errors: {'ignore', 'raise'}, optional
+        If 'ignore' suppress error when computing property and return
+        `fill_value` for that property. Default is 'raise'.
+    fill_value: float or None, optional
+        If `errors='ignore'` return `fill_value` if computing a property raises
+        an error.
 
     Returns
     -------
@@ -834,7 +841,28 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         orig_prop = prop
         # determine the current property name for any deprecated property.
         prop = PROPS.get(prop, prop)
-        rp = getattr(r, prop)
+        if errors == 'raise':
+            rp = getattr(r, prop)
+        else:
+            # Try to compute `rp` for all objects to get one that doesn't raise
+            # exceptions
+            for _region in regions:
+                try:
+                    rp = getattr(_region, prop)
+                    break
+                except Exception as err:
+                    continue
+            else:
+                # break was never called --> all objects raise exceptions
+                rp = None
+
+        if rp is None:
+            # Error was raised on all the objects so we add the property
+            # without modified name --> we cannot modify the name because
+            # we do not know the type of the property
+            out[prop] = np.full(n, fill_value, dtype=float)
+            continue
+
         if prop in COL_DTYPES:
             dtype = COL_DTYPES[prop]
         else:
@@ -851,7 +879,13 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
         if np.isscalar(rp) or prop in OBJECT_COLUMNS or dtype is np.object_:
             column_buffer = np.empty(n, dtype=dtype)
             for i in range(n):
-                column_buffer[i] = regions[i][prop]
+                try:
+                    column_buffer[i] = regions[i][prop]
+                except Exception as err:
+                    if errors == 'raise':
+                        raise err
+                    else:
+                        column_buffer[i] = fill_value
             out[orig_prop] = np.copy(column_buffer)
         else:
             if isinstance(rp, np.ndarray):
@@ -872,7 +906,13 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             n_columns = len(locs)
             column_data = np.empty((n, n_columns), dtype=dtype)
             for k in range(n):
-                rp = regions[k][prop]
+                try:
+                    rp = regions[k][prop]
+                except Exception as err:
+                    if errors == 'raise':
+                        raise err
+                    else:
+                        rp = [fill_value]*n_columns
                 for i, loc in enumerate(locs):
                     column_data[k, i] = rp[loc]
 
@@ -881,11 +921,11 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 out[modified_prop] = column_data[:, i]
     return out
 
-
 def regionprops_table(label_image, intensity_image=None,
                       properties=('label', 'bbox'),
                       *,
-                      cache=True, separator='-', extra_properties=None, spacing=None):
+                      cache=True, separator='-', extra_properties=None,
+                      spacing=None, errors='raise', fill_value=None):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -936,6 +976,12 @@ def regionprops_table(label_image, intensity_image=None,
         accept the intensity image as the second argument.
     spacing: tuple of float, shape (ndim, )
         The pixel spacing along each axis of the image.
+    errors: {'ignore', 'raise'}, optional
+        If 'ignore' suppress error when computing property and return
+        `fill_value` for that property. Default is 'raise'.
+    fill_value: float or None, optional
+        If `errors='ignore'` return `fill_value` if computing a property raises
+        an error.
 
     Returns
     -------
@@ -1039,11 +1085,13 @@ def regionprops_table(label_image, intensity_image=None,
                               cache=cache, extra_properties=extra_properties, spacing=spacing)
 
         out_d = _props_to_dict(regions, properties=properties,
-                               separator=separator)
+                               separator=separator, errors=errors,
+                               fill_value=fill_value)
         return {k: v[:0] for k, v in out_d.items()}
 
     return _props_to_dict(
-        regions, properties=properties, separator=separator
+        regions, properties=properties, separator=separator,
+        errors=errors, fill_value=fill_value
     )
 
 
