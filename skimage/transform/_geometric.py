@@ -1196,8 +1196,12 @@ class EuclideanTransform(ProjectiveTransform):
     >>> rows, cols = img.shape[:2]
     >>> src_points = np.float32([[0,0], [cols-1,0], [0,rows-1]])
     >>> dst_points = np.float32([[0,0], [int(0.6*(cols-1)),0], [int(0.4*(cols-1)),rows-1]])
-    >>> euclidean = EuclideanTransform(dimensionality=3)
-    >>> euclidean.estimate(src_points, dst_points)
+    >>> # Create Euclidean Transform using full transformation matrix
+    >>> matrix = np.array([[np.cos(np.pi/6), -np.sin(np.pi/6), 200],
+    ...                    [np.sin(np.pi/6), np.cos(np.pi/6), -20],
+    ...                    [0, 0, 1]])
+    >>> euclidean_transform = EuclideanTransform(matrix)
+    >>> euclidean_transform.estimate(src_points, dst_points)
     True
 
     """
