@@ -9,7 +9,7 @@
  `~skimage.transform.EuclideanTransform`.
 
 - Image Resizing and Rescaling:
- These transforms change the size or resolution of an image.<br>
+ These transforms change the size or resolution of an image.
  They are useful for tasks such as down-sampling an image to
  reduce its size or up-sampling an image to increase its resolution.
  Examples: :func:`~skimage.transform.resize`,
@@ -18,7 +18,7 @@
 - Feature Detection and Extraction:
  These transforms identify and extract specific features or
  patterns in an image. They are useful for tasks s object detection,
- image segmentation, and  feature matching.<br>
+ image segmentation, and  feature matching.
  Examples: `~skimage.transform.hough_circle` and other Hough transforms,
  `~skimage.transform.pyramid_expand` and other Pyramid Transforms,
  `~skimage.transform.radon` and other Radon transforms.
