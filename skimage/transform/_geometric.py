@@ -1385,7 +1385,7 @@ class SimilarityTransform(EuclideanTransform):
         Examples
         --------
 
-        Calculating the tranformation parameters
+        Calculating the tranformation parameters:
 
         >>> tform = SimilarityTransform(scale=0.5, rotation=0.2, translation=(50, -20))
         >>> tform.params
@@ -1393,7 +1393,7 @@ class SimilarityTransform(EuclideanTransform):
         [  0.09933467   0.49003329 -20.        ]
         [  0.           0.           1.        ]]
 
-        Image Warping
+        Image Warping:
 
         >>> from skimage import data
         >>> from skimage.transform import SimilarityTransform, warp
@@ -1401,7 +1401,7 @@ class SimilarityTransform(EuclideanTransform):
         >>> tform2 = SimilarityTransform(scale=0.5, rotation=0.2, translation=(50, -20))
         >>> image_transformed = warp(image, tform2)
 
-        Parameter estimation
+        Parameter estimation:
 
         >>> import numpy as np
         >>> text = data.text()
