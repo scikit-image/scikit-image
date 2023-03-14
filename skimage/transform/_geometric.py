@@ -1382,6 +1382,36 @@ class SimilarityTransform(EuclideanTransform):
         success : bool
             True, if model estimation succeeds.
 
+        Examples
+        --------
+
+        Calculating the tranformation parameters
+
+         >>> tform = SimilarityTransform(scale=0.5, rotation=0.2, translation=(50, -20))
+         >>> tform.params
+         [[  0.49003329  -0.09933467  50.        ]
+         [  0.09933467   0.49003329 -20.        ]
+         [  0.           0.           1.        ]]
+
+        Image Warping
+
+        >>> from skimage import data
+        >>> from skimage.transform import SimilarityTransform, warp
+        >>> image = data.camera()
+        >>> tform2 = SimilarityTransform(scale=0.5, rotation=0.2, translation=(50, -20))
+        >>> image_transformed = warp(image, tform2)
+
+        Parameter estimation
+
+        >>> import numpy as np
+        >>> text = data.text()
+        >>> src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
+        >>> dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
+        >>> tform3 = SimilarityTransform()
+        >>> tform3.estimate(src, dst)
+        True
+        >>> warped = transform.warp(text, tform3, output_shape=(50, 300))
+
         """
 
         self.params = _umeyama(src, dst, estimate_scale=True)
