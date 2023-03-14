@@ -2,7 +2,7 @@
 related to the form or shape of features in images. The key
 operators are dilation and erosion.
 
-This operations are particularly suited for binary images
+These operations are particularly suited for binary images
 (where pixels are represented as 0 or 1), although it can
 be extended to images of all types.
 """
