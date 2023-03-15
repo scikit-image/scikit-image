@@ -608,7 +608,7 @@ class RegionProperties:
             else:
                 return PI / 4.
         else:
-            return 0.5 * atan2(-2 * b, c - a)
+            return 0.5 * atan2(2 * b, a - c)
 
     @property
     @only2d
