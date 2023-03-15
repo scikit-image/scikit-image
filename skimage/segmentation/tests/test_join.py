@@ -24,6 +24,11 @@ def test_join_segmentations():
                       [4, 5, 5, 3]])
     assert_array_equal(j, j_ref)
 
+    # test correct mapping
+    j, m1, m2 = join_segmentations(s1, s2, return_mapping=True)
+    assert_array_equal(m1[j], s1)
+    assert_array_equal(m2[j], s2)
+
     # test correct exception when arrays are different shapes
     s3 = np.array([[0, 0, 1, 1], [0, 2, 2, 1]])
     with testing.raises(ValueError):
