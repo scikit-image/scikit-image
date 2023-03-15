@@ -51,6 +51,18 @@ Another equivalent way to code this loop is to use a comprehension list which ha
 
     %timeit comprehension_loop()
 
+``apply_parallel`` is a function in ``skimage.util`` module that provides mapping function in parallel across an array.
+It is used to apply the``task``function to each element of the 5D array a in parallel.
+
+.. code-block:: python
+
+    from skimage.util.apply_parallel import apply_parallel
+    def apply_parallel_loop():
+        [apply_parallel(task, image, dtype=image.dtype,
+                        mode="nearest", channel_axis=-1) for image in pics]
+
+    %timeit apply_parallel_loop()
+
 ``joblib`` is a library providing an easy way to parallelize for loops once we have a comprehension list.
 The number of jobs can be specified.
 
