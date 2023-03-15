@@ -44,7 +44,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     elif method == 'blend':
         comparison = 0.5 * (img2 + img1)
     elif method == 'checkerboard':
-        shapex, shapey = img1.shape
+        shapex, shapey = img1.shape[:2]
         mask = np.full((shapex, shapey), False)
         stepx = int(shapex / n_tiles[0])
         stepy = int(shapey / n_tiles[1])
