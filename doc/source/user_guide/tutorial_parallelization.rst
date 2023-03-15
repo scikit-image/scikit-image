@@ -52,7 +52,7 @@ Another equivalent way to code this loop is to use a comprehension list which ha
     %timeit comprehension_loop()
 
 ``apply_parallel`` is a function in ``skimage.util`` module that provides mapping function in parallel across an array.
-It is used to apply the``task``function to each element of the 5D array a in parallel.
+In this guide, it is used to apply the ``task`` function to each element of a 5D array(image) in parallel.
 
 .. code-block:: python
 
