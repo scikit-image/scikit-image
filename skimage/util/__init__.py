@@ -1,3 +1,7 @@
+"""Utility functions (:mod:`skimage.util`), this module contains a
+number of utility functions that are used throughout the library.
+"""
+
 import functools
 import warnings
 import numpy as np
