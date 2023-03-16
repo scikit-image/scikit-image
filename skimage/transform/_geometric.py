@@ -1293,7 +1293,7 @@ class SimilarityTransform(EuclideanTransform):
 
     where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
+        [[a0  -b0  a1]
          [b0  a0  b1]
          [0   0    1]]
 
