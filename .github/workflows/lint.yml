@@ -28,6 +28,11 @@ jobs:
 
       - name: Lint
         run: |
+          # Debug
+          echo "GITHUB_BASE_REF=${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF=${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
           if [[ -n ${GITHUB_BASE_REF} ]]; then
             # Pull request, base is known
             FROM_REF=${GITHUB_BASE_REF}
