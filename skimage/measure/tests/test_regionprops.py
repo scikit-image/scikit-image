@@ -645,21 +645,36 @@ def test_orientation():
     # test diagonal regions
     diag = np.eye(10, dtype=int)
     orient_diag = regionprops(diag)[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    assert_almost_equal(orient_diag, math.pi / 4)
     orient_diag = regionprops(diag, spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.flipud(diag))[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    assert_almost_equal(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.flipud(diag), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.fliplr(diag))[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    assert_almost_equal(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.fliplr(diag), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    assert_almost_equal(orient_diag, math.pi / 4)
     orient_diag = regionprops(np.fliplr(np.flipud(diag)), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
+
+def test_orientation_continuity():
+    # nearly diagonal array
+    arr1 = np.array([[0, 0, 1, 1],[0, 0, 1, 0],[0, 1, 0, 0],[1, 0, 0, 0]])
+    # diagonal array
+    arr2 = np.array([[0, 0, 0, 2],[0, 0, 2, 0],[0, 2, 0, 0],[2, 0, 0, 0]])
+    # nearly diagonal array
+    arr3 = np.array([[0, 0, 0, 3],[0, 0, 3, 3],[0, 3, 0, 0],[3, 0, 0, 0]])
+    image = np.hstack((arr1,arr2,arr3))
+    props = regionprops(image)
+    orientations = [prop.orientation for prop in props]
+    np.testing.assert_allclose(orientations, orientations[1], rtol=0, atol=0.08)
+    assert_almost_equal(orientations[0], -0.7144496360953664)
+    assert_almost_equal(orientations[1], -0.7853981633974483)
+    assert_almost_equal(orientations[2], -0.8563466906995303)
 
 
 def test_perimeter():
