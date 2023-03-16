@@ -9,5 +9,5 @@ pythran
 numpy>=1.21.1
 
 # Developer UI
-git+https://github.com/scientific-python/devpy@v0.1
+spin>=0.2
 build

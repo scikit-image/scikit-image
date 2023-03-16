@@ -64,6 +64,7 @@ build = [
     'Cython>=0.29.24',
     'pythran',
     'numpy>=1.21.1',
+    'spin>=0.2',
     'build',
 ]
 data = ['pooch>=1.3.0']
@@ -146,24 +147,24 @@ requires = [
     "numpy; python_version>='3.12'",
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
-[tool.devpy]
+[tool.spin]
 package = 'skimage'
 
-[tool.devpy.commands]
+[tool.spin.commands]
 Build = [
-    'devpy.build',
-    'devpy.test',
-    '.devpy/cmds.py:sdist',
+    'spin.build',
+    'spin.test',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
-    'devpy.shell',
-    'devpy.ipython',
-    'devpy.python',
+    'spin.shell',
+    'spin.ipython',
+    'spin.python',
 ]
-Documentation = ['.devpy/cmds.py:docs']
+Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.devpy/cmds.py:asv',
-    '.devpy/cmds.py:coverage',
+    '.spin/cmds.py:asv',
+    '.spin/cmds.py:coverage',
 ]
 
 [tool.ruff]

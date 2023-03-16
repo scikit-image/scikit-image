@@ -3,8 +3,8 @@ import shutil
 import sys
 
 import click
-from devpy.cmds import meson
-from devpy import util
+from spin.cmds import meson
+from spin import util
 
 
 @click.command()
@@ -56,7 +56,7 @@ def asv(asv_args):
 def coverage():
     """📊 Generate coverage report
     """
-    util.run(['python', '-m', 'devpy', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+    util.run(['python', '-m', 'spin', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
 
 
 @click.command()
