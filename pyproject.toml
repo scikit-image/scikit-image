@@ -174,11 +174,7 @@ select = [
     'W',
     'UP',
 ]
-ignore = [
-    'E501',
-    'E741',
-    'E712',
-]
+ignore = ['E741']
 exclude = [
     '.git',
     '.ruff_cache',

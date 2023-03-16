@@ -90,7 +90,7 @@ package = 'skimage'
 [tool.ruff]
 line-length = 88
 select = ["F", "E", "W", "UP"]
-ignore = ["E501", "E741", "E712"]
+ignore = ['E741']
 exclude = [
     ".git",
     ".ruff_cache",
