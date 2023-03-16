@@ -27,4 +27,19 @@ jobs:
           pip list
 
       - name: Lint
-        run: pre-commit run --all-files --show-diff-on-failure --color always
+        run: |
+          if [[ -n ${GITHUB_BASE_REF} ]]; then
+            # Pull request, base is known
+            FROM_REF=${GITHUB_BASE_REF}
+            TO_REF=${GITHUB_HEAD_REF}
+          elif [[ "gh-readonly-queue" =~ ${GITHUB_REF_NAME} ]]; then
+            # Merge-queue, remove prefix to get base
+            FROM_REF=${GITHUB_REF_NAME#gh-readonly-queue/}
+            TO_REF=${GITHUB_REF_NAME}
+          else
+            # Fallback to checking last commit
+            FROM_REF=${GITHUB_REF_NAME}~1
+            TO_REF=${GITHUB_REF_NAME}
+          fi
+          pre-commit run --show-diff-on-failure --color always \
+            --from-ref "${FROM_REF}" --to-ref "${TO_REF}"
