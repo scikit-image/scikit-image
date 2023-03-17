@@ -1,5 +1,5 @@
 """
-Image measurement tool is collection of functions for image measurement.
+Tools to measure image metrics and features.
 """
 
 
