@@ -1,3 +1,6 @@
+"""Algorithms for image segmentation.
+"""
+
 from ._expand_labels import expand_labels
 from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
