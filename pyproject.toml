@@ -44,7 +44,7 @@ dependencies = [
     'tifffile>=2019.7.26',
     'PyWavelets>=1.1.1',
     'packaging>=20.0',
-    'lazy_loader>=0.1',
+    'lazy_loader>=0.2',
 ]
 
 [[project.maintainers]]
@@ -76,7 +76,7 @@ default = [
     'tifffile>=2019.7.26',
     'PyWavelets>=1.1.1',
     'packaging>=20.0',
-    'lazy_loader>=0.1',
+    'lazy_loader>=0.2',
 ]
 developer = [
     'pre-commit',
@@ -137,7 +137,7 @@ requires = [
     'packaging>=20',
     'Cython>=0.29.24',
     'pythran',
-    'lazy_loader>=0.1',
+    'lazy_loader>=0.2',
     "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.21.1; python_version=='3.8' and platform_python_implementation != 'PyPy'",
     "numpy==1.21.1; python_version=='3.9' and platform_python_implementation != 'PyPy'",
