@@ -1,4 +1,4 @@
-"""Collection of broad set of operations that process images based on shapes.
+"""Utilities that process images based on shapes.
 
 They are particularly suited for binary images where pixels are represented as 0 or 1,
 although they can be extended to images of all types.
