@@ -26,7 +26,7 @@ from ..util import crop, regular_seeds
 
 
 def _validate_inputs(image, markers, mask, connectivity):
-    """Ensures that all inputs to watershed have matching shapes and types.
+    """Ensure that all inputs to watershed have matching shapes and types.
 
     Parameters
     ----------
@@ -119,7 +119,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     Returns
     -------
     out : ndarray
-        A labeled matrix of dtype `int32` and the shape as markers
+        A labeled matrix of the same type and shape as markers
 
     See Also
     --------
