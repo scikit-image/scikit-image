@@ -392,7 +392,16 @@ class TestWatershed(unittest.TestCase):
         for lab, area in zip(range(4), [34,74,74,74]):
             self.assertTrue(np.sum(ws == lab) == area)
 
+    def test_watershed13(self):
+        """Test on markers
 
+        This is here to ensure input markers is not modified
+        """
+        image = np.zeros((21, 21))
+        markers = np.zeros((21, 21), int)
+        original_markers = np.copy(markers)
+        watershed(image, markers)
+        np.testing.assert_equal(original_markers, markers)
 
 def test_compact_watershed():
     image = np.zeros((5, 6))
@@ -424,6 +433,17 @@ def test_numeric_seed_watershed():
                          [1, 1, 1, 1, 2, 2],
                          [1, 1, 1, 1, 2, 2]], dtype=np.int32)
     np.testing.assert_equal(compact, expected)
+
+
+@pytest.mark.parametrize(
+    'dtype', [np.uint8, np.int8, np.uint16,
+              np.int16, np.int32, np.uint64, np.int64]
+)
+def test_watershed_output_dtype(dtype):
+    image = np.zeros((100, 100))
+    markers = np.zeros((100, 100), dtype)
+    out = watershed(image, markers)
+    np.testing.assert_equal(out.dtype, markers.dtype)
 
 
 def test_incorrect_markers_shape():
