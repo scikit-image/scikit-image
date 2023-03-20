@@ -22,7 +22,7 @@ def docs(clean=False):
 
     site_path = meson._get_site_packages()
     if site_path is None:
-        print("No built scikit-image found; run `./dev.py build` first.")
+        print("No built scikit-image found; run `./spin build` first.")
         sys.exit(1)
 
     util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
@@ -39,13 +39,13 @@ def asv(asv_args):
 
     ASV_ARGS are passed through directly to asv, e.g.:
 
-    ./dev.py asv -- dev -b TransformSuite
+    ./spin asv -- dev -b TransformSuite
 
     Please see CONTRIBUTING.txt
     """
     site_path = meson._get_site_packages()
     if site_path is None:
-        print("No built scikit-image found; run `./dev.py build` first.")
+        print("No built scikit-image found; run `./spin build` first.")
         sys.exit(1)
 
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
