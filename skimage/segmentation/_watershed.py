@@ -79,7 +79,7 @@ def _validate_inputs(image, markers, mask, connectivity):
                        f'shape as `image` (shape {image.shape})')
             raise ValueError(message)
     return (image.astype(np.float64),
-            markers.astype(f'{markers.dtype}'),
+            markers,
             mask.astype(np.int8))
 
 
