@@ -45,49 +45,7 @@ Here's the long and short of it:
      - ``origin``, which refers to your personal fork
 
    * Next, you need to set up your build environment.
-     Here are instructions for two popular environment managers:
-
-     * ``venv`` (pip based)
-
-       ::
-
-         # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
-         # One common convention is to place it inside an ``envs`` directory under your home directory:
-         mkdir ~/envs
-         python -m venv ~/envs/skimage-dev
-         # Activate it
-         source ~/envs/skimage-dev/bin/activate
-         # Install main development and runtime dependencies
-         pip install -r requirements.txt
-         # Install build dependencies of scikit-image
-         pip install -r requirements/build.txt
-         # Build scikit-image from source
-         ./dev.py build
-         # Test your installation
-         ./dev.py test
-         # Try the new version in IPython
-         ./dev.py ipython
-
-     * ``conda`` (Anaconda or Miniconda)
-
-       ::
-
-         # Create a conda environment named ``skimage-dev``
-         conda create --name skimage-dev
-         # Activate it
-         conda activate skimage-dev
-         # Install main development and runtime dependencies
-         conda install -c conda-forge --file requirements.txt
-         # Install build dependencies of scikit-image
-         conda install -c conda-forge --file requirements/build.txt
-         # Build scikit-image from source
-         ./dev.py build
-         # Test your installation
-         ./dev.py test
-         # Try the new version in IPython
-         ./dev.py ipython
-
-   * For more information about building and using the dev.py package, see ``meson.md``.
+     Please refer to :ref:`build-env-setup` for instructions.
 
    * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
      when you do a ``git commit``::
@@ -222,12 +180,6 @@ Once you've fixed all merge conflicts, do::
    Advanced Git users are encouraged to `rebase instead of merge
    <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
    but we squash and merge most PRs either way.
-
-Build environment setup
------------------------
-
-Please refer to :ref:`installing-scikit-image` for development installation
-instructions.
 
 Guidelines
 ----------

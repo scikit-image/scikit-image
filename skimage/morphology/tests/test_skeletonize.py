@@ -27,6 +27,11 @@ class TestSkeletonize():
         with pytest.raises(ValueError):
             skeletonize(im, method='zhang')
 
+    def test_skeletonize_wrong_method(self):
+        im=np.ones((5,5))
+        with pytest.raises(ValueError):
+            skeletonize(im, method='foo')
+
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
         skeletonize(im)

@@ -8,7 +8,10 @@ import re
 def main():
     requirements_dir = Path(__file__).parent / '..' / 'requirements'
 
-    for requirement_file in requirements_dir.glob('*.txt'):
+    requirement_files = requirements_dir.glob('*.txt')
+    requirement_files = [r for r in requirement_files if not r.name.startswith('_')]
+
+    for n, requirement_file in enumerate(requirement_files):
         print(requirement_file.name)
         with open(str(requirement_file)) as f:
             for req in f:
@@ -22,8 +25,7 @@ def main():
                 # Get the name of the package
                 if req.startswith('git+http'):
                     req = req.split('/')[-1]
-                else:
-                    req = re.split('<|>|=|!|;|~', req)[0]
+                req = re.split('[<>=!;@~]', req)[0]
 
                 try:
                     # use pkg_resources to reliably get the version at install
@@ -35,6 +37,8 @@ def main():
                 except pkg_resources.DistributionNotFound:
                     print(req.rjust(20), 'is not installed')
 
+        if not n == len(requirement_files) - 1:
+            print()
 
 if __name__ == '__main__':
     main()
