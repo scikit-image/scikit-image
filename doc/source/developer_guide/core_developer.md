@@ -9,7 +9,7 @@ so far.
 
 This document offers guidelines for your new role. First and
 foremost, you should familiarize yourself with the project's
-{doc}`mission, vision, and values <values>`. When in
+{doc}`mission, vision, and values <../about/values>`. When in
 doubt, always refer back here.
 
 As a core team member, you gain the responsibility of shepherding
@@ -89,7 +89,7 @@ When reviewing, focus on the following:
 6. **Established methods:** In general, we are looking to include algorithms
    and methods which are established, well documented in the literature and
    widely used by the imaging community. While this is not a hard requirement,
-   new contributions should be consistent with {doc}`our mission <values>`.
+   new contributions should be consistent with {doc}`our mission <../about/values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
 [dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
