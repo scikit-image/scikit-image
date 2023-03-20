@@ -1,6 +1,6 @@
 """This module includes tools to transform images and volumetric data.
 
-- Geometric Transformations:
+- Geometric transformations:
   These transforms change the shape or position of an image.
   They are useful for tasks such as image registration,
   alignment, and geometric correction.
@@ -8,26 +8,26 @@
   :class:`~skimage.transform.ProjectiveTransform`,
   :class:`~skimage.transform.EuclideanTransform`.
 
-- Image Resizing and Rescaling:
+- Image resizing and rescaling:
   These transforms change the size or resolution of an image.
   They are useful for tasks such as down-sampling an image to
   reduce its size or up-sampling an image to increase its resolution.
   Examples: :func:`~skimage.transform.resize`,
   :func:`~skimage.transform.rescale`.
 
-- Feature Detection and Extraction:
+- Feature detection and extraction:
   These transforms identify and extract specific features or
   patterns in an image. They are useful for tasks s object detection,
   image segmentation, and  feature matching.
-  Examples: :func:`~skimage.transform.hough_circle` and other Hough transforms,
-  :func:`~skimage.transform.pyramid_expand` and other Pyramid Transforms,
-  :func:`~skimage.transform.radon` and other Radon transforms.
+  Examples: :func:`~skimage.transform.hough_circle`,
+  :func:`~skimage.transform.pyramid_expand`,
+  :func:`~skimage.transform.radon`.
 
-- Image Transformation:
+- Image transformation:
   These transforms change the appearance of an image without changing its
   content. They are useful for tasks such a creating image mosaics,
   applying artistic effects, and visualizing image data.
-  Examples::func:`~skimage.transform.warp`, Inverse transforms.
+  Examples: :func:`~skimage.transform.warp`, inverse transforms.
 
 """
 
