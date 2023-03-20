@@ -26,7 +26,7 @@ from ..util import crop, regular_seeds
 
 
 def _validate_inputs(image, markers, mask, connectivity):
-    """Ensure that all inputs to watershed have matching shapes and types.
+    """Ensures that all inputs to watershed have matching shapes and types.
 
     Parameters
     ----------
