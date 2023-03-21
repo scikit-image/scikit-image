@@ -392,16 +392,19 @@ class TestWatershed(unittest.TestCase):
         for lab, area in zip(range(4), [34,74,74,74]):
             self.assertTrue(np.sum(ws == lab) == area)
 
-    def test_watershed13(self):
+    def test_watershed_input_not_modified(self):
         """Test on markers
 
         This is here to ensure input markers is not modified
         """
-        image = np.zeros((21, 21))
-        markers = np.zeros((21, 21), int)
+        image = np.random.default_rng().random(size=(21, 21))
+        markers = np.zeros((21, 21), dtype=np.uint8)
+        markers[[5, 5, 15, 15], [5, 15, 5, 15]] = [1, 2, 3, 4]
         original_markers = np.copy(markers)
-        watershed(image, markers)
+        result = watershed(image, markers)
         np.testing.assert_equal(original_markers, markers)
+        assert not np.all(result == markers)
+
 
 def test_compact_watershed():
     image = np.zeros((5, 6))
