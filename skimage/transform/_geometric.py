@@ -1335,7 +1335,7 @@ class SimilarityTransform(EuclideanTransform):
     Image Warping
 
     >>> from skimage import data
-    >>> from skimage.transform import SimilarityTransform, wsarp
+    >>> from skimage.transform import SimilarityTransform, warp
     >>> image = data.camera()
     >>> tform2 = SimilarityTransform(scale=0.5, rotation=0.2,
     ...                                translation=(50, -20))
