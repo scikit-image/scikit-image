@@ -1328,9 +1328,9 @@ class SimilarityTransform(EuclideanTransform):
     >>> tform = SimilarityTransform(scale=0.5, rotation=0.2,
     ...                               translation=(50, -20))
     >>> tform.params
-    array([[  0.49003329,  -0.09933467,  50.        ],
-           [  0.09933467,   0.49003329, -20.        ],
-           [  0.        ,   0.        ,   1.        ]])
+    array([[  0.4900332889,  -0.0993346654,  50.          ],
+           [  0.0993346654,   0.4900332889, -20.          ],
+           [  0.          ,   0.          ,   1.          ]])
 
     Image Warping
 
