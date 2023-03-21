@@ -7,7 +7,6 @@ touch $MPL_DIR/matplotlibrc
 
 
 python -m pip list
-tools/build_versions.py
 
 TEST_ARGS="--doctest-modules --cov=skimage"
 
@@ -22,7 +21,6 @@ if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples
   python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
   python -m pip list
-  tools/build_versions.py
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 if [[ "${BUILD_DOCS}" == "1" ]]; then
