@@ -1408,6 +1408,8 @@ class SimilarityTransform(EuclideanTransform):
         Examples
         --------
 
+        Parameter estimation
+
         >>> import numpy as np
         >>> from skimage import data
         >>> from skimage.transform import SimilarityTransform, warp
