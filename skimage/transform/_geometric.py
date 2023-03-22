@@ -573,8 +573,8 @@ class ProjectiveTransform(GeometricTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import ProjectiveTransform
     >>> from skimage import data
+    >>> from skimage.transform import ProjectiveTransform
     >>> img_src = data.rocket()
     >>> height, width, dim = img_src.shape
     >>> img_dst = np.zeros((height, width, dim))
