@@ -3,7 +3,7 @@
 They are particularly suited for binary images where pixels are represented as 0 or 1,
 although some may be useful on images of all types.
 
-The most basic operators are dilation and erosion.
+Basic morphological operations include dilation and erosion.
 """
 
 from .binary import (binary_closing, binary_dilation, binary_erosion,
