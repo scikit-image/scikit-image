@@ -575,26 +575,24 @@ class ProjectiveTransform(GeometricTransform):
     >>> import numpy as np
     >>> from skimage import data
     >>> from skimage.transform import ProjectiveTransform
-    >>> img_src = data.rocket()
-    >>> height, width, dim = img_src.shape
-    >>> img_dst = np.zeros((height, width, dim))
+    >>> img = data.rocket()
+    >>> height, width, dim = img.shape
 
     Provide four pairs of matching points between the source and
     destination images to estimate the homography matrix, H,
     automatically for you.
 
-    >>> src = np.array([[ 41., 74.],
-    ...                [ 228., 72.],
-    ...                [ 192., 272.],
-    ...                [ 96., 272.]])
+    >>> src = np.array([[41., 74.],
+    ...                 [width, 72.],
+    ...                 [height, width],
+    ...                 [96., height]])
     >>> dst = np.array([[0., 0.],
-    ...                [height-1, 0.],
-    ...                [height-1, width-1],
-    ...                [0., width-1]])
+    ...                 [0., height],
+    ...                 [height-50, width*0.75],
+    ...                 [width*0.75, 80]])
     >>> pt = ProjectiveTransform()
     >>> pt.estimate(src, dst)
     True
-
     """
     def __init__(self, matrix=None, *, dimensionality=2):
         if matrix is None:
