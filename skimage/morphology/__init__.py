@@ -1,7 +1,7 @@
 """Utilities that process images based on shapes.
 
 They are particularly suited for binary images where pixels are represented as 0 or 1,
-although they can be extended to images of all types.
+although some may be useful on images of all types.
 
 The most basic operators are dilation and erosion.
 """
