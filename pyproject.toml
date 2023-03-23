@@ -64,7 +64,7 @@ build = [
     'Cython>=0.29.24',
     'pythran',
     'numpy>=1.21.1',
-    'spin>=0.2',
+    'spin==0.3',
     'build',
 ]
 data = ['pooch>=1.3.0']
