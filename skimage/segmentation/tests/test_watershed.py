@@ -393,10 +393,7 @@ class TestWatershed(unittest.TestCase):
             self.assertTrue(np.sum(ws == lab) == area)
 
     def test_watershed_input_not_modified(self):
-        """Test on markers
-
-        This is here to ensure input markers is not modified
-        """
+        """Test to ensure input markers are not modified."""
         image = np.random.default_rng().random(size=(21, 21))
         markers = np.zeros((21, 21), dtype=np.uint8)
         markers[[5, 5, 15, 15], [5, 15, 5, 15]] = [1, 2, 3, 4]
@@ -439,8 +436,8 @@ def test_numeric_seed_watershed():
 
 
 @pytest.mark.parametrize(
-    'dtype', [np.uint8, np.int8, np.uint16,
-              np.int16, np.int32, np.uint64, np.int64]
+    'dtype', [np.uint8, np.int8, np.uint16, np.int16,
+              np.uint32, np.int32, np.uint64, np.int64]
 )
 def test_watershed_output_dtype(dtype):
     image = np.zeros((100, 100))
