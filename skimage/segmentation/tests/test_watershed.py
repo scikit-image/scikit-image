@@ -443,7 +443,7 @@ def test_watershed_output_dtype(dtype):
     image = np.zeros((100, 100))
     markers = np.zeros((100, 100), dtype)
     out = watershed(image, markers)
-    np.testing.assert_equal(out.dtype, markers.dtype)
+    assert out.dtype == markers.dtype
 
 
 def test_incorrect_markers_shape():
