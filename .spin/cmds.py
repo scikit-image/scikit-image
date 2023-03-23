@@ -3,8 +3,8 @@ import shutil
 import sys
 
 import click
-from devpy.cmds import meson
-from devpy import util
+from spin.cmds import meson
+from spin import util
 
 
 @click.command()
@@ -22,7 +22,7 @@ def docs(clean=False):
 
     site_path = meson._get_site_packages()
     if site_path is None:
-        print("No built scikit-image found; run `./dev.py build` first.")
+        print("No built scikit-image found; run `spin build` first.")
         sys.exit(1)
 
     util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
@@ -39,13 +39,13 @@ def asv(asv_args):
 
     ASV_ARGS are passed through directly to asv, e.g.:
 
-    ./dev.py asv -- dev -b TransformSuite
+    spin asv -- dev -b TransformSuite
 
     Please see CONTRIBUTING.txt
     """
     site_path = meson._get_site_packages()
     if site_path is None:
-        print("No built scikit-image found; run `./dev.py build` first.")
+        print("No built scikit-image found; run `spin build` first.")
         sys.exit(1)
 
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
@@ -56,7 +56,7 @@ def asv(asv_args):
 def coverage():
     """📊 Generate coverage report
     """
-    util.run(['python', '-m', 'devpy', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+    util.run(['python', '-m', 'spin', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
 
 
 @click.command()
