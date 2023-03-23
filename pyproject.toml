@@ -97,6 +97,7 @@ docs = [
     'tifffile>=2022.8.12',
     'myst-parser',
     'ipywidgets',
+    'ipykernel',
     'plotly>=5.10',
     'kaleido',
 ]
