@@ -142,8 +142,7 @@ html_logo = "_static/logo.png"
 html_css_files = ['theme_overrides.css']
 
 html_theme_options = {
-    "github_url": "https://github.com/scikit-image/scikit-image",
-    "navbar_start": ["navbar-logo", "version-switcher"],
+    # Navigation bar
     "logo": {
         "alt_text": (
             "scikit-image's logo, showing a snake's head overlayed with green "
@@ -151,6 +150,7 @@ html_theme_options = {
         ),
         "text": "scikit-image"
     },
+    "header_links_before_dropdown": 6,
     "icon_links": [
         {
             "name": "PyPI",
@@ -158,11 +158,14 @@ html_theme_options = {
             "icon": "fa-solid fa-box",
         },
     ],
+    "navbar_end": ["version-switcher", "navbar-icon-links"],
     "switcher": {
         # "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
         "json_url": "https://gist.githubusercontent.com/lagru/8bce79c510b9026dab455c0a96a2c0b3/raw/f1fd57408675bb728a2cddddcae788ef107aa06b/version_switcher.json",
         "version_match": "dev" if "dev" in version else version,
     },
+    "github_url": "https://github.com/scikit-image/scikit-image",
+    # Other
     "pygment_light_style": "default",
     "pygment_dark_style": "github-dark",
 }
