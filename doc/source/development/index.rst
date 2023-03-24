@@ -1,9 +1,8 @@
-Developer guide
-===============
+Development
+===========
 
 .. toctree::
     :maxdepth: 1
-    :caption: Development
 
     contribute
     ../gitwash/index

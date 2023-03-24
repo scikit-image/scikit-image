@@ -65,7 +65,7 @@ all are encouraged to do so. By contributing to the project, community members
 can directly help to shape its future.
 
 Contributors are encouraged to read the
-:doc:`contributing guide <../developer_guide/contribute>`.
+:doc:`contributing guide <../development/contribute>`.
 
 Core developers
 ---------------

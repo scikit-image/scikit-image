@@ -3,7 +3,6 @@ About
 
 .. toctree::
     :maxdepth: 1
-    :caption: Community
 
     values
     code_of_conduct

@@ -46,7 +46,7 @@ Quick links
         understanding of the key concepts.
 
     .. grid-item-card:: :octicon:`tools` Contribute
-        :link: developer_guide/contribute
+        :link: development/contribute
         :link-type: any
 
         Saw a typo? Found a bug? Want to improve a function? Learn how to
@@ -73,8 +73,8 @@ Quick links
         scikit-image proposals, documents describing major changes to the
         library.
 
-Navigation
-----------
+Site map
+--------
 
 .. toctree::
     :maxdepth: 1
@@ -83,7 +83,7 @@ Navigation
     auto_examples/index
     api/api
     release_notes/index
-    developer_guide/index
+    development/index
     about/index
 
 See also our site-wide :ref:`genindex` our
