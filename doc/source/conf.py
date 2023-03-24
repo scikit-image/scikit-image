@@ -54,6 +54,7 @@ extensions = [
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "skimage_extensions",
 ]
 
 autosummary_generate = True
