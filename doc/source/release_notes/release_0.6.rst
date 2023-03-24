@@ -1,4 +1,4 @@
-Announcement: scikits-image 0.6
+scikits-image 0.6 release notes
 ===============================
 
 We're happy to announce the 6th version of scikits-image!

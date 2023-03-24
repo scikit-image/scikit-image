@@ -1,4 +1,4 @@
-Announcement: scikits-image 0.7.0
+scikits-image 0.7.0 release notes
 =================================
 
 We're happy to announce the 7th version of scikits-image!

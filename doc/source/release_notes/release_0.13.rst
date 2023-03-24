@@ -13,7 +13,7 @@ include:
   Varoquaux (#2722), and Stéfan van der Walt (#2723, #2810)
 
 
-Announcement: scikit-image 0.13.0
+scikit-image 0.13.0 release notes
 =================================
 
 We're happy to (finally) announce the release of scikit-image v0.13.0!

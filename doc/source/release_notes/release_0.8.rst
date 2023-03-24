@@ -1,4 +1,4 @@
-Announcement: scikits-image 0.8.0
+scikits-image 0.8.0 release notes
 =================================
 
 We're happy to announce the 8th version of scikit-image!

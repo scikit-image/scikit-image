@@ -1,4 +1,4 @@
-Announcement: scikits.image 0.3
+scikits.image 0.3 release notes
 ===============================
 
 After a brief (!) absence, we're back with a new and shiny version of

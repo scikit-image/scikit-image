@@ -1,4 +1,4 @@
-Announcement: scikits-image 0.4
+scikits-image 0.4 release notes
 ===============================
 
 We're happy to announce the 0.4 release of scikits-image, an image processing

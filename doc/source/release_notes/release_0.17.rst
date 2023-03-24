@@ -1,4 +1,4 @@
-Announcement: scikit-image 0.17.2
+scikit-image 0.17.2 release notes
 =================================
 
 We're happy to announce the release of scikit-image v0.17.2, which is a bug-fix
@@ -34,7 +34,7 @@ Bug fixes
 
 
 
-Announcement: scikit-image 0.17.1
+scikit-image 0.17.1 release notes
 =================================
 
 We're happy to announce the release of scikit-image v0.17.1!

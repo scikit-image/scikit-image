@@ -1,4 +1,4 @@
-Announcement: scikit-image 0.20.0
+scikit-image 0.20.0 release notes
 =================================
 
 scikit-image is an image processing toolbox built on SciPy that

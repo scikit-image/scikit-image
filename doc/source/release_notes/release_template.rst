@@ -1,6 +1,6 @@
 :orphan:
 
-Announcement: scikit-image 0.X.0
+scikit-image 0.X.0 release notes
 ================================
 
 We're happy to announce the release of scikit-image v0.X.0!

@@ -1,4 +1,4 @@
-Announcement: scikit-image 0.21.0 (unreleased)
+scikit-image 0.21.0 release notes (unreleased)
 ==============================================
 
 We're happy to announce the release of scikit-image v0.21.0 (unreleased)!

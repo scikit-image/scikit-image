@@ -1,4 +1,4 @@
-Announcement: scikit-image 0.14.4
+scikit-image 0.14.4 release notes
 =================================
 
 We're happy to announce the release of scikit-image v0.14.4!
@@ -25,7 +25,7 @@ Other Pull Requests
 - Mark Harfouche
 
 
-Announcement: scikit-image 0.14.3
+scikit-image 0.14.3 release notes
 =================================
 
 As a reminder, 0.14.x is the final version of scikit-image with support for
@@ -101,7 +101,7 @@ which remains invaluable for our backports.
 - Stefan van der Walt
 
 
-Announcement: scikit-image 0.14.2
+scikit-image 0.14.2 release notes
 =================================
 
 This release handles an incompatibility between scikit-image and NumPy
@@ -148,7 +148,7 @@ Contributors & Reviewers
 - Stefan van der Walt
 
 
-Announcement: scikit-image 0.14.1
+scikit-image 0.14.1 release notes
 =================================
 
 We're happy to announce the release of scikit-image v0.14.1!
@@ -268,7 +268,7 @@ And with the special support of [MeeseeksDev](https://github.com/MeeseeksBox),
 created by Matthias Bussonnier
 
 
-Announcement: scikit-image 0.14.0
+scikit-image 0.14.0 release notes
 =================================
 
 We're happy to announce the release of scikit-image v0.14.0!
