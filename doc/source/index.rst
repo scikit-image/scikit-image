@@ -73,11 +73,11 @@ Quick links
         scikit-image proposals, documents describing major changes to the
         library.
 
-Site map
---------
+See also our site-wide :ref:`genindex` our
+:ref:`search this documentation <search>`.
 
 .. toctree::
-    :maxdepth: 1
+    :hidden:
 
     user_guide/index
     auto_examples/index
@@ -85,6 +85,3 @@ Site map
     release_notes/index
     development/index
     about/index
-
-See also our site-wide :ref:`genindex` our
-:ref:`search this documentation <search>`.
