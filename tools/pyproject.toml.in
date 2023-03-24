@@ -54,7 +54,7 @@ requires = [
     "packaging>=20",
     "Cython>=0.29.24",
     "pythran",
-    "lazy_loader>=0.1",
+    "lazy_loader>=0.2",
 
     # We follow scipy for much of these pinnings
     # https://github.com/scipy/scipy/blob/main/pyproject.toml
