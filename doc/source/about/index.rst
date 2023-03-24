@@ -1,6 +1,9 @@
 About
 =====
 
+This section includes resources on the scikit-image project itself, it's community,
+values and how we work together.
+
 .. toctree::
     :maxdepth: 1
 

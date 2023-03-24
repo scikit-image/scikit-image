@@ -1,6 +1,8 @@
 Development
 ===========
 
+Below you will find resources about the development of scikit-image.
+
 .. toctree::
     :maxdepth: 1
 
