@@ -165,6 +165,9 @@ html_theme_options = {
         "version_match": "dev" if "dev" in version else version,
     },
     "github_url": "https://github.com/scikit-image/scikit-image",
+    # Footer
+    "footer_start": ["copyright"],
+    "footer_end": ["sphinx-version", "theme-version"],
     # Other
     "pygment_light_style": "default",
     "pygment_dark_style": "github-dark",

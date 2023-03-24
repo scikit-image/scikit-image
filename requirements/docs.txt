@@ -15,4 +15,4 @@ ipywidgets
 plotly>=5.10
 kaleido
 sphinx-design~=0.3
-pydata-sphinx-theme~=0.12
+pydata-sphinx-theme~=0.13

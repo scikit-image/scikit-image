@@ -12,3 +12,8 @@ which has a very low contrast with the background. */
 div.highlight a {
     color: var(--pst-color-text-base);
 }
+
+/* Stack components in footer vertically. */
+.bd-footer .footer-items__end, .bd-footer .footer-items__start {
+  flex-direction: row;
+}
