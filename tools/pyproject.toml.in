@@ -54,7 +54,7 @@ requires = [
     "packaging>=20",
     "Cython>=0.29.24",
     "pythran",
-    "lazy_loader>=0.1",
+    "lazy_loader>=0.2",
 
     # We follow scipy for much of these pinnings
     # https://github.com/scipy/scipy/blob/main/pyproject.toml
@@ -78,14 +78,14 @@ requires = [
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
 
-[tool.devpy]
+[tool.spin]
 package = 'skimage'
 
-[tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test", ".devpy/cmds.py:sdist"]
-"Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
-"Documentation" = [".devpy/cmds.py:docs"]
-"Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
+[tool.spin.commands]
+"Build" = ["spin.build", "spin.test", ".spin/cmds.py:sdist"]
+"Environments" = ["spin.shell", "spin.ipython", "spin.python"]
+"Documentation" = [".spin/cmds.py:docs"]
+"Metrics" = [".spin/cmds.py:asv", ".spin/cmds.py:coverage"]
 
 [tool.ruff]
 line-length = 88
