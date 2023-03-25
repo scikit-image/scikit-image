@@ -23,8 +23,8 @@ Quick links
         :link: user_guide/install
         :link-type: any
 
-        New to scikit-image? Start with our installation guide and learn the
-        scikit-image's key concepts.
+        New to scikit-image? Start with our installation guide and scikit-image's key
+        concepts.
 
     .. grid-item-card:: :octicon:`image` Examples
         :link: auto_examples/index

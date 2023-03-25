@@ -2,6 +2,8 @@
 
 User guide
 ==========
+Here you can find our narrative documentation, learn about scikit-image's key concepts
+and more advanced topics.
 
 .. toctree::
    :maxdepth: 1
