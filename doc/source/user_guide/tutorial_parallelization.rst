@@ -55,7 +55,9 @@ Another equivalent way to code this loop is to use a comprehension list which ha
 In this guide, it is used to apply the ``task`` function to each element of a 5D array(image) in parallel.
 
 .. note::
-    ``apply_parallel`` needs the optional dependency dask to be installed.
+    :func:`skimage.util.apply_parallel` needs the optional dependency dask_ to be installed.
+    
+.. _dask: https://www.dask.org
 
 .. code-block:: python
 
