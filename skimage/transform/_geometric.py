@@ -472,7 +472,6 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
            [ 0.,  0.,  0.]])
-
     >>> src = np.array([[ 1.839035, 1.924743],
     ...                 [ 0.543582, 0.375221],
     ...                 [ 0.47324 , 0.142522],
@@ -491,11 +490,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [0.642616, 1.028681]])
     >>> tform_matrix.estimate(src, dst)
     True
-
     >>> tform_matrix.residuals(src, dst)
     array([0.4245518687, 0.0146044753, 0.1384703409, 0.1214095141,
            0.2775934609, 0.3245311807, 0.0021077555, 0.2651228318])
-
     """
 
     def __init__(self, rotation=None, translation=None, matrix=None,
