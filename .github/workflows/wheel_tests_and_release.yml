@@ -5,7 +5,6 @@ on:
       - v*
     branches:
       - maintenance/**
-      - "!main"
 
 env:
   CIBW_BUILD_VERBOSITY: 2
@@ -117,6 +116,16 @@ jobs:
         with:
           python-version: "3.9"
 
+      # See:
+      # https://cibuildwheel.readthedocs.io/en/stable/faq/#macos-building-cpython-38-wheels-on-arm64
+      # https://github.com/pypa/cibuildwheel/issues/1414
+      - name: Install experimental MacOSX Py38
+        if: startsWith(matrix.cibw_python, 'cp38') && (matrix.cibw_arch == 'arm64')
+        run: |
+          curl -o /tmp/Python38.pkg https://www.python.org/ftp/python/3.8.10/python-3.8.10-macos11.pkg
+          sudo installer -pkg /tmp/Python38.pkg -target /
+          sh "/Applications/Python 3.8/Install Certificates.command"
+
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
@@ -130,17 +139,24 @@ jobs:
           # supported macos version is: High Sierra / 10.13. When upgrading
           # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
           # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
+          #
+          # We need to set both MACOS_DEPLOYMENT_TARGET and MACOSX_DEPLOYMENT_TARGET
+          # until there is a new release with this commit:
+          # https://github.com/mesonbuild/meson-python/pull/309
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
               # SciPy requires 12.0 on arm to prevent kernel panics
               # https://github.com/scipy/scipy/issues/14688
               # so being conservative, we just do the same here
               export MACOSX_DEPLOYMENT_TARGET=12.0
+              export MACOS_DEPLOYMENT_TARGET=12.0
               OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
           else
-              export MACOSX_DEPLOYMENT_TARGET=10.13
+              export MACOSX_DEPLOYMENT_TARGET=10.9
+              export MACOS_DEPLOYMENT_TARGET=10.9
               OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-64/llvm-openmp-11.1.0-hda6cdc1_1.tar.bz2"
           fi
           echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
+          echo MACOS_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET}
 
           # use conda to install llvm-openmp
           # Note that we do NOT activate the conda environment, we just add the
@@ -249,8 +265,6 @@ jobs:
 
       - name: Install Twine
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/build.txt
           pip install twine
 
       - uses: actions/download-artifact@v3
@@ -262,12 +276,13 @@ jobs:
       - name: Publish the source distribution on PyPI
         run: |
           SK_VERSION=$(git describe --tags)
-          python setup.py sdist
+          source tools/github/before_install.sh
+          python -m build --no-isolation --skip-dependency-check --sdist .
           ls -la ${{ github.workspace }}/dist
           # We prefer to release wheels before source because otherwise there is a
           # small window during which users who pip install scikit-image will require compilation.
           twine upload ${{ github.workspace }}/dist/*.whl
-          twine upload ${{ github.workspace }}/dist/scikit-image-${SK_VERSION:1}.tar.gz
+          twine upload ${{ github.workspace }}/dist/scikit_image-${SK_VERSION:1}.tar.gz
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}

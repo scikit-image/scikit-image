@@ -16,6 +16,3 @@ jobs:
           artifact-path: 0/doc/build/html/index.html
           circleci-jobs: doc
           job-title: Check the rendered docs here!
-      - name: Check the URL
-        run: |
-          curl --fail ${{ steps.step1.outputs.url }} | grep $GITHUB_SHA

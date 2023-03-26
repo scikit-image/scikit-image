@@ -1,7 +1,7 @@
 # Workflow to build and test wheels
 name: Test
 
-on: [push, pull_request]
+on: [push, pull_request, merge_group]
 
 permissions:
   contents: read
@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -86,9 +86,8 @@ jobs:
           source tools/github/before_install.sh
           set -ex
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-              pip uninstall cython -y
-              python setup.py sdist
-              pip install dist/scikit-image-*.tar.gz
+              python -m build --no-isolation --skip-dependency-check --sdist .
+              pip install dist/scikit_image-*.tar.gz
           else
               pip install -vv --no-build-isolation .;
           fi
@@ -108,14 +107,6 @@ jobs:
           SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: ${{ matrix.SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL }}
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
-          echo $PIP_FLAGS
-          pip install $PIP_FLAGS -r requirements/test.txt
-          export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-          mkdir -p ${MPL_DIR}
-          touch ${MPL_DIR}/matplotlibrc
-          if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-              pip install -r ./requirements/optional.txt
-          fi
           source tools/github/script.sh
 
       - name: Check benchmarks
@@ -130,14 +121,14 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
         include:
           - python-version: "3.9"
             OPTIONAL_DEPS: 0
-          - python-version: "3.11-dev"
+          - python-version: "3.11"
             OPTIONAL_DEPS: 0
             BUILD_DOCS: 0
         exclude:
@@ -145,7 +136,7 @@ jobs:
           - python-version: "3.9"
             OPTIONAL_DEPS: 1
           # a number of optional deps don't yet have Python 3.11 wheels
-          - python-version: "3.11-dev"
+          - python-version: "3.11"
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 1
     env:
@@ -176,7 +167,6 @@ jobs:
         run: |
           set -ex
           source tools/github/before_install.sh
-          pip install -U pip setuptools<=65.5 wheel
           python setup.py sdist
           pip install -vv --no-build-isolation .;
 
@@ -187,13 +177,6 @@ jobs:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
         run: |
-          pip install $PIP_FLAGS -r requirements/test.txt
-          export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-          mkdir -p ${MPL_DIR}
-          touch ${MPL_DIR}/matplotlibrc
-          if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-              pip install -r ./requirements/optional.txt
-          fi
           source tools/github/script.sh
 
       - name: Check benchmarks

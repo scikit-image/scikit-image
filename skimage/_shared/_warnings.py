@@ -142,5 +142,6 @@ def expected_warnings(matching):
             if strict_warnings and not found:
                 raise ValueError(f'Unexpected warning: {str(warn.message)}')
         if strict_warnings and (len(remaining) > 0):
-            msg = f"No warning raised matching:\n{{'\n'.join(remaining)}}"
+            newline = "\n"
+            msg = f"No warning raised matching:{newline}{newline.join(remaining)}"
             raise ValueError(msg)

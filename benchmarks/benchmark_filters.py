@@ -35,10 +35,6 @@ class MultiOtsu:
     param_names = ['classes']
     params = [3, 4, 5]
     def setup(self, *args):
-        try:
-            from skimage.filters import threshold_multiotsu
-        except ImportError:
-            raise NotImplementedError("threshold_multiotsu unavailable")
         self.image = data.camera()
 
     def time_threshold_multiotsu(self, classes):
@@ -82,10 +78,10 @@ class ThresholdSauvolaSuite:
         self.image3D[:, idx3D, idx3D] = 255
 
     def time_sauvola(self):
-        result = filters.threshold_sauvola(self.image, window_size=51)
+        filters.threshold_sauvola(self.image, window_size=51)
 
     def time_sauvola_3d(self):
-        result = filters.threshold_sauvola(self.image3D, window_size=51)
+        filters.threshold_sauvola(self.image3D, window_size=51)
 
 
 class ThresholdLi:
@@ -99,10 +95,10 @@ class ThresholdLi:
         self.image_float32 = self.image.astype(np.float32)
 
     def time_integer_image(self):
-        result1 = threshold_li(self.image)
+        threshold_li(self.image)
 
     def time_float32_image(self):
-        result1 = threshold_li(self.image_float32)
+        threshold_li(self.image_float32)
 
 
 class RidgeFilters:

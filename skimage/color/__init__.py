@@ -1,3 +1,7 @@
+"""Utilities for color conversion, color labeling, and color difference
+calculations.
+"""
+
 from .colorconv import (convert_colorspace,
                         xyz_tristimulus_values,
                         rgba2rgb,

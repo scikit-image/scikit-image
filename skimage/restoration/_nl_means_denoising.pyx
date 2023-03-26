@@ -159,7 +159,6 @@ def _nl_means_denoising_2d(cnp.ndarray[np_floats, ndim=3] image, Py_ssize_t s,
         np.pad(image, ((offset, offset), (offset, offset), (0, 0)),
                mode='reflect'))
     cdef np_floats [:, :, ::1] result = np.empty_like(image)
-    cdef np_floats new_value
     cdef np_floats weight_sum, weight
 
     cdef np_floats A = ((s - 1.) / 4.)
@@ -1008,7 +1007,6 @@ def _fast_nl_means_denoising_4d(cnp.ndarray[np_floats, ndim=5] image,
              pln, row, col, channel, n_channels, t_time, n_time, time
     cdef Py_ssize_t time_dist_min, time_dist_max, pln_dist_min, pln_dist_max, \
              row_dist_min, row_dist_max, col_dist_min, col_dist_max,
-    cdef Py_ssize_t d_row, d_col, d_pln, d_time
     cdef cnp.float64_t weight, distance, alpha
     n_time, n_pln, n_row, n_col, n_channels = padded.shape[0], padded.shape[1], padded.shape[2], padded.shape[3], padded.shape[4]
     cdef cnp.float64_t s4_h_square = n_channels * h * h * s * s * s * s

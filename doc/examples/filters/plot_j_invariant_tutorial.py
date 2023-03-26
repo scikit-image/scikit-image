@@ -113,7 +113,8 @@ ground_truth_loss = [mse(img, image) for img in denoised_invariant]
 opt_idx = np.argmin(self_supervised_loss)
 plot_idx = [0, opt_idx, len(sigma_range) - 1]
 
-get_inset = lambda x: x[25:225, 100:300]
+def get_inset(x):
+    return x[25:225, 100:300]
 
 plt.figure(figsize=(10, 12))
 
@@ -268,7 +269,7 @@ denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 psnr_calibrated_nl = psnr(image, denoised_calibrated_nl)
 psnr_default_nl = psnr(image, denoised_default_nl)
 
-print(f'                       PSNR')
+print('                       PSNR')
 print(f'NL means (Default)   : {psnr_default_nl:.1f}')
 print(f'NL means (Calibrated): {psnr_calibrated_nl:.1f}')
 print(f'Wavelet  (Default)   : {psnr_default_wavelet:.1f}')
@@ -282,7 +283,8 @@ plt.xticks([])
 plt.yticks([])
 plt.title('Noisy Image')
 
-get_inset = lambda x: x[0:100, -140:]
+def get_inset(x):
+    return x[0:100, -140:]
 
 fig, axes = plt.subplots(ncols=3, nrows=2, figsize=(15, 8))
 

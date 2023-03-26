@@ -136,7 +136,7 @@ def require(name, version=None):
                 return obj(*args, **kwargs)
             else:
                 msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
-                if not version is None:
+                if version is not None:
                     msg += f" {version}"
                 raise ImportError(msg + '"')
         return func_wrapped

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Script to auto-generate our API docs.
 """
-# stdlib imports
-import os, sys
+
+import sys
 
 from packaging import version as _version
 
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     try:
         __import__(package)
-    except ImportError as e:
+    except ImportError:
         abort("Can not import skimage")
 
     module = sys.modules[package]
