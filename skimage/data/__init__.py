@@ -1,7 +1,10 @@
 """
-Image data module.
+Images and datasets for tests and examples.
 
-Contains test images and example data.
+Makes a curated set of general purpose and scientific images and datasets easily
+available for tests, examples and documentation. Newer datasets are no longer included
+in scikit-image directly but are downloaded if accessed. To make them available offline,
+use :func:`download_all`.
 
 """
 
