@@ -465,11 +465,36 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     Examples
     --------
-    >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3), translation=np.array([0, 0, 1]))
+    >>> tform_matrix = EssentialMatrixTransform(
+    ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
+    ... )
     >>> tform_matrix.params
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
            [ 0.,  0.,  0.]])
+
+    >>> src = np.array([[ 1.839035, 1.924743],
+    ...                 [ 0.543582, 0.375221],
+    ...                 [ 0.47324 , 0.142522],
+    ...                 [ 0.96491 , 0.598376],
+    ...                 [ 0.102388, 0.140092],
+    ...                 [15.994343, 9.622164],
+    ...                 [ 0.285901, 0.430055],
+    ...                 [ 0.09115 , 0.254594]])
+    >>> dst = np.array([[1.002114, 1.129644],
+    ...                 [1.521742, 1.846002],
+    ...                 [1.084332, 0.275134],
+    ...                 [0.293328, 0.588992],
+    ...                 [0.839509, 0.08729 ],
+    ...                 [1.779735, 1.116857],
+    ...                 [0.878616, 0.602447],
+    ...                 [0.642616, 1.028681]])
+    >>> tform_matrix.estimate(src, dst)
+    True
+
+    >>> tform_matrix.residuals(src, dst)
+    array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
+           0.32453118, 0.00210776, 0.26512283])
 
     """
 
@@ -521,28 +546,6 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         -------
         success : bool
             True, if model estimation succeeds.
-
-        Examples
-        --------
-        >>> tform_matrix = EssentialMatrixTransform(rotation=np.eye(3), translation=np.array([0, 0, 1]))
-        >>> src = np.array([[ 1.839035, 1.924743],
-        ...                 [ 0.543582, 0.375221],
-        ...                 [ 0.47324 , 0.142522],
-        ...                 [ 0.96491 , 0.598376],
-        ...                 [ 0.102388, 0.140092],
-        ...                 [15.994343, 9.622164],
-        ...                 [ 0.285901, 0.430055],
-        ...                 [ 0.09115 , 0.254594]])
-        >>> dst = np.array([[1.002114, 1.129644],
-        ...                 [1.521742, 1.846002],
-        ...                 [1.084332, 0.275134],
-        ...                 [0.293328, 0.588992],
-        ...                 [0.839509, 0.08729 ],
-        ...                 [1.779735, 1.116857],
-        ...                 [0.878616, 0.602447],
-        ...                 [0.642616, 1.028681]])
-        >>> tform_matrix.estimate(src, dst)
-        True
 
         """
 
