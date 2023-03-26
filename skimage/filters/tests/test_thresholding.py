@@ -388,19 +388,26 @@ def test_li_negative_inital_guess():
         threshold_li(coins, initial_guess=-5)
 
 
-def test_li_pathological_arrays():
-    # See https://github.com/scikit-image/scikit-image/issues/4140
-    a = np.array([0, 0, 1, 0, 0, 1, 0, 1])
-    b = np.array([0, 0, 0.1, 0, 0, 0.1, 0, 0.1])
-    c = np.array([0, 0, 0.1, 0, 0, 0.1, 0.01, 0.1])
-    d = np.array([0, 0, 1, 0, 0, 1, 0.5, 1])
-    e = np.array([1, 1])
-    f = np.array([1, 2])
-    arrays = [a, b, c, d, e, f]
-    with np.errstate(divide='ignore'):
-        # ignoring "divide by zero encountered in log" error from np.log(0)
-        thresholds = [threshold_li(arr) for arr in arrays]
-    assert np.all(np.isfinite(thresholds))
+@pytest.mark.parametrize(
+    "image",
+    [
+        # See https://github.com/scikit-image/scikit-image/issues/4140
+        [0, 0, 1, 0, 0, 1, 0, 1],
+        [0, 0, 0.1, 0, 0, 0.1, 0, 0.1],
+        [0, 0, 0.1, 0, 0, 0.1, 0.01, 0.1],
+        [0, 0, 1, 0, 0, 1, 0.5, 1],
+        [1, 1],
+        [1, 2],
+        # See https://github.com/scikit-image/scikit-image/issues/6744
+        [0, 254, 255],
+        [0, 1, 255],
+        [0.1, 0.8, 0.9]
+    ]
+)
+def test_li_pathological(image):
+    image = np.array(image)
+    threshold = threshold_li(image)
+    assert np.isfinite(threshold)
 
 
 def test_yen_camera_image():

@@ -36,7 +36,6 @@ this is the case for your image, you can directly use the filter like so:
 
 """
 
-import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import pywt

@@ -6,18 +6,19 @@ __all__ = [
     "LPIFilter2D",
     "apply_hysteresis_threshold",
     "butterworth",
+    "compute_hessian_eigenvalues",
     "correlate_sparse",
     "difference_of_gaussians",
     "farid",
     "farid_h",
     "farid_v",
-    "filter_forward",
     "filter_inverse",
     "frangi",
     "gabor",
     "gabor_kernel",
     "gaussian",
     "hessian",
+    "inverse",
     "laplace",
     "median",
     "meijering",
@@ -80,8 +81,19 @@ from ._edges import (
     sobel_h,
     sobel_v,
 )
-from ._lpi_filter import LPIFilter2D, filter_forward, filter_inverse, wiener
-from ._ridges import frangi, hessian, meijering, sato
+from ._lpi_filter import (
+    LPIFilter2D,
+    filter_inverse,
+    inverse,
+    wiener,
+)
+from ._ridges import (
+    compute_hessian_eigenvalues,
+    frangi,
+    hessian,
+    meijering,
+    sato,
+)
 from ._thresholding import (
     apply_hysteresis_threshold,
     threshold_isodata,

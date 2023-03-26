@@ -256,28 +256,32 @@ This directory contains the following files:
     scikit-image
     ├── asv.conf.json
     ├── azure-pipelines.yml
-    ├── benchmarks
+    ├── benchmarks/
+    ├── CITATION.bib
     ├── CODE_OF_CONDUCT.md
     ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
-    ├── doc
+    ├── dev.py
+    ├── doc/
     ├── INSTALL.rst
     ├── LICENSE.txt
-    ├── Makefile
     ├── MANIFEST.in
+    ├── meson.build
+    ├── meson.md
+    ├── pyproject.toml
     ├── README.md
     ├── RELEASE.txt
-    ├── requirements
+    ├── requirements/
     ├── requirements.txt
-    ├── setup.cfg
-    ├── setup.py
-    ├── skimage
+    ├── skimage/
     ├── TODO.txt
-    ├── tools
+    └── tools/
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
 
+
+.. _build-env-setup:
 
 Build environment setup
 ------------------------------------------------------------------------------
@@ -291,24 +295,27 @@ Here we provide instructions for two popular environment managers:
 venv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When using ``venv``, you may find the following bash commands useful:
-
 .. code-block:: sh
 
-  # Create a virtualenv named ``skimage-dev``
-  python -m venv skimage-dev
-  # Activate it. On Linux and MacOS:
-  source skimage-dev/bin/activate
-  # Make sure that pip is up to date
-  pip install --upgrade pip
-  # Install all development and runtime dependencies of scikit-image
+  # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+  # One common convention is to place it inside an ``envs`` directory under your home directory:
+  mkdir ~/envs
+  python -m venv ~/envs/skimage-dev
+  # Activate it
+  # (On Windows, please use ``skimage-dev\Scripts\activate``)
+  source ~/envs/skimage-dev/bin/activate
+  # Install main development and runtime dependencies
   pip install -r requirements.txt
-  # Build and install scikit-image from source
-  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
+  # Install build dependencies of scikit-image
+  pip install -r requirements/build.txt
+  # Build scikit-image from source
+  ./dev.py build
   # Test your installation
-  pytest --pyargs skimage
-
-On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
+  ./dev.py test
+  # Build docs
+  ./dev.py docs
+  # Try the new version in IPython
+  ./dev.py ipython
 
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -327,12 +334,22 @@ before you get started.
   conda create --name skimage-dev
   # Activate it
   conda activate skimage-dev
-  # Install major development and runtime dependencies of scikit-image
-  conda install --file requirements/default.txt --file requirements/build.txt --file requirements/test.txt
-  # Install scikit-image from source
-  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
+  # Install main development and runtime dependencies
+  conda install -c conda-forge --file requirements/default.txt
+  conda install -c conda-forge --file requirements/test.txt
+  conda install -c conda-forge pre-commit
+  # Install build dependencies of scikit-image
+  pip install -r requirements/build.txt
+  # Build scikit-image from source
+  ./dev.py build
   # Test your installation
-  pytest --pyargs skimage
+  ./dev.py test
+  # Build docs
+  ./dev.py docs
+  # Try the new version in IPython
+  ./dev.py ipython
+
+For more information about building and using the dev.py package, see ``meson.md``.
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -418,23 +435,10 @@ Platform-specific notes
 
 **Windows**
 
-If you experience the error ``Error:unable to find vcvarsall.bat`` it means
-that your computer does not have recommended compilers for Python. You can
-either download and install Windows compilers from `here`_  or use
-`MinGW compilers`_ . If using `MinGW`, make sure to correctly configure
-``distutils`` by modifying (or create, if not existing) the configuration file
-``distutils.cfg`` (located for example at
-``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
-
-  [build]
-   compiler=mingw32
-
 A run-through of the compilation process for Windows is included in
 our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
-.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
-.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
 **Debian and Ubuntu**
 

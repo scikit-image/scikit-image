@@ -1,10 +1,8 @@
 import inspect
-import os
 
 import numpy as np
 import scipy.ndimage as ndi
 
-import skimage
 from skimage.data import camera
 from skimage import restoration, data, color
 from skimage.morphology import binary_dilation

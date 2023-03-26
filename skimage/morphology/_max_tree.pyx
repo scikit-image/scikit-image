@@ -15,7 +15,6 @@ functions to characterize the tree components.
 
 import numpy as np
 cimport numpy as np
-cimport cython
 from .._shared.fused_numerics cimport np_real_numeric
 
 np.import_array()
@@ -132,7 +131,7 @@ cdef np.ndarray[DTYPE_INT32_t, ndim = 2] unravel_offsets(
                                                         dtype=np.int32)
     cdef DTYPE_INT32_t neg_shift = np.ravel_multi_index(center_point, shape)
 
-    cdef DTYPE_INT32_t i, offset, curr_index, coord
+    cdef DTYPE_INT32_t i, offset
 
     for i, offset in enumerate(offsets):
         current_point = np.unravel_index(offset + neg_shift, shape)
@@ -268,7 +267,6 @@ cpdef void _max_tree_local_maxima(np_real_numeric[::1] image,
 
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
-    cdef DTYPE_UINT64_t number_of_pixels = len(image)
     cdef DTYPE_UINT64_t label = 1
 
     for p in sorted_indices[::-1]:
@@ -346,7 +344,6 @@ cpdef void _direct_filter(np_real_numeric[::1] image,
 
     cdef DTYPE_INT64_t p_root = sorted_indices[0]
     cdef DTYPE_INT64_t p, q
-    cdef DTYPE_UINT64_t number_of_pixels = len(image)
 
     if attribute[p_root] < attribute_threshold:
         output[p_root] = 0
@@ -415,7 +412,6 @@ cpdef void _max_tree(np_real_numeric[::1] image,
     """
 
     cdef DTYPE_UINT64_t number_of_pixels = len(image)
-    cdef DTYPE_UINT64_t number_of_dimensions = len(shape)
 
     cdef DTYPE_INT64_t i = 0
     cdef DTYPE_INT64_t p = 0

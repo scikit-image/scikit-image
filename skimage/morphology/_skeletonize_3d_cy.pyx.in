@@ -1,5 +1,3 @@
-# distutils: language = c++
-
 """
 This is an implementation of the 2D/3D thinning algorithm
 of [Lee94]_ of binary images, based on [IAC15]_.

@@ -230,7 +230,7 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
                  int volume_width, int volume_height, int volume_depth,
                  params_t *params) {
   int n, i, j;
-  int vw = volume_width, vh = volume_height, vd = volume_depth;
+  int vw = volume_width;
   int fs = volume_width * volume_height;  // frame size
   int frame_size = volume_width * volume_height;
   int volume_size = volume_width * volume_height * volume_depth;  // volume size
@@ -1058,15 +1058,10 @@ void unwrapVolume(VOXELM *voxel, int volume_width, int volume_height,
 // set the masked voxels (mask = 0) to the minimum of the unwrapper phase
 void maskVolume(VOXELM *voxel, unsigned char *input_mask, int volume_width,
                 int volume_height, int volume_depth) {
-  int volume_width_plus_one = volume_width + 1;
-  int volume_height_plus_one = volume_height + 1;
-  int volume_width_minus_one = volume_width - 1;
-  int volume_height_minus_one = volume_height - 1;
-
   VOXELM *pointer_voxel = voxel;
   unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;
-  int i, j;
+  int i;
   int volume_size = volume_width * volume_height * volume_depth;
 
   // find the minimum of the unwrapped phase

@@ -1,9 +1,9 @@
-#cython: cdivision=True
-#cython: boundscheck=False
-#cython: nonecheck=False
-#cython: wraparound=False
-import numpy as np
+# cython: cdivision=True
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: wraparound=False
 
+import numpy as np
 cimport numpy as cnp
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
@@ -15,6 +15,7 @@ from ..draw import circle_perimeter
 from .._shared.interpolation cimport round
 
 cnp.import_array()
+
 
 def _hough_circle(cnp.ndarray img,
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
@@ -229,7 +230,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
                             if orientation > M_PI:
                                 orientation = orientation - M_PI / 2.
                                 a, b = b, a
-                        results.append((hist_max, # Accumulator
+                        results.append((hist_max,  # Accumulator
                                         yc, xc,
                                         a, b,
                                         orientation))
@@ -379,9 +380,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         <Py_ssize_t *>PyMem_Malloc(4 * sizeof(Py_ssize_t))
     if not line_end:
         raise MemoryError('could not allocate line_end')
-    cdef Py_ssize_t max_distance, offset, num_indexes, index
+    cdef Py_ssize_t max_distance, offset, index
     cdef cnp.float64_t a, b
-    cdef Py_ssize_t nidxs, i, j, k, x, y, px, py, accum_idx, max_theta
+    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16

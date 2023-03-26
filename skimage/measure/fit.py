@@ -282,6 +282,20 @@ class CircleModel(BaseModel):
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
+        # normalize value range to avoid misfitting due to numeric errors if
+        # the relative distanceses are small compared to absolute distances
+        origin = data.mean(axis=0)
+        data = data - origin
+        scale = data.std()
+        if scale < np.finfo(float_type).tiny:
+            warn(
+                "Standard deviation of data is too small to estimate "
+                "circle with meaningful precision.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
+        data /= scale
 
         # Adapted from a spherical estimator covered in a blog post by Charles
         # Jeckel (see also reference 1 above):
@@ -300,6 +314,10 @@ class CircleModel(BaseModel):
         distances = spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances ** 2))
 
+        # revert normalization and set params
+        center *= scale
+        r *= scale
+        center += origin
         self.params = tuple(center) + (r,)
 
         return True
@@ -399,7 +417,7 @@ class EllipseModel(BaseModel):
     """
 
     def estimate(self, data):
-        """Estimate circle model from data using total least squares.
+        """Estimate ellipse model from data using total least squares.
 
         Parameters
         ----------
@@ -427,6 +445,21 @@ class EllipseModel(BaseModel):
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
+
+        # normalize value range to avoid misfitting due to numeric errors if
+        # the relative distanceses are small compared to absolute distances
+        origin = data.mean(axis=0)
+        data = data - origin
+        scale = data.std()
+        if scale < np.finfo(float_type).tiny:
+            warn(
+                "Standard deviation of data is too small to estimate "
+                "ellipse with meaningful precision.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
+        data /= scale
 
         x = data[:, 0]
         y = data[:, 1]
@@ -492,8 +525,12 @@ class EllipseModel(BaseModel):
         if a > c:
             phi += 0.5 * np.pi
 
-        self.params = np.nan_to_num([x0, y0, width, height, phi]).tolist()
-        self.params = [float(np.real(x)) for x in self.params]
+        # revert normalization and set params
+        params = np.nan_to_num([x0, y0, width, height, phi]).real
+        params[:4] *= scale
+        params[:2] += origin
+        self.params = tuple(float(p) for p in params)
+
         return True
 
     def residuals(self, data):

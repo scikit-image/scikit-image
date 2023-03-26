@@ -22,8 +22,21 @@ repos:
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
-  - repo: https://github.com/asottile/pyupgrade
-    rev: d50ce21fc45d014790d4ecf71d1b1d7ccc450526 # v3.1.0
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 6ba454799f284b13ccd53ca2adaf4848da6d3509 # v0.0.240
     hooks:
-      - id: pyupgrade
-        args: [--py38-plus]
+      - id: ruff
+
+  - repo: https://github.com/MarcoGorelli/cython-lint
+    rev: 51998cd6d59a93f1f01678e2ce722873eb8ca7af # v0.12.2
+    hooks:
+      - id: cython-lint
+        args: [--no-pycodestyle, --max-line-length=88]
+
+  - repo: local
+    hooks:
+      - id: pyproject.toml
+        name: pyproject.toml
+        language: system
+        entry: python tools/generate_pyproject.toml.py
+        files: pyproject.toml

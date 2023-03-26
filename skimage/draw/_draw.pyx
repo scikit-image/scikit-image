@@ -2,7 +2,6 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import math
 import numpy as np
 
 cimport numpy as cnp
@@ -134,7 +133,6 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef list val = list()
 
     cdef int dc = abs(c0 - c1)
-    cdef int dc_prime
 
     cdef int dr = abs(r0 - r1)
     cdef cnp.float64_t err = dc - dr
@@ -216,7 +214,6 @@ def _polygon(r, c, shape):
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
     cdef Py_ssize_t minc = int(max(0, c.min()))
@@ -294,9 +291,6 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
-    cdef cnp.float64_t dceil = 0
-    cdef cnp.float64_t dceil_prev = 0
-
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
@@ -372,7 +366,6 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
 
     cdef Py_ssize_t c = 0
     cdef Py_ssize_t r = radius
-    cdef Py_ssize_t d = 0
 
     cdef cnp.float64_t dceil = 0
     cdef cnp.float64_t dceil_prev = 0

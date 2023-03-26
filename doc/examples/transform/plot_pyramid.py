@@ -9,7 +9,6 @@ implement algorithms for denoising, texture discrimination, and scale-invariant
 detection.
 
 """
-import math
 
 import numpy as np
 import matplotlib.pyplot as plt

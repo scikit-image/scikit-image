@@ -10,10 +10,13 @@ def test_future_graph_import_error():
         "`cut_normalized`. Please update your import paths accordingly."
     )
     with pytest.raises(ModuleNotFoundError, match=error_msg):
-        import skimage.future.graph
+        import skimage.future.graph  # noqa: F401
+        pass
 
     with pytest.raises(ModuleNotFoundError, match=error_msg):
-        from skimage.future import graph
+        from skimage.future import graph  # noqa: F401
+        pass
 
     with pytest.raises(ModuleNotFoundError, match=error_msg):
-        from skimage.future.graph import rag
+        from skimage.future.graph import rag  # noqa: F401
+        pass
