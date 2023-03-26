@@ -447,7 +447,7 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     if dtype == np.uint8:
         x *= 255
     else:
-        x[0,0] = np.NaN
+        x[0, 0] = np.NaN
     resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
                      anti_aliasing=anti_aliasing)
 
