@@ -995,8 +995,8 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
-    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
