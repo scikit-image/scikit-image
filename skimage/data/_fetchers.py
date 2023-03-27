@@ -70,7 +70,7 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def create_image_fetcher():
+def _create_image_fetcher():
     try:
         import pooch
         # older versions of Pooch don't have a __version__ attribute
@@ -131,7 +131,7 @@ def create_image_fetcher():
     return image_fetcher, data_dir
 
 
-image_fetcher, data_dir = create_image_fetcher()
+image_fetcher, data_dir = _create_image_fetcher()
 
 if image_fetcher is None:
     has_pooch = False

@@ -201,7 +201,7 @@ def test_vortex():
 
 
 @pytest.mark.parametrize(
-    'function_name', ['create_image_fetcher', 'file_hash', 'image_fetcher']
+    'function_name', ['file_hash', 'image_fetcher']
 )
 def test_fetchers_are_public(function_name):
     # Check that the following functions that are only used indirectly in the
