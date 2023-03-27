@@ -3,10 +3,17 @@
 Reconstruct dust-covered human cornea image using inpainting
 ============================================================
 
-It is possible that dust gets accumulated on the reference mirror and causes
-dark spots to appear on direct images. This example reproduces the steps taken
-to perform OCT (Optical Coherence Tomography [1]_) dust removal in images.
-This application was first discussed by Jules Scholler in [2]_.
+Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an image
+of the retina in the back of a patient's eye. It utilizes the concept of inferometry
+to create a cross-sectional map of the retina that is accurate to within at least 10-15
+microns. From its inception, OCT images have been acquired in a time domain fashion. OCT is
+useful in the diagnosis of many retinal conditions, especially when the media is clear.
+
+Quite commonly, dust gets accumulated on the reference mirror of the OCT equipment and causes
+dark spots to appear on images. This could reduce the accuracy of an optometrist's diagnosis.
+In this example, we reproduce the steps taken to perform OCT dust removal in an image to
+restore it to its original form. This application was first discussed by Jules Scholler
+in [2]_.
 
 .. [1] Vinay A. Shah M.D. (2015)
        `Optical Coherence Tomography <https://eyewiki.aao.org/Optical_Coherence_Tomography#:~:text=3%20Limitations-,Overview,at%20least%2010%2D15%20microns.>`_,
@@ -50,7 +57,7 @@ fig.show()
 # In order to create a mask, we use the statistically average image over all the
 # images in the TIFF file. This average frame is computed over time.
 
-image_sequence_mean = np.sum(image_sequence, axis=0)
+image_sequence_mean = np.mean(image_sequence, axis=0)
 image_sequence_mean.shape
 
 fig, ax = plt.subplots()
