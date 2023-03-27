@@ -6,10 +6,10 @@ Reconstruct dust-covered human cornea image using inpainting
 Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an image
 of the retina in the back of a patient's eye. It utilizes the concept of inferometry
 to create a cross-sectional map of the retina that is accurate to within at least 10-15
-microns. From its inception, OCT images have been acquired in a time domain fashion. OCT is
+microns. From its inception, OCT images have been acquired in a time domain fashion. It is
 useful in the diagnosis of many retinal conditions, especially when the media is clear.
 
-Quite commonly, dust gets accumulated on the reference mirror of the OCT equipment and causes
+Quite commonly, dust gets accumulated on the reference mirror of the equipment and causes
 dark spots to appear on images. This could reduce the accuracy of an optometrist's diagnosis.
 In this example, we reproduce the steps taken to perform OCT dust removal in an image to
 restore it to its original form. This application was first discussed by Jules Scholler
@@ -32,9 +32,8 @@ import plotly.express as px
 #################################################################################
 # Load image
 # ==========
-# The dataset that we are using in this example is an image sequence showing
-# the palisades of Vogt in a human cornea in vivo. The file has been
-# acquired in TIFF format.
+# The dataset that we are using in this example is an image sequence showing the palisades of
+# Vogt in a human cornea in vivo. The file has been acquired in TIFF format.
 
 image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
 
@@ -43,9 +42,9 @@ print(f'shape: {image_sequence.shape}')
 print(f'dtype: {image_sequence.dtype}')
 
 #################################################################################
-# We visualize the image sequence by taking advantage of the *animation_feature*
-# parameter in Plotly's *imshow* function. We set this feature to 0 to slice the
-# image sequence along the temporal axis.
+# The dataset is a timeseries of 60 images, we visualize the image sequence by taking advantage
+# of the *animation_feature* parameter in Plotly's *imshow* function. We set this feature to 0 to
+# slice the image sequence along the temporal axis.
 
 fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
                 labels=dict(animation_frame="slice"),
@@ -54,8 +53,9 @@ fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
 fig.show()
 
 #################################################################################
-# In order to create a mask, we use the statistically average image over all the
-# images in the TIFF file. This average frame is computed over time.
+# In order to create a mask for all the images in the sequence, we compute the statistically average
+# image, which is a NumPy array. This 2D array is the mean of all the frames (axis=0) in the 3D array
+# *image_sequence*.
 
 image_sequence_mean = np.mean(image_sequence, axis=0)
 image_sequence_mean.shape
