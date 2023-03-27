@@ -62,4 +62,4 @@ image_sequence_mean.shape
 
 fig, ax = plt.subplots()
 ax.set_title('image_sequence_mean')
-plt.imshow(image_sequence_mean, cmap="gray")
+ax.imshow(image_sequence_mean, cmap="gray")
