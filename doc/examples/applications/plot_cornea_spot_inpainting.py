@@ -1,7 +1,7 @@
 """
-===============================================
-Reconstruct dust-covered image using inpainting
-===============================================
+============================================================
+Reconstruct dust-covered human cornea image using inpainting
+============================================================
 
 It is possible that dust gets accumulated on the reference mirror and causes
 dark spots to appear on direct images. This example reproduces the steps taken
@@ -23,13 +23,17 @@ import plotly.express as px
 
 
 #################################################################################
+# Load image
+# ==========
 # The dataset that we are using in this example is an image sequence showing
-# the palisades of Vogt in vivo in a human cornea. The file has been
+# the palisades of Vogt in a human cornea in vivo. The file has been
 # acquired in TIFF format.
 
 image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
 
+print(f'number of dimensions: {image_sequence.ndim}')
 print(f'shape: {image_sequence.shape}')
+print(f'dtype: {image_sequence.dtype}')
 
 #################################################################################
 # We visualize the image sequence by taking advantage of the *animation_feature*
