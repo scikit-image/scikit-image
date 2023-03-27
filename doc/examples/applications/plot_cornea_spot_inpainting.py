@@ -27,28 +27,28 @@ import plotly.express as px
 # the palisades of Vogt in vivo in a human cornea. The file has been
 # acquired in TIFF format.
 
-raw = iio.imread('data/raw.tiff')
+image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
 
-print(f'shape: {raw.shape}')
+print(f'shape: {image_sequence.shape}')
 
 #################################################################################
-# We visualise the image sequence by taking advantage of  the *animation_feature*
+# We visualize the image sequence by taking advantage of the *animation_feature*
 # parameter in Plotly's *imshow* function. We set this feature to 0 to slice the
 # image sequence along the temporal axis.
 
-fig = px.imshow(raw, animation_frame=0, binary_string=True,
+fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
                 labels=dict(animation_frame="slice"),
                 height=500, width=500,
-                title="Animated Visualisation")
+                title="Animated Visualization")
 fig.show()
 
 #################################################################################
 # In order to create a mask, we use the statistically average image over all the
 # images in the TIFF file. This average frame is computed over time.
 
-raw_mean = np.sum(raw, axis=0)
-raw_mean.shape
+image_sequence_mean = np.sum(image_sequence, axis=0)
+image_sequence_mean.shape
 
 fig, ax = plt.subplots()
-ax.set_title('raw_mean')
-plt.imshow(raw_mean, cmap="gray")
+ax.set_title('image_sequence_mean')
+plt.imshow(image_sequence_mean, cmap="gray")
