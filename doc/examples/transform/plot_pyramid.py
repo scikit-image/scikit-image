@@ -19,7 +19,8 @@ from skimage.transform import pyramid_gaussian
 
 image = data.astronaut()
 rows, cols, dim = image.shape
-pyramid = tuple(pyramid_gaussian(image, downscale=2, channel_axis=-1))
+pyramid_generator = pyramid_gaussian(image, downscale=2, channel_axis=-1)
+pyramid = tuple(pyramid_generator)  # Make generator index-able
 
 #####################################################################
 # Generate a composite image for visualization
