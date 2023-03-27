@@ -55,6 +55,12 @@ extensions = [
     "myst_parser",
 ]
 
+# Configure the autodoc extention
+autodoc_default_options = {
+    'members': True,
+    'inherited-members': True,
+}
+
 autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = ".rst"
