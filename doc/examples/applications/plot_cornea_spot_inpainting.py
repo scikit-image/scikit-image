@@ -52,10 +52,12 @@ fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
                 title="Animated Visualization")
 fig.show()
 
-#################################################################################
-# In order to create a mask for all the images in the sequence, we compute the statistically average
-# image, which is a NumPy array. This 2D array is the mean of all the frames (axis=0) in the 3D array
-# *image_sequence*.
+###################################################################################
+# To restore the dust-covered dark spots in the image sequence, we need to contrast these spots
+# from the image background. This can be done by creating a thresholding mask that would be applied to all
+# the frames (2D arrays) in the image sequence (3D array). We can say without doubt that the
+# dark spots remain static through all the frames (or time points) in the sequence. Thus, we
+# compute the 'time-averaged' image frame (along axis=0) to highlight these dark spots.
 
 image_sequence_mean = np.mean(image_sequence, axis=0)
 image_sequence_mean.shape
