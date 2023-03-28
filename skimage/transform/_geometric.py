@@ -493,6 +493,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     >>> tform_matrix.residuals(src, dst)
     array([0.4245518687, 0.0146044753, 0.1384703409, 0.1214095141,
            0.2775934609, 0.3245311807, 0.0021077555, 0.2651228318])
+
     """
 
     def __init__(self, rotation=None, translation=None, matrix=None,
