@@ -574,24 +574,29 @@ class ProjectiveTransform(GeometricTransform):
     --------
     >>> import numpy as np
     >>> from skimage import data
-    >>> from skimage.transform import ProjectiveTransform
+    >>> from skimage.transform import warp, ProjectiveTransform
     >>> img = data.rocket()
     >>> height, width, dim = img.shape
 
     Provide four pairs of matching points between the source and
     destination images to estimate the homography matrix H:
 
-    >>> src = np.array([[41., 74.],
-    ...                 [width, 72.],
+    >>> src_points = np.array([[0, 0],
+    ...                 [height, 0.],
     ...                 [height, width],
-    ...                 [96., height]])
-    >>> dst = np.array([[0., 0.],
-    ...                 [0., height],
-    ...                 [height-50, width*0.75],
-    ...                 [width*0.75, 80]])
+    ...                 [0., width]])
+    >>> dst_points = np.array([[height*0.5, 0.],
+    ...                 [height, 0.],
+    ...                 [height, width],
+    ...                 [0., width]])
     >>> pt = ProjectiveTransform()
-    >>> pt.estimate(src, dst)
+    >>> pt.estimate(src_points, dst_points)
     True
+
+    Apply the transformation to the image
+
+    >>> warped_img = warp(img, pt.inverse)
+
     """
     def __init__(self, matrix=None, *, dimensionality=2):
         if matrix is None:
