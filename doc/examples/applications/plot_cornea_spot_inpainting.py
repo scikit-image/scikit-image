@@ -30,10 +30,27 @@ import plotly.express as px
 
 
 #################################################################################
+# Let’s define a convenience function for plotting comparisons:
+
+
+def plot_comparison(original, filtered, filter_name):
+
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 8), sharex=True, sharey=True)
+    ax1.imshow(original)
+    ax1.set_title('raw_mean')
+    ax1.axis('off')
+    ax2.imshow(filtered)
+    ax2.set_title(filter_name)
+    ax2.axis('off')
+
+
+#################################################################################
+
 # Load image
 # ==========
 # The dataset that we are using in this example is an image sequence showing the palisades of
 # Vogt in a human cornea in vivo. The file has been acquired in TIFF format.
+
 
 image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
 
@@ -45,6 +62,7 @@ print(f'dtype: {image_sequence.dtype}')
 # The dataset is a timeseries of 60 images, we visualize the image sequence by taking advantage
 # of the *animation_feature* parameter in Plotly's *imshow* function. We set this feature to 0 to
 # slice the image sequence along the temporal axis.
+
 
 fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
                 labels=dict(animation_frame="slice"),
@@ -65,3 +83,14 @@ image_sequence_mean.shape
 fig, ax = plt.subplots()
 ax.set_title('image_sequence_mean')
 ax.imshow(image_sequence_mean, cmap="gray")
+
+
+###################################################################################
+
+# Use a local threshold
+# =====================
+# Thresholding is used to segment an image by assigning all pixels whose intensity values are above
+# a threshold to a foreground value, and all other pixels to a background value. It can be observed
+# that the illumination in our image is uneven. So, we use adaptive (or local) thresholding which
+# alters the threshold dynamically throughout the image, unlike traditional thresholding, which employs
+# a global threshold for all pixels.
