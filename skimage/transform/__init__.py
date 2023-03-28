@@ -27,7 +27,8 @@
   These transforms change the appearance of an image without changing its
   content. They are useful for tasks such a creating image mosaics,
   applying artistic effects, and visualizing image data.
-  Examples: :func:`~skimage.transform.warp`, inverse transforms.
+  Examples: :func:`~skimage.transform.warp`,
+  :func:`~skimage.transform.iradon`.
 
 """
 
