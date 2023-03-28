@@ -579,8 +579,7 @@ class ProjectiveTransform(GeometricTransform):
     >>> height, width, dim = img.shape
 
     Provide four pairs of matching points between the source and
-    destination images to estimate the homography matrix, H,
-    automatically for you.
+    destination images to estimate the homography matrix H:
 
     >>> src = np.array([[41., 74.],
     ...                 [width, 72.],
