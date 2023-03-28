@@ -27,6 +27,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio.v3 as iio
 import plotly.express as px
+from skimage.filters import threshold_local
 
 
 #################################################################################
@@ -45,11 +46,11 @@ def plot_comparison(original, filtered, title1, title2):
 
 
 #################################################################################
-
 # Load image
 # ==========
-# The dataset that we are using in this example is an image sequence showing the palisades of
-# Vogt in a human cornea in vivo. The file has been acquired in TIFF format.
+# The dataset that we are using in this example is an image sequence showing the
+# palisades of Vogt in a human cornea in vivo. The file has been acquired in
+# TIFF format.
 
 
 image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
@@ -86,11 +87,17 @@ ax.imshow(image_sequence_mean, cmap="gray")
 
 
 ###################################################################################
-
-# Use a local threshold
-# =====================
+# Use a local threshold to create a mask
+# ======================================
 # Thresholding is used to segment an image by assigning all pixels whose intensity values are above
 # a threshold to a foreground value, and all other pixels to a background value. It can be observed
 # that the illumination in our image is uneven. So, we use adaptive (or local) thresholding which
 # alters the threshold dynamically throughout the image, unlike traditional thresholding, which employs
 # a global threshold for all pixels.
+# Let's define a function to create a mask using local threshsolding:
+
+def create_mask(image, block_size):
+
+    thresh_value = threshold_local(image, block_size=block_size)
+    mask = (image > thresh_value)
+    return mask
