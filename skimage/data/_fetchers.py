@@ -1029,6 +1029,24 @@ def colorwheel():
     return _load("data/color.png")
 
 
+def cornea():
+    """Image sequence of in-vivo human cornea showing the palisades of Vogt.
+    There are some dark spots due to the presence of dust on the reference
+    mirror.
+
+    Returns
+    -------
+    cornea: (60, 1440, 1440) uint16 ndarray
+
+    Notes
+    -----
+    See info under `in-vivo-cornea-spots.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/cornea.tif')
+
+
 def rocket():
     """Launch photo of DSCOVR on Falcon 9 by SpaceX.
 

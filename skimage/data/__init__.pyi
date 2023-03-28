@@ -59,6 +59,7 @@ from ._fetchers import (
     coffee,
     coins,
     colorwheel,
+    cornea,
     create_image_fetcher,
     data_dir,
     download_all,
