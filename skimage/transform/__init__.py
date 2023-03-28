@@ -1,6 +1,6 @@
 """This module includes tools to transform images and volumetric data.
 
-- Geometric transformations:
+- Geometric transformation:
   These transforms change the shape or position of an image.
   They are useful for tasks such as image registration,
   alignment, and geometric correction.
@@ -17,8 +17,8 @@
 
 - Feature detection and extraction:
   These transforms identify and extract specific features or
-  patterns in an image. They are useful for tasks s object detection,
-  image segmentation, and  feature matching.
+  patterns in an image. They are useful for tasks such as object
+  detection, image segmentation, and  feature matching.
   Examples: :func:`~skimage.transform.hough_circle`,
   :func:`~skimage.transform.pyramid_expand`,
   :func:`~skimage.transform.radon`.
