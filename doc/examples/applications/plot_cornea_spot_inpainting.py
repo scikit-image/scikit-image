@@ -33,14 +33,14 @@ import plotly.express as px
 # Let’s define a convenience function for plotting comparisons:
 
 
-def plot_comparison(original, filtered, filter_name):
+def plot_comparison(original, filtered, title1, title2):
 
     fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 8), sharex=True, sharey=True)
     ax1.imshow(original)
-    ax1.set_title('raw_mean')
+    ax1.set_title(title1)
     ax1.axis('off')
     ax2.imshow(filtered)
-    ax2.set_title(filter_name)
+    ax2.set_title(title2)
     ax2.axis('off')
 
 
