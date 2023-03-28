@@ -3,101 +3,89 @@
 Reconstruct dust-covered human cornea image using inpainting
 ============================================================
 
-Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an image
-of the retina in the back of a patient's eye. It utilizes the concept of inferometry
-to create a cross-sectional map of the retina that is accurate to within at least 10-15
-microns. From its inception, OCT images have been acquired in a time domain fashion. It is
-useful in the diagnosis of many retinal conditions, especially when the media is clear.
+Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an
+image of the retina in the back of a patient's eye.
 
-Quite commonly, dust gets accumulated on the reference mirror of the equipment and causes
-dark spots to appear on images. This could reduce the accuracy of an optometrist's diagnosis.
-In this example, we reproduce the steps taken to perform OCT dust removal in an image to
-restore it to its original form. This application was first discussed by Jules Scholler
-in [2]_.
+Quite commonly, there is dust on the reference mirror of the equipment,
+causing dark spots to appear on the acquired images.
 
-.. [1] Vinay A. Shah M.D. (2015)
+This tutorial is adapted from an application shared by Jules Scholler in [2]_.
+The images were acquired by Viacheslav Mazlin.
+
+.. [1] Vinay A. Shah, MD (2015)
        `Optical Coherence Tomography <https://eyewiki.aao.org/Optical_Coherence_Tomography#:~:text=3%20Limitations-,Overview,at%20least%2010%2D15%20microns.>`_,
        American Academy of Ophthalmology.
-.. [2] Jules Scholler (2019) "Image denoising using inpainting":
-       `<https://www.jscholler.com/2019-02-28-remove-dots/>`_
+.. [2] Jules Scholler (2019) "Image denoising using inpainting"
+       https://www.jscholler.com/2019-02-28-remove-dots/
 
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import imageio.v3 as iio
+import numpy as np
+import plotly.io
 import plotly.express as px
-from skimage.filters import threshold_local
+
+from skimage import filters
 
 
-#################################################################################
-# Let’s define a convenience function for plotting comparisons:
+#####################################################################
+# The dataset we are using in this example is an image sequence showing the
+# palisades of Vogt in a human cornea in vivo. Basically, it is a
+# black-and-white movie!
 
+#####################################################################
+# Load image data
+# ===============
 
-def plot_comparison(original, filtered, title1, title2):
+image_seq = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
 
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 8), sharex=True, sharey=True)
-    ax1.imshow(original)
-    ax1.set_title(title1)
-    ax1.axis('off')
-    ax2.imshow(filtered)
-    ax2.set_title(title2)
-    ax2.axis('off')
+print(f'number of dimensions: {image_seq.ndim}')
+print(f'shape: {image_seq.shape}')
+print(f'dtype: {image_seq.dtype}')
 
+#####################################################################
+# The dataset is a timeseries of 60 (2D) images. We can visualize it by taking
+# advantage of the `animation_frame` parameter in Plotly's `imshow` function.
 
-#################################################################################
-# Load image
-# ==========
-# The dataset that we are using in this example is an image sequence showing the
-# palisades of Vogt in a human cornea in vivo. The file has been acquired in
-# TIFF format.
+fig = px.imshow(
+    image_seq,
+    animation_frame=0,
+    binary_string=True,
+    labels=dict(animation_frame='time point'),
+    title='In-vivo human cornea'
+)
+plotly.io.show(fig)
 
+#####################################################################
+# Average over time
+# =================
 
-image_sequence = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
+image_seq_mean = np.mean(image_seq, axis=0)
 
-print(f'number of dimensions: {image_sequence.ndim}')
-print(f'shape: {image_sequence.shape}')
-print(f'dtype: {image_sequence.dtype}')
+print(f'shape: {image_seq_mean.shape}')
 
-#################################################################################
-# The dataset is a timeseries of 60 images, we visualize the image sequence by taking advantage
-# of the *animation_feature* parameter in Plotly's *imshow* function. We set this feature to 0 to
-# slice the image sequence along the temporal axis.
+fig = px.imshow(image_seq_mean)
+plotly.io.show(fig)
 
+#####################################################################
+# Use local thresholding
+# ======================
 
-fig = px.imshow(image_sequence, animation_frame=0, binary_string=True,
-                labels=dict(animation_frame="slice"),
-                height=500, width=500,
-                title="Animated Visualization")
-fig.show()
+spot_size = 17
 
-###################################################################################
-# To restore the dust-covered dark spots in the image sequence, we need to contrast these spots
-# from the image background. This can be done by creating a thresholding mask that would be applied to all
-# the frames (2D arrays) in the image sequence (3D array). We can say without doubt that the
-# dark spots remain static through all the frames (or time points) in the sequence. Thus, we
-# compute the 'time-averaged' image frame (along axis=0) to highlight these dark spots.
+thresh_value = filters.threshold_local(
+    image_seq_mean,
+    block_size=spot_size
+)
 
-image_sequence_mean = np.mean(image_sequence, axis=0)
-image_sequence_mean.shape
+#####################################################################
+# Remove fine-grained features
+# ============================
 
-fig, ax = plt.subplots()
-ax.set_title('image_sequence_mean')
-ax.imshow(image_sequence_mean, cmap="gray")
+#####################################################################
+# Apply mask across frames
+# ========================
 
-
-###################################################################################
-# Use a local threshold to create a mask
-# ======================================
-# Thresholding is used to segment an image by assigning all pixels whose intensity values are above
-# a threshold to a foreground value, and all other pixels to a background value. It can be observed
-# that the illumination in our image is uneven. So, we use adaptive (or local) thresholding which
-# alters the threshold dynamically throughout the image, unlike traditional thresholding, which employs
-# a global threshold for all pixels.
-# Let's define a function to create a mask using local threshsolding:
-
-def create_mask(image, block_size):
-
-    thresh_value = threshold_local(image, block_size=block_size)
-    mask = (image > thresh_value)
-    return mask
+#####################################################################
+# Inpaint each frame separately
+# =============================
