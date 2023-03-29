@@ -733,7 +733,8 @@ def test_multichannel_centroid_weighted_table():
 
     table = regionprops_table(SAMPLE, intensity_image=intensity_image,
                               properties=('centroid_weighted',))
-    assert table.shape[1] == np.size(rpm.centroid_weighted)
+    # check the number of returned columns is correct
+    assert len(table) == np.size(rpm.centroid_weighted)
 
 
 def test_moments_weighted_central():
