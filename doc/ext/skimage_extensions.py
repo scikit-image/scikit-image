@@ -6,7 +6,7 @@ from sphinx.directives.other import TocTree
 
 
 def natural_sort_key(item):
-    """Transforms entries into tuples that can be sorted in natural order [1]_.
+    """Transform entries into tuples that can be sorted in natural order [1]_.
 
     This can be passed to the "key" argument of Python's `sorted` function.
 

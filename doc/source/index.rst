@@ -30,7 +30,7 @@ Quick links
         :link: auto_examples/index
         :link-type: any
 
-        Browse our gallery of introductory generic and domain-specific examples.
+        Browse our gallery of entry-level and domain-specific examples.
 
     .. grid-item-card:: :octicon:`comment-discussion` Get help :octicon:`link-external`
         :link: https://forum.image.sc/tag/scikit-image
