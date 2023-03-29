@@ -24,8 +24,8 @@ References
 """
 
 from ..._shared.utils import check_nD
-from . import bilateral_cy
-from .generic import _preprocess_input
+from . import _bilateral_cy
+from ._generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
@@ -97,7 +97,7 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._mean, image, footprint, out=out,
+    return _apply(_bilateral_cy._mean, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
@@ -153,7 +153,7 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._pop, image, footprint, out=out,
+    return _apply(_bilateral_cy._pop, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
@@ -214,5 +214,5 @@ def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._sum, image, footprint, out=out,
+    return _apply(_bilateral_cy._sum, image, footprint, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)

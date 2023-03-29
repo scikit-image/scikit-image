@@ -4,7 +4,7 @@ from numpy.testing import assert_, assert_equal
 
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera
-from skimage.filters.lpi_filter import LPIFilter2D, filter_inverse, wiener
+from skimage.filters._lpi_filter import LPIFilter2D, filter_inverse, wiener
 
 
 class TestLPIFilter2D:

@@ -54,7 +54,7 @@ from scipy import ndimage as ndi
 from ..._shared.utils import check_nD, warn
 from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
-from . import generic_cy
+from . import _generic_cy
 
 
 __all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',
@@ -382,11 +382,11 @@ def autolevel(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._autolevel, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._autolevel, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._autolevel_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -435,11 +435,11 @@ def equalize(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._equalize, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._equalize, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._equalize_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -488,11 +488,11 @@ def gradient(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._gradient, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._gradient, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._gradient_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._gradient_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -550,11 +550,11 @@ def maximum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._maximum, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._maximum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._maximum_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._maximum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -603,11 +603,11 @@ def mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._mean, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._mean, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._mean_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -661,11 +661,11 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._geometric_mean, image,
+        return _apply_scalar_per_pixel(_generic_cy._geometric_mean, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._geometric_mean_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._geometric_mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -722,11 +722,11 @@ def subtract_mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._subtract_mean, image,
+        return _apply_scalar_per_pixel(_generic_cy._subtract_mean, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._subtract_mean_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._subtract_mean_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -783,11 +783,11 @@ def median(image, footprint=None, out=None, mask=None,
     if footprint is None:
         footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._median, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._median, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._median_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._median_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -845,11 +845,11 @@ def minimum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._minimum, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._minimum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._minimum_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._minimum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -900,11 +900,11 @@ def modal(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._modal, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._modal, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._modal_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._modal_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -957,11 +957,11 @@ def enhance_contrast(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image,
+        return _apply_scalar_per_pixel(_generic_cy._enhance_contrast, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._enhance_contrast_3D,
+        return _apply_scalar_per_pixel_3D(_generic_cy._enhance_contrast_3D,
                                           image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -1017,11 +1017,11 @@ def pop(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._pop, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._pop, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._pop_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._pop_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -1077,11 +1077,11 @@ def sum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._sum, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._sum, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._sum_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._sum_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -1137,11 +1137,11 @@ def threshold(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._threshold, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._threshold, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._threshold_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._threshold_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -1206,7 +1206,7 @@ def noise_filter(image, footprint, out=None, mask=None,
         footprint_cpy = footprint.copy()
         footprint_cpy[centre_r, centre_c] = 0
 
-        return _apply_scalar_per_pixel(generic_cy._noise_filter, image,
+        return _apply_scalar_per_pixel(_generic_cy._noise_filter, image,
                                        footprint_cpy, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
@@ -1218,7 +1218,7 @@ def noise_filter(image, footprint, out=None, mask=None,
         footprint_cpy = footprint.copy()
         footprint_cpy[centre_r, centre_c, centre_z] = 0
 
-        return _apply_scalar_per_pixel_3D(generic_cy._noise_filter_3D,
+        return _apply_scalar_per_pixel_3D(_generic_cy._noise_filter_3D,
                                           image, footprint_cpy, out=out,
                                           mask=mask, shift_x=shift_x,
                                           shift_y=shift_y, shift_z=shift_z)
@@ -1276,12 +1276,12 @@ def entropy(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._entropy, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y,
                                        out_dtype=np.float64)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._entropy_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z,
@@ -1337,11 +1337,11 @@ def otsu(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._otsu, image, footprint,
+        return _apply_scalar_per_pixel(_generic_cy._otsu, image, footprint,
                                        out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
+        return _apply_scalar_per_pixel_3D(_generic_cy._otsu_3D, image,
                                           footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)
@@ -1398,7 +1398,7 @@ def windowed_histogram(image, footprint, out=None, mask=None,
     if n_bins is None:
         n_bins = int(image.max()) + 1
 
-    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
+    return _apply_vector_per_pixel(_generic_cy._windowed_hist, image, footprint,
                                    out=out, mask=mask,
                                    shift_x=shift_x, shift_y=shift_y,
                                    out_dtype=np.float64,
@@ -1445,11 +1445,11 @@ def majority(image, footprint, *, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._majority, image,
+        return _apply_scalar_per_pixel(_generic_cy._majority, image,
                                        footprint, out=out, mask=mask,
                                        shift_x=shift_x, shift_y=shift_y)
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._majority_3D,
+        return _apply_scalar_per_pixel_3D(_generic_cy._majority_3D,
                                           image, footprint, out=out, mask=mask,
                                           shift_x=shift_x, shift_y=shift_y,
                                           shift_z=shift_z)

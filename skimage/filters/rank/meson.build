@@ -1,9 +1,9 @@
 extensions = [
-  'bilateral_cy',
-  'core_cy',
-  'core_cy_3d',
-  'generic_cy',
-  'percentile_cy'
+  '_bilateral_cy',
+  '_core_cy',
+  '_core_cy_3d',
+  '_generic_cy',
+  '_percentile_cy'
 ]
 
 foreach ext: extensions
@@ -19,8 +19,8 @@ endforeach
 python_sources = [
   '__init__.py',
   '_percentile.py',
-  'bilateral.py',
-  'generic.py'
+  '_bilateral.py',
+  '_generic.py'
 ]
 
 py3.install_sources(

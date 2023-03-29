@@ -31,7 +31,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage import filters
-from skimage.filters.thresholding import _cross_entropy
+from skimage.filters._thresholding import _cross_entropy
 
 cell = data.cell()
 camera = data.camera()

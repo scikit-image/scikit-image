@@ -23,10 +23,10 @@ python_sources = [
   '_sparse.py',
   '_unsharp_mask.py',
   '_window.py',
-  'edges.py',
-  'lpi_filter.py',
-  'ridges.py',
-  'thresholding.py'
+  '_edges.py',
+  '_lpi_filter.py',
+  '_ridges.py',
+  '_thresholding.py'
 ]
 
 py3.install_sources(

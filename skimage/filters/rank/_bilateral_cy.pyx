@@ -5,7 +5,7 @@
 
 cimport numpy as cnp
 
-from .core_cy cimport dtype_t, dtype_t_out, _core
+from ._core_cy cimport dtype_t, dtype_t_out, _core
 
 cnp.import_array()
 

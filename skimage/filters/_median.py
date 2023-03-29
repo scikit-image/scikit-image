@@ -3,7 +3,7 @@ from warnings import warn
 import numpy as np
 from scipy import ndimage as ndi
 
-from .rank import generic
+from .rank import _generic
 
 
 def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
@@ -70,7 +70,7 @@ def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
             warn("Change 'behavior' to 'ndimage' if you want to use the "
                  "parameters 'mode' or 'cval'. They will be discarded "
                  "otherwise.")
-        return generic.median(image, footprint=footprint, out=out)
+        return _generic.median(image, footprint=footprint, out=out)
     if footprint is None:
         footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
     return ndi.median_filter(image, footprint=footprint, output=out, mode=mode,
