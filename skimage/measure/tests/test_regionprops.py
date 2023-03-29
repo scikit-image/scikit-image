@@ -33,6 +33,9 @@ SAMPLE = np.array(
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 INTENSITY_FLOAT_SAMPLE = INTENSITY_SAMPLE.copy().astype(np.float64) / 10.0
+INTENSITY_FLOAT_SAMPLE_MULTICHANNEL = (
+        INTENSITY_FLOAT_SAMPLE[..., np.newaxis] * [1, 2, 3]
+        )
 
 SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
 SAMPLE_MULTIPLE[3:5, 7:8] = 2
@@ -712,6 +715,25 @@ def test_solidity():
 
     solidity = regionprops(SAMPLE, spacing=(3, 9))[0].solidity
     assert_almost_equal(solidity, target_solidity)
+
+
+def test_multichannel_centroid_weighted_table():
+    """Test for https://github.com/scikit-image/scikit-image/issues/6860."""
+    intensity_image = INTENSITY_FLOAT_SAMPLE_MULTICHANNEL
+    rp0 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0])[0]
+    rp1 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0:1])[0]
+    rpm = regionprops(SAMPLE, intensity_image=intensity_image)[0]
+    np.testing.assert_almost_equal(rp0.centroid_weighted,
+                                   np.squeeze(rp1.centroid_weighted))
+    np.testing.assert_almost_equal(rp0.centroid_weighted,
+                                   np.array(rpm.centroid_weighted)[:, 0])
+    assert np.shape(rp1.centroid_weighted) == (SAMPLE.ndim, 1)
+    assert np.shape(rpm.centroid_weighted) == (SAMPLE.ndim,
+                                               intensity_image.shape[-1])
+
+    table = regionprops_table(SAMPLE, intensity_image=intensity_image,
+                              properties=('centroid_weighted',))
+    assert table.shape[1] == np.size(rpm.centroid_weighted)
 
 
 def test_moments_weighted_central():
