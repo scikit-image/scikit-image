@@ -15,7 +15,7 @@
 - **pip:** `pip install scikit-image`
 - **conda:** `conda install -c conda-forge scikit-image`
 
-Also see [installing `scikit-image`](INSTALL.rst).
+Also see [installing `scikit-image`](https://github.com/scikit-image/scikit-image/blob/main/INSTALL.rst).
 
 ## License
 
