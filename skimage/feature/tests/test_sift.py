@@ -129,3 +129,35 @@ def test_no_descriptors_extracted_sift():
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+def test_features_dtype():
+    detector_extractor = SIFT()
+    positions_oct = np.array([[1.0, 1.0]])
+    sigmas_oct = np.array([0.8])
+    octaves = np.array([0])
+    scales_oct = np.array([1])
+    gaussian_scalespace = detector_extractor._create_scalespace(img)
+    detector_extractor._compute_orientation(
+        positions_oct, scales_oct, sigmas_oct, octaves, gaussian_scalespace
+    )
+    assert (
+        detector_extractor.positions is not None
+        and detector_extractor.positions.dtype == positions_oct.dtype
+    )
+    assert (
+        detector_extractor.sigmas is not None
+        and detector_extractor.sigmas.dtype == sigmas_oct.dtype
+    )
+    assert (
+        detector_extractor.orientations is not None
+        and detector_extractor.orientations.dtype == detector_extractor.float_dtype
+    )
+    assert (
+        detector_extractor.octaves is not None
+        and detector_extractor.octaves.dtype == octaves.dtype
+    )
+    assert (
+        detector_extractor.scales is not None
+        and detector_extractor.scales.dtype == scales_oct.dtype
+    )
