@@ -941,10 +941,10 @@ class AffineTransform(ProjectiveTransform):
 
     References
     ----------
-    .. [1] Wikipedia, "Image transformation" section of "Affine transformation":
-           <https://en.wikipedia.org/wiki/Affine_transformation>
-    .. [2] Wikipedia, :"Shear mapping"
-           <https://en.wikipedia.org/wiki/Shear_mapping>
+    .. [1] Wikipedia, "Affine transformation",
+           https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
+    .. [2] Wikipedia, "Shear mapping",
+           https://en.wikipedia.org/wiki/Shear_mapping
 
     Notes
     -----
