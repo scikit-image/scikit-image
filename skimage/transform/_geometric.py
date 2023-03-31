@@ -891,9 +891,9 @@ class AffineTransform(ProjectiveTransform):
     >>> tform = transform.AffineTransform()
     >>> tform.estimate(src,dst)
 
-    Apply the Transformation
+    Apply the transformation
 
-    >>> tform_img = transform.warp(img, inverse_map = tform.inverse)
+    >>> warped = transform.warp(img, inverse_map = tform.inverse)
 
     """
 
