@@ -895,9 +895,8 @@ class AffineTransform(ProjectiveTransform):
         Rotation angle in counter-clockwise direction as radians. Only
         available for 2D.
     shear : float, optional
-        Shear angle is the counter-clockwise radians between the former verticals and the y-axis.
-        See the reference [2] for detail about the shear mapping.
-        Only available for 2D.
+        The shear angle is the counter-clockwise radians by which the former y-axis is
+        rotated around the origin [2]. Only available for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
