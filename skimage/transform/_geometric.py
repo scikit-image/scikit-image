@@ -890,6 +890,7 @@ class AffineTransform(ProjectiveTransform):
 
     >>> tform = transform.AffineTransform()
     >>> tform.estimate(src,dst)
+    True
 
     Apply the transformation
 
