@@ -882,7 +882,6 @@ class AffineTransform(ProjectiveTransform):
     >>> src = np.array([[150, 150],
     ... [250, 100],
     ... [150, 200]])
-
     >>> dst = np.array([[200, 200],
     ... [300, 150],
     ... [150, 400]])
