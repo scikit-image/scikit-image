@@ -886,12 +886,9 @@ class AffineTransform(ProjectiveTransform):
     ... [300, 150],
     ... [150, 400]])
 
-    Creating AffineTransform object
+    Estimate the transformation matrix
 
     >>> tform = transform.AffineTransform()
-
-    Computes the transformation matrix
-
     >>> tform.estimate(src,dst)
 
     Apply the Transformation
