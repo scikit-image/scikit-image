@@ -875,9 +875,6 @@ class AffineTransform(ProjectiveTransform):
     --------
     >>> import numpy as np
     >>> from skimage import data, transform
-
-    Load an image data
-
     >>> img = data.astronaut()
 
     Define source and destination points
