@@ -727,6 +727,7 @@ def test_multichannel_centroid_weighted_table():
                                    np.squeeze(rp1.centroid_weighted))
     np.testing.assert_almost_equal(rp0.centroid_weighted,
                                    np.array(rpm.centroid_weighted)[:, 0])
+    assert np.shape(rp0.centroid_weighted) == (SAMPLE.ndim,)
     assert np.shape(rp1.centroid_weighted) == (SAMPLE.ndim, 1)
     assert np.shape(rpm.centroid_weighted) == (SAMPLE.ndim,
                                                intensity_image.shape[-1])
