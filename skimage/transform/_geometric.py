@@ -874,8 +874,8 @@ class AffineTransform(ProjectiveTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import data, transform
-    >>> img = data.astronaut()
+    >>> import skimage as ski
+    >>> img = ski.data.astronaut()
 
     Define source and destination points
 
@@ -888,7 +888,7 @@ class AffineTransform(ProjectiveTransform):
 
     Estimate the transformation matrix
 
-    >>> tform = transform.AffineTransform()
+    >>> tform = ski.transform.AffineTransform()
     >>> tform.estimate(src,dst)
     True
 
