@@ -1,6 +1,6 @@
 """
 ============================================================
-Reconstruct dust-covered human cornea image using inpainting
+Reconstruct dust-obstructed human cornea image with inpainting
 ============================================================
 
 Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an
@@ -50,6 +50,8 @@ print(f'dtype: {image_seq.dtype}')
 fig = px.imshow(
     image_seq,
     animation_frame=0,
+    height=500,
+    width=500,
     binary_string=True,
     labels=dict(animation_frame='time point'),
     title='In-vivo human cornea'
@@ -64,7 +66,12 @@ image_seq_mean = np.mean(image_seq, axis=0)
 
 print(f'shape: {image_seq_mean.shape}')
 
-fig = px.imshow(image_seq_mean)
+fig = px.imshow(
+    image_seq_mean,
+    width=500,
+    height=500,
+    binary_string=True
+)
 plotly.io.show(fig)
 
 #####################################################################
