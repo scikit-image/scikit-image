@@ -661,7 +661,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
                  removed_version='1.0')
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,

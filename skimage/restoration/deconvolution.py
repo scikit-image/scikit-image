@@ -139,7 +139,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     return deconv
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
                  removed_version='1.0')
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
                         clip=True, *, seed=None):

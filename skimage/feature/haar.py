@@ -218,7 +218,7 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         return haar_feature
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
                  removed_version='1.0')
 def draw_haar_like_feature(image, r, c, width, height,
                            feature_coord,

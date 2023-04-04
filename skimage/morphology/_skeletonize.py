@@ -350,7 +350,7 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.20',
+@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
                  removed_version='1.0')
 def medial_axis(image, mask=None, return_distance=False, *, seed=None):
     """Compute the medial axis transform of a binary image.

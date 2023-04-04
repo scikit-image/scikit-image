@@ -292,7 +292,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
-@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.20',
+@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.21',
                  removed_version='1.0')
 def random_shapes(image_shape,
                   max_shapes,
