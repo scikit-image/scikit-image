@@ -117,7 +117,7 @@ def test_unsupervised_wiener_deprecated_user_param():
                             "`min_iter` is a deprecated key"]):
         restoration.unsupervised_wiener(
             data, otf, reg=laplacian, is_real=False,
-            user_params={"min_num_iter": 30}, seed=5
+            user_params={"max_iter": 300, "min_iter": 30}, seed=5
         )
 
 
