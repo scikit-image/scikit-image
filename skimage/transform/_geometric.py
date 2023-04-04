@@ -877,24 +877,24 @@ class AffineTransform(ProjectiveTransform):
     >>> import skimage as ski
     >>> img = ski.data.astronaut()
 
-    Define source and destination points
+    Define source and destination points:
 
     >>> src = np.array([[150, 150],
-    ... [250, 100],
-    ... [150, 200]])
+    ...                 [250, 100],
+    ...                 [150, 200]])
     >>> dst = np.array([[200, 200],
-    ... [300, 150],
-    ... [150, 400]])
+    ...                 [300, 150],
+    ...                 [150, 400]])
 
-    Estimate the transformation matrix
+    Estimate the transformation matrix:
 
     >>> tform = ski.transform.AffineTransform()
-    >>> tform.estimate(src,dst)
+    >>> tform.estimate(src, dst)
     True
 
-    Apply the transformation
+    Apply the transformation:
 
-    >>> warped = transform.warp(img, inverse_map = tform.inverse)
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
     """
 
