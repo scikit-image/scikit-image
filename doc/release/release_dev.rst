@@ -25,7 +25,7 @@ Improvements
 
 API Changes
 -----------
-
+''data.create_image_fetcher'' is now private and has been removed from the ''skimage/data/__init__.pyi''
 
 
 Bugfixes
