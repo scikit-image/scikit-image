@@ -465,7 +465,10 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     Examples
     --------
-    >>> tform_matrix = EssentialMatrixTransform(
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>>
+    >>> tform_matrix = ski.transform.EssentialMatrixTransform(
     ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
     ... )
     >>> tform_matrix.params
@@ -1653,25 +1656,24 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import transform
+    >>> import skimage as ski
 
     >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
 
-    >>> tform = transform.estimate_transform('similarity', src, dst)
+    >>> tform = ski.transform.estimate_transform('similarity', src, dst)
 
     >>> np.allclose(tform.inverse(tform(src)), src)
     True
 
     >>> # warp image using the estimated transformation
-    >>> from skimage import data
-    >>> image = data.camera()
+    >>> image = ski.data.camera()
 
-    >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
+    >>> ski.transform.warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = transform.SimilarityTransform(scale=1.1, rotation=1,
+    >>> tform2 = ski.transform.SimilarityTransform(scale=1.1, rotation=1,
     ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
