@@ -10,6 +10,8 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
+from skimage._shared._warnings import expected_warnings
+
 
 test_img = util.img_as_float(camera())
 
