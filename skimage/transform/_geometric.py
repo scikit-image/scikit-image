@@ -463,6 +463,40 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     params : (3, 3) array
         Essential matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>>
+    >>> tform_matrix = ski.transform.EssentialMatrixTransform(
+    ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
+    ... )
+    >>> tform_matrix.params
+    array([[ 0., -1.,  0.],
+           [ 1.,  0.,  0.],
+           [ 0.,  0.,  0.]])
+    >>> src = np.array([[ 1.839035, 1.924743],
+    ...                 [ 0.543582, 0.375221],
+    ...                 [ 0.47324 , 0.142522],
+    ...                 [ 0.96491 , 0.598376],
+    ...                 [ 0.102388, 0.140092],
+    ...                 [15.994343, 9.622164],
+    ...                 [ 0.285901, 0.430055],
+    ...                 [ 0.09115 , 0.254594]])
+    >>> dst = np.array([[1.002114, 1.129644],
+    ...                 [1.521742, 1.846002],
+    ...                 [1.084332, 0.275134],
+    ...                 [0.293328, 0.588992],
+    ...                 [0.839509, 0.08729 ],
+    ...                 [1.779735, 1.116857],
+    ...                 [0.878616, 0.602447],
+    ...                 [0.642616, 1.028681]])
+    >>> tform_matrix.estimate(src, dst)
+    True
+    >>> tform_matrix.residuals(src, dst)
+    array([0.4245518687, 0.0146044753, 0.1384703409, 0.1214095141,
+           0.2775934609, 0.3245311807, 0.0021077555, 0.2651228318])
+
     """
 
     def __init__(self, rotation=None, translation=None, matrix=None,
@@ -1648,25 +1682,24 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import transform
+    >>> import skimage as ski
 
     >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
 
-    >>> tform = transform.estimate_transform('similarity', src, dst)
+    >>> tform = ski.transform.estimate_transform('similarity', src, dst)
 
     >>> np.allclose(tform.inverse(tform(src)), src)
     True
 
     >>> # warp image using the estimated transformation
-    >>> from skimage import data
-    >>> image = data.camera()
+    >>> image = ski.data.camera()
 
-    >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
+    >>> ski.transform.warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = transform.SimilarityTransform(scale=1.1, rotation=1,
+    >>> tform2 = ski.transform.SimilarityTransform(scale=1.1, rotation=1,
     ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
