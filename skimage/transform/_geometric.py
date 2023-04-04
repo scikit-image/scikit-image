@@ -870,6 +870,32 @@ class AffineTransform(ProjectiveTransform):
     ------
     ValueError
         If both ``matrix`` and any of the other parameters are provided.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> img = ski.data.astronaut()
+
+    Define source and destination points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+
+    Estimate the transformation matrix:
+
+    >>> tform = ski.transform.AffineTransform()
+    >>> tform.estimate(src, dst)
+    True
+
+    Apply the transformation:
+
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
