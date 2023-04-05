@@ -5,7 +5,7 @@ Version 0.17
 
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.21
+Version 0.22
 ------------
 * In ``skimage/filters/lpi_filter.py``, remove the deprecated function
   inverse().
