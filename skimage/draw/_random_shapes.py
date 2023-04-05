@@ -293,7 +293,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
 
 
 @deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.21',
-                 removed_version='1.0')
+                 removed_version='0.23')
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,

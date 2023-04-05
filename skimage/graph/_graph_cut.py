@@ -70,7 +70,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
 
 
 @deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
-                 removed_version='1.0')
+                 removed_version='0.23')
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
                    max_edge=1.0,
                    *,

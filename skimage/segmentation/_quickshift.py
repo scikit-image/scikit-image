@@ -7,8 +7,8 @@ from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 
 
-@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.20',
-                 removed_version='1.0')
+@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, seed=42,
                *, channel_axis=-1):

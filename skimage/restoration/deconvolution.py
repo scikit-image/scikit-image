@@ -140,7 +140,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
 
 @deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
-                 removed_version='1.0')
+                 removed_version='0.23')
 def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
                         clip=True, *, seed=None):
     """Unsupervised Wiener-Hunt deconvolution.

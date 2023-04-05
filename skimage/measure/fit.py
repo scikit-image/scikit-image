@@ -662,7 +662,7 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
 
 
 @deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
-                 removed_version='1.0')
+                 removed_version='0.23')
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,

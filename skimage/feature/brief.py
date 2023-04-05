@@ -116,8 +116,8 @@ class BRIEF(DescriptorExtractor):
 
     """
 
-    @deprecate_kwarg({'sample_seed': 'seed'}, deprecated_version='0.20',
-                     removed_version='1.0')
+    @deprecate_kwarg({'sample_seed': 'seed'}, deprecated_version='0.21',
+                     removed_version='0.23')
     def __init__(self, descriptor_size=256, patch_size=49,
                  mode='normal', sigma=1, seed=1):
 
