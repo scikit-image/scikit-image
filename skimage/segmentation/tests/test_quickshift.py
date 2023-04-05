@@ -15,8 +15,11 @@ def test_grey(dtype):
     img[10:, 10:] = 0.6
     img += 0.05 * rnd.normal(size=img.shape)
     img = img.astype(dtype, copy=False)
-    seg = quickshift(img, kernel_size=2, max_dist=3, random_seed=0,
+    seg = quickshift(img, kernel_size=2, max_dist=3, seed=0,
                      convert2lab=False, sigma=0)
+    with testing.expected_warnings(['`random_seed` is a deprecated argument']):
+        quickshift(img, kernel_size=2, max_dist=3, random_seed=0,
+                   convert2lab=False, sigma=0)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     # that mostly respect the 4 regions:
@@ -39,7 +42,7 @@ def test_color(dtype, channel_axis):
     img = img.astype(dtype, copy=False)
 
     img = np.moveaxis(img, source=-1, destination=channel_axis)
-    seg = quickshift(img, random_seed=0, max_dist=30, kernel_size=10, sigma=0,
+    seg = quickshift(img, seed=0, max_dist=30, kernel_size=10, sigma=0,
                      channel_axis=channel_axis)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
@@ -48,7 +51,7 @@ def test_color(dtype, channel_axis):
     assert_array_equal(seg[:10, 10:], 0)
     assert_array_equal(seg[10:, 10:], 2)
 
-    seg2 = quickshift(img, kernel_size=1, max_dist=2, random_seed=0,
+    seg2 = quickshift(img, kernel_size=1, max_dist=2, seed=0,
                       convert2lab=False, sigma=0,
                       channel_axis=channel_axis)
     # very oversegmented:

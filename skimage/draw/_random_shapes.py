@@ -1,9 +1,10 @@
 import math
+
 import numpy as np
 
 from . import (polygon as draw_polygon, disk as draw_disk,
                ellipse as draw_ellipse)
-from .._shared.utils import warn
+from .._shared.utils import deprecate_kwarg, warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -291,6 +292,8 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
+@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,
@@ -301,7 +304,7 @@ def random_shapes(image_shape,
                   intensity_range=None,
                   allow_overlap=False,
                   num_trials=100,
-                  random_seed=None,
+                  seed=None,
                   *,
                   channel_axis=-1):
     """Generate an image with random shapes, labeled with bounding boxes.
@@ -346,12 +349,12 @@ def random_shapes(image_shape,
         If `True`, allow shapes to overlap.
     num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
-    random_seed : {None, int, `numpy.random.Generator`}, optional
-        If `random_seed` is None the `numpy.random.Generator` singleton is
+    seed : {None, int, `numpy.random.Generator`}, optional
+        If `seed` is None, the `numpy.random.Generator` singleton is
         used.
-        If `random_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `random_seed`.
-        If `random_seed` is already a ``Generator`` instance then that instance
+        If `seed` is an int, a new ``Generator`` instance is used,
+        seeded with `seed`.
+        If `seed` is already a ``Generator`` instance, then that instance
         is used.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -404,7 +407,7 @@ def random_shapes(image_shape,
                     msg = 'Intensity range must lie within (0, 255) interval'
                     raise ValueError(msg)
 
-    random = np.random.default_rng(random_seed)
+    random = np.random.default_rng(seed)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
     image = np.full(image_shape, 255, dtype=np.uint8)
