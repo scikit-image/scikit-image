@@ -757,7 +757,7 @@ cdef class MCP_Connect(MCP):
         cdef INDEX_T start
 
         MCP._reset(self)
-        starts, - = self._starts, self._ends
+        starts, _ = self._starts, self._ends
 
         # Reset idmap
         self.flat_idmap[...] = -1
