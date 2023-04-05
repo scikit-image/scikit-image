@@ -895,8 +895,8 @@ class AffineTransform(ProjectiveTransform):
         Rotation angle in counter-clockwise direction as radians. Only
         available for 2D.
     shear : float, optional
-        The shear angle is the counter-clockwise radians by which the former y-axis is
-        rotated around the origin [2]. Only available for 2D.
+        The shear angle is the counter-clockwise radians by which the y-axis is
+        rotated around the origin [2]. Only available in 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
@@ -947,10 +947,9 @@ class AffineTransform(ProjectiveTransform):
 
     Notes
     -----
-    The shear angle definition is different from the angle defined in [2].
-    The skimage's version is defined as the angle between the former verticals
-    and the y-axis instead of the angle between the former verticals and the x-axis,
-    and the direction is counter-clockwise.
+    The shear angle is defined differently from [2]:
+    here, it is the angle that the transformed y-axis makes with the y-axis,
+    measured counter-clockwise.
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
