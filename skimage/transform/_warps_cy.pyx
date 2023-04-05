@@ -107,7 +107,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
-    cval : string, optional (default 0)
+    cval : float, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
 
