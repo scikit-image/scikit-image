@@ -160,8 +160,8 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     Parameters
     -----------
     descriptors : np.ndarray, shape=(n_descriptors, descriptor_length)
-        NumPy array of the descriptors to use to compute the Fisher vector
-        representation for.
+        NumPy array of the descriptors for which the Fisher vector
+        representation is to be computed.
     gmm : sklearn.mixture.GaussianMixture
         An estimated GMM object, which contains the necessary parameters needed
         to compute the Fisher vector.
@@ -254,8 +254,8 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     # Apply analytical diagonal normalization
     sqrt_mixture_weights = np.sqrt(mixture_weights)
     d_pi /= sqrt_mixture_weights
-    d_mu /= np.expand_dims(sqrt_mixture_weights, -1) * covariances
-    d_sigma /= np.expand_dims(np.sqrt(2 * mixture_weights), -1) * covariances ** 2
+    d_mu /= sqrt_mixture_weights[:, np.newaxis] * np.sqrt(covariances)
+    d_sigma /= np.sqrt(2) * sqrt_mixture_weights[:, np.newaxis] * covariances
 
     # Concatenate GMM gradients to form Fisher vector representation
     fisher_vector = np.hstack((d_pi, d_mu.ravel(), d_sigma.ravel()))
