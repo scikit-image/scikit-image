@@ -101,6 +101,7 @@ docs = [
     'ipykernel',
     'plotly>=5.10',
     'kaleido',
+    'scikit-learn>=0.24.0',
 ]
 optional = [
     'SimpleITK',
@@ -110,6 +111,7 @@ optional = [
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pyamg',
+    'scikit-learn>=0.24.0',
 ]
 test = [
     'asv',
