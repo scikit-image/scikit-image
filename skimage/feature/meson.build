@@ -62,7 +62,7 @@ python_sources = [
   'brief.py',
   'censure.py',
   'corner.py',
-  'fished_vector.py',
+  'fisher_vector.py',
   'haar.py',
   'match.py',
   'orb.py',
