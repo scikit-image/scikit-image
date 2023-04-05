@@ -1,5 +1,3 @@
-import numpy as np
-
 __all__ = ['slice_along_axes']
 
 
@@ -56,10 +54,10 @@ def slice_along_axes(image, slices, axes=None, copy=False):
         raise ValueError("`axes` must be unique")
 
     if not all(a >= 0 and a < image.ndim for a in axes):
-        raise ValueError(f"axis {axes} out of range; image has only "
+        raise ValueError(f"axes {axes} out of range; image has only "
                          f"{image.ndim} dimensions")
 
-    _slices = [slice(None)] * image.ndim
+    _slices = [slice(None),] * image.ndim
     for (a, b), ax in zip(slices, axes):
         if a > b:
             raise ValueError(
@@ -69,7 +67,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
             raise ValueError(f"Invalid slice ({a}, {b}) for image with dimensions {image.shape}")
         _slices[ax] = slice(a, b)
 
-    image_slice = image[tuple(slices)]
+    image_slice = image[tuple(_slices)]
 
     if copy and image_slice.base is not None:
         image_slice = image_slice.copy()
