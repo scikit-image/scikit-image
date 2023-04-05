@@ -81,7 +81,7 @@ def create_image_fetcher():
             retry = {'retry_if_failed': 3}
             # Keep version check in synch with
             # scikit-image/requirements/optional.txt
-            if version.parse(pooch_version) < version.parse('1.3.0'):
+            if version.parse(pooch_version) < version.parse('1.6.0'):
                 # we need a more recent version of pooch to retry
                 retry = {}
     except ImportError:

@@ -1,1 +1,4 @@
-pooch>=1.3.0
+# Keep pooch version in synch with the one hard coded in
+# skimage/data/_fetchers.py
+# requirements/optional.txt
+pooch>=1.6.0
