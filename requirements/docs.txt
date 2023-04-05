@@ -1,10 +1,10 @@
-sphinx>=5.2
+sphinx>=6.0
 sphinx-gallery>=0.11
 numpydoc>=1.5
 sphinx-copybutton
 pytest-runner
 scikit-learn
-matplotlib>=3.6
+matplotlib>=3.5
 dask[array]>=2022.9.2
 pandas>=1.5
 seaborn>=0.11
