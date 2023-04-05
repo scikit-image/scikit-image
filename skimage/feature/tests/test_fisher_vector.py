@@ -2,12 +2,12 @@ import pytest
 
 import numpy as np
 
-from skimage.feature.fisher_vector import (
+pytest.importorskip('sklearn')
+
+from skimage.feature.fisher_vector import (   # noqa: E402
     learn_gmm, fisher_vector, FisherVectorException,
     DescriptorException
 )
-
-pytest.importorskip('sklearn')
 
 
 def test_gmm_wrong_descriptor_format_1():
