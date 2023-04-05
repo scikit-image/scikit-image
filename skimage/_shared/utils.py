@@ -5,7 +5,6 @@ import warnings
 
 import numpy as np
 
-from ..util.dtype import img_as_float
 from ._warnings import all_warnings, warn
 
 
