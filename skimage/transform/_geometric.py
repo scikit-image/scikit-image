@@ -892,10 +892,9 @@ class AffineTransform(ProjectiveTransform):
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
     rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians. Only
-        available for 2D.
+        Rotation angle, clockwise, as radians. Only available for 2D.
     shear : float, optional
-        The shear angle is the counter-clockwise radians by which the y-axis is
+        The shear angle, clockwise, by which the y-axis is
         rotated around the origin [2]. Only available in 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
@@ -944,12 +943,6 @@ class AffineTransform(ProjectiveTransform):
            https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
     .. [2] Wikipedia, "Shear mapping",
            https://en.wikipedia.org/wiki/Shear_mapping
-
-    Notes
-    -----
-    The shear angle is defined differently from [2]:
-    here, it is the angle that the transformed y-axis makes with the y-axis,
-    measured counter-clockwise.
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
@@ -1258,7 +1251,7 @@ class EuclideanTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle in counter-clockwise direction as radians. If given as
+        Rotation angle, clockwise, as radians. If given as
         a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
@@ -1398,7 +1391,7 @@ class SimilarityTransform(EuclideanTransform):
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
     rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians.
+        Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
     translation : (dim,) array_like, optional
