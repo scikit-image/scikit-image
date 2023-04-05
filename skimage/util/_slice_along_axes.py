@@ -29,9 +29,9 @@ def slice_along_axes(image, slices, axes=None, copy=False):
     >>> img = data.camera()
     >>> img.shape
     (512, 512)
-    >>> cropped_img = slice_along_axes(img, [(0, 100)])
+    >>> cropped_img = slice_along_axes(img, [(0, 100)], axes=[1])
     >>> cropped_img.shape
-    (100, 512)
+    (512, 100)
     >>> cropped_img = slice_along_axes(img, [(0, 100), (0, 100)])
     >>> cropped_img.shape
     (100, 100)
