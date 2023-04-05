@@ -40,10 +40,10 @@ dependencies = [
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.12',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
+    'packaging>=21',
     'lazy_loader>=0.2',
 ]
 
@@ -73,10 +73,10 @@ default = [
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.12',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
+    'packaging>=21',
     'lazy_loader>=0.2',
 ]
 developer = [

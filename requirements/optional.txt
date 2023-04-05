@@ -4,8 +4,5 @@ astropy>=5.0
 cloudpickle>=0.2.1
 dask[array]>=2021.1.0
 matplotlib>=3.5
-# Keep pooch version in synch with the one hard coded in
-# skimage/data/_fetchers.py
-# requirements/data.txt
 pooch>=1.6.0
 pyamg
