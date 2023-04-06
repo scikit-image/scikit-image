@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
-from skimage.transform._geometric import _euler_rotation
+from scipy.spatial.transform import Rotation
 
 
 def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
@@ -159,8 +159,9 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
             f'len(axis_lengths) should be 3 but got {len(axis_lengths)}')
     axis_lengths = np.array(axis_lengths)
 
-    R = np.eye(3)
-    if angles is not None:
+    if angles is None:
+        R = np.eye(3)
+    else:
         if len(angles) != 3:
             raise ValueError(
                 'len(angles) should be 3 but got',
@@ -172,13 +173,14 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
             or axes[0] == axes[1]
                 or axes[1] == axes[2]):
             raise ValueError(f'axes: {axes} is invalid')
-        if intrinsic:
-            for i, angle in zip(axes, angles):
-                R = _euler_rotation(i, angle) @ R
-            R = R.T
-        else:
-            for i, angle in zip(axes, angles):
-                R = _euler_rotation(i, angle).T @ R
+        axes_str = 'ZYX' if intrinsic else 'zyx'
+        seq = ''
+        for axis in axes:
+            seq += axes_str[axis]
+
+        # Generate a rotation matrix. The order of the elements needs to be
+        # reversed so that it follows the (z, y, x) order.
+        R = Rotation.from_euler(seq, angles).as_matrix()[::-1, ::-1]
 
     if spacing is None:
         spacing = np.ones(3)
