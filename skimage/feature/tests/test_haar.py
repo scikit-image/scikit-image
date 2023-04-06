@@ -6,6 +6,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 from numpy.testing import assert_array_equal
 
+from skimage._shared._warnings import expected_warnings
 from skimage.transform import integral_image
 from skimage.feature import haar_like_feature
 from skimage.feature import haar_like_feature_coord
@@ -153,6 +154,10 @@ def test_draw_haar_like_feature(max_n_features, nnz_values):
     coord, _ = haar_like_feature_coord(5, 5, 'type-4')
     image = draw_haar_like_feature(img, 0, 0, 5, 5, coord,
                                    max_n_features=max_n_features,
-                                   random_state=0)
+                                   seed=0)
+    with expected_warnings(['`random_state` is a deprecated argument']):
+        draw_haar_like_feature(img, 0, 0, 5, 5, coord,
+                               max_n_features=max_n_features,
+                               random_state=0)
     assert image.shape == (5, 5, 3)
     assert np.count_nonzero(image) == nnz_values
