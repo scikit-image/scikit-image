@@ -25,6 +25,10 @@ Version 0.21
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
 
+Version 0.23
+------------
+* Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
+
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
