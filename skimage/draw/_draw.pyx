@@ -218,7 +218,7 @@ def _polygon(r, c, shape):
     Notes
     -----
     This function ensures that `rr` and `cc` don't contain negative values.
-    Pixels of the polygon that whose coordinates are smaller 0, are not drawn.
+    Pixels in the polygon with coordinates smaller than 0 are not drawn.
     """
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
