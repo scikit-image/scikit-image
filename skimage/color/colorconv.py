@@ -473,7 +473,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 #    ----------
 #    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
 
-illuminants = \
+_illuminants = \
     {"A": {'2': (1.098466069456375, 1, 0.3558228003436005),
            '10': (1.111420406956693, 1, 0.3519978321919493),
            'R': (1.098466069456375, 1, 0.3558228003436005)},
@@ -500,11 +500,11 @@ illuminants = \
            'R': (1.0, 1.0, 1.0)}}
 
 
-def xyz_tristimulus_values(illuminant, observer, dtype=float):
+def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
     """Get the CIE XYZ tristimulus values.
 
     Given an illuminant and observer, this function returns the CIE XYZ tristimulus
-    values [1]_, [2]_.
+    values [2]_ scaled such that :math:`Y = 1`.
 
     Parameters
     ----------
@@ -512,15 +512,15 @@ def xyz_tristimulus_values(illuminant, observer, dtype=float):
         The name of the illuminant (the function is NOT case sensitive).
     observer : {"2", "10", "R"}
         One of: 2-degree observer, 10-degree observer, or 'R' observer as in
-        R function grDevices::convertColor.
+        R function ``grDevices::convertColor`` [3]_.
     dtype: dtype, optional
         Output data type.
 
     Returns
     -------
     values : array
-        Array with 3 elements containing the CIE XYZ tristimulus values of the given
-        illuminant.
+        Array with 3 elements :math:`X, Y, Z` containing the CIE XYZ tristimulus values
+        of the given illuminant.
 
     Raises
     ------
@@ -530,18 +530,36 @@ def xyz_tristimulus_values(illuminant, observer, dtype=float):
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
+    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant#White_points_of_standard_illuminants
     .. [2] https://en.wikipedia.org/wiki/CIE_1931_color_space#Meaning_of_X,_Y_and_Z
+    .. [3] https://www.rdocumentation.org/packages/grDevices/versions/3.6.2/topics/convertColor
+
+    Notes
+    -----
+    The CIE XYZ tristimulus values are calculated from :math:`x, y` [1]_, using the
+    formula
+
+    .. math:: X = x / y
+
+    .. math:: Y = 1
+
+    .. math:: Z = (1 - x - y) / y
+
+    The only exception is the illuminant "D65" with aperture angle 2° for
+    backward-compatibility reasons.
 
     Examples
     --------
-    >>> xyz_tristimulus_values(illuminant="D50", observer="10")
+    Get the CIE XYZ tristimulus values for a "D65" illuminant for a 10 degree field of
+    view
+
+    >>> xyz_tristimulus_values(illuminant="D65", observer="10")
     array([0.96720628, 1.        , 0.81428015])
     """
     illuminant = illuminant.upper()
     observer = observer.upper()
     try:
-        return np.asarray(illuminants[illuminant][observer], dtype=dtype)
+        return np.asarray(_illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(f'Unknown illuminant/observer combination '
                          f'(`{illuminant}`, `{observer}`)')
@@ -1008,7 +1026,9 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     """
     arr = _prepare_colorarray(xyz, channel_axis=-1)
 
-    xyz_ref_white = xyz_tristimulus_values(illuminant, observer, arr.dtype)
+    xyz_ref_white = xyz_tristimulus_values(
+        illuminant=illuminant, observer=observer, dtype=arr.dtype
+    )
 
     # scale by CIE XYZ tristimulus values of the reference white point
     arr = arr / xyz_ref_white
@@ -1125,7 +1145,7 @@ def _lab2xyz(lab, illuminant, observer):
     out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
 
     # rescale to the reference white (illuminant)
-    xyz_ref_white = xyz_tristimulus_values(illuminant, observer)
+    xyz_ref_white = xyz_tristimulus_values(illuminant=illuminant, observer=observer)
     out *= xyz_ref_white
     return out, n_invalid
 
@@ -1303,7 +1323,9 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     eps = np.finfo(float).eps
 
     # compute y_r and L
-    xyz_ref_white = np.array(xyz_tristimulus_values(illuminant, observer))
+    xyz_ref_white = np.array(
+        xyz_tristimulus_values(illuminant=illuminant, observer=observer)
+    )
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116. * np.cbrt(L[mask]) - 16.
@@ -1386,7 +1408,7 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
     mask = y > 7.999625
     y[mask] = np.power((y[mask] + 16.) / 116., 3.)
     y[~mask] = y[~mask] / 903.3
-    xyz_ref_white = xyz_tristimulus_values(illuminant, observer)
+    xyz_ref_white = xyz_tristimulus_values(illuminant=illuminant, observer=observer)
     y *= xyz_ref_white[1]
 
     # reference white x,z
