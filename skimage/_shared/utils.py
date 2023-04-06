@@ -368,6 +368,21 @@ class deprecate_func(_DecoratorBaseClass):
     hint : str, optional
         A hint on how to address this deprecation,
         e.g., "Use `skimage.submodule.alternative_func` instead."
+
+    Examples
+    --------
+    >>> @deprecate_func(
+    ...     deprecated_version="1.0.0",
+    ...     removed_version="1.2.0",
+    ...     hint="Use `bar` instead."
+    ... )
+    ... def foo():
+    ...     pass
+
+    Calling ``foo`` will warn with::
+
+        FutureWarning: `foo` is deprecated since version 1.0.0
+        and will be removed in version 1.2.0. Use `bar` instead.
     """
 
     def __init__(self, *, deprecated_version, removed_version=None, hint=None):
