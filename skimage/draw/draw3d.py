@@ -71,7 +71,7 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
     Parameters
     ----------
     center : (3,) array-like of float
-        Center coordinate of ellipsoid. The order is (z, y, x). The values will
+        Center coordinate of ellipsoid. The values will
         be divided by ``spacing`` inside the function.
     axis_lengths : (3,) array-like of float
         Axis lengths of ellipsoid. The order is (z, y, x). The values will be
@@ -85,38 +85,23 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
         produce the rotations are specified by ``axes``. No rotation will be
         applied if ``angles`` is ``None``.
     axes : iterable of int, length 3, optional (default None)
-        Axes about which to produce the rotations represented by ``{0, 1, 2}``,
-        where ``0 = z``, ``1 = y`` and ``2 = x``. There should be no adjacent
-        repeating numbers in the list. If not specified, defaults to 0, 1, 2.
-    intrinsic : bool optional (default True)
+        Axes about which to produce the rotations.
+        Defaults to ``[0, 1, 2]``.
+    intrinsic : bool, optional
         Specify if the rotations are intrinsic (``True``) or extrinsic
         (``False``).
 
         - *intrinsic*: rotations occur about the rotating coordinate system
         - *extrinsic*: rotations occur about the original coordinate system
-    spacing : (3,) array-like of float, optional (default None)
-        Spacing in each spatial dimension. The order is (z, y, x). If
-        ``spacing`` is ``None``, ``1.`` is set to all dimensions.
+    spacing : (3,) array-like of float, optional
+        Spacing in each spatial dimension.  Defaults to 1.
 
     Returns
     -------
     dd, rr, cc : ndarray of int
         Voxel coordinates of ellipsoid.
-        May be used to directl index into an array, e.g.
+        May be used to index into an array, e.g.
         ``img[dd, rr, cc] = 1``
-
-    Raises
-    ------
-    ValueError
-        If the length of ``center`` is not 3.
-    ValueError
-        If the length of ``axis_lengths`` is not 3.
-    ValueError
-        If the length of ``angles`` is not 3.
-    ValueError
-        If the length of ``spacing`` is not 3.
-    ValueError
-        If ``axes`` is invalid.
 
     Notes
     ------
@@ -173,10 +158,9 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
             or axes[0] == axes[1]
                 or axes[1] == axes[2]):
             raise ValueError(f'axes: {axes} is invalid')
+
         axes_str = 'ZYX' if intrinsic else 'zyx'
-        seq = ''
-        for axis in axes:
-            seq += axes_str[axis]
+        seq = ''.join(axes_str[axis] for axis in axes)
 
         # Generate a rotation matrix. The order of the elements needs to be
         # reversed so that it follows the (z, y, x) order.
@@ -192,7 +176,8 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
     # The upper_left_bottom and lower_right_top corners of the smallest cuboid
     # containing the ellipsoid.
     factor = np.array([
-        [i, j, k] for k in (-1, 1) for j in (-1, 1) for i in (-1, 1)]).T
+        [i, j, k] for k in (-1, 1) for j in (-1, 1) for i in (-1, 1)
+    ]).T
     axis_lengths_rot = np.abs(
         np.diag(1. / spacing) @ (R @ (np.diag(axis_lengths) @ factor))
     ).max(axis=1)
@@ -206,9 +191,9 @@ def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
 
     bounding_shape = lower_right_top - upper_left_bottom + 1
 
-    d_lim, r_lim, c_lim = np.ogrid[0:float(bounding_shape[0]),
-                                   0:float(bounding_shape[1]),
-                                   0:float(bounding_shape[2])]
+    d_lim, r_lim, c_lim = np.ogrid[:float(bounding_shape[0]),
+                                   :float(bounding_shape[1]),
+                                   :float(bounding_shape[2])]
     d_org, r_org, c_org = scaled_center - upper_left_bottom
     d_rad, r_rad, c_rad = axis_lengths
     conversion_matrix = R.T @ np.diag(spacing)
