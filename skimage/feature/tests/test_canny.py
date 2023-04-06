@@ -129,3 +129,15 @@ class TestCanny(unittest.TestCase):
 
         assert_equal(feature.canny(image_float, 1.0, low, high),
                      feature.canny(image_uint8, 1.0, 255 * low, 255 * high))
+
+    def test_full_mask_matches_no_mask(self):
+        """The masked and unmasked algorithms should return the same result.
+
+        """
+        image = data.camera()
+
+        for mode in ('constant', 'nearest', 'reflect'):
+            assert_equal(
+                feature.canny(image, mode=mode),
+                feature.canny(image, mode=mode, mask=np.ones_like(image, dtype=bool))
+        )

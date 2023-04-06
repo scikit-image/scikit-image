@@ -55,8 +55,12 @@ def _preprocess(image, mask, sigma, mode, cval):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
-    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
-                           preserve_range=False)
+    gaussian_kwargs = dict(
+        sigma=sigma,
+        mode=mode,
+        cval=cval,
+        preserve_range=False
+    )
     compute_bleedover = (mode == 'constant' or mask is not None)
     float_type = _supported_float_type(image.dtype)
     if mask is None:
@@ -187,6 +191,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     # that is "infected" by the masked point, so it's enough to erode the
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
+
+    if np.issubdtype(image.dtype, np.int64) or np.issubdtype(image.dtype, np.uint64):
+        raise ValueError("skimage does not support 64-bit integer images")
 
     check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
