@@ -89,7 +89,6 @@ docs = [
     'numpydoc>=1.5',
     'sphinx-copybutton',
     'pytest-runner',
-    'scikit-learn',
     'matplotlib>=3.5',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
