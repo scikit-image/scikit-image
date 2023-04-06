@@ -56,12 +56,10 @@ def _preprocess(image, mask, sigma, mode, cval):
     pixels.
     """
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval,
-                           preserve_range=False)
-    compute_bleedover = (mode == 'constant' or mask is not None)
+                           preserve_range=True)
+    compute_bleedover = mask is not None
     float_type = _supported_float_type(image.dtype)
     if mask is None:
-        if compute_bleedover:
-            mask = np.ones(image.shape, dtype=float_type)
         masked_image = image
 
         eroded_mask = np.ones(image.shape, dtype=bool)
