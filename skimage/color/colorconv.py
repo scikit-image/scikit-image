@@ -560,7 +560,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
     view
 
     >>> xyz_tristimulus_values(illuminant="D65", observer="10")
-    array([0.96720628, 1.        , 0.81428015])
+    array([0.94809668, 1.        , 1.07305136])
     """
     illuminant = illuminant.upper()
     observer = observer.upper()
