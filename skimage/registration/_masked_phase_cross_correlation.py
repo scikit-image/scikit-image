@@ -157,7 +157,7 @@ def cross_correlate_masked(arr1, arr2, m1, m2, mode='full', axes=(-2, -1),
     fixed_image = np.asarray(arr1)
     moving_image = np.asarray(arr2)
     float_dtype = _supported_float_type(
-        [fixed_image.dtype, moving_image.dtype]
+        (fixed_image.dtype, moving_image.dtype)
     )
     if float_dtype.kind == 'c':
         raise ValueError("complex-valued arr1, arr2 are not supported")

@@ -10,6 +10,8 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
+from skimage._shared._warnings import expected_warnings
+
 
 test_img = util.img_as_float(camera())
 
@@ -77,7 +79,9 @@ def test_unsupervised_wiener(dtype):
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf,
-                                                     random_state=seed)
+                                                     seed=seed)
+    with expected_warnings(['`random_state` is a deprecated argument']):
+        restoration.unsupervised_wiener(data, psf, random_state=seed)
     float_type = _supported_float_type(dtype)
     assert deconvolved.dtype == float_type
 
@@ -96,7 +100,7 @@ def test_unsupervised_wiener(dtype):
             "max_num_iter": 200,
             "min_num_iter": 30,
         },
-        random_state=seed)[0]
+        seed=seed)[0]
     assert deconvolved2.real.dtype == float_type
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved2),
@@ -111,7 +115,7 @@ def test_unsupervised_wiener_deprecated_user_param():
     _, laplacian = uft.laplacian(2, data.shape)
     restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"min_num_iter": 30}, random_state=5
+        user_params={"max_num_iter": 300, "min_num_iter": 30}, seed=5
     )
 
 

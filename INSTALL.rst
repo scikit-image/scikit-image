@@ -243,7 +243,7 @@ We also make a few more assumptions about your system:
 - You have a C compiler set up.
 - You have a C++ compiler set up.
 - You are running a version of Python compatible with our system as listed
-  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/main/setup.py#L212>`_.
+  in our `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
   You have set up the `upstream` remote to point to our repository and `origin`
   to point to your fork.
@@ -261,7 +261,6 @@ This directory contains the following files:
     ├── CODE_OF_CONDUCT.md
     ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
-    ├── dev.py
     ├── doc/
     ├── INSTALL.rst
     ├── LICENSE.txt
@@ -309,13 +308,13 @@ venv
   # Install build dependencies of scikit-image
   pip install -r requirements/build.txt
   # Build scikit-image from source
-  ./dev.py build
+  spin build
   # Test your installation
-  ./dev.py test
+  spin test
   # Build docs
-  ./dev.py docs
+  spin docs
   # Try the new version in IPython
-  ./dev.py ipython
+  spin ipython
 
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -341,15 +340,15 @@ before you get started.
   # Install build dependencies of scikit-image
   pip install -r requirements/build.txt
   # Build scikit-image from source
-  ./dev.py build
+  spin build
   # Test your installation
-  ./dev.py test
+  spin test
   # Build docs
-  ./dev.py docs
-  # Try the new version in IPython
-  ./dev.py ipython
+  spin docs
+  # Try the new version
+  spin python
 
-For more information about building and using the dev.py package, see ``meson.md``.
+For more information about building and using the ``spin`` package, see ``meson.md``.
 
 Updating the installation
 ------------------------------------------------------------------------------

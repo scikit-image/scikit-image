@@ -9,7 +9,7 @@ from ._denoise import (denoise_tv_chambolle, denoise_tv_bregman,
 from ._cycle_spin import cycle_spin
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
-from .j_invariant import calibrate_denoiser
+from .j_invariant import calibrate_denoiser, denoise_invariant
 from .rolling_ball import rolling_ball, ball_kernel, ellipsoid_kernel
 
 
@@ -22,6 +22,7 @@ __all__ = ['wiener',
            'denoise_bilateral',
            'denoise_wavelet',
            'denoise_nl_means',
+           'denoise_invariant',
            'estimate_sigma',
            'inpaint_biharmonic',
            'cycle_spin',

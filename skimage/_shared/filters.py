@@ -28,7 +28,7 @@ class ChannelAxisNotSet(metaclass=_PatchClassRepr):
     image is grayscale.
 
     This automatic behavior was broken in v0.19, recovered but deprecated in
-    v0.20 and will be removed in v0.21.
+    v0.20 and will be removed in v0.22.
     """
 
 
@@ -81,7 +81,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             behavior is fixed. The last axis of an `image` with dimensions
             (M, N, 3) is interpreted as a color channel if `channel_axis` is not
             set by the user (signaled by the default proxy value
-            `ChannelAxisNotSet`). Starting with 0.21, `channel_axis=None` will
+            `ChannelAxisNotSet`). Starting with 0.22, `channel_axis=None` will
             be used as the new default value.
 
     Returns
@@ -139,7 +139,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
             warn(
                 "Automatic detection of the color channel was deprecated in "
                 "v0.19, and `channel_axis=None` will be the new default in "
-                "v0.21. Set `channel_axis=-1` explicitly to silence this "
+                "v0.22. Set `channel_axis=-1` explicitly to silence this "
                 "warning.",
                 FutureWarning,
                 stacklevel=2,

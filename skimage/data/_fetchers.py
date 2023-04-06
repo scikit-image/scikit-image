@@ -7,7 +7,6 @@ For more images, see
 """
 import numpy as np
 import shutil
-from packaging import version
 
 from ..util.dtype import img_as_bool
 from ._registry import registry, legacy_registry, registry_urls
@@ -77,13 +76,7 @@ def create_image_fetcher():
         if not hasattr(pooch, '__version__'):
             retry = {}
         else:
-            pooch_version = pooch.__version__.lstrip('v')
             retry = {'retry_if_failed': 3}
-            # Keep version check in synch with
-            # scikit-image/requirements/optional.txt
-            if version.parse(pooch_version) < version.parse('1.3.0'):
-                # we need a more recent version of pooch to retry
-                retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
