@@ -1,10 +1,11 @@
 import numpy as np
+import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (arch32, assert_almost_equal,
                                      assert_array_less, assert_equal, xfail)
-from skimage.measure import LineModelND, CircleModel, EllipseModel, ransac
+from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
 from skimage.measure.fit import _dynamic_max_trials
 from skimage.transform import AffineTransform
 
@@ -58,8 +59,8 @@ def test_line_model_nd_estimate():
              10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1])
 
     # add gaussian noise to data
-    random_state = np.random.default_rng(1234)
-    data = data0 + random_state.normal(size=data0.shape)
+    rng = np.random.default_rng(1234)
+    data = data0 + rng.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = LineModelND()
@@ -116,8 +117,8 @@ def test_circle_model_estimate():
     data0 = model0.predict_xy(t)
 
     # add gaussian noise to data
-    random_state = np.random.default_rng(1234)
-    data = data0 + random_state.normal(size=data0.shape)
+    rng = np.random.default_rng(1234)
+    data = data0 + rng.normal(size=data0.shape)
 
     # estimate parameters of noisy data
     model_est = CircleModel()
@@ -153,10 +154,31 @@ def test_circle_model_insufficient_data():
         model.estimate(np.array([[1, 2], [3, 4]]))
 
     with expected_warnings(warning_message):
-        model.estimate(np.ones((6, 2)))
-
-    with expected_warnings(warning_message):
         model.estimate(np.array([[0, 0], [1, 1], [2, 2]]))
+
+    warning_message = (
+        "Standard deviation of data is too small to estimate "
+        "circle with meaningful precision."
+    )
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.ones((6, 2)))
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__
+
+
+def test_circle_model_estimate_from_small_scale_data():
+    params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float64)
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
+    ], dtype=np.float64)
+    data = CircleModel().predict_xy(angles, params=params)
+    model = CircleModel()
+    # assert that far small scale data can be estimated
+    assert model.estimate(data.astype(np.float64))
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
 
 
 def test_ellipse_model_invalid_input():
@@ -183,8 +205,8 @@ def test_ellipse_model_estimate():
         data0 = model0.predict_xy(t)
 
         # add gaussian noise to data
-        random_state = np.random.default_rng(1234)
-        data = data0 + random_state.normal(size=data0.shape)
+        rng = np.random.default_rng(1234)
+        data = data0 + rng.normal(size=data0.shape)
 
         # estimate parameters of noisy data
         model_est = EllipseModel()
@@ -234,6 +256,20 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
 
+def test_ellipse_model_estimate_from_far_shifted_data():
+    params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float64)
+    angles = np.array([
+        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
+        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
+    ], dtype=np.float64)
+    data = EllipseModel().predict_xy(angles, params=params)
+    model = EllipseModel()
+    # assert that far shifted data can be estimated
+    assert model.estimate(data.astype(np.float64))
+    # test whether the predicted parameters are close to the original ones
+    assert_almost_equal(params, model.params)
+
+
 @xfail(condition=arch32,
        reason=('Known test failure on 32-bit platforms. See links for '
                'details: '
@@ -242,7 +278,16 @@ def test_ellipse_model_estimate_from_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
-    assert not model.estimate(np.ones((5, 2)))
+    warning_message = (
+        "Standard deviation of data is too small to estimate "
+        "ellipse with meaningful precision."
+    )
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.ones((6, 2)))
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__
+
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
 
@@ -269,7 +314,9 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5, random_state=1)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, seed=1)
+    with expected_warnings(['`random_state` is a deprecated argument']):
+        ransac(data0, CircleModel, 3, 5, random_state=1)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -278,10 +325,10 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
-    random_state = np.random.default_rng(12373240)
+    rng = np.random.default_rng(12373240)
 
     # generate original data without noise
-    src = 100 * random_state.random((50, 2))
+    src = 100 * rng.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
                              translation=(10, 20))
     dst = model0(src)
@@ -294,7 +341,7 @@ def test_ransac_geometric():
 
     # estimate parameters of corrupted data
     model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                random_state=random_state)
+                                seed=rng)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -306,7 +353,7 @@ def test_ransac_is_data_valid():
         return data.shape[0] > 2
     with expected_warnings(["No inliers found"]):
         model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_data_valid=is_data_valid, random_state=1)
+                                is_data_valid=is_data_valid, seed=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -316,7 +363,7 @@ def test_ransac_is_model_valid():
         return False
     with expected_warnings(["No inliers found"]):
         model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_model_valid=is_model_valid, random_state=1)
+                                is_model_valid=is_model_valid, seed=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -418,7 +465,7 @@ def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
     with expected_warnings(['No inliers found. Model not fitted']):
         model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
-                                residual_threshold=0, random_state=1523427)
+                                residual_threshold=0, seed=1523427)
     assert inliers is None
     assert model is None
 
@@ -436,5 +483,5 @@ def test_ransac_non_valid_best_model():
     data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rnd.rand(1000, 3) - 0.5
     with expected_warnings(["Estimated model is not valid"]):
         ransac(data, LineModelND, min_samples=2,
-               residual_threshold=0.3, max_trials=50, random_state=0,
+               residual_threshold=0.3, max_trials=50, seed=0,
                is_model_valid=is_model_valid)

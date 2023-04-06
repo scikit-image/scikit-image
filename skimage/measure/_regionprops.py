@@ -604,9 +604,9 @@ class RegionProperties:
         a, b, b, c = self.inertia_tensor.flat
         if a - c == 0:
             if b < 0:
-                return -PI / 4.
-            else:
                 return PI / 4.
+            else:
+                return -PI / 4.
         else:
             return 0.5 * atan2(-2 * b, c - a)
 
@@ -854,15 +854,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 column_buffer[i] = regions[i][prop]
             out[orig_prop] = np.copy(column_buffer)
         else:
-            if isinstance(rp, np.ndarray):
-                shape = rp.shape
-            else:
-                shape = (len(rp),)
-
             # precompute property column names and locations
             modified_props = []
             locs = []
-            for ind in np.ndindex(shape):
+            for ind in np.ndindex(np.shape(rp)):
                 modified_props.append(
                     separator.join(map(str, (orig_prop,) + ind))
                 )
@@ -872,7 +867,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             n_columns = len(locs)
             column_data = np.empty((n, n_columns), dtype=dtype)
             for k in range(n):
-                rp = regions[k][prop]
+                # we coerce to a numpy array to ensure structures like
+                # tuple-of-arrays expand correctly into columns
+                rp = np.asarray(regions[k][prop])
                 for i, loc in enumerate(locs):
                     column_data[k, i] = rp[loc]
 

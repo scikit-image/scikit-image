@@ -57,12 +57,12 @@ def test_denoise_tv_chambolle_2d(dtype):
     img = np.clip(img, 0, 1)
     # denoise
     denoised_astro = restoration.denoise_tv_chambolle(img, weight=0.1)
-    assert denoised_astro.dtype == _supported_float_type(img)
+    assert denoised_astro.dtype == _supported_float_type(img.dtype)
 
     from scipy import ndimage as ndi
 
     # Convert to a floating point type supported by scipy.ndimage
-    float_dtype = _supported_float_type(img)
+    float_dtype = _supported_float_type(img.dtype)
     img = img.astype(float_dtype, copy=False)
 
     grad = ndi.morphological_gradient(img, size=((3, 3)))
@@ -743,7 +743,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                            channel_axis=channel_axis,
                                            convert2ycbcr=convert2ycbcr,
                                            rescale_sigma=True)
-    assert denoised.dtype == _supported_float_type(noisy)
+    assert denoised.dtype == _supported_float_type(noisy.dtype)
 
     data_range = x.max() - x.min()
     psnr_noisy = peak_signal_noise_ratio(x, noisy, data_range=data_range)

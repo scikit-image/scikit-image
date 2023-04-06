@@ -2,27 +2,30 @@
 # Fail on non-zero exit and echo the commands
 set -evx
 
+python -m pip install $PIP_FLAGS -r requirements/test.txt
+export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
-
-
-python -m pip list
-tools/build_versions.py
 
 TEST_ARGS="--doctest-modules --cov=skimage"
 
 if [[ ${WITHOUT_POOCH} == "1" ]]; then
   # remove pooch (previously installed via requirements/test.txt)
-  pip uninstall pooch -y
+  python -m pip uninstall pooch -y
+fi
+if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+    python -m pip install $PIP_FLAGS -r ./requirements/optional.txt
 fi
 
+python -m pip list
+
 (cd .. && pytest $TEST_ARGS --pyargs skimage)
+
 
 if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples
   python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
   python -m pip list
-  tools/build_versions.py
   echo 'backend : Template' > $MPL_DIR/matplotlibrc
 fi
 if [[ "${BUILD_DOCS}" == "1" ]]; then
@@ -37,6 +40,5 @@ elif [[ "${TEST_EXAMPLES}" == "1" ]]; then
     fi
   done
 fi
-
 
 set +ev

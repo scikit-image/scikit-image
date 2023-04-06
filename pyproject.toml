@@ -27,7 +27,6 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
     'Operating System :: Microsoft :: Windows',
@@ -38,15 +37,14 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'numpy>=1.21.1',
-    "scipy>=1.8,<1.9.2; python_version<='3.9'",
-    "scipy>=1.8; python_version>'3.9'",
+    'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.12',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
-    'lazy_loader>=0.1',
+    'packaging>=21',
+    'lazy_loader>=0.2',
 ]
 
 [[project.maintainers]]
@@ -60,35 +58,38 @@ file = 'LICENSE.txt'
 build = [
     'meson-python>=0.13.0rc0',
     'wheel',
-    'setuptools<=65.5',
-    'packaging>=20.0',
+    'setuptools>=67',
+    'packaging>=21',
     'ninja',
-    'Cython>=0.29.24',
+    'Cython>=0.29.26',
     'pythran',
     'numpy>=1.21.1',
+    'spin==0.3',
+    'build',
 ]
-data = ['pooch>=1.3.0']
+data = ['pooch>=1.6.0']
 default = [
     'numpy>=1.21.1',
-    "scipy>=1.8,<1.9.2; python_version<='3.9'",
-    "scipy>=1.8; python_version>'3.9'",
+    'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.12',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
-    'lazy_loader>=0.1',
+    'packaging>=21',
+    'lazy_loader>=0.2',
 ]
-developer = ['pre-commit']
+developer = [
+    'pre-commit',
+    'rtoml',
+]
 docs = [
-    'sphinx>=5.2',
+    'sphinx>=6.0',
     'sphinx-gallery>=0.11',
     'numpydoc>=1.5',
     'sphinx-copybutton',
     'pytest-runner',
-    'scikit-learn',
-    'matplotlib>=3.6',
+    'matplotlib>=3.5',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
     'seaborn>=0.11',
@@ -96,25 +97,28 @@ docs = [
     'tifffile>=2022.8.12',
     'myst-parser',
     'ipywidgets',
+    'ipykernel',
     'plotly>=5.10',
     'kaleido',
+    'scikit-learn>=0.24.0',
 ]
 optional = [
     'SimpleITK',
-    'astropy>=3.1.2',
+    'astropy>=5.0',
     'cloudpickle>=0.2.1',
-    'dask[array]>=1.0.0,!=2.17.0',
-    'matplotlib>=3.3',
-    'pooch>=1.3.0',
+    'dask[array]>=2021.1.0',
+    'matplotlib>=3.5',
+    'pooch>=1.6.0',
     'pyamg',
+    'scikit-learn>=0.24.0',
 ]
 test = [
     'asv',
     'codecov',
-    'matplotlib>=3.3',
-    'pooch>=1.3.0',
-    'pytest>=5.2.0',
-    'pytest-cov>=2.7.0',
+    'matplotlib>=3.5',
+    'pooch>=1.6.0',
+    'pytest>=7.0',
+    'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
 ]
@@ -131,11 +135,11 @@ build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.13.0rc0',
     'wheel',
-    'setuptools<=65.5',
-    'packaging>=20.0',
-    'Cython>=0.29.24',
+    'setuptools>=67',
+    'packaging>=21',
+    'Cython>=0.29.26',
     'pythran',
-    'lazy_loader>=0.1',
+    'lazy_loader>=0.2',
     "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.21.1; python_version=='3.8' and platform_python_implementation != 'PyPy'",
     "numpy==1.21.1; python_version=='3.9' and platform_python_implementation != 'PyPy'",
@@ -144,23 +148,24 @@ requires = [
     "numpy; python_version>='3.12'",
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
-[tool.devpy]
+[tool.spin]
 package = 'skimage'
 
-[tool.devpy.commands]
+[tool.spin.commands]
 Build = [
-    'devpy.build',
-    'devpy.test',
+    'spin.build',
+    'spin.test',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
-    'devpy.shell',
-    'devpy.ipython',
-    'devpy.python',
+    'spin.shell',
+    'spin.ipython',
+    'spin.python',
 ]
-Documentation = ['.devpy/cmds.py:docs']
+Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.devpy/cmds.py:asv',
-    '.devpy/cmds.py:coverage',
+    '.spin/cmds.py:asv',
+    '.spin/cmds.py:coverage',
 ]
 
 [tool.ruff]
@@ -201,5 +206,23 @@ exclude = [
 ]
 "skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
-[tools.ruff.pydocstyle]
+
+[tool.ruff.pydocstyle]
 convention = 'numpy'
+
+[tool.pytest]
+python_files = [
+    'benchmark_*.py',
+    'test_*.py',
+]
+python_classes = [
+    'Test*',
+    '*Suite',
+]
+python_functions = [
+    'time_*',
+    'test_*',
+    'peakmem_*',
+]
+[tool.coverage.run]
+omit = ['*/tests/*']

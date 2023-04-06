@@ -21,7 +21,7 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
     img[np.where(mask)] = 0
     out = inpaint.inpaint_biharmonic(img, mask,
                                      split_into_regions=split_into_regions)
-    assert out.dtype == _supported_float_type(img)
+    assert out.dtype == _supported_float_type(img.dtype)
 
     ref = np.array(
         [[0., 0.0625, 0.25000000, 0.5625000, 0.73925058],

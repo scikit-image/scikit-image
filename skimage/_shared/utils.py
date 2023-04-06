@@ -2,7 +2,6 @@ import functools
 import inspect
 import sys
 import warnings
-from collections.abc import Iterable
 
 import numpy as np
 
@@ -152,7 +151,7 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
     Parameters
-    ---------
+    ----------
     func : function
         The function whose docstring we wish to update.
     kwarg_mapping : dict
@@ -703,8 +702,8 @@ def _supported_float_type(input_dtype, allow_complex=False):
 
     Parameters
     ----------
-    input_dtype : np.dtype or Iterable of np.dtype
-        The input dtype. If a sequence of multiple dtypes is provided, each
+    input_dtype : np.dtype or tuple of np.dtype
+        The input dtype. If a tuple of multiple dtypes is provided, each
         dtype is first converted to a supported floating point type and the
         final dtype is then determined by applying `np.result_type` on the
         sequence of supported floating point types.
@@ -716,7 +715,7 @@ def _supported_float_type(input_dtype, allow_complex=False):
     float_type : dtype
         Floating-point dtype for the image.
     """
-    if isinstance(input_dtype, Iterable) and not isinstance(input_dtype, str):
+    if isinstance(input_dtype, tuple):
         return np.result_type(*(_supported_float_type(d) for d in input_dtype))
     input_dtype = np.dtype(input_dtype)
     if not allow_complex and input_dtype.kind == 'c':

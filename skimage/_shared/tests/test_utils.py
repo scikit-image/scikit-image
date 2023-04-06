@@ -247,8 +247,8 @@ def test_supported_float_dtype_input_kinds(dtype):
     'dtypes, expected',
     [
         ((np.float16, np.float64), np.float64),
-        ([np.float32, np.uint16, np.int8], np.float64),
-        ({np.float32, np.float16}, np.float32),
+        ((np.float32, np.uint16, np.int8), np.float64),
+        ((np.float32, np.float16), np.float32),
     ]
 )
 def test_supported_float_dtype_sequence(dtypes, expected):
