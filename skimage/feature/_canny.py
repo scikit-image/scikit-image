@@ -83,7 +83,7 @@ def _preprocess(image, mask, sigma, mode, cval):
         # the function to the mask (which gets you the fraction of the
         # pixel data that's due to significant points)
         bleed_over = gaussian(mask.astype(float_type, copy=False),
-                              **gaussian_kwargs) + np.finfo(float_type).eps
+                              sigma=1, mode='nearest') + np.finfo(float_type).eps
 
     # Smooth the masked image
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
