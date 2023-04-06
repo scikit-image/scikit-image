@@ -21,7 +21,7 @@ Please note that scikit-learn is required to run this example.
 from matplotlib import pyplot as plt
 import numpy as np
 from sklearn.datasets import load_digits
-from sklearn.metrics import classification_report, plot_confusion_matrix
+from sklearn.metrics import classification_report, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 
@@ -68,5 +68,11 @@ predictions = svm.predict(testing_fvs)
 
 print(classification_report(test_targets, predictions))
 
-plot_confusion_matrix(svm, testing_fvs, test_targets)
+ConfusionMatrixDisplay.from_estimator(
+    svm,
+    testing_fvs,
+    test_targets,
+    cmap=plt.cm.Blues,
+)
+
 plt.show()
