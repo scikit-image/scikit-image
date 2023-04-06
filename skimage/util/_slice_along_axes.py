@@ -2,7 +2,7 @@ __all__ = ['slice_along_axes']
 
 
 def slice_along_axes(image, slices, axes=None, copy=False):
-    """Slice image along given axes.
+    """Slice an image along given axes.
 
     Parameters
     ----------
@@ -12,9 +12,9 @@ def slice_along_axes(image, slices, axes=None, copy=False):
         For each axis in `axes`, a corresponding 2-tuple
         ``(min_val, max_val)`` to slice with (as with Python slices,
         ``max_val`` is non-inclusive).
-    axes : tuple, optional
+    axes : int or tuple, optional
         Axes corresponding to the limits given in `slices`. If None,
-        all axes are included (in ascending order).
+        axes are in ascending order, up to the length of `slices`.
     copy : bool, optional
         If True, ensure that the output is not a view of `image`.
 
@@ -29,7 +29,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
     >>> img = data.camera()
     >>> img.shape
     (512, 512)
-    >>> cropped_img = slice_along_axes(img, [(0, 100)], axes=[1])
+    >>> cropped_img = slice_along_axes(img, [(0, 100)])
     >>> cropped_img.shape
     (512, 100)
     >>> cropped_img = slice_along_axes(img, [(0, 100), (0, 100)])
@@ -44,10 +44,12 @@ def slice_along_axes(image, slices, axes=None, copy=False):
     if not slices:
         return image
 
-    if not axes:
+    if axes is None:
         axes = list(range(image.ndim))
+        if len(axes) < len(slices):
+            raise ValueError("More `slices` than available axes")
 
-    if len(axes) != len(slices):
+    elif len(axes) != len(slices):
         raise ValueError("`axes` and `slices` must have equal length")
 
     if len(axes) != len(set(axes)):
@@ -59,6 +61,10 @@ def slice_along_axes(image, slices, axes=None, copy=False):
 
     _slices = [slice(None),] * image.ndim
     for (a, b), ax in zip(slices, axes):
+        if a < 0:
+            a %= image.shape[ax]
+        if b < 0:
+            b %= image.shape[ax]
         if a > b:
             raise ValueError(
                 f"Invalid slice ({a}, {b}): must be ordered `(min_val, max_val)`"
