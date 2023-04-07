@@ -54,7 +54,7 @@ from scipy import ndimage as ndi
 from ..._shared.utils import check_nD, warn
 from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
-from . import generic_cy
+from . import generic_cy  # type: ignore
 
 
 __all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',

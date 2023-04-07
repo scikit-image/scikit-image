@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 from scipy import sparse
-from . import _ncut_cy
+from . import _ncut_cy  # type: ignore
 
 
 def DW_matrices(graph):

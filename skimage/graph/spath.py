@@ -1,5 +1,5 @@
 import numpy as np
-from . import _spath
+from . import _spath  # type: ignore
 
 
 def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):

@@ -23,7 +23,7 @@ References
 """
 
 from ..._shared.utils import check_nD
-from . import percentile_cy
+from . import percentile_cy  # type: ignore
 from .generic import _preprocess_input
 
 __all__ = ['autolevel_percentile', 'gradient_percentile',

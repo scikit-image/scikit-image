@@ -18,7 +18,7 @@ be split between markers on opposite sides.
 import numpy as np
 from scipy import ndimage as ndi
 
-from . import _watershed_cy
+from . import _watershed_cy  # type: ignore
 from ..morphology.extrema import local_minima
 from ..morphology._util import (_validate_connectivity,
                                 _offsets_to_raveled_neighbors)

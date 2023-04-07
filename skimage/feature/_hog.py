@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import _hoghistogram
+from . import _hoghistogram  # type: ignore
 from .._shared import utils
 
 
