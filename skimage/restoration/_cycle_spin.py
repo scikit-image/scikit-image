@@ -1,5 +1,8 @@
 from itertools import product
+from typing import Callable
+
 import numpy as np
+from numpy.typing import ArrayLike
 from .._shared import utils
 from .._shared.utils import warn
 
@@ -48,8 +51,16 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
 
 @utils.channel_as_last_axis()
-def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
-               func_kw={}, *, channel_axis=None):
+def cycle_spin(
+    x: ArrayLike,
+    func: Callable,
+    max_shifts,
+    shift_steps=1,
+    num_workers=None,
+    func_kw={},
+    *,
+    channel_axis=None
+) -> np.ndarray:
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
