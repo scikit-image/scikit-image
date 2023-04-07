@@ -193,7 +193,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     # because who knows what lies beyond the edge of the image?
 
     if np.issubdtype(image.dtype, np.int64) or np.issubdtype(image.dtype, np.uint64):
-        raise ValueError("skimage does not support 64-bit integer images")
+        raise ValueError("64-bit integer images are not supported")
 
     check_nD(image, 2)
     dtype_max = dtype_limits(image, clip_negative=False)[1]
