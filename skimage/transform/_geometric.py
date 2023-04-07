@@ -895,12 +895,11 @@ class AffineTransform(ProjectiveTransform):
            Added support for supplying a single scalar value.
     rotation : float, optional
         Rotation angle, clockwise, as radians. Only available for 2D.
-    shear : float, optional
-        The shear angle, clockwise, by which the y-axis is
+    shear : float or 2-tuple of float, optional
+        The x and y shear angles, clockwise, by which these axes are
         rotated around the origin [2].
-        If a single value, it will be assigned only to the shear_x,
-        and the shear_y remains zero (ex. `shear_x, shear_y = shear, 0`).
-        Only available in 2D.
+        If a single value is given, take that to be the x shear angle, with
+        the y angle remaining 0. Only available in 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
