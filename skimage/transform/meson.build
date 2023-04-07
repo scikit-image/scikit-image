@@ -22,8 +22,7 @@ python_sources = [
   'hough_transform.py',
   'integral.py',
   'pyramids.py',
-  'radon_transform.py',
-  'setup.py'
+  'radon_transform.py'
 ]
 
 py3.install_sources(

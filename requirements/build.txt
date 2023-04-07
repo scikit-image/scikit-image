@@ -1,10 +1,13 @@
 # Also update `tools/pyproject.toml.in`, [build-system] -> requires
 meson-python>=0.13.0rc0
 wheel
-setuptools<=65.5
-packaging>=20.0
+setuptools>=67
+packaging>=21
 ninja
-Cython>=0.29.24
+Cython>=0.29.26
 pythran
 numpy>=1.21.1
-git+https://github.com/scientific-python/devpy
+
+# Developer UI
+spin==0.3
+build

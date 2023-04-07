@@ -18,7 +18,6 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3 :: Only',
     "Topic :: Software Development :: Libraries",
     'Topic :: Scientific/Engineering',
     'Operating System :: Microsoft :: Windows',
@@ -51,11 +50,11 @@ requires = [
     # doesn't list it as a runtime requirement (at least in 0.10.0)
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
     "wheel",
-    "setuptools<=65.5",
-    "packaging>=20.0",
-    "Cython>=0.29.24",
+    "setuptools>=67",
+    "packaging>=21",
+    "Cython>=0.29.26",
     "pythran",
-    "lazy_loader>=0.1",
+    "lazy_loader>=0.2",
 
     # We follow scipy for much of these pinnings
     # https://github.com/scipy/scipy/blob/main/pyproject.toml
@@ -79,14 +78,14 @@ requires = [
     "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
 ]
 
-[tool.devpy]
+[tool.spin]
 package = 'skimage'
 
-[tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test"]
-"Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
-"Documentation" = [".devpy/cmds.py:docs"]
-"Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
+[tool.spin.commands]
+"Build" = ["spin.build", "spin.test", ".spin/cmds.py:sdist"]
+"Environments" = ["spin.shell", "spin.ipython", "spin.python"]
+"Documentation" = [".spin/cmds.py:docs"]
+"Metrics" = [".spin/cmds.py:asv", ".spin/cmds.py:coverage"]
 
 [tool.ruff]
 line-length = 88
@@ -110,5 +109,13 @@ target-version = "py38"
 "skimage/_shared/testing.py" = ["F401"]
 "doc/examples/**/*.py" = ["E402"]
 
-[tools.ruff.pydocstyle]
+[tool.ruff.pydocstyle]
 convention = "numpy"
+
+[tool.pytest]
+python_files = ["benchmark_*.py", "test_*.py"]
+python_classes = ["Test*", "*Suite"]
+python_functions = ["time_*", "test_*", "peakmem_*"]
+
+[tool.coverage.run]
+omit = ["*/tests/*"]
