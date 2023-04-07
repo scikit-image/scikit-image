@@ -5,7 +5,7 @@
 
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport M_PI, floor
+from libc.math cimport M_PI
 
 from .._shared.fused_numerics cimport np_floats
 
@@ -31,7 +31,7 @@ cpdef _ori_distances(np_floats[::1] ori_bins,
     cdef:
         Py_ssize_t n_theta = theta.size
         Py_ssize_t n_ori = ori_bins.size
-        Py_ssize_t i, j, idx_min
+        Py_ssize_t i, j, idx_min = 0
         np_floats th, dist, dist_min
         np_floats two_pi = 2 * M_PI
         Py_ssize_t[::1] near_t = np.empty((n_theta, ), dtype=np.intp)
@@ -91,7 +91,7 @@ cpdef _update_histogram(np_floats[:, :, ::1] histograms,
 
     """
     cdef:
-        Py_ssize_t i, p, r, c, k_index, k_index2
+        Py_ssize_t p, r, c, k_index, k_index2
         Py_ssize_t n_patch = len(magnitude)
         Py_ssize_t n_hist = histograms.shape[0]
         Py_ssize_t n_ori = histograms.shape[2]

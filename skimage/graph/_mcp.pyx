@@ -439,7 +439,7 @@ cdef class MCP:
         # basic variables to use for end-finding; also fix up the start and end
         # lists
         cdef BOOL_T use_ends = 0
-        cdef INDEX_T num_ends
+        cdef INDEX_T num_ends = 0
         cdef BOOL_T all_ends = find_all_ends
         cdef INDEX_T[:] flat_ends
         starts = _normalize_indices(starts, self.costs_shape)

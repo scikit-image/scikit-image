@@ -300,7 +300,7 @@ def _load(plugin):
 
         store = plugin_store[p]
         func = getattr(plugin_module, p)
-        if not (plugin, func) in store:
+        if (plugin, func) not in store:
             store.append((plugin, func))
 
 

@@ -8,7 +8,6 @@ from libc.float cimport DBL_MAX
 from libc.math cimport atan2, fabs
 
 from .._shared.fused_numerics cimport np_floats
-from ..util import img_as_float64
 
 cnp.import_array()
 
@@ -70,7 +69,7 @@ def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
     cdef np_floats[:, ::1] out = np.zeros((rows, cols), dtype=dtype)
 
     cdef np_floats msum, min_msum, t
-    cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
+    cdef Py_ssize_t r, c, br, bc, mr, mc
 
     with nogil:
         for r in range(2 * window_size, rows - 2 * window_size):

@@ -4,7 +4,6 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from libc.math cimport log
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 

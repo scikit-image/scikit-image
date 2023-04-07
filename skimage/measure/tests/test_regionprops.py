@@ -5,11 +5,10 @@ import pytest
 import scipy.ndimage as ndi
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_almost_equal, assert_array_equal,
-                           assert_equal, assert_raises)
+                           assert_equal)
 
 from skimage import data, draw, transform
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
@@ -461,7 +460,7 @@ def test_moments_hu():
     assert_array_almost_equal(hu, ref)
 
     with testing.raises(NotImplementedError):
-        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
+        regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
 
 
 def test_image():
@@ -802,7 +801,7 @@ def test_moments_weighted_hu():
     assert_array_almost_equal(whu, ref)
 
     with testing.raises(NotImplementedError):
-        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
+        regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
 
 
 def test_moments_weighted():

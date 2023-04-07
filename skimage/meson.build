@@ -104,7 +104,8 @@ c_undefined_ok = ['-Wno-maybe-uninitialized']
 # Suppress warning for deprecated Numpy API.
 # (Suppress warning messages emitted by #warning directives).
 # Replace with numpy_nodepr_api after Cython 3.0 is out
-cython_c_args += ['-Wno-cpp']
+_cpp_Wno_cpp = cpp.get_supported_arguments('-Wno-cpp')
+cython_c_args += [_cpp_Wno_cpp]
 cython_cpp_args = cython_c_args
 
 subdir('_shared')

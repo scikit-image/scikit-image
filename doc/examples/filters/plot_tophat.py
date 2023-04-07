@@ -13,7 +13,6 @@ defined as the difference between the input image and its
 
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data

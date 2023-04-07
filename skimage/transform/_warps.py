@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 from scipy import ndimage as ndi
 
 from ._geometric import (SimilarityTransform, AffineTransform,

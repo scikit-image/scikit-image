@@ -18,7 +18,7 @@ submodules = [
     'util',
 ]
 
-__all__ = submodules + ['__version__']
+__all__ = submodules + ['__version__']  # noqa: F822
 
 from . import (
     color,

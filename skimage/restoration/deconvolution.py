@@ -1,5 +1,4 @@
 """Implementations restoration functions"""
-import warnings
 
 import numpy as np
 from scipy.signal import convolve

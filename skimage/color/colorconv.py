@@ -986,8 +986,8 @@ def xyz2lab(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
-    .. [2] https://en.wikipedia.org/wiki/Lab_color_space
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
@@ -1045,7 +1045,7 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in XYZ color space. Same dimensions as input.
+        The image in XYZ color space, of same shape as input.
 
     Raises
     ------
@@ -1063,9 +1063,13 @@ def lab2xyz(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     z_ref = 108.883. See function :func:`~.get_xyz_coords` for a list of
     supported illuminants.
 
+    See Also
+    --------
+    xyz2lab
+
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
     """
     arr = _prepare_colorarray(lab, channel_axis=-1).copy()
@@ -1168,7 +1172,7 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in RGB format. Same dimensions as input.
+        The image in sRGB color space, of same shape as input.
 
     Raises
     ------
@@ -1177,10 +1181,14 @@ def lab2rgb(lab, illuminant="D65", observer="2", *, channel_axis=-1):
 
     Notes
     -----
-    This function uses lab2xyz and xyz2rgb.
+    This function uses :func:`~.lab2xyz` and :func:`~.xyz2rgb`.
     The CIE XYZ tristimulus values are x_ref = 95.047, y_ref = 100., and
     z_ref = 108.883. See function :func:`~.get_xyz_coords` for a list of
     supported illuminants.
+
+    See Also
+    --------
+    rgb2lab
 
     References
     ----------
@@ -1232,7 +1240,7 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELUV
 
     Examples
@@ -1324,7 +1332,7 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [1] http://www.easyrgb.com/en/math.php
     .. [2] https://en.wikipedia.org/wiki/CIELUV
     """
     arr = _prepare_colorarray(luv, channel_axis=-1).copy()
@@ -1390,9 +1398,8 @@ def rgb2luv(rgb, *, channel_axis=-1):
 
     References
     ----------
-    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
-    .. [2] http://www.easyrgb.com/index.php?X=MATH&H=02#text2
-    .. [3] https://en.wikipedia.org/wiki/CIELUV
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELUV
     """
     return xyz2luv(rgb2xyz(rgb))
 
@@ -1575,7 +1582,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     >>> from skimage.color import separate_stains, hdx_from_rgb
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
-    """
+    """  # noqa: E501
     rgb = _prepare_colorarray(rgb, force_copy=True, channel_axis=-1)
     np.maximum(rgb, 1E-6, out=rgb)  # avoiding log artifacts
     log_adjust = np.log(1E-6)  # used to compensate the sum above
@@ -1661,16 +1668,19 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
 
 @channel_as_last_axis()
 def lab2lch(lab, *, channel_axis=-1):
-    """CIE-LAB to CIE-LCH color space conversion.
+    """Convert image in CIE-LAB to CIE-LCh color space.
 
-    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+    CIE-LCh is the cylindrical representation of the CIE-LAB (Cartesian) color
+    space.
 
     Parameters
     ----------
     lab : (..., 3, ...) array_like
-        The N-D image in CIE-LAB format. The last (``N+1``-th) dimension must
-        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
-        color channels. Subsequent elements are copied.
+        The input image in CIE-LAB color space.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
+        The L* values range from 0 to 100;
+        the a* and b* values range from -128 to 127.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.
@@ -1681,16 +1691,26 @@ def lab2lch(lab, *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in LCH format, in a N-D array with same shape as input `lab`.
+        The image in CIE-LCh color space, of same shape as input.
 
     Raises
     ------
     ValueError
-        If `lch` does not have at least 3 color channels (i.e. l, a, b).
+        If `lab` does not have at least 3 channels (i.e., L*, a*, and b*).
 
     Notes
     -----
-    The Hue is expressed as an angle between ``(0, 2*pi)``
+    The h channel (i.e., hue) is expressed as an angle in range ``(0, 2*pi)``.
+
+    See Also
+    --------
+    lch2lab
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/CIELAB_color_space
+    .. [3] https://en.wikipedia.org/wiki/HCL_color_space
 
     Examples
     --------
@@ -1719,16 +1739,20 @@ def _cart2polar_2pi(x, y):
 
 @channel_as_last_axis()
 def lch2lab(lch, *, channel_axis=-1):
-    """CIE-LCH to CIE-LAB color space conversion.
+    """Convert image in CIE-LCh to CIE-LAB color space.
 
-    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+    CIE-LCh is the cylindrical representation of the CIE-LAB (Cartesian) color
+    space.
 
     Parameters
     ----------
     lch : (..., 3, ...) array_like
-        The N-D image in CIE-LCH format. The last (``N+1``-th) dimension must
-        have at least 3 elements, corresponding to the ``L``, ``a``, and ``b``
-        color channels.  Subsequent elements are copied.
+        The input image in CIE-LCh color space.
+        Unless `channel_axis` is set, the final dimension denotes the CIE-LAB
+        channels.
+        The L* values range from 0 to 100;
+        the C values range from 0 to 100;
+        the h values range from 0 to ``2*pi``.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
         channels.
@@ -1739,12 +1763,26 @@ def lch2lab(lch, *, channel_axis=-1):
     Returns
     -------
     out : (..., 3, ...) ndarray
-        The image in LAB format, with same shape as input `lch`.
+        The image in CIE-LAB format, of same shape as input.
 
     Raises
     ------
     ValueError
-        If `lch` does not have at least 3 color channels (i.e. l, c, h).
+        If `lch` does not have at least 3 channels (i.e., L*, C, and h).
+
+    Notes
+    -----
+    The h channel (i.e., hue) is expressed as an angle in range ``(0, 2*pi)``.
+
+    See Also
+    --------
+    lab2lch
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/en/math.php
+    .. [2] https://en.wikipedia.org/wiki/HCL_color_space
+    .. [3] https://en.wikipedia.org/wiki/CIELAB_color_space
 
     Examples
     --------
@@ -1763,15 +1801,15 @@ def lch2lab(lch, *, channel_axis=-1):
 
 
 def _prepare_lab_array(arr, force_copy=True):
-    """Ensure input for lab2lch, lch2lab are well-posed.
+    """Ensure input for lab2lch and lch2lab is well-formed.
 
-    Arrays must be in floating point and have at least 3 elements in
-    last dimension.  Return a new array.
+    Input array must be in floating point and have at least 3 elements in the
+    last dimension. Returns a new array by default.
     """
     arr = np.asarray(arr)
     shape = arr.shape
     if shape[-1] < 3:
-        raise ValueError('Input array has less than 3 color channels')
+        raise ValueError('Input image has less than 3 channels.')
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
         _func = dtype.img_as_float32

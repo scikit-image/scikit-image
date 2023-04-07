@@ -45,7 +45,6 @@ information was reported by the microscope used to image the cells.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
-from scipy import ndimage as ndi
 
 import plotly
 import plotly.express as px

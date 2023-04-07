@@ -5,7 +5,6 @@
 import numpy as np
 
 cimport numpy as cnp
-cimport cython
 cnp.import_array()
 
 def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,

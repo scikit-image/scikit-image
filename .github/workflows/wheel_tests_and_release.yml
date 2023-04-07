@@ -5,7 +5,6 @@ on:
       - v*
     branches:
       - maintenance/**
-      - "!main"
 
 env:
   CIBW_BUILD_VERBOSITY: 2
@@ -249,8 +248,6 @@ jobs:
 
       - name: Install Twine
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/build.txt
           pip install twine
 
       - uses: actions/download-artifact@v3
@@ -262,6 +259,7 @@ jobs:
       - name: Publish the source distribution on PyPI
         run: |
           SK_VERSION=$(git describe --tags)
+          source tools/github/before_install.sh
           python setup.py sdist
           ls -la ${{ github.workspace }}/dist
           # We prefer to release wheels before source because otherwise there is a

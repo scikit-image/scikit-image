@@ -13,7 +13,6 @@ import pytest
 
 
 try:
-    import pooch
     has_pooch = True
 except ModuleNotFoundError:
     has_pooch = False
