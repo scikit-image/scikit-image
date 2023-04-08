@@ -260,9 +260,8 @@ class FundamentalMatrixTransform(GeometricTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import FundamentalMatrixTransform
-
-    >>> tform_matrix = FundamentalMatrixTransform()
+    >>> import skimage as ski
+    >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
     >>> src = np.array([1.839035, 1.924743,
     ...                 0.543582, 0.375221,
     ...                 0.473240, 0.142522,
