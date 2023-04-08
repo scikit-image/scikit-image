@@ -177,7 +177,7 @@ def inverse(data, impulse_response=None, filter_params=None, max_gain=2,
                           max_gain, predefined_filter)
 
 
-def filter_inverse(data, impulse_response, filter_params=None, max_gain=2,
+def filter_inverse(data, impulse_response=None, filter_params=None, max_gain=2,
                    predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
@@ -186,7 +186,8 @@ def filter_inverse(data, impulse_response, filter_params=None, max_gain=2,
     data : (M,N) ndarray
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
-        Impulse response of the filter.  See :class:`~.LPIFilter2D`.
+        Impulse response of the filter.  See :class:`~.LPIFilter2D`. This is a required
+        argument unless a `predifined_filter` is provided.
     filter_params : dict, optional
         Additional keyword parameters to the impulse_response function.
     max_gain : float, optional
@@ -196,7 +197,7 @@ def filter_inverse(data, impulse_response, filter_params=None, max_gain=2,
 
     Other Parameters
     ----------------
-    predefined_filter : LPIFilter2D
+    predefined_filter : LPIFilter2D, optional
         If you need to apply the same filter multiple times over different
         images, construct the LPIFilter2D and specify it here.
 
