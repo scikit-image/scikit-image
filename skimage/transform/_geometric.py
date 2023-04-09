@@ -262,6 +262,9 @@ class FundamentalMatrixTransform(GeometricTransform):
     >>> import numpy as np
     >>> import skimage as ski
     >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
+
+    Define source and destination points:
+
     >>> src = np.array([1.839035, 1.924743,
     ...                 0.543582, 0.375221,
     ...                 0.473240, 0.142522,
@@ -278,15 +281,24 @@ class FundamentalMatrixTransform(GeometricTransform):
     ...                 1.779735, 1.116857,
     ...                 0.878616, 0.602447,
     ...                 0.642616, 1.028681]).reshape(-1, 2)
+
+    Estimate the transformation matrix:
+
     >>> tform_matrix.estimate(src, dst)
     True
     >>> tform_matrix.params
     array([[-0.2178588368,  0.4192819131, -0.0343074756],
            [-0.0717941428,  0.0451643229,  0.0216072614],
            [ 0.2480621133, -0.4294781423,  0.0221019139]])
+
+    Compute the Sampson distance:
+
     >>> tform_matrix.residuals(src, dst)
     array([0.0053886022, 0.0052610069, 0.086897007 , 0.0185053395,
            0.0941825909, 0.0018596663, 0.0616048944, 0.0265513581])
+
+    Apply inverse transformation:
+
     >>> tform_matrix.inverse(dst)
     array([[-0.0513590998,  0.0417097392,  0.0121304255],
            [-0.2159949601,  0.2919341852,  0.0097818351],
