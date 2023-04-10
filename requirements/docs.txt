@@ -1,4 +1,4 @@
-sphinx>=6.0
+sphinx>=5.0
 sphinx-gallery>=0.11
 numpydoc>=1.5
 sphinx-copybutton
@@ -16,3 +16,5 @@ ipykernel
 plotly>=5.10
 kaleido
 scikit-learn>=0.24.0
+sphinx_design>=0.3
+pydata-sphinx-theme>=0.13

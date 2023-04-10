@@ -51,8 +51,10 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "doi_role",
     "numpydoc",
+    "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "skimage_extensions",
 ]
 
 autosummary_generate = True
@@ -131,16 +133,51 @@ if _has_optipng():
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# https://pydata-sphinx-theme.readthedocs.io/en/latest/user_guide/branding.html
 
-html_theme = "scikit-image"
-html_theme_path = ["themes"]
-html_title = f"skimage v{version} docs"
+html_theme = "pydata_sphinx_theme"
 html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
+html_logo = "_static/logo.png"
+
+html_css_files = ['theme_overrides.css']
+
+html_theme_options = {
+    # Navigation bar
+    "logo": {
+        "alt_text": (
+            "scikit-image's logo, showing a snake's head overlayed with green "
+            "and orange"
+        ),
+        "text": "scikit-image"
+    },
+    "header_links_before_dropdown": 6,
+    "icon_links": [
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/scikit-image/",
+            "icon": "fa-solid fa-box",
+        },
+    ],
+    "navbar_end": ["version-switcher", "navbar-icon-links"],
+    "switcher": {
+        # "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
+        "json_url": "https://gist.githubusercontent.com/lagru/8bce79c510b9026dab455c0a96a2c0b3/raw/f1fd57408675bb728a2cddddcae788ef107aa06b/version_switcher.json",
+        "version_match": "dev" if "dev" in version else version,
+    },
+    "github_url": "https://github.com/scikit-image/scikit-image",
+    # Footer
+    "footer_start": ["copyright"],
+    "footer_end": ["sphinx-version", "theme-version"],
+    # Other
+    "pygment_light_style": "default",
+    "pygment_dark_style": "github-dark",
+}
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-    "**": ["searchbox.html", "navigation.html", "localtoc.html", "versions.html"],
+    # "**": ["sidebar-nav-bs", "sidebar-ethical-ads"],
+    "auto_examples/index": []  # Hide sidebar in example gallery
 }
 
 # Output file base name for HTML help builder.
