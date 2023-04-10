@@ -849,14 +849,26 @@ class AffineTransform(ProjectiveTransform):
 
     Has the following form::
 
-        X = a0*x + a1*y + a2 =
-          = sx*x*cos(rotation) - sy*y*sin(rotation + shear) + a2
+        X = a0 * x + a1 * y + a2
+          =   sx * x * [cos(rotation) + tan(shear_y) * sin(rotation)]
+            - sy * y * [tan(shear_x) * cos(rotation) + sin(rotation)]
+            + translation_x
 
-        Y = b0*x + b1*y + b2 =
-          = sx*x*sin(rotation) + sy*y*cos(rotation + shear) + b2
+        Y = b0 * x + b1 * y + b2
+          =   sx * x * [sin(rotation) - tan(shear_y) * cos(rotation)]
+            - sy * y * [tan(shear_x) * sin(rotation) - cos(rotation)]
+            + translation_y
 
-    where ``sx`` and ``sy`` are scale factors in the x and y directions,
-    and the homogeneous transformation matrix is::
+    where ``sx`` and ``sy`` are scale factors in the x and y directions.
+
+    This is equivalent to applying the operations in the following order:
+
+    1. Scale
+    2. Shear
+    3. Rotate
+    4. Translate
+
+    The homogeneous transformation matrix is::
 
         [[a0  a1  a2]
          [b0  b1  b2]
@@ -884,11 +896,12 @@ class AffineTransform(ProjectiveTransform):
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
     rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians. Only
-        available for 2D.
-    shear : float, optional
-        Shear angle in counter-clockwise direction as radians. Only available
-        for 2D.
+        Rotation angle, clockwise, as radians. Only available for 2D.
+    shear : float or 2-tuple of float, optional
+        The x and y shear angles, clockwise, by which these axes are
+        rotated around the origin [2].
+        If a single value is given, take that to be the x shear angle, with
+        the y angle remaining 0. Only available in 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
@@ -930,6 +943,12 @@ class AffineTransform(ProjectiveTransform):
 
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
+    References
+    ----------
+    .. [1] Wikipedia, "Affine transformation",
+           https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
+    .. [2] Wikipedia, "Shear mapping",
+           https://en.wikipedia.org/wiki/Shear_mapping
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
@@ -969,19 +988,39 @@ class AffineTransform(ProjectiveTransform):
             else:
                 sx, sy = scale
 
-            self.params = np.array([
-                [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
-                [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
-                [                      0,                                0, 1]
-            ])
-            self.params[0:2, 2] = translation
+            if np.isscalar(shear):
+                shear_x, shear_y = (shear, 0)
+            else:
+                shear_x, shear_y = shear
+
+            a0 = sx * (
+                math.cos(rotation) + math.tan(shear_y) * math.sin(rotation)
+            )
+            a1 = -sy * (
+                math.tan(shear_x) * math.cos(rotation) + math.sin(rotation)
+            )
+            a2 = translation[0]
+
+            b0 = sx * (
+                math.sin(rotation) - math.tan(shear_y) * math.cos(rotation)
+            )
+            b1 = -sy * (
+                math.tan(shear_x) * math.sin(rotation) - math.cos(rotation)
+            )
+            b2 = translation[1]
+            self.params = np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
         else:
             # default to an identity transform
             self.params = np.eye(dimensionality + 1)
 
     @property
     def scale(self):
-        return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dimensionality]
+        if self.dimensionality != 2:
+            return np.sqrt(np.sum(self.params ** 2, axis=0))[:self.dimensionality]
+        else:
+            ss = np.sum(self.params ** 2, axis=0)
+            ss[1] = ss[1] / (math.tan(self.shear)**2 + 1)
+            return np.sqrt(ss)[:self.dimensionality]
 
     @property
     def rotation(self):
@@ -1228,7 +1267,7 @@ class EuclideanTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle in counter-clockwise direction as radians. If given as
+        Rotation angle, clockwise, as radians. If given as
         a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
@@ -1368,7 +1407,7 @@ class SimilarityTransform(EuclideanTransform):
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
     rotation : float, optional
-        Rotation angle in counter-clockwise direction as radians.
+        Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
     translation : (dim,) array_like, optional
