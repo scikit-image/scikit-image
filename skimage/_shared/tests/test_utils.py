@@ -1,16 +1,16 @@
+import inspect
 import sys
 import warnings
-import inspect
 
 import numpy as np
 import pytest
 
 from skimage._shared import testing
-from skimage._shared.utils import (check_nD, deprecate_kwarg,
+from skimage._shared.utils import (_supported_float_type,
                                    _validate_interpolation_order,
-                                   change_default_value, remove_arg,
-                                   _supported_float_type,
-                                   channel_as_last_axis)
+                                   change_default_value, channel_as_last_axis,
+                                   check_nD, deprecate_func, deprecate_kwarg,
+                                   remove_arg)
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -290,5 +290,29 @@ def test_deprecate_kwarg_location():
     with pytest.warns(FutureWarning) as record:
         _function_with_deprecated_kwarg(old_kwarg=True)
         expected_lineno = inspect.currentframe().f_lineno - 1
+    assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__
+
+
+@deprecate_func(
+    deprecated_version="x", removed_version="y", hint="You are on your own."
+)
+def _deprecated_func():
+    """Dummy function used in `test_deprecate_func`.
+
+    The decorated function must be outside the test function, otherwise it
+    seems that the warning does not point at the calling location.
+    """
+
+
+def test_deprecate_func():
+    with pytest.warns(FutureWarning) as record:
+        _deprecated_func()
+        expected_lineno = inspect.currentframe().f_lineno - 1
+
+    assert record[0].message.args[0] == (
+        "`_deprecated_func` is deprecated since version x and will be removed in "
+        "version y. You are on your own."
+    )
     assert record[0].lineno == expected_lineno
     assert record[0].filename == __file__

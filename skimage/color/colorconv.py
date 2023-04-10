@@ -61,7 +61,7 @@ from .._shared.utils import (
     identity,
     reshape_nd,
     slice_at_axis,
-    deprecated,
+    deprecate_func,
 )
 from ..util import dtype, dtype_limits
 
@@ -571,8 +571,9 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
                          f'(`{illuminant}`, `{observer}`)')
 
 
-@deprecated(
-    alt_func="skimage.color.xyz_tristimulus_values",
+@deprecate_func(
+    hint="Use `skimage.color.xyz_tristimulus_values` instead.",
+    deprecated_version="0.21",
     removed_version="0.23",
 )
 def get_xyz_coords(illuminant, observer, dtype=float):
