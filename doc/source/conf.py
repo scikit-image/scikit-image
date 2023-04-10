@@ -161,8 +161,7 @@ html_theme_options = {
     ],
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "switcher": {
-        # "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
-        "json_url": "https://gist.githubusercontent.com/lagru/8bce79c510b9026dab455c0a96a2c0b3/raw/f1fd57408675bb728a2cddddcae788ef107aa06b/version_switcher.json",
+        "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
         "version_match": "dev" if "dev" in version else version,
     },
     "github_url": "https://github.com/scikit-image/scikit-image",
