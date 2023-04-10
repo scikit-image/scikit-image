@@ -130,7 +130,7 @@ class LPIFilter2D:
         return out
 
 
-def filter_forward(data, impulse_response=None, filter_params={},
+def filter_forward(data, impulse_response=None, filter_params=None,
                    predefined_filter=None):
     """Apply the given filter to data.
 
@@ -140,7 +140,7 @@ def filter_forward(data, impulse_response=None, filter_params={},
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
-    filter_params : dict
+    filter_params : dict, optional
         Additional keyword parameters to the impulse_response function.
 
     Other Parameters
@@ -161,6 +161,8 @@ def filter_forward(data, impulse_response=None, filter_params={},
     >>> filtered = filter_forward(data.coins(), filt_func)
 
     """
+    if filter_params is None:
+        filter_params = {}
     check_nD(data, 2, 'data')
     if predefined_filter is None:
         predefined_filter = LPIFilter2D(impulse_response, **filter_params)
@@ -169,13 +171,13 @@ def filter_forward(data, impulse_response=None, filter_params={},
 
 @deprecated(alt_func='skimage.filters.lpi_filter.filter_inverse',
             removed_version='0.22')
-def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
+def inverse(data, impulse_response=None, filter_params=None, max_gain=2,
             predefined_filter=None):
     return filter_inverse(data, impulse_response, filter_params,
                           max_gain, predefined_filter)
 
 
-def filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
+def filter_inverse(data, impulse_response=None, filter_params=None, max_gain=2,
                    predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
@@ -184,21 +186,25 @@ def filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     data : (M,N) ndarray
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
-        Impulse response of the filter.  See LPIFilter2D.__init__.
-    filter_params : dict
+        Impulse response of the filter.  See :class:`~.LPIFilter2D`. This is a required
+        argument unless a `predifined_filter` is provided.
+    filter_params : dict, optional
         Additional keyword parameters to the impulse_response function.
-    max_gain : float
+    max_gain : float, optional
         Limit the filter gain.  Often, the filter contains zeros, which would
         cause the inverse filter to have infinite gain.  High gain causes
         amplification of artefacts, so a conservative limit is recommended.
 
     Other Parameters
     ----------------
-    predefined_filter : LPIFilter2D
+    predefined_filter : LPIFilter2D, optional
         If you need to apply the same filter multiple times over different
         images, construct the LPIFilter2D and specify it here.
 
     """
+    if filter_params is None:
+        filter_params = {}
+
     check_nD(data, 2, 'data')
     if predefined_filter is None:
         filt = LPIFilter2D(impulse_response, **filter_params)
@@ -215,7 +221,7 @@ def filter_inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
-def wiener(data, impulse_response=None, filter_params={}, K=0.25,
+def wiener(data, impulse_response=None, filter_params=None, K=0.25,
            predefined_filter=None):
     """Minimum Mean Square Error (Wiener) inverse filter.
 
@@ -228,7 +234,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
         image.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
-    filter_params : dict
+    filter_params : dict, optional
         Additional keyword parameters to the impulse_response function.
 
     Other Parameters
@@ -238,6 +244,9 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
         images, construct the LPIFilter2D and specify it here.
 
     """
+    if filter_params is None:
+        filter_params = {}
+
     check_nD(data, 2, 'data')
 
     if not isinstance(K, float):
