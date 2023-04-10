@@ -21,7 +21,7 @@ from ..util import img_as_float
 
 @deprecate_func(
     deprecated_version="0.20",
-    removed_version="0.21",
+    removed_version="0.22",
     hint="Use `skimage.feature.hessian_matrix_eigvals` on the results of "
          "`skimage.feature.hessian_matrix` instead."
 )

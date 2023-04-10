@@ -24,6 +24,7 @@ Version 0.22
   Remove the ``r'\.future.graph$'`` entry added to
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
+* Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.
 
 Version 0.23
 ------------
