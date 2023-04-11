@@ -148,7 +148,7 @@ def _skip_pytest_case_requiring_pooch(data_filename):
 
 
 def _ensure_data_dir(*, target_dir: Path):
-    """Prepare local cache directory "data" for if it doesn't exist already."""
+    """Prepare local cache directory if it doesn't exist already."""
     target_dir.mkdir(parents=True, exist_ok=True)
     readme_src = _DISTRIBUTION_DIR / "data/README.txt"
     readme_dest = target_dir / "README.txt"
