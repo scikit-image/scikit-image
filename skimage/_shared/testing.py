@@ -287,7 +287,6 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
-@pytest.mark.skip()
 def test_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
