@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage._shared.testing import expected_warnings, test_parallel
+from skimage._shared.testing import expected_warnings, run_in_parallel
 from skimage.feature import (graycomatrix, graycoprops,
                              local_binary_pattern, multiblock_lbp)
 from skimage.transform import integral_image
@@ -15,7 +15,7 @@ class TestGLCM():
                                [0, 2, 2, 2],
                                [2, 2, 3, 3]], dtype=np.uint8)
 
-    @test_parallel()
+    @run_in_parallel()
     def test_output_angles(self):
         result = graycomatrix(
             self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4
@@ -214,7 +214,7 @@ class TestLBP():
                                [146, 241, 255,   0,  189, 126]],
                               dtype=np.uint8)
 
-    @test_parallel()
+    @run_in_parallel()
     def test_default(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'default')
         ref = np.array([[  0, 251,   0, 255,  96, 255],
