@@ -13,11 +13,11 @@ from ._registry import registry, legacy_registry, registry_urls
 
 from .. import __version__
 
-import os.path as osp
 import os
+from pathlib import Path
 
-legacy_data_dir = osp.abspath(osp.dirname(__file__))
-skimage_distribution_dir = osp.join(legacy_data_dir, '..')
+legacy_data_dir = Path(__file__).parent
+skimage_distribution_dir = legacy_data_dir.parent
 
 try:
     from pooch import file_hash
@@ -64,7 +64,7 @@ except ModuleNotFoundError:
 
 def _has_hash(path, expected_hash):
     """Check if the provided path has the expected hash."""
-    if not osp.exists(path):
+    if not Path(path).exists():
         return False
     return file_hash(path) == expected_hash
 
@@ -120,7 +120,7 @@ def create_image_fetcher():
         **retry,
     )
 
-    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+    data_dir = image_fetcher.abspath / 'data'
     return image_fetcher, data_dir
 
 
@@ -181,7 +181,7 @@ def _fetch(data_filename):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    resolved_path = osp.join(data_dir, '..', data_filename)
+    resolved_path = data_dir.parent / data_filename
     expected_hash = registry[data_filename]
 
     # Case 1:
@@ -196,9 +196,9 @@ def _fetch(data_filename):
     # contains both the publicly shipped data, and test data.
     # In this case, the file would be located relative to the
     # skimage_distribution_dir
-    gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
+    gh_repository_path = skimage_distribution_dir / data_filename
     if _has_hash(gh_repository_path, expected_hash):
-        parent = osp.dirname(resolved_path)
+        parent = resolved_path.parent
         os.makedirs(parent, exist_ok=True)
         shutil.copy2(gh_repository_path, resolved_path)
         return resolved_path
@@ -245,10 +245,9 @@ def _init_pooch():
     # In general, as the data cache directory contains the scikit-image version
     # it should not be necessary to overwrite this file as it should not
     # change.
-    dest_path = osp.join(data_dir, 'README.txt')
+    dest_path = data_dir / 'README.txt'
     if not os.path.isfile(dest_path):
-        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                     dest_path)
+        shutil.copy2(skimage_distribution_dir / 'data/README.txt', dest_path)
 
     # Fetch all legacy data so that it is available by default
     for filename in legacy_registry:
