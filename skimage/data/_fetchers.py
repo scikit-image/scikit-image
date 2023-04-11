@@ -131,9 +131,9 @@ def _create_image_fetcher():
     return image_fetcher, data_dir
 
 
-image_fetcher, data_dir = _create_image_fetcher()
+_image_fetcher, data_dir = _create_image_fetcher()
 
-if image_fetcher is None:
+if _image_fetcher is None:
     has_pooch = False
 else:
     has_pooch = True
@@ -212,7 +212,7 @@ def _fetch(data_filename):
 
     # Case 3:
     # Pooch not found.
-    if image_fetcher is None:
+    if _image_fetcher is None:
         _skip_pytest_case_requiring_pooch(data_filename)
 
         raise ModuleNotFoundError(
@@ -228,7 +228,7 @@ def _fetch(data_filename):
     # our data. A ConnectionError is raised if no internet connection is
     # available.
     try:
-        resolved_path = image_fetcher.fetch(data_filename)
+        resolved_path = _image_fetcher.fetch(data_filename)
     except ConnectionError as err:
         _skip_pytest_case_requiring_pooch(data_filename)
 
@@ -303,7 +303,7 @@ def download_all(directory=None):
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
 
-    if image_fetcher is None:
+    if _image_fetcher is None:
         raise ModuleNotFoundError(
             "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
@@ -311,15 +311,15 @@ def download_all(directory=None):
             "https://scikit-image.org/docs/stable/install.html"
         )
     # Consider moving this kind of logic to Pooch
-    old_dir = image_fetcher.path
+    old_dir = _image_fetcher.path
     try:
         if directory is not None:
-            image_fetcher.path = directory
+            _image_fetcher.path = directory
 
-        for filename in image_fetcher.registry:
+        for filename in _image_fetcher.registry:
             _fetch(filename)
     finally:
-        image_fetcher.path = old_dir
+        _image_fetcher.path = old_dir
 
 
 def lbp_frontal_face_cascade_filename():
