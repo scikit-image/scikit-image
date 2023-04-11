@@ -2,10 +2,10 @@ import numpy as np
 from skimage.segmentation import quickshift
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_greater, test_parallel,
+from skimage._shared.testing import (assert_greater, run_in_parallel,
                                      assert_equal, assert_array_equal)
 
-@test_parallel()
+@run_in_parallel()
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_grey(dtype):
     rnd = np.random.default_rng(0)

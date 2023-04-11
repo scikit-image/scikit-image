@@ -3,12 +3,12 @@ from skimage import data
 from skimage.segmentation import felzenszwalb
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_greater, test_parallel,
+from skimage._shared.testing import (assert_greater, run_in_parallel,
                                      assert_equal, assert_array_equal,
                                      assert_warns, assert_no_warnings)
 
 
-@test_parallel()
+@run_in_parallel()
 def test_grey():
     # very weak tests.
     img = np.zeros((20, 21))
