@@ -121,7 +121,7 @@ def create_image_fetcher():
     )
 
     data_dir = image_fetcher.abspath / 'data'
-    return image_fetcher, data_dir
+    return image_fetcher, str(data_dir)
 
 
 image_fetcher, data_dir = create_image_fetcher()
@@ -196,13 +196,13 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
     legacy_file_path = _LEGACY_DATA_DIR / Path(data_filename).name
     if _has_hash(legacy_file_path, expected_hash):
         if copy_legacy_to_cache is True:
-            _ensure_data_dir(target_dir=data_dir)
-            cached_file_path = data_dir.parent / data_filename
+            _ensure_data_dir(target_dir=Path(data_dir))
+            cached_file_path = Path(data_dir).parent / data_filename
             shutil.copy2(legacy_file_path, cached_file_path)
         return legacy_file_path
 
     # Case 2: the file is already cached in `data_cache_dir`
-    cached_file_path = data_dir.parent / data_filename
+    cached_file_path = Path(data_dir).parent / data_filename
     if _has_hash(cached_file_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return cached_file_path
@@ -217,7 +217,7 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
             "Follow installation instruction found at "
             "https://scikit-image.org/docs/stable/install.html"
         )
-    _ensure_data_dir(target_dir=data_dir)
+    _ensure_data_dir(target_dir=Path(data_dir))
     # Download the data with pooch, cache and return its location
     try:
         cached_file_path = image_fetcher.fetch(data_filename)

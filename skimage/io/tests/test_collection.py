@@ -119,7 +119,7 @@ class TestImageCollection():
 
     @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
     def test_custom_load_func_w_kwarg(self):
-        load_pattern = fetch('data/no_time_for_that_tiny.gif')
+        load_pattern = str(fetch('data/no_time_for_that_tiny.gif'))
 
         def load_fn(f, step):
             vid = imageio.get_reader(f)
