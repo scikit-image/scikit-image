@@ -80,7 +80,7 @@ def create_image_fetcher():
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
-        return None, _LEGACY_DATA_DIR
+        return None, str(_LEGACY_DATA_DIR)
 
     # Pooch expects a `+` to exist in development versions.
     # Since scikit-image doesn't follow that convention, we have to manually
