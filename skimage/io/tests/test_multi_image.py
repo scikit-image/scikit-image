@@ -33,9 +33,9 @@ def imgs():
 def test_debug(data_filename):
     from skimage.data._fetchers import file_hash, _LEGACY_DATA_DIR, data_dir
 
-    path_legacy = os.path.join(_LEGACY_DATA_DIR, "..", data_filename)
+    path_legacy = os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", data_filename))
     path_fetch = testing.fetch(data_filename)
-    path_cache = os.path.join(data_dir, "..", data_filename)
+    path_cache = os.path.abspath(os.path.join(data_dir, "..", data_filename))
 
     assert os.path.exists(path_legacy)
     assert os.path.exists(path_fetch)
@@ -49,16 +49,18 @@ def test_debug2():
     from skimage.data._fetchers import _LEGACY_DATA_DIR, data_dir
 
     paths_legacy = [
-        os.path.join(_LEGACY_DATA_DIR, "..", 'data/multipage_rgb.tif'),
-        os.path.join(_LEGACY_DATA_DIR, "..", 'data/no_time_for_that_tiny.gif')
+        os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", 'data/multipage_rgb.tif')),
+        os.path.abspath(
+            os.path.join(_LEGACY_DATA_DIR, "..", 'data/no_time_for_that_tiny.gif')
+        ),
     ]
     paths_fetch = [
         testing.fetch('data/multipage_rgb.tif'),
         testing.fetch('data/no_time_for_that_tiny.gif')
     ]
     paths_cache = [
-        os.path.join(data_dir, "..", 'data/multipage_rgb.tif'),
-        os.path.join(data_dir, "..", 'data/no_time_for_that_tiny.gif')
+        os.path.abspath(os.path.join(data_dir, "..", 'data/multipage_rgb.tif')),
+        os.path.abspath(os.path.join(data_dir, "..", 'data/no_time_for_that_tiny.gif')),
     ]
 
     img_legacy = MultiImage(os.pathsep.join(paths_legacy))

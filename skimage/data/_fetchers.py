@@ -7,6 +7,7 @@ For more images, see
 """
 import numpy as np
 import shutil
+from functools import wraps
 
 from ..util.dtype import img_as_bool
 from ._registry import registry, registry_urls
@@ -156,6 +157,17 @@ def _ensure_data_dir(*, target_dir):
         shutil.copy2(readme_src, readme_dest)
 
 
+def _absolute_return_path(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        path = func(*args, **kwargs)
+        path = os.path.abspath(path)
+        assert os.path.exists(path)
+        return path
+    return wrapper
+
+
+@_absolute_return_path
 def _fetch(data_filename, *, copy_legacy_to_cache=False):
     """Fetch a given data file from either the local cache or the repository.
 
