@@ -87,7 +87,7 @@ using a combination of `conda`, `pip` and `meson` command lines:
 
 - First, create a conda environment with available build and run dependencies
   ```
-  conda create -n skimage-dev python=3.10 scipy networkx pywavelets pillow imageiomeson-python cython pythran
+  conda create -n skimage-dev python=3.10 scipy networkx pywavelets pillow imageio meson-python cython pythran
   conda activate skimage-dev
   ```
 - then install skimage in editable mode
@@ -95,6 +95,7 @@ using a combination of `conda`, `pip` and `meson` command lines:
   cd SKIMAGE_SRC_PATH
   pip install -e . --config-settings editable-verbose=true
   ```
+  The `editable-verbose <https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode>` is a `mesonpy` option. 
 - reconfigure meson
   ```
   meson setup .mesonpy/editable/build --wipe
@@ -104,14 +105,14 @@ and you are done!
 
 #### Testing with pytest
 
-Testing in the above settings can be achieved using
+Testing in the above settings can be achieved by
 
-- Activate the previously created development environment and install `pytest`
+- activating the previously created development environment and install `pytest`
   ```
   conda activate skimage-dev
   conda install pytest
   ```
-- use the `importlib` import mode when you run the tests:
+- using the `importlib` import mode when you run the tests:
   ```
   pytest --import-mode=importlib skimage/
   ```
