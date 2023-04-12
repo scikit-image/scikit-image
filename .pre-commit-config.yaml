@@ -40,4 +40,4 @@ repos:
         name: pyproject.toml
         language: system
         entry: python tools/generate_pyproject.toml.py
-        files: pyproject.toml
+        files: "pyproject.toml|requirements/.*\\.txt|tools/.*pyproject.*"
