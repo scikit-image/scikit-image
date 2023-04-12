@@ -95,7 +95,7 @@ using a combination of `conda`, `pip` and `meson` command lines:
   cd SKIMAGE_SRC_PATH
   pip install -e . --config-settings editable-verbose=true
   ```
-  `[editable-verbose](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode)` is a `mesonpy` option. 
+  [`editable-verbose`](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode) is a `mesonpy` option. 
 - reconfigure meson
   ```
   meson setup .mesonpy/editable/build --wipe
