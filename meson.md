@@ -77,8 +77,8 @@ python -m build --no-isolation
 
 ### Conda (Experimental)
 
-.. warning::
-   Combining `conda` and `pip` is not recommanded. Use with caution!
+> **_Warning_**: Combining `conda` and `pip` is not recommanded. Use
+  with caution!
 
 The recommanded versions of `scikit-image` dependencies are
 unfortunatly not available in the main Conda channel. But you still
