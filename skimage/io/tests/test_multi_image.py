@@ -28,6 +28,7 @@ def imgs():
 
 def test_debug():
     from .._io import imread
+    from ..collection import alphanumeric_key
     from skimage.data._fetchers import file_hash, data_dir
 
     paths_fetch = [
@@ -42,8 +43,15 @@ def test_debug():
         assert file_hash(f) == file_hash(c)
         np.testing.assert_array_equal(imread(f), imread(c))
 
+    sorted_fetch = sorted(paths_fetch, key=alphanumeric_key)
+    sorted_cache = sorted(paths_cache, key=alphanumeric_key)
+    assert sorted_fetch == sorted_cache
+
     img_fetch = MultiImage(os.pathsep.join(paths_fetch))
     img_cache = MultiImage(os.pathsep.join(paths_cache))
+
+    assert img_fetch.files == img_cache.files
+
     assert len(img_fetch) == 2
     assert len(img_cache) == 2
     np.testing.assert_array_equal(img_fetch[0], img_cache[0])
