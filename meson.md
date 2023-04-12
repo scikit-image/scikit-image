@@ -75,6 +75,33 @@ produce an sdist and a wheel:
 python -m build --no-isolation
 ```
 
+### Conda (Experimental)
+
+.. warning::
+   Combining `conda` and `pip` is not recommanded. Use with caution!
+
+The recommanded versions of `scikit-image` dependencies are
+unfortunatly not available in the main Conda channel. But you still
+can get `scikit-image` installed in editable mode for development
+using a combination of `conda`, `pip` and `meson` command lines:
+
+- First, create a conda environment with available build and run dependencies
+  ```
+  conda create -n skimage-dev python=3.10 scipy networkx pywavelets pillow imageiomeson-python cython pythran
+  conda activate skimage-dev
+  ```
+- then install skimage in editable mode
+  ```
+  cd SKIMAGE_SRC_PATH
+  pip install -e . --config-settings editable-verbose=true
+  ```
+- reconfigure meson
+  ```
+  meson setup .mesonpy/editable/build --wipe
+  ```
+
+and you are done!
+
 ## Notes
 
 ### Templated Cython files
