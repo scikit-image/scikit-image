@@ -102,6 +102,20 @@ using a combination of `conda`, `pip` and `meson` command lines:
 
 and you are done!
 
+#### Testing with pytest
+
+Testing in the above settings can be achieved using
+
+- Activate the previously created development environment and install `pytest`
+  ```
+  conda activate skimage-dev
+  conda install pytest
+  ```
+- use the `importlib` import mode when you run the tests:
+  ```
+  pytest --import-mode=importlib skimage/
+  ```
+
 ## Notes
 
 ### Templated Cython files
