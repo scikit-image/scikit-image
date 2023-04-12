@@ -198,6 +198,7 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
         if copy_legacy_to_cache is True:
             _ensure_data_dir(target_dir=data_dir)
             cached_file_path = osp.join(data_dir, "..", data_filename)
+            os.makedirs(osp.dirname(cached_file_path), exist_ok=True)
             shutil.copy2(legacy_file_path, cached_file_path)
         return legacy_file_path
 
