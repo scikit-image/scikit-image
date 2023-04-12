@@ -116,7 +116,6 @@ optional = [
 ]
 test = [
     'asv',
-    'codecov',
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pytest>=7.0',
