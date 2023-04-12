@@ -13,8 +13,8 @@ from pytest import fixture
 def imgs():
     use_plugin('pil')
 
-    paths = [str(testing.fetch('data/multipage_rgb.tif')),
-             str(testing.fetch('data/no_time_for_that_tiny.gif'))]
+    paths = [testing.fetch('data/multipage_rgb.tif'),
+             testing.fetch('data/no_time_for_that_tiny.gif')]
     imgs = [MultiImage(paths[0]),
             MultiImage(paths[0], conserve_memory=False),
             MultiImage(paths[1]),

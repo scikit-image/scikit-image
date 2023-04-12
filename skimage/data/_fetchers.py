@@ -13,11 +13,11 @@ from ._registry import registry, registry_urls
 
 from .. import __version__
 
+import os.path as osp
 import os
-from pathlib import Path
 
-_LEGACY_DATA_DIR = Path(__file__).parent
-_DISTRIBUTION_DIR = _LEGACY_DATA_DIR.parent
+_LEGACY_DATA_DIR = osp.abspath(osp.dirname(__file__))
+_DISTRIBUTION_DIR = osp.join(_LEGACY_DATA_DIR, '..')
 
 try:
     from pooch import file_hash
@@ -64,7 +64,7 @@ except ModuleNotFoundError:
 
 def _has_hash(path, expected_hash):
     """Check if the provided path has the expected hash."""
-    if not Path(path).exists():
+    if not osp.exists(path):
         return False
     return file_hash(path) == expected_hash
 
@@ -80,7 +80,7 @@ def create_image_fetcher():
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
-        return None, str(_LEGACY_DATA_DIR)
+        return None, _LEGACY_DATA_DIR
 
     # Pooch expects a `+` to exist in development versions.
     # Since scikit-image doesn't follow that convention, we have to manually
@@ -120,8 +120,8 @@ def create_image_fetcher():
         **retry,
     )
 
-    data_dir = image_fetcher.abspath / 'data'
-    return image_fetcher, str(data_dir)
+    data_dir = osp.join(str(image_fetcher.abspath), 'data')
+    return image_fetcher, data_dir
 
 
 image_fetcher, data_dir = create_image_fetcher()
@@ -147,12 +147,12 @@ def _skip_pytest_case_requiring_pooch(data_filename):
                     allow_module_level=True)
 
 
-def _ensure_data_dir(*, target_dir: Path):
+def _ensure_data_dir(*, target_dir):
     """Prepare local cache directory if it doesn't exist already."""
-    target_dir.mkdir(parents=True, exist_ok=True)
-    readme_src = _DISTRIBUTION_DIR / "data/README.txt"
-    readme_dest = target_dir / "README.txt"
-    if not readme_dest.exists():
+    os.makedirs(target_dir, exist_ok=True)
+    readme_src = osp.join(_DISTRIBUTION_DIR, "data/README.txt")
+    readme_dest = osp.join(target_dir, "README.txt")
+    if not osp.exists(readme_dest):
         shutil.copy2(readme_src, readme_dest)
 
 
@@ -174,7 +174,7 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
 
     Returns
     -------
-    file_path : Path
+    file_path : str
         Path of the local file.
 
     Raises
@@ -193,16 +193,16 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
     expected_hash = registry[data_filename]
 
     # Case 1: file is present in `legacy_data_dir`
-    legacy_file_path = _LEGACY_DATA_DIR / Path(data_filename).name
+    legacy_file_path = osp.join(_LEGACY_DATA_DIR, "..", data_filename)
     if _has_hash(legacy_file_path, expected_hash):
         if copy_legacy_to_cache is True:
-            _ensure_data_dir(target_dir=Path(data_dir))
-            cached_file_path = Path(data_dir).parent / data_filename
+            _ensure_data_dir(target_dir=data_dir)
+            cached_file_path = osp.join(data_dir, "..", data_filename)
             shutil.copy2(legacy_file_path, cached_file_path)
         return legacy_file_path
 
     # Case 2: the file is already cached in `data_cache_dir`
-    cached_file_path = Path(data_dir).parent / data_filename
+    cached_file_path = osp.join(data_dir, "..", data_filename)
     if _has_hash(cached_file_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return cached_file_path
@@ -217,7 +217,7 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
             "Follow installation instruction found at "
             "https://scikit-image.org/docs/stable/install.html"
         )
-    _ensure_data_dir(target_dir=Path(data_dir))
+    _ensure_data_dir(target_dir=data_dir)
     # Download the data with pooch, cache and return its location
     try:
         cached_file_path = image_fetcher.fetch(data_filename)
