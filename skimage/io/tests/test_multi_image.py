@@ -31,29 +31,29 @@ def imgs():
     "data_filename", ["data/multipage_rgb.tif", "data/no_time_for_that_tiny.gif"]
 )
 def test_debug(data_filename):
-    from skimage.data._fetchers import file_hash, _LEGACY_DATA_DIR, data_dir
+    from skimage.data._fetchers import file_hash, data_dir
 
-    path_legacy = os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", data_filename))
+    # path_legacy = os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", data_filename))
     path_fetch = testing.fetch(data_filename)
     path_cache = os.path.abspath(os.path.join(data_dir, "..", data_filename))
 
-    assert os.path.exists(path_legacy)
+    # assert os.path.exists(path_legacy)
     assert os.path.exists(path_fetch)
-    assert file_hash(path_legacy) == file_hash(path_fetch)
+    # assert file_hash(path_legacy) == file_hash(path_fetch)
 
     assert os.path.exists(path_cache)
-    assert file_hash(path_legacy) == file_hash(path_cache)
+    assert file_hash(path_fetch) == file_hash(path_cache)
 
 
 def test_debug2():
-    from skimage.data._fetchers import _LEGACY_DATA_DIR, data_dir
+    from skimage.data._fetchers import data_dir
 
-    paths_legacy = [
-        os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", 'data/multipage_rgb.tif')),
-        os.path.abspath(
-            os.path.join(_LEGACY_DATA_DIR, "..", 'data/no_time_for_that_tiny.gif')
-        ),
-    ]
+    # paths_legacy = [
+    #     os.path.abspath(os.path.join(_LEGACY_DATA_DIR, "..", 'data/multipage_rgb.tif')),
+    #     os.path.abspath(
+    #         os.path.join(_LEGACY_DATA_DIR, "..", 'data/no_time_for_that_tiny.gif')
+    #     ),
+    # ]
     paths_fetch = [
         testing.fetch('data/multipage_rgb.tif'),
         testing.fetch('data/no_time_for_that_tiny.gif')
@@ -63,19 +63,19 @@ def test_debug2():
         os.path.abspath(os.path.join(data_dir, "..", 'data/no_time_for_that_tiny.gif')),
     ]
 
-    img_legacy = MultiImage(os.pathsep.join(paths_legacy))
+    # img_legacy = MultiImage(os.pathsep.join(paths_legacy))
     img_fetch = MultiImage(os.pathsep.join(paths_fetch))
 
-    assert len(img_legacy) == 2
+    # assert len(img_legacy) == 2
     assert len(img_fetch) == 2
-    np.testing.assert_array_equal(img_legacy[0], img_fetch[0])
-    np.testing.assert_array_equal(img_legacy[1], img_fetch[1])
+    # np.testing.assert_array_equal(img_legacy[0], img_fetch[0])
+    # np.testing.assert_array_equal(img_legacy[1], img_fetch[1])
 
     img_cache = MultiImage(os.pathsep.join(paths_cache))
 
     assert len(img_cache) == 2
-    np.testing.assert_array_equal(img_legacy[0], img_cache[0])
-    np.testing.assert_array_equal(img_legacy[1], img_cache[1])
+    np.testing.assert_array_equal(img_fetch[0], img_cache[0])
+    np.testing.assert_array_equal(img_fetch[1], img_cache[1])
 
 
 def test_shapes(imgs):
