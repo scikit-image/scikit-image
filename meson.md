@@ -85,7 +85,7 @@ unfortunatly not available in the main Conda channel. But you still
 can get `scikit-image` installed in editable mode for development
 using a combination of `conda`, `pip` and `meson` command lines:
 
-- First, create a conda environment with available build and run dependencies
+- first, create a conda environment with available build and run dependencies
   ```
   conda create -n skimage-dev python=3.10 scipy networkx pywavelets pillow imageio meson-python cython pythran
   conda activate skimage-dev
@@ -95,7 +95,8 @@ using a combination of `conda`, `pip` and `meson` command lines:
   cd SKIMAGE_SRC_PATH
   pip install -e . --config-settings editable-verbose=true
   ```
-  [`editable-verbose`](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode) is a `mesonpy` option.
+  [`editable-verbose`](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode)
+  is a `mesonpy` option.
 - reconfigure meson
   ```
   meson setup .mesonpy/editable/build --wipe
