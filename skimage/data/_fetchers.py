@@ -16,8 +16,8 @@ from .. import __version__
 import os.path as osp
 import os
 
-_LEGACY_DATA_DIR = osp.abspath(osp.dirname(__file__))
-_DISTRIBUTION_DIR = osp.join(_LEGACY_DATA_DIR, '..')
+_LEGACY_DATA_DIR = osp.dirname(__file__)
+_DISTRIBUTION_DIR = osp.dirname(_LEGACY_DATA_DIR)
 
 try:
     from pooch import file_hash
@@ -147,30 +147,34 @@ def _skip_pytest_case_requiring_pooch(data_filename):
                     allow_module_level=True)
 
 
-def _ensure_data_dir(*, target_dir):
-    """Prepare local cache directory if it doesn't exist already."""
-    os.makedirs(target_dir, exist_ok=True)
+def _ensure_cache_dir(*, target_dir):
+    """Prepare local cache directory if it doesn't exist already.
+
+    Creates::
+
+        /path/to/target_dir/
+                 └─ data/
+                    └─ README.txt
+    """
+    os.makedirs(osp.join(target_dir, "data"), exist_ok=True)
     readme_src = osp.join(_DISTRIBUTION_DIR, "data/README.txt")
-    readme_dest = osp.join(target_dir, "README.txt")
+    readme_dest = osp.join(target_dir, "data/README.txt")
     if not osp.exists(readme_dest):
         shutil.copy2(readme_src, readme_dest)
 
 
-def _fetch(data_filename, *, copy_legacy_to_cache=False):
+def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
-    its name in the scikit-image repository.
+    its name in the scikit-image repository. If a data file is not included in the
+    distribution and pooch is available, it is downloaded and cached.
 
     Parameters
     ----------
     data_filename : str
         Name of the file in the scikit-image repository. e.g.
         'restoration/tess/camera_rl.npy'.
-    copy_legacy_to_cache : bool, optional
-        If true, create a copy of files that are found in `LEGACY_DATA_DIR` into
-        `cache_dir`. Otherwise, legacy files can be fetched without needing to write
-        to the file system.
 
     Returns
     -------
@@ -193,23 +197,15 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
     expected_hash = registry[data_filename]
 
     # Case 1: the file is already cached in `data_cache_dir`
-    cached_file_path = osp.abspath(osp.join(data_dir, "..", data_filename))
+    cached_file_path = osp.join(image_fetcher.path, data_filename)
     if _has_hash(cached_file_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return cached_file_path
 
     # Case 2: file is present in `legacy_data_dir`
-    legacy_file_path = osp.abspath(osp.join(_LEGACY_DATA_DIR, "..", data_filename))
+    legacy_file_path = osp.join(_DISTRIBUTION_DIR, data_filename)
     if _has_hash(legacy_file_path, expected_hash):
-        # If requested, copy to cache and use that path
-        if copy_legacy_to_cache is True:
-            _ensure_data_dir(target_dir=data_dir)
-            cached_file_path = osp.abspath(osp.join(data_dir, "..", data_filename))
-            os.makedirs(osp.dirname(cached_file_path), exist_ok=True)
-            shutil.copy2(legacy_file_path, cached_file_path)
-            return cached_file_path
-        else:
-            return legacy_file_path
+        return legacy_file_path
 
     # Case 3: file is not present locally
     if image_fetcher is None:
@@ -222,10 +218,10 @@ def _fetch(data_filename, *, copy_legacy_to_cache=False):
             "https://scikit-image.org/docs/stable/install.html"
         )
     # Download the data with pooch which caches it automatically
-    _ensure_data_dir(target_dir=data_dir)
+    _ensure_cache_dir(target_dir=image_fetcher.path)
     try:
         cached_file_path = image_fetcher.fetch(data_filename)
-        return osp.abspath(cached_file_path)
+        return cached_file_path
     except ConnectionError as err:
         _skip_pytest_case_requiring_pooch(data_filename)
         # If we decide in the future to suppress the underlying 'requests'
@@ -283,9 +279,16 @@ def download_all(directory=None):
     try:
         if directory is not None:
             image_fetcher.path = directory
+        _ensure_cache_dir(target_dir=image_fetcher.path)
 
-        for filename in image_fetcher.registry:
-            _fetch(filename, copy_legacy_to_cache=True)
+        for data_filename in image_fetcher.registry:
+            file_path = _fetch(data_filename)
+
+            # Copy to `directory` or implicit cache if it is not already there
+            if not file_path.startswith(str(image_fetcher.path)):
+                dest_path = osp.join(image_fetcher.path, data_filename)
+                os.makedirs(osp.dirname(dest_path), exist_ok=True)
+                shutil.copy2(file_path, dest_path)
     finally:
         image_fetcher.path = old_dir
 
