@@ -195,9 +195,13 @@ def _fetch(data_filename):
         dataset has not been downloaded yet.
     """
     expected_hash = registry[data_filename]
+    if image_fetcher is None:
+        cache_dir = osp.dirname(data_dir)
+    else:
+        cache_dir = str(image_fetcher.abspath)
 
     # Case 1: the file is already cached in `data_cache_dir`
-    cached_file_path = osp.join(image_fetcher.path, data_filename)
+    cached_file_path = osp.join(cache_dir, data_filename)
     if _has_hash(cached_file_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
         return cached_file_path
@@ -218,7 +222,7 @@ def _fetch(data_filename):
             "https://scikit-image.org/docs/stable/install.html"
         )
     # Download the data with pooch which caches it automatically
-    _ensure_cache_dir(target_dir=image_fetcher.path)
+    _ensure_cache_dir(target_dir=cache_dir)
     try:
         cached_file_path = image_fetcher.fetch(data_filename)
         return cached_file_path
