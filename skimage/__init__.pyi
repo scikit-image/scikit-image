@@ -39,3 +39,18 @@ from . import (
     transform,
     util,
 )
+
+# Legacy imports into the root namespace; not advertised in __all__
+from ._shared import geometry
+from .util.dtype import (
+    dtype_limits,
+    img_as_float32,
+    img_as_float64,
+    img_as_float,
+    img_as_int,
+    img_as_uint,
+    img_as_ubyte,
+    img_as_bool
+)
+from .util.lookfor import lookfor
+from .data import data_dir
