@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-import numpy.testing
 from skimage.io import use_plugin, reset_plugins
 from skimage.io.collection import MultiImage
 
@@ -24,38 +23,6 @@ def imgs():
     yield imgs
 
     reset_plugins()
-
-
-def test_debug():
-    from .._io import imread
-    from ..collection import alphanumeric_key
-    from skimage.data._fetchers import file_hash, data_dir
-
-    paths_fetch = [
-        testing.fetch('data/multipage_rgb.tif'),
-        testing.fetch('data/no_time_for_that_tiny.gif')
-    ]
-    paths_cache = [
-        os.path.abspath(os.path.join(data_dir, "..", 'data/multipage_rgb.tif')),
-        os.path.abspath(os.path.join(data_dir, "..", 'data/no_time_for_that_tiny.gif')),
-    ]
-    for f, c in zip(paths_fetch, paths_cache):
-        assert file_hash(f) == file_hash(c)
-        np.testing.assert_array_equal(imread(f), imread(c))
-
-    sorted_fetch = sorted(paths_fetch, key=alphanumeric_key)
-    sorted_cache = sorted(paths_cache, key=alphanumeric_key)
-    assert sorted_fetch == sorted_cache
-
-    img_fetch = MultiImage(os.pathsep.join(paths_fetch))
-    img_cache = MultiImage(os.pathsep.join(paths_cache))
-
-    assert img_fetch.files == img_cache.files
-
-    assert len(img_fetch) == 2
-    assert len(img_cache) == 2
-    np.testing.assert_array_equal(img_fetch[0], img_cache[0])
-    np.testing.assert_array_equal(img_fetch[1], img_cache[1])
 
 
 def test_shapes(imgs):
