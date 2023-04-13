@@ -51,7 +51,7 @@ class _DecoratorBaseClass:
     `stacklevel = 1 + stack_length - stack_rank`.
     """
 
-    _stack_length = {}
+    _stack_length: dict = {}
 
     def get_stack_length(self, func):
         return self._stack_length.get(func.__name__,

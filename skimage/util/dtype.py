@@ -22,15 +22,17 @@ _integer_types = (np.byte, np.ubyte,          # 8 bits
                   np.intc, np.uintc,          # 16 or 32 or 64 bits
                   int, np.int_, np.uint,      # 32 or 64 bits
                   np.longlong, np.ulonglong)  # 64 bits
-_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
-                   for t in _integer_types}
-dtype_range = {bool: (False, True),
-               np.bool_: (False, True),
-               float: (-1, 1),
-               np.float_: (-1, 1),
-               np.float16: (-1, 1),
-               np.float32: (-1, 1),
-               np.float64: (-1, 1)}
+_integer_ranges: dict = {t: (np.iinfo(t).min, np.iinfo(t).max)
+                         for t in _integer_types}
+dtype_range: dict = {
+    bool: (False, True),
+    np.bool_: (False, True),
+    float: (-1, 1),
+    np.float_: (-1, 1),
+    np.float16: (-1, 1),
+    np.float32: (-1, 1),
+    np.float64: (-1, 1)
+}
 
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=DeprecationWarning)

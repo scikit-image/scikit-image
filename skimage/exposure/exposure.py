@@ -8,7 +8,7 @@ __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
            'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
 
 
-DTYPE_RANGE = dtype_range.copy()
+DTYPE_RANGE: dict = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
 DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
                     'uint12': (0, 2 ** 12 - 1),
