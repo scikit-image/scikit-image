@@ -282,6 +282,7 @@ def download_all(directory=None):
     old_dir = image_fetcher.path
     try:
         if directory is not None:
+            directory = osp.expanduser(directory)
             image_fetcher.path = directory
         _ensure_cache_dir(target_dir=image_fetcher.path)
 
