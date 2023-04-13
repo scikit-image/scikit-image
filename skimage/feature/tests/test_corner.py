@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data, draw, img_as_float
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import run_in_parallel
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (corner_fast, corner_foerstner, corner_harris,
@@ -271,7 +271,7 @@ def test_hessian_matrix_eigvals_3d(im3d, dtype):
     assert np.max(response0) > 0
 
 
-@test_parallel()
+@run_in_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
@@ -315,7 +315,7 @@ def test_shape_index():
     )
 
 
-@test_parallel()
+@run_in_parallel()
 def test_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
@@ -548,7 +548,7 @@ def test_corner_fast_image_unsupported_error():
         corner_fast(img)
 
 
-@test_parallel()
+@run_in_parallel()
 def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())
     expected = np.array([[444, 310],
@@ -609,7 +609,7 @@ def test_corner_orientations_even_shape_error():
             np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
-@test_parallel()
+@run_in_parallel()
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
     corners = corner_peaks(corner_fast(img, 11, 0.35),

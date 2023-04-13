@@ -5,11 +5,11 @@ import pytest
 from numpy.testing import assert_equal
 
 from skimage import data, filters, img_as_float
-from skimage._shared.testing import test_parallel, expected_warnings
+from skimage._shared.testing import run_in_parallel, expected_warnings
 from skimage.segmentation import slic
 
 
-@test_parallel()
+@run_in_parallel()
 def test_color_2d():
     rnd = np.random.default_rng(0)
     img = np.zeros((20, 21, 3))
