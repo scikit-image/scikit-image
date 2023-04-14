@@ -19,7 +19,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
         If True, ensure that the output is not a view of `image`.
 
     Returns
-    ----------
+    -------
     out : ndarray
         The region of `image` corresponding to the given slices and axes.
 
