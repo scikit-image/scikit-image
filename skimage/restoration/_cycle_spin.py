@@ -1,5 +1,5 @@
+import typing as ty
 from itertools import product
-from typing import Callable
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -58,13 +58,13 @@ def _generate_shifts(
 @utils.channel_as_last_axis()
 def cycle_spin(
     x: ArrayLike,
-    func: Callable,
+    func: ty.Callable,
     max_shifts: int | tuple[int, ...],
     shift_steps: int | tuple[int, ...] = 1,
     num_workers: int = None,
     func_kw: dict = None,
     *,
-    channel_axis=None
+    channel_axis: int = None
 ) -> np.ndarray:
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 

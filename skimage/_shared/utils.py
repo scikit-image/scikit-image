@@ -3,6 +3,7 @@ import functools
 import sys
 import warnings
 from collections.abc import Iterable
+import typing as ty
 
 import numpy as np
 
@@ -286,6 +287,9 @@ class deprecate_kwarg(_DecoratorBaseClass):
         return fixed_func
 
 
+F = ty.TypeVar('F', bound=ty.Callable[..., ty.Any])
+
+
 class channel_as_last_axis:
     """Decorator for automatically making channels axis last for all arrays.
 
@@ -315,7 +319,7 @@ class channel_as_last_axis:
         self.kwarg_names = set(channel_kwarg_names)
         self.multichannel_output = multichannel_output
 
-    def __call__(self, func):
+    def __call__(self, func: F) -> F:
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -361,7 +365,7 @@ class channel_as_last_axis:
                 out = np.moveaxis(out, -1, channel_axis[0])
             return out
 
-        return fixed_func
+        return ty.cast(F, fixed_func)
 
 
 class deprecated:
