@@ -62,7 +62,8 @@ img_as_bool
     Convert an image to boolean format, with values either True or False.
 dtype_limits
     Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
-
+lookfor
+    Do a keyword search on scikit-image docstrings.
 """
 
 __version__ = '0.21.0rc1.dev0'
