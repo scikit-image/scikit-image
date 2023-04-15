@@ -1005,14 +1005,14 @@ def colorwheel():
     return _load("data/color.png")
 
 
-def cornea():
+def palisades_of_vogt():
     """Image sequence of in-vivo human cornea showing the palisades of Vogt.
     There are some dark spots due to the presence of dust on the reference
     mirror.
 
     Returns
     -------
-    cornea: (60, 1440, 1440) uint16 ndarray
+    palisades_of_vogt: (60, 1440, 1440) uint16 ndarray
 
     Notes
     -----
@@ -1020,7 +1020,7 @@ def cornea():
     https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
 
     """
-    return _load('data/cornea.tif')
+    return _load('data/palisades_of_vogt.tif')
 
 
 def rocket():

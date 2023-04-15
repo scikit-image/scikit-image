@@ -154,7 +154,7 @@ registry = {
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/brain.tiff": "bcdbaf424fbad7b1fb0f855f608c68e5a838f35affc323ff04ea17f678eef5c6",
     "data/cells3d.tif": "afc7c7d80d38bfde09788b4064ac1e64ec14e88454ab785ebdc8dbba5ca3b222",
-    "data/cornea.tif": "7f205b626407e194974cead67c4d3909344cf59c42d229a349da0198183e5bd0",
+    "data/palisades_of_vogt.tif": "7f205b626407e194974cead67c4d3909344cf59c42d229a349da0198183e5bd0",
     "data/kidney.tif": "80c0799bc58b08cf6eaa53ecd202305eb42fd7bc73746cb6c5064dbeae7e8476",
     "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
@@ -168,7 +168,7 @@ registry = {
 registry_urls = {
     "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/brain.tiff",
     "data/cells3d.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/cells3d.tif",
-    "data/cornea.tif": "https://gitlab.com/scikit-image/data/-/raw/b2bc880f3bac23a583724befe8388dae368c52fe/in-vivo-cornea-spots.tif",
+    "data/palisades_of_vogt.tif": "https://gitlab.com/scikit-image/data/-/raw/b2bc880f3bac23a583724befe8388dae368c52fe/in-vivo-cornea-spots.tif",
     "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/eagle.png",
     "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/kidney-tissue-fluorescence.tif",
     "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/lily-of-the-valley-fluorescence.tif",
