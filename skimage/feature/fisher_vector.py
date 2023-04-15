@@ -50,7 +50,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     the resultant Fisher vectors has maximal performance.
 
     Parameters
-    -----------
+    ----------
     descriptors : np.ndarray (N, M) or list [(N1, M), (N2, M), ...]
         List of NumPy arrays, or a single NumPy array, of the descriptors
         used to estimate the GMM. The reason a list of NumPy arrays is
@@ -74,7 +74,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         needed to compute the Fisher vector.
 
     References
-    -----------
+    ----------
     .. [1] https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
 
     Examples
@@ -160,7 +160,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     and an associated estimated GMM.
 
     Parameters
-    -----------
+    ----------
     descriptors : np.ndarray, shape=(n_descriptors, descriptor_length)
         NumPy array of the descriptors for which the Fisher vector
         representation is to be computed.
@@ -187,7 +187,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
         descriptors/vectors.
 
     References
-    -----------
+    ----------
     .. [1] Perronnin, F. and Dance, C. Fisher kernels on Visual Vocabularies
            for Image Categorization, IEEE Conference on Computer Vision and
            Pattern Recognition, 2007
