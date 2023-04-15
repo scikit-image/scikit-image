@@ -1006,9 +1006,13 @@ def colorwheel():
 
 
 def palisades_of_vogt():
-    """Image sequence of in-vivo human cornea showing the palisades of Vogt.
-    There are some dark spots due to the presence of dust on the reference
-    mirror.
+    """Return image sequence of in-vivo tissue showing the palisades of Vogt.
+
+    In the human eye, the palisades of Vogt are normal features of the corneal
+    limbus, which is the border between the cornea and the sclera (i.e., the
+    white of the eye).
+    In the image sequence, there are some dark spots due to the presence of
+    dust on the reference mirror.
 
     Returns
     -------
