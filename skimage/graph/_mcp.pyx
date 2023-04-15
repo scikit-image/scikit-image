@@ -337,7 +337,7 @@ cdef class MCP:
 
         # Get starts and ends
         # We do not pass them in as arguments for backwards compat
-        starts, ends = self._starts, self._ends
+        starts, _ = self._starts, self._ends
 
         # push each start point into the heap. Note that we use flat indexing!
         for start in _ravel_index_fortran(starts, self.costs_shape):
@@ -757,7 +757,7 @@ cdef class MCP_Connect(MCP):
         cdef INDEX_T start
 
         MCP._reset(self)
-        starts, ends = self._starts, self._ends
+        starts, _ = self._starts, self._ends
 
         # Reset idmap
         self.flat_idmap[...] = -1

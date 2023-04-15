@@ -47,7 +47,9 @@ def test_uniform_mode(dtype):
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
                              threshold_abs=0, threshold_rel=0.1)
 
-    extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
+    extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', seed=1)
+    with testing.expected_warnings(['`sample_seed` is a deprecated argument']):
+        BRIEF(descriptor_size=8, sigma=2, mode='uniform', sample_seed=1)
 
     extractor.extract(img, keypoints[:8])
 

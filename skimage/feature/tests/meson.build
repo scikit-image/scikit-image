@@ -8,6 +8,7 @@ python_sources = [
   'test_censure.py',
   'test_corner.py',
   'test_daisy.py',
+  'test_fisher_vector.py',
   'test_haar.py',
   'test_hog.py',
   'test_match.py',

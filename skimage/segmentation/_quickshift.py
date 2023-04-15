@@ -1,16 +1,18 @@
 import numpy as np
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from ..color import rgb2lab
 from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 
 
+@deprecate_kwarg({'random_seed': 'seed'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
-               return_tree=False, sigma=0, convert2lab=True, random_seed=42,
+               return_tree=False, sigma=0, convert2lab=True, seed=42,
                *, channel_axis=-1):
-    """Segments image using quickshift clustering in Color-(x,y) space.
+    """Segment image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
     algorithm.
@@ -36,7 +38,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB.
-    random_seed : int, optional
+    seed : int, optional
         Random seed used for breaking ties.
     channel_axis : int, optional
         The axis of `image` corresponding to color channels. Defaults to the
@@ -83,5 +85,5 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     segment_mask = _quickshift_cython(
         image, kernel_size=kernel_size, max_dist=max_dist,
-        return_tree=return_tree, random_seed=random_seed)
+        return_tree=return_tree, random_seed=seed)
     return segment_mask

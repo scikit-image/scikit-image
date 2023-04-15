@@ -14,12 +14,17 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-from .._shared.utils import _supported_float_type, check_nD, deprecated
+from .._shared.utils import _supported_float_type, check_nD, deprecate_func
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 from ..util import img_as_float
 
 
-@deprecated(alt_func='skimage.feature.hessian_matrix', removed_version="0.21")
+@deprecate_func(
+    deprecated_version="0.20",
+    removed_version="0.22",
+    hint="Use `skimage.feature.hessian_matrix_eigvals` on the results of "
+         "`skimage.feature.hessian_matrix` instead."
+)
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
                                 use_gaussian_derivatives=False):

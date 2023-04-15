@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
 import pytest
 
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import run_in_parallel
 from skimage._shared._dependency_checks import has_mpl
 
 from skimage.draw import (set_color, line, line_aa, polygon, polygon_perimeter,
@@ -41,7 +41,7 @@ def test_set_color_with_alpha():
     set_color(img, (rr, cc), (1, 0, 0), alpha=alpha)
 
 
-@test_parallel()
+@run_in_parallel()
 def test_line_horizontal():
     img = np.zeros((10, 10))
 

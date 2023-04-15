@@ -51,8 +51,8 @@ requires = [
     # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
     "wheel",
     "setuptools>=67",
-    "packaging>=20",
-    "Cython>=0.29.24",
+    "packaging>=21",
+    "Cython>=0.29.26",
     "pythran",
     "lazy_loader>=0.2",
 

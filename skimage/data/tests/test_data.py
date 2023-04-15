@@ -7,13 +7,6 @@ import os
 import pytest
 
 
-def test_data_dir():
-    # data_dir should be a directory people can use as a standard directory
-    # https://github.com/scikit-image/scikit-image/pull/3945#issuecomment-498141893
-    data_dir = data.data_dir
-    assert 'astronaut.png' in os.listdir(data_dir)
-
-
 def test_download_all_with_pooch():
     # jni first wrote this test with the intention of
     # fully deleting the files in the data_dir,
@@ -30,6 +23,7 @@ def test_download_all_with_pooch():
     data_dir = data.data_dir
     if image_fetcher is not None:
         data.download_all()
+        assert 'astronaut.png' in os.listdir(data_dir)
         assert len(os.listdir(data_dir)) > 50
     else:
         with pytest.raises(ModuleNotFoundError):

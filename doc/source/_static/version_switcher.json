@@ -1,0 +1,92 @@
+[
+    {
+        "name": "dev",
+        "version": "dev",
+        "url": "https://scikit-image.org/docs/dev/"
+    },
+    {
+        "name": "0.20 (stable)",
+        "version":"0.20.0",
+        "url": "https://scikit-image.org/docs/stable/"
+    },
+    {
+        "name": "0.19",
+        "version":"0.19.2",
+        "url": "https://scikit-image.org/docs/0.19.x/"
+    },
+    {
+        "name": "0.18",
+        "version":"0.18.0",
+        "url": "https://scikit-image.org/docs/0.18.x/"
+    },
+    {
+        "name": "0.17",
+        "version":"0.17.2",
+        "url": "https://scikit-image.org/docs/0.17.x/"
+    },
+    {
+        "name": "0.16",
+        "version":"0.16.1",
+        "url": "https://scikit-image.org/docs/0.16.x/"
+    },
+    {
+        "name": "0.15",
+        "version":"0.15.0",
+        "url": "https://scikit-image.org/docs/0.15.x/"
+    },
+    {
+        "name": "0.13",
+        "version":"0.13.1",
+        "url": "https://scikit-image.org/docs/0.13.x/"
+    },
+    {
+        "name": "0.12",
+        "version":"0.12.2",
+        "url": "https://scikit-image.org/docs/0.12.x/"
+    },
+    {
+        "name": "0.11",
+        "version":"0.11.3",
+        "url": "https://scikit-image.org/docs/0.11.x/"
+    },
+    {
+        "name": "0.10",
+        "version":"0.10.0",
+        "url": "https://scikit-image.org/docs/0.10.x/"
+    },
+    {
+        "name": "0.9",
+        "version":"0.9.0",
+        "url": "https://scikit-image.org/docs/0.9.x/"
+    },
+    {
+        "name": "0.8",
+        "version":"0.8.0",
+        "url": "https://scikit-image.org/docs/0.8.x/"
+    },
+    {
+        "name": "0.7",
+        "version":"0.7.0",
+        "url": "https://scikit-image.org/docs/0.7.x/"
+    },
+    {
+        "name": "0.6",
+        "version":"0.6",
+        "url": "https://scikit-image.org/docs/0.6/"
+    },
+    {
+        "name": "0.5",
+        "version":"0.5",
+        "url": "https://scikit-image.org/docs/0.5/"
+    },
+    {
+        "name": "0.4",
+        "version":"0.4",
+        "url": "https://scikit-image.org/docs/0.4/"
+    },
+    {
+        "name": "0.3",
+        "version":"0.3",
+        "url": "https://scikit-image.org/docs/0.3/"
+    }
+]
