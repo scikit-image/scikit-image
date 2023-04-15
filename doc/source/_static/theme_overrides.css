@@ -1,5 +1,9 @@
 /* Additional styling for the PyData Sphinx theme. */
 
+html {
+  --pst-header-article-height: auto;
+}
+
 /* Use hyperlink color for grid-item-cards.
 TODO find a way to only apply this to grid-item-cards that link somewhere */
 .sd-card-title {
@@ -16,4 +20,8 @@ div.highlight a {
 /* Stack components in footer vertically. */
 .bd-footer .footer-items__end, .bd-footer .footer-items__start {
   flex-direction: row;
+}
+
+.version-switcher__button[data-active-version-name*="dev"] {
+  background-color: var(--pst-color-secondary);
 }

@@ -159,6 +159,7 @@ html_theme_options = {
             "icon": "fa-solid fa-box",
         },
     ],
+    "article_header_start": ["doc-version-warning", "breadcrumbs"],
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "switcher": {
         "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
