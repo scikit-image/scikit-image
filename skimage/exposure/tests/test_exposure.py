@@ -21,8 +21,9 @@ from skimage._shared.utils import _supported_float_type
 # Test integer histograms
 # =======================
 
-def test_wrong_source_range():
-    im = np.array([-1, 100], dtype=np.int8)
+@pytest.mark.parametrize('dtype', [np.int8, np.float32])
+def test_wrong_source_range(dtype):
+    im = np.array([-1, 100], dtype=dtype)
     with pytest.raises(ValueError):
         frequencies, bin_centers = exposure.histogram(im,
                                                       source_range='foobar')
