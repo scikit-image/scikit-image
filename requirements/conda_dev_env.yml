@@ -19,9 +19,9 @@ dependencies:
   - pytest-localserver
   - pip
   - pip:
-    - tifffile>=2022.8.12
-    - lazy_loader>=0.2
-    - meson-python>=0.13.0rc0
-    - pythran
-    - asv
-    - pytest-faulthandler
+      - tifffile>=2022.8.12
+      - lazy_loader>=0.2
+      - meson-python>=0.13.0rc0
+      - pythran
+      - asv
+      - pytest-faulthandler
