@@ -4,21 +4,6 @@ from scipy.ndimage import distance_transform_edt as distance
 from .._shared.utils import _supported_float_type
 
 
-def _cv_curvature(phi):
-    """Returns the 'curvature' of a level set 'phi'.
-    """
-    P = np.pad(phi, 1, mode='edge')
-    fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
-    fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
-    fyy = P[2:, 1:-1] + P[:-2, 1:-1] - 2*phi
-    fxx = P[1:-1, 2:] + P[1:-1, :-2] - 2*phi
-    fxy = .25 * (P[2:, 2:] + P[:-2, :-2] - P[:-2, 2:] - P[2:, :-2])
-    grad2 = fx**2 + fy**2
-    K = ((fxx*fy**2 - 2*fxy*fx*fy + fyy*fx**2) /
-         (grad2*np.sqrt(grad2) + 1e-8))
-    return K
-
-
 def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):
     """Returns the variation of level set 'phi' based on algorithm parameters.
     """
