@@ -75,48 +75,25 @@ produce an sdist and a wheel:
 python -m build --no-isolation
 ```
 
-### Conda (Experimental)
+### Conda
 
-> **_Warning_**: Combining `conda` and `pip` is not recommanded. Use
-> with caution!
-
-The recommanded versions of `scikit-image` dependencies are
+All the recommanded versions of `scikit-image` dependencies are
 unfortunatly not available in the main Conda channel. But you still
 can get `scikit-image` installed in editable mode for development
-using a combination of `conda`, `pip` and `meson` command lines:
+using a combination of `conda` and `pip` command lines:
 
 - first, create a conda environment with available build and run dependencies
   ```
-  conda create -n skimage-dev python=3.10 scipy networkx pywavelets pillow imageio meson-python cython pythran
+  conda env create -f requirements/conda_dev_env.yml
   conda activate skimage-dev
   ```
 - then install skimage in editable mode
   ```
   cd SKIMAGE_SRC_PATH
-  pip install -e . --config-settings editable-verbose=true
+  pip install -ve . --no-build-isolation --config-settings editable-verbose=true
   ```
   [`editable-verbose`](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode)
   is a `mesonpy` option.
-- reconfigure meson
-  ```
-  meson setup .mesonpy/editable/build --wipe
-  ```
-
-and you are done!
-
-#### Testing with pytest
-
-Testing in the above settings can be achieved by
-
-- activating the previously created development environment and install `pytest`
-  ```
-  conda activate skimage-dev
-  conda install pytest
-  ```
-- using the `importlib` import mode when you run the tests:
-  ```
-  pytest --import-mode=importlib skimage/
-  ```
 
 ## Notes
 
