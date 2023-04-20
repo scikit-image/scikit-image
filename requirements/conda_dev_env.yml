@@ -1,0 +1,27 @@
+name: skim-dev
+dependencies:
+  - python=3.10
+  - numpy>=1.21.1
+  - scipy>=1.8
+  - networkx>=2.8
+  - pillow>=9.0.1
+  - imageio>=2.12
+  - pywavelets>=1.1.1
+  - gxx_linux-64
+  - pkg-config
+  - ninja
+  - cython>=0.29.26
+  - matplotlib>=3.5
+  - codecov
+  - matplotlib>=3.5
+  - pytest>=7.0
+  - pytest-cov>=2.11.0
+  - pytest-localserver
+  - pip
+  - pip:
+    - tifffile>=2022.8.12
+    - lazy_loader>=0.2
+    - meson-python>=0.13.0rc0
+    - pythran
+    - asv
+    - pytest-faulthandler
