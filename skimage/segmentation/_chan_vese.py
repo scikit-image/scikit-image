@@ -95,8 +95,10 @@ def _cv_edge_length_term(phi, mu):
     """Returns the 'energy' contribution due to the length of the
     edge between regions at each point, multiplied by a factor 'mu'.
     """
-    toret = _cv_curvature(phi)
-    return mu * toret
+    P = np.pad(phi, 1, mode='edge')
+    fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
+    fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
+    return mu * _cv_delta(phi) * np.sqrt(fx * fx + fy * fy)
 
 
 def _cv_energy(image, phi, mu, lambda1, lambda2):
