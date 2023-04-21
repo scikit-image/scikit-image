@@ -6,6 +6,7 @@ import inspect
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from itertools import combinations
 
 import click
 
@@ -31,12 +32,6 @@ class Entry:
     @property
     def public_discovery_paths(self):
         paths = [path for path in self.sorted_discovery_paths if "._" not in path]
-        if len(paths) > 1:
-            logger.warning(
-                "object at %r with more than 1 public discovery path: %r",
-                self.source_path,
-                paths,
-            )
         return paths
 
     @property
@@ -62,43 +57,59 @@ def _source_path(obj):
     return path
 
 
-def visit_api(table, *, discovery_path, obj, parent=None):
-    obj_module = inspect.getmodule(obj)
+def _unwrap(obj):
+    while hasattr(obj, "__wrapped__"):
+        obj = obj.__wrapped__
+    return obj
 
-    source_path = _source_path(obj)
+
+def _is_discover_loop(parents, node):
+    for a, b in combinations(parents + (node,), 2):
+        if a is b:
+            return True
+    return False
+
+
+def visit_api(table, *, discovery_path, node, _parents=(), _rec_depth=0):
+    if _is_discover_loop(_parents, node):
+        logger.warning(
+            "stopping API discovery at %r, detected discover loop", discovery_path
+        )
+        return
+
+    obj_module = inspect.getmodule(node)
+
+    source_path = _source_path(node)
     if source_path is None:
-        source_path = _source_path(parent)
+        source_path = _source_path(_parents[-1])
         if source_path is None:
-            logger.info(
+            logger.warning(
                 "stopping API discovery at %r, cannot determine path to source",
                 discovery_path,
             )
             return
-        source_path += discovery_path.split(".")[-1]
+        # Fallback to parent's source path + member name (last part of discovery_path)
+        name = discovery_path.split(".")[-1]
+        source_path = f"{source_path}.{name}"
 
     if source_path in table:
-        logger.info(
-            "stopping API discovery at %r, already know %r", discovery_path, source_path
-        )
         table[source_path].discovery_paths.append(discovery_path)
-        return  # Already visited, avoids endless recursion
+    else:
+        table[source_path] = Entry(
+            source_path=source_path, discovery_paths=[discovery_path], obj=node
+        )
 
-    table[source_path] = Entry(
-        source_path=source_path, discovery_paths=[discovery_path], obj=obj
-    )
-
-    # Skip member discovery if module or source_path is unknown
     if obj_module is None or source_path is None:
-        return
+        return  # Skip member discovery if module or source_path is unknown
 
-    for member_name, member in inspect.getmembers(obj):
+    for member_name, member in inspect.getmembers(node):
         member_discovery_path = f"{discovery_path}.{member_name}"
 
         if inspect.iscode(member):
             logger.debug(
                 "stopping API discovery at %r, is code object", member_discovery_path
             )
-            continue  # Skip code objects
+            continue
 
         member_module = inspect.getmodule(member)
         if member_module is None:
@@ -108,7 +119,7 @@ def visit_api(table, *, discovery_path, obj, parent=None):
                     member_discovery_path,
                     member,
                 )
-                continue  # Silently method wrappers
+                continue
 
         elif obj_module.__name__ not in member_module.__name__:
             logger.debug(
@@ -116,36 +127,40 @@ def visit_api(table, *, discovery_path, obj, parent=None):
                 member_discovery_path,
                 member_module.__name__,
             )
-            continue  # Skip members defined outside inspected package
+            continue
 
-        visit_api(table, discovery_path=member_discovery_path, obj=member, parent=obj)
-
-
-def print_public_api(table):
-    entries = [entry for entry in table.values() if entry.is_public]
-    for entry in sorted(entries, key=lambda e: e.public_discovery_paths[0]):
-        print(entry.sorted_discovery_paths[0], f"({entry.type_name})")
-
-    print(f"{len(entries)} discovered objects in public API")
+        visit_api(
+            table,
+            discovery_path=member_discovery_path,
+            node=member,
+            _parents=_parents + (node,),
+            _rec_depth=_rec_depth + 1,
+        )
 
 
-def print_full_api(table, blacklist=None):
-    if blacklist is None:
-        blacklist = []
+def print_table(table: dict[str, Entry]):
+    for key in sorted(table.keys()):
+        entry = table[key]
+        print(f"\n{entry.source_path} ({entry.type_name})")
+        for path in entry.sorted_discovery_paths:
+            print("    " + path)
+    print(f"\n{len(table)} discovered objects in total")
 
-    entries = table
-    for black in blacklist:
-        entries = {k: v for k, v in entries.items() if black not in k}
 
-    for entry in sorted(entries.values(), key=lambda e: e.sorted_discovery_paths[0]):
-        print(entry.sorted_discovery_paths[0], f"({entry.type_name})")
-
-    print(f"{len(table)} discovered objects in total")
+def print_public_api(table: dict[str, Entry]):
+    print()
+    public = {k: v for k, v in table.items() if v.is_public}
+    for entry in sorted(public.values(), key=lambda e: e.public_discovery_paths[0]):
+        print(f"{entry.public_discovery_paths[0]} ({entry.type_name})")
+        for path in entry.public_discovery_paths[1:]:
+            print("    " + path)
+    print(f"\n{len(table)} discovered objects in total")
 
 
 @click.command()
 @click.argument("module")
-def main(module):
+@click.option("--private", is_flag=True)
+def main(module, private):
     """Create an API table for a given Python package."""
     log_file = Path(tempfile.gettempdir()) / (Path(__file__).name + ".log")
     print(f"logging to {log_file}")
@@ -155,11 +170,14 @@ def main(module):
         level=logging.INFO,
     )
 
-    table = {}
+    table: dict[str, Entry] = {}
     api_root = importlib.import_module(module)
-    visit_api(table, obj=api_root, discovery_path=module)
+    visit_api(table, node=api_root, discovery_path=module)
 
-    print_full_api(table)
+    if private:
+        print_table(table)
+    else:
+        print_public_api(table)
 
 
 if __name__ == "__main__":
