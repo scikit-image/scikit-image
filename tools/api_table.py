@@ -154,7 +154,7 @@ def print_public_api(table: dict[str, Entry]):
         print(f"{entry.public_discovery_paths[0]} ({entry.type_name})")
         for path in entry.public_discovery_paths[1:]:
             print("    " + path)
-    print(f"\n{len(table)} discovered objects in total")
+    print(f"\n{len(public)} discovered objects in total")
 
 
 @click.command()
