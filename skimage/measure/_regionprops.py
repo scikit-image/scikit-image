@@ -283,20 +283,20 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
 def _check_spacing(spacing, ndims:int):
     """Checks the spacing parameter
-    
+
     The `spacing` parameter should be a tuple.
     If the spacing is a single number (e.g. float)
     then assume spacing is same in all dimensions.
-    
+
     Parameters
     ---------
     spacing: The spacing of the pixels in the image
-    
+
     Returns
     -------
     Corrected spacing as tuple (if needed)
     """
-    
+
     if isinstance(spacing, tuple):
         return spacing
     elif isinstance(spacing, float):
@@ -304,7 +304,7 @@ def _check_spacing(spacing, ndims:int):
     elif isinstance(spacing, int):
         return np.full(ndims, float(spacing))
     else:
-        raise ValueError(f'Spacing should be a tuple of {dims} floats.')
+        raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
 
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
