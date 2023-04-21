@@ -19,9 +19,6 @@ class Entry:
     discovery_paths: list
     obj: object
 
-    def __str__(self):
-        return f"{self.sorted_discovery_paths[0]} ({self.type_name})"
-
     @property
     def is_public(self):
         return len(self.public_discovery_paths) > 0
@@ -44,25 +41,40 @@ class Entry:
 
     @property
     def type_name(self):
-        return type(self.obj).__name__
+        if inspect.isclass(self.obj):
+            return "class"
+        else:
+            return type(self.obj).__name__
 
 
-def visit_api(table, *, discovery_path, obj):
+def _source_path(obj):
     obj_module = inspect.getmodule(obj)
-
-    source_path = f"{obj_module.__name__}."
+    if obj_module is None:
+        return None
+    path = f"{obj_module.__name__}."
     try:
-        source_path += obj.__qualname__
+        path += obj.__qualname__
     except AttributeError:
         try:
-            source_path += obj.__name__
+            path += obj.__name__
         except AttributeError:
-            logger.warning(
-                "stopping API discovery at %r, cannot determine source path, "
-                "no __qualname__ or __name__ attributes",
+            return None
+    return path
+
+
+def visit_api(table, *, discovery_path, obj, parent=None):
+    obj_module = inspect.getmodule(obj)
+
+    source_path = _source_path(obj)
+    if source_path is None:
+        source_path = _source_path(parent)
+        if source_path is None:
+            logger.info(
+                "stopping API discovery at %r, cannot determine path to source",
                 discovery_path,
             )
-            pass
+            return
+        source_path += discovery_path.split(".")[-1]
 
     if source_path in table:
         logger.info(
@@ -75,6 +87,10 @@ def visit_api(table, *, discovery_path, obj):
         source_path=source_path, discovery_paths=[discovery_path], obj=obj
     )
 
+    # Skip member discovery if module or source_path is unknown
+    if obj_module is None or source_path is None:
+        return
+
     for member_name, member in inspect.getmembers(obj):
         member_discovery_path = f"{discovery_path}.{member_name}"
 
@@ -86,13 +102,15 @@ def visit_api(table, *, discovery_path, obj):
 
         member_module = inspect.getmodule(member)
         if member_module is None:
-            # logger.debug(
-            #     "stopping API discovery at %r, cannot find its module, "
-            #     "probably a builtin",
-            #     member_discovery_path,
-            # )
-            continue  # Skip built-ins
-        if obj_module.__name__ not in member_module.__name__:
+            if inspect.isbuiltin(member) or inspect.ismethodwrapper(member):
+                logger.debug(
+                    "stopping API discovery at %r, builtin or method wrapper %r",
+                    member_discovery_path,
+                    member,
+                )
+                continue  # Silently method wrappers
+
+        elif obj_module.__name__ not in member_module.__name__:
             logger.debug(
                 "stopping API discovery at %r, in external package %r",
                 member_discovery_path,
@@ -100,16 +118,29 @@ def visit_api(table, *, discovery_path, obj):
             )
             continue  # Skip members defined outside inspected package
 
-        visit_api(table, obj=member, discovery_path=member_discovery_path)
+        visit_api(table, discovery_path=member_discovery_path, obj=member, parent=obj)
 
 
 def print_public_api(table):
-    public_entries = [entry for entry in table.values() if entry.is_public]
+    entries = [entry for entry in table.values() if entry.is_public]
+    for entry in sorted(entries, key=lambda e: e.public_discovery_paths[0]):
+        print(entry.sorted_discovery_paths[0], f"({entry.type_name})")
 
-    for entry in sorted(public_entries, key=lambda e: e.public_discovery_paths[0]):
-        print(entry)
+    print(f"{len(entries)} discovered objects in public API")
 
-    print(f"{len(public_entries)} objects in public API")
+
+def print_full_api(table, blacklist=None):
+    if blacklist is None:
+        blacklist = []
+
+    entries = table
+    for black in blacklist:
+        entries = {k: v for k, v in entries.items() if black not in k}
+
+    for entry in sorted(entries.values(), key=lambda e: e.sorted_discovery_paths[0]):
+        print(entry.sorted_discovery_paths[0], f"({entry.type_name})")
+
+    print(f"{len(table)} discovered objects in total")
 
 
 @click.command()
@@ -121,14 +152,14 @@ def main(module):
     logging.basicConfig(
         filename=log_file,
         filemode="w",
-        level=logging.DEBUG,
+        level=logging.INFO,
     )
 
     table = {}
     api_root = importlib.import_module(module)
     visit_api(table, obj=api_root, discovery_path=module)
 
-    print_public_api(table)
+    print_full_api(table)
 
 
 if __name__ == "__main__":
