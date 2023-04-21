@@ -286,7 +286,7 @@ def _check_spacing(spacing, ndims:int):
     
     The `spacing` parameter should be a tuple.
     If the spacing is a single number (e.g. float)
-    then assume spacing is same in all dimensions
+    then assume spacing is same in all dimensions.
     
     Parameters
     ---------
@@ -295,6 +295,7 @@ def _check_spacing(spacing, ndims:int):
     Returns
     -------
     Corrected spacing as tuple (if needed)
+    """
     
     if isinstance(spacing, tuple):
         return spacing
