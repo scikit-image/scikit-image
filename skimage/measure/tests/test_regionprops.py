@@ -46,9 +46,6 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
-SPACING_INT=2
-SPACING_FLOAT=0.5
-
 def get_moment_function(img, spacing=(1, 1)):
     rows, cols = img.shape
     Y, X = np.meshgrid(np.linspace(0, rows * spacing[0], rows, endpoint=False),
@@ -325,8 +322,9 @@ def test_centroid_3d():
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
+    spacing = "bad input"
     with pytest.raises(ValueError):
-        centroid = regionprops(SAMPLE_3D, spacing="bad input")[0].centroid
+        centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
 
 def test_area_convex():
     area = regionprops(SAMPLE)[0].area_convex
@@ -858,6 +856,11 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
     assert_almost_equal(centroid, 2 * np.array(target_centroid))
+
+    spacing = "bad input"
+    with pytest.raises(ValueError):
+        centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+
 
 def test_moments_weighted_hu():
     whu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
