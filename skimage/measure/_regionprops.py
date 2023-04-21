@@ -318,6 +318,8 @@ class RegionProperties:
         self._ndim = label_image.ndim
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
+        if np.dims(spacing) == 1:  # If spacing is single float, then apply to all dims
+            spacing = np.full(self._ndim, spacing)
         self._spacing = (spacing if spacing is not None else np.full(self._ndim, 1.))
         self._pixel_area = np.product(self._spacing)
 
