@@ -46,6 +46,8 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+SPACING_INT=2
+SPACING_FLOAT=0.5
 
 def get_moment_function(img, spacing=(1, 1)):
     rows, cols = img.shape
@@ -264,7 +266,6 @@ def test_moments_central():
     assert_almost_equal(mu[1, 2], centralMpq(1, 2))
     assert_almost_equal(mu[0, 3], centralMpq(0, 3))
 
-
 def test_centroid():
     centroid = regionprops(SAMPLE)[0].centroid
     # determined with MATLAB
@@ -308,6 +309,24 @@ def test_centroid_3d():
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
+    spacing = 2
+    Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
+    cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
+    cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
+    cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
+    centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
+    assert_array_almost_equal(centroid, (cZ, cY, cX))
+
+    spacing = 2.1
+    Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
+    cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
+    cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
+    cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
+    centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
+    assert_array_almost_equal(centroid, (cZ, cY, cX))
+
+    with pytest.raises(ValueError):
+        centroid = regionprops(SAMPLE_3D, spacing="bad input")[0].centroid
 
 def test_area_convex():
     area = regionprops(SAMPLE)[0].area_convex
@@ -824,6 +843,21 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
 
+    spacing = 2
+    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    cY = Mpq(0, 1) / Mpq(0, 0)
+    cX = Mpq(1, 0) / Mpq(0, 0)
+    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, (cX, cY))
+    assert_almost_equal(centroid, 2 * np.array(target_centroid))
+
+    spacing = 2.3
+    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    cY = Mpq(0, 1) / Mpq(0, 0)
+    cX = Mpq(1, 0) / Mpq(0, 0)
+    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, (cX, cY))
+    assert_almost_equal(centroid, 2 * np.array(target_centroid))
 
 def test_moments_weighted_hu():
     whu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
