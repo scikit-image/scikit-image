@@ -4,6 +4,7 @@ from math import atan2
 from math import pi as PI
 from math import sqrt
 from warnings import warn
+from typing import List
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -299,6 +300,8 @@ def _check_spacing(spacing, ndims:int):
 
     if isinstance(spacing, tuple):
         return spacing
+    elif isinstance(spacing, List):
+        return tuple(spacing)
     elif isinstance(spacing, float):
         return np.full(ndims, spacing)
     elif isinstance(spacing, int):
