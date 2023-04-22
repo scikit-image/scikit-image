@@ -857,10 +857,12 @@ def test_centroid_weighted():
     assert_almost_equal(centroid, (cX, cY))
     assert_almost_equal(centroid, 2 * np.array(target_centroid))
 
-    spacing = 2.3
+    spacing = (2.3, 2.3, 2.3)
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
     cY = Mpq(0, 1) / Mpq(0, 0)
     cX = Mpq(1, 0) / Mpq(0, 0)
+
+    spacing = 2.3
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
     assert_almost_equal(centroid, 2 * np.array(target_centroid))
