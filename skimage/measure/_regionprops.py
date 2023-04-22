@@ -4,7 +4,6 @@ from math import atan2
 from math import pi as PI
 from math import sqrt
 from warnings import warn
-from typing import List
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -13,7 +12,7 @@ from scipy.spatial.distance import pdist
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
+from ._regionprops_utils import euler_number, perimeter, perimeter_crofton, check_spacing
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -282,33 +281,6 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
 
-def _check_spacing(spacing, ndims:int):
-    """Checks the spacing parameter
-
-    The `spacing` parameter should be a tuple.
-    If the spacing is a single number (e.g. float)
-    then assume spacing is same in all dimensions.
-
-    Parameters
-    ---------
-    spacing: The spacing of the pixels in the image
-
-    Returns
-    -------
-    Corrected spacing as tuple (if needed)
-    """
-
-    if isinstance(spacing, tuple):
-        return spacing
-    elif isinstance(spacing, List):
-        return tuple(spacing)
-    elif isinstance(spacing, float):
-        return np.full(ndims, spacing)
-    elif isinstance(spacing, int):
-        return np.full(ndims, float(spacing))
-    else:
-        raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
-
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
@@ -345,7 +317,7 @@ class RegionProperties:
         self._ndim = label_image.ndim
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
-        self._spacing = (_check_spacing(spacing, self._ndim) if spacing is not None else np.full(self._ndim, 1.))
+        self._spacing = (check_spacing(spacing, self._ndim) if spacing is not None else np.full(self._ndim, 1.))
         self._pixel_area = np.product(self._spacing)
 
         self._extra_properties = {}

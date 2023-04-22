@@ -330,6 +330,10 @@ def test_centroid_3d():
     with pytest.raises(ValueError):
         centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
 
+    spacing = ("bad input", 3.3, 4.4)
+    with pytest.raises(ValueError):
+        centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
+
 def test_area_convex():
     area = regionprops(SAMPLE)[0].area_convex
     assert area == 125

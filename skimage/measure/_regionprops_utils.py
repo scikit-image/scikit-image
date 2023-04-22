@@ -1,4 +1,5 @@
 from math import sqrt
+from typing import List
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -326,3 +327,28 @@ def perimeter_crofton(image, directions=4):
 
     total_perimeter = coefs @ h
     return total_perimeter
+
+def check_spacing(spacing, ndims:int):
+    """Checks the spacing parameter
+
+    The `spacing` parameter should be a tuple.
+    If the spacing is a single number (e.g. float)
+    then assume spacing is same in all dimensions.
+
+    Parameters
+    ---------
+    spacing: The spacing of the pixels in the image
+
+    Returns
+    -------
+    Corrected spacing as tuple (if needed)
+    """
+
+    if isinstance(spacing, (tuple, List)):
+        if not np.all([np.isreal(x) for x in spacing]):
+            raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
+        return spacing
+    elif isinstance(spacing, (float, int)):
+        return np.full(ndims, float(spacing))
+    else:
+        raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
