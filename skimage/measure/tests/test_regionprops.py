@@ -306,19 +306,23 @@ def test_centroid_3d():
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
-    spacing = 2
+    spacing = (2., 2., 2.)
     Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
     cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
     cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
+
+    spacing = 2
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
-    spacing = 2.1
+    spacing = (2.1, 2.1, 2.1)
     Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
     cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
     cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
+
+    spacing = 2.1
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
