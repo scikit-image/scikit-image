@@ -341,7 +341,8 @@ def _normalize_spacing(spacing, ndims):
 
     Returns
     -------
-    Corrected spacing as tuple (if needed)
+    spacing : tuple of floats
+        Corrected spacing, if possible.
     """
 
     if isinstance(spacing, (tuple, List)):
