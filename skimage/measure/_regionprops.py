@@ -12,7 +12,7 @@ from scipy.spatial.distance import pdist
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-from ._regionprops_utils import euler_number, perimeter, perimeter_crofton, check_spacing
+from ._regionprops_utils import euler_number, perimeter, perimeter_crofton, _normalize_spacing
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -317,7 +317,7 @@ class RegionProperties:
         self._ndim = label_image.ndim
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
-        self._spacing = (check_spacing(spacing, self._ndim) if spacing is not None else np.full(self._ndim, 1.))
+        self._spacing = (_normalize_spacing(spacing, self._ndim) if spacing is not None else np.full(self._ndim, 1.))
         self._pixel_area = np.product(self._spacing)
 
         self._extra_properties = {}
