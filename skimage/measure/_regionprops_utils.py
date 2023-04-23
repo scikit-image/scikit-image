@@ -337,7 +337,8 @@ def _normalize_spacing(spacing, ndims):
 
     Parameters
     ---------
-    spacing: The spacing of the pixels in the image
+    spacing : any
+        User-provided `spacing` keyword.
 
     Returns
     -------
