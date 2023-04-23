@@ -328,7 +328,7 @@ def perimeter_crofton(image, directions=4):
     total_perimeter = coefs @ h
     return total_perimeter
 
-def check_spacing(spacing, ndims:int):
+def _normalize_spacing(spacing, ndims):
     """Checks the spacing parameter
 
     The `spacing` parameter should be a tuple.
