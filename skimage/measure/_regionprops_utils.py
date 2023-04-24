@@ -350,12 +350,15 @@ def _normalize_spacing(spacing:Any, ndims:int):
     spacing : tuple of floats
         Corrected spacing, if possible.
     """
-
-    if (np.ndim(spacing) == 1) and (len(spacing) == ndims):
-        if not np.all([np.isreal(x) for x in spacing]):
-            raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
-        return np.array(spacing)
-    elif isinstance(spacing, Real):
-        return np.full(ndims, float(spacing))
-    else:
-        raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
+    spacing = np.array(spacing)
+    if spacing.shape == ():
+        spacing = np.broadcast_to(spacing, shape=(ndims,))
+    elif spacing.shape != (ndims,):
+        raise ValueError(
+            f"spacing isn't a scalar or a sequence of shape {(ndims,)}, got {spacing}"
+        )
+    if not all(isinstance(s, Real) for s in spacing):
+        raise TypeError(
+            f"spacing isn't of floating or integer type, got {spacing}"
+        )
+    return spacing
