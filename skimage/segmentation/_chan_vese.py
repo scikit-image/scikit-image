@@ -98,7 +98,7 @@ def _cv_edge_length_term(phi, mu):
     P = np.pad(phi, 1, mode='edge')
     fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
     fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
-    return mu * _cv_delta(phi) * np.sqrt(fx * fx + fy * fy)
+    return mu * _cv_delta(phi) * np.sqrt(fx ** 2 + fy ** 2)
 
 
 def _cv_energy(image, phi, mu, lambda1, lambda2):
