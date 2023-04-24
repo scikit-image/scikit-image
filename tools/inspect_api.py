@@ -140,6 +140,7 @@ class Node:
             "type": type(self.obj).__name__,
             "param_count": self.parameter_count,
             "return_count": self.return_count,
+            "signature": str(self.signature) if self.signature else "",
         }
         return [table]
 
