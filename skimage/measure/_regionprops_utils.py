@@ -1,6 +1,5 @@
 from math import sqrt
 from numbers import Real
-from typing import Any
 import numpy as np
 from scipy import ndimage as ndi
 
