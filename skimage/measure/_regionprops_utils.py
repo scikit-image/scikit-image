@@ -1,5 +1,5 @@
 from math import sqrt
-from numbers import Number
+from numbers import Real
 from typing import Any
 import numpy as np
 from scipy import ndimage as ndi
@@ -355,7 +355,7 @@ def _normalize_spacing(spacing:Any, ndims:int):
         if not np.all([np.isreal(x) for x in spacing]):
             raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
         return np.array(spacing)
-    elif isinstance(spacing, Number):
+    elif isinstance(spacing, Real):
         return np.full(ndims, float(spacing))
     else:
         raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
