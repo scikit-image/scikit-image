@@ -340,7 +340,7 @@ def _normalize_spacing(spacing:Any, ndims:int):
     ---------
     spacing : Any
         User-provided `spacing` keyword.
-    ndim: int
+    ndims: int
         The number of dimensions in the image
 
     Returns
@@ -349,7 +349,7 @@ def _normalize_spacing(spacing:Any, ndims:int):
         Corrected spacing, if possible.
     """
 
-    if np.ndim(spacing) == 1:
+    if (np.ndim(spacing) == 1) and (len(spacing) == ndims):
         if not np.all([np.isreal(x) for x in spacing]):
             raise ValueError(f'Spacing should be a tuple of {ndims} floats.')
         return np.array(spacing)
