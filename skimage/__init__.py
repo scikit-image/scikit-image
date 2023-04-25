@@ -72,7 +72,7 @@ from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 8))
 
 import lazy_loader as lazy
-__getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
+__getattr__, __lazy_dir__, __all__ = lazy.attach_stub(__name__, __file__)
 
 def __dir__():
     return __lazy_dir__() + ['__version__']
