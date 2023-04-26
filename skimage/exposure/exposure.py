@@ -595,7 +595,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     if imin != imax:
         image = (image - imin) / (imax - imin)
-        return np.asarray(image * (omax - omin) + omin, dtype=out_dtype)
+        return (image * (omax - omin) + omin).astype(out_dtype)
     else:
         return np.clip(image, omin, omax).astype(out_dtype)
 
