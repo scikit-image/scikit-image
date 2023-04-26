@@ -21,9 +21,10 @@ from skimage._shared.utils import _supported_float_type
 # Test integer histograms
 # =======================
 
-def test_wrong_source_range():
-    im = np.array([-1, 100], dtype=np.int8)
-    with pytest.raises(ValueError):
+@pytest.mark.parametrize('dtype', [np.int8, np.float32])
+def test_wrong_source_range(dtype):
+    im = np.array([-1, 100], dtype=dtype)
+    with pytest.raises(ValueError, match="Incorrect value for `source_range` argument"):
         frequencies, bin_centers = exposure.histogram(im,
                                                       source_range='foobar')
 
@@ -592,6 +593,12 @@ def norm_brightness_err(img1, img2):
     ambe = np.abs(img1.mean() - img2.mean())
     nbe = ambe / dtype_range[img1.dtype.type][1]
     return nbe
+
+
+def test_adapthist_incorrect_kernel_size():
+    img = np.ones((8, 8), dtype=float)
+    with pytest.raises(ValueError, match="Incorrect value of `kernel_size`"):
+        exposure.equalize_adapthist(img, (3, 3, 3))
 
 
 # Test Gamma Correction
