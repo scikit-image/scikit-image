@@ -8,6 +8,7 @@ import inspect
 import os
 import sys
 from warnings import filterwarnings
+import warnings
 
 import plotly.io as pio
 import skimage
