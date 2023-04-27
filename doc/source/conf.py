@@ -15,6 +15,7 @@ from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.utils import _has_optipng
+from sphinx_gallery.notebook import add_markdown_cell, add_code_cell
 
 filterwarnings(
     "ignore", message="Matplotlib is currently using agg", category=UserWarning
@@ -62,6 +63,18 @@ autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = ".rst"
 
+try:
+    import jupyterlite_sphinx  # noqa: F401
+
+    extensions.append("jupyterlite_sphinx")
+except ImportError:
+    # In some cases we don't want to require jupyterlite_sphinx to be installed,
+    # e.g. the doc-min-dependencies build
+    warnings.warn(
+        "jupyterlite_sphinx is not installed, you need to install it "
+        "if you want JupyterLite links to appear in each example"
+    )
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
@@ -84,6 +97,64 @@ else:
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 
 pio.renderers.default = "sphinx_gallery_png"
+
+
+def notebook_modification_function(notebook_content, notebook_filename):
+    notebook_content_str = str(notebook_content)
+    warning_template = "\n".join(
+        [
+            "<div class='alert alert-{message_class}'>",
+            "",
+            "# JupyterLite warning",
+            "",
+            "{message}",
+            "</div>",
+        ]
+    )
+
+    message_class = "warning"
+    message = (
+        "Running the scikit-image examples in JupyterLite is experimental and you may"
+        " encounter some unexpected behavior.\n\nThe main difference is that imports"
+        " will take a lot longer than usual, for example the first `import skimage` can"
+        " take roughly 10-20s.\n\nIf you notice problems, feel free to open an"
+        " [issue](https://github.com/scikit-image/scikit-image/issues/new/choose)"
+        " about it."
+    )
+
+    markdown = warning_template.format(message_class=message_class, message=message)
+
+    dummy_notebook_content = {"cells": []}
+    add_markdown_cell(dummy_notebook_content, markdown)
+
+    code_lines = []
+
+    if "seaborn" in notebook_content_str:
+        code_lines.append("%pip install seaborn")
+    if "plotly" in notebook_content_str:
+        code_lines.append("%pip install plotly")
+    if "data." in notebook_content_str:
+        code_lines.extend(
+            [
+                "%pip install pyodide-http",
+                "import pyodide_http",
+                "pyodide_http.patch_all()",
+            ]
+        )
+    # always import matplotlib and pandas to avoid Pyodide limitation with
+    # imports inside functions
+    code_lines.extend(["import matplotlib", "import pandas", "import lzma",
+                       "%pip install pooch", "import pooch"])
+
+    if code_lines:
+        code_lines = ["# JupyterLite-specific code"] + code_lines
+        code = "\n".join(code_lines)
+        add_code_cell(dummy_notebook_content, code)
+
+    notebook_content["cells"] = (
+        dummy_notebook_content["cells"] + notebook_content["cells"]
+    )
+
 
 sphinx_gallery_conf = {
     "doc_module": ("skimage",),
@@ -119,6 +190,9 @@ sphinx_gallery_conf = {
     },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
+    "jupyterlite": {"notebook_modification_function": notebook_modification_function},
+    # TODO temporary to speed the build by not running the example
+    "plot_gallery": False
 }
 
 
