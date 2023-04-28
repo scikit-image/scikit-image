@@ -83,8 +83,8 @@ plt.show()
 #
 # The algorithm takes two different points belonging to the ellipse. It
 # assumes that it is the major axis. A loop on all the other points determines
-# potential minor axis lengths of candidate ellipses. An accumulator keeps  
-# track of these values and, if a bin in the histogram of candidate minor axis 
+# potential minor axis lengths of candidate ellipses. An accumulator keeps
+# track of these values and, if a bin in the histogram of candidate minor axis
 # lengths (with `bin_size = accuracy * accuracy`) is superior to the `threshold`,
 # the candidate ellipse is added to the results.
 #
@@ -111,10 +111,10 @@ edges = canny(image_gray, sigma=2.0,
 
 # Perform a Hough Transform
 # The accuracy corresponds to the bin size of the minor axis lengths histogram.
-# A higher `accuracy` value will lead to more ellipses being found, at the 
-# cost of a lower precision on the minor axis length estimation. 
-# A higher `threshold` will lead to less ellipses being found, filtering out those 
-# that have less edge points on their perimeter. 
+# A higher `accuracy` value will lead to more ellipses being found, at the
+# cost of a lower precision on the minor axis length estimation.
+# A higher `threshold` will lead to less ellipses being found, filtering out those
+# that have less edge points on their perimeter.
 result = hough_ellipse(edges, accuracy=20, threshold=250,
                        min_size=100, max_size=120)
 result.sort(order='accumulator')
