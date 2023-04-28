@@ -894,6 +894,7 @@ def test_dask_histogram():
     expected_hist = [1, 2, 1]
     assert np.allclose(expected_bins, output_bins)
     assert np.allclose(expected_hist, output_hist)
+    assert isinstance(output_hist, da.Array)
 
 
 def test_dask_rescale():
