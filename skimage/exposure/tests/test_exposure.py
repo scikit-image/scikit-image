@@ -894,3 +894,14 @@ def test_dask_histogram():
     expected_hist = [1, 2, 1]
     assert np.allclose(expected_bins, output_bins)
     assert np.allclose(expected_hist, output_hist)
+    assert isinstance(output_hist, da.Array)
+
+
+def test_dask_rescale():
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    image = da.array([51, 102, 153], dtype=np.uint8)
+    out = exposure.rescale_intensity(image)
+    assert out.dtype == np.uint8
+    assert_array_almost_equal(out, [0, 127, 255])
+    assert isinstance(out, da.Array)
