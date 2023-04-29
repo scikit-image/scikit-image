@@ -134,18 +134,41 @@ def notebook_modification_function(notebook_content, notebook_filename):
         code_lines.append("%pip install seaborn")
     if "plotly" in notebook_content_str:
         code_lines.append("%pip install plotly")
-    if "data." in notebook_content_str:
+    if "data." in notebook_content_str or ".data" in notebook_content_str:
         code_lines.extend(
             [
+                # lzma needs to be imported so that %pip install pooch works
+                "import lzma",
+                # pooch depends on requests and need to be installed before
+                # pyodide_http.patch_all() is called
+                "%pip install pooch",
+                "import pooch",
                 "%pip install pyodide-http",
                 "import pyodide_http",
                 "pyodide_http.patch_all()",
             ]
         )
+    # Use cdn.statically.io for CORS proxy that supports gitlab.com
+        code_lines.extend(
+    r"""
+import re
+
+import skimage.data._registry
+
+new_registry_urls = {
+    k: re.sub(
+        r'https://gitlab.com/(.+)/-/raw(.+)',
+        r'https://cdn.statically.io/gl/\1\2',
+        url
+    )
+    for k, url in skimage.data._registry.registry_urls.items()
+}
+skimage.data._registry.registry_urls = new_registry_urls
+    """.splitlines()
+        )
     # always import matplotlib and pandas to avoid Pyodide limitation with
-    # imports inside functions
-    code_lines.extend(["import matplotlib", "import pandas", "import lzma",
-                       "%pip install pooch", "import pooch"])
+    # imports inside functions. TODO not sure this is needed for scikit-image ...
+    code_lines.extend(["import matplotlib", "import pandas"])
 
     if code_lines:
         code_lines = ["# JupyterLite-specific code"] + code_lines
