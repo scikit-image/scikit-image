@@ -7,7 +7,7 @@ export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'
 mkdir -p $MPL_DIR
 touch $MPL_DIR/matplotlibrc
 
-TEST_ARGS="--doctest-modules --cov=skimage"
+TEST_ARGS="--doctest-modules --cov=skimage --showlocals"
 
 if [[ ${WITHOUT_POOCH} == "1" ]]; then
   # remove pooch (previously installed via requirements/test.txt)
