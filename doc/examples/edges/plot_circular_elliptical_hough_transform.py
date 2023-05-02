@@ -83,11 +83,9 @@ plt.show()
 #
 # The algorithm takes two different points belonging to the ellipse. It
 # assumes that it is the major axis. A loop on all the other points determines
-# potential minor axis lengths of candidate ellipses. An accumulator keeps
-# track of these values and, if a bin in the histogram of candidate minor axis
-# lengths (with `bin_size = accuracy * accuracy`) is superior to the `threshold`,
-# the candidate ellipse is added to the results.
-#
+# potential minor axis lengths of candidate ellipses. Ellipses are added to the
+# results if enough valid candidates have similar minor axis lengths.
+# 
 # A full description of the algorithm can be found in reference [1]_.
 #
 # References
