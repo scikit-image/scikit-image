@@ -178,7 +178,7 @@ def _get_numpy_hist_range(image, source_range):
     elif source_range == 'dtype':
         hist_range = dtype_limits(image, clip_negative=False)
     else:
-        ValueError('Wrong value for the `source_range` argument')
+        raise ValueError(f'Incorrect value for `source_range` argument: {source_range}')
     return hist_range
 
 
