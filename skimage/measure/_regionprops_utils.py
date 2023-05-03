@@ -335,7 +335,7 @@ def _normalize_spacing(spacing, ndims):
     The `spacing` parameter should be a sequence of numbers
     that is the same length as the number of dimensions
     in the image.
-    If the spacing is a single number (e.g. float)
+    If `spacing` is a scalar (single number),
     then assume spacing is same in all dimensions.
 
     Parameters
