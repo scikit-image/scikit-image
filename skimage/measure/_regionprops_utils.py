@@ -332,7 +332,7 @@ def perimeter_crofton(image, directions=4):
 def _normalize_spacing(spacing, ndims):
     """Normalize spacing parameter.
 
-    The `spacing` parameter should be a tuple of numbers
+    The `spacing` parameter should be a sequence of numbers
     that is the same length as the number of dimensions
     in the image.
     If the spacing is a single number (e.g. float)
