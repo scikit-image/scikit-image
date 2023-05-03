@@ -359,6 +359,6 @@ def _normalize_spacing(spacing, ndims):
         )
     if not all(isinstance(s, Real) for s in spacing):
         raise TypeError(
-            f"spacing isn't of floating or integer type, got {spacing}"
+            f"spacing isn't of float or integer type, got {spacing}"
         )
     return spacing
