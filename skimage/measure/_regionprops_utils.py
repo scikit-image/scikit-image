@@ -336,7 +336,7 @@ def _normalize_spacing(spacing, ndims):
     that is the same length as the number of dimensions
     in the image.
     If `spacing` is a scalar (single number),
-    then assume spacing is same in all dimensions.
+    then assume spacing is the same in all dimensions.
 
     Parameters
     ---------
