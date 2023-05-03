@@ -1,3 +1,8 @@
+"""
+Tools to measure image metrics and features.
+"""
+
+
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes, mesh_surface_area
 from ._regionprops import (regionprops, perimeter,
