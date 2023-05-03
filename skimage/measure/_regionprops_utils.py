@@ -355,7 +355,7 @@ def _normalize_spacing(spacing, ndims):
         spacing = np.broadcast_to(spacing, shape=(ndims,))
     elif spacing.shape != (ndims,):
         raise ValueError(
-            f"spacing isn't a scalar or a sequence of shape {(ndims,)}, got {spacing}"
+            f"spacing isn't a scalar nor a sequence of shape {(ndims,)}, got {spacing}"
         )
     if not all(isinstance(s, Real) for s in spacing):
         raise TypeError(
