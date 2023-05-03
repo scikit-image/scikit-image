@@ -347,7 +347,7 @@ def _normalize_spacing(spacing, ndims):
 
     Returns
     -------
-    spacing : tuple of floats
+    spacing : array
         Corrected spacing, if possible.
     """
     spacing = np.array(spacing)
