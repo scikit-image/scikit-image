@@ -298,7 +298,7 @@ def test_centroid_3d():
     assert_array_almost_equal((cZ, cY, cX), centroid)
 
 def test_spacing_parameter():
-    """Test the _normalize_spacing code"""
+    """Test the _normalize_spacing code."""
 
     # Test centroid3d spacing
     spacing = (2, 1, 0.8)
