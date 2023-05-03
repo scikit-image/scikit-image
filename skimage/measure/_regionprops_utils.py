@@ -343,7 +343,7 @@ def _normalize_spacing(spacing, ndims):
     spacing : Any
         User-provided `spacing` keyword.
     ndims: int
-        The number of dimensions in the image
+        Number of dimensions in the image.
 
     Returns
     -------
