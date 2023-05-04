@@ -797,6 +797,15 @@ def test_moments_weighted_central():
 
 
 def test_centroid_weighted():
+    sample_for_spacing = np.array(
+        [[0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 1, 1, 1],]
+        )
+    target_centroid_wspacing = (4.0, 4.0)
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                            )[0].centroid_weighted
     target_centroid = (5.540540540540, 9.445945945945)
@@ -816,6 +825,8 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
     assert_almost_equal(centroid, 2 * np.array(target_centroid))
+    centroid = regionprops(sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, 2 * np.array(target_centroid_wspacing))
 
     spacing = (1.3, 0.7)
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
@@ -823,6 +834,8 @@ def test_centroid_weighted():
     cX = Mpq(1, 0) / Mpq(0, 0)
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
+    centroid = regionprops(sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, spacing * np.array(target_centroid_wspacing))
 
 
 def test_moments_weighted_hu():
