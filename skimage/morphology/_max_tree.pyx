@@ -56,7 +56,7 @@ cdef DTYPE_INT64_t find_root_rec(DTYPE_INT64_t[::1] parent,
 
 
 cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
-                                    DTYPE_INT64_t index):
+                                    DTYPE_INT64_t index) noexcept:
     """Get the root of the current tree.
 
     Here, we do without path compression and accept the higher complexity, but
@@ -81,7 +81,7 @@ cdef inline DTYPE_INT64_t find_root(DTYPE_INT64_t[::1] parent,
 
 
 cdef void canonize(np_real_numeric[::1] image, DTYPE_INT64_t[::1] parent,
-                   DTYPE_INT64_t[::1] sorted_indices):
+                   DTYPE_INT64_t[::1] sorted_indices) noexcept:
     """Generate a max-tree for which every node's parent is a canonical node.
 
     The parent of a non-canonical pixel is a canonical pixel.

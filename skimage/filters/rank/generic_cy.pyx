@@ -389,7 +389,7 @@ cdef inline void _kernel_win_hist(dtype_t_out* out, Py_ssize_t odepth,
                                   cnp.float64_t pop, dtype_t g,
                                   Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                   cnp.float64_t p0, cnp.float64_t p1,
-                                  Py_ssize_t s0, Py_ssize_t s1) noexcpt nogil:
+                                  Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
     cdef Py_ssize_t i
     cdef cnp.float64_t scale
     if pop:
