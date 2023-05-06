@@ -61,7 +61,7 @@ build = [
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.26',
+    'Cython>=0.29.32',
     'pythran',
     'numpy>=1.21.1',
     'spin==0.3',
