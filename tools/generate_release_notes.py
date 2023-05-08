@@ -206,9 +206,8 @@ for section, pull_request_dicts in highlights.items():
     if not pull_request_dicts:
         continue
     print(f'{section}s\n{"*" * (len(section)+1)}')
-    for number, pull_request_info in pull_request_dicts.items():
-        print(f'- {pull_request_info["summary"]} (#{number})')
-
+    for pr_num, pr_info in pull_request_dicts.items():
+        print(f"- {pr_info['summary']}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_).")
 
 contributors = OrderedDict()
 
