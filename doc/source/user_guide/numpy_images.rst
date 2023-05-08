@@ -35,14 +35,14 @@ types and how ``scikit-image`` treats them.
 NumPy indexing
 --------------
 
-NumPy indexing can be used both for looking at the pixel values and to
-modify them::
+NumPy indexing (0-based!) can be used both for looking at the pixel values
+and to modify them::
 
     >>> # Get the value of the pixel at the 10th row and 20th column
-    >>> camera[10, 20]
+    >>> camera[9, 19]
     153
     >>> # Set to black the pixel at the 3rd row and 10th column
-    >>> camera[3, 10] = 0
+    >>> camera[2, 9] = 0
 
 Be careful! In NumPy indexing, the first dimension (``camera.shape[0]``)
 corresponds to rows, while the second (``camera.shape[1]``) corresponds
@@ -67,7 +67,7 @@ Masking (indexing with masks of booleans)::
 
 Fancy indexing (indexing with sets of indices)::
 
-    >>> inds_r = np.arange(len(camera))
+    >>> inds_r = np.arange(camera.shape[0])
     >>> inds_c = 4 * inds_r % len(camera)
     >>> camera[inds_r, inds_c] = 0
 
@@ -110,12 +110,12 @@ NumPy array with an additional trailing dimension for the channels::
 This shows that ``cat`` is a 300-by-451 pixel image with three channels
 (red, green, and blue). As before, we can get and set the pixel values::
 
-    >>> cat[10, 20]
-    array([151, 129, 115], dtype=uint8)
+    >>> cat[9, 19]
+    array([152, 128, 116], dtype=uint8)
     >>> # Set the pixel at (50th row, 60th column) to "black"
-    >>> cat[50, 60] = 0
+    >>> cat[49, 59] = 0
     >>> # set the pixel at (50th row, 61st column) to "green"
-    >>> cat[50, 61] = [0, 255, 0]  # [red, green, blue]
+    >>> cat[49, 60] = [0, 255, 0]  # [red, green, blue]
 
 We can also use 2D boolean masks for 2D multichannel images, as we did with
 the grayscale image above:
