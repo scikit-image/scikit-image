@@ -63,6 +63,8 @@ from .colorconv import (convert_colorspace,
 
 from .colorlabel import color_dict, label2rgb
 
+from .bayer2rgb import bayer2rgb
+
 from .delta_e import (deltaE_cie76,
                       deltaE_ciede94,
                       deltaE_ciede2000,
