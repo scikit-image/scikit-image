@@ -32,7 +32,6 @@ https://github.com/scikit-image/scikit-image/issues/3405
 import os
 import argparse
 from datetime import datetime
-from collections import OrderedDict
 from warnings import warn
 
 from github import Github
@@ -143,7 +142,7 @@ for commit in tqdm(all_commits, desc='Getting committers and authors'):
 committers.discard('GitHub Web Flow')
 authors.discard('Azure Pipelines Bot')
 
-highlights = OrderedDict()
+highlights = {}
 
 highlights['New Feature'] = {}
 highlights['Improvement'] = {}
@@ -209,7 +208,7 @@ for section, pull_request_dicts in highlights.items():
     for pr_num, pr_info in pull_request_dicts.items():
         print(f"- {pr_info['summary']}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_).")
 
-contributors = OrderedDict()
+contributors = {}
 
 contributors['authors'] = authors
 # contributors['committers'] = committers
