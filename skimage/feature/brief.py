@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 from .._shared.filters import gaussian
@@ -32,19 +34,21 @@ class BRIEF(DescriptorExtractor):
     mode : {'normal', 'uniform'}, optional
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is
-        used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance, then that instance
-        is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator (RNG).
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
-        Seed for the random sampling of the decision pixel-pairs. From a square
-        window with length `patch_size`, pixel pairs are sampled using the
-        `mode` parameter to build the descriptors using intensity comparison.
-        The value of `seed` must be the same for the images to be
-        matched while building the descriptors.
+        The PRNG is used for the random sampling of the decision
+        pixel-pairs. From a square window with length `patch_size`,
+        pixel pairs are sampled using the `mode` parameter to build
+        the descriptors using intensity comparison.
+
+        For matching across images, the same `rng` should be used to construct
+        descriptors. To facilitate this:
+
+        (a) `rng` defauls to 1
+        (b) Subsequent calls of the ``extract`` method will use the same rng/seed.
     sigma : float, optional
         Standard deviation of the Gaussian low-pass filter applied to the image
         to alleviate noise sensitivity, which is strongly recommended to obtain
@@ -116,10 +120,10 @@ class BRIEF(DescriptorExtractor):
 
     """
 
-    @deprecate_kwarg({'sample_seed': 'seed'}, deprecated_version='0.21',
+    @deprecate_kwarg({'sample_seed': 'rng'}, deprecated_version='0.21',
                      removed_version='0.23')
     def __init__(self, descriptor_size=256, patch_size=49,
-                 mode='normal', sigma=1, seed=1):
+                 mode='normal', sigma=1, rng=1):
 
         mode = mode.lower()
         if mode not in ('normal', 'uniform'):
@@ -130,10 +134,10 @@ class BRIEF(DescriptorExtractor):
         self.mode = mode
         self.sigma = sigma
 
-        if seed is None:
-            self.seed = np.random.SeedSequence().entropy
+        if rng is None:
+            self.seed = np.random.SeedSequence()
         else:
-            self.seed = seed
+            self.seed = rng
 
         self.descriptors = None
         self.mask = None
@@ -151,7 +155,7 @@ class BRIEF(DescriptorExtractor):
         """
         check_nD(image, 2)
 
-        random = np.random.default_rng(self.seed)
+        random = np.random.default_rng(copy.deepcopy(self.seed))
 
         image = _prepare_grayscale_input_2D(image)
 
