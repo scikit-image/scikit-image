@@ -84,12 +84,11 @@ developer = [
     'rtoml',
 ]
 docs = [
-    'sphinx>=6.0',
+    'sphinx>=5.0',
     'sphinx-gallery>=0.11',
     'numpydoc>=1.5',
     'sphinx-copybutton',
     'pytest-runner',
-    'scikit-learn',
     'matplotlib>=3.5',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
@@ -101,6 +100,9 @@ docs = [
     'ipykernel',
     'plotly>=5.10',
     'kaleido',
+    'scikit-learn>=0.24.0',
+    'sphinx_design>=0.3',
+    'pydata-sphinx-theme>=0.13',
 ]
 optional = [
     'SimpleITK',
@@ -110,10 +112,10 @@ optional = [
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pyamg',
+    'scikit-learn>=0.24.0',
 ]
 test = [
     'asv',
-    'codecov',
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pytest>=7.0',

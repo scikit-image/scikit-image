@@ -1,11 +1,12 @@
 import numpy as np
+import pytest
 from skimage.segmentation import quickshift
 
 from skimage._shared import testing
-from skimage._shared.testing import (assert_greater, test_parallel,
+from skimage._shared.testing import (assert_greater, run_in_parallel,
                                      assert_equal, assert_array_equal)
 
-@test_parallel()
+@run_in_parallel()
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_grey(dtype):
     rnd = np.random.default_rng(0)
@@ -59,3 +60,11 @@ def test_color(dtype, channel_axis):
     # still don't cross lines
     assert (seg2[9, :] != seg2[10, :]).all()
     assert (seg2[:, 9] != seg2[:, 10]).all()
+
+
+def test_convert2lab_not_rgb():
+    img = np.zeros((20, 21, 2))
+    with pytest.raises(
+            ValueError, match="Only RGB images can be converted to Lab space"
+    ):
+        quickshift(img, convert2lab=True)

@@ -1,9 +1,8 @@
-sphinx>=6.0
+sphinx>=5.0
 sphinx-gallery>=0.11
 numpydoc>=1.5
 sphinx-copybutton
 pytest-runner
-scikit-learn
 matplotlib>=3.5
 dask[array]>=2022.9.2
 pandas>=1.5
@@ -16,3 +15,6 @@ ipywidgets
 ipykernel
 plotly>=5.10
 kaleido
+scikit-learn>=0.24.0
+sphinx_design>=0.3
+pydata-sphinx-theme>=0.13

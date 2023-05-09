@@ -74,7 +74,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     if convert2lab:
         if image.shape[-1] != 3:
-            ValueError("Only RGB images can be converted to Lab space.")
+            raise ValueError("Only RGB images can be converted to Lab space.")
         image = rgb2lab(image)
 
     if kernel_size < 1:
