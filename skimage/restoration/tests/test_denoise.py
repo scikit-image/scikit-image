@@ -455,7 +455,7 @@ def test_denoise_nl_means_multichannel(fast_mode, dtype, channel_axis):
     # for true 3D data, 3D denoising is better than denoising as 2D+channels
 
     # synthetic 3d volume
-    img = data.binary_blobs(length=32, n_dim=3, seed=5)
+    img = data.binary_blobs(length=32, n_dim=3, rng=5)
     img = img[:, :24, :16].astype(dtype, copy=False)
 
     sigma = 0.2
