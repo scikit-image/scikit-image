@@ -1,12 +1,9 @@
-Announcement: scikit-image 0.21.0
-=================================
-
-We're happy to announce the release of scikit-image v0.21.0!
+scikit-image 0.21.0
+===================
 
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-
 
 For more information, examples, and documentation, please visit our website:
 
