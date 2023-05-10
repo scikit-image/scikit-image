@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from datetime import date
 import inspect
 import os
 import sys
@@ -23,7 +24,7 @@ filterwarnings(
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "skimage"
-copyright = "2013, the scikit-image team"
+copyright = f"2013-{date.today().year}, the scikit-image team"
 
 with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
