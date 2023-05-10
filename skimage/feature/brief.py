@@ -155,7 +155,7 @@ class BRIEF(DescriptorExtractor):
         """
         check_nD(image, 2)
 
-        random = np.random.default_rng(copy.deepcopy(self.seed))
+        rng = np.random.default_rng(copy.deepcopy(self.seed))
 
         image = _prepare_grayscale_input_2D(image)
 
@@ -168,8 +168,7 @@ class BRIEF(DescriptorExtractor):
         desc_size = self.descriptor_size
         patch_size = self.patch_size
         if self.mode == 'normal':
-            samples = (patch_size / 5.0) * random.standard_normal(desc_size
-                                                                  * 8)
+            samples = (patch_size / 5.0) * rng.standard_normal(desc_size * 8)
             samples = np.array(samples, dtype=np.int32)
             samples = samples[(samples < (patch_size // 2))
                               & (samples > - (patch_size - 2) // 2)]
@@ -177,7 +176,7 @@ class BRIEF(DescriptorExtractor):
             pos1 = samples[:desc_size * 2].reshape(desc_size, 2)
             pos2 = samples[desc_size * 2:desc_size * 4].reshape(desc_size, 2)
         elif self.mode == 'uniform':
-            samples = random.integers(-(patch_size - 2) // 2,
+            samples = rng.integers(-(patch_size - 2) // 2,
                                       (patch_size // 2) + 1,
                                       (desc_size * 2, 2))
             samples = np.array(samples, dtype=np.int32)
@@ -197,5 +196,4 @@ class BRIEF(DescriptorExtractor):
         self.descriptors = np.zeros((keypoints.shape[0], desc_size),
                                     dtype=bool, order='C')
 
-        _brief_loop(image, self.descriptors.view(np.uint8), keypoints,
-                    pos1, pos2)
+        _brief_loop(image, self.descriptors.view(np.uint8), keypoints, pos1, pos2)

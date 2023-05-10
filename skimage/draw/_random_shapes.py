@@ -404,30 +404,28 @@ def random_shapes(image_shape,
                     msg = 'Intensity range must lie within (0, 255) interval'
                     raise ValueError(msg)
 
-    random = np.random.default_rng(rng)
+    rng = np.random.default_rng(rng)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
     image = np.full(image_shape, 255, dtype=np.uint8)
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
 
-    num_shapes = random.integers(min_shapes, max_shapes + 1)
-    colors = _generate_random_colors(num_shapes, num_channels,
-                                     intensity_range, random)
+    num_shapes = rng.integers(min_shapes, max_shapes + 1)
+    colors = _generate_random_colors(num_shapes, num_channels, intensity_range, rng)
     shape = (min_size, max_size)
     for shape_idx in range(num_shapes):
         if user_shape is None:
-            shape_generator = random.choice(SHAPE_CHOICES)
+            shape_generator = rng.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.integers(max(1, image_shape[1] - min_size))
-            row = random.integers(max(1, image_shape[0] - min_size))
+            column = rng.integers(max(1, image_shape[1] - min_size))
+            row = rng.integers(max(1, image_shape[0] - min_size))
             point = (row, column)
             try:
-                indices, label = shape_generator(point, image_shape, shape,
-                                                 random)
+                indices, label = shape_generator(point, image_shape, shape, rng)
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
                 indices = []
