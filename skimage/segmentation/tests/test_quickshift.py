@@ -9,12 +9,12 @@ from skimage._shared.testing import (assert_greater, run_in_parallel,
 @run_in_parallel()
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_grey(dtype):
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, 10:] = 0.2
     img[10:, :10] = 0.4
     img[10:, 10:] = 0.6
-    img += 0.05 * rnd.normal(size=img.shape)
+    img += 0.05 * rng.normal(size=img.shape)
     img = img.astype(dtype, copy=False)
     seg = quickshift(img, kernel_size=2, max_dist=3, rng=0,
                      convert2lab=False, sigma=0)
@@ -32,12 +32,12 @@ def test_grey(dtype):
 @testing.parametrize('dtype', [np.float32, np.float64])
 @testing.parametrize('channel_axis', [-3, -2, -1, 0, 1, 2])
 def test_color(dtype, channel_axis):
-    rnd = np.random.default_rng(583428449)
+    rng = np.random.default_rng(583428449)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     img = img.astype(dtype, copy=False)

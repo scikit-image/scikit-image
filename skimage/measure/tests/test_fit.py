@@ -479,8 +479,8 @@ def test_ransac_non_valid_best_model():
         tilt = abs(np.arccos(np.dot(model.params[1], [0, 0, 1])))
         return tilt <= (10 / 180 * np.pi)
 
-    rnd = np.random.RandomState(1)
-    data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rnd.rand(1000, 3) - 0.5
+    rng = np.random.RandomState(1)
+    data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
     with expected_warnings(["Estimated model is not valid"]):
         ransac(data, LineModelND, min_samples=2,
                residual_threshold=0.3, max_trials=50, rng=0,
