@@ -149,7 +149,7 @@ Merged Pull Requests
   (`#6898 <https://github.com/scikit-image/scikit-image/pull/6898>`_).
 - Remove old doc cruft
   (`#6901 <https://github.com/scikit-image/scikit-image/pull/6901>`_).
--  Corrected energy calculation in chan vese
+- Corrected energy calculation in chan vese
   (`#6902 <https://github.com/scikit-image/scikit-image/pull/6902>`_).
 - Temporarily pin imageio to <2.28
   (`#6909 <https://github.com/scikit-image/scikit-image/pull/6909>`_).
@@ -157,7 +157,7 @@ Merged Pull Requests
   (`#6910 <https://github.com/scikit-image/scikit-image/pull/6910>`_).
 - Add missing backticks to DOI role in docstring of `area_opening`
   (`#6913 <https://github.com/scikit-image/scikit-image/pull/6913>`_).
--  Add PR links to release notes generating script
+- Add PR links to release notes generating script
   (`#6917 <https://github.com/scikit-image/scikit-image/pull/6917>`_).
 - Unify pseudo-random seeding interface
   (`#6922 <https://github.com/scikit-image/scikit-image/pull/6922>`_).

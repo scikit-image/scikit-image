@@ -221,7 +221,7 @@ for section, pull_request_dicts in highlights.items():
     print(f'{section}s\n{"*" * (len(section)+1)}')
     for pr_num, pr_info in pull_request_dicts.items():
         print(
-            f"- {pr_info['summary']}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_)."
+            f"- {pr_info['summary'].strip()}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_)."
         )
 
 contributors = {}
