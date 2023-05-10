@@ -161,6 +161,7 @@ html_theme_options = {
         },
     ],
     "navbar_end": ["version-switcher", "navbar-icon-links"],
+    "show_prev_next": False,
     "switcher": {
         "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
         "version_match": "dev" if "dev" in version else version,
