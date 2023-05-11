@@ -192,7 +192,7 @@ highlights["Other Pull Request"] = other_pull_requests
 
 
 # Now generate the release notes
-announcement_title = f"scikit-image {args.version}"
+announcement_title = f"scikit-image {args.version} release notes"
 print(announcement_title)
 print("=" * len(announcement_title))
 
