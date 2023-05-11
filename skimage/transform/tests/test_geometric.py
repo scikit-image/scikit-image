@@ -544,6 +544,39 @@ def test_union_differing_types():
         tform1.__add__(tform2)
 
 
+@pytest.mark.parametrize(
+    "tform",
+    [
+        ProjectiveTransform(matrix=np.random.rand(3, 3)),
+        AffineTransform(scale=(0.1, 0.1), rotation=0.3),
+        EuclideanTransform(rotation=0.9, translation=(5, 5)),
+        SimilarityTransform(scale=0.1, rotation=0.9),
+        EssentialMatrixTransform(
+            rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
+        ),
+        FundamentalMatrixTransform(
+            matrix=EssentialMatrixTransform(
+                rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
+            ).params
+        ),
+        ((t := PiecewiseAffineTransform()).estimate(SRC, DST) and t),
+    ],
+)
+def test_inverse(tform):
+    assert isinstance(tform.inverse, type(tform))
+    assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
+    if not isinstance(
+        tform,
+        (
+            EssentialMatrixTransform,
+            FundamentalMatrixTransform,
+            PiecewiseAffineTransform,
+        ),
+    ):
+        assert_almost_equal((tform + tform.inverse)(SRC), SRC)
+        assert_almost_equal((tform.inverse + tform)(SRC), SRC)
+
+
 def test_geometric_tform():
     tform = GeometricTransform()
     with pytest.raises(NotImplementedError):
