@@ -564,6 +564,10 @@ def test_union_differing_types():
 )
 def test_inverse_all_transforms(tform):
     assert isinstance(tform.inverse, type(tform))
+    try:
+        assert_almost_equal(tform.inverse.inverse.params, tform.params)
+    except AttributeError:
+        assert isinstance(tform, PiecewiseAffineTransform)
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
     # Test addition with inverse, not implemented for all
     if not isinstance(
