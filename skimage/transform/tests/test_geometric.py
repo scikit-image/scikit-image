@@ -565,6 +565,7 @@ def test_union_differing_types():
 def test_inverse(tform):
     assert isinstance(tform.inverse, type(tform))
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
+    # Test addition with inverse, not implemented for all
     if not isinstance(
         tform,
         (
