@@ -52,6 +52,8 @@ Merged Pull Requests
   (`#6755 <https://github.com/scikit-image/scikit-image/pull/6755>`_).
 - Fix copy-paste error in `footprints.diamond` test case
   (`#6756 <https://github.com/scikit-image/scikit-image/pull/6756>`_).
+- Use imageio v3 API
+  (`#6764 <https://github.com/scikit-image/scikit-image/pull/6764>`_).
 - Merge duplicate instructions for setting up build environment.
   (`#6770 <https://github.com/scikit-image/scikit-image/pull/6770>`_).
 - Prepare CI configuration for merge queue
@@ -162,6 +164,10 @@ Merged Pull Requests
   (`#6924 <https://github.com/scikit-image/scikit-image/pull/6924>`_).
 - Add 0.21 release notes
   (`#6925 <https://github.com/scikit-image/scikit-image/pull/6925>`_).
+- Simplify installation instruction document
+  (`#6927 <https://github.com/scikit-image/scikit-image/pull/6927>`_).
+- Use official meson-python release
+  (`#6928 <https://github.com/scikit-image/scikit-image/pull/6928>`_).
 
 28 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
