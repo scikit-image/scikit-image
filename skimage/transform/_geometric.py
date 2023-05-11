@@ -285,7 +285,7 @@ class FundamentalMatrixTransform(GeometricTransform):
     @property
     def inverse(self):
         """Return a transform object representing the inverse."""
-        return type(self)(matrix=self.params.T)
+        return FundamentalMatrixTransform(matrix=self.params.T)
 
     def _setup_constraint_matrix(self, src, dst):
         """Setup and solve the homogeneous epipolar constraint matrix::
@@ -639,7 +639,7 @@ class ProjectiveTransform(GeometricTransform):
     @property
     def inverse(self):
         """Return a transform object representing the inverse."""
-        return type(self)(matrix=self._inv_matrix)
+        return ProjectiveTransform(matrix=self._inv_matrix)
 
     def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -1112,7 +1112,7 @@ class PiecewiseAffineTransform(GeometricTransform):
     @property
     def inverse(self):
         """Return a transform object representing the inverse."""
-        tform = type(self)()
+        tform = PiecewiseAffineTransform()
         tform._tesselation = self._inverse_tesselation
         tform._inverse_tesselation = self._tesselation
         tform.affines = self.inverse_affines
