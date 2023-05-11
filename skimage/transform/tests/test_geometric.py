@@ -562,7 +562,7 @@ def test_union_differing_types():
         ((t := PiecewiseAffineTransform()).estimate(SRC, DST) and t),
     ],
 )
-def test_inverse(tform):
+def test_inverse_all_transforms(tform):
     assert isinstance(tform.inverse, type(tform))
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
     # Test addition with inverse, not implemented for all
