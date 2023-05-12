@@ -509,12 +509,8 @@ def test_polynomial_default_order():
 
 
 def test_polynomial_inverse():
-    # Instantiation of an inverse transform should not raise
-    inv_transform = PolynomialTransform().inverse
-    assert isinstance(inv_transform, PolynomialTransform)
-    # Applying the transform should raise
     with pytest.raises(NotImplementedError):
-        inv_transform(0)
+        PolynomialTransform().inverse(0)
 
 
 def test_union():

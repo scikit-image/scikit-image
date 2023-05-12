@@ -1436,12 +1436,6 @@ class SimilarityTransform(EuclideanTransform):
                 'Scale is only implemented for 2D and 3D.')
 
 
-class ParamsUndetermined:
-    """Signal that a transforms `params` are undetermined
-    """
-    ...
-
-
 class PolynomialTransform(GeometricTransform):
     """2D polynomial transformation.
 
@@ -1469,14 +1463,13 @@ class PolynomialTransform(GeometricTransform):
             raise NotImplementedError(
                 'Polynomial transforms are only implemented for 2D.'
             )
-        if params is not ParamsUndetermined:
-            if params is None:
-                # default to transformation which preserves original coordinates
-                params = np.array([[0, 1, 0], [0, 0, 1]])
-            else:
-                params = np.asarray(params)
-            if params.shape[0] != 2:
-                raise ValueError("invalid shape of transformation parameters")
+        if params is None:
+            # default to transformation which preserves original coordinates
+            params = np.array([[0, 1, 0], [0, 0, 1]])
+        else:
+            params = np.asarray(params)
+        if params.shape[0] != 2:
+            raise ValueError("invalid shape of transformation parameters")
         self.params = params
 
     def estimate(self, src, dst, order=2, weights=None):
@@ -1591,13 +1584,6 @@ class PolynomialTransform(GeometricTransform):
             Transformed coordinates.
 
         """
-        if self.params is ParamsUndetermined:
-            raise NotImplementedError(
-                'There is no explicit way to do the inverse polynomial '
-                'transformation. Instead, estimate the inverse transformation '
-                'parameters by exchanging source and destination coordinates,'
-                'then apply the forward transformation.'
-            )
         coords = np.asarray(coords)
         x = coords[:, 0]
         y = coords[:, 1]
@@ -1617,7 +1603,11 @@ class PolynomialTransform(GeometricTransform):
 
     @property
     def inverse(self):
-        return PolynomialTransform(params=ParamsUndetermined)
+        raise NotImplementedError(
+            'There is no explicit way to do the inverse polynomial '
+            'transformation. Instead, estimate the inverse transformation '
+            'parameters by exchanging source and destination coordinates,'
+            'then apply the forward transformation.')
 
 
 TRANSFORMS = {
