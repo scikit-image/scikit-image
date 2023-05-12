@@ -3,8 +3,6 @@
 scikit-image 0.X.0 release notes
 ================================
 
-We're happy to announce the release of scikit-image v0.X.0!
-
 scikit-image is an image processing library for the scientific Python
 ecosystem that includes algorithms for segmentation, geometric
 transformations, feature detection, registration, color space

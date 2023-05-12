@@ -192,14 +192,12 @@ highlights["Other Pull Request"] = other_pull_requests
 
 
 # Now generate the release notes
-announcement_title = f"Announcement: scikit-image {args.version}"
+announcement_title = f"scikit-image {args.version} release notes"
 print(announcement_title)
 print("=" * len(announcement_title))
 
 print(
-    f"""
-We're happy to announce the release of scikit-image v{args.version}!
-
+    """
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
@@ -221,7 +219,7 @@ for section, pull_request_dicts in highlights.items():
     print(f'{section}s\n{"*" * (len(section)+1)}')
     for pr_num, pr_info in pull_request_dicts.items():
         print(
-            f"- {pr_info['summary']}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_)."
+            f"- {pr_info['summary'].strip()}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_)."
         )
 
 contributors = {}
