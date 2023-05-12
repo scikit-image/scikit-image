@@ -122,7 +122,7 @@ def test_nmi_different_sizes():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_nmi_random(dtype):
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(123)
     random1 = rng.random((100, 100)).astype(dtype)
     random2 = rng.random((100, 100)).astype(dtype)
     nmi = normalized_mutual_information(random1, random2, bins=10)

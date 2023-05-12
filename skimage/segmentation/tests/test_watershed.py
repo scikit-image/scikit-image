@@ -394,7 +394,7 @@ class TestWatershed(unittest.TestCase):
 
     def test_watershed_input_not_modified(self):
         """Test to ensure input markers are not modified."""
-        image = np.random.default_rng().random(size=(21, 21))
+        image = np.random.default_rng(123).random(size=(21, 21))
         markers = np.zeros((21, 21), dtype=np.uint8)
         markers[[5, 5, 15, 15], [5, 15, 5, 15]] = [1, 2, 3, 4]
         original_markers = np.copy(markers)

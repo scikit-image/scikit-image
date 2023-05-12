@@ -184,7 +184,7 @@ argument.
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> im3d = rng.random((100, 1000, 1000))
     >>> from skimage import morphology
     >>> from scipy import ndimage as ndi
@@ -229,7 +229,7 @@ is the same::
     ...         arr[:, :, plane] *= scalar
     ...
     >>> import time
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> im3d = rng.random((100, 1024, 1024))
     >>> t0 = time.time(); x = in_order_multiply(im3d, 5); t1 = time.time()
     >>> print("%.2f seconds" % (t1 - t0))  # doctest: +SKIP

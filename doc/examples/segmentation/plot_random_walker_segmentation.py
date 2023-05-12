@@ -28,7 +28,7 @@ from skimage.data import binary_blobs
 from skimage.exposure import rescale_intensity
 import skimage
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 # Generate noisy synthetic data
 data = skimage.img_as_float(binary_blobs(length=128, rng=1))

@@ -33,7 +33,7 @@ from skimage.util import img_as_ubyte
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 noise_mask = np.full((128, 128), 28, dtype=np.uint8)
 noise_mask[32:-32, 32:-32] = 30

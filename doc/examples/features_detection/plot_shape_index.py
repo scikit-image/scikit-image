@@ -51,7 +51,7 @@ def create_test_image(
     """
     Generate a test image with random noise, uneven illumination and spots.
     """
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(123)
     image = rng.normal(
         loc=0.25,
         scale=0.25,

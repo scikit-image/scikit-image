@@ -66,7 +66,7 @@ plt.tight_layout()
 from skimage.filters.rank import median
 from skimage.morphology import disk, ball
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 noise = rng.random(noisy_image.shape)
 noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255

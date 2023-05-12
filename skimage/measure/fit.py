@@ -807,7 +807,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     proportion of the total samples, rather than an absolute number.
 
     >>> from skimage.transform import SimilarityTransform
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> src = 100 * rng.random((50, 2))
     >>> model0 = SimilarityTransform(scale=0.5, rotation=1,
     ...                              translation=(10, 20))

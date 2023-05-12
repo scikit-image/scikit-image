@@ -175,7 +175,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     Examples
     --------
     >>> from skimage import feature
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1

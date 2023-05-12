@@ -23,7 +23,7 @@ from scipy.signal import convolve2d as conv2
 
 from skimage import color, data, restoration
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 astro = color.rgb2gray(data.astronaut())
 

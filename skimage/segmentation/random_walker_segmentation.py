@@ -404,7 +404,7 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> a = np.zeros((10, 10)) + 0.2 * rng.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a, dtype=np.int32)

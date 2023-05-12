@@ -815,7 +815,7 @@ def warp(image, inverse_map, map_args=None, output_shape=None, order=None,
     if you want to rescale a 3-D cube, you can do:
 
     >>> cube_shape = np.array([30, 30, 30])
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> cube = rng.random(cube_shape)
 
     Setup the coordinate array, that defines the scaling:

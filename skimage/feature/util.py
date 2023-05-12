@@ -42,7 +42,7 @@ class DescriptorExtractor:
 
 def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
                  keypoints_color='k', matches_color=None, only_matches=False,
-                 alignment='horizontal'):
+                 alignment='horizontal', seed=123):
     """Plot matched features.
 
     Parameters
@@ -71,6 +71,8 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
     alignment : {'horizontal', 'vertical'}, optional
         Whether to show images side by side, ``'horizontal'``, or one above
         the other, ``'vertical'``.
+    seed :  {None, int, array_like[ints], SeedSequence, BitGenerator, Generator}, optional
+        Random seed of numpy's random number generator.
 
     """
     image1 = img_as_float(image1)
@@ -122,7 +124,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
     ax.imshow(image, cmap='gray')
     ax.axis((0, image1.shape[1] + offset[1], image1.shape[0] + offset[0], 0))
 
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed)
 
     for i in range(matches.shape[0]):
         idx1 = matches[i, 0]

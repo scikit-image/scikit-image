@@ -83,7 +83,7 @@ def expected_warnings(matching):
     Examples
     --------
     >>> import numpy as np
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> image = rng.integers(0, 2**16, size=(100, 100), dtype=np.uint16)
     >>> # rank filters are slow when bit-depth exceeds 10 bits
     >>> from skimage import filters
