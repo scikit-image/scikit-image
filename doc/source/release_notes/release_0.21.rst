@@ -168,6 +168,8 @@ Merged Pull Requests
   (`#6927 <https://github.com/scikit-image/scikit-image/pull/6927>`_).
 - Use official meson-python release
   (`#6928 <https://github.com/scikit-image/scikit-image/pull/6928>`_).
+- Bypass test failure due to "unclosed file" with pytest.warn
+  (`#6931 <https://github.com/scikit-image/scikit-image/pull/6931>`_).
 
 28 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
