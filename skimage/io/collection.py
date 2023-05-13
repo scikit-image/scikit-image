@@ -194,7 +194,6 @@ class ImageCollection:
     >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
     >>> len(image_col)
     24
-    >>> image_col.load_func.vid.close()
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
