@@ -5,8 +5,7 @@ from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
-
-import pytest
+from skimage._shared._warnings import expected_warnings
 
 
 def setup():
@@ -68,7 +67,7 @@ class TestSave(TestCase):
         with NamedTemporaryFile(suffix='.png') as f:
             fname = f.name
 
-        with pytest.warns(UserWarning, match=r'.* is a boolean image'):
+        with expected_warnings(['.* is a boolean image']):
             a = np.zeros((5, 5), bool)
             a[2, 2] = True
             imsave(fname, a)
