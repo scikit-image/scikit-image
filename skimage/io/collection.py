@@ -132,7 +132,7 @@ class ImageCollection:
     Imagine, for example, an ImageCollection that loads every third
     frame from a video file::
 
-      video_file = 'no_time_for_that_tiny.gif'
+      video_file = 'small_clip.gif'
 
       def vidread_step(f, step):
           vid = imageio.get_reader(f)
@@ -172,28 +172,21 @@ class ImageCollection:
 
     Examples
     --------
-    >>> import imageio
-    >>> import skimage.io as io
-    >>> from skimage import data_dir
-
-    >>> coll = io.ImageCollection(data_dir + '/chess*.png')
+    >>> import skimage as ski
+    >>> coll = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
     >>> len(coll)
     2
     >>> coll[0].shape
     (200, 200)
 
-    >>> image_col = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    Use a custom function to load each image
 
-    >>> class multiread:
-    ...     def __init__ (self, f):
-    ...         self.vid = imageio.get_reader(f)
-    ...     def __call__ (self, frameno):
-    ...         return self.vid.get_data(frameno)
-    ...
-    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
-    >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> frames = ski.data.protein_transport()
+    >>> image_col = ski.io.ImageCollection(
+    ...     range(frames.shape[0]), load_func=lambda i: frames[i]
+    ... )
     >>> len(image_col)
-    24
+    15
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):

@@ -4,10 +4,10 @@ import numpy as np
 import imageio
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
-from skimage.io import reset_plugins
+from skimage.io import reset_plugins, imread
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, assert_allclose, fetch
+from skimage._shared.testing import assert_equal, assert_allclose
 
 import pytest
 
@@ -16,6 +16,16 @@ try:
     has_pooch = True
 except ModuleNotFoundError:
     has_pooch = False
+
+
+@pytest.fixture(scope="session")
+def random_gif_path(tmpdir_factory):
+    """Create "random.gif" once per session and return its path."""
+    rng = np.random.default_rng(42)
+    img = rng.integers(0, 255, (24, 25, 14, 3), dtype=np.uint8)
+    tmp_path = str(tmpdir_factory.mktemp("session-data").join("random.gif"))
+    imageio.v3.imwrite(tmp_path, img)
+    return tmp_path
 
 
 def test_string_split():
@@ -104,29 +114,25 @@ class TestImageCollection():
             set_files('newfiles')
 
     @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
-    def test_custom_load_func_sequence(self):
-        filename = fetch('data/no_time_for_that_tiny.gif')
-
+    def test_custom_load_func_sequence(self, random_gif_path):
         def reader(frameno):
-            vid = imageio.get_reader(filename)
-            return vid.get_data(frameno)
+            return imread(random_gif_path, mode="RGB")[frameno, ...]
 
         ic = ImageCollection(range(24), load_func=reader)
         # the length of ic should be that of the given load_pattern sequence
         assert len(ic) == 24
-        # GIF file has frames of size 25x14 with 4 channels (RGBA)
-        assert ic[0].shape == (25, 14, 4)
+        # GIF file has frames of size 25x14 with 3 channels (RGB)
+        assert ic[0].shape == (25, 14, 3)
 
     @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
-    def test_custom_load_func_w_kwarg(self):
-        load_pattern = fetch('data/no_time_for_that_tiny.gif')
+    def test_custom_load_func_w_kwarg(self, random_gif_path):
 
         def load_fn(f, step):
-            vid = imageio.get_reader(f)
-            seq = [v for v in vid.iter_data()]
+            img = imread(f)
+            seq = [frame for frame in img]
             return seq[::step]
 
-        ic = ImageCollection(load_pattern, load_func=load_fn, step=3)
+        ic = ImageCollection(random_gif_path, load_func=load_fn, step=3)
         # Each file should map to one image (array).
         assert len(ic) == 1
         # GIF file has 24 frames, so 24 / 3 equals 8.

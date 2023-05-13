@@ -262,10 +262,10 @@ def test_all_mono():
         mono_check('pil')
 
 
-def test_multi_page_gif():
-    img = imread(fetch('data/no_time_for_that_tiny.gif'))
+def test_multi_page_gif(random_gif_path):
+    img = imread(random_gif_path)
     assert img.shape == (24, 25, 14, 3), img.shape
-    img2 = imread(fetch('data/no_time_for_that_tiny.gif'),
+    img2 = imread(random_gif_path,
                   img_num=5)
     assert img2.shape == (25, 14, 3)
     assert_allclose(img[5], img2)

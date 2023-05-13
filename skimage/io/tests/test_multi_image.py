@@ -10,11 +10,11 @@ from skimage._shared.testing import assert_equal, assert_allclose
 from pytest import fixture
 
 @fixture
-def imgs():
+def imgs(random_gif_path):
     use_plugin('pil')
 
     paths = [testing.fetch('data/multipage_rgb.tif'),
-             testing.fetch('data/no_time_for_that_tiny.gif')]
+             random_gif_path]
     imgs = [MultiImage(paths[0]),
             MultiImage(paths[0], conserve_memory=False),
             MultiImage(paths[1]),
