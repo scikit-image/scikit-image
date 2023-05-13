@@ -1,7 +1,6 @@
 import os
 
 import numpy as np
-import imageio
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
 from skimage.io import reset_plugins, imread
@@ -16,16 +15,6 @@ try:
     has_pooch = True
 except ModuleNotFoundError:
     has_pooch = False
-
-
-@pytest.fixture(scope="session")
-def random_gif_path(tmpdir_factory):
-    """Create "random.gif" once per session and return its path."""
-    rng = np.random.default_rng(42)
-    img = rng.integers(0, 255, (24, 25, 14, 3), dtype=np.uint8)
-    tmp_path = str(tmpdir_factory.mktemp("session-data").join("random.gif"))
-    imageio.v3.imwrite(tmp_path, img)
-    return tmp_path
 
 
 def test_string_split():

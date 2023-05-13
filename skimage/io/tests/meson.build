@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  'conftest.py',
   'test_collection.py',
   'test_fits.py',
   'test_histograms.py',
