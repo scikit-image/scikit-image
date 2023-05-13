@@ -68,7 +68,7 @@ class TestSave(TestCase):
         with NamedTemporaryFile(suffix='.png') as f:
             fname = f.name
 
-        with pytest.warns(UserWarning, match=r'.* is a boolean image'):
+        with pytest.warns(UserWarning, match=r'.* is a bolean image'):
             a = np.zeros((5, 5), bool)
             a[2, 2] = True
             imsave(fname, a)
