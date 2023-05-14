@@ -350,12 +350,11 @@ def _normalize_spacing(spacing, ndims):
     spacing : array
         Corrected spacing, if possible.
     """
-    if np.isscalar(spacing):
-        spacing = np.broadcast_to(spacing, shape=(ndims,))
-    else:
-        spacing = np.array(spacing)
+    spacing = np.array(spacing)
 
-    if np.array(spacing.shape) != (ndims,):
+    if spacing.shape == ():
+        spacing = np.broadcast_to(spacing, shape=(ndims,))
+    elif spacing.shape != (ndims,):
         raise ValueError(
             f"spacing isn't a scalar nor a sequence of shape {(ndims,)}, got {spacing}"
         )
