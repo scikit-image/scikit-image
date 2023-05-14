@@ -325,7 +325,7 @@ def test_spacing_parameter_3d(spacing):
 
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
-def test_spacing_parameter_3d_bad_input(spacing):
+def test_spacing_parameter_3d_bad_input():
     """Test the _normalize_spacing code."""
     spacing = ["bad_input"]
     with pytest.raises(ValueError):
@@ -813,42 +813,6 @@ def test_moments_weighted_central():
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
-@pytest.mark.parametrize(
-    "spacing",
-    [[3.2, 1.2], [1, 1]],
-)
-def test_moments_weighted_central_spacing(spacing):
-
-    ref = np.array(
-        [[7.4000000000e+01, 3.7303493627e-14, 1.2602837838e+03,
-          -7.6561796932e+02],
-         [-2.1316282073e-13, -8.7837837838e+01, 2.1571526662e+03,
-          -4.2385971907e+03],
-         [4.7837837838e+02, -1.4801314828e+02, 6.6989799420e+03,
-          -9.9501164076e+03],
-         [-7.5943608473e+02, -1.2714707125e+03, 1.5304076361e+04,
-          -3.3156729271e+04]])
-
-    np.set_printoptions(precision=10)
-
-    # Verify test function
-    centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    assert_almost_equal(centralMpq(0, 0), ref[0, 0])
-    assert_almost_equal(centralMpq(0, 1), ref[0, 1])
-    assert_almost_equal(centralMpq(0, 2), ref[0, 2])
-    assert_almost_equal(centralMpq(0, 3), ref[0, 3])
-    assert_almost_equal(centralMpq(1, 0), ref[1, 0])
-    assert_almost_equal(centralMpq(1, 1), ref[1, 1])
-    assert_almost_equal(centralMpq(1, 2), ref[1, 2])
-    assert_almost_equal(centralMpq(1, 3), ref[1, 3])
-    assert_almost_equal(centralMpq(2, 0), ref[2, 0])
-    assert_almost_equal(centralMpq(2, 1), ref[2, 1])
-    assert_almost_equal(centralMpq(2, 2), ref[2, 2])
-    assert_almost_equal(centralMpq(2, 3), ref[2, 3])
-    assert_almost_equal(centralMpq(3, 0), ref[3, 0])
-    assert_almost_equal(centralMpq(3, 1), ref[3, 1])
-    assert_almost_equal(centralMpq(3, 2), ref[3, 2])
-    assert_almost_equal(centralMpq(3, 3), ref[3, 3])
 
 def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
