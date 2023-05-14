@@ -707,8 +707,6 @@ class RegionProperties:
         else:
             return _moments.moments_normalized(mu, order=3,
                                                spacing=self._spacing)
-        return _moments.moments_normalized(self.moments_weighted_central, 3,
-                                           spacing=self._spacing)
 
     def __iter__(self):
         props = PROP_VALS

@@ -325,38 +325,6 @@ def test_spacing_parameter_3d(spacing):
 
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
-def test_spacing_parameter_3d_int():
-    """Test the _normalize_spacing code."""
-
-    spacing = 2
-    # Test centroid3d spacing
-    Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
-    cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
-    cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
-    cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
-    centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
-
-    assert_array_almost_equal(centroid, (cZ, cY, cX))
-
-def test_spacing_parameter_3d_float():
-    """Test the _normalize_spacing code."""
-
-    spacing = 2.1
-    # Test centroid3d spacing
-    Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
-    cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
-    cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
-    cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
-    centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
-
-    assert_array_almost_equal(centroid, (cZ, cY, cX))
-
-def test_spacing_parameter_3d_bad_input():
-    """Test the _normalize_spacing code."""
-    spacing = "bad_input"
-    with pytest.raises(ValueError):
-        regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
-
 @pytest.mark.parametrize(
     "spacing",
     [["bad input"], ["bad_input", 3.3, 4.4]],
@@ -374,32 +342,6 @@ def test_spacing_parameter_3d_bad_input2(spacing):
 def test_spacing_parameter_2d(spacing):
     """Test the _normalize_spacing code."""
 
-    # Test weight centroid spacing
-
-    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    cY = Mpq(0, 1) / Mpq(0, 0)
-    cX = Mpq(1, 0) / Mpq(0, 0)
-    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
-
-    assert_almost_equal(centroid, (cX, cY))
-
-def test_spacing_parameter_2d_int():
-    """Test the _normalize_spacing code."""
-
-    spacing = 2
-    # Test weight centroid spacing
-
-    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    cY = Mpq(0, 1) / Mpq(0, 0)
-    cX = Mpq(1, 0) / Mpq(0, 0)
-    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
-
-    assert_almost_equal(centroid, (cX, cY))
-
-def test_spacing_parameter_2d_float():
-    """Test the _normalize_spacing code."""
-
-    spacing = 2.1
     # Test weight centroid spacing
 
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)

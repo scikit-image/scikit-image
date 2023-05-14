@@ -358,9 +358,9 @@ def _normalize_spacing(spacing, ndims):
         raise ValueError(
             f"spacing isn't a scalar nor a sequence of shape {(ndims,)}, got {spacing}"
         )
-
-    if not all(isinstance(s, Real) for s in spacing):
+    elif not all(isinstance(s, Real) for s in spacing):
         raise TypeError(
             f"spacing isn't of float or integer type, got {spacing}"
         )
+
     return spacing
