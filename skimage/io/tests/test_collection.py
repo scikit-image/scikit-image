@@ -3,12 +3,13 @@ import os
 import numpy as np
 from skimage import data_dir
 from skimage.io.collection import ImageCollection, MultiImage, alphanumeric_key
-from skimage.io import reset_plugins, imread
+from skimage.io import reset_plugins
 
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose
 
 import pytest
+import imageio.v3 as iio
 
 
 try:
@@ -105,7 +106,7 @@ class TestImageCollection():
     @pytest.mark.skipif(not has_pooch, reason="needs pooch to download data")
     def test_custom_load_func_sequence(self, random_gif_path):
         def reader(frameno):
-            return imread(random_gif_path, mode="RGB")[frameno, ...]
+            return iio.imread(random_gif_path, index=frameno, mode="RGB")
 
         ic = ImageCollection(range(24), load_func=reader)
         # the length of ic should be that of the given load_pattern sequence
@@ -117,8 +118,7 @@ class TestImageCollection():
     def test_custom_load_func_w_kwarg(self, random_gif_path):
 
         def load_fn(f, step):
-            img = imread(f)
-            seq = [frame for frame in img]
+            seq = [frame for frame in iio.imiter(f)]
             return seq[::step]
 
         ic = ImageCollection(random_gif_path, load_func=load_fn, step=3)
