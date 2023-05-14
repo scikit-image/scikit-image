@@ -113,14 +113,14 @@ supports a wide range of other image file formats as well.
 
 .. code-block:: python
 
-    import imageio
+    import imageio.v3 as iio
     filename = '/tmp/file.mp4'
-    vid = imageio.get_reader(filename,  'ffmpeg')
 
-    for num, image in vid.iter_data():
-        print(image.mean())
+    with iio.imiter(filename, plugin='ffmpeg') as frames:
+        for frame in frames:
+            print(frame.mean())
 
-    metadata = vid.get_meta_data()
+    metadata = iio.immeta(filename, plugin='ffmpeg')
 
 OpenCV
 ^^^^^^
