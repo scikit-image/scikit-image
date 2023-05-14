@@ -299,7 +299,7 @@ def test_centroid_3d():
 
 @pytest.mark.parametrize(
     "spacing",
-    [(2.1, 2.2, 2.3), (2., 2., 2.), (2, 2, 2), 2.1, 2., 2],
+    [(2.1, 2.2, 2.3), (2., 2., 2.), (2, 2, 2), (2.1), (2.), (2)],
 )
 def test_spacing_parameter_3d(spacing):
     """Test the _normalize_spacing code."""
@@ -315,18 +315,18 @@ def test_spacing_parameter_3d(spacing):
 
 @pytest.mark.parametrize(
     "spacing",
-    ["bad input", ("bad_input", 3.3, 4.4)],
+    [("bad input"), ("bad_input", 3.3, 4.4)],
 )
 def test_spacing_parameter_3d_bad_input(spacing):
     """Test the _normalize_spacing code."""
 
     spacing = "bad input"
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
 
 @pytest.mark.parametrize(
     "spacing",
-    [(2., 2.), (2.3, 2.3), (2, 2), 2., 2.3, 2],
+    [(2., 2.), (2.3, 2.3), (2, 2), (2.), (2.3), (2)],
 )
 def test_spacing_parameter_2d(spacing):
     """Test the _normalize_spacing code."""
@@ -347,7 +347,7 @@ def test_spacing_parameter_2d(spacing):
 def test_spacing_parameter_2d_bad_input(spacing):
     """Test the _normalize_spacing code."""
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
 
 def test_area_convex():
