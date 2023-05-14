@@ -311,7 +311,7 @@ def test_centroid_3d():
 
 @pytest.mark.parametrize(
     "spacing",
-    [[2.1, 2.2, 2.3], [2., 2., 2.], [2, 2, 2]],
+    [[2.1, 2.2, 2.3], [2., 2., 2.], [2, 2, 2], 2, 2.1],
 )
 def test_spacing_parameter_3d(spacing):
     """Test the _normalize_spacing code."""
@@ -333,7 +333,7 @@ def test_spacing_parameter_3d_bad_input():
 
 @pytest.mark.parametrize(
     "spacing",
-    [["bad input"], ["bad_input", 3.3, 4.4]],
+    [["bad input"], ["bad_input", 3.3, 4.4], "bad input"],
 )
 def test_spacing_parameter_3d_bad_input2(spacing):
     """Test the _normalize_spacing code."""
@@ -343,7 +343,7 @@ def test_spacing_parameter_3d_bad_input2(spacing):
 
 @pytest.mark.parametrize(
     "spacing",
-    [[2.1, 2.2], [2., 2.], [2, 2]]
+    [[2.1, 2.2], [2., 2.], [2, 2], 2, 2.]
 )
 def test_spacing_parameter_2d(spacing):
     """Test the _normalize_spacing code."""
@@ -359,7 +359,7 @@ def test_spacing_parameter_2d(spacing):
 
 @pytest.mark.parametrize(
     "spacing",
-    [["bad input"], ["bad input", 1, 2.1]],
+    [["bad input"], ["bad input", 1, 2.1], "bad input"],
 )
 def test_spacing_parameter_2d_bad_input(spacing):
     """Test the _normalize_spacing code."""
@@ -405,7 +405,7 @@ def test_coordinates():
 
 @pytest.mark.parametrize(
     "spacing",
-    [[1, 1], [1, 0.5]],
+    [[1, 1], [1, 0.5], 2., 2],
 )
 def test_coordinates_scaled(spacing):
     sample = np.zeros((10, 10), dtype=np.int8)
@@ -900,6 +900,7 @@ def test_moments_weighted_spacing():
          [1.9778000e+04, 1.7500100e+05, 2.0810510e+06, 2.8078871e+07]]
     )
     assert_array_almost_equal(wm, ref)
+
     # Test spacing
     spacing = (3.2, 1.2)
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
