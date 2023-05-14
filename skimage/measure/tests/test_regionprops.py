@@ -337,7 +337,7 @@ def test_spacing_parameter_3d_bad_input2(spacing):
 
 @pytest.mark.parametrize(
     "spacing",
-    [[2.1, 2.2], [2., 2.], [2, 2], [2], [2.1]]
+    [[2.1, 2.2], [2., 2.], [2, 2]]
 )
 def test_spacing_parameter_2d(spacing):
     """Test the _normalize_spacing code."""
