@@ -351,6 +351,18 @@ def test_spacing_parameter_2d(spacing):
 
     assert_almost_equal(centroid, (cX, cY))
 
+def test_spacing_parameter_2d_float():
+    """Test the _normalize_spacing code."""
+
+    # Test weight centroid spacing
+    spacing = 2.1
+    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    cY = Mpq(0, 1) / Mpq(0, 0)
+    cX = Mpq(1, 0) / Mpq(0, 0)
+    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+
+    assert_almost_equal(centroid, (cX, cY))
+
 @pytest.mark.parametrize(
     "spacing",
     [["bad input"], ["bad input", 1, 2.1]],
