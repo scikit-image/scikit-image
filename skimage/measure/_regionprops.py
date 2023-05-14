@@ -319,7 +319,7 @@ class RegionProperties:
         self._spatial_axes = tuple(range(self._ndim))
         if spacing is None:
             spacing = np.full(self._ndim, 1.)
-        self._spacing = _normalize_spacing(spacing, self._ndim) 
+        self._spacing = _normalize_spacing(spacing, self._ndim)
         self._pixel_area = np.product(self._spacing)
 
         self._extra_properties = {}
