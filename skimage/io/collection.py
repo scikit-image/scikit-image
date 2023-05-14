@@ -100,17 +100,18 @@ class ImageCollection:
 
     Parameters
     ----------
-    load_pattern : str or list of str
-        Pattern string or list of strings to load. The filename path can be
-        absolute or relative.
+    load_pattern : str or sequence
+        A glob-like pattern or sequence of patterns to load files. The pattern can be
+        absolute or relative. If a sequence of objects other than strings is passed,
+        e.g. a range of numbers, each item will be passed directly to `load_func`.
     conserve_memory : bool, optional
         If True, `ImageCollection` does not keep more than one in memory at a
         specific time. Otherwise, images will be cached once they are loaded.
-
-    Other parameters
-    ----------------
-    load_func : callable
-        ``imread`` by default. See notes below.
+    load_func : callable, optional
+        Load images with a custom callable.
+        Defaults to :func:`skimage.io.imread` by default.
+    **load_func_kwargs : dict, optional
+        Passed to `load_func` as additional keyword parameters on each call.
 
     Attributes
     ----------
@@ -124,69 +125,42 @@ class ImageCollection:
     Note that files are always returned in alphanumerical order. Also note
     that slicing returns a new ImageCollection, *not* a view into the data.
 
-    ImageCollection can be modified to load images from an arbitrary
-    source by specifying a combination of `load_pattern` and
-    `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
-    ``load_func(load_pattern[5])`` to load the image.
-
-    Imagine, for example, an ImageCollection that loads every third
-    frame from a video file::
-
-      video_file = 'small_clip.gif'
-
-      def vidread_step(f, step):
-          vid = imageio.get_reader(f)
-          seq = [v for v in vid.iter_data()]
-          return seq[::step]
-
-      ic = ImageCollection(video_file, load_func=vidread_step, step=3)
-
-      ic  # is an ImageCollection object of length 1 because there is 1 file
-
-      x = ic[0]  # calls vidread_step(video_file, step=3)
-      x[5]  # is the sixth element of a list of length 8 (24 / 3)
-
-    Alternatively, if `load_func` is provided and `load_pattern` is a
-    sequence, an `ImageCollection` of corresponding length will be created,
-    and the individual images will be loaded by calling `load_func` with the
-    matching element of the `load_pattern` as its first argument. In this
-    case, the elements of the sequence do not need to be names of existing
-    files (or strings at all). For example, to create an `ImageCollection`
-    containing 500 images from a video::
-
-      class vidread_random:
-          def __init__ (self, f):
-              self.vid = imageio.get_reader(f)
-          def __call__ (self, frameno):
-              return self.vid.get_data(frameno)
-      ic = ImageCollection(range(500), load_func=vidread_random('movie.mp4'))
-
-      ic  # is an ImageCollection object of length 500
-
-    Another use of `load_func` would be to convert all images to ``uint8``::
-
-      def imread_convert(f):
-          return imread(f).astype(np.uint8)
-
-      ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
-
     Examples
     --------
     >>> import skimage as ski
-    >>> coll = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
-    >>> len(coll)
+    >>> collection = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
+    >>> len(collection)
     2
-    >>> coll[0].shape
+    >>> collection[0].shape
     (200, 200)
 
-    Use a custom function to load each image
+    If `load_func` is provided and `load_pattern` is a sequence of objects other than
+    strings, an `ImageCollection` of corresponding length will be created, and the
+    individual images will be loaded by calling `load_func` with the matching element
+    of the `load_pattern` as its first argument. In this case, the elements of the
+    sequence do not need to be names of existing files (or strings at all). For example,
+    to create an `ImageCollection` that of frames based on an increasing counter with a
+    specific width:
 
+    >>> def render_flower(petal_count, width):
+    ...     length = np.linspace(-1, 1, width)
+    ...     xx, yy = np.meshgrid(length, length)
+    ...     # Evaluate cosinus function in polar coordinate space
+    ...     phi = np.cos(np.arctan2(xx, yy) * petal_count / 2)
+    ...     r = np.cos(np.sqrt(xx**2 + yy**2))
+    ...     image = ski.util.img_as_ubyte(np.abs(phi * r))
+    ...     return image
+    ...
     >>> frames = ski.data.protein_transport()
-    >>> image_col = ski.io.ImageCollection(
-    ...     range(frames.shape[0]), load_func=lambda i: frames[i]
-    ... )
-    >>> len(image_col)
-    15
+    >>> collection = ski.io.ImageCollection(range(10), load_func=render_flower, width=5)
+    >>> len(collection)
+    10
+    >>> collection[4]
+    array([[  0,  67, 138,  67,   0],
+           [ 67,   0, 224,   0,  67],
+           [138, 224, 255, 224, 138],
+           [ 67,   0, 224,   0,  67],
+           [  0,  67, 138,  67,   0]], dtype=uint8)
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None,
                  **load_func_kwargs):
