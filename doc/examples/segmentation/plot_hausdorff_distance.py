@@ -34,7 +34,7 @@ gt_contour = ground_truth ^ erosion(ground_truth, se)
 predicted_contour = predicted ^ erosion(predicted, se)
 
 # From the "contours image":
-# Computes & display the distance & the corresponding pair of points  
+# Computes & display the distance & the corresponding pair of points
 distance = metrics.hausdorff_distance(gt_contour, predicted_contour)
 pair = metrics.hausdorff_pair(gt_contour, predicted_contour)
 
@@ -51,7 +51,7 @@ plt.title(f"HD={distance:.3f}px")
 plt.show()
 
 # From the segmentation masks directly:
-# Computes & display the distance & the corresponding pair of points  
+# Computes & display the distance & the corresponding pair of points
 distance = metrics.hausdorff_distance_mask(ground_truth, predicted)
 pair = metrics.hausdorff_pair_mask(ground_truth, predicted)
 

@@ -140,7 +140,7 @@ def hausdorff_distance(image0, image1, method="standard"):
 
 def hausdorff_distance_mask(image0, image1, method = 'standard'):
     """Calculate the Hausdorff distance between the contours of two segmentation masks.
-    
+
     Parameters
     ----------
     image0, image1 : ndarray
@@ -179,12 +179,12 @@ def hausdorff_distance_mask(image0, image1, method = 'standard'):
     >>> hausdorff_distance_mask(ground_truth, predicted)
     2.0
     """
-    
+
     if method not in ('standard', 'modified'):
         raise ValueError(f'unrecognized method {method}')
     if image0.shape != image1.shape:
         raise ValueError(f'shape of image0 {image0.shape} and image1 {image1.shape} should be equal.')
-    
+
     # Handle empty images
     if not np.any(image0):  # no nonzero elements in image0
         return 0.0 if not np.any(image1) else np.inf
@@ -238,7 +238,7 @@ def hausdorff_pair(image0, image1):
 
 
 def hausdorff_pair_mask(image0, image1):
-    """Returns pair of points that are Hausdorff's Distance apart between 
+    """Returns pair of points that are Hausdorff's Distance apart between
     the contours of two segmentation masks.
 
     The Hausdorff distance [1]_ is the maximum distance between any point on
@@ -268,7 +268,7 @@ def hausdorff_pair_mask(image0, image1):
     >>> hausdorff_pair_mask(ground_truth, predicted)
     (array([8.5, 6]), array([6.5, 6]))
     """
-    
+
     # Handle empty images
     if not np.any(image0) or not np.any(image1):
         warnings.warn("One or both of the images is empty.", stacklevel=2)
