@@ -11,12 +11,12 @@ from skimage.segmentation import slic
 
 @run_in_parallel()
 def test_color_2d():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
@@ -32,13 +32,13 @@ def test_color_2d():
 
 
 def test_multichannel_2d():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 20, 8))
     img[:10, :10, 0:2] = 1
     img[:10, 10:, 2:4] = 1
     img[10:, :10, 4:6] = 1
     img[10:, 10:, 6:8] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     img = np.clip(img, 0, 1, out=img)
     seg = slic(img, n_segments=4, enforce_connectivity=False, start_label=0)
 
@@ -52,12 +52,12 @@ def test_multichannel_2d():
 
 
 def test_gray_2d():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
+    img += 0.0033 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=4, compactness=1,
@@ -116,7 +116,7 @@ def test_slic_consistency_across_image_magnitude():
 
 
 def test_color_3d():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in img.shape[:-1]:
@@ -126,7 +126,7 @@ def test_color_3d():
     colors = list(product(*(([0, 1],) * 3)))
     for s, c in zip(slices, colors):
         img[s] = c
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=8, start_label=0)
@@ -137,7 +137,7 @@ def test_color_3d():
 
 
 def test_gray_3d():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:
@@ -147,7 +147,7 @@ def test_gray_3d():
     shades = np.arange(0, 1.000001, 1.0 / 7)
     for s, sh in zip(slices, shades):
         img[s] = sh
-    img += 0.001 * rnd.normal(size=img.shape)
+    img += 0.001 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=8, compactness=1,
@@ -159,10 +159,10 @@ def test_gray_3d():
 
 
 def test_list_sigma():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.array([[1, 1, 1, 0, 0, 0],
                     [0, 0, 0, 1, 1, 1]], float)
-    img += 0.1 * rnd.normal(size=img.shape)
+    img += 0.1 * rng.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1],
                              [0, 0, 0, 1, 1, 1]], int)
     with expected_warnings(["Input image is 2D: sigma number of "
@@ -173,14 +173,14 @@ def test_list_sigma():
 
 
 def test_spacing():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1],
                                   [0, 0, 1, 1, 1]], int)
     result_spaced = np.array([[0, 0, 0, 0, 0],
                               [1, 1, 1, 1, 1]], int)
-    img += 0.1 * rnd.normal(size=img.shape)
+    img += 0.1 * rng.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, channel_axis=None,
                           compactness=1.0, start_label=0)
     seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[500, 1],
@@ -234,12 +234,12 @@ def test_enforce_connectivity():
 
 def test_slic_zero():
     # Same as test_color_2d but with slic_zero=True
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, n_segments=4, sigma=0, slic_zero=True, start_label=0)
@@ -254,12 +254,12 @@ def test_slic_zero():
 
 
 def test_more_segments_than_pixels():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
+    img += 0.0033 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
@@ -268,14 +268,14 @@ def test_more_segments_than_pixels():
 
 
 def test_color_2d_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
                mask=msk)
@@ -296,7 +296,7 @@ def test_color_2d_mask():
 
 
 def test_multichannel_2d_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((20, 20))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 20, 8))
@@ -304,7 +304,7 @@ def test_multichannel_2d_mask():
     img[:10, 10:, 2:4] = 1
     img[10:, :10, 4:6] = 1
     img[10:, 10:, 6:8] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, n_segments=4, enforce_connectivity=False,
                mask=msk)
@@ -325,14 +325,14 @@ def test_multichannel_2d_mask():
 
 
 def test_gray_2d_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
+    img += 0.0033 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, sigma=0, n_segments=4, compactness=1,
                channel_axis=None, convert2lab=False, mask=msk)
@@ -352,12 +352,12 @@ def test_gray_2d_mask():
 
 
 def test_list_sigma_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((2, 6))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0, 0],
                     [0, 0, 0, 1, 1, 1]], float)
-    img += 0.1 * rnd.normal(size=img.shape)
+    img += 0.1 * rng.normal(size=img.shape)
     result_sigma = np.array([[0, 1, 1, 2, 2, 0],
                              [0, 1, 1, 2, 2, 0]], int)
     seg_sigma = slic(img, n_segments=2, sigma=[50, 1],
@@ -366,7 +366,7 @@ def test_list_sigma_mask():
 
 
 def test_spacing_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((2, 5))
     msk[:, 1:-1] = 1
     img = np.array([[1, 1, 1, 0, 0],
@@ -375,7 +375,7 @@ def test_spacing_mask():
                                   [0, 1, 2, 2, 0]], int)
     result_spaced = np.array([[0, 1, 1, 1, 0],
                               [0, 2, 2, 2, 0]], int)
-    img += 0.1 * rnd.normal(size=img.shape)
+    img += 0.1 * rng.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, channel_axis=None,
                           compactness=1.0, mask=msk)
     seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[50, 1],
@@ -421,14 +421,14 @@ def test_enforce_connectivity_mask():
 
 def test_slic_zero_mask():
 
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, n_segments=4, sigma=0, slic_zero=True,
                mask=msk)
@@ -449,14 +449,14 @@ def test_slic_zero_mask():
 
 
 def test_more_segments_than_pixels_mask():
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00
-    img += 0.0033 * rnd.normal(size=img.shape)
+    img += 0.0033 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, sigma=0, n_segments=500, compactness=1,
                channel_axis=None, convert2lab=False, mask=msk)
@@ -470,7 +470,7 @@ def test_color_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 22, 3))
     slices = []
     for dim_size in msk.shape:
@@ -480,7 +480,7 @@ def test_color_3d_mask():
     colors = list(product(*(([0, 1],) * 3)))
     for s, c in zip(slices, colors):
         img[s] = c
-    img += 0.01 * rnd.normal(size=img.shape)
+    img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
 
     seg = slic(img, sigma=0, n_segments=8, mask=msk)
@@ -496,7 +496,7 @@ def test_gray_3d_mask():
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
-    rnd = np.random.default_rng(0)
+    rng = np.random.default_rng(0)
     img = np.zeros((20, 21, 22))
     slices = []
     for dim_size in img.shape:
@@ -506,7 +506,7 @@ def test_gray_3d_mask():
     shades = np.linspace(0, 1, 8)
     for s, sh in zip(slices, shades):
         img[s] = sh
-    img += 0.001 * rnd.normal(size=img.shape)
+    img += 0.001 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
     seg = slic(img, sigma=0, n_segments=8, channel_axis=None,
                convert2lab=False, mask=msk)

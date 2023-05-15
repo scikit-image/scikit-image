@@ -40,7 +40,7 @@ dependencies = [
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.12,<2.28',
+    'imageio>=2.27,<2.28',
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
@@ -56,7 +56,7 @@ file = 'LICENSE.txt'
 
 [project.optional-dependencies]
 build = [
-    'meson-python>=0.13.0rc0',
+    'meson-python>=0.13',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
@@ -73,7 +73,7 @@ default = [
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.12,<2.28',
+    'imageio>=2.27,<2.28',
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
@@ -134,7 +134,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.13.0rc0',
+    'meson-python>=0.13',
     'wheel',
     'setuptools>=67',
     'packaging>=21',

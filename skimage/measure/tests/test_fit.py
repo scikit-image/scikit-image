@@ -314,7 +314,7 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5, seed=1)
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=1)
     with expected_warnings(['`random_state` is a deprecated argument']):
         ransac(data0, CircleModel, 3, 5, random_state=1)
 
@@ -341,7 +341,7 @@ def test_ransac_geometric():
 
     # estimate parameters of corrupted data
     model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                seed=rng)
+                                rng=rng)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -353,7 +353,7 @@ def test_ransac_is_data_valid():
         return data.shape[0] > 2
     with expected_warnings(["No inliers found"]):
         model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_data_valid=is_data_valid, seed=1)
+                                is_data_valid=is_data_valid, rng=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -363,7 +363,7 @@ def test_ransac_is_model_valid():
         return False
     with expected_warnings(["No inliers found"]):
         model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_model_valid=is_model_valid, seed=1)
+                                is_model_valid=is_model_valid, rng=1)
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -465,7 +465,7 @@ def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
     with expected_warnings(['No inliers found. Model not fitted']):
         model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
-                                residual_threshold=0, seed=1523427)
+                                residual_threshold=0, rng=1523427)
     assert inliers is None
     assert model is None
 
@@ -479,9 +479,9 @@ def test_ransac_non_valid_best_model():
         tilt = abs(np.arccos(np.dot(model.params[1], [0, 0, 1])))
         return tilt <= (10 / 180 * np.pi)
 
-    rnd = np.random.RandomState(1)
-    data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rnd.rand(1000, 3) - 0.5
+    rng = np.random.RandomState(1)
+    data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
     with expected_warnings(["Estimated model is not valid"]):
         ransac(data, LineModelND, min_samples=2,
-               residual_threshold=0.3, max_trials=50, seed=0,
+               residual_threshold=0.3, max_trials=50, rng=0,
                is_model_valid=is_model_valid)

@@ -55,7 +55,7 @@ def _get_decomp_test_data(function, ndim=2):
         img = np.zeros((17, ) * ndim, dtype=np.uint8)
         img[8, 8] = 1
     else:
-        img = data.binary_blobs(32, n_dim=ndim, seed=1)
+        img = data.binary_blobs(32, n_dim=ndim, rng=1)
     return img
 
 
