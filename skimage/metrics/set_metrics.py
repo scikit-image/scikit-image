@@ -266,7 +266,7 @@ def hausdorff_pair_mask(image0, image1):
     >>> ground_truth[2:9, 2:9] = True
     >>> predicted[4:7, 2:9] = True
     >>> hausdorff_pair_mask(ground_truth, predicted)
-    (array([8.5, 6]), array([6.5, 6]))
+    (array([8.5, 6.]), array([6.5, 6.]))
     """
 
     # Handle empty images
