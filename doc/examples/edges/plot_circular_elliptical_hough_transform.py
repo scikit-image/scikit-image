@@ -112,7 +112,7 @@ edges = canny(image_gray, sigma=2.0,
 # A higher `accuracy` value will lead to more ellipses being found, at the
 # cost of a lower precision on the minor axis length estimation.
 # A higher `threshold` will lead to less ellipses being found, filtering out those
-# that have less edge points on their perimeter.
+# that have fewer edge points on their perimeter.
 result = hough_ellipse(edges, accuracy=20, threshold=250,
                        min_size=100, max_size=120)
 result.sort(order='accumulator')
