@@ -332,7 +332,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              seed=None):
+                              rng=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -349,14 +349,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype='float64'
         Angles at which to compute the transform, in radians.
-    seed : {None, int, `numpy.random.Generator`, optional}
-        If `seed` is None the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
-        used.
-
-        Seed to initialize the random number generator.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
     Returns
     -------
@@ -410,7 +406,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     mask[y_idxs, x_idxs] = 1
 
     count = len(x_idxs)
-    random_state = np.random.default_rng(seed)
+    random_state = np.random.default_rng(rng)
     random_ = np.arange(count, dtype=np.intp)
     random_state.shuffle(random_)
     cdef cnp.intp_t[::1] random = random_

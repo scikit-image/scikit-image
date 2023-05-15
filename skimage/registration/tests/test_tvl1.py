@@ -37,8 +37,8 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_motion(dtype):
     # Generate synthetic data
-    rnd = np.random.default_rng(0)
-    image0 = rnd.normal(size=(256, 256))
+    rng = np.random.default_rng(0)
+    image0 = rng.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     image1 = image1.astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
@@ -54,8 +54,8 @@ def test_2d_motion(dtype):
 
 def test_3d_motion():
     # Generate synthetic data
-    rnd = np.random.default_rng(0)
-    image0 = rnd.normal(size=(100, 100, 100))
+    rng = np.random.default_rng(0)
+    image0 = rng.normal(size=(100, 100, 100))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow
     flow = optical_flow_tvl1(image0, image1, attachment=10)
@@ -64,8 +64,8 @@ def test_3d_motion():
 
 
 def test_no_motion_2d():
-    rnd = np.random.default_rng(0)
-    img = rnd.normal(size=(256, 256))
+    rng = np.random.default_rng(0)
+    img = rng.normal(size=(256, 256))
 
     flow = optical_flow_tvl1(img, img)
 
@@ -73,8 +73,8 @@ def test_no_motion_2d():
 
 
 def test_no_motion_3d():
-    rnd = np.random.default_rng(0)
-    img = rnd.normal(size=(64, 64, 64))
+    rng = np.random.default_rng(0)
+    img = rng.normal(size=(64, 64, 64))
 
     flow = optical_flow_tvl1(img, img)
 
@@ -83,8 +83,8 @@ def test_no_motion_3d():
 
 def test_optical_flow_dtype():
     # Generate synthetic data
-    rnd = np.random.default_rng(0)
-    image0 = rnd.normal(size=(256, 256))
+    rng = np.random.default_rng(0)
+    image0 = rng.normal(size=(256, 256))
     gt_flow, image1 = _sin_flow_gen(image0)
     # Estimate the flow at double precision
     flow_f64 = optical_flow_tvl1(image0, image1, attachment=5, dtype=np.float64)
@@ -103,15 +103,15 @@ def test_optical_flow_dtype():
 
 
 def test_incompatible_shapes():
-    rnd = np.random.default_rng(0)
-    I0 = rnd.normal(size=(256, 256))
-    I1 = rnd.normal(size=(128, 256))
+    rng = np.random.default_rng(0)
+    I0 = rng.normal(size=(256, 256))
+    I1 = rng.normal(size=(128, 256))
     with pytest.raises(ValueError):
         u, v = optical_flow_tvl1(I0, I1)
 
 
 def test_wrong_dtype():
-    rnd = np.random.default_rng(0)
-    img = rnd.normal(size=(256, 256))
+    rng = np.random.default_rng(0)
+    img = rng.normal(size=(256, 256))
     with pytest.raises(ValueError):
         u, v = optical_flow_tvl1(img, img, dtype=np.int64)

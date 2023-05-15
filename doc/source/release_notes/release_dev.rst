@@ -1,7 +1,7 @@
-scikit-image 0.21.0 release notes (unreleased)
-==============================================
+:orphan:
 
-We're happy to announce the release of scikit-image v0.21.0 (unreleased)!
+scikit-image 0.X.0 release notes
+================================
 
 scikit-image is an image processing library for the scientific Python
 ecosystem that includes algorithms for segmentation, geometric
