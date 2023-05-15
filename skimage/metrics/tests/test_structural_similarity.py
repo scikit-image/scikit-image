@@ -48,21 +48,21 @@ def test_structural_similarity_image():
     assert_equal(structural_similarity(X, X), 1.0)
 
 
-# Because we are forcing a random seed state, it is probably good to test
-# against a few seeds in case on seed gives a particularly bad example
+# FIXME: Because we are forcing a random seed state, it is probably good to test
+#        against a few seeds in case on seed gives a particularly bad example
 @pytest.mark.parametrize('seed', [1, 2, 3, 5, 8, 13])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_structural_similarity_grad(seed, dtype):
     N = 60
-    # NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
-    #       And when testing tests in parallel. Therefore, we choose a few
-    #       seeds that are known to work.
-    #       The likely cause of this failure is that we are setting a hard
-    #       threshold on the value of the gradient. Often the computed gradient
-    #       is only slightly larger than what was measured.
-    rnd = np.random.default_rng(seed)
-    X = rnd.random((N, N)).astype(dtype, copy=False) * 255
-    Y = rnd.random((N, N)).astype(dtype, copy=False) * 255
+    # FIXME: This test is known to randomly fail on some systems (Mac OS X 10.6)
+    #        And when testing tests in parallel. Therefore, we choose a few
+    #        seeds that are known to work.
+    #        The likely cause of this failure is that we are setting a hard
+    #        threshold on the value of the gradient. Often the computed gradient
+    #        is only slightly larger than what was measured.
+    rng = np.random.default_rng(seed)
+    X = rng.random((N, N)).astype(dtype, copy=False) * 255
+    Y = rng.random((N, N)).astype(dtype, copy=False) * 255
 
     f = structural_similarity(X, Y, data_range=255)
     g = structural_similarity(X, Y, data_range=255, gradient=True)

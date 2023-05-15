@@ -350,9 +350,9 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
+@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
                  removed_version='0.23')
-def medial_axis(image, mask=None, return_distance=False, *, seed=None):
+def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
     Parameters
@@ -364,12 +364,13 @@ def medial_axis(image, mask=None, return_distance=False, *, seed=None):
         value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used, seeded with
-        `seed`.
-        If `seed` is already a ``Generator`` instance, then that instance is
-        used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
+
+        The PRNG determines the order in which pixels are processed for
+        tiebreaking.
 
         .. versionadded:: 0.19
 
@@ -488,7 +489,7 @@ def medial_axis(image, mask=None, return_distance=False, *, seed=None):
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    generator = np.random.default_rng(seed)
+    generator = np.random.default_rng(rng)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],

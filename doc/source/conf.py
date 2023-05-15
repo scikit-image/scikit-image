@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from datetime import date
 import inspect
 import os
 import sys
@@ -23,7 +24,7 @@ filterwarnings(
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "skimage"
-copyright = "2013, the scikit-image team"
+copyright = f"2013-{date.today().year}, the scikit-image team"
 
 with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
@@ -160,6 +161,7 @@ html_theme_options = {
         },
     ],
     "navbar_end": ["version-switcher", "navbar-icon-links"],
+    "show_prev_next": False,
     "switcher": {
         "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
         "version_match": "dev" if "dev" in version else version,
@@ -225,26 +227,13 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 # -- intersphinx --------------------------------------------------------------
-_python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
-_python_doc_base = "https://docs.python.org/" + _python_version_str
 intersphinx_mapping = {
-    "python": (_python_doc_base, None),
-    "numpy": (
-        "https://numpy.org/doc/stable/",
-        (None, "./_intersphinx/numpy-objects.inv"),
-    ),
-    "scipy": (
-        "https://docs.scipy.org/doc/scipy/",
-        (None, "./_intersphinx/scipy-objects.inv"),
-    ),
-    "sklearn": (
-        "https://scikit-learn.org/stable/",
-        (None, "./_intersphinx/sklearn-objects.inv"),
-    ),
-    "matplotlib": (
-        "https://matplotlib.org/stable/",
-        (None, "./_intersphinx/matplotlib-objects.inv"),
-    ),
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "neps": ("https://numpy.org/neps/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
 }
 
 # -- Source code links -------------------------------------------------------

@@ -661,12 +661,12 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
+@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
                  removed_version='0.23')
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, seed=None, initial_inliers=None):
+           stop_probability=1, rng=None, initial_inliers=None):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -739,12 +739,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, e is the current fraction of inliers w.r.t. the
         total number of samples, and m is the min_samples value.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used, seeded with
-        `seed`.
-        If `seed` is already a ``Generator`` instance, then that instance is
-        used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
 
@@ -838,7 +836,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     validate_model = is_model_valid is not None
     validate_data = is_data_valid is not None
 
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(rng)
 
     # in case data is not pair of input and output, male it like it
     if not isinstance(data, (tuple, list)):

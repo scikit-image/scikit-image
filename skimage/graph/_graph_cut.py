@@ -69,12 +69,12 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
+@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
                  removed_version='0.23')
 def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
                    max_edge=1.0,
                    *,
-                   seed=None,
+                   rng=None,
                    ):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
@@ -101,14 +101,12 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance, then that
-        instance is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
-        The `seed` is used for the starting point
+        The `rng` is used to determine the starting point
         of `scipy.sparse.linalg.eigsh`.
 
     Returns
@@ -131,7 +129,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(rng)
     if not in_place:
         rag = rag.copy()
 

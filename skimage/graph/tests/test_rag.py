@@ -213,7 +213,7 @@ def test_reproducibility():
     results = [None] * 4
     for i in range(len(results)):
         results[i] = graph.cut_normalized(
-            labels1, g, in_place=False, thresh=1e-3, seed=1234)
+            labels1, g, in_place=False, thresh=1e-3, rng=1234)
     with expected_warnings(['`random_state` is a deprecated argument']):
         graph.cut_normalized(
             labels1, g, in_place=False, thresh=1e-3, random_state=1234)
