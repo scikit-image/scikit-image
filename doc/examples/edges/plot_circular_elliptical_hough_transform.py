@@ -83,7 +83,7 @@ plt.show()
 #
 # The algorithm takes two different points belonging to the ellipse. It
 # assumes that it is the major axis. A loop on all the other points determines
-# potential minor axis lengths of candidate ellipses. Ellipses are added to the
+# the minor axis length for candidate ellipses. The latter are included in the
 # results if enough valid candidates have similar minor axis lengths.
 # 
 # A full description of the algorithm can be found in reference [1]_.
