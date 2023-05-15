@@ -86,9 +86,10 @@ def test_hausdorff_region_single(points_a, points_b):
     coords_a[points_a] = True
     coords_b[points_b] = True
 
-    assert_almost_equal(hausdorff_distance(coords_a, coords_b), 0.0)
+    d = distance.cdist([points_a], [points_b])
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b), d)
     assert_almost_equal(
-        hausdorff_distance(coords_a, coords_b, method="modified"), 0.0
+        hausdorff_distance(coords_a, coords_b, method="modified"), d
     )
 
 

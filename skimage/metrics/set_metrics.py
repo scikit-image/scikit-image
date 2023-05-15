@@ -138,7 +138,7 @@ def hausdorff_distance(image0, image1, method="standard"):
     return _hausdorff_distance_set(a_points, b_points, method)
 
 
-def hausdorff_distance_mask(image0, image1, method = 'standard'):
+def hausdorff_distance_mask(image0, image1, method='standard'):
     """Calculate the Hausdorff distance between the contours of two segmentation masks.
 
     Parameters
