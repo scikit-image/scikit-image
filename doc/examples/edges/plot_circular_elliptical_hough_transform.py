@@ -108,7 +108,7 @@ edges = canny(image_gray, sigma=2.0,
               low_threshold=0.55, high_threshold=0.8)
 
 # Perform a Hough Transform
-# The accuracy corresponds to the bin size of the minor axis lengths histogram.
+# The accuracy corresponds to the bin size of the histogram for minor axis lengths.
 # A higher `accuracy` value will lead to more ellipses being found, at the
 # cost of a lower precision on the minor axis length estimation.
 # A higher `threshold` will lead to less ellipses being found, filtering out those
