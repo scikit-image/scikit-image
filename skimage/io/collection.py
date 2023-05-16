@@ -139,8 +139,7 @@ class ImageCollection:
     individual images will be loaded by calling `load_func` with the matching element
     of the `load_pattern` as its first argument. In this case, the elements of the
     sequence do not need to be names of existing files (or strings at all). For example,
-    to create an `ImageCollection` of frames based on an increasing counter with a
-    specific width:
+    to create an `ImageCollection` of frames based on an iterable of integers:
 
     >>> def render_flower(petal_count, width):
     ...     length = np.linspace(-1, 1, width)
