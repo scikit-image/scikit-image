@@ -338,7 +338,7 @@ def test_spacing_parameter_3d(spacing):
 )
 def test_spacing_parameter_complex_input(spacing):
     """Test the _normalize_spacing code."""
-    with pytest.raises(TypeError, match="spacing isn't of float or integer type"):
+    with pytest.raises(TypeError, match="Element of spacing isn't float or integer type, got"):
         regionprops(SAMPLE, spacing=spacing)[0].centroid
 
 @pytest.mark.parametrize(
