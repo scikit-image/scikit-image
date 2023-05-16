@@ -166,9 +166,6 @@ new_registry_urls = {
 skimage.data._registry.registry_urls = new_registry_urls
     """.splitlines()
         )
-    # always import matplotlib and pandas to avoid Pyodide limitation with
-    # imports inside functions. TODO not sure this is needed for scikit-image ...
-    code_lines.extend(["import matplotlib", "import pandas"])
 
     if code_lines:
         code_lines = ["# JupyterLite-specific code"] + code_lines
