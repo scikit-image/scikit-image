@@ -9,9 +9,21 @@ from spin import util
 
 @click.command()
 @click.option(
-    "--clean", is_flag=True, help="Clean previously built docs before building"
+    "--clean", is_flag=True,
+    default=False,
+    help="Clean previously built docs before building"
 )
-def docs(clean=False):
+@click.option(
+    "--raise-on-warning/--no-raise-on-warning",
+    default=True,
+    help="Convert warnings to errors"
+)
+@click.option(
+    "--install-deps/--no-install-deps",
+    default=True,
+    help="Install dependencies before building"
+)
+def docs(clean, raise_on_warning, install_deps):
     """📖 Build documentation
     """
     if clean:
@@ -25,9 +37,12 @@ def docs(clean=False):
         print("No built scikit-image found; run `spin build` first.")
         sys.exit(1)
 
-    util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
+    if install_deps:
+        util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
-    os.environ['SPHINXOPTS'] = '-W'
+    if raise_on_warning:
+        os.environ['SPHINXOPTS'] = '-W'
+
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
     util.run(['make', '-C', 'doc', 'html'], replace=True)
 
