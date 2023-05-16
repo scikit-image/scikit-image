@@ -336,7 +336,7 @@ def test_spacing_parameter_3d(spacing):
     "spacing",
     [(1, 1j), 1+0j],
 )
-def test_spacing_parameter_3d_bad_input2(spacing):
+def test_spacing_parameter_complex_input(spacing):
     """Test the _normalize_spacing code."""
     with pytest.raises(TypeError, match="spacing isn't of float or integer type"):
         regionprops(SAMPLE, spacing=spacing)[0].centroid
