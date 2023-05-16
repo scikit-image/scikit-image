@@ -21,9 +21,10 @@ from skimage._shared.utils import _supported_float_type
 # Test integer histograms
 # =======================
 
-def test_wrong_source_range():
-    im = np.array([-1, 100], dtype=np.int8)
-    with pytest.raises(ValueError):
+@pytest.mark.parametrize('dtype', [np.int8, np.float32])
+def test_wrong_source_range(dtype):
+    im = np.array([-1, 100], dtype=dtype)
+    with pytest.raises(ValueError, match="Incorrect value for `source_range` argument"):
         frequencies, bin_centers = exposure.histogram(im,
                                                       source_range='foobar')
 
@@ -594,6 +595,12 @@ def norm_brightness_err(img1, img2):
     return nbe
 
 
+def test_adapthist_incorrect_kernel_size():
+    img = np.ones((8, 8), dtype=float)
+    with pytest.raises(ValueError, match="Incorrect value of `kernel_size`"):
+        exposure.equalize_adapthist(img, (3, 3, 3))
+
+
 # Test Gamma Correction
 # =====================
 
@@ -887,3 +894,14 @@ def test_dask_histogram():
     expected_hist = [1, 2, 1]
     assert np.allclose(expected_bins, output_bins)
     assert np.allclose(expected_hist, output_hist)
+    assert isinstance(output_hist, da.Array)
+
+
+def test_dask_rescale():
+    pytest.importorskip('dask', reason="dask python library is not installed")
+    import dask.array as da
+    image = da.array([51, 102, 153], dtype=np.uint8)
+    out = exposure.rescale_intensity(image)
+    assert out.dtype == np.uint8
+    assert_array_almost_equal(out, [0, 127, 255])
+    assert isinstance(out, da.Array)

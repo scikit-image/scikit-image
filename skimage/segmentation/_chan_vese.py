@@ -4,23 +4,23 @@ from scipy.ndimage import distance_transform_edt as distance
 from .._shared.utils import _supported_float_type
 
 
-def _cv_curvature(phi):
-    """Returns the 'curvature' of a level set 'phi'.
-    """
-    P = np.pad(phi, 1, mode='edge')
-    fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
-    fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
-    fyy = P[2:, 1:-1] + P[:-2, 1:-1] - 2*phi
-    fxx = P[1:-1, 2:] + P[1:-1, :-2] - 2*phi
-    fxy = .25 * (P[2:, 2:] + P[:-2, :-2] - P[:-2, 2:] - P[2:, :-2])
-    grad2 = fx**2 + fy**2
-    K = ((fxx*fy**2 - 2*fxy*fx*fy + fyy*fx**2) /
-         (grad2*np.sqrt(grad2) + 1e-8))
-    return K
-
-
 def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):
     """Returns the variation of level set 'phi' based on algorithm parameters.
+
+    This corresponds to equation (22) of the paper by Pascal Getreuer,
+    which computes the next iteration of the level set based on a current
+    level set.
+
+    A full explanation regarding all the terms is beyond the scope of the
+    present description, but there is one difference of particular import.
+    In the original algorithm, convergence is accelerated, and required
+    memory is reduced, by using a single array. This array, therefore, is a
+    combination of non-updated and updated values. If this were to be
+    implemented in python, this would require a double loop, where the
+    benefits of having fewer iterations would be outweided by massively
+    increasing the time required to perform each individual iteration. A
+    similar approach is used by Rami Cohen, and it is from there that the
+    C1-4 notation is taken.
     """
     eta = 1e-16
     P = np.pad(phi, 1, mode='edge')
@@ -95,12 +95,26 @@ def _cv_edge_length_term(phi, mu):
     """Returns the 'energy' contribution due to the length of the
     edge between regions at each point, multiplied by a factor 'mu'.
     """
-    toret = _cv_curvature(phi)
-    return mu * toret
+    P = np.pad(phi, 1, mode='edge')
+    fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
+    fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
+    return mu * _cv_delta(phi) * np.sqrt(fx ** 2 + fy ** 2)
 
 
 def _cv_energy(image, phi, mu, lambda1, lambda2):
     """Returns the total 'energy' of the current level set function.
+
+    This corresponds to equation (7) of the paper by Pascal Getreuer,
+    which is the weighted sum of the following:
+    (A) the length of the contour produced by the zero values of the
+    level set,
+    (B) the area of the "foreground" (area of the image where the
+    level set is positive),
+    (C) the variance of the image inside the foreground,
+    (D) the variance of the image outside of the foreground
+
+    Each value is computed for each pixel, and then summed. The weight
+    of (B) is set to 0 in this implementation.
     """
     H = _cv_heavyside(phi)
     avgenergy = _cv_difference_from_average_term(image, H, lambda1, lambda2)

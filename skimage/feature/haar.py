@@ -218,13 +218,13 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         return haar_feature
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
+@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
                  removed_version='0.23')
 def draw_haar_like_feature(image, r, c, width, height,
                            feature_coord,
                            color_positive_block=(1., 0., 0.),
                            color_negative_block=(0., 1., 0.),
-                           alpha=0.5, max_n_features=None, seed=None):
+                           alpha=0.5, max_n_features=None, rng=None):
     """Visualization of Haar-like features.
 
     Parameters
@@ -258,13 +258,12 @@ def draw_haar_like_feature(image, r, c, width, height,
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used, seeded with
-        `seed`.
-        If `seed` is already a ``Generator`` instance, then that instance is
-        used.
-        The random seed is used when generating a set of features smaller than
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
+
+        The rng is used when generating a set of features smaller than
         the total number of available features.
 
     Returns
@@ -290,7 +289,7 @@ def draw_haar_like_feature(image, r, c, width, height,
             [0. , 0.5, 0. ]]])
 
     """
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(rng)
     color_positive_block = np.asarray(color_positive_block, dtype=np.float64)
     color_negative_block = np.asarray(color_negative_block, dtype=np.float64)
 

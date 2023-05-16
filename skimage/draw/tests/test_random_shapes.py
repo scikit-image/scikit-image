@@ -45,7 +45,7 @@ def test_generates_correct_bounding_boxes_for_rectangles():
         (128, 128),
         max_shapes=1,
         shape='rectangle',
-        seed=42)
+        rng=42)
 
     assert len(labels) == 1
     label, bbox = labels[0]
@@ -75,7 +75,7 @@ def test_generates_correct_bounding_boxes_for_triangles():
         (128, 128),
         max_shapes=1,
         shape='triangle',
-        seed=42)
+        rng=42)
     assert len(labels) == 1
     label, bbox = labels[0]
     assert label == 'triangle', label
@@ -97,7 +97,7 @@ def test_generates_correct_bounding_boxes_for_circles():
         min_size=20,
         max_size=20,
         shape='circle',
-        seed=42)
+        rng=42)
     assert len(labels) == 1
     label, bbox = labels[0]
     assert label == 'circle', label
@@ -119,7 +119,7 @@ def test_generates_correct_bounding_boxes_for_ellipses():
         min_size=20,
         max_size=20,
         shape='ellipse',
-        seed=42)
+        rng=42)
     assert len(labels) == 1
     label, bbox = labels[0]
     assert label == 'ellipse', label
@@ -190,13 +190,13 @@ def test_random_shapes_is_reproducible_with_seed():
     random_seed = 42
     labels = []
     for _ in range(5):
-        _, label = random_shapes((128, 128), max_shapes=5, seed=random_seed)
+        _, label = random_shapes((128, 128), max_shapes=5, rng=random_seed)
         labels.append(label)
     assert all(other == labels[0] for other in labels[1:])
 
 
 def test_generates_white_image_when_intensity_range_255():
     image, labels = random_shapes((128, 128), max_shapes=3,
-                                  intensity_range=((255, 255),), seed=42)
+                                  intensity_range=((255, 255),), rng=42)
     assert len(labels) > 0
     assert (image == 255).all()
