@@ -212,8 +212,8 @@ sphinx_gallery_conf = {
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
     "jupyterlite": {"notebook_modification_function": notebook_modification_function},
-    # TODO temporary to speed the build by not running the example
-    "plot_gallery": False
+    # Can be disabled during development to accelerate build
+    "plot_gallery": True
 }
 
 
