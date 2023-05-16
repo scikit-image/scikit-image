@@ -343,6 +343,14 @@ def test_spacing_parameter_complex_input(spacing):
 
 
 @pytest.mark.parametrize(
+    "spacing", ([1], [[1, 1]], (1, 1, 1))
+)
+def test_spacing_mismtaching_shape(spacing):
+    with pytest.raises(ValueError, match="spacing isn't a scalar nor a sequence"):
+        regionprops(SAMPLE, spacing=spacing)[0].centroid
+
+
+@pytest.mark.parametrize(
     "spacing",
     [[2.1, 2.2], [2., 2.], [2, 2]]
 )
