@@ -107,7 +107,7 @@ def write_random_js(app, exception):
         if not (build_dir / "_images" / image_name).exists():
             continue
         image_url = f'{url_root}_images/{image_name}'
-        tutorial_url = f'{url_root}_{example.relative_to(build_dir)}'
+        tutorial_url = f'{url_root}{example.relative_to(build_dir)}'
         image_urls.append(image_url)
         tutorial_urls.append(tutorial_url)
 
