@@ -161,7 +161,7 @@ cdef void get_shape_info(inarr_shape, shape_info *res) except *:
 
 
 cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
-                                    DTYPE_t rindex, DTYPE_t idxdiff) nogil:
+                                    DTYPE_t rindex, DTYPE_t idxdiff) noexcept nogil:
     if data_p[rindex] == data_p[rindex + idxdiff]:
         join_trees(forest_p, rindex, rindex + idxdiff)
 
@@ -226,7 +226,7 @@ cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n) nogil:
     return root
 
 
-cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root) nogil:
+cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root) noexcept nogil:
     """
     Set all nodes on a path to point to new_root.
     Given the example above, given n=9, root=6, it would "reconnect" the tree.
@@ -243,7 +243,7 @@ cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root) nogil:
     forest[n] = root
 
 
-cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m) nogil:
+cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m) noexcept nogil:
     """Join two trees containing nodes n and m.
     If we imagine that in the example tree, the root 1 is not known, we
     rather have two disjoint trees with roots 2 and 6.
@@ -434,7 +434,7 @@ cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
 
 
 cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg) nogil:
+                 bginfo *bg) noexcept nogil:
     """
     Settle all background pixels now and don't bother with them later.
     Since this only requires one linear sweep through the array, it is fast
@@ -478,7 +478,7 @@ cdef void scanBG(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z) nogil:
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t y, DTYPE_t z) noexcept nogil:
     """
     Perform forward scan on a 1D object, usually the first row of an image
     """
@@ -500,7 +500,7 @@ cdef void scan1D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z) nogil:
+                 bginfo *bg, DTYPE_t connectivity, DTYPE_t z) noexcept nogil:
     """
     Perform forward scan on a 2D array.
     """
@@ -553,7 +553,7 @@ cdef void scan2D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
 
 
 cdef void scan3D(DTYPE_t *data_p, DTYPE_t *forest_p, shape_info *shapeinfo,
-                 bginfo *bg, DTYPE_t connectivity) nogil:
+                 bginfo *bg, DTYPE_t connectivity) noexcept nogil:
     """
     Perform forward scan on a 3D array.
 

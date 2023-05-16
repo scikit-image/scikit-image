@@ -22,15 +22,15 @@ import numpy as np
 cimport numpy as np
 from .fused_numerics cimport np_real_numeric, np_floats
 
-cdef inline Py_ssize_t round(np_floats r) nogil:
+cdef inline Py_ssize_t round(np_floats r) noexcept nogil:
     return <Py_ssize_t>(
         (r + <np_floats>0.5) if (r > <np_floats>0.0) else (r - <np_floats>0.5)
     )
 
-cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) nogil:
+cdef inline Py_ssize_t fmax(Py_ssize_t one, Py_ssize_t two) noexcept nogil:
     return one if one > two else two
 
-cdef inline Py_ssize_t fmin(Py_ssize_t one, Py_ssize_t two) nogil:
+cdef inline Py_ssize_t fmin(Py_ssize_t one, Py_ssize_t two) noexcept nogil:
     return one if one < two else two
 
 # Redefine np_real_numeric to force cross type compilation
@@ -42,7 +42,7 @@ ctypedef fused np_real_numeric_out:
 cdef inline void nearest_neighbor_interpolation(
         np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
         np_floats r, np_floats c, char mode, np_real_numeric cval,
-        np_real_numeric_out* out) nogil:
+        np_real_numeric_out* out) noexcept nogil:
     """Nearest neighbor interpolation at a given position in the image.
 
     Parameters
@@ -72,7 +72,7 @@ cdef inline void nearest_neighbor_interpolation(
 cdef inline void bilinear_interpolation(
         np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
         np_floats r, np_floats c, char mode, np_real_numeric cval,
-        np_real_numeric_out* out) nogil:
+        np_real_numeric_out* out) noexcept nogil:
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -117,7 +117,7 @@ cdef inline void bilinear_interpolation(
     out[0] = <np_real_numeric_out> ((1 - dr) * top + dr * bottom)
 
 cdef inline np_floats quadratic_interpolation(np_floats x,
-                                              np_real_numeric[3] f) nogil:
+                                              np_real_numeric[3] f) noexcept nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Quadratic interpolation.
@@ -143,7 +143,7 @@ cdef inline np_floats quadratic_interpolation(np_floats x,
 cdef inline void biquadratic_interpolation(
         np_real_numeric* image, Py_ssize_t rows, Py_ssize_t cols,
         np_floats r, np_floats c, char mode, np_real_numeric cval,
-        np_real_numeric_out* out) nogil:
+        np_real_numeric_out* out) noexcept nogil:
     """WARNING: Do not use, not implemented correctly.
 
     Biquadratic interpolation at a given position in the image.
@@ -189,7 +189,7 @@ cdef inline void biquadratic_interpolation(
     out[0] = <np_real_numeric_out>quadratic_interpolation(xr, fr)
 
 
-cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) nogil:
+cdef inline np_floats cubic_interpolation(np_floats x, np_real_numeric[4] f) noexcept nogil:
     """Cubic interpolation.
 
     Parameters
@@ -225,7 +225,7 @@ cdef inline void bicubic_interpolation(np_real_numeric* image,
                                        Py_ssize_t rows, Py_ssize_t cols,
                                        np_floats r, np_floats c, char mode,
                                        np_real_numeric cval,
-                                       np_real_numeric_out* out) nogil:
+                                       np_real_numeric_out* out) noexcept nogil:
     """Bicubic interpolation at a given position in the image.
 
     Interpolation using Catmull-Rom splines, based on the bicubic convolution
@@ -282,7 +282,7 @@ cdef inline void bicubic_interpolation(np_real_numeric* image,
 cdef inline np_real_numeric get_pixel2d(np_real_numeric* image,
                                         Py_ssize_t rows, Py_ssize_t cols,
                                         long r, long c, char mode,
-                                        np_real_numeric cval) nogil:
+                                        np_real_numeric cval) noexcept nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -318,7 +318,7 @@ cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
                                         Py_ssize_t rows, Py_ssize_t cols,
                                         Py_ssize_t dims, Py_ssize_t r,
                                         Py_ssize_t c, Py_ssize_t d, char mode,
-                                        np_real_numeric cval) nogil:
+                                        np_real_numeric cval) noexcept nogil:
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -350,7 +350,7 @@ cdef inline np_real_numeric get_pixel3d(np_real_numeric* image,
                      coord_map(dims, d, mode)]
 
 
-cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) nogil:
+cdef inline Py_ssize_t coord_map(Py_ssize_t dim, long coord, char mode) noexcept nogil:
     """Wrap a coordinate, according to a given mode.
 
     Parameters

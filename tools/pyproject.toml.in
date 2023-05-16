@@ -52,7 +52,7 @@ requires = [
     "wheel",
     "setuptools>=67",
     "packaging>=21",
-    "Cython>=0.29.26",
+    "Cython>=0.29.32",
     "pythran",
     "lazy_loader>=0.2",
 
