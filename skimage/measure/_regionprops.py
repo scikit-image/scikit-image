@@ -1103,7 +1103,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **area_bbox** : float
         Area of the bounding box i.e. number of pixels of bounding box scaled by pixel-area.
     **area_convex** : float
-        Are of the convex hull image, which is the smallest convex
+        Area of the convex hull image, which is the smallest convex
         polygon that encloses the region.
     **area_filled** : float
         Area of the region with all the holes filled in.
