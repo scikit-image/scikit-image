@@ -332,41 +332,41 @@ def perimeter_crofton(image, directions=4):
 def _normalize_spacing(spacing, ndims):
     """Normalize spacing parameter.
 
-    The `spacing` parameter should be a sequence of numbers
-    that is the same length as the number of dimensions
-    in the image.
-    If `spacing` is a scalar (single number),
-    then assume spacing is the same in all dimensions.
+    The `spacing` parameter should be a sequence of numbers matching
+    the image dimensions. If `spacing` is a scalar, assume equal
+    spacing along all dimensions.
 
     Parameters
     ---------
     spacing : Any
         User-provided `spacing` keyword.
-    ndims: int
-        Number of dimensions in the image.
+    ndims : int
+        Number of image dimensions.
 
     Returns
     -------
     spacing : array
-        Corrected spacing, if possible.
+        Corrected spacing.
+
+    Raises
+    ------
+    ValueError
+        If `spacing` is invalid.
+
     """
     spacing = np.array(spacing)
     if spacing.shape == ():
         spacing = np.broadcast_to(spacing, shape=(ndims,))
     elif spacing.shape != (ndims,):
         raise ValueError(
-            f"spacing isn't a scalar nor a sequence of shape {(ndims,)}, got {spacing}"
+            f"spacing isn't a scalar nor a sequence of shape {(ndims,)}, got {spacing}."
         )
     if not all(isinstance(s, Real) for s in spacing):
         raise TypeError(
-            f"spacing isn't of float or integer type, got {spacing}"
+            f"Element of spacing isn't float or integer type, got {spacing}."
         )
-    if any(np.isnan(s) for s in spacing):
+    if not all(np.isfinite(spacing)):
         raise ValueError(
-            "Got NaN in spacing parameter. Spacing must be a real number."
-        )
-    if any(np.isinf(np.abs(s)) for s in spacing):
-        raise ValueError(
-            "Got infinity in spacing parameter. Spacing must be a real number."
+            f"Invalid spacing parameter. All elements must be finite, got {spacing}."
         )
     return spacing
