@@ -109,9 +109,9 @@ class ImageCollection:
         specific time. Otherwise, images will be cached once they are loaded.
     load_func : callable, optional
         Load images with a custom callable.
-        Defaults to :func:`skimage.io.imread` by default.
+        Defaults to :func:`skimage.io.imread`.
     **load_func_kwargs : dict, optional
-        Passed to `load_func` as additional keyword parameters on each call.
+        Passed to `load_func` as additional keyword arguments on each call.
 
     Attributes
     ----------
@@ -139,13 +139,13 @@ class ImageCollection:
     individual images will be loaded by calling `load_func` with the matching element
     of the `load_pattern` as its first argument. In this case, the elements of the
     sequence do not need to be names of existing files (or strings at all). For example,
-    to create an `ImageCollection` that of frames based on an increasing counter with a
+    to create an `ImageCollection` of frames based on an increasing counter with a
     specific width:
 
     >>> def render_flower(petal_count, width):
     ...     length = np.linspace(-1, 1, width)
     ...     xx, yy = np.meshgrid(length, length)
-    ...     # Evaluate cosinus function in polar coordinate space
+    ...     # Evaluate cosine function in polar coordinate space
     ...     phi = np.cos(np.arctan2(xx, yy) * petal_count / 2)
     ...     r = np.cos(np.sqrt(xx**2 + yy**2))
     ...     image = ski.util.img_as_ubyte(np.abs(phi * r))
