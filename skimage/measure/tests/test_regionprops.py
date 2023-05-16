@@ -768,6 +768,28 @@ def test_orientation_continuity():
     assert_almost_equal(orientations[1], -0.7853981633974483)
     assert_almost_equal(orientations[2], -0.8563466906995303)
 
+    # Test spacing
+    spacing = (3.2, 1.2)
+    wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                      spacing=spacing)[0].moments_weighted_central
+    centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    assert_almost_equal(wmu[0, 0], centralMpq(0, 0))
+    assert_almost_equal(wmu[0, 1], centralMpq(0, 1))
+    assert_almost_equal(wmu[0, 2], centralMpq(0, 2))
+    assert_almost_equal(wmu[0, 3], centralMpq(0, 3))
+    assert_almost_equal(wmu[1, 0], centralMpq(1, 0))
+    assert_almost_equal(wmu[1, 1], centralMpq(1, 1))
+    assert_almost_equal(wmu[1, 2], centralMpq(1, 2))
+    assert_almost_equal(wmu[1, 3], centralMpq(1, 3))
+    assert_almost_equal(wmu[2, 0], centralMpq(2, 0))
+    assert_almost_equal(wmu[2, 1], centralMpq(2, 1))
+    assert_almost_equal(wmu[2, 2], centralMpq(2, 2))
+    assert_almost_equal(wmu[2, 3], centralMpq(2, 3))
+    assert_almost_equal(wmu[3, 0], centralMpq(3, 0))
+    assert_almost_equal(wmu[3, 1], centralMpq(3, 1))
+    assert_almost_equal(wmu[3, 2], centralMpq(3, 2))
+    assert_almost_equal(wmu[3, 3], centralMpq(3, 3))
+
 
 def test_perimeter():
     per = regionprops(SAMPLE)[0].perimeter
