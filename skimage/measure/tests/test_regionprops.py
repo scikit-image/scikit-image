@@ -843,6 +843,25 @@ def test_moments_weighted_central():
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
+     # Verify test function
+    centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=(1, 1))
+    assert_almost_equal(centralMpq(0, 0), ref[0, 0])
+    assert_almost_equal(centralMpq(0, 1), ref[0, 1])
+    assert_almost_equal(centralMpq(0, 2), ref[0, 2])
+    assert_almost_equal(centralMpq(0, 3), ref[0, 3])
+    assert_almost_equal(centralMpq(1, 0), ref[1, 0])
+    assert_almost_equal(centralMpq(1, 1), ref[1, 1])
+    assert_almost_equal(centralMpq(1, 2), ref[1, 2])
+    assert_almost_equal(centralMpq(1, 3), ref[1, 3])
+    assert_almost_equal(centralMpq(2, 0), ref[2, 0])
+    assert_almost_equal(centralMpq(2, 1), ref[2, 1])
+    assert_almost_equal(centralMpq(2, 2), ref[2, 2])
+    assert_almost_equal(centralMpq(2, 3), ref[2, 3])
+    assert_almost_equal(centralMpq(3, 0), ref[3, 0])
+    assert_almost_equal(centralMpq(3, 1), ref[3, 1])
+    assert_almost_equal(centralMpq(3, 2), ref[3, 2])
+    assert_almost_equal(centralMpq(3, 3), ref[3, 3])
+
 
 def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE

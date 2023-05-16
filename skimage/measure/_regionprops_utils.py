@@ -361,4 +361,12 @@ def _normalize_spacing(spacing, ndims):
         raise TypeError(
             f"spacing isn't of float or integer type, got {spacing}"
         )
+    if any(s == np.nan for s in spacing):
+        raise ValueError(
+            "Got NaN in spacing parameter. Spacing must be a real number."
+        )
+    if any(np.abs(s) == np.inf for s in spacing):
+        raise ValueError(
+            "Got infinity in spacing parameter. Spacing must be a real number."
+        )
     return spacing
