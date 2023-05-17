@@ -284,7 +284,11 @@ class FundamentalMatrixTransform(GeometricTransform):
 
     @property
     def inverse(self):
-        """Return a transform object representing the inverse."""
+        """Return a transform object representing the inverse.
+
+        See Hartley & Zisserman, Ch. 8: Epipolar Geometry and the Fundamental
+        Matrix, for an explanation of why F.T gives the inverse.
+        """
         return type(self)(matrix=self.params.T)
 
     def _setup_constraint_matrix(self, src, dst):

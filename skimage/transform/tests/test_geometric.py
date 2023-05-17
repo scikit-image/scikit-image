@@ -354,6 +354,24 @@ def test_fundamental_matrix_inverse():
                         [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
+def test_fundamental_matrix_inverse2():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    tform = estimate_transform('fundamental', src, dst)
+
+    # calculate x' F x for each coordinate; should be close to zero
+    p = np.abs(np.sum(np.column_stack((dst, np.ones(len(dst)))) * tform(src), axis=1))
+    assert np.all(p < 0.01)
+
+
 def test_essential_matrix_init():
     tform = EssentialMatrixTransform(rotation=np.eye(3),
                                      translation=np.array([0, 0, 1]))
@@ -753,7 +771,6 @@ def test_projective_str():
     # compatibility with different numpy versions.
     want = want.replace('0\\.', ' *0\\.')
     want = want.replace('1\\.', ' *1\\.')
-    print(want)
     assert re.match(want, str(tform))
 
 
