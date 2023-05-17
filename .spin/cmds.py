@@ -14,17 +14,18 @@ from spin import util
     help="Clean previously built docs before building"
 )
 @click.option(
-    "--raise-on-warning/--no-raise-on-warning",
-    default=True,
-    help="Convert warnings to errors"
-)
-@click.option(
     "--install-deps/--no-install-deps",
     default=True,
     help="Install dependencies before building"
 )
-def docs(clean, raise_on_warning, install_deps):
+def docs(clean, install_deps):
     """📖 Build documentation
+
+    By default, SPHINXOPTS="-W", raising errors on warnings.
+    To build without raising on warnings:
+
+      SPHINXOPTS="" spin docs
+
     """
     if clean:
         doc_dir = "./doc/build"
@@ -40,8 +41,7 @@ def docs(clean, raise_on_warning, install_deps):
     if install_deps:
         util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
-    if raise_on_warning:
-        os.environ['SPHINXOPTS'] = '-W'
+    os.environ['SPHINXOPTS'] = os.environ.get('SPHINXOPTS', "-W")
 
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
     util.run(['make', '-C', 'doc', 'html'], replace=True)
