@@ -354,7 +354,26 @@ def test_fundamental_matrix_inverse():
                         [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
 
 
-def test_fundamental_matrix_inverse2():
+def test_fundamental_matrix_inverse_estimation():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    # Inverse of (src -> dst) transform should be equivalent to
+    # (dst -> src) transformation
+    tform = estimate_transform('fundamental', src, dst)
+    tform_inv = estimate_transform('fundamental', dst, src)
+
+    np.testing.assert_array_almost_equal(tform.inverse.params, tform_inv.params)
+
+
+def test_fundamental_matrix_epipolar_projection():
     src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
                     0.473240, 0.142522, 0.964910,  0.598376,
                     0.102388, 0.140092, 15.994343, 9.622164,
