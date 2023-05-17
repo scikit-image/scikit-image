@@ -94,11 +94,13 @@ def hausdorff_distance(image0, image1, method="standard"):
         The method to use for calculating the Hausdorff distance.
         ``standard`` is the standard Hausdorff distance, while ``modified``
         is the modified Hausdorff distance.
+
     Returns
     -------
     distance : float
         The Hausdorff distance between coordinates of nonzero pixels in
         ``image0`` and ``image1``, using the Euclidean distance.
+
     Notes
     -----
     The Hausdorff distance [1]_ is the maximum distance between any point on
@@ -107,6 +109,7 @@ def hausdorff_distance(image0, image1, method="standard"):
     than the directed Hausdorff Distance (HD) in the following work by
     Dubuisson et al. [2]_. The function calculates forward and backward
     mean distances and returns the largest of the two.
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Hausdorff_distance
@@ -114,6 +117,7 @@ def hausdorff_distance(image0, image1, method="standard"):
        matching. In ICPR94, pages A:566-568, Jerusalem, Israel, 1994.
        :DOI:`10.1109/ICPR.1994.576361`
        http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.1.8155
+
     Examples
     --------
     >>> points_a = (3, 0)
@@ -150,11 +154,13 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
         The method to use for calculating the Hausdorff distance.
         ``standard`` is the standard Hausdorff distance, while ``modified``
         is the modified Hausdorff distance.
+
     Returns
     -------
     distance : float
         The Hausdorff distance between coordinates of the segmentation mask contours in
         ``image0`` and ``image1``, using the Euclidean distance.
+
     Notes
     -----
     The Hausdorff distance [1]_ is the maximum distance between any point on the
@@ -164,6 +170,7 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
     than the directed Hausdorff Distance (HD) in the following work by
     Dubuisson et al. [2]_. The function calculates forward and backward
     mean distances and returns the largest of the two.
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Hausdorff_distance
@@ -171,6 +178,7 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
        matching. In ICPR94, pages A:566-568, Jerusalem, Israel, 1994.
        :DOI:`10.1109/ICPR.1994.576361`
        http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.1.8155
+
     Examples
     --------
     >>> ground_truth = np.zeros((10, 10), dtype=bool)
