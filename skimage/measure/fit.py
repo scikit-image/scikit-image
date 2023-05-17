@@ -407,12 +407,12 @@ class EllipseModel(BaseModel):
     --------
 
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
-    ...                                params=(10, 15, 4, 8, np.deg2rad(30)))
+    ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
     >>> ellipse = EllipseModel()
     >>> ellipse.estimate(xy)
     True
     >>> np.round(ellipse.params, 2)
-    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
+    array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
