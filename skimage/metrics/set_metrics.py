@@ -80,6 +80,7 @@ def _hausdorff_pair_set(a_points, b_points):
 
 def hausdorff_distance(image0, image1, method="standard"):
     """Calculate the Hausdorff distance between nonzero elements of given images.
+
     To use as a segmentation metric, the method should receive as input images
     containing the contours of the objects as nonzero elements. To use with
     segmentation masks as inputs, see the method ``hausdorff_distance_mask``.
