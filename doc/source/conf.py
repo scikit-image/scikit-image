@@ -89,14 +89,7 @@ v = parse(release)
 if v.release is None:
     raise ValueError(f"Ill-formed version: {version!r}. Version should follow PEP440")
 
-if v.is_devrelease:
-    binder_branch = "main"
-else:
-    major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
-
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
-
 pio.renderers.default = "sphinx_gallery_png"
 
 
@@ -199,16 +192,6 @@ sphinx_gallery_conf = {
             "../examples/developers",
         ]
     ),
-    "binder": {
-        # Required keys
-        "org": "scikit-image",
-        "repo": "scikit-image",
-        "branch": binder_branch,  # Can be any branch, tag, or commit hash
-        "binderhub_url": "https://mybinder.org",  # Any URL of a binderhub.
-        "dependencies": ["../../.binder/requirements.txt", "../../.binder/runtime.txt"],
-        # Optional keys
-        "use_jupyter_lab": False,
-    },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
     "jupyterlite": {"notebook_modification_function": notebook_modification_function},
