@@ -21,7 +21,6 @@ Deprecations
 - Unify pseudo-random seeding interface
   (`#6922 <https://github.com/scikit-image/scikit-image/pull/6922>`_).
 
-
 Merged Pull Requests
 --------------------
 - Implement Fisher vectors in scikit-image
@@ -146,14 +145,20 @@ Merged Pull Requests
   (`#6895 <https://github.com/scikit-image/scikit-image/pull/6895>`_).
 - Raise error when source_range is not correct
   (`#6898 <https://github.com/scikit-image/scikit-image/pull/6898>`_).
+- apply spacing rescaling when computing centroid_weighted
+  (`#6900 <https://github.com/scikit-image/scikit-image/pull/6900>`_).
 - Remove old doc cruft
   (`#6901 <https://github.com/scikit-image/scikit-image/pull/6901>`_).
 - Corrected energy calculation in chan vese
   (`#6902 <https://github.com/scikit-image/scikit-image/pull/6902>`_).
+- Check if `spacing` parameter is tuple in `regionprops`
+  (`#6907 <https://github.com/scikit-image/scikit-image/pull/6907>`_).
 - Temporarily pin imageio to <2.28
   (`#6909 <https://github.com/scikit-image/scikit-image/pull/6909>`_).
 - Enable use of `rescale_intensity` with dask array
   (`#6910 <https://github.com/scikit-image/scikit-image/pull/6910>`_).
+- ENH Add JupyterLite button to gallery examples
+  (`#6911 <https://github.com/scikit-image/scikit-image/pull/6911>`_).
 - Add missing backticks to DOI role in docstring of `area_opening`
   (`#6913 <https://github.com/scikit-image/scikit-image/pull/6913>`_).
 - Add PR links to release notes generating script
@@ -164,14 +169,32 @@ Merged Pull Requests
   (`#6924 <https://github.com/scikit-image/scikit-image/pull/6924>`_).
 - Add 0.21 release notes
   (`#6925 <https://github.com/scikit-image/scikit-image/pull/6925>`_).
+- Change geometric transform inverse to property
+  (`#6926 <https://github.com/scikit-image/scikit-image/pull/6926>`_).
 - Simplify installation instruction document
   (`#6927 <https://github.com/scikit-image/scikit-image/pull/6927>`_).
 - Use official meson-python release
   (`#6928 <https://github.com/scikit-image/scikit-image/pull/6928>`_).
-- Bypass test failure due to "unclosed file" with pytest.warn
+- Use pytest.warn instead of custom context manager
   (`#6931 <https://github.com/scikit-image/scikit-image/pull/6931>`_).
+- Follow-up to move to pydata-sphinx-theme
+  (`#6933 <https://github.com/scikit-image/scikit-image/pull/6933>`_).
+- Fix inclusion of `random.js` in HTML output
+  (`#6935 <https://github.com/scikit-image/scikit-image/pull/6935>`_).
+- Mark functions as `noexcept` to support Cython 3
+  (`#6936 <https://github.com/scikit-image/scikit-image/pull/6936>`_).
+- Fix URL of random gallery links
+  (`#6937 <https://github.com/scikit-image/scikit-image/pull/6937>`_).
+- Skip unstable test in `ransac`'s docstring
+  (`#6938 <https://github.com/scikit-image/scikit-image/pull/6938>`_).
+- Respect SPHINXOPTS and add --install-deps flags to `spin docs`
+  (`#6940 <https://github.com/scikit-image/scikit-image/pull/6940>`_).
+- Use context manager to ensure urlopen buffer is closed
+  (`#6942 <https://github.com/scikit-image/scikit-image/pull/6942>`_).
+- Stabilize EllipseModel fitting parameters
+  (`#6943 <https://github.com/scikit-image/scikit-image/pull/6943>`_).
 
-28 authors added to this release [alphabetical by first name or login]
+32 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
 - Adam J. Stewart
 - Adeyemi Biola
@@ -182,6 +205,7 @@ Merged Pull Requests
 - Daniel Angelov
 - DavidTorpey (DavidTorpey)
 - Dipkumar Patel
+- Enrico Tagliavini
 - Eric Prestat
 - GGoussar (GGoussar)
 - Gregory Lee
@@ -193,17 +217,19 @@ Merged Pull Requests
 - Juan Nunez-Iglesias
 - Kevin MEETOOA
 - Lars Grüter
+- Loïc Estève
 - mahamtariq58 (mahamtariq58)
 - Marianne Corvellec
 - Mark Harfouche
 - Matthias Bussonnier
+- Matus Valo
 - Michael Görner
 - Ramyashri Padmanabhakumar
 - scott-vsi (scott-vsi)
 - Stefan van der Walt
+- Tony Reina
 
-
-19 reviewers added to this release [alphabetical by first name or login]
+23 reviewers added to this release [alphabetical by first name or login]
 ------------------------------------------------------------------------
 - Adeyemi Biola
 - aeisenbarth
@@ -211,6 +237,7 @@ Merged Pull Requests
 - Carlos Horn
 - DavidTorpey
 - Dipkumar Patel
+- Enrico Tagliavini
 - Gregory Lee
 - Henry Pinkard
 - i-aki-y
@@ -222,4 +249,7 @@ Merged Pull Requests
 - Mark Harfouche
 - Ramyashri Padmanabhakumar
 - Riadh Fezzani
+- Sebastian Berg
+- Sebastian Wallkötter
 - Stefan van der Walt
+- Tony Reina
