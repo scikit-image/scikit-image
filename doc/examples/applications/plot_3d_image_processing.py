@@ -335,3 +335,9 @@ fig['layout'].pop('updatemenus')
 plotly.io.show(fig)
 
 plt.show()
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupterLite, due to a limitation
+#   when downloading large datasets.
