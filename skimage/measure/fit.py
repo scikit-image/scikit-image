@@ -407,12 +407,12 @@ class EllipseModel(BaseModel):
     --------
 
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
-    ...                                params=(10, 15, 4, 8, np.deg2rad(30)))
+    ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
     >>> ellipse = EllipseModel()
     >>> ellipse.estimate(xy)
     True
     >>> np.round(ellipse.params, 2)
-    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
+    array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -527,10 +527,21 @@ class EllipseModel(BaseModel):
         if a > c:
             phi += 0.5 * np.pi
 
+
+        # stabilize parameters:
+        # sometimes small fluctuations in data can cause
+        # height and width to swap
+        if width < height:
+            width, height = height, width
+            phi += np.pi / 2
+
+        phi %= np.pi
+
         # revert normalization and set params
         params = np.nan_to_num([x0, y0, width, height, phi]).real
         params[:4] *= scale
         params[:2] += origin
+
         self.params = tuple(float(p) for p in params)
 
         return True
