@@ -103,6 +103,8 @@ docs = [
     'scikit-learn>=0.24.0',
     'sphinx_design>=0.3',
     'pydata-sphinx-theme>=0.13',
+    'jupyterlite-sphinx',
+    'jupyterlite-pyodide-kernel',
 ]
 optional = [
     'SimpleITK',
