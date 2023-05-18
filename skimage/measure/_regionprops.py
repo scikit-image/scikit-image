@@ -632,8 +632,8 @@ class RegionProperties:
     @property
     def centroid_weighted(self):
         ctr = self.centroid_weighted_local
-        return tuple(idx + slc.start
-                     for idx, slc in zip(ctr, self.slice))
+        return tuple(idx + slc.start * spc
+                     for idx, slc, spc in zip(ctr, self.slice, self._spacing))
 
     @property
     def centroid_weighted_local(self):
