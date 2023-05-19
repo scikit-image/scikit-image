@@ -65,5 +65,5 @@ plt.subplots_adjust(wspace=-0.3, hspace=0.1)
 # %%
 # .. warning::
 #
-#   This example does not run in JupterLite, due to a limitation
+#   This example does not run in JupyterLite, due to a limitation
 #   when downloading large datasets.
