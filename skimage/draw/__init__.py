@@ -1,3 +1,11 @@
+"""Utilities for generating coordinates of different shapes and curves.
+
+Use the tools in this module to generate coordinates of basic geometric shapes
+curves such as ellipses or bezier curves. Additional tools allow the creation
+of masks from polygons or setting the color of manipulation.
+
+...
+"""
 from .draw import (ellipse, set_color, polygon_perimeter,
                    line, line_aa, polygon, ellipse_perimeter,
                    circle_perimeter, circle_perimeter_aa,
