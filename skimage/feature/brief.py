@@ -47,7 +47,7 @@ class BRIEF(DescriptorExtractor):
         For matching across images, the same `rng` should be used to construct
         descriptors. To facilitate this:
 
-        (a) `rng` defauls to 1
+        (a) `rng` defaults to 1
         (b) Subsequent calls of the ``extract`` method will use the same rng/seed.
     sigma : float, optional
         Standard deviation of the Gaussian low-pass filter applied to the image
@@ -134,10 +134,18 @@ class BRIEF(DescriptorExtractor):
         self.mode = mode
         self.sigma = sigma
 
-        if rng is None:
-            self.seed = np.random.SeedSequence()
+        if isinstance(rng, np.random.Generator):
+            # Spawn an independent RNG from parent RNG provided by the user.
+            # This is necessary so that we can safely deepcopy the RNG.
+            # See https://github.com/scikit-learn/scikit-learn/issues/16988#issuecomment-1518037853
+            bg = rng._bit_generator
+            ss = bg._seed_seq
+            child_ss, = ss.spawn(1)
+            self.rng = np.random.Generator(type(bg)(child_ss))
+        elif rng is None:
+            self.rng = np.random.default_rng(np.random.SeedSequence())
         else:
-            self.seed = rng
+            self.rng = np.random.default_rng(rng)
 
         self.descriptors = None
         self.mask = None
@@ -155,7 +163,8 @@ class BRIEF(DescriptorExtractor):
         """
         check_nD(image, 2)
 
-        rng = np.random.default_rng(copy.deepcopy(self.seed))
+        # Copy RNG so we can repeatedly call extract with the same random values
+        rng = copy.deepcopy(self.rng)
 
         image = _prepare_grayscale_input_2D(image)
 
