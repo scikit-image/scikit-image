@@ -18,7 +18,13 @@ from spin import util
     default=True,
     help="Install dependencies before building"
 )
-def docs(clean, install_deps):
+@click.option(
+    '--build/--no-build',
+    default=True,
+    help="Build skimage before generating docs"
+)
+@click.pass_context
+def docs(ctx, clean, install_deps, build):
     """📖 Build documentation
 
     By default, SPHINXOPTS="-W", raising errors on warnings.
@@ -33,8 +39,15 @@ def docs(clean, install_deps):
             print(f"Removing `{doc_dir}`")
             shutil.rmtree(doc_dir)
 
-    site_path = meson._get_site_packages()
-    if site_path is None:
+    if build:
+        click.secho(
+            "Invoking `build` prior to running tests:", bold=True, fg="bright_green"
+        )
+        ctx.invoke(meson.build)
+
+    try:
+        site_path = meson._get_site_packages()
+    except FileNotFoundError:
         print("No built scikit-image found; run `spin build` first.")
         sys.exit(1)
 
