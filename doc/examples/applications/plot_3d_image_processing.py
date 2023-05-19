@@ -45,7 +45,6 @@ information was reported by the microscope used to image the cells.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
-from scipy import ndimage as ndi
 
 import plotly
 import plotly.express as px
@@ -220,7 +219,7 @@ def explore_slices(data, cmap="gray"):
     return display_slice
 
 
-explore_slices(data);
+explore_slices(data)
 
 #####################################################################
 # Adjust exposure
@@ -281,7 +280,7 @@ display(equalized_data)
 # As before, if we have a Jupyter kernel running, we can explore the above
 # slices interactively.
 
-explore_slices(equalized_data);
+explore_slices(equalized_data)
 
 #####################################################################
 # Let us now plot the image histogram before and after histogram equalization.
@@ -336,3 +335,9 @@ fig['layout'].pop('updatemenus')
 plotly.io.show(fig)
 
 plt.show()
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupyterLite, due to a limitation
+#   when downloading large datasets.

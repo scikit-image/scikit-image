@@ -1,11 +1,38 @@
 import numpy as np
 import pytest
-import scipy
-from numpy.testing import assert_, assert_equal
+from numpy.testing import assert_, assert_equal, assert_array_almost_equal
 
 from skimage._shared.utils import _supported_float_type
-from skimage.data import camera
-from skimage.filters.lpi_filter import LPIFilter2D, filter_inverse, wiener
+from skimage.data import camera, coins
+from skimage.filters import (
+    LPIFilter2D, filter_inverse, filter_forward, wiener, gaussian
+)
+
+
+def test_filter_forward():
+    def filt_func(r, c, sigma=2):
+        return (1 / (2 * np.pi * sigma**2)) *  np.exp(-(r**2 + c**2) / (2 * sigma ** 2))
+
+    gaussian_args = {
+        'sigma': 2,
+        'preserve_range': True,
+        'mode': 'constant',
+        'truncate': 20  # LPI filtering is more precise than the truncated
+                        # Gaussian, so don't truncate at the default of 4 sigma
+    }
+
+    # Odd image size
+    image = coins()[:303, :383]
+    filtered = filter_forward(image, filt_func)
+    filtered_gaussian = gaussian(image, **gaussian_args)
+    assert_array_almost_equal(filtered, filtered_gaussian)
+
+    # Even image size
+    image = coins()
+    filtered = filter_forward(image, filt_func)
+    filtered_gaussian = gaussian(image, **gaussian_args)
+    assert_array_almost_equal(filtered, filtered_gaussian)
+
 
 
 class TestLPIFilter2D:
@@ -13,7 +40,7 @@ class TestLPIFilter2D:
     img = camera()[:50, :50]
 
     def filt_func(self, r, c):
-        return np.exp(-np.hypot(r, c) / 1)
+        return np.exp(-(r**2 + c**2) / 1)
 
     def setup_method(self):
         self.f = LPIFilter2D(self.filt_func)

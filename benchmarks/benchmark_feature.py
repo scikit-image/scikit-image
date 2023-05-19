@@ -1,7 +1,6 @@
 # See "Writing benchmarks" in the asv docs for more information.
 # https://asv.readthedocs.io/en/latest/writing_benchmarks.html
 import numpy as np
-from scipy import ndimage as ndi
 from skimage import color, data, feature, util
 
 
@@ -17,16 +16,16 @@ class FeatureSuite:
                 )
 
     def time_canny(self):
-        result = feature.canny(self.image)
+        feature.canny(self.image)
 
     def time_glcm(self):
         pi = np.pi
-        result = feature.greycomatrix(self.image_ubyte, distances=[1, 2],
-                                      angles=[0, pi/4, pi/2, 3*pi/4])
+        feature.greycomatrix(self.image_ubyte, distances=[1, 2],
+                             angles=[0, pi/4, pi/2, 3*pi/4])
 
     def time_brief(self):
         extractor = feature.BRIEF()
         extractor.extract(self.image, self.keypoints)
 
     def time_hessian_matrix_det(self):
-        result = feature.hessian_matrix_det(self.image, 4)
+        feature.hessian_matrix_det(self.image, 4)

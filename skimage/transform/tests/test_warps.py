@@ -4,7 +4,7 @@ from numpy.testing import (assert_allclose, assert_array_almost_equal,
                            assert_array_equal)
 from scipy.ndimage import map_coordinates
 
-from skimage._shared.testing import expected_warnings, test_parallel
+from skimage._shared.testing import expected_warnings, run_in_parallel
 from skimage._shared.utils import _supported_float_type
 from skimage.color.colorconv import rgb2gray
 from skimage.data import checkerboard, astronaut
@@ -61,7 +61,7 @@ def test_warp_callable():
     assert_array_almost_equal(outx, refx)
 
 
-@test_parallel()
+@run_in_parallel()
 def test_warp_matrix():
     x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
@@ -446,10 +446,12 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     x = np.ones((5, 5), dtype=dtype)
     if dtype == np.uint8:
         x *= 255
+    else:
+        x[0, 0] = np.NaN
     resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
                      anti_aliasing=anti_aliasing)
 
-    assert resized.max() == expected_max
+    assert np.nanmax(resized) == expected_max
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -518,6 +520,20 @@ def test_downsize(dtype):
     assert scaled[1, 1] == 1
     assert scaled[2:, :].sum() == 0
     assert scaled[:, 2:].sum() == 0
+
+    x = np.zeros((10, 10), dtype=dtype)
+    x[1:3, 1:3] = 1
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=False, mode='constant')
+    expected_dtype = np.float32 if dtype == np.float16 else dtype
+    assert scaled.dtype == expected_dtype
+    assert scaled.shape == (5, 5)
+    assert scaled[0, 0] == 1
+    assert scaled[1:, :].sum() == 0
+    assert scaled[:, 1:].sum() == 0
+
+    x = np.eye(10, dtype=dtype)
+    scaled = resize(x, (5, 5), order=0, anti_aliasing=False, mode='constant')
+    np.testing.assert_array_equal(scaled, np.eye(5))
 
 
 def test_downsize_anti_aliasing():

@@ -21,12 +21,6 @@ foreach pyx_file: pyx_files
   )
 endforeach
 
-if cc.has_argument('-Wno-unused-but-set-variable')
-  Wno_unused_but_set = ['-Wno-unused-but-set-variable']
-else
-  Wno_unused_but_set = []
-endif
-
 _brief_pythran = custom_target('_brief_pythran',
   output: ['brief_cy.cpp'],
   input: 'brief_pythran.py',
@@ -35,12 +29,7 @@ _brief_pythran = custom_target('_brief_pythran',
 
 py3.extension_module('brief_cy',
   [_brief_pythran],
-  cpp_args: [
-    '-Wno-unused-function', '-Wno-unused-variable',
-    '-Wno-deprecated-declarations',
-    '-Wno-cpp', '-Wno-int-in-bool-context',
-    Wno_unused_but_set
-  ] + cpp_args_pythran,
+  cpp_args: cpp_args_pythran,
   include_directories: [incdir_pythran, incdir_numpy],
   dependencies: [py3_dep],
   install: true,
@@ -55,12 +44,7 @@ _hessian_det_appx_pythran = custom_target('_hessian_det_appx_pythran',
 
 py3.extension_module('_hessian_det_appx',
   [_hessian_det_appx_pythran],
-  cpp_args: [
-    '-Wno-unused-function', '-Wno-unused-variable',
-    '-Wno-deprecated-declarations',
-    '-Wno-cpp', '-Wno-int-in-bool-context',
-    Wno_unused_but_set
-  ] + cpp_args_pythran,
+  cpp_args: cpp_args_pythran,
   include_directories: [incdir_pythran, incdir_numpy],
   dependencies: [py3_dep],
   install: true,
@@ -78,6 +62,7 @@ python_sources = [
   'brief.py',
   'censure.py',
   'corner.py',
+  'fisher_vector.py',
   'haar.py',
   'match.py',
   'orb.py',

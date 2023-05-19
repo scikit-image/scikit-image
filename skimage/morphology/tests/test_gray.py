@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
-from skimage.morphology import gray, footprints, binary
+from skimage.morphology import gray, footprints
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -333,14 +333,14 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols,
                  "black_tophat"],
 )
 @pytest.mark.parametrize("radius", (2, 3))
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
+@pytest.mark.parametrize("decomposition", ['sequence'])
 def test_diamond_decomposition(cam_image, function, radius, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.square(radius, decomposition=None)
-    footprint = footprints.square(radius, decomposition=decomposition)
+    footprint_ndarray = footprints.diamond(radius, decomposition=None)
+    footprint = footprints.diamond(radius, decomposition=decomposition)
     func = getattr(gray, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)

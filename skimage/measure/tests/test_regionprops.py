@@ -5,11 +5,10 @@ import pytest
 import scipy.ndimage as ndi
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_almost_equal, assert_array_equal,
-                           assert_equal, assert_raises)
+                           assert_equal)
 
 from skimage import data, draw, transform
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 from skimage.measure._regionprops import (COL_DTYPES, OBJECT_COLUMNS, PROPS,
                                           _inertia_eigvals_to_axes_lengths_3D,
                                           _parse_docs, _props_to_dict,
@@ -34,6 +33,9 @@ SAMPLE = np.array(
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 INTENSITY_FLOAT_SAMPLE = INTENSITY_SAMPLE.copy().astype(np.float64) / 10.0
+INTENSITY_FLOAT_SAMPLE_MULTICHANNEL = (
+        INTENSITY_FLOAT_SAMPLE[..., np.newaxis] * [1, 2, 3]
+        )
 
 SAMPLE_MULTIPLE = np.eye(10, dtype=np.int32)
 SAMPLE_MULTIPLE[3:5, 7:8] = 2
@@ -150,7 +152,17 @@ def test_feret_diameter_max():
     assert np.abs(feret_diameter_max - 16 * np.sqrt(2)) < 1
     # Due to marching-squares with a level of .5 the diagonal goes from (0, 0.5) to (16, 15.5).
     assert np.abs(feret_diameter_max - np.sqrt(16 ** 2 + (16 - 1) ** 2)) < 1e-6
+
+
+def test_feret_diameter_max_spacing():
+    # comparator result is based on SAMPLE from manually-inspected computations
+    comparator_result = 18
+    test_result = regionprops(SAMPLE)[0].feret_diameter_max
+    assert np.abs(test_result - comparator_result) < 1
     spacing = (2, 1)
+    # square, test that maximum Feret diameter is sqrt(2) * square side
+    img = np.zeros((20, 20), dtype=np.uint8)
+    img[2:-2, 2:-2] = 1
     feret_diameter_max = regionprops(img, spacing=spacing)[0].feret_diameter_max
     # For anisotropic spacing the shift is applied to the smaller spacing.
     assert np.abs(feret_diameter_max - np.sqrt(
@@ -184,17 +196,15 @@ def test_feret_diameter_max_3d():
         (spacing[2] * (3 - 1)) ** 2)) > 1e-6
 
 
-def test_area():
-    area = regionprops(SAMPLE)[0].area
-    assert area == np.sum(SAMPLE)
-    spacing = (1, 2)
-    area = regionprops(SAMPLE, spacing=spacing)[0].area
-    assert area == np.sum(SAMPLE * np.prod(spacing))
-    area = regionprops(SAMPLE_3D)[0].area
-    assert area == np.sum(SAMPLE_3D)
-    spacing = (2, 1, 3)
-    area = regionprops(SAMPLE_3D, spacing=spacing)[0].area
-    assert area == np.sum(SAMPLE_3D * np.prod(spacing))
+@pytest.mark.parametrize(
+    "sample,spacing",
+    [(SAMPLE, None), (SAMPLE, 1), (SAMPLE, (1, 1)), (SAMPLE, (1, 2)),
+     (SAMPLE_3D, None), (SAMPLE_3D, 1), (SAMPLE_3D, (2, 1, 3))],
+)
+def test_area(sample, spacing):
+    area = regionprops(sample, spacing=spacing)[0].area
+    desired = np.sum(sample * (np.prod(spacing) if spacing else 1))
+    assert area == desired
 
 
 def test_bbox():
@@ -222,7 +232,10 @@ def test_area_bbox():
     bbox_area = regionprops(padded)[0].area_bbox
     assert_array_almost_equal(bbox_area, SAMPLE.size)
 
+
+def test_area_bbox_spacing():
     spacing = (0.5, 3)
+    padded = np.pad(SAMPLE, 5, mode='constant')
     bbox_area = regionprops(padded, spacing=spacing)[0].area_bbox
     assert_array_almost_equal(bbox_area, SAMPLE.size * np.prod(spacing))
 
@@ -249,6 +262,8 @@ def test_moments_central():
     assert_almost_equal(centralMpq(1, 2), mu[1, 2])
     assert_almost_equal(centralMpq(0, 3), mu[0, 3])
 
+
+def test_moments_central_spacing():
     # Test spacing against verified central moment test function
     spacing = (1.8, 0.8)
     centralMpq = get_central_moment_function(SAMPLE, spacing=spacing)
@@ -275,6 +290,8 @@ def test_centroid():
 
     assert_array_almost_equal((cY, cX), centroid)
 
+
+def test_centroid_spacing():
     spacing = (1.8, 0.8)
     # Moment
     Mpq = get_moment_function(SAMPLE, spacing=spacing)
@@ -295,10 +312,18 @@ def test_centroid_3d():
     cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
     cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
+
     assert_array_almost_equal((cZ, cY, cX), centroid)
 
-    # Test spacing
-    spacing = (2, 1, 0.8)
+
+@pytest.mark.parametrize(
+    "spacing",
+    [[2.1, 2.2, 2.3], [2., 2., 2.], [2, 2, 2]],
+)
+def test_spacing_parameter_3d(spacing):
+    """Test the _normalize_spacing code."""
+
+    # Test centroid3d spacing
     Mpqr = get_moment3D_function(SAMPLE_3D, spacing=spacing)
     cZ = Mpqr(1, 0, 0) / Mpqr(0, 0, 0)
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
@@ -307,10 +332,62 @@ def test_centroid_3d():
     assert_array_almost_equal(centroid, (cZ, cY, cX))
 
 
+@pytest.mark.parametrize(
+    "spacing",
+    [(1, 1j), 1+0j],
+)
+def test_spacing_parameter_complex_input(spacing):
+    """Test the _normalize_spacing code."""
+    with pytest.raises(TypeError, match="Element of spacing isn't float or integer type, got"):
+        regionprops(SAMPLE, spacing=spacing)[0].centroid
+
+@pytest.mark.parametrize(
+    "spacing",
+    [np.nan, np.inf, -np.inf],
+)
+def test_spacing_parameter_nan_inf(spacing):
+    """Test the _normalize_spacing code."""
+    with pytest.raises(ValueError):
+        regionprops(SAMPLE, spacing=spacing)[0].centroid
+
+@pytest.mark.parametrize(
+    "spacing", ([1], [[1, 1]], (1, 1, 1))
+)
+def test_spacing_mismtaching_shape(spacing):
+    with pytest.raises(ValueError, match="spacing isn't a scalar nor a sequence"):
+        regionprops(SAMPLE, spacing=spacing)[0].centroid
+
+
+@pytest.mark.parametrize(
+    "spacing",
+    [[2.1, 2.2], [2., 2.], [2, 2]]
+)
+def test_spacing_parameter_2d(spacing):
+    """Test the _normalize_spacing code."""
+    # Test weight centroid spacing
+    Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    cY = Mpq(0, 1) / Mpq(0, 0)
+    cX = Mpq(1, 0) / Mpq(0, 0)
+    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, (cX, cY))
+
+
+@pytest.mark.parametrize(
+    "spacing",
+    [["bad input"], ["bad input", 1, 2.1]],
+)
+def test_spacing_parameter_2d_bad_input(spacing):
+    """Test the _normalize_spacing code."""
+    with pytest.raises(ValueError):
+        regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
+
+
 def test_area_convex():
     area = regionprops(SAMPLE)[0].area_convex
     assert area == 125
 
+
+def test_area_convex_spacing():
     spacing = (1, 4)
     area = regionprops(SAMPLE, spacing=spacing)[0].area_convex
     assert area == 125 * np.prod(spacing)
@@ -342,29 +419,34 @@ def test_coordinates():
     prop_coords = regionprops(sample, spacing=(0.5, 1.2))[0].coords
     assert_array_equal(prop_coords, coords)
 
-
-def test_coordinates_scaled():
+@pytest.mark.parametrize(
+    "spacing", [None, 1, 2, (1, 1), (1, 0.5)],
+)
+def test_coordinates_scaled(spacing):
     sample = np.zeros((10, 10), dtype=np.int8)
     coords = np.array([[3, 2], [3, 3], [3, 4]])
     sample[coords[:, 0], coords[:, 1]] = 1
-
-    spacing = (1, 1)
     prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
-    assert_array_equal(prop_coords, coords * np.array(spacing))
+    if spacing is None:
+        desired_coords = coords
+    else:
+        desired_coords = coords * np.array(spacing)
+    assert_array_equal(prop_coords, desired_coords)
 
-    spacing = (1, 0.5)
-    prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
-    assert_array_equal(prop_coords, coords * np.array(spacing))
 
+@pytest.mark.parametrize(
+    "spacing", [None, 1, 2, (0.2, 3, 2.3)],
+)
+def test_coordinates_scaled_3d(spacing):
     sample = np.zeros((6, 6, 6), dtype=np.int8)
     coords = np.array([[1, 1, 1], [1, 2, 1], [1, 3, 1]])
     sample[coords[:, 0], coords[:, 1], coords[:, 2]] = 1
-    prop_coords = regionprops(sample)[0].coords_scaled
-    assert_array_equal(prop_coords, coords)
-
-    spacing = (0.2, 3, 2.3)
     prop_coords = regionprops(sample, spacing=spacing)[0].coords_scaled
-    assert_array_equal(prop_coords, coords * np.array(spacing))
+    if spacing is None:
+        desired_coords = coords
+    else:
+        desired_coords = coords * np.array(spacing)
+    assert_array_equal(prop_coords, desired_coords)
 
 
 def test_slice():
@@ -374,6 +456,12 @@ def test_slice():
     expected = (slice(2, 2 + nrow), slice(5, 5 + ncol))
     assert_equal(result, expected)
 
+
+def test_slice_spacing():
+    padded = np.pad(SAMPLE, ((2, 4), (5, 2)), mode='constant')
+    nrow, ncol = SAMPLE.shape
+    result = regionprops(padded)[0].slice
+    expected = (slice(2, 2 + nrow), slice(5, 5 + ncol))
     spacing = (2, 0.2)
     result = regionprops(padded, spacing=spacing)[0].slice
     assert_equal(result, expected)
@@ -461,7 +549,7 @@ def test_moments_hu():
     assert_array_almost_equal(hu, ref)
 
     with testing.raises(NotImplementedError):
-        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
+        regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
 
 
 def test_image():
@@ -484,14 +572,21 @@ def test_area_filled():
     area = regionprops(SAMPLE)[0].area_filled
     assert area == np.sum(SAMPLE)
 
-    spacing = (2, 1.2)
-    area = regionprops(SAMPLE, spacing=spacing)[0].area_filled
-    assert area == np.sum(SAMPLE) * np.prod(spacing)
 
+def test_area_filled_zero():
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
     area = regionprops(SAMPLE_mod)[0].area_filled
     assert area == np.sum(SAMPLE)
+
+
+def test_area_filled_spacing():
+    SAMPLE_mod = SAMPLE.copy()
+    SAMPLE_mod[7, -3] = 0
+
+    spacing = (2, 1.2)
+    area = regionprops(SAMPLE, spacing=spacing)[0].area_filled
+    assert area == np.sum(SAMPLE) * np.prod(spacing)
 
     area = regionprops(SAMPLE_mod, spacing=spacing)[0].area_filled
     assert area == np.sum(SAMPLE) * np.prod(spacing)
@@ -595,6 +690,8 @@ def test_moments():
     assert_almost_equal(Mpq(2, 1), m[2, 1])
     assert_almost_equal(Mpq(3, 0), m[3, 0])
 
+
+def test_moments_spacing():
     # Test moment on spacing
     spacing = (2, 0.3)
     m = regionprops(SAMPLE, spacing=spacing)[0].moments
@@ -622,6 +719,8 @@ def test_moments_normalized():
     assert_almost_equal(nu[2, 0], 0.08410493827160502)
     assert_almost_equal(nu[2, 1], -0.002899800614433943)
 
+
+def test_moments_normalized_spacing():
     spacing = (3, 3)
     nu = regionprops(SAMPLE, spacing=spacing)[0].moments_normalized
 
@@ -646,21 +745,58 @@ def test_orientation():
     # test diagonal regions
     diag = np.eye(10, dtype=int)
     orient_diag = regionprops(diag)[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    assert_almost_equal(orient_diag, math.pi / 4)
     orient_diag = regionprops(diag, spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.flipud(diag))[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    assert_almost_equal(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.flipud(diag), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.fliplr(diag))[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    assert_almost_equal(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.fliplr(diag), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
     orient_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    assert_almost_equal(orient_diag, math.pi / 4)
     orient_diag = regionprops(np.fliplr(np.flipud(diag)), spacing=(1, 2))[0].orientation
     assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5 ** 2)))
+
+def test_orientation_continuity():
+    # nearly diagonal array
+    arr1 = np.array([[0, 0, 1, 1],[0, 0, 1, 0],[0, 1, 0, 0],[1, 0, 0, 0]])
+    # diagonal array
+    arr2 = np.array([[0, 0, 0, 2],[0, 0, 2, 0],[0, 2, 0, 0],[2, 0, 0, 0]])
+    # nearly diagonal array
+    arr3 = np.array([[0, 0, 0, 3],[0, 0, 3, 3],[0, 3, 0, 0],[3, 0, 0, 0]])
+    image = np.hstack((arr1,arr2,arr3))
+    props = regionprops(image)
+    orientations = [prop.orientation for prop in props]
+    np.testing.assert_allclose(orientations, orientations[1], rtol=0, atol=0.08)
+    assert_almost_equal(orientations[0], -0.7144496360953664)
+    assert_almost_equal(orientations[1], -0.7853981633974483)
+    assert_almost_equal(orientations[2], -0.8563466906995303)
+
+    # Test spacing
+    spacing = (3.2, 1.2)
+    wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
+                      spacing=spacing)[0].moments_weighted_central
+    centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=spacing)
+    assert_almost_equal(wmu[0, 0], centralMpq(0, 0))
+    assert_almost_equal(wmu[0, 1], centralMpq(0, 1))
+    assert_almost_equal(wmu[0, 2], centralMpq(0, 2))
+    assert_almost_equal(wmu[0, 3], centralMpq(0, 3))
+    assert_almost_equal(wmu[1, 0], centralMpq(1, 0))
+    assert_almost_equal(wmu[1, 1], centralMpq(1, 1))
+    assert_almost_equal(wmu[1, 2], centralMpq(1, 2))
+    assert_almost_equal(wmu[1, 3], centralMpq(1, 3))
+    assert_almost_equal(wmu[2, 0], centralMpq(2, 0))
+    assert_almost_equal(wmu[2, 1], centralMpq(2, 1))
+    assert_almost_equal(wmu[2, 2], centralMpq(2, 2))
+    assert_almost_equal(wmu[2, 3], centralMpq(2, 3))
+    assert_almost_equal(wmu[3, 0], centralMpq(3, 0))
+    assert_almost_equal(wmu[3, 1], centralMpq(3, 1))
+    assert_almost_equal(wmu[3, 2], centralMpq(3, 2))
+    assert_almost_equal(wmu[3, 3], centralMpq(3, 3))
 
 
 def test_perimeter():
@@ -700,6 +836,27 @@ def test_solidity():
     assert_almost_equal(solidity, target_solidity)
 
 
+def test_multichannel_centroid_weighted_table():
+    """Test for https://github.com/scikit-image/scikit-image/issues/6860."""
+    intensity_image = INTENSITY_FLOAT_SAMPLE_MULTICHANNEL
+    rp0 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0])[0]
+    rp1 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0:1])[0]
+    rpm = regionprops(SAMPLE, intensity_image=intensity_image)[0]
+    np.testing.assert_almost_equal(rp0.centroid_weighted,
+                                   np.squeeze(rp1.centroid_weighted))
+    np.testing.assert_almost_equal(rp0.centroid_weighted,
+                                   np.array(rpm.centroid_weighted)[:, 0])
+    assert np.shape(rp0.centroid_weighted) == (SAMPLE.ndim,)
+    assert np.shape(rp1.centroid_weighted) == (SAMPLE.ndim, 1)
+    assert np.shape(rpm.centroid_weighted) == (SAMPLE.ndim,
+                                               intensity_image.shape[-1])
+
+    table = regionprops_table(SAMPLE, intensity_image=intensity_image,
+                              properties=('centroid_weighted',))
+    # check the number of returned columns is correct
+    assert len(table) == np.size(rpm.centroid_weighted)
+
+
 def test_moments_weighted_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].moments_weighted_central
@@ -716,7 +873,7 @@ def test_moments_weighted_central():
     np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
-    # Verify test function
+     # Verify test function
     centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=(1, 1))
     assert_almost_equal(centralMpq(0, 0), ref[0, 0])
     assert_almost_equal(centralMpq(0, 1), ref[0, 1])
@@ -735,30 +892,17 @@ def test_moments_weighted_central():
     assert_almost_equal(centralMpq(3, 2), ref[3, 2])
     assert_almost_equal(centralMpq(3, 3), ref[3, 3])
 
-    # Test spacing
-    spacing = (3.2, 1.2)
-    wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE,
-                      spacing=spacing)[0].moments_weighted_central
-    centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    assert_almost_equal(wmu[0, 0], centralMpq(0, 0))
-    assert_almost_equal(wmu[0, 1], centralMpq(0, 1))
-    assert_almost_equal(wmu[0, 2], centralMpq(0, 2))
-    assert_almost_equal(wmu[0, 3], centralMpq(0, 3))
-    assert_almost_equal(wmu[1, 0], centralMpq(1, 0))
-    assert_almost_equal(wmu[1, 1], centralMpq(1, 1))
-    assert_almost_equal(wmu[1, 2], centralMpq(1, 2))
-    assert_almost_equal(wmu[1, 3], centralMpq(1, 3))
-    assert_almost_equal(wmu[2, 0], centralMpq(2, 0))
-    assert_almost_equal(wmu[2, 1], centralMpq(2, 1))
-    assert_almost_equal(wmu[2, 2], centralMpq(2, 2))
-    assert_almost_equal(wmu[2, 3], centralMpq(2, 3))
-    assert_almost_equal(wmu[3, 0], centralMpq(3, 0))
-    assert_almost_equal(wmu[3, 1], centralMpq(3, 1))
-    assert_almost_equal(wmu[3, 2], centralMpq(3, 2))
-    assert_almost_equal(wmu[3, 3], centralMpq(3, 3))
-
 
 def test_centroid_weighted():
+    sample_for_spacing = np.array(
+        [[0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 1, 1, 1],]
+        )
+    target_centroid_wspacing = (4.0, 4.0)
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                            )[0].centroid_weighted
     target_centroid = (5.540540540540, 9.445945945945)
@@ -778,6 +922,8 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
     assert_almost_equal(centroid, 2 * np.array(target_centroid))
+    centroid = regionprops(sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, 2 * np.array(target_centroid_wspacing))
 
     spacing = (1.3, 0.7)
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
@@ -785,7 +931,8 @@ def test_centroid_weighted():
     cX = Mpq(1, 0) / Mpq(0, 0)
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].centroid_weighted
     assert_almost_equal(centroid, (cX, cY))
-
+    centroid = regionprops(sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing)[0].centroid_weighted
+    assert_almost_equal(centroid, spacing * np.array(target_centroid_wspacing))
 
 def test_moments_weighted_hu():
     whu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
@@ -802,7 +949,7 @@ def test_moments_weighted_hu():
     assert_array_almost_equal(whu, ref)
 
     with testing.raises(NotImplementedError):
-        per = regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
+        regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
 
 
 def test_moments_weighted():
@@ -834,6 +981,18 @@ def test_moments_weighted():
     assert_almost_equal(Mpq(3, 1), ref[3, 1])
     assert_almost_equal(Mpq(3, 2), ref[3, 2])
     assert_almost_equal(Mpq(3, 3), ref[3, 3])
+
+
+def test_moments_weighted_spacing():
+    wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                     )[0].moments_weighted
+    ref = np.array(
+        [[7.4000000e+01, 6.9900000e+02, 7.8630000e+03, 9.7317000e+04],
+         [4.1000000e+02, 3.7850000e+03, 4.4063000e+04, 5.7256700e+05],
+         [2.7500000e+03, 2.4855000e+04, 2.9347700e+05, 3.9007170e+06],
+         [1.9778000e+04, 1.7500100e+05, 2.0810510e+06, 2.8078871e+07]]
+    )
+    assert_array_almost_equal(wm, ref)
 
     # Test spacing
     spacing = (3.2, 1.2)
@@ -869,8 +1028,17 @@ def test_moments_weighted_normalized():
     )
     assert_array_almost_equal(wnu, ref)
 
+
+def test_moments_weighted_normalized_spacing():
     spacing = (3, 3)
     wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[0].moments_weighted_normalized
+
+    np.array(
+        [[np.nan, np.nan, 0.2301467830, -0.0162529732],
+         [np.nan, -0.0160405109, 0.0457932622, -0.0104598869],
+         [0.0873590903, -0.0031421072, 0.0165315478, -0.0028544152],
+         [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191]]
+    )
 
     # Normalized moments are scale invariant
     assert_almost_equal(wnu[0, 2], 0.2301467830)

@@ -19,7 +19,6 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import numpy as np
 from skimage import exposure, util
-import imageio as io
 
 
 # Prepare data and apply histogram equalization
@@ -243,3 +242,9 @@ cbar_ax.set_xticklabels([])
 cbar_ax.set_yticklabels([1., 0.])
 
 plt.show()
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupyterLite, due to a limitation
+#   when downloading large datasets.

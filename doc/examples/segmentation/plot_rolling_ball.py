@@ -36,7 +36,6 @@ this is the case for your image, you can directly use the filter like so:
 
 """
 
-import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import pywt
@@ -315,3 +314,9 @@ plt.plot(x - background, label='radius=80')
 plt.plot(x - background2, label='radius=10')
 plt.legend()
 plt.show()
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupyterLite, due to a limitation
+#   when downloading large datasets.

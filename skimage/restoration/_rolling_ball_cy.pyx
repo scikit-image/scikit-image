@@ -1,6 +1,5 @@
 import math
 
-import numpy as np
 cimport cython
 from libc.math cimport isnan, INFINITY
 from cython.parallel cimport prange
@@ -16,7 +15,7 @@ cdef inline Py_ssize_t ind2ind(
     Py_ssize_t from_index,
     Py_ssize_t offset,
     Py_ssize_t[::1] from_shape,
-    Py_ssize_t[::1] to_shape) nogil:
+    Py_ssize_t[::1] to_shape) noexcept nogil:
     """Convert the flat index of one array to a flat index of another array.
 
     The primary use case for this is if one array is a view into the other

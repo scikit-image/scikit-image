@@ -22,7 +22,6 @@ leading to a sharper transition between the passband and stopband.
 # highpass filtering at a specified series of cutoff frequencies.
 
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 
 from skimage import data, filters
 

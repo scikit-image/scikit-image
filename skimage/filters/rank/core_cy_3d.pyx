@@ -4,17 +4,15 @@
 #cython: wraparound=False
 
 import numpy as np
-
 cimport numpy as cnp
-from libc.stdlib cimport malloc, free
 
 cnp.import_array()
 
-cdef inline dtype_t _max(dtype_t a, dtype_t b) nogil:
+cdef inline dtype_t _max(dtype_t a, dtype_t b) noexcept nogil:
     return a if a >= b else b
 
 
-cdef inline dtype_t _min(dtype_t a, dtype_t b) nogil:
+cdef inline dtype_t _min(dtype_t a, dtype_t b) noexcept nogil:
     return a if a <= b else b
 
 
@@ -26,7 +24,7 @@ cdef inline void _count_attack_border_elements(char[:, :, ::1] footprint,
                                                Py_ssize_t scols,
                                                Py_ssize_t centre_p,
                                                Py_ssize_t centre_r,
-                                               Py_ssize_t centre_c):
+                                               Py_ssize_t centre_c) noexcept:
 
     cdef Py_ssize_t r, c, p
 
@@ -90,7 +88,7 @@ cdef inline void _build_initial_histogram_from_neighborhood(dtype_t[:, :, ::1] i
                                                             Py_ssize_t scols,
                                                             Py_ssize_t centre_p,
                                                             Py_ssize_t centre_r,
-                                                            Py_ssize_t centre_c):
+                                                            Py_ssize_t centre_c) noexcept:
 
     cdef Py_ssize_t r, c, j
 
@@ -117,7 +115,7 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
                                    Py_ssize_t p, Py_ssize_t r, Py_ssize_t c,
                                    Py_ssize_t planes, Py_ssize_t rows,
                                    Py_ssize_t cols,
-                                   Py_ssize_t axis_inc) nogil:
+                                   Py_ssize_t axis_inc) noexcept nogil:
 
     cdef Py_ssize_t pp, rr, cc, j
 
@@ -149,7 +147,7 @@ cdef inline void _update_histogram(dtype_t[:, :, ::1] image,
 
 cdef inline char is_in_mask_3D(Py_ssize_t planes, Py_ssize_t rows,
                                Py_ssize_t cols, Py_ssize_t p, Py_ssize_t r,
-                               Py_ssize_t c, char* mask) nogil:
+                               Py_ssize_t c, char* mask) noexcept nogil:
     """Check whether given coordinate is within image and mask is true."""
     if (r < 0 or r > rows - 1 or c < 0 or c > cols - 1 or
             p < 0 or p > planes - 1):
@@ -162,7 +160,7 @@ cdef inline char is_in_mask_3D(Py_ssize_t planes, Py_ssize_t rows,
 
 cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.float64_t,
                                dtype_t, Py_ssize_t, Py_ssize_t, cnp.float64_t,
-                               cnp.float64_t, Py_ssize_t, Py_ssize_t) nogil,
+                               cnp.float64_t, Py_ssize_t, Py_ssize_t) noexcept nogil,
                    dtype_t[:, :, ::1] image,
                    char[:, :, ::1] footprint,
                    char[:, :, ::1] mask,
@@ -207,7 +205,7 @@ cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1], cnp.fl
     cdef char* mask_data = &mask[0, 0, 0]
 
     # define local variable types
-    cdef Py_ssize_t p, r, c, rr, cc, pp, value, local_max, i, even_row
+    cdef Py_ssize_t p, r, c, even_row
 
     # number of pixels actually inside the neighborhood (cnp.float64_t)
     cdef cnp.float64_t pop = 0

@@ -50,7 +50,7 @@ def histograms(cnp.ndarray[cnp.uint8_t, ndim=3] img, int nbins):
     b = np.zeros((nbins,), dtype=np.int32)
     v = np.zeros((nbins,), dtype=np.int32)
 
-    cdef int i, j, k, rbin, gbin, bbin, vbin
+    cdef int i, j, rbin, gbin, bbin, vbin
     cdef cnp.float32_t bin_width = 255./ nbins
     cdef cnp.float32_t R, G, B, V
 

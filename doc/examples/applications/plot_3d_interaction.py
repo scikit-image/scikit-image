@@ -17,7 +17,6 @@ imaged with confocal fluorescence microscopy (more details at [1]_ under
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage as ndi
 
 import plotly
 import plotly.express as px
@@ -149,3 +148,9 @@ plotly.io.show(fig)
 # .. [2] https://en.wikipedia.org/wiki/Glomerulus_(kidney)
 
 plt.show()
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupyterLite, due to a limitation
+#   when downloading large datasets.

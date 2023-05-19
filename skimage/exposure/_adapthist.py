@@ -1,8 +1,10 @@
 """
-Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
-Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
+Adapted from "Contrast Limited Adaptive Histogram Equalization" by Karel
+Zuiderveld, Graphics Gems IV, Academic Press, 1994.
 
 http://tog.acm.org/resources/GraphicsGems/
+
+Relicensed with permission of the author under the Modified BSD license.
 """
 import math
 import numbers
@@ -80,7 +82,7 @@ def equalize_adapthist(image, kernel_size=None,
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
-        ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
+        raise ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
 
     kernel_size = [int(k) for k in kernel_size]
 

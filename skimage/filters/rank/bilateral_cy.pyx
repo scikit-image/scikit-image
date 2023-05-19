@@ -4,7 +4,6 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from libc.math cimport log
 
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
@@ -15,7 +14,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               cnp.float64_t pop, dtype_t g,
                               Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               cnp.float64_t p0, cnp.float64_t p1,
-                              Py_ssize_t s0, Py_ssize_t s1) nogil:
+                              Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t bilat_pop = 0
@@ -39,7 +38,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
                              cnp.float64_t pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              cnp.float64_t p0, cnp.float64_t p1,
-                             Py_ssize_t s0, Py_ssize_t s1) nogil:
+                             Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t bilat_pop = 0
@@ -58,7 +57,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              cnp.float64_t pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              cnp.float64_t p0, cnp.float64_t p1,
-                             Py_ssize_t s0, Py_ssize_t s1) nogil:
+                             Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i
     cdef Py_ssize_t bilat_pop = 0
