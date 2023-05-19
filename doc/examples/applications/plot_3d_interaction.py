@@ -147,5 +147,5 @@ plt.show()
 # %%
 # .. warning::
 #
-#   This example does not run in JupterLite, due to a limitation
+#   This example does not run in JupyterLite, due to a limitation
 #   when downloading large datasets.
