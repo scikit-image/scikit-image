@@ -228,7 +228,8 @@ html_theme_options = {
             "scikit-image's logo, showing a snake's head overlayed with green "
             "and orange"
         ),
-        "text": "scikit-image"
+        "text": "scikit-image",
+        "link": "https://scikit-image.org",
     },
     "header_links_before_dropdown": 6,
     "icon_links": [
