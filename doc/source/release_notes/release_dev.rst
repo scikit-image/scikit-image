@@ -17,8 +17,7 @@ New Features
 ------------
 
 - Add parameters ``mode`` and ``cval`` to ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology``;
-  add parameter ``border_value`` to ``binary_erosion``, ``binary_dilation``, ``binary_opening`` and ``binary_closing`` in ``skimage.morphology``;
-  add parameter ``mirror`` to ``erosion``, ``dilation``, ``binary_erosion`` and ``binary_dilation`` in ``skimage.morphology``;
+  add parameter ``mode`` to ``binary_erosion``, ``binary_dilation``, ``binary_opening`` and ``binary_closing`` in ``skimage.morphology``;
   add functions ``mirror_footprint`` and ``pad_footprint`` to ``skimage.morphology``;
   (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
 

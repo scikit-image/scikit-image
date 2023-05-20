@@ -32,7 +32,7 @@ Version 0.23
   arguments in favor of `rng`.
 * Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
 
-Version 0.24
+Version 0.25
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated

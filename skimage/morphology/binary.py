@@ -1,12 +1,11 @@
 """
 Binary morphological operations
 """
-import functools
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
+from .footprints import _footprint_is_sequence, pad_footprint
 from .misc import default_footprint
 
 
@@ -32,8 +31,7 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
-def binary_erosion(image, footprint=None, out=None, mirror=False,
-                   border_value=True):
+def binary_erosion(image, footprint=None, out=None, mode='ignore'):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -55,18 +53,15 @@ def binary_erosion(image, footprint=None, out=None, mirror=False,
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    mirror : bool, optional
-        Mirror the footprint along each dimension. Default is ``False``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'max' or 'ignore', pixels outside the image domain are assumed
+        to be `True`, which causes them to not influence the result.
+        Default is 'ignore'.
 
-        .. versionadded:: 0.21
-            `mirror` was added in 0.21.
-
-    border_value : bool or None, optional
-        Value at the border in the output array. ``None`` is the same as
-        ``True``. Default is ``True``.
-
-        .. versionadded:: 0.21
-            `border_value` was added in 0.21.
+        .. versionadded:: 0.22
+            `mode` was added in 0.22.
 
     Returns
     -------
@@ -98,25 +93,22 @@ def binary_erosion(image, footprint=None, out=None, mirror=False,
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
-    if border_value is None:
-        border_value = True
+    border_value = False if mode == 'min' else True
 
     footprint = pad_footprint(footprint, right=True)
-    if mirror:
-        footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_erosion, image, footprint, out,
                                     border_value)
 
+    print(f"binary_erosion, {border_value=}")
     ndi.binary_erosion(image, structure=footprint, output=out,
                        border_value=border_value)
     return out
 
 
 @default_footprint
-def binary_dilation(image, footprint=None, out=None, mirror=True,
-                    border_value=False):
+def binary_dilation(image, footprint=None, out=None, mode='ignore'):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -138,18 +130,15 @@ def binary_dilation(image, footprint=None, out=None, mirror=True,
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    mirror : bool, optional
-        Mirror the footprint along each dimension. Default is ``True``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'min' or 'ignore', pixels outside the image domain are assumed
+        to be `False`, which causes them to not influence the result.
+        Default is 'ignore'.
 
-        .. versionadded:: 0.21
-            `mirror` was added in 0.21.
-
-    border_value : bool or None, optional
-        Value at the border in the output array. ``None`` is the same as
-        ``False``. Default is ``False``.
-
-        .. versionadded:: 0.21
-            `border_value` was added in 0.21.
+        .. versionadded:: 0.22
+            `mode` was added in 0.22.
 
     Returns
     -------
@@ -171,8 +160,7 @@ def binary_dilation(image, footprint=None, out=None, mirror=True,
 
     For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
     and :func:`skimage.morphology.dilation` produce an output that differs:
-    `binary_dilation` mirrors the footprint, whereas `dilation` does not (by
-    default).
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not.
 
     See also
     --------
@@ -182,25 +170,22 @@ def binary_dilation(image, footprint=None, out=None, mirror=True,
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
-    if border_value is None:
-        border_value = False
+    border_value = True if mode == 'max' else False
 
     footprint = pad_footprint(footprint, right=True)
-    if not mirror:
-        # Note that `ndi.binary_dilation` mirrors the footprint.
-        footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_dilation, image, footprint, out,
                                     border_value)
 
+    print(f"binary_dilation, {border_value=}")
     ndi.binary_dilation(image, structure=footprint, output=out,
                         border_value=border_value)
     return out
 
 
 @default_footprint
-def binary_opening(image, footprint=None, out=None, border_value=None):
+def binary_opening(image, footprint=None, out=None, mode='ignore'):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as grayscale opening but performs
@@ -223,13 +208,15 @@ def binary_opening(image, footprint=None, out=None, border_value=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
-    border_value : bool or None, optional
-        Value at the border in the output array. ``None`` is ``True`` for the
-        erosion and ``False`` for the dilation, causing pixels outside the
-        image not to influence the results. Default is ``None``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed to be `True`
+        for the erosion and `False` for the dilation, which causes them to not
+        influence the result. Default is 'ignore'.
 
-        .. versionadded:: 0.21
-            `border_value` was added in 0.21.
+        .. versionadded:: 0.22
+            `mode` was added in 0.22.
 
     Returns
     -------
@@ -253,13 +240,13 @@ def binary_opening(image, footprint=None, out=None, border_value=None):
     skimage.morphology.isotropic_opening
 
     """
-    tmp = binary_erosion(image, footprint, border_value=border_value)
-    out = binary_dilation(tmp, footprint, out=out, border_value=border_value)
+    tmp = binary_erosion(image, footprint, mode=mode)
+    out = binary_dilation(tmp, footprint, out=out, mode=mode)
     return out
 
 
 @default_footprint
-def binary_closing(image, footprint=None, out=None, border_value=None):
+def binary_closing(image, footprint=None, out=None, mode='ignore'):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as grayscale closing but performs
@@ -282,13 +269,15 @@ def binary_closing(image, footprint=None, out=None, border_value=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
-    border_value : bool or None, optional
-        Value at the border in the output array. ``None`` is ``True`` for the
-        erosion and ``False`` for the dilation, causing pixels outside the
-        image not to influence the results. Default is ``None``.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed to be `True`
+        for the erosion and `False` for the dilation, which causes them to not
+        influence the result. Default is 'ignore'.
 
-        .. versionadded:: 0.21
-            `border_value` was added in 0.21.
+        .. versionadded:: 0.22
+            `mode` was added in 0.22.
 
     Returns
     -------
@@ -312,6 +301,6 @@ def binary_closing(image, footprint=None, out=None, border_value=None):
     skimage.morphology.isotropic_closing
 
     """
-    tmp = binary_dilation(image, footprint, border_value=border_value)
-    out = binary_erosion(tmp, footprint, out=out, border_value=border_value)
+    tmp = binary_dilation(image, footprint, mode=mode)
+    out = binary_erosion(tmp, footprint, out=out, mode=mode)
     return out

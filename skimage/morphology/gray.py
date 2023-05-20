@@ -6,8 +6,7 @@ import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
-from .footprints import (_footprint_is_sequence, _shape_from_sequence,
-                         mirror_footprint, pad_footprint)
+from .footprints import (_footprint_is_sequence, mirror_footprint, pad_footprint)
 from .misc import default_footprint
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
@@ -81,8 +80,7 @@ def _shift_footprints(footprint, shift_x, shift_y):
         return footprint
 
     warning_msg = ("The parameters `shift_x` and `shift_y` are deprecated "
-                   "since v0.21 and will be removed in v0.24. Please use the "
-                   "new parameter `mirror` instead.")
+                   "since v0.22 and will be removed in v0.25.")
     warnings.warn(warning_msg, FutureWarning, stacklevel=4)
 
     if _footprint_is_sequence(footprint):
@@ -114,7 +112,7 @@ def _handle_mode_and_cval(dtype, mode, cval):
 
 @default_footprint
 def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
-            mirror=False, mode="reflect", cval=0.0):
+            mode="reflect", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -133,12 +131,6 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     out : ndarrays, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    mirror : bool, optional
-        Mirror the footprint along each dimension. Default is ``False``.
-
-        .. versionadded:: 0.21
-            `mirror` was added in 0.21.
-
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -150,8 +142,8 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
@@ -161,9 +153,8 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     Other Parameters
     ----------------
     shift_x, shift_y : DEPRECATED
-        Deprecated in favour of `mirror`.
 
-        .. deprecated:: 0.21
+        .. deprecated:: 0.22
 
     Notes
     -----
@@ -212,8 +203,6 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)
-    if mirror:
-        footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
         return _iterate_gray_func(ndi.grey_erosion, image, footprint, out,
@@ -226,7 +215,7 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
 @default_footprint
 def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
-             mirror=False, mode="reflect", cval=0.0):
+             mode="reflect", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -246,12 +235,6 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     out : ndarray, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
-    mirror : bool, optional
-        Mirror the footprint along each dimension. Default is ``False``.
-
-        .. versionadded:: 0.21
-            `mirror` was added in 0.21.
-
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -263,8 +246,8 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
@@ -274,9 +257,8 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     Other Parameters
     ----------------
     shift_x, shift_y : DEPRECATED
-        Deprecated in favour of `mirror`.
 
-        .. deprecated:: 0.21
+        .. deprecated:: 0.22
 
     Notes
     -----
@@ -296,8 +278,7 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
     For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
     and :func:`skimage.morphology.dilation` produce an output that differs:
-    `binary_dilation` mirrors the footprint, whereas `dilation` does not (by
-    default).
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not.
 
     Examples
     --------
@@ -326,10 +307,9 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)
-    if not mirror:
-        # Note that `ndi.grey_dilation` mirrors the footprint and this
-        # additional inversion should be removed in skimage2, see gh-6676.
-        footprint = mirror_footprint(footprint)
+    # Note that `ndi.grey_dilation` mirrors the footprint and this
+    # additional inversion should be removed in skimage2, see gh-6676.
+    footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
         return _iterate_gray_func(ndi.grey_dilation, image, footprint, out,
@@ -373,8 +353,8 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
@@ -413,7 +393,7 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """
     footprint = pad_footprint(footprint, right=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
-    out = dilation(eroded, footprint, out=out, mirror=True, mode=mode,
+    out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode,
                    cval=cval)
     return out
 
@@ -451,8 +431,8 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
@@ -490,8 +470,8 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
 
     """
     footprint = pad_footprint(footprint, right=False)
-    dilated = dilation(image, footprint, mirror=True, mode=mode, cval=cval)
-    out = erosion(dilated, footprint, out=out, mode=mode, cval=cval)
+    dilated = dilation(image, footprint, mode=mode, cval=cval)
+    out = erosion(dilated, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
     return out
 
 
@@ -524,8 +504,8 @@ def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
@@ -618,8 +598,8 @@ def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.21
-            `mode` and `cval` were added in 0.21.
+        .. versionadded:: 0.22
+            `mode` and `cval` were added in 0.22.
 
     Returns
     -------
