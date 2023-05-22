@@ -193,6 +193,14 @@ Merged Pull Requests
   (`#6942 <https://github.com/scikit-image/scikit-image/pull/6942>`_).
 - Stabilize EllipseModel fitting parameters
   (`#6943 <https://github.com/scikit-image/scikit-image/pull/6943>`_).
+- MNT Fix typo in JupyterLite comment
+  (`#6945 <https://github.com/scikit-image/scikit-image/pull/6945>`_).
+- Build skimage before generating docs
+  (`#6946 <https://github.com/scikit-image/scikit-image/pull/6946>`_).
+- Point logo in generated HTML at scikit-image.org
+  (`#6947 <https://github.com/scikit-image/scikit-image/pull/6947>`_).
+- If user provides RNG, spawn it before deepcopying
+  (`#6948 <https://github.com/scikit-image/scikit-image/pull/6948>`_).
 
 32 authors added to this release [alphabetical by first name or login]
 ----------------------------------------------------------------------
