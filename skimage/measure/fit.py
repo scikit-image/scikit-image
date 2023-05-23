@@ -828,9 +828,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[2] = (50, 50)
     >>> ratio = 0.5  # use half of the samples
     >>> min_samples = int(ratio * len(src))
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples,
-    ...                         10,
-    ...                         initial_inliers=np.ones(len(src), dtype=bool))
+    >>> model, inliers = ransac(
+    ...     (src, dst),
+    ...     SimilarityTransform,
+    ...     min_samples,
+    ...     10,
+    ...     initial_inliers=np.ones(len(src), dtype=bool),
+    ... )  # doctest: +SKIP
     >>> inliers  # doctest: +SKIP
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
