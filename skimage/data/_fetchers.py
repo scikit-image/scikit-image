@@ -199,10 +199,10 @@ def _fetch(data_filename):
         dataset has not been downloaded yet.
     """
     expected_hash = registry[data_filename]
-    if image_fetcher is None:
+    if _image_fetcher is None:
         cache_dir = osp.dirname(data_dir)
     else:
-        cache_dir = str(image_fetcher.abspath)
+        cache_dir = str(_image_fetcher.abspath)
 
     # Case 1: the file is already cached in `data_cache_dir`
     cached_file_path = osp.join(cache_dir, data_filename)
