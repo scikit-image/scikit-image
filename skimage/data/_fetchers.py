@@ -126,10 +126,6 @@ def _create_image_fetcher():
 
 _image_fetcher, data_dir = _create_image_fetcher()
 
-if _image_fetcher is None:
-    has_pooch = False
-else:
-    has_pooch = True
 
 def _skip_pytest_case_requiring_pooch(data_filename):
     """If a test case is calling pooch, skip it.
