@@ -46,8 +46,9 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: 3.11
             PIP_FLAGS: >-
-              -i https://pypi.org/simple
-              -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+              --extra-index-url
+              https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+              --upgrade
               --pre
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test nightly wheels
