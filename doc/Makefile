@@ -45,20 +45,11 @@ api:
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
-release_notes:
-	@echo "Copying release notes"
-	@tail -n +4 release/release_$$(\
-		ls release/release_*.*.* \
-			| sed s:release/release_:: \
-			| sort -nrt. -k1,1 -k2,2 \
-			| head -n 1) \
-		> release/_release_notes_for_docs.rst
 
-html: api release_notes
+html: api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
-	$(PYTHON) source/random_gallery.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(DEST)/dirhtml

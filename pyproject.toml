@@ -40,10 +40,10 @@ dependencies = [
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.27,<2.28',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
+    'packaging>=21',
     'lazy_loader>=0.2',
 ]
 
@@ -56,27 +56,27 @@ file = 'LICENSE.txt'
 
 [project.optional-dependencies]
 build = [
-    'meson-python>=0.13.0rc0',
+    'meson-python>=0.13',
     'wheel',
     'setuptools>=67',
-    'packaging>=20',
+    'packaging>=21',
     'ninja',
-    'Cython>=0.29.24',
+    'Cython>=0.29.32',
     'pythran',
     'numpy>=1.21.1',
     'spin==0.3',
     'build',
 ]
-data = ['pooch>=1.3.0']
+data = ['pooch>=1.6.0']
 default = [
     'numpy>=1.21.1',
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.4.1',
-    'tifffile>=2019.7.26',
+    'imageio>=2.27,<2.28',
+    'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
-    'packaging>=20.0',
+    'packaging>=21',
     'lazy_loader>=0.2',
 ]
 developer = [
@@ -84,13 +84,12 @@ developer = [
     'rtoml',
 ]
 docs = [
-    'sphinx>=5.2',
+    'sphinx>=5.0',
     'sphinx-gallery>=0.11',
     'numpydoc>=1.5',
     'sphinx-copybutton',
     'pytest-runner',
-    'scikit-learn',
-    'matplotlib>=3.6',
+    'matplotlib>=3.5',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
     'seaborn>=0.11',
@@ -101,23 +100,28 @@ docs = [
     'ipykernel',
     'plotly>=5.10',
     'kaleido',
+    'scikit-learn>=0.24.0',
+    'sphinx_design>=0.3',
+    'pydata-sphinx-theme>=0.13',
+    'jupyterlite-sphinx',
+    'jupyterlite-pyodide-kernel',
 ]
 optional = [
     'SimpleITK',
-    'astropy>=3.1.2',
+    'astropy>=5.0',
     'cloudpickle>=0.2.1',
-    'dask[array]>=1.0.0,!=2.17.0',
-    'matplotlib>=3.3',
-    'pooch>=1.3.0',
+    'dask[array]>=2021.1.0',
+    'matplotlib>=3.5',
+    'pooch>=1.6.0',
     'pyamg',
+    'scikit-learn>=0.24.0',
 ]
 test = [
     'asv',
-    'codecov',
-    'matplotlib>=3.3',
-    'pooch>=1.3.0',
-    'pytest>=5.2.0',
-    'pytest-cov>=2.7.0',
+    'matplotlib>=3.5',
+    'pooch>=1.6.0',
+    'pytest>=7.0',
+    'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
 ]
@@ -132,11 +136,11 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.13.0rc0',
+    'meson-python>=0.13',
     'wheel',
     'setuptools>=67',
-    'packaging>=20',
-    'Cython>=0.29.24',
+    'packaging>=21',
+    'Cython>=0.29.32',
     'pythran',
     'lazy_loader>=0.2',
     "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",

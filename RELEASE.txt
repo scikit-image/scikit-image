@@ -78,7 +78,8 @@ the appropriate point in main and the following instructions are still apt.
 
   Once everything works as intended, remove those branches and proceed.
 
-- Edit ``doc/source/_static/docversions.js`` in order to
+- Edit ``doc/source/_static/docversions.js`` and
+  ``doc/source/_static/version_switcher.json`` in order to
   add the release, e.g., `0.15.x`, and commit.
 
 - Update the version number to stable in ``skimage/__init__.py``, and commit.

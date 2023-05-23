@@ -178,7 +178,7 @@ def _get_numpy_hist_range(image, source_range):
     elif source_range == 'dtype':
         hist_range = dtype_limits(image, clip_negative=False)
     else:
-        ValueError('Wrong value for the `source_range` argument')
+        raise ValueError(f'Incorrect value for `source_range` argument: {source_range}')
     return hist_range
 
 
@@ -595,7 +595,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     if imin != imax:
         image = (image - imin) / (imax - imin)
-        return np.asarray(image * (omax - omin) + omin, dtype=out_dtype)
+        return (image * (omax - omin) + omin).astype(out_dtype)
     else:
         return np.clip(image, omin, omax).astype(out_dtype)
 

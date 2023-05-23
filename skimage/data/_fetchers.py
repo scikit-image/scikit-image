@@ -7,18 +7,17 @@ For more images, see
 """
 import numpy as np
 import shutil
-from packaging import version
 
 from ..util.dtype import img_as_bool
-from ._registry import registry, legacy_registry, registry_urls
+from ._registry import registry, registry_urls
 
 from .. import __version__
 
 import os.path as osp
 import os
 
-legacy_data_dir = osp.abspath(osp.dirname(__file__))
-skimage_distribution_dir = osp.join(legacy_data_dir, '..')
+_LEGACY_DATA_DIR = osp.dirname(__file__)
+_DISTRIBUTION_DIR = osp.dirname(_LEGACY_DATA_DIR)
 
 try:
     from pooch import file_hash
@@ -77,17 +76,11 @@ def _create_image_fetcher():
         if not hasattr(pooch, '__version__'):
             retry = {}
         else:
-            pooch_version = pooch.__version__.lstrip('v')
             retry = {'retry_if_failed': 3}
-            # Keep version check in synch with
-            # scikit-image/requirements/optional.txt
-            if version.parse(pooch_version) < version.parse('1.3.0'):
-                # we need a more recent version of pooch to retry
-                retry = {}
     except ImportError:
         # Without pooch, fallback on the standard data directory
         # which for now, includes a few limited data samples
-        return None, legacy_data_dir
+        return None, _LEGACY_DATA_DIR
 
     # Pooch expects a `+` to exist in development versions.
     # Since scikit-image doesn't follow that convention, we have to manually
@@ -138,7 +131,6 @@ if _image_fetcher is None:
 else:
     has_pooch = True
 
-
 def _skip_pytest_case_requiring_pooch(data_filename):
     """If a test case is calling pooch, skip it.
 
@@ -159,21 +151,39 @@ def _skip_pytest_case_requiring_pooch(data_filename):
                     allow_module_level=True)
 
 
+def _ensure_cache_dir(*, target_dir):
+    """Prepare local cache directory if it doesn't exist already.
+
+    Creates::
+
+        /path/to/target_dir/
+                 └─ data/
+                    └─ README.txt
+    """
+    os.makedirs(osp.join(target_dir, "data"), exist_ok=True)
+    readme_src = osp.join(_DISTRIBUTION_DIR, "data/README.txt")
+    readme_dest = osp.join(target_dir, "data/README.txt")
+    if not osp.exists(readme_dest):
+        shutil.copy2(readme_src, readme_dest)
+
+
 def _fetch(data_filename):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
-    its name in the scikit-image repository.
+    its name in the scikit-image repository. If a data file is not included in the
+    distribution and pooch is available, it is downloaded and cached.
 
     Parameters
     ----------
-    data_filename:
+    data_filename : str
         Name of the file in the scikit-image repository. e.g.
         'restoration/tess/camera_rl.npy'.
 
     Returns
     -------
-    Path of the local file as a python string.
+    file_path : str
+        Path of the local file.
 
     Raises
     ------
@@ -188,33 +198,26 @@ def _fetch(data_filename):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    resolved_path = osp.join(data_dir, '..', data_filename)
     expected_hash = registry[data_filename]
+    if image_fetcher is None:
+        cache_dir = osp.dirname(data_dir)
+    else:
+        cache_dir = str(image_fetcher.abspath)
 
-    # Case 1:
-    # The file may already be in the data_dir.
-    # We may have decided to ship it in the scikit-image distribution.
-    if _has_hash(resolved_path, expected_hash):
+    # Case 1: the file is already cached in `data_cache_dir`
+    cached_file_path = osp.join(cache_dir, data_filename)
+    if _has_hash(cached_file_path, expected_hash):
         # Nothing to be done, file is where it is expected to be
-        return resolved_path
+        return cached_file_path
 
-    # Case 2:
-    # The user is using a cloned version of the github repo, which
-    # contains both the publicly shipped data, and test data.
-    # In this case, the file would be located relative to the
-    # skimage_distribution_dir
-    gh_repository_path = osp.join(skimage_distribution_dir, data_filename)
-    if _has_hash(gh_repository_path, expected_hash):
-        parent = osp.dirname(resolved_path)
-        os.makedirs(parent, exist_ok=True)
-        shutil.copy2(gh_repository_path, resolved_path)
-        return resolved_path
+    # Case 2: file is present in `legacy_data_dir`
+    legacy_file_path = osp.join(_DISTRIBUTION_DIR, data_filename)
+    if _has_hash(legacy_file_path, expected_hash):
+        return legacy_file_path
 
-    # Case 3:
-    # Pooch not found.
+    # Case 3: file is not present locally
     if _image_fetcher is None:
         _skip_pytest_case_requiring_pooch(data_filename)
-
         raise ModuleNotFoundError(
             "The requested file is part of the scikit-image distribution, "
             "but requires the installation of an optional dependency, pooch. "
@@ -222,16 +225,13 @@ def _fetch(data_filename):
             "Follow installation instruction found at "
             "https://scikit-image.org/docs/stable/install.html"
         )
-
-    # Case 4:
-    # Pooch needs to download the data. Let the image fetcher to search for
-    # our data. A ConnectionError is raised if no internet connection is
-    # available.
+    # Download the data with pooch which caches it automatically
+    _ensure_cache_dir(target_dir=cache_dir)
     try:
-        resolved_path = _image_fetcher.fetch(data_filename)
+        cached_file_path = _image_fetcher.fetch(data_filename)
+        return cached_file_path
     except ConnectionError as err:
         _skip_pytest_case_requiring_pooch(data_filename)
-
         # If we decide in the future to suppress the underlying 'requests'
         # error, change this to `raise ... from None`. See PEP 3134.
         raise ConnectionError(
@@ -240,34 +240,6 @@ def _fetch(data_filename):
             'future, try `skimage.data.download_all()` when you are '
             'connected to the internet.'
         ) from err
-    return resolved_path
-
-
-def _init_pooch():
-    os.makedirs(data_dir, exist_ok=True)
-
-    # Copy in the README.txt if it doesn't already exist.
-    # If the file was originally copied to the data cache directory read-only
-    # then we cannot overwrite it, nor do we need to copy on every init.
-    # In general, as the data cache directory contains the scikit-image version
-    # it should not be necessary to overwrite this file as it should not
-    # change.
-    dest_path = osp.join(data_dir, 'README.txt')
-    if not os.path.isfile(dest_path):
-        shutil.copy2(osp.join(skimage_distribution_dir, 'data', 'README.txt'),
-                     dest_path)
-
-    # Fetch all legacy data so that it is available by default
-    for filename in legacy_registry:
-        _fetch(filename)
-
-
-# This function creates directories, and has been the source of issues for
-# downstream users, see
-# https://github.com/scikit-image/scikit-image/issues/4660
-# https://github.com/scikit-image/scikit-image/issues/4664
-if has_pooch:
-    _init_pooch()
 
 
 def download_all(directory=None):
@@ -314,10 +286,18 @@ def download_all(directory=None):
     old_dir = _image_fetcher.path
     try:
         if directory is not None:
+            directory = osp.expanduser(directory)
             _image_fetcher.path = directory
+        _ensure_cache_dir(target_dir=_image_fetcher.path)
 
-        for filename in _image_fetcher.registry:
-            _fetch(filename)
+        for data_filename in _image_fetcher.registry:
+            file_path = _fetch(data_filename)
+
+            # Copy to `directory` or implicit cache if it is not already there
+            if not file_path.startswith(str(_image_fetcher.path)):
+                dest_path = osp.join(_image_fetcher.path, data_filename)
+                os.makedirs(osp.dirname(dest_path), exist_ok=True)
+                shutil.copy2(file_path, dest_path)
     finally:
         _image_fetcher.path = old_dir
 
