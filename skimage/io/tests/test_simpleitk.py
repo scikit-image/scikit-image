@@ -1,26 +1,26 @@
 import numpy as np
 import pytest
 
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import imread, imsave, use_plugin, reset_plugins, plugin_order
 from skimage._shared import testing
 
 
 pytest.importorskip('SimpleITK')
 
-np.random.seed(0)
 
-
-def teardown():
+@pytest.fixture(autouse=True)
+def use_simpleitk_plugin():
+    """Ensure that SimpleITK plugin is used."""
+    use_plugin('simpleitk')
+    yield
     reset_plugins()
 
 
-@pytest.fixture(autouse=True)
-def setup_plugin():
-    """This ensures that `use_plugin` is directly called before all tests to
-    ensure that SimpleITK is used.
-    """
-    use_plugin('simpleitk')
-    yield
+def test_prefered_plugin():
+    order = plugin_order()
+    assert order["imread"][0] == "simpleitk"
+    assert order["imsave"][0] == "simpleitk"
+    assert order["imread_collection"][0] == "simpleitk"
 
 
 def test_imread_as_gray():
@@ -61,13 +61,17 @@ def test_imread_uint16_big_endian():
 @pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
 @pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32, np.float64])
 def test_imsave_roundtrip(shape, dtype, tmp_path):
-    expected = np.zeros(shape, dtype=dtype)
     if np.issubdtype(dtype, np.floating):
         info_func = np.finfo
     else:
         info_func = np.iinfo
-    expected.flat[0] = info_func(dtype).min
-    expected.flat[-1] = info_func(dtype).max
+    expected = np.linspace(
+        info_func(dtype).min, info_func(dtype).max,
+        endpoint=True,
+        num=np.prod(shape),
+        dtype=dtype
+    )
+    expected = expected.reshape(shape)
     file_path = tmp_path / "roundtrip.mha"
     imsave(file_path, expected)
     actual = imread(file_path)
