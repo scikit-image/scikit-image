@@ -10,10 +10,10 @@ between any point on the contour of the first mask and its nearest point on the
 contour of the second mask, and vice-versa.
 
 It can be computed either directly from the segmentation masks using
-``hausdorff_distance_mask`` or from contours images (i.e. binary images where
+``hausdorff_distance_mask`` or from their respective contours (i.e., binary images where
 all the pixels on the contours are True) using ``hausdorff_distance``.
 
-In this example, the "contours image" is computed by removing the eroded mask
+In this example, the contour is computed by removing the eroded mask
 from the mask itself.
 """
 import numpy as np
