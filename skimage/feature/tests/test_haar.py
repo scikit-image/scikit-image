@@ -154,7 +154,7 @@ def test_draw_haar_like_feature(max_n_features, nnz_values):
     coord, _ = haar_like_feature_coord(5, 5, 'type-4')
     image = draw_haar_like_feature(img, 0, 0, 5, 5, coord,
                                    max_n_features=max_n_features,
-                                   seed=0)
+                                   rng=0)
     with expected_warnings(['`random_state` is a deprecated argument']):
         draw_haar_like_feature(img, 0, 0, 5, 5, coord,
                                max_n_features=max_n_features,

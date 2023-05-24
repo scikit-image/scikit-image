@@ -12,7 +12,7 @@ cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
                                    cnp.float64_t pop, dtype_t g,
                                    Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                    cnp.float64_t p0, cnp.float64_t p1,
-                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
+                                   Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i = 0, imin = 0, imax = 0, sum, delta
 
@@ -46,7 +46,7 @@ cdef inline void _kernel_gradient(dtype_t_out* out, Py_ssize_t odepth,
                                   cnp.float64_t pop, dtype_t g,
                                   Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                   cnp.float64_t p0, cnp.float64_t p1,
-                                  Py_ssize_t s0, Py_ssize_t s1) nogil:
+                                  Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i, imin = 0, imax = 0, sum
 
@@ -75,7 +75,7 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               cnp.float64_t pop, dtype_t g,
                               Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               cnp.float64_t p0, cnp.float64_t p1,
-                              Py_ssize_t s0, Py_ssize_t s1) nogil:
+                              Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i, sum, mean, n
 
@@ -101,7 +101,7 @@ cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              cnp.float64_t pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              cnp.float64_t p0, cnp.float64_t p1,
-                             Py_ssize_t s0, Py_ssize_t s1) nogil:
+                             Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i, sum, sum_g, n
 
@@ -128,7 +128,7 @@ cdef inline void _kernel_subtract_mean(dtype_t_out* out, Py_ssize_t odepth,
                                        Py_ssize_t n_bins,
                                        Py_ssize_t mid_bin, cnp.float64_t p0,
                                        cnp.float64_t p1, Py_ssize_t s0,
-                                       Py_ssize_t s1) nogil:
+                                       Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i, sum, mean, n
 
@@ -156,7 +156,7 @@ cdef inline void _kernel_enhance_contrast(dtype_t_out* out,
                                           Py_ssize_t n_bins,
                                           Py_ssize_t mid_bin, cnp.float64_t p0,
                                           cnp.float64_t p1, Py_ssize_t s0,
-                                          Py_ssize_t s1) nogil:
+                                          Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i, imin = 0, imax = 0, sum
 
@@ -191,7 +191,7 @@ cdef inline void _kernel_percentile(dtype_t_out* out, Py_ssize_t odepth,
                                     cnp.float64_t pop, dtype_t g,
                                     Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                     cnp.float64_t p0, cnp.float64_t p1,
-                                    Py_ssize_t s0, Py_ssize_t s1) nogil:
+                                    Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i = 0
     cdef Py_ssize_t sum = 0
@@ -216,7 +216,7 @@ cdef inline void _kernel_pop(dtype_t_out* out, Py_ssize_t odepth,
                              cnp.float64_t pop, dtype_t g,
                              Py_ssize_t n_bins, Py_ssize_t mid_bin,
                              cnp.float64_t p0, cnp.float64_t p1,
-                             Py_ssize_t s0, Py_ssize_t s1) nogil:
+                             Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef Py_ssize_t i = 0, sum, n
 
@@ -237,7 +237,7 @@ cdef inline void _kernel_threshold(dtype_t_out* out, Py_ssize_t odepth,
                                    cnp.float64_t pop, dtype_t g,
                                    Py_ssize_t n_bins, Py_ssize_t mid_bin,
                                    cnp.float64_t p0, cnp.float64_t p1,
-                                   Py_ssize_t s0, Py_ssize_t s1) nogil:
+                                   Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
 
     cdef int i = 0
     cdef Py_ssize_t sum = 0

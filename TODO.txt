@@ -29,10 +29,13 @@ Version 0.22
 Version 0.23
 ------------
 * Remove deprecated `random_seed`, `random_state`, and `sample_seed`
-  arguments in favor of `seed`.
+  arguments in favor of `rng`.
 * Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
 
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
+* Remove temporary pin of imageio <2.28 once the breakage is dealt with. See also
+  https://github.com/scikit-image/scikit-image/issues/6908 and
+  https://github.com/scikit-image/scikit-image/pull/6764.

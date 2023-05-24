@@ -1,8 +1,16 @@
-"""Custom Sphinx extensions for scikit-image's docs."""
+"""Custom Sphinx extensions for scikit-image's docs.
+
+Have a look at the `setup` function to see what kind of functionality is added.
+"""
 
 import re
+from pathlib import Path
 
+from sphinx.util import logging
 from sphinx.directives.other import TocTree
+
+
+logger = logging.getLogger(__name__)
 
 
 def natural_sort_key(item):
@@ -55,5 +63,74 @@ class NaturalSortedTocTree(TocTree):
         return ret
 
 
+RANDOM_JS_TEMPLATE = '''\
+
+   function insert_gallery() {
+       var images = {{IMAGES}};
+       var links = {{LINKS}};
+
+       ix = Math.floor(Math.random() * images.length);
+       document.write(
+'{{GALLERY_DIV}}'.replace('IMG', images[ix]).replace('URL', links[ix])
+       );
+
+       console.log('{{GALLERY_DIV}}'.replace('IMG', images[ix]).replace('URL', links[ix]));
+   };
+
+'''
+
+
+GALLERY_DIV = '''\
+<div class="gallery_image">
+      <a href="URL"><img src="IMG"/></a>
+</div>\
+'''
+
+
+def write_random_js(app, exception):
+    """Generate a javascript snippet that links to a random gallery example."""
+    if app.builder.format != "html":
+        logger.debug(
+            "[skimage_extensions] skipping generation of random.js for non-html build"
+        )
+        return
+
+    build_dir = Path(app.outdir)
+    random_js_path = Path(app.outdir) / "_static/random.js"
+
+    image_urls = []
+    tutorial_urls = []
+    url_root = "https://scikit-image.org/docs/dev/"
+    examples = build_dir.rglob("auto_examples/**/plot_*.html")
+    for example in examples:
+        image_name = f"sphx_glr_{example.stem}_001.png"
+        if not (build_dir / "_images" / image_name).exists():
+            continue
+        image_url = f'{url_root}_images/{image_name}'
+        tutorial_url = f'{url_root}{example.relative_to(build_dir)}'
+        image_urls.append(image_url)
+        tutorial_urls.append(tutorial_url)
+
+    if tutorial_urls == 0:
+        logger.error(
+            "[skimage_extensions] did not find any gallery examples while creating %s",
+            random_js_path
+        )
+        return
+
+    content = RANDOM_JS_TEMPLATE.replace('{{IMAGES}}', str(image_urls))
+    content = content.replace('{{LINKS}}', str(tutorial_urls))
+    content = content.replace('{{GALLERY_DIV}}', ''.join(GALLERY_DIV.split('\n')))
+
+    with open(random_js_path, 'w') as file:
+        file.write(content)
+    logger.info(
+        "[skimage_extensions] created %s with %i possible targets",
+        random_js_path,
+        len(tutorial_urls),
+    )
+
+
 def setup(app):
     app.add_directive('naturalsortedtoctree', NaturalSortedTocTree)
+    app.connect('build-finished', write_random_js)
