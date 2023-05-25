@@ -1,5 +1,5 @@
 # Workflow to build and test against nightly wheels
-name: Nightly
+name: Test Nightly
 
 on:
   [push]
