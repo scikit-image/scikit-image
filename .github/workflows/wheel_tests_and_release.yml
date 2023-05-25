@@ -23,13 +23,7 @@ jobs:
     permissions:
       contents: write # for softprops/action-gh-release to create GitHub release
     name: Release
-    needs:
-      [
-        build_linux_38_and_above_wheels,
-        build_linux_aarch64_wheels,
-        build_macos_wheels,
-        build_windows_wheels,
-      ]
+    needs: call-workflow-build-wheels
     if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
     runs-on: ubuntu-latest
     steps:
