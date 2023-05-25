@@ -26,6 +26,8 @@ Improvements
 API Changes
 -----------
 
+- ``data.image_fetcher`` is now private (gh-6854)
+- ``data.create_image_fetcher`` is now private (gh-6854)
 
 
 Bugfixes

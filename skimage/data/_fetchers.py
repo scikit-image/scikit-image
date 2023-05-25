@@ -69,7 +69,7 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def create_image_fetcher():
+def _create_image_fetcher():
     try:
         import pooch
         # older versions of Pooch don't have a __version__ attribute
@@ -124,7 +124,7 @@ def create_image_fetcher():
     return image_fetcher, data_dir
 
 
-image_fetcher, data_dir = create_image_fetcher()
+_image_fetcher, data_dir = _create_image_fetcher()
 
 
 def _skip_pytest_case_requiring_pooch(data_filename):
@@ -195,10 +195,10 @@ def _fetch(data_filename):
         dataset has not been downloaded yet.
     """
     expected_hash = registry[data_filename]
-    if image_fetcher is None:
+    if _image_fetcher is None:
         cache_dir = osp.dirname(data_dir)
     else:
-        cache_dir = str(image_fetcher.abspath)
+        cache_dir = str(_image_fetcher.abspath)
 
     # Case 1: the file is already cached in `data_cache_dir`
     cached_file_path = osp.join(cache_dir, data_filename)
@@ -212,7 +212,7 @@ def _fetch(data_filename):
         return legacy_file_path
 
     # Case 3: file is not present locally
-    if image_fetcher is None:
+    if _image_fetcher is None:
         _skip_pytest_case_requiring_pooch(data_filename)
         raise ModuleNotFoundError(
             "The requested file is part of the scikit-image distribution, "
@@ -224,7 +224,7 @@ def _fetch(data_filename):
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
     try:
-        cached_file_path = image_fetcher.fetch(data_filename)
+        cached_file_path = _image_fetcher.fetch(data_filename)
         return cached_file_path
     except ConnectionError as err:
         _skip_pytest_case_requiring_pooch(data_filename)
@@ -271,7 +271,7 @@ def download_all(directory=None):
     data directory by inspecting the variable `skimage.data.data_dir`.
     """
 
-    if image_fetcher is None:
+    if _image_fetcher is None:
         raise ModuleNotFoundError(
             "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
@@ -279,23 +279,23 @@ def download_all(directory=None):
             "https://scikit-image.org/docs/stable/install.html"
         )
     # Consider moving this kind of logic to Pooch
-    old_dir = image_fetcher.path
+    old_dir = _image_fetcher.path
     try:
         if directory is not None:
             directory = osp.expanduser(directory)
-            image_fetcher.path = directory
-        _ensure_cache_dir(target_dir=image_fetcher.path)
+            _image_fetcher.path = directory
+        _ensure_cache_dir(target_dir=_image_fetcher.path)
 
-        for data_filename in image_fetcher.registry:
+        for data_filename in _image_fetcher.registry:
             file_path = _fetch(data_filename)
 
             # Copy to `directory` or implicit cache if it is not already there
-            if not file_path.startswith(str(image_fetcher.path)):
-                dest_path = osp.join(image_fetcher.path, data_filename)
+            if not file_path.startswith(str(_image_fetcher.path)):
+                dest_path = osp.join(_image_fetcher.path, data_filename)
                 os.makedirs(osp.dirname(dest_path), exist_ok=True)
                 shutil.copy2(file_path, dest_path)
     finally:
-        image_fetcher.path = old_dir
+        _image_fetcher.path = old_dir
 
 
 def lbp_frontal_face_cascade_filename():
