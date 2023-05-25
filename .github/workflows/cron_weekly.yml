@@ -1,0 +1,67 @@
+# Workflow to build and test against nightly wheels
+name: Test Nightly
+
+on:
+  schedule:
+    # run every Monday at 4am UTC
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  linux-${{ matrix.python-version }}:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build package
+        env:
+          # Set variables here that are used by the build script below
+          # (including those used within tools/github/before_install.sh)
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+        run: |
+          set -ex
+          source tools/github/before_install.sh
+          set -ex
+          if [[ $INSTALL_FROM_SDIST == "1" ]]; then
+              python -m build --no-isolation --skip-dependency-check --sdist .
+              pip install dist/scikit_image-*.tar.gz
+          else
+              pip install -vv --no-build-isolation .;
+          fi
+
+      - name: Run tests
+        env:
+          # Set variables here that are used by the run script below
+          # (including those used within tools/github/script.sh)
+          # Also includes the EAGER_IMPORT and
+          # SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL env vars that skimage checks.
+          PIP_FLAGS: >-
+            --extra-index-url
+            https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+            --upgrade
+            --pre
+          MINIMUM_REQUIREMENTS: [0]
+          BUILD_DOCS: [1]
+          PYTHONOPTIMIZE: [0]
+          TEST_EXAMPLES: [0]
+          OPTIONAL_DEPS: [0]
+          OPTIONS_NAME: ["default"]
+          INSTALL_FROM_SDIST: [0]
+          WITHOUT_POOCH: [0]
+          SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: [0]
+          EAGER_IMPORT: [0]
+        run: |
+          source tools/github/script.sh
