@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   call-workflow-build-wheels:
-    uses: ./.github/workflows/build_wheels.yml
+    uses: ./.github/workflows/wheels_recipe.yml
 
   upload_anaconda:
     permissions:
