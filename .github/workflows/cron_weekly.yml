@@ -2,9 +2,10 @@
 name: Test Nightly
 
 on:
-  schedule:
-    # run every Monday at 4am UTC
-    - cron: "0 4 * * 1"
+  [push]
+  #  schedule:
+  #    # run every Monday at 4am UTC
+  #    - cron: "0 4 * * 1"
 
 permissions:
   contents: read
