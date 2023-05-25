@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
+from scipy.spatial.transform import Rotation
 
 
 def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
@@ -61,6 +62,165 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
                (z / float(c)) ** 2) - 1
 
     return arr
+
+
+def ellipsoid_coords(center, axis_lengths, *, shape=None, angles=None,
+                     axes=None, intrinsic=True, spacing=None):
+    r"""Generate coordinates of voxels within ellipsoid.
+
+    Parameters
+    ----------
+    center : (3,) array-like of float
+        Center coordinate of ellipsoid. The values will
+        be divided by ``spacing`` inside the function.
+    axis_lengths : (3,) array-like of float
+        Axis lengths of ellipsoid. The order is (z, y, x). The values will be
+        divided by ``spacing`` inside the function.
+    shape : tuple of int, length 3, optional
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates. This is useful for ellipsoids which exceed the
+        image size. By default the full extent of the ellipsoid is used.
+    angles : iterable of float, length 3, optional (default None)
+        Rotation angles to rotate the ellipsoid. The axes about which to
+        produce the rotations are specified by ``axes``. No rotation will be
+        applied if ``angles`` is ``None``.
+    axes : iterable of int, length 3, optional (default None)
+        Axes about which to produce the rotations.
+        Defaults to ``[0, 1, 2]``.
+    intrinsic : bool, optional
+        Specify if the rotations are intrinsic (``True``) or extrinsic
+        (``False``).
+
+        - *intrinsic*: rotations occur about the rotating coordinate system
+        - *extrinsic*: rotations occur about the original coordinate system
+    spacing : (3,) array-like of float, optional
+        Spacing in each spatial dimension.  Defaults to 1.
+
+    Returns
+    -------
+    dd, rr, cc : ndarray of int
+        Voxel coordinates of ellipsoid.
+        May be used to index into an array, e.g.
+        ``img[dd, rr, cc] = 1``
+
+    Notes
+    ------
+    ``angles`` are defined as the Euler angles based on ``axes`` and
+    ``intrinsic`` parameters. The following example shows the ``0-2-0``
+    (``z-x-z``) intrinsic rotations.
+
+    .. math::
+
+        R(\phi) = \begin{bmatrix}
+                      1 &        0 &         0 \\
+                      0 & \cos\phi & -\sin\phi \\
+                      0 & \sin\phi &  \cos\phi \\
+                  \end{bmatrix}
+
+        R(\theta) = \begin{bmatrix}
+                        \cos\theta & -\sin\theta & 0 \\
+                        \sin\theta &  \cos\theta & 0 \\
+                                 0 &           0 & 1 \\
+                    \end{bmatrix}
+
+        R(\psi) = \begin{bmatrix}
+                      1 &        0 &         0 \\
+                      0 & \cos\psi & -\sin\psi \\
+                      0 & \sin\psi &  \cos\psi \\
+                           \end{bmatrix}
+
+        \\
+
+        R(\phi, \theta, \psi) = (R(\psi)R(\theta)R(\phi))^\intercal
+
+    """
+
+    if len(center) != 3:
+        raise ValueError(f'len(center) should be 3 but got {len(center)}')
+    center = np.array(center)
+
+    if len(axis_lengths) != 3:
+        raise ValueError(
+            f'len(axis_lengths) should be 3 but got {len(axis_lengths)}')
+    axis_lengths = np.array(axis_lengths)
+
+    if angles is None:
+        R = np.eye(3)
+    else:
+        if len(angles) != 3:
+            raise ValueError(
+                'len(angles) should be 3 but got',
+                len(angles))
+        if axes is None:
+            axes = range(3)
+        if (len(axes) != 3
+            or not set(axes).issubset(range(3))
+            or axes[0] == axes[1]
+                or axes[1] == axes[2]):
+            raise ValueError(f'axes: {axes} is invalid')
+
+        axes_str = 'ZYX' if intrinsic else 'zyx'
+        seq = ''.join(axes_str[axis] for axis in axes)
+
+        # Generate a rotation matrix. The order of the elements needs to be
+        # reversed so that it follows the (z, y, x) order.
+        R = Rotation.from_euler(seq, angles).as_matrix()[::-1, ::-1]
+
+    if spacing is None:
+        spacing = np.ones(3)
+    elif len(spacing) != 3:
+        raise ValueError(f'len(spacing) should be 3 but got {len(spacing)}')
+    spacing = np.array(spacing)
+    scaled_center = center / spacing
+
+    # The upper_left_bottom and lower_right_top corners of the smallest cuboid
+    # containing the ellipsoid.
+    factor = np.array([
+        [i, j, k] for k in (-1, 1) for j in (-1, 1) for i in (-1, 1)
+    ]).T
+    axis_lengths_rot = np.abs(
+        np.diag(1. / spacing) @ (R @ (np.diag(axis_lengths) @ factor))
+    ).max(axis=1)
+    upper_left_bottom = np.ceil(scaled_center - axis_lengths_rot).astype(int)
+    lower_right_top = np.floor(scaled_center + axis_lengths_rot).astype(int)
+
+    if shape is not None:
+        # Constrain upper_left and lower_ight by shape boundary.
+        upper_left_bottom = np.maximum(upper_left_bottom, np.array([0, 0, 0]))
+        lower_right_top = np.minimum(lower_right_top, np.array(shape[:3]) - 1)
+
+    bounding_shape = lower_right_top - upper_left_bottom + 1
+
+    d_lim, r_lim, c_lim = np.ogrid[:float(bounding_shape[0]),
+                                   :float(bounding_shape[1]),
+                                   :float(bounding_shape[2])]
+    d_org, r_org, c_org = scaled_center - upper_left_bottom
+    d_rad, r_rad, c_rad = axis_lengths
+    conversion_matrix = R.T @ np.diag(spacing)
+    d, r, c = (d_lim - d_org), (r_lim - r_org), (c_lim - c_org)
+    distances = (
+        ((d * conversion_matrix[0, 0]
+          + r * conversion_matrix[0, 1]
+          + c * conversion_matrix[0, 2]) / d_rad) ** 2 +
+        ((d * conversion_matrix[1, 0]
+          + r * conversion_matrix[1, 1]
+          + c * conversion_matrix[1, 2]) / r_rad) ** 2 +
+        ((d * conversion_matrix[2, 0]
+          + r * conversion_matrix[2, 1]
+          + c * conversion_matrix[2, 2]) / c_rad) ** 2
+    )
+    if distances.size == 0:
+        return (np.empty(0, dtype=int),
+                np.empty(0, dtype=int),
+                np.empty(0, dtype=int))
+    dd, rr, cc = np.nonzero(distances < 1)
+    dd.flags.writeable = True
+    rr.flags.writeable = True
+    cc.flags.writeable = True
+    dd += upper_left_bottom[0]
+    rr += upper_left_bottom[1]
+    cc += upper_left_bottom[2]
+    return dd, rr, cc
 
 
 def ellipsoid_stats(a, b, c):
