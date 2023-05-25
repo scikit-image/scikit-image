@@ -104,7 +104,7 @@ class Node:
             return None
 
     @property
-    def required_parameter_count(self):
+    def required_parameter_count(self) -> ty.Union[int, None]:
         """Number of parameters in a signature for which a value must be given.
 
         `None` if `obj` has no signature.
@@ -119,7 +119,7 @@ class Node:
             return None
 
     @property
-    def positional_only_parameter_count(self):
+    def positional_only_parameter_count(self) -> ty.Union[int, None]:
         """Number of positional-only parameters in a signature.
 
         `None` if `obj` has no signature.
@@ -134,7 +134,7 @@ class Node:
             return None
 
     @property
-    def keyword_only_parameter_count(self):
+    def keyword_only_parameter_count(self) -> ty.Union[int, None]:
         """Number of keyword-only parameters in a signature.
 
         `None` if `obj` has no signature.
@@ -167,11 +167,11 @@ class Node:
         return self.member_path.count(".")
 
     @property
-    def is_alias(self):
+    def is_alias(self) -> bool:
         return self.source_path == self.member_path
 
     @property
-    def is_public(self):
+    def is_public(self) -> bool:
         return not any(node.name.startswith("_") for node in self.nodes)
 
     def __repr__(self) -> str:
@@ -208,7 +208,11 @@ class Node:
         from numpydoc.docscrape import get_doc_object
 
         table = []
-        docstring = get_doc_object(self.obj)
+        try:
+            docstring = get_doc_object(self.obj)
+        except ValueError as e:
+            logger.warning("couldn't parse docstring of %s: %r", self.source_path, e)
+            docstring = {}
 
         def replace_empty_sig_value(x):
             return "" if x is inspect.Signature.empty else repr(x)
@@ -220,7 +224,7 @@ class Node:
             parameters = {}
 
         for i, (name, param) in enumerate(parameters.items()):
-            for docstring_param in docstring["Parameters"]:
+            for docstring_param in docstring.get("Parameters", []):
                 if docstring_param.name == name:
                     ds_type = docstring_param.type
                     break
@@ -244,7 +248,7 @@ class Node:
             table.append(parameter_spec)
 
         # Extract returns
-        for i, docstring_return in enumerate(docstring["Returns"]):
+        for i, docstring_return in enumerate(docstring.get("Returns", [])):
             return_spec = {
                 "source_path": self.source_path,
                 "kind": "return",
@@ -267,7 +271,7 @@ def _unwrap_callable(obj):
 
 
 def _has_duplicate(objects: ty.Iterable) -> bool:
-    """Return True if any two objects in a sequence are identical."""
+    """Return True if any two objects in an iterable are identical."""
     for a, b in combinations(objects, 2):
         if a is b:
             return True
@@ -414,55 +418,9 @@ class MemberWalker:
         return False
 
 
-class PublicMemberWalker(MemberWalker):
-    """Walk the public member tree of a given Python object.
-
-    Similar to `ApiWalker` but stop at private members. Private members are those whose
-    name is prefixed with at least one underscore.
-    """
-
-    def _stop_before_recursion(
-        self, node: Node, member: object, member_name: str
-    ) -> bool:
-        if member_name.startswith("_"):
-            return True
-        return super()._stop_before_recursion(node, member, member_name)
-
-
-def warn_inconsistent__all__(nodes: ty.Iterable[Node]) -> None:
-    """Warn about inconsistencies in API declared by ``__all__`` and import paths.
-
-    Compares the public API as defined by the `__all__` attribute of modules and the
-    API as defined by the import path.
-    """
-    # Build set of API paths as defined by __all__
-    api_defined_by__all__ = set()
-    for node in nodes:
-        if inspect.ismodule(node.obj):
-            if not hasattr(node.obj, "__all__"):
-                logger.warning("public module %r without __all__", node.member_path)
-                continue
-            api_defined_by__all__.update(
-                f"{node.member_path}.{name}" for name in node.obj.__all__
-            )
-
-    # Iterate API that is reachable via public imports
-    for node in nodes:
-        if inspect.ismodule(node.obj):
-            continue
-        if node.member_path in api_defined_by__all__:
-            api_defined_by__all__.remove(node.member_path)
-        elif node.parent and inspect.ismodule(node.parent.obj):
-            logger.warning("public object %r not included in __all__", node.member_path)
-
-    for member_path in api_defined_by__all__:
-        logger.warning(
-            "public object %r in __all__ was not found in source", member_path
-        )
-
-
 def tree_to_csv(path: Path, nodes: ty.Iterable[Node]):
     """Export general node information into a CSV file."""
+    node_count = 0
     with path.open("w") as file:
         writer = None
         for node in nodes:
@@ -471,11 +429,15 @@ def tree_to_csv(path: Path, nodes: ty.Iterable[Node]):
                 writer = csv.DictWriter(file, table[0].keys())
                 writer.writeheader()
             writer.writerows(table)
+            print("· " * node.depth + str(node))
+            node_count += 1
+    print(f"Found {node_count} nodes in tree")
 
 
 def params_to_csv(path: Path, nodes: ty.Iterable[Node]):
     """Export information on parameters and returns into a CSV file."""
     already_documented = set()
+    param_count = 0
     with path.open("w") as file:
         writer = None
         for node in nodes:
@@ -488,7 +450,14 @@ def params_to_csv(path: Path, nodes: ty.Iterable[Node]):
             if writer is None:
                 writer = csv.DictWriter(file, table[0].keys())
                 writer.writeheader()
+            for row in table:
+                print(
+                    f"{row['source_path']} {row['position']}: "
+                    f"{row['name']} : {row['kind']} = {row['default']}",
+                )
             writer.writerows(table)
+            param_count += len(table)
+    print(f"Found {param_count} parameters")
 
 
 def cli(func: ty.Callable) -> ty.Callable:
@@ -500,9 +469,6 @@ def cli(func: ty.Callable) -> ty.Callable:
     parser.add_argument("module")
     parser.add_argument(
         "--csv", dest="export_csv", action="store_true", help="export results to CSV"
-    )
-    parser.add_argument(
-        "--private", action="store_true", help="include private members"
     )
     parser.add_argument(
         "--max-depth", type=int, help="maximal recursion depth, no limit if not given"
@@ -525,9 +491,7 @@ def cli(func: ty.Callable) -> ty.Callable:
 
 
 @cli
-def main(
-    module: str, export_csv: bool, private: bool, max_depth: int | None, verbosity: int
-):
+def main(module: str, export_csv: bool, max_depth: int | None, verbosity: int):
     """Create an API table for a given Python package."""
     log_file = Path(tempfile.gettempdir()) / (Path(__file__).name + ".log")
     print(f"Logging to {log_file}")
@@ -538,28 +502,13 @@ def main(
     )
 
     api_root = importlib.import_module(module)
-    if private:
-        walker = MemberWalker(root_path=module, root_obj=api_root, max_depth=max_depth)
-    else:
-        walker = PublicMemberWalker(
-            root_path=module, root_obj=api_root, max_depth=max_depth
-        )
-
-    nodes = []
-    print("\nMember tree:")
-    for node in walker:
-        print("  " * node.depth + str(node))
-        nodes.append(node)
-    print(f"\nFound {len(nodes)} nodes in tree")
-
-    if not private:
-        warn_inconsistent__all__(nodes)
+    walker = MemberWalker(root_path=module, root_obj=api_root, max_depth=max_depth)
 
     if export_csv:
         tree_csv = Path.cwd() / f"{module}_tree.csv"
         params_csv = Path.cwd() / f"{module}_params.csv"
-        tree_to_csv(tree_csv, nodes)
-        params_to_csv(params_csv, nodes)
+        tree_to_csv(tree_csv, walker)
+        params_to_csv(params_csv, walker)
         print(f"\nCreated\n{tree_csv}\n{params_csv}")
 
 
