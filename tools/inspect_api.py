@@ -95,22 +95,68 @@ class Node:
     def parameter_count(self) -> int:
         """Number of parameters in the signature.
 
-        0 if `obj` has no signature.
+        `None` if `obj` has no signature.
         """
         signature = self.signature
         if signature:
             return len(signature.parameters)
         else:
-            return 0
+            return None
+
+    @property
+    def required_parameter_count(self):
+        """Number of parameters in a signature for which a value must be given.
+
+        `None` if `obj` has no signature.
+        """
+        signature = self.signature
+        if signature:
+            return sum(
+                1 for p in self.signature.parameters.values()
+                if p.default is not inspect.Parameter.empty
+            )
+        else:
+            return None
+
+    @property
+    def positional_only_parameter_count(self):
+        """Number of positional-only parameters in a signature.
+
+        `None` if `obj` has no signature.
+        """
+        signature = self.signature
+        if signature:
+            return sum(
+                1 for p in self.signature.parameters.values()
+                if p.kind is inspect.Parameter.POSITIONAL_ONLY
+            )
+        else:
+            return None
+
+    @property
+    def keyword_only_parameter_count(self):
+        """Number of keyword-only parameters in a signature.
+
+        `None` if `obj` has no signature.
+        """
+        signature = self.signature
+        if signature:
+            return sum(
+                1 for p in self.signature.parameters.values()
+                if p.kind is inspect.Parameter.KEYWORD_ONLY
+            )
+        else:
+            return None
 
     @property
     def return_count(self) -> int:
         """Number of return values that are documented in the docstring.
 
-        0 if none are documented in `obj`'s docstring.
+        None if none are documented in `obj`'s docstring.
         """
+        if self.signature is None:
+            return None
         from numpydoc.docscrape import get_doc_object
-
         docstring = get_doc_object(self.obj)
         return_spec = docstring["Returns"]
         return len(return_spec)
@@ -119,6 +165,14 @@ class Node:
     def depth(self) -> int:
         """The depth of the node in the import tree."""
         return self.member_path.count(".")
+
+    @property
+    def is_alias(self):
+        return self.source_path == self.member_path
+
+    @property
+    def is_public(self):
+        return not any(node.name.startswith("_") for node in self.nodes)
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.member_path!r}>"
@@ -136,11 +190,16 @@ class Node:
             "source_path": self.source_path,
             "member_path (unique)": self.member_path,
             "name": self.name,
+            "is_alias": self.is_alias,
+            "is_public": self.is_public,
             "import_depth": self.depth,
             "type": type(self.obj).__name__,
+            "signature": str(self.signature) if self.signature else None,
             "param_count": self.parameter_count,
             "return_count": self.return_count,
-            "signature": str(self.signature) if self.signature else "",
+            "required_param_count": self.required_parameter_count,
+            "positional_only_param_count": self.positional_only_parameter_count,
+            "keyword_only_param_count": self.keyword_only_parameter_count,
         }
         return [table]
 
@@ -152,7 +211,7 @@ class Node:
         docstring = get_doc_object(self.obj)
 
         def replace_empty_sig_value(x):
-            return "" if x is inspect.Signature.empty else x
+            return "" if x is inspect.Signature.empty else repr(x)
 
         # Extract parameters
         try:
