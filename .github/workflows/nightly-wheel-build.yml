@@ -1,0 +1,32 @@
+name: Nightly Wheel builder
+on:
+  workflow_dispatch:
+  schedule:
+    # this cron is ran every Sunday at midnight UTC
+    - cron: "0 0 * * 0"
+env:
+  CIBW_BUILD_VERBOSITY: 2
+  CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
+  CIBW_TEST_COMMAND: pytest --pyargs skimage
+  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+
+permissions:
+  contents: read
+
+jobs:
+  call-workflow-build-wheels:
+    uses: ./.github/workflows/build_wheels.yml
+
+  upload_anaconda:
+    permissions:
+      contents: write # for softprops/action-gh-release to create GitHub release
+    name: Release
+    needs: call-workflow-build-wheels
+    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload wheel
+        uses: scientific-python/upload-nightly-action@main
+        with:
+          artifacts_path: dist
+          anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}

@@ -45,14 +45,10 @@ jobs:
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
             python-version: 3.11
-            PIP_FLAGS: >-
-              --extra-index-url
-              https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
-              --upgrade
-              --pre
+            PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
-            # test nightly wheels
-            OPTIONS_NAME: "nightly"
+            # test prereleases
+            OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: 3.9
             BUILD_DOCS: 1
