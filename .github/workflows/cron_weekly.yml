@@ -1,8 +1,9 @@
 # Workflow to build and test against nightly wheels
-name: Test Nightly
+name: Nightly
 
 on:
   [push]
+  #
   #  schedule:
   #    # run every Monday at 4am UTC
   #    - cron: "0 4 * * 1"
@@ -11,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  linux-${{ matrix.python-version }}:
+  linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
