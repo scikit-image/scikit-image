@@ -581,6 +581,12 @@ def test_union_differing_types():
         tform1.__add__(tform2)
 
 
+def _estimated_piecewise_affine_transform():
+    tform = PiecewiseAffineTransform()
+    tform.estimate(SRC, DST)
+    return tform
+
+
 @pytest.mark.parametrize(
     "tform",
     [
@@ -596,7 +602,7 @@ def test_union_differing_types():
                 rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
             ).params
         ),
-        ((t := PiecewiseAffineTransform()).estimate(SRC, DST) and t),
+        _estimated_piecewise_affine_transform(),
     ],
 )
 def test_inverse_all_transforms(tform):
