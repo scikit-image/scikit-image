@@ -1095,23 +1095,26 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         """
         coords = np.asarray(coords)
-        out = np.empty_like(coords, np.float64)
 
         # determine triangle index for each coordinate
         simplex = self._tesselation.find_simplex(coords)
 
+        # stack of affine transforms to be applied to every coord
+        affines = np.stack([affine.params for affine in self.affines])[simplex]
+
+        # convert coords to homgeneous points
+        points = np.c_[coords, np.ones((coords.shape[0], 1))]
+
+        # apply affine transform to every point
+        result = np.einsum("ikj,ij->ik", affines, points)
+
         # coordinates outside of mesh
-        out[simplex == -1, :] = -1
+        result[simplex == -1, :] = -1
 
-        for index in range(len(self._tesselation.simplices)):
-            # affine transform for triangle
-            affine = self.affines[index]
-            # all coordinates within triangle
-            index_mask = simplex == index
+        # convert back to 2d coords
+        result = result[:, :2]
 
-            out[index_mask, :] = affine(coords[index_mask, :])
-
-        return out
+        return result
 
     @property
     def inverse(self):
