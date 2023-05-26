@@ -26,6 +26,12 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: wheels
+          path: ./dist
+
       - name: Upload wheel
         uses: scientific-python/upload-nightly-action@main
         with:
