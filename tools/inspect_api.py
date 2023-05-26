@@ -168,7 +168,7 @@ class Node:
 
     @property
     def is_alias(self) -> bool:
-        return self.source_path == self.member_path
+        return self.source_path != self.member_path
 
     @property
     def is_public(self) -> bool:
