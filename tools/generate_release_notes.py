@@ -35,7 +35,6 @@ import os
 import re
 import sys
 from collections import OrderedDict
-from contextlib import contextmanager
 from datetime import datetime
 from itertools import chain
 from os.path import abspath
@@ -45,35 +44,13 @@ from git import Repo
 from github import Github
 from tqdm import tqdm
 
-try:
-    import requests
-    import requests_cache
+import requests_cache
 
-    requests_cache.install_cache(
-        'github_cache', backend='sqlite', expire_after=3600
-    )
-    # setup cache for speedup execution and reduce number of requests to GitHub API
-    # cache will expire after 1h (3600s)
-
-    @contextmanager
-    def short_cache(new_time):
-        if requests_cache.get_cache() is None:
-            yield
-            return
-        session = requests.Session()
-        old_time = session.expire_after
-        session.expire_after = new_time
-        try:
-            yield
-        finally:
-            session.expire_after = old_time
-
-except ImportError:
-
-    @contextmanager
-    def short_cache(new_time):
-        """dummy context manager"""
-        yield
+requests_cache.install_cache(
+    'github_cache', backend='sqlite', expire_after=3600
+)
+# setup cache for speedup execution and reduce number of requests to GitHub API
+# cache will expire after 1h (3600s)
 
 
 pr_num_pattern = re.compile(r'\(#(\d+)\)(?:$|\n)')
@@ -137,17 +114,16 @@ release_branch_count = (
     len(list(get_commits_to_ancestor(common_ancestor, args.from_commit))) + 1
 )
 
-with short_cache(60):
-    all_commits = list(
-        tqdm(
-            repository.get_commits(
-                sha=args.to_commit, since=previous_tag_date
-            ),
-            desc=f'Getting all commits between {remote_commit.sha} '
-            f'and {args.to_commit}',
-            total=new_commits_count,
-        )
+all_commits = list(
+    tqdm(
+        repository.get_commits(
+            sha=args.to_commit, since=previous_tag_date
+        ),
+        desc=f'Getting all commits between {remote_commit.sha} '
+        f'and {args.to_commit}',
+        total=new_commits_count,
     )
+)
 branch_commit = list(
     tqdm(
         repository.get_commits(
@@ -292,7 +268,8 @@ highlights['Other Pull Requests'] = other_pull_requests
 
 
 # Now generate the release notes
-title = f'# napari {args.version}'
+title = f'scikit-image {args.version} release notes'
+title = f'{title}\n{len(title) * "="}'
 print(title)
 
 print(
@@ -312,9 +289,10 @@ https://scikit-image.org
 )
 
 for section, pull_request_dicts in highlights.items():
-    print(f'## {section}\n')
+    print(f'{section}\n{len(section) * "-"}')
     for number, pull_request_info in pull_request_dicts.items():
-        print(f'- {pull_request_info["summary"]} (#{number})')
+        pr_link = f"{GH}/{GH_USER}/{GH_REPO}/pull/{number}"
+        print(f'- {pull_request_info["summary"]} (`#{number} <{pr_link}>`_).')
     print()
 
 
@@ -338,5 +316,5 @@ for section_name, contributor_set in contributors.items():
 
     for c in sorted(contributor_set, key=lambda x: users[x].lower()):
         commit_link = f"{GH}/{GH_USER}/{GH_REPO}/commits?author={c}"
-        print(f"- [{users[c]}]({commit_link}) - @{c}")
+        print(f"- `{users[c]} (@{c}) <{commit_link}>`_")
     print()
