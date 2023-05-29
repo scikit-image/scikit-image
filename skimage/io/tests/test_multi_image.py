@@ -24,6 +24,7 @@ def imgs():
 
     reset_plugins()
 
+
 def test_shapes(imgs):
     imgs = imgs[-1]
     assert imgs[0][0].shape == imgs[0][1].shape

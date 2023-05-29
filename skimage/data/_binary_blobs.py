@@ -1,10 +1,13 @@
 import numpy as np
 
+from .._shared.utils import deprecate_kwarg
 from .._shared.filters import gaussian
 
 
+@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
-                 volume_fraction=0.5, seed=None):
+                 volume_fraction=0.5, rng=None):
     """
     Generate synthetic binary image with several rounded blob-like objects.
 
@@ -20,12 +23,10 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
     volume_fraction : float, default 0.5
         Fraction of image pixels covered by the blobs (where the output is 1).
         Should be in [0, 1].
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
-        used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
     Returns
     -------
@@ -51,7 +52,7 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
     # filters is quite an expensive import since it imports all of scipy.signal
     # We lazy import here
 
-    rs = np.random.default_rng(seed)
+    rs = np.random.default_rng(rng)
     shape = tuple([length] * n_dim)
     mask = np.zeros(shape)
     n_pts = max(int(1. / blob_size_fraction) ** n_dim, 1)

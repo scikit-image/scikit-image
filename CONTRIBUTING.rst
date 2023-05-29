@@ -11,7 +11,7 @@ which of the following challenges you'd like to solve.
 * If you're looking for something to implement or to fix, you can browse the
   `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
 * The technical detail of the `development process`_ is summed up below.
-  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
+  Refer to the :doc:`gitwash <../gitwash/index>` for a step-by-step tutorial.
 
 .. contents::
    :local:
@@ -95,7 +95,7 @@ Here's the long and short of it:
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
-<gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
+<../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
 4. Review process:
 

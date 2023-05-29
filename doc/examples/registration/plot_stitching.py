@@ -71,7 +71,7 @@ img_list = [transform.rotate(img, angle=a, center=c)[40:240, 50:350]
             for a, c in zip(angle_list, center_list)]
 ref_img = img_list[0].copy()
 
-img_list = [util.random_noise(filters.gaussian(im, 1.1), var=5e-4, seed=seed)
+img_list = [util.random_noise(filters.gaussian(im, 1.1), var=5e-4, rng=seed)
             for seed, im in enumerate(img_list)]
 
 psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])

@@ -3,6 +3,7 @@ calculations.
 """
 
 from .colorconv import (convert_colorspace,
+                        xyz_tristimulus_values,
                         rgba2rgb,
                         rgb2hsv,
                         hsv2rgb,
@@ -70,6 +71,7 @@ from .delta_e import (deltaE_cie76,
 
 
 __all__ = ['convert_colorspace',
+           'xyz_tristimulus_values',
            'rgba2rgb',
            'rgb2hsv',
            'hsv2rgb',

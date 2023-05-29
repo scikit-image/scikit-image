@@ -19,6 +19,7 @@ python_sources = [
   '_map_array.py',
   '_montage.py',
   '_regular_grid.py',
+  '_slice_along_axes.py',
   'apply_parallel.py',
   'arraycrop.py',
   'compare.py',

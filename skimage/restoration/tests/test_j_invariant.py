@@ -9,7 +9,7 @@ from skimage.data import camera, chelsea
 from skimage.metrics import mean_squared_error as mse
 from skimage.restoration import (calibrate_denoiser,
                                  denoise_wavelet)
-from skimage.restoration.j_invariant import _invariant_denoise
+from skimage.restoration.j_invariant import denoise_invariant
 from skimage.util import img_as_float, random_noise
 
 test_img = img_as_float(camera())
@@ -23,7 +23,7 @@ _denoise_wavelet = functools.partial(denoise_wavelet, rescale_sigma=True)
 
 
 def test_invariant_denoise():
-    denoised_img = _invariant_denoise(noisy_img, _denoise_wavelet)
+    denoised_img = denoise_invariant(noisy_img, _denoise_wavelet)
 
     denoised_mse = mse(denoised_img, test_img)
     original_mse = mse(noisy_img, test_img)
@@ -32,7 +32,7 @@ def test_invariant_denoise():
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_invariant_denoise_color(dtype):
-    denoised_img_color = _invariant_denoise(
+    denoised_img_color = denoise_invariant(
         noisy_img_color.astype(dtype), _denoise_wavelet,
         denoiser_kwargs=dict(channel_axis=-1))
     denoised_mse = mse(denoised_img_color, test_img_color)
@@ -42,7 +42,7 @@ def test_invariant_denoise_color(dtype):
 
 
 def test_invariant_denoise_3d():
-    denoised_img_3d = _invariant_denoise(noisy_img_3d, _denoise_wavelet)
+    denoised_img_3d = denoise_invariant(noisy_img_3d, _denoise_wavelet)
 
     denoised_mse = mse(denoised_img_3d, test_img_3d)
     original_mse = mse(noisy_img_3d, test_img_3d)
@@ -58,8 +58,8 @@ def test_calibrate_denoiser_extra_output():
         extra_output=True
     )
 
-    all_denoised = [_invariant_denoise(noisy_img, _denoise_wavelet,
-                                       denoiser_kwargs=denoiser_kwargs)
+    all_denoised = [denoise_invariant(noisy_img, _denoise_wavelet,
+                                      denoiser_kwargs=denoiser_kwargs)
                     for denoiser_kwargs in parameters_tested]
 
     ground_truth_losses = [mse(img, test_img) for img in all_denoised]
