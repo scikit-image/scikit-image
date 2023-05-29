@@ -1,17 +1,10 @@
 import numpy as np
 import skimage.data as data
-from skimage.data._fetchers import image_fetcher
+from skimage.data._fetchers import _image_fetcher
 from skimage import io
 from skimage._shared.testing import assert_equal, assert_almost_equal, fetch
 import os
 import pytest
-
-
-def test_data_dir():
-    # data_dir should be a directory people can use as a standard directory
-    # https://github.com/scikit-image/scikit-image/pull/3945#issuecomment-498141893
-    data_dir = data.data_dir
-    assert 'astronaut.png' in os.listdir(data_dir)
 
 
 def test_download_all_with_pooch():
@@ -28,8 +21,9 @@ def test_download_all_with_pooch():
     # lower speed connections.
     # https://github.com/scikit-image/scikit-image/pull/4666/files/26d5138b25b958da6e97ebf979e9bc36f32c3568#r422604863
     data_dir = data.data_dir
-    if image_fetcher is not None:
+    if _image_fetcher is not None:
         data.download_all()
+        assert 'astronaut.png' in os.listdir(data_dir)
         assert len(os.listdir(data_dir)) > 50
     else:
         with pytest.raises(ModuleNotFoundError):
@@ -201,7 +195,7 @@ def test_vortex():
 
 
 @pytest.mark.parametrize(
-    'function_name', ['create_image_fetcher', 'file_hash', 'image_fetcher']
+    'function_name', ['file_hash',]
 )
 def test_fetchers_are_public(function_name):
     # Check that the following functions that are only used indirectly in the

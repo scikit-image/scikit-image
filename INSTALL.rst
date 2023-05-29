@@ -22,10 +22,11 @@ Supported platforms
 ------------------------------------------------------------------------------
 
 - Windows 64-bit on x86 processors
-- Mac OS X on x86 processors
+- macOS on x86 and M (ARM) processors
 - Linux 64-bit on x86 processors
 
-For information on other platforms, see `other platforms <#other-platforms>`_.
+While we do not officially support other platforms, you could still
+try `building from source <#building-from-source>`_.
 
 Version check
 ------------------------------------------------------------------------------
@@ -48,28 +49,6 @@ or, from the command line:
 
 You'll see the version number if ``scikit-image`` is installed and
 an error message otherwise.
-
-Scientific Python distributions
-------------------------------------------------------------------------------
-
-In a single install these give you Python,
-``scikit-image`` and libraries it depends on, and other useful scientific
-packages. They install into an isolated environment, so they won't conflict
-with any existing installed programs.
-
-Drawbacks are that the install can be large and you may not get
-the most recent ``scikit-image``.
-
-We recommend one of these distributions:
-
-- `Anaconda <https://www.anaconda.com/distribution/>`_
-- `Python(x,y) <https://python-xy.github.io/>`_
-- `WinPython <https://winpython.github.io/>`_
-
-When using the ``scikit-image``
-documentation, make sure it's for the version you've installed (see
-`Version check <#version-check>`_ above).
-
 
 Installation via pip and conda
 ------------------------------------------------------------------------------
@@ -176,45 +155,6 @@ is installed and then run this command:
 
 or call ``download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
-
-Other platforms
-------------------------------------------------------------------------------
-
-We still support Windows 32-bit on x86 processors but urge switching
-to Windows 64-bit.
-
-Unsupported platforms include:
-
-1. Linux on 32-bit x86 processors.
-2. Linux on 32-bit on ARM processors (Raspberry Pi running Raspbian):
-
-   - While we do not officially support this distribution, we point users to
-     `piwheels <https://wwww.piwheels.org>`_
-     and their
-     `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
-
-   - You may need to install additional system dependencies listed for
-     `imagecodecs <https://www.piwheels.org/project/imagecodecs/>`_.
-     See
-     `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>`_.
-
-3. Linux on 64-bit ARM processors (Nvidia Jetson):
-
-   - Follow the conversation on
-     `issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
-
-Although these platforms lack official support, many of the core
-developers have experience with them and can help with questions.
-
-If you want to install on an unsupported platform, try
-`building from source <#building-from-source>`_.
-
-Tell us which other platforms you'd like to see ``scikit-image`` on!
-We are very interested in how ``scikit-image`` gets
-`used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
-
-If you'd like to package ``scikit-image`` for an as-yet-unsupported platform,
-`reach out on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
 
 
 Additional help
@@ -378,7 +318,7 @@ testing framework, with tests located in the various
 
 Our testing requirements are listed below:
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 
@@ -452,27 +392,27 @@ Full requirements list
 ----------------------
 **Build Requirements**
 
-.. include:: ../../requirements/build.txt
+.. include:: ../../../requirements/build.txt
    :literal:
 
 **Runtime Requirements**
 
-.. include:: ../../requirements/default.txt
+.. include:: ../../../requirements/default.txt
    :literal:
 
 **Test Requirements**
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 **Documentation Requirements**
 
-.. include:: ../../requirements/docs.txt
+.. include:: ../../../requirements/docs.txt
    :literal:
 
 **Developer Requirements**
 
-.. include:: ../../requirements/developer.txt
+.. include:: ../../../requirements/developer.txt
    :literal:
 
 **Data Requirements**
@@ -480,7 +420,7 @@ Full requirements list
 The full selection of demo datasets is only available with the
 following installed:
 
-.. include:: ../../requirements/data.txt
+.. include:: ../../../requirements/data.txt
    :literal:
 
 **Optional Requirements**
@@ -503,7 +443,7 @@ functionality is only available with the following installed:
     The ``dask`` module is used to speed up certain functions.
 
 
-.. include:: ../../requirements/optional.txt
+.. include:: ../../../requirements/optional.txt
   :literal:
 
 

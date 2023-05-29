@@ -203,7 +203,7 @@ def structural_similarity(im1, im2,
         data_range = dmax - dmin
         if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
             warn("Setting data_range based on im1.dtype. " +
-                 ("data_range = %.0f. " % data_range) +
+                 f"data_range = {data_range:.0f}. " +
                  "Please specify data_range explicitly to avoid mistakes.", stacklevel=2)
 
     ndim = im1.ndim

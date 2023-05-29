@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 3298ddab3c13dd77d6ce1fc0baf97691430d84b0 # v4.3.0
+    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # v4.4.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -23,12 +23,13 @@ repos:
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 6ba454799f284b13ccd53ca2adaf4848da6d3509 # v0.0.240
+    rev: f6346ef27faac608d493bf3926528b308d175d9e # v0.0.261
     hooks:
       - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: 51998cd6d59a93f1f01678e2ce722873eb8ca7af # v0.12.2
+    rev: ee720d6332a996d755b8919de55fc75d408be768 # v0.15.0
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
@@ -39,4 +40,4 @@ repos:
         name: pyproject.toml
         language: system
         entry: python tools/generate_pyproject.toml.py
-        files: pyproject.toml
+        files: "pyproject.toml|requirements/.*\\.txt|tools/.*pyproject.*"
