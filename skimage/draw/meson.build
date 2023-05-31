@@ -8,7 +8,7 @@ py3.extension_module('_draw',
 
 python_sources = [
   '__init__.py',
-  '__init__pyi',
+  '__init__.pyi',
   '_polygon2mask.py',
   '_random_shapes.py',
   'draw3d.py',
