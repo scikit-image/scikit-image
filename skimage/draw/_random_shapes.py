@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 
-from . import (polygon as draw_polygon, disk as draw_disk,
-               ellipse as draw_ellipse)
+from .draw import (polygon as draw_polygon, disk as draw_disk,
+                   ellipse as draw_ellipse)
 from .._shared.utils import deprecate_kwarg, warn
 
 
