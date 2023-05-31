@@ -320,7 +320,7 @@ class RegionProperties:
         if spacing is None:
             spacing = np.full(self._ndim, 1.)
         self._spacing = _normalize_spacing(spacing, self._ndim)
-        self._pixel_area = np.product(self._spacing)
+        self._pixel_area = np.prod(self._spacing)
 
         self._extra_properties = {}
         if extra_properties is not None:
