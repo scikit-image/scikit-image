@@ -213,7 +213,7 @@ for pull in tqdm(
     g.search_issues(
         f'repo:{GH_USER}/{GH_REPO} '
         f'merged:>{previous_tag_date.isoformat()} '
-        'sort:created-asc'
+        'sort:created-asc is:pull-request'
     ),
     desc='Pull Requests...',
     total=pr_count,
@@ -292,7 +292,7 @@ for section, pull_request_dicts in highlights.items():
     print(f'{section}\n{len(section) * "-"}')
     for number, pull_request_info in pull_request_dicts.items():
         pr_link = f"{GH}/{GH_USER}/{GH_REPO}/pull/{number}"
-        print(f'- {pull_request_info["summary"]} (`#{number} <{pr_link}>`_).')
+        print(f'- {pull_request_info["summary"]}\n  (`#{number} <{pr_link}>`_).')
     print()
 
 
