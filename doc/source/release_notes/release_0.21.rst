@@ -106,7 +106,7 @@ Bug Fixes
   (`#6898 <https://github.com/scikit-image/scikit-image/pull/6898>`_).
 - apply spacing rescaling when computing centroid_weighted
   (`#6900 <https://github.com/scikit-image/scikit-image/pull/6900>`_).
--  Corrected energy calculation in chan vese
+- Corrected energy calculation in Chan Vese
   (`#6902 <https://github.com/scikit-image/scikit-image/pull/6902>`_).
 - Add missing backticks to DOI role in docstring of `area_opening`
   (`#6913 <https://github.com/scikit-image/scikit-image/pull/6913>`_).
@@ -275,7 +275,7 @@ Infrastructure
   (`#6894 <https://github.com/scikit-image/scikit-image/pull/6894>`_).
 - Temporarily pin imageio to <2.28
   (`#6909 <https://github.com/scikit-image/scikit-image/pull/6909>`_).
--  Add PR links to release notes generating script
+- Add PR links to release notes generating script
   (`#6917 <https://github.com/scikit-image/scikit-image/pull/6917>`_).
 - Use official meson-python release
   (`#6928 <https://github.com/scikit-image/scikit-image/pull/6928>`_).
