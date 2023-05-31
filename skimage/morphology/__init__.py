@@ -1,11 +1,3 @@
-"""Utilities that process images based on shapes.
-
-They are particularly suited for binary images where pixels are represented as 0 or 1,
-although they can be extended to images of all types.
-
-The most basic operators are dilation and erosion.
-"""
-
 from .binary import (binary_closing, binary_dilation, binary_erosion,
                      binary_opening)
 from .gray import (black_tophat, closing, dilation, erosion, opening,
