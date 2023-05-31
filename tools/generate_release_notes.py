@@ -306,10 +306,10 @@ for section_name, contributor_set in contributors.items():
     if None in contributor_set:
         contributor_set.remove(None)
     committer_str = (
-        f'## {len(contributor_set)} {section_name} added to this '
+        f'{len(contributor_set)} {section_name} added to this '
         'release (alphabetical)'
     )
-    print(committer_str)
+    print(f"{committer_str}\n{'-' * len(committer_str)}")
     print()
 
     for c in sorted(contributor_set, key=lambda x: users[x].lower()):
