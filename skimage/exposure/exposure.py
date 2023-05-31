@@ -336,7 +336,7 @@ def cumulative_distribution(image, nbins=256):
     >>> image = img_as_float(data.camera())
     >>> hi = exposure.histogram(image)
     >>> cdf = exposure.cumulative_distribution(image)
-    >>> np.all(cdf[0] == np.cumsum(hi[0])/float(image.size))
+    >>> all(cdf[0] == np.cumsum(hi[0])/float(image.size))
     True
     """
     hist, bin_centers = histogram(image, nbins)
