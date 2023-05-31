@@ -61,6 +61,10 @@ Enhancements
 
 Performance
 -----------
+- Add lazy loading to skimage.color submodule
+  (`#6967 <https://github.com/scikit-image/scikit-image/pull/6967>`_).
+- Add Lazy loading to skimage.draw submodule
+  (`#6971 <https://github.com/scikit-image/scikit-image/pull/6971>`_).
 
 Bug Fixes
 ---------
@@ -295,13 +299,6 @@ Infrastructure
   (`#6959 <https://github.com/scikit-image/scikit-image/pull/6959>`_).
 - CI: ensure that a "type: " label is present on each PR
   (`#6960 <https://github.com/scikit-image/scikit-image/pull/6960>`_).
-
-Other Pull Requests
--------------------
-- Add lazy loading to skimage.color submodule
-  (`#6967 <https://github.com/scikit-image/scikit-image/pull/6967>`_).
-- Add Lazy loading to skimage.draw submodule
-  (`#6971 <https://github.com/scikit-image/scikit-image/pull/6971>`_).
 
 
 33 authors added to this release (alphabetical)
