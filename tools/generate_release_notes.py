@@ -180,10 +180,10 @@ highlights = OrderedDict()
 
 highlights['Highlights'] = {}
 highlights['New Features'] = {}
+highlights['API Changes'] = {}
 highlights['Enhancements'] = {}
 highlights["Performance"] = {}
 highlights['Bug Fixes'] = {}
-highlights['API Changes'] = {}
 highlights['Maintenance'] = {}
 highlights['Documentation'] = {}
 highlights['Infrastructure'] = {}
