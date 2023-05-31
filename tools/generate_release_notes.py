@@ -184,7 +184,6 @@ highlights['Enhancements'] = {}
 highlights["Performance"] = {}
 highlights['Bug Fixes'] = {}
 highlights['API Changes'] = {}
-highlights['Deprecations'] = {}
 highlights['Maintenance'] = {}
 highlights['Documentation'] = {}
 highlights['Infrastructure'] = {}
@@ -197,7 +196,6 @@ label_to_section = {
     ":chart_with_upwards_trend: Performance": "Performance",
     ":adhesive_bandage: type: Bug fix": "Bug Fixes",
     ":scroll: type: API": "API Changes",
-    ":arrow_down_small: type: Deprecation": "Deprecations",
     ":wrench: type: Maintenance": "Maintenance",
     ":page_facing_up: type: Documentation": "Documentation",
     ":robot: type: Infrastructure": "Infrastructure",
