@@ -1,7 +1,9 @@
 import math
+import textwrap
+from abc import ABC, abstractmethod
+
 import numpy as np
 from scipy import spatial
-import textwrap
 
 from .._shared.utils import safe_as_int
 
@@ -165,10 +167,10 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class GeometricTransform:
-    """Base class for geometric transformations.
+class _GeometricTransform(ABC):
+    """Abstract base class for geometric transformations."""
 
-    """
+    @abstractmethod
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -183,17 +185,16 @@ class GeometricTransform:
             Destination coordinates.
 
         """
-        raise NotImplementedError()
 
     @property
+    @abstractmethod
     def inverse(self):
         """Return a transform object representing the inverse."""
-        raise NotImplementedError()
 
     def residuals(self, src, dst):
         """Determine residuals of transformed destination coordinates.
 
-        For each transformed source coordinate the euclidean distance to the
+        For each transformed source coordinate the Euclidean distance to the
         respective destination coordinate is determined.
 
         Parameters
@@ -211,14 +212,8 @@ class GeometricTransform:
         """
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
-    def __add__(self, other):
-        """Combine this transformation with another.
 
-        """
-        raise NotImplementedError()
-
-
-class FundamentalMatrixTransform(GeometricTransform):
+class FundamentalMatrixTransform(_GeometricTransform):
     """Fundamental matrix transformation.
 
     The fundamental matrix relates corresponding points between a pair of
@@ -546,7 +541,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
-class ProjectiveTransform(GeometricTransform):
+class ProjectiveTransform(_GeometricTransform):
     r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -1009,7 +1004,7 @@ class AffineTransform(ProjectiveTransform):
         return self.params[0:self.dimensionality, self.dimensionality]
 
 
-class PiecewiseAffineTransform(GeometricTransform):
+class PiecewiseAffineTransform(_GeometricTransform):
     """Piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
@@ -1440,7 +1435,7 @@ class SimilarityTransform(EuclideanTransform):
                 'Scale is only implemented for 2D and 3D.')
 
 
-class PolynomialTransform(GeometricTransform):
+class PolynomialTransform(_GeometricTransform):
     """2D polynomial transformation.
 
     Has the following form::
@@ -1655,7 +1650,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tform : :class:`GeometricTransform`
+    tform : :class:`_GeometricTransform`
         Transform object containing the transformation parameters and providing
         access to forward and inverse transformation functions.
 

@@ -303,6 +303,7 @@ class ApiDocWriter:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
             ad += '  :members:\n' \
+                  '  :inherited-members:\n' \
                   '  :undoc-members:\n' \
                   '  :show-inheritance:\n' \
                   '\n' \

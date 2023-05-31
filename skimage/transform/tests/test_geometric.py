@@ -11,7 +11,7 @@ from skimage.transform import (AffineTransform, EssentialMatrixTransform,
                                PiecewiseAffineTransform, PolynomialTransform,
                                ProjectiveTransform, SimilarityTransform,
                                estimate_transform, matrix_transform)
-from skimage.transform._geometric import (GeometricTransform,
+from skimage.transform._geometric import (_GeometricTransform,
                                           _affine_matrix_from_vector,
                                           _center_and_normalize_points,
                                           _euler_rotation_matrix)
@@ -620,13 +620,8 @@ def test_inverse_all_transforms(tform):
 
 
 def test_geometric_tform():
-    tform = GeometricTransform()
-    with pytest.raises(NotImplementedError):
-        tform(0)
-    with pytest.raises(NotImplementedError):
-        tform.inverse(0)
-    with pytest.raises(NotImplementedError):
-        tform.__add__(0)
+    with pytest.raises(TypeError, match="Can't instantiate abstract class"):
+        _GeometricTransform()
 
     # See gh-3926 for discussion details
     for i in range(20):
