@@ -314,9 +314,3 @@ plt.plot(x - background, label='radius=80')
 plt.plot(x - background2, label='radius=10')
 plt.legend()
 plt.show()
-
-# %%
-# .. warning::
-#
-#   This example does not run in JupterLite, due to a limitation
-#   when downloading large datasets.

@@ -242,9 +242,3 @@ cbar_ax.set_xticklabels([])
 cbar_ax.set_yticklabels([1., 0.])
 
 plt.show()
-
-# %%
-# .. warning::
-#
-#   This example does not run in JupterLite, due to a limitation
-#   when downloading large datasets.

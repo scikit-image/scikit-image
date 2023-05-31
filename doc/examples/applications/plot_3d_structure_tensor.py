@@ -228,9 +228,3 @@ plotly.io.show(fig5)
 # we would get the pancake situation.
 #
 # .. [2] https://en.wikipedia.org/wiki/Structure_tensor#Interpretation_2
-
-# %%
-# .. warning::
-#
-#   This example does not run in JupterLite, due to a limitation
-#   when downloading large datasets.

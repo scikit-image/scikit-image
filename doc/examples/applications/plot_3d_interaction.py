@@ -148,9 +148,3 @@ plotly.io.show(fig)
 # .. [2] https://en.wikipedia.org/wiki/Glomerulus_(kidney)
 
 plt.show()
-
-# %%
-# .. warning::
-#
-#   This example does not run in JupterLite, due to a limitation
-#   when downloading large datasets.
