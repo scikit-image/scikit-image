@@ -23,6 +23,16 @@ New Features
 
 API Changes
 -----------
+In this release, we unify the way seeds are specified for algorithms that make use of
+pseudo-random numbers. Before, various keyword arguments (``sample_seed``, ``seed``,
+``random_seed``, and ``random_state``) served the same purpose in different places.
+These have all been replaced with a single ``rng`` argument, that handles both integer
+seeds and NumPy Generators. Please see the related `SciPy discussion`_, as well as
+`Scientific Python SPEC 7`_ that attempts to summarize the argument.
+
+.. _SciPy discussion: https://github.com/scipy/scipy/issues/14322
+.. _Scientific Python SPEC 7: https://github.com/scientific-python/specs/pull/180
+
 - Unify API on seed keyword for random seeds / generator
   (`#6258 <https://github.com/scikit-image/scikit-image/pull/6258>`_).
 - Refactor `_invariant_denoise` to `denoise_invariant`
