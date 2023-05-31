@@ -54,7 +54,7 @@ def ncut_cost(cut, D, W):
            Intelligence, Page 889, Equation 2.
     """
     cut = np.array(cut)
-    cut_cost = _ncut_cy.cut_cost(cut, W)
+    cut_cost = _ncut_cy.cut_cost(cut, W, W.indices, W.indptr)
 
     # D has elements only along the diagonal, one per node, so we can directly
     # index the data attribute with cut.
