@@ -63,7 +63,7 @@ def cut_cost(
         A array of booleans. Elements set to `True` belong to one
         set.
     W_data : array
-        The data of the sparse weight matrix of the graph ].
+        The data of the sparse weight matrix of the graph.
     W_indices : array
         The indices of the sparse weight matrix of the graph.
     W_indptr : array
