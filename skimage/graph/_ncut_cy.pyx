@@ -6,6 +6,12 @@ cimport numpy as cnp
 import numpy as np
 cnp.import_array()
 
+from cython cimport floating
+
+ctypedef fused index_t:
+    cnp.int32_t
+    cnp.int64_t
+
 
 def argmin2(cnp.float64_t[:] array):
     """Return the index of the 2nd smallest value in an array.
@@ -42,7 +48,13 @@ def argmin2(cnp.float64_t[:] array):
     return min_idx2
 
 
-def cut_cost(cut, W):
+def cut_cost(
+    cut,
+    floating[:] W_data,
+    index_t[:] W_indices,
+    index_t[:] W_indptr,
+    int num_cols,
+):
     """Return the total weight of crossing edges in a bi-partition.
 
     Parameters
@@ -50,8 +62,14 @@ def cut_cost(cut, W):
     cut : array
         A array of booleans. Elements set to `True` belong to one
         set.
-    W : array
-        The weight matrix of the graph.
+    W_data : array
+        The data of the sparse weight matrix of the graph.
+    W_indices : array
+        The indices of the sparse weight matrix of the graph.
+    W_indptr : array
+        The index pointers of the sparse weight matrix of the graph.
+    num_cols : int
+        The number of columns in the sparse weight matrix of the graph.
 
     Returns
     -------
@@ -59,20 +77,14 @@ def cut_cost(cut, W):
         The total weight of crossing edges.
     """
     cdef cnp.ndarray[cnp.uint8_t, cast = True] cut_mask = np.array(cut)
-    cdef Py_ssize_t num_cols
-    cdef cnp.int32_t row, col
-    cdef cnp.int32_t[:] indices = W.indices
-    cdef cnp.int32_t[:] indptr = W.indptr
-    cdef cnp.float64_t[:] data = W.data.astype(np.float64)
-    cdef cnp.int32_t row_index
+    cdef index_t row, col
+    cdef index_t row_index
     cdef cnp.float64_t cost = 0
 
-    num_cols = W.shape[1]
-
     for col in range(num_cols):
-        for row_index in range(indptr[col], indptr[col + 1]):
-            row = indices[row_index]
+        for row_index in range(W_indptr[col], W_indptr[col + 1]):
+            row = W_indices[row_index]
             if cut_mask[row] != cut_mask[col]:
-                cost += data[row_index]
+                cost += W_data[row_index]
 
     return cost * 0.5
