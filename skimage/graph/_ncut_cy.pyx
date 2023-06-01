@@ -50,9 +50,9 @@ def argmin2(cnp.float64_t[:] array):
 
 def cut_cost(
     cut,
-    const floating[:] W_data,
-    const index_t[:] W_indices,
-    const index_t[:] W_indptr,
+    floating[:] W_data,
+    index_t[:] W_indices,
+    index_t[:] W_indptr,
     int num_cols,
 ):
     """Return the total weight of crossing edges in a bi-partition.
