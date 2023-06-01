@@ -6,7 +6,11 @@ cimport numpy as cnp
 import numpy as np
 cnp.import_array()
 
-from cython cimport floating, integral
+from cython cimport floating
+
+ctypedef fused index_t:
+    cnp.int32_t
+    cnp.int64_t
 
 
 def argmin2(cnp.float64_t[:] array):
@@ -47,8 +51,8 @@ def argmin2(cnp.float64_t[:] array):
 def cut_cost(
     cut,
     const floating[:] W_data,
-    const integral[:] W_indices,
-    const integral[:] W_indptr,
+    const index_t[:] W_indices,
+    const index_t[:] W_indptr,
     int num_cols,
 ):
     """Return the total weight of crossing edges in a bi-partition.
@@ -73,8 +77,8 @@ def cut_cost(
         The total weight of crossing edges.
     """
     cdef cnp.ndarray[cnp.uint8_t, cast = True] cut_mask = np.array(cut)
-    cdef integral row, col
-    cdef integral row_index
+    cdef index_t row, col
+    cdef index_t row_index
     cdef cnp.float64_t cost = 0
 
     for col in range(num_cols):
