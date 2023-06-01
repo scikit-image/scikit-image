@@ -65,6 +65,10 @@ Performance
   (`#6967 <https://github.com/scikit-image/scikit-image/pull/6967>`_).
 - Add Lazy loading to skimage.draw submodule
   (`#6971 <https://github.com/scikit-image/scikit-image/pull/6971>`_).
+- Add Lazy loader to skimage.exposure
+  (`#6978 <https://github.com/scikit-image/scikit-image/pull/6978>`_).
+- Add lazy loading to skimage.future module
+  (`#6981 <https://github.com/scikit-image/scikit-image/pull/6981>`_).
 
 Bug Fixes
 ---------
@@ -120,6 +124,8 @@ Bug Fixes
   (`#6937 <https://github.com/scikit-image/scikit-image/pull/6937>`_).
 - Use context manager to ensure urlopen buffer is closed
   (`#6942 <https://github.com/scikit-image/scikit-image/pull/6942>`_).
+- Fix sparse index type casting in skimage.graph._ncut
+  (`#6975 <https://github.com/scikit-image/scikit-image/pull/6975>`_).
 
 Maintenance
 -----------
@@ -195,6 +201,12 @@ Maintenance
   (`#6969 <https://github.com/scikit-image/scikit-image/pull/6969>`_).
 - Revert jupyterlite
   (`#6972 <https://github.com/scikit-image/scikit-image/pull/6972>`_).
+- Don't test numpy nightlies due to transcendental functions issue
+  (`#6973 <https://github.com/scikit-image/scikit-image/pull/6973>`_).
+- Ignore tight layout warning from matplotlib pre-release
+  (`#6976 <https://github.com/scikit-image/scikit-image/pull/6976>`_).
+- Remove temporary constraint <2.28 for imageio
+  (`#6980 <https://github.com/scikit-image/scikit-image/pull/6980>`_).
 
 Documentation
 -------------
@@ -250,6 +262,8 @@ Documentation
   (`#6945 <https://github.com/scikit-image/scikit-image/pull/6945>`_).
 - Point logo in generated HTML docs at scikit-image.org
   (`#6947 <https://github.com/scikit-image/scikit-image/pull/6947>`_).
+- Add missing PRs to release notes
+  (`#6949 <https://github.com/scikit-image/scikit-image/pull/6949>`_).
 - fix bad link in CODE_OF_CONDUCT.md
   (`#6952 <https://github.com/scikit-image/scikit-image/pull/6952>`_).
 - Expose `GeometricTransform.residuals` in HTML doc
@@ -299,7 +313,8 @@ Infrastructure
   (`#6959 <https://github.com/scikit-image/scikit-image/pull/6959>`_).
 - CI: ensure that a "type: " label is present on each PR
   (`#6960 <https://github.com/scikit-image/scikit-image/pull/6960>`_).
-
+- Add PR milestone labeler
+  (`#6977 <https://github.com/scikit-image/scikit-image/pull/6977>`_).
 
 33 authors added to this release (alphabetical)
 -----------------------------------------------
