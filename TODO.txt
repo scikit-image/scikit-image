@@ -36,6 +36,3 @@ Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
-* Remove temporary pin of imageio <2.28 once the breakage is dealt with. See also
-  https://github.com/scikit-image/scikit-image/issues/6908 and
-  https://github.com/scikit-image/scikit-image/pull/6764.
