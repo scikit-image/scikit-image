@@ -13,6 +13,7 @@ env:
   PIP_FLAGS: >-
     --extra-index-url
     https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --upgrade
     --pre
   MINIMUM_REQUIREMENTS: 0
   BUILD_DOCS: 0
