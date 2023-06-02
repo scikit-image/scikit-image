@@ -88,4 +88,4 @@ from .haar import (
     draw_haar_like_feature
 )
 from ._basic_features import multiscale_basic_features
-from ._fisher_vector import learn_gmm, fisher_vector
+from .fisher_vector import learn_gmm, fisher_vector
