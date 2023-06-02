@@ -72,7 +72,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \hat x = F^\dagger \left( |\Lambda_H|^2 + \lambda |\Lambda_D|^2 \right)^{-1}
        \Lambda_H^\dagger F y
 
     where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
