@@ -17,6 +17,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_graph.py',
   '_graph_cut.py',
   '_graph_merge.py',
