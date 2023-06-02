@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 
 from skimage.transform import resize
-from skimage.feature import fisher_vector, ORB, learn_gmm
+from skimage.feature import _fisher_vector, ORB, learn_gmm
 
 
 data = load_digits()
@@ -53,12 +53,12 @@ gmm = learn_gmm(train_descriptors, n_modes=k)
 
 # Compute the Fisher vectors
 training_fvs = np.array([
-    fisher_vector(descriptor_mat, gmm)
+    _fisher_vector(descriptor_mat, gmm)
     for descriptor_mat in train_descriptors
 ])
 
 testing_fvs = np.array([
-    fisher_vector(descriptor_mat, gmm)
+    _fisher_vector(descriptor_mat, gmm)
     for descriptor_mat in test_descriptors
 ])
 
