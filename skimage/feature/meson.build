@@ -53,6 +53,7 @@ py3.extension_module('_hessian_det_appx',
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_basic_features.py',
   '_canny.py',
   '_daisy.py',
