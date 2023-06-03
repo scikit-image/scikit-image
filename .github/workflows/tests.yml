@@ -44,10 +44,10 @@ jobs:
             BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: 3.11
             PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
-            # test pre-releases
+            # test prereleases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: 3.9

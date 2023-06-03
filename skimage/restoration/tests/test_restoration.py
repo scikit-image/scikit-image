@@ -35,16 +35,17 @@ def test_wiener(dtype, ndim):
     precomputed result in 2d case.
     """
 
+    rng = np.random.RandomState(0)
     psf = np.ones([5] * ndim, dtype=dtype) / 5 ** ndim
-    np.random.seed(0)
+
     # for ndim == 2 use camera (to compare to presaved result)
     if ndim != 2:
-        test_img = np.random.randint(0, 100, [50] * ndim)
+        test_img = rng.randint(0, 100, [50] * ndim)
     else:
         test_img = util.img_as_float(camera())
 
     data = convolve(test_img, psf, 'same')
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
     deconvolved = restoration.wiener(data, psf, 0.05)
     assert deconvolved.dtype == _supported_float_type(dtype)
@@ -79,7 +80,7 @@ def test_unsupervised_wiener(dtype):
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf,
-                                                     seed=seed)
+                                                     rng=seed)
     with expected_warnings(['`random_state` is a deprecated argument']):
         restoration.unsupervised_wiener(data, psf, random_state=seed)
     float_type = _supported_float_type(dtype)
@@ -100,7 +101,7 @@ def test_unsupervised_wiener(dtype):
             "max_num_iter": 200,
             "min_num_iter": 30,
         },
-        seed=seed)[0]
+        rng=seed)[0]
     assert deconvolved2.real.dtype == float_type
     path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(np.real(deconvolved2),
@@ -115,7 +116,7 @@ def test_unsupervised_wiener_deprecated_user_param():
     _, laplacian = uft.laplacian(2, data.shape)
     restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"max_num_iter": 300, "min_num_iter": 30}, seed=5
+        user_params={"max_num_iter": 300, "min_num_iter": 30}, rng=5
     )
 
 
@@ -150,8 +151,9 @@ def test_richardson_lucy(ndim):
     else:
         test_img = util.img_as_float(camera())
     data = convolve(test_img, psf, 'same')
-    np.random.seed(0)
-    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+
+    rng = np.random.RandomState(0)
+    data += 0.1 * data.std() * rng.standard_normal(data.shape)
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
 
     if ndim == 2:

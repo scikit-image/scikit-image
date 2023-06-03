@@ -9,5 +9,5 @@ applications in tutorial form.
 
 .. hint::
 
-    Check out our :ref:`user_guide` for a good narrative
+    Check out our :ref:`user_guide` for a narrative
     introduction to key library conventions and basic image manipulation.

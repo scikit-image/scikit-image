@@ -372,8 +372,8 @@ def test_corner_foerstner_dtype(dtype):
 def test_noisy_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
-    np.random.seed(seed=1234)
-    im = im + np.random.uniform(size=im.shape) * .2
+    rng = np.random.default_rng(1234)
+    im = im + rng.uniform(size=im.shape) * .2
 
     # Moravec
     results = peak_local_max(corner_moravec(im),

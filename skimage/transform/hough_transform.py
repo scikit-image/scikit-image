@@ -3,6 +3,7 @@ from scipy.spatial import cKDTree
 
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
+from .._shared.utils import deprecate_kwarg
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -221,8 +222,10 @@ def hough_line(image, theta=None):
     return _hough_line(image, theta=theta)
 
 
+@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
-                             theta=None, seed=None):
+                             theta=None, rng=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -241,8 +244,10 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
-    seed : int, optional
-        Seed to initialize the random number generator.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
     Returns
     -------
@@ -265,7 +270,7 @@ def probabilistic_hough_line(image, threshold=10, line_length=50, line_gap=10,
 
     return _prob_hough_line(image, threshold=threshold,
                             line_length=line_length, line_gap=line_gap,
-                            theta=theta, seed=seed)
+                            theta=theta, rng=rng)
 
 
 def hough_circle_peaks(hspaces, radii, min_xdistance=1, min_ydistance=1,

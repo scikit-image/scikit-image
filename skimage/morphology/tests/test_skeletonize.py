@@ -163,7 +163,7 @@ class TestThin():
 class TestMedialAxis():
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
-        result = medial_axis(np.zeros((10, 10), bool), seed=None)
+        result = medial_axis(np.zeros((10, 10), bool))
         assert np.all(result == False)
 
     def test_00_01_zeros_masked(self):

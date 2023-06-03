@@ -1,9 +1,11 @@
 import math
+import textwrap
+from abc import ABC, abstractmethod
+
 import numpy as np
 from scipy import spatial
-import textwrap
 
-from .._shared.utils import get_bound_method_class, safe_as_int
+from .._shared.utils import safe_as_int
 
 
 def _affine_matrix_from_vector(v):
@@ -165,10 +167,10 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-class GeometricTransform:
-    """Base class for geometric transformations.
+class _GeometricTransform(ABC):
+    """Abstract base class for geometric transformations."""
 
-    """
+    @abstractmethod
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -183,28 +185,16 @@ class GeometricTransform:
             Destination coordinates.
 
         """
-        raise NotImplementedError()
 
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Source coordinates.
-
-        """
-        raise NotImplementedError()
+    @property
+    @abstractmethod
+    def inverse(self):
+        """Return a transform object representing the inverse."""
 
     def residuals(self, src, dst):
         """Determine residuals of transformed destination coordinates.
 
-        For each transformed source coordinate the euclidean distance to the
+        For each transformed source coordinate the Euclidean distance to the
         respective destination coordinate is determined.
 
         Parameters
@@ -222,14 +212,8 @@ class GeometricTransform:
         """
         return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
-    def __add__(self, other):
-        """Combine this transformation with another.
 
-        """
-        raise NotImplementedError()
-
-
-class FundamentalMatrixTransform(GeometricTransform):
+class FundamentalMatrixTransform(_GeometricTransform):
     """Fundamental matrix transformation.
 
     The fundamental matrix relates corresponding points between a pair of
@@ -293,23 +277,14 @@ class FundamentalMatrixTransform(GeometricTransform):
         coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
         return coords_homogeneous @ self.params.T
 
-    def inverse(self, coords):
-        """Apply inverse transformation.
+    @property
+    def inverse(self):
+        """Return a transform object representing the inverse.
 
-        Parameters
-        ----------
-        coords : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        coords : (N, 3) array
-            Epipolar lines in the source image.
-
+        See Hartley & Zisserman, Ch. 8: Epipolar Geometry and the Fundamental
+        Matrix, for an explanation of why F.T gives the inverse.
         """
-        coords = np.asarray(coords)
-        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return coords_homogeneous @ self.params
+        return type(self)(matrix=self.params.T)
 
     def _setup_constraint_matrix(self, src, dst):
         """Setup and solve the homogeneous epipolar constraint matrix::
@@ -566,7 +541,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
-class ProjectiveTransform(GeometricTransform):
+class ProjectiveTransform(_GeometricTransform):
     r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -660,21 +635,10 @@ class ProjectiveTransform(GeometricTransform):
         """
         return self._apply_mat(coords, self.params)
 
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Parameters
-        ----------
-        coords : (N, D) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        coords_out : (N, D) array
-            Source coordinates.
-
-        """
-        return self._apply_mat(coords, self._inv_matrix)
+    @property
+    def inverse(self):
+        """Return a transform object representing the inverse."""
+        return type(self)(matrix=self._inv_matrix)
 
     def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -810,10 +774,6 @@ class ProjectiveTransform(GeometricTransform):
             else:
                 tform = ProjectiveTransform
             return tform(other.params @ self.params)
-        elif (hasattr(other, '__name__')
-                and other.__name__ == 'inverse'
-                and hasattr(get_bound_method_class(other), '_inv_matrix')):
-            return ProjectiveTransform(other.__self__._inv_matrix @ self.params)
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -1044,7 +1004,7 @@ class AffineTransform(ProjectiveTransform):
         return self.params[0:self.dimensionality, self.dimensionality]
 
 
-class PiecewiseAffineTransform(GeometricTransform):
+class PiecewiseAffineTransform(_GeometricTransform):
     """Piecewise affine transformation.
 
     Control points are used to define the mapping. The transform is based on
@@ -1148,40 +1108,15 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         return out
 
-    def inverse(self, coords):
-        """Apply inverse transformation.
-
-        Coordinates outside of the mesh will be set to `- 1`.
-
-        Parameters
-        ----------
-        coords : (N, D) array_like
-            Source coordinates.
-
-        Returns
-        -------
-        coords : (N, D) array
-            Transformed coordinates.
-
-        """
-        coords = np.asarray(coords)
-        out = np.empty_like(coords, np.float64)
-
-        # determine triangle index for each coordinate
-        simplex = self._inverse_tesselation.find_simplex(coords)
-
-        # coordinates outside of mesh
-        out[simplex == -1, :] = -1
-
-        for index in range(len(self._inverse_tesselation.simplices)):
-            # affine transform for triangle
-            affine = self.inverse_affines[index]
-            # all coordinates within triangle
-            index_mask = simplex == index
-
-            out[index_mask, :] = affine(coords[index_mask, :])
-
-        return out
+    @property
+    def inverse(self):
+        """Return a transform object representing the inverse."""
+        tform = type(self)()
+        tform._tesselation = self._inverse_tesselation
+        tform._inverse_tesselation = self._tesselation
+        tform.affines = self.inverse_affines
+        tform.inverse_affines = self.affines
+        return tform
 
 
 def _euler_rotation(axis, angle):
@@ -1500,7 +1435,7 @@ class SimilarityTransform(EuclideanTransform):
                 'Scale is only implemented for 2D and 3D.')
 
 
-class PolynomialTransform(GeometricTransform):
+class PolynomialTransform(_GeometricTransform):
     """2D polynomial transformation.
 
     Has the following form::
@@ -1665,8 +1600,9 @@ class PolynomialTransform(GeometricTransform):
 
         return dst
 
-    def inverse(self, coords):
-        raise Exception(
+    @property
+    def inverse(self):
+        raise NotImplementedError(
             'There is no explicit way to do the inverse polynomial '
             'transformation. Instead, estimate the inverse transformation '
             'parameters by exchanging source and destination coordinates,'
@@ -1714,7 +1650,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tform : :class:`GeometricTransform`
+    tform : :class:`_GeometricTransform`
         Transform object containing the transformation parameters and providing
         access to forward and inverse transformation functions.
 
