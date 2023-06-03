@@ -70,7 +70,7 @@ Function: skimage/_shared/version_requirements.py:is_installed
 Copyright: 2009-2011 Pierre Raybaut
 License: MIT
 
-File: skimage/feature/fisher_vector.py
+File: skimage/feature/_fisher_vector.py
 Copyright: 2014 2014 Dan Oneata
 License: MIT
 
