@@ -375,14 +375,19 @@ a function signature. In version N, we have:
 .. code-block:: python
 
     def some_function(image, rescale=True):
-        """Does something.
+        """Do something.
 
         Parameters
         ----------
         image : ndarray
             Input image.
-        rescale : bool
-            Whether or not to rescale the image.
+        rescale : bool, optional
+            Rescale the image unless ``False`` is given.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
         """
         out = do_something(image, rescale=rescale)
         return out
@@ -392,18 +397,22 @@ In version N+1, we will change this to:
 .. code-block:: python
 
     def some_function(image, rescale=None):
-        """Does something.
+        """Do something.
 
         Parameters
         ----------
         image : ndarray
             Input image.
-        rescale : bool
-            Whether or not to rescale the image.
-            Defaults to True.
+        rescale : bool, optional
+            Rescale the image unless ``False`` is given.
 
-            .. warning:: The default value will change from True to
-                         False in skimage N+3.
+            .. warning:: The default value will change from ``True`` to
+                         ``False`` in skimage N+3.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
         """
         if rescale is None:
             warn('The default value of rescale will change '
@@ -417,6 +426,20 @@ And, in version N+3:
 .. code-block:: python
 
     def some_function(image, rescale=False):
+        """Do something.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image.
+        rescale : bool, optional
+            Rescale the image if ``True`` is given.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
+        """
         out = do_something(image, rescale=rescale)
         return out
 
