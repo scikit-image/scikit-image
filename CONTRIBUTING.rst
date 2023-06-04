@@ -29,11 +29,11 @@ can be contributed to scikit-image.
      <https://github.com/scikit-image/scikit-image>`_ and click the
      "fork" button to create your own copy of the project.
 
-   * Clone (download) the project source on your local computer::
+   * Clone (download) the repository with the project source on your local computer::
 
       git clone https://github.com/your-username/scikit-image.git
 
-   * Change into the source directory::
+   * Change into the root directory of the cloned repository::
 
       cd scikit-image
 
@@ -356,7 +356,7 @@ A deprecation cycle is *not* necessary when:
 
 * adding a new function, or
 * adding a new keyword argument to the *end* of a function signature, or
-* fixing buggy behavior.
+* fixing unexpected or incorrect behavior.
 
 A deprecation cycle is necessary when:
 
