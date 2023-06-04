@@ -302,25 +302,6 @@ To build the HTML documentation, run:
 Output is in ``scikit-image/doc/build/html/``.  Add the ``--clean``
 flag to build from scratch, deleting any cached output.
 
-You may need the following system requirements:
-
-**LaTeX Ubuntu:**
-
-.. code:: sh
-
-    sudo apt-get install -qq texlive texlive-latex-extra dvipng
-
-**LaTeX Mac:**
-
-Install the full `MacTex <https://www.tug.org/mactex/>`__ installation or
-install the smaller
-`BasicTex <https://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
-and *dvipng* packages:
-
-.. code:: sh
-
-    sudo tlmgr install ucs dvipng
-
 Gallery
 ~~~~~~~
 
