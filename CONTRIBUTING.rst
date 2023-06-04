@@ -20,10 +20,8 @@ If you're looking for something to implement or to fix, you can browse the
 
 Development process
 -------------------
-
-Please refer to the full `contributor guide
-<https://scikit-image.org/docs/dev/development/contribute.html>`_
-for more information.
+The following is a brief overview about how changes to source code and documentation
+can be contributed to scikit-image.
 
 1. If you are a first-time contributor:
 
