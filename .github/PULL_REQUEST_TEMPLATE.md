@@ -12,6 +12,6 @@
 
 - A descriptive but concise pull request title
 - [Docstrings for all functions](https://github.com/numpy/numpy/blob/master/doc/example.py)
-- [Unit tests](https://scikit-image.org/docs/stable/user_guide/install.html#testing)
+- [Unit tests](https://scikit-image.org/docs/dev/development/contribute.html#testing)
 - A gallery example in `./doc/examples` for new features
 - [Contribution guide](https://scikit-image.org/docs/dev/development/contribute.html) is followed
