@@ -34,9 +34,9 @@ from skimage.data import palisades_of_vogt
 
 
 #####################################################################
-# The dataset we are using in this example is an image sequence showing the
-# palisades of Vogt in a human cornea in vivo. Basically, it is a
-# black-and-white movie!
+# The dataset we are using in this example is an image sequence (a movie!) of
+# human in-vivo tissue. Specifically, it shows the *palisades of Vogt* of a
+# given cornea sample.
 
 #####################################################################
 # Load image data
