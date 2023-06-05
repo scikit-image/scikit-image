@@ -22,12 +22,12 @@ The images were acquired by Viacheslav Mazlin.
 
 """
 
-import imageio.v3 as iio
 import numpy as np
 import plotly.io
 import plotly.express as px
 
 from skimage import filters
+from skimage.data import palisades_of_vogt
 
 
 #####################################################################
@@ -39,7 +39,7 @@ from skimage import filters
 # Load image data
 # ===============
 
-image_seq = iio.imread('https://gitlab.com/mkcor/data/-/raw/70eb189f9b1c512fc8926891a2bdf96b67dcf441/in-vivo-cornea-spots.tif')
+image_seq = palisades_of_vogt()
 
 print(f'number of dimensions: {image_seq.ndim}')
 print(f'shape: {image_seq.shape}')
