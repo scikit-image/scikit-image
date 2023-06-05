@@ -12,15 +12,13 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
-        Python38-x64:
-          PYTHON_VERSION: "3.8"
+        Python311-x64:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: ""
           BUILD_DOCS: "true"
-        # build pre release packages on Python 3.8 since it has been out long
-        # enough for wheels to be built for packages that need to be compiled.
-        Python38-x64-pre:
-          PYTHON_VERSION: "3.8"
+        Python311-x64-pre:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
         Python39:
