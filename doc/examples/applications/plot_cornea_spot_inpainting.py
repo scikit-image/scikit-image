@@ -6,8 +6,10 @@ Reconstruct dust-obstructed human cornea image with inpainting
 Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an
 image of the retina in the back of a patient's eye.
 
-Quite commonly, there is dust on the reference mirror of the equipment,
-causing dark spots to appear on the acquired images.
+Dust may stick to the reference mirror of the equipment, causing dark spots to
+appear on the images. The problem is that these dark spots cover areas of
+in-vivo tissue, hence hiding data of interest. Our goal here is to restore
+(reconstruct) the hidden areas based on the pixels near their boundaries.
 
 This tutorial is adapted from an application shared by Jules Scholler in [2]_.
 The images were acquired by Viacheslav Mazlin.
