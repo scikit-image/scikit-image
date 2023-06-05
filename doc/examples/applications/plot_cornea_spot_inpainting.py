@@ -83,15 +83,22 @@ fig = px.imshow(
     image_seq_mean,
     width=500,
     height=500,
-    binary_string=True
+    binary_string=True,
+    title='Time-averaged image'
 )
 plotly.io.show(fig)
 
 #####################################################################
 # Use local thresholding
 # ======================
-
-#####################################################################
+# To segment the dark spots, we use thresholding. The images we are working
+# with have uneven illumination, which causes variations in the (absolute)
+# intensities of the foreground and the background, from one region to another
+# (distant) one. It is therefore more fitting to compute different threshold
+# values across the image, one for each region. This is called adaptive (or
+# local) thresholding, as opposed to the usual thresholding procedure which
+# employs a single (global) threshold for all pixels in the image.
+#
 # Let us compare the visibility of the hidden data in two different
 # thresholding masks, one of which has the `block_size` set to 21, while
 # the other has it set to 35. For this, we start by defining a convenience
