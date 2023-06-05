@@ -219,7 +219,7 @@ def _fetch(data_filename):
             "but requires the installation of an optional dependency, pooch. "
             "To install pooch, use your preferred python package manager. "
             "Follow installation instruction found at "
-            "https://scikit-image.org/docs/stable/install.html"
+            "https://scikit-image.org/docs/stable/user_guide/install.html"
         )
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
@@ -248,7 +248,7 @@ def download_all(directory=None):
     This function requires the installation of an optional dependency, pooch,
     to download the full dataset. Follow installation instruction found at
 
-        https://scikit-image.org/docs/stable/install.html
+        https://scikit-image.org/docs/stable/user_guide/install.html
 
     Call this function to download all sample images making them available
     offline on your machine.
@@ -276,7 +276,7 @@ def download_all(directory=None):
             "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
             "To install pooch, follow our installation instructions found at "
-            "https://scikit-image.org/docs/stable/install.html"
+            "https://scikit-image.org/docs/stable/user_guide/install.html"
         )
     # Consider moving this kind of logic to Pooch
     old_dir = _image_fetcher.path
