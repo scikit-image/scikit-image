@@ -1005,6 +1005,28 @@ def colorwheel():
     return _load("data/color.png")
 
 
+def palisades_of_vogt():
+    """Return image sequence of in-vivo tissue showing the palisades of Vogt.
+
+    In the human eye, the palisades of Vogt are normal features of the corneal
+    limbus, which is the border between the cornea and the sclera (i.e., the
+    white of the eye).
+    In the image sequence, there are some dark spots due to the presence of
+    dust on the reference mirror.
+
+    Returns
+    -------
+    palisades_of_vogt: (60, 1440, 1440) uint16 ndarray
+
+    Notes
+    -----
+    See info under `in-vivo-cornea-spots.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/palisades_of_vogt.tif')
+
+
 def rocket():
     """Launch photo of DSCOVR on Falcon 9 by SpaceX.
 
