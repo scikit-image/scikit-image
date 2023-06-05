@@ -25,7 +25,8 @@ imshow_expected_warnings = [
     # Maptlotlib 2.2.3 seems to use np.asscalar which issues a warning
     # with numpy 1.16
     # Matplotlib 2.2.3 is the last supported version for python 2.7
-    r"np.asscalar|\A\Z"
+    r"np.asscalar|\A\Z",
+    r"The figure layout has changed to tight|\A\Z"
 ]
 
 

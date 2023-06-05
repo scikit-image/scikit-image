@@ -11,7 +11,7 @@ from skimage.transform import (AffineTransform, EssentialMatrixTransform,
                                PiecewiseAffineTransform, PolynomialTransform,
                                ProjectiveTransform, SimilarityTransform,
                                estimate_transform, matrix_transform)
-from skimage.transform._geometric import (GeometricTransform,
+from skimage.transform._geometric import (_GeometricTransform,
                                           _affine_matrix_from_vector,
                                           _center_and_normalize_points,
                                           _euler_rotation_matrix)
@@ -261,6 +261,33 @@ def test_affine_init():
                         AffineTransform(scale=(0.5, 0.5)).scale)
 
 
+def test_affine_shear():
+    shear = 0.1
+    # expected horizontal shear transform
+    cx = -np.tan(shear)
+    expected = np.array([
+        [1, cx, 0],
+        [0,  1, 0],
+        [0,  0, 1]
+    ])
+
+    tform = AffineTransform(shear=shear)
+    assert_almost_equal(tform.params, expected)
+
+    shear = (1.2, 0.8)
+    # expected x, y shear transform
+    cx = -np.tan(shear[0])
+    cy = -np.tan(shear[1])
+    expected = np.array([
+        [ 1, cx, 0],
+        [cy,  1, 0],
+        [ 0,  0, 1]
+    ])
+
+    tform = AffineTransform(shear=shear)
+    assert_almost_equal(tform.params, expected)
+
+
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform()
     assert tform.estimate(SRC, DST)
@@ -325,6 +352,43 @@ def test_fundamental_matrix_inverse():
     src = np.array([[0, 0], [0, 1], [1, 1]])
     assert_almost_equal(tform.inverse(src),
                         [[0, 1, 0], [0, 1, -1], [0, 1, -1]])
+
+
+def test_fundamental_matrix_inverse_estimation():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    # Inverse of (src -> dst) transform should be equivalent to
+    # (dst -> src) transformation
+    tform = estimate_transform('fundamental', src, dst)
+    tform_inv = estimate_transform('fundamental', dst, src)
+
+    np.testing.assert_array_almost_equal(tform.inverse.params, tform_inv.params)
+
+
+def test_fundamental_matrix_epipolar_projection():
+    src = np.array([1.839035, 1.924743, 0.543582,  0.375221,
+                    0.473240, 0.142522, 0.964910,  0.598376,
+                    0.102388, 0.140092, 15.994343, 9.622164,
+                    0.285901, 0.430055, 0.091150,  0.254594]).reshape(-1, 2)
+
+    dst = np.array([1.002114, 1.129644, 1.521742, 1.846002,
+                    1.084332, 0.275134, 0.293328, 0.588992,
+                    0.839509, 0.087290, 1.779735, 1.116857,
+                    0.878616, 0.602447, 0.642616, 1.028681]).reshape(-1, 2)
+
+    tform = estimate_transform('fundamental', src, dst)
+
+    # calculate x' F x for each coordinate; should be close to zero
+    p = np.abs(np.sum(np.column_stack((dst, np.ones(len(dst)))) * tform(src), axis=1))
+    assert np.all(p < 0.01)
 
 
 def test_essential_matrix_init():
@@ -482,7 +546,7 @@ def test_polynomial_default_order():
 
 
 def test_polynomial_inverse():
-    with pytest.raises(Exception):
+    with pytest.raises(NotImplementedError):
         PolynomialTransform().inverse(0)
 
 
@@ -517,14 +581,47 @@ def test_union_differing_types():
         tform1.__add__(tform2)
 
 
+@pytest.mark.parametrize(
+    "tform",
+    [
+        ProjectiveTransform(matrix=np.random.rand(3, 3)),
+        AffineTransform(scale=(0.1, 0.1), rotation=0.3),
+        EuclideanTransform(rotation=0.9, translation=(5, 5)),
+        SimilarityTransform(scale=0.1, rotation=0.9),
+        EssentialMatrixTransform(
+            rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
+        ),
+        FundamentalMatrixTransform(
+            matrix=EssentialMatrixTransform(
+                rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
+            ).params
+        ),
+        ((t := PiecewiseAffineTransform()).estimate(SRC, DST) and t),
+    ],
+)
+def test_inverse_all_transforms(tform):
+    assert isinstance(tform.inverse, type(tform))
+    try:
+        assert_almost_equal(tform.inverse.inverse.params, tform.params)
+    except AttributeError:
+        assert isinstance(tform, PiecewiseAffineTransform)
+    assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
+    # Test addition with inverse, not implemented for all
+    if not isinstance(
+        tform,
+        (
+            EssentialMatrixTransform,
+            FundamentalMatrixTransform,
+            PiecewiseAffineTransform,
+        ),
+    ):
+        assert_almost_equal((tform + tform.inverse)(SRC), SRC)
+        assert_almost_equal((tform.inverse + tform)(SRC), SRC)
+
+
 def test_geometric_tform():
-    tform = GeometricTransform()
-    with pytest.raises(NotImplementedError):
-        tform(0)
-    with pytest.raises(NotImplementedError):
-        tform.inverse(0)
-    with pytest.raises(NotImplementedError):
-        tform.__add__(0)
+    with pytest.raises(TypeError, match="Can't instantiate abstract class"):
+        _GeometricTransform()
 
     # See gh-3926 for discussion details
     for i in range(20):
@@ -688,7 +785,6 @@ def test_projective_str():
     # compatibility with different numpy versions.
     want = want.replace('0\\.', ' *0\\.')
     want = want.replace('1\\.', ' *1\\.')
-    print(want)
     assert re.match(want, str(tform))
 
 

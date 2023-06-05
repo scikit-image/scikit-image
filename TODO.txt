@@ -5,7 +5,7 @@ Version 0.17
 
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.21
+Version 0.22
 ------------
 * In ``skimage/filters/lpi_filter.py``, remove the deprecated function
   inverse().
@@ -24,6 +24,13 @@ Version 0.21
   Remove the ``r'\.future.graph$'`` entry added to
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
+* Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.
+
+Version 0.23
+------------
+* Remove deprecated `random_seed`, `random_state`, and `sample_seed`
+  arguments in favor of `rng`.
+* Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
 
 Other (2022)
 ------------

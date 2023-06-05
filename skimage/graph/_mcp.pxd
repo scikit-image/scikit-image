@@ -40,5 +40,5 @@ cdef class MCP:
     # Methods
     cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost)
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, FLOAT_T offset_length)
-    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
-    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length) noexcept
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length) noexcept

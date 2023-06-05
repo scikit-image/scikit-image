@@ -298,7 +298,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
     """
     def warn_return_error():
         warnings.warn(
-            "In scikit-image 0.21, phase_cross_correlation will start "
+            "In scikit-image 0.22, phase_cross_correlation will start "
             "returning a tuple or 3 items (shift, error, phasediff) always. "
             "To enable the new return behavior and silence this warning, use "
             "return_error='always'.",

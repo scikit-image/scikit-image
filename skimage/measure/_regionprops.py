@@ -12,7 +12,7 @@ from scipy.spatial.distance import pdist
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-from ._regionprops_utils import euler_number, perimeter, perimeter_crofton
+from ._regionprops_utils import euler_number, perimeter, perimeter_crofton, _normalize_spacing
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -281,7 +281,6 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
 
-
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
@@ -318,8 +317,10 @@ class RegionProperties:
         self._ndim = label_image.ndim
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
-        self._spacing = (spacing if spacing is not None else np.full(self._ndim, 1.))
-        self._pixel_area = np.product(self._spacing)
+        if spacing is None:
+            spacing = np.full(self._ndim, 1.)
+        self._spacing = _normalize_spacing(spacing, self._ndim)
+        self._pixel_area = np.prod(self._spacing)
 
         self._extra_properties = {}
         if extra_properties is not None:
@@ -631,8 +632,8 @@ class RegionProperties:
     @property
     def centroid_weighted(self):
         ctr = self.centroid_weighted_local
-        return tuple(idx + slc.start
-                     for idx, slc in zip(ctr, self.slice))
+        return tuple(idx + slc.start * spc
+                     for idx, slc, spc in zip(ctr, self.slice, self._spacing))
 
     @property
     def centroid_weighted_local(self):
@@ -706,8 +707,6 @@ class RegionProperties:
         else:
             return _moments.moments_normalized(mu, order=3,
                                                spacing=self._spacing)
-        return _moments.moments_normalized(self.moments_weighted_central, 3,
-                                           spacing=self._spacing)
 
     def __iter__(self):
         props = PROP_VALS
@@ -854,15 +853,10 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
                 column_buffer[i] = regions[i][prop]
             out[orig_prop] = np.copy(column_buffer)
         else:
-            if isinstance(rp, np.ndarray):
-                shape = rp.shape
-            else:
-                shape = (len(rp),)
-
             # precompute property column names and locations
             modified_props = []
             locs = []
-            for ind in np.ndindex(shape):
+            for ind in np.ndindex(np.shape(rp)):
                 modified_props.append(
                     separator.join(map(str, (orig_prop,) + ind))
                 )
@@ -872,7 +866,9 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             n_columns = len(locs)
             column_data = np.empty((n, n_columns), dtype=dtype)
             for k in range(n):
-                rp = regions[k][prop]
+                # we coerce to a numpy array to ensure structures like
+                # tuple-of-arrays expand correctly into columns
+                rp = np.asarray(regions[k][prop])
                 for i, loc in enumerate(locs):
                     column_data[k, i] = rp[loc]
 
@@ -1107,7 +1103,7 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **area_bbox** : float
         Area of the bounding box i.e. number of pixels of bounding box scaled by pixel-area.
     **area_convex** : float
-        Are of the convex hull image, which is the smallest convex
+        Area of the convex hull image, which is the smallest convex
         polygon that encloses the region.
     **area_filled** : float
         Area of the region with all the holes filled in.

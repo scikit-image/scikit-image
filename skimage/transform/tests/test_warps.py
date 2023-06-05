@@ -4,7 +4,7 @@ from numpy.testing import (assert_allclose, assert_array_almost_equal,
                            assert_array_equal)
 from scipy.ndimage import map_coordinates
 
-from skimage._shared.testing import expected_warnings, test_parallel
+from skimage._shared.testing import expected_warnings, run_in_parallel
 from skimage._shared.utils import _supported_float_type
 from skimage.color.colorconv import rgb2gray
 from skimage.data import checkerboard, astronaut
@@ -61,7 +61,7 @@ def test_warp_callable():
     assert_array_almost_equal(outx, refx)
 
 
-@test_parallel()
+@run_in_parallel()
 def test_warp_matrix():
     x = np.zeros((5, 5), dtype=np.float64)
     x[2, 2] = 1
@@ -446,10 +446,12 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     x = np.ones((5, 5), dtype=dtype)
     if dtype == np.uint8:
         x *= 255
+    else:
+        x[0, 0] = np.NaN
     resized = resize(x, (3, 3), order=order, preserve_range=preserve_range,
                      anti_aliasing=anti_aliasing)
 
-    assert resized.max() == expected_max
+    assert np.nanmax(resized) == expected_max
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -746,7 +748,7 @@ def test_linear_warp_polar(dtype):
     assert warped.dtype == _supported_float_type(dtype)
     profile = warped.mean(axis=0)
     peaks = peak_local_max(profile)
-    assert np.alltrue([peak in radii for peak in peaks])
+    assert all(peak in radii for peak in peaks)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -765,7 +767,7 @@ def test_log_warp_polar(dtype):
     peaks_coord = peak_local_max(profile)
     peaks_coord.sort(axis=0)
     gaps = peaks_coord[1:] - peaks_coord[:-1]
-    assert np.alltrue([x >= 38 and x <= 40 for x in gaps])
+    assert all(x >= 38 and x <= 40 for x in gaps)
 
 
 def test_invalid_scaling_polar():

@@ -29,6 +29,10 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     done
 fi
 
+
+perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/default.txt
+perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/build.txt
+
 python -m pip install --upgrade pip wheel "setuptools<=65.5"
 
 # Install build time requirements

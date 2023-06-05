@@ -1,4 +1,6 @@
 import pytest
+import copy
+
 import numpy as np
 
 from skimage._shared.testing import assert_array_equal
@@ -47,7 +49,9 @@ def test_uniform_mode(dtype):
     keypoints = corner_peaks(corner_harris(img), min_distance=5,
                              threshold_abs=0, threshold_rel=0.1)
 
-    extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
+    extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)
+    with testing.expected_warnings(['`sample_seed` is a deprecated argument']):
+        BRIEF(descriptor_size=8, sigma=2, mode='uniform', sample_seed=1)
 
     extractor.extract(img, keypoints[:8])
 
@@ -73,8 +77,23 @@ def test_border(dtype):
     img = np.zeros((100, 100), dtype=dtype)
     keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
 
-    extractor = BRIEF(patch_size=41)
+    extractor = BRIEF(patch_size=41, rng=1)
     extractor.extract(img, keypoints)
 
     assert extractor.descriptors.shape[0] == 3
     assert_array_equal(extractor.mask, (False, True, True, True))
+
+
+def test_independent_rng():
+    img = np.zeros((100, 100), dtype=int)
+    keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
+
+    rng = np.random.default_rng()
+    extractor = BRIEF(patch_size=41, rng=rng)
+
+    x = copy.deepcopy(extractor.rng).random()
+    rng.random()
+    extractor.extract(img, keypoints)
+    z = copy.deepcopy(extractor.rng).random()
+
+    assert x == z

@@ -1,25 +1,15 @@
-import inspect
 import functools
+import inspect
 import sys
 import warnings
-from collections.abc import Iterable
 
 import numpy as np
 
 from ._warnings import all_warnings, warn
 
-
-__all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
+__all__ = ['deprecate_func', 'get_bound_method_class', 'all_warnings',
            'safe_as_int', 'check_shape_equality', 'check_nD', 'warn',
            'reshape_nd', 'identity', 'slice_at_axis']
-
-
-class skimage_deprecation(Warning):
-    """Create our own deprecation class, since Python >= 2.7
-    silences deprecations by default.
-
-    """
-    pass
 
 
 def _get_stack_rank(func):
@@ -157,7 +147,7 @@ class remove_arg(_DecoratorBaseClass):
         return fixed_func
 
 
-def docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
+def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
     Parameters
@@ -280,8 +270,8 @@ class deprecate_kwarg(_DecoratorBaseClass):
             return func(*args, **kwargs)
 
         if func.__doc__ is not None:
-            newdoc = docstring_add_deprecated(func, self.kwarg_mapping,
-                                              self.deprecated_version)
+            newdoc = _docstring_add_deprecated(func, self.kwarg_mapping,
+                                               self.deprecated_version)
             fixed_func.__doc__ = newdoc
         return fixed_func
 
@@ -364,53 +354,67 @@ class channel_as_last_axis:
         return fixed_func
 
 
-class deprecated:
-    """Decorator to mark deprecated functions with warning.
+class deprecate_func(_DecoratorBaseClass):
+    """Decorate a deprecated function and warn when it is called.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
 
     Parameters
     ----------
-    alt_func : str
-        If given, tell user what function to use instead.
-    behavior : {'warn', 'raise'}
-        Behavior during call to deprecated function: 'warn' = warn user that
-        function is deprecated; 'raise' = raise error.
+    deprecated_version : str
+        The package version when the deprecation was introduced.
     removed_version : str
         The package version in which the deprecated function will be removed.
+    hint : str, optional
+        A hint on how to address this deprecation,
+        e.g., "Use `skimage.submodule.alternative_func` instead."
+
+    Examples
+    --------
+    >>> @deprecate_func(
+    ...     deprecated_version="1.0.0",
+    ...     removed_version="1.2.0",
+    ...     hint="Use `bar` instead."
+    ... )
+    ... def foo():
+    ...     pass
+
+    Calling ``foo`` will warn with::
+
+        FutureWarning: `foo` is deprecated since version 1.0.0
+        and will be removed in version 1.2.0. Use `bar` instead.
     """
 
-    def __init__(self, alt_func=None, behavior='warn', removed_version=None):
-        self.alt_func = alt_func
-        self.behavior = behavior
+    def __init__(self, *, deprecated_version, removed_version=None, hint=None):
+        self.deprecated_version=deprecated_version
         self.removed_version = removed_version
+        self.hint = hint
 
     def __call__(self, func):
+        message = (
+            f"`{func.__name__}` is deprecated since version "
+            f"{self.deprecated_version}"
+        )
+        if self.removed_version:
+            message += f" and will be removed in version {self.removed_version}."
+        if self.hint:
+            # Prepend space and make sure it closes with "."
+            message += f" {self.hint.rstrip('.')}."
 
-        alt_msg = ''
-        if self.alt_func is not None:
-            alt_msg = f' Use ``{self.alt_func}`` instead.'
-        rmv_msg = ''
-        if self.removed_version is not None:
-            rmv_msg = f' and will be removed in version {self.removed_version}'
-
-        msg = f'Function ``{func.__name__}`` is deprecated{rmv_msg}.{alt_msg}'
+        stack_rank = _get_stack_rank(func)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            if self.behavior == 'warn':
-                func_code = func.__code__
-                warnings.simplefilter('always', skimage_deprecation)
-                warnings.warn_explicit(msg,
-                                       category=skimage_deprecation,
-                                       filename=func_code.co_filename,
-                                       lineno=func_code.co_firstlineno + 1)
-            elif self.behavior == 'raise':
-                raise skimage_deprecation(msg)
+            stacklevel = 1 + self.get_stack_length(func) - stack_rank
+            warnings.warn(
+                message,
+                category=FutureWarning,
+                stacklevel=stacklevel
+            )
             return func(*args, **kwargs)
 
-        # modify doc string to display deprecation warning
-        doc = '**Deprecated function**.' + alt_msg
+        # modify docstring to display deprecation warning
+        doc = f'**Deprecated:** {message}'
         if wrapped.__doc__ is None:
             wrapped.__doc__ = doc
         else:
@@ -713,8 +717,8 @@ def _supported_float_type(input_dtype, allow_complex=False):
 
     Parameters
     ----------
-    input_dtype : np.dtype or Iterable of np.dtype
-        The input dtype. If a sequence of multiple dtypes is provided, each
+    input_dtype : np.dtype or tuple of np.dtype
+        The input dtype. If a tuple of multiple dtypes is provided, each
         dtype is first converted to a supported floating point type and the
         final dtype is then determined by applying `np.result_type` on the
         sequence of supported floating point types.
@@ -726,7 +730,7 @@ def _supported_float_type(input_dtype, allow_complex=False):
     float_type : dtype
         Floating-point dtype for the image.
     """
-    if isinstance(input_dtype, Iterable) and not isinstance(input_dtype, str):
+    if isinstance(input_dtype, tuple):
         return np.result_type(*(_supported_float_type(d) for d in input_dtype))
     input_dtype = np.dtype(input_dtype)
     if not allow_complex and input_dtype.kind == 'c':
