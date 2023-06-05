@@ -15,7 +15,7 @@ This tutorial is adapted from an application shared by Jules Scholler in [2]_.
 The images were acquired by Viacheslav Mazlin.
 
 .. [1] Vinay A. Shah, MD (2015)
-       `Optical Coherence Tomography <https://eyewiki.aao.org/Optical_Coherence_Tomography#:~:text=3%20Limitations-,Overview,at%20least%2010%2D15%20microns.>`_,
+       `Optical Coherence Tomography <https://eyewiki.aao.org/Optical_Coherence_Tomography#:~:text=3%20Limitations-,Overview,at%20least%2010%2D15%20microns.>`__,
        American Academy of Ophthalmology.
 .. [2] Jules Scholler (2019) "Image denoising using inpainting"
        https://www.jscholler.com/2019-02-28-remove-dots/
@@ -49,8 +49,9 @@ print(f'shape: {image_seq.shape}')
 print(f'dtype: {image_seq.dtype}')
 
 #####################################################################
-# The dataset is a timeseries of 60 (2D) images. We can visualize it by taking
-# advantage of the `animation_frame` parameter in Plotly's `imshow` function.
+# The dataset is a timeseries of 60 frames (which are 2D images). We can
+# visualize it by taking advantage of the ``animation_frame`` parameter in
+# Plotly's ``imshow`` function.
 
 fig = px.imshow(
     image_seq,
@@ -58,14 +59,21 @@ fig = px.imshow(
     height=500,
     width=500,
     binary_string=True,
-    labels=dict(animation_frame='time point'),
-    title='In-vivo human cornea'
+    labels={'animation_frame': 'time point'},
+    title='Sample of in-vivo human cornea'
 )
 plotly.io.show(fig)
 
 #####################################################################
 # Average over time
 # =================
+# First, we want to detect those dark spots where the data are lost. In
+# technical terms, we want to *segment* the dark spots. We want to do so for
+# all frames in the sequence. Unlike the actual data (signal), the dark spots
+# do not move from one frame to the next; they are still. Therefore, we begin
+# by computing the time average of the image sequence. We shall use this
+# time-averaged image to segment the dark spots, the latter then standing out
+# with respect to the background (blurred signal).
 
 image_seq_mean = np.mean(image_seq, axis=0)
 
@@ -84,7 +92,7 @@ plotly.io.show(fig)
 # ======================
 
 #####################################################################
-# Let's compare the visibility of the hidden data in two different
+# Let us compare the visibility of the hidden data in two different
 # thresholding masks, one of which has the `block_size` set to 21, while
 # the other has it set to 35. For this, we start by defining a convenience
 # function to create a mask:
