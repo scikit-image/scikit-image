@@ -22,14 +22,14 @@ The images were acquired by Viacheslav Mazlin.
 
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io
 import plotly.express as px
-import matplotlib.pyplot as plt
 
-from skimage.morphology import opening, erosion, diamond
-from skimage.restoration import inpaint
-from skimage import filters
+from skimage import (
+    filters, morphology
+)
 from skimage.data import palisades_of_vogt
 
 
@@ -87,7 +87,7 @@ plotly.io.show(fig)
 # Let's compare the visibility of the hidden data in two different
 # thresholding masks, one of which has the `block_size` set to 21, while
 # the other has it set to 35. For this, we start by defining a convenience
-# function to create a mask: 
+# function to create a mask:
 
 def create_mask(image_seq_mean, spot_size):
     thresh_value = filters.threshold_local(
@@ -133,26 +133,26 @@ plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
 # a dilation*. Opening can remove small bright spots (i.e. "dust") and
 # connect small dark cracks.
 
-footprint = diamond(1)
-mask = opening(mask, footprint)
-plot_comparison(image_seq_mean, mask, 'erosion')
+footprint = morphology.diamond(1)
+mask = morphology.opening(mask1, footprint)
+plot_comparison(image_seq_mean, mask, "original", "erosion")
 
 # Since ``opening`` an image starts with an erosion operation, light regions that are
 # smaller than the structuring element are removed.
 
 # Let's make the detected areas wider
-mask = dilation(mask, diamond(3))
-plot_comparison(image_seq_mean, mask, 'dilation')
+footprint = morphology.diamond(3)
+mask = morphology.dilation(mask1, footprint)
+plot_comparison(image_seq_mean, mask,"original", "dilation")
 
 # Dilation enlarges bright regions and shrinks dark regions.
-# Notice how the white spots of the image thickens, or gets dilated, as we increase the 
+# Notice how the white spots of the image thickens, or gets dilated, as we increase the
 # size of the diamond.
-
 
 #####################################################################
 # Apply mask across frames
 # ========================
-# Although masks are binary, they can be applied to images to filter out 
+# Although masks are binary, they can be applied to images to filter out
 # pixels where the mask is ``False``.
 # Numpy's ``where()`` is a flexible way of applying masks.
 # The application of a mask to the input image produces an output image of
@@ -160,7 +160,8 @@ plot_comparison(image_seq_mean, mask, 'dilation')
 # Let's apply the mask across frame
 
 image_masked = np.where(image_seq_mean, mask, 0)
-plot_comparison(image_seq_mean, image_masked, 'Masked across frames')
+plot_comparison(image_seq_mean, image_masked, "original", "Masked across frames")
+
 #####################################################################
 # Inpaint each frame separately
 # =============================
