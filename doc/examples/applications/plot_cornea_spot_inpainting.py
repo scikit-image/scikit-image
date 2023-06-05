@@ -1,7 +1,7 @@
 """
-============================================================
+==============================================================
 Reconstruct dust-obstructed human cornea image with inpainting
-============================================================
+==============================================================
 
 Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an
 image of the retina in the back of a patient's eye.
