@@ -112,7 +112,7 @@ def create_mask(image_avg, spot_size):
         offset=10
     )
     mask = (image_avg > thresh_value)
-    return mask
+    return 1 - mask
 
 #####################################################################
 # Let's also define a function to display two plots side-by-side so
