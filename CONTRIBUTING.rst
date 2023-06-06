@@ -181,7 +181,7 @@ Guidelines
 * All code should be documented, to the same
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
-  :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
+  :ref:`Gallery` below for more details).
 * No changes are ever merged without review and approval by two core team members.
   There are two exceptions to this rule. First, pull requests which affect
   only the documentation require review and approval by only one core team
@@ -263,7 +263,7 @@ Run:
   ``spin test -- --doctest-modules skimage``
 
 Warnings during testing phase
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By default, warnings raised by the test suite result in errors.
 You can switch that behavior off by setting the environment variable
@@ -303,9 +303,9 @@ Output is in ``scikit-image/doc/build/html/``.  Add the ``--clean``
 flag to build from scratch, deleting any cached output.
 
 Gallery
-~~~~~~~
+^^^^^^^
 
-The :ref:`example gallery <examples_gallery>` is built using
+The example gallery is built using
 `Sphinx-Gallery <https://sphinx-gallery.github.io>`_.
 Refer to their documentation for complete usage instructions, and also
 to existing examples in ``doc/examples``.
@@ -315,7 +315,7 @@ You can also `change a gallery entry's thumbnail
 <https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_.
 
 Fixing Warnings
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 -  "citation not found: R###" There is probably an underscore after a
    reference in the first line of a docstring (e.g. [1]\_). Use this
@@ -439,7 +439,7 @@ Note that the 3-release deprecation cycle is not a strict rule and, in some
 cases, developers can agree on a different procedure.
 
 Raising Warnings
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 ``skimage`` raises ``FutureWarning``\ s to highlight changes in its
 API, e.g.:
@@ -473,7 +473,7 @@ instead of being emitted by files in the scikit-image library:
 * **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
 Deprecating Keywords and Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
 ``skimage._shared.utils.deprecate_kwarg`` and
@@ -503,7 +503,7 @@ and three commands ``spin asv -- dev``, ``spin asv -- run`` and
 ``spin asv -- continuous``.
 
 Prerequisites
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 Begin by installing `airspeed velocity <https://asv.readthedocs.io/en/stable/>`_
 in your development environment. Prior to installation, be sure to activate your
 development environment, then if using ``venv`` you may install the requirement with::
@@ -523,7 +523,7 @@ is more appropriate. Once installed, it is useful to run the command::
 To let airspeed velocity know more information about your machine.
 
 Writing a benchmark
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
 a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
@@ -584,7 +584,7 @@ NotImplemented error.  See the following example for the registration module:
         raise NotImplementedError("registration module not available")
 
 Testing the benchmarks locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Prior to running the true benchmark, it is often worthwhile to test that the
 code is free of typos. To do so, you may use the command::
@@ -595,7 +595,7 @@ Where the ``TransformSuite`` above will be run once in your current environment
 to test that everything is in order.
 
 Running your benchmark
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 The command above is fast, but doesn't test the performance of the code
 adequately. To do that you may want to run the benchmark in your current
@@ -607,7 +607,7 @@ of time since building scikit-image can be a time consuming task::
   spin asv -- run -E existing -b TransformSuite
 
 Comparing results to main
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Often, the goal of a PR is to compare the results of the modifications in terms
 speed to a snapshot of the code that is in the main branch of the
