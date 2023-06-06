@@ -3,23 +3,23 @@
 Restore spotted cornea image with inpainting
 ============================================
 
-Optical Coherence Tomography (OCT) [1]_ is used to provide eye doctors with an
-image of the retina in the back of a patient's eye.
-
-Dust may stick to the reference mirror of the equipment, causing dark spots to
+Optical coherence tomography (OCT) is a non-invasive imaging technique used by
+ophthalmologists to take pictures of the back of a patient's eye [1]_.
+When performing OCT,
+dust may stick to the reference mirror of the equipment, causing dark spots to
 appear on the images. The problem is that these dark spots cover areas of
 in-vivo tissue, hence hiding data of interest. Our goal here is to restore
 (reconstruct) the hidden areas based on the pixels near their boundaries.
 
-This tutorial is adapted from an application shared by Jules Scholler in [2]_.
+This tutorial is adapted from an application shared by Jules Scholler [2]_.
 The images were acquired by Viacheslav Mazlin.
 
-.. [1] Vinay A. Shah, MD (2015)
-       `Optical Coherence Tomography <https://eyewiki.aao.org/Optical_Coherence_Tomography#:~:text=3%20Limitations-,Overview,at%20least%2010%2D15%20microns.>`__,
+.. [1] David Turbert, reviewed by Ninel Z Gregori, MD (2023)
+       `What Is Optical Coherence Tomography?
+       https://www.aao.org/eye-health/treatments/what-is-optical-coherence-tomography>`__,
        American Academy of Ophthalmology.
 .. [2] Jules Scholler (2019) "Image denoising using inpainting"
        https://www.jscholler.com/2019-02-28-remove-dots/
-
 """
 
 import matplotlib.pyplot as plt
