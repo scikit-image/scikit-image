@@ -35,6 +35,7 @@ py3.extension_module('_skeletonize_3d_cy',
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_flood_fill.py',
   '_skeletonize.py',
   '_util.py',
