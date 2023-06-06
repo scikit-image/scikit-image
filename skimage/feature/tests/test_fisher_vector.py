@@ -4,7 +4,7 @@ import numpy as np
 
 pytest.importorskip('sklearn')
 
-from skimage.feature.fisher_vector import (   # noqa: E402
+from skimage.feature._fisher_vector import (   # noqa: E402
     learn_gmm, fisher_vector, FisherVectorException,
     DescriptorException
 )
