@@ -10,23 +10,34 @@ import numpy
 
 def warp_images(from_points, to_points, images, output_region, interpolation_order = 1, approximate_grid=2):
     """Define a thin-plate-spline warping transform that warps from the from_points
-    to the to_points, and then warp the given images by that transform. This
-    transform is described in the paper: "Principal Warps: Thin-Plate Splines and
-    the Decomposition of Deformations" by F.L. Bookstein.
+    to the to_points, and then warp the given images by that transform.
 
-    Parameters:
-        - from_points and to_points: Nx2 arrays containing N 2D landmark points.
-        - images: list of images to warp with the given warp transform.
-        - output_region: the (xmin, ymin, xmax, ymax) region of the output
-                image that should be produced. (Note: The region is inclusive, i.e.
-                xmin <= x <= xmax)
-        - interpolation_order: if 1, then use linear interpolation; if 0 then use
-                nearest-neighbor.
-        - approximate_grid: defining the warping transform is slow. If approximate_grid
-                is greater than 1, then the transform is defined on a grid 'approximate_grid'
-                times smaller than the output image region, and then the transform is
-                bilinearly interpolated to the larger region. This is fairly accurate
-                for values up to 10 or so.
+    References
+    ----------
+    .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
+    decomposition of deformations." IEEE Transactions on pattern analysis and
+    machine intelligence 11.6 (1989): 567-585.
+
+    Parameters
+    ----------
+    from_points: (N, 2) array_like
+            Source image coordinates.
+    to_points: (N, 2) array_like
+            Target image coordinates.
+    image: ndarray
+            Image to be warped with the given warp transform.
+    output_region: (1, 4) array
+            The (xmin, ymin, xmax, ymax) region of the output
+            image that should be produced. (Note: The region is inclusive, i.e.
+            xmin <= x <= xmax)
+    interpolation_order: int, optional
+            If value is 1, then use linear interpolation else use
+            nearest-neighbor interpolation.
+    approximate_grid: int, optional
+            If approximate_grid is greater than 1, say x, then the transform is defined
+            on a grid x times smaller than the output image region. Then the
+            transform is bilinearly interpolated to the larger region. This is fairly
+            accurate for values up to 10 or so.
     """
     transform = _make_inverse_warp(from_points, to_points, output_region, approximate_grid)
     return [ndimage.map_coordinates(numpy.asarray(image), transform, order=interpolation_order) for image in images]
