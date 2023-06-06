@@ -49,7 +49,8 @@ print(f'shape: {image_seq.shape}')
 print(f'dtype: {image_seq.dtype}')
 
 #####################################################################
-# The dataset is a timeseries of 60 frames (which are 2D images). We can
+# The dataset is an image stack with 60 frames (time points) and 2 spatial
+# dimensions. We can
 # visualize it by taking advantage of the ``animation_frame`` parameter in
 # Plotly's ``imshow`` function.
 
