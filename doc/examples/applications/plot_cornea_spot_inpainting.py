@@ -28,7 +28,7 @@ import plotly.io
 import plotly.express as px
 
 from skimage import (
-    filters, morphology
+    filters, morphology, restoration
 )
 from skimage.data import palisades_of_vogt
 
@@ -53,16 +53,16 @@ print(f'dtype: {image_seq.dtype}')
 # visualize it by taking advantage of the ``animation_frame`` parameter in
 # Plotly's ``imshow`` function.
 
-fig = px.imshow(
-    image_seq,
-    animation_frame=0,
-    height=500,
-    width=500,
-    binary_string=True,
-    labels={'animation_frame': 'time point'},
-    title='Sample of in-vivo human cornea'
-)
-plotly.io.show(fig)
+# fig = px.imshow(
+#     image_seq,
+#     animation_frame=0,
+#     height=500,
+#     width=500,
+#     binary_string=True,
+#     labels={'animation_frame': 'time point'},
+#     title='Sample of in-vivo human cornea'
+# )
+# plotly.io.show(fig)
 
 #####################################################################
 # Average over time
@@ -152,14 +152,16 @@ footprint = morphology.diamond(1)
 mask = morphology.opening(mask1, footprint)
 plot_comparison(image_seq_mean, mask, "original", "erosion")
 
-# Since ``opening`` an image starts with an erosion operation, light regions that are
-# smaller than the structuring element are removed.
+#####################################################################
+# Since *opening* an image starts with an erosion operation, bright regions
+# which are smaller than the structuring element are removed.
+# Let us try with a larger structuring element:
 
-# Let's make the detected areas wider
 footprint = morphology.diamond(3)
 mask = morphology.dilation(mask1, footprint)
 plot_comparison(image_seq_mean, mask,"original", "dilation")
 
+#####################################################################
 # Dilation enlarges bright regions and shrinks dark regions.
 # Notice how the white spots of the image thickens, or gets dilated, as we increase the
 # size of the diamond.
@@ -180,3 +182,28 @@ plot_comparison(image_seq_mean, image_masked, "original", "Masked across frames"
 #####################################################################
 # Inpaint each frame separately
 # =============================
+# We are now ready to apply inpainting to each frame. For this we use function
+# ``inpaint_biharmonic`` from the ``restoration`` module.
+# This function takes two arrays as inputs:
+# The image to restore and the mask corresponding to the regions we want to
+# inpaint.
+
+image_denoised = np.zeros(image_seq.shape)
+
+for i in range(image_seq.shape[0]):
+    image_denoised[i] = restoration.inpaint_biharmonic(image_seq[i], mask)
+
+#####################################################################
+# Let us view the sequence of restored images, where the dark spots have been
+# inpainted, using an algorithm based on biharmonic equations.
+
+# fig = px.imshow(
+#     image_denoised,
+#     animation_frame=0,
+#     height=500,
+#     width=500,
+#     binary_string=True,
+#     labels={'animation_frame': 'time point'},
+#     title='Sample of in-vivo human cornea restored with inpainting'
+# )
+# plotly.io.show(fig)
