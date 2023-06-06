@@ -18,6 +18,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_blur_effect.py',
   '_colocalization.py',
   '_find_contours.py',
