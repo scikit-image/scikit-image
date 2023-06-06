@@ -75,12 +75,12 @@ print(f'dtype: {image_seq.dtype}')
 # time-averaged image to segment the dark spots, the latter then standing out
 # with respect to the background (blurred signal).
 
-image_seq_mean = np.mean(image_seq, axis=0)
+image_avg = np.mean(image_seq, axis=0)
 
-print(f'shape: {image_seq_mean.shape}')
+print(f'shape: {image_avg.shape}')
 
 fig = px.imshow(
-    image_seq_mean,
+    image_avg,
     width=500,
     height=500,
     binary_string=True,
@@ -104,13 +104,13 @@ plotly.io.show(fig)
 # the other has it set to 35. For this, we start by defining a convenience
 # function to create a mask:
 
-def create_mask(image_seq_mean, spot_size):
+def create_mask(image_avg, spot_size):
     thresh_value = filters.threshold_local(
-        image_seq_mean,
+        image_avg,
         block_size=spot_size,
         offset=10
     )
-    mask = (image_seq_mean > thresh_value)
+    mask = (image_avg > thresh_value)
     return mask
 
 #####################################################################
@@ -135,8 +135,8 @@ def plot_comparison(plot1, plot2, title1, title2):
 # Now, we plot the two masks. It seems that the dust-covered
 # spots appear more distinct in the second mask!
 
-mask1 = create_mask(image_seq_mean, 21)
-mask2 = create_mask(image_seq_mean, 35)
+mask1 = create_mask(image_avg, 21)
+mask2 = create_mask(image_avg, 35)
 
 plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
 
@@ -150,7 +150,7 @@ plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
 
 footprint = morphology.diamond(1)
 mask = morphology.opening(mask1, footprint)
-plot_comparison(image_seq_mean, mask, "original", "erosion")
+plot_comparison(image_avg, mask, "original", "erosion")
 
 #####################################################################
 # Since *opening* an image starts with an erosion operation, bright regions
@@ -159,7 +159,7 @@ plot_comparison(image_seq_mean, mask, "original", "erosion")
 
 footprint = morphology.diamond(3)
 mask = morphology.dilation(mask1, footprint)
-plot_comparison(image_seq_mean, mask,"original", "dilation")
+plot_comparison(image_avg, mask,"original", "dilation")
 
 #####################################################################
 # Dilation enlarges bright regions and shrinks dark regions.
@@ -176,8 +176,8 @@ plot_comparison(image_seq_mean, mask,"original", "dilation")
 # the same size as the input.
 # Let's apply the mask across frame
 
-image_masked = np.where(image_seq_mean, mask, 0)
-plot_comparison(image_seq_mean, image_masked, "original", "Masked across frames")
+image_masked = np.where(image_avg, mask, 0)
+plot_comparison(image_avg, image_masked, "original", "Masked across frames")
 
 #####################################################################
 # Inpaint each frame separately
