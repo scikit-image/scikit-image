@@ -125,10 +125,10 @@ def plot_comparison(plot1, plot2, title1, title2):
         sharex=True,
         sharey=True
     )
-    ax1.imshow(plot1)
+    ax1.imshow(plot1, cmap='gray')
     ax1.set_title(title1)
     ax1.axis('off')
-    ax2.imshow(plot2)
+    ax2.imshow(plot2, cmap='gray')
     ax2.set_title(title2)
     ax2.axis('off')
 
@@ -144,26 +144,39 @@ plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
 #####################################################################
 # Remove fine-grained features
 # ============================
-# We use diamond to create a diamond structuring element ``footprint`` for this example.
-# Morphological ``opening`` on an image is defined as an *erosion followed by
-# a dilation*. Opening can remove small bright spots (i.e. "dust") and
-# connect small dark cracks.
+# We use morphological filters to sharpen the mask and focus on the dark
+# spots. The two fundamental morphological operators are *dilation* and
+# *erosion*, where dilation (resp. erosion) sets the pixel to the brightest
+# (resp. darkest) value of the neighborhood defined by a structuring element
+# (footprint).
+#
+# Here, we use the ``diamond`` function from the ``morphology`` module to
+# create a diamond-shaped footprint.
+# An erosion followed by a dilation is called an *opening*.
+# First, we apply an opening filter, in order to remove small objects and thin
+# lines, while preserving the shape and size of larger objects.
 
 footprint = morphology.diamond(1)
-mask = morphology.opening(mask1, footprint)
-plot_comparison(image_avg, mask, "original", "erosion")
+mask_open = morphology.opening(mask2, footprint)
+plot_comparison(mask2, mask_open, "mask before", "after opening")
 
-# Since ``opening`` an image starts with an erosion operation, light regions that are
-# smaller than the structuring element are removed.
+#####################################################################
+# Since "opening" an image starts with an erosion operation, bright regions
+# which are smaller than the structuring element have been removed.
+# Let us try now with a larger footprint:
 
-# Let's make the detected areas wider
 footprint = morphology.diamond(3)
-mask = morphology.dilation(mask1, footprint)
-plot_comparison(image_avg, mask,"original", "dilation")
+mask_open = morphology.opening(mask2, footprint)
+plot_comparison(mask2, mask_open, "mask before", "after opening")
+
+#####################################################################
+# Next, we can make the detected areas wider by applying a dilation filter:
+
+mask_dilate = morphology.dilation(mask_open, footprint)
+plot_comparison(mask_open, mask_dilate, "before", "after dilation")
 
 # Dilation enlarges bright regions and shrinks dark regions.
-# Notice how the white spots of the image thickens, or gets dilated, as we increase the
-# size of the diamond.
+# Notice how, indeed, the white spots have thickened.
 
 #####################################################################
 # Apply mask across frames
@@ -175,6 +188,7 @@ plot_comparison(image_avg, mask,"original", "dilation")
 # the same size as the input.
 # Let's apply the mask across frame
 
+mask = mask_dilate
 image_masked = np.where(image_avg, mask, 0)
 plot_comparison(image_avg, image_masked, "original", "Masked across frames")
 
