@@ -29,37 +29,61 @@ if is_windows
   endif
 endif
 
-# NumPy include directory - needed in all submodules
-incdir_numpy = run_command(py3,
-  [
-    '-c',
-    'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
-  ],
-  check: true
-).stdout().strip()
+# When cross-compiling skimage, the compiler needs access to NumPy and Pythran
+# headers for the host platform (where the package will actually run). These
+# headers may be incompatible with any corresponding headers that might be
+# installed on the build system (where the compilation is performed). To make
+# sure that the compiler finds the right headers, paths can be configured in
+# the 'properties' section of a Meson cross file:
+#
+#   [properties]
+#   numpy-include-dir = '/path/to/host/numpy/includes'
+#   pythran-include-dir = '/path/to/host/pythran/includes'
+#
+# If a cross file is not provided or does not specify either of these
+# properties, fall back to running Python on the build system to query NumPy or
+# Pythran directly for the appropriate paths. This will detect appropriate
+# paths for native builds. (This might even work for certain build/host cross
+# combinations, but don't rely on that.)
+#
+# For more information about cross compilation in Meson, including a definition
+# of "build" and "host" in this context, refer to
+#
+#     https://mesonbuild.com/Cross-compilation.html
+
+# NumPy include directory
+incdir_numpy = meson.get_external_property('numpy-include-dir', 'not-given')
+if incdir_numpy == 'not-given'
+  # If not specified, try to query NumPy from the build python
+  incdir_numpy = run_command(py3,
+    [
+      '-c',
+      'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
+    ],
+    check: true
+  ).stdout().strip()
+endif
 
 inc_np = include_directories(incdir_numpy)
 
 cc = meson.get_compiler('c')
 
-# Pythran include directory and build flags
-use_pythran = run_command(py3,
-  [
-    '-c',
-    'import os; print(os.environ.get("SCIPY_USE_PYTHRAN", 1))'
-  ],
-  check: true
-).stdout().strip() == '1'
+# Pythran include directory
+incdir_pythran = meson.get_external_property('pythran-include-dir', 'not-given')
+if incdir_pythran == 'not-given'
+  # If not specified, try to query Pythran from the build python
+  incdir_pythran = run_command(py3,
+    [
+      '-c',
+      'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
+    ],
+    check: true
+  ).stdout().strip()
+endif
 
-incdir_pythran = run_command(py3,
-  [
-    '-c',
-    'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
-  ],
-  check: true
-).stdout().strip()
 inc_pythran = include_directories(incdir_pythran)
 
+# Pythran build flags
 cpp_args_pythran = [
   '-DENABLE_PYTHON_MODULE',
   '-D__PYTHRAN__=3',
