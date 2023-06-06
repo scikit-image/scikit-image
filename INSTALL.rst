@@ -5,18 +5,18 @@ Installing scikit-image
 
 How you should install ``scikit-image`` depends on your needs and skills:
 
-- Simplest solution:
-  `scientific Python distribution <#scientific-python-distributions>`_.
+- First, ensure that you have Python installed.
+  Two popular alternatives are the pip-based
+  `Python.org installers <https://www.python.org/downloads/>`_
+  and the conda-based
+  `miniforge <https://github.com/conda-forge/miniforge>`_.
 
-- If you can install Python packages and work in virtual environments:
+- Install `scikit-image` via `pip <#install-via-pip>`_ or `conda
+  <#install-via-conda>`_, as appropriate.
 
-  - `pip <#install-via-pip>`_
-
-  - `conda <#install-via-conda>`_
-
-- Easy solution but with pitfalls: `system package manager <#system-package-managers>`_ (yum, apt, ...).
-
-- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_.
+- Or, `build the package from source
+  <#installing-scikit-image-for-contributors>`_.
+  Do this if you'd like to contribute to development.
 
 Supported platforms
 ------------------------------------------------------------------------------
