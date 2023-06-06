@@ -181,7 +181,7 @@ Guidelines
 * All code should be documented, to the same
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
-  :ref:`Gallery` below for more details).
+  `Gallery`_ below for more details).
 * No changes are ever merged without review and approval by two core team members.
   There are two exceptions to this rule. First, pull requests which affect
   only the documentation require review and approval by only one core team
