@@ -260,8 +260,7 @@ class FundamentalMatrixTransform(GeometricTransform):
     Examples
     --------
     >>> import numpy as np
-    >>> import skimage as ski
-    >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
+    >>> tform_matrix = FundamentalMatrixTransform()
 
     Define source and destination points:
 
