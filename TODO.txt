@@ -36,3 +36,6 @@ Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
+* Remove warningsfilter for imageio and Pillow once
+  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
+  version of pillow (probably the release after Pillow 9.5.0).
