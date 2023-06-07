@@ -100,23 +100,21 @@ plotly.io.show(fig)
 # local) thresholding, as opposed to the usual thresholding procedure which
 # employs a single (global) threshold for all pixels in the image.
 #
-# Let us compare the visibility of the hidden data in two different
-# thresholding masks, one of which has the `block_size` set to 21, while
-# the other has it set to 35. For this, we start by defining a convenience
-# function to create a mask:
+# When calling the ``threshold_local`` function from the ``filters`` module,
+# we may change the default neighborhood size (``block_size``), i.e., the
+# typical size (number of pixels) over which illumination varies,
+# as well as the ``offset`` (shifting the neighborhood's weighted mean).
+# Let us try two different values for ``block_size``:
 
-def create_mask(image_avg, spot_size):
-    thresh_value = filters.threshold_local(
-        image_avg,
-        block_size=spot_size,
-        offset=10
-    )
-    mask = (image_avg > thresh_value)
-    return 1 - mask
+thresh_1 = filters.threshold_local(image_avg, block_size=21, offset=15)
+thresh_2 = filters.threshold_local(image_avg, block_size=43, offset=15)
+
+mask_1 = image_avg < thresh_1
+mask_2 = image_avg < thresh_2
 
 #####################################################################
-# Let's also define a function to display two plots side-by-side so
-# that it is easier for us to draw comparisons between plots:
+# Let us define a convenience function to display two plots side by side, so
+# it is easier for us to compare them:
 
 def plot_comparison(plot1, plot2, title1, title2):
     fig, (ax1, ax2) = plt.subplots(
@@ -132,14 +130,11 @@ def plot_comparison(plot1, plot2, title1, title2):
     ax2.set_title(title2)
     ax2.axis('off')
 
+plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
+
 #####################################################################
-# Now, we plot the two masks. It seems that the dust-covered
-# spots appear more distinct in the second mask!
-
-mask1 = create_mask(image_avg, 21)
-mask2 = create_mask(image_avg, 35)
-
-plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
+# The "dark spots" appear to be more distinct in the second mask, i.e., the
+# one resulting from using the larger ``block_size`` value.
 
 #####################################################################
 # Remove fine-grained features
@@ -157,8 +152,8 @@ plot_comparison(mask1, mask2, "spot_size = 21", "spot_size = 35")
 # lines, while preserving the shape and size of larger objects.
 
 footprint = morphology.diamond(1)
-mask_open = morphology.opening(mask2, footprint)
-plot_comparison(mask2, mask_open, "mask before", "after opening")
+mask_open = morphology.opening(mask_2, footprint)
+plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
 # Since "opening" an image starts with an erosion operation, bright regions
@@ -166,8 +161,8 @@ plot_comparison(mask2, mask_open, "mask before", "after opening")
 # Let us try now with a larger footprint:
 
 footprint = morphology.diamond(3)
-mask_open = morphology.opening(mask2, footprint)
-plot_comparison(mask2, mask_open, "mask before", "after opening")
+mask_open = morphology.opening(mask_2, footprint)
+plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
 # Next, we can make the detected areas wider by applying a dilation filter:
@@ -195,3 +190,5 @@ plot_comparison(image_avg, image_masked, "original", "Masked across frames")
 #####################################################################
 # Inpaint each frame separately
 # =============================
+
+plt.show()
