@@ -3,7 +3,7 @@ from scipy.ndimage import maximum_filter, minimum_filter, convolve
 
 from ..transform import integral_image
 from .corner import structure_tensor
-from ..morphology import octagon, star
+from ..morphology.footprints import octagon, star
 from .censure_cy import _censure_dob_loop
 from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
                             _mask_border_keypoints)
