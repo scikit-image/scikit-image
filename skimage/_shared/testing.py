@@ -273,9 +273,9 @@ def setup_test():
         warnings.filterwarnings(
             "default",
             message=(
-                "Loading 16-bit (uint16) PNG as int32 due to limitations in pillow's "
-                "PNG decoder. This will be fixed in a future version of pillow which "
-                "will make this warning dissapear."
+                r"Loading 16-bit \(uint16\) PNG as int32 due to limitations in "
+                r"pillow's PNG decoder\. This will be fixed in a future version of "
+                r"pillow which will make this warning dissapear\."
             ),
             category=UserWarning,
         )
