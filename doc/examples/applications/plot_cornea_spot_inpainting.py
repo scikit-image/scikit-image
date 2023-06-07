@@ -52,7 +52,9 @@ print(f'dtype: {image_seq.dtype}')
 # The dataset is an image stack with 60 frames (time points) and 2 spatial
 # dimensions. We can
 # visualize it by taking advantage of the ``animation_frame`` parameter in
-# Plotly's ``imshow`` function.
+# Plotly's ``imshow`` function. As a side note, when the
+# ``binary_string`` parameter is set to ``True``, the image is
+# represented as grayscale.
 
 fig = px.imshow(
     image_seq,
@@ -69,8 +71,8 @@ plotly.io.show(fig)
 # Average over time
 # =================
 # First, we want to detect those dark spots where the data are lost. In
-# technical terms, we want to *segment* the dark spots. We want to do so for
-# all frames in the sequence. Unlike the actual data (signal), the dark spots
+# technical terms, we want to *segment* the dark spots (for
+# all frames in the sequence). Unlike the actual data (signal), the dark spots
 # do not move from one frame to the next; they are still. Therefore, we begin
 # by computing the time average of the image sequence. We shall use this
 # time-averaged image to segment the dark spots, the latter then standing out
