@@ -137,6 +137,16 @@ plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 #####################################################################
 # The "dark spots" appear to be more distinct in the second mask, i.e., the
 # one resulting from using the larger ``block_size`` value.
+# Regarding the value of the offset parameter, we noticed that increasing it   
+# instead of keeping its default zero value, would yield a more uniform        
+# background, hence letting the objects of interest stand out more visibly.       
+# Indeed:                                                                      
+                                                                               
+thresh_0 = filters.threshold_local(image_avg, block_size=43)                   
+                                                                               
+mask_0 = image_avg < thresh_0                                                  
+                                                                               
+plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 
 #####################################################################
 # Remove fine-grained features
