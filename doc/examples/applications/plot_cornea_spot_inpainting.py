@@ -16,7 +16,7 @@ The images were acquired by Viacheslav Mazlin.
 
 .. [1] David Turbert, reviewed by Ninel Z Gregori, MD (2023)
        `What Is Optical Coherence Tomography?
-       https://www.aao.org/eye-health/treatments/what-is-optical-coherence-tomography>`__,
+       <https://www.aao.org/eye-health/treatments/what-is-optical-coherence-tomography>`_,
        American Academy of Ophthalmology.
 .. [2] Jules Scholler (2019) "Image denoising using inpainting"
        https://www.jscholler.com/2019-02-28-remove-dots/
