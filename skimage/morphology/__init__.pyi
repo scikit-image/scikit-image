@@ -61,7 +61,6 @@ from .isotropic import (isotropic_erosion, isotropic_dilation,
 from .footprints import (ball, cube, diamond, disk, ellipse,
                          footprint_from_sequence, octagon, octahedron,
                          rectangle, square, star)
-from skimage.measure._label import label
 from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
@@ -76,3 +75,4 @@ from .max_tree import (
     max_tree,
     max_tree_local_maxima
 )
+from ._util import label

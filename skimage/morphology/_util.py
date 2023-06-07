@@ -1,6 +1,5 @@
 """Utility functions used in the morphology subpackage."""
 
-
 import numpy as np
 from scipy import ndimage as ndi
 
