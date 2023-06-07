@@ -74,6 +74,9 @@ File: skimage/feature/fisher_vector.py
 Copyright: 2014 2014 Dan Oneata
 License: MIT
 
+File: skimage/transform/_thin_plate_splines.py
+Copyright: 2007 Zachary Pincus
+License: GNU General Public License v2.0
 
 License: BSD-2-Clause
 
