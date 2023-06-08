@@ -28,7 +28,7 @@ import plotly.io
 import plotly.express as px
 
 from skimage import (
-    filters, morphology
+    filters, morphology, restoration
 )
 from skimage.data import palisades_of_vogt
 
@@ -186,21 +186,25 @@ plot_comparison(mask_open, mask_dilate, "before", "after dilation")
 # Notice how, indeed, the white spots have thickened.
 
 #####################################################################
-# Apply mask across frames
-# ========================
-# Although masks are binary, they can be applied to images to filter out
-# pixels where the mask is ``False``.
-# Numpy's ``where()`` is a flexible way of applying masks.
-# The application of a mask to the input image produces an output image of
-# the same size as the input.
-# Let's apply the mask across frame
-
-mask = mask_dilate
-image_masked = np.where(image_avg, mask, 0)
-plot_comparison(image_avg, image_masked, "original", "Masked across frames")
-
-#####################################################################
 # Inpaint each frame separately
 # =============================
+# We are now ready to apply inpainting to each frame. For this we use function
+# ``inpaint_biharmonic`` from the ``restoration`` module. It implements an
+# algorithm based on biharmonic equations.
+# This function takes two arrays as inputs:
+# The image to restore and a mask (with same shape) corresponding to the
+# regions we want to inpaint.
+
+image_seq_inpainted = np.zeros(image_seq.shape)
+
+for i in range(image_seq.shape[0]):
+    image_seq_inpainted[i] = restoration.inpaint_biharmonic(
+        image_seq[i],
+        mask_dilate
+    )
+
+#####################################################################
+# Let us visualize one restored image, where the dark spots have been
+# inpainted.
 
 plt.show()
