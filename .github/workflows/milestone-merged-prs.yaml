@@ -1,0 +1,16 @@
+name: Milestone
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+jobs:
+  milestone_pr:
+    name: attach to PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: scientific-python/attach-next-milestone@2b15698722111206a92ee005cd13969b05b7af4f
+        with:
+          token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
+          force: true

@@ -1,15 +1,16 @@
 """
-===========
-Inpainting
-===========
+===============================
+Fill in defects with inpainting
+===============================
+
 Inpainting [1]_ is the process of reconstructing lost or deteriorated
 parts of images and videos.
 
-The reconstruction is supposed to be performed in fully automatic way by
-exploiting the information presented in non-damaged regions.
+The reconstruction (restoration) is performed in an automatic way by
+exploiting the information present in non-damaged regions.
 
-In this example, we show how the masked pixels get inpainted by
-inpainting algorithm based on 'biharmonic equation'-assumption [2]_ [3]_ [4]_.
+In this example, we show how the masked pixels get inpainted using an
+inpainting algorithm based on the biharmonic equation [2]_ [3]_ [4]_.
 
 .. [1]  Wikipedia. Inpainting
         https://en.wikipedia.org/wiki/Inpainting
@@ -44,12 +45,12 @@ mask[-60:-30, 170:195] = 1
 mask[-180:-160, 70:155] = 1
 mask[-60:-20, 0:20] = 1
 
-# add a few long, narrow defects
+# Add a few long, narrow defects
 mask[200:205, -200:] = 1
 mask[150:255, 20:23] = 1
 mask[365:368, 60:130] = 1
 
-# add randomly positioned small point-like defects
+# Add randomly positioned small point-like defects
 rstate = np.random.default_rng(0)
 for radius in [0, 2, 4]:
     # larger defects are less common

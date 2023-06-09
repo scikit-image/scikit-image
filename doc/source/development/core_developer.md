@@ -92,7 +92,7 @@ When reviewing, focus on the following:
    new contributions should be consistent with {doc}`our mission <../about/values>`.
 
 [wiki_functional]: https://en.wikipedia.org/wiki/Functional_programming
-[dep_pol]: https://scikit-image.org/docs/dev/contribute.html#deprecation-cycle
+[dep_pol]: https://scikit-image.org/docs/dev/development/contribute.html#deprecation-cycle
 [mit_license]: https://spdx.org/licenses/MIT.html
 [apache_2-2]: https://spdx.org/licenses/Apache-2.0.html
 

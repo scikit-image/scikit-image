@@ -65,7 +65,7 @@ dtype_limits
 
 """
 
-__version__ = '0.21.0rc2.dev0'
+__version__ = '0.22.0rc0.dev0'
 
 from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 8))
@@ -87,7 +87,7 @@ directory and you need to try from another location."""
 _STANDARD_MSG = """
 Your install of scikit-image appears to be broken.
 Try re-installing the package following the instructions at:
-https://scikit-image.org/docs/stable/install.html """
+https://scikit-image.org/docs/stable/user_guide/install.html"""
 
 
 def _raise_build_error(e):

@@ -12,15 +12,13 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
-        Python38-x64:
-          PYTHON_VERSION: "3.8"
+        Python311-x64:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: ""
           BUILD_DOCS: "true"
-        # build pre release packages on Python 3.8 since it has been out long
-        # enough for wheels to be built for packages that need to be compiled.
-        Python38-x64-pre:
-          PYTHON_VERSION: "3.8"
+        Python311-x64-pre:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
         Python39:
@@ -86,11 +84,13 @@ jobs:
           echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
           # Install the build and runtime dependencies of the project
+          sed -i 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/build.txt  # FIXME: Remove
           $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
           $PYTHON -m pip list
 
           # Disable C99 complex if PyWavelets needs to be built from source.
           # The compiler used will be MSVC, but C99 may be detected improperly
+          sed -i 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/default.txt  # FIXME: Remove
           USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
 
           $PYTHON -m pip list

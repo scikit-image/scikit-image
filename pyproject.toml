@@ -11,7 +11,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.8'
+requires-python = '>=3.9'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -22,7 +22,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
@@ -36,11 +35,11 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.21.1',
+    'numpy>=1.22',
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.27,<2.28',
+    'imageio>=2.27',
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
@@ -69,11 +68,11 @@ build = [
 ]
 data = ['pooch>=1.6.0']
 default = [
-    'numpy>=1.21.1',
+    'numpy>=1.22',
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.0.1',
-    'imageio>=2.27,<2.28',
+    'imageio>=2.27',
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
@@ -103,8 +102,6 @@ docs = [
     'scikit-learn>=0.24.0',
     'sphinx_design>=0.3',
     'pydata-sphinx-theme>=0.13',
-    'jupyterlite-sphinx',
-    'jupyterlite-pyodide-kernel',
 ]
 optional = [
     'SimpleITK',
@@ -114,7 +111,7 @@ optional = [
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pyamg',
-    'scikit-learn>=0.24.0',
+    'scikit-learn>=1.0',
 ]
 test = [
     'asv',
@@ -143,13 +140,12 @@ requires = [
     'Cython>=0.29.32',
     'pythran',
     'lazy_loader>=0.2',
-    "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.1; python_version=='3.8' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.1; python_version=='3.9' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.6; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
+    "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
+    "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
+    "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
     "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
+    "numpy; python_version>='3.9' and platform_python_implementation=='PyPy'",
 ]
 [tool.spin]
 package = 'skimage'
@@ -173,7 +169,7 @@ Metrics = [
 
 [tool.ruff]
 line-length = 88
-target-version = 'py38'
+target-version = 'py39'
 select = [
     'F',
     'E',

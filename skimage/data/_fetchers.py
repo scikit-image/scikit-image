@@ -219,7 +219,7 @@ def _fetch(data_filename):
             "but requires the installation of an optional dependency, pooch. "
             "To install pooch, use your preferred python package manager. "
             "Follow installation instruction found at "
-            "https://scikit-image.org/docs/stable/install.html"
+            "https://scikit-image.org/docs/stable/user_guide/install.html"
         )
     # Download the data with pooch which caches it automatically
     _ensure_cache_dir(target_dir=cache_dir)
@@ -248,7 +248,7 @@ def download_all(directory=None):
     This function requires the installation of an optional dependency, pooch,
     to download the full dataset. Follow installation instruction found at
 
-        https://scikit-image.org/docs/stable/install.html
+        https://scikit-image.org/docs/stable/user_guide/install.html
 
     Call this function to download all sample images making them available
     offline on your machine.
@@ -276,7 +276,7 @@ def download_all(directory=None):
             "To download all package data, scikit-image needs an optional "
             "dependency, pooch."
             "To install pooch, follow our installation instructions found at "
-            "https://scikit-image.org/docs/stable/install.html"
+            "https://scikit-image.org/docs/stable/user_guide/install.html"
         )
     # Consider moving this kind of logic to Pooch
     old_dir = _image_fetcher.path
@@ -1003,6 +1003,28 @@ def colorwheel():
         A colorwheel.
     """
     return _load("data/color.png")
+
+
+def palisades_of_vogt():
+    """Return image sequence of in-vivo tissue showing the palisades of Vogt.
+
+    In the human eye, the palisades of Vogt are normal features of the corneal
+    limbus, which is the border between the cornea and the sclera (i.e., the
+    white of the eye).
+    In the image sequence, there are some dark spots due to the presence of
+    dust on the reference mirror.
+
+    Returns
+    -------
+    palisades_of_vogt: (60, 1440, 1440) uint16 ndarray
+
+    Notes
+    -----
+    See info under `in-vivo-cornea-spots.tif` at
+    https://gitlab.com/scikit-image/data/-/blob/master/README.md#data.
+
+    """
+    return _load('data/palisades_of_vogt.tif')
 
 
 def rocket():

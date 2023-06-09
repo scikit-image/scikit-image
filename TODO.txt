@@ -36,6 +36,6 @@ Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
-* Remove temporary pin of imageio <2.28 once the breakage is dealt with. See also
-  https://github.com/scikit-image/scikit-image/issues/6908 and
-  https://github.com/scikit-image/scikit-image/pull/6764.
+* Remove warningsfilter for imageio and Pillow once
+  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
+  version of pillow (probably the release after Pillow 9.5.0).

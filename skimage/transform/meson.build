@@ -16,6 +16,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_geometric.py',
   '_warps.py',
   'finite_radon_transform.py',

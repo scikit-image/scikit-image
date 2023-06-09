@@ -5,18 +5,18 @@ Installing scikit-image
 
 How you should install ``scikit-image`` depends on your needs and skills:
 
-- Simplest solution:
-  `scientific Python distribution <#scientific-python-distributions>`_.
+- First, ensure that you have Python installed.
+  Two popular alternatives are the pip-based
+  `Python.org installers <https://www.python.org/downloads/>`_
+  and the conda-based
+  `miniforge <https://github.com/conda-forge/miniforge>`_.
 
-- If you can install Python packages and work in virtual environments:
+- Install `scikit-image` via `pip <#install-via-pip>`_ or `conda
+  <#install-via-conda>`_, as appropriate.
 
-  - `pip <#install-via-pip>`_
-
-  - `conda <#install-via-conda>`_
-
-- Easy solution but with pitfalls: `system package manager <#system-package-managers>`_ (yum, apt, ...).
-
-- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_.
+- Or, `build the package from source
+  <#installing-scikit-image-for-contributors>`_.
+  Do this if you'd like to contribute to development.
 
 Supported platforms
 ------------------------------------------------------------------------------
@@ -290,6 +290,15 @@ before you get started.
 
 For more information about building and using the ``spin`` package, see ``meson.md``.
 
+Testing
+-------
+
+Test your installation for correct behavior using:
+
+.. code-block:: sh
+
+   pytest skimage
+
 Updating the installation
 ------------------------------------------------------------------------------
 
@@ -303,71 +312,6 @@ that have changed. Do so with the following commands:
     git pull upstream main
     # Update the installation
     pip install -e . -vv
-
-Testing
--------
-
-``scikit-image`` has an extensive test suite that ensures correct
-execution on your system.  The test suite must pass before a pull
-request can be merged, and tests should be added to cover any
-modifications to the code base.
-
-We use the `pytest <https://docs.pytest.org/en/latest/>`__
-testing framework, with tests located in the various
-``skimage/submodule/tests`` folders.
-
-Our testing requirements are listed below:
-
-.. include:: ../../../requirements/test.txt
-   :literal:
-
-
-Run all tests using:
-
-.. code-block:: sh
-
-    pytest skimage
-
-Or the tests for a specific submodule:
-
-.. code-block:: sh
-
-    pytest skimage/morphology
-
-Or tests from a specific file:
-
-.. code-block:: sh
-
-    pytest skimage/morphology/tests/test_gray.py
-
-Or a single test within that file:
-
-.. code-block:: sh
-
-    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
-
-Use ``--doctest-modules`` to run doctests. For example, run all tests and all
-doctests using:
-
-.. code-block:: sh
-
-    pytest --doctest-modules skimage
-
-Warnings during testing phase
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed. This might cause
-certain tests to fail if you are building scikit-image with versions of
-dependencies that were not tested at the time of the release. To disable
-failures on warnings, export the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests:
-
-.. code-block:: sh
-
-   export SKIMAGE_TEST_STRICT_WARNINGS=False
-   pytest --pyargs skimage
 
 Platform-specific notes
 ------------------------------------------------------------------------------
