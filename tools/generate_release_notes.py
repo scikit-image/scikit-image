@@ -2,12 +2,14 @@
 
 
 import os
+import re
 import sys
 import argparse
 import logging
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Iterable, Callable
+from typing import Callable
+from collections.abc import Iterable
 
 import requests_cache
 from tqdm import tqdm
@@ -121,6 +123,9 @@ https://scikit-image.org
         (":robot: type: Infrastructure", "Infrastructure"),
     )
     ignored_user_logins: tuple[str] = ("web-flow",)
+    pr_summary_regex = re.compile(
+        r"^```release-note\s*(?P<summary>[\s\S]*?\w[\s\S]*?)\s*^```", flags=re.MULTILINE
+    )
 
     @property
     def intro(self):
@@ -157,6 +162,8 @@ https://scikit-image.org
 
     def _sanitize_text(self, text: str) -> str:
         text = text.strip()
+        text = text.replace("\r\n", " ")
+        text = text.replace("\n", " ")
         return text
 
     def _format_link(self, name: str, target: str) -> str:
@@ -165,8 +172,17 @@ https://scikit-image.org
     def _format_section_title(self, title: str, level: int) -> Iterable[str]:
         yield f"{'#' * level} {title}\n"
 
+    def _parse_pull_request_summary(self, pr: PullRequest) -> str:
+        if pr.body and (match := self.pr_summary_regex.search(pr.body)):
+            summary = match["summary"]
+        else:
+            logger.debug("falling back to title for %s", pr.html_url)
+            summary = pr.title
+        summary = self._sanitize_text(summary)
+        return summary
+
     def _format_pull_request(self, pr: PullRequest) -> Iterable[str]:
-        summary = self._sanitize_text(pr.title)
+        summary = self._parse_pull_request_summary(pr).rstrip(".")
         yield f"- {summary}\n"
         link = self._format_link(f"#{pr.number}", f"{pr.html_url}")
         yield f"  ({link}).\n"
@@ -305,5 +321,5 @@ def main(*, start_rev: str, stop_rev: str, version: str, out: str, format: str):
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
+    # logging.basicConfig(level=logging.DEBUG)
     main()
