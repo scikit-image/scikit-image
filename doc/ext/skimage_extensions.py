@@ -122,6 +122,7 @@ def write_random_js(app, exception):
     content = content.replace('{{LINKS}}', str(tutorial_urls))
     content = content.replace('{{GALLERY_DIV}}', ''.join(GALLERY_DIV.split('\n')))
 
+    random_js_path.parent.mkdir(parents=True, exist_ok=True)
     with open(random_js_path, 'w') as file:
         file.write(content)
     logger.info(
