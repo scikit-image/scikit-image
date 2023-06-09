@@ -1,27 +1,4 @@
-"""Generate release notes automatically from GitHub pull requests.
-
-Start with:
-```
-pip install pygithub gitpython tqdm
-```
-and export an GitHub token (classic) with public repo access
-```
-export GH_TOKEN=<your-gh-api-token>
-```
-Then, for to include everything from a certain release to main:
-```
-python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
-```
-Or two include only things between two releases:
-```
-python /path/to/generate_release_notes.py v.14.2 v0.14.3 --version 0.14.3
-```
-
-References
-https://github.com/scikit-image/scikit-image/blob/main/tools/generate_release_notes.py
-https://github.com/scikit-image/scikit-image/issues/3404
-https://github.com/scikit-image/scikit-image/issues/3405
-"""
+"""Generate release notes automatically from GitHub pull requests."""
 
 
 import os
@@ -30,11 +7,11 @@ import argparse
 import logging
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Callable
 
 import requests_cache
 from tqdm import tqdm
-from github import Github, Repository, PullRequest, NamedUser
+from github import Github, Repository, PullRequest, NamedUser, Commit
 
 
 logger = logging.getLogger(__name__)
@@ -42,22 +19,25 @@ logger = logging.getLogger(__name__)
 here = Path(__file__).parent
 
 GH_URL = "https://github.com"
-GH_ORG = 'scikit-image'
-GH_REPO = 'scikit-image'
+GH_ORG = "scikit-image"
+GH_REPO = "scikit-image"
 
 
 def lazy_tqdm(*args, **kwargs):
+    """Defer initialization of progress bar until first item is requested."""
     kwargs["file"] = kwargs.get("file", sys.stderr)
     yield from tqdm(*args, **kwargs)
 
 
-def commits_between(repo: Repository, start_rev, stop_rev):
+def commits_between(repo: Repository, start_rev: str, stop_rev: str) -> set[Commit]:
+    """Fetch commits between two revisions excluding the commit of `start_rev`."""
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
     comparison = repo.compare(base=start_rev, head=stop_rev)
-    return comparison.commits
+    return set(comparison.commits)
 
 
-def pull_requests_from_commits(commits):
+def pull_requests_from_commits(commits: Iterable[Commit]) -> set[Commit]:
+    """Fetch pull requests that are associated with the given `commits`."""
     all_pull_requests = set()
     for commit in commits:
         commit_pull_requests = list(commit.get_pulls())
@@ -65,12 +45,11 @@ def pull_requests_from_commits(commits):
             logger.info(
                 "commit %s with no or multiple PR(s): %r",
                 commit.html_url,
-                [p.html_url for p in commit_pull_requests]
+                [p.html_url for p in commit_pull_requests],
             )
         if any(not p.merged for p in commit_pull_requests):
             logger.error(
                 "commit %s with unmerged PRs: %r",
-
             )
         for pull in commit_pull_requests:
             if pull in all_pull_requests:
@@ -83,7 +62,15 @@ def pull_requests_from_commits(commits):
     return all_pull_requests
 
 
-def contributors(commits, pull_requests):
+def contributors(
+    commits: Iterable[Commit], pull_requests
+) -> tuple[set[NamedUser], set[NamedUser]]:
+    """Fetch code authors and reviewers.
+
+    `authors` are first authors of commits; co-authors are not included (yet).
+    `reviewers` are users, who added reviews to a merged pull request or create the
+    merge commit for one.
+    """
     authors = set()
     reviewers = set()
 
@@ -104,6 +91,7 @@ def contributors(commits, pull_requests):
 
 @dataclass
 class MdFormatter:
+    """Format release notes in Markdown from PRs, authors and reviewers."""
 
     pull_requests: set[PullRequest]
     authors: set[NamedUser]
@@ -119,28 +107,35 @@ analysis, filtering, morphology, feature detection, and more.
 
 For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
+
 """
     label_section_map: tuple[str, str] = (
-        (":trophy: type: Highlight" , "Highlights"),
-        (":baby: type: New feature" , "New Features"),
-        (":fast_forward: type: Enhancement" , "Enhancements"),
-        (":chart_with_upwards_trend: type: Performance" , "Performance"),
-        (":adhesive_bandage: type: Bug fix" , "Bug Fixes"),
-        (":scroll: type: API" , "API Changes"),
-        (":wrench: type: Maintenance" , "Maintenance"),
-        (":page_facing_up: type: Documentation" , "Documentation"),
-        (":robot: type: Infrastructure" , "Infrastructure"),
+        (":trophy: type: Highlight", "Highlights"),
+        (":baby: type: New feature", "New Features"),
+        (":fast_forward: type: Enhancement", "Enhancements"),
+        (":chart_with_upwards_trend: type: Performance", "Performance"),
+        (":adhesive_bandage: type: Bug fix", "Bug Fixes"),
+        (":scroll: type: API", "API Changes"),
+        (":wrench: type: Maintenance", "Maintenance"),
+        (":page_facing_up: type: Documentation", "Documentation"),
+        (":robot: type: Infrastructure", "Infrastructure"),
     )
     ignored_user_logins: tuple[str] = ("web-flow",)
-
-    def __str__(self) -> str:
-        return "".join(self.iter_lines())
 
     @property
     def intro(self):
         return self.intro_template.format(version=self.version)
 
+    def __str__(self) -> str:
+        return "".join(self.iter_lines())
+
+    @property
     def _prs_by_section(self) -> dict[str, set[PullRequest]]:
+        """Map pull requests to section titles.
+
+        Pull requests that lack a label which is associated with a section, are sorted
+        into a section named "Other".
+        """
         label_section_map = {k: v for k, v in self.label_section_map}
         prs_by_section = {
             section_name: set() for section_name in label_section_map.values()
@@ -152,7 +147,7 @@ https://scikit-image.org
             if not pr_labels:
                 logger.warning(
                     "pull request %s without known section label, sorting into 'Other'",
-                    pr.html_url
+                    pr.html_url,
                 )
                 prs_by_section["Other"].add(pr)
             for name in pr_labels:
@@ -179,6 +174,7 @@ https://scikit-image.org
     def _format_pr_section(
         self, title: str, pull_requests: set[PullRequest]
     ) -> Iterable[str]:
+        """Format a section title and list its pull requests sorted by merge date."""
         yield from self._format_section_title(title, 2)
         for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
             yield from self._format_pull_request(pr)
@@ -187,6 +183,7 @@ https://scikit-image.org
     def _format_contributor_section(
         self, authors: set[NamedUser], reviewers: set[NamedUser]
     ) -> Iterable[str]:
+        """Format contributor section and list users sorted by login handle."""
         authors = {u for u in authors if u.login not in self.ignored_user_logins}
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
@@ -211,16 +208,19 @@ https://scikit-image.org
         yield "\n"
 
     def iter_lines(self) -> Iterable[str]:
+        """Iterate the release notes document line-wise."""
         yield from self._format_section_title(
             self.title_template.format(version=self.version), 1
         )
         yield self.intro_template.format(version=self.version)
-        for title, pull_requests in self._prs_by_section().items():
+        for title, pull_requests in self._prs_by_section.items():
             yield from self._format_pr_section(title, pull_requests)
         yield from self._format_contributor_section(self.authors, self.reviewers)
 
 
 class RstFormatter(MdFormatter):
+    """Format release notes in reStructuredText from PRs, authors and reviewers."""
+
     def _sanitize_text(self, text) -> str:
         text = super()._sanitize_text(text)
         text = text.replace("`", "``")
@@ -234,20 +234,24 @@ class RstFormatter(MdFormatter):
         underline = {1: "=", 2: "-", 3: "~"}
         yield underline[level] * len(title) + "\n"
 
-def cli(func):
+
+def parse_command_line(func: Callable) -> Callable:
+    """Define and parse command line options.
+
+    Has no effect if any keyword argument is passed to the underlying function.
+    """
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument('start_rev', help='The starting revision (excluded)')
-    parser.add_argument('stop_rev', help='The stop revision (included)')
+    parser.add_argument("start_rev", help="The starting revision (excluded)")
+    parser.add_argument("stop_rev", help="The stop revision (included)")
     parser.add_argument(
-        '--version', help="Version you're about to release", default='0.2.0'
+        "--version", help="Version you're about to release", default="0.2.0"
     )
+    parser.add_argument("--out", help="Write to file, prints to STDOUT otherwise")
     parser.add_argument(
-        "--out", help="Write to file, prints to STDOUT otherwise"
-    )
-    parser.add_argument(
-        "--format", choices=["rst", "md"],
+        "--format",
+        choices=["rst", "md"],
         default="md",
-        help="Choose format, defaults to Markdown"
+        help="Choose format, defaults to Markdown",
     )
 
     def wrapped(**kwargs):
@@ -258,14 +262,12 @@ def cli(func):
     return wrapped
 
 
-@cli
-def main(*, start_rev, stop_rev, version, out, format):
+@parse_command_line
+def main(*, start_rev: str, stop_rev: str, version: str, out: str, format: str):
     # TODO option to delete cache
-    requests_cache.install_cache(
-        'github_cache', backend='sqlite', expire_after=3600
-    )
+    requests_cache.install_cache("github_cache", backend="sqlite", expire_after=3600)
 
-    gh_token = os.environ.get('GH_TOKEN')
+    gh_token = os.environ.get("GH_TOKEN")
     if gh_token is None:
         raise RuntimeError(
             "It is necessary that the environment variable `GH_TOKEN` "
@@ -277,14 +279,17 @@ def main(*, start_rev, stop_rev, version, out, format):
     gh = Github(gh_token)
     repo = gh.get_repo(f"{GH_ORG}/{GH_REPO}")
 
-    print("Getting commits...", file=sys.stderr)
+    print("Fetching commits...", file=sys.stderr)
     commits = commits_between(repo, start_rev, stop_rev)
     pull_requests = pull_requests_from_commits(
-        lazy_tqdm(commits, desc="Getting pull requests")
+        lazy_tqdm(commits, desc="Fetching pull requests")
     )
     authors, reviewers = contributors(
-        commits=lazy_tqdm(commits, desc="Getting authors", ),
-        pull_requests=lazy_tqdm(pull_requests, desc="Getting reviewers"),
+        commits=lazy_tqdm(
+            commits,
+            desc="Fetching authors",
+        ),
+        pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
 
     Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
