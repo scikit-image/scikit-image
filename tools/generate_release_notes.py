@@ -1,4 +1,4 @@
-"""Generate the release notes automatically from Github pull requests.
+"""Generate release notes automatically from GitHub pull requests.
 
 Start with:
 ```
@@ -16,303 +16,286 @@ Or two include only things between two releases:
 ```
 python /path/to/generate_release_notes.py v.14.2 v0.14.3 --version 0.14.3
 ```
-You should probably redirect the output with:
-```
-python /path/to/generate_release_notes.py [args] | tee release_notes.md
-```
-You'll require PyGitHub and tqdm, which you can install with:
-```
-python -m pip install -e ".[release]"
-```
+
 References
 https://github.com/scikit-image/scikit-image/blob/main/tools/generate_release_notes.py
 https://github.com/scikit-image/scikit-image/issues/3404
 https://github.com/scikit-image/scikit-image/issues/3405
 """
 
-import argparse
-import os
-import re
-import sys
-from collections import OrderedDict
-from datetime import datetime
-from itertools import chain
-from os.path import abspath
-from pathlib import Path
 
-from git import Repo
-from github import Github
-from tqdm import tqdm
+import os
+import sys
+import argparse
+import logging
+from pathlib import Path
+from dataclasses import dataclass
 
 import requests_cache
-
-requests_cache.install_cache(
-    'github_cache', backend='sqlite', expire_after=3600
-)
-# setup cache for speedup execution and reduce number of requests to GitHub API
-# cache will expire after 1h (3600s)
+from tqdm import tqdm
+from github import Github, Repository, PullRequest, NamedUser
 
 
-pr_num_pattern = re.compile(r'\(#(\d+)\)(?:$|\n)')
-issue_pattern = re.compile(
-    r'(?:Close|Closes|close|closes|Fix|Fixes|fix|fixes|Resolves|resolves) +#(\d+)'
-)
+logger = logging.getLogger(__name__)
 
-GH = "https://github.com"
-GH_USER = 'scikit-image'
+here = Path(__file__).parent
+
+GH_URL = "https://github.com"
+GH_ORG = 'scikit-image'
 GH_REPO = 'scikit-image'
-GH_TOKEN = os.environ.get('GH_TOKEN')
-if GH_TOKEN is None:
-    raise RuntimeError(
-        "It is necessary that the environment variable `GH_TOKEN` "
-        "be set to avoid running into problems with rate limiting. "
-        "One can be acquired at https://github.com/settings/tokens.\n\n"
-        "You do not need to select any permission boxes while generating "
-        "the token."
-    )
-
-g = Github(GH_TOKEN)
-repository = g.get_repo(f'{GH_USER}/{GH_REPO}')
-
-local_repo = Repo(Path(abspath(__file__)).parent.parent)
 
 
-parser = argparse.ArgumentParser(usage=__doc__)
-parser.add_argument('from_commit', help='The starting tag.')
-parser.add_argument('to_commit', help='The head branch.')
-parser.add_argument(
-    '--version', help="Version you're about to release.", default='0.2.0'
-)
-
-args = parser.parse_args()
-
-for tag in repository.get_tags():
-    if tag.name == args.from_commit:
-        previous_tag = tag
-        break
-else:
-    raise RuntimeError(f'Desired tag ({args.from_commit}) not found')
-
-common_ancestor = local_repo.merge_base(args.to_commit, args.from_commit)[0]
-remote_commit = repository.get_commit(common_ancestor.hexsha)
-
-# For some reason, go get the github commit from the commit to get
-# the correct date
-previous_tag_date = datetime.strptime(
-    remote_commit.last_modified, '%a, %d %b %Y %H:%M:%S %Z'
-)
+def lazy_tqdm(*args, **kwargs):
+    kwargs["file"] = kwargs.get("file", sys.stderr)
+    yield from tqdm(*args, **kwargs)
 
 
-def get_commits_to_ancestor(ancestor, rev="main"):
-    yield from local_repo.iter_commits(f'{ancestor.hexsha}..{rev}')
+def commits_between(repo: Repository, start_rev, stop_rev):
+    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
+    comparison = repo.compare(base=start_rev, head=stop_rev)
+    return comparison.commits
 
 
-new_commits_count = (
-    len(list(get_commits_to_ancestor(common_ancestor, args.to_commit))) + 1
-)
-release_branch_count = (
-    len(list(get_commits_to_ancestor(common_ancestor, args.from_commit))) + 1
-)
+def pull_requests_from_commits(commits):
+    all_pull_requests = set()
+    for commit in commits:
+        commit_pull_requests = list(commit.get_pulls())
+        if len(commit_pull_requests) != 1:
+            logger.info(
+                "commit %s with no or multiple PR(s): %r",
+                commit.html_url,
+                [p.html_url for p in commit_pull_requests]
+            )
+        if any(not p.merged for p in commit_pull_requests):
+            logger.error(
+                "commit %s with unmerged PRs: %r",
 
-all_commits = list(
-    tqdm(
-        repository.get_commits(
-            sha=args.to_commit, since=previous_tag_date
-        ),
-        desc=f'Getting all commits between {remote_commit.sha} '
-        f'and {args.to_commit}',
-        total=new_commits_count,
-    )
-)
-branch_commit = list(
-    tqdm(
-        repository.get_commits(
-            sha=local_repo.tag(args.from_commit).commit.hexsha,
-            since=previous_tag_date,
-        ),
-        desc=f'Getting all commits from release branch {args.from_commit} '
-        f'and {remote_commit.sha}',
-        total=release_branch_count,
-    )
-)
-all_hashes = {c.sha for c in all_commits}
-
-consumed_pr = set()
-
-for commit in branch_commit:
-    if match := pr_num_pattern.search(commit.commit.message):
-        consumed_pr.add(int(match[1]))
+            )
+        for pull in commit_pull_requests:
+            if pull in all_pull_requests:
+                # May happen if
+                logger.info(
+                    "pull request associated with multiple commits: %r",
+                    pull.html_url,
+                )
+        all_pull_requests.update(commit_pull_requests)
+    return all_pull_requests
 
 
-def add_to_users(users, new_user):
-    if new_user.login in users:
-        # reduce obsolete requests to GitHub API
-        return
-    if new_user.name is None:
-        users[new_user.login] = new_user.login
-    else:
-        users[new_user.login] = new_user.name
+def contributors(commits, pull_requests):
+    authors = set()
+    reviewers = set()
+
+    for commit in commits:
+        # TODO include co-authors?
+        if commit.author:
+            authors.add(commit.author)
+        if commit.committer:
+            reviewers.add(commit.committer)
+
+    for pull in pull_requests:
+        for review in pull.get_reviews():
+            if review.user:
+                reviewers.add(review.user)
+
+    return authors, reviewers
 
 
-authors = set()
-committers = set()
-reviewers = set()
-users = {}
+@dataclass
+class MdFormatter:
 
-for commit in tqdm(all_commits, desc="Getting committers and authors"):
-    if match := pr_num_pattern.search(commit.commit.message):
-        if int(match[1]) in consumed_pr:
-            continue
-            # omit commits from release branch
+    pull_requests: set[PullRequest]
+    authors: set[NamedUser]
+    reviewers: set[NamedUser]
 
-    if commit.committer is not None:
-        add_to_users(users, commit.committer)
-        committers.add(commit.committer.login)
-    if commit.author is not None:
-        add_to_users(users, commit.author)
-        authors.add(commit.author.login)
-
-# remove these bots.
-committers.discard("web-flow")
-authors.discard("azure-pipelines-bot")
-
-highlights = OrderedDict()
-
-highlights['Highlights'] = {}
-highlights['New Features'] = {}
-highlights['API Changes'] = {}
-highlights['Enhancements'] = {}
-highlights["Performance"] = {}
-highlights['Bug Fixes'] = {}
-highlights['Maintenance'] = {}
-highlights['Documentation'] = {}
-highlights['Infrastructure'] = {}
-other_pull_requests = {}
-
-label_to_section = {
-    ":trophy: type: Highlight": "Highlights",
-    ":baby: type: New feature": "New Features",
-    ":fast_forward: type: Enhancement": "Enhancements",
-    ":chart_with_upwards_trend: Performance": "Performance",
-    ":adhesive_bandage: type: Bug fix": "Bug Fixes",
-    ":scroll: type: API": "API Changes",
-    ":wrench: type: Maintenance": "Maintenance",
-    ":page_facing_up: type: Documentation": "Documentation",
-    ":robot: type: Infrastructure": "Infrastructure",
-}
-
-pr_count = 0
-
-for commit in get_commits_to_ancestor(common_ancestor, args.to_commit):
-    if pr_num_pattern.search(commit.message) is not None:
-        pr_count += 1
-
-for pull in tqdm(
-    g.search_issues(
-        f'repo:{GH_USER}/{GH_REPO} '
-        f'merged:>{previous_tag_date.isoformat()} '
-        'sort:created-asc is:pull-request'
-    ),
-    desc='Pull Requests...',
-    total=pr_count,
-):
-    if pull.number in consumed_pr:
-        continue
-    if pull.milestone is not None and pull.milestone.title not in args.version:
-        print(
-            f"PR {pull.number} is assigned to milestone {pull.milestone.title}",
-            file=sys.stderr,
-        )
-    pr = repository.get_pull(pull.number)
-    if pr.merge_commit_sha not in all_hashes:
-        continue
-    summary = pull.title
-
-    for review in pr.get_reviews():
-        if review.user is not None:
-            add_to_users(users, review.user)
-            reviewers.add(review.user.login)
-    assigned_to_section = False
-    pr_lables = {label.name.lower() for label in pull.labels}
-    for label_name, section in label_to_section.items():
-        if label_name.lower() in pr_lables:
-            highlights[section][pull.number] = {'summary': summary}
-            assigned_to_section = True
-
-    if assigned_to_section:
-        continue
-
-    issues_list = []
-    if pull.body:
-        for x in issue_pattern.findall(pull.body):
-            issue = repository.get_issue(int(x))
-            if issue.pull_request is None:
-                issues_list.append(issue)
-
-    issue_labels = [
-        label.name for label in chain(*[x.labels for x in issues_list])
-    ]
-
-    for label_name, section in label_to_section.items():
-        if label_name in issue_labels:
-            highlights[section][pull.number] = {'summary': summary}
-            break
-    else:
-        other_pull_requests[pull.number] = {'summary': summary}
-
-
-# add Other PRs to the ordered dict to make doc generation easier.
-highlights['Other Pull Requests'] = other_pull_requests
-
-
-# Now generate the release notes
-title = f'scikit-image {args.version} release notes'
-title = f'{title}\n{len(title) * "="}'
-print(title)
-
-print(
-    f"""
-We're happy to announce the release of scikit-image {args.version}!
+    version: str = "x.y.z"
+    title_template: str = "scikit-image {version} release notes"
+    intro_template: str = """
+We're happy to announce the release of scikit-image {version}!
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-"""
-)
 
-print(
-    """
 For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 """
-)
-
-for section, pull_request_dicts in highlights.items():
-    print(f'{section}\n{len(section) * "-"}')
-    for number, pull_request_info in pull_request_dicts.items():
-        pr_link = f"{GH}/{GH_USER}/{GH_REPO}/pull/{number}"
-        print(f'- {pull_request_info["summary"]}\n  (`#{number} <{pr_link}>`_).')
-    print()
-
-
-contributors = OrderedDict()
-
-contributors['authors'] = authors
-contributors['reviewers'] = reviewers
-# ignore committers
-# contributors['committers'] = committers
-
-for section_name, contributor_set in contributors.items():
-    print()
-    if None in contributor_set:
-        contributor_set.remove(None)
-    committer_str = (
-        f'{len(contributor_set)} {section_name} added to this '
-        'release (alphabetical)'
+    label_section_map: tuple[str, str] = (
+        (":trophy: type: Highlight" , "Highlights"),
+        (":baby: type: New feature" , "New Features"),
+        (":fast_forward: type: Enhancement" , "Enhancements"),
+        (":chart_with_upwards_trend: type: Performance" , "Performance"),
+        (":adhesive_bandage: type: Bug fix" , "Bug Fixes"),
+        (":scroll: type: API" , "API Changes"),
+        (":wrench: type: Maintenance" , "Maintenance"),
+        (":page_facing_up: type: Documentation" , "Documentation"),
+        (":robot: type: Infrastructure" , "Infrastructure"),
     )
-    print(f"{committer_str}\n{'-' * len(committer_str)}")
-    print()
+    ignored_user_logins: tuple[str] = ("web-flow",)
 
-    for c in sorted(contributor_set, key=lambda x: users[x].lower()):
-        commit_link = f"{GH}/{GH_USER}/{GH_REPO}/commits?author={c}"
-        print(f"- `{users[c]} (@{c}) <{commit_link}>`_")
-    print()
+    def __str__(self):
+        return "\n".join(self.iter_lines())
+
+    @property
+    def intro(self):
+        return self.intro_template.format(version=self.version)
+
+    def _prs_by_section(self) -> dict[str, set[PullRequest]]:
+        label_section_map = {k: v for k, v in self.label_section_map}
+        prs_by_section = {
+            section_name: set() for section_name in label_section_map.values()
+        }
+        prs_by_section["Other"] = set()
+        for pr in self.pull_requests:
+            pr_labels = {label.name for label in pr.labels}
+            pr_labels = pr_labels & label_section_map.keys()
+            if not pr_labels:
+                logger.warning(
+                    "pull request %s without known section label, sorting into 'Other'",
+                    pr.html_url
+                )
+                prs_by_section["Other"].add(pr)
+            for name in pr_labels:
+                prs_by_section[label_section_map[name]].add(pr)
+
+        return prs_by_section
+
+    def _format_pr_title(self, title):
+        title = title.strip()
+        return title
+
+    def _format_section_title(self, title, level):
+        return f"{'#' * level} {title}"
+
+    def _format_link(self, name, target):
+        return f"[{name}]({target})"
+
+    def _format_pr_section(self, title, pull_requests):
+        pull_url = f"{GH_URL}/{GH_ORG}/{GH_REPO}/pull"
+        yield self._format_section_title(title, 2)
+        for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
+            yield f"- {self._format_pr_title(pr.title)}"
+            link = self._format_link(f"#{pr.number}", f"{pull_url}/{pr.number}")
+            yield f"  ({link})."
+        yield ""
+
+    def _format_contributor_section(self, authors, reviewers):
+        authors = {u for u in authors if u.login not in self.ignored_user_logins}
+        reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
+
+        yield self._format_section_title("Contributors", 2)
+
+        def format_user(user):
+            line = self._format_link(f"@{user.login}", user.html_url)
+            if user.name:
+                line = f"{user.name} ({line})"
+            return line
+
+        authors = sorted(authors, key=lambda user: user.login)
+        paragraph = f"{len(authors)} authors added to this release (sorted by login):\n"
+        paragraph += ",\n".join(format_user(user) for user in authors)
+        yield paragraph
+        yield ""
+
+        reviewers = sorted(reviewers, key=lambda user: user.login)
+        paragraph = (
+            f"{len(reviewers)} reviewers added to this release (sorted by login):\n"
+        )
+        paragraph += ",\n".join(format_user(user) for user in reviewers)
+        yield paragraph
+        yield ""
+
+    def iter_lines(self):
+        yield self._format_section_title(
+            self.title_template.format(version=self.version), 1
+        )
+        yield self.intro_template.format(version=self.version)
+        for title, pull_requests in self._prs_by_section().items():
+            yield from self._format_pr_section(title, pull_requests)
+        yield from self._format_contributor_section(self.authors, self.reviewers)
+
+
+class RstFormatter(MdFormatter):
+
+    def _format_pr_title(self, title):
+        title = super()._format_pr_title(title)
+        title = title.replace("`", "``")
+        return title
+
+    def _format_section_title(self, title, level):
+        underline = {
+            1: "=", 2: "-", 3: "~"
+        }
+        return f"{title}\n{underline[level] * len(title)}"
+
+    def _format_link(self, name, target):
+        return f"`{name} <{target}>`_"
+
+
+def cli(func):
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument('start_rev', help='The starting revision (excluded)')
+    parser.add_argument('stop_rev', help='The stop revision (included)')
+    parser.add_argument(
+        '--version', help="Version you're about to release", default='0.2.0'
+    )
+    parser.add_argument(
+        "--out", help="Write to file, prints to STDOUT otherwise"
+    )
+    parser.add_argument(
+        "--format", choices=["rst", "md"],
+        default="md",
+        help="Choose format, defaults to Markdown"
+    )
+
+    def wrapped(**kwargs):
+        if not kwargs:
+            kwargs = vars(parser.parse_args())
+        return func(**kwargs)
+
+    return wrapped
+
+
+@cli
+def main(*, start_rev, stop_rev, version, out, format):
+    # TODO option to delete cache
+    requests_cache.install_cache(
+        'github_cache', backend='sqlite', expire_after=3600
+    )
+
+    gh_token = os.environ.get('GH_TOKEN')
+    if gh_token is None:
+        raise RuntimeError(
+            "It is necessary that the environment variable `GH_TOKEN` "
+            "be set to avoid running into problems with rate limiting. "
+            "One can be acquired at https://github.com/settings/tokens.\n\n"
+            "You do not need to select any permission boxes while generating "
+            "the token."
+        )
+    gh = Github(gh_token)
+    repo = gh.get_repo(f"{GH_ORG}/{GH_REPO}")
+
+    print("Getting commits...", file=sys.stderr)
+    commits = commits_between(repo, start_rev, stop_rev)
+    pull_requests = pull_requests_from_commits(
+        lazy_tqdm(commits, desc="Getting pull requests")
+    )
+    authors, reviewers = contributors(
+        commits=lazy_tqdm(commits, desc="Getting authors", ),
+        pull_requests=lazy_tqdm(pull_requests, desc="Getting reviewers"),
+    )
+
+    Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
+    formatter = Formatter(pull_requests, authors, reviewers, version)
+    if out:
+        out = Path(out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with open(out, "w") as io:
+            io.writelines(formatter.iter_lines())
+    else:
+        print()
+        print(str(formatter), file=sys.stdout)
+
+
+if __name__ == "__main__":
+    logging.basicConfig()
+    main()
