@@ -30,6 +30,7 @@ import argparse
 import logging
 from pathlib import Path
 from dataclasses import dataclass
+from typing import Iterable
 
 import requests_cache
 from tqdm import tqdm
@@ -132,8 +133,8 @@ https://scikit-image.org
     )
     ignored_user_logins: tuple[str] = ("web-flow",)
 
-    def __str__(self):
-        return "\n".join(self.iter_lines())
+    def __str__(self) -> str:
+        return "".join(self.iter_lines())
 
     @property
     def intro(self):
@@ -159,30 +160,37 @@ https://scikit-image.org
 
         return prs_by_section
 
-    def _format_pr_title(self, title):
-        title = title.strip()
-        return title
+    def _sanitize_text(self, text: str) -> str:
+        text = text.strip()
+        return text
 
-    def _format_section_title(self, title, level):
-        return f"{'#' * level} {title}"
-
-    def _format_link(self, name, target):
+    def _format_link(self, name: str, target: str) -> str:
         return f"[{name}]({target})"
 
-    def _format_pr_section(self, title, pull_requests):
-        pull_url = f"{GH_URL}/{GH_ORG}/{GH_REPO}/pull"
-        yield self._format_section_title(title, 2)
-        for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
-            yield f"- {self._format_pr_title(pr.title)}"
-            link = self._format_link(f"#{pr.number}", f"{pull_url}/{pr.number}")
-            yield f"  ({link})."
-        yield ""
+    def _format_section_title(self, title: str, level: int) -> Iterable[str]:
+        yield f"{'#' * level} {title}\n"
 
-    def _format_contributor_section(self, authors, reviewers):
+    def _format_pull_request(self, pr: PullRequest) -> Iterable[str]:
+        summary = self._sanitize_text(pr.title)
+        yield f"- {summary}\n"
+        link = self._format_link(f"#{pr.number}", f"{pr.html_url}")
+        yield f"  ({link}).\n"
+
+    def _format_pr_section(
+        self, title: str, pull_requests: set[PullRequest]
+    ) -> Iterable[str]:
+        yield from self._format_section_title(title, 2)
+        for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
+            yield from self._format_pull_request(pr)
+        yield "\n"
+
+    def _format_contributor_section(
+        self, authors: set[NamedUser], reviewers: set[NamedUser]
+    ) -> Iterable[str]:
         authors = {u for u in authors if u.login not in self.ignored_user_logins}
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
-        yield self._format_section_title("Contributors", 2)
+        yield from self._format_section_title("Contributors", 2)
 
         def format_user(user):
             line = self._format_link(f"@{user.login}", user.html_url)
@@ -191,21 +199,19 @@ https://scikit-image.org
             return line
 
         authors = sorted(authors, key=lambda user: user.login)
-        paragraph = f"{len(authors)} authors added to this release (sorted by login):\n"
-        paragraph += ",\n".join(format_user(user) for user in authors)
-        yield paragraph
-        yield ""
+        yield f"{len(authors)} authors added to this release (sorted by login):\n"
+        for user in authors:
+            yield format_user(user) + "\n"
+        yield "\n"
 
         reviewers = sorted(reviewers, key=lambda user: user.login)
-        paragraph = (
-            f"{len(reviewers)} reviewers added to this release (sorted by login):\n"
-        )
-        paragraph += ",\n".join(format_user(user) for user in reviewers)
-        yield paragraph
-        yield ""
+        yield f"{len(reviewers)} reviewers added to this release (sorted by login):\n"
+        for user in reviewers:
+            yield format_user(user) + "\n"
+        yield "\n"
 
-    def iter_lines(self):
-        yield self._format_section_title(
+    def iter_lines(self) -> Iterable[str]:
+        yield from self._format_section_title(
             self.title_template.format(version=self.version), 1
         )
         yield self.intro_template.format(version=self.version)
@@ -215,21 +221,18 @@ https://scikit-image.org
 
 
 class RstFormatter(MdFormatter):
+    def _sanitize_text(self, text) -> str:
+        text = super()._sanitize_text(text)
+        text = text.replace("`", "``")
+        return text
 
-    def _format_pr_title(self, title):
-        title = super()._format_pr_title(title)
-        title = title.replace("`", "``")
-        return title
-
-    def _format_section_title(self, title, level):
-        underline = {
-            1: "=", 2: "-", 3: "~"
-        }
-        return f"{title}\n{underline[level] * len(title)}"
-
-    def _format_link(self, name, target):
+    def _format_link(self, name: str, target: str) -> str:
         return f"`{name} <{target}>`_"
 
+    def _format_section_title(self, title: str, level: int) -> Iterable[str]:
+        yield title + "\n"
+        underline = {1: "=", 2: "-", 3: "~"}
+        yield underline[level] * len(title) + "\n"
 
 def cli(func):
     parser = argparse.ArgumentParser(usage=__doc__)
