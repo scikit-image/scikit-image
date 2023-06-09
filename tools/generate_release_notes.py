@@ -260,7 +260,7 @@ def parse_command_line(func: Callable) -> Callable:
     parser.add_argument("start_rev", help="The starting revision (excluded)")
     parser.add_argument("stop_rev", help="The stop revision (included)")
     parser.add_argument(
-        "--version", help="Version you're about to release", default="0.2.0"
+        "--version", help="Version you're about to release", default="0.0.0"
     )
     parser.add_argument("--out", help="Write to file, prints to STDOUT otherwise")
     parser.add_argument(
