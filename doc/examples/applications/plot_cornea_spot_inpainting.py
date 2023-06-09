@@ -26,9 +26,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io
 import plotly.express as px
+import plotly.graph_objects as go
+from scipy import sparse
 
 from skimage import (
-    filters, morphology, restoration
+    filters, measure, morphology, restoration
 )
 from skimage.data import palisades_of_vogt
 
@@ -182,6 +184,7 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 mask_dilate = morphology.dilation(mask_open, footprint)
 plot_comparison(mask_open, mask_dilate, "before", "after dilation")
 
+#####################################################################
 # Dilation enlarges bright regions and shrinks dark regions.
 # Notice how, indeed, the white spots have thickened.
 
@@ -205,6 +208,28 @@ for i in range(image_seq.shape[0]):
 
 #####################################################################
 # Let us visualize one restored image, where the dark spots have been
-# inpainted.
+# inpainted. First, we find the contours of the dark spots (i.e., of the mask)
+# so we can draw them on top of the restored image;
+
+contours = measure.find_contours(mask_dilate)
+
+# Gather all (row, column) coordinates of the contours
+x = []
+y = []
+for contour in contours:
+    x.append(contour[:, 0])
+    y.append(contour[:, 1])
+# Flatten them
+x_flat = np.concatenate(x).ravel()
+y_flat = np.concatenate(y).ravel()
+# Create a sparse matrix corresponding to the mask of these contours
+data = np.ones(x_flat.shape, dtype='bool')
+mtx = sparse.coo_matrix((data, (x_flat, y_flat)), shape=mask_dilate.shape)
+# Convert it to array
+arr = mtx.toarray().astype('float')
+
+fig = px.imshow(image_seq_inpainted[50], color_continuous_scale='gray')
+fig.add_trace(go.Contour(z=arr, contours_coloring='lines'))
+plotly.io.show(fig)
 
 plt.show()
