@@ -91,7 +91,7 @@ def contributors(
     return authors, reviewers
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class MdFormatter:
     """Format release notes in Markdown from PRs, authors and reviewers."""
 
@@ -206,9 +206,10 @@ https://scikit-image.org
         yield from self._format_section_title("Contributors", 2)
 
         def format_user(user):
-            line = self._format_link(f"@{user.login}", user.html_url)
+            line = f"@{user.login}"
             if user.name:
                 line = f"{user.name} ({line})"
+            line = self._format_link(line, user.html_url)
             return line
 
         authors = sorted(authors, key=lambda user: user.login)
@@ -309,7 +310,12 @@ def main(*, start_rev: str, stop_rev: str, version: str, out: str, format: str):
     )
 
     Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
-    formatter = Formatter(pull_requests, authors, reviewers, version)
+    formatter = Formatter(
+        pull_requests=pull_requests,
+        authors=authors,
+        reviewers=reviewers,
+        version=version,
+    )
     if out:
         out = Path(out)
         out.parent.mkdir(parents=True, exist_ok=True)
