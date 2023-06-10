@@ -26,11 +26,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io
 import plotly.express as px
-import plotly.graph_objects as go
 from scipy import sparse
 
 from skimage import (
-    filters, measure, morphology, restoration
+    color, filters, measure, morphology, restoration
 )
 from skimage.data import palisades_of_vogt
 
@@ -122,16 +121,14 @@ mask_2 = image_avg < thresh_2
 def plot_comparison(plot1, plot2, title1, title2):
     fig, (ax1, ax2) = plt.subplots(
         ncols=2,
-        figsize=(12, 8),
+        figsize=(12, 6),
         sharex=True,
         sharey=True
     )
     ax1.imshow(plot1, cmap='gray')
     ax1.set_title(title1)
-    ax1.axis('off')
     ax2.imshow(plot2, cmap='gray')
     ax2.set_title(title2)
-    ax2.axis('off')
 
 plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 
@@ -208,7 +205,7 @@ for i in range(image_seq.shape[0]):
 #####################################################################
 # Let us visualize one restored image, where the dark spots have been
 # inpainted. First, we find the contours of the dark spots (i.e., of the mask)
-# so we can draw them on top of the restored image;
+# so we can draw them on top of the restored image:
 
 contours = measure.find_contours(mask_dilate)
 
@@ -225,10 +222,34 @@ y_flat = np.concatenate(y).ravel()
 data = np.ones(x_flat.shape, dtype='bool')
 mtx = sparse.coo_matrix((data, (x_flat, y_flat)), shape=mask_dilate.shape)
 # Convert it to array
-arr = mtx.toarray().astype('float')
+arr = mtx.toarray().astype('int')
+# Pick one frame
+sample_result = image_seq_inpainted[12]
+# Normalize it (so intensity values range [0, 1])
+sample_result /= sample_result.max()
 
-fig = px.imshow(image_seq_inpainted[50], color_continuous_scale='gray')
-fig.add_trace(go.Contour(z=arr, contours_coloring='lines'))
-plotly.io.show(fig)
+#####################################################################
+# We use function ``label2rgb`` from the ``color`` module to overlay the
+# restored image with the segmented spots, using transparency (alpha
+# parameter).
+
+color_contours = color.label2rgb(
+    arr,
+    image=sample_result,
+    alpha=0.4,
+    bg_label=0
+)
+
+fig, ax = plt.subplots(figsize=(6, 6))
+
+ax.imshow(color_contours)
+ax.set_title('Segmented spots over restored image')
+
+fig.tight_layout()
+
+#####################################################################
+# Note that the dark spot located at (x, y) ~ (719, 1237) stands out; ideally,
+# it should have been segmented and inpainted. We can see that we 'lost' it to
+# the opening processing step, when removing fine-grained features.
 
 plt.show()
