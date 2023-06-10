@@ -85,7 +85,7 @@ image_avg = np.mean(image_seq, axis=0)
 
 print(f'shape: {image_avg.shape}')
 
-fig, ax = plt.subplots(figsize=(12, 12))
+fig, ax = plt.subplots(figsize=(6, 6))
 
 ax.imshow(image_avg, cmap='gray')
 ax.set_title('Time-averaged image')
