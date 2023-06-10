@@ -85,14 +85,12 @@ image_avg = np.mean(image_seq, axis=0)
 
 print(f'shape: {image_avg.shape}')
 
-fig = px.imshow(
-    image_avg,
-    width=500,
-    height=500,
-    binary_string=True,
-    title='Time-averaged image'
-)
-plotly.io.show(fig)
+fig, ax = plt.subplots(figsize=(12, 12))
+
+ax.imshow(image_avg, cmap='gray')
+ax.set_title('Time-averaged image')
+
+fig.tight_layout()
 
 #####################################################################
 # Use local thresholding
