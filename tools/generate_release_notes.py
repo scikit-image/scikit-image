@@ -321,5 +321,5 @@ def main(*, start_rev: str, stop_rev: str, version: str, out: str, format: str):
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.WARNING)
     main()
