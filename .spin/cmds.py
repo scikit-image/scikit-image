@@ -34,10 +34,16 @@ def docs(ctx, clean, install_deps, build):
 
     """
     if clean:
-        doc_dir = "./doc/build"
-        if os.path.isdir(doc_dir):
-            print(f"Removing `{doc_dir}`")
-            shutil.rmtree(doc_dir)
+        doc_dirs = [
+            "./doc/build/",
+            "./doc/source/api/",
+            "./doc/source/auto_examples/",
+            "./doc/source/jupyterlite_contents/",
+        ]
+        for doc_dir in doc_dirs:
+            if os.path.isdir(doc_dir):
+                print(f"Removing {doc_dir!r}")
+                shutil.rmtree(doc_dir)
 
     if build:
         click.secho(
