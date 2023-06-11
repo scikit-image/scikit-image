@@ -3,8 +3,13 @@ from scipy import ndimage
 
 
 def warp_images(
-        from_points, to_points, images, output_region, interpolation_order=1,
-        approximate_grid=2):
+    from_points,
+    to_points,
+    images,
+    output_region,
+    interpolation_order=1,
+    approximate_grid=2
+):
     """Return an array of warped images.
 
     Define a thin-plate-spline warping transform that warps from the
