@@ -18,6 +18,7 @@ SKIP 1 — scikit-image governance and decision-making
 :Resolved: 2019-09-25
 :Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
+:Revised: 2023-06-12
 
 Abstract
 ========
@@ -145,13 +146,13 @@ are made according to the following rules:
   sentence (but no change of the scikit-image.org landing page or the “about”
   page), require approval by a core developer *and* no disagreement or requested
   changes by a core developer on the issue or pull request page (lazy
-  consensus). Core developers are expected to give “reasonable time” to others
-  to give their opinion on the pull request if they’re not confident others
-  would agree.
+  consensus). Generally, an objection period of one or two days should be given before
+  lazy consensus is assumed.
 
 - **Code changes and major documentation changes** require agreement by *two*
   core developers *and* no disagreement or requested changes by a core developer
-  on the issue or pull-request page (lazy consensus).
+  on the issue or pull-request page (lazy consensus). Generally, an objection period
+  of one week should be given before lazy consensus is assumed.
 
 - **Changes to the API principles** require a :ref:`skip` and follow the
   decision-making process outlined above.
