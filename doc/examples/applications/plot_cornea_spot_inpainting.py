@@ -59,7 +59,7 @@ print(f'dtype: {image_seq.dtype}')
 # represented as grayscale.
 
 fig = px.imshow(
-    image_seq[12:22, :, :],
+    image_seq[::6, :, :],
     animation_frame=0,
     height=500,
     width=500,
