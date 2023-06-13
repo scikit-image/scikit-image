@@ -12,7 +12,8 @@ in-vivo tissue, hence hiding data of interest. Our goal here is to restore
 (reconstruct) the hidden areas based on the pixels near their boundaries.
 
 This tutorial is adapted from an application shared by Jules Scholler [2]_.
-The images were acquired by Viacheslav Mazlin.
+The images were acquired by Viacheslav Mazlin (see
+:func:`skimage.data.palisades_of_vogt`).
 
 .. [1] David Turbert, reviewed by Ninel Z Gregori, MD (2023)
        `What Is Optical Coherence Tomography?
@@ -61,8 +62,6 @@ print(f'dtype: {image_seq.dtype}')
 fig = px.imshow(
     image_seq[::6, :, :],
     animation_frame=0,
-    height=500,
-    width=500,
     binary_string=True,
     labels={'animation_frame': 'time point'},
     title='Sample of in-vivo human cornea'
