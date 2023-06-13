@@ -29,10 +29,7 @@ import plotly.io
 import plotly.express as px
 from scipy import sparse
 
-from skimage import (
-    color, filters, measure, morphology, restoration
-)
-from skimage.data import palisades_of_vogt
+import skimage as ski
 
 
 #####################################################################
@@ -44,7 +41,7 @@ from skimage.data import palisades_of_vogt
 # Load image data
 # ===============
 
-image_seq = palisades_of_vogt()
+image_seq = ski.data.palisades_of_vogt()
 
 print(f'number of dimensions: {image_seq.ndim}')
 print(f'shape: {image_seq.shape}')
@@ -107,8 +104,8 @@ fig.tight_layout()
 # as well as the ``offset`` (shifting the neighborhood's weighted mean).
 # Let us try two different values for ``block_size``:
 
-thresh_1 = filters.threshold_local(image_avg, block_size=21, offset=15)
-thresh_2 = filters.threshold_local(image_avg, block_size=43, offset=15)
+thresh_1 = ski.filters.threshold_local(image_avg, block_size=21, offset=15)
+thresh_2 = ski.filters.threshold_local(image_avg, block_size=43, offset=15)
 
 mask_1 = image_avg < thresh_1
 mask_2 = image_avg < thresh_2
@@ -139,7 +136,7 @@ plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 # background, hence letting the objects of interest stand out more visibly.
 # Indeed:
 
-thresh_0 = filters.threshold_local(image_avg, block_size=43)
+thresh_0 = ski.filters.threshold_local(image_avg, block_size=43)
 
 mask_0 = image_avg < thresh_0
 
@@ -160,8 +157,8 @@ plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 # First, we apply an opening filter, in order to remove small objects and thin
 # lines, while preserving the shape and size of larger objects.
 
-footprint = morphology.diamond(1)
-mask_open = morphology.opening(mask_2, footprint)
+footprint = ski.morphology.diamond(1)
+mask_open = ski.morphology.opening(mask_2, footprint)
 plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
@@ -169,8 +166,8 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 # which are smaller than the structuring element have been removed.
 # Let us try now with a larger footprint:
 
-footprint = morphology.diamond(3)
-mask_open = morphology.opening(mask_2, footprint)
+footprint = ski.morphology.diamond(3)
+mask_open = ski.morphology.opening(mask_2, footprint)
 plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
@@ -179,7 +176,7 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 # only the larger ones.
 # Next, we can make the detected areas wider by applying a dilation filter:
 
-mask_dilate = morphology.dilation(mask_open, footprint)
+mask_dilate = ski.morphology.dilation(mask_open, footprint)
 plot_comparison(mask_open, mask_dilate, "before", "after dilation")
 
 #####################################################################
@@ -199,7 +196,7 @@ plot_comparison(mask_open, mask_dilate, "before", "after dilation")
 image_seq_inpainted = np.zeros(image_seq.shape)
 
 for i in range(image_seq.shape[0]):
-    image_seq_inpainted[i] = restoration.inpaint_biharmonic(
+    image_seq_inpainted[i] = ski.restoration.inpaint_biharmonic(
         image_seq[i],
         mask_dilate
     )
@@ -209,7 +206,7 @@ for i in range(image_seq.shape[0]):
 # inpainted. First, we find the contours of the dirt spots (well, of the mask)
 # so we can draw them on top of the restored image:
 
-contours = measure.find_contours(mask_dilate)
+contours = ski.measure.find_contours(mask_dilate)
 
 # Gather all (row, column) coordinates of the contours
 x = []
@@ -235,7 +232,7 @@ sample_result /= sample_result.max()
 # restored image with the segmented spots, using transparency (alpha
 # parameter).
 
-color_contours = color.label2rgb(
+color_contours = ski.color.label2rgb(
     arr,
     image=sample_result,
     alpha=0.4,
