@@ -206,7 +206,11 @@ Stylistic Guidelines
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from scipy import ndimage as ndi
+   import scipy as sp
+   import skimage as ski
+
+   sp.ndimage.label(...)
+   ski.measure.label(...)
 
    # only in Cython code
    cimport numpy as cnp
