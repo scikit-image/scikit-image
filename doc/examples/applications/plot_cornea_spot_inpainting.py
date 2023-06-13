@@ -174,6 +174,9 @@ mask_open = morphology.opening(mask_2, footprint)
 plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
+# We can see that, with respect to the previous comparison plot, fewer spots
+# are retained in the mask: The smaller ones have been filtered out, leaving
+# only the larger ones.
 # Next, we can make the detected areas wider by applying a dilation filter:
 
 mask_dilate = morphology.dilation(mask_open, footprint)
