@@ -48,10 +48,9 @@ Conversion from RGBA to RGB - Removing alpha channel through alpha blending
 Converting an RGBA image to an RGB image by alpha blending it with a
 background is realized with :func:`rgba2rgb` ::
 
-    >>> from skimage.color import rgba2rgb
-    >>> from skimage import data
-    >>> img_rgba = data.logo()
-    >>> img_rgb = rgba2rgb(img_rgba)
+    >>> import skimage as ski
+    >>> img_rgba = ski.data.logo()
+    >>> img_rgb = ski.color.rgba2rgb(img_rgba)
 
 Conversion between color and gray values
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,10 +58,8 @@ Conversion between color and gray values
 Converting an RGB image to a grayscale image is realized with
 :func:`rgb2gray` ::
 
-    >>> from skimage.color import rgb2gray
-    >>> from skimage import data
-    >>> img = data.astronaut()
-    >>> img_gray = rgb2gray(img)
+    >>> img = ski.data.astronaut()
+    >>> img_gray = ski.color.rgb2gray(img)
 
 :func:`rgb2gray` uses a non-uniform weighting of color channels, because of the
 different sensitivity of the human eye to different colors. Therefore,
@@ -71,10 +68,10 @@ such a weighting ensures `luminance preservation
 from RGB to grayscale::
 
     >>> red_pixel = np.array([[[255, 0, 0]]], dtype=np.uint8)
-    >>> color.rgb2gray(red_pixel)
+    >>> ski.color.rgb2gray(red_pixel)
     array([[ 0.2125]])
     >>> green_pixel = np.array([[[0, 255, 0]]], dtype=np.uint8)
-    >>> color.rgb2gray(green_pixel)
+    >>> ski.color.rgb2gray(green_pixel)
     array([[ 0.7154]])
 
 
@@ -90,9 +87,9 @@ difference of the maximum value of the data type and the actual value. For RGB
 images, the same operation is done for each channel. This operation can be achieved
 with :py:func:`skimage.util.invert`::
 
-    >>> from skimage import util
-    >>> img = data.camera()
-    >>> inverted_img = util.invert(img)
+    >>> import skimage as ski
+    >>> img = ski.data.camera()
+    >>> inverted_img = ski.util.invert(img)
 
 Painting images with labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,8 +139,10 @@ Other methods re-distribute pixel values according to the *histogram* of
 the image. The histogram of pixel values is computed with
 :func:`skimage.exposure.histogram`::
 
+    >>> import numpy as np
+    >>> import skimage as ski
     >>> image = np.array([[1, 3], [1, 1]])
-    >>> exposure.histogram(image)
+    >>> ski.exposure.histogram(image)
     (array([3, 0, 1]), array([1, 2, 3]))
 
 :func:`histogram` returns the number of pixels for each value bin, and
@@ -155,11 +154,11 @@ The simplest contrast enhancement :func:`rescale_intensity` consists in
 stretching pixel values to the whole allowed range, using a linear
 transformation::
 
-    >>> from skimage import exposure
-    >>> text = data.text()
+    >>> import skimage as ski
+    >>> text = ski.data.text()
     >>> text.min(), text.max()
     (10, 197)
-    >>> better_contrast = exposure.rescale_intensity(text)
+    >>> better_contrast = ski.exposure.rescale_intensity(text)
     >>> better_contrast.min(), better_contrast.max()
     (0, 255)
 
@@ -169,12 +168,11 @@ pixel values using percentiles of the image improves the contrast (at the
 expense of some loss of information, because some pixels are saturated by
 this operation)::
 
-    >>> moon = data.moon()
+    >>> moon = ski.data.moon()
     >>> v_min, v_max = np.percentile(moon, (0.2, 99.8))
     >>> v_min, v_max
     (10.0, 186.0)
-    >>> better_contrast = exposure.rescale_intensity(
-    ...                                     moon, in_range=(v_min, v_max))
+    >>> better_contrast = ski.exposure.rescale_intensity(moon, in_range=(v_min, v_max))
 
 The function :func:`equalize_hist` maps the cumulative distribution
 function (cdf) of pixel values onto a linear cdf, ensuring that all parts

@@ -33,11 +33,12 @@ functions that convert dtypes and properly rescale image intensities (see
 `Input types`_). You should **never use** ``astype`` on an image, because it
 violates these assumptions about the dtype range::
 
-   >>> from skimage.util import img_as_float
+   >>> import numpy as np
+   >>> import skimage as ski
    >>> image = np.arange(0, 50, 10, dtype=np.uint8)
    >>> print(image.astype(float)) # These float values are out of range.
    [  0.  10.  20.  30.  40.]
-   >>> print(img_as_float(image))
+   >>> print(ski.util.img_as_float(image))
    [ 0.          0.03921569  0.07843137  0.11764706  0.15686275]
 
 
@@ -65,25 +66,25 @@ img_as_int     Convert to 16-bit int.
 These functions convert images to the desired dtype and *properly rescale their
 values*::
 
-   >>> from skimage.util import img_as_ubyte
+   >>> import skimage as ski
    >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> img_as_ubyte(image)
+   >>> ski.util.img_as_ubyte(image)
    array([  0, 128, 255], dtype=uint8)
 
 Be careful! These conversions can result in a loss of precision, since 8 bits
 cannot hold the same amount of information as 64 bits::
 
    >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
-   >>> image_as_ubyte(image)
+   >>> ski.util.image_as_ubyte(image)
    array([  0, 128, 128, 255], dtype=uint8)
 
-Note that ``img_as_float`` will preserve the precision of floating point types
-and does not automatically rescale the range of floating point inputs.
+Note that :func:`ski.util.img_as_float` will preserve the precision of floating point
+types and does not automatically rescale the range of floating point inputs.
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
-``transform.warp`` requires an image of type float, which should have a range
-in [0, 1]. So, by default, input images will be rescaled to this range.
+:func:`skimage.transform.warp` requires an image of type float, which should have a
+range in [0, 1]. So, by default, input images will be rescaled to this range.
 However, in some cases, the image values represent physical measurements, such
 as temperature or rainfall values, that the user does not want rescaled.
 With ``preserve_range=True``, the original range of the data will be
@@ -94,16 +95,14 @@ may expect an image in [0, 1]. In general, unless a function has a
 be automatically rescaled.
 
 
-    >>> from skimage import data
-    >>> from skimage.transform import rescale
-    >>> image = data.coins()
+    >>> image = ski.data.coins()
     >>> image.dtype, image.min(), image.max(), image.shape
     (dtype('uint8'), 1, 252, (303, 384))
-    >>> rescaled = rescale(image, 0.5)
+    >>> rescaled = ski.transform.rescale(image, 0.5)
     >>> (rescaled.dtype, np.round(rescaled.min(), 4),
     ...  np.round(rescaled.max(), 4), rescaled.shape)
     (dtype('float64'), 0.0147, 0.9456, (152, 192))
-    >>> rescaled = rescale(image, 0.5, preserve_range=True)
+    >>> rescaled = ski.transform.rescale(image, 0.5, preserve_range=True)
     >>> (rescaled.dtype, np.round(rescaled.min()),
     ...  np.round(rescaled.max()), rescaled.shape
     (dtype('float64'), 4.0, 241.0, (152, 192))
@@ -120,8 +119,7 @@ unnecessary data copies take place.
 A user that requires a specific type of output (e.g., for display purposes),
 may write::
 
-   >>> from skimage.util import img_as_uint
-   >>> out = img_as_uint(sobel(image))
+   >>> out = ski.util.img_as_uint(sobel(image))
    >>> plt.imshow(out)
 
 
@@ -154,19 +152,19 @@ Using an image from OpenCV with ``skimage``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
-default. If you prefer working with floating point images, :func:`img_as_float`
+default. If you prefer working with floating point images, :func:`~.img_as_float`
 can be used to convert the image::
 
-    >>> from skimage.util import img_as_float
-    >>> image = img_as_float(any_opencv_image)
+    >>> import skimage as ski
+    >>> image = ski.util.img_as_float(any_opencv_image)
 
 Using an image from ``skimage`` with OpenCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The reverse can be achieved with :func:`img_as_ubyte`::
+The reverse can be achieved with :func:`~.img_as_ubyte`::
 
-    >>> from skimage.util import img_as_ubyte
-    >>> cv_image = img_as_ubyte(any_skimage_image)
+    >>> import skimage as ski
+    >>> cv_image = ski.util.img_as_ubyte(any_skimage_image)
 
 
 Image processing pipeline
@@ -178,15 +176,15 @@ a custom function that requires a particular dtype, you should call one of the
 dtype conversion functions (here, ``func1`` and ``func2`` are ``skimage``
 functions)::
 
-   >>> from skimage.util import img_as_float
-   >>> image = img_as_float(func1(func2(image)))
+   >>> import skimage as ski
+   >>> image = ski.util.img_as_float(func1(func2(image)))
    >>> processed_image = custom_func(image)
 
 Better yet, you can convert the image internally and use a simplified
 processing pipeline::
 
    >>> def custom_func(image):
-   ...     image = img_as_float(image)
+   ...     image = ski.util.img_as_float(image)
    ...     # do something
    ...
    >>> processed_image = custom_func(func1(func2(image)))
@@ -207,19 +205,19 @@ range but do not. For example, some cameras store images with 10-, 12-, or
 14-bit depth per pixel. If these images are stored in an array with dtype
 uint16, then the image won't extend over the full intensity range, and thus,
 would appear dimmer than it should. To correct for this, you can use the
-``rescale_intensity`` function to rescale the image so that it uses the full
+:func:`~.rescale_intensity` function to rescale the image so that it uses the full
 dtype range::
 
-   >>> from skimage import exposure
-   >>> image = exposure.rescale_intensity(img10bit, in_range=(0, 2**10 - 1))
+   >>> import skimage as ski
+   >>> image = ski.exposure.rescale_intensity(img10bit, in_range=(0, 2**10 - 1))
 
 Here, the ``in_range`` argument is set to the maximum range for a 10-bit image.
-By default, ``rescale_intensity`` stretches the values of ``in_range`` to match
-the range of the dtype. ``rescale_intensity`` also accepts strings as inputs
+By default, :func:`~.rescale_intensity` stretches the values of ``in_range`` to match
+the range of the dtype. :func:`~.rescale_intensity` also accepts strings as inputs
 to ``in_range`` and ``out_range``, so the example above could also be written
 as::
 
-   >>> image = exposure.rescale_intensity(img10bit, in_range='uint10')
+   >>> image = ski.exposure.rescale_intensity(img10bit, in_range='uint10')
 
 
 Note about negative values
@@ -233,8 +231,8 @@ negative values are clipped to 0 when converting from signed to unsigned
 dtypes. (Negative values are preserved when converting between signed dtypes.)
 To prevent this clipping behavior, you should rescale your image beforehand::
 
-   >>> image = exposure.rescale_intensity(img_int32, out_range=(0, 2**31 - 1))
-   >>> img_uint8 = img_as_ubyte(image)
+   >>> image = ski.exposure.rescale_intensity(img_int32, out_range=(0, 2**31 - 1))
+   >>> img_uint8 = ski.util.img_as_ubyte(image)
 
 This behavior is symmetric: The values in an unsigned dtype are spread over
 just the positive range of a signed dtype.

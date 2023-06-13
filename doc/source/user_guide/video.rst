@@ -62,6 +62,7 @@ PyAV's API reflects the way frames are stored in a video file.
 
 .. code-block:: python
 
+   import numpy as np
    for packet in container.demux():
        for frame in packet.decode():
            if frame.type == 'video':

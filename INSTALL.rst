@@ -36,8 +36,8 @@ worked, run the following in a Python shell or Jupyter notebook:
 
 .. code-block:: python
 
-  import skimage
-  print(skimage.__version__)
+  import skimage as ski
+  print(ski.__version__)
 
 or, from the command line:
 
@@ -151,7 +151,7 @@ is installed and then run this command:
 
 .. code-block:: sh
 
-    python -c 'from skimage.data import download_all; download_all()'
+    python -c 'import skimage; skimage.data.download_all()'
 
 or call ``download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
