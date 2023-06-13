@@ -7,7 +7,7 @@ Optical coherence tomography (OCT) is a non-invasive imaging technique used by
 ophthalmologists to take pictures of the back of a patient's eye [1]_.
 When performing OCT,
 dust may stick to the reference mirror of the equipment, causing dark spots to
-appear on the images. The problem is that these dark spots cover areas of
+appear on the images. The problem is that these dirt spots cover areas of
 in-vivo tissue, hence hiding data of interest. Our goal here is to restore
 (reconstruct) the hidden areas based on the pixels near their boundaries.
 
@@ -71,12 +71,12 @@ plotly.io.show(fig)
 #####################################################################
 # Average over time
 # =================
-# First, we want to detect those dark spots where the data are lost. In
-# technical terms, we want to *segment* the dark spots (for
-# all frames in the sequence). Unlike the actual data (signal), the dark spots
+# First, we want to detect those dirt spots where the data are lost. In
+# technical terms, we want to *segment* the dirt spots (for
+# all frames in the sequence). Unlike the actual data (signal), the dirt spots
 # do not move from one frame to the next; they are still. Therefore, we begin
 # by computing the time average of the image sequence. We shall use this
-# time-averaged image to segment the dark spots, the latter then standing out
+# time-averaged image to segment the dirt spots, the latter then standing out
 # with respect to the background (blurred signal).
 
 image_avg = np.mean(image_seq, axis=0)
@@ -93,7 +93,7 @@ fig.tight_layout()
 #####################################################################
 # Use local thresholding
 # ======================
-# To segment the dark spots, we use thresholding. The images we are working
+# To segment the dirt spots, we use thresholding. The images we are working
 # with have uneven illumination, which causes variations in the (absolute)
 # intensities of the foreground and the background, from one region to another
 # (distant) one. It is therefore more fitting to compute different threshold
@@ -132,7 +132,7 @@ def plot_comparison(plot1, plot2, title1, title2):
 plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 
 #####################################################################
-# The "dark spots" appear to be more distinct in the second mask, i.e., the
+# The "dirt spots" appear to be more distinct in the second mask, i.e., the
 # one resulting from using the larger ``block_size`` value.
 # Regarding the value of the offset parameter, we noticed that increasing it
 # instead of keeping its default zero value, would yield a more uniform
@@ -205,8 +205,8 @@ for i in range(image_seq.shape[0]):
     )
 
 #####################################################################
-# Let us visualize one restored image, where the dark spots have been
-# inpainted. First, we find the contours of the dark spots (i.e., of the mask)
+# Let us visualize one restored image, where the dirt spots have been
+# inpainted. First, we find the contours of the dirt spots (well, of the mask)
 # so we can draw them on top of the restored image:
 
 contours = measure.find_contours(mask_dilate)
@@ -250,7 +250,7 @@ ax.set_title('Segmented spots over restored image')
 fig.tight_layout()
 
 #####################################################################
-# Note that the dark spot located at (x, y) ~ (719, 1237) stands out; ideally,
+# Note that the dirt spot located at (x, y) ~ (719, 1237) stands out; ideally,
 # it should have been segmented and inpainted. We can see that we 'lost' it to
 # the opening processing step, when removing fine-grained features.
 
