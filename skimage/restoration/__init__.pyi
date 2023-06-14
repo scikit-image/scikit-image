@@ -34,4 +34,4 @@ from ._cycle_spin import cycle_spin
 from .non_local_means import denoise_nl_means
 from .inpaint import inpaint_biharmonic
 from .j_invariant import calibrate_denoiser, denoise_invariant
-from .rolling_ball import rolling_ball, ball_kernel, ellipsoid_kernel
+from ._rolling_ball import rolling_ball, ball_kernel, ellipsoid_kernel
