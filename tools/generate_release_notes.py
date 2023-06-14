@@ -136,7 +136,27 @@ https://scikit-image.org
     )
 
     def __str__(self) -> str:
-        return "".join(self.iter_lines())
+        """Return complete release notes document as a string."""
+        return "".join(self)
+
+    def __iter__(self) -> Iterable[str]:
+        """Iterate the release notes document line-wise."""
+        yield from self._format_section_title(
+            self.title_template.format(version=self.version), 1
+        )
+        yield self.intro_template.format(version=self.version)
+        for title, pull_requests in self._prs_by_section.items():
+            yield from self._format_pr_section(title, pull_requests)
+        yield from self._format_contributor_section(self.authors, self.reviewers)
+
+    @property
+    def document(self) -> str:
+        """Return complete release notes document as a string."""
+        return str(self)
+
+    def iter_lines(self) -> Iterable[str]:
+        """Iterate the release notes document line-wise."""
+        return self
 
     @property
     def _prs_by_section(self) -> dict[str, set[PullRequest]]:
@@ -227,16 +247,6 @@ https://scikit-image.org
         for user in reviewers:
             yield format_user(user) + "\n"
         yield "\n"
-
-    def iter_lines(self) -> Iterable[str]:
-        """Iterate the release notes document line-wise."""
-        yield from self._format_section_title(
-            self.title_template.format(version=self.version), 1
-        )
-        yield self.intro_template.format(version=self.version)
-        for title, pull_requests in self._prs_by_section.items():
-            yield from self._format_pr_section(title, pull_requests)
-        yield from self._format_contributor_section(self.authors, self.reviewers)
 
 
 class RstFormatter(MdFormatter):
@@ -353,7 +363,7 @@ def main(
             io.writelines(formatter.iter_lines())
     else:
         print()
-        print(str(formatter), file=sys.stdout)
+        print(formatter.document, file=sys.stdout)
 
 
 if __name__ == "__main__":
