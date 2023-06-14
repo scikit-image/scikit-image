@@ -318,11 +318,10 @@ def main(
     gh_token = os.environ.get("GH_TOKEN")
     if gh_token is None:
         raise RuntimeError(
-            "It is necessary that the environment variable `GH_TOKEN` "
-            "be set to avoid running into problems with rate limiting. "
-            "One can be acquired at https://github.com/settings/tokens.\n\n"
-            "You do not need to select any permission boxes while generating "
-            "the token."
+            "You need to set the environment variable `GH_TOKEN`. "
+            "The token is used to avoid rate limiting, "
+            "and can be created at https://github.com/settings/tokens.\n\n"
+            "The token does not require any permissions (we only use the public API)."
         )
     gh = Github(gh_token)
     repo = gh.get_repo(f"{GH_ORG}/{GH_REPO}")
