@@ -43,7 +43,7 @@ def commits_between(repo: Repository, start_rev: str, stop_rev: str) -> set[Comm
     return set(comparison.commits)
 
 
-def pull_requests_from_commits(commits: Iterable[Commit]) -> set[Commit]:
+def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
     """Fetch pull requests that are associated with the given `commits`."""
     all_pull_requests = set()
     for commit in commits:
@@ -131,10 +131,6 @@ https://scikit-image.org
     pr_summary_regex = re.compile(
         r"^```release-note\s*(?P<summary>[\s\S]*?\w[\s\S]*?)\s*^```", flags=re.MULTILINE
     )
-
-    @property
-    def intro(self):
-        return self.intro_template.format(version=self.version)
 
     def __str__(self) -> str:
         return "".join(self.iter_lines())
