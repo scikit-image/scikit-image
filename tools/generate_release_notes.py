@@ -6,6 +6,7 @@ import re
 import sys
 import argparse
 import logging
+import tempfile
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Callable
@@ -19,6 +20,8 @@ from github import Github, Repository, PullRequest, NamedUser, Commit
 logger = logging.getLogger(__name__)
 
 here = Path(__file__).parent
+
+REQUESTS_CACHE_PATH = Path(tempfile.gettempdir()) / "github_cache.sqlite"
 
 GH_URL = "https://github.com"
 GH_ORG = "scikit-image"
@@ -259,10 +262,19 @@ def parse_command_line(func: Callable) -> Callable:
     Has no effect if any keyword argument is passed to the underlying function.
     """
     parser = argparse.ArgumentParser(usage=__doc__)
-    parser.add_argument("start_rev", help="The starting revision (excluded)")
-    parser.add_argument("stop_rev", help="The stop revision (included)")
     parser.add_argument(
-        "--version", help="Version you're about to release", default="0.0.0"
+        "start_rev",
+        help="The starting revision (excluded), e.g. the tag of the previous release",
+    )
+    parser.add_argument(
+        "stop_rev",
+        help="The stop revision (included), e.g. the 'main' branch or the current "
+        "release",
+    )
+    parser.add_argument(
+        "--version",
+        default="0.0.0",
+        help="Version you're about to release, used title and description of the notes",
     )
     parser.add_argument("--out", help="Write to file, prints to STDOUT otherwise")
     parser.add_argument(
@@ -270,6 +282,11 @@ def parse_command_line(func: Callable) -> Callable:
         choices=["rst", "md"],
         default="md",
         help="Choose format, defaults to Markdown",
+    )
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="Clear cached requests to GitHub's API before running",
     )
 
     def wrapped(**kwargs):
@@ -281,9 +298,22 @@ def parse_command_line(func: Callable) -> Callable:
 
 
 @parse_command_line
-def main(*, start_rev: str, stop_rev: str, version: str, out: str, format: str):
-    # TODO option to delete cache
-    requests_cache.install_cache("github_cache", backend="sqlite", expire_after=3600)
+def main(
+    *,
+    start_rev: str,
+    stop_rev: str,
+    version: str,
+    out: str,
+    format: str,
+    clear_cache: bool,
+):
+    requests_cache.install_cache(
+        REQUESTS_CACHE_PATH, backend="sqlite", expire_after=3600
+    )
+    print(f"Using requests cache at {REQUESTS_CACHE_PATH}")
+    if clear_cache:
+        requests_cache.clear()
+        logger.info("cleared requests cache at %s", REQUESTS_CACHE_PATH)
 
     gh_token = os.environ.get("GH_TOKEN")
     if gh_token is None:
