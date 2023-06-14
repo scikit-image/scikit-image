@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import ndimage
+from scipy.spatial import distance
 
 
 def warp_images(
@@ -97,24 +98,16 @@ def _make_inverse_warp(
     return transform
 
 
-_small = 1e-100
-
 
 def _U(x):
+    _small = 1e-100 # A small value to avoid division by zero
     return (x**2) * np.where(x < _small, 0, np.log(x))
-
-
-def _interpoint_distances(points):
-    xd = np.subtract.outer(points[:, 0], points[:, 0])
-    yd = np.subtract.outer(points[:, 1], points[:, 1])
-    return np.sqrt(xd**2 + yd**2)
 
 
 def _make_L_matrix(points):
     n = len(points)
-    K = _U(_interpoint_distances(points))
-    P = np.ones((n, 3))
-    P[:, 1:] = points
+    P = np.hstack([np.ones((n, 1)), points])
+    K = _U(distance.cdist(points, points, metric='euclidean'))
     O = np.zeros((3, 3))
     L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
     return L
@@ -134,8 +127,8 @@ def _calculate_f(coeffs, points, x, y):
 
 
 def _make_warp(from_points, to_points, x_vals, y_vals):
-    from_points, to_points = np.asarray(
-        from_points), np.asarray(to_points)
+    from_points = np.asarray(from_points)
+    to_points = np.asarray(to_points)
     err = np.seterr(divide='ignore')
     L = _make_L_matrix(from_points)
     V = np.resize(to_points, (len(to_points)+3, 2))
