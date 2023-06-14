@@ -119,7 +119,6 @@ binary = image > thresh
 
 fig, ax = plt.subplots(ncols=3, figsize=(8, 2.5))
 
-
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Original')
 ax[0].axis('off')
