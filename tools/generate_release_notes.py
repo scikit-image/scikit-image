@@ -8,8 +8,8 @@ import argparse
 import logging
 import tempfile
 from pathlib import Path
-from dataclasses import dataclass
-from typing import Callable
+from dataclasses import dataclass, field
+from typing import Callable, Union
 from collections.abc import Iterable
 
 import requests_cache
@@ -72,9 +72,35 @@ def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
     return all_pull_requests
 
 
+@dataclass(frozen=True, eq=True)
+class UnknownCoAuthor:
+    """Represents a co-author for which the GitHub user is not known.
+
+    Hashing and comparing only takes into account the `name` attribute.
+    """
+
+    name: str
+    email: str = field(compare=False)
+    commit: Commit = field(compare=False)
+
+
+def _find_coauthors(commit: Commit) -> set[UnknownCoAuthor]:
+    co_author_regex = re.compile(
+        r"^\s*Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>$", flags=re.MULTILINE
+    )
+    message = commit.commit.message
+    matches = co_author_regex.finditer(message)
+    matches = list(matches)
+    coauthors = {
+        UnknownCoAuthor(name=m["name"], email=m["email"], commit=commit)
+        for m in matches
+    }
+    return coauthors
+
+
 def contributors(
     commits: Iterable[Commit], pull_requests
-) -> tuple[set[NamedUser], set[NamedUser]]:
+) -> tuple[set[NamedUser], set[Union[NamedUser, UnknownCoAuthor]], set[NamedUser]]:
     """Fetch code authors and reviewers.
 
     `authors` are first authors of commits; co-authors are not included (yet).
@@ -83,20 +109,30 @@ def contributors(
     """
     authors = set()
     reviewers = set()
+    unknown_coauthors = set()
 
     for commit in commits:
-        # TODO include co-authors?
         if commit.author:
             authors.add(commit.author)
         if commit.committer:
             reviewers.add(commit.committer)
+        unknown_coauthors.update(_find_coauthors(commit))
 
     for pull in pull_requests:
         for review in pull.get_reviews():
             if review.user:
                 reviewers.add(review.user)
 
-    return authors, reviewers
+    # Try to replace unknown coauthors with known users by matching email
+    coauthors = set()
+    known_users_by_mail = {u.email: u for u in authors | reviewers}
+    for unknown in unknown_coauthors:
+        if unknown.email in known_users_by_mail:
+            coauthors.add(known_users_by_mail[unknown.email])
+        else:
+            coauthors.add(unknown)
+
+    return authors, coauthors, reviewers
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -105,6 +141,7 @@ class MdFormatter:
 
     pull_requests: set[PullRequest]
     authors: set[NamedUser]
+    coauthors: set[Union[NamedUser, UnknownCoAuthor]]
     reviewers: set[NamedUser]
 
     version: str = "x.y.z"
@@ -147,7 +184,9 @@ https://scikit-image.org
         yield self.intro_template.format(version=self.version)
         for title, pull_requests in self._prs_by_section.items():
             yield from self._format_pr_section(title, pull_requests)
-        yield from self._format_contributor_section(self.authors, self.reviewers)
+        yield from self._format_contributor_section(
+            self.authors, self.coauthors, self.reviewers
+        )
 
     @property
     def document(self) -> str:
@@ -220,8 +259,21 @@ https://scikit-image.org
             yield from self._format_pull_request(pr)
         yield "\n"
 
+    def _format_user_line(self, user: Union[NamedUser, UnknownCoAuthor]) -> str:
+        if isinstance(user, UnknownCoAuthor):
+            line = self._format_link(user.name, user.commit.html_url)
+        else:
+            line = f"@{user.login}"
+            if user.name:
+                line = f"{user.name} ({line})"
+            line = self._format_link(line, user.html_url)
+        return line + ",\n"
+
     def _format_contributor_section(
-        self, authors: set[NamedUser], reviewers: set[NamedUser]
+        self,
+        authors: set[NamedUser],
+        coauthors: set[Union[NamedUser, UnknownCoAuthor]],
+        reviewers: set[NamedUser],
     ) -> Iterable[str]:
         """Format contributor section and list users sorted by login handle."""
         authors = {u for u in authors if u.login not in self.ignored_user_logins}
@@ -229,23 +281,19 @@ https://scikit-image.org
 
         yield from self._format_section_title("Contributors", 2)
 
-        def format_user(user):
-            line = f"@{user.login}"
-            if user.name:
-                line = f"{user.name} ({line})"
-            line = self._format_link(line, user.html_url)
-            return line
-
-        authors = sorted(authors, key=lambda user: user.login)
-        yield f"{len(authors)} authors added to this release (sorted by login):\n"
-        for user in authors:
-            yield format_user(user) + "\n"
+        yield f"{len(authors)} authors added to this release (alphabetically):\n"
+        author_lines = map(self._format_user_line, authors)
+        yield from sorted(author_lines)
         yield "\n"
 
-        reviewers = sorted(reviewers, key=lambda user: user.login)
-        yield f"{len(reviewers)} reviewers added to this release (sorted by login):\n"
-        for user in reviewers:
-            yield format_user(user) + "\n"
+        yield f"{len(coauthors)} co-authors added to this release (alphabetically):\n"
+        coauthor_lines = map(self._format_user_line, coauthors)
+        yield from sorted(coauthor_lines)
+        yield "\n"
+
+        yield f"{len(reviewers)} reviewers added to this release (alphabetically):\n"
+        reviewers_lines = map(self._format_user_line, reviewers)
+        yield from sorted(reviewers_lines)
         yield "\n"
 
 
@@ -341,7 +389,7 @@ def main(
     pull_requests = pull_requests_from_commits(
         lazy_tqdm(commits, desc="Fetching pull requests")
     )
-    authors, reviewers = contributors(
+    authors, coauthors, reviewers = contributors(
         commits=lazy_tqdm(
             commits,
             desc="Fetching authors",
@@ -353,6 +401,7 @@ def main(
     formatter = Formatter(
         pull_requests=pull_requests,
         authors=authors,
+        coauthors=coauthors,
         reviewers=reviewers,
         version=version,
     )
