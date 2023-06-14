@@ -8,7 +8,7 @@ import pytest
 
 from skimage import data
 from skimage.restoration import rolling_ball
-from skimage.restoration.rolling_ball import ellipsoid_kernel
+from skimage.restoration._rolling_ball import ellipsoid_kernel
 
 
 @pytest.mark.parametrize(
