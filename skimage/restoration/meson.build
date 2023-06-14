@@ -40,7 +40,7 @@ python_sources = [
   'inpaint.py',
   'j_invariant.py',
   'non_local_means.py',
-  'rolling_ball.py',
+  '_rolling_ball.py',
   'uft.py',
   'unwrap.py'
 ]
