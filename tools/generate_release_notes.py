@@ -26,7 +26,12 @@ GH_REPO = "scikit-image"
 
 
 def lazy_tqdm(*args, **kwargs):
-    """Defer initialization of progress bar until first item is requested."""
+    """Defer initialization of progress bar until first item is requested.
+
+    Calling `tqdm(...)` prints the progress bar right there and then. This can scramble
+    output, if more than one progress bar are initialized at the same time but their
+    iteration is meant to be done later in successive order.
+    """
     kwargs["file"] = kwargs.get("file", sys.stderr)
     yield from tqdm(*args, **kwargs)
 
