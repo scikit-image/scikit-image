@@ -43,7 +43,10 @@ def commits_between(repo: Repository, start_rev: str, stop_rev: str) -> set[Comm
     """Fetch commits between two revisions excluding the commit of `start_rev`."""
     # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
     comparison = repo.compare(base=start_rev, head=stop_rev)
-    return set(comparison.commits)
+    commits = set(comparison.commits)
+    assert repo.get_commit(start_rev) not in commits
+    assert repo.get_commit(stop_rev) in commits
+    return commits
 
 
 def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
@@ -53,19 +56,19 @@ def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
         commit_pull_requests = list(commit.get_pulls())
         if len(commit_pull_requests) != 1:
             logger.info(
-                "commit %s with no or multiple PR(s): %r",
+                "%s with no or multiple PR(s): %r",
                 commit.html_url,
                 [p.html_url for p in commit_pull_requests],
             )
         if any(not p.merged for p in commit_pull_requests):
             logger.error(
-                "commit %s with unmerged PRs: %r",
+                "%s with unmerged PRs: %r",
             )
         for pull in commit_pull_requests:
             if pull in all_pull_requests:
-                # May happen if
-                logger.info(
-                    "pull request associated with multiple commits: %r",
+                # Expected if pull request is merged without squashing
+                logger.debug(
+                    "%r associated with multiple commits",
                     pull.html_url,
                 )
         all_pull_requests.update(commit_pull_requests)
@@ -73,34 +76,41 @@ def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
 
 
 @dataclass(frozen=True, eq=True)
-class UnknownCoAuthor:
-    """Represents a co-author for which the GitHub user is not known.
+class CoAuthor:
+    """Represents a co-author for which the GitHub login is not known.
 
     Hashing and comparing only takes into account the `name` attribute.
     """
 
     name: str
-    email: str = field(compare=False)
+    email: str
     commit: Commit = field(compare=False)
 
 
-def _find_coauthors(commit: Commit) -> set[UnknownCoAuthor]:
+def find_coauthors(commit: Commit) -> set[CoAuthor]:
+    """Find co-author names and emails in a commit message."""
     co_author_regex = re.compile(
-        r"^\s*Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>$", flags=re.MULTILINE
+        r"Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>", flags=re.MULTILINE
     )
     message = commit.commit.message
-    matches = co_author_regex.finditer(message)
-    matches = list(matches)
+    matches = list(co_author_regex.finditer(message))
+    expected_count = message.count("Co-authored-by:")
+    if len(matches) != expected_count:
+        logger.warning(
+            "expected %i co-authors, regex found %i in %s",
+            expected_count,
+            len(matches),
+            commit.html_url
+        )
     coauthors = {
-        UnknownCoAuthor(name=m["name"], email=m["email"], commit=commit)
-        for m in matches
+        CoAuthor(name=m["name"], email=m["email"], commit=commit) for m in matches
     }
     return coauthors
 
 
 def contributors(
-    commits: Iterable[Commit], pull_requests
-) -> tuple[set[NamedUser], set[Union[NamedUser, UnknownCoAuthor]], set[NamedUser]]:
+    commits: Iterable[Commit], pull_requests: Iterable[PullRequest]
+) -> tuple[set[Union[NamedUser, CoAuthor]], set[NamedUser]]:
     """Fetch code authors and reviewers.
 
     `authors` are first authors of commits; co-authors are not included (yet).
@@ -109,30 +119,38 @@ def contributors(
     """
     authors = set()
     reviewers = set()
-    unknown_coauthors = set()
+    coauthors = set()
 
     for commit in commits:
         if commit.author:
             authors.add(commit.author)
         if commit.committer:
             reviewers.add(commit.committer)
-        unknown_coauthors.update(_find_coauthors(commit))
+        coauthors.update(find_coauthors(commit))
 
     for pull in pull_requests:
         for review in pull.get_reviews():
             if review.user:
                 reviewers.add(review.user)
 
-    # Try to replace unknown coauthors with known users by matching email
-    coauthors = set()
-    known_users_by_mail = {u.email: u for u in authors | reviewers}
-    for unknown in unknown_coauthors:
-        if unknown.email in known_users_by_mail:
-            coauthors.add(known_users_by_mail[unknown.email])
+    # List names and emails of users for which we know the login handle
+    known = set()
+    for user in authors | reviewers:
+        known.add(user.name)
+        known.add(user.email)
+    # Add co-authors to `authors` which are not already known by name or email
+    for coauthor in coauthors:
+        if coauthor.name in known or coauthor.email in known:
+            logger.info(
+                "dropping co-author, '%s <%s>' from %s already known",
+                coauthor.name,
+                coauthor.email,
+                coauthor.commit.html_url,
+            )
         else:
-            coauthors.add(unknown)
+            authors.add(coauthor)
 
-    return authors, coauthors, reviewers
+    return authors, reviewers
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -140,8 +158,7 @@ class MdFormatter:
     """Format release notes in Markdown from PRs, authors and reviewers."""
 
     pull_requests: set[PullRequest]
-    authors: set[NamedUser]
-    coauthors: set[Union[NamedUser, UnknownCoAuthor]]
+    authors: set[Union[NamedUser, CoAuthor]]
     reviewers: set[NamedUser]
 
     version: str = "x.y.z"
@@ -184,9 +201,7 @@ https://scikit-image.org
         yield self.intro_template.format(version=self.version)
         for title, pull_requests in self._prs_by_section.items():
             yield from self._format_pr_section(title, pull_requests)
-        yield from self._format_contributor_section(
-            self.authors, self.coauthors, self.reviewers
-        )
+        yield from self._format_contributor_section(self.authors, self.reviewers)
 
     @property
     def document(self) -> str:
@@ -259,9 +274,10 @@ https://scikit-image.org
             yield from self._format_pull_request(pr)
         yield "\n"
 
-    def _format_user_line(self, user: Union[NamedUser, UnknownCoAuthor]) -> str:
-        if isinstance(user, UnknownCoAuthor):
-            line = self._format_link(user.name, user.commit.html_url)
+    def _format_user_line(self, user: Union[NamedUser, CoAuthor]) -> str:
+        if isinstance(user, CoAuthor):
+            line = self._format_link(user.commit.sha, user.commit.html_url)
+            line = f"{user.name} (see {line})"
         else:
             line = f"@{user.login}"
             if user.name:
@@ -271,24 +287,23 @@ https://scikit-image.org
 
     def _format_contributor_section(
         self,
-        authors: set[NamedUser],
-        coauthors: set[Union[NamedUser, UnknownCoAuthor]],
+        authors: set[Union[NamedUser, CoAuthor]],
         reviewers: set[NamedUser],
     ) -> Iterable[str]:
         """Format contributor section and list users sorted by login handle."""
-        authors = {u for u in authors if u.login not in self.ignored_user_logins}
+        authors = {
+            u
+            for u in authors
+            if hasattr(u, "login") and u.login not in self.ignored_user_logins
+        }
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
         yield from self._format_section_title("Contributors", 2)
+        yield "\n"
 
         yield f"{len(authors)} authors added to this release (alphabetically):\n"
         author_lines = map(self._format_user_line, authors)
         yield from sorted(author_lines)
-        yield "\n"
-
-        yield f"{len(coauthors)} co-authors added to this release (alphabetically):\n"
-        coauthor_lines = map(self._format_user_line, coauthors)
-        yield from sorted(coauthor_lines)
         yield "\n"
 
         yield f"{len(reviewers)} reviewers added to this release (alphabetically):\n"
@@ -389,7 +404,7 @@ def main(
     pull_requests = pull_requests_from_commits(
         lazy_tqdm(commits, desc="Fetching pull requests")
     )
-    authors, coauthors, reviewers = contributors(
+    authors, reviewers = contributors(
         commits=lazy_tqdm(
             commits,
             desc="Fetching authors",
@@ -401,7 +416,6 @@ def main(
     formatter = Formatter(
         pull_requests=pull_requests,
         authors=authors,
-        coauthors=coauthors,
         reviewers=reviewers,
         version=version,
     )
