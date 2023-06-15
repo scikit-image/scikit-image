@@ -14,7 +14,11 @@ from collections.abc import Iterable
 
 import requests_cache
 from tqdm import tqdm
-from github import Github, Repository, PullRequest, NamedUser, Commit
+from github import Github
+from github.PullRequest import PullRequest
+from github.NamedUser import NamedUser
+from github.Commit import Commit
+from github.Repository import Repository
 
 
 logger = logging.getLogger(__name__)
@@ -100,7 +104,7 @@ def find_coauthors(commit: Commit) -> set[CoAuthor]:
             "expected %i co-authors, regex found %i in %s",
             expected_count,
             len(matches),
-            commit.html_url
+            commit.html_url,
         )
     coauthors = {
         CoAuthor(name=m["name"], email=m["email"], commit=commit) for m in matches
@@ -444,9 +448,10 @@ def main(
         reviewers=reviewers,
         version=version,
     )
+
     if out:
-        out = Path(out)
-        out.parent.mkdir(parents=True, exist_ok=True)
+        out_path = Path(out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "w") as io:
             io.writelines(formatter.iter_lines())
     else:
