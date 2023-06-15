@@ -361,6 +361,13 @@ def parse_command_line(func: Callable) -> Callable:
         action="store_true",
         help="Clear cached requests to GitHub's API before running",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase logging level",
+    )
 
     def wrapped(**kwargs):
         if not kwargs:
@@ -379,7 +386,11 @@ def main(
     out: str,
     format: str,
     clear_cache: bool,
+    verbose: int,
 ):
+    level = {0: logging.WARNING, 1: logging.INFO}.get(verbose, logging.DEBUG)
+    logger.setLevel(level)
+
     requests_cache.install_cache(
         REQUESTS_CACHE_PATH, backend="sqlite", expire_after=3600
     )
@@ -430,5 +441,5 @@ def main(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARNING)
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
     main()
