@@ -92,7 +92,13 @@ class CoAuthor:
 
 
 def find_coauthors(commit: Commit) -> set[CoAuthor]:
-    """Find co-author names and emails in a commit message."""
+    """Find co-author in a commit message.
+
+    These are matched by looking for occurrences of "Co-authored-by:" bollowed by a name
+    and email address in a commit message. Unfortunately, GitHub's API doesn't provide
+    a way yet to extract co-authors as NamedUsers from a commit.
+    See also  :func:`try_replace_coauthors`
+    """
     co_author_regex = re.compile(
         r"Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>", flags=re.MULTILINE
     )
@@ -114,11 +120,13 @@ def find_coauthors(commit: Commit) -> set[CoAuthor]:
 
 def contributors(
     commits: Iterable[Commit], pull_requests: Iterable[PullRequest]
-) -> tuple[set[Union[NamedUser, CoAuthor]], set[NamedUser]]:
-    """Fetch code authors and reviewers.
+) -> tuple[set[NamedUser], set[CoAuthor], set[NamedUser]]:
+    """Fetch commit authors, co-authors and reviewers.
 
-    `authors` are first authors of commits; co-authors are not included (yet).
-    `reviewers` are users, who added reviews to a merged pull request or create the
+    `authors` are users which created a commit.
+    `coauthors` are name, and email pairs that signify the co-author of a commit, see
+    :func:`find_coauthors` and :func:`try_replace_coauthors`.
+    `reviewers` are users, who added reviews to a merged pull request or created the
     merge commit for one.
     """
     authors = set()
@@ -137,24 +145,38 @@ def contributors(
             if review.user:
                 reviewers.add(review.user)
 
-    # List names and emails of users for which we know the login handle
-    known = set()
-    for user in authors | reviewers:
-        known.add(user.name)
-        known.add(user.email)
-    # Add co-authors to `authors` which are not already known by name or email
-    for coauthor in coauthors:
-        if coauthor.name in known or coauthor.email in known:
-            logger.info(
-                "dropping co-author, '%s <%s>' from %s already known",
-                coauthor.name,
-                coauthor.email,
-                coauthor.commit.html_url,
-            )
-        else:
-            authors.add(coauthor)
+    return authors, coauthors, reviewers
 
-    return authors, reviewers
+
+def try_replace_coauthors(
+    coauthors: set[CoAuthor], known_users: set[NamedUser]
+) -> set[Union[NamedUser, CoAuthor]]:
+    """Replace "CoAuthors" with known "NamedUsers" by matching email or name.
+
+    Co-authors which were matched by their name and email may be duplicates of
+    "NamedUsers" which are already known by their login handle.
+    See also :func:`find_coauthors`.
+    """
+    authors = set()
+
+    known_emails = dict()
+    known_names = dict()
+    for user in known_users:
+        known_emails[user.email] = user
+        known_names[user.name] = user
+    for coauthor in coauthors:
+        if coauthor.email in known_emails:
+            author = known_emails[coauthor.email]
+            logger.info("linking %r with %r by email", coauthor, author)
+        elif coauthor.name in known_names:
+            author = known_names[coauthor.name]
+            logger.info("linking %r with %r by name", coauthor, author)
+        else:
+            author = coauthor
+            logger.info("don't know login for %r", coauthor)
+        authors.add(author)
+
+    return authors
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -302,7 +324,7 @@ https://scikit-image.org
         authors = {
             u
             for u in authors
-            if hasattr(u, "login") and u.login not in self.ignored_user_logins
+            if isinstance(u, CoAuthor) or u.login not in self.ignored_user_logins
         }
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
@@ -433,13 +455,15 @@ def main(
     pull_requests = pull_requests_from_commits(
         lazy_tqdm(commits, desc="Fetching pull requests")
     )
-    authors, reviewers = contributors(
+    authors, coauthors, reviewers = contributors(
         commits=lazy_tqdm(
             commits,
             desc="Fetching authors",
         ),
         pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
+    coauthors = try_replace_coauthors(coauthors, known_users=authors | reviewers)
+    authors |= coauthors
 
     Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
     formatter = Formatter(
