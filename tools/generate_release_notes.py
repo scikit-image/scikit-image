@@ -173,7 +173,10 @@ For more information, examples, and documentation, please visit our website:
 https://scikit-image.org
 
 """
-    label_section_map: tuple[str, str] = (
+    outro_template: str = (
+        "*These lists are automatically generated, and may not be fully complete.*\n"
+    )
+    label_section_map: tuple[tuple[str, str], ...] = (
         (":trophy: type: Highlight", "Highlights"),
         (":baby: type: New feature", "New Features"),
         (":fast_forward: type: Enhancement", "Enhancements"),
@@ -191,26 +194,27 @@ https://scikit-image.org
 
     def __str__(self) -> str:
         """Return complete release notes document as a string."""
-        return "".join(self)
+        return self.document
 
     def __iter__(self) -> Iterable[str]:
         """Iterate the release notes document line-wise."""
-        yield from self._format_section_title(
-            self.title_template.format(version=self.version), 1
-        )
-        yield self.intro_template.format(version=self.version)
-        for title, pull_requests in self._prs_by_section.items():
-            yield from self._format_pr_section(title, pull_requests)
-        yield from self._format_contributor_section(self.authors, self.reviewers)
+        return self.iter_lines()
 
     @property
     def document(self) -> str:
         """Return complete release notes document as a string."""
-        return str(self)
+        return "".join(self.iter_lines())
 
     def iter_lines(self) -> Iterable[str]:
         """Iterate the release notes document line-wise."""
-        return self
+        yield from self._format_section_title(
+            self.title_template.format(version=self.version), level=1
+        )
+        yield from self._format_intro(version=self.version)
+        for title, pull_requests in self._prs_by_section.items():
+            yield from self._format_pr_section(title, pull_requests)
+        yield from self._format_contributor_section(self.authors, self.reviewers)
+        yield from self._format_outro()
 
     @property
     def _prs_by_section(self) -> dict[str, set[PullRequest]]:
@@ -247,7 +251,7 @@ https://scikit-image.org
     def _format_link(self, name: str, target: str) -> str:
         return f"[{name}]({target})"
 
-    def _format_section_title(self, title: str, level: int) -> Iterable[str]:
+    def _format_section_title(self, title: str, *, level: int) -> Iterable[str]:
         yield f"{'#' * level} {title}\n"
 
     def _parse_pull_request_summary(self, pr: PullRequest) -> str:
@@ -269,7 +273,7 @@ https://scikit-image.org
         self, title: str, pull_requests: set[PullRequest]
     ) -> Iterable[str]:
         """Format a section title and list its pull requests sorted by merge date."""
-        yield from self._format_section_title(title, 2)
+        yield from self._format_section_title(title, level=2)
         for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
             yield from self._format_pull_request(pr)
         yield "\n"
@@ -298,7 +302,7 @@ https://scikit-image.org
         }
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
-        yield from self._format_section_title("Contributors", 2)
+        yield from self._format_section_title("Contributors", level=2)
         yield "\n"
 
         yield f"{len(authors)} authors added to this release (alphabetically):\n"
@@ -310,6 +314,16 @@ https://scikit-image.org
         reviewers_lines = map(self._format_user_line, reviewers)
         yield from sorted(reviewers_lines)
         yield "\n"
+
+    def _format_intro(self, version):
+        intro = self.intro_template.format(version=version)
+        # Make sure to return exactly one line at a time
+        yield from (f"{line}\n" for line in intro.split("\n"))
+
+    def _format_outro(self) -> Iterable[str]:
+        outro = self.outro_template
+        # Make sure to return exactly one line at a time
+        yield from (f"{line}\n" for line in outro.split("\n"))
 
 
 class RstFormatter(MdFormatter):
@@ -323,7 +337,7 @@ class RstFormatter(MdFormatter):
     def _format_link(self, name: str, target: str) -> str:
         return f"`{name} <{target}>`_"
 
-    def _format_section_title(self, title: str, level: int) -> Iterable[str]:
+    def _format_section_title(self, title: str, *, level: int) -> Iterable[str]:
         yield title + "\n"
         underline = {1: "=", 2: "-", 3: "~"}
         yield underline[level] * len(title) + "\n"
