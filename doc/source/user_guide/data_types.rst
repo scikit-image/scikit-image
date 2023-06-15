@@ -78,8 +78,8 @@ cannot hold the same amount of information as 64 bits::
    >>> ski.util.image_as_ubyte(image)
    array([  0, 128, 128, 255], dtype=uint8)
 
-Note that :func:`ski.util.img_as_float` will preserve the precision of floating point
-types and does not automatically rescale the range of floating point inputs.
+Note that :func:`skimage.util.img_as_float` will preserve the precision of floating
+point types and does not automatically rescale the range of floating point inputs.
 
 Additionally, some functions take a ``preserve_range`` argument where a range
 conversion is convenient but not necessary. For example, interpolation in
