@@ -200,7 +200,8 @@ https://scikit-image.org
 
 """
     outro_template: str = (
-        "*These lists are automatically generated, and may not be fully complete.*\n"
+        "*These lists are automatically generated, and may not be complete or may "
+        "contain duplicates.*\n"
     )
     label_section_map: tuple[tuple[str, str], ...] = (
         (":trophy: type: Highlight", "Highlights"),
@@ -310,9 +311,9 @@ https://scikit-image.org
             line = f"{user.name} (see {line})"
         else:
             line = f"@{user.login}"
+            line = self._format_link(line, user.html_url)
             if user.name:
                 line = f"{user.name} ({line})"
-            line = self._format_link(line, user.html_url)
         return line + ",\n"
 
     def _format_contributor_section(
@@ -333,12 +334,12 @@ https://scikit-image.org
 
         yield f"{len(authors)} authors added to this release (alphabetically):\n"
         author_lines = map(self._format_user_line, authors)
-        yield from sorted(author_lines)
+        yield from sorted(author_lines, key=lambda s: s.lower())
         yield "\n"
 
         yield f"{len(reviewers)} reviewers added to this release (alphabetically):\n"
         reviewers_lines = map(self._format_user_line, reviewers)
-        yield from sorted(reviewers_lines)
+        yield from sorted(reviewers_lines, key=lambda s: s.lower())
         yield "\n"
 
     def _format_intro(self, version):
