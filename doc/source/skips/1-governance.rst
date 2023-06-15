@@ -146,13 +146,14 @@ are made according to the following rules:
   sentence (but no change of the scikit-image.org landing page or the “about”
   page), require approval by a core developer *and* no disagreement or requested
   changes by a core developer on the issue or pull request page (lazy
-  consensus). Generally, an objection period of one or two days should be given before
-  lazy consensus is assumed.
+  consensus). Core developers are expected to wait one or two days for others to give
+  their opinion if they’re not confident, others would agree.
 
 - **Code changes and major documentation changes** require agreement by *two*
   core developers *and* no disagreement or requested changes by a core developer
-  on the issue or pull-request page (lazy consensus). Generally, an objection period
-  of one week should be given before lazy consensus is assumed.
+  on the issue or pull-request page (lazy consensus). In this case, core developers are
+  expected to wait about a week for others to give their opinion if they’re not
+  confident, others would agree.
 
 - **Changes to the API principles** require a :ref:`skip` and follow the
   decision-making process outlined above.
