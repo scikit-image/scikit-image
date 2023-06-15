@@ -156,7 +156,8 @@ are made according to the following rules:
   confident, others would agree.
 
 - **Changes to the API principles** require a :ref:`skip` and follow the
-  decision-making process outlined above.
+  decision-making process outlined above. Except in this case an objection period of
+  one month should be given.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`skip` and follow the decision-making process outlined above,
