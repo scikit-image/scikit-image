@@ -151,9 +151,9 @@ is installed and then run this command:
 
 .. code-block:: sh
 
-    python -c 'import skimage; skimage.data.download_all()'
+    python -c 'import skimage as ski; ski.data.download_all()'
 
-or call ``download_all()`` in your favourite interactive Python environment
+or call ``ski.data.download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
 
 
