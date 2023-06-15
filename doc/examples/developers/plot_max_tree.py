@@ -43,7 +43,7 @@ References
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from skimage.morphology.max_tree import max_tree
+from skimage.morphology import max_tree
 import networkx as nx
 
 
