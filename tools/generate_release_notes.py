@@ -11,6 +11,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Callable, Union
 from collections.abc import Iterable
+from collections import OrderedDict
 
 import requests_cache
 from tqdm import tqdm
@@ -138,7 +139,7 @@ def contributors(
             authors.add(commit.author)
         if commit.committer:
             reviewers.add(commit.committer)
-        coauthors.update(find_coauthors(commit))
+        coauthors |= find_coauthors(commit)
 
     for pull in pull_requests:
         for review in pull.get_reviews():
@@ -203,16 +204,17 @@ https://scikit-image.org
         "*These lists are automatically generated, and may not be complete or may "
         "contain duplicates.*\n"
     )
-    label_section_map: tuple[tuple[str, str], ...] = (
-        (":trophy: type: Highlight", "Highlights"),
-        (":baby: type: New feature", "New Features"),
-        (":fast_forward: type: Enhancement", "Enhancements"),
-        (":chart_with_upwards_trend: type: Performance", "Performance"),
-        (":adhesive_bandage: type: Bug fix", "Bug Fixes"),
-        (":scroll: type: API", "API Changes"),
-        (":wrench: type: Maintenance", "Maintenance"),
-        (":page_facing_up: type: Documentation", "Documentation"),
-        (":robot: type: Infrastructure", "Infrastructure"),
+    # Associate regexes matching PR labels to a section titles in the release notes
+    regex_section_map: tuple[tuple[str, str], ...] = (
+        (".*Highlight.*", "Highlights"),
+        (".*New feature.*", "New Features"),
+        (".*Enhancement.*", "Enhancements"),
+        (".*Performance.*", "Performance"),
+        (".*Bug fix.*", "Bug Fixes"),
+        (".*API.*", "API Changes"),
+        (".*Maintenance.*", "Maintenance"),
+        (".*Documentation.*", "Documentation"),
+        (".*Infrastructure.*", "Infrastructure"),
     )
     ignored_user_logins: tuple[str] = ("web-flow",)
     pr_summary_regex = re.compile(
@@ -244,28 +246,35 @@ https://scikit-image.org
         yield from self._format_outro()
 
     @property
-    def _prs_by_section(self) -> dict[str, set[PullRequest]]:
+    def _prs_by_section(self) -> OrderedDict[str, set[PullRequest]]:
         """Map pull requests to section titles.
 
-        Pull requests that lack a label which is associated with a section, are sorted
-        into a section named "Other".
+        Pull requests whose labels do not match one of the sections given in
+        `regex_section_map`, are sorted into a section named "Other".
         """
-        label_section_map = {k: v for k, v in self.label_section_map}
-        prs_by_section = {
-            section_name: set() for section_name in label_section_map.values()
+        label_section_map = {
+            re.compile(pattern): section_name
+            for pattern, section_name in self.regex_section_map
         }
+        prs_by_section = OrderedDict()
+        for _, section_name in self.regex_section_map:
+            prs_by_section[section_name] = set()
         prs_by_section["Other"] = set()
+
         for pr in self.pull_requests:
-            pr_labels = {label.name for label in pr.labels}
-            pr_labels = pr_labels & label_section_map.keys()
-            if not pr_labels:
+            matching_sections = [
+                section_name
+                for regex, section_name in label_section_map.items()
+                if any(regex.match(label.name) for label in pr.labels)
+            ]
+            for section_name in matching_sections:
+                prs_by_section[section_name].add(pr)
+            if not matching_sections:
                 logger.warning(
-                    "pull request %s without known section label, sorting into 'Other'",
+                    "%s without matching label, sorting into section 'Other'",
                     pr.html_url,
                 )
                 prs_by_section["Other"].add(pr)
-            for name in pr_labels:
-                prs_by_section[label_section_map[name]].add(pr)
 
         return prs_by_section
 
