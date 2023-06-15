@@ -24,7 +24,7 @@ def warp_images(
     to_points: (N, 2) array_like
         Target image coordinates.
     images: ndarray
-        Image to be warped with the given warp transform.
+        Array of nD images to be warped with the given warp transform.
     output_region: (1, 4) array
         The (xmin, ymin, xmax, ymax) region of the output
         image that should be produced. (Note: The region is inclusive, i.e.
@@ -47,7 +47,7 @@ def warp_images(
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
     decomposition of deformations." IEEE Transactions on pattern analysis and
-    machine intelligence 11.6 (1989): 567-585.
+    machine intelligence 11.6 (1989): 567–585.
 
     """
     transform = _make_inverse_warp(from_points, to_points,
