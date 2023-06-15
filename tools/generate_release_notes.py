@@ -46,7 +46,6 @@ def lazy_tqdm(*args, **kwargs):
 
 def commits_between(repo: Repository, start_rev: str, stop_rev: str) -> set[Commit]:
     """Fetch commits between two revisions excluding the commit of `start_rev`."""
-    # https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#compare-two-commits
     comparison = repo.compare(base=start_rev, head=stop_rev)
     commits = set(comparison.commits)
     assert repo.get_commit(start_rev) not in commits
@@ -84,7 +83,7 @@ def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
 class CoAuthor:
     """Represents a co-author for which the GitHub login is not known.
 
-    Hashing and comparing only takes into account the `name` attribute.
+    Hashing and comparing does not take into account the `commit` attribute.
     """
 
     name: str
@@ -95,9 +94,9 @@ class CoAuthor:
 def find_coauthors(commit: Commit) -> set[CoAuthor]:
     """Find co-author in a commit message.
 
-    These are matched by looking for occurrences of "Co-authored-by:" bollowed by a name
-    and email address in a commit message. Unfortunately, GitHub's API doesn't provide
-    a way yet to extract co-authors as NamedUsers from a commit.
+    These are matched by looking for occurrences of "Co-authored-by:" followed by a name
+    and email address in a commit message. Unfortunately, GitHub's API doesn't yet
+    provide a way yet to extract co-authors as NamedUsers from a commit directly.
     See also  :func:`try_replace_coauthors`
     """
     co_author_regex = re.compile(
@@ -127,8 +126,8 @@ def contributors(
     `authors` are users which created a commit.
     `coauthors` are name, and email pairs that signify the co-author of a commit, see
     :func:`find_coauthors` and :func:`try_replace_coauthors`.
-    `reviewers` are users, who added reviews to a merged pull request or created the
-    merge commit for one.
+    `reviewers` are users, who added reviews to a merged pull request or merged a
+    pull request (committer of the merge commit).
     """
     authors = set()
     reviewers = set()
@@ -154,8 +153,8 @@ def try_replace_coauthors(
 ) -> set[Union[NamedUser, CoAuthor]]:
     """Replace "CoAuthors" with known "NamedUsers" by matching email or name.
 
-    Co-authors which were matched by their name and email may be duplicates of
-    "NamedUsers" which are already known by their login handle.
+    Co-authors which were matched by their name and email may match users with known
+    login names in `known_users`. Try to match these by name and email address.
     See also :func:`find_coauthors`.
     """
     authors = set()
@@ -490,7 +489,10 @@ def main(
             io.writelines(formatter.iter_lines())
     else:
         print()
-        print(formatter.document, file=sys.stdout)
+        for line in formatter.iter_lines():
+            assert line.endswith("\n")
+            assert line.count("\n") == 1
+            print(line, end="", file=sys.stdout)
 
 
 if __name__ == "__main__":
