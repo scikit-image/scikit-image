@@ -97,7 +97,7 @@ def find_coauthors(commit: Commit) -> set[CoAuthor]:
     These are matched by looking for occurrences of "Co-authored-by:" followed by a name
     and email address in a commit message. Unfortunately, GitHub's API doesn't yet
     provide a way yet to extract co-authors as NamedUsers from a commit directly.
-    See also  :func:`try_replace_coauthors`
+    See also  :func:`try_match_coauthors`
     """
     co_author_regex = re.compile(
         r"Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>", flags=re.MULTILINE
@@ -125,7 +125,7 @@ def contributors(
 
     `authors` are users which created a commit.
     `coauthors` are name, and email pairs that signify the co-author of a commit, see
-    :func:`find_coauthors` and :func:`try_replace_coauthors`.
+    :func:`find_coauthors` and :func:`try_match_coauthors`.
     `reviewers` are users, who added reviews to a merged pull request or merged a
     pull request (committer of the merge commit).
     """
@@ -148,29 +148,47 @@ def contributors(
     return authors, coauthors, reviewers
 
 
-def try_replace_coauthors(
-    coauthors: set[CoAuthor], known_users: set[NamedUser]
+def try_match_coauthors(
+    coauthors: set[CoAuthor], known_users: set[NamedUser], gh: Github
 ) -> set[Union[NamedUser, CoAuthor]]:
-    """Replace "CoAuthors" with known "NamedUsers" by matching email or name.
+    """Try to find a NamedUser for all co-authors based on already known ones.
 
-    Co-authors which were matched by their name and email may match users with known
-    login names in `known_users`. Try to match these by name and email address.
-    See also :func:`find_coauthors`.
+    The login of co-authors is unknown because they are currently retrieved by
+    their name and email from commit messages. This function tries to match the
+    corresponding login and NamedUser.
     """
-    authors = set()
-
     known_emails = dict()
     known_names = dict()
+    known_logins = dict()
     for user in known_users:
-        known_emails[user.email] = user
-        known_names[user.name] = user
+        if user.email:
+            known_emails[user.email] = user
+        if user.name:
+            known_names[user.name] = user
+        known_logins[user.login] = user
+
+    user_id_regex = re.compile(r"(?P<id>\d+)+[^@]+@users\.noreply\.github\.com")
+    authors = set()
     for coauthor in coauthors:
-        if coauthor.email in known_emails:
+        # First attempt to match by user ID,
+        # don't do this for login names as they can be changed
+        id_match = user_id_regex.match(coauthor.email)
+        if id_match:
+            author = gh.get_user_by_id(int(id_match["id"]))
+            logger.info(
+                "linking %r with %r by ID %i in email", coauthor, author, author.id
+            )
+        # If a co-author's name or email matches an already known user we can be
+        # reasonably sure that it's the same user
+        elif coauthor.email in known_emails:
             author = known_emails[coauthor.email]
             logger.info("linking %r with %r by email", coauthor, author)
         elif coauthor.name in known_names:
             author = known_names[coauthor.name]
             logger.info("linking %r with %r by name", coauthor, author)
+        elif coauthor.name in known_logins:
+            author = known_logins[coauthor.name]
+            logger.info("linking %r with %r by name & login", coauthor, author)
         else:
             author = coauthor
             logger.info("don't know login for %r", coauthor)
@@ -471,7 +489,8 @@ def main(
         ),
         pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
-    coauthors = try_replace_coauthors(coauthors, known_users=authors | reviewers)
+    print("Matching co-authors...")
+    coauthors = try_match_coauthors(coauthors, known_users=authors | reviewers, gh=gh)
     authors |= coauthors
 
     Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
