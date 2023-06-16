@@ -495,7 +495,7 @@ def main(
         ),
         pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
-    print("Matching co-authors...")
+    print("Matching co-authors...", file=sys.stderr)
     coauthors = try_match_coauthors(coauthors, known_users=authors | reviewers, gh=gh)
     authors |= coauthors
 
