@@ -13,13 +13,19 @@ from typing import Callable, Union
 from collections.abc import Iterable
 from collections import OrderedDict
 
-import requests_cache
-from tqdm import tqdm
-from github import Github
-from github.PullRequest import PullRequest
-from github.NamedUser import NamedUser
-from github.Commit import Commit
-from github.Repository import Repository
+try:
+    import requests_cache
+    from tqdm import tqdm
+    from github import Github
+    from github.PullRequest import PullRequest
+    from github.NamedUser import NamedUser
+    from github.Commit import Commit
+    from github.Repository import Repository
+except ImportError as e:
+    raise ImportError(
+        "This script depends on the third party libraries PyGithub, requests-cache, "
+        "and tqdm"
+    ) from e
 
 
 logger = logging.getLogger(__name__)
