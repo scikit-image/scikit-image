@@ -49,8 +49,8 @@ print(f'dtype: {image_seq.dtype}')
 
 #####################################################################
 # The dataset is an image stack with 60 frames (time points) and 2 spatial
-# dimensions. Let us visualize 10 frames towards the beginning of the
-# sequence, where we can see slight changes in illumination.
+# dimensions. Let us visualize 10 frames by sampling every six time points:
+# We can see some changes in illumination.
 # We take advantage of the ``animation_frame`` parameter in
 # Plotly's ``imshow`` function. As a side note, when the
 # ``binary_string`` parameter is set to ``True``, the image is
@@ -60,7 +60,7 @@ fig = px.imshow(
     image_seq[::6, :, :],
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'},
+    labels={'animation_frame': '6-step time point'},
     title='Sample of in-vivo human cornea'
 )
 plotly.io.show(fig)
