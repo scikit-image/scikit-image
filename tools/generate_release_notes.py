@@ -7,24 +7,25 @@ import sys
 import argparse
 import logging
 import tempfile
+import json
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Union
 from collections.abc import Iterable
 from collections import OrderedDict
 
 try:
+    import requests
     import requests_cache
     from tqdm import tqdm
     from github import Github
     from github.PullRequest import PullRequest
     from github.NamedUser import NamedUser
     from github.Commit import Commit
-    from github.Repository import Repository
 except ImportError as e:
     raise ImportError(
-        "This script depends on the third party libraries PyGithub, requests-cache, "
-        "and tqdm"
+        "This script depends on the third party libraries PyGithub, requests, "
+        "requests-cache, and tqdm"
     ) from e
 
 
@@ -86,43 +87,83 @@ def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
     return all_pull_requests
 
 
-@dataclass(frozen=True, eq=True)
-class CoAuthor:
-    """Represents a co-author for which the GitHub login is not known.
+@dataclass(frozen=True, kw_only=True)
+class GitHubGraphQl:
+    """Interface to query GitHub's GraphQL API for a particular repository."""
 
-    Hashing and comparing does not take into account the `commit` attribute.
+    org_name: str
+    repo_name: str
+
+    URL: str = "https://api.github.com/graphql"
+    GRAPHQL_COAUTHOR: str = """
+    query {{
+      repository (owner: "{org_name}" name: "{repo_name}") {{
+        object(expression: "{commit_sha}" ) {{
+          ... on Commit {{
+            commitUrl
+            authors(first:{page_limit}) {{
+              edges {{
+                cursor
+                node {{
+                  name
+                  email
+                  user {{
+                    login
+                    databaseId
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+      }}
+    }}
     """
+    PAGE_LIMIT: int = 100
 
-    name: str
-    email: str
-    commit: Commit = field(compare=False)
+    def find_authors(self, commit_sha: str) -> dict[int, str]:
+        """Find ID and login of (co-)author(s) for a commit.
 
-
-def find_coauthors(commit: Commit) -> set[CoAuthor]:
-    """Find co-author in a commit message.
-
-    These are matched by looking for occurrences of "Co-authored-by:" followed by a name
-    and email address in a commit message. Unfortunately, GitHub's API doesn't yet
-    provide a way yet to extract co-authors as NamedUsers from a commit directly.
-    See also  :func:`try_match_coauthors`
-    """
-    co_author_regex = re.compile(
-        r"Co-authored-by: (?P<name>[^<]+) <(?P<email>[^>]+)>", flags=re.MULTILINE
-    )
-    message = commit.commit.message
-    matches = list(co_author_regex.finditer(message))
-    expected_count = message.count("Co-authored-by:")
-    if len(matches) != expected_count:
-        logger.warning(
-            "expected %i co-authors, regex found %i in %s",
-            expected_count,
-            len(matches),
-            commit.html_url,
+        Other than GitHub's REST API, the GraphQL API supports returning all authors,
+        including co-authors, of a commit.
+        """
+        headers = {"Authorization": f"Bearer {os.environ.get('GH_TOKEN')}"}
+        query = self.GRAPHQL_COAUTHOR.format(
+            org_name=self.org_name,
+            repo_name=self.repo_name,
+            commit_sha=commit_sha,
+            page_limit=self.PAGE_LIMIT,
         )
-    coauthors = {
-        CoAuthor(name=m["name"], email=m["email"], commit=commit) for m in matches
-    }
-    return coauthors
+        sanitized_query = json.dumps({"query": query.replace("\n", "")})
+        response = requests.post(self.URL, data=sanitized_query, headers=headers)
+        data = response.json()
+        commit = data["data"]["repository"]["object"]
+        edges = commit["authors"]["edges"]
+        if len(edges) == self.PAGE_LIMIT:
+            # TODO implement pagination if this becomes an issue, e.g. see
+            # https://github.com/scientific-python/devstats-data/blob/e3cd826518bf590083409318b0a7518f7781084f/query.py#L92-L107
+            logger.warning(
+                "reached page limit while querying authors in %r, "
+                "only the first %i authors will be included",
+                commit["commitUrl"],
+                self.PAGE_LIMIT,
+            )
+
+        coauthors = dict()
+        for i, edge in enumerate(edges):
+            node = edge["node"]
+            user = node["user"]
+            if user is None:
+                logger.warning(
+                    "could not determine GitHub user for %r in %r",
+                    node,
+                    commit["commitUrl"],
+                )
+                continue
+            coauthors[user["databaseId"]] = user["login"]
+
+        assert coauthors
+        return coauthors
 
 
 def contributors(
@@ -133,78 +174,37 @@ def contributors(
 ) -> tuple[set[NamedUser], set[NamedUser]]:
     """Fetch commit authors, co-authors and reviewers.
 
-    `authors` are users which created a commit.
-    `coauthors` are name, and email pairs that signify the co-author of a commit, see
-    :func:`find_coauthors` and :func:`try_match_coauthors`.
+    `authors` are users which created or co-authored a commit.
     `reviewers` are users, who added reviews to a merged pull request or merged a
     pull request (committer of the merge commit).
     """
     authors = set()
     reviewers = set()
-    coauthors = set()
+
+    org_name, repo_name = org_repo.split("/")
+    ql = GitHubGraphQl(org_name=org_name, repo_name=repo_name)
 
     for commit in commits:
         if commit.author:
             authors.add(commit.author)
         if commit.committer:
             reviewers.add(commit.committer)
-        coauthors |= find_coauthors(commit)
+        if "Co-authored-by:" in commit.commit.message:
+            # Fallback on GraphQL API to find co-authors as well
+            user_ids = ql.find_authors(commit.sha)
+            for user_id, user_login in user_ids.items():
+                named_user = gh.get_user_by_id(user_id)
+                assert named_user.login == user_login
+                authors.add(named_user)
+        else:
+            logger.debug("no co-authors in %r", commit.html_url)
 
     for pull in pull_requests:
         for review in pull.get_reviews():
             if review.user:
                 reviewers.add(review.user)
 
-    return authors, coauthors, reviewers
-
-
-def try_match_coauthors(
-    coauthors: set[CoAuthor], known_users: set[NamedUser], gh: Github
-) -> set[Union[NamedUser, CoAuthor]]:
-    """Try to find a NamedUser for all co-authors based on already known ones.
-
-    The login of co-authors is unknown because they are currently retrieved by
-    their name and email from commit messages. This function tries to match the
-    corresponding login and NamedUser.
-    """
-    known_emails = dict()
-    known_names = dict()
-    known_logins = dict()
-    for user in known_users:
-        if user.email:
-            known_emails[user.email] = user
-        if user.name:
-            known_names[user.name] = user
-        known_logins[user.login] = user
-
-    user_id_regex = re.compile(r"(?P<id>\d+)+[^@]+@users\.noreply\.github\.com")
-    authors = set()
-    for coauthor in coauthors:
-        # First attempt to match by user ID,
-        # don't do this for login names as they can be changed
-        id_match = user_id_regex.match(coauthor.email)
-        if id_match:
-            author = gh.get_user_by_id(int(id_match["id"]))
-            logger.info(
-                "linking %r with %r by ID %i in email", coauthor, author, author.id
-            )
-        # If a co-author's name or email matches an already known user we can be
-        # reasonably sure that it's the same user
-        elif coauthor.email in known_emails:
-            author = known_emails[coauthor.email]
-            logger.info("linking %r with %r by email", coauthor, author)
-        elif coauthor.name in known_names:
-            author = known_names[coauthor.name]
-            logger.info("linking %r with %r by name", coauthor, author)
-        elif coauthor.name in known_logins:
-            author = known_logins[coauthor.name]
-            logger.info("linking %r with %r by name & login", coauthor, author)
-        else:
-            author = coauthor
-            logger.info("don't know login for %r", coauthor)
-        authors.add(author)
-
-    return authors
+    return authors, reviewers
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -212,7 +212,7 @@ class MdFormatter:
     """Format release notes in Markdown from PRs, authors and reviewers."""
 
     pull_requests: set[PullRequest]
-    authors: set[Union[NamedUser, CoAuthor]]
+    authors: set[Union[NamedUser]]
     reviewers: set[NamedUser]
 
     version: str = "x.y.z"
@@ -341,28 +341,20 @@ https://scikit-image.org
             yield from self._format_pull_request(pr)
         yield "\n"
 
-    def _format_user_line(self, user: Union[NamedUser, CoAuthor]) -> str:
-        if isinstance(user, CoAuthor):
-            line = self._format_link(user.commit.sha, user.commit.html_url)
-            line = f"{user.name} (see {line})"
-        else:
-            line = f"@{user.login}"
-            line = self._format_link(line, user.html_url)
-            if user.name:
-                line = f"{user.name} ({line})"
+    def _format_user_line(self, user: Union[NamedUser]) -> str:
+        line = f"@{user.login}"
+        line = self._format_link(line, user.html_url)
+        if user.name:
+            line = f"{user.name} ({line})"
         return line + ",\n"
 
     def _format_contributor_section(
         self,
-        authors: set[Union[NamedUser, CoAuthor]],
+        authors: set[Union[NamedUser]],
         reviewers: set[NamedUser],
     ) -> Iterable[str]:
         """Format contributor section and list users sorted by login handle."""
-        authors = {
-            u
-            for u in authors
-            if isinstance(u, CoAuthor) or u.login not in self.ignored_user_logins
-        }
+        authors = {u for u in authors if u.login not in self.ignored_user_logins}
         reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
 
         yield from self._format_section_title("Contributors", level=2)
@@ -501,15 +493,12 @@ def main(
     pull_requests = pull_requests_from_commits(
         lazy_tqdm(commits, desc="Fetching pull requests")
     )
-    authors, coauthors, reviewers = contributors(
+    authors, reviewers = contributors(
         gh=gh,
         org_repo=org_repo,
         commits=lazy_tqdm(commits, desc="Fetching authors"),
         pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
-    print("Matching co-authors...", file=sys.stderr)
-    coauthors = try_match_coauthors(coauthors, known_users=authors | reviewers, gh=gh)
-    authors |= coauthors
 
     Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
     formatter = Formatter(
