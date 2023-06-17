@@ -35,8 +35,6 @@ here = Path(__file__).parent
 REQUESTS_CACHE_PATH = Path(tempfile.gettempdir()) / "github_cache.sqlite"
 
 GH_URL = "https://github.com"
-GH_ORG = "scikit-image"
-GH_REPO = "scikit-image"
 
 
 def lazy_tqdm(*args, **kwargs):
@@ -50,8 +48,11 @@ def lazy_tqdm(*args, **kwargs):
     yield from tqdm(*args, **kwargs)
 
 
-def commits_between(repo: Repository, start_rev: str, stop_rev: str) -> set[Commit]:
+def commits_between(
+    gh: Github, org_name: str, start_rev: str, stop_rev: str
+) -> set[Commit]:
     """Fetch commits between two revisions excluding the commit of `start_rev`."""
+    repo = gh.get_repo(org_name)
     comparison = repo.compare(base=start_rev, head=stop_rev)
     commits = set(comparison.commits)
     assert repo.get_commit(start_rev) not in commits
@@ -125,8 +126,11 @@ def find_coauthors(commit: Commit) -> set[CoAuthor]:
 
 
 def contributors(
-    commits: Iterable[Commit], pull_requests: Iterable[PullRequest]
-) -> tuple[set[NamedUser], set[CoAuthor], set[NamedUser]]:
+    gh: Github,
+    org_repo: str,
+    commits: Iterable[Commit],
+    pull_requests: Iterable[PullRequest],
+) -> tuple[set[NamedUser], set[NamedUser]]:
     """Fetch commit authors, co-authors and reviewers.
 
     `authors` are users which created a commit.
@@ -409,6 +413,11 @@ def parse_command_line(func: Callable) -> Callable:
     """
     parser = argparse.ArgumentParser(usage=__doc__)
     parser.add_argument(
+        "org_repo",
+        help="Org and repo name of a repository on GitHub (delimited by a slash), "
+        "e.g. 'numpy/numpy'",
+    )
+    parser.add_argument(
         "start_rev",
         help="The starting revision (excluded), e.g. the tag of the previous release",
     )
@@ -453,6 +462,7 @@ def parse_command_line(func: Callable) -> Callable:
 @parse_command_line
 def main(
     *,
+    org_repo: str,
     start_rev: str,
     stop_rev: str,
     version: str,
@@ -461,6 +471,10 @@ def main(
     clear_cache: bool,
     verbose: int,
 ):
+    """Main function of the script.
+
+    See :func:`parse_command_line` for a description of the accepted input.
+    """
     level = {0: logging.WARNING, 1: logging.INFO}.get(verbose, logging.DEBUG)
     logger.setLevel(level)
 
@@ -481,18 +495,16 @@ def main(
             "The token does not require any permissions (we only use the public API)."
         )
     gh = Github(gh_token)
-    repo = gh.get_repo(f"{GH_ORG}/{GH_REPO}")
 
     print("Fetching commits...", file=sys.stderr)
-    commits = commits_between(repo, start_rev, stop_rev)
+    commits = commits_between(gh, org_repo, start_rev, stop_rev)
     pull_requests = pull_requests_from_commits(
         lazy_tqdm(commits, desc="Fetching pull requests")
     )
     authors, coauthors, reviewers = contributors(
-        commits=lazy_tqdm(
-            commits,
-            desc="Fetching authors",
-        ),
+        gh=gh,
+        org_repo=org_repo,
+        commits=lazy_tqdm(commits, desc="Fetching authors"),
         pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
     )
     print("Matching co-authors...", file=sys.stderr)
@@ -521,5 +533,9 @@ def main(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARNING, format="%(levelname)s: %(message)s")
+    logging.basicConfig(
+        level=logging.WARNING,
+        format="%(levelname)s: %(filename)s::%(funcName)s: %(message)s",
+        stream=sys.stderr,
+    )
     main()
