@@ -138,10 +138,12 @@ plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 #####################################################################
 # The "dirt spots" appear to be more distinct in the second mask, i.e., the
 # one resulting from using the larger ``block_size`` value.
-# Regarding the value of the offset parameter, we noticed that increasing it
-# instead of keeping its default zero value, would yield a more uniform
-# background, hence letting the objects of interest stand out more visibly.
-# Indeed:
+# We noticed that increasing the value of the offset parameter from
+# its default zero value would yield a more uniform background,
+# letting the objects of interest stand out more visibly. Note that
+# toggling parameter values can give us a deeper
+# understanding of the method being used, which can typically move us
+# closer to the desired results.
 
 thresh_0 = ski.filters.threshold_local(image_med, block_size=43)
 
