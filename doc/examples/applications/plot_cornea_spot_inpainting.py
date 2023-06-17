@@ -173,7 +173,8 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 #####################################################################
 # Since "opening" an image starts with an erosion operation, bright regions
 # which are smaller than the structuring element have been removed.
-# Let us try now with a larger footprint:
+# Let us apply an opening filter again, this time with a larger footprint,
+# which will remove even larger fine-grained features:
 
 footprint = ski.morphology.diamond(3)
 mask_open = ski.morphology.opening(mask_2, footprint)
