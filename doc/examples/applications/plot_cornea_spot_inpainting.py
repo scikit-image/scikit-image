@@ -66,24 +66,31 @@ fig = px.imshow(
 plotly.io.show(fig)
 
 #####################################################################
-# Average over time
-# =================
+# Aggregate over time
+# ===================
 # First, we want to detect those dirt spots where the data are lost. In
 # technical terms, we want to *segment* the dirt spots (for
 # all frames in the sequence). Unlike the actual data (signal), the dirt spots
 # do not move from one frame to the next; they are still. Therefore, we begin
-# by computing the time average of the image sequence. We shall use this
-# time-averaged image to segment the dirt spots, the latter then standing out
+# by computing a time aggregate of the image sequence. We shall use the median
+# image to segment the dirt spots, the latter then standing out
 # with respect to the background (blurred signal).
+# Complementarily, to get a feel for the (moving) data, let us compute the
+# variance.
 
-image_avg = np.mean(image_seq, axis=0)
+image_med = np.median(image_seq, axis=0)
+image_var = np.var(image_seq, axis=0)
 
-print(f'shape: {image_avg.shape}')
+assert image_var.shape == image_med.shape
 
-fig, ax = plt.subplots(figsize=(6, 6))
+print(f'shape: {image_med.shape}')
 
-ax.imshow(image_avg, cmap='gray')
-ax.set_title('Time-averaged image')
+fig, ax = plt.subplots(ncols=2, figsize=(12, 6))
+
+ax[0].imshow(image_med, cmap='gray')
+ax[0].set_title('Image median over time')
+ax[1].imshow(image_var, cmap='gray')
+ax[1].set_title('Image variance over time')
 
 fig.tight_layout()
 
@@ -104,11 +111,11 @@ fig.tight_layout()
 # as well as the ``offset`` (shifting the neighborhood's weighted mean).
 # Let us try two different values for ``block_size``:
 
-thresh_1 = ski.filters.threshold_local(image_avg, block_size=21, offset=15)
-thresh_2 = ski.filters.threshold_local(image_avg, block_size=43, offset=15)
+thresh_1 = ski.filters.threshold_local(image_med, block_size=21, offset=15)
+thresh_2 = ski.filters.threshold_local(image_med, block_size=43, offset=15)
 
-mask_1 = image_avg < thresh_1
-mask_2 = image_avg < thresh_2
+mask_1 = image_med < thresh_1
+mask_2 = image_med < thresh_2
 
 #####################################################################
 # Let us define a convenience function to display two plots side by side, so
@@ -136,9 +143,9 @@ plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 # background, hence letting the objects of interest stand out more visibly.
 # Indeed:
 
-thresh_0 = ski.filters.threshold_local(image_avg, block_size=43)
+thresh_0 = ski.filters.threshold_local(image_med, block_size=43)
 
-mask_0 = image_avg < thresh_0
+mask_0 = image_med < thresh_0
 
 plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 
