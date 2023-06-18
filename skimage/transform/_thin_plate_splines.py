@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from scipy.spatial import distance
+import scipy as sp
 
 
 def warp_images(
