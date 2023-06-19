@@ -240,7 +240,7 @@ color_contours = ski.color.label2rgb(
     arr,
     image=sample_result,
     alpha=0.4,
-    bg_label=0
+    bg_color=(1, 1, 1)
 )
 
 fig, ax = plt.subplots(figsize=(6, 6))
