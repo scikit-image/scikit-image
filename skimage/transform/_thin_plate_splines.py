@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import ndimage
 import scipy as sp
 
 
@@ -52,7 +51,7 @@ def warp_images(
     """
     transform = _make_inverse_warp(from_points, to_points,
                                    output_region, approximate_grid)
-    return [ndimage.map_coordinates(np.asarray(image), transform, order=interpolation_order) for image in images]
+    return [sp.ndimage.map_coordinates(np.asarray(image), transform, order=interpolation_order) for image in images]
 
 
 def _make_inverse_warp(
@@ -107,7 +106,7 @@ def _U(x):
 def _make_L_matrix(points):
     n = len(points)
     P = np.hstack([np.ones((n, 1)), points])
-    K = _U(distance.cdist(points, points, metric='euclidean'))
+    K = _U(sp.spatial.distance.cdist(points, points, metric='euclidean'))
     O = np.zeros((3, 3))
     L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
     return L
@@ -137,4 +136,5 @@ def _make_warp(from_points, to_points, x_vals, y_vals):
     x_warp = _calculate_f(coeffs[:, 0], from_points, x_vals, y_vals)
     y_warp = _calculate_f(coeffs[:, 1], from_points, x_vals, y_vals)
     np.seterr(**err)
+    return [x_warp, y_warp]
     return [x_warp, y_warp]
