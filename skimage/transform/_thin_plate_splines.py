@@ -97,11 +97,21 @@ def _make_inverse_warp(
     return transform
 
 
-
 def _U(x):
-    _small = 1e-100 # A small value to avoid division by zero
-    return (x**2) * np.where(x < _small, 0, np.log(x))
+    """Compute basis kernel function for thine-plate splines.
 
+    Parameters
+    ----------
+    x: ndarray
+        Input array representing the norm distance between points.
+        The norm is the Euclidean distance.
+    Returns
+    -------
+    ndarray
+        Calculated U values.
+    """
+    _small = 1e-8  # Small value to avoid divide-by-zero
+    return np.where(x == 0.0, 0.0, (x**2) * np.log((x**2) + _small))
 
 def _make_L_matrix(points):
     n = len(points)
@@ -136,5 +146,4 @@ def _make_warp(from_points, to_points, x_vals, y_vals):
     x_warp = _calculate_f(coeffs[:, 0], from_points, x_vals, y_vals)
     y_warp = _calculate_f(coeffs[:, 1], from_points, x_vals, y_vals)
     np.seterr(**err)
-    return [x_warp, y_warp]
     return [x_warp, y_warp]
