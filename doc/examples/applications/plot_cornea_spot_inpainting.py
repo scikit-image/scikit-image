@@ -154,7 +154,7 @@ plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 #####################################################################
 # Remove fine-grained features
 # ============================
-# We use morphological filters to sharpen the mask and focus on the dark
+# We use morphological filters to sharpen the mask and focus on the dirt
 # spots. The two fundamental morphological operators are *dilation* and
 # *erosion*, where dilation (resp. erosion) sets the pixel to the brightest
 # (resp. darkest) value of the neighborhood defined by a structuring element
