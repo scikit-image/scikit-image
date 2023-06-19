@@ -166,24 +166,18 @@ plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 # First, we apply an opening filter, in order to remove small objects and thin
 # lines, while preserving the shape and size of larger objects.
 
-footprint = ski.morphology.diamond(1)
+footprint = ski.morphology.diamond(3)
 mask_open = ski.morphology.opening(mask_2, footprint)
 plot_comparison(mask_2, mask_open, "mask before", "after opening")
 
 #####################################################################
 # Since "opening" an image starts with an erosion operation, bright regions
 # which are smaller than the structuring element have been removed.
-# Let us apply an opening filter again, this time with a larger footprint,
-# which will remove even larger fine-grained features:
-
-footprint = ski.morphology.diamond(3)
-mask_open = ski.morphology.opening(mask_2, footprint)
-plot_comparison(mask_2, mask_open, "mask before", "after opening")
-
-#####################################################################
-# We can see that, with respect to the previous comparison plot, fewer spots
-# are retained in the mask: The smaller ones have been filtered out, leaving
-# only the larger ones.
+# When applying an opening filter, tweaking the footprint parameter lets us
+# control how fine-grained the removed features are. For example, if we used
+# ``footprint = ski.morphology.diamond(1)`` in the above, we could see that
+# only smaller features would be filtered out, hence retaining more spots in
+# the mask.
 # Next, we can make the detected areas wider by applying a dilation filter:
 
 mask_dilate = ski.morphology.dilation(mask_open, footprint)
