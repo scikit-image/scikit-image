@@ -210,12 +210,9 @@ def _calculate_f(coeffs, points, x, y):
 def _make_warp(from_points, to_points, x_vals, y_vals):
     from_points = np.asarray(from_points)
     to_points = np.asarray(to_points)
-    err = np.seterr(divide='ignore')
-    L = _make_L_matrix(from_points)
-    V = np.resize(to_points, (len(to_points)+3, 2))
-    V[-3:, :] = 0
-    coeffs = np.dot(np.linalg.pinv(L), V)
+    # err = np.seterr(divide='ignore')
+    coeffs = _coeffs(from_points, to_points)
     x_warp = _calculate_f(coeffs[:, 0], from_points, x_vals, y_vals)
     y_warp = _calculate_f(coeffs[:, 1], from_points, x_vals, y_vals)
-    np.seterr(**err)
+    # np.seterr(**err)
     return [x_warp, y_warp]
