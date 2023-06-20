@@ -114,8 +114,25 @@ def _U(x):
     return np.where(x == 0.0, 0.0, (x**2) * np.log((x**2) + _small))
 
 def _make_L_matrix(points):
-    n = len(points)
-    P = np.hstack([np.ones((n, 1)), points])
+    """Define the L matrix based on the given points.
+
+    A (N+P+1, N+P+1)-shaped L matrix that gets inverted when calculating
+    the thin-plate spline from `points`.
+
+    Parameters
+    ----------
+    points: (N, 2) shaped array_like
+        A (N, D) array of N landmarks in D=2 dimensions.
+
+    Returns
+    -------
+    L : ndarray
+        A (N+D+1, N+D+1) shaped array of the form [[K | P][P.T | 0]].
+    """
+    if points.ndim != 2:
+        raise ValueError("The input `points` must be a 2-D tensor")
+    n_pts = points.shape[0]
+    P = np.hstack([np.ones((n_pts, 1)), points])
     K = _U(sp.spatial.distance.cdist(points, points, metric='euclidean'))
     O = np.zeros((3, 3))
     L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
