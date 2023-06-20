@@ -121,7 +121,7 @@ def _make_L_matrix(points):
 
     Parameters
     ----------
-    points: (N, 2) shaped array_like
+    points : (N, 2) shaped array_like
         A (N, D) array of N landmarks in D=2 dimensions.
 
     Returns
@@ -164,15 +164,46 @@ def _coeffs(from_points, to_points):
 
 
 def _calculate_f(coeffs, points, x, y):
+    """Compute the thin-plate spline function at given coordinates (x, y).
+
+    Parameters:
+    ----------
+    coeffs : ndarray
+        Array of shape (N+3, 2) containing the thin-plate spline coefficients.
+    points : ndarray
+        Array of shape (N, 2) representing the source landmarks.
+    x : ndarray
+        Array representing the x-coordinates of the evaluation points.
+    y : ndarray
+        Array representing the y-coordinates of the evaluation points.
+
+    Returns:
+    -------
+    ndarray :
+        Array containing the computed thin-plate spline function values.
+
+    Notes:
+    -----
+    This function calculates the thin-plate spline function values at each
+    coordinate (x, y) everywhere in the plane.
+
+    The function is calculated as:
+
+    .. math::
+
+        f(x, y) = a1 + ax * x + ay * y + Σ(wi * U(|Pi - (x, y)|))
+
+        where:
+        - a1, ax, and ay are the last three coefficients in `coeffs`.
+        - wi represents the weights corresponding to each point Pi in `points`.
+        - U(r) is the basis kernel function.
+
+    """
     w = coeffs[:-3]
     a1, ax, ay = coeffs[-3:]
-    # The following uses too much RAM:
-    # distances = _U(np.sqrt((points[:,0]-x[...,np.newaxis])**2
-    # + (points[:,1]-y[...,np.newaxis])**2))
-    # summation = (w * distances).sum(axis=-1)
     summation = np.zeros(x.shape)
     for wi, Pi in zip(w, points):
-        summation += wi * _U(np.sqrt((x-Pi[0])**2 + (y-Pi[1])**2))
+        summation += wi * _U(np.sqrt((Pi[0]-x)**2 + (Pi[1]-y)**2))
     return a1 + ax*x + ay*y + summation
 
 
