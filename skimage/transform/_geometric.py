@@ -627,7 +627,7 @@ class ProjectiveTransform(_GeometricTransform):
        [b0 b1 b2]
        [c0 c1 1 ]].
 
-    E.g., to rotate by theta degrees clockwise, the matrix should be::
+    E.g., to rotate by theta degrees counter-clockwise, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
@@ -928,7 +928,7 @@ class AffineTransform(ProjectiveTransform):
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
     rotation : float, optional
-        Rotation angle, clockwise, as radians. Only available for 2D.
+        Rotation angle, counter-clockwise, as radians. Only available for 2D.
     shear : float or 2-tuple of float, optional
         The x and y shear angles, clockwise, by which these axes are
         rotated around the origin [2].
@@ -1283,7 +1283,7 @@ class EuclideanTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle, clockwise, as radians. If given as
+        Rotation angle, counter-clockwise, as radians. If given as
         a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
@@ -1428,7 +1428,7 @@ class SimilarityTransform(EuclideanTransform):
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
     rotation : float, optional
-        Rotation angle, clockwise, as radians.
+        Rotation angle, counter-clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
     translation : (dim,) array_like, optional
