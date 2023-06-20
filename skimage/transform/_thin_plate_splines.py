@@ -138,6 +138,30 @@ def _make_L_matrix(points):
     L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
     return L
 
+def _coeffs(from_points, to_points):
+    """Find the thin-plate spline coefficients.
+
+    Parameters
+    ----------
+    from_points : (N, 2) array_like
+        An array of N points representing the source landmark.
+
+    to_points : (N,2) array_like
+        An array of N points representing the target landmark.
+        `to_points` must have the same shape as `from_points`.
+
+    Returns
+    -------
+    coeffs : ndarray
+        Array of shape (N+3, 2) containing the calculated coefficients.
+
+    """
+    n_coords = from_points.shape[1]
+    Y = np.row_stack((to_points, np.zeros((n_coords+1, n_coords))))
+    L = _make_L_matrix(from_points)
+    coeffs = np.dot(np.linalg.pinv(L), Y)
+    return coeffs
+
 
 def _calculate_f(coeffs, points, x, y):
     w = coeffs[:-3]
