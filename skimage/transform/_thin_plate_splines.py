@@ -70,7 +70,7 @@ def _make_inverse_warp(
 
     if approximate_grid != 1:
         # linearly interpolate the zoomed transform grid
-        new_x, new_y = np.mgrid[x_min:x_max+1, y_min:y_max+1]
+        new_x, new_y = np.mgrid[x_min:x_max, y_min:y_max]
         x_fracs, x_indices = np.modf(
             (x_steps-1)*(new_x-x_min)/float(x_max-x_min))
         y_fracs, y_indices = np.modf(
