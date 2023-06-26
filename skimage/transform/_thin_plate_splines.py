@@ -120,28 +120,6 @@ def _make_inverse_warp(
         y_indices = np.clip(y_indices, 0, y_steps - 1)
 
 
-        # x_fracs, x_indices = np.modf(
-        #     (x_steps-1)*(new_x-x_min)/float(x_max-x_min))
-        # y_fracs, y_indices = np.modf(
-        #     (y_steps-1)*(new_y-y_min)/float(y_max-y_min))
-        # x_indices = x_indices.astype(int)
-        # y_indices = y_indices.astype(int)
-        # x1 = 1 - x_fracs
-        # y1 = 1 - y_fracs
-        # ix1 = (x_indices+1).clip(0, x_steps-1)
-        # iy1 = (y_indices+1).clip(0, y_steps-1)
-        # t00 = transform[0][(x_indices, y_indices)]
-        # t01 = transform[0][(x_indices, iy1)]
-        # t10 = transform[0][(ix1, y_indices)]
-        # t11 = transform[0][(ix1, iy1)]
-        # transform_x = (t00*x1*y1 + t01*x1*y_fracs
-        #                + t10*x_fracs*y1 + t11*x_fracs*y_fracs)
-        # t00 = transform[1][(x_indices, y_indices)]
-        # t01 = transform[1][(x_indices, iy1)]
-        # t10 = transform[1][(ix1, y_indices)]
-        # t11 = transform[1][(ix1, iy1)]
-        # transform_y = (t00*x1*y1 + t01*x1*y_fracs
-        #                + t10*x_fracs*y1 + t11*x_fracs*y_fracs)
 
         transform_x = sp.ndimage.map_coordinates(transform[0], [x_indices, y_indices])
         transform_y = sp.ndimage.map_coordinates(transform[1], [x_indices, y_indices])
