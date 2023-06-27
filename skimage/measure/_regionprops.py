@@ -125,6 +125,7 @@ COL_DTYPES = {
     'moments_weighted_central': float,
     'moments_weighted_hu': float,
     'moments_weighted_normalized': float,
+    'num_pixels': int,
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
