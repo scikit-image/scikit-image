@@ -1097,8 +1097,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
     -----
     The following properties can be accessed as attributes or keys:
 
-    **num_pixels** : int
-        Number of foreground pixels.
     **area** : float
         Area of the region i.e. number of pixels of the region scaled by pixel-area.
     **area_bbox** : float
@@ -1220,6 +1218,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+    **num_pixels** : int
+        Number of foreground pixels.
     **orientation** : float
         Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,
