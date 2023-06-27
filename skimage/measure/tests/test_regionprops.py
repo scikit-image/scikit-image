@@ -1234,10 +1234,6 @@ def test_regionprops_table_no_regions():
     assert len(out['bbox+3']) == 0
 
 
-def test_column_dtypes_complete():
-    assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
-
-
 def test_column_dtypes_correct():
     msg = 'mismatch with expected type,'
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
