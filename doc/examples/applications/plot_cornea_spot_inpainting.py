@@ -98,7 +98,7 @@ fig.tight_layout()
 # Use local thresholding
 # ======================
 # To segment the dirt spots, we use thresholding. The images we are working
-# with have uneven illumination, which causes variations in the (absolute)
+# with are unevenly illuminated, which causes variations in the (absolute)
 # intensities of the foreground and the background, from one region to another
 # (distant) one. It is therefore more fitting to compute different threshold
 # values across the image, one for each region. This is called adaptive (or
