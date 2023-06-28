@@ -2,28 +2,28 @@ import numpy as np
 import scipy as sp
 
 
-def warp_images(
-    from_points,
-    to_points,
-    images,
+def tps_warp(
+    image,
+    src,
+    dst,
     output_region,
     interpolation_order=1,
-    approximate_grid=2
+    grid_scaling=None
 ):
     """Return an array of warped images.
 
     Define a thin-plate-spline warping transform that warps from the
-    from_points to the to_points, and then warp the given images by
+    src to the dst, and then warp the given images by
     that transform.
 
     Parameters
     ----------
-    from_points: (N, 2) array_like
+    src: (N, 2) array_like
         Source image coordinates.
-    to_points: (N, 2) array_like
-        Target image coordinates.
-    images: ndarray
-        Array of nD images to be warped with the given warp transform.
+    dst: (N, 2) array_like
+        Destination image coordinates.
+    image: ndarray
+        Input image.
     output_region: (1, 4) array
         The (xmin, ymin, xmax, ymax) region of the output
         image that should be produced. (Note: The region is inclusive, i.e.
@@ -31,8 +31,8 @@ def warp_images(
     interpolation_order: int, optional
         If value is 1, then use linear interpolation else use
         nearest-neighbor interpolation.
-    approximate_grid: int, optional
-        If approximate_grid is greater than 1, say x, then the transform is
+    grid_scaling: int, optional
+        If grid_scaling is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
         This is fairly accurate for values up to 10 or so.
@@ -44,14 +44,16 @@ def warp_images(
 
     Examples
     --------
+    Produce a warped image rotated by 90 degrees counter-clockwise:
+
     >>> import skimage as ski
     >>> image = ski.data.astronaut()
     >>> astronaut = ski.color.rgb2gray(image)
-    >>> from_points = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
-    >>> to_points = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
+    >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
+    >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
     >>> output_region = (0, 0, astronaut.shape[1], astronaut.shape[0])
-    >>> warped_image = warp_images(from_points, to_points,
-                        images=[astronaut], output_region=output_region)
+    >>> warped_image = ski.transform.tps_warp(image, src, dst,
+                                    output_region=output_region)
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
@@ -59,25 +61,33 @@ def warp_images(
     machine intelligence 11.6 (1989): 567–585.
 
     """
-    transform = _make_inverse_warp(from_points, to_points,
-                                   output_region, approximate_grid)
-    return [sp.ndimage.map_coordinates(np.asarray(image), transform, order=interpolation_order) for image in images]
+    if image.size == 0:
+        raise ValueError("Cannot warp empty image with dimensions",
+                         image.shape)
+
+    if image.ndim != 2:
+        raise ValueError("Only 2-D images (grayscale or color) are "
+                         "supported")
+
+    transform = _make_inverse_warp(src, dst,
+                                   output_region, grid_scaling)
+    return sp.ndimage.map_coordinates(np.asarray(image), transform, order=interpolation_order)
 
 
 def _make_inverse_warp(
-    from_points,
-    to_points,
+    src,
+    dst,
     output_region,
-    approximate_grid
+    grid_scaling,
 ):
     """Compute inverse warp tranform.
 
     Parameters
     ----------
-    from_points : (N,2) array_like
-        An array of N points representing the source point.
-    to_points : (N,2) array_like
-        An array of N points representing the target point.
+    src : (N,2) array_like
+        An array of N points representing the source coordinates.
+    dst : (N,2) array_like
+        An array of N points representing the destination coordinates.
     output_region: (1, 4) array
         The (xmin, ymin, xmax, ymax) region of the output
         image that should be produced. (Note: The region is inclusive, i.e.
@@ -85,8 +95,8 @@ def _make_inverse_warp(
     interpolation_order: int, optional
         If value is 1, then use linear interpolation else use
         nearest-neighbor interpolation.
-    approximate_grid: int, optional
-        If approximate_grid is greater than 1, say x, then the transform is
+    grid_scaling: int, optional
+        If grid_scaling is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
         This is fairly accurate for values up to 10 or so.
@@ -98,18 +108,18 @@ def _make_inverse_warp(
 
     """
     x_min, y_min, x_max, y_max = output_region
-    if approximate_grid is None:
-        approximate_grid = 1
-    x_steps = (x_max - x_min) // approximate_grid
-    y_steps = (y_max - y_min) // approximate_grid
+    if grid_scaling is None:
+        grid_scaling = 1
+    x_steps = (x_max - x_min) // grid_scaling
+    y_steps = (y_max - y_min) // grid_scaling
     x, y = np.mgrid[x_min:x_max:x_steps*1j, y_min:y_max:y_steps*1j]
 
-    # make the reverse transform warping from the to_points to the from_points,
+    # make the reverse transform warping from the dst to the src,
     # because we do image interpolation in this reverse fashion
-    transform = _tps_transform(to_points, from_points, x, y)
+    transform = tps_transform(dst, src, x, y)
 
 
-    if approximate_grid != 1:
+    if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid
         new_x, new_y = np.mgrid[x_min:x_max, y_min:y_max]
         # new_x, new_y = np.mgrid[x_min:x_max+1, y_min:y_max+1]
@@ -118,8 +128,6 @@ def _make_inverse_warp(
 
         x_indices = np.clip(x_indices, 0, x_steps - 1)
         y_indices = np.clip(y_indices, 0, y_steps - 1)
-
-
 
         transform_x = sp.ndimage.map_coordinates(transform[0], [x_indices, y_indices])
         transform_y = sp.ndimage.map_coordinates(transform[1], [x_indices, y_indices])
@@ -151,7 +159,7 @@ def _make_L_matrix(points):
 
     Parameters
     ----------
-    points : (N, 2) shaped array_like
+    points : (N, 2) array_like
         A (N, D) array of N point in D=2 dimensions.
 
     Returns
@@ -159,8 +167,6 @@ def _make_L_matrix(points):
     L : ndarray
         A (N+D+1, N+D+1) shaped array of the form [[K | P][P.T | 0]].
     """
-    if points.ndim != 2:
-        raise ValueError("The input `points` must be a 2-D tensor")
     n_pts = points.shape[0]
     P = np.hstack([np.ones((n_pts, 1)), points])
     K = _U(sp.spatial.distance.cdist(points, points, metric='euclidean'))
@@ -168,16 +174,16 @@ def _make_L_matrix(points):
     L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
     return L
 
-def _coeffs(from_points, to_points):
+def _coeffs(src, dst):
     """Find the thin-plate spline coefficients.
 
     Parameters
     ----------
-    from_points : (N, 2) array_like
+    src : (N, 2) array_like
         An array of N points representing the source point.
-    to_points : (N,2) array_like
-        An array of N points representing the target point.
-        `to_points` must have the same shape as `from_points`.
+    dst : (N,2) array_like
+        An array of N points representing the destination point.
+        `dst` must have the same shape as `src`.
 
     Returns
     -------
@@ -185,9 +191,9 @@ def _coeffs(from_points, to_points):
         Array of shape (N+3, 2) containing the calculated coefficients.
 
     """
-    n_coords = from_points.shape[1]
-    Y = np.row_stack((to_points, np.zeros((n_coords+1, n_coords))))
-    L = _make_L_matrix(from_points)
+    n_coords = src.shape[1]
+    Y = np.row_stack((dst, np.zeros((n_coords+1, n_coords))))
+    L = _make_L_matrix(src)
     coeffs = np.dot(np.linalg.pinv(L), Y)
     return coeffs
 
@@ -236,16 +242,16 @@ def _calculate_f(x, y, points, coeffs):
     return a1 + ax*x + ay*y + summation
 
 
-def _tps_transform(from_points, to_points, x_vals, y_vals):
+def tps_transform(src, dst, x_vals, y_vals):
     """Apply transformation to coordinates `x_vals` and `y_vals`.
 
     Parameters
     ----------
-    from_points : (N,2) array_like
+    src : (N, 2) array_like
         An array of N points representing the source point.
-    to_points : (N,2) array_like
-        An array of N points representing the target point.
-        `to_points` must have the same shape as `from_points`.
+    dst : (N, 2) array_like
+        An array of N points representing the destination point.
+        `dst` must have the same shape as `src`.
     x_vals : array_like
         The x-coordinates of points to transform.
     y_vals : array_like
@@ -255,12 +261,45 @@ def _tps_transform(from_points, to_points, x_vals, y_vals):
     -------
     transformed_pts : lists
         A list of transformed coordinates.
+
+    Examples
+    --------
+    >>> import skimage as ski
+
+    Define source and destination points:
+
+    >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
+    >>> dst = np.roll(src_points, 1, axis=0)
+
+    Generate the grid points for transformation
+
+    >>> x_min, x_max = 0, 90
+    >>> y_min, y_max = 0, 90
+    >>> num_points = 100
+    >>> x, y = np.meshgrid(np.linspace(x_min, x_max, num_points),
+                   np.linspace(y_min, y_max, num_points))
+
+    Apply the transformation
+
+    >>> transformed_x, transformed_y = ski.transform.tps_transform(
+            src_points, dst_points, x, y)
+    >>> transformed_x[10, 10]
+    501.88594868313635
+    >>> transformed_y[10, 10]
+    10.112359869775215
     """
-    from_points = np.asarray(from_points)
-    to_points = np.asarray(to_points)
+    src = np.asarray(src)
+    dst = np.asarray(dst)
+
+    if src.shape != dst.shape:
+        raise ValueError("The `src` and `dst` must be of the same shape.")
+
+    if src.shape[1] != 2 or dst.shape[1] != 2:
+        raise ValueError("The input `src` or `dst` must have shape (N, 2)")
+
     # err = np.seterr(divide='ignore')
-    coeffs = _coeffs(from_points, to_points)
-    transformed_x = _calculate_f(x_vals, y_vals, from_points, coeffs[:, 0])
-    transformed_y = _calculate_f(x_vals, y_vals, from_points, coeffs[:, 1])
+    coeffs = _coeffs(src, dst)
+    transformed_x = _calculate_f(x_vals, y_vals, src, coeffs[:, 0])
+    transformed_y = _calculate_f(x_vals, y_vals, src, coeffs[:, 1])
     # np.seterr(**err)
     return [transformed_x, transformed_y]
