@@ -18,12 +18,12 @@ def tps_warp(
 
     Parameters
     ----------
+    image: ndarray
+        Input image.
     src: (N, 2) array_like
         Source image coordinates.
     dst: (N, 2) array_like
         Destination image coordinates.
-    image: ndarray
-        Input image.
     output_region: tuple of integers
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
