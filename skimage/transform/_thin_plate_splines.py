@@ -263,28 +263,27 @@ def tps_transform(src, dst, x_vals, y_vals):
 
     Examples
     --------
-    >>> import skimage as ski
-
-    Define source and destination points:
-
-    >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
+    Define source and destination points and generate meshgrid for transformation:
+    >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
     >>> dst = np.roll(src, 1, axis=0)
-
-    Generate the grid points for transformation
-
-    >>> x_min, x_max = 0, 90
-    >>> y_min, y_max = 0, 90
-    >>> num_points = 100
-    >>> x, y = np.meshgrid(np.linspace(x_min, x_max, num_points),
-    ...     np.linspace(y_min, y_max, num_points))
+    >>> xx, yy = np.meshgrid(np.arange(5), np.arange(5))
+    >>> xx
+    array([[0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4]])
 
     Apply the transformation
 
-    >>> x_trans, y_trans = ski.transform.tps_transform(src, dst, x, y)
-    >>> x_trans[10, 10]
-    501.88594868313635
-    >>> y_trans[10, 10]
-    10.112359869775215
+    >>> import skimage as ski
+    >>> xx_trans, yy_trans = ski.transform.tps_transform(src, dst, x, y)
+    >>> xx_trans
+    array([[5., 5., 5., 5., 5.],
+           [4., 4., 4., 4., 4.],
+           [3., 3., 3., 3., 3.],
+           [2., 2., 2., 2., 2.],
+           [1., 1., 1., 1., 1.]])
     """
     src = np.asarray(src)
     dst = np.asarray(dst)
