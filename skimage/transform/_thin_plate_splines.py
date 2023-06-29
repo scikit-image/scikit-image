@@ -53,7 +53,7 @@ def tps_warp(
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
     >>> output_region = (0, 0, astronaut.shape[1], astronaut.shape[0])
     >>> warped_image = ski.transform.tps_warp(image, src, dst,
-                                    output_region=output_region)
+    ...     output_region=output_region)
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
@@ -62,12 +62,10 @@ def tps_warp(
 
     """
     if image.size == 0:
-        raise ValueError("Cannot warp empty image with dimensions",
-                         image.shape)
+        raise ValueError("Cannot warp empty image with dimensions", image.shape)
 
     if image.ndim != 2:
-        raise ValueError("Only 2-D images (grayscale or color) are "
-                         "supported")
+        raise ValueError("Only 2-D images (grayscale or color) are supported")
 
     transform = _make_inverse_warp(src, dst,
                                    output_region, grid_scaling)
@@ -269,7 +267,7 @@ def tps_transform(src, dst, x_vals, y_vals):
     Define source and destination points:
 
     >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
-    >>> dst = np.roll(src_points, 1, axis=0)
+    >>> dst = np.roll(src, 1, axis=0)
 
     Generate the grid points for transformation
 
@@ -277,22 +275,21 @@ def tps_transform(src, dst, x_vals, y_vals):
     >>> y_min, y_max = 0, 90
     >>> num_points = 100
     >>> x, y = np.meshgrid(np.linspace(x_min, x_max, num_points),
-                   np.linspace(y_min, y_max, num_points))
+    ...     np.linspace(y_min, y_max, num_points))
 
     Apply the transformation
 
-    >>> transformed_x, transformed_y = ski.transform.tps_transform(
-            src_points, dst_points, x, y)
-    >>> transformed_x[10, 10]
+    >>> x_trans, y_trans = ski.transform.tps_transform(src, dst, x, y)
+    >>> x_trans[10, 10]
     501.88594868313635
-    >>> transformed_y[10, 10]
+    >>> y_trans[10, 10]
     10.112359869775215
     """
     src = np.asarray(src)
     dst = np.asarray(dst)
 
     if src.shape != dst.shape:
-        raise ValueError("The `src` and `dst` must be of the same shape.")
+        raise ValueError("src and dst shapes must be identical.")
 
     if src.shape[1] != 2 or dst.shape[1] != 2:
         raise ValueError("The input `src` or `dst` must have shape (N, 2)")
