@@ -48,12 +48,13 @@ def tps_warp(
 
     >>> import skimage as ski
     >>> image = ski.data.astronaut()
-    >>> astronaut = ski.color.rgb2gray(image)
+    >>> image = ski.color.rgb2gray(image)
     >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
-    >>> output_region = (0, 0, astronaut.shape[1], astronaut.shape[0])
-    >>> warped_image = ski.transform.tps_warp(image, src, dst,
-    ...     output_region=output_region)
+    >>> output_region = (0, 0, astronaut.shape[0], astronaut.shape[1])
+    >>> warped_image = ski.transform.tps_warp(
+    ...     image, src, dst, output_region=output_region
+    ... )
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
