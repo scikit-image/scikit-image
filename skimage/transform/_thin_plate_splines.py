@@ -277,7 +277,7 @@ def tps_transform(src, dst, x_vals, y_vals):
     Apply the transformation
 
     >>> import skimage as ski
-    >>> xx_trans, yy_trans = ski.transform.tps_transform(src, dst, x, y)
+    >>> xx_trans, yy_trans = ski.transform.tps_transform(src, dst, xx, yy)
     >>> xx_trans
     array([[5., 5., 5., 5., 5.],
            [4., 4., 4., 4., 4.],
