@@ -33,7 +33,7 @@ import skimage as ski
 
 
 #####################################################################
-# The dataset we are using in this example is an image sequence (a movie!) of
+# The dataset we are here is an image sequence (a movie!) of
 # human in-vivo tissue. Specifically, it shows the *palisades of Vogt* of a
 # given cornea sample.
 
