@@ -51,7 +51,7 @@ def tps_warp(
     >>> image = ski.color.rgb2gray(image)
     >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
-    >>> output_region = (0, 0, astronaut.shape[0], astronaut.shape[1])
+    >>> output_region = (0, 0, image.shape[0], image.shape[1])
     >>> warped_image = ski.transform.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
