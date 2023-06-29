@@ -24,8 +24,8 @@ def tps_warp(
         Destination image coordinates.
     image: ndarray
         Input image.
-    output_region: (1, 4) array
-        The (xmin, ymin, xmax, ymax) region of the output
+    output_region: tuple of integers
+        The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
         xmin <= x <= xmax)
     interpolation_order: int, optional
