@@ -43,7 +43,7 @@ dependencies = [
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
-    'lazy_loader>=0.2',
+    'lazy_loader>=0.3',
 ]
 
 [[project.maintainers]]
@@ -76,7 +76,7 @@ default = [
     'tifffile>=2022.8.12',
     'PyWavelets>=1.1.1',
     'packaging>=21',
-    'lazy_loader>=0.2',
+    'lazy_loader>=0.3',
 ]
 developer = [
     'pre-commit',
