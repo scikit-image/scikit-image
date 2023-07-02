@@ -33,7 +33,7 @@ fi
 perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/default.txt
 perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/build.txt
 
-python -m pip install --upgrade pip wheel "setuptools<=65.5"
+python -m pip install --upgrade pip
 
 # Install build time requirements
 python -m pip install $PIP_FLAGS -r requirements/build.txt
