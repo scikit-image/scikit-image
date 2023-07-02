@@ -6,7 +6,7 @@ def tps_warp(
     image,
     src,
     dst,
-    output_region,
+    output_region=None,
     interpolation_order=1,
     grid_scaling=None
 ):
@@ -24,7 +24,7 @@ def tps_warp(
         Source image coordinates.
     dst: (N, 2) array_like
         Destination image coordinates.
-    output_region: tuple of integers
+    output_region: tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
         xmin <= x <= xmax)
@@ -47,14 +47,15 @@ def tps_warp(
     Produce a warped image rotated by 90 degrees counter-clockwise:
 
     >>> import skimage as ski
-    >>> image = ski.data.astronaut()
-    >>> image = ski.color.rgb2gray(image)
+    >>> astronaut = ski.data.astronaut()
+    >>> image = ski.color.rgb2gray(astronaut)
     >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
     >>> warped_image = ski.transform.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
+
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
@@ -62,15 +63,18 @@ def tps_warp(
     machine intelligence 11.6 (1989): 567–585.
 
     """
+    image = np.asarray(image)
+
     if image.size == 0:
         raise ValueError("Cannot warp empty image with dimensions", image.shape)
-
     if image.ndim != 2:
         raise ValueError("Only 2-D images (grayscale or color) are supported")
+    if output_region is None:
+        output_region = (0, 0) + image.shape
 
     transform = _make_inverse_warp(src, dst,
                                    output_region, grid_scaling)
-    return sp.ndimage.map_coordinates(np.asarray(image), transform, order=interpolation_order)
+    return sp.ndimage.map_coordinates(image, transform, order=interpolation_order)
 
 
 def _make_inverse_warp(
@@ -87,7 +91,7 @@ def _make_inverse_warp(
         An array of N points representing the source coordinates.
     dst : (N,2) array_like
         An array of N points representing the destination coordinates.
-    output_region: (1, 4) array
+    output_region: tuple of integers, optional
         The (xmin, ymin, xmax, ymax) region of the output
         image that should be produced. (Note: The region is inclusive, i.e.
         xmin <= x <= xmax)
@@ -166,11 +170,12 @@ def _make_L_matrix(points):
     L : ndarray
         A (N+D+1, N+D+1) shaped array of the form [[K | P][P.T | 0]].
     """
-    n_pts = points.shape[0]
+    n_pts, dim = points.shape
+    points.shape[1]
     P = np.hstack([np.ones((n_pts, 1)), points])
     K = _U(sp.spatial.distance.cdist(points, points, metric='euclidean'))
-    O = np.zeros((3, 3))
-    L = np.asarray(np.bmat([[K, P], [P.transpose(), O]]))
+    O = np.zeros((dim+1, dim+1))
+    L = np.asarray(np.bmat([[K, P], [P.T, O]]))
     return L
 
 def _coeffs(src, dst):
@@ -195,7 +200,6 @@ def _coeffs(src, dst):
     L = _make_L_matrix(src)
     coeffs = np.dot(np.linalg.pinv(L), Y)
     return coeffs
-
 
 def _calculate_f(x, y, points, coeffs):
     """Compute the thin-plate spline function at given coordinates (x, y).
@@ -289,9 +293,9 @@ def tps_transform(src, dst, x_vals, y_vals):
     dst = np.asarray(dst)
 
     if src.shape != dst.shape:
-        raise ValueError("src and dst shapes must be identical.")
+        raise ValueError("Shape of src and dst are not the same.")
 
-    if src.shape[1] != 2 or dst.shape[1] != 2:
+    if src.shape[-1] != 2 or dst.shape[-1] != 2:
         raise ValueError("The input `src` or `dst` must have shape (N, 2)")
 
     # err = np.seterr(divide='ignore')
