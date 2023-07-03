@@ -63,6 +63,11 @@ fig = px.imshow(
     labels={'animation_frame': '6-step time point'},
     title='Sample of in-vivo human cornea'
 )
+fig.update_layout(
+    autosize=False,
+    minreducedwidth=250,
+    minreducedheight=250
+)
 plotly.io.show(fig)
 
 #####################################################################
