@@ -218,7 +218,10 @@ y = []
 for contour in contours:
     x.append(contour[:, 0])
     y.append(contour[:, 1])
-# Flatten them
+# Note that the following one-liner is equivalent to the above:
+# x, y = zip(*((contour[:, 0], contour[:, 1]) for contour in contours))
+
+# Flatten the coordinates
 x_flat = np.concatenate(x).ravel()
 y_flat = np.concatenate(y).ravel()
 # Create a sparse matrix corresponding to the mask of these contours
