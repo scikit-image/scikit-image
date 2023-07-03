@@ -167,7 +167,7 @@ jobs:
         run: |
           set -ex
           source tools/github/before_install.sh
-          python setup.py sdist
+          python -m build --no-isolation --sdist
           pip install -vv --no-build-isolation .;
 
       - name: Run tests
