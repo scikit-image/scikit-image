@@ -27,7 +27,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.io
 import plotly.express as px
-from scipy import sparse
 
 import skimage as ski
 
@@ -236,8 +235,8 @@ for contour in contours:
 x_flat = np.concatenate(x).ravel().round().astype(int)
 y_flat = np.concatenate(y).ravel().round().astype(int)
 # Create mask of these contours
-arr = np.zeros(mask_dilate.shape, dtype=bool)
-arr[x_flat, y_flat] = 1
+contour_mask = np.zeros(mask_dilate.shape, dtype=bool)
+contour_mask[x_flat, y_flat] = 1
 # Pick one frame
 sample_result = image_seq_inpainted[12]
 # Normalize it (so intensity values range [0, 1])
@@ -249,7 +248,7 @@ sample_result /= sample_result.max()
 # parameter).
 
 color_contours = ski.color.label2rgb(
-    arr,
+    contour_mask,
     image=sample_result,
     alpha=0.4,
     bg_color=(1, 1, 1)
