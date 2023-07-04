@@ -183,7 +183,12 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 # control how fine-grained the removed features are. For example, if we used
 # ``footprint = ski.morphology.diamond(1)`` in the above, we could see that
 # only smaller features would be filtered out, hence retaining more spots in
-# the mask.
+# the mask. Conversely, if we used a disk-shaped footprint of same radius,
+# i.e., ``footprint = ski.morphology.disk(3)``, more of the fine-grained
+# features would be filtered out, since the disk's area is larger than the
+# diamond's.
+
+#####################################################################
 # Next, we can make the detected areas wider by applying a dilation filter:
 
 mask_dilate = ski.morphology.dilation(mask_open, footprint)
