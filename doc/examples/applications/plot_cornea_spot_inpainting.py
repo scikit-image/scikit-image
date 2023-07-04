@@ -233,13 +233,11 @@ for contour in contours:
 # x, y = zip(*((contour[:, 0], contour[:, 1]) for contour in contours))
 
 # Flatten the coordinates
-x_flat = np.concatenate(x).ravel()
-y_flat = np.concatenate(y).ravel()
-# Create a sparse matrix corresponding to the mask of these contours
-data = np.ones(x_flat.shape, dtype='bool')
-mtx = sparse.coo_matrix((data, (x_flat, y_flat)), shape=mask_dilate.shape)
-# Convert it to array
-arr = mtx.toarray().astype('int')
+x_flat = np.concatenate(x).ravel().round().astype(int)
+y_flat = np.concatenate(y).ravel().round().astype(int)
+# Create mask of these contours
+arr = np.zeros(mask_dilate.shape, dtype=bool)
+arr[x_flat, y_flat] = 1
 # Pick one frame
 sample_result = image_seq_inpainted[12]
 # Normalize it (so intensity values range [0, 1])
