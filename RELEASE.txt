@@ -39,6 +39,8 @@ the appropriate point in main and the following instructions are still apt.
 
   4. Scan the PR titles for highlights and mention these in the
      relevant sections of the notes.
+     Ideally, all changed API objects are mentioned by name, 
+     e.g. a new parameter or a deprecated function. 
 
   5. Check for duplicate names in the automatically generated list of
      contributors and reviewers.
