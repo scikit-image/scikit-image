@@ -35,7 +35,7 @@ the appropriate point in main and the following instructions are still apt.
        export PREVIOUS=<previous version number>
 
        pip install changelist
-       changelist scikit-image/scikit-image v${PREVIOUS} main --version >> doc/source/release_notes/release_dev.txt
+       changelist scikit-image/scikit-image v${PREVIOUS} main --version ${VERSION} --out doc/source/release_notes/release_dev.rst --format rst
 
   4. Scan the PR titles for highlights and mention these in the
      relevant sections of the notes.
