@@ -1,246 +1,530 @@
-"""Generate the release notes automatically from Github pull requests.
+"""Generate release notes automatically from GitHub pull requests."""
 
-Start with:
-```
-export GH_TOKEN=<your-gh-api-token>
-```
 
-Then, for a major release:
-```
-python /path/to/generate_release_notes.py v0.14.0 main --version 0.15.0
-```
-
-For a minor release:
-```
-python /path/to/generate_release_notes.py v.14.2 v0.14.x --version 0.14.3
-```
-
-You should probably redirect the output with:
-```
-python /path/to/generate_release_notes.py [args] | tee release_notes.rst
-```
-
-You'll require PyGitHub and tqdm, which you can install with:
-```
-pip install -r requirements/_release_tools.txt
-```
-
-References
-https://github.com/scikit-image/scikit-image/issues/3404
-https://github.com/scikit-image/scikit-image/issues/3405
-"""
 import os
+import re
+import sys
 import argparse
-from datetime import datetime
-from warnings import warn
-
-from github import Github
+import logging
+import tempfile
+import json
+from pathlib import Path
+from dataclasses import dataclass
+from typing import Callable, Union
+from collections.abc import Iterable
+from collections import OrderedDict
 
 try:
+    import requests
+    import requests_cache
     from tqdm import tqdm
-except ImportError:
-    warn(
-        "tqdm not installed. This script takes approximately 5 minutes "
-        "to run. To view live progressbars, please install tqdm. "
-        "Otherwise, be patient."
-    )
-
-    def tqdm(i, **kwargs):
-        return i
-
-
-GH_USER = "scikit-image"
-GH_REPO = "scikit-image"
-GH_TOKEN = os.environ.get("GH_TOKEN")
-if GH_TOKEN is None:
-    raise RuntimeError(
-        "It is necessary that the environment variable `GH_TOKEN` "
-        "be set to avoid running into problems with rate limiting. "
-        "One can be acquired at https://github.com/settings/tokens.\n\n"
-        "You do not need to select any permission boxes while generating "
-        "the token."
-    )
-
-g = Github(GH_TOKEN)
-repository = g.get_repo(f"{GH_USER}/{GH_REPO}")
+    from github import Github
+    from github.PullRequest import PullRequest
+    from github.NamedUser import NamedUser
+    from github.Commit import Commit
+except ImportError as e:
+    raise ImportError(
+        "This script depends on the third party libraries PyGithub, requests, "
+        "requests-cache, and tqdm"
+    ) from e
 
 
-parser = argparse.ArgumentParser(usage=__doc__)
-parser.add_argument("from_commit", help="The starting tag.")
-parser.add_argument("to_commit", help="The head branch.")
-parser.add_argument(
-    "--version", help="Version you're about to release.", default="0.15.0"
-)
+logger = logging.getLogger(__name__)
 
-args = parser.parse_args()
+here = Path(__file__).parent
 
-for tag in repository.get_tags():
-    if tag.name == args.from_commit:
-        previous_tag = tag
-        break
-else:
-    raise RuntimeError(f"Desired tag ({args.from_commit}) not found")
+REQUESTS_CACHE_PATH = Path(tempfile.gettempdir()) / "github_cache.sqlite"
 
-# For some reason, go get the github commit from the commit to get
-# the correct date
-github_commit = previous_tag.commit.commit
-previous_tag_date = datetime.strptime(
-    github_commit.last_modified, "%a, %d %b %Y %H:%M:%S %Z"
-)
+GH_URL = "https://github.com"
 
 
-all_commits = list(
-    tqdm(
-        repository.get_commits(sha=args.to_commit, since=previous_tag_date),
-        desc=f"Getting all commits between {args.from_commit} " f"and {args.to_commit}",
-    )
-)
-all_hashes = {c.sha for c in all_commits}
+def lazy_tqdm(*args, **kwargs):
+    """Defer initialization of progress bar until first item is requested.
 
-authors = set()
-reviewers = set()
-committers = set()
-users = dict()  # keep track of known usernames
-
-
-def find_author_info(commit):
-    """Return committer and author of a commit.
-
-    Parameters
-    ----------
-    commit : Github commit
-        The commit to query.
-
-    Returns
-    -------
-    committer : str or None
-        The git committer.
-    author : str
-        The git author.
+    Calling `tqdm(...)` prints the progress bar right there and then. This can scramble
+    output, if more than one progress bar are initialized at the same time but their
+    iteration is meant to be done later in successive order.
     """
-    committer = None
-    if commit.committer is not None:
-        committer = commit.committer.name or commit.committer.login
-    git_author = commit.raw_data["commit"]["author"]["name"]
-    if commit.author is not None:
-        author = commit.author.name or commit.author.login + f" ({git_author})"
-    else:
-        # Users that deleted their accounts will appear as None
-        author = git_author
-    return committer, author
+    kwargs["file"] = kwargs.get("file", sys.stderr)
+    yield from tqdm(*args, **kwargs)
 
 
-def add_to_users(users, new_user):
-    if new_user.name is None:
-        users[new_user.login] = new_user.login
-    else:
-        users[new_user.login] = new_user.name
+def commits_between(
+    gh: Github, org_name: str, start_rev: str, stop_rev: str
+) -> set[Commit]:
+    """Fetch commits between two revisions excluding the commit of `start_rev`."""
+    repo = gh.get_repo(org_name)
+    comparison = repo.compare(base=start_rev, head=stop_rev)
+    commits = set(comparison.commits)
+    assert repo.get_commit(start_rev) not in commits
+    assert repo.get_commit(stop_rev) in commits
+    return commits
 
 
-for commit in tqdm(all_commits, desc="Getting committers and authors"):
-    committer, author = find_author_info(commit)
-    if committer is not None:
-        committers.add(committer)
-        # users maps github ids to a unique name.
-        add_to_users(users, commit.committer)
-        committers.add(users[commit.committer.login])
+def pull_requests_from_commits(commits: Iterable[Commit]) -> set[PullRequest]:
+    """Fetch pull requests that are associated with the given `commits`."""
+    all_pull_requests = set()
+    for commit in commits:
+        commit_pull_requests = list(commit.get_pulls())
+        if len(commit_pull_requests) != 1:
+            logger.info(
+                "%s with no or multiple PR(s): %r",
+                commit.html_url,
+                [p.html_url for p in commit_pull_requests],
+            )
+        if any(not p.merged for p in commit_pull_requests):
+            logger.error(
+                "%s with unmerged PRs: %r",
+            )
+        for pull in commit_pull_requests:
+            if pull in all_pull_requests:
+                # Expected if pull request is merged without squashing
+                logger.debug(
+                    "%r associated with multiple commits",
+                    pull.html_url,
+                )
+        all_pull_requests.update(commit_pull_requests)
+    return all_pull_requests
 
-    if commit.author is not None:
-        add_to_users(users, commit.author)
-    authors.add(author)
 
-# this gets found as a committer
-committers.discard("GitHub Web Flow")
-authors.discard("Azure Pipelines Bot")
+@dataclass(frozen=True, kw_only=True)
+class GitHubGraphQl:
+    """Interface to query GitHub's GraphQL API for a particular repository."""
 
-highlights = {}
+    org_name: str
+    repo_name: str
 
-highlights["New Feature"] = {}
-highlights["Improvement"] = {}
-highlights["Bugfix"] = {}
-highlights["API Change"] = {}
-highlights["Deprecations"] = {}
-highlights["Build Tool"] = {}
-other_pull_requests = {}
+    URL: str = "https://api.github.com/graphql"
+    GRAPHQL_COAUTHOR: str = """
+    query {{
+      repository (owner: "{org_name}" name: "{repo_name}") {{
+        object(expression: "{commit_sha}" ) {{
+          ... on Commit {{
+            commitUrl
+            authors(first:{page_limit}) {{
+              edges {{
+                cursor
+                node {{
+                  name
+                  email
+                  user {{
+                    login
+                    databaseId
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+      }}
+    }}
+    """
+    PAGE_LIMIT: int = 100
 
-for pull in tqdm(
-    g.search_issues(
-        f"repo:{GH_USER}/{GH_REPO} "
-        f"merged:>{previous_tag_date.isoformat()} "
-        "sort:created-asc"
-    ),
-    desc="Pull Requests...",
-):
-    pr = repository.get_pull(pull.number)
-    if pr.merge_commit_sha in all_hashes:
-        summary = pull.title
-        for review in pr.get_reviews():
-            if review.user.login not in users:
-                users[review.user.login] = review.user.name
-            reviewers.add(users[review.user.login])
-        for key, key_dict in highlights.items():
-            pr_title_prefix = (key + ": ").lower()
-            if summary.lower().startswith(pr_title_prefix):
-                key_dict[pull.number] = {"summary": summary[len(pr_title_prefix) :]}
-                break
+    def find_authors(self, commit_sha: str) -> dict[int, str]:
+        """Find ID and login of (co-)author(s) for a commit.
+
+        Other than GitHub's REST API, the GraphQL API supports returning all authors,
+        including co-authors, of a commit.
+        """
+        headers = {"Authorization": f"Bearer {os.environ.get('GH_TOKEN')}"}
+        query = self.GRAPHQL_COAUTHOR.format(
+            org_name=self.org_name,
+            repo_name=self.repo_name,
+            commit_sha=commit_sha,
+            page_limit=self.PAGE_LIMIT,
+        )
+        sanitized_query = json.dumps({"query": query.replace("\n", "")})
+        response = requests.post(self.URL, data=sanitized_query, headers=headers)
+        data = response.json()
+        commit = data["data"]["repository"]["object"]
+        edges = commit["authors"]["edges"]
+        if len(edges) == self.PAGE_LIMIT:
+            # TODO implement pagination if this becomes an issue, e.g. see
+            # https://github.com/scientific-python/devstats-data/blob/e3cd826518bf590083409318b0a7518f7781084f/query.py#L92-L107
+            logger.warning(
+                "reached page limit while querying authors in %r, "
+                "only the first %i authors will be included",
+                commit["commitUrl"],
+                self.PAGE_LIMIT,
+            )
+
+        coauthors = dict()
+        for i, edge in enumerate(edges):
+            node = edge["node"]
+            user = node["user"]
+            if user is None:
+                logger.warning(
+                    "could not determine GitHub user for %r in %r",
+                    node,
+                    commit["commitUrl"],
+                )
+                continue
+            coauthors[user["databaseId"]] = user["login"]
+
+        assert coauthors
+        return coauthors
+
+
+def contributors(
+    gh: Github,
+    org_repo: str,
+    commits: Iterable[Commit],
+    pull_requests: Iterable[PullRequest],
+) -> tuple[set[NamedUser], set[NamedUser]]:
+    """Fetch commit authors, co-authors and reviewers.
+
+    `authors` are users which created or co-authored a commit.
+    `reviewers` are users, who added reviews to a merged pull request or merged a
+    pull request (committer of the merge commit).
+    """
+    authors = set()
+    reviewers = set()
+
+    org_name, repo_name = org_repo.split("/")
+    ql = GitHubGraphQl(org_name=org_name, repo_name=repo_name)
+
+    for commit in commits:
+        if commit.author:
+            authors.add(commit.author)
+        if commit.committer:
+            reviewers.add(commit.committer)
+        if "Co-authored-by:" in commit.commit.message:
+            # Fallback on GraphQL API to find co-authors as well
+            user_ids = ql.find_authors(commit.sha)
+            for user_id, user_login in user_ids.items():
+                named_user = gh.get_user_by_id(user_id)
+                assert named_user.login == user_login
+                authors.add(named_user)
         else:
-            other_pull_requests[pull.number] = {"summary": summary}
+            logger.debug("no co-authors in %r", commit.html_url)
+
+    for pull in pull_requests:
+        for review in pull.get_reviews():
+            if review.user:
+                reviewers.add(review.user)
+
+    return authors, reviewers
 
 
-# add Other PRs to the ordered dict to make doc generation easier.
-highlights["Other Pull Request"] = other_pull_requests
+@dataclass(frozen=True, kw_only=True)
+class MdFormatter:
+    """Format release notes in Markdown from PRs, authors and reviewers."""
 
+    pull_requests: set[PullRequest]
+    authors: set[Union[NamedUser]]
+    reviewers: set[NamedUser]
 
-# Now generate the release notes
-announcement_title = f"scikit-image {args.version} release notes"
-print(announcement_title)
-print("=" * len(announcement_title))
-
-print(
-    """
+    version: str = "x.y.z"
+    title_template: str = "scikit-image {version} release notes"
+    intro_template: str = """
+We're happy to announce the release of scikit-image {version}!
 scikit-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
-"""
-)
 
-print(
-    """
 For more information, examples, and documentation, please visit our website:
-
 https://scikit-image.org
 
 """
-)
-
-for section, pull_request_dicts in highlights.items():
-    if not pull_request_dicts:
-        continue
-    print(f'{section}s\n{"*" * (len(section)+1)}')
-    for pr_num, pr_info in pull_request_dicts.items():
-        print(
-            f"- {pr_info['summary'].strip()}\n  (`#{pr_num} <https://github.com/scikit-image/scikit-image/pull/{pr_num}>`_)."
-        )
-
-contributors = {}
-
-contributors["authors"] = authors
-# contributors['committers'] = committers
-contributors["reviewers"] = reviewers
-
-for section_name, contributor_set in contributors.items():
-    print()
-    committer_str = (
-        f"{len(contributor_set)} {section_name} added to this "
-        "release [alphabetical by first name or login]"
+    outro_template: str = (
+        "*These lists are automatically generated, and may not be complete or may "
+        "contain duplicates.*\n"
     )
-    print(committer_str)
-    print("-" * len(committer_str))
+    # Associate regexes matching PR labels to a section titles in the release notes
+    regex_section_map: tuple[tuple[str, str], ...] = (
+        (".*Highlight.*", "Highlights"),
+        (".*New feature.*", "New Features"),
+        (".*Enhancement.*", "Enhancements"),
+        (".*Performance.*", "Performance"),
+        (".*Bug fix.*", "Bug Fixes"),
+        (".*API.*", "API Changes"),
+        (".*Maintenance.*", "Maintenance"),
+        (".*Documentation.*", "Documentation"),
+        (".*Infrastructure.*", "Infrastructure"),
+    )
+    ignored_user_logins: tuple[str] = ("web-flow",)
+    pr_summary_regex = re.compile(
+        r"^```release-note\s*(?P<summary>[\s\S]*?\w[\s\S]*?)\s*^```", flags=re.MULTILINE
+    )
 
-    # Remove None from contributor set if it's in there.
-    if None in contributor_set:
-        contributor_set.remove(None)
+    def __str__(self) -> str:
+        """Return complete release notes document as a string."""
+        return self.document
 
-    for c in sorted(contributor_set, key=str.lower):
-        print(f"- {c}")
-    print()
+    def __iter__(self) -> Iterable[str]:
+        """Iterate the release notes document line-wise."""
+        return self.iter_lines()
+
+    @property
+    def document(self) -> str:
+        """Return complete release notes document as a string."""
+        return "".join(self.iter_lines())
+
+    def iter_lines(self) -> Iterable[str]:
+        """Iterate the release notes document line-wise."""
+        yield from self._format_section_title(
+            self.title_template.format(version=self.version), level=1
+        )
+        yield from self._format_intro(version=self.version)
+        for title, pull_requests in self._prs_by_section.items():
+            yield from self._format_pr_section(title, pull_requests)
+        yield from self._format_contributor_section(self.authors, self.reviewers)
+        yield from self._format_outro()
+
+    @property
+    def _prs_by_section(self) -> OrderedDict[str, set[PullRequest]]:
+        """Map pull requests to section titles.
+
+        Pull requests whose labels do not match one of the sections given in
+        `regex_section_map`, are sorted into a section named "Other".
+        """
+        label_section_map = {
+            re.compile(pattern): section_name
+            for pattern, section_name in self.regex_section_map
+        }
+        prs_by_section = OrderedDict()
+        for _, section_name in self.regex_section_map:
+            prs_by_section[section_name] = set()
+        prs_by_section["Other"] = set()
+
+        for pr in self.pull_requests:
+            matching_sections = [
+                section_name
+                for regex, section_name in label_section_map.items()
+                if any(regex.match(label.name) for label in pr.labels)
+            ]
+            for section_name in matching_sections:
+                prs_by_section[section_name].add(pr)
+            if not matching_sections:
+                logger.warning(
+                    "%s without matching label, sorting into section 'Other'",
+                    pr.html_url,
+                )
+                prs_by_section["Other"].add(pr)
+
+        return prs_by_section
+
+    def _sanitize_text(self, text: str) -> str:
+        text = text.strip()
+        text = text.replace("\r\n", " ")
+        text = text.replace("\n", " ")
+        return text
+
+    def _format_link(self, name: str, target: str) -> str:
+        return f"[{name}]({target})"
+
+    def _format_section_title(self, title: str, *, level: int) -> Iterable[str]:
+        yield f"{'#' * level} {title}\n"
+
+    def _parse_pull_request_summary(self, pr: PullRequest) -> str:
+        if pr.body and (match := self.pr_summary_regex.search(pr.body)):
+            summary = match["summary"]
+        else:
+            logger.debug("falling back to title for %s", pr.html_url)
+            summary = pr.title
+        summary = self._sanitize_text(summary)
+        return summary
+
+    def _format_pull_request(self, pr: PullRequest) -> Iterable[str]:
+        summary = self._parse_pull_request_summary(pr).rstrip(".")
+        yield f"- {summary}\n"
+        link = self._format_link(f"#{pr.number}", f"{pr.html_url}")
+        yield f"  ({link}).\n"
+
+    def _format_pr_section(
+        self, title: str, pull_requests: set[PullRequest]
+    ) -> Iterable[str]:
+        """Format a section title and list its pull requests sorted by merge date."""
+        yield from self._format_section_title(title, level=2)
+        for pr in sorted(pull_requests, key=lambda pr: pr.merged_at):
+            yield from self._format_pull_request(pr)
+        yield "\n"
+
+    def _format_user_line(self, user: Union[NamedUser]) -> str:
+        line = f"@{user.login}"
+        line = self._format_link(line, user.html_url)
+        if user.name:
+            line = f"{user.name} ({line})"
+        return line + ",\n"
+
+    def _format_contributor_section(
+        self,
+        authors: set[Union[NamedUser]],
+        reviewers: set[NamedUser],
+    ) -> Iterable[str]:
+        """Format contributor section and list users sorted by login handle."""
+        authors = {u for u in authors if u.login not in self.ignored_user_logins}
+        reviewers = {u for u in reviewers if u.login not in self.ignored_user_logins}
+
+        yield from self._format_section_title("Contributors", level=2)
+        yield "\n"
+
+        yield f"{len(authors)} authors added to this release (alphabetically):\n"
+        author_lines = map(self._format_user_line, authors)
+        yield from sorted(author_lines, key=lambda s: s.lower())
+        yield "\n"
+
+        yield f"{len(reviewers)} reviewers added to this release (alphabetically):\n"
+        reviewers_lines = map(self._format_user_line, reviewers)
+        yield from sorted(reviewers_lines, key=lambda s: s.lower())
+        yield "\n"
+
+    def _format_intro(self, version):
+        intro = self.intro_template.format(version=version)
+        # Make sure to return exactly one line at a time
+        yield from (f"{line}\n" for line in intro.split("\n"))
+
+    def _format_outro(self) -> Iterable[str]:
+        outro = self.outro_template
+        # Make sure to return exactly one line at a time
+        yield from (f"{line}\n" for line in outro.split("\n"))
+
+
+class RstFormatter(MdFormatter):
+    """Format release notes in reStructuredText from PRs, authors and reviewers."""
+
+    def _sanitize_text(self, text) -> str:
+        text = super()._sanitize_text(text)
+        text = text.replace("`", "``")
+        return text
+
+    def _format_link(self, name: str, target: str) -> str:
+        return f"`{name} <{target}>`_"
+
+    def _format_section_title(self, title: str, *, level: int) -> Iterable[str]:
+        yield title + "\n"
+        underline = {1: "=", 2: "-", 3: "~"}
+        yield underline[level] * len(title) + "\n"
+
+
+def parse_command_line(func: Callable) -> Callable:
+    """Define and parse command line options.
+
+    Has no effect if any keyword argument is passed to the underlying function.
+    """
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument(
+        "org_repo",
+        help="Org and repo name of a repository on GitHub (delimited by a slash), "
+        "e.g. 'numpy/numpy'",
+    )
+    parser.add_argument(
+        "start_rev",
+        help="The starting revision (excluded), e.g. the tag of the previous release",
+    )
+    parser.add_argument(
+        "stop_rev",
+        help="The stop revision (included), e.g. the 'main' branch or the current "
+        "release",
+    )
+    parser.add_argument(
+        "--version",
+        default="0.0.0",
+        help="Version you're about to release, used title and description of the notes",
+    )
+    parser.add_argument("--out", help="Write to file, prints to STDOUT otherwise")
+    parser.add_argument(
+        "--format",
+        choices=["rst", "md"],
+        default="md",
+        help="Choose format, defaults to Markdown",
+    )
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="Clear cached requests to GitHub's API before running",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase logging level",
+    )
+
+    def wrapped(**kwargs):
+        if not kwargs:
+            kwargs = vars(parser.parse_args())
+        return func(**kwargs)
+
+    return wrapped
+
+
+@parse_command_line
+def main(
+    *,
+    org_repo: str,
+    start_rev: str,
+    stop_rev: str,
+    version: str,
+    out: str,
+    format: str,
+    clear_cache: bool,
+    verbose: int,
+):
+    """Main function of the script.
+
+    See :func:`parse_command_line` for a description of the accepted input.
+    """
+    level = {0: logging.WARNING, 1: logging.INFO}.get(verbose, logging.DEBUG)
+    logger.setLevel(level)
+
+    requests_cache.install_cache(
+        REQUESTS_CACHE_PATH, backend="sqlite", expire_after=3600
+    )
+    print(f"Using requests cache at {REQUESTS_CACHE_PATH}")
+    if clear_cache:
+        requests_cache.clear()
+        logger.info("cleared requests cache at %s", REQUESTS_CACHE_PATH)
+
+    gh_token = os.environ.get("GH_TOKEN")
+    if gh_token is None:
+        raise RuntimeError(
+            "You need to set the environment variable `GH_TOKEN`. "
+            "The token is used to avoid rate limiting, "
+            "and can be created at https://github.com/settings/tokens.\n\n"
+            "The token does not require any permissions (we only use the public API)."
+        )
+    gh = Github(gh_token)
+
+    print("Fetching commits...", file=sys.stderr)
+    commits = commits_between(gh, org_repo, start_rev, stop_rev)
+    pull_requests = pull_requests_from_commits(
+        lazy_tqdm(commits, desc="Fetching pull requests")
+    )
+    authors, reviewers = contributors(
+        gh=gh,
+        org_repo=org_repo,
+        commits=lazy_tqdm(commits, desc="Fetching authors"),
+        pull_requests=lazy_tqdm(pull_requests, desc="Fetching reviewers"),
+    )
+
+    Formatter = {"md": MdFormatter, "rst": RstFormatter}[format]
+    formatter = Formatter(
+        pull_requests=pull_requests,
+        authors=authors,
+        reviewers=reviewers,
+        version=version,
+    )
+
+    if out:
+        out_path = Path(out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out, "w") as io:
+            io.writelines(formatter.iter_lines())
+    else:
+        print()
+        for line in formatter.iter_lines():
+            assert line.endswith("\n")
+            assert line.count("\n") == 1
+            print(line, end="", file=sys.stdout)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.WARNING,
+        format="%(levelname)s: %(filename)s::%(funcName)s: %(message)s",
+        stream=sys.stderr,
+    )
+    main()
