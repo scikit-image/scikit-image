@@ -16,8 +16,41 @@ def find_transform_ECC(
     termination_eps=-1,
     input_mask=None,
     gauss_filt_size=5,
-    numerical_dtype=np.float32,
 ):
+    """find_transform_ECC _summary_
+
+    Parameters
+    ----------
+    src : ndarray
+        Template use as a reference to find the warp of dst.
+    dst : ndarray
+        Image that need to be corrected in respect to the reference frame.
+    warp_matrix : ndarray, optional
+        Initial guess for the transformation matrix. If set to None the identity matrix is used as a guess, by default None.
+    motion_type : str, optional
+        Can be one of fourth values:
+        - MOTION_TRANSLATION
+        - MOTION_EUCLIDEAN
+        - MOTION_AFFINE
+        - MOTION HOMOGRAPHY
+        , by default "MOTION_AFFINE"
+    number_of_iterations : int, optional
+        Maximum amount of iteration to find the matrix, by default 200
+    termination_eps : int, optional
+        Used to break the loop early if the normalized correlation does not change anymore.
+        Break the loop if np.abs(rho - last_rho) < termination_eps, by default -1
+    input_mask : ndarray, optional
+        ndarray containig 0 or 1 to qualify region that need to be masked, by default None
+    gauss_filt_size : int, optional
+        sigma parameter for ndi.gaussian_filter which is applied on the image to help registration, by default 5
+
+    Returns
+    -------
+    rho, warp_matrix
+        rho is the normalized correlation (1 means that the src and dst are fully correlated, 0 means that they are un-correlated)
+        warp_matrix is the transformation matrix between src and dst.
+
+    """
     src = convert_to_float(src, preserve_range=True)
     dst = convert_to_float(dst, preserve_range=True)
     numerical_dtype = src.dtype()
@@ -88,15 +121,15 @@ def find_transform_ECC(
         imgNorm = np.sqrt(np.sum(imageMask != 0) * (imgStd**2))
 
         if motion_type == "MOTION_AFFINE":
-            jacobian = image_jacobian_affine_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid)
+            jacobian = image_jacobian_affine_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid)
         if motion_type == "MOTION_HOMOGRAPHY":
-            jacobian = image_jacobian_homo_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
+            jacobian = image_jacobian_homo_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
         if motion_type == "MOTION_TRANSLATION":
-            jacobian = image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped)
+            jacobian = image_jacobian_translation_ECC_(gradient_x_warped, gradient_y_warped)
         if motion_type == "MOTION_EUCLIDEAN":
-            jacobian = image_jacobian_euclidean_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
+            jacobian = image_jacobian_euclidean_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
 
-        hessian = project_onto_jacobian_ECC(jacobian, jacobian)
+        hessian = project_onto_jacobian_ECC_(jacobian, jacobian)
         hessian = hessian.astype(numerical_dtype)
         hessian_inv = np.linalg.inv(hessian)
 
@@ -108,8 +141,8 @@ def find_transform_ECC(
         if np.isnan(rho):
             raise Exception("NaN encountered.")
 
-        imageProjection = project_onto_jacobian_ECC(jacobian, image_warped)
-        templateProjection = project_onto_jacobian_ECC(jacobian, templateZM)
+        imageProjection = project_onto_jacobian_ECC_(jacobian, image_warped)
+        templateProjection = project_onto_jacobian_ECC_(jacobian, templateZM)
 
         imageProjectionHessian = np.matmul(hessian_inv, imageProjection)
         num = (imgNorm * imgNorm) - np.dot(imageProjection, imageProjectionHessian)
@@ -125,16 +158,16 @@ def find_transform_ECC(
 
         # estimate the update step delta_p
         error = _lambda * templateZM - image_warped
-        error_projection = project_onto_jacobian_ECC(jacobian, error)
+        error_projection = project_onto_jacobian_ECC_(jacobian, error)
         delta_p = np.matmul(hessian_inv, error_projection)
 
         # update warping matrix
-        warp_matrix = update_warping_matrix_ECC(warp_matrix, delta_p, motion_type)
+        warp_matrix = update_warping_matrix_ECC_(warp_matrix, delta_p, motion_type)
 
     return rho, warp_matrix
 
 
-def image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped):
+def image_jacobian_translation_ECC_(gradient_x_warped, gradient_y_warped):
     dst = np.empty((gradient_x_warped.shape[0], 2 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     w = gradient_x_warped.shape[1]
@@ -147,7 +180,7 @@ def image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped):
     return dst
 
 
-def image_jacobian_affine_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid):
+def image_jacobian_affine_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid):
     dst = np.empty((gradient_x_warped.shape[0], 6 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     w = gradient_x_warped.shape[1]
@@ -162,7 +195,7 @@ def image_jacobian_affine_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_gr
     return dst
 
 
-def image_jacobian_homo_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix):
+def image_jacobian_homo_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix):
     dst = np.empty((gradient_x_warped.shape[0], 8 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     h0_ = warp_matrix[0, 0]
@@ -207,7 +240,7 @@ def image_jacobian_homo_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid
     return dst
 
 
-def image_jacobian_euclidean_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix):
+def image_jacobian_euclidean_ECC_(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix):
     w = gradient_x_warped.shape[1]
 
     h0 = warp_matrix[0, 0]  # cos(theta)
@@ -229,7 +262,7 @@ def image_jacobian_euclidean_ECC(gradient_x_warped, gradient_y_warped, x_grid, y
     return dst
 
 
-def project_onto_jacobian_ECC(src1, src2):
+def project_onto_jacobian_ECC_(src1, src2):
     if src1.shape[1] != src2.shape[1]:
         w = src2.shape[1]
         dst = []
@@ -252,7 +285,7 @@ def project_onto_jacobian_ECC(src1, src2):
     return dst
 
 
-def update_warping_matrix_ECC(map_matrix, update, motion_type):
+def update_warping_matrix_ECC_(map_matrix, update, motion_type):
     if motion_type not in MOTION_TYPES:
         raise Exception(
             "motion_type not in ['MOTION_TRANSLATION','MOTION_EUCLIDEAN','MOTION_AFFINE','MOTION_HOMOGRAPHY']"
