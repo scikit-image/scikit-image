@@ -53,7 +53,7 @@ def find_transform_ECC(
     """
     src = convert_to_float(src, preserve_range=True)
     dst = convert_to_float(dst, preserve_range=True)
-    numerical_dtype = src.dtype()
+    numerical_dtype = src.dtype
 
     if warp_matrix is None:
         warp_matrix = np.eye(3, dtype=numerical_dtype)
