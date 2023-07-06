@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data
-from skimage.transform import AffineTransform, find_transform_ECC, warp
+from skimage.registration import find_transform_ECC
+from skimage.transform import AffineTransform, warp
 
 template = data.camera()
 
