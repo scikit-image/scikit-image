@@ -10,7 +10,7 @@ MOTION_TYPES = ["MOTION_TRANSLATION", "MOTION_EUCLIDEAN", "MOTION_AFFINE", "MOTI
 def find_transform_ECC(
     src,
     dst,
-    warp_matrix,
+    warp_matrix=None,
     motion_type="MOTION_AFFINE",
     number_of_iterations=200,
     termination_eps=-1,
