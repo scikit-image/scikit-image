@@ -17,17 +17,21 @@ from skimage import data
 from skimage.registration import find_transform_ECC
 from skimage.transform import AffineTransform, warp
 
-template = data.camera()
+template = data.camera().astype(np.float32)
 
-warp_matrix = AffineTransform(scale=[1, 1], rotation=10, shear=0.2, translation=[10, 15])
+warp_matrix = AffineTransform(scale=[1, 1], rotation=np.deg2rad(5), shear=0.1, translation=[10, 15])
 distorted = warp(template, warp_matrix)
 
-rho, estimated_warp = find_transform_ECC(distorted, template, motion_type="MOTION_AFFINE", number_of_iterations=200)
+rho, estimated_warp = find_transform_ECC(
+    distorted, template.astype(np.float32), motion_type="MOTION_HOMOGRAPHY", number_of_iterations=200
+)
 
-corrected = warp(distorted, estimated_warp[1])
+corrected = warp(distorted, np.linalg.inv(estimated_warp))
 
 fig, ax = plt.subplots(1, 3, figsize=(16, 9))
 
 ax[0].imshow(template, cmap="gray")
 ax[1].imshow(distorted, cmap="gray")
 ax[2].imshow(corrected, cmap="gray")
+
+plt.show()
