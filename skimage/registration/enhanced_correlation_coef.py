@@ -16,114 +16,145 @@ def find_transform_ECC(
     termination_eps=-1,
     input_mask=None,
     gauss_filt_size=5,
+    numerical_dtype=np.float32,
 ):
-    src = convert_to_float(src, preserve_range=True)
-    dst = convert_to_float(dst, preserve_range=True)
+    if warp_matrix is None:
+        warp_matrix = np.eye(3, dtype=numerical_dtype)
 
-    if warp_matrix.shape != (3, 3):
+    if src.dtype != dst.dtype:
+        raise TypeError(
+            "Both input images must have the same data type. \n Current dtype is: template_image-{src.dtype}, input_image-{dst.dtype}"
+        )
+
+    if warp_matrix.shape != (3, 3) and warp_matrix.shape[1] != 2:
         raise ValueError(f"warp_matrix.shape != (3,3). Current shape is: {warp_matrix.shape}")
 
     if motion_type not in MOTION_TYPES:
         raise ValueError(f"motion_type not in {MOTION_TYPES}")
 
-    if warp_matrix is None:
-        warp_matrix = np.eye(3)
-
-    ws, hs = src.shape
+    hs, ws = src.shape
+    wd, hd = dst.shape
 
     x_grid, y_grid = np.meshgrid(np.arange(ws), np.arange(hs))
+    x_grid = x_grid.astype(numerical_dtype)
+    y_grid = y_grid.astype(numerical_dtype)
 
-    pre_mask = np.ones(dst.shape, dtype=np.uint8)
+    # to use it for mask warping
+    pre_mask = np.ones((hd, wd), dtype=np.uint8)
     if input_mask is not None:
-        pre_mask = input_mask.astype(np.uint8)
+        pre_mask = input_mask
 
+    # gaussian filtering is optional
     template_float = ndi.gaussian_filter(src, gauss_filt_size)
+    template_float = template_float.astype(numerical_dtype)
 
-    pre_mask_float = ndi.gaussian_filter(convert_to_float(pre_mask, preserve_range=True), gauss_filt_size)
+    pre_maskFloat = pre_mask.astype(numerical_dtype)
+    pre_maskFloat = ndi.gaussian_filter(pre_maskFloat, gauss_filt_size)
+    pre_maskFloat = pre_maskFloat.astype(numerical_dtype)
+    # Change threshold.
+    pre_maskFloat = pre_maskFloat * (0.5 / 0.95)
 
-    image_float = ndi.gaussian_filter(dst, gauss_filt_size)
+    # Rounding conversion.
+    pre_mask = np.round(pre_maskFloat).astype(pre_mask.dtype)
+    pre_maskFloat = pre_mask.astype(pre_maskFloat.dtype)
 
-    gradient_y, gradient_x = np.gradient(image_float)
+    imageFloat = dst.astype(numerical_dtype)
+    imageFloat = ndi.gaussian_filter(imageFloat, gauss_filt_size)
 
-    gradient_x = gradient_x * pre_mask_float
-    gradient_y = gradient_y * pre_mask_float
+    # calculate first order image derivatives
+    [gradientY, gradientX] = np.gradient(imageFloat)
 
+    gradientX = np.multiply(gradientX, pre_maskFloat)
+    gradientY = np.multiply(gradientY, pre_maskFloat)
+    gradientX = gradientX.astype(numerical_dtype)
+    gradientY = gradientY.astype(numerical_dtype)
+
+    # iteratively update map_matrix
     rho = -1
     last_rho = -termination_eps
-
     for _ in range(number_of_iterations):
         if np.abs(rho - last_rho) < termination_eps:
             break
 
-        image_warped = warp(image_float, warp_matrix, clip=False, order=1, preserve_range=True)
-        gradient_x_warped = warp(gradient_x, warp_matrix, clip=False, order=1, preserve_range=True)
-        gradient_y_warped = warp(gradient_y, warp_matrix, clip=False, order=1, preserve_range=True)
-        image_mask = warp(pre_mask, warp_matrix, clip=False, order=0, preserve_range=True)
+        imageWarped = warp(imageFloat, warp_matrix, clip=False, order=1, preserve_range=True)
+        gradient_x_warped = warp(gradientX, warp_matrix, clip=False, order=1, preserve_range=True)
+        gradient_y_warped = warp(gradientY, warp_matrix, clip=False, order=1, preserve_range=True)
+        imageMask = warp(pre_mask, warp_matrix, clip=False, order=0, preserve_range=True)
 
-        img_mean = np.mean(image_warped[image_mask != 0])
-        img_std = np.std(image_warped[image_mask != 0])
+        imgMean = np.mean(imageWarped[imageMask != 0])
+        imgStd = np.std(imageWarped[imageMask != 0])
+        tmpMean = np.mean(template_float[imageMask != 0])
+        tmpStd = np.std(template_float[imageMask != 0])
 
-        tmp_mean = np.mean(template_float[image_mask != 0])
-        tmp_std = np.std(template_float[image_mask != 0])
+        imageWarped[imageMask != 0] = imageWarped[imageMask != 0] - imgMean
+        templateZM = np.zeros((hs, ws), dtype=np.float32)
+        templateZM[imageMask != 0] = template_float[imageMask != 0] - tmpMean
 
-        image_warped[image_mask != 0] -= img_mean
-        template_zm = np.zeros((hs, ws))
-        template_zm[image_mask != 0] -= tmp_mean
+        tmpNorm = np.sqrt(np.sum(imageMask != 0) * (tmpStd**2))
+        imgNorm = np.sqrt(np.sum(imageMask != 0) * (imgStd**2))
 
-        tmp_norm = np.sqrt(np.sum(image_mask != 0) * tmp_std**2)
-        img_norm = np.sqrt(np.sum(image_mask != 0) * img_std**2)
-
-        if motion_type == "MOTION_TRANSLATION":
-            jacobian = image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped)
+        # calculate jacobian of image wrt parameters
         if motion_type == "MOTION_AFFINE":
             jacobian = image_jacobian_affine_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid)
         if motion_type == "MOTION_HOMOGRAPHY":
             jacobian = image_jacobian_homo_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
+        if motion_type == "MOTION_TRANSLATION":
+            jacobian = image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped)
         if motion_type == "MOTION_EUCLIDEAN":
             jacobian = image_jacobian_euclidean_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix)
 
         hessian = project_onto_jacobian_ECC(jacobian, jacobian)
-        hessian_inv = np.linalg.inv(hessian)
+        hessian = hessian.astype(numerical_dtype)
+        hessianInv = np.linalg.inv(hessian)
 
-        correlation = np.vdot(template_zm, image_warped)
+        correlation = np.vdot(templateZM, imageWarped)
 
         last_rho = rho
-        rho = correlation / (img_norm * tmp_norm)
+        rho = correlation / (imgNorm * tmpNorm)
 
         if np.isnan(rho):
-            raise ValueError("NaN encountered.")
+            raise Exception("NaN encountered.")
 
-        image_projection = project_onto_jacobian_ECC(jacobian, image_warped)
-        template_projection = project_onto_jacobian_ECC(jacobian, template_zm)
+        # project images into jacobian
+        imageProjection = project_onto_jacobian_ECC(jacobian, imageWarped)
+        templateProjection = project_onto_jacobian_ECC(jacobian, templateZM)
 
-        image_projection_hessian = hessian_inv @ image_projection
+        # calculate the parameter lambda to account for illumination variation
+        imageProjectionHessian = np.matmul(hessianInv, imageProjection)
+        num = (imgNorm * imgNorm) - np.dot(imageProjection, imageProjectionHessian)
+        den = correlation - np.dot(templateProjection, imageProjectionHessian)
 
-        num = img_norm**2 - np.dot(image_projection, image_projection_hessian)
-        den = correlation - np.dot(template_projection, image_projection_hessian)
-
-        if den <= 0:
-            raise ValueError(
-                "den <= 0. The algorithm stopped before its convergence. Images may be uncorrelated or non-overlapped"
+        if den <= 0.0:
+            rho = -1
+            raise Exception(
+                "The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped"
             )
 
         _lambda = num / den
 
-        error = _lambda * template_zm - image_warped
-        error_projection = project_onto_jacobian_ECC(jacobian, error)
-        delta_p = hessian_inv @ error_projection
+        # estimate the update step delta_p
+        error = _lambda * templateZM - imageWarped
+        errorProjection = project_onto_jacobian_ECC(jacobian, error)
+        deltaP = np.matmul(hessianInv, errorProjection)
 
-        warp_matrix = update_warping_matrix_ECC(warp_matrix, delta_p, motion_type)
+        # update warping matrix
+        warp_matrix = update_warping_matrix_ECC(warp_matrix, deltaP, motion_type)
 
     return rho, warp_matrix
 
 
 def image_jacobian_translation_ECC(gradient_x_warped, gradient_y_warped):
-    dst = np.empty((gradient_x_warped.shape[0], 2 * gradient_y_warped.shape[1]), dtype=np.float32)
+    if gradient_x_warped.size != gradient_y_warped.size:
+        raise Exception("gradient_x_warped.size != gradient_y_warped.size")
+
+    dst = np.empty((gradient_x_warped.shape[0], 2 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     w = gradient_x_warped.shape[1]
 
-    dst[:, 0:w] = gradient_x_warped
-    dst[:, w : 2 * w] = gradient_y_warped
+    # compute Jacobian blocks (2 blocks)
+
+    dst[:, 0:w] = np.copy(gradient_x_warped)
+    dst[:, w : 2 * w] = np.copy(gradient_y_warped)
 
     return dst
 
@@ -144,33 +175,36 @@ def image_jacobian_affine_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_gr
 
 
 def image_jacobian_homo_ECC(gradient_x_warped, gradient_y_warped, x_grid, y_grid, warp_matrix):
-    dst = np.empty((gradient_x_warped.shape[0], 8 * gradient_x_warped.shape[1]), dtype=np.float32)
-
-    h0 = warp_matrix[0, 0]
-    h1 = warp_matrix[1, 0]
-    h2 = warp_matrix[2, 0]
-    h3 = warp_matrix[0, 1]
-    h4 = warp_matrix[1, 1]
-    h5 = warp_matrix[2, 1]
-    h6 = warp_matrix[0, 2]
-    h7 = warp_matrix[1, 2]
+    h0_ = warp_matrix[0, 0]
+    h1_ = warp_matrix[1, 0]
+    h2_ = warp_matrix[2, 0]
+    h3_ = warp_matrix[0, 1]
+    h4_ = warp_matrix[1, 1]
+    h5_ = warp_matrix[2, 1]
+    h6_ = warp_matrix[0, 2]
+    h7_ = warp_matrix[1, 2]
 
     w = gradient_x_warped.shape[1]
 
     # create denominator for all points as a block
-    den = x_grid * h2 + y_grid * h5 + 1.0
+    den_ = x_grid * h2_ + y_grid * h5_ + 1.0  # check the time of this! otherwise use addWeighted
 
     # create projected points
-    hatX = -x_grid * h0 - y_grid * h3 - h6
-    hatX = np.divide(hatX, den)
+    hat_x = -x_grid * h0_ - y_grid * h3_ - h6_
+    hat_x = np.divide(hat_x, den_)
 
-    hatY = -x_grid * h1 - y_grid * h4 - h7
-    hatY = np.divide(hatY, den)
+    hat_y = -x_grid * h1_ - y_grid * h4_ - h7_
+    hat_y = np.divide(hat_y, den_)
 
-    gradient_x_warped_divided = np.divide(gradient_x_warped, den)
-    gradient_y_warped_divided = np.divide(gradient_y_warped, den)
+    # instead of dividing each block with den,
+    # just pre-divide the block of gradients (it's more efficient)
 
-    temp = np.multiply(hatX, gradient_x_warped_divided) + np.multiply(hatY, gradient_y_warped_divided)
+    gradient_x_warped_divided = np.divide(gradient_x_warped, den_)
+    gradient_y_warped_divided = np.divide(gradient_y_warped, den_)
+
+    temp = np.multiply(hat_x, gradient_x_warped_divided) + np.multiply(hat_y, gradient_y_warped_divided)
+
+    dst = np.empty((gradient_x_warped.shape[0], 8 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     # compute Jacobian blocks (8 blocks)
     dst[:, 0:w] = np.multiply(gradient_x_warped_divided, x_grid)
@@ -200,9 +234,9 @@ def image_jacobian_euclidean_ECC(gradient_x_warped, gradient_y_warped, x_grid, y
     dst = np.empty((gradient_x_warped.shape[0], 3 * gradient_x_warped.shape[1]), dtype=np.float32)
 
     # compute Jacobian blocks (3 blocks)
-    dst[:, 0:w] = np.multiply(gradient_x_warped, hatX) + np.multiply(gradient_y_warped, hatY)  # 1
-    dst[:, w : 2 * w] = np.copy(gradient_x_warped)  # 2
-    dst[:, 2 * w : 3 * w] = np.copy(gradient_y_warped)  # 3
+    dst[:, 0:w] = np.multiply(gradient_x_warped, hatX) + np.multiply(gradient_y_warped, hatY)
+    dst[:, w : 2 * w] = gradient_x_warped
+    dst[:, 2 * w : 3 * w] = gradient_y_warped
 
     return dst
 
@@ -231,7 +265,7 @@ def project_onto_jacobian_ECC(src1, src2):
 
 
 def update_warping_matrix_ECC(map_matrix, update, motion_type):
-    if motion_type not in ["MOTION_TRANSLATION", "MOTION_EUCLIDEAN", "MOTION_AFFINE", "MOTION_HOMOGRAPHY"]:
+    if motion_type not in MOTION_TYPES:
         raise Exception(
             "motion_type not in ['MOTION_TRANSLATION','MOTION_EUCLIDEAN','MOTION_AFFINE','MOTION_HOMOGRAPHY']"
         )
