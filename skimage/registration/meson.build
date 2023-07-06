@@ -4,6 +4,7 @@ python_sources = [
   '_optical_flow.py',
   '_optical_flow_utils.py',
   '_phase_cross_correlation.py'
+  'enhanced_correlation_coef.py'
 ]
 
 py3.install_sources(
