@@ -281,6 +281,13 @@ def setup_test():
         )
 
 
+        warnings.filterwarnings(
+            "default",
+            message=("The figure layout has changed to tight"),
+            category=UserWarning,
+        )
+
+
 def teardown_test():
     """Default package level teardown routine for skimage tests.
 
