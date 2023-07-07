@@ -265,9 +265,12 @@ def image_jacobian_euclidean_ECC_(gradient_x_warped, gradient_y_warped, x_grid, 
 def project_onto_jacobian_ECC_(src1, src2):
     if src1.shape[1] != src2.shape[1]:
         w = src2.shape[1]
-        dst = []
+        dst = np.empty(src1.shape[1] // src2.shape[1])
+        src2_ravel = src2.ravel()
         for i in range(src1.shape[1] // src2.shape[1]):
-            dst.append(np.vdot(src2, src1[:, i * w : (i + 1) * w]))
+            dst[i] = src2_ravel.dot(
+                src1[:, i * w : (i + 1) * w].ravel()
+            )  # np.vdot(src2, src1[:, i * w : (i + 1) * w])
 
         return np.array(dst)
 
@@ -277,9 +280,11 @@ def project_onto_jacobian_ECC_(src1, src2):
     for i in range(dst.shape[1]):
         mat = src1[:, i * w : ((i + 1) * w)]
         dst[i, i] = np.linalg.norm(mat) ** 2
-
+        mat_ravel = mat.ravel()
         for j in range(i + 1, dst.shape[1]):
-            dst[j, i] = np.vdot(mat, src2[:, j * w : (j + 1) * w])
+            dst[j, i] = mat_ravel.dot(
+                src2[:, j * w : (j + 1) * w].ravel()
+            )  # np.vdot(mat, src2[:, j * w : (j + 1) * w])
             dst[i, j] = dst[j, i]
 
     return dst
