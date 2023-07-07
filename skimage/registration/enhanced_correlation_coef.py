@@ -13,7 +13,8 @@ def find_transform_ECC(
     warp_matrix=None,
     motion_type="MOTION_AFFINE",
     number_of_iterations=200,
-    termination_eps=-1,
+    termination_eps=-1.0,
+    termination_rho=-1.0,
     input_mask=None,
     gauss_filt_size=5,
 ):
@@ -100,6 +101,8 @@ def find_transform_ECC(
     rho = -1
     last_rho = -termination_eps
     for _ in range(number_of_iterations):
+        if rho > termination_rho:
+            break
         if np.abs(rho - last_rho) < termination_eps:
             break
 
