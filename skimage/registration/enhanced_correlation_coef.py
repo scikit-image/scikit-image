@@ -3,6 +3,7 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import convert_to_float
 from ..transform._warps import warp
+from ..transform._warps_cy import _warp_fast
 
 MOTION_TYPES = ["MOTION_TRANSLATION", "MOTION_EUCLIDEAN", "MOTION_AFFINE", "MOTION_HOMOGRAPHY"]
 
@@ -17,6 +18,7 @@ def find_transform_ECC(
     termination_rho=-1.0,
     input_mask=None,
     gauss_filt_size=5,
+    order=1,
 ):
     """find_transform_ECC _summary_
 
@@ -106,10 +108,10 @@ def find_transform_ECC(
         if np.abs(rho - last_rho) < termination_eps:
             break
 
-        image_warped = warp(imageFloat, warp_matrix, clip=False, order=1, preserve_range=True)
-        gradient_x_warped = warp(gradientX, warp_matrix, clip=False, order=1, preserve_range=True)
-        gradient_y_warped = warp(gradientY, warp_matrix, clip=False, order=1, preserve_range=True)
-        imageMask = warp(pre_mask, warp_matrix, clip=False, order=0, preserve_range=True)
+        image_warped = _warp_fast(imageFloat, warp_matrix, order=order)
+        gradient_x_warped = _warp_fast(gradientX, warp_matrix, order=order)
+        gradient_y_warped = _warp_fast(gradientY, warp_matrix, order=order)
+        imageMask = _warp_fast(pre_mask.astype(numerical_dtype), warp_matrix, order=0)
 
         imgMean = np.mean(image_warped[imageMask != 0])
         imgStd = np.std(image_warped[imageMask != 0])
@@ -117,7 +119,7 @@ def find_transform_ECC(
         tmpStd = np.std(template_float[imageMask != 0])
 
         image_warped[imageMask != 0] = image_warped[imageMask != 0] - imgMean
-        templateZM = np.zeros((hs, ws), dtype=np.float32)
+        templateZM = np.zeros((hs, ws), dtype=numerical_dtype)
         templateZM[imageMask != 0] = template_float[imageMask != 0] - tmpMean
 
         tmpNorm = np.sqrt(np.sum(imageMask != 0) * (tmpStd**2))
