@@ -30,8 +30,8 @@ if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
 fi
 
 
-perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/default.txt
-perl -pi -e 's/numpy>=1.21.1/numpy>=1.21.1,<1.25/g' requirements/build.txt
+perl -pi -e 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt
+perl -pi -e 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt
 
 python -m pip install --upgrade pip
 
