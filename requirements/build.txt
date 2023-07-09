@@ -6,7 +6,7 @@ packaging>=21
 ninja
 Cython>=0.29.32
 pythran
-numpy>=1.21.1
+numpy>=1.22
 
 # Developer UI
 spin==0.4
