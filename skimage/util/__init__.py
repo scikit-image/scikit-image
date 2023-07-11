@@ -1,5 +1,6 @@
-"""Utility functions (:mod:`skimage.util`), this module contains a
-number of utility functions that are used throughout the library.
+"""General utility functions.
+
+This module contains a number of utility functions to work with images in general.
 """
 
 import functools
