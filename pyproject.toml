@@ -209,8 +209,7 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = 'numpy'
-
-[tool.pytest]
+[tool.pytest.ini_options]
 python_files = [
     'benchmark_*.py',
     'test_*.py',
