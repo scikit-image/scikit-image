@@ -72,7 +72,7 @@ class TPSTransform:
         self.parameters = np.dot(np.linalg.pinv(L), Y)
 
         self._estimated = True
-        return self
+        return self._estimated
 
 
     def _transform_points(self, x, y, coeffs):
@@ -113,16 +113,17 @@ class TPSTransform:
 
         >>> tps = ski.transform.TPSTransform()
         >>> tps.estimate(src, dst)
+        True
+
+        Apply the transformation
+
+        >>> xx_trans, yy_trans = tps.transform(xx, yy)
         >>> xx
         array([[0, 1, 2, 3, 4],
                [0, 1, 2, 3, 4],
                [0, 1, 2, 3, 4],
                [0, 1, 2, 3, 4],
                [0, 1, 2, 3, 4]])
-
-        Apply the transformation
-
-        >>> xx_trans, yy_trans = tps.transform(xx, yy)
         >>> xx_trans
         array([[5., 5., 5., 5., 5.],
                [4., 4., 4., 4., 4.],
