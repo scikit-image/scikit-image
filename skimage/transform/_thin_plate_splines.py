@@ -15,26 +15,27 @@ class TPSTransform:
 
         Parameters
         ----------
-        new_coords: array_like
+        new_coords : array_like
             Array of source points to be transformed
         Returns
         -------
-            ndarray: Mapped point of the distination point
+            ndarray : Mapped point of the distination point
         """
-        X_src = _ensure_2d(points)
+        x_src = _ensure_2d(points)
 
-        if X_src.shape[1] != self.control_points.shape[1]:
+
+        if x_src.shape[1] != self.control_points.shape[1]:
             raise ValueError("Array must be identical")
 
-        dist = self._radial_distance(X_src)
-        transforms = np.hstack([dist, np.ones((X_src.shape[0], 1)), X_src])
+        dist = self._radial_distance(x_src)
+        transforms = np.hstack([dist, np.ones((x_src.shape[0], 1)), x_src])
         return transforms @ self.parameters
 
     @property
     def inverse(self):
         raise NotImplementedError("This is yet to be implemented.")
 
-    def estimate(self, src, dst):
+    def estimate(self, dst, src):
         """Estimate the transformation from a set of corresponding points.
 
         Number of source and destination points must match.
@@ -62,13 +63,13 @@ class TPSTransform:
             raise ValueError("src and dst must have shape (N,2)")
 
         self.control_points = src
-        n_pts , dim = src.shape
+        n , d = src.shape
 
         K = self._radial_distance(src)
-        P = np.hstack([np.ones((n_pts, 1)), src])
+        P = np.hstack([np.ones((n, 1)), src])
         O = np.zeros((3, 3))
         L = np.asarray(np.bmat([[K, P],[P.T, O]]))
-        Y = np.concatenate([dst, np.zeros((dim + 1, dim))])
+        Y = np.concatenate([dst, np.zeros((d + 1, d))])
         self.parameters = np.dot(np.linalg.pinv(L), Y)
 
         self._estimated = True
@@ -118,18 +119,18 @@ class TPSTransform:
         Apply the transformation
 
         >>> xx_trans, yy_trans = tps.transform(xx, yy)
-        >>> xx
-        array([[0, 1, 2, 3, 4],
-               [0, 1, 2, 3, 4],
-               [0, 1, 2, 3, 4],
-               [0, 1, 2, 3, 4],
-               [0, 1, 2, 3, 4]])
-        >>> xx_trans
-        array([[5., 5., 5., 5., 5.],
-               [4., 4., 4., 4., 4.],
-               [3., 3., 3., 3., 3.],
-               [2., 2., 2., 2., 2.],
-               [1., 1., 1., 1., 1.]])
+        >>> yy
+        array([[0, 0, 0, 0, 0],
+               [1, 1, 1, 1, 1],
+               [2, 2, 2, 2, 2],
+               [3, 3, 3, 3, 3],
+               [4, 4, 4, 4, 4]])
+        >>> yy_trans
+        array([[5., 4., 3., 2., 1.],
+               [5., 4., 3., 2., 1.],
+               [5., 4., 3., 2., 1.],
+               [5., 4., 3., 2., 1.],
+               [5., 4., 3., 2., 1.]])
         """
         coeffs =  self.parameters
         transformed_x = self._transform_points(x, y, coeffs[:, 0])
@@ -146,7 +147,7 @@ class TPSTransform:
             N points in the source space
         Returns
         -------
-        ndarray:
+        ndarray :
             The radial distance for each `N` point to a control point.
         """
         dist = sp.spatial.distance.cdist(points, self.control_points)
@@ -158,7 +159,7 @@ def _U(r):
 
     Parameters
     ----------
-    r: ndarray
+    r : ndarray
         Input array representing the norm distance between points.
         The norm is the Euclidean distance.
     Returns
@@ -184,8 +185,7 @@ def _ensure_2d(array):
 
 def tps_warp(
     image,
-    src,
-    dst,
+    inverse_map,
     output_region=None,
     interpolation_order=1,
     grid_scaling=None
@@ -198,20 +198,19 @@ def tps_warp(
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Input image.
-    src: (N, 2) array_like
-        Source image coordinates.
-    dst: (N, 2) array_like
-        Destination image coordinates.
-    output_region: tuple of integers, optional
+    inverse_map : transformation object, or ndarray
+        Inverse coordinate map, which transforms coordinates in the output
+        images into their corresponding coordinates in the input image.
+    output_region : tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
         xmin <= x <= xmax)
-    interpolation_order: int, optional
+    interpolation_order : int, optional
         If value is 1, then use linear interpolation else use
         nearest-neighbor interpolation.
-    grid_scaling: int, optional
+    grid_scaling : int, optional
         If grid_scaling is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
@@ -219,8 +218,8 @@ def tps_warp(
 
     Returns
     -------
-    warped: array_like
-        Array of warped images.
+    warped : array_like
+        The warped input image.
 
     Examples
     --------
@@ -232,8 +231,10 @@ def tps_warp(
     >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
+    >>> tform = ski.transform.TPSTransform()
+    >>> tform.estimate(src, dst)
     >>> warped_image = ski.transform.tps_warp(
-    ...     image, src, dst, output_region=output_region
+    ...     image, tform, output_region=output_region
     ... )
 
     References
@@ -259,12 +260,7 @@ def tps_warp(
     y_steps = (y_max - y_min) // grid_scaling
     x, y = np.mgrid[x_min:x_max:x_steps*1j, y_min:y_max:y_steps*1j]
 
-    # make the reverse transform warping from the dst to the src,
-    # because we do image interpolation in this reverse fashion
-    tps = TPSTransform()
-    tps.estimate(dst, src)
-    transform = tps.transform(x, y)
-
+    transform = inverse_map.transform(x, y)
 
     if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid
@@ -280,4 +276,5 @@ def tps_warp(
         transform_y = sp.ndimage.map_coordinates(transform[1], [x_indices, y_indices])
         transform = [transform_x, transform_y]
 
-    return sp.ndimage.map_coordinates(image, transform, order=interpolation_order)
+    warped = sp.ndimage.map_coordinates(image, transform, order=interpolation_order)
+    return warped
