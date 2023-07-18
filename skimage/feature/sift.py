@@ -429,7 +429,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     def _fit(self, h):
         """Refine the position of the peak by fitting it to a parabola"""
-        return (h[0] - h[2]) / (2 * (h[0] + h[2] - 2 * h[1]))
+        return (h[0] - h[2]) / (2 * ((h[0] - h[1]) + (h[2] - h[1])))
 
     def _compute_orientation(self, positions_oct, scales_oct, sigmas_oct,
                              octaves, gaussian_scalespace):
@@ -519,6 +519,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     # result
                     ori = ((m + self._fit(hist[neigh]) + 0.5)
                            * 2 * np.pi / self.n_bins)
+                    if not np.isfinite(ori):
+                        continue
                     if ori > np.pi:
                         ori -= 2 * np.pi
                     if c == 0:
