@@ -3,7 +3,6 @@ import scipy as sp
 
 
 class TPSTransform:
-    """Thin plate spline transformation."""
     def __init__(self):
         self._estimated =  False
         self.parameters = np.array([], dtype=np.float32)
@@ -36,7 +35,7 @@ class TPSTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, dst, src):
-        """Estimate the transformation from a set of corresponding points.
+        """Estimate how close is the deformed source to the target.
 
         Number of source and destination points must match.
 
@@ -87,8 +86,6 @@ class TPSTransform:
 
     def transform(self, x, y):
         """Estimate the transformation from a set of corresponding points.
-
-        Number of source and destination points must match.
 
         Parameters
         ----------
@@ -160,8 +157,9 @@ def _U(r):
     Parameters
     ----------
     r : ndarray
-        Input array representing the norm distance between points.
-        The norm is the Euclidean distance.
+        Input array representing the norm distance between interlandmark
+        distances for the source form and based on the (x,y) coordinates
+        for each of these points.
     Returns
     -------
     ndarray
@@ -200,7 +198,7 @@ def tps_warp(
     ----------
     image : ndarray
         Input image.
-    inverse_map : transformation object, or ndarray
+    inverse_map : transformation object.
         Inverse coordinate map, which transforms coordinates in the output
         images into their corresponding coordinates in the input image.
     output_region : tuple of integers, optional
@@ -233,6 +231,7 @@ def tps_warp(
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
     >>> tform = ski.transform.TPSTransform()
     >>> tform.estimate(src, dst)
+    True
     >>> warped_image = ski.transform.tps_warp(
     ...     image, tform, output_region=output_region
     ... )
@@ -248,10 +247,10 @@ def tps_warp(
 
     if image.size == 0:
         raise ValueError("Cannot warp empty image with dimensions", image.shape)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D images (grayscale or color) are supported")
+    # if image.ndim != 2:
+    #     raise ValueError("Only 2-D images (grayscale or color) are supported")
     if output_region is None:
-        output_region = (0, 0) + image.shape
+        output_region = (0, 0, image.shape[0], image.shape[1])
 
     x_min, y_min, x_max, y_max = output_region
     if grid_scaling is None:
@@ -275,6 +274,14 @@ def tps_warp(
         transform_x = sp.ndimage.map_coordinates(transform[0], [x_indices, y_indices])
         transform_y = sp.ndimage.map_coordinates(transform[1], [x_indices, y_indices])
         transform = [transform_x, transform_y]
+    if image.ndim == 2:
+        warped_image = sp.ndimage.map_coordinates(image, transform, order=interpolation_order)
+    else: # RGB image
+        channels = image.shape[-1]
+        warped_channels = [
+            sp.ndimage.map_coordinates(image[..., channel], transform, order=interpolation_order)[..., None]
+            for channel in range(channels)
+        ]
+        warped_image = np.concatenate(warped_channels, axis=-1)
 
-    warped = sp.ndimage.map_coordinates(image, transform, order=interpolation_order)
-    return warped
+    return warped_image
