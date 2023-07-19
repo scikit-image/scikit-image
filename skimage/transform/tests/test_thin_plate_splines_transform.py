@@ -52,7 +52,7 @@ def test_tps_transform_ensure_2d():
         _ensure_2d(array_3d)
 
     scalar = 5
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         _ensure_2d(scalar)
 
 
