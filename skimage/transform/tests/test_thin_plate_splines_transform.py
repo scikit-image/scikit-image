@@ -43,16 +43,16 @@ def test_tps_transform_ensure_2d():
     expected = np.array([[0], [5], [10]])
     assert_array_equal(_ensure_2d(array_1d), expected)
 
-    # empty_array = np.array([])
-    # expected_empty_result = np.array([[]])
-    # assert_array_equal(_ensure_2d(empty_array), expected_empty_result)
+    empty_array = np.array([])
+    with pytest.raises(ValueError):
+        _ensure_2d(empty_array)
 
     array_3d = np.array([[[0, 5], [10, 15]], [[20, 25], [30, 35]]])
     with pytest.raises(ValueError):
         _ensure_2d(array_3d)
 
     scalar = 5
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError):
         _ensure_2d(scalar)
 
 

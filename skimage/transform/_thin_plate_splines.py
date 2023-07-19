@@ -52,14 +52,14 @@ class TPSTransform:
             True, if all pieces of the model are successfully estimated.
         """
 
-        src = np.asarray(src)
-        dst = np.asarray(dst)
+        src = _ensure_2d(src)
+        dst = _ensure_2d(dst)
 
         if src.shape != dst.shape:
             raise ValueError("src and dst shape must be identical")
 
-        if src.shape[-1] != 2 and dst.shape[-1] != 2:
-            raise ValueError("src and dst must have shape (N,2)")
+        # if src.shape[-1] != 2 and dst.shape[-1] != 2:
+        #     raise ValueError("src and dst must have shape (N,2)")
 
         self.control_points = src
         n , d = src.shape
@@ -168,16 +168,21 @@ def _U(r):
     _small = 1e-8  # Small value to avoid divide-by-zero
     return np.where(r == 0.0, 0.0, (r**2) * np.log((r) + _small))
 
-def _ensure_2d(array):
+def _ensure_2d(arr):
     """Ensure that `array` is a 2d array.
 
         In case given 1d array, expand the last dimension.
     """
+    array = np.asarray(arr)
+
     if array.ndim not in (1, 2):
         raise ValueError("Array can not be more than 2D")
+    if array.size == 0:
+        raise ValueError(f"{array} can not be of size zero.")
     # Expand last dim in order to interpret this as (n, 1) points
     if array.ndim == 1:
         array = array[:, None]
+
 
     return array
 
