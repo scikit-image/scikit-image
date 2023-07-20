@@ -417,8 +417,10 @@ def test_compact_watershed():
                          [1, 1, 1, 2, 2, 2]], dtype=int)
     np.testing.assert_equal(compact, expected)
     normal = watershed(image, seeds)
-    expected = np.ones(image.shape, dtype=int)
-    expected[2, 3:] = 2
+    # input image is full o tie-zones, watershed solution is arbitrary
+    expected[0, :] = 1
+    expected[2, 2] = 2
+    expected[-1, :] = 1
     np.testing.assert_equal(normal, expected)
 
 
