@@ -129,6 +129,8 @@ class TPSTransform:
                [5., 4., 3., 2., 1.],
                [5., 4., 3., 2., 1.]])
         """
+        if len(self.parameters) == 0 :
+            raise ValueError(f"{self.parameters} is zero. Compute the `estimate(src, dst)`")
         coeffs =  self.parameters
         transformed_x = self._transform_points(x, y, coeffs[:, 0])
         transformed_y = self._transform_points(x, y, coeffs[:, 1])
@@ -149,7 +151,7 @@ class TPSTransform:
         """
         dist = sp.spatial.distance.cdist(points, self.control_points)
         _small = 1e-8  # Small value to avoid divide-by-zero
-        return np.where(dist == 0.0, 0.0, (dist**2) * np.log((dist) + _small))
+        return np.where(dist == 0.0, 0.0, (dist**2) * np.log(dist + _small))
 
 def _U(r):
     """Compute basis kernel function for thine-plate splines.
@@ -188,7 +190,7 @@ def _ensure_2d(arr):
 
 def tps_warp(
     image,
-    inverse_map,
+    tform,
     output_region=None,
     interpolation_order=1,
     grid_scaling=None
@@ -203,7 +205,7 @@ def tps_warp(
     ----------
     image : ndarray
         Input image.
-    inverse_map : transformation object.
+    tform : transformation object.
         Inverse coordinate map, which transforms coordinates in the output
         images into their corresponding coordinates in the input image.
     output_region : tuple of integers, optional
@@ -264,7 +266,7 @@ def tps_warp(
     y_steps = (y_max - y_min) // grid_scaling
     x, y = np.mgrid[x_min:x_max:x_steps*1j, y_min:y_max:y_steps*1j]
 
-    transform = inverse_map.transform(x, y)
+    transform = tform.transform(x, y)
 
     if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid

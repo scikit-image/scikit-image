@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
+import skimage as ski
 
 from skimage.transform._thin_plate_splines import (TPSTransform, _ensure_2d,
                                                    tps_warp)
@@ -84,7 +85,19 @@ def test_tps_transform_init():
 
 
 def test_warp_tform():
-    pass
+    image = ski.data.checkerboard()
+    tform = TPSTransform()
+    assert hasattr(tform, 'transform')
+
+    # Test warp before estimate is computed
+    with pytest.raises(ValueError):
+        tps_warp(image, tform)
+
+    # Test warp after estimate is computed
+    tform.estimate(SRC, DST)
+    output = tps_warp(image, tform)
+
+    assert image.shape == output.shape
 
 def test_tps_warp_rotation():
     pass
