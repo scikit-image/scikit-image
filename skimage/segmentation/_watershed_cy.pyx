@@ -139,6 +139,10 @@ def watershed_raveled(cnp.float64_t[::1] image,
         while hp.items > 0:
             heappop(hp, &elem)
 
+            if elem.value < image[elem.index]:
+                # this will reset the value of a marker pixel
+                elem.value = image[elem.index]
+
             if compact or wsl:
                 # in the compact case, we need to label pixels as they come off
                 # the heap, because the same pixel can be pushed twice, *and* the
@@ -188,6 +192,11 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 new_elem.age = age
                 new_elem.index = neighbor_index
                 new_elem.source = elem.source
+
+                # watershed cost of moving to neighbor is at least the cost of
+                # its own neighboring pixel
+                if new_elem.value < elem.value:
+                    new_elem.value = elem.value
 
                 heappush(hp, &new_elem)
 
