@@ -2,6 +2,7 @@
 """
 from libc.math cimport sqrt
 from .._shared.fused_numerics cimport np_anyint
+import numpy as np
 
 cimport numpy as cnp
 cimport cython
@@ -121,6 +122,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t index = 0
     cdef Py_ssize_t neighbor_index = 0
     cdef DTYPE_BOOL_t compact = (compactness > 0)
+    cdef cnp.float64_t dbl_min = np.finfo(np.float64).min
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
@@ -130,7 +132,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
             if from_minima:
                 elem.value = image[index]
             else:
-                elem.value = -2.2e-308  # almost the minimum value of float64
+                elem.value = dbl_min
             elem.age = 0
             elem.index = index
             elem.source = index
