@@ -48,6 +48,10 @@ def test_tps_transform_ensure_2d():
     with pytest.raises(ValueError):
         _ensure_2d(empty_array)
 
+    scalar = 5
+    with pytest.raises(ValueError):
+        _ensure_2d(scalar)
+
     array_3d = np.array([[[0, 5], [10, 15]], [[20, 25], [30, 35]]])
     with pytest.raises(ValueError):
         _ensure_2d(array_3d)
@@ -56,20 +60,16 @@ def test_tps_transform_ensure_2d():
     with pytest.raises(ValueError):
         _ensure_2d(control_pts_less_than_3)
 
-    scalar = 5
-    with pytest.raises(ValueError):
-        _ensure_2d(scalar)
-
 
 def test_tps_transform_estimation():
     tform = TPSTransform()
-    assert tform.estimate(DST[:2, :], SRC[:2, :])
+    assert tform.estimate(DST, SRC)
     assert tform._estimated is True
     assert len(tform.control_points) > 0
 
     assert len(tform.parameters) > 0
-    assert tform.parameters.shape[0] ==  SRC[:2, :].shape[0] + 3
-    np.testing.assert_array_equal(tform.control_points, SRC[:2, :])
+    assert tform.parameters.shape[0] ==  SRC.shape[0] + 3
+    np.testing.assert_array_equal(tform.control_points, SRC)
 
 def test_tps_transform_init():
     tps = TPSTransform()

@@ -177,17 +177,15 @@ def _ensure_2d(arr):
     """
     array = np.asarray(arr)
 
-    if len(array) < 3:
-        raise ValueError("Control points less than 3 is undefined")
-
     if array.ndim not in (1, 2):
-        raise ValueError("Array can not be more than 2D")
-    if array.size == 0:
-        raise ValueError(f"{array} can not be of size zero.")
+        raise ValueError("Array must be be 2D.")
     # Expand last dim in order to interpret this as (n, 1) points
     if array.ndim == 1:
         array = array[:, None]
-
+    if array.size == 0:
+        raise ValueError("Array of points can not be empty.")
+    if len(array) < 3:
+        raise ValueError("Array points less than 3 is undefined.")
 
     return array
 
