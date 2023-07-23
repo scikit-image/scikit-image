@@ -404,11 +404,17 @@ class TestWatershed(unittest.TestCase):
 
 
 def test_compact_watershed():
+    # in this test, when compactness is greater than zero the watershed line
+    # is labeled with the closest marker (label=2)
+    # when compactness is zero the watershed line is labeled with
+    # the marker that reaches it first (label=1)
+    # because their it has a zero cost path to the line.
     image = np.zeros((5, 6))
-    image[:, 3:] = 1
+    image[:, 3] = 2  # watershed line
+    image[:, 4:] = 1
     seeds = np.zeros((5, 6), dtype=int)
     seeds[2, 0] = 1
-    seeds[2, 3] = 2
+    seeds[2, 5] = 2
     compact = watershed(image, seeds, compactness=0.01)
     expected = np.array([[1, 1, 1, 2, 2, 2],
                          [1, 1, 1, 2, 2, 2],
@@ -417,10 +423,11 @@ def test_compact_watershed():
                          [1, 1, 1, 2, 2, 2]], dtype=int)
     np.testing.assert_equal(compact, expected)
     normal = watershed(image, seeds)
-    # input image is full o tie-zones, watershed solution is arbitrary
-    expected[0, :] = 1
-    expected[2, 2] = 2
-    expected[-1, :] = 1
+    expected = np.array([[1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2],
+                         [1, 1, 1, 1, 2, 2]], dtype=int)
     np.testing.assert_equal(normal, expected)
 
 
