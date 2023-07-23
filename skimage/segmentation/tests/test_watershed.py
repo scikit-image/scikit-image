@@ -408,7 +408,7 @@ def test_compact_watershed():
     # is labeled with the closest marker (label=2)
     # when compactness is zero the watershed line is labeled with
     # the marker that reaches it first (label=1)
-    # because their it has a zero cost path to the line.
+    # because it has a zero cost path to the line.
     image = np.zeros((5, 6))
     image[:, 3] = 2  # watershed line
     image[:, 4:] = 1
