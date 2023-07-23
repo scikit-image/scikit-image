@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
-import skimage as ski
 
+import skimage as ski
 from skimage.transform._thin_plate_splines import (TPSTransform, _ensure_2d,
                                                    tps_warp)
 
@@ -52,6 +52,10 @@ def test_tps_transform_ensure_2d():
     with pytest.raises(ValueError):
         _ensure_2d(array_3d)
 
+    control_pts_less_than_3 = np.array([[0, 0], [0, 0]])
+    with pytest.raises(ValueError):
+        _ensure_2d(control_pts_less_than_3)
+
     scalar = 5
     with pytest.raises(ValueError):
         _ensure_2d(scalar)
@@ -99,14 +103,15 @@ def test_warp_tform():
 
     assert image.shape == output.shape
 
+def test_tps_warp_resizing():
+    pass
+
 def test_tps_warp_rotation():
     pass
 
 def test_tps_warp_translation():
     pass
 
-def test_tps_warp_resizing():
-    pass
 
 def test_tps_transform_call():
     pass

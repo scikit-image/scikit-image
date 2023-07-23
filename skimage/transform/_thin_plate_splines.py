@@ -177,6 +177,9 @@ def _ensure_2d(arr):
     """
     array = np.asarray(arr)
 
+    if len(array) < 3:
+        raise ValueError("Control points less than 3 is undefined")
+
     if array.ndim not in (1, 2):
         raise ValueError("Array can not be more than 2D")
     if array.size == 0:
@@ -251,6 +254,8 @@ def tps_warp(
 
     """
     image = np.asarray(image)
+
+    assert hasattr(tform, "transform")
 
     if image.size == 0:
         raise ValueError("Cannot warp empty image with dimensions", image.shape)
