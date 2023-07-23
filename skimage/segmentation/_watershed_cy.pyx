@@ -111,6 +111,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     from_minima : bool
         Parameter indicating whether the watershed is calculated from minima.
         If from_minima is set to True, the watershed markers are the minima.
+        When False (from markers) it is set to the minimum possible value (-inf).
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
