@@ -8,83 +8,7 @@ class TpsTransform:
         self.parameters = None
         self.control_points = None
 
-
-    def __call__(self, points):
-        """Map the source points to the destination surface.
-
-        Parameters
-        ----------
-        new_coords : array_like
-            Array of source points to be transformed
-        Returns
-        -------
-            ndarray : Mapped point of the distination point
-        """
-        x_src = _ensure_2d(points)
-
-
-        if x_src.shape[1] != self.control_points.shape[1]:
-            raise ValueError("Array must be identical")
-
-        dist = self._radial_distance(x_src)
-        transformed = np.hstack([dist, np.ones((x_src.shape[0], 1)), x_src])
-        # return np.dot(transformed, self.parameters )
-        return transformed @ self.parameters
-
-    @property
-    def inverse(self):
-        raise NotImplementedError("This is yet to be implemented.")
-
-    def estimate(self, dst, src):
-        """Estimate how close is the deformed source to the target.
-
-        Number of source and destination points must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Control point at source coordinates
-        dst : (N, 2) array_like
-            Control point at destination coordinates
-
-        Returns
-        -------
-        success: bool
-            True, if all pieces of the model are successfully estimated.
-        """
-
-        src = _ensure_2d(src)
-        dst = _ensure_2d(dst)
-
-        if src.shape != dst.shape:
-            raise ValueError("src and dst shape must be identical")
-
-        # if src.shape[-1] != 2 and dst.shape[-1] != 2:
-        #     raise ValueError("src and dst must have shape (N,2)")
-
-        self.control_points = src
-        n , d = src.shape
-
-        K = self._radial_distance(src)
-        P = np.hstack([np.ones((n, 1)), src])
-        O = np.zeros((3, 3))
-        L = np.asarray(np.bmat([[K, P],[P.T, O]]))
-        Y = np.concatenate([dst, np.zeros((d + 1, d))])
-        self.parameters = np.dot(np.linalg.pinv(L), Y)
-        self._estimated = True
-        return self
-
-
-    def _transform_points(self, x, y, coeffs):
-        w = coeffs[:-3]
-        a1, ax, ay, = coeffs[-3:]
-        summation = np.zeros(x.shape)
-        for wi, Pi in zip(w, self.control_points):
-            r = np.sqrt((Pi[0] - x)**2 + (Pi[1] - y)**2)
-            summation += wi * _U(r)
-        return a1 + ax*x + ay*y + summation
-
-    def transform(self, x, y):
+    def __call__(self, x, y):
         """Estimate the transformation from a set of corresponding points.
 
         Parameters
@@ -136,6 +60,57 @@ class TpsTransform:
         transformed_y = self._transform_points(x, y, coeffs[:, 1])
         return [transformed_x, transformed_y]
 
+    @property
+    def inverse(self):
+        raise NotImplementedError("This is yet to be implemented.")
+
+    def estimate(self, src, dst):
+        """Estimate how close is the deformed source to the target.
+
+        Number of source and destination points must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Control point at source coordinates
+        dst : (N, 2) array_like
+            Control point at destination coordinates
+
+        Returns
+        -------
+        success: bool
+            True, if all pieces of the model are successfully estimated.
+        """
+
+        src = _ensure_2d(src)
+        dst = _ensure_2d(dst)
+
+        if src.shape != dst.shape:
+            raise ValueError("src and dst shape must be identical")
+
+        # if src.shape[-1] != 2 and dst.shape[-1] != 2:
+        #     raise ValueError("src and dst must have shape (N,2)")
+
+        self.control_points = src
+        n , d = src.shape
+
+        K = self._radial_distance(src)
+        P = np.hstack([np.ones((n, 1)), src])
+        O = np.zeros((3, 3))
+        L = np.asarray(np.bmat([[K, P],[P.T, O]]))
+        Y = np.concatenate([dst, np.zeros((d + 1, d))])
+        self.parameters = np.dot(np.linalg.pinv(L), Y)
+        self._estimated = True
+        return self._estimated
+
+    def _transform_points(self, x, y, coeffs):
+        w = coeffs[:-3]
+        a1, ax, ay, = coeffs[-3:]
+        summation = np.zeros(x.shape)
+        for wi, Pi in zip(w, self.control_points):
+            r = np.sqrt((Pi[0] - x)**2 + (Pi[1] - y)**2)
+            summation += wi * _U(r)
+        return a1 + ax*x + ay*y + summation
 
     def _radial_distance(self, points):
         """Compute the pairwise radial distances of the given points to the control points.
@@ -171,6 +146,7 @@ def _U(r):
     _small = 1e-8  # Small value to avoid divide-by-zero
     return np.where(r == 0.0, 0.0, (r**2) * np.log((r) + _small))
 
+
 def _ensure_2d(arr):
     """Ensure that `array` is a 2d array.
 
@@ -187,12 +163,13 @@ def _ensure_2d(arr):
         raise ValueError("Array of points can not be empty.")
     if len(array) < 3:
         raise ValueError("Array points less than 3 is undefined.")
-
     return array
+
 
 def tps_warp(
     image,
-    tform,
+    src,
+    dst,
     output_region=None,
     interpolation_order=1,
     grid_scaling=None
@@ -207,9 +184,10 @@ def tps_warp(
     ----------
     image : ndarray
         Input image.
-    tform : transformation object.
-        Inverse coordinate map, which transforms coordinates in the output
-        images into their corresponding coordinates in the input image.
+    src : (N, 2)
+        Control point at source coordinates.
+    dst : (N, 2)
+        Control point at target coordinates.
     output_region : tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
@@ -248,13 +226,11 @@ def tps_warp(
     >>> tform.estimate(src, dst)
     True
     >>> warped_image = ski.transform.tps_warp(
-    ...     image, tform, output_region=output_region
+    ...     image, src, dst, output_region=output_region
     ... )
 
     """
     image = np.asarray(image)
-
-    assert hasattr(tform, "transform")
 
     if image.shape[0] == 0 or image.shape[1] == 0:
         raise ValueError(f"Cannot warp image with invalid shape: {image.shape}")
@@ -270,7 +246,9 @@ def tps_warp(
     y_steps = (y_max - y_min) // grid_scaling
     x, y = np.mgrid[x_min:x_max:x_steps*1j, y_min:y_max:y_steps*1j]
 
-    transform = tform.transform(x, y)
+    tform = TpsTransform()
+    tform.estimate(dst, src)
+    transform = tform(x, y)
 
     if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid
