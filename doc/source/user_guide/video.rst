@@ -117,7 +117,7 @@ supports a wide range of other image file formats as well.
     filename = '/tmp/file.mp4'
     vid = imageio.get_reader(filename,  'ffmpeg')
 
-    for num, image in vid.iter_data():
+    for image in vid.iter_data():
         print(image.mean())
 
     metadata = vid.get_meta_data()
