@@ -2,11 +2,11 @@ import numpy as np
 import scipy as sp
 
 
-class TPSTransform:
+class TpsTransform:
     def __init__(self):
         self._estimated =  False
-        self.parameters = np.array([], dtype=np.float32)
-        self.control_points = np.array([], dtype=np.float32)
+        self.parameters = None
+        self.control_points = None
 
 
     def __call__(self, points):
@@ -27,8 +27,9 @@ class TPSTransform:
             raise ValueError("Array must be identical")
 
         dist = self._radial_distance(x_src)
-        transforms = np.hstack([dist, np.ones((x_src.shape[0], 1)), x_src])
-        return transforms @ self.parameters
+        transformed = np.hstack([dist, np.ones((x_src.shape[0], 1)), x_src])
+        # return np.dot(transformed, self.parameters )
+        return transformed @ self.parameters
 
     @property
     def inverse(self):
@@ -70,9 +71,8 @@ class TPSTransform:
         L = np.asarray(np.bmat([[K, P],[P.T, O]]))
         Y = np.concatenate([dst, np.zeros((d + 1, d))])
         self.parameters = np.dot(np.linalg.pinv(L), Y)
-
         self._estimated = True
-        return self._estimated
+        return self
 
 
     def _transform_points(self, x, y, coeffs):
@@ -109,7 +109,7 @@ class TPSTransform:
         >>> dst = np.roll(src, 1, axis=0)
         >>> xx, yy = np.meshgrid(np.arange(5), np.arange(5))
 
-        >>> tps = ski.transform.TPSTransform()
+        >>> tps = ski.transform.TpsTransform()
         >>> tps.estimate(src, dst)
         True
 
@@ -129,8 +129,8 @@ class TPSTransform:
                [5., 4., 3., 2., 1.],
                [5., 4., 3., 2., 1.]])
         """
-        if len(self.parameters) == 0 :
-            raise ValueError(f"{self.parameters} is zero. Compute the `estimate(src, dst)`")
+        if self.parameters is None :
+            raise ValueError(f"{self.parameters}. Compute the `estimate`")
         coeffs =  self.parameters
         transformed_x = self._transform_points(x, y, coeffs[:, 0])
         transformed_y = self._transform_points(x, y, coeffs[:, 1])
@@ -152,6 +152,7 @@ class TPSTransform:
         dist = sp.spatial.distance.cdist(points, self.control_points)
         _small = 1e-8  # Small value to avoid divide-by-zero
         return np.where(dist == 0.0, 0.0, (dist**2) * np.log(dist + _small))
+
 
 def _U(r):
     """Compute basis kernel function for thine-plate splines.
@@ -227,6 +228,12 @@ def tps_warp(
     warped : array_like
         The warped input image.
 
+    References
+    ----------
+    .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
+    decomposition of deformations." IEEE Transactions on pattern analysis and
+    machine intelligence 11.6 (1989): 567–585.
+
     Examples
     --------
     Produce a warped image rotated by 90 degrees counter-clockwise:
@@ -237,26 +244,20 @@ def tps_warp(
     >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
     >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
-    >>> tform = ski.transform.TPSTransform()
+    >>> tform = ski.transform.TpsTransform()
     >>> tform.estimate(src, dst)
     True
     >>> warped_image = ski.transform.tps_warp(
     ...     image, tform, output_region=output_region
     ... )
 
-    References
-    ----------
-    .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
-    decomposition of deformations." IEEE Transactions on pattern analysis and
-    machine intelligence 11.6 (1989): 567–585.
-
     """
     image = np.asarray(image)
 
     assert hasattr(tform, "transform")
 
-    if image.size == 0:
-        raise ValueError("Cannot warp empty image with dimensions", image.shape)
+    if image.shape[0] == 0 or image.shape[1] == 0:
+        raise ValueError(f"Cannot warp image with invalid shape: {image.shape}")
     # if image.ndim != 2:
     #     raise ValueError("Only 2-D images (grayscale or color) are supported")
     if output_region is None:
