@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_allclose, assert_array_equal
 
-import skimage as ski
 from skimage.transform._thin_plate_splines import (TpsTransform, _ensure_2d,
                                                    tps_warp)
 
@@ -68,7 +67,7 @@ def test_tps_transform_estimation():
     assert tform.control_points is None
 
     # Perform estimation
-    tcoeffs = tform.estimate(DST, SRC)
+    tcoeffs = tform.estimate(SRC, DST)
 
     # Check if the estimation was successful
     assert tcoeffs
@@ -99,20 +98,6 @@ def test_tps_transform_estimation_failure():
     assert tform.parameters is None
     assert tform.control_points is None
 
-def test_warp_tform():
-    img = ski.data.checkerboard()
-    tform = TpsTransform()
-    assert hasattr(tform, 'transform')
-
-    # Test warp before estimate is computed
-    with pytest.raises(ValueError, match="None. Compute the `estimate`"):
-        tps_warp(img, tform)
-
-    # Test warp after estimate is computed
-    tform.estimate(SRC, DST)
-    output = tps_warp(img, tform)
-    assert img.shape == output.shape
-
 @pytest.mark.parametrize('image_shape', [0, (0, 10), (10, 0)])
 def test_zero_image_size(image_shape):
     tform = TpsTransform()
@@ -120,20 +105,33 @@ def test_zero_image_size(image_shape):
     img = np.zeros(image_shape)
 
     with pytest.raises(ValueError):
-        tps_warp(img, tform)
+        tps_warp(img, SRC, DST)
     with pytest.raises(ValueError):
-        tps_warp(img, tform)
+        tps_warp(img, SRC, DST)
     with pytest.raises(ValueError):
-        tps_warp(img, tform)
+        tps_warp(img, SRC, DST)
 
-# def test_output_region():
-#     img = ski.data.checkerboard()
-#     tform = TpsTransform()
-#     tform.estimate(SRC, DST)
-#     output_region = (200, 200, 100, 100)
+def test_tps_transform_call():
+    # Test __call__ method without esitmate
+    tform = TpsTransform()
+    x = np.array([0, 1, 2, 3, 4])
+    y = np.array([0, 1, 2, 3, 4])
 
-#     with pytest.raises(ValueError):
-#         tps_warp(img, tform, output_region=output_region)
+    with pytest.raises(ValueError, match="None. Compute the `estimate`"):
+        tform(x, y)
+
+    # Test __call__ method with estimmate
+    tform.estimate(SRC, DST)
+    xx, yy = np.meshgrid(np.arange(5), np.arange(5))
+    xx_trans, yy_trans = tform(xx, yy)
+
+    expected_xx = np.array([[5., 5., 5., 5., 5.],
+                            [4., 4., 4., 4., 4.],
+                            [3., 3., 3., 3., 3.],
+                            [2., 2., 2., 2., 2.],
+                            [1., 1., 1., 1., 1.]])
+    assert_allclose(xx_trans, expected_xx)
+
 
 def test_tps_warp_resizing():
     pass
@@ -142,8 +140,4 @@ def test_tps_warp_rotation():
     pass
 
 def test_tps_warp_translation():
-    pass
-
-
-def test_tps_transform_call():
     pass
