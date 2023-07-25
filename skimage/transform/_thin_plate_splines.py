@@ -40,7 +40,7 @@ class TpsTransform:
 
         Apply the transformation
 
-        >>> xx_trans, yy_trans = tps.transform(xx, yy)
+        >>> xx_trans, yy_trans = tps(xx, yy)
         >>> xx
         array([[0, 1, 2, 3, 4],
                [0, 1, 2, 3, 4],
