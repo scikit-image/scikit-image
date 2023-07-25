@@ -8,6 +8,7 @@ class TpsTransform:
         self.parameters = None
         self.control_points = None
 
+
     def __call__(self, x, y):
         """Estimate the transformation from a set of corresponding points.
 
@@ -40,18 +41,18 @@ class TpsTransform:
         Apply the transformation
 
         >>> xx_trans, yy_trans = tps.transform(xx, yy)
-        >>> yy
-        array([[0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 1],
-               [2, 2, 2, 2, 2],
-               [3, 3, 3, 3, 3],
-               [4, 4, 4, 4, 4]])
-        >>> yy_trans
-        array([[5., 4., 3., 2., 1.],
-               [5., 4., 3., 2., 1.],
-               [5., 4., 3., 2., 1.],
-               [5., 4., 3., 2., 1.],
-               [5., 4., 3., 2., 1.]])
+        >>> xx
+        array([[0, 1, 2, 3, 4],
+               [0, 1, 2, 3, 4],
+               [0, 1, 2, 3, 4],
+               [0, 1, 2, 3, 4],
+               [0, 1, 2, 3, 4]])
+        >>> xx_trans
+        array([[5., 5., 5., 5., 5.],
+               [4., 4., 4., 4., 4.],
+               [3., 3., 3., 3., 3.],
+               [2., 2., 2., 2., 2.],
+               [1., 1., 1., 1., 1.]])
         """
         if self.parameters is None :
             raise ValueError(f"{self.parameters}. Compute the `estimate`")
