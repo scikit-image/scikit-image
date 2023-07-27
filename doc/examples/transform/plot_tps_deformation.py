@@ -1,7 +1,22 @@
 r"""
-===============
-TPS Deformation
-===============
+==================
+TPS Transformation
+==================
+
+TPS is the 2D generalization form of cubic spline
+Given corresponding source and target points TPS is used to compute
+a spatial deformation function for every point in the 2D plane or 3D volume.
+
+
+For further information on TPS Transformation, see:
+
+.. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
+    decomposition of deformations." IEEE Transactions on pattern analysis and
+    machine intelligence 11.6 (1989): 567–585.
+
+.. [2] Wikipedia, Thin plate spline,
+       https://en.wikipedia.org/wiki/Thin_plate_spline#
+
 
 Inspired from https://github.com/tzing/tps-deformation
 """
@@ -17,7 +32,7 @@ xx, yy = np.meshgrid(samp, samp)
 source_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 # Make target points
-yy[:, [0, 3]] *=2
+yy[:, [0, 3]] *= 2
 target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 # Get coefficient, use class
@@ -29,18 +44,55 @@ samp2 = np.linspace(-1.8, 1.8, 10)
 test_xy = np.tile(samp2, [2, 1]).T
 
 # Estimate transformed points from given sets of source and targets points.
-transformed_xy = trans(test_xy[:,0], test_xy[:,1])
+transformed_xy = trans(test_xy)
 
 
 fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3))
 
-ax0.scatter(source_xy[:, 0], source_xy[:, 1], label='Source Points')
-ax0.scatter(test_xy[:, 0], test_xy[:, 1], c="orange", label='Test Points')
+ax0.scatter(source_xy[:, 0], source_xy[:, 1], label="Source Points")
+ax0.scatter(test_xy[:, 0], test_xy[:, 1], c="orange", label="Test Points")
 ax0.legend(loc="upper center")
-ax0.set_title('Source and Test Coordinates')
+ax0.set_title("Source and Test Coordinates")
 
-ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target Points')
-ax1.scatter(transformed_xy[0], transformed_xy[1], c="orange", label='Transformed Test Points')
+ax1.scatter(target_xy[:, 0], target_xy[:, 1], label="Target Points")
+ax1.scatter(
+    transformed_xy[0],
+    transformed_xy[1],
+    c="orange",
+    label="Transformed Test Points",
+)
 ax1.legend(loc="upper center")
 ax1.set_title("Target and Transformed Coordinates")
+plt.show()
+
+
+######################################################################
+#
+# Image Distortion/Deformation
+# ============================================================
+#
+src = np.array([[0.25, 0.25], [0.25, 0.75], [0.75, 0.25], [0.75, 0.75]])
+
+dst = np.array([[0.35, 0.35], [0.35, 0.65], [0.65, 0.35], [0.65, 0.65]])
+
+astronaut = ski.data.astronaut()
+width, height, _ = astronaut.shape
+start = (50, 150)
+end = (250, 350)
+rr, cc = ski.draw.rectangle_perimeter(
+    start=start, end=end, shape=astronaut.shape, clip=True
+)
+astronaut[rr, cc] = 1
+
+src *= [height, width]
+dst *= [height, width]
+
+# Fit the thin plate spline from output to input
+tps = ski.transform.TpsTransform()
+
+warped = ski.transform.tps_warp(astronaut, src, dst)
+
+fig, ax = plt.subplots(ncols=2)
+ax[0].imshow(astronaut)
+ax[1].imshow(warped)
 plt.show()
