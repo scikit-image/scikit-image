@@ -99,11 +99,11 @@ def test_zero_image_size(image_shape):
     tform.estimate(SRC, DST)
     img = np.zeros(image_shape)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=".* invalid shape"):
         tps_warp(img, SRC, DST)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=".* invalid shape"):
         tps_warp(img, SRC, DST)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=".* invalid shape"):
         tps_warp(img, SRC, DST)
 
 def test_tps_transform_call():
