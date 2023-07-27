@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_allclose, assert_array_equal
+from numpy.testing import assert_array_equal
 
 from skimage.transform._thin_plate_splines import (TpsTransform, _ensure_2d,
                                                    tps_warp)
@@ -62,16 +62,11 @@ def test_tps_transform_estimation():
     tform = TpsTransform()
 
     # Ensure that the initial state is as expected
-    assert tform._estimated is False
     assert tform.parameters is None
     assert tform.control_points is None
 
     # Perform estimation
-    tcoeffs = tform.estimate(SRC, DST)
-
-    # Check if the estimation was successful
-    assert tcoeffs
-    assert tform._estimated is True
+    tform.estimate(SRC, DST)
     assert len(tform.control_points) > 0
 
     assert len(tform.parameters) > 0
@@ -90,7 +85,7 @@ def test_tps_transform_estimation_failure():
     assert tform.control_points is None
 
     # Perform the estimation, which should fail due to the mismatched number of points
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=".*shape must be identical"):
         tform.estimate(src, dst)
 
     # Check if the estimation failed and the instance attributes remain unchanged
@@ -114,23 +109,30 @@ def test_zero_image_size(image_shape):
 def test_tps_transform_call():
     # Test __call__ method without esitmate
     tform = TpsTransform()
-    x = np.array([0, 1, 2, 3, 4])
-    y = np.array([0, 1, 2, 3, 4])
+        # Define coordinates to transform using meshgrid
+    coords = np.array(np.meshgrid(np.arange(5), np.arange(5)))
 
+    # Call a TpsTransform without estimate
     with pytest.raises(ValueError, match="None. Compute the `estimate`"):
-        tform(x, y)
+        tform(coords)
 
     # Test __call__ method with estimmate
     tform.estimate(SRC, DST)
-    xx, yy = np.meshgrid(np.arange(5), np.arange(5))
-    xx_trans, yy_trans = tform(xx, yy)
+
+    transformed_pts = tform(coords)
+    xx = transformed_pts[0]
+    yy = transformed_pts[1]
+
+    assert len(transformed_pts) == 2
+    assert xx.shape == (5, 5)
+    assert yy.shape == (5, 5)
 
     expected_xx = np.array([[5., 5., 5., 5., 5.],
                             [4., 4., 4., 4., 4.],
                             [3., 3., 3., 3., 3.],
                             [2., 2., 2., 2., 2.],
                             [1., 1., 1., 1., 1.]])
-    assert_allclose(xx_trans, expected_xx)
+    np.testing.assert_allclose(xx, expected_xx)
 
 
 def test_tps_warp_resizing():
