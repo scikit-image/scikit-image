@@ -30,8 +30,6 @@ class TpsTransform:
         >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
         >>> dst = np.roll(src, 1, axis=0)
         >>> coords = np.meshgrid(np.arange(5), np.arange(5))
-        >>> coords.ndim
-        3
 
         >>> tps = ski.transform.TpsTransform()
         >>> tps.estimate(src, dst)
