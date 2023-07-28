@@ -8,6 +8,7 @@ import pytest
 from scipy import ndimage as ndi
 
 from skimage._shared.filters import gaussian
+from skimage.feature import peak_local_max
 from skimage.measure import label
 
 from .._watershed import watershed
@@ -429,6 +430,43 @@ def test_compact_watershed():
                          [1, 1, 1, 1, 2, 2],
                          [1, 1, 1, 1, 2, 2]], dtype=int)
     np.testing.assert_equal(normal, expected)
+
+    # checks that compact watershed labels with watershed lines are
+    # a subset of the labels from normal watershed
+    compact_wsl = watershed(image, seeds, compactness=0.01, watershed_line=True)
+    difference = compact_wsl != compact
+    difference[compact_wsl == 0] = False
+
+    assert not np.any(difference)
+
+
+def test_watershed_with_markers_offset():
+    """
+    Regression test from https://github.com/scikit-image/scikit-image/issues/6632
+    Generate an initial image with two overlapping circles.
+    """
+    x, y = np.indices((80, 80))
+    x1, y1, x2, y2 = 28, 28, 44, 52
+    r1, r2 = 16, 20
+    mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
+    mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+    image = np.logical_or(mask_circle1, mask_circle2)
+
+    # Now we want to separate the two objects in image
+    # Generate the markers as local maxima of the distance to the background
+    distance = ndi.distance_transform_edt(image)
+    # shift the markers y coordinates by 0 or 4 pixels to demonstrate what happens
+    # when the markers don't perfectly align with the distance map minima
+    solutions = []
+    for i, dy in enumerate((0, 4)):
+        coords = peak_local_max(distance, footprint=np.ones((3, 3)), labels=image)
+        coords[:, 0] += dy
+        mask = np.zeros(distance.shape, dtype=bool)
+        mask[tuple(coords.T)] = True
+        markers, _ = ndi.label(mask)
+        solutions.append(watershed(-distance, markers, mask=image))
+
+    np.testing.assert_array_equal(solutions[0], solutions[1])
 
 
 def test_numeric_seed_watershed():
