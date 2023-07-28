@@ -458,6 +458,7 @@ def test_watershed_with_markers_offset():
     # shift the markers y coordinates by 0 or 4 pixels to demonstrate what happens
     # when the markers don't perfectly align with the distance map minima
     solutions = []
+    solutions_wsl = []
     for i, dy in enumerate((0, 4)):
         coords = peak_local_max(distance, footprint=np.ones((3, 3)), labels=image)
         coords[:, 0] += dy
@@ -465,8 +466,10 @@ def test_watershed_with_markers_offset():
         mask[tuple(coords.T)] = True
         markers, _ = ndi.label(mask)
         solutions.append(watershed(-distance, markers, mask=image))
+        solutions_wsl.append(watershed(-distance, markers, mask=image, watershed_line=True))
 
     np.testing.assert_array_equal(solutions[0], solutions[1])
+    np.testing.assert_array_equal(solutions_wsl[0], solutions_wsl[1])
 
 
 def test_numeric_seed_watershed():
