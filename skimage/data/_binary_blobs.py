@@ -49,6 +49,7 @@ def binary_blobs(length=512, blob_size_fraction=0.1, n_dim=2,
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
 
     """
+
     rs = np.random.default_rng(rng)
     shape = tuple([length] * n_dim)
     mask = np.zeros(shape)
