@@ -107,6 +107,8 @@ class TpsTransform:
         L = np.asarray(np.bmat([[K, P], [P.T, zero]]))
         Y = np.concatenate([dst, np.zeros((d + 1, d))])
         self.parameters = np.dot(np.linalg.pinv(L), Y)
+        self._estimated = True
+        return self._estimated
 
     def _spline_function(self, x, y, coeffs):
         """Solve the spline function in the X and Y directions"""
