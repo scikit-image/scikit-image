@@ -63,8 +63,8 @@ class TpsTransform:
             x = coords[0]
             y = coords[1]
 
-        transformed_x = self._transform_points(x, y, coeffs[:, 0])
-        transformed_y = self._transform_points(x, y, coeffs[:, 1])
+        transformed_x = self._spline_function(x, y, coeffs[:, 0])
+        transformed_y = self._spline_function(x, y, coeffs[:, 1])
         return [transformed_x, transformed_y]
 
     @property
@@ -101,16 +101,15 @@ class TpsTransform:
         self.control_points = src
         n, d = src.shape
 
-        K = self._radial_distance(src)
+        K = self._radial_distance(src) + np.eye(n, dtype=np.float32)
         P = np.hstack([np.ones((n, 1)), src])
         zero = np.zeros((3, 3))
         L = np.asarray(np.bmat([[K, P], [P.T, zero]]))
         Y = np.concatenate([dst, np.zeros((d + 1, d))])
         self.parameters = np.dot(np.linalg.pinv(L), Y)
-        self._estimated = True
-        return self._estimated
 
-    def _transform_points(self, x, y, coeffs):
+    def _spline_function(self, x, y, coeffs):
+        """Solve the spline function in the X and Y directions"""
         w = coeffs[:-3]
         a1, ax, ay = coeffs[-3:]
         summation = np.zeros(x.shape)
@@ -243,10 +242,11 @@ def tps_warp(
         raise ValueError(
             f"Cannot warp image with invalid shape: {image.shape}"
         )
-    # if image.ndim != 2:
-    #     raise ValueError("Only 2-D images (grayscale or color) are supported")
-    if output_region is None:
-        output_region = (0, 0, image.shape[0], image.shape[1])
+
+    if image.ndim not in (2, 3):
+        raise ValueError("Only 2D and 3D images are supported")
+
+    output_region = output_region or (0, 0, image.shape[0], image.shape[1])
 
     x_min, y_min, x_max, y_max = output_region
     if grid_scaling is None:
