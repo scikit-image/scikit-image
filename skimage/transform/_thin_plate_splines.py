@@ -222,7 +222,7 @@ def tps_warp(
 
     Examples
     --------
-    Produce a warped image rotated by 90 degrees counter-clockwise:
+    Produce a warped image rotated by 90 degrees counter-clockwise.
 
     >>> import skimage as ski
     >>> astronaut = ski.data.astronaut()
