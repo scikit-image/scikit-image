@@ -157,7 +157,7 @@ are made according to the following rules:
   decision-making process outlined above.
 
 - **Changes to this governance model or our mission, vision, and values**
-  require a :ref:`skip` and follow the decision-making process outlined above,
+  require an :ref:`skip` and follow the decision-making process outlined above,
   *unless* there is unanimous agreement from core developers on the change.
 
 If an objection is raised on a lazy consensus, the proposer can appeal to the
