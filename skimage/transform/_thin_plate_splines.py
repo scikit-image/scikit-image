@@ -180,7 +180,7 @@ def tps_warp(
     dst,
     output_region=None,
     interpolation_order=1,
-    grid_scaling=None,
+    grid_scaling=None
 ):
     """Return an array of warped images.
 
@@ -217,7 +217,7 @@ def tps_warp(
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
-    decomposition of deformations." IEEE Transactions on pattern analysis and
+    decomposition of deformations," IEEE Transactions on pattern analysis and
     machine intelligence 11.6 (1989): 567–585.
 
     Examples
@@ -236,7 +236,6 @@ def tps_warp(
     >>> warped_image = ski.transform.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
-
     """
     image = np.asarray(image)
 

@@ -78,9 +78,10 @@ plt.show()
 ######################################################################
 #
 # Deformation
+# ===========
 # In this example we compute the coefficients, and then transform an arbitrary
 # points from source surface to the deformed surface.
-# ============================================================
+
 import matplotlib.pyplot as plt
 
 import skimage as ski
