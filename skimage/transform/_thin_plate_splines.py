@@ -63,9 +63,9 @@ class TpsTransform:
             x = coords[0]
             y = coords[1]
 
-        transformed_x = self._spline_function(x, y, coeffs[:, 0])
-        transformed_y = self._spline_function(x, y, coeffs[:, 1])
-        return [transformed_x, transformed_y]
+        x_warp = self._spline_function(x, y, coeffs[:, 0])
+        y_warp = self._spline_function(x, y, coeffs[:, 1])
+        return [x_warp, y_warp]
 
     @property
     def inverse(self):
@@ -101,12 +101,15 @@ class TpsTransform:
         self.control_points = src
         n, d = src.shape
 
-        K = self._radial_distance(src) + np.eye(n, dtype=np.float32)
+        K = self._radial_distance(src)
         P = np.hstack([np.ones((n, 1)), src])
-        zero = np.zeros((3, 3))
-        L = np.asarray(np.bmat([[K, P], [P.T, zero]]))
-        Y = np.concatenate([dst, np.zeros((d + 1, d))])
-        self.parameters = np.dot(np.linalg.pinv(L), Y)
+        np.zeros((3, 3))
+        L = np.zeros((n+3, n+3), dtype=np.float32)
+        L[:n, :n] = K
+        L[:n, -3:] = P
+        L[-3:, :n] = P.T
+        V = np.concatenate([dst, np.zeros((d + 1, d))])
+        self.parameters = np.dot(np.linalg.inv(L), V)
         self._estimated = True
         return self._estimated
 
