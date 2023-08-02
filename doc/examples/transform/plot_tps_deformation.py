@@ -3,8 +3,9 @@ r"""
 Thin Plate Spline (TPS)
 =======================
 
-TPS is the 2D generalization form of cubic spline [1]_. It is a two dimensional
-simulation of 1D cubic spline, which is the basic solution of Biharmonic Equation [2]_.
+Thin-plate splines (TPS) refer to a method for interpolating data [1]_.
+In an image context, we use a 2D generalization of TPS, i.e., a two-dimensional
+simulation of a 1D cubic spline, which is the solution of the biharmonic equation [2]_.
 According to [3]_, the basic solution of the biharmonic function was expanded.
 Given corresponding source and target points, TPS is used to compute
 a spatial deformation function for every point in the 2D plane or 3D volume.
