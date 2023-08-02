@@ -136,24 +136,17 @@ def test_tps_transform_call():
     # Test __call__ method with estimmate
     tform.estimate(SRC, DST)
 
-    transformed_pts = tform(coords)
-    xx = transformed_pts[0]
-    yy = transformed_pts[1]
+    xx_trans, yy_trans = tform(coords)
 
-    assert len(transformed_pts) == 2
-    assert xx.shape == (5, 5)
-    assert yy.shape == (5, 5)
+    assert xx_trans.shape == (5, 5)
+    assert yy_trans.shape == (5, 5)
 
-    expected_xx = np.array(
-        [
-            [5.0, 5.0, 5.0, 5.0, 5.0],
-            [4.0, 4.0, 4.0, 4.0, 4.0],
-            [3.0, 3.0, 3.0, 3.0, 3.0],
-            [2.0, 2.0, 2.0, 2.0, 2.0],
-            [1.0, 1.0, 1.0, 1.0, 1.0],
-        ]
-    )
-    np.testing.assert_allclose(xx, expected_xx)
+    expected_yy = np.array([[0, 1.0, 2.0, 3.0, 4.0],
+                            [0, 1.0, 2.0, 3.0, 4.0],
+                            [0, 1.0, 2.0, 3.0, 4.0],
+                            [0, 1.0, 2.0, 3.0, 4.0],
+                            [0, 1.0, 2.0, 3.0, 4.0]], dtype=np.float32)
+    np.testing.assert_allclose(yy_trans, expected_yy)
 
 
 def test_tps_warp_resizing():
