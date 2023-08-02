@@ -55,7 +55,7 @@ dst = np.array([[0.35, 0.35],
                 [0.65, 0.65]])
 
 astronaut = ski.data.astronaut()
-width, height, _= astronaut.shape
+width, height, _ = astronaut.shape
 start = (50, 150)
 end = (250, 350)
 rr, cc = ski.draw.rectangle_perimeter(start=start, end=end, shape=astronaut.shape, clip=True)
