@@ -19,7 +19,7 @@ image warping.
 For further information on TPS Transformation, see:
 
 .. [1] Wikipedia, Spline interpolation
-       Shttps://en.wikipedia.org/wiki/Spline_interpolation
+       https://en.wikipedia.org/wiki/Spline_interpolation
 
 .. [2] Weisstein, Eric W. "Biharmonic Equation." From MathWorld--A Wolfram Web Resource
        https://mathworld.wolfram.com/BiharmonicEquation.html
