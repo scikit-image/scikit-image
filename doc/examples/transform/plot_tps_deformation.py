@@ -18,8 +18,8 @@ image warping.
 
 For further information on TPS Transformation, see:
 
-.. [1] Wikipedia, Spline interpolation
-       https://en.wikipedia.org/wiki/Spline_interpolation
+.. [1] Wikipedia, Cubic Spline interpolation
+       https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
 
 .. [2] Weisstein, Eric W. "Biharmonic Equation." From MathWorld--A Wolfram Web Resource
        https://mathworld.wolfram.com/BiharmonicEquation.html
@@ -80,8 +80,12 @@ plt.show()
 #
 # Deformation
 # ===========
+# In 2D cases, given a set of K corresponding points, the TPS warp is described by
+# `2(K+3)`` parameters which include 6 global affine motion parameters and
+# `2K` coefficients for correspondences of the control points.
+#
 # In this example we compute the coefficients, and then transform an arbitrary
-# points from source surface to the deformed surface.
+# point from source surface to the deformed surface.
 
 import matplotlib.pyplot as plt
 
