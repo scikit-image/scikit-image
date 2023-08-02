@@ -51,6 +51,7 @@ class TpsTransform:
         ...                         [0, 1, 2, 3, 4],
         ...                         [0, 1, 2, 3, 4]])
         >>> np.allclose(yy_trans, expected_yy)
+        True
         """
         if self.parameters is None:
             raise ValueError(f"{self.parameters}. Compute the `estimate`")
