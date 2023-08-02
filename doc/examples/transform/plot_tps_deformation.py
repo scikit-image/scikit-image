@@ -1,7 +1,7 @@
 r"""
-=======================
-Thin Plate Spline (TPS)
-=======================
+==========================================
+Interpolate images with thin-plate splines
+==========================================
 
 Thin-plate splines (TPS) refer to a method for interpolating data [1]_.
 In an image context, we use a 2D generalization of TPS, i.e., a two-dimensional
