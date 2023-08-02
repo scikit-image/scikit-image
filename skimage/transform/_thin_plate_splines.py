@@ -6,7 +6,8 @@ class TpsTransform:
     def __init__(self):
         self._estimated = False
         self.parameters = None
-        self.control_points = None
+        self.src = None
+        self.dst = None
 
     def __call__(self, coords):
         """Estimate the transformation from a set of corresponding points.
@@ -98,7 +99,8 @@ class TpsTransform:
         # if src.shape[-1] != 2 and dst.shape[-1] != 2:
         #     raise ValueError("src and dst must have shape (N,2)")
 
-        self.control_points = src
+        self.src = src
+        self.dst = dst
         n, d = src.shape
 
         K = self._radial_distance(src)
@@ -118,7 +120,7 @@ class TpsTransform:
         w = coeffs[:-3]
         a1, ax, ay = coeffs[-3:]
         summation = np.zeros(x.shape)
-        for wi, Pi in zip(w, self.control_points):
+        for wi, Pi in zip(w, self.src):
             r = np.sqrt((Pi[0] - x) ** 2 + (Pi[1] - y) ** 2)
             summation += wi * _U(r)
         return a1 + ax * x + ay * y + summation
@@ -135,9 +137,9 @@ class TpsTransform:
         ndarray :
             The radial distance for each `N` point to a control point.
         """
-        dist = sp.spatial.distance.cdist(points, self.control_points)
+        dist = sp.spatial.distance.cdist(self.src, points)
         _small = 1e-8  # Small value to avoid divide-by-zero
-        return np.where(dist == 0.0, 0.0, (dist**2) * np.log(dist + _small))
+        return np.where(dist == 0.0, 0.0, (dist**2) * np.log(dist**2 + _small))
 
 
 def _U(r):
@@ -155,7 +157,7 @@ def _U(r):
         Calculated kernel function U.
     """
     _small = 1e-8  # Small value to avoid divide-by-zero
-    return np.where(r == 0.0, 0.0, (r**2) * np.log((r) + _small))
+    return np.where(r == 0.0, 0.0, (r**2) * np.log((r**2) + _small))
 
 
 def _ensure_2d(arr):
