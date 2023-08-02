@@ -153,11 +153,11 @@ are made according to the following rules:
   core developers *and* no disagreement or requested changes by a core developer
   on the issue or pull-request page (lazy consensus).
 
-- **Changes to the API principles** require a :ref:`skip` and follow the
+- **Changes to the API principles** requires a :ref:`SKIP <skip>` and follow the
   decision-making process outlined above.
 
 - **Changes to this governance model or our mission, vision, and values**
-  require an :ref:`skip` and follow the decision-making process outlined above,
+  requires a :ref:`SKIP <skip>` and follow the decision-making process outlined above,
   *unless* there is unanimous agreement from core developers on the change.
 
 If an objection is raised on a lazy consensus, the proposer can appeal to the
