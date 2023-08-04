@@ -1,6 +1,6 @@
+# Generated from pyproject.toml
 SimpleITK
 astropy>=5.0
-# cloudpickle is necessary to provide the 'processes' scheduler for dask
 cloudpickle>=0.2.1
 dask[array]>=2021.1.0
 matplotlib>=3.5

@@ -1,2 +1,3 @@
+# Generated from pyproject.toml
 pre-commit
-rtoml
+tomli; python_version < '3.11'

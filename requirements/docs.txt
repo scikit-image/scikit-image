@@ -1,3 +1,4 @@
+# Generated from pyproject.toml
 sphinx>=5.0
 sphinx-gallery>=0.11
 numpydoc>=1.5
@@ -11,7 +12,6 @@ pooch>=1.6
 tifffile>=2022.8.12
 myst-parser
 ipywidgets
-# Needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
 ipykernel
 plotly>=5.10
 kaleido

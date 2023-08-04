@@ -1,4 +1,4 @@
-# Also update `tools/pyproject.toml.in`, [build-system] -> requires
+# Generated from pyproject.toml
 meson-python>=0.13
 wheel
 setuptools>=67
@@ -7,7 +7,5 @@ ninja
 Cython>=0.29.32
 pythran
 numpy>=1.22
-
-# Developer UI
 spin==0.4
 build

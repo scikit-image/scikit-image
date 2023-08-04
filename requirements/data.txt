@@ -1,1 +1,2 @@
+# Generated from pyproject.toml
 pooch>=1.6.0
