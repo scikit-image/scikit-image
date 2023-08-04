@@ -12,11 +12,18 @@ except ImportError:
     except ImportError:
         sys.exit("Please install `tomli` first: `pip install tomli`")
 
-repo_dir = (Path(__file__).parent / "..").resolve()
-req_dir = repo_dir / "requirements"
+repo_dir = Path(__file__).parent.parent
+
 pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
-for key, opt_list in pyproject["project"]["optional-dependencies"].items():
-    lines = ["# Generated from pyproject.toml"] + opt_list
-    req_fname = req_dir / f"{key}.txt"
+
+def generate_requirement_file(name: str, req_list: list[str]) -> None:
+    lines = ["# Generated from pyproject.toml, do not edit"] + req_list
+    req_fname = repo_dir / "requirements" / f"{name}.txt"
     req_fname.write_text("\n".join(lines) + "\n")
+
+
+generate_requirement_file("default", pyproject["project"]["dependencies"])
+
+for key, opt_list in pyproject["project"]["optional-dependencies"].items():
+    generate_requirement_file(key, opt_list)

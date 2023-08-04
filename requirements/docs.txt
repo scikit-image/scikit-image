@@ -1,4 +1,4 @@
-# Generated from pyproject.toml
+# Generated from pyproject.toml, do not edit
 sphinx>=5.0
 sphinx-gallery>=0.11
 numpydoc>=1.5
