@@ -14,8 +14,6 @@ except ImportError:
 
 repo_dir = Path(__file__).parent.parent
 
-pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
-
 
 def generate_requirement_file(name: str, req_list: list[str]) -> None:
     lines = ["# Generated from pyproject.toml, do not edit"] + req_list
@@ -23,7 +21,14 @@ def generate_requirement_file(name: str, req_list: list[str]) -> None:
     req_fname.write_text("\n".join(lines) + "\n")
 
 
-generate_requirement_file("default", pyproject["project"]["dependencies"])
+def main() -> None:
+    pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
-for key, opt_list in pyproject["project"]["optional-dependencies"].items():
-    generate_requirement_file(key, opt_list)
+    generate_requirement_file("default", pyproject["project"]["dependencies"])
+
+    for key, opt_list in pyproject["project"]["optional-dependencies"].items():
+        generate_requirement_file(key, opt_list)
+
+
+if __name__ == "__main__":
+    main()
