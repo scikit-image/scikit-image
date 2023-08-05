@@ -199,7 +199,7 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     >>> _offsets_to_raveled_neighbors((2, 3, 2), np.ones((3, 3, 3)), (1, 1, 1))
-    array([ 2, -6,  1, -1,  6, -2,  3,  8, -3, -4,  7, -5, -7, -8,  5,  4, -9,
+    array([-6, -2, -1,  1,  2,  6, -8, -7, -5, -4, -3,  3,  4,  5,  7,  8, -9,
             9])
     """
     raveled_offsets = _raveled_offsets_and_distances(
