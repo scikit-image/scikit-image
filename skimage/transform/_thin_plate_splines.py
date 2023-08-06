@@ -223,8 +223,8 @@ def tps_warp(
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
-    decomposition of deformations," IEEE Transactions on pattern analysis and
-    machine intelligence 11.6 (1989): 567–585.
+           decomposition of deformations," IEEE Transactions on pattern analysis
+           and machine intelligence 11.6 (1989): 567–585.
 
     Examples
     --------
@@ -242,6 +242,7 @@ def tps_warp(
     >>> warped_image = ski.transform.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
+
     """
     image = np.asarray(image)
 
