@@ -31,6 +31,7 @@ class TpsTransform:
         >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
         >>> dst = np.roll(src, 1, axis=0)
         >>> coords = np.meshgrid(np.arange(5), np.arange(5))
+        >>> coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
 
         >>> tps = ski.transform.TpsTransform()
         >>> tps.estimate(src, dst)
@@ -38,7 +39,9 @@ class TpsTransform:
 
         Apply the transformation
 
-        >>> xx_trans, yy_trans = tps(coords)
+        >>> trans_coord = tps(coords)
+        >>> xx_trans = trans_coord[:, 0]
+        >>> yy_trans = trans_coord[:, 1]
         >>> coords[1]
         array([[0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1],
@@ -58,16 +61,13 @@ class TpsTransform:
         coeffs = self.parameters
         coords = np.array(coords)
 
-        if coords.ndim == 2:
-            x = coords[:, 0]
-            y = coords[:, 1]
-        else:
-            x = coords[0]
-            y = coords[1]
+        if not coords.ndim == 2 or coords.shape[1] != 2:
+            raise ValueError("Input 'coords' must have shape (N,2)")
 
-        x_warp = self._spline_function(x, y, coeffs[:, 0])
-        y_warp = self._spline_function(x, y, coeffs[:, 1])
-        return [x_warp, y_warp]
+
+        x_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 0])
+        y_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 1])
+        return np.vstack([x_warp, y_warp]).T
 
     @property
     def inverse(self):
@@ -106,7 +106,6 @@ class TpsTransform:
 
         K = self._radial_distance(src)
         P = np.hstack([np.ones((n, 1)), src])
-        np.zeros((3, 3))
         L = np.zeros((n+3, n+3), dtype=np.float32)
         L[:n, :n] = K
         L[:n, -3:] = P
@@ -139,8 +138,7 @@ class TpsTransform:
             The radial distance for each `N` point to a control point.
         """
         dist = sp.spatial.distance.cdist(self.src, points)
-        _small = 1e-8  # Small value to avoid divide-by-zero
-        return np.where(dist == 0.0, 0.0, (dist**2) * np.log(dist**2 + _small))
+        return _U(dist)
 
 
 def _U(r):
@@ -233,8 +231,8 @@ def tps_warp(
     >>> import skimage as ski
     >>> astronaut = ski.data.astronaut()
     >>> image = ski.color.rgb2gray(astronaut)
-    >>> src = np.array([[0, 0], [0, 500], [500, 500],[500, 0]])
-    >>> dst = np.array([[500, 0], [0, 0], [0, 500],[500, 500]])
+    >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
+    >>> dst = np.array([[512, 0], [0, 0], [0, 512],[512, 512]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
     >>> tform = ski.transform.TpsTransform()
     >>> tform.estimate(src, dst)
@@ -261,11 +259,15 @@ def tps_warp(
         grid_scaling = 1
     x_steps = (x_max - x_min) // grid_scaling
     y_steps = (y_max - y_min) // grid_scaling
-    coords = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
+    xx, yy = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
+    coords = np.vstack([xx.ravel(), yy.ravel()]).T
 
     tform = TpsTransform()
     tform.estimate(dst, src)
     transform = tform(coords)
+
+    transform = transform.reshape((x_steps, y_steps, 2))
+    transform = [transform[..., 0], transform[..., 1]]
 
     if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid
