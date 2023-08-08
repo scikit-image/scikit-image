@@ -31,7 +31,7 @@ class TpsTransform:
         >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
         >>> dst = np.roll(src, 1, axis=0)
         >>> coords = np.meshgrid(np.arange(5), np.arange(5))
-        >>> coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
+        >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
 
         >>> tps = ski.transform.TpsTransform()
         >>> tps.estimate(src, dst)
@@ -39,7 +39,7 @@ class TpsTransform:
 
         Apply the transformation
 
-        >>> trans_coord = tps(coords)
+        >>> trans_coord = tps(t_coords)
         >>> xx_trans = trans_coord[:, 0]
         >>> yy_trans = trans_coord[:, 1]
         >>> coords[1]
