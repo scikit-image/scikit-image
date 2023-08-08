@@ -122,7 +122,7 @@ class TpsTransform:
         summation = np.zeros(x.shape)
         for wi, Pi in zip(w, self.src):
             r = np.sqrt((Pi[0] - x) ** 2 + (Pi[1] - y) ** 2)
-            summation += wi * _U(r)
+            summation += wi * _radial_basis_function(r)
         return a1 + ax * x + ay * y + summation
 
     def _radial_distance(self, points):
@@ -138,10 +138,10 @@ class TpsTransform:
             The radial distance for each `N` point to a control point.
         """
         dist = sp.spatial.distance.cdist(self.src, points)
-        return _U(dist)
+        return _radial_basis_function(dist)
 
 
-def _U(r):
+def _radial_basis_function(r):
     """Compute basis kernel function for thine-plate splines.
 
     Parameters
