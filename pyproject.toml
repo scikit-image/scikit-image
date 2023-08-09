@@ -191,20 +191,17 @@ exclude = [
 
 [tool.ruff.pydocstyle]
 convention = 'numpy'
+
 [tool.pytest.ini_options]
-python_files = [
-    'benchmark_*.py',
-    'test_*.py',
-]
-python_classes = [
-    'Test*',
-    '*Suite',
-]
-python_functions = [
-    'time_*',
-    'test_*',
-    'peakmem_*',
-]
+minversion = "6.0"
+addopts = "-ra  --strict-config  --strict-markers"
+log_cli_level = "INFO"
+xfail_strict = true
+#testpaths = ["skimage", "../../../../../benchmarks"]
+python_files = ["benchmark_*.py", "test_*.py"]
+python_classes = ["Test*", "*Suite"]
+python_functions = ["time_*", "test_*", "peakmem_*"]
+filterwarnings = []
 
 [tool.coverage.run]
 omit = ['*/tests/*']
