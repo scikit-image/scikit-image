@@ -52,7 +52,6 @@ def test_tps_transform_init():
     assert tform._estimated is False
     assert tform.parameters is None
     assert tform.src is None
-    assert tform.dst is None
 
 
 def test_tps_transform_estimation():

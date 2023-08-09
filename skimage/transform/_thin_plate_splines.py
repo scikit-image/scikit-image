@@ -118,10 +118,14 @@ class TpsTransform:
         """Solve the spline function in the X and Y directions"""
         w = coeffs[:-3]
         a1, ax, ay = coeffs[-3:]
-        summation = np.zeros(x.shape)
-        for wi, Pi in zip(w, self.src):
-            r = np.sqrt((Pi[0] - x) ** 2 + (Pi[1] - y) ** 2)
-            summation += wi * _radial_basis_function(r)
+        Pi_x = self.src[:, 0]
+        Pi_y = self.src[:, 1]
+
+        dx = Pi_x[:, np.newaxis] - x
+        dy = Pi_y[:, np.newaxis] - y
+        r = np.sqrt(dx**2 + dy**2)
+        radial_dist = _radial_basis_function(r)
+        summation = np.dot(w, radial_dist)
         return a1 + ax * x + ay * y + summation
 
     def _radial_distance(self, points):

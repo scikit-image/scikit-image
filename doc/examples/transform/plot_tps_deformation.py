@@ -7,8 +7,8 @@ Thin-plate splines (TPS) refer to a method for interpolating data [1]_.
 In an image context, we use a 2D generalization of TPS, i.e., a two-dimensional
 simulation of a 1D cubic spline, which is the solution of the biharmonic equation [2]_.
 According to [3]_, the basic solution of the biharmonic function was expanded.
-Given corresponding source and target points, TPS is used to compute
-a spatial deformation function for every point in the 2D plane or 3D volume.
+Given corresponding source and target control points, TPS is used to transform a space.
+In this case our space is a 2D image.
 
 It should be noted that the commonly used in image processing
 Affine Transformation [4]_ can be understood as special variant of TPS.
