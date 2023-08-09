@@ -7,7 +7,6 @@ class TpsTransform:
         self._estimated = False
         self.parameters = None
         self.src = None
-        self.dst = None
 
     def __call__(self, coords):
         """Estimate the transformation from a set of corresponding points.
