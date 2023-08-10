@@ -167,6 +167,9 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
+    if max_slice is None:
+        warnings.warn('Phase cross correlation shift disambiguation inconclusive')
+        return shift
     real_shift_acc = []
     for sl, pos_shift, neg_shift in zip(
             max_slice, positive_shift, negative_shift
