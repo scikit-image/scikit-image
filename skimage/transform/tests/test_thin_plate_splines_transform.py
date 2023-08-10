@@ -126,8 +126,8 @@ def test_tps_transform_call():
     # Test __call__ method without esitmate
     tform = TpsTransform()
     # Define coordinates to transform using meshgrid
-    coords = np.array(np.meshgrid(np.arange(5), np.arange(5)))
-    coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
+    coords = np.array(np.mgrid[0:5, 0:5])
+    coords = coords.T.reshape(-1, 2)
 
     # Call a TpsTransform without estimate
     with pytest.raises(ValueError, match="None. Compute the `estimate`"):
@@ -136,7 +136,6 @@ def test_tps_transform_call():
     # Test __call__ method with estimmate
     tform.estimate(SRC, DST)
     trans_coord = tform(coords)
-    trans_coord[:, 0]
     yy_trans = trans_coord[:, 1]
 
     expected_yy = np.array([0, 1.0, 2.0, 3.0, 4.0,

@@ -50,30 +50,31 @@ chess = ski.data.checkerboard()
 src = np.array([[3.6929, 10.3819],[6.5827, 8.8386], [6.7766, 12.0866], [4.8189, 11.2047], [5.6969, 10.0748]])
 dst = np.array([[3.9724, 6.5354], [6.6969, 4.1181], [6.5394, 7.2362], [5.4016, 6.4528], [5.7756, 5.1142]])
 
-
+src *= chess.shape[0]//15
+dst *= chess.shape[0]//15
 # Fit the thin plate spline from output to input
 tps = ski.transform.TpsTransform()
 warped_img = ski.transform.tps_warp(chess, src, dst, grid_scaling=1)
 
 
 fig, axs = plt.subplots(1, 2, figsize=(16, 8))
-axs[0].axis('off')
-axs[1].axis('off')
+# axs[0].axis('off')
+# axs[1].axis('off')
 
 labels = ['1', '2', '3', '4', '5']  # Adjust the number of labels to match the number of points
 
-# axs[0].imshow(img[..., ::-1], origin='upper')
-axs[0].scatter(src[:, 0] * chess.shape[0], src[:, 1] * chess.shape[1], marker='x', color='black')
+axs[0].imshow(chess[..., ::-1], origin='upper', cmap='gray')
+axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):
-    axs[0].annotate(label, (src[:, 0][i] * chess.shape[0], src[:, 1][i] * chess.shape[1]),
+    axs[0].annotate(label, (src[:, 0][i], src[:, 1][i] ),
                     textcoords="offset points", xytext=(0, 10), ha='center', color='red')
 
-# axs[1].imshow(warped[..., ::-1], origin='upper')
-axs[1].scatter(dst[:, 0] * warped_img.shape[0], dst[:, 1] * warped_img.shape[1], marker='x', color='black')
+axs[1].imshow(warped_img[..., ::-1], origin='upper', cmap='gray')
+axs[1].scatter(dst[:, 0] , dst[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):
-    axs[1].annotate(label, (dst[:, 0][i] * warped_img.shape[0], dst[:, 1][i] * warped_img.shape[1]),
+    axs[1].annotate(label, (dst[:, 0][i] , dst[:, 1][i] ),
                     textcoords="offset points", xytext=(0, 10), ha='center', color='red')
 
 plt.show()
@@ -93,7 +94,6 @@ import skimage as ski
 
 samp = np.linspace(-2, 2, 4)
 xx, yy = np.meshgrid(samp, samp)
-coords= np.meshgrid(samp, samp)
 
 # Make source points
 source_xy = np.column_stack((xx.ravel(), yy.ravel()))
