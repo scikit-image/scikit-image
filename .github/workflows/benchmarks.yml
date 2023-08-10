@@ -45,8 +45,8 @@ jobs:
         id: prepare-ccache
         shell: bash -l {0}
         run: |
-          echo "::set-output name=key::benchmark-$RUNNER_OS"
-          echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
+          echo "key=benchmark-$RUNNER_OS" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
           ccache -p
           ccache -z
 

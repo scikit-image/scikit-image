@@ -1,29 +1,26 @@
 import numpy as np
-import unittest
+import pytest
 
-from tempfile import NamedTemporaryFile
-
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import imread, imsave, use_plugin, reset_plugins, plugin_order
 from skimage._shared import testing
 
-from pytest import importorskip, raises, fixture
 
-importorskip('SimpleITK')
-
-np.random.seed(0)
+pytest.importorskip('SimpleITK')
 
 
-def teardown():
+@pytest.fixture(autouse=True)
+def use_simpleitk_plugin():
+    """Ensure that SimpleITK plugin is used."""
+    use_plugin('simpleitk')
+    yield
     reset_plugins()
 
 
-@fixture(autouse=True)
-def setup_plugin():
-    """This ensures that `use_plugin` is directly called before all tests to
-    ensure that SimpleITK is used.
-    """
-    use_plugin('simpleitk')
-    yield
+def test_prefered_plugin():
+    order = plugin_order()
+    assert order["imread"][0] == "simpleitk"
+    assert order["imsave"][0] == "simpleitk"
+    assert order["imread_collection"][0] == "simpleitk"
 
 
 def test_imread_as_gray():
@@ -44,7 +41,7 @@ def test_bilevel():
 
 
 def test_imread_truncated_jpg():
-    with raises(RuntimeError):
+    with pytest.raises(RuntimeError):
         imread(testing.fetch('data/truncated.jpg'))
 
 
@@ -61,23 +58,21 @@ def test_imread_uint16_big_endian():
     np.testing.assert_array_almost_equal(img, expected)
 
 
-class TestSave(unittest.TestCase):
-    def roundtrip(self, dtype, x):
-        with NamedTemporaryFile(suffix='.mha') as f:
-            fname = f.name
-
-        imsave(fname, x)
-        y = imread(fname)
-
-        np.testing.assert_array_almost_equal(x, y)
-
-    def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
-
-                if np.issubdtype(dtype, np.floating):
-                    yield self.roundtrip, dtype, x
-                else:
-                    x = (x * 255).astype(dtype)
-                    yield self.roundtrip, dtype, x
+@pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32, np.float64])
+def test_imsave_roundtrip(shape, dtype, tmp_path):
+    if np.issubdtype(dtype, np.floating):
+        info_func = np.finfo
+    else:
+        info_func = np.iinfo
+    expected = np.linspace(
+        info_func(dtype).min, info_func(dtype).max,
+        endpoint=True,
+        num=np.prod(shape),
+        dtype=dtype
+    )
+    expected = expected.reshape(shape)
+    file_path = tmp_path / "roundtrip.mha"
+    imsave(file_path, expected)
+    actual = imread(file_path)
+    np.testing.assert_array_almost_equal(actual, expected)

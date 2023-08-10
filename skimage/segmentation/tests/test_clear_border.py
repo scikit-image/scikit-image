@@ -2,7 +2,6 @@ import numpy as np
 from skimage.segmentation import clear_border
 
 from skimage._shared.testing import assert_array_equal, assert_
-from skimage._shared._warnings import expected_warnings
 
 
 def test_clear_border():

@@ -3,8 +3,6 @@ import skimage.io as io
 from skimage._shared import testing
 
 testing.pytest.importorskip('astropy')
-from astropy.io import fits
-import skimage.io._plugins.fits_plugin as fplug
 
 
 def test_fits_plugin_import():

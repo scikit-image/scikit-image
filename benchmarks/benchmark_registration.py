@@ -27,10 +27,6 @@ class RegistrationSuite:
     params = [(np.float32, np.float64)]
 
     def setup(self, *args):
-        try:
-            from skimage.registration import optical_flow_tvl1
-        except ImportError:
-            raise NotImplementedError("optical_flow_tvl1 unavailable")
         I0, I1, _ = data.stereo_motorcycle()
         self.I0 = rgb2gray(I0)
         self.I1 = rgb2gray(I1)
@@ -60,10 +56,10 @@ class PhaseCrossCorrelationRegistration:
 
     def time_phase_cross_correlation(self, ndims, image_size, upsample_factor,
                                      *args):
-        result = phase_cross_correlation(self.reference_image,
-                                         self.shifted_image,
-                                         upsample_factor=upsample_factor,
-                                         space="fourier")
+        phase_cross_correlation(self.reference_image,
+                                self.shifted_image,
+                                upsample_factor=upsample_factor,
+                                space="fourier")
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -81,7 +77,7 @@ class PhaseCrossCorrelationRegistration:
 
     def peakmem_phase_cross_correlation(self, ndims, image_size,
                                         upsample_factor, *args):
-        result = phase_cross_correlation(self.reference_image,
-                                         self.shifted_image,
-                                         upsample_factor=upsample_factor,
-                                         space="fourier")
+        phase_cross_correlation(self.reference_image,
+                                self.shifted_image,
+                                upsample_factor=upsample_factor,
+                                space="fourier")

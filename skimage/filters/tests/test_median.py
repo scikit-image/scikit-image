@@ -3,7 +3,6 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy import ndimage
 
-from skimage._shared.testing import expected_warnings
 from skimage.filters import median, rank
 
 

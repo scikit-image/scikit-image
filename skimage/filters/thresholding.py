@@ -227,7 +227,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     if any(b % 2 == 0 for b in block_size):
         raise ValueError(f'block_size must be odd! Given block_size '
                          f'{block_size} contains even values.')
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     thresh_image = np.zeros(image.shape, dtype=float_dtype)
     if method == 'generic':
@@ -725,6 +725,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
 
     # Stop the iterations when the difference between the
     # new and old threshold values is less than the tolerance
+    # or if the background mode has only one value left,
+    # since log(0) is not defined.
 
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1),
@@ -740,6 +742,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             mean_back = np.average(bin_centers[background],
                                    weights=hist[background])
 
+            if mean_back == 0:
+                break
+
             t_next = ((mean_back - mean_fore)
                       / (np.log(mean_back) - np.log(mean_fore)))
 
@@ -752,6 +757,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None,
             foreground = (image > t_curr)
             mean_fore = np.mean(image[foreground])
             mean_back = np.mean(image[~foreground])
+
+            if mean_back == 0.0:
+                break
 
             t_next = ((mean_back - mean_fore)
                       / (np.log(mean_back) - np.log(mean_fore)))

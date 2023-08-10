@@ -1,15 +1,30 @@
 name: Lint
 
-on: [push, pull_request]
+on: [push, pull_request, merge_group]
 
 permissions:
   contents: read
 
 jobs:
   pre-commit:
-    name: pre-commit-hooks
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-      - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install packages
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements/developer.txt
+          pip list
+
+      - name: Lint
+        run: pre-commit run --all-files --show-diff-on-failure --color always

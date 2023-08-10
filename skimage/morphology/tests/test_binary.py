@@ -4,7 +4,6 @@ from numpy.testing import assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
 from skimage import data, color, morphology
-from skimage._shared._warnings import expected_warnings
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray
 
@@ -56,7 +55,7 @@ def _get_decomp_test_data(function, ndim=2):
         img = np.zeros((17, ) * ndim, dtype=np.uint8)
         img[8, 8] = 1
     else:
-        img = data.binary_blobs(32, n_dim=ndim, seed=1)
+        img = data.binary_blobs(32, n_dim=ndim, rng=1)
     return img
 
 

@@ -11,6 +11,7 @@ python_sources = [
   'test_random_noise.py',
   'test_regular_grid.py',
   'test_shape.py',
+  'test_slice_along_axes.py',
   'test_unique_rows.py'
 ]
 

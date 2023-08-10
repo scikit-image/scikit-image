@@ -4,7 +4,7 @@ import pytest
 from skimage import data, morphology, util
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (assert_allclose, assert_array_almost_equal,
-                                     assert_equal, fetch, test_parallel)
+                                     assert_equal, fetch, run_in_parallel)
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
@@ -59,10 +59,42 @@ ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
 ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
+@pytest.mark.parametrize(
+    'func',
+    [
+        rank.autolevel,
+        rank.equalize,
+        rank.gradient,
+        rank.maximum,
+        rank.mean,
+        rank.geometric_mean,
+        rank.subtract_mean,
+        rank.median,
+        rank.minimum,
+        rank.modal,
+        rank.enhance_contrast,
+        rank.pop,
+        rank.sum,
+        rank.threshold,
+        rank.noise_filter,
+        rank.entropy,
+        rank.otsu,
+        rank.majority
+    ],
+)
+def test_1d_input_raises_error(func):
+    image = np.arange(10)
+    footprint = disk(3)
+    with pytest.raises(
+        ValueError, match='`image` must have 2 or 3 dimensions, got 1'
+    ):
+        func(image, footprint)
+
+
 class TestRank:
     def setup_method(self):
         np.random.seed(0)
-        # This image is used along with @test_parallel
+        # This image is used along with @run_in_parallel
         # to ensure that the same seed is used for each thread.
         self.image = np.random.rand(25, 25)
         np.random.seed(0)
@@ -77,7 +109,7 @@ class TestRank:
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter, outdt):
-        @test_parallel(warnings_matching=['Possible precision loss'])
+        @run_in_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs[filter]
             if outdt is not None:
@@ -134,7 +166,7 @@ class TestRank:
                    'noise_filter', 'entropy']
     )
     def test_rank_filters_3D(self, filter, outdt):
-        @test_parallel(warnings_matching=['Possible precision loss'])
+        @run_in_parallel(warnings_matching=['Possible precision loss'])
         def check():
             expected = self.refs_3d[filter]
             if outdt is not None:

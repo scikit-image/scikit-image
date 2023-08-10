@@ -65,7 +65,7 @@ import numpy as np
 
 from skimage.transform import hough_line, hough_line_peaks
 from skimage.feature import canny
-from skimage.draw import line
+from skimage.draw import line as draw_line
 from skimage import data
 
 import matplotlib.pyplot as plt
@@ -76,8 +76,8 @@ from matplotlib import cm
 image = np.zeros((200, 200))
 idx = np.arange(25, 175)
 image[idx, idx] = 255
-image[line(45, 25, 25, 175)] = 255
-image[line(25, 135, 175, 155)] = 255
+image[draw_line(45, 25, 25, 175)] = 255
+image[draw_line(25, 135, 175, 155)] = 255
 
 # Classic straight-line Hough transform
 # Set a precision of 0.5 degree.

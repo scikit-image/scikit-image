@@ -28,6 +28,7 @@ class PeakLocalMaxSuite:
         self.dist = ndi.distance_transform_edt(mask)
 
     def time_peak_local_max(self):
-        local_max = peak_local_max(
+        peak_local_max(
             self.dist, labels=self.labels,
-            min_distance=20, exclude_border=False, **peak_kwargs)
+            min_distance=20, exclude_border=False, **peak_kwargs
+        )

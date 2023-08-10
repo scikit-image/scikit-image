@@ -22,7 +22,6 @@ by Almar Klein in 2012. Adapted for scikit-image in 2016.
 # Cython specific imports
 import numpy as np
 cimport numpy as cnp
-import cython
 cnp.import_array()
 
 # Enable low level memory management
@@ -32,8 +31,8 @@ from libc.stdlib cimport malloc, free
 cdef cnp.float64_t FLT_EPSILON = np.spacing(1.0) #0.0000001
 
 # Define abs function for doubles
-cdef inline cnp.float64_t dabs(cnp.float64_t a): return a if a>=0 else -a
-cdef inline int imin(int a, int b): return a if a<b else b
+cdef inline cnp.float64_t dabs(cnp.float64_t a) noexcept: return a if a>=0 else -a
+cdef inline int imin(int a, int b) noexcept: return a if a<b else b
 
 # todo: allow dynamic isovalue?
 # todo: can we disable Cython from checking for zero division? Sometimes we know that it never happens!
@@ -243,7 +242,7 @@ cdef class Cell:
         free(self._faces)
 
 
-    cdef void _increase_size_vertices(self):
+    cdef void _increase_size_vertices(self) noexcept:
         """ Increase the size of the vertices array by a factor two.
         """
         # Allocate new array
@@ -275,7 +274,7 @@ cdef class Cell:
         self._vertexMaxCount = newMaxCount
 
 
-    cdef void _increase_size_faces(self):
+    cdef void _increase_size_faces(self) noexcept:
         """ Increase the size of the faces array by a factor two.
         """
         # Allocate new array
@@ -311,7 +310,7 @@ cdef class Cell:
 
 
     cdef void add_gradient(self, int vertexIndex, cnp.float32_t gx,
-                           cnp.float32_t gy, cnp.float32_t gz):
+                           cnp.float32_t gy, cnp.float32_t gz) noexcept:
         """ Add a gradient value to the vertex corresponding to the given index.
         """
         self._normals[vertexIndex*3+0] += gx
@@ -320,7 +319,7 @@ cdef class Cell:
 
 
     cdef void add_gradient_from_index(self, int vertexIndex, int i,
-                                      cnp.float32_t strength):
+                                      cnp.float32_t strength) noexcept:
         """ Add a gradient value to the vertex corresponding to the given index.
         vertexIndex is the index in the large array of vertices that is returned.
         i is the index of the array of vertices 0-7 for the current cell.
@@ -379,7 +378,7 @@ cdef class Cell:
     def get_faces(self):
         faces = np.empty((self._faceCount,), np.int32)
         cdef int [:] faces_ = faces
-        cdef int i, j
+        cdef int i
         for i in range(self._faceCount):
             faces_[i] = self._faces[i]
         return faces
@@ -387,7 +386,7 @@ cdef class Cell:
     def get_values(self):
         values = np.empty((self._vertexCount,), np.float32)
         cdef cnp.float32_t [:] values_ = values
-        cdef int i, j
+        cdef int i
         for i in range(self._vertexCount):
             values_[i] = self._values[i]
         return values
@@ -395,7 +394,7 @@ cdef class Cell:
 
     ## Called from marching cube function
 
-    cdef void new_z_value(self):
+    cdef void new_z_value(self) noexcept:
         """ This method should be called each time a new z layer is entered.
         We will swap the layers with face information and empty the second.
         """
@@ -409,7 +408,7 @@ cdef class Cell:
 
     cdef void set_cube(self,    cnp.float64_t isovalue, int x, int y, int z, int step,
                                 cnp.float64_t v0, cnp.float64_t v1, cnp.float64_t v2, cnp.float64_t v3,
-                                cnp.float64_t v4, cnp.float64_t v5, cnp.float64_t v6, cnp.float64_t v7):
+                                cnp.float64_t v4, cnp.float64_t v5, cnp.float64_t v6, cnp.float64_t v7) noexcept:
         """ Set the cube to the new location.
 
         Set the values of the cube corners. The isovalue is subtracted
@@ -452,7 +451,7 @@ cdef class Cell:
         self.v12_calculated = 0
 
 
-    cdef void add_triangles(self, Lut lut, int lutIndex, int nt):
+    cdef void add_triangles(self, Lut lut, int lutIndex, int nt) noexcept:
         """ Add triangles.
 
         The vertices for the triangles are specified in the given
@@ -475,7 +474,7 @@ cdef class Cell:
                 self._add_face_from_edge_index(vi)
 
 
-    cdef void add_triangles2(self, Lut lut, int lutIndex, int lutIndex2, int nt):
+    cdef void add_triangles2(self, Lut lut, int lutIndex, int lutIndex2, int nt) noexcept:
         """ Same as add_triangles, except that now the geometry is in a LUT
         with 3 dimensions, and an extra index is provided.
 
@@ -493,7 +492,7 @@ cdef class Cell:
 
     ## Used internally
 
-    cdef void _add_face_from_edge_index(self, int vi):
+    cdef void _add_face_from_edge_index(self, int vi) noexcept:
         """ Add one face from an edge index. Only adds a face if the
         vertex already exists. Otherwise also adds a vertex and applies
         interpolation.
@@ -611,7 +610,6 @@ cdef class Cell:
         # Init indices, both are corrected below
         cdef int i = self.nx * self.y + self.x  # Index of cube to get vertex at
         cdef int j = 0 # Vertex number for that cell
-        cdef int vi_ = vi
 
         cdef int *faceLayer
 
@@ -657,7 +655,7 @@ cdef class Cell:
         return 4*i + j
 
 
-    cdef void prepare_for_adding_triangles(self):
+    cdef void prepare_for_adding_triangles(self) noexcept:
         """ Calculates some things to help adding the triangles:
         array with corner values, max corner value, gradient at each corner.
         """
@@ -700,7 +698,7 @@ cdef class Cell:
         self.vg[7*3+0], self.vg[7*3+1], self.vg[7*3+2] = self.v7-self.v6, self.v4-self.v7, self.v3-self.v7
 
 
-    cdef void calculate_center_vertex(self):
+    cdef void calculate_center_vertex(self) noexcept:
         """ Calculate interpolated center vertex and its gradient.
         """
         cdef cnp.float64_t v0, v1, v2, v3, v4, v5, v6, v7
@@ -956,7 +954,7 @@ def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
     # Typedef variables
     cdef int x, y, z, x_st, y_st, z_st
     cdef int nt
-    cdef int case, config, subconfig
+    cdef int case, config
     cdef bint no_mask = mask is None
     # Unfortunately specifying a step in range() significantly degrades
     # performance. Therefore we use a while loop.
@@ -1009,7 +1007,7 @@ def marching_cubes(cnp.float32_t[:, :, :] im not None, cnp.float64_t isovalue,
 
 
 
-cdef void the_big_switch(LutProvider luts, Cell cell, int case, int config):
+cdef void the_big_switch(LutProvider luts, Cell cell, int case, int config) noexcept:
     """ The big switch (i.e. if-statement) that I meticulously ported from
     the source code provided by Lewiner et. al.
 
@@ -1288,7 +1286,7 @@ cdef int test_face(Cell cell, int face):
         absFace *= -1
 
     # Get values of corners A B C D
-    cdef cnp.float64_t A, B, C, D
+    cdef cnp.float64_t A=0, B=0, C=0, D=0
     if absFace == 1:
         A, B, C, D = cell.v0, cell.v4, cell.v5, cell.v1
     elif absFace == 2:

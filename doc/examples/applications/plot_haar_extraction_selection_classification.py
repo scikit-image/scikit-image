@@ -24,7 +24,6 @@ References
        :DOI:`10.1109/CVPR.2001.990517`
 
 """
-import sys
 from time import time
 
 import numpy as np

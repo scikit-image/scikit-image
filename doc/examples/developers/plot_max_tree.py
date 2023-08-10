@@ -161,7 +161,6 @@ def plot_tree(graph, positions, ax, *, title='', labels=None,
     nx.draw_networkx(graph, pos=positions, ax=ax,
                      node_size=40, node_shape='s', node_color='white',
                      font_size=font_size, labels=labels)
-    xlimit = ax.get_xlim()
     for v in range(image_rav.min(), image_rav.max() + 1):
         ax.hlines(v - 0.5, -3, 10, linestyles='dotted')
         ax.text(-3, v - 0.15, f"val: {v}", fontsize=text_size)

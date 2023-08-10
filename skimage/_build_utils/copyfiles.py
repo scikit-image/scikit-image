@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/env python
 """ Platform independent file copier script
 """
 

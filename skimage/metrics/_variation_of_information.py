@@ -12,7 +12,7 @@ def variation_of_information(image0=None, image1=None, *, table=None,
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If X is the ground-truth segmentation, then H(X|Y) can be interpreted
-    as the amount of under-segmentation and H(X|Y) as the amount
+    as the amount of under-segmentation and H(Y|X) as the amount
     of over-segmentation. In other words, a perfect over-segmentation
     will have H(X|Y)=0 and a perfect under-segmentation will have H(Y|X)=0.
 

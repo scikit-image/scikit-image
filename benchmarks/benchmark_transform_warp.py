@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from skimage.transform import SimilarityTransform, warp, resize_local_mean
 import warnings
@@ -51,8 +50,8 @@ class WarpSuite:
     def time_to_float64(self, dtype_in, N, order):
         """Test the case where want to upvert to float64 for continued
         transformations."""
-        result = warp(self.image, self.tform, order=self.order,
-                      preserve_range=True)
+        warp(self.image, self.tform, order=self.order,
+             preserve_range=True)
 
 
 class ResizeLocalMeanSuite:

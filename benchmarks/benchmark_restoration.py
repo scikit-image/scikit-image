@@ -1,10 +1,8 @@
 import inspect
-import os
 
 import numpy as np
 import scipy.ndimage as ndi
 
-import skimage
 from skimage.data import camera
 from skimage import restoration, data, color
 from skimage.morphology import binary_dilation
@@ -158,7 +156,7 @@ class RollingBall:
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
-        from skimage.restoration.rolling_ball import ellipsoid_kernel
+        from skimage.restoration._rolling_ball import ellipsoid_kernel
         image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(

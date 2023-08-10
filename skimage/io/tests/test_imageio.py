@@ -1,19 +1,21 @@
 from tempfile import NamedTemporaryFile
 
 import numpy as np
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import imread, imsave,plugin_order
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_almost_equal, TestCase, fetch
-from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import fetch
+
+import pytest
 
 
-def setup():
-    use_plugin('imageio')
-
-
-def teardown():
-    reset_plugins()
+def test_prefered_plugin():
+    # Don't call use_plugin("imageio") before, this way we test that imageio is used
+    # by default
+    order = plugin_order()
+    assert order["imread"][0] == "imageio"
+    assert order["imsave"][0] == "imageio"
+    assert order["imread_collection"][0] == "imageio"
 
 
 def test_imageio_as_gray():
@@ -40,34 +42,43 @@ def test_imageio_truncated_jpg():
         imread(fetch('data/truncated.jpg'))
 
 
-class TestSave(TestCase):
+class TestSave:
 
-    def roundtrip(self, x, scaling=1):
-        with NamedTemporaryFile(suffix='.png') as f:
-            fname = f.name
-
-        imsave(fname, x)
-        y = imread(fname)
-
-        assert_array_almost_equal((x * scaling).astype(np.int32), y)
-
-    def test_imsave_roundtrip(self):
-        dtype = np.uint8
-        np.random.seed(0)
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
-
-            if np.issubdtype(dtype, np.floating):
-                yield self.roundtrip, x, 255
-            else:
-                x = (x * 255).astype(dtype)
-                yield self.roundtrip, x
+    @pytest.mark.parametrize(
+        "shape,dtype", [
+            # float32, float64 can't be saved as PNG and raise
+            # uint32 is not roundtripping properly
+            ((10, 10), np.uint8),
+            ((10, 10), np.uint16),
+            ((10, 10, 2), np.uint8),
+            ((10, 10, 3), np.uint8),
+            ((10, 10, 4), np.uint8),
+        ]
+    )
+    def test_imsave_roundtrip(self, shape, dtype, tmp_path):
+        if np.issubdtype(dtype, np.floating):
+            min_ = 0
+            max_ = 1
+        else:
+            min_ = 0
+            max_ = np.iinfo(dtype).max
+        expected = np.linspace(
+            min_, max_,
+            endpoint=True,
+            num=np.prod(shape),
+            dtype=dtype
+        )
+        expected = expected.reshape(shape)
+        file_path = tmp_path / "roundtrip.png"
+        imsave(file_path, expected)
+        actual = imread(file_path)
+        np.testing.assert_array_almost_equal(actual, expected)
 
     def test_bool_array_save(self):
         with NamedTemporaryFile(suffix='.png') as f:
             fname = f.name
 
-        with expected_warnings(['.* is a boolean image']):
+        with pytest.warns(UserWarning, match=r'.* is a boolean image'):
             a = np.zeros((5, 5), bool)
             a[2, 2] = True
             imsave(fname, a)

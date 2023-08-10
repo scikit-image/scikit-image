@@ -61,7 +61,7 @@ model.estimate(data)
 # robustly fit line only using inlier data with RANSAC algorithm
 model_robust, inliers = ransac(data, LineModelND, min_samples=2,
                                residual_threshold=1, max_trials=1000)
-outliers = inliers == False
+outliers = (inliers == False)
 
 # generate coordinates of estimated models
 line_x = np.arange(-250, 250)
@@ -84,7 +84,6 @@ plt.show()
 
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from skimage.measure import LineModelND, ransac
 
 

@@ -9,7 +9,6 @@ The title of each plot indicates the call of the function.
 
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 

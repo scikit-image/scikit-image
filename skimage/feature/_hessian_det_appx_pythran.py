@@ -105,9 +105,7 @@ def _hessian_matrix_det(img, sigma):
     height, width = img.shape
     s2 = (size - 1) // 2
     s3 = size // 3
-    l = size // 3
     w = size
-    b = (size - 1) // 2
     out = np.empty_like(img, dtype=np.float64)
     w_i = 1.0 / size / size
 

@@ -16,7 +16,6 @@ closing stops the filling as soon as a maximal extension is reached. The line
 is therefore not filled and therefore not extracted by the difference.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 from skimage.morphology import diameter_closing
 from skimage import data

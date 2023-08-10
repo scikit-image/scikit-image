@@ -24,7 +24,6 @@ Inner porosities are represented in red.
 
 .. [1] https://en.wikipedia.org/wiki/Euler_characteristic
 """
-from mpl_toolkits.mplot3d import Axes3D
 from skimage.measure import euler_number, label
 import matplotlib.pyplot as plt
 import numpy as np

@@ -11,11 +11,13 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 from numpy import testing
-from numpy.testing import (assert_array_equal, assert_array_almost_equal,
-                           assert_array_less, assert_array_almost_equal_nulp,
-                           assert_equal, TestCase, assert_allclose,
-                           assert_almost_equal, assert_, assert_warns,
-                           assert_no_warnings)
+from numpy.testing import (
+    TestCase, assert_, assert_warns, assert_no_warnings,
+    assert_equal, assert_almost_equal,
+    assert_array_equal, assert_allclose,
+    assert_array_almost_equal, assert_array_almost_equal_nulp,
+    assert_array_less
+)
 
 import warnings
 
@@ -24,15 +26,17 @@ from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
 
-
-SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
-
 import pytest
+
+
 skipif = pytest.mark.skipif
 xfail = pytest.mark.xfail
 parametrize = pytest.mark.parametrize
 raises = pytest.raises
 fixture = pytest.fixture
+
+SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
+
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
@@ -205,8 +209,6 @@ def setup_test():
     warnings.simplefilter('default')
 
     if _error_on_warnings:
-        from scipy import signal, ndimage, special, optimize, linalg
-        from scipy.io import loadmat
 
         np.random.seed(0)
 
@@ -265,6 +267,37 @@ def setup_test():
             category=DeprecationWarning
         )
 
+        # Temporary warning raised by imageio about change in Pillow. May be removed
+        # once https://github.com/python-pillow/Pillow/pull/7125 is shipped in the
+        # minimal required version of pillow (probably the release after Pillow 9.5.0)
+        warnings.filterwarnings(
+            "default",
+            message=(
+                r"Loading 16-bit \(uint16\) PNG as int32 due to limitations in "
+                r"pillow's PNG decoder\. This will be fixed in a future version of "
+                r"pillow which will make this warning dissapear\."
+            ),
+            category=UserWarning,
+        )
+
+        # Temporary warning raised by scipy. May be removed when scipy 1.12 is
+        # minimum supported version and we replace tol with rtol
+        warnings.filterwarnings(
+            "default",
+            message=(
+                "'scipy.sparse.linalg.cg' keyword argument 'tol' is deprecated in "
+                "favor of 'rtol' and will be removed in SciPy v.1.14.0."
+            ),
+            category=DeprecationWarning,
+        )
+
+
+        warnings.filterwarnings(
+            "default",
+            message=("The figure layout has changed to tight"),
+            category=UserWarning,
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
@@ -285,8 +318,7 @@ def fetch(data_filename):
                     allow_module_level=True)
 
 
-@pytest.mark.skip()
-def test_parallel(num_threads=2, warnings_matching=None):
+def run_in_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -319,7 +351,7 @@ def test_parallel(num_threads=2, warnings_matching=None):
                 for thread in threads:
                     thread.start()
 
-                result = func(*args, **kwargs)
+                func(*args, **kwargs)
 
                 for thread in threads:
                     thread.join()

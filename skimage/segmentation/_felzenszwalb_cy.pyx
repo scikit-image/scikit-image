@@ -95,7 +95,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
     # inner cost of segments
     cdef cnp.ndarray[cnp.float64_t, ndim=1] cint = np.zeros(width * height)
     cdef cnp.intp_t seg0, seg1, seg_new, e
-    cdef cnp.float32_t cost, inner_cost0, inner_cost1
+    cdef cnp.float32_t inner_cost0, inner_cost1
     cdef Py_ssize_t num_costs = costs.size
 
     with nogil:

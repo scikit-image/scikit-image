@@ -5,27 +5,28 @@ Installing scikit-image
 
 How you should install ``scikit-image`` depends on your needs and skills:
 
-- Simplest solution:
-  `scientific Python distribution <#scientific-python-distributions>`_.
+- First, ensure that you have Python installed.
+  Two popular alternatives are the pip-based
+  `Python.org installers <https://www.python.org/downloads/>`_
+  and the conda-based
+  `miniforge <https://github.com/conda-forge/miniforge>`_.
 
-- If you can install Python packages and work in virtual environments:
+- Install `scikit-image` via `pip <#install-via-pip>`_ or `conda
+  <#install-via-conda>`_, as appropriate.
 
-  - `pip <#install-via-pip>`_
-
-  - `conda <#install-via-conda>`_
-
-- Easy solution but with pitfalls: `system package manager <#system-package-managers>`_ (yum, apt, ...).
-
-- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_.
+- Or, `build the package from source
+  <#installing-scikit-image-for-contributors>`_.
+  Do this if you'd like to contribute to development.
 
 Supported platforms
 ------------------------------------------------------------------------------
 
 - Windows 64-bit on x86 processors
-- Mac OS X on x86 processors
+- macOS on x86 and M (ARM) processors
 - Linux 64-bit on x86 processors
 
-For information on other platforms, see `other platforms <#other-platforms>`_.
+While we do not officially support other platforms, you could still
+try `building from source <#building-from-source>`_.
 
 Version check
 ------------------------------------------------------------------------------
@@ -48,28 +49,6 @@ or, from the command line:
 
 You'll see the version number if ``scikit-image`` is installed and
 an error message otherwise.
-
-Scientific Python distributions
-------------------------------------------------------------------------------
-
-In a single install these give you Python,
-``scikit-image`` and libraries it depends on, and other useful scientific
-packages. They install into an isolated environment, so they won't conflict
-with any existing installed programs.
-
-Drawbacks are that the install can be large and you may not get
-the most recent ``scikit-image``.
-
-We recommend one of these distributions:
-
-- `Anaconda <https://www.anaconda.com/distribution/>`_
-- `Python(x,y) <https://python-xy.github.io/>`_
-- `WinPython <https://winpython.github.io/>`_
-
-When using the ``scikit-image``
-documentation, make sure it's for the version you've installed (see
-`Version check <#version-check>`_ above).
-
 
 Installation via pip and conda
 ------------------------------------------------------------------------------
@@ -177,45 +156,6 @@ is installed and then run this command:
 or call ``download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
 
-Other platforms
-------------------------------------------------------------------------------
-
-We still support Windows 32-bit on x86 processors but urge switching
-to Windows 64-bit.
-
-Unsupported platforms include:
-
-1. Linux on 32-bit x86 processors.
-2. Linux on 32-bit on ARM processors (Raspberry Pi running Raspbian):
-
-   - While we do not officially support this distribution, we point users to
-     `piwheels <https://wwww.piwheels.org>`_
-     and their
-     `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
-
-   - You may need to install additional system dependencies listed for
-     `imagecodecs <https://www.piwheels.org/project/imagecodecs/>`_.
-     See
-     `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>`_.
-
-3. Linux on 64-bit ARM processors (Nvidia Jetson):
-
-   - Follow the conversation on
-     `issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
-
-Although these platforms lack official support, many of the core
-developers have experience with them and can help with questions.
-
-If you want to install on an unsupported platform, try
-`building from source <#building-from-source>`_.
-
-Tell us which other platforms you'd like to see ``scikit-image`` on!
-We are very interested in how ``scikit-image`` gets
-`used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
-
-If you'd like to package ``scikit-image`` for an as-yet-unsupported platform,
-`reach out on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
-
 
 Additional help
 ------------------------------------------------------------------------------
@@ -243,7 +183,7 @@ We also make a few more assumptions about your system:
 - You have a C compiler set up.
 - You have a C++ compiler set up.
 - You are running a version of Python compatible with our system as listed
-  in our `setup.py file <https://github.com/scikit-image/scikit-image/blob/main/setup.py#L212>`_.
+  in our `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
   You have set up the `upstream` remote to point to our repository and `origin`
   to point to your fork.
@@ -256,28 +196,31 @@ This directory contains the following files:
     scikit-image
     ├── asv.conf.json
     ├── azure-pipelines.yml
-    ├── benchmarks
+    ├── benchmarks/
+    ├── CITATION.bib
     ├── CODE_OF_CONDUCT.md
     ├── CONTRIBUTING.rst
     ├── CONTRIBUTORS.txt
-    ├── doc
+    ├── doc/
     ├── INSTALL.rst
     ├── LICENSE.txt
-    ├── Makefile
     ├── MANIFEST.in
+    ├── meson.build
+    ├── meson.md
+    ├── pyproject.toml
     ├── README.md
     ├── RELEASE.txt
-    ├── requirements
+    ├── requirements/
     ├── requirements.txt
-    ├── setup.cfg
-    ├── setup.py
-    ├── skimage
+    ├── skimage/
     ├── TODO.txt
-    ├── tools
+    └── tools/
 
 All commands below are assumed to be running from the ``scikit-image``
 directory containing the files above.
 
+
+.. _build-env-setup:
 
 Build environment setup
 ------------------------------------------------------------------------------
@@ -291,24 +234,27 @@ Here we provide instructions for two popular environment managers:
 venv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When using ``venv``, you may find the following bash commands useful:
-
 .. code-block:: sh
 
-  # Create a virtualenv named ``skimage-dev``
-  python -m venv skimage-dev
-  # Activate it. On Linux and MacOS:
-  source skimage-dev/bin/activate
-  # Make sure that pip is up to date
-  pip install --upgrade pip
-  # Install all development and runtime dependencies of scikit-image
+  # Create a virtualenv named ``skimage-dev`` that lives outside of the repository.
+  # One common convention is to place it inside an ``envs`` directory under your home directory:
+  mkdir ~/envs
+  python -m venv ~/envs/skimage-dev
+  # Activate it
+  # (On Windows, please use ``skimage-dev\Scripts\activate``)
+  source ~/envs/skimage-dev/bin/activate
+  # Install main development and runtime dependencies
   pip install -r requirements.txt
-  # Build and install scikit-image from source
-  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
+  # Install build dependencies of scikit-image
+  pip install -r requirements/build.txt
+  # Build scikit-image from source
+  spin build
   # Test your installation
-  pytest --pyargs skimage
-
-On Windows, please use ``skimage-dev\Scripts\activate`` on the activation step.
+  spin test
+  # Build docs
+  spin docs
+  # Try the new version in IPython
+  spin ipython
 
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -327,12 +273,31 @@ before you get started.
   conda create --name skimage-dev
   # Activate it
   conda activate skimage-dev
-  # Install major development and runtime dependencies of scikit-image
-  conda install --file requirements/default.txt --file requirements/build.txt --file requirements/test.txt
-  # Install scikit-image from source
-  pip install -e . -vv  ## TODO: to be updated for meson (see meson.md)
+  # Install main development and runtime dependencies
+  conda install -c conda-forge --file requirements/default.txt
+  conda install -c conda-forge --file requirements/test.txt
+  conda install -c conda-forge pre-commit
+  # Install build dependencies of scikit-image
+  pip install -r requirements/build.txt
+  # Build scikit-image from source
+  spin build
   # Test your installation
-  pytest --pyargs skimage
+  spin test
+  # Build docs
+  spin docs
+  # Try the new version
+  spin python
+
+For more information about building and using the ``spin`` package, see ``meson.md``.
+
+Testing
+-------
+
+Test your installation for correct behavior using:
+
+.. code-block:: sh
+
+   pytest skimage
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -348,93 +313,15 @@ that have changed. Do so with the following commands:
     # Update the installation
     pip install -e . -vv
 
-Testing
--------
-
-``scikit-image`` has an extensive test suite that ensures correct
-execution on your system.  The test suite must pass before a pull
-request can be merged, and tests should be added to cover any
-modifications to the code base.
-
-We use the `pytest <https://docs.pytest.org/en/latest/>`__
-testing framework, with tests located in the various
-``skimage/submodule/tests`` folders.
-
-Our testing requirements are listed below:
-
-.. include:: ../../requirements/test.txt
-   :literal:
-
-
-Run all tests using:
-
-.. code-block:: sh
-
-    pytest skimage
-
-Or the tests for a specific submodule:
-
-.. code-block:: sh
-
-    pytest skimage/morphology
-
-Or tests from a specific file:
-
-.. code-block:: sh
-
-    pytest skimage/morphology/tests/test_gray.py
-
-Or a single test within that file:
-
-.. code-block:: sh
-
-    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
-
-Use ``--doctest-modules`` to run doctests. For example, run all tests and all
-doctests using:
-
-.. code-block:: sh
-
-    pytest --doctest-modules skimage
-
-Warnings during testing phase
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed. This might cause
-certain tests to fail if you are building scikit-image with versions of
-dependencies that were not tested at the time of the release. To disable
-failures on warnings, export the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests:
-
-.. code-block:: sh
-
-   export SKIMAGE_TEST_STRICT_WARNINGS=False
-   pytest --pyargs skimage
-
 Platform-specific notes
 ------------------------------------------------------------------------------
 
 **Windows**
 
-If you experience the error ``Error:unable to find vcvarsall.bat`` it means
-that your computer does not have recommended compilers for Python. You can
-either download and install Windows compilers from `here`_  or use
-`MinGW compilers`_ . If using `MinGW`, make sure to correctly configure
-``distutils`` by modifying (or create, if not existing) the configuration file
-``distutils.cfg`` (located for example at
-``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
-
-  [build]
-   compiler=mingw32
-
 A run-through of the compilation process for Windows is included in
 our `setup of Azure Pipelines`_ (a continuous integration service).
 
 .. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
-.. _here: https://wiki.python.org/moin/WindowsCompilers#Microsoft_Visual_C.2B-.2B-_14.0_standalone:_Visual_C.2B-.2B-_Build_Tools_2015_.28x86.2C_x64.2C_ARM.29
-.. _MinGW compilers: http://www.mingw.org/wiki/howto_install_the_mingw_gcc_compiler_suite
 
 **Debian and Ubuntu**
 
@@ -449,27 +336,27 @@ Full requirements list
 ----------------------
 **Build Requirements**
 
-.. include:: ../../requirements/build.txt
+.. include:: ../../../requirements/build.txt
    :literal:
 
 **Runtime Requirements**
 
-.. include:: ../../requirements/default.txt
+.. include:: ../../../requirements/default.txt
    :literal:
 
 **Test Requirements**
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 **Documentation Requirements**
 
-.. include:: ../../requirements/docs.txt
+.. include:: ../../../requirements/docs.txt
    :literal:
 
 **Developer Requirements**
 
-.. include:: ../../requirements/developer.txt
+.. include:: ../../../requirements/developer.txt
    :literal:
 
 **Data Requirements**
@@ -477,7 +364,7 @@ Full requirements list
 The full selection of demo datasets is only available with the
 following installed:
 
-.. include:: ../../requirements/data.txt
+.. include:: ../../../requirements/data.txt
    :literal:
 
 **Optional Requirements**
@@ -500,7 +387,7 @@ functionality is only available with the following installed:
     The ``dask`` module is used to speed up certain functions.
 
 
-.. include:: ../../requirements/optional.txt
+.. include:: ../../../requirements/optional.txt
   :literal:
 
 

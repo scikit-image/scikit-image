@@ -22,7 +22,6 @@ transformations, tutorial
 such transformations for various tasks such as image warping or parameter
 estimation.
 """
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 

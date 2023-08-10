@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 
-from skimage._shared.testing import expected_warnings
 from skimage.morphology import flood, flood_fill
 
 eps = 1e-12

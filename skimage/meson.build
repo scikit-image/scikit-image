@@ -29,42 +29,75 @@ if is_windows
   endif
 endif
 
-# NumPy include directory - needed in all submodules
-incdir_numpy = run_command(py3,
-  [
-    '-c',
-    'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
-  ],
-  check: true
-).stdout().strip()
+# When cross-compiling skimage, the compiler needs access to NumPy and Pythran
+# headers for the host platform (where the package will actually run). These
+# headers may be incompatible with any corresponding headers that might be
+# installed on the build system (where the compilation is performed). To make
+# sure that the compiler finds the right headers, paths can be configured in
+# the 'properties' section of a Meson cross file:
+#
+#   [properties]
+#   numpy-include-dir = '/path/to/host/numpy/includes'
+#   pythran-include-dir = '/path/to/host/pythran/includes'
+#
+# If a cross file is not provided or does not specify either of these
+# properties, fall back to running Python on the build system to query NumPy or
+# Pythran directly for the appropriate paths. This will detect appropriate
+# paths for native builds. (This might even work for certain build/host cross
+# combinations, but don't rely on that.)
+#
+# For more information about cross compilation in Meson, including a definition
+# of "build" and "host" in this context, refer to
+#
+#     https://mesonbuild.com/Cross-compilation.html
+
+# NumPy include directory
+incdir_numpy = meson.get_external_property('numpy-include-dir', 'not-given')
+if incdir_numpy == 'not-given'
+  # If not specified, try to query NumPy from the build python
+  incdir_numpy = run_command(py3,
+    [
+      '-c',
+      'import os; os.chdir(".."); import numpy; print(numpy.get_include())'
+    ],
+    check: true
+  ).stdout().strip()
+endif
 
 inc_np = include_directories(incdir_numpy)
 
 cc = meson.get_compiler('c')
 
-# Pythran include directory and build flags
-use_pythran = run_command(py3,
-  [
-    '-c',
-    'import os; print(os.environ.get("SCIPY_USE_PYTHRAN", 1))'
-  ],
-  check: true
-).stdout().strip() == '1'
+# Pythran include directory
+incdir_pythran = meson.get_external_property('pythran-include-dir', 'not-given')
+if incdir_pythran == 'not-given'
+  # If not specified, try to query Pythran from the build python
+  incdir_pythran = run_command(py3,
+    [
+      '-c',
+      'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
+    ],
+    check: true
+  ).stdout().strip()
+endif
 
-incdir_pythran = run_command(py3,
-  [
-    '-c',
-    'import os; os.chdir(".."); import pythran; print(os.path.dirname(pythran.__file__));'
-  ],
-  check: true
-).stdout().strip()
 inc_pythran = include_directories(incdir_pythran)
 
+# Pythran build flags
 cpp_args_pythran = [
   '-DENABLE_PYTHON_MODULE',
   '-D__PYTHRAN__=3',
   '-DPYTHRAN_BLAS_NONE'
 ]
+
+# Deal with M_PI & friends; add `use_math_defines` to c_args
+# Cython doesn't always get this correctly itself
+# explicitly add the define as a compiler flag for Cython-generated code.
+if is_windows
+  use_math_defines = ['-D_USE_MATH_DEFINES']
+else
+  use_math_defines = []
+endif
 
 # Don't use the deprecated NumPy C API. Define this to a fixed version instead of
 # NPY_API_VERSION in order not to break compilation for released SciPy versions
@@ -79,7 +112,6 @@ numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  '_build.py',
   'conftest.py'
 ]
 
@@ -104,7 +136,8 @@ c_undefined_ok = ['-Wno-maybe-uninitialized']
 # Suppress warning for deprecated Numpy API.
 # (Suppress warning messages emitted by #warning directives).
 # Replace with numpy_nodepr_api after Cython 3.0 is out
-cython_c_args += ['-Wno-cpp']
+_cpp_Wno_cpp = cpp.get_supported_arguments('-Wno-cpp')
+cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
 
 subdir('_shared')
