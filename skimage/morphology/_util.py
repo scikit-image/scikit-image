@@ -149,14 +149,14 @@ def _raveled_offsets_and_distances(
     weighted_offsets = offsets * spacing
     distances = np.sqrt(np.sum(weighted_offsets**2, axis=1))
     sorted_raveled_offsets = raveled_offsets[np.argsort(distances, kind="stable")]
-    sorted_distances = np.sort(distances)
+    sorted_distances = np.sort(distances, kind="stable")
 
     # If any dimension in image_shape is smaller than footprint.shape
     # duplicates might occur, remove them
     if any(x < y for x, y in zip(image_shape, footprint.shape)):
         # np.unique reorders, which we don't want
         _, indices = np.unique(sorted_raveled_offsets, return_index=True)
-        indices = np.sort(indices)
+        indices = np.sort(indices, kind="stable")
         sorted_raveled_offsets = sorted_raveled_offsets[indices]
         sorted_distances = sorted_distances[indices]
 
