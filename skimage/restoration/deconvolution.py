@@ -57,7 +57,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.wiener(img, psf, 0.1)
 
@@ -212,7 +212,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
     >>> deconvolved_img = restoration.unsupervised_wiener(img, psf)
 
@@ -383,7 +383,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> camera += 0.1 * camera.std() * rng.standard_normal(camera.shape)
     >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
 

@@ -205,7 +205,7 @@ def hough_line(image, theta=None):
     >>> img[35:45, 35:50] = 1
     >>> for i in range(90):
     ...     img[i, i] = 1
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> img += rng.random(img.shape) > 0.95
 
     Apply the Hough transform:

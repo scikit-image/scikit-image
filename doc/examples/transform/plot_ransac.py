@@ -36,7 +36,7 @@ from matplotlib import pyplot as plt
 
 from skimage.measure import LineModelND, ransac
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 # generate coordinates of line
 x = np.arange(-200, 200)

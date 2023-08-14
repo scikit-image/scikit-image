@@ -107,7 +107,7 @@ def _reshape_nd(arr, ndim, dim):
 
     Examples
     --------
-    >>> rng = np.random.default_rng()
+    >>> rng = np.random.default_rng(123)
     >>> arr = rng.random(7)
     >>> _reshape_nd(arr, 2, 0).shape
     (7, 1)

@@ -4,7 +4,7 @@ import pytest
 from skimage.util import slice_along_axes
 
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 
 def test_2d_crop_0():

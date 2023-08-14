@@ -2,7 +2,7 @@ import numpy as np
 from skimage.graph._graph import pixel_graph, central_pixel
 
 mask = np.array([[1, 0, 0], [0, 1, 1], [0, 1, 0]], dtype=bool)
-image = np.random.default_rng().random(mask.shape)
+image = np.random.default_rng(123).random(mask.shape)
 
 
 def test_small_graph():

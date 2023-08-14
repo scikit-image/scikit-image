@@ -33,7 +33,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from scipy import ndimage as ndi
 from skimage import data, filters, measure, segmentation
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 
 # segment nucleus
 nucleus = data.protein_transport()[0, 0, :, :180]

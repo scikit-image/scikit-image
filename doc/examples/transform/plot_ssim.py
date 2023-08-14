@@ -33,7 +33,7 @@ img = img_as_float(data.camera())
 rows, cols = img.shape
 
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
-rng = np.random.default_rng()
+rng = np.random.default_rng(123)
 noise[rng.random(size=noise.shape) > 0.5] *= -1
 
 img_noise = img + noise
