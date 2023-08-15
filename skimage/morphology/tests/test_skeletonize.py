@@ -11,39 +11,42 @@ from skimage.morphology._skeletonize import (G123_LUT, G123P_LUT,
                                              _generate_thin_luts)
 
 
+pytestmark = pytest.mark.filterwarnings("error:expected binary image:RuntimeWarning")
+
+
 class TestSkeletonize():
     def test_skeletonize_no_foreground(self):
-        im = np.zeros((5, 5))
+        im = np.zeros((5, 5), dtype=bool)
         result = skeletonize(im)
         assert_array_equal(result, np.zeros((5, 5)))
 
     def test_skeletonize_wrong_dim1(self):
-        im = np.zeros(5)
+        im = np.zeros(5, dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
-        im = np.zeros((5, 5, 5))
+        im = np.zeros((5, 5, 5), dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im, method='zhang')
 
     def test_skeletonize_wrong_method(self):
-        im=np.ones((5,5))
+        im = np.ones((5,5), dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im, method='foo')
 
     def test_skeletonize_all_foreground(self):
-        im = np.ones((3, 4))
+        im = np.ones((3, 4), dtype=bool)
         skeletonize(im)
 
     def test_skeletonize_single_point(self):
-        im = np.zeros((5, 5), np.uint8)
+        im = np.zeros((5, 5), dtype=bool)
         im[3, 3] = 1
         result = skeletonize(im)
         assert_array_equal(result, im)
 
     def test_skeletonize_already_thinned(self):
-        im = np.zeros((5, 5), np.uint8)
+        im = np.zeros((5, 5), dtype=bool)
         im[3, 1:-1] = 1
         im[2, -1] = 1
         im[4, 0] = 1
@@ -62,7 +65,7 @@ class TestSkeletonize():
 
     def test_skeletonize_num_neighbors(self):
         # an empty image
-        image = np.zeros((300, 300))
+        image = np.zeros((300, 300), dtype=bool)
 
         # foreground object 1
         image[10:-10, 10:100] = 1
@@ -92,7 +95,7 @@ class TestSkeletonize():
         assert not np.any(blocks == 4)
 
     def test_lut_fix(self):
-        im = np.zeros((6, 6), np.uint8)
+        im = np.zeros((6, 6), dtype=bool)
         im[1, 2] = 1
         im[2, 2] = 1
         im[2, 3] = 1
@@ -106,8 +109,15 @@ class TestSkeletonize():
                              [0, 0, 0, 1, 0, 0],
                              [0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 1],
-                             [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                             [0, 0, 0, 0, 0, 0]], dtype=bool)
         assert np.all(result == expected)
+
+    def test_nonbinary_warning(self):
+        image = np.ones((3, 3), dtype=float)
+        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
+            skeletonize(image, method="zhang")
+        assert len(messages) == 1
+        assert messages[0].filename == __file__, "warning points at wrong file"
 
 
 class TestThin():
@@ -120,36 +130,37 @@ class TestThin():
                        [0, 1, 1, 1, 1, 1, 0],
                        [0, 1, 1, 1, 1, 1, 0],
                        [0, 1, 1, 1, 1, 1, 0],
-                       [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                       [0, 0, 0, 0, 0, 0, 0]], dtype=bool)
         return ii
 
     def test_zeros(self):
-        assert np.all(thin(np.zeros((10, 10))) == False)
+        image = np.zeros((10, 10), dtype=bool)
+        assert np.all(thin(image) == False)
 
     def test_iter_1(self):
-        result = thin(self.input_image, 1).astype(np.uint8)
+        result = thin(self.input_image, 1).astype(bool)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 1, 0, 1, 1, 0, 0],
                              [0, 0, 1, 1, 1, 0, 0],
                              [0, 0, 1, 1, 1, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0],
-                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=bool)
         assert_array_equal(result, expected)
 
     def test_noiter(self):
-        result = thin(self.input_image).astype(np.uint8)
+        result = thin(self.input_image).astype(bool)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 1, 0, 1, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0],
-                             [0, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+                             [0, 0, 0, 0, 0, 0, 0]], dtype=bool)
         assert_array_equal(result, expected)
 
     def test_baddim(self):
-        for ii in [np.zeros(3), np.zeros((3, 3, 3))]:
+        for ii in [np.zeros(3, dtype=bool), np.zeros((3, 3, 3), dtype=bool)]:
             with pytest.raises(ValueError):
                 thin(ii)
 
@@ -158,6 +169,13 @@ class TestThin():
 
         assert_array_equal(g123, G123_LUT)
         assert_array_equal(g123p, G123P_LUT)
+
+    def test_nonbinary_warning(self):
+        image = np.ones((3, 3), dtype=float)
+        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
+            thin(image)
+        assert len(messages) == 1
+        assert messages[0].filename == __file__, "warning points at wrong file"
 
 
 class TestMedialAxis():
@@ -174,7 +192,7 @@ class TestMedialAxis():
 
     def test_vertical_line(self):
         '''Test a thick vertical line, issue #3861'''
-        img = np.zeros((9, 9))
+        img = np.zeros((9, 9), dtype=bool)
         img[:, 2] = 1
         img[:, 3] = 1
         img[:, 4] = 1
@@ -237,3 +255,13 @@ class TestMedialAxis():
         """Test medial_axis on an array of all zeros."""
         with expected_warnings(['`random_state` is a deprecated argument']):
             medial_axis(np.zeros((10, 10), bool), random_state=None)
+
+    def test_nonbinary_warning(self):
+        image = np.zeros((1, 5), dtype=float)
+        image[:, 1:-1] = True
+        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
+            result = medial_axis(image)
+        assert len(messages) == 1
+        assert messages[0].filename == __file__, "warning points at wrong file"
+        assert result.dtype is np.dtype("bool")
+        np.testing.assert_array_equal(result, image)

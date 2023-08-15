@@ -1,11 +1,14 @@
 """
 Algorithms for computing the skeleton of a binary image
 """
+
+import warnings
+
 import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.utils import check_nD, deprecate_kwarg
-from ..util import crop, img_as_ubyte
+from ..util import crop
 from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
@@ -49,8 +52,8 @@ def skeletonize(image, *, method=None):
     Examples
     --------
     >>> X, Y = np.ogrid[0:9, 0:9]
-    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
-    >>> ellipse
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
+    >>> ellipse.view(np.uint8)
     array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -61,7 +64,7 @@ def skeletonize(image, *, method=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -73,11 +76,17 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if image.dtype is not np.dtype("bool"):
+        warnings.warn(
+            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
+        )
+    image = image.astype(bool, copy=False)
+
     if method not in {'zhang', 'lee', None}:
         raise ValueError(f'skeletonize method should be either "lee" or "zhang", '
                          f'got {method}.')
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image.astype(bool, copy=False))
+        skeleton = skeletonize_2d(image)
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
@@ -135,8 +144,8 @@ def skeletonize_2d(image):
     Examples
     --------
     >>> X, Y = np.ogrid[0:9, 0:9]
-    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
-    >>> ellipse
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
+    >>> ellipse.view(np.uint8)
     array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -147,7 +156,7 @@ def skeletonize_2d(image):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -291,10 +300,10 @@ def thin(image, max_num_iter=None):
 
     Examples
     --------
-    >>> square = np.zeros((7, 7), dtype=np.uint8)
+    >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
     >>> square[0, 1] =  1
-    >>> square
+    >>> square.view(np.uint8)
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
@@ -303,7 +312,7 @@ def thin(image, max_num_iter=None):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     >>> skel = thin(square)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],
@@ -315,8 +324,12 @@ def thin(image, max_num_iter=None):
     # check that image is 2d
     check_nD(image, 2)
 
+    if image.dtype is not np.dtype("bool"):
+        warnings.warn(
+            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
+        )
     # convert image to uint8 with values in {0, 1}
-    skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
+    skel = np.asanyarray(image, dtype=bool).view(np.uint8)
 
     # neighborhood mask
     mask = np.array([[ 8,  4,   2],
@@ -411,9 +424,9 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     Examples
     --------
-    >>> square = np.zeros((7, 7), dtype=np.uint8)
+    >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
-    >>> square
+    >>> square.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
@@ -421,7 +434,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-    >>> medial_axis(square).astype(np.uint8)
+    >>> medial_axis(square).view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 1, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],
@@ -431,6 +444,10 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    if image.dtype is not np.dtype("bool"):
+        warnings.warn(
+            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=3
+        )
     global _eight_connect
     if mask is None:
         masked_image = image.astype(bool)
@@ -617,27 +634,25 @@ def skeletonize_3d(image):
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          f"got image.ndim = {image.ndim} instead.")
-    image = np.ascontiguousarray(image)
-    image = img_as_ubyte(image, force_copy=False)
+
+    if image.dtype is not np.dtype("bool"):
+        warnings.warn(
+            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
+        )
+    image_io = image.astype(bool, copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
-    image_o = image
     if image.ndim == 2:
-        image_o = image[np.newaxis, ...]
-    image_o = np.pad(image_o, pad_width=1, mode='constant')
-
-    # normalize to binary
-    maxval = image_o.max()
-    image_o[image_o != 0] = 1
+        image_io = image_io[np.newaxis, ...]
+    image_o = np.pad(image_io, pad_width=1, mode='constant')
 
     # do the computation
-    image_o = np.asarray(_compute_thin_image(image_o))
+    image_o = _compute_thin_image(image_o)
 
     # crop it back and restore the original intensity range
     image_o = crop(image_o, crop_width=1)
     if image.ndim == 2:
         image_o = image_o[0]
-    image_o *= maxval
 
     return image_o
