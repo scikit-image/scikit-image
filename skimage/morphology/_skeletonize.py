@@ -34,7 +34,7 @@ def skeletonize(image, *, method=None):
 
     See Also
     --------
-    medial_axis
+    medial_axis, skeletonize_2d, skeletonize_3d, thin
 
     References
     ----------
@@ -109,7 +109,7 @@ def skeletonize_2d(image):
 
     See Also
     --------
-    medial_axis
+    medial_axis, skeletonize, skeletonize_3d, thin
 
     Notes
     -----
@@ -267,7 +267,7 @@ def thin(image, max_num_iter=None):
 
     See Also
     --------
-    skeletonize, medial_axis
+    medial_axis, skeletonize, skeletonize_2d, skeletonize_3d
 
     Notes
     -----
@@ -384,7 +384,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     See Also
     --------
-    skeletonize
+    skeletonize, skeletonize_2d, skeletonize_3d, thin
 
     Notes
     -----
@@ -591,7 +591,7 @@ def skeletonize_3d(image):
 
     See Also
     --------
-    skeletonize, medial_axis
+    medial_axis, skeletonize, skeletonize_2d, thin
 
     Notes
     -----
