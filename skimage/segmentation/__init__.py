@@ -1,4 +1,4 @@
-"""Algorithms for image segmentation.
+"""Algorithms to partition images into meaningful regions or boundaries.
 """
 
 from ._expand_labels import expand_labels
