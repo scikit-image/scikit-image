@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import pytest
 from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 from skimage import data, feature
@@ -129,3 +130,24 @@ class TestCanny(unittest.TestCase):
 
         assert_equal(feature.canny(image_float, 1.0, low, high),
                      feature.canny(image_uint8, 1.0, 255 * low, 255 * high))
+
+    def test_full_mask_matches_no_mask(self):
+        """The masked and unmasked algorithms should return the same result.
+
+        """
+        image = data.camera()
+
+        for mode in ('constant', 'nearest', 'reflect'):
+            assert_equal(
+                feature.canny(image, mode=mode),
+                feature.canny(image, mode=mode, mask=np.ones_like(image, dtype=bool))
+        )
+
+    def test_unsupported_int64(self):
+        for dtype in (np.int64, np.uint64):
+            image = np.zeros((10, 10), dtype=dtype)
+            image[3, 3] = np.iinfo(dtype).max
+            with pytest.raises(
+                    ValueError, match="64-bit integer images are not supported"
+            ):
+                feature.canny(image)

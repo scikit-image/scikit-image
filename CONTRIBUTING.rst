@@ -4,22 +4,24 @@ How to contribute to scikit-image
 =================================
 
 Developing Open Source is great fun! Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ and tell us
-which of the following challenges you'd like to solve.
+developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
 
-* Mentoring is available for those new to scientific programming in Python.
-* If you're looking for something to implement or to fix, you can browse the
-  `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
-* The technical detail of the `development process`_ is summed up below.
-  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
+If you're looking for something to implement or to fix, you can browse the
+`open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
+
+.. warning::
+
+   Given the uncertainty around licensing of AI-generated code, we
+   require that you **not** make use of these tools during the development
+   of any contributions to scikit-image.
 
 .. contents::
    :local:
 
 Development process
 -------------------
-
-Here's the long and short of it:
+The following is a brief overview about how changes to source code and documentation
+can be contributed to scikit-image.
 
 1. If you are a first-time contributor:
 
@@ -27,11 +29,11 @@ Here's the long and short of it:
      <https://github.com/scikit-image/scikit-image>`_ and click the
      "fork" button to create your own copy of the project.
 
-   * Clone the project to your local computer::
+   * Clone (download) the repository with the project source on your local computer::
 
       git clone https://github.com/your-username/scikit-image.git
 
-   * Change the directory::
+   * Change into the root directory of the cloned repository::
 
       cd scikit-image
 
@@ -41,25 +43,16 @@ Here's the long and short of it:
 
    * Now, you have remote repositories named:
 
-     - ``upstream``, which refers to the ``scikit-image`` repository
-     - ``origin``, which refers to your personal fork
+     - ``upstream``, which refers to the ``scikit-image`` repository, and
+     - ``origin``, which refers to your personal fork.
 
-   * Next, you need to set up your build environment.
-     Please refer to :ref:`build-env-setup` for instructions.
+   * Next, :ref:`set up your build environment <build-env-setup>`.
 
-   * Finally, we recommend you use a pre-commit hook, which runs some auto-formatters
-     when you do a ``git commit``::
+   * Finally, we recommend that you use a pre-commit hook, which runs code
+     checkers and formatters each time you do a ``git commit``::
 
+       pip install pre-commit
        pre-commit install
-
-.. note::
-
-    Although our code is hosted on `github
-    <https://github.com/scikit-image/>`_, our datasets are stored on `gitlab
-    <https://gitlab.com/scikit-image/data>`_ and fetched with `pooch
-    <https://github.com/fatiando/pooch>`_. New datasets must be submitted on
-    gitlab. Once merged, the data registry ``skimage/data/_registry.py``
-    in the main Github repository can be updated.
 
 2. Develop your contribution:
 
@@ -95,7 +88,7 @@ Here's the long and short of it:
      to ask for review.
 
 For a more detailed discussion, read these :doc:`detailed documents
-<gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
+<../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
 4. Review process:
 
@@ -188,7 +181,7 @@ Guidelines
 * All code should be documented, to the same
   `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_ as NumPy and SciPy.
 * For new functionality, always add an example to the gallery (see
-  :ref:`Sphinx-Gallery<sphinx_gallery>` below for more details).
+  `Gallery`_ below for more details).
 * No changes are ever merged without review and approval by two core team members.
   There are two exceptions to this rule. First, pull requests which affect
   only the documentation require review and approval by only one core team
@@ -246,11 +239,36 @@ Stylistic Guidelines
 * For Cython functions, release the GIL whenever possible, using
   ``with nogil:``.
 
-
 Testing
 -------
 
-See the testing section of the Installation guide.
+The test suite must pass before a pull request can be merged, and
+tests should be added to cover all modifications in behavior.
+
+We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
+framework, with tests located in the various
+``skimage/submodule/tests`` folders.
+
+Testing requirements are listed in `requirements/test.txt`.
+Run:
+
+- **All tests**: ``spin test``
+- Tests for a **submodule**: ``spin test skimage/morphology``
+- Run tests from a **specific file**: ``spin test skimage/morphology/tests/test_gray.py``
+- Run **a test inside a file**:
+  ``spin test skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
+- Run tests with **arbitrary ``pytest`` options**:
+  ``spin test -- any pytest args you want``.
+- Run all tests and **doctests**:
+  ``spin test -- --doctest-modules skimage``
+
+Warnings during testing phase
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, warnings raised by the test suite result in errors.
+You can switch that behavior off by setting the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` to `0`.
+
 
 Test coverage
 -------------
@@ -258,11 +276,9 @@ Test coverage
 Tests for a module should ideally cover all code in that module,
 i.e., statement coverage should be at 100%.
 
-To measure the test coverage, install
-`pytest-cov <https://pytest-cov.readthedocs.io/en/latest/>`__
-(using ``pip install pytest-cov``) and then run::
+To measure test coverage run::
 
-  $ ./dev.py coverage
+  $ spin coverage
 
 This will print a report with one line for each file in `skimage`,
 detailing the test coverage::
@@ -277,77 +293,29 @@ detailing the test coverage::
 Building docs
 -------------
 
-To build the HTML documentation, you can run:
+To build the HTML documentation, run:
 
 .. code:: sh
 
-    ./dev.py docs
+    spin docs
 
-Then, all the HTML files will be generated in ``scikit-image/doc/build/html/``.
-To rebuild a full clean documentation, run:
+Output is in ``scikit-image/doc/build/html/``.  Add the ``--clean``
+flag to build from scratch, deleting any cached output.
 
-.. code:: sh
+Gallery
+^^^^^^^
 
-    ./dev.py docs --clean
+The example gallery is built using
+`Sphinx-Gallery <https://sphinx-gallery.github.io>`_.
+Refer to their documentation for complete usage instructions, and also
+to existing examples in ``doc/examples``.
 
-Requirements
-~~~~~~~~~~~~
-
-`Sphinx <http://www.sphinx-doc.org/en/stable/>`_,
-`Sphinx-Gallery <https://sphinx-gallery.github.io>`_,
-and LaTeX are needed to build the documentation.
-
-**Sphinx:**
-
-Sphinx and other python packages needed to build the documentation
-can be installed using: ``scikit-image/requirements/docs.txt`` file.
-
-.. code:: sh
-
-    pip install -r requirements/docs.txt
-
-.. _sphinx_gallery:
-
-**Sphinx-Gallery:**
-
-The above install command includes the installation of
-`Sphinx-Gallery <https://sphinx-gallery.github.io>`_, which we use to create
-the :ref:`examples_gallery`.
-Refer to the Sphinx-Gallery documentation for complete instructions on syntax and usage.
-
-If you are contributing an example to the gallery or editing an existing one,
-build the docs (see above) and open a web browser to check how your edits
-render at ``scikit-image/doc/build/html/auto_examples/``: navigate to the file
-you have added or changed.
-
-When adding an example, visit also
-``scikit-image/doc/build/html/auto_examples/index.html`` to check how the new
-thumbnail renders on the gallery's homepage. To change the thumbnail image,
-please refer to `this section
-<https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_
-of the Sphinx-Gallery docs.
-
-Note that gallery examples should have a maximum figure width of 8 inches.
-
-**LaTeX Ubuntu:**
-
-.. code:: sh
-
-    sudo apt-get install -qq texlive texlive-latex-extra dvipng
-
-**LaTeX Mac:**
-
-Install the full `MacTex <https://www.tug.org/mactex/>`__ installation or
-install the smaller
-`BasicTex <https://www.tug.org/mactex/morepackages.html>`__ and add *ucs*
-and *dvipng* packages:
-
-.. code:: sh
-
-    sudo tlmgr install ucs dvipng
+Gallery examples should have a maximum figure width of 8 inches.
+You can also `change a gallery entry's thumbnail
+<https://sphinx-gallery.github.io/stable/configuration.html#choosing-thumbnail>`_.
 
 Fixing Warnings
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 -  "citation not found: R###" There is probably an underscore after a
    reference in the first line of a docstring (e.g. [1]\_). Use this
@@ -362,41 +330,71 @@ Fixing Warnings
 Deprecation cycle
 -----------------
 
-If the behavior of the library has to be changed, a deprecation cycle must be
-followed to warn users.
+If the way a function is called has to be changed, a deprecation cycle
+must be followed to warn users.
 
-- a deprecation cycle is *not* necessary when:
+A deprecation cycle is *not* necessary when:
 
-    * adding a new function, or
-    * adding a new keyword argument to the *end* of a function signature, or
-    * fixing what was buggy behavior
+* adding a new function, or
+* adding a new keyword argument to the *end* of a function signature, or
+* fixing unexpected or incorrect behavior.
 
-- a deprecation cycle is necessary for *any breaking API change*, meaning a
-    change where the function, invoked with the same arguments, would return a
-    different result after the change. This includes:
+A deprecation cycle is necessary when:
 
-    * changing the order of arguments or keyword arguments, or
-    * adding arguments or keyword arguments to a function, or
-    * changing a function's name or submodule, or
-    * changing the default value of a function's arguments.
+* renaming keyword arguments, or
+* changing the order of arguments or keywords, or
+* adding arguments to a function, or
+* changing a function's name or location, or
+* changing the default value of function arguments or keywords.
 
-Usually, our policy is to put in place a deprecation cycle over two releases.
+Typically, deprecation warnings are in place for two releases, before
+a change is made.
 
-For the sake of illustration, we consider the modification of a default value in
-a function signature. In version N (therefore, next release will be N+1), we
-have
+For example, consider the modification of a default value in
+a function signature. In version N, we have:
 
 .. code-block:: python
 
-    def a_function(image, rescale=True):
+    def some_function(image, rescale=True):
+        """Do something.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image.
+        rescale : bool, optional
+            Rescale the image unless ``False`` is given.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
+        """
         out = do_something(image, rescale=rescale)
         return out
 
-that has to be changed to
+In version N+1, we will change this to:
 
 .. code-block:: python
 
-    def a_function(image, rescale=None):
+    def some_function(image, rescale=None):
+        """Do something.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image.
+        rescale : bool, optional
+            Rescale the image unless ``False`` is given.
+
+            .. warning:: The default value will change from ``True`` to
+                         ``False`` in skimage N+3.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
+        """
         if rescale is None:
             warn('The default value of rescale will change '
                  'to `False` in version N+3.', stacklevel=2)
@@ -404,65 +402,108 @@ that has to be changed to
         out = do_something(image, rescale=rescale)
         return out
 
-and in version N+3
+And, in version N+3:
 
 .. code-block:: python
 
-    def a_function(image, rescale=False):
+    def some_function(image, rescale=False):
+        """Do something.
+
+        Parameters
+        ----------
+        image : ndarray
+            Input image.
+        rescale : bool, optional
+            Rescale the image if ``True`` is given.
+
+        Returns
+        -------
+        out : ndarray
+            The resulting image.
+        """
         out = do_something(image, rescale=rescale)
         return out
 
-Here is the process for a 2-release deprecation cycle:
+Here is the process for a 3-release deprecation cycle:
 
-- In the signature, set default to `None`, and modify the docstring to specify
-  that it's `True`.
-- In the function, _if_ rescale is set to `None`, set to `True` and warn that the
+- Set the default to `None`, and modify the
+  docstring to specify that the default is `True`.
+- In the function, _if_ rescale is `None`, set it to `True` and warn that the
   default will change to `False` in version N+3.
 - In ``doc/release/release_dev.rst``, under deprecations, add "In
-  `a_function`, the `rescale` argument will default to `False` in N+3."
-- In ``TODO.txt``, create an item in the section related to version N+3 and write
-  "change rescale default to False in a_function".
+  `some_function`, the `rescale` argument will default to `False` in N+3."
+- In ``TODO.txt``, create an item in the section related to version
+  N+3 and write "change rescale default to False in some_function".
 
-Note that the 2-release deprecation cycle is not a strict rule and in some
-cases, the developers can agree on a different procedure upon justification
-(like when we can't detect the change, or it involves moving or deleting an
-entire function for example).
+Note that the 3-release deprecation cycle is not a strict rule and, in some
+cases, developers can agree on a different procedure.
 
-Scikit-image uses warnings to highlight changes in its API so that users may
-update their code accordingly. The ``stacklevel`` argument sets the location in
-the callstack where the warnings will point. In most cases, it is appropriate
-to set the ``stacklevel`` to ``2``.  When warnings originate from helper
-routines internal to the scikit-image library, it is may be more appropriate to
-set the ``stacklevel`` to ``3``. For more information, see the documentation of
-the `warn <https://docs.python.org/3/library/warnings.html#warnings.warn>`__
-function in the Python standard library.
+Raising Warnings
+^^^^^^^^^^^^^^^^
+
+``skimage`` raises ``FutureWarning``\ s to highlight changes in its
+API, e.g.:
+
+.. code-block:: python
+
+   from warnings import warn
+   warn(
+       "Automatic detection of the color channel was deprecated in "
+       "v0.19, and `channel_axis=None` will be the new default in "
+       "v0.22. Set `channel_axis=-1` explicitly to silence this "
+       "warning.",
+       FutureWarning,
+       stacklevel=2,
+   )
+
+The `stacklevel
+<https://docs.python.org/3/library/warnings.html#warnings.warn>`_ is
+a bit of a technicality, but ensures that the warning points to the
+user-called function, and not to a utility function within.
+
+In most cases, set the ``stacklevel`` to ``2``.
+When warnings originate from helper routines internal to the
+scikit-image library, set it to ``3``.
 
 To test if your warning is being emitted correctly, try calling the function
 from an IPython console. It should point you to the console input itself
-instead of being emitted by the files in the scikit-image library.
+instead of being emitted by files in the scikit-image library:
 
 * **Good**: ``ipython:1: UserWarning: ...``
 * **Bad**: ``scikit-image/skimage/measure/_structural_similarity.py:155: UserWarning:``
 
-Bugs
-----
+Deprecating Keywords and Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please `report bugs on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
+When removing keywords or entire functions, the
+``skimage._shared.utils.deprecate_kwarg`` and
+``skimage._shared.utils.deprecate_func`` utility functions can be used
+to perform the above procedure.
+
+Adding Data
+-----------
+While code is hosted on `github <https://github.com/scikit-image/>`_,
+example datasets are on `gitlab <https://gitlab.com/scikit-image/data>`_.
+These are fetched with `pooch <https://github.com/fatiando/pooch>`_
+when accessing `skimage.data.*`.
+
+New datasets are submitted on gitlab and, once merged, the data
+registry ``skimage/data/_registry.py`` in the main GitHub repository
+can be updated.
 
 Benchmarks
 ----------
-
 While not mandatory for most pull requests, we ask that performance related
 PRs include a benchmark in order to clearly depict the use-case that is being
 optimized for. A historical view of our snapshots can be found on
 at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
 
 In this section we will review how to setup the benchmarks,
-and three commands ``./dev.py asv -- dev``, ``./dev.py asv -- run`` and
-``./dev.py asv -- continuous``.
+and three commands ``spin asv -- dev``, ``spin asv -- run`` and
+``spin asv -- continuous``.
 
 Prerequisites
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 Begin by installing `airspeed velocity <https://asv.readthedocs.io/en/stable/>`_
 in your development environment. Prior to installation, be sure to activate your
 development environment, then if using ``venv`` you may install the requirement with::
@@ -477,12 +518,12 @@ If you are using conda, then the command::
 
 is more appropriate. Once installed, it is useful to run the command::
 
-  ./dev.py asv -- machine
+  spin asv -- machine
 
 To let airspeed velocity know more information about your machine.
 
 Writing a benchmark
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 To write  benchmark, add a file in the ``benchmarks`` directory which contains a
 a class with one ``setup`` method and at least one method prefixed with ``time_``.
 
@@ -543,18 +584,18 @@ NotImplemented error.  See the following example for the registration module:
         raise NotImplementedError("registration module not available")
 
 Testing the benchmarks locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Prior to running the true benchmark, it is often worthwhile to test that the
 code is free of typos. To do so, you may use the command::
 
-  ./dev.py asv -- dev -b TransformSuite
+  spin asv -- dev -b TransformSuite
 
 Where the ``TransformSuite`` above will be run once in your current environment
 to test that everything is in order.
 
 Running your benchmark
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 The command above is fast, but doesn't test the performance of the code
 adequately. To do that you may want to run the benchmark in your current
@@ -563,16 +604,16 @@ features. The command ``asv run -E existing`` will specify that you wish to run
 the benchmark in your existing environment. This will save a significant amount
 of time since building scikit-image can be a time consuming task::
 
-  ./dev.py asv -- run -E existing -b TransformSuite
+  spin asv -- run -E existing -b TransformSuite
 
 Comparing results to main
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Often, the goal of a PR is to compare the results of the modifications in terms
 speed to a snapshot of the code that is in the main branch of the
 ``scikit-image`` repository. The command ``asv continuous`` is of help here::
 
-  ./dev.py asv -- continuous main -b TransformSuite
+  spin asv -- continuous main -b TransformSuite
 
 This call will build out the environments specified in the ``asv.conf.json``
 file and compare the performance of the benchmark between your current commit
@@ -580,7 +621,7 @@ and the code in the main branch.
 
 The output may look something like::
 
-  $ ./dev.py asv -- continuous main -b TransformSuite
+  $ spin asv -- continuous main -b TransformSuite
   · Creating environments
   · Discovering benchmarks
   ·· Uninstalling from conda-py3.7-cython-numpy1.15-scipy
@@ -599,10 +640,10 @@ It is also possible to get a comparison of results for two specific revisions
 for which benchmark results have previously been run via the `asv compare`
 command::
 
-    ./dev.py asv -- compare v0.14.5 v0.17.2
+    spin asv -- compare v0.14.5 v0.17.2
 
 Finally, one can also run ASV benchmarks only for a specific commit hash or
 release tag by appending ``^!`` to the commit or tag name. For example to run
 the skimage.filter module benchmarks on release v0.17.2::
 
-    ./dev.py asv -- run -b Filter v0.17.2^!
+    spin asv -- run -b Filter v0.17.2^!

@@ -1,11 +1,12 @@
-import numpy as np
-from .dtype import img_as_float
-
-
 __all__ = ['random_noise']
 
 
-def _bernoulli(p, shape, *, random_state):
+import numpy as np
+from .dtype import img_as_float
+from .._shared.utils import deprecate_kwarg
+
+
+def _bernoulli(p, shape, *, rng):
     """
     Bernoulli trials at a given probability of a given size.
 
@@ -20,8 +21,8 @@ def _bernoulli(p, shape, *, random_state):
         The probability that any given trial returns `True`.
     shape : int or tuple of ints
         The shape of the ndarray to return.
-    seed : `numpy.random.Generator`
-        ``Generator`` instance.
+    rng : `numpy.random.Generator`
+        ``Generator`` instance, typically obtained via `np.random.default_rng()`.
 
     Returns
     -------
@@ -33,10 +34,12 @@ def _bernoulli(p, shape, *, random_state):
         return np.zeros(shape, dtype=bool)
     if p == 1:
         return np.ones(shape, dtype=bool)
-    return random_state.random(shape) <= p
+    return rng.random(shape) <= p
 
 
-def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
+@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
+def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
 
@@ -65,16 +68,10 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         'speckle'
             Multiplicative noise using ``out = image + n * image``, where ``n``
             is Gaussian noise with specified mean & variance.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None the `numpy.random.Generator` singleton is
-        used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that
-        instance is used.
-
-        This will set the random seed before generating noise,
-        for valid pseudo-random comparisons.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
     clip : bool, optional
         If True (default), the output will be clipped after noise applied
         for modes `'speckle'`, `'poisson'`, and `'gaussian'`. This is
@@ -138,7 +135,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     image = img_as_float(image)
 
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(rng)
 
     allowedtypes = {
         'gaussian': 'gaussian_values',
@@ -205,20 +202,20 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
-        out = random_noise(image, mode='s&p', seed=rng,
+        out = random_noise(image, mode='s&p', rng=rng,
                            amount=kwargs['amount'], salt_vs_pepper=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
-        out = random_noise(image, mode='s&p', seed=rng,
+        out = random_noise(image, mode='s&p', rng=rng,
                            amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
         out = image.copy()
         p = kwargs['amount']
         q = kwargs['salt_vs_pepper']
-        flipped = _bernoulli(p, image.shape, random_state=rng)
-        salted = _bernoulli(q, image.shape, random_state=rng)
+        flipped = _bernoulli(p, image.shape, rng=rng)
+        salted = _bernoulli(q, image.shape, rng=rng)
         peppered = ~salted
         out[flipped & salted] = 1
         out[flipped & peppered] = low_clip

@@ -5,7 +5,7 @@ Version 0.17
 
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.21
+Version 0.22
 ------------
 * In ``skimage/filters/lpi_filter.py``, remove the deprecated function
   inverse().
@@ -24,8 +24,21 @@ Version 0.21
   Remove the ``r'\.future.graph$'`` entry added to
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
+* Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.
+
+Version 0.23
+------------
+* Remove deprecated `random_seed`, `random_state`, and `sample_seed`
+  arguments in favor of `rng`.
+* Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
 
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
+* Remove warningsfilter for imageio and Pillow once
+  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
+  version of pillow (probably the release after Pillow 9.5.0).
+* NumPy 1.25.0 is minimal required version:
+    * Remove optional test for a NaN-related deprecation warning from numpy.clip in
+      skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning

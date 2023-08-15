@@ -13,6 +13,7 @@ __all__ = [
     "farid_h",
     "farid_v",
     "filter_inverse",
+    "filter_forward",
     "frangi",
     "gabor",
     "gabor_kernel",
@@ -84,6 +85,7 @@ from .edges import (
 from .lpi_filter import (
     LPIFilter2D,
     filter_inverse,
+    filter_forward,
     inverse,
     wiener,
 )

@@ -227,7 +227,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     if any(b % 2 == 0 for b in block_size):
         raise ValueError(f'block_size must be odd! Given block_size '
                          f'{block_size} contains even values.')
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     thresh_image = np.zeros(image.shape, dtype=float_dtype)
     if method == 'generic':

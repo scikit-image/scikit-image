@@ -219,7 +219,7 @@ def explore_slices(data, cmap="gray"):
     return display_slice
 
 
-explore_slices(data);
+explore_slices(data)
 
 #####################################################################
 # Adjust exposure
@@ -280,7 +280,7 @@ display(equalized_data)
 # As before, if we have a Jupyter kernel running, we can explore the above
 # slices interactively.
 
-explore_slices(equalized_data);
+explore_slices(equalized_data)
 
 #####################################################################
 # Let us now plot the image histogram before and after histogram equalization.

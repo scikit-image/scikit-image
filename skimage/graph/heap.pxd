@@ -20,10 +20,10 @@ cdef class BinaryHeap:
     cdef REFERENCE_T *_references
     cdef REFERENCE_T _popped_ref
 
-    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) nogil
-    cdef void _update(self) nogil
-    cdef void _update_one(self, INDEX_T i) nogil
-    cdef void _remove(self, INDEX_T i) nogil
+    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) noexcept nogil
+    cdef void _update(self) noexcept nogil
+    cdef void _update_one(self, INDEX_T i) noexcept nogil
+    cdef void _remove(self, INDEX_T i) noexcept nogil
 
     cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil
     cdef VALUE_T pop_fast(self) nogil
