@@ -927,6 +927,12 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
+    # Check if the image has more than one intensity value; if not, return that
+    # value
+    if image is not None:
+        first_pixel = image.reshape(-1)[0]
+        if np.all(image == first_pixel):
+            return first_pixel
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.reshape(-1), nbins,

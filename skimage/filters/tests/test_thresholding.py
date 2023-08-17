@@ -570,6 +570,8 @@ def test_mean():
 
 
 def test_triangle_uint_images():
+    assert(threshold_triangle(np.zeros((10, 10), dtype='uint8')) == 0)
+    assert(threshold_triangle(np.zeros((10, 10))) == 0.0)
     assert(threshold_triangle(np.invert(data.text())) == 151)
     assert(threshold_triangle(data.text()) == 104)
     assert(threshold_triangle(data.coins()) == 80)
