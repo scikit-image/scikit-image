@@ -11,9 +11,10 @@ permissions:
 
 env:
   PIP_FLAGS: >-
-    --extra-index-url
-    https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --upgrade
     --pre
+    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --extra-index-url https://pypi.org/simple
   MINIMUM_REQUIREMENTS: 0
   BUILD_DOCS: 0
   PYTHONOPTIMIZE: 0
