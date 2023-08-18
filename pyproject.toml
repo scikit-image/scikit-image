@@ -64,7 +64,7 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=5.0,<7.2', # TODO:needed until sphinx-gallery makes new release
+    'sphinx>=5.0',
     'sphinx-gallery>=0.11',
     'numpydoc>=1.5',
     'sphinx-copybutton',
