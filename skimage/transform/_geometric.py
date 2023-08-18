@@ -1197,6 +1197,12 @@ class EuclideanTransform(ProjectiveTransform):
     translation parameters. The similarity transformation extends the Euclidean
     transformation with a single scaling factor.
 
+    In 2D and 3D, the transformation parameters can be given as the homogeneous
+    transformation matrix, above, or as the implicit parameters, rotation and
+    translation in x (a1) and y (b1). Beyond 3D, translation can be specified
+    using the implicit parameter (again, in x (a1), y (b1), etc.), otherwise,
+    only the matrix form is allowed.
+
     Parameters
     ----------
     matrix : (D+1, D+1) array_like, optional
@@ -1208,7 +1214,7 @@ class EuclideanTransform(ProjectiveTransform):
         higher dimensions, you must provide or estimate the transformation
         matrix.
     translation : sequence of float, length D, optional
-        Translation parameters for each axis.
+        x, y[, z, ...] translation parameters.
     dimensionality : int, optional
         The dimensionality of the transform.
 
