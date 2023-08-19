@@ -3,7 +3,7 @@ import scipy as sp
 
 
 class TpsTransform:
-    """Thin plate spline transformation.
+    """Thin plate splines transformation.
 
     Apply thin plates spline transformation between a set of control points.
     It interpolates a surface that passes through each control point.
@@ -76,7 +76,6 @@ class TpsTransform:
 
         if not coords.ndim == 2 or coords.shape[1] != 2:
             raise ValueError("Input 'coords' must have shape (N,2)")
-
 
         x_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 0])
         y_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 1])

@@ -33,7 +33,7 @@ For further information on TPS Transformation, see:
 
 
 Image Deformation
-===================
+=================
 
 In this example we will see how to use thin plates spline interpolation in the
 context of deforming an astronaut image. To deform the image, the displacement of every
@@ -41,6 +41,7 @@ pixel is needed. In our image we define 6 source points labelled 1-6: 1-4 in the
 corners, 5 near the smile corner and 6 in an eye. At the corners, there is no
 displacement. The smile corner label 5 moved upward, The eye position labelled 6 moved
 down.
+
 Thin Plate Splines provides a very handy interpolator for image deformation.
 """
 import matplotlib.pyplot as plt
@@ -50,16 +51,14 @@ import skimage as ski
 
 astronaut = ski.data.astronaut()
 
-src = np.array([[50,50],[400,50],[50,400],[400,400],[240,150],[200,100]])
-dst = np.array([[50, 50], [400,50], [50,400], [400,400], [276,100], [230,100]])
+src = np.array([[50, 50],[400, 50],[50, 400],[400, 400],[240, 150],[200, 100]])
+dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
 # Fit the thin plate spline from output to input
 warped_img = ski.transform.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
 
 
 fig, axs = plt.subplots(1, 2, figsize=(16, 8))
-# axs[0].axis('off')
-# axs[1].axis('off')
 
 labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
 
@@ -82,7 +81,7 @@ plt.show()
 ######################################################################
 #
 # Interpolation
-# ===========
+# =============
 # In this example thin-plate spline is applied to source coordinates and to
 # each target coordinates to derive an interpolation function and coefficients for
 # each target points. These coefficients is then used to transforms an arbitrary
