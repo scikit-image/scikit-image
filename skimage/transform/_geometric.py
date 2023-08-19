@@ -1213,8 +1213,8 @@ class EuclideanTransform(ProjectiveTransform):
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
         matrix.
-    translation : sequence of float, length D, optional
-        x, y[, z, ...] translation parameters.
+    translation : (x, y[, z, ...]) sequence of float, length D, optional
+            Translation parameters for each axis.
     dimensionality : int, optional
         The dimensionality of the transform.
 
