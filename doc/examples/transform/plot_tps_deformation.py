@@ -53,7 +53,6 @@ dst = np.array([[3.9724, 6.5354], [6.6969, 4.1181], [6.5394, 7.2362], [5.4016, 6
 src *= chess.shape[0]//15
 dst *= chess.shape[0]//15
 # Fit the thin plate spline from output to input
-tps = ski.transform.TpsTransform()
 warped_img = ski.transform.tps_warp(chess, src, dst, grid_scaling=1)
 
 
