@@ -3,6 +3,54 @@ import scipy as sp
 
 
 class TpsTransform:
+    """Thin plate spline transformation.
+
+    Apply thin plates spline transformation between a set of control points.
+    It interpolates a surface that passes through each control point.
+    Control points are position constraints on a bending surface. The ideal
+    surface is one that bends the least.
+
+    Attributes
+    ----------
+    parameters : (N, D) array_like
+        Coefficients for every control points.
+    src : (N, 2) array_like
+        Control point at source coordinates
+
+    Examples
+    --------
+    >>> import skimage as ski
+
+    Define source and destination points and generate meshgrid for transformation:
+
+    >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
+    >>> dst = np.roll(src, 1, axis=0)
+    >>> coords = np.meshgrid(np.arange(5), np.arange(5))
+    >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
+
+    >>> tps = ski.transform.TpsTransform()
+    >>> tps.estimate(src, dst)
+    True
+
+    Apply the transformation
+
+    >>> trans_coord = tps(t_coords)
+    >>> xx_trans = trans_coord[:, 0]
+    >>> yy_trans = trans_coord[:, 1]
+    >>> coords[1]
+    array([[0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1],
+           [2, 2, 2, 2, 2],
+           [3, 3, 3, 3, 3],
+           [4, 4, 4, 4, 4]])
+    >>> expected_yy = np.array([0, 1, 2, 3, 4,
+    ...                         0, 1, 2, 3, 4,
+    ...                         0, 1, 2, 3, 4,
+    ...                         0, 1, 2, 3, 4,
+    ...                         0, 1, 2, 3, 4])
+    >>> np.allclose(yy_trans, expected_yy)
+    True
+    """
     def __init__(self):
         self._estimated = False
         self.parameters = None
@@ -18,42 +66,8 @@ class TpsTransform:
 
         Returns
         -------
-        transformed_pts: lists
-            A list of tranformed coordinates.
-
-        Examples
-        --------
-        >>> import skimage as ski
-
-        Define source and destination points and generate meshgrid for transformation:
-
-        >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
-        >>> dst = np.roll(src, 1, axis=0)
-        >>> coords = np.meshgrid(np.arange(5), np.arange(5))
-        >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
-
-        >>> tps = ski.transform.TpsTransform()
-        >>> tps.estimate(src, dst)
-        True
-
-        Apply the transformation
-
-        >>> trans_coord = tps(t_coords)
-        >>> xx_trans = trans_coord[:, 0]
-        >>> yy_trans = trans_coord[:, 1]
-        >>> coords[1]
-        array([[0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 1],
-               [2, 2, 2, 2, 2],
-               [3, 3, 3, 3, 3],
-               [4, 4, 4, 4, 4]])
-        >>> expected_yy = np.array([0, 1, 2, 3, 4,
-        ...                         0, 1, 2, 3, 4,
-        ...                         0, 1, 2, 3, 4,
-        ...                         0, 1, 2, 3, 4,
-        ...                         0, 1, 2, 3, 4])
-        >>> np.allclose(yy_trans, expected_yy)
-        True
+        transformed_coords: (N, D) array
+            Destination coordinates
         """
         if self.parameters is None:
             raise ValueError(f"{self.parameters}. Compute the `estimate`")
