@@ -32,37 +32,38 @@ For further information on TPS Transformation, see:
        https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
 
 
-Image Interpolation
+Image Deformation
 ===================
 
-In this example we will see how to use thin plate spline interpolation in the
-context of interpolating the correspondence of five pairs of landmarks.
-The examples shows landmarks before and after being bent using the TPS algorithm,
-and the control points (X) used as input the the algorithm.
+In this example we will see how to use thin plates spline interpolation in the
+context of deforming an astronaut image. To deform the image, the displacement of every
+pixel is needed. In our image we define 6 source points labelled 1-6: 1-4 in the image
+corners, 5 near the smile corner and 6 in an eye. At the corners, there is no
+displacement. The smile corner label 5 moved upward, The eye position labelled 6 moved
+down.
+Thin Plate Splines provides a very handy interpolator for image deformation.
 """
 import matplotlib.pyplot as plt
 import numpy as np
 
 import skimage as ski
 
-chess = ski.data.checkerboard()
+astronaut = ski.data.astronaut()
 
-src = np.array([[3.6929, 10.3819],[6.5827, 8.8386], [6.7766, 12.0866], [4.8189, 11.2047], [5.6969, 10.0748]])
-dst = np.array([[3.9724, 6.5354], [6.6969, 4.1181], [6.5394, 7.2362], [5.4016, 6.4528], [5.7756, 5.1142]])
+src = np.array([[50,50],[400,50],[50,400],[400,400],[240,150],[200,100]])
+dst = np.array([[50, 50], [400,50], [50,400], [400,400], [276,100], [230,100]])
 
-src *= chess.shape[0]//15
-dst *= chess.shape[0]//15
 # Fit the thin plate spline from output to input
-warped_img = ski.transform.tps_warp(chess, src, dst, grid_scaling=1)
+warped_img = ski.transform.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
 
 
 fig, axs = plt.subplots(1, 2, figsize=(16, 8))
 # axs[0].axis('off')
 # axs[1].axis('off')
 
-labels = ['1', '2', '3', '4', '5']  # Adjust the number of labels to match the number of points
+labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
 
-axs[0].imshow(chess[..., ::-1], origin='upper', cmap='gray')
+axs[0].imshow(astronaut[..., ::-1], origin='upper', cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):
@@ -80,7 +81,7 @@ plt.show()
 
 ######################################################################
 #
-# Deformation
+# Interpolation
 # ===========
 # In this example thin-plate spline is applied to source coordinates and to
 # each target coordinates to derive an interpolation function and coefficients for
