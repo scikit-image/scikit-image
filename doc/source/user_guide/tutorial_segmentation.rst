@@ -5,7 +5,7 @@ Image segmentation is the task of labeling the pixels of objects of
 interest in an image.
 
 In this tutorial, we will see how to segment objects from a background.
-We use the ``coins`` image from ``skimage.data``. This image shows
+We use the image from :func:`skimage.data.coins`. This image shows
 several coins outlined against a darker background. The segmentation of
 the coins cannot be done directly from the histogram of gray values,
 because the background shares enough gray levels with the coins that a
@@ -17,10 +17,9 @@ thresholding segmentation is not sufficient.
 
 ::
 
-    >>> from skimage import data
     >>> from skimage.exposure import histogram
-    >>> coins = data.coins()
-    >>> hist, hist_centers = histogram(coins)
+    >>> coins = ski.data.coins()
+    >>> hist, hist_centers = ski.exposure.histogram(coins)
 
 Simply thresholding the image leads either to missing significant parts
 of the coins, or to merging parts of the background with the
@@ -38,20 +37,19 @@ Edge-based segmentation
 
 Let us first try to detect edges that enclose the coins. For edge
 detection, we use the `Canny detector
-<https://en.wikipedia.org/wiki/Canny_edge_detector>`_ of ``skimage.feature.canny``
+<https://en.wikipedia.org/wiki/Canny_edge_detector>`_ of :func:`skimage.feature.canny`
 
 ::
 
-    >>> from skimage.feature import canny
-    >>> edges = canny(coins/255.)
+    >>> edges = ski.feature.canny(coins / 255.)
 
 As the background is very smooth, almost all edges are found at the
 boundary of the coins, or inside the coins.
 
 ::
 
-    >>> from scipy import ndimage as ndi
-    >>> fill_coins = ndi.binary_fill_holes(edges)
+    >>> import scipy as sp
+    >>> fill_coins = sp.ndimage.binary_fill_holes(edges)
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_003.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html
@@ -59,7 +57,7 @@ boundary of the coins, or inside the coins.
 
 Now that we have contours that delineate the outer boundary of the coins,
 we fill the inner part of the coins using the
-``ndi.binary_fill_holes`` function, which uses mathematical morphology
+:func:`scipy.ndimage.binary_fill_holes` function, which uses mathematical morphology
 to fill the holes.
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_004.png
@@ -72,7 +70,7 @@ function to remove objects smaller than a small threshold.
 
 ::
 
-    >>> label_objects, nb_labels = ndi.label(fill_coins)
+    >>> label_objects, nb_labels = sp.ndimage..label(fill_coins)
     >>> sizes = np.bincount(label_objects.ravel())
     >>> mask_sizes = sizes > 20
     >>> mask_sizes[0] = 0
@@ -117,8 +115,7 @@ The choice of the elevation map is critical for good segmentation.
 Here, the amplitude of the gradient provides a good elevation map. We
 use the Sobel operator for computing the amplitude of the gradient::
 
-    >>> from skimage.filters import sobel
-    >>> elevation_map = sobel(coins)
+    >>> elevation_map = ski.filters.sobel(coins)
 
 From the 3-D surface plot shown below, we see that high barriers effectively
 separate the coins from the background.
@@ -145,8 +142,7 @@ extreme parts of the histogram of gray values::
 
 Let us now compute the watershed transform::
 
-    >>> from skimage.segmentation import watershed
-    >>> segmentation = watershed(elevation_map, markers)
+    >>> segmentation = ski.segmentation.watershed(elevation_map, markers)
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_008.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html
@@ -159,11 +155,11 @@ background.
 
 We remove a few small holes with mathematical morphology::
 
-    >>> segmentation = ndi.binary_fill_holes(segmentation - 1)
+    >>> segmentation = sp.ndimage.binary_fill_holes(segmentation - 1)
 
 We can now label all the coins one by one using ``ndi.label``::
 
-    >>> labeled_coins, _ = ndi.label(segmentation)
+    >>> labeled_coins, _ = sp.ndimage.label(segmentation)
 
 .. image:: ../auto_examples/applications/images/sphx_glr_plot_coins_segmentation_009.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html

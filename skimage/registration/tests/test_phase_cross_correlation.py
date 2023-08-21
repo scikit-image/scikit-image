@@ -175,7 +175,7 @@ def test_4d_input_subpixel():
 @pytest.mark.parametrize("reference_mask", [None, True])
 def test_phase_cross_correlation_deprecation(return_error, reference_mask):
     # For now, assert that phase_cross_correlation raises a warning that
-    # returning only shifts is deprecated. In skimage 0.21, this test should be
+    # returning only shifts is deprecated. In skimage 0.22, this test should be
     # updated for the deprecation of the return_error parameter.
     should_warn = (
         return_error is False
@@ -191,7 +191,7 @@ def test_phase_cross_correlation_deprecation(return_error, reference_mask):
 
     if should_warn:
         msg = (
-            "In scikit-image 0.21, phase_cross_correlation will start "
+            "In scikit-image 0.22, phase_cross_correlation will start "
             "returning a tuple or 3 items (shift, error, phasediff) always. "
             "To enable the new return behavior and silence this warning, use "
             "return_error='always'."

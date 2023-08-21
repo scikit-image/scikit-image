@@ -1,5 +1,6 @@
 import numpy as np
-from ..util import img_as_float
+
+from .dtype import img_as_float
 from itertools import product
 
 

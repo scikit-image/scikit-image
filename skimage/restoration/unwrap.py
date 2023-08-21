@@ -1,13 +1,16 @@
 import numpy as np
 
 from .._shared.utils import warn
+from .._shared.utils import deprecate_kwarg
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
-def unwrap_phase(image, wrap_around=False, seed=None):
+@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
+def unwrap_phase(image, wrap_around=False, rng=None):
     '''Recover the original from a wrapped phase image.
 
     From an image wrapped to lie in the interval [-pi, pi), recover the
@@ -27,9 +30,13 @@ def unwrap_phase(image, wrap_around=False, seed=None):
         connected and use this connectivity to guide the phase unwrapping
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
-    seed : int, optional
-        Unwrapping 2D or 3D images uses random initialization. This sets the
-        seed of the PRNG to achieve deterministic behavior.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
+
+        Unwrapping relies on a random initialization. This sets the
+        PRNG to use to achieve deterministic behavior.
 
     Returns
     -------
@@ -101,10 +108,10 @@ def unwrap_phase(image, wrap_around=False, seed=None):
         unwrap_1d(image_not_masked, image_unwrapped)
     elif image.ndim == 2:
         unwrap_2d(image_not_masked, mask, image_unwrapped,
-                  wrap_around, seed)
+                  wrap_around, rng)
     elif image.ndim == 3:
         unwrap_3d(image_not_masked, mask, image_unwrapped,
-                  wrap_around, seed)
+                  wrap_around, rng)
 
     if np.ma.isMaskedArray(image):
         return np.ma.array(image_unwrapped, mask=mask,

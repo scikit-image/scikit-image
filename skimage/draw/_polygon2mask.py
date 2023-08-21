@@ -4,33 +4,65 @@ from . import draw
 
 
 def polygon2mask(image_shape, polygon):
-    """Compute a mask from polygon.
+    """Create a binary mask from a polygon.
 
     Parameters
     ----------
-    image_shape : tuple of size 2.
+    image_shape : tuple of size 2
         The shape of the mask.
-    polygon : array_like.
+    polygon : (N, 2) array_like
         The polygon coordinates of shape (N, 2) where N is
         the number of points.
 
     Returns
     -------
-    mask : 2-D ndarray of type 'bool'.
-        The mask that corresponds to the input polygon.
+    mask : 2-D ndarray of type 'bool'
+        The binary mask that corresponds to the input polygon.
+
+    See Also
+    --------
+    polygon:
+        Generate coordinates of pixels inside a polygon.
 
     Notes
     -----
-    This function does not do any border checking, so that all
-    the vertices need to be within the given shape.
+    This function does not do any border checking. Parts of the polygon that
+    are outside the coordinate space defined by `image_shape` are not drawn.
 
     Examples
     --------
-    >>> image_shape = (128, 128)
-    >>> polygon = np.array([[60, 100], [100, 40], [40, 40]])
-    >>> mask = polygon2mask(image_shape, polygon)
-    >>> mask.shape
-    (128, 128)
+    >>> import skimage as ski
+    >>> image_shape = (10, 10)
+    >>> polygon = np.array([[1, 1], [2, 7], [8, 4]])
+    >>> mask = ski.draw.polygon2mask(image_shape, polygon)
+    >>> mask.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
+    If vertices / points of the `polygon` are outside the coordinate space
+    defined by `image_shape`, only a part (or none at all) of the polygon is
+    drawn in the mask.
+
+    >>> offset = np.array([[2, -4]])
+    >>> ski.draw.polygon2mask(image_shape, polygon - offset).astype(int)
+    array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     """
     polygon = np.asarray(polygon)
     vertex_row_coords, vertex_col_coords = polygon.T

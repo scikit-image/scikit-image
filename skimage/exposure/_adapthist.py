@@ -13,7 +13,7 @@ import numpy as np
 
 from .._shared.utils import _supported_float_type
 from ..color.adapt_rgb import adapt_rgb, hsv_value
-from ..exposure import rescale_intensity
+from .exposure import rescale_intensity
 from ..util import img_as_uint
 
 NR_OF_GRAY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
@@ -82,7 +82,7 @@ def equalize_adapthist(image, kernel_size=None,
     elif isinstance(kernel_size, numbers.Number):
         kernel_size = (kernel_size,) * image.ndim
     elif len(kernel_size) != image.ndim:
-        ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
+        raise ValueError(f'Incorrect value of `kernel_size`: {kernel_size}')
 
     kernel_size = [int(k) for k in kernel_size]
 

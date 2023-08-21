@@ -2,13 +2,13 @@
 Algorithms for computing the skeleton of a binary image
 """
 import numpy as np
-from ..util import img_as_ubyte, crop
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, deprecate_kwarg
+from ..util import crop, img_as_ubyte
+from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
-from ._skeletonize_3d_cy import _compute_thin_image
 
 
 def skeletonize(image, *, method=None):
@@ -350,7 +350,9 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
+@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
+def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
     Parameters
@@ -362,13 +364,13 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
         value in `mask` are used for computing the medial axis.
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
-        used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
-        instance is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
+
+        The PRNG determines the order in which pixels are processed for
+        tiebreaking.
 
         .. versionadded:: 0.19
 
@@ -487,7 +489,7 @@ def medial_axis(image, mask=None, return_distance=False, *, random_state=None):
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    generator = np.random.default_rng(random_state)
+    generator = np.random.default_rng(rng)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],

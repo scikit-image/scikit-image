@@ -8,15 +8,6 @@
     in production code that will depend on updated skimage versions.
 """
 
-from .manual_segmentation import manual_polygon_segmentation
-from .manual_segmentation import manual_lasso_segmentation
-from .trainable_segmentation import fit_segmenter, predict_segmenter, TrainableSegmenter
+import lazy_loader as lazy
 
-
-__all__ = [
-    "manual_lasso_segmentation",
-    "manual_polygon_segmentation",
-    "fit_segmenter",
-    "predict_segmenter",
-    "TrainableSegmenter",
-]
+__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
