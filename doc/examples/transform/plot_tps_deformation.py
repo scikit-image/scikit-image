@@ -37,10 +37,9 @@ Image Deformation
 
 In this example we will see how to use thin plates spline interpolation in the
 context of deforming an astronaut image. To deform the image, the displacement of every
-pixel is needed. In our image we define 6 source points labelled 1-6: 1-4 in the image
-corners, 5 near the smile corner and 6 in an eye. At the corners, there is no
-displacement. The smile corner label 5 moved upward, The eye position labelled 6 moved
-down.
+pixel is needed. In our image we define 6 source and destination points labelled 1-6: 1-4 in the image
+corners, 5 near the smile corner and 6 in an eye. At the corners, there are no
+displacements. The smile corner moved upward and the eye position moved down.
 
 Thin Plate Splines provides a very handy interpolator for image deformation.
 """
@@ -51,7 +50,7 @@ import skimage as ski
 
 astronaut = ski.data.astronaut()
 
-src = np.array([[50, 50],[400, 50],[50, 400],[400, 400],[240, 150],[200, 100]])
+src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 100]])
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
 # Fit the thin plate spline from output to input
