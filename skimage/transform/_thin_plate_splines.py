@@ -268,6 +268,9 @@ def tps_warp(
     if image.ndim not in (2, 3):
         raise ValueError("Only 2D and 3D images are supported")
 
+    if output_region is not None:
+        if not isinstance(output_region, tuple) or len(output_region) != 4:
+            raise ValueError("Output region should be a tuple of 4 values.")
     output_region = output_region or (0, 0, image.shape[0], image.shape[1])
 
     x_min, y_min, x_max, y_max = output_region
