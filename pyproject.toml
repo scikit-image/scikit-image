@@ -66,7 +66,7 @@ developer = [
 docs = [
     'sphinx>=7.2',
     'sphinx-gallery>=0.14',
-    'numpydoc>=1.5',
+    'numpydoc>=1.6',
     'sphinx-copybutton',
     'pytest-runner',
     'matplotlib>=3.5',
