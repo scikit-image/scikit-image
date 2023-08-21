@@ -234,6 +234,11 @@ def tps_warp(
     warped : array_like
         The warped input image.
 
+    Raises
+    ------
+    RuntineError
+        If ``x_steps`` or ``y_steps`` <= 0
+
     References
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
@@ -278,6 +283,10 @@ def tps_warp(
         grid_scaling = 1
     x_steps = (x_max - x_min) // grid_scaling
     y_steps = (y_max - y_min) // grid_scaling
+
+    if x_steps <= 0 or y_steps <= 0:
+        raise RuntimeError('Unable to compute output region')
+
     xx, yy = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
     coords = np.vstack([xx.ravel(), yy.ravel()]).T
 
