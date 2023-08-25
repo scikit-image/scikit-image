@@ -927,22 +927,20 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
-    # Check if the image has more than one intensity value; if not, return that
-    # value
-    if image is not None:
-        first_pixel = image.reshape(-1)[0]
-        if np.all(image == first_pixel):
-            return first_pixel
-    # nbins is ignored for integer arrays
-    # so, we recalculate the effective nbins.
     hist, bin_centers = histogram(image.reshape(-1), nbins,
                                   source_range='image')
+    # nbins is ignored for integer arrays
+    # so, we recalculate the effective nbins.
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
     arg_low_level, arg_high_level = np.flatnonzero(hist)[[0, -1]]
+
+    if arg_low_level == arg_high_level:
+        # Image has constant intensity.
+        return image.ravel()[0]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
