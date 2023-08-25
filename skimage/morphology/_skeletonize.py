@@ -1,9 +1,6 @@
 """
 Algorithms for computing the skeleton of a binary image
 """
-
-import warnings
-
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -32,7 +29,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : ndarray
+    skeleton : ndarray of bool
         The thinned image.
 
     See Also
@@ -76,10 +73,6 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if image.dtype is not np.dtype("bool"):
-        warnings.warn(
-            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
-        )
     image = image.astype(bool, copy=False)
 
     if method not in {'zhang', 'lee', None}:
@@ -262,7 +255,8 @@ def thin(image, max_num_iter=None):
     Parameters
     ----------
     image : binary (M, N) ndarray
-        The image to be thinned.
+        The image to be thinned. Zeros represent background, nonzero values are
+        foreground.
     max_num_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -324,10 +318,6 @@ def thin(image, max_num_iter=None):
     # check that image is 2d
     check_nD(image, 2)
 
-    if image.dtype is not np.dtype("bool"):
-        warnings.warn(
-            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
-        )
     # convert image to uint8 with values in {0, 1}
     skel = np.asanyarray(image, dtype=bool).view(np.uint8)
 
@@ -371,7 +361,8 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     Parameters
     ----------
     image : binary ndarray, shape (M, N)
-        The image of the shape to be skeletonized.
+        The image of the shape to be skeletonized. Zeros represent background, nonzero
+        values are foreground.
     mask : binary ndarray, shape (M, N), optional
         If a mask is given, only those elements in `image` with a true
         value in `mask` are used for computing the medial axis.
@@ -444,10 +435,6 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if image.dtype is not np.dtype("bool"):
-        warnings.warn(
-            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=3
-        )
     global _eight_connect
     if mask is None:
         masked_image = image.astype(bool)
@@ -603,7 +590,7 @@ def skeletonize_3d(image):
 
     Returns
     -------
-    skeleton : ndarray
+    skeleton : ndarray of bool
         The thinned image.
 
     See Also
@@ -635,10 +622,6 @@ def skeletonize_3d(image):
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          f"got image.ndim = {image.ndim} instead.")
 
-    if image.dtype is not np.dtype("bool"):
-        warnings.warn(
-            "expected binary image, converting implicitly", RuntimeWarning, stacklevel=2
-        )
     image_io = image.astype(bool, copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries

@@ -11,9 +11,6 @@ from skimage.morphology._skeletonize import (G123_LUT, G123P_LUT,
                                              _generate_thin_luts)
 
 
-pytestmark = pytest.mark.filterwarnings("error:expected binary image:RuntimeWarning")
-
-
 class TestSkeletonize():
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5, 5), dtype=bool)
@@ -63,14 +60,15 @@ class TestSkeletonize():
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbors(self):
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_skeletonize_num_neighbors(self, dtype):
         # an empty image
-        image = np.zeros((300, 300), dtype=bool)
+        image = np.zeros((300, 300), dtype=dtype)
 
         # foreground object 1
-        image[10:-10, 10:100] = 1
-        image[-100:-10, 10:-10] = 1
-        image[10:-10, -100:-10] = 1
+        image[10:-10, 10:100] = 2
+        image[-100:-10, 10:-10] = 2
+        image[10:-10, -100:-10] = 2
 
         # foreground object 2
         rs, cs = draw.line(250, 150, 10, 280)
@@ -78,7 +76,7 @@ class TestSkeletonize():
             image[rs + i, cs] = 1
         rs, cs = draw.line(10, 150, 250, 280)
         for i in range(20):
-            image[rs + i, cs] = 1
+            image[rs + i, cs] = 3
 
         # foreground object 3
         ir, ic = np.indices(image.shape)
@@ -112,33 +110,28 @@ class TestSkeletonize():
                              [0, 0, 0, 0, 0, 0]], dtype=bool)
         assert np.all(result == expected)
 
-    def test_nonbinary_warning(self):
-        image = np.ones((3, 3), dtype=float)
-        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
-            skeletonize(image, method="zhang")
-        assert len(messages) == 1
-        assert messages[0].filename == __file__, "warning points at wrong file"
-
 
 class TestThin():
     @property
     def input_image(self):
         """image to test thinning with"""
         ii = np.array([[0, 0, 0, 0, 0, 0, 0],
-                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 1, 2, 3, 4, 5, 0],
                        [0, 1, 0, 1, 1, 1, 0],
                        [0, 1, 1, 1, 1, 1, 0],
+                       [0, 6, 1, 1, 1, 1, 0],
                        [0, 1, 1, 1, 1, 1, 0],
-                       [0, 1, 1, 1, 1, 1, 0],
-                       [0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+                       [0, 0, 0, 0, 0, 0, 0]], dtype=float)
         return ii
 
     def test_zeros(self):
         image = np.zeros((10, 10), dtype=bool)
         assert np.all(thin(image) == False)
 
-    def test_iter_1(self):
-        result = thin(self.input_image, 1).astype(bool)
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_iter_1(self, dtype):
+        image = self.input_image.astype(dtype)
+        result = thin(image, 1).astype(bool)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 1, 0, 1, 1, 0, 0],
@@ -148,8 +141,10 @@ class TestThin():
                              [0, 0, 0, 0, 0, 0, 0]], dtype=bool)
         assert_array_equal(result, expected)
 
-    def test_noiter(self):
-        result = thin(self.input_image).astype(bool)
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_noiter(self, dtype):
+        image = self.input_image.astype(dtype)
+        result = thin(image).astype(bool)
         expected = np.array([[0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 1, 0, 0, 0, 0],
                              [0, 1, 0, 1, 0, 0, 0],
@@ -170,13 +165,6 @@ class TestThin():
         assert_array_equal(g123, G123_LUT)
         assert_array_equal(g123p, G123P_LUT)
 
-    def test_nonbinary_warning(self):
-        image = np.ones((3, 3), dtype=float)
-        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
-            thin(image)
-        assert len(messages) == 1
-        assert messages[0].filename == __file__, "warning points at wrong file"
-
 
 class TestMedialAxis():
     def test_00_00_zeros(self):
@@ -190,12 +178,13 @@ class TestMedialAxis():
                              np.zeros((10, 10), bool))
         assert np.all(result == False)
 
-    def test_vertical_line(self):
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_vertical_line(self, dtype):
         '''Test a thick vertical line, issue #3861'''
-        img = np.zeros((9, 9), dtype=bool)
+        img = np.zeros((9, 9), dtype=dtype)
         img[:, 2] = 1
-        img[:, 3] = 1
-        img[:, 4] = 1
+        img[:, 3] = 2
+        img[:, 4] = 3
 
         expected = np.full(img.shape, False)
         expected[:, 3] = True
@@ -255,13 +244,3 @@ class TestMedialAxis():
         """Test medial_axis on an array of all zeros."""
         with expected_warnings(['`random_state` is a deprecated argument']):
             medial_axis(np.zeros((10, 10), bool), random_state=None)
-
-    def test_nonbinary_warning(self):
-        image = np.zeros((1, 5), dtype=float)
-        image[:, 1:-1] = True
-        with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
-            result = medial_axis(image)
-        assert len(messages) == 1
-        assert messages[0].filename == __file__, "warning points at wrong file"
-        assert result.dtype is np.dtype("bool")
-        np.testing.assert_array_equal(result, image)

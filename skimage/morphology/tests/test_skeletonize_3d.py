@@ -11,10 +11,6 @@ from skimage._shared.testing import assert_equal, assert_, parametrize, fetch
 
 # basic behavior tests (mostly copied over from 2D skeletonize)
 
-
-pytestmark = pytest.mark.filterwarnings("error:expected binary image:RuntimeWarning")
-
-
 def test_skeletonize_wrong_dim():
     im = np.zeros(5, dtype=bool)
     with testing.raises(ValueError):
@@ -76,8 +72,7 @@ def test_dtype_conv():
     img[img < 0.5] = 0
 
     orig = img.copy()
-    with pytest.warns(RuntimeWarning, match="expected binary image"):
-        res = skeletonize(img, method='lee')
+    res = skeletonize(img, method='lee')
 
     assert_equal(res.dtype, bool)
     assert_equal(img, orig)  # operation does not clobber the original
@@ -107,22 +102,23 @@ def check_input(img):
     assert_equal(img, orig)
 
 
-def test_skeletonize_num_neighbors():
+@pytest.mark.parametrize("dtype", [bool, float, int])
+def test_skeletonize_num_neighbors(dtype):
     # an empty image
-    image = np.zeros((300, 300), dtype=bool)
+    image = np.zeros((300, 300), dtype=dtype)
 
     # foreground object 1
     image[10:-10, 10:100] = 1
-    image[-100:-10, 10:-10] = 1
-    image[10:-10, -100:-10] = 1
+    image[-100:-10, 10:-10] = 2
+    image[10:-10, -100:-10] = 3
 
     # foreground object 2
     rs, cs = draw.line(250, 150, 10, 280)
     for i in range(10):
-        image[rs + i, cs] = 1
+        image[rs + i, cs] = 4
     rs, cs = draw.line(10, 150, 250, 280)
     for i in range(20):
-        image[rs + i, cs] = 1
+        image[rs + i, cs] = 5
 
     # foreground object 3
     ir, ic = np.indices(image.shape)
@@ -184,19 +180,3 @@ def test_3d_vs_fiji():
     img_s = skeletonize(img)
     img_f = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif")).astype(bool)
     assert_equal(img_s, img_f)
-
-
-def test_skeletonize_nonbinary_warning():
-    image = np.ones((3, 3, 3), dtype=float)
-    with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
-        skeletonize(image)
-    assert len(messages) == 1
-    assert messages[0].filename == __file__, "warning points at wrong file"
-
-
-def test_skeletonize_3d_nonbinary_warning():
-    image = np.ones((3, 3, 3), dtype=float)
-    with pytest.warns(RuntimeWarning, match="expected binary image") as messages:
-        skeletonize_3d(image)
-    assert len(messages) == 1
-    assert messages[0].filename == __file__, "warning points at wrong file"
