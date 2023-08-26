@@ -234,10 +234,6 @@ def tps_warp(
     warped : array_like
         The warped input image.
 
-    Raises
-    ------
-    RuntineError
-        If ``x_steps`` or ``y_steps`` <= 0
 
     References
     ----------
