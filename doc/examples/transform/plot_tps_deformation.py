@@ -61,7 +61,7 @@ fig, axs = plt.subplots(1, 2, figsize=(16, 8))
 
 labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
 
-axs[0].imshow(astronaut[..., ::-1], origin='upper', cmap='gray')
+axs[0].imshow(astronaut, origin='upper', cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):
