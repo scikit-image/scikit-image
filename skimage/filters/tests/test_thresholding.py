@@ -569,7 +569,7 @@ def test_mean():
     assert(threshold_mean(img) == 1.)
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
-def test_traingle_uniform_images(dtype):
+def test_triangle_uniform_images(dtype):
     assert threshold_triangle(np.zeros((10, 10), dtype=dtype)) == 0
     assert threshold_triangle(np.ones((10, 10), dtype=dtype)) == 1
     assert threshold_triangle(np.full((10, 10), 2, dtype=dtype)) == 2

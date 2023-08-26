@@ -927,10 +927,10 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image.reshape(-1), nbins,
-                                  source_range='image')
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
+    hist, bin_centers = histogram(image.reshape(-1), nbins,
+                                  source_range='image')
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
