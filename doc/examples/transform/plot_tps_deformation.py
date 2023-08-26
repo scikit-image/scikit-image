@@ -61,14 +61,14 @@ fig, axs = plt.subplots(1, 2, figsize=(16, 8))
 
 labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
 
-axs[0].imshow(astronaut, origin='upper', cmap='gray')
+axs[0].imshow(astronaut, cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):
     axs[0].annotate(label, (src[:, 0][i], src[:, 1][i] ),
                     textcoords="offset points", xytext=(0, 10), ha='center', color='red')
 
-axs[1].imshow(warped_img[..., ::-1], origin='upper', cmap='gray')
+axs[1].imshow(warped_img, cmap='gray')
 axs[1].scatter(dst[:, 0] , dst[:, 1] , marker='x', color='green')
 
 for i, label in enumerate(labels):

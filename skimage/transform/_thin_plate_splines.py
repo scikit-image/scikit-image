@@ -280,7 +280,7 @@ def tps_warp(
     y_steps = (y_max - y_min) // grid_scaling
 
     if x_steps <= 0 or y_steps <= 0:
-        raise RuntimeError('Unable to compute output region')
+        RuntimeError(f"Invalid or empty `output_region`: {output_region}")
 
     xx, yy = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
     coords = np.vstack([xx.ravel(), yy.ravel()]).T
