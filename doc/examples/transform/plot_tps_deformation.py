@@ -57,23 +57,23 @@ dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 10
 warped_img = ski.transform.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
 
 
-fig, axs = plt.subplots(1, 2, figsize=(16, 8))
+fig, axs = plt.subplots(1, 2)
 
 labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
 
 axs[0].imshow(astronaut, cmap='gray')
-axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='green')
+axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='cyan')
 
 for i, label in enumerate(labels):
     axs[0].annotate(label, (src[:, 0][i], src[:, 1][i] ),
-                    textcoords="offset points", xytext=(0, 10), ha='center', color='red')
+                    textcoords="offset points", xytext=(0, 5), ha='center', color='red')
 
 axs[1].imshow(warped_img, cmap='gray')
-axs[1].scatter(dst[:, 0] , dst[:, 1] , marker='x', color='green')
+axs[1].scatter(dst[:, 0] , dst[:, 1] , marker='x', color='cyan')
 
 for i, label in enumerate(labels):
     axs[1].annotate(label, (dst[:, 0][i] , dst[:, 1][i] ),
-                    textcoords="offset points", xytext=(0, 10), ha='center', color='red')
+                    textcoords="offset points", xytext=(0, 5), ha='center', color='red')
 
 plt.show()
 
