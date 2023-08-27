@@ -262,8 +262,7 @@ def tps_warp(
     image = np.asarray(image)
 
     if image.size == 0:
-        raise ValueError("Cannot warp empty image with dimensions",
-                          image.shape)
+        raise ValueError(f"Cannot warp empty image with dimensions {image.shape!r}")
 
     if image.ndim not in (2, 3):
         raise ValueError("Only 2D and 3D images are supported")
