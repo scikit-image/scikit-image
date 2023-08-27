@@ -108,11 +108,11 @@ class TestTpsWarp():
     def test_tps_warp_invalid_image_shape(self, image_shape):
         img = np.zeros(image_shape)
 
-        with pytest.raises(ValueError, match=".* invalid shape"):
+        with pytest.raises(ValueError, match="Cannot warp empty image with dimensions."):
             tps_warp(img, SRC, DST)
-        with pytest.raises(ValueError, match=".* invalid shape"):
+        with pytest.raises(ValueError, match="Cannot warp empty image with dimensions."):
             tps_warp(img, SRC, DST)
-        with pytest.raises(ValueError, match=".* invalid shape"):
+        with pytest.raises(ValueError, match="Cannot warp empty image with dimensions."):
             tps_warp(img, SRC, DST)
 
     def test_tps_warp_valid_output_region(self):
