@@ -149,8 +149,33 @@ def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
     out : 2-D array (same dtype as input image)
         Output image.
 
-    """
+    Notes
+    -----
+    The algorithm is defined as follows:
 
+    1. Determine the local neighborhood and sort by value.
+    2. Drop values below percentile given by p0 and above percentile given by p1.
+    3. Calculate the arithmetic mean and drop the remainder (for backwards compability).
+
+    Note that the actual implementation differs for performance reasons.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = np.array([[0, 1, 2],
+    ...                   [3, 4, 5],
+    ...                   [6, 7, 8]], dtype=np.uint8)
+    >>> fp = np.ones((3, 3), dtype=bool)
+    >>> ski.filters.rank.mean_percentile(image, footprint=fp, p0=0.25, p1=0.75)
+    array([[2, 2, 3],
+           [3, 4, 4],
+           [5, 5, 6]], dtype=uint8)
+    """
+    if not 0. <= p0 < p1 <= 1.:
+        raise ValueError(
+            f"Percentile interval doesn't satisfy 0 <= p0 < p1 <= 1, was [{p0}, {p1}]"
+        )
     return _apply(percentile_cy._mean,
                   image, footprint, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)

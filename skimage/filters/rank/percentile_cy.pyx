@@ -5,6 +5,7 @@
 
 cimport numpy as cnp
 from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
+from libc.math cimport floor, ceil
 cnp.import_array()
 
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
@@ -76,25 +77,39 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               cnp.float64_t p0, cnp.float64_t p1,
                               Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
+    cdef:
+        Py_ssize_t i
+        # Decreasing counter for lower excluded pixels
+        Py_ssize_t lower = <Py_ssize_t>floor(pop * p0)
+        # Decreasing counter for valid included pixels
+        Py_ssize_t valid = <Py_ssize_t>ceil(pop * p1) - lower
+        cnp.uint64_t total = 0
+        cnp.float64_t valid_ = valid
 
-    cdef Py_ssize_t i, sum, mean, n
+    if pop <= 0 or valid_ <= 0:
+        out[0] = <dtype_t_out> 0
+        return  # Return early
 
-    if pop:
-        sum = 0
-        mean = 0
-        n = 0
-        for i in range(n_bins):
-            sum += histo[i]
-            if (sum >= p0 * pop) and (sum <= p1 * pop):
-                n += histo[i]
-                mean += histo[i] * i
+    i = 0
+    # Deplete counter `lower` for excluded pixels in lower percentile
+    while 0 < lower:
+        lower -= histo[i]
+        i += 1
+    # If `lower` is negative, percentile border is inside bin
+    # so add as many pixel values as `lower` underflowed
+    total += -lower * (i - 1)
+    valid += lower
+    # Deplete counter `valid` for included pixels until upper excluded percentile
+    while 0 < valid:
+        valid -= histo[i]
+        total += histo[i] * i
+        i += 1
+    # If `upper` is negative, percentile border is inside bin, and we added too
+    # much, so subtract as many pixel values as `upper` underflowed
+    total += valid * (i - 1)
+    # Assign mean while dropping remainder, don't round for backwards compatibility
+    out[0] = <dtype_t_out>(total / valid_)
 
-        if n > 0:
-            out[0] = <dtype_t_out>(mean / n)
-        else:
-            out[0] = <dtype_t_out>0
-    else:
-        out[0] = <dtype_t_out>0
 
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t[::1] histo,

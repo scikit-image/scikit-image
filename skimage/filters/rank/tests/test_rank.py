@@ -887,3 +887,34 @@ class TestRank:
         elem = np.ones((3, 3), dtype=bool)
         with pytest.raises(ValueError):
             rank.maximum(image=image, footprint=elem)
+
+    @pytest.mark.parametrize("p0,p1", [(0.5, 0.5), (0.6, 0.4), (-1, 1), (0, 2)])
+    def test_percentile_mean_invalid(self, p0, p1):
+        image = np.ones((9, 9), dtype=np.uint8)
+        fp = np.ones((3, 3), dtype=bool)
+        with pytest.raises(ValueError, match="Percentile interval doesn't satisfy"):
+            rank.mean_percentile(image, footprint=fp, p0=p0, p1=p1)
+
+    @pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+    def test_percentile_mean_handcrafted(self, dtype):
+        image = np.array([[0, 1, 2],
+                          [3, 4, 5],
+                          [6, 7, 8]], dtype=dtype)
+        fp = np.ones((3, 3), dtype=bool)
+        result = rank.mean_percentile(image, footprint=fp, p0=0.25, p1=0.75)
+        desired = np.array([[2, 2, 3],
+                            [3, 4, 4],
+                            [5, 5, 6]], dtype=dtype)
+        np.testing.assert_equal(result, desired)
+
+    @pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
+    def test_percentile_mean_pr7096(self, dtype):
+        image = np.array([[0, 0, 0],
+                          [0, 1, 1],
+                          [1, 1, 1]], dtype=dtype)
+        fp = np.ones((3, 3), dtype=bool)
+        result = rank.mean_percentile(image, footprint=fp, p0=0.25, p1=0.75)
+        desired = np.array([[0, 0, 0],
+                            [0, 0, 0],
+                            [1, 1, 1]], dtype=dtype)
+        np.testing.assert_equal(result, desired)
