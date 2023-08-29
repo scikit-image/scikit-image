@@ -122,7 +122,7 @@ def gradient_percentile(image, footprint, out=None, mask=None, shift_x=False,
 
 def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
-    """Return local mean of an image.
+    """Return local mean of an image exlcuding outer percentiles in kernel.
 
     Only grayvalues between percentiles [p0, p1] are considered in the filter.
 
@@ -154,7 +154,9 @@ def mean_percentile(image, footprint, out=None, mask=None, shift_x=False,
     The algorithm is defined as follows:
 
     1. Determine the local neighborhood and sort by value.
-    2. Drop values below percentile given by p0 and above percentile given by p1.
+    2. Drop values below percentile given by p0 and above percentile given by p1. The
+       interval is inclusive, e.g. ``p0=0`` and ``p0=0.1`` behave the same for a kernel
+       size of 10.
     3. Calculate the arithmetic mean and drop the remainder (for backwards compability).
 
     Note that the actual implementation differs for performance reasons.

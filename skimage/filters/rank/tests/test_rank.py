@@ -897,14 +897,14 @@ class TestRank:
 
     @pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
     def test_percentile_mean_handcrafted(self, dtype):
-        image = np.array([[0, 1, 2],
-                          [3, 4, 5],
-                          [6, 7, 8]], dtype=dtype)
+        image = np.array([[0, 11, 22],
+                          [33, 44, 55],
+                          [66, 77, 88]], dtype=dtype)
         fp = np.ones((3, 3), dtype=bool)
         result = rank.mean_percentile(image, footprint=fp, p0=0.25, p1=0.75)
-        desired = np.array([[2, 2, 3],
-                            [3, 4, 4],
-                            [5, 5, 6]], dtype=dtype)
+        desired = np.array([[22, 27, 33],
+                            [38, 44, 49],
+                            [55, 60, 66]], dtype=dtype)
         np.testing.assert_equal(result, desired)
 
     @pytest.mark.parametrize("dtype", [np.uint8, np.uint16])
@@ -916,5 +916,25 @@ class TestRank:
         result = rank.mean_percentile(image, footprint=fp, p0=0.25, p1=0.75)
         desired = np.array([[0, 0, 0],
                             [0, 0, 0],
-                            [1, 1, 1]], dtype=dtype)
+                            [0, 1, 1]], dtype=dtype)
         np.testing.assert_equal(result, desired)
+
+    @pytest.mark.parametrize("p0", (0., .09, .1, .11, .3, .4))
+    @pytest.mark.parametrize("p1", (.6, .7, .89, .9, .91, 1.))
+    def test_percentile_mean_edges2(self, p0, p1):
+        image = np.arange(10, dtype=np.uint16) ** 2
+        image = image.reshape((1, 10))
+
+        lower = int(np.ceil(p0 * image.size))
+        lower = max(0, lower - 1)  # Inclusive border
+        upper = int(np.floor(p1 * image.size))
+        upper = min(image.size, upper + 1)  # Inclusive border
+
+        values = image.ravel()[lower:upper]
+        desired = np.sum(values) // len(values)
+
+        # Kernel should cover entire image for every position
+        footprint = np.ones((1, image.size * 3), dtype=bool)
+        result = rank.mean_percentile(image, footprint, p0=p0, p1=p1)
+
+        assert result[0, 0] == desired
