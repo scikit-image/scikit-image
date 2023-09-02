@@ -1150,3 +1150,18 @@ def test_rectangle_perimiter_clip_bottom_left():
                                  clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
+
+
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+def test_rectangle_perimeter_nan():
+    # Prevent regression, see https://github.com/scikit-image/scikit-image/issues/7114
+    result = rectangle_perimeter((np.nan, np.nan), (np.nan, np.nan))
+    desired = (
+        np.array(
+            [-9223372036854775808, -9223372036854775808,
+             -9223372036854775808, -9223372036854775808]),
+        np.array(
+            [-9223372036854775808, -9223372036854775808,
+             -9223372036854775808, -9223372036854775808])
+    )
+    np.testing.assert_equal(result, desired)
