@@ -1179,7 +1179,10 @@ def _lab2xyz(lab, illuminant, observer):
     n_invalid = invalid[0].size
     if n_invalid != 0:
         # Warning should be emitted by caller
-        z[invalid] = 0
+        if z.ndim > 0:
+            z[invalid] = 0
+        else:
+            z = 0
 
     out = np.stack([x, y, z], axis=-1)
 
