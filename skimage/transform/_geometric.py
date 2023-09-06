@@ -1214,7 +1214,7 @@ class EuclideanTransform(ProjectiveTransform):
         higher dimensions, you must provide or estimate the transformation
         matrix.
     translation : (x, y[, z, ...]) sequence of float, length D, optional
-            Translation parameters for each axis.
+        Translation parameters for each axis.
     dimensionality : int, optional
         The dimensionality of the transform.
 
