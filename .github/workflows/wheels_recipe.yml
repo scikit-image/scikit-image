@@ -6,7 +6,12 @@ env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
-  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+  CIBW_ENVIRONMENT: >
+    PIP_PREFER_BINARY=1
+    PIP_UPGRADE=1
+    PIP_PRE=1
+    PIP_INDEX_URL=https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    PIP_EXTRA_INDEX_URL=https://pypi.org/simple
 
 permissions:
   contents: read
