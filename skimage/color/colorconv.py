@@ -65,6 +65,14 @@ from .._shared.utils import (
 )
 from ..util import dtype, dtype_limits
 
+# TODO: when minimum numpy dependency is 1.25 use:
+# np..exceptions.AxisError instead of AxisError
+# and remove this try-except
+try:
+    from numpy import AxisError
+except ImportError:
+    from numpy.exceptions import AxisError
+
 
 def convert_colorspace(arr, fromspace, tospace, *, channel_axis=-1):
     """Convert an image array to a new color space.
@@ -157,7 +165,7 @@ def _validate_channel_axis(channel_axis, ndim):
     if not isinstance(channel_axis, int):
         raise TypeError("channel_axis must be an integer")
     if channel_axis < -ndim or channel_axis >= ndim:
-        raise np.exceptions.AxisError("channel_axis exceeds array dimensions")
+        raise AxisError("channel_axis exceeds array dimensions")
 
 
 def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
