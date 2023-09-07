@@ -128,17 +128,10 @@ jobs:
         include:
           - python-version: "3.9"
             OPTIONAL_DEPS: 0
-          - python-version: "3.11"
-            OPTIONAL_DEPS: 0
-            BUILD_DOCS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: "3.9"
             OPTIONAL_DEPS: 1
-          # a number of optional deps don't yet have Python 3.11 wheels
-          - python-version: "3.11"
-            OPTIONAL_DEPS: 1
-            BUILD_DOCS: 1
     env:
       TEST_EXAMPLES: 0
       CC: /usr/bin/clang
