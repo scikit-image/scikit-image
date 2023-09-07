@@ -55,7 +55,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         try:
             # ensure color channels are in the final dimension
             image = np.moveaxis(image, channel_axis, -1)
-        except np.AxisError:
+        except np.exceptions.AxisError:
             print('channel_axis must be one of the image array dimensions')
             raise
         except TypeError:

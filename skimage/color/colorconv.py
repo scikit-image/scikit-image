@@ -157,7 +157,7 @@ def _validate_channel_axis(channel_axis, ndim):
     if not isinstance(channel_axis, int):
         raise TypeError("channel_axis must be an integer")
     if channel_axis < -ndim or channel_axis >= ndim:
-        raise np.AxisError("channel_axis exceeds array dimensions")
+        raise np.exceptions.AxisError("channel_axis exceeds array dimensions")
 
 
 def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):

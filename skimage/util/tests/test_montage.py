@@ -84,7 +84,7 @@ def test_montage_simple_rgb_channel_axes(channel_axis):
 @testing.parametrize('channel_axis', (4, -5))
 def test_montage_invalid_channel_axes(channel_axis):
     arr_in = np.arange(16, dtype=float).reshape(2, 2, 2, 2)
-    with testing.raises(np.AxisError):
+    with testing.raises(np.exceptions.AxisError):
         montage(arr_in, channel_axis=channel_axis)
 
 

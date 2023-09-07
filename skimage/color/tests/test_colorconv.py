@@ -102,7 +102,7 @@ class TestColorconv():
 
     @pytest.mark.parametrize("channel_axis", [-4, 3])
     def test_rgba2rgb_error_channel_axis_out_of_range(self, channel_axis):
-        with pytest.raises(np.AxisError):
+        with pytest.raises(np.exceptions.AxisError):
             rgba2rgb(self.img_rgba, channel_axis=channel_axis)
 
     def test_rgba2rgb_error_rgb(self):
