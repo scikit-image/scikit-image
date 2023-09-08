@@ -139,6 +139,10 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     floating point representation.
     """
     arr = np.asanyarray(arr)
+    print(arr.shape)
+
+    if arr.shape == (3,):
+        arr = arr.reshape((1, 3))
 
     if arr.shape[channel_axis] != 3:
         msg = (f'the input array must have size 3 along `channel_axis`, '
@@ -1179,10 +1183,7 @@ def _lab2xyz(lab, illuminant, observer):
     n_invalid = invalid[0].size
     if n_invalid != 0:
         # Warning should be emitted by caller
-        if z.ndim > 0:
-            z[invalid] = 0
-        else:
-            z = 0
+        z[invalid] = 0
 
     out = np.stack([x, y, z], axis=-1)
 
