@@ -121,7 +121,7 @@ requires = [
     'packaging>=21',
     'Cython>=0.29.32',
     'pythran',
-    'lazy_loader>=0.2',
+    'lazy_loader>=0.3',
     "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
