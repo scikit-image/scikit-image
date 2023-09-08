@@ -139,7 +139,6 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     floating point representation.
     """
     arr = np.asanyarray(arr)
-    print(arr.shape)
 
     if arr.shape == (3,):
         arr = arr.reshape((1, 3))
