@@ -156,7 +156,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
     if not np.any(img):
         return np.zeros((0, 6))
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t[:, ::1] pixels = np.vstack(np.nonzero(img))
 
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
