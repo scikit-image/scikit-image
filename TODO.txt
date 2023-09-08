@@ -42,3 +42,12 @@ Other (2022)
 * NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+
+Post numpy 2
+------------
+
+- Remove try except blocks following comment starting
+  `# TODO: when minimum numpy`
+  in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
+  `skimage/measure/_blur_effect.py`, and `skimage/util/tests/test_montage.py`
+- Remove `handle_np2` from `skimage/conftest.py`
