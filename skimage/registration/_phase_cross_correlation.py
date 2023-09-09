@@ -172,11 +172,7 @@ def _disambiguate_shift(reference_image, moving_image, shift):
             max_slice, positive_shift, negative_shift
             ):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
-    # if not subpixel:
-    #     real_shift = tuple(map(int, real_shift_acc))
-    # else:
-    #     real_shift = tuple(real_shift_acc)
-    # return real_shift
+
     return np.array(real_shift_acc)
 
 
