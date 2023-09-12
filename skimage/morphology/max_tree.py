@@ -131,7 +131,7 @@ def max_tree(image, connectivity=1):
                                                       offset).astype(np.int32)
 
     # pixels need to be sorted according to their gray level.
-    tree_traverser = np.argsort(image.ravel()).astype(np.int64)
+    tree_traverser = np.argsort(image.ravel(), kind="stable").astype(np.int64)
 
     # call of cython function.
     _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),

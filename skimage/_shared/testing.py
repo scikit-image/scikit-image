@@ -267,6 +267,37 @@ def setup_test():
             category=DeprecationWarning
         )
 
+        # Temporary warning raised by imageio about change in Pillow. May be removed
+        # once https://github.com/python-pillow/Pillow/pull/7125 is shipped in the
+        # minimal required version of pillow (probably the release after Pillow 9.5.0)
+        warnings.filterwarnings(
+            "default",
+            message=(
+                r"Loading 16-bit \(uint16\) PNG as int32 due to limitations in "
+                r"pillow's PNG decoder\. This will be fixed in a future version of "
+                r"pillow which will make this warning dissapear\."
+            ),
+            category=UserWarning,
+        )
+
+        # Temporary warning raised by scipy. May be removed when scipy 1.12 is
+        # minimum supported version and we replace tol with rtol
+        warnings.filterwarnings(
+            "default",
+            message=(
+                "'scipy.sparse.linalg.cg' keyword argument 'tol' is deprecated in "
+                "favor of 'rtol' and will be removed in SciPy v.1.14.0."
+            ),
+            category=DeprecationWarning,
+        )
+
+
+        warnings.filterwarnings(
+            "default",
+            message=("The figure layout has changed to tight"),
+            category=UserWarning,
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.

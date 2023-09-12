@@ -4,7 +4,7 @@ import numpy as np
 
 from .._shared.filters import gaussian
 from .._shared.utils import convert_to_float
-from ..transform import resize
+from ._warps import resize
 
 
 def _smooth(image, sigma, mode, cval, channel_axis):

@@ -148,16 +148,17 @@ def _raveled_offsets_and_distances(
         spacing = np.ones(ndim)
     weighted_offsets = offsets * spacing
     distances = np.sqrt(np.sum(weighted_offsets**2, axis=1))
-    sorted_raveled_offsets = raveled_offsets[np.argsort(distances)]
-    sorted_distances = np.sort(distances)
+    sorted_raveled_offsets = raveled_offsets[np.argsort(distances, kind="stable")]
+    sorted_distances = np.sort(distances, kind="stable")
 
     # If any dimension in image_shape is smaller than footprint.shape
     # duplicates might occur, remove them
     if any(x < y for x, y in zip(image_shape, footprint.shape)):
         # np.unique reorders, which we don't want
         _, indices = np.unique(sorted_raveled_offsets, return_index=True)
-        sorted_raveled_offsets = sorted_raveled_offsets[np.sort(indices)]
-        sorted_distances = sorted_distances[np.sort(indices)]
+        indices = np.sort(indices, kind="stable")
+        sorted_raveled_offsets = sorted_raveled_offsets[indices]
+        sorted_distances = sorted_distances[indices]
 
     # Remove "offset to center"
     sorted_raveled_offsets = sorted_raveled_offsets[1:]
@@ -198,7 +199,7 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     >>> _offsets_to_raveled_neighbors((2, 3, 2), np.ones((3, 3, 3)), (1, 1, 1))
-    array([ 2, -6,  1, -1,  6, -2,  3,  8, -3, -4,  7, -5, -7, -8,  5,  4, -9,
+    array([-6, -2, -1,  1,  2,  6, -8, -7, -5, -4, -3,  3,  4,  5,  7,  8, -9,
             9])
     """
     raveled_offsets = _raveled_offsets_and_distances(

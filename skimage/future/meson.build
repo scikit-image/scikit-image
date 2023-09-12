@@ -11,5 +11,4 @@ py3.install_sources(
   subdir: 'skimage/future'  # Folder relative to site-packages to install to
 )
 
-subdir('graph')
 subdir('tests')

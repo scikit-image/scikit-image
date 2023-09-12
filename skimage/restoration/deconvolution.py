@@ -265,7 +265,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     prev_x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
 
     # Difference between two successive mean
-    delta = np.NAN
+    delta = np.nan
 
     # Initial state of the chain
     gn_chain, gx_chain = [1], [1]
