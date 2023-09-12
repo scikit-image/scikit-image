@@ -7,4 +7,4 @@ dask[array]>=2021.1.0
 matplotlib>=3.5
 pooch>=1.6.0
 pyamg
-scikit-learn>=1.0
+scikit-learn>=1.1

@@ -4,6 +4,14 @@ from skimage._shared.testing import assert_equal, assert_array_equal
 import numpy as np
 from skimage.util import montage
 
+# TODO: when minimum numpy dependency is 1.25 use:
+# np..exceptions.AxisError instead of AxisError
+# and remove this try-except
+try:
+    from numpy import AxisError
+except ImportError:
+    from numpy.exceptions import AxisError
+
 
 def test_montage_simple_gray():
     n_images, n_rows, n_cols = 3, 2, 3
@@ -84,7 +92,7 @@ def test_montage_simple_rgb_channel_axes(channel_axis):
 @testing.parametrize('channel_axis', (4, -5))
 def test_montage_invalid_channel_axes(channel_axis):
     arr_in = np.arange(16, dtype=float).reshape(2, 2, 2, 2)
-    with testing.raises(np.AxisError):
+    with testing.raises(AxisError):
         montage(arr_in, channel_axis=channel_axis)
 
 

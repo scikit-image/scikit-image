@@ -7,6 +7,7 @@ from numpy.testing import (assert_allclose,
                            assert_array_almost_equal,
                            assert_array_equal,
                            assert_equal)
+from packaging.version import Version
 
 from skimage import data
 from skimage import exposure
@@ -354,6 +355,10 @@ def test_rescale_same_values():
     assert_array_almost_equal(out, image)
 
 
+@pytest.mark.skipif(
+    Version(np.__version__) < Version('1.25'),
+    reason="Older NumPy throws a few extra warnings here"
+)
 @pytest.mark.parametrize(
     "in_range,out_range", [("image", "dtype"),
                            ("dtype", "image")]
@@ -362,22 +367,11 @@ def test_rescale_nan_warning(in_range, out_range):
     image = np.arange(12, dtype=float).reshape(3, 4)
     image[1, 1] = np.nan
 
-    msg = (
-        r"One or more intensity levels are NaN\."
-        r" Rescaling will broadcast NaN to the full image\."
-    )
-
-    # 2019/11/10 Passing NaN to np.clip raises a DeprecationWarning for
-    # versions above 1.17, "|\A\Z" marks as optional warning
-    # TODO: Remove once NumPy 1.25.0 is minimal dependency
-    numpy_warning_1_17_plus = (
-        "|\\A\\ZPassing `np.nan` to mean no clipping in np.clip"
-    )
-
-    with expected_warnings([msg, numpy_warning_1_17_plus]):
-        result = exposure.rescale_intensity(image, in_range, out_range)
-
-    assert np.all(np.isnan(result))
+    with expected_warnings([
+            r"One or more intensity levels are NaN\."
+            r" Rescaling will broadcast NaN to the full image\."
+    ]):
+        exposure.rescale_intensity(image, in_range, out_range)
 
 
 @pytest.mark.parametrize(

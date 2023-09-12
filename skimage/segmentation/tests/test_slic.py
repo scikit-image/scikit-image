@@ -549,7 +549,7 @@ def test_start_label_fix():
 
 def test_raises_ValueError_if_input_has_NaN():
     img = np.zeros((4,5), dtype=float)
-    img[2, 3] = np.NaN
+    img[2, 3] = np.nan
     with pytest.raises(ValueError):
         slic(img, channel_axis=None)
 

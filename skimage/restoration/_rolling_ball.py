@@ -94,12 +94,12 @@ def rolling_ball(image, *, radius=100, kernel=None,
     center_intensity = kernel[tuple(kernel_center)]
 
     intensity_difference = center_intensity - kernel
-    intensity_difference[kernel == np.Inf] = np.Inf
+    intensity_difference[kernel == np.inf] = np.inf
     intensity_difference = intensity_difference.astype(img.dtype)
     intensity_difference = intensity_difference.reshape(-1)
 
     img = np.pad(img, kernel_center[:, np.newaxis],
-                 constant_values=np.Inf, mode="constant")
+                 constant_values=np.inf, mode="constant")
 
     func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
@@ -150,7 +150,7 @@ def ball_kernel(radius, ndim):
     sum_of_squares = np.sum(kernel_coords ** 2, axis=-1)
     distance_from_center = np.sqrt(sum_of_squares)
     kernel = np.sqrt(np.clip(radius ** 2 - sum_of_squares, 0, None))
-    kernel[distance_from_center > radius] = np.Inf
+    kernel[distance_from_center > radius] = np.inf
 
     return kernel
 
@@ -190,6 +190,6 @@ def ellipsoid_kernel(shape, intensity):
 
     intensity_scaling = 1 - np.sum((kernel_coords / semi_axis) ** 2, axis=-1)
     kernel = intensity * np.sqrt(np.clip(intensity_scaling, 0, None))
-    kernel[intensity_scaling < 0] = np.Inf
+    kernel[intensity_scaling < 0] = np.inf
 
     return kernel
