@@ -280,6 +280,24 @@ def setup_test():
             category=UserWarning,
         )
 
+        # Temporary warning raised by scipy. May be removed when scipy 1.12 is
+        # minimum supported version and we replace tol with rtol
+        warnings.filterwarnings(
+            "default",
+            message=(
+                "'scipy.sparse.linalg.cg' keyword argument 'tol' is deprecated in "
+                "favor of 'rtol' and will be removed in SciPy v.1.14.0."
+            ),
+            category=DeprecationWarning,
+        )
+
+
+        warnings.filterwarnings(
+            "default",
+            message=("The figure layout has changed to tight"),
+            category=UserWarning,
+        )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.

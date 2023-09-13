@@ -33,13 +33,14 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_cycle_spin.py',
   '_denoise.py',
   'deconvolution.py',
   'inpaint.py',
   'j_invariant.py',
   'non_local_means.py',
-  'rolling_ball.py',
+  '_rolling_ball.py',
   'uft.py',
   'unwrap.py'
 ]

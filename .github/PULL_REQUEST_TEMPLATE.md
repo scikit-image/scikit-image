@@ -15,3 +15,12 @@
 - [Unit tests](https://scikit-image.org/docs/dev/development/contribute.html#testing)
 - A gallery example in `./doc/examples` for new features
 - [Contribution guide](https://scikit-image.org/docs/dev/development/contribute.html) is followed
+
+## Release note
+
+Summarize the introduced changes in the code block below in one or a few sentences. The
+summary will be included in the next release notes automatically:
+
+```release-note
+...
+```

@@ -1,3 +1,8 @@
+"""General utility functions.
+
+This module contains a number of utility functions to work with images in general.
+"""
+
 import functools
 import warnings
 

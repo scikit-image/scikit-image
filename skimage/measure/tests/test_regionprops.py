@@ -1,8 +1,10 @@
 import math
 
+import re
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
+import numpydoc
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_almost_equal, assert_array_equal,
                            assert_equal)
@@ -1232,10 +1234,6 @@ def test_regionprops_table_no_regions():
     assert len(out['bbox+3']) == 0
 
 
-def test_column_dtypes_complete():
-    assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
-
-
 def test_column_dtypes_correct():
     msg = 'mismatch with expected type,'
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
@@ -1260,6 +1258,17 @@ def test_column_dtypes_correct():
             assert False, (
                 f'{col} dtype {t} {msg} {COL_DTYPES[col]}'
             )
+
+
+def test_all_documented_items_in_col_dtypes():
+    docstring = numpydoc.docscrape.FunctionDoc(regionprops)
+    notes_lines = docstring['Notes']
+    property_lines = filter(lambda line: line.startswith('**'), notes_lines)
+    pattern = r'\*\*(?P<property_name>[a-z_]+)\*\*.*'
+    property_names = {re.search(pattern, property_line).group('property_name')
+                      for property_line in property_lines}
+    column_keys = set(COL_DTYPES.keys())
+    assert column_keys == property_names
 
 
 def pixelcount(regionmask):

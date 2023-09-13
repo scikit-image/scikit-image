@@ -155,12 +155,12 @@ are made according to the following rules:
   expected to wait about a week for others to give their opinion if they’re not
   confident, that others would agree.
 
-- **Changes to the API principles** require a :ref:`skip` and follow the
+- **Changes to the API principles** require a :ref:`SKIP <skip>` and follow the
   decision-making process outlined above. But, in this case, the objection period
   should be one-month-long.
 
 - **Changes to this governance model or our mission, vision, and values**
-  require a :ref:`skip` and follow the decision-making process outlined above,
+  require a :ref:`SKIP <skip>` and follow the decision-making process outlined above,
   *unless* there is unanimous agreement from core developers on the change.
 
 If an objection is raised on a lazy consensus, the proposer can appeal to the
