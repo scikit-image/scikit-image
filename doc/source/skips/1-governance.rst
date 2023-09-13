@@ -153,11 +153,11 @@ are made according to the following rules:
   core developers *and* no disagreement or requested changes by a core developer
   on the issue or pull-request page (lazy consensus). In this case, core developers are
   expected to wait about a week for others to give their opinion if they’re not
-  confident, others would agree.
+  confident, that others would agree.
 
 - **Changes to the API principles** require a :ref:`skip` and follow the
-  decision-making process outlined above. Except in this case an objection period of
-  one month should be given.
+  decision-making process outlined above. But, in this case, the objection period
+  should be one-month-long.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`skip` and follow the decision-making process outlined above,
