@@ -6,7 +6,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.utils import check_nD, deprecate_kwarg, deprecate_func
-from ..util import crop, img_as_ubyte
+from ..util import crop
 from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
                               _table_lookup_index)
@@ -21,8 +21,8 @@ def skeletonize(image, *, method=None):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        An image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
@@ -30,7 +30,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : ndarray
+    skeleton : ndarray of bool
         The thinned image.
 
     See Also
@@ -62,7 +62,7 @@ def skeletonize(image, *, method=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -74,11 +74,12 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    image = np.asarray(image)
     if method not in {'zhang', 'lee', None}:
         raise ValueError(f'skeletonize method should be either "lee" or "zhang", '
                          f'got {method}.')
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = _skeletonize_2d(image.astype(bool, copy=False))
+        skeleton = _skeletonize_2d(image)
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
@@ -99,9 +100,8 @@ def _skeletonize_2d(image):
     Parameters
     ----------
     image : numpy.ndarray
-        A binary image containing the objects to be skeletonized. '1'
-        represents foreground, and '0' represents background. It
-        also accepts arrays of boolean values where True is foreground.
+        An image containing the objects to be skeletonized. Zeros
+        represent background, nonzero values are foreground.
 
     Returns
     -------
@@ -148,7 +148,7 @@ def _skeletonize_2d(image):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -160,10 +160,10 @@ def _skeletonize_2d(image):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
     if image.ndim != 2:
         raise ValueError("Zhang's skeletonize method requires a 2D array")
 
+    image = image.astype(bool, order="C")
     return _fast_skeletonize(image)
 
 
@@ -594,7 +594,7 @@ def _skeletonize_3d(image):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
+        An image containing the objects to be skeletonized. Zeros
         represent background, nonzero values are foreground.
 
     Returns
@@ -630,19 +630,13 @@ def _skeletonize_3d(image):
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
                          f"got image.ndim = {image.ndim} instead.")
-    image = np.ascontiguousarray(image)
-    image = img_as_ubyte(image, force_copy=False)
 
     # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
-    image_o = image
+    image_o = image.astype(bool)
     if image.ndim == 2:
-        image_o = image[np.newaxis, ...]
-    image_o = np.pad(image_o, pad_width=1, mode='constant')
-
-    # normalize to binary
-    maxval = image_o.max()
-    image_o[image_o != 0] = 1
+        image_o = image_o[np.newaxis, ...]
+    image_o = np.pad(image_o, pad_width=1, mode='constant')  # copies
 
     # do the computation
     image_o = np.asarray(_compute_thin_image(image_o))
@@ -651,7 +645,6 @@ def _skeletonize_3d(image):
     image_o = crop(image_o, crop_width=1)
     if image.ndim == 2:
         image_o = image_o[0]
-    image_o *= maxval
 
     return image_o
 
