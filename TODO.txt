@@ -32,6 +32,12 @@ Version 0.23
   arguments in favor of `rng`.
 * Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
 
+Version 0.24
+------------
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_2d`.
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` as well as
+  `skimage.morphology.tests.test_skeletonize_3d.test_deprecated_skeletonize_3d`.
+
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating

@@ -1,10 +1,11 @@
 """
 Algorithms for computing the skeleton of a binary image
 """
+
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD, deprecate_kwarg, deprecate_func
 from ..util import crop, img_as_ubyte
 from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
@@ -34,7 +35,7 @@ def skeletonize(image, *, method=None):
 
     See Also
     --------
-    medial_axis, skeletonize_2d, skeletonize_3d, thin
+    medial_axis
 
     References
     ----------
@@ -77,19 +78,19 @@ def skeletonize(image, *, method=None):
         raise ValueError(f'skeletonize method should be either "lee" or "zhang", '
                          f'got {method}.')
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image.astype(bool, copy=False))
+        skeleton = _skeletonize_2d(image.astype(bool, copy=False))
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D '
                          'images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
-        skeleton = skeletonize_3d(image)
+        skeleton = _skeletonize_3d(image)
     else:
         raise ValueError(f'skeletonize requires a 2D or 3D image as input, '
                          f'got {image.ndim}D.')
     return skeleton
 
 
-def skeletonize_2d(image):
+def _skeletonize_2d(image):
     """Return the skeleton of a 2D binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -164,6 +165,18 @@ def skeletonize_2d(image):
         raise ValueError("Zhang's skeletonize method requires a 2D array")
 
     return _fast_skeletonize(image)
+
+
+def skeletonize_2d(image):
+    return _skeletonize_2d(image)
+
+
+skeletonize_2d.__doc__ = _skeletonize_2d.__doc__
+skeletonize_2d = deprecate_func(
+    deprecated_version="0.22",
+    removed_version="0.24",
+    hint="Use `skimage.morphology.skeletonize` instead."
+)(skeletonize_2d)
 
 
 # --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
@@ -267,7 +280,7 @@ def thin(image, max_num_iter=None):
 
     See Also
     --------
-    medial_axis, skeletonize, skeletonize_2d, skeletonize_3d
+    skeletonize, medial_axis
 
     Notes
     -----
@@ -384,7 +397,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     See Also
     --------
-    skeletonize, skeletonize_2d, skeletonize_3d, thin
+    skeletonize, thin
 
     Notes
     -----
@@ -572,7 +585,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(image):
+def _skeletonize_3d(image):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -591,7 +604,7 @@ def skeletonize_3d(image):
 
     See Also
     --------
-    medial_axis, skeletonize, skeletonize_2d, thin
+    skeletonize, medial_axis
 
     Notes
     -----
@@ -641,3 +654,15 @@ def skeletonize_3d(image):
     image_o *= maxval
 
     return image_o
+
+
+def skeletonize_3d(image):
+    return _skeletonize_3d(image)
+
+
+skeletonize_3d.__doc__ = _skeletonize_3d.__doc__
+skeletonize_3d = deprecate_func(
+    deprecated_version="0.22",
+    removed_version="0.24",
+    hint="Use `skimage.morphology.skeletonize` instead."
+)(skeletonize_3d)

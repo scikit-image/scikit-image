@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 import scipy.ndimage as ndi
 
 from skimage import io, draw
@@ -24,7 +25,7 @@ def test_skeletonize_wrong_dim():
 def test_skeletonize_1D_old_api():
     # a corner case of an image of a shape(1, N)
     im = np.ones((5, 1), dtype=np.uint8)
-    res = skeletonize_3d(im)
+    res = skeletonize(im)
     assert_equal(res, im)
 
 
@@ -183,3 +184,12 @@ def test_3d_vs_fiji():
     img_s = skeletonize(img)
     img_f = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif"))
     assert_equal(img_s, img_f)
+
+
+def test_deprecated_skeletonize_3d():
+    image = np.ones((10, 10), dtype=bool)
+    regex = "Use `skimage\\.morphology\\.skeletonize"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        skeletonize_3d(image)
+    assert len(record) == 1
+    assert record[0].filename == __file__, "warning points at wrong file"
