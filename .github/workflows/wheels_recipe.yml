@@ -23,7 +23,7 @@ jobs:
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -57,7 +57,7 @@ jobs:
         cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
         cibw_manylinux: [manylinux2014]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: "3.9"
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Install cibuildwheel
@@ -99,7 +99,7 @@ jobs:
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -176,7 +176,7 @@ jobs:
         cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
