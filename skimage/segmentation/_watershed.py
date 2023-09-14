@@ -35,7 +35,7 @@ def _validate_inputs(image, markers, mask, connectivity):
     markers : int or array of int
         The marker image.
     mask : array, or None
-        A boolean mask, True where we want to compute the watershed.
+        Array of same shape as image. Defaults to ndarray of 1s. May be used to restrict labeling to thresholded regions (see Examples section).
     connectivity : int in {1, ..., image.ndim}
         The connectivity of the neighborhood of a pixel.
 
