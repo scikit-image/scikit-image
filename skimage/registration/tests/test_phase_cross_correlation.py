@@ -266,4 +266,4 @@ def test_disambiguate_zero_shift(disambiguate):
             image, image, disambiguate=disambiguate, return_error='always'
             )
     np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
-    assert(isinstance(computed_shift, np.ndarray))
+    assert isinstance(computed_shift, np.ndarray)
