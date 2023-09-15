@@ -196,9 +196,12 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     """
     labels = [1, 2]
     sample = np.zeros((3,) * ndim, dtype=np.intp)
-    sample[(0,) * ndim] = labels[0]
-    sample[(slice(1, None),) * ndim] = labels[1]
-    propmasks = [(sample == n) for n in labels]
+
+    regions = [(slice(0,),) * ndim, (slice(1, None),) * ndim]
+    sample[regions[0]] = labels[0]
+    sample[regions[1]] = labels[1]
+
+    propmasks = [(sample[region] == label) for (label, region) in zip(labels, regions)]
 
     rng = np.random.default_rng()
 
