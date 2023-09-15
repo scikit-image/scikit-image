@@ -151,9 +151,9 @@ are made according to the following rules:
 
 - **Code and major documentation changes, and changes to the API** require agreement by
   *two* core developers *and* no disagreement or requested changes by a core developer
-  on the issue or pull request page (lazy consensus). In case of such changes, core
-  developers are expected to wait about a week for others to give their opinion if
-  they’re not confident that others would agree.
+  on the issue or pull request page (lazy consensus). In the case of disagreement or
+  requested changes, core developers are expected to wait about a week for others to
+  give their opinion if they’re not confident that others would agree.
 
 - **Changes to the API principles** require a :ref:`SKIP <skip>` and follow the
   decision-making process outlined above. But, in this case, the objection period
