@@ -63,13 +63,13 @@ def precompute_decompositions(
                 raise ValueError(f"ndim={ndim} not currently supported")
 
             all_actual = []
-            min_err = np.Inf
+            min_err = np.inf
             for n_t in range(radius // len(all_t) + 1):
                 if (n_t * len(all_t)) > radius:
                     n_t -= 1
                 len_t = n_t * len(all_t)
                 d_range = range(radius - len_t, -1, -1)
-                err_prev = np.Inf
+                err_prev = np.inf
                 for n_diamond in d_range:
                     r_rem = radius - len_t - n_diamond
                     n_square = r_rem

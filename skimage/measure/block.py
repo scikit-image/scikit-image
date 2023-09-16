@@ -81,8 +81,9 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
             after_width = 0
         pad_width.append((0, after_width))
 
-    image = np.pad(image, pad_width=pad_width, mode='constant',
-                   constant_values=cval)
+    if np.any(np.asarray(pad_width)):
+        image = np.pad(image, pad_width=pad_width, mode='constant',
+                       constant_values=cval)
 
     blocked = view_as_blocks(image, block_size)
 

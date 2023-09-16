@@ -10,8 +10,8 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     """Generate a synthetic ground truth optical flow with a sinusoid as
       first component.
 
-    Parameters:
-    ----
+    Parameters
+    ----------
     image0: ndarray
         The base image to be warped.
     max_motion: float

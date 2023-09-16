@@ -20,8 +20,8 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
     are defined as patches located around pixels with Gaussian
     weights.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     img0, img1 : 2D array
         Input images.
     coords0 : (2, m) array_like
@@ -33,8 +33,8 @@ def match_locations(img0, img1, coords0, coords1, radius=5, sigma=3):
     sigma : float
         Standard deviation of the Gaussian kernel centered over the patches.
 
-    Returns:
-    --------
+    Returns
+    -------
     match_coords: (2, m) array
         The points in `coords1` that are the closest corresponding matches to
         those in `coords0` as determined by the (Gaussian weighted) sum of

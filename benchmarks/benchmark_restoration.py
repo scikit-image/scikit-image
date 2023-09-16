@@ -150,7 +150,7 @@ class RollingBall:
     def time_rollingball_nan(self, radius):
         image = data.coins().astype(float)
         pos = np.arange(np.min(image.shape))
-        image[pos, pos] = np.NaN
+        image[pos, pos] = np.nan
         restoration.rolling_ball(image, radius=radius, nansafe=True)
     time_rollingball_nan.params = [25, 50, 100, 200]
     time_rollingball_nan.param_names = ["radius"]

@@ -46,7 +46,7 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.13',
+    'meson-python>=0.14',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
@@ -80,7 +80,7 @@ docs = [
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
     'plotly>=5.10',
     'kaleido',
-    'scikit-learn>=0.24.0',
+    'scikit-learn>=1.1',
     'sphinx_design>=0.3',
     'pydata-sphinx-theme>=0.13',
 ]
@@ -92,7 +92,7 @@ optional = [
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pyamg',
-    'scikit-learn>=1.0',
+    'scikit-learn>=1.1',
 ]
 test = [
     'asv',
@@ -115,13 +115,13 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.13',
+    'meson-python>=0.14',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
     'Cython>=0.29.32',
     'pythran',
-    'lazy_loader>=0.2',
+    'lazy_loader>=0.3',
     "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
@@ -192,20 +192,16 @@ exclude = [
 [tool.ruff.pydocstyle]
 convention = 'numpy'
 
-[tool.pytest]
-python_files = [
-    'benchmark_*.py',
-    'test_*.py',
-]
-python_classes = [
-    'Test*',
-    '*Suite',
-]
-python_functions = [
-    'time_*',
-    'test_*',
-    'peakmem_*',
-]
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra  --strict-config  --strict-markers"
+log_cli_level = "INFO"
+xfail_strict = true
+#testpaths = ["skimage", "../../../../../benchmarks"]
+python_files = ["benchmark_*.py", "test_*.py"]
+python_classes = ["Test*", "*Suite"]
+python_functions = ["time_*", "test_*", "peakmem_*"]
+filterwarnings = []
 
 [tool.coverage.run]
 omit = ['*/tests/*']
