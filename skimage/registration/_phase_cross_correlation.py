@@ -142,7 +142,7 @@ def _disambiguate_shift(reference_image, moving_image, shift):
 
     Returns
     -------
-    real_shift : sequence of floats
+    real_shift : ndarray
         The shift disambiguated in real space.
     """
     shape = reference_image.shape
