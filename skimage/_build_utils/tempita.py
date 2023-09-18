@@ -10,7 +10,7 @@ from Cython import Tempita as tempita
 # cython.tempita or numpy/npy_tempita.
 
 
-def process_tempita(fromfile, outfile=None):
+def process_tempita(fromfile, outfile):
     """Process tempita templated file and write out the result.
 
     The template file is expected to end in `.c.in` or `.pyx.in`:
@@ -42,7 +42,11 @@ def main():
     if not args.infile.endswith('.in'):
         raise ValueError(f"Unexpected extension: {args.infile}")
 
+    if os.path.isabs(args.outdir):
+        raise ValueError("outdir must relative to the current directory")
     outdir_abs = os.path.join(os.getcwd(), args.outdir)
+    if not os.path.exists(outdir_abs):
+        raise ValueError("outdir doesn't exist")
     outfile = os.path.join(
         outdir_abs, os.path.splitext(os.path.split(args.infile)[1])[0]
     )
