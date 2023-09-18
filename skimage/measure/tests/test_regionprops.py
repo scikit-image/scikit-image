@@ -1280,6 +1280,11 @@ def intensity_median(regionmask, image_intensity):
     return np.median(image_intensity[regionmask])
 
 
+def bbox_list(regionmask):
+    """Extra property who's output shape is dependent on mask shape."""
+    return [1] * regionmask.shape[1]
+
+
 def too_many_args(regionmask, image_intensity, superfluous):
     return 1
 
@@ -1337,13 +1342,18 @@ def test_extra_properties_mixed():
 
 
 def test_extra_properties_table():
-    out = regionprops_table(SAMPLE_MULTIPLE,
-                            intensity_image=INTENSITY_SAMPLE_MULTIPLE,
-                            properties=('label',),
-                            extra_properties=(intensity_median, pixelcount)
-                            )
+    out = regionprops_table(
+        SAMPLE_MULTIPLE,
+        intensity_image=INTENSITY_SAMPLE_MULTIPLE,
+        properties=('label',),
+        extra_properties=(intensity_median, pixelcount, bbox_list)
+    )
     assert_array_almost_equal(out['intensity_median'], np.array([2., 4.]))
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
+
+    assert out["bbox_list"].dtype == np.object_
+    assert out["bbox_list"][0] == [1] * 10
+    assert out["bbox_list"][1] == [1] * 1
 
 
 def test_multichannel():
