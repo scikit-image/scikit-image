@@ -25,11 +25,11 @@ References
 
 """
 from time import time
+from functools import partial
+from multiprocessing.pool import Pool
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-from dask import delayed
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -48,7 +48,6 @@ from skimage.feature import draw_haar_like_feature
 # integral image within this ROI is computed. Finally, the integral image is
 # used to extract the features.
 
-@delayed
 def extract_feature_image(img, feature_type, feature_coord=None):
     """Extract the haar feature for the current image"""
     ii = integral_image(img)
@@ -67,12 +66,11 @@ images = lfw_subset()
 # To speed up the example, extract the two types of features only
 feature_types = ['type-2-x', 'type-2-y']
 
-# Build a computation graph using Dask. This allows the use of multiple
-# CPU cores later during the actual computation
-X = delayed(extract_feature_image(img, feature_types) for img in images)
-# Compute the result
+# Use multiprocessing pool to compute tasks in parallel
+worker = partial(extract_feature_image, feature_type=feature_types)
 t_start = time()
-X = np.array(X.compute(scheduler='single-threaded'))
+X = [x for x in Pool().map(worker, images)]
+X = np.stack(X)
 time_full_feature_comp = time() - t_start
 
 # Label images (100 faces and 100 non-faces)
@@ -139,12 +137,15 @@ feature_type_sel = feature_type[idx_sorted[:sig_feature_count]]
 # but we would like to emphasize the usage of `feature_coord` and `feature_type`
 # to recompute a subset of desired features.
 
-# Build the computational graph using Dask
-X = delayed(extract_feature_image(img, feature_type_sel, feature_coord_sel)
-            for img in images)
-# Compute the result
+# Use multiprocessing pool to compute tasks in parallel
+worker = partial(
+    extract_feature_image,
+    feature_type=feature_type_sel,
+    feature_coord=feature_coord_sel
+)
 t_start = time()
-X = np.array(X.compute(scheduler='single-threaded'))
+X = [x for x in Pool().map(worker, images)]
+X = np.stack(X)
 time_subs_feature_comp = time() - t_start
 
 y = np.array([1] * 100 + [0] * 100)
