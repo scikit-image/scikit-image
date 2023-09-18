@@ -25,9 +25,8 @@ References
 
 """
 from time import time
-from functools import partial
-from multiprocessing.pool import Pool
 
+import dask
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -66,11 +65,13 @@ images = lfw_subset()
 # To speed up the example, extract the two types of features only
 feature_types = ['type-2-x', 'type-2-y']
 
-# Use multiprocessing pool to compute tasks in parallel
-worker = partial(extract_feature_image, feature_type=feature_types)
+# Build a computation graph using Dask. This allows the use of multiple
+# CPU cores later during the actual computation
+X = [dask.delayed(extract_feature_image)(img, feature_types) for img in images]
+X = dask.delayed(np.stack)(X)
+# Compute the result
 t_start = time()
-X = [x for x in Pool().map(worker, images)]
-X = np.stack(X)
+X = X.compute(scheduler="processes")
 time_full_feature_comp = time() - t_start
 
 # Label images (100 faces and 100 non-faces)
@@ -137,15 +138,16 @@ feature_type_sel = feature_type[idx_sorted[:sig_feature_count]]
 # but we would like to emphasize the usage of `feature_coord` and `feature_type`
 # to recompute a subset of desired features.
 
-# Use multiprocessing pool to compute tasks in parallel
-worker = partial(
-    extract_feature_image,
-    feature_type=feature_type_sel,
-    feature_coord=feature_coord_sel
-)
+# Build a computation graph using Dask. This allows the use of multiple
+# CPU cores later during the actual computation
+X = [
+    dask.delayed(extract_feature_image)(img, feature_type_sel, feature_coord_sel)
+    for img in images
+]
+X = dask.delayed(np.stack)(X)
+# Compute the result
 t_start = time()
-X = [x for x in Pool().map(worker, images)]
-X = np.stack(X)
+X = X.compute(scheduler="processes")
 time_subs_feature_comp = time() - t_start
 
 y = np.array([1] * 100 + [0] * 100)
