@@ -265,5 +265,5 @@ def test_disambiguate_zero_shift(disambiguate):
     computed_shift, _, _ = phase_cross_correlation(
             image, image, disambiguate=disambiguate, return_error='always'
             )
-    np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
     assert isinstance(computed_shift, np.ndarray)
+    np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
