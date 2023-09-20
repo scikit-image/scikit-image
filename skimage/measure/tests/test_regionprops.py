@@ -1281,7 +1281,7 @@ def intensity_median(regionmask, image_intensity):
 
 
 def bbox_list(regionmask):
-    """Extra property who's output shape is dependent on mask shape."""
+    """Extra property whose output shape is dependent on mask shape."""
     return [1] * regionmask.shape[1]
 
 
@@ -1351,7 +1351,7 @@ def test_extra_properties_table():
     assert_array_almost_equal(out['intensity_median'], np.array([2., 4.]))
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
 
-    assert out["bbox_list"].dtype == np.object_
+    assert out['bbox_list'].dtype == np.object_
     assert out["bbox_list"][0] == [1] * 10
     assert out["bbox_list"][1] == [1] * 1
 
