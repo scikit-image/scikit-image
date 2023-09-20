@@ -253,8 +253,8 @@ def test_disambiguate_2d(shift0, shift1):
             )
     np.testing.assert_equal(shift, computed_shift)
 
-
-def test_disambiguate_zero_shift():
+@pytest.mark.parametrize('disambiguate', [True, False])
+def test_disambiguate_zero_shift(disambiguate):
     """When the shift is 0, disambiguation becomes degenerate.
 
     Some quadrants become size 0, which prevents computation of
@@ -263,6 +263,7 @@ def test_disambiguate_zero_shift():
     """
     image = camera()
     computed_shift, _, _ = phase_cross_correlation(
-            image, image, disambiguate=True, return_error='always'
+            image, image, disambiguate=disambiguate, return_error='always'
             )
-    assert computed_shift == (0, 0)
+    assert isinstance(computed_shift, np.ndarray)
+    np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
