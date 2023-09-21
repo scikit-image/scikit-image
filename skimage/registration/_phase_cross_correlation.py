@@ -136,13 +136,13 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     moving_image : numpy array
         The moving image: applying the shift to this image overlays it on the
         reference image. Must be the same shape as the reference image.
-    shift : tuple of float
+    shift : ndarray
         The shift to apply to each axis of the moving image, *modulo* image
         size. The length of ``shift`` must be equal to ``moving_image.ndim``.
 
     Returns
     -------
-    real_shift : tuple of float
+    real_shift : ndarray
         The shift disambiguated in real space.
     """
     shape = reference_image.shape
@@ -172,11 +172,8 @@ def _disambiguate_shift(reference_image, moving_image, shift):
             max_slice, positive_shift, negative_shift
             ):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
-    if not subpixel:
-        real_shift = tuple(map(int, real_shift_acc))
-    else:
-        real_shift = tuple(real_shift_acc)
-    return real_shift
+
+    return np.array(real_shift_acc)
 
 
 def phase_cross_correlation(reference_image, moving_image, *,
