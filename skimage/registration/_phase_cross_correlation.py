@@ -163,7 +163,13 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         moving_tile = np.reshape(shifted[test_slice], -1)
         corr = -1.0
         if reference_tile.size > 2:
-            corr = np.corrcoef(reference_tile, moving_tile)[0, 1]
+            # In the case of zero std, np.corrcoef returns nan and warns
+            # about zero division. This is expected and handled below.
+            # To avoid performing a computationally expensive check for
+            # zero std, we catch the warning.
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                corr = np.corrcoef(reference_tile, moving_tile)[0, 1]
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
