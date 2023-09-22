@@ -176,8 +176,10 @@ html_theme_options = {
     "pygment_dark_style": "github-dark",
     "analytics": {
         "plausible_analytics_domain": "scikit-image.org",
-        "plausible_analytics_url": "https://views.scientific-python.org/js/script.js"
-    }
+        "plausible_analytics_url": (
+            "https://views.scientific-python.org/js/script.js"
+        ),
+    },
 }
 
 # Custom sidebar templates, maps document names to template names.
