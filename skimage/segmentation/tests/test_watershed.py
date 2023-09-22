@@ -472,6 +472,20 @@ def test_watershed_with_markers_offset():
     np.testing.assert_array_equal(solutions_wsl[0], solutions_wsl[1])
 
 
+def test_watershed_simple_basin_overspill():
+    """
+    Test behavior when markers spill over into another basin / compete.
+
+    Regression test for
+    https://github.com/scikit-image/scikit-image/issues/6632.
+    """
+    image = -np.array([1, 2, 2, 2, 2, 2, 3])
+    markers = np.array([1, 0, 0, 0, 0, 0, 2])
+    expected = np.array([1, 1, 1, 1, 2, 2, 2])
+    result = watershed(image, markers=markers, mask=image != 0)
+    np.testing.assert_array_equal(result, expected)
+
+
 def test_numeric_seed_watershed():
     """Test that passing just the number of seeds to watershed works."""
     image = np.zeros((5, 6))
