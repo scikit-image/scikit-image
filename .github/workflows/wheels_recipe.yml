@@ -31,16 +31,9 @@ jobs:
         with:
           python-version: "3.9"
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Temporarily upperpin NumPy
-        run: |
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' pyproject.toml  # FIXME: Remove
+        run: python -m pip install cibuildwheel
       - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
+        run: python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
@@ -76,16 +69,9 @@ jobs:
         with:
           platforms: arm64
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Temporarily upperpin NumPy
-        run: |
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' pyproject.toml  # FIXME: Remove
+        run: python -m pip install cibuildwheel
       - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
+        run: python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_SKIP: "*-musllinux_*"
