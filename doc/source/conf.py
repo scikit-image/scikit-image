@@ -170,7 +170,9 @@ html_theme_options = {
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "show_prev_next": False,
     "switcher": {
-        "json_url": "https://gist.githubusercontent.com/lagru/8bce79c510b9026dab455c0a96a2c0b3/raw/d7d6159090de17cf54b55b457b198284c4078da0/version_switcher.json",
+        "json_url": (
+            "https://scikit-image.org/docs/dev/_static/version_switcher.json"
+        ),
         "version_match": "dev" if "dev" in version else version,
     },
     "show_version_warning_banner": True,
