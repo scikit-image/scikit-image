@@ -2,7 +2,7 @@ scanner:
   diff_only: True # Errors caused by only the patch are shown, not the whole file
 
 pycodestyle:
-  max-line-length: 88  # Same as in pyproject.toml > tool.ruff
+  max-line-length: 88 # Same as in pyproject.toml > tool.ruff
   ignore: # Errors and warnings to ignore
     - W391 # blank line at the end of file
     - E203 # whitespace before ,;:
