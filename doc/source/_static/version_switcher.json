@@ -7,7 +7,8 @@
     {
         "name": "0.21 (stable)",
         "version":"0.21.0",
-        "url": "https://scikit-image.org/docs/stable/"
+        "url": "https://scikit-image.org/docs/stable/",
+        "preferred": true
     },
     {
         "name": "0.20",
