@@ -55,7 +55,7 @@ build = [
     'pythran',
     'numpy>=1.22',
     # Developer UI
-    'spin==0.5',
+    'spin==0.6',
     'build',
 ]
 data = ['pooch>=1.6.0']
@@ -82,7 +82,7 @@ docs = [
     'kaleido',
     'scikit-learn>=1.1',
     'sphinx_design>=0.3',
-    'pydata-sphinx-theme>=0.13',
+    'pydata-sphinx-theme>=0.14.1',
 ]
 optional = [
     'SimpleITK',

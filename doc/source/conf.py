@@ -156,18 +156,26 @@ html_theme_options = {
     "header_links_before_dropdown": 6,
     "icon_links": [
         {
+            "name": "GitHub",
+            "url": "https://github.com/scikit-image/scikit-image",
+            "icon": "fa-brands fa-github",
+        },
+        {
             "name": "PyPI",
             "url": "https://pypi.org/project/scikit-image/",
             "icon": "fa-solid fa-box",
         },
     ],
+    "navbar_align": "left",
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "show_prev_next": False,
     "switcher": {
-        "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
+        "json_url": (
+            "https://scikit-image.org/docs/dev/_static/version_switcher.json"
+        ),
         "version_match": "dev" if "dev" in version else version,
     },
-    "github_url": "https://github.com/scikit-image/scikit-image",
+    "show_version_warning_banner": True,
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
