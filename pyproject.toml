@@ -55,7 +55,7 @@ build = [
     'pythran',
     'numpy>=1.22',
     # Developer UI
-    'spin==0.5',
+    'spin==0.6',
     'build',
 ]
 data = ['pooch>=1.6.0']
