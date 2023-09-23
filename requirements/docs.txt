@@ -18,4 +18,4 @@ plotly>=5.10
 kaleido
 scikit-learn>=1.1
 sphinx_design>=0.3
-pydata-sphinx-theme>=0.13
+pydata-sphinx-theme>=0.14.1

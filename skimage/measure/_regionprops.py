@@ -194,17 +194,17 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     dtype : NumPy data type
         The data type of the returned property.
     """
-    labels = [1, 2]
-    sample = np.zeros((3,) * ndim, dtype=np.intp)
-    sample[(0,) * ndim] = labels[0]
-    sample[(slice(1, None),) * ndim] = labels[1]
-    propmasks = [(sample == n) for n in labels]
+    mask_1 = np.ones((1,) * ndim, dtype=bool)
+    mask_1 = np.pad(mask_1, (0, 1), constant_values=False)
+    mask_2 = np.ones((2,) * ndim, dtype=bool)
+    mask_2 = np.pad(mask_2, (1, 0), constant_values=False)
+    propmasks = [mask_1, mask_2]
 
     rng = np.random.default_rng()
 
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, rng.random(sample.shape))
+            return func(mask, rng.random(mask.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
