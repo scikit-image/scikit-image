@@ -1198,7 +1198,7 @@ class EuclideanTransform(ProjectiveTransform):
     transformation with a single scaling factor.
 
     In 2D and 3D, the transformation parameters may be provided either via
-    `matrix`, the homogeneous transformation matrix, above, or through the
+    `matrix`, the homogeneous transformation matrix, above, or via the
     implicit parameters `rotation` and/or `translation` (where `a1` is the
     translation along `x`, `b1` along `y`, etc.). Beyond 3D, if the
     transformation is only a translation, you may use the implicit parameter
