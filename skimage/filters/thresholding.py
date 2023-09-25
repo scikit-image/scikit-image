@@ -227,7 +227,7 @@ def threshold_local(image, block_size=3, method='gaussian', offset=0,
     if any(b % 2 == 0 for b in block_size):
         raise ValueError(f'block_size must be odd! Given block_size '
                          f'{block_size} contains even values.')
-    float_dtype = _supported_float_type(image)
+    float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     thresh_image = np.zeros(image.shape, dtype=float_dtype)
     if method == 'generic':
@@ -937,6 +937,10 @@ def threshold_triangle(image, nbins=256):
     arg_peak_height = np.argmax(hist)
     peak_height = hist[arg_peak_height]
     arg_low_level, arg_high_level = np.flatnonzero(hist)[[0, -1]]
+
+    if arg_low_level == arg_high_level:
+        # Image has constant intensity.
+        return image.ravel()[0]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height

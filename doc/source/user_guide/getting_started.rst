@@ -4,12 +4,11 @@ Getting started
 ``scikit-image`` is an image processing Python package that works with
 :mod:`numpy` arrays. The package is imported as ``skimage``: ::
 
-    >>> import skimage
+    >>> import skimage as ski
 
 Most functions of ``skimage`` are found within submodules: ::
 
-    >>> from skimage import data
-    >>> camera = data.camera()
+    >>> camera = ski.data.camera()
 
 A list of submodules and functions is found on the `API reference
 <https://scikit-image.org/docs/stable/api/api.html>`_ webpage.
@@ -27,9 +26,8 @@ The :mod:`skimage.data` submodule provides a set of functions returning
 example images, that can be used to get started quickly on using
 scikit-image's functions: ::
 
-    >>> coins = data.coins()
-    >>> from skimage import filters
-    >>> threshold_value = filters.threshold_otsu(coins)
+    >>> coins = ski.data.coins()
+    >>> threshold_value = ski.filters.threshold_otsu(coins)
     >>> threshold_value
     107
 
@@ -38,14 +36,12 @@ from image files, using :func:`skimage.io.imread`: ::
 
     >>> import os
     >>> filename = os.path.join(skimage.data_dir, 'moon.png')
-    >>> from skimage import io
-    >>> moon = io.imread(filename)
+    >>> moon = ski.io.imread(filename)
 
 Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
 
     >>> import os
     >>> from natsort import natsorted, ns
-    >>> from skimage import io
     >>> list_files = os.listdir('.')
     >>> list_files
     ['01.png', '010.png', '0101.png', '0190.png', '02.png']
@@ -54,4 +50,4 @@ Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
     ['01.png', '02.png', '010.png', '0101.png', '0190.png']
     >>> image_list = []
     >>> for filename in list_files:
-    ...   image_list.append(io.imread(filename))
+    ...   image_list.append(ski.io.imread(filename))

@@ -75,7 +75,7 @@ import matplotlib.pyplot as plt
 from skimage.morphology import skeletonize
 
 blobs = data.binary_blobs(200, blob_size_fraction=.2,
-                          volume_fraction=.35, seed=1)
+                          volume_fraction=.35, rng=1)
 
 skeleton = skeletonize(blobs)
 skeleton_lee = skeletonize(blobs, method='lee')
@@ -119,7 +119,7 @@ from skimage.morphology import medial_axis, skeletonize
 
 # Generate the data
 blobs = data.binary_blobs(200, blob_size_fraction=.2,
-                          volume_fraction=.35, seed=1)
+                          volume_fraction=.35, rng=1)
 
 # Compute the medial axis (skeleton) and the distance transform
 skel, distance = medial_axis(blobs, return_distance=True)

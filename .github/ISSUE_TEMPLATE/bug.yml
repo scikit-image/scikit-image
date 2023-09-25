@@ -30,21 +30,14 @@ body:
       label: "Way to reproduce:"
       description: >
         Provide a short, self-contained code example that reproduces the issue,
-        i.e., can be copy-pasted into the Python interpreter.
+        i.e., can be copy-pasted into the Python interpreter. Please also
+        include the full error message, traceback or output, if any.
       placeholder: |
+        ```python
         import numpy as np
-        import skimage
+        import skimage as ski
         # Your code here...
-      render: Python
-
-  - type: textarea
-    attributes:
-      label: "Traceback or output:"
-      description: >
-        Include the full error message, traceback or output, if any.
-      placeholder: |
-        Full error (starting from Traceback) or output..
-      render: Shell
+        ```
 
   - type: textarea
     attributes:

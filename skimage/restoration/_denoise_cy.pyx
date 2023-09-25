@@ -12,7 +12,7 @@ from .._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 
-cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) nogil:
+cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) noexcept nogil:
     if value1 < value2:
         return value1
     else:

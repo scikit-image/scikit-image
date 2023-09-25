@@ -62,10 +62,10 @@ def test_imread_pathlib_tiff():
     """Tests reading from Path object (issue gh-5545)."""
 
     # read via fetch
-    expected = io.imread(fetch('data/multipage.tif'))
+    fname = fetch('data/multipage.tif')
+    expected = io.imread(fname)
 
     # read by passing in a pathlib.Path object
-    fname = os.path.join(data_dir, 'multipage.tif')
     path = pathlib.Path(fname)
     img = io.imread(path)
 

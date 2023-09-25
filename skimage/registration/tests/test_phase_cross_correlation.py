@@ -175,7 +175,7 @@ def test_4d_input_subpixel():
 @pytest.mark.parametrize("reference_mask", [None, True])
 def test_phase_cross_correlation_deprecation(return_error, reference_mask):
     # For now, assert that phase_cross_correlation raises a warning that
-    # returning only shifts is deprecated. In skimage 0.21, this test should be
+    # returning only shifts is deprecated. In skimage 0.22, this test should be
     # updated for the deprecation of the return_error parameter.
     should_warn = (
         return_error is False
@@ -191,7 +191,7 @@ def test_phase_cross_correlation_deprecation(return_error, reference_mask):
 
     if should_warn:
         msg = (
-            "In scikit-image 0.21, phase_cross_correlation will start "
+            "In scikit-image 0.22, phase_cross_correlation will start "
             "returning a tuple or 3 items (shift, error, phasediff) always. "
             "To enable the new return behavior and silence this warning, use "
             "return_error='always'."
@@ -254,7 +254,8 @@ def test_disambiguate_2d(shift0, shift1):
     np.testing.assert_equal(shift, computed_shift)
 
 
-def test_disambiguate_zero_shift():
+@pytest.mark.parametrize('disambiguate', [True, False])
+def test_disambiguate_zero_shift(disambiguate):
     """When the shift is 0, disambiguation becomes degenerate.
 
     Some quadrants become size 0, which prevents computation of
@@ -263,6 +264,7 @@ def test_disambiguate_zero_shift():
     """
     image = camera()
     computed_shift, _, _ = phase_cross_correlation(
-            image, image, disambiguate=True, return_error='always'
-            )
-    assert computed_shift == (0, 0)
+        image, image, disambiguate=disambiguate, return_error='always'
+    )
+    assert isinstance(computed_shift, np.ndarray)
+    np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
