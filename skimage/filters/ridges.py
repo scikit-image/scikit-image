@@ -14,12 +14,17 @@ from warnings import warn
 import numpy as np
 from scipy import linalg
 
-from .._shared.utils import _supported_float_type, check_nD, deprecated
+from .._shared.utils import _supported_float_type, check_nD, deprecate_func
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 from ..util import img_as_float
 
 
-@deprecated(alt_func='skimage.feature.hessian_matrix', removed_version="0.21")
+@deprecate_func(
+    deprecated_version="0.20",
+    removed_version="0.22",
+    hint="Use `skimage.feature.hessian_matrix_eigvals` on the results of "
+         "`skimage.feature.hessian_matrix` instead."
+)
 def compute_hessian_eigenvalues(image, sigma, sorting='none',
                                 mode='constant', cval=0,
                                 use_gaussian_derivatives=False):
@@ -99,7 +104,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Calculates the eigenvectors of the Hessian to compute the similarity of
+    Calculates the eigenvalues of the Hessian to compute the similarity of
     an image region to neurites, according to the method described in [1]_.
 
     Parameters
@@ -180,7 +185,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Defined only for 2-D and 3-D images. Calculates the eigenvectors of the
+    Defined only for 2-D and 3-D images. Calculates the eigenvalues of the
     Hessian to compute the similarity of an image region to tubes, according to
     the method described in [1]_.
 
@@ -251,7 +256,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     wrinkles, rivers. It can be used to calculate the fraction of the
     whole image containing such objects.
 
-    Defined only for 2-D and 3-D images. Calculates the eigenvectors of the
+    Defined only for 2-D and 3-D images. Calculates the eigenvalues of the
     Hessian to compute the similarity of an image region to vessels, according
     to the method described in [1]_.
 

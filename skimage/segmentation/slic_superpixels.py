@@ -37,11 +37,11 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
     coord = np.array(np.nonzero(mask), dtype=float).T
     # Fix random seed to ensure repeatability
     # Keep old-style RandomState here as expected results in tests depend on it
-    rnd = random.RandomState(123)
+    rng = random.RandomState(123)
 
     # select n_centroids randomly distributed points from within the mask
     idx_full = np.arange(len(coord), dtype=int)
-    idx = np.sort(rnd.choice(idx_full,
+    idx = np.sort(rng.choice(idx_full,
                              min(n_centroids, len(coord)),
                              replace=False))
 
@@ -56,7 +56,7 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
     if len(coord) > n_dense:
         # subset of points to use for the k-means calculation
         # (much denser than idx, but less than the full set)
-        idx_dense = np.sort(rnd.choice(idx_full,
+        idx_dense = np.sort(rng.choice(idx_full,
                                        n_dense,
                                        replace=False))
     else:

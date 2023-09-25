@@ -150,13 +150,13 @@ class RollingBall:
     def time_rollingball_nan(self, radius):
         image = data.coins().astype(float)
         pos = np.arange(np.min(image.shape))
-        image[pos, pos] = np.NaN
+        image[pos, pos] = np.nan
         restoration.rolling_ball(image, radius=radius, nansafe=True)
     time_rollingball_nan.params = [25, 50, 100, 200]
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
-        from skimage.restoration.rolling_ball import ellipsoid_kernel
+        from skimage.restoration._rolling_ball import ellipsoid_kernel
         image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
         restoration.rolling_ball(

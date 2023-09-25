@@ -4,7 +4,7 @@ from ..feature.util import (FeatureDetector, DescriptorExtractor,
                             _mask_border_keypoints,
                             _prepare_grayscale_input_2D)
 
-from ..feature import (corner_fast, corner_orientations, corner_peaks,
+from .corner import (corner_fast, corner_orientations, corner_peaks,
                        corner_harris)
 from ..transform import pyramid_gaussian
 from .._shared.utils import check_nD

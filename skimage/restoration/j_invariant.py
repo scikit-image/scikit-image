@@ -89,14 +89,16 @@ def _generate_grid_slice(shape, *, offset, stride=3):
     return mask
 
 
-def _invariant_denoise(image, denoise_function, *, stride=4,
-                       masks=None, denoiser_kwargs=None):
-    """Apply a J-invariant version of `denoise_function`.
+def denoise_invariant(image, denoise_function, *, stride=4,
+                      masks=None, denoiser_kwargs=None):
+    """Apply a J-invariant version of a denoising function.
 
     Parameters
     ----------
-    image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+    image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
+        Input data to be denoised. `image` can be of any numeric type,
+        but it is cast into a ndarray of floats (using `img_as_float`) for the
+        computation of the denoised image.
     denoise_function : function
         Original denoising function.
     stride : int, optional
@@ -112,6 +114,39 @@ def _invariant_denoise(image, denoise_function, *, stride=4,
     -------
     output : ndarray
         Denoised image, of same shape as `image`.
+
+    Notes
+    -----
+    A denoising function is J-invariant if the prediction it makes for each
+    pixel does not depend on the value of that pixel in the original image.
+    The prediction for each pixel may instead use all the relevant information
+    contained in the rest of the image, which is typically quite significant.
+    Any function can be converted into a J-invariant one using a simple masking
+    procedure, as described in [1].
+
+    The pixel-wise error of a J-invariant denoiser is uncorrelated to the noise,
+    so long as the noise in each pixel is independent. Consequently, the average
+    difference between the denoised image and the oisy image, the
+    *self-supervised loss*, is the same as the difference between the denoised
+    image and the original clean image, the *ground-truth loss* (up to a
+    constant).
+
+    This means that the best J-invariant denoiser for a given image can be found
+    using the noisy data alone, by selecting the denoiser minimizing the self-
+    supervised loss.
+
+    References
+    ----------
+    .. [1] J. Batson & L. Royer. Noise2Self: Blind Denoising by Self-Supervision,
+       International Conference on Machine Learning, p. 524-533 (2019).
+
+    Examples
+    --------
+    >>> import skimage
+    >>> from skimage.restoration import denoise_invariant, denoise_wavelet
+    >>> image = skimage.util.img_as_float(skimage.data.chelsea())
+    >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
+    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_wavelet)
     """
     image = img_as_float(image)
 
@@ -247,7 +282,7 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
     best_parameters = parameters_tested[idx]
 
     best_denoise_function = functools.partial(
-        _invariant_denoise,
+        denoise_invariant,
         denoise_function=denoise_function,
         stride=stride,
         denoiser_kwargs=best_parameters,
@@ -294,7 +329,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
     for denoiser_kwargs in parameters_tested:
         multichannel = denoiser_kwargs.get('channel_axis', None) is not None
         if not approximate_loss:
-            denoised = _invariant_denoise(
+            denoised = denoise_invariant(
                 image, denoise_function,
                 stride=stride,
                 denoiser_kwargs=denoiser_kwargs
@@ -306,7 +341,7 @@ def _calibrate_denoiser_search(image, denoise_function, denoise_parameters, *,
             mask = _generate_grid_slice(image.shape[:spatialdims],
                                         offset=n_masks // 2, stride=stride)
 
-            masked_denoised = _invariant_denoise(
+            masked_denoised = denoise_invariant(
                 image, denoise_function,
                 masks=[mask],
                 denoiser_kwargs=denoiser_kwargs
