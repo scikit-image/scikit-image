@@ -1,7 +1,7 @@
-"""Utilities that process images based on their shapes.
+"""Utilities that operate on shapes in images.
 
-They are particularly suited for binary images,
-although some may be useful on images of all types.
+These operations are particularly suited for binary images,
+although some may be useful for images of other types as well.
 
 Basic morphological operations include dilation and erosion.
 """
