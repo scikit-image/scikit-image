@@ -58,7 +58,7 @@ def test_hog_odd_cell_size():
     img = np.zeros((3, 3))
     img[2, 2] = 1
 
-    correct_output = np.zeros((9, ))
+    correct_output = np.zeros((9,))
     correct_output[0] = 0.5
     correct_output[4] = 0.5
 
@@ -287,3 +287,16 @@ def test_hog_output_equivariance_channel_axis(channel_axis):
         hog_fact = feature.hog(np.roll(img, n, axis=channel_axis),
                                channel_axis=channel_axis, block_norm='L1')
         assert_almost_equal(hog_ref, hog_fact)
+
+
+def test_hog_small_image():
+    """
+    tests that an exception is thrown instead of an empty array returned when the image is smaller than it should be for
+    the given pixels_per_cell and cells_per_block
+    """
+    img = np.zeros((24, 193))
+    feature.hog(img)
+
+    img = np.zeros((16, 193))
+    with pytest.raises(ValueError):
+        feature.hog(img)
