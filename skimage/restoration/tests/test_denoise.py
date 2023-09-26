@@ -15,13 +15,16 @@ from skimage.restoration._denoise import _wavelet_threshold
 try:
     import pywt
 except ImportError:
-    xfail_without_pywt = pytest.mark.xfail(
-        reason="optional dependency PyWavelets is not installed",
-        raises=ImportError,
-    )
+    PYWT_NOT_INSTALLED = True
 else:
-    def xfail_without_pywt(func):
-        return func
+    PYWT_NOT_INSTALLED = False
+
+xfail_without_pywt = pytest.mark.xfail(
+    condition=PYWT_NOT_INSTALLED,
+    reason="optional dependency PyWavelets is not installed",
+    raises=ImportError,
+)
+
 
 try:
     import dask  # noqa
