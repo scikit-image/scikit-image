@@ -107,7 +107,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
         Array of same shape as `image`. Only points at which mask == True
         will be labeled.
     compactness : float, optional
-        Use compact watershed [3]_ with given compactness parameter.
+        Use compact watershed [1]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
     watershed_line : bool, optional
         If watershed_line is True, a one-pixel wide line separates the regions
@@ -123,23 +123,20 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     See Also
     --------
-    skimage.segmentation.random_walker : random walker segmentation
+    skimage.segmentation.random_walker
         A segmentation algorithm based on anisotropic diffusion, usually
         slower than the watershed but with good results on noisy data and
         boundaries with holes.
 
     Notes
     -----
-    This function implements a watershed algorithm [1]_ [2]_ that apportions
+    This function implements a watershed algorithm [2]_ [3]_ that apportions
     pixels into marked basins. The algorithm uses a priority queue to hold
     the pixels with the metric for the priority queue being pixel value, then
-    the time of entry into the queue - this settles ties in favor of the
+    the time of entry into the queue -- this settles ties in favor of the
     closest marker.
 
-    Some ideas taken from
-    Soille, "Automated Basin Delineation from Digital Elevation Models Using
-    Mathematical Morphology", Signal Processing 20 (1990) 171-182
-
+    Some ideas are taken from [4]_.
     The most important insight in the paper is that entry time onto the queue
     solves two problems: a pixel should be assigned to the neighbor with the
     largest gradient or, if there is no gradient, pixels on a plateau should
@@ -155,14 +152,19 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
 
     References
     ----------
-    .. [1] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
-
-    .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
-
-    .. [3] Peer Neubert & Peter Protzel (2014). Compact Watershed and
-           Preemptive SLIC: On Improving Trade-offs of Superpixel Segmentation
-           Algorithms. ICPR 2014, pp 996-1001. :DOI:`10.1109/ICPR.2014.181`
+    .. [1] P. Neubert and P. Protzel, "Compact Watershed and Preemptive SLIC:
+           On Improving Trade-offs of Superpixel Segmentation Algorithms,"
+           2014 22nd International Conference on Pattern Recognition,
+           Stockholm, Sweden, 2014, pp. 996-1001, :DOI:`10.1109/ICPR.2014.181`
            https://www.tu-chemnitz.de/etit/proaut/publications/cws_pSLIC_ICPR.pdf
+
+    .. [2] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+
+    .. [3] http://cmm.ensmp.fr/~beucher/wtshed.html
+
+    .. [4] P. J. Soille and M. M. Ansoult, "Automated basin delineation from
+           digital elevation models using mathematical morphology," Signal
+           Processing, 20(2):171-182, :DOI:`10.1016/0165-1684(90)90127-K`
 
     Examples
     --------
