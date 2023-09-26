@@ -20,7 +20,7 @@ except ImportError:
         raises=ImportError,
     )
 else:
-    def skip_without_pywt(func):
+    def xfail_without_pywt(func):
         return func
 
 try:
