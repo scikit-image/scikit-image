@@ -64,8 +64,8 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=5.0',
-    'sphinx-gallery>=0.11',
+    'sphinx>=7.2',
+    'sphinx-gallery>=0.14',
     'numpydoc>=1.5',
     'sphinx-copybutton',
     'pytest-runner',
@@ -81,7 +81,7 @@ docs = [
     'plotly>=5.10',
     'kaleido',
     'scikit-learn>=1.1',
-    'sphinx_design>=0.3',
+    'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.14.1',
 ]
 optional = [
