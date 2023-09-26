@@ -85,36 +85,36 @@ def _validate_inputs(image, markers, mask, connectivity):
 
 def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
               compactness=0, watershed_line=False):
-    """Find watershed basins in `image` flooded from given `markers`.
+    """Find watershed basins in an image flooded from given markers.
 
     Parameters
     ----------
     image : ndarray (2-D, 3-D, ...)
         Data array where the lowest value points are labeled first.
-    markers : int, or ndarray of int with same shape as `image`, optional
+    markers : int, or ndarray of int with same shape as image, optional
         The desired number of basins, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
-        ``None`` (no markers given), the local minima of the image are used as
+        None (no markers given), the local minima of the image are used as
         markers. Note that, in this case, the local minima are determined in
         such a way that it is equivalent to applying
-        :func:`skimage.morphology.local_minima` onto `image` followed by
+        :func:`skimage.morphology.local_minima` onto ``image`` followed by
         :func:`skimage.morphology.label` onto the result
         only if setting ``connectivity=2``.
     connectivity : ndarray, optional
-        An array with the same number of dimensions as `image` whose
+        An array with the same number of dimensions as ``image`` whose
         non-zero elements indicate neighbors for connection.
         Following the scipy convention, default is a one-connected array of
         the dimension of the image.
     offset : array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
     mask : ndarray of bools or 0s and 1s, optional
-        Array of same shape as `image`. Only points at which mask == True
+        Array of same shape as ``image``. Only points at which mask == True
         will be labeled.
     compactness : float, optional
         Use compact watershed [1]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.
     watershed_line : bool, optional
-        If watershed_line is True, a one-pixel wide line separates the regions
+        If True, a one-pixel wide line separates the regions
         obtained by the watershed algorithm. The line has the label 0.
         Note that the method used for adding this line expects that
         marker regions are not adjacent; the watershed line may not catch
@@ -123,7 +123,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     Returns
     -------
     out : ndarray
-        A labeled matrix of the same type and shape as markers
+        A labeled matrix of the same type and shape as ``markers``
 
     See Also
     --------
