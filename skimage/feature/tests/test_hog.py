@@ -297,6 +297,6 @@ def test_hog_small_image():
     img = np.zeros((24, 193))
     feature.hog(img)
 
-    img = np.zeros((16, 193))
+    img = np.zeros((15, 193))
     with pytest.raises(ValueError):
         feature.hog(img)
