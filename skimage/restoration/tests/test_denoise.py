@@ -11,7 +11,17 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
-from skimage.restoration.tests import xfail_without_pywt
+
+try:
+    import pywt
+except ImportError:
+    xfail_without_pywt = pytest.mark.xfail(
+        reason="optional dependency PyWavelets is not installed",
+        raises=ImportError,
+    )
+else:
+    def skip_without_pywt(func):
+        return func
 
 try:
     import dask  # noqa
@@ -874,7 +884,6 @@ def test_wavelet_denoising_levels(rescale_sigma):
     assert psnr_denoised > psnr_denoised_1 > psnr_noisy
 
     # invalid number of wavelet levels results in a ValueError or UserWarning
-    import pywt
     max_level = pywt.dwt_max_level(np.min(img.shape),
                                    pywt.Wavelet(wavelet).dec_len)
     # exceeding max_level raises a UserWarning in PyWavelets >= 1.0.0

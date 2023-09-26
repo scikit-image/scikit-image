@@ -11,7 +11,7 @@ from skimage.restoration import (calibrate_denoiser,
                                  denoise_wavelet)
 from skimage.restoration.j_invariant import denoise_invariant
 from skimage.util import img_as_float, random_noise
-from skimage.restoration.tests import xfail_without_pywt
+from skimage.restoration.tests.test_denoise import xfail_without_pywt
 
 test_img = img_as_float(camera())
 test_img_color = img_as_float(chelsea())
