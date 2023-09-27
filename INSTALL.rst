@@ -310,9 +310,8 @@ source:
    git checkout main
    git pull upstream main
 
-And you possibly want to create a feature branch from there (or check out an
-existing branch where you are testing changes). As you work on this branch,
-you can re-build scikit-image with the following command:
+And you likely want to create a feature branch from there.
+As you work on this branch, you can re-build scikit-image using:
 
 .. code-block:: sh
 
