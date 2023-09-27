@@ -6,7 +6,6 @@ __all__ = [
     "LPIFilter2D",
     "apply_hysteresis_threshold",
     "butterworth",
-    "compute_hessian_eigenvalues",
     "correlate_sparse",
     "difference_of_gaussians",
     "farid",
@@ -90,7 +89,6 @@ from .lpi_filter import (
     wiener,
 )
 from .ridges import (
-    compute_hessian_eigenvalues,
     frangi,
     hessian,
     meijering,
