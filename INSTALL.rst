@@ -302,16 +302,28 @@ Test your installation for correct behavior using:
 Updating the installation
 ------------------------------------------------------------------------------
 
-When updating your installation, it is often necessary to recompile submodules
-that have changed. Do so with the following commands:
+Before updating your installation, you typically want to grab the latest
+source:
 
 .. code-block:: sh
 
-    # Grab the latest source
-    git checkout main
-    git pull upstream main
-    # Update the installation
-    pip install -e . -vv
+   git checkout main
+   git pull upstream main
+
+And you possibly want to create a feature branch from there (or check out an
+existing branch where you are testing changes). As you work on this branch,
+you can re-build scikit-image with the following command:
+
+.. code-block:: sh
+
+   spin build
+
+If you need to clean the build directory before building scikit-image (e.g.,
+when modules have changed places), use the ``clean`` option in addition:
+
+.. code-block:: sh
+
+   spin build --clean
 
 Platform-specific notes
 ------------------------------------------------------------------------------
