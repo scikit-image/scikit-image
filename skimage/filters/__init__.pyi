@@ -19,7 +19,6 @@ __all__ = [
     "gabor_kernel",
     "gaussian",
     "hessian",
-    "inverse",
     "laplace",
     "median",
     "meijering",
@@ -86,7 +85,6 @@ from .lpi_filter import (
     LPIFilter2D,
     filter_inverse,
     filter_forward,
-    inverse,
     wiener,
 )
 from .ridges import (
