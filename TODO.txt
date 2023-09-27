@@ -7,8 +7,6 @@ Version 0.17
 
 Version 0.22
 ------------
-* In ``skimage/filters/lpi_filter.py``, remove the deprecated function
-  inverse().
 * Set `channel_axis=None` in `skimage._shared.filters.gaussian` and remove
   `skimage._shared.filters._PatchClassRepr`,
   `skimage/_shared/filters.ChannelAxisNotSet`, and
@@ -24,7 +22,6 @@ Version 0.22
   Remove the ``r'\.future.graph$'`` entry added to
   ``docwriter.package_skip_patterns`` in
   ``doc/tools/build_modref_templates.py``.
-* Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.
 
 Version 0.23
 ------------
