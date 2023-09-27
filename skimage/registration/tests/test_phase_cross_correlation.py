@@ -1,6 +1,4 @@
 import itertools
-import warnings
-import re
 
 import numpy as np
 import pytest
