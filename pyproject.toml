@@ -31,7 +31,6 @@ dependencies = [
     'pillow>=9.0.1',
     'imageio>=2.27',
     'tifffile>=2022.8.12',
-    'PyWavelets>=1.1.1',
     'packaging>=21',
     'lazy_loader>=0.3',
 ]
@@ -83,6 +82,7 @@ docs = [
     'scikit-learn>=1.1',
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.14.1',
+    'PyWavelets>=1.1.1',
 ]
 optional = [
     'SimpleITK',
@@ -92,6 +92,7 @@ optional = [
     'matplotlib>=3.5',
     'pooch>=1.6.0',
     'pyamg',
+    'PyWavelets>=1.1.1',
     'scikit-learn>=1.1',
 ]
 test = [
