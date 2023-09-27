@@ -9,32 +9,12 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _supported_float_type, convert_to_float, warn
-
-
-class _PatchClassRepr(type):
-    """Control class representations in rendered signatures."""
-    def __repr__(cls):
-        return f"<{cls.__name__}>"
-
-
-class ChannelAxisNotSet(metaclass=_PatchClassRepr):
-    """Signal that the `channel_axis` parameter is not set.
-
-    This is a proxy object, used to signal to `skimage.filters.gaussian` that
-    the `channel_axis` parameter has not been set, in which case the function
-    will determine whether a color channel is present. We cannot use ``None``
-    for this purpose as it has its own meaning which indicates that the given
-    image is grayscale.
-
-    This automatic behavior was broken in v0.19, recovered but deprecated in
-    v0.20 and will be removed in v0.22.
-    """
+from .._shared.utils import _supported_float_type, convert_to_float
 
 
 def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
              preserve_range=False, truncate=4.0, *,
-             channel_axis=ChannelAxisNotSet):
+             channel_axis=None):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -134,20 +114,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     >>> filtered_img = gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    if channel_axis is ChannelAxisNotSet:
-        if image.ndim == 3 and image.shape[-1] == 3:
-            warn(
-                "Automatic detection of the color channel was deprecated in "
-                "v0.19, and `channel_axis=None` will be the new default in "
-                "v0.22. Set `channel_axis=-1` explicitly to silence this "
-                "warning.",
-                FutureWarning,
-                stacklevel=2,
-            )
-            channel_axis = -1
-        else:
-            channel_axis = None
-
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
     if channel_axis is not None:
