@@ -169,25 +169,6 @@ def test_4d_input_subpixel():
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
-@pytest.mark.parametrize("reference_mask", [None, True])
-def test_phase_cross_correlation_deprecation(reference_mask):
-
-    reference_image = np.ones((10, 10))
-    moving_image = np.ones_like(reference_image)
-    if reference_mask is True:
-        # moving_mask defaults to reference_mask, passing moving_mask only is
-        # not supported, so we don't need to test it
-        reference_mask = np.ones_like(reference_image)
-
-    out = phase_cross_correlation(
-        reference_image=reference_image,
-        moving_image=moving_image,
-        reference_mask=reference_mask,
-    )
-    assert isinstance(out, tuple)
-    assert len(out) == 3
-
-
 def test_mismatch_upsampled_region_size():
     with pytest.raises(ValueError):
         _upsampled_dft(
