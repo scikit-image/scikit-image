@@ -12,7 +12,7 @@ def polygon2mask(image_shape, polygon):
         The shape of the mask.
     polygon : (N, 2) array_like
         The polygon coordinates of shape (N, 2) where N is
-        the number of points.
+        the number of points. The coordinates are (row, column).
 
     Returns
     -------
