@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -70,9 +70,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: Build package
         env:
@@ -121,12 +122,12 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: "3.9"
+          - python-version: "3.12"
             OPTIONAL_DEPS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
@@ -146,9 +147,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: OSX configuration
         run: |
