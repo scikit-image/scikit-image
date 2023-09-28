@@ -75,6 +75,26 @@ produce an sdist and a wheel:
 python -m build --no-isolation
 ```
 
+### Conda
+
+All the recommanded versions of `scikit-image` dependencies are
+unfortunatly not available in the main Conda channel. But you still
+can get `scikit-image` installed in editable mode for development
+using a combination of `conda` and `pip` command lines:
+
+- first, create a conda environment with available build and run dependencies
+  ```
+  conda env create -f requirements/conda_dev_env.yml
+  conda activate skimage-dev
+  ```
+- then install skimage in editable mode
+  ```
+  cd SKIMAGE_SRC_PATH
+  pip install -ve . --no-build-isolation --config-settings editable-verbose=true
+  ```
+  [`editable-verbose`](https://meson-python.readthedocs.io/en/latest/how-to-guides/editable-installs.html#verbose-mode)
+  is a `mesonpy` option.
+
 ## Notes
 
 ### Templated Cython files
