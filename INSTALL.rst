@@ -287,8 +287,8 @@ before you get started.
   spin test
   # Build docs
   spin docs
-  # Try the new version
-  spin python
+  # Try the new version in IPython
+  spin ipython
 
 For more information about building and using the ``spin`` package, see ``meson.md``.
 
