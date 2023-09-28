@@ -41,6 +41,11 @@ def docs(ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, inst
 
       SPHINXOPTS="" spin docs
 
+    The command is roughly equivalent to `cd doc && make SPHINX_TARGET`.
+    To get a list of viable `SPHINX_TARGET`:
+
+      spin docs help
+
     """
     if install_deps:
         util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
