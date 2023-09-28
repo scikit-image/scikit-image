@@ -12,6 +12,10 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
+        Python32-x64:
+          PYTHON_VERSION: "3.12"
+          ARCH: "x64"
+          PIP_FLAGS: ""
         Python311-x64:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
