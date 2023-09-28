@@ -295,8 +295,8 @@ def test_hog_small_image():
     the image is smaller than it should be for the given parameters
     """
     img = np.zeros((24, 193))
-    feature.hog(img)
+    feature.hog(img, pixels_per_cell=(8, 8), cells_per_block=(3, 3))
 
     img = np.zeros((15, 193))
     with pytest.raises(ValueError):
-        feature.hog(img)
+        feature.hog(img, pixels_per_cell=(8, 8), cells_per_block=(3, 3),)
