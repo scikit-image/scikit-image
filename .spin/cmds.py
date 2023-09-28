@@ -92,13 +92,10 @@ def ipython(ctx, ipython_args):
     env = os.environ
     env['PYTHONWARNINGS'] = env.get('PYTHONWARNINGS', 'all')
 
-    ctx.invoke(meson.build)
+    preimport = (
+        r"import skimage as ski; "
+        r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
+    )
+    ctx.params['ipython_args'] = (f"--TerminalIPythonApp.exec_lines={preimport}",) + ipython_args
 
-    ppath = meson._set_pythonpath()
-
-    print(f'💻 Launching IPython with PYTHONPATH="{ppath}"')
-    preimport = (r"import skimage as ski; "
-                 r"print(f'\nPreimported scikit-image {ski.__version__} as ski')")
-    util.run(["ipython", "--ignore-cwd",
-              f"--TerminalIPythonApp.exec_lines={preimport}"] +
-             list(ipython_args))
+    ctx.forward(meson.ipython)
