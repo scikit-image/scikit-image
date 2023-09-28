@@ -41,3 +41,12 @@ repos:
         language: system
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+
+ci:
+  # This ensures that PR's aren't autofixed by the bot, rather you call
+  # the bot to make the fix
+  autofix_prs: false
+  autofix_commit_msg: |
+    '[pre-commit.ci 🤖] Apply code format tools to PR'
+  # Update hook versions every month (so we don't get hit with weekly update PR's)
+  autoupdate_schedule: monthly
