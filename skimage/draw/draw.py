@@ -1,11 +1,42 @@
+import operator
+
 import numpy as np
 
 from .._shared._geometry import polygon_clip
 from .._shared.version_requirements import require
-from ._draw import (_coords_inside_image, _line, _line_aa,
+from ._draw import (_line, _line_aa,
                     _polygon, _ellipse_perimeter,
                     _circle_perimeter, _circle_perimeter_aa,
                     _bezier_curve)
+
+
+def _inside_image(rr, cc, shape):
+    """
+    Return mask that excludes points outside an image.
+
+    Parameters
+    ----------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels.
+    shape : (int, int)
+        Image shape which is used to determine the maximum extent of output
+        pixel coordinates.
+
+    Returns
+    -------
+    keep : ndarray
+        Boolean array that is True for all points that are inside an image
+        of `shape`.
+
+    Examples
+    --------
+    >>> rr, cc = np.arange(-2, 8).reshape((2, 5))
+    >>> rr, cc
+    (array([-2, -1,  0,  1,  2]), array([3, 4, 5, 6, 7]))
+    >>> _inside_image(rr, cc, shape=(3, 7))
+    array([False, False,  True,  True, False])
+    """
+    return (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
 
 
 def _ellipse_in_shape(shape, center, radii, rotation=0.):
@@ -281,10 +312,12 @@ def polygon_perimeter(r, c, shape=None, clip=False):
     rr = np.asarray(rr)
     cc = np.asarray(cc)
 
-    if shape is None:
-        return rr, cc
-    else:
-        return _coords_inside_image(rr, cc, shape)
+    if shape is not None:
+        keep = _inside_image(rr, cc, shape)
+        rr = rr[keep]
+        cc = cc[keep]
+
+    return rr, cc
 
 
 def set_color(image, coords, color, alpha=1):
@@ -340,7 +373,10 @@ def set_color(image, coords, color, alpha=1):
         # minimum dependency
         alpha = np.ones_like(rr) * alpha
 
-    rr, cc, alpha = _coords_inside_image(rr, cc, image.shape, val=alpha)
+    keep = _inside_image(rr, cc, image.shape)
+    rr = rr[keep]
+    cc = cc[keep]
+    alpha = alpha[keep]
 
     alpha = alpha[..., np.newaxis]
 
@@ -572,7 +608,21 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    return _circle_perimeter(r, c, radius, method, shape)
+    rr, cc = _circle_perimeter(radius, method)
+    rr, cc = np.unique(np.stack([rr, cc]), axis=1)
+
+    try:
+        rr += operator.index(r)
+        cc += operator.index(c)
+    except TypeError as e:
+        raise TypeError("r and c must be integers") from e
+
+    if shape is not None:
+        keep = _inside_image(rr, cc, shape)
+        rr = rr[keep]
+        cc = cc[keep]
+
+    return rr, cc
 
 
 def circle_perimeter_aa(r, c, radius, shape=None):
@@ -633,7 +683,25 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     >>> rr, cc, val = draw.circle_perimeter_aa(r=100, c=100, radius=75)
     >>> draw.set_color(image, (rr, cc), [1, 0, 0], alpha=val)
     """
-    return _circle_perimeter_aa(r, c, radius, shape)
+    rr, cc, val = _circle_perimeter_aa(radius)
+    (rr, cc), unique_indices = np.unique(
+        np.stack([rr, cc]), return_index=True, axis=1
+    )
+    val = val[unique_indices]
+
+    try:
+        rr += operator.index(r)
+        cc += operator.index(c)
+    except TypeError as e:
+        raise TypeError("r and c must be integers") from e
+
+    if shape is not None:
+        keep = _inside_image(rr, cc, shape)
+        rr = rr[keep]
+        cc = cc[keep]
+        val = val[keep]
+
+    return rr, cc, val
 
 
 def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
@@ -704,7 +772,14 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
            [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    return _ellipse_perimeter(r, c, r_radius, c_radius, orientation, shape)
+    rr, cc = _ellipse_perimeter(r, c, r_radius, c_radius, orientation)
+    rr, cc = np.unique(np.stack([rr, cc]), axis=1)
+
+    if shape is not None:
+        keep = _inside_image(rr, cc, shape)
+        rr = rr[keep]
+        cc = cc[keep]
+    return rr, cc
 
 
 def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
@@ -761,7 +836,14 @@ def bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape=None):
            [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
-    return _bezier_curve(r0, c0, r1, c1, r2, c2, weight, shape)
+    rr, cc = _bezier_curve(r0, c0, r1, c1, r2, c2, weight)
+
+    if shape is not None:
+        keep = _inside_image(rr, cc, shape)
+        rr = rr[keep]
+        cc = cc[keep]
+
+    return rr, cc
 
 
 def rectangle(start, end=None, extent=None, shape=None):
