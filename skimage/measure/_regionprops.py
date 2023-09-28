@@ -34,6 +34,7 @@ PROPS = {
     'ConvexImage': 'image_convex',
     'convex_image': 'image_convex',
     'Coordinates': 'coords',
+    'Aspect_ratio': 'aspect_ratio',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter_area',
     'equivalent_diameter': 'equivalent_diameter_area',
@@ -94,6 +95,7 @@ COL_DTYPES = {
     'area_bbox': float,
     'area_convex': float,
     'area_filled': float,
+    'aspect_ratio': float,
     'axis_major_length': float,
     'axis_minor_length': float,
     'bbox': int,
@@ -550,6 +552,10 @@ class RegionProperties:
     def intensity_min(self):
         vals = self.image_intensity[self.image]
         return np.min(vals, axis=0).astype(np.float64, copy=False)
+
+    @property
+    def aspect_ratio(self):
+        return self.axis_major_length / self.axis_minor_length
 
     @property
     def axis_major_length(self):
@@ -1113,6 +1119,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **axis_minor_length** : float
         The length of the minor axis of the ellipse that has the same
         normalized second central moments as the region.
+    **aspect_ratio** : float
+        The length of the major axis of the ellipse that has the same
+        normalized second central moments as the region divided by the minor axis.
     **bbox** : tuple
         Bounding box ``(min_row, min_col, max_row, max_col)``.
         Pixels belonging to the bounding box are in the half-open interval
