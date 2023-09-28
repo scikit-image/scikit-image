@@ -1,4 +1,5 @@
 import itertools
+import warnings
 
 import numpy as np
 import pytest
@@ -204,6 +205,17 @@ def test_disambiguate_2d(shift0, shift1):
             reference, moving, disambiguate=True,
             )
     np.testing.assert_equal(shift, computed_shift)
+
+
+def test_invalid_value_in_division_warnings():
+    """Regression test for https://github.com/scikit-image/scikit-image/issues/7146."""
+    im1 = np.zeros((100, 100))
+    im1[50, 50] = 1
+    im2 = np.zeros((100, 100))
+    im2[60, 60] = 1
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        phase_cross_correlation(im1, im2, disambiguate=True)
 
 
 @pytest.mark.parametrize('disambiguate', [True, False])
