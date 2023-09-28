@@ -4,6 +4,7 @@ http://www.mathworks.com/matlabcentral/fileexchange/18401-efficient-subpixel-ima
 """
 
 import itertools
+import warnings
 
 import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
