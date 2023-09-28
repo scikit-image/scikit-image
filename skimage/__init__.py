@@ -62,7 +62,8 @@ img_as_bool
     Convert an image to boolean format, with values either True or False.
 dtype_limits
     Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
-
+lookfor
+    Do a keyword search on scikit-image docstrings.
 """
 
 __version__ = '0.22.0rc0.dev0'
@@ -71,7 +72,7 @@ from ._shared.version_requirements import ensure_python_version
 ensure_python_version((3, 8))
 
 import lazy_loader as lazy
-__getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
+__getattr__, __lazy_dir__, __all__ = lazy.attach_stub(__name__, __file__)
 
 def __dir__():
     return __lazy_dir__() + ['__version__']
@@ -117,28 +118,6 @@ if __SKIMAGE_SETUP__:
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
-else:
-    try:
-        from ._shared import geometry
-        del geometry
-    except ImportError as e:
-        _raise_build_error(e)
-
-    # Legacy imports into the root namespace; not advertised in __all__
-    from .util.dtype import (
-        dtype_limits,
-        img_as_float32,
-        img_as_float64,
-        img_as_float,
-        img_as_int,
-        img_as_uint,
-        img_as_ubyte,
-        img_as_bool
-    )
-
-    from .util.lookfor import lookfor
-
-    from .data import data_dir
 
 
 if 'dev' in __version__:
