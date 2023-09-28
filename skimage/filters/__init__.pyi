@@ -18,6 +18,7 @@ __all__ = [
     "gabor_kernel",
     "gaussian",
     "hessian",
+    "homomorphic",
     "laplace",
     "median",
     "meijering",
@@ -55,6 +56,7 @@ __all__ = [
 
 from . import rank
 from ._fft_based import butterworth
+from ._homomorphic import homomorphic
 from ._gabor import gabor, gabor_kernel
 from ._gaussian import difference_of_gaussians, gaussian
 from ._median import median

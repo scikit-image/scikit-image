@@ -7,7 +7,8 @@ from .._shared.utils import _supported_float_type
 
 
 def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
-                               dtype=np.float64, squared_butterworth=True):
+                               dtype=np.float64, squared_butterworth=True,
+                               amplitude_range=(0.0, 1.0)):
     """Create a N-dimensional Butterworth mask for an FFT
 
     Parameters
@@ -24,7 +25,11 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
     real : bool
         Whether the FFT is of a real (True) or complex (False) image
     squared_butterworth : bool, optional
-        When True, the square of the Butterworth filter is used.
+        When True, the square of the Butterworth filter is used. If False, the
+        traditional signal processing definition of the Butterworth filter is
+        used.
+    amplitude_range : 2-tuple of float, optional
+        The frequency response will have amplitudes in the specified range.
 
     Returns
     -------
@@ -52,6 +57,16 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
         wfilt *= q2
     if not squared_butterworth:
         np.sqrt(wfilt, out=wfilt)
+
+    # rescale to desired amplitude range
+    low, high = amplitude_range
+    if low < 0 or high < low:
+        raise ValueError(
+            "Expected 0 <= amplitude_range[0] <= amplitude_range[1].")
+    if not (low == 0.0 and high == 1.0):
+        # adjust range to [low, high]
+        wfilt = low + wfilt * (high - low)
+
     return wfilt
 
 
@@ -64,6 +79,7 @@ def butterworth(
     *,
     squared_butterworth=True,
     npad=0,
+    amplitude_range=(0.0, 1.0),
 ):
     """Apply a Butterworth filter to enhance high or low frequency features.
 
@@ -75,7 +91,7 @@ def butterworth(
         Input image.
     cutoff_frequency_ratio : float, optional
         Determines the position of the cut-off relative to the shape of the
-        FFT. Receives a value between [0, 0.5].
+        FFT. This value should be in the range [0, 0.5].
     high_pass : bool, optional
         Whether to perform a high pass filter. If False, a low pass filter is
         performed.
@@ -87,10 +103,16 @@ def butterworth(
         (default) then all axes are assumed to be spatial dimensions.
     squared_butterworth : bool, optional
         When True, the square of a Butterworth filter is used. See notes below
-        for more details.
+        for more details. If False, the traditional signal processing
+        definition of the Butterworth filter is used.
     npad : int, optional
         Pad each edge of the image by `npad` pixels using `numpy.pad`'s
-        ``mode='edge'`` extension.
+        ``mode='edge'`` extension. Try increasing `npad` if boundary artifacts
+        are apparent.
+    amplitude_range : 2-tuple of float, optional
+        The frequency response will have amplitudes in the specified range. The
+        first value is the desired amplitude in the stop-band while the second
+        is the desired amplitude in the pass-band.
 
     Returns
     -------
@@ -100,18 +122,18 @@ def butterworth(
     Notes
     -----
     A band-pass filter can be achieved by combining a high-pass and low-pass
-    filter. The user can increase `npad` if boundary artifacts are apparent.
+    filter.
 
-    The "Butterworth filter" used in image processing textbooks (e.g. [1]_,
-    [2]_) is often the square of the traditional Butterworth filters as
+    The "Butterworth filter" used in image processing textbooks (e.g., [1]_,
+    [2]_) is often the square of the traditional Butterworth filter as
     described by [3]_, [4]_. The squared version will be used here if
-    `squared_butterworth` is set to ``True``. The lowpass, squared Butterworth
-    filter is given by the following expression for the lowpass case:
+    `squared_butterworth` is set to ``True``. The low-pass, squared Butterworth
+    filter is given by the following expression for the low-pass case:
 
     .. math::
         H_{low}(f) = \\frac{1}{1 + \\left(\\frac{f}{c f_s}\\right)^{2n}}
 
-    with the highpass case given by
+    with the high-pass case given by:
 
     .. math::
         H_{hi}(f) = 1 - H_{low}(f)
@@ -127,6 +149,12 @@ def butterworth(
     (:math:`[-f_s/2, f_s/2]`) so ``cutoff_frequency_ratio`` should have a value
     between 0 and 0.5. The frequency response (gain) at the cutoff is 0.5 when
     ``squared_butterworth`` is true and :math:`1/\\sqrt{2}` when it is false.
+
+    When an `amplitude_range` :math:`(a_{min}, a_{max})` is specified,
+    a modified Butterworth :math:`H^{\\prime} (f)` is used:
+
+    .. math::
+        H^{\\prime} (f) = a_{min}  + H(f) * (a_{max} - a_{min})
 
     Examples
     --------
@@ -162,9 +190,11 @@ def butterworth(
         raise ValueError(
             "cutoff_frequency_ratio should be in the range [0, 0.5]"
         )
+    if len(amplitude_range) != 2:
+        raise ValueError("amplitude_range must be a pair of values")
     wfilt = _get_nd_butterworth_filter(
         fft_shape, cutoff_frequency_ratio, order, high_pass, is_real,
-        float_dtype, squared_butterworth
+        float_dtype, squared_butterworth, amplitude_range
     )
     axes = np.arange(image.ndim)
     if channel_axis is not None:
