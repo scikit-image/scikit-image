@@ -220,3 +220,15 @@ def test_disambiguate_zero_shift(disambiguate):
     )
     assert isinstance(computed_shift, np.ndarray)
     np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
+
+
+@pytest.mark.parametrize(
+    "return_error", [False, True, "always"]
+)
+def test_deprecated_return_error(return_error):
+    img = np.ones((10, 10))
+    with pytest.warns() as record:
+        phase_cross_correlation(img, img, return_error=return_error)
+    assert len(record) == 1
+    assert "return_error argument is deprecated" in record[0].message.args[0]
+    assert record[0].filename == __file__

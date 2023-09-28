@@ -10,6 +10,8 @@ Version 0.23
 * Remove deprecated `random_seed`, `random_state`, and `sample_seed`
   arguments in favor of `rng`.
 * Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
+* Remove deprecated ``return_error`` in
+  ``skimage.registration.phase_cross_correlation``.
 
 Other (2022)
 ------------
