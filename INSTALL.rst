@@ -317,8 +317,8 @@ As you work on this branch, you can re-build scikit-image using:
 
    spin build
 
-If you need to clean the build directory before building scikit-image (e.g.,
-when modules have changed places), use the ``clean`` option in addition:
+Repeated, incremental builds usually work just fine, but if you notice build
+problems, rebuild from scratch using:
 
 .. code-block:: sh
 
