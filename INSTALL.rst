@@ -249,6 +249,7 @@ venv
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
@@ -281,6 +282,7 @@ before you get started.
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
