@@ -11,7 +11,7 @@ extensions = [
   '_extrema_cy',
   '_flood_fill_cy',
   '_grayreconstruct',
-  '_max_tree',
+  '_max_tree_cy',
   '_skeletonize_cy'
 ]
 
