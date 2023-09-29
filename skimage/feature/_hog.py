@@ -283,8 +283,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     n_blocks_row = (n_cells_row - b_row) + 1
     n_blocks_col = (n_cells_col - b_col) + 1
     if n_blocks_col <= 0 or n_blocks_row <= 0:
-        min_row = (-1 + b_row) * c_row + 1
-        min_col = (-1 + b_col) * c_col + 1
+        min_row = b_row * c_row
+        min_col = b_col * c_col
         raise ValueError('The image given is not large enough for the cells_per_block '
                          'and pixels_per_cell given, should be at least:'
                          f' {min_row} rows x {min_col} cols')
