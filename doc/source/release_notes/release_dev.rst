@@ -181,4 +181,3 @@ Contributors
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
 _These lists are automatically generated, and may not be complete or may contain duplicates._
-
