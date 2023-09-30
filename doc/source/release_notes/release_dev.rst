@@ -69,7 +69,7 @@ Maintenance
 - Pin sphinx until sphinx-gallery is fixed (`#7100 <https://github.com/scikit-image/scikit-image/pull/7100>`_).
 - Cleanup old Python 3.11 tests (`#7099 <https://github.com/scikit-image/scikit-image/pull/7099>`_).
 - Revert "Pin sphinx until sphinx-gallery is fixed (#7100)" (`#7102 <https://github.com/scikit-image/scikit-image/pull/7102>`_).
-- MNT: Remove np.float_ alias; it is removed in NumPy 2.0 (`#7118 <https://github.com/scikit-image/scikit-image/pull/7118>`_).
+- MNT: Remove ``np.float_`` alias; it is removed in NumPy 2.0 (`#7118 <https://github.com/scikit-image/scikit-image/pull/7118>`_).
 - Fix for NumPy 1.26 (`#7101 <https://github.com/scikit-image/scikit-image/pull/7101>`_).
 - Update meson-python (`#7120 <https://github.com/scikit-image/scikit-image/pull/7120>`_).
 - We now require sklearn 1.1, as per [SPEC0](https://scientific-python.org/specs/spec-0000/) (`#7121 <https://github.com/scikit-image/scikit-image/pull/7121>`_).
