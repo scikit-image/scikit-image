@@ -1,7 +1,7 @@
-scikit-image 0.22.0rc0
+scikit-image 0.22.0rc1
 ======================
 
-We're happy to announce the release of scikit-image 0.22.0rc0!
+We're happy to announce the release of scikit-image 0.22.0rc1!
 
 New Features
 ------------
@@ -93,6 +93,8 @@ Maintenance
 - Filter out expected runtime warnings in registation.phase_cross_correlation when disambiguate=True (`#7147 <https://github.com/scikit-image/scikit-image/pull/7147>`_).
 - Use pre-commit bot (`#7171 <https://github.com/scikit-image/scikit-image/pull/7171>`_).
 - Fix missing warnings import in ``phase_cross_correlation`` (`#7175 <https://github.com/scikit-image/scikit-image/pull/7175>`_).
+- Fix release notes error (`#7177 <https://github.com/scikit-image/scikit-image/pull/7177>`_).
+- Use trusted publisher (`#7178 <https://github.com/scikit-image/scikit-image/pull/7178>`_).
 
 Documentation
 -------------
