@@ -13,7 +13,7 @@ from skimage.feature import peak
 np.random.seed(21)
 
 
-class TestPeakLocalMax():
+class TestPeakLocalMax:
     def test_trivial_case(self):
         trivial = np.zeros((25, 25))
         peak_indices = peak.peak_local_max(trivial, min_distance=1)
@@ -498,7 +498,7 @@ def test_input_values_with_labels():
     assert_array_equal(img, img_before)
 
 
-class TestProminentPeaks():
+class TestProminentPeaks:
     def test_isolated_peaks(self):
         image = np.zeros((15, 15))
         x0, y0, i0 = (12, 8, 1)

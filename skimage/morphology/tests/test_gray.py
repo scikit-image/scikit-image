@@ -22,7 +22,7 @@ def cell3d_image():
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
-class TestMorphology():
+class TestMorphology:
 
     # These expected outputs were generated with skimage v0.12.1
     # using:
@@ -56,7 +56,7 @@ class TestMorphology():
         assert_equal(expected, calculated)
 
 
-class TestEccentricStructuringElements():
+class TestEccentricStructuringElements:
     def setup_class(self):
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
