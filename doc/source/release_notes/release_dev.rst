@@ -190,5 +190,5 @@ Contributors
 - Mike Taves (`@mwtoews <https://github.com/mwtoews>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-_These lists are automatically generated, and may not be complete or may contain
-duplicates._
+*These lists are automatically generated, and may not be complete or may contain
+duplicates.*
