@@ -1,17 +1,34 @@
 scikit-image 0.22.0rc1
 ======================
-
 We're happy to announce the release of scikit-image 0.22.0rc1!
+
+Highlights
+----------
+
+- Add new image sequence ``skimage.data.palisades_of_vogt`` showing in-vivo tissue of the palisades of Vogt (`#6858 <https://github.com/scikit-image/scikit-image/pull/6858>`_).
+- Add inpainting example to gallery (`#6853 <https://github.com/scikit-image/scikit-image/pull/6853>`_).
 
 New Features
 ------------
 
 - Add new image sequence ``skimage.data.palisades_of_vogt`` showing in-vivo tissue of the palisades of Vogt (`#6858 <https://github.com/scikit-image/scikit-image/pull/6858>`_).
 
+API Changes
+-----------
+
+- Update minimal required NumPy version to 1.22 (`#7005 <https://github.com/scikit-image/scikit-image/pull/7005>`_).
+- Update minimal required lazy_loader version to 0.3 (`#7043 <https://github.com/scikit-image/scikit-image/pull/7043>`_).
+- Make PyWavelets an optional dependency which is only required for ``skimage.restoration.denoise_wavelet`` and ``skimage.restoration.estimate_sigma`` (`#7156 <https://github.com/scikit-image/scikit-image/pull/7156>`_).
+- Remove deprecated ``skimage.filters.inverse``. Use ``skimage.filters.filter_inverse`` instead (`#7161 <https://github.com/scikit-image/scikit-image/pull/7161>`_).
+- Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.  Use ``skimage.feature.hessian_matrix_eigvals`` on the results of  ``skimage.feature.hessian_matrix`` instead (`#7162 <https://github.com/scikit-image/scikit-image/pull/7162>`_).
+- Remove deprecated automatic detection of the color channel in  ``skimage.filters.gaussian``. ``channel_axis=None`` now indicates a grayscale image. Set the color channel with ``channel_axis=-1`` explicitly (`#7164 <https://github.com/scikit-image/scikit-image/pull/7164>`_).
+- Change number of returned arguments in ``skimage.registration.phase_cross_correlation``. The function now always returns the 3 arguments ``shift``, ``error``, and ``phasediff`` (`#7166 <https://github.com/scikit-image/scikit-image/pull/7166>`_).
+- Deprecate ``return_error`` in ``skimage.registration.phase_cross_correlation`` (`#7174 <https://github.com/scikit-image/scikit-image/pull/7174>`_).
+
 Performance
 -----------
 
-- Add lazy loading to the ``skimage.feature`` module (`#6983 <https://github.com/scikit-image/scikit-image/pull/6983>`_).
+- Add lazy loading to the ``skimage.feature`` submodule (`#6983 <https://github.com/scikit-image/scikit-image/pull/6983>`_).
 - Add lazy loading to the ``skimage.graph`` submodule (`#6985 <https://github.com/scikit-image/scikit-image/pull/6985>`_).
 - Add lazy loading to the ``skimage.measure`` submodule (`#6999 <https://github.com/scikit-image/scikit-image/pull/6999>`_).
 - Add lazy loading to the ``skimage.transform`` submodule (`#7009 <https://github.com/scikit-image/scikit-image/pull/7009>`_).
@@ -22,22 +39,48 @@ Performance
 Bug Fixes
 ---------
 
-- Add num_pixels and coords_scaled to regionprops_table (`#7039 <https://github.com/scikit-image/scikit-image/pull/7039>`_).
-- Update video.rst (`#7076 <https://github.com/scikit-image/scikit-image/pull/7076>`_).
-- For uniform intensity images, return intensity value as threshold (`#7098 <https://github.com/scikit-image/scikit-image/pull/7098>`_).
-- Fix color conversion error (`#7116 <https://github.com/scikit-image/scikit-image/pull/7116>`_).
-- Make phase_cross_correlation return ndarray when disambiguate=True (`#7112 <https://github.com/scikit-image/scikit-image/pull/7112>`_).
-- Allow ``extra_properties`` of non equal lengths to be passed correctly to ``regionprops_table`` (`#7136 <https://github.com/scikit-image/scikit-image/pull/7136>`_).
+- Add missing properties ``num_pixels`` and ``coords_scaled`` to  ``skimage.measure.regionprops_table`` (`#7039 <https://github.com/scikit-image/scikit-image/pull/7039>`_).
+- Fix ``too many values to unpack error`` with imageio 2.31.1 in ``video.rst`` (`#7076 <https://github.com/scikit-image/scikit-image/pull/7076>`_).
+- Address error in ``skimage.filters.threshold_triangle`` when images with a uniform intensity are passed. In these cases the uniform intensity is returned as the threshold (`#7098 <https://github.com/scikit-image/scikit-image/pull/7098>`_).
+- Fix error in ``skimage.color.lab2rgb`` for 1D input (`#7116 <https://github.com/scikit-image/scikit-image/pull/7116>`_).
+- Make ``skimage.registration.phase_cross_correlation`` consistently return an array even if ``disambiguate=True`` (`#7112 <https://github.com/scikit-image/scikit-image/pull/7112>`_).
+- Allow ``extra_properties`` of non-equal lengths to be passed correctly to  ``skimage.measure.regionprops_table`` (`#7136 <https://github.com/scikit-image/scikit-image/pull/7136>`_).
 
-API Changes
------------
+Documentation
+-------------
 
-- Make PyWavelets an optional dependency which is only required for  ``skimage.restoration.denoise_wavelet`` and ``skimage.restoration.estimate_sigma`` (`#7156 <https://github.com/scikit-image/scikit-image/pull/7156>`_).
-- Remove deprecated ``skimage.filters.inverse``. Use ``skimage.filters.filter_inverse`` instead (`#7161 <https://github.com/scikit-image/scikit-image/pull/7161>`_).
-- Remove deprecated function ``skimage.filters.ridges.compute_hessian_eigenvalues``.  Use ``skimage.feature.hessian_matrix_eigvals`` on the results of  ``skimage.feature.hessian_matrix`` instead (`#7162 <https://github.com/scikit-image/scikit-image/pull/7162>`_).
-- Remove deprecated automatic detection of the color channel in  ``skimage.filters.gaussian``. ``channel_axis=None`` now indicates a grayscale image. Set the color channel with ``channel_axis=-1`` explicitly (`#7164 <https://github.com/scikit-image/scikit-image/pull/7164>`_).
-- Change number of returned arguments in ``skimage.registration.phase_cross_correlation``. The function now always returns the 3 arguments ``shift``, ``error``, and ``phasediff`` (`#7166 <https://github.com/scikit-image/scikit-image/pull/7166>`_).
-- Deprecate ``return_error`` in ``skimage.registration.phase_cross_correlation`` (`#7174 <https://github.com/scikit-image/scikit-image/pull/7174>`_).
+- Use a more descriptive title for current inpainting example (`#6989 <https://github.com/scikit-image/scikit-image/pull/6989>`_).
+- Fix URLs to the install page (`#6998 <https://github.com/scikit-image/scikit-image/pull/6998>`_).
+- Fix equation for Wiener filter in ``restoration.wiener``'s docstring (`#6987 <https://github.com/scikit-image/scikit-image/pull/6987>`_).
+- Fix missing links in INSTALL.rst and simplify language (`#6984 <https://github.com/scikit-image/scikit-image/pull/6984>`_).
+- Edit installation and contributor guidelines (`#6991 <https://github.com/scikit-image/scikit-image/pull/6991>`_).
+- Fix URLs that lead to 404 page (`#7008 <https://github.com/scikit-image/scikit-image/pull/7008>`_).
+- Replace with correct reference to eigenvalues in ridge detection docstrings (`#7034 <https://github.com/scikit-image/scikit-image/pull/7034>`_).
+- Add inpainting example to gallery (`#6853 <https://github.com/scikit-image/scikit-image/pull/6853>`_).
+- Fix grammar in SKIP 1 (`#7081 <https://github.com/scikit-image/scikit-image/pull/7081>`_).
+- Add missing minus in ``SimilarityTransform`` docstring (`#6840 <https://github.com/scikit-image/scikit-image/pull/6840>`_).
+- Add one-line docstring to ``skimage.segmentation`` (`#6843 <https://github.com/scikit-image/scikit-image/pull/6843>`_).
+- Add a short docstring to ``skimage.util`` (`#6831 <https://github.com/scikit-image/scikit-image/pull/6831>`_).
+- Enable version warning banners for docs (`#7139 <https://github.com/scikit-image/scikit-image/pull/7139>`_).
+- Clarify order of dimensions in ``skimage.transform.EuclideanTransform`` (`#7103 <https://github.com/scikit-image/scikit-image/pull/7103>`_).
+- Add docstring to the ``morphology`` module (`#6814 <https://github.com/scikit-image/scikit-image/pull/6814>`_).
+- Include Plausible analytics from Scientific Python in our HTML docs (`#7145 <https://github.com/scikit-image/scikit-image/pull/7145>`_).
+- Specify coordinate convention in ``skimage.draw.polygon2mask`` (`#7131 <https://github.com/scikit-image/scikit-image/pull/7131>`_).
+
+Infrastructure
+--------------
+
+- Pin milestone labeler to v0.1.0 SHA (`#6982 <https://github.com/scikit-image/scikit-image/pull/6982>`_).
+- Ensure existing target directory for ``random.js`` (`#7015 <https://github.com/scikit-image/scikit-image/pull/7015>`_).
+- Assign next milestone only for PRs targeting ``main`` branch (`#7018 <https://github.com/scikit-image/scikit-image/pull/7018>`_).
+- Add missing directories to ``spin docs --clean`` command (`#7019 <https://github.com/scikit-image/scikit-image/pull/7019>`_).
+- Rework ``generate_release_notes.py`` and add PR summary parsing (`#6961 <https://github.com/scikit-image/scikit-image/pull/6961>`_).
+- Use packaged version of ``generate_release_notes.py`` (``changelist``) (`#7049 <https://github.com/scikit-image/scikit-image/pull/7049>`_).
+- Generate requirements files from pyproject.toml (`#7085 <https://github.com/scikit-image/scikit-image/pull/7085>`_).
+- Update spin to v0.5 (`#7093 <https://github.com/scikit-image/scikit-image/pull/7093>`_).
+- Update to LLVM 16 with choco temporarily (`#7109 <https://github.com/scikit-image/scikit-image/pull/7109>`_).
+- Update pytest config in ``pyproject.toml`` with repo-review recommendations (`#7063 <https://github.com/scikit-image/scikit-image/pull/7063>`_).
+- Use checkout action version 4 (`#7180 <https://github.com/scikit-image/scikit-image/pull/7180>`_).
 
 Maintenance
 -----------
@@ -45,12 +88,10 @@ Maintenance
 - Don't test numpy prerelease on azure (`#6996 <https://github.com/scikit-image/scikit-image/pull/6996>`_).
 - Drop Python 3.8 support per SPEC 0 (`#6990 <https://github.com/scikit-image/scikit-image/pull/6990>`_).
 - Upper pin imageio (`#7002 <https://github.com/scikit-image/scikit-image/pull/7002>`_).
-- Update core dependencies per SPEC0 (`#7005 <https://github.com/scikit-image/scikit-image/pull/7005>`_).
 - meson: allow proper selection of NumPy, Pythran in cross builds (`#7003 <https://github.com/scikit-image/scikit-image/pull/7003>`_).
 - Unpin imageio and add warningfilter (`#7006 <https://github.com/scikit-image/scikit-image/pull/7006>`_).
 - Update to latest attach-next-milestone action (`#7014 <https://github.com/scikit-image/scikit-image/pull/7014>`_).
 - Avoid deprecated auto-removal of overlapping axes in thresholding example (`#7026 <https://github.com/scikit-image/scikit-image/pull/7026>`_).
-- Update lazy_loader (`#7043 <https://github.com/scikit-image/scikit-image/pull/7043>`_).
 - Remove conflicting setuptools upper pin (`#7045 <https://github.com/scikit-image/scikit-image/pull/7045>`_).
 - Remove future.graph after v0.21 release (`#6899 <https://github.com/scikit-image/scikit-image/pull/6899>`_).
 - Cleanup from move to pyproject.toml (`#7044 <https://github.com/scikit-image/scikit-image/pull/7044>`_).
@@ -96,45 +137,10 @@ Maintenance
 - Fix release notes error (`#7177 <https://github.com/scikit-image/scikit-image/pull/7177>`_).
 - Use trusted publisher (`#7178 <https://github.com/scikit-image/scikit-image/pull/7178>`_).
 
-Documentation
--------------
-
-- Use a more descriptive title for current inpainting example (`#6989 <https://github.com/scikit-image/scikit-image/pull/6989>`_).
-- Fix URLs to the install page (`#6998 <https://github.com/scikit-image/scikit-image/pull/6998>`_).
-- Fix equation for Wiener filter in ``restoration.wiener``'s docstring (`#6987 <https://github.com/scikit-image/scikit-image/pull/6987>`_).
-- Fix missing links in INSTALL.rst and simplify language (`#6984 <https://github.com/scikit-image/scikit-image/pull/6984>`_).
-- Edit installation and contributor guidelines (`#6991 <https://github.com/scikit-image/scikit-image/pull/6991>`_).
-- Fix URLs that lead to 404 page (`#7008 <https://github.com/scikit-image/scikit-image/pull/7008>`_).
-- Replace with correct reference to eigenvalues in ridge detection docstrings (`#7034 <https://github.com/scikit-image/scikit-image/pull/7034>`_).
-- Add inpainting example to gallery (`#6853 <https://github.com/scikit-image/scikit-image/pull/6853>`_).
-- Use packaged version of ``generate_release_notes.py`` (``changelist``) (`#7049 <https://github.com/scikit-image/scikit-image/pull/7049>`_).
-- Fix grammar in SKIP 1 (`#7081 <https://github.com/scikit-image/scikit-image/pull/7081>`_).
-- Add missing minus in ``SimilarityTransform`` docstring (`#6840 <https://github.com/scikit-image/scikit-image/pull/6840>`_).
-- Add one-line docstring to ``skimage.segmentation`` (`#6843 <https://github.com/scikit-image/scikit-image/pull/6843>`_).
-- Add a short docstring to ``skimage.util`` (`#6831 <https://github.com/scikit-image/scikit-image/pull/6831>`_).
-- Enable version warning banners for docs (`#7139 <https://github.com/scikit-image/scikit-image/pull/7139>`_).
-- Clarify order of dimensions in ``skimage.transform.EuclideanTransform`` (`#7103 <https://github.com/scikit-image/scikit-image/pull/7103>`_).
-- Add docstring to the ``morphology`` module (`#6814 <https://github.com/scikit-image/scikit-image/pull/6814>`_).
-- Include Plausible analytics from Scientific Python in our HTML docs (`#7145 <https://github.com/scikit-image/scikit-image/pull/7145>`_).
-- Specify coordinate convention in ``skimage.draw.polygon2mask`` (`#7131 <https://github.com/scikit-image/scikit-image/pull/7131>`_).
-
-Infrastructure
---------------
-
-- Pin milestone labeler to v0.1.0 SHA (`#6982 <https://github.com/scikit-image/scikit-image/pull/6982>`_).
-- Ensure existing target directory for ``random.js`` (`#7015 <https://github.com/scikit-image/scikit-image/pull/7015>`_).
-- Assign next milestone only for PRs targeting ``main`` branch (`#7018 <https://github.com/scikit-image/scikit-image/pull/7018>`_).
-- Add missing directories to ``spin docs --clean`` command (`#7019 <https://github.com/scikit-image/scikit-image/pull/7019>`_).
-- Rework ``generate_release_notes.py`` and add PR summary parsing (`#6961 <https://github.com/scikit-image/scikit-image/pull/6961>`_).
-- Generate requirements files from pyproject.toml (`#7085 <https://github.com/scikit-image/scikit-image/pull/7085>`_).
-- Update spin to v0.5 (`#7093 <https://github.com/scikit-image/scikit-image/pull/7093>`_).
-- Update to LLVM 16 with choco temporarily (`#7109 <https://github.com/scikit-image/scikit-image/pull/7109>`_).
-- Update pytest config in ``pyproject.toml`` with repo-review recommendations (`#7063 <https://github.com/scikit-image/scikit-image/pull/7063>`_).
-
 Contributors
 ------------
 
-23 authors added to this release (alphabetically):
+24 authors added to this release (alphabetically):
 
 - `@akonsk <https://github.com/akonsk>`_
 - `@patquem <https://github.com/patquem>`_
@@ -149,6 +155,7 @@ Contributors
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
 - Juan Nunez-Iglesias (`@jni <https://github.com/jni>`_)
 - Kenfack Anafack Alex Bruno (`@Br-Al <https://github.com/Br-Al>`_)
+- Klaus Rettinghaus (`@rettinghaus <https://github.com/rettinghaus>`_)
 - Larry Bradley (`@larrybradley <https://github.com/larrybradley>`_)
 - Lars Grüter (`@lagru <https://github.com/lagru>`_)
 - Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
@@ -182,4 +189,6 @@ Contributors
 - Mike Taves (`@mwtoews <https://github.com/mwtoews>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-_These lists are automatically generated, and may not be complete or may contain duplicates._
+_These lists are automatically generated, and may not be complete or may contain
+duplicates._
+
