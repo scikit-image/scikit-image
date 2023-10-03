@@ -66,6 +66,7 @@ Documentation
 - Add docstring to the ``morphology`` module (`#6814 <https://github.com/scikit-image/scikit-image/pull/6814>`_).
 - Include Plausible analytics from Scientific Python in our HTML docs (`#7145 <https://github.com/scikit-image/scikit-image/pull/7145>`_).
 - Specify coordinate convention in ``skimage.draw.polygon2mask`` (`#7131 <https://github.com/scikit-image/scikit-image/pull/7131>`_).
+- Update 0.22.0 release notes (`#7182 <https://github.com/scikit-image/scikit-image/pull/7182>`_).
 
 Infrastructure
 --------------
