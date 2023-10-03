@@ -60,6 +60,7 @@ build = [
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
+    'ipython',
     "tomli; python_version < '3.11'",
 ]
 docs = [
