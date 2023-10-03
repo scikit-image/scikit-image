@@ -13,8 +13,7 @@
     {
         "name": "0.21",
         "version":"0.21.0",
-        "url": "https://scikit-image.org/docs/0.21.x//",
-        "preferred": true
+        "url": "https://scikit-image.org/docs/0.21.x//"
     },
     {
         "name": "0.20",
