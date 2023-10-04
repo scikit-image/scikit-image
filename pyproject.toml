@@ -106,6 +106,7 @@ test = [
     'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
+    'mypy',
 ]
 
 [project.urls]
