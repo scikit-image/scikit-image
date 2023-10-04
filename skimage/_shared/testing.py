@@ -44,14 +44,16 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 arch32 = struct.calcsize("P") * 8 == 32
 
 
-_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
-if _error_on_warnings.lower() == 'true':
+SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL = os.environ.get(
+    'SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0'
+)
+if SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL.lower() == 'true':
     _error_on_warnings = True
-elif _error_on_warnings.lower() == 'false':
+elif SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL.lower() == 'false':
     _error_on_warnings = False
 else:
     try:
-        _error_on_warnings = bool(int(_error_on_warnings))
+        _error_on_warnings = bool(int(SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL))
     except ValueError:
         _error_on_warnings = False
 
