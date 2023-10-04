@@ -13,7 +13,7 @@ Version 0.23
 * Remove deprecated ``return_error`` in
   ``skimage.registration.phase_cross_correlation``.
 
-Version 0.25
+Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated

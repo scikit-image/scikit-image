@@ -80,7 +80,7 @@ def _shift_footprints(footprint, shift_x, shift_y):
         return footprint
 
     warning_msg = ("The parameters `shift_x` and `shift_y` are deprecated "
-                   "since v0.22 and will be removed in v0.25.")
+                   "since v0.23 and will be removed in v0.26.")
     warnings.warn(warning_msg, FutureWarning, stacklevel=4)
 
     if _footprint_is_sequence(footprint):
@@ -142,8 +142,8 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------
@@ -154,7 +154,7 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     ----------------
     shift_x, shift_y : DEPRECATED
 
-        .. deprecated:: 0.22
+        .. deprecated:: 0.23
 
     Notes
     -----
@@ -246,8 +246,8 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------
@@ -258,7 +258,7 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     ----------------
     shift_x, shift_y : DEPRECATED
 
-        .. deprecated:: 0.22
+        .. deprecated:: 0.23
 
     Notes
     -----
@@ -353,8 +353,8 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------
@@ -431,8 +431,8 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------
@@ -504,8 +504,8 @@ def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------
@@ -598,8 +598,8 @@ def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.22
-            `mode` and `cval` were added in 0.22.
+        .. versionadded:: 0.23
+            `mode` and `cval` were added in 0.23.
 
     Returns
     -------

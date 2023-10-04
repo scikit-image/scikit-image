@@ -60,8 +60,8 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
         to be `True`, which causes them to not influence the result.
         Default is 'ignore'.
 
-        .. versionadded:: 0.22
-            `mode` was added in 0.22.
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -137,8 +137,8 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
         to be `False`, which causes them to not influence the result.
         Default is 'ignore'.
 
-        .. versionadded:: 0.22
-            `mode` was added in 0.22.
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -215,8 +215,8 @@ def binary_opening(image, footprint=None, out=None, mode='ignore'):
         for the erosion and `False` for the dilation, which causes them to not
         influence the result. Default is 'ignore'.
 
-        .. versionadded:: 0.22
-            `mode` was added in 0.22.
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -276,8 +276,8 @@ def binary_closing(image, footprint=None, out=None, mode='ignore'):
         for the erosion and `False` for the dilation, which causes them to not
         influence the result. Default is 'ignore'.
 
-        .. versionadded:: 0.22
-            `mode` was added in 0.22.
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
