@@ -1,3 +1,11 @@
+"""Utilities that operate on shapes in images.
+
+These operations are particularly suited for binary images,
+although some may be useful for images of other types as well.
+
+Basic morphological operations include dilation and erosion.
+"""
+
 from .binary import (binary_closing, binary_dilation, binary_erosion,
                      binary_opening)
 from .gray import (black_tophat, closing, dilation, erosion, opening,

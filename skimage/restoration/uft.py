@@ -391,7 +391,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     if not dim:
         dim = imp_resp.ndim
     # Zero padding and fill
-    irpadded_dtype = _supported_float_type(imp_resp)
+    irpadded_dtype = _supported_float_type(imp_resp.dtype)
     irpadded = np.zeros(shape, dtype=irpadded_dtype)
     irpadded[tuple([slice(0, s) for s in imp_resp.shape])] = imp_resp
     # Roll for zero convention of the fft to avoid the phase

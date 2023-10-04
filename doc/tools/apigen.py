@@ -273,23 +273,16 @@ class ApiDocWriter:
         classes = sorted(classes)
         submodules = sorted(submodules)
 
-        # Make a shorter version of the uri that omits the package name for
-        # titles
-        uri_short = re.sub(rf'^{self.package_name}\.','',uri)
-
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
-        if '.' in uri:
-            title = 'Module: :mod:`' + uri_short + '`'
-        else:
-            title = ':mod:`' + uri_short + '`'
-        ad += title + '\n' + self.rst_section_levels[1] * len(title)
+        title = ':mod:`' + uri + '`'
+        ad += title + '\n' + self.rst_section_levels[1] * len(title) + '\n\n'
 
-        ad += '\n.. automodule:: ' + uri + '\n'
-        ad += '\n.. currentmodule:: ' + uri + '\n'
-        ad += '.. autosummary::\n\n'
+        ad += '.. automodule:: ' + uri + '\n\n'
+        ad += '.. currentmodule:: ' + uri + '\n\n'
+        ad += '.. autosummary::\n   :nosignatures:\n\n'
         for f in functions:
             ad += '   ' + uri + '.' + f + '\n'
         ad += '\n'
@@ -301,25 +294,22 @@ class ApiDocWriter:
         ad += '\n'
 
         for f in functions:
+            ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
             full_f = uri + '.' + f
-            ad += f + '\n'
-            ad += self.rst_section_levels[2] * len(f) + '\n'
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
-            ad += '\n.. include:: ' + full_f + '.examples\n\n'
+            ad += f'    .. minigallery:: {full_f}\n\n'
         for c in classes:
-            ad += '\n:class:`' + c + '`\n' \
-                  + self.rst_section_levels[2] * \
-                  (len(c)+9) + '\n\n'
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
             ad += '  :members:\n' \
+                  '  :inherited-members:\n' \
                   '  :undoc-members:\n' \
                   '  :show-inheritance:\n' \
                   '\n' \
-                  '  .. automethod:: __init__\n'
+                  '  .. automethod:: __init__\n\n'
             full_c = uri + '.' + c
-            ad += '\n.. include:: ' + full_c + '.examples\n\n'
+            ad += f'    .. minigallery:: {full_c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -476,32 +466,16 @@ class ApiDocWriter:
             # if `skimage.submodule`, only show `submodule`,
             # if it is `skimage.submodule.subsubmodule`, ignore.
 
-            title = "API Reference for skimage |version|"
+            title = "API reference"
             w(title + "\n")
             w("=" * len(title) + "\n\n")
 
-            subtitle = "Submodules"
-            w(subtitle + "\n")
-            w("-" * len(subtitle) + "\n\n")
-
-            for f in self.written_modules:
-                module_name = f.split('.')
-                if len(module_name) > 2:
-                    continue
-                elif len(module_name) == 1:
-                    module_name = module_name[0]
-                    prefix = "-"
-                elif len(module_name) == 2:
-                    module_name = module_name[1]
-                    prefix = "\n  -"
-                w(f'{prefix} `{module_name} <{os.path.join(f)}.html>`__\n')
-            w('\n')
-
-            subtitle = "Submodule Contents"
-            w(subtitle + "\n")
-            w("-" * len(subtitle) + "\n\n")
-
             w('.. toctree::\n')
-            w('   :maxdepth: 2\n\n')
+            w('   :maxdepth: 1\n\n')
             for f in self.written_modules:
-                w(f'   {os.path.join(relpath, f)}\n')
+                w(f'   {os.path.join(relpath, f)}\n\n')
+
+            w('----------------------\n\n')
+            w('.. toctree::\n')
+            w('   :maxdepth: 1\n\n')
+            w('   ../license\n')

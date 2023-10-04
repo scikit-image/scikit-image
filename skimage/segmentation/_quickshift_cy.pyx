@@ -15,7 +15,7 @@ cnp.import_array()
 
 
 def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
-                       np_floats max_dist, bint return_tree, int random_seed):
+                       np_floats max_dist, bint return_tree, int rng):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -33,15 +33,12 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         Higher means fewer clusters.
     return_tree : bool
         Whether to return the full segmentation hierarchy tree and distances.
-    random_seed : {None, int, `numpy.random.Generator`}, optional
-        If `random_seed` is None the `numpy.random.Generator` singleton
-        is used.
-        If `random_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `random_seed`.
-        If `random_seed` is already a ``Generator`` instance then that instance
-        is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
-        Random seed used for breaking ties.
+        PRNG used to break ties.
 
     Returns
     -------
@@ -49,7 +46,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         Integer mask indicating segment labels.
     """
 
-    random_state = np.random.default_rng(random_seed)
+    random_state = np.random.default_rng(rng)
 
     if np_floats is cnp.float64_t:
         dtype = np.float64

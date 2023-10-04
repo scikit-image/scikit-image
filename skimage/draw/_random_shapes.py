@@ -1,9 +1,10 @@
 import math
+
 import numpy as np
 
-from . import (polygon as draw_polygon, disk as draw_disk,
-               ellipse as draw_ellipse)
-from .._shared.utils import warn
+from .draw import (polygon as draw_polygon, disk as draw_disk,
+                   ellipse as draw_ellipse)
+from .._shared.utils import deprecate_kwarg, warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -291,6 +292,8 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
+@deprecate_kwarg({'random_seed': 'rng'}, deprecated_version='0.21',
+                 removed_version='0.23')
 def random_shapes(image_shape,
                   max_shapes,
                   min_shapes=1,
@@ -301,7 +304,7 @@ def random_shapes(image_shape,
                   intensity_range=None,
                   allow_overlap=False,
                   num_trials=100,
-                  random_seed=None,
+                  rng=None,
                   *,
                   channel_axis=-1):
     """Generate an image with random shapes, labeled with bounding boxes.
@@ -346,13 +349,10 @@ def random_shapes(image_shape,
         If `True`, allow shapes to overlap.
     num_trials : int, optional
         How often to attempt to fit a shape into the image before skipping it.
-    random_seed : {None, int, `numpy.random.Generator`}, optional
-        If `random_seed` is None the `numpy.random.Generator` singleton is
-        used.
-        If `random_seed` is an int, a new ``Generator`` instance is used,
-        seeded with `random_seed`.
-        If `random_seed` is already a ``Generator`` instance then that instance
-        is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
@@ -404,30 +404,28 @@ def random_shapes(image_shape,
                     msg = 'Intensity range must lie within (0, 255) interval'
                     raise ValueError(msg)
 
-    random = np.random.default_rng(random_seed)
+    rng = np.random.default_rng(rng)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
     image = np.full(image_shape, 255, dtype=np.uint8)
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
 
-    num_shapes = random.integers(min_shapes, max_shapes + 1)
-    colors = _generate_random_colors(num_shapes, num_channels,
-                                     intensity_range, random)
+    num_shapes = rng.integers(min_shapes, max_shapes + 1)
+    colors = _generate_random_colors(num_shapes, num_channels, intensity_range, rng)
     shape = (min_size, max_size)
     for shape_idx in range(num_shapes):
         if user_shape is None:
-            shape_generator = random.choice(SHAPE_CHOICES)
+            shape_generator = rng.choice(SHAPE_CHOICES)
         else:
             shape_generator = SHAPE_GENERATORS[user_shape]
         for _ in range(num_trials):
             # Pick start coordinates.
-            column = random.integers(max(1, image_shape[1] - min_size))
-            row = random.integers(max(1, image_shape[0] - min_size))
+            column = rng.integers(max(1, image_shape[1] - min_size))
+            row = rng.integers(max(1, image_shape[0] - min_size))
             point = (row, column)
             try:
-                indices, label = shape_generator(point, image_shape, shape,
-                                                 random)
+                indices, label = shape_generator(point, image_shape, shape, rng)
             except ArithmeticError:
                 # Couldn't fit the shape, skip it.
                 indices = []

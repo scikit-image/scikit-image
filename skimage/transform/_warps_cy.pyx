@@ -13,7 +13,7 @@ from .._shared.fused_numerics cimport np_floats
 cnp.import_array()
 
 cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
-                                   np_floats *x_, np_floats *y_) nogil:
+                                   np_floats *x_, np_floats *y_) noexcept nogil:
     """Apply a metric transformation to a coordinate.
 
     Parameters
@@ -31,7 +31,7 @@ cdef inline void _transform_metric(np_floats x, np_floats y, np_floats* H,
 
 
 cdef inline void _transform_affine(np_floats x, np_floats y, np_floats* H,
-                                   np_floats *x_, np_floats *y_) nogil:
+                                   np_floats *x_, np_floats *y_) noexcept nogil:
     """Apply an affine transformation to a coordinate.
 
     Parameters
@@ -49,7 +49,7 @@ cdef inline void _transform_affine(np_floats x, np_floats y, np_floats* H,
 
 
 cdef inline void _transform_projective(np_floats x, np_floats y, np_floats* H,
-                                       np_floats *x_, np_floats *y_) nogil:
+                                       np_floats *x_, np_floats *y_) noexcept nogil:
     """Apply a homography to a coordinate.
 
     Parameters
@@ -107,7 +107,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
         to the given mode.  Modes match the behaviour of `numpy.pad`.
-    cval : string, optional (default 0)
+    cval : float, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
 
@@ -150,7 +150,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
     cdef Py_ssize_t cols = img.shape[1]
 
     cdef void (*transform_func)(np_floats, np_floats, np_floats*,
-                                np_floats*, np_floats*) nogil
+                                np_floats*, np_floats*) noexcept nogil
     if M[2, 0] == 0 and M[2, 1] == 0 and M[2, 2] == 1:
         if M[0, 1] == 0 and M[1, 0] == 0:
             transform_func = _transform_metric
@@ -161,7 +161,7 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
 
     cdef void (*interp_func)(np_floats*, Py_ssize_t , Py_ssize_t ,
                              np_floats, np_floats, char, np_floats,
-                             np_floats*) nogil
+                             np_floats*) noexcept nogil
     if order == 0:
         interp_func = nearest_neighbor_interpolation[np_floats, np_floats,
                                                       np_floats]

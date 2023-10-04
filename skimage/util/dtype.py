@@ -28,10 +28,9 @@ dtype_range: dict = {
     bool: (False, True),
     np.bool_: (False, True),
     float: (-1, 1),
-    np.float_: (-1, 1),
     np.float16: (-1, 1),
     np.float32: (-1, 1),
-    np.float64: (-1, 1)
+    np.float64: (-1, 1),
 }
 
 with warnings.catch_warnings():
@@ -257,7 +256,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     #   is a subclass of that type (e.g. `np.floating` will allow
     #   `float32` and `float64` arrays through)
 
-    if np.issubdtype(dtype_in, np.obj2sctype(dtype)):
+    if np.issubdtype(dtype_in, np.core.numerictypes.obj2sctype(dtype)):
         if force_copy:
             image = image.copy()
         return image

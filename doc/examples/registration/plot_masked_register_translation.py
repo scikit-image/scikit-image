@@ -50,7 +50,7 @@ print(f'Known offset (row, col): {shift}')
 # the pixels ourselves
 mask = corrupted_pixels
 
-detected_shift = phase_cross_correlation(image, offset_image,
+detected_shift, _, _ = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask)
 
 print(f'Detected pixel offset (row, col): {-detected_shift}')
@@ -99,7 +99,7 @@ offset_image *= mask2
 
 print(f'Known offset (row, col): {shift}')
 
-detected_shift = phase_cross_correlation(image, offset_image,
+detected_shift, _, _ = phase_cross_correlation(image, offset_image,
                                          reference_mask=mask1,
                                          moving_mask=mask2)
 
