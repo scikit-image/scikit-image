@@ -1,8 +1,10 @@
 import math
 
+import re
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
+import numpydoc
 from numpy.testing import (assert_allclose, assert_almost_equal,
                            assert_array_almost_equal, assert_array_equal,
                            assert_equal)
@@ -1232,10 +1234,6 @@ def test_regionprops_table_no_regions():
     assert len(out['bbox+3']) == 0
 
 
-def test_column_dtypes_complete():
-    assert set(COL_DTYPES.keys()).union(OBJECT_COLUMNS) == set(PROPS.values())
-
-
 def test_column_dtypes_correct():
     msg = 'mismatch with expected type,'
     region = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0]
@@ -1262,6 +1260,17 @@ def test_column_dtypes_correct():
             )
 
 
+def test_all_documented_items_in_col_dtypes():
+    docstring = numpydoc.docscrape.FunctionDoc(regionprops)
+    notes_lines = docstring['Notes']
+    property_lines = filter(lambda line: line.startswith('**'), notes_lines)
+    pattern = r'\*\*(?P<property_name>[a-z_]+)\*\*.*'
+    property_names = {re.search(pattern, property_line).group('property_name')
+                      for property_line in property_lines}
+    column_keys = set(COL_DTYPES.keys())
+    assert column_keys == property_names
+
+
 def pixelcount(regionmask):
     """a short test for an extra property"""
     return np.sum(regionmask)
@@ -1269,6 +1278,11 @@ def pixelcount(regionmask):
 
 def intensity_median(regionmask, image_intensity):
     return np.median(image_intensity[regionmask])
+
+
+def bbox_list(regionmask):
+    """Extra property whose output shape is dependent on mask shape."""
+    return [1] * regionmask.shape[1]
 
 
 def too_many_args(regionmask, image_intensity, superfluous):
@@ -1328,13 +1342,18 @@ def test_extra_properties_mixed():
 
 
 def test_extra_properties_table():
-    out = regionprops_table(SAMPLE_MULTIPLE,
-                            intensity_image=INTENSITY_SAMPLE_MULTIPLE,
-                            properties=('label',),
-                            extra_properties=(intensity_median, pixelcount)
-                            )
+    out = regionprops_table(
+        SAMPLE_MULTIPLE,
+        intensity_image=INTENSITY_SAMPLE_MULTIPLE,
+        properties=('label',),
+        extra_properties=(intensity_median, pixelcount, bbox_list)
+    )
     assert_array_almost_equal(out['intensity_median'], np.array([2., 4.]))
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
+
+    assert out['bbox_list'].dtype == np.object_
+    assert out["bbox_list"][0] == [1] * 10
+    assert out["bbox_list"][1] == [1] * 1
 
 
 def test_multichannel():

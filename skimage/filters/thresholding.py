@@ -938,6 +938,10 @@ def threshold_triangle(image, nbins=256):
     peak_height = hist[arg_peak_height]
     arg_low_level, arg_high_level = np.flatnonzero(hist)[[0, -1]]
 
+    if arg_low_level == arg_high_level:
+        # Image has constant intensity.
+        return image.ravel()[0]
+
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
     if flip:

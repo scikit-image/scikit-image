@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
-from libc.stdlib cimport abs
+from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
@@ -156,7 +156,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
     if not np.any(img):
         return np.zeros((0, 6))
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t[:, ::1] pixels = np.vstack(np.nonzero(img))
 
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
@@ -495,8 +495,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     py += dy
 
             # confirm line length is sufficient
-            good_line = (abs(line_end[3] - line_end[1]) >= line_length or
-                         abs(line_end[2] - line_end[0]) >= line_length)
+            good_line = (labs(line_end[3] - line_end[1]) >= line_length or
+                         labs(line_end[2] - line_end[0]) >= line_length)
 
             # pass 2: walk the line again and reset accumulator and mask
             for k in range(2):

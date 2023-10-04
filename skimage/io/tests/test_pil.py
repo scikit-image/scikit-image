@@ -16,27 +16,24 @@ from skimage.metrics import structural_similarity
 
 from ... import img_as_float
 from ...color import rgb2lab
-from .. import imread, imsave, reset_plugins, use_plugin
+from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
 from .._plugins.pil_plugin import (_palette_is_grayscale, ndarray_to_pil,
                                    pil_to_ndarray)
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def use_pil_plugin():
+    """Ensure that PIL plugin is used in tests here."""
     use_plugin('pil')
-
-
-def teardown():
+    yield
     reset_plugins()
 
 
-def setup_module(self):
-    """The effect of the `plugin.use` call may be overridden by later imports.
-    Call `use_plugin` directly before the tests to ensure that PIL is used.
-    """
-    try:
-        use_plugin('pil')
-    except ImportError:
-        pass
+def test_prefered_plugin():
+    order = plugin_order()
+    assert order["imread"][0] == "pil"
+    assert order["imsave"][0] == "pil"
+    assert order["imread_collection"][0] == "pil"
 
 
 def test_png_round_trip():
@@ -56,7 +53,7 @@ def test_imread_as_gray():
     assert img.dtype == np.float64
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
 
 @pytest.mark.parametrize('explicit_kwargs', [False, True])

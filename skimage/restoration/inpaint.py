@@ -42,7 +42,7 @@ def _inpaint_biharmonic_single_region(image, mask, out, neigh_coef_full,
     boundary constraints and ``u`` is the vector of inpainted values to be
     (uniquely) determined by solving the linear system.
 
-    ``A`` is a sparse matrix of shape (n_mask, n_mask) where `n_mask``
+    ``A`` is a sparse matrix of shape (n_mask, n_mask) where ``n_mask``
     corresponds to the number of non-zero values in ``mask`` (i.e. the number
     of pixels to be inpainted). Each row in A will have a number of non-zero
     values equal to the number of non-zero values in the biharmonic kernel,

@@ -143,10 +143,10 @@ def denoise_invariant(image, denoise_function, *, stride=4,
     Examples
     --------
     >>> import skimage
-    >>> from skimage.restoration import denoise_invariant, denoise_wavelet
+    >>> from skimage.restoration import denoise_invariant, denoise_tv_chambolle
     >>> image = skimage.util.img_as_float(skimage.data.chelsea())
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
-    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_wavelet)
+    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)
     """
     image = img_as_float(image)
 
@@ -258,15 +258,14 @@ def calibrate_denoiser(image, denoise_function, denoise_parameters, *,
 
     Examples
     --------
-
     >>> from skimage import color, data
-    >>> from skimage.restoration import denoise_wavelet
+    >>> from skimage.restoration import denoise_tv_chambolle
     >>> import numpy as np
     >>> img = color.rgb2gray(data.astronaut()[:50, :50])
     >>> rng = np.random.default_rng()
     >>> noisy = img + 0.5 * img.std() * rng.standard_normal(img.shape)
-    >>> parameters = {'sigma': np.arange(0.1, 0.4, 0.02)}
-    >>> denoising_function = calibrate_denoiser(noisy, denoise_wavelet,
+    >>> parameters = {'weight': np.arange(0.01, 0.3, 0.02)}
+    >>> denoising_function = calibrate_denoiser(noisy, denoise_tv_chambolle,
     ...                                         denoise_parameters=parameters)
     >>> denoised_img = denoising_function(img)
 

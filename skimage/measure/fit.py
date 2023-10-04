@@ -576,8 +576,8 @@ class EllipseModel(BaseModel):
         N = data.shape[0]
 
         def fun(t, xi, yi):
-            ct = math.cos(t)
-            st = math.sin(t)
+            ct = math.cos(np.squeeze(t))
+            st = math.sin(np.squeeze(t))
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
             return (xi - xt) ** 2 + (yi - yt) ** 2
@@ -828,9 +828,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[2] = (50, 50)
     >>> ratio = 0.5  # use half of the samples
     >>> min_samples = int(ratio * len(src))
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples,
-    ...                         10,
-    ...                         initial_inliers=np.ones(len(src), dtype=bool))
+    >>> model, inliers = ransac(
+    ...     (src, dst),
+    ...     SimilarityTransform,
+    ...     min_samples,
+    ...     10,
+    ...     initial_inliers=np.ones(len(src), dtype=bool),
+    ... )  # doctest: +SKIP
     >>> inliers  # doctest: +SKIP
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,

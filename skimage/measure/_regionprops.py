@@ -102,6 +102,7 @@ COL_DTYPES = {
     'centroid_weighted': float,
     'centroid_weighted_local': float,
     'coords': object,
+    'coords_scaled': object,
     'eccentricity': float,
     'equivalent_diameter_area': float,
     'euler_number': int,
@@ -125,6 +126,7 @@ COL_DTYPES = {
     'moments_weighted_central': float,
     'moments_weighted_hu': float,
     'moments_weighted_normalized': float,
+    'num_pixels': int,
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
@@ -192,17 +194,17 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     dtype : NumPy data type
         The data type of the returned property.
     """
-    labels = [1, 2]
-    sample = np.zeros((3,) * ndim, dtype=np.intp)
-    sample[(0,) * ndim] = labels[0]
-    sample[(slice(1, None),) * ndim] = labels[1]
-    propmasks = [(sample == n) for n in labels]
+    mask_1 = np.ones((1,) * ndim, dtype=bool)
+    mask_1 = np.pad(mask_1, (0, 1), constant_values=False)
+    mask_2 = np.ones((2,) * ndim, dtype=bool)
+    mask_2 = np.pad(mask_2, (1, 0), constant_values=False)
+    propmasks = [mask_1, mask_2]
 
     rng = np.random.default_rng()
 
     if intensity and _infer_number_of_required_args(func) == 2:
         def _func(mask):
-            return func(mask, rng.random(sample.shape))
+            return func(mask, rng.random(mask.shape))
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
@@ -320,7 +322,7 @@ class RegionProperties:
         if spacing is None:
             spacing = np.full(self._ndim, 1.)
         self._spacing = _normalize_spacing(spacing, self._ndim)
-        self._pixel_area = np.product(self._spacing)
+        self._pixel_area = np.prod(self._spacing)
 
         self._extra_properties = {}
         if extra_properties is not None:
@@ -1096,8 +1098,6 @@ def regionprops(label_image, intensity_image=None, cache=True,
     -----
     The following properties can be accessed as attributes or keys:
 
-    **num_pixels** : int
-        Number of foreground pixels.
     **area** : float
         Area of the region i.e. number of pixels of the region scaled by pixel-area.
     **area_bbox** : float
@@ -1219,6 +1219,8 @@ def regionprops(label_image, intensity_image=None, cache=True,
             wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
         where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+    **num_pixels** : int
+        Number of foreground pixels.
     **orientation** : float
         Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,

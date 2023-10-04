@@ -3,7 +3,6 @@ import itertools
 
 import numpy as np
 import pytest
-import pywt
 from numpy.testing import (assert_array_almost_equal, assert_array_equal,
                            assert_warns)
 
@@ -12,6 +11,20 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
+
+try:
+    import pywt
+except ImportError:
+    PYWT_NOT_INSTALLED = True
+else:
+    PYWT_NOT_INSTALLED = False
+
+xfail_without_pywt = pytest.mark.xfail(
+    condition=PYWT_NOT_INSTALLED,
+    reason="optional dependency PyWavelets is not installed",
+    raises=ImportError,
+)
+
 
 try:
     import dask  # noqa
@@ -367,7 +380,7 @@ def test_denoise_bilateral_multidimensional():
 
 
 def test_denoise_bilateral_nan():
-    img = np.full((50, 50), np.NaN)
+    img = np.full((50, 50), np.nan)
     # This is in fact an optional warning for our test suite.
     # Python 3.5 will not trigger a warning.
     with expected_warnings([r'invalid|\A\Z']):
@@ -619,6 +632,7 @@ def test_denoise_nl_means_3d_dtype(fast_mode):
         img_f64, patch_distance=2, fast_mode=fast_mode).dtype == img_f64.dtype
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize(
     'img, channel_axis, convert2ycbcr',
     [(astro_gray, None, False),
@@ -670,6 +684,7 @@ def test_wavelet_denoising(img, channel_axis, convert2ycbcr):
     assert np.sum(res1**2) <= np.sum(res2**2)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 @pytest.mark.parametrize('convert2ycbcr', [False, True])
 def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
@@ -693,12 +708,16 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
 
 
 @pytest.mark.parametrize(
-    'case, dtype, convert2ycbcr, estimate_sigma',
-    itertools.product(
-        ['1d', '2d multichannel'],
-        [np.float16, np.float32, np.float64, np.int16, np.uint8],
-        [True, False],
-        [True, False])
+    "case", ["1d", pytest.param("2d multichannel", marks=xfail_without_pywt)]
+)
+@pytest.mark.parametrize(
+    "dtype", [np.float16, np.float32, np.float64, np.int16, np.uint8],
+)
+@pytest.mark.parametrize(
+    "convert2ycbcr", [True, pytest.param(False, marks=xfail_without_pywt)]
+)
+@pytest.mark.parametrize(
+    "estimate_sigma", [pytest.param(True, marks=xfail_without_pywt), False]
 )
 def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
                                    estimate_sigma):
@@ -771,6 +790,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr,
     assert psnr_denoised > psnr_noisy
 
 
+@xfail_without_pywt
 def test_wavelet_threshold():
     rstate = np.random.default_rng(1234)
 
@@ -796,6 +816,7 @@ def test_wavelet_threshold():
                            threshold=sigma)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize(
     'rescale_sigma, method, ndim',
     itertools.product(
@@ -838,6 +859,7 @@ def test_wavelet_invalid_method():
                                     rescale_sigma=True)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_levels(rescale_sigma):
     rstate = np.random.default_rng(1234)
@@ -881,6 +903,7 @@ def test_wavelet_denoising_levels(rescale_sigma):
             rescale_sigma=rescale_sigma)
 
 
+@xfail_without_pywt
 def test_estimate_sigma_gray():
     rstate = np.random.default_rng(1234)
     # astronaut image
@@ -893,6 +916,7 @@ def test_estimate_sigma_gray():
     assert_array_almost_equal(sigma, sigma_est, decimal=2)
 
 
+@xfail_without_pywt
 def test_estimate_sigma_masked_image():
     # Verify computation on an image with a large, noise-free border.
     # (zero regions will be masked out by _sigma_est_dwt to avoid returning
@@ -910,6 +934,7 @@ def test_estimate_sigma_masked_image():
     assert_array_almost_equal(sigma, sigma_est, decimal=1)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1])
 def test_estimate_sigma_color(channel_axis):
     rstate = np.random.default_rng(1234)
@@ -934,6 +959,7 @@ def test_estimate_sigma_color(channel_axis):
         assert_warns(UserWarning, restoration.estimate_sigma, img)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_args(rescale_sigma):
     """
@@ -964,6 +990,7 @@ def test_wavelet_denoising_args(rescale_sigma):
                                             rescale_sigma=rescale_sigma)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_denoise_wavelet_biorthogonal(rescale_sigma):
     """Biorthogonal wavelets should raise a warning during thresholding."""
@@ -973,6 +1000,7 @@ def test_denoise_wavelet_biorthogonal(rescale_sigma):
                  rescale_sigma=rescale_sigma)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('channel_axis', [-1, None])
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
@@ -1047,6 +1075,7 @@ def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
                                            channel_axis=channel_axis)
 
 
+@xfail_without_pywt
 def test_cycle_spinning_num_workers():
     img = astro_gray
     sigma = 0.1

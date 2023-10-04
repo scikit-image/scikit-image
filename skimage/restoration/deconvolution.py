@@ -72,7 +72,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \hat x = F^\dagger \left( |\Lambda_H|^2 + \lambda |\Lambda_D|^2 \right)^{-1}
        \Lambda_H^\dagger F y
 
     where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
@@ -265,7 +265,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     prev_x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
 
     # Difference between two successive mean
-    delta = np.NAN
+    delta = np.nan
 
     # Initial state of the chain
     gn_chain, gx_chain = [1], [1]
