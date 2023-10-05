@@ -55,12 +55,13 @@ build = [
     'pythran',
     'numpy>=1.22',
     # Developer UI
-    'spin==0.6',
+    'spin==0.7',
     'build',
 ]
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
+    'ipython',
     "tomli; python_version < '3.11'",
 ]
 docs = [
@@ -137,19 +138,18 @@ package = 'skimage'
 
 [tool.spin.commands]
 Build = [
-    'spin.build',
-    'spin.test',
-    '.spin/cmds.py:sdist',
+    'spin.cmds.meson.build',
+    'spin.cmds.meson.test',
+    'spin.cmds.build.sdist',
 ]
 Environments = [
-    'spin.shell',
-    'spin.ipython',
-    'spin.python',
+    'spin.cmds.meson.run',
+    '.spin/cmds.py:ipython',
+    'spin.cmds.meson.python',
 ]
 Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.spin/cmds.py:asv',
-    '.spin/cmds.py:coverage',
+    '.spin/cmds.py:asv'
 ]
 
 [tool.ruff]

@@ -123,7 +123,7 @@ def FITSFactory(image_ext):
     filename = image_ext[0]
     extnum = image_ext[1]
 
-    if type(filename) is not str or type(extnum) is not int:
+    if not (isinstance(filename, str) and isinstance(extnum, int)):
         raise ValueError("Expected a (filename, extension) tuple")
 
     with fits.open(filename) as hdulist:
