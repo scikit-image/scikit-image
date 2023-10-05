@@ -7,7 +7,7 @@ from skimage.feature import (graycomatrix, graycoprops,
 from skimage.transform import integral_image
 
 
-class TestGLCM():
+class TestGLCM:
 
     def setup_method(self):
         self.image = np.array([[0, 0, 1, 1],
@@ -203,7 +203,7 @@ class TestGLCM():
             graycoprops(result, prop)
 
 
-class TestLBP():
+class TestLBP:
 
     def setup_method(self):
         self.image = np.array([[255,   6, 255,   0,  141,   0],
@@ -295,7 +295,7 @@ class TestLBP():
         np.testing.assert_array_almost_equal(lbp, ref)
 
 
-class TestMBLBP():
+class TestMBLBP:
 
     def test_single_mblbp(self):
 

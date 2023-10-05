@@ -48,7 +48,7 @@ except ImportError:
     from numpy.exceptions import AxisError
 
 
-class TestColorconv():
+class TestColorconv:
 
     img_rgb = data.colorwheel()
     img_grayscale = data.camera()
