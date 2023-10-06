@@ -89,8 +89,8 @@ def _shift_footprints(footprint, shift_x, shift_y):
     return _shift_footprint(footprint, shift_x, shift_y)
 
 
-def _handle_mode_and_cval(dtype, mode, cval):
-    """Sets the mode and cval parameters for 'max' and 'min'."""
+def _min_max_to_constant_mode(dtype, mode, cval):
+    """Replace 'max' and 'min' with appropriate 'cval' and 'constant' mode."""
     if mode == "max":
         mode = "constant"
         if np.issubdtype(dtype, bool):
@@ -173,8 +173,8 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     a footprint sequence of this type.
 
     For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
-    :func:`skimage.morphology.erosion` produce an output that differs: the one
-    is shifted by one pixel compared to the other.
+    this function produce an output that differs: one is shifted by one pixel
+    compared to the other.
 
     Examples
     --------
@@ -199,7 +199,7 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
     if mode == "ignore":
         mode = "max"
-    mode, cval = _handle_mode_and_cval(image.dtype, mode, cval)
+    mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)
@@ -303,7 +303,7 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
 
     if mode == "ignore":
         mode = "min"
-    mode, cval = _handle_mode_and_cval(image.dtype, mode, cval)
+    mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, right=False)

@@ -81,9 +81,9 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
     :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
-    For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
-    :func:`skimage.morphology.erosion` produce an output that differs: the one
-    is shifted by one pixel compared to the other.
+    For even-sized footprints, :func:`skimage.morphology.erosion` and
+    this function produce an output that differs: one is shifted by one pixel
+    compared to the other.
 
     See also
     --------

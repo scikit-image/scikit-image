@@ -24,7 +24,7 @@ def cell3d_image():
 
 class TestMorphology():
 
-    # These expected outputs were generated with skimage v0.12.1
+    # These expected outputs were generated with skimage v0.21.0 + PR #6695
     # using:
     #
     #   from skimage.morphology.tests.test_gray import TestMorphology
