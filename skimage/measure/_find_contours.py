@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 import numpy as np
 
 from ._find_contours_cy import _get_contour_segments
@@ -7,13 +9,14 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-def find_contours(image, level=None,
-                  fully_connected='low', positive_orientation='low',
+def find_contours(image: np.typing.NDArray[np.float32], level: Optional[float] = None,
+                  fully_connected: str = 'low', positive_orientation: str = 'low',
                   *,
-                  mask=None):
+                  mask: Optional[np.typing.NDArray[np.bool_]] = None
+    ) -> List[np.typing.NDArray[np.float32]]:
     """Find iso-valued contours in a 2D array for a given level value.
 
-    Uses the "marching squares" method to compute a the iso-valued contours of
+    Uses the "marching squares" method to compute the iso-valued contours of
     the input 2D array for a particular level value. Array values are linearly
     interpolated to provide better precision for the output contours.
 
