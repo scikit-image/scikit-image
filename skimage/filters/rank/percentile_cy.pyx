@@ -5,6 +5,7 @@
 
 cimport numpy as cnp
 from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
+from libc.math cimport floor, ceil
 cnp.import_array()
 
 cdef inline void _kernel_autolevel(dtype_t_out* out, Py_ssize_t odepth,
@@ -76,25 +77,58 @@ cdef inline void _kernel_mean(dtype_t_out* out, Py_ssize_t odepth,
                               Py_ssize_t n_bins, Py_ssize_t mid_bin,
                               cnp.float64_t p0, cnp.float64_t p1,
                               Py_ssize_t s0, Py_ssize_t s1) noexcept nogil:
+    """Return local mean of an histogram excluding optional outer percentiles.
 
-    cdef Py_ssize_t i, sum, mean, n
+    This algorithm uses two counters -- `lower` and `inner``-- to average the
+    appropriate bins of the histogram. First, the number of pixels in each excluded bin
+    are subtracted from `lower` until the percentile is reached for which the arithmetic
+    mean is to be calculated. The same is repeated with the `inner` counter, while
+    summing the value of pixels in each bin which is later divided by the total number
+    of included pixels.
+    """
+    cdef:
+        Py_ssize_t i, lower, inner, denominator
+        cnp.uint64_t total = 0
 
-    if pop:
-        sum = 0
-        mean = 0
-        n = 0
-        for i in range(n_bins):
-            sum += histo[i]
-            if (sum >= p0 * pop) and (sum <= p1 * pop):
-                n += histo[i]
-                mean += histo[i] * i
+    # Counter to deplete while summing lower excluded bins in histogram
+    lower = <Py_ssize_t>ceil(pop * p0)
+    # Safely subtract 1 because border should be included in average
+    if 0 < lower:
+        lower -= 1
+    # Counter to deplete while summing inner included bins in histogram
+    inner = <Py_ssize_t>floor(pop * p1)
+    # Safely add 1 because border should be included in average
+    if inner < pop:
+        inner += 1
+    # Inner counter starts after `lower` is depleted, so adjust
+    inner -= lower
+    denominator = inner
 
-        if n > 0:
-            out[0] = <dtype_t_out>(mean / n)
-        else:
-            out[0] = <dtype_t_out>0
-    else:
-        out[0] = <dtype_t_out>0
+    if denominator <= 0:
+        out[0] = <dtype_t_out> 0
+        return  # Return early
+
+    i = 0
+    # Deplete counter `lower` by subtracting lower excluded bins
+    while 0 < lower:
+        lower -= histo[i]
+        i += 1
+    # If `lower` is negative, percentile border is inside bin
+    # so add as many pixel values as `lower` underflowed
+    total += -lower * (i - 1)
+    inner += lower
+    # Deplete counter `inner` by subtracting inner included bins, upper excluded bins
+    # are therefore implicitly excluded
+    while 0 < inner:
+        inner -= histo[i]
+        total += histo[i] * i
+        i += 1
+    # If `inner` is negative, percentile border is inside bin, and we added too
+    # much, so subtract as many pixel values as `inner` underflowed
+    total += inner * (i - 1)
+    # Drop remainder of mean to maintain backwards compatibility
+    out[0] = <dtype_t_out>(total / denominator)
+
 
 cdef inline void _kernel_sum(dtype_t_out* out, Py_ssize_t odepth,
                              Py_ssize_t[::1] histo,
