@@ -13,7 +13,7 @@ def test_skipper():
     def f():
         pass
 
-    class c():
+    class c:
 
         def __init__(self):
             self.me = "I think, therefore..."
