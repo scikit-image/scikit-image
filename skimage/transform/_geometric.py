@@ -1352,8 +1352,8 @@ class SimilarityTransform(EuclideanTransform):
         Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : (dim,) array_like, optional
-        x, y[, z] translation parameters. Implemented only for 2D and 3D.
+    translation : (x, y[, z, ...]) sequence of float, length D, optional
+        Translation parameters for each axis. Implemented only for 2D and 3D.
 
     Attributes
     ----------
