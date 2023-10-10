@@ -4,7 +4,7 @@ from skimage.measure import points_in_poly, grid_points_in_poly
 from skimage._shared.testing import assert_array_equal
 
 
-class TestNpnpoly():
+class TestNpnpoly:
     def test_square(self):
         v = np.array([[0, 0],
                       [0, 1],

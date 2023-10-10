@@ -19,7 +19,7 @@ def diff(a, b):
     return math.sqrt(t)
 
 
-class TestExtrema():
+class TestExtrema:
 
     def test_saturated_arithmetic(self):
         """Adding/subtracting a constant and clipping"""

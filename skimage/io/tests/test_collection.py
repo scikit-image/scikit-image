@@ -56,7 +56,7 @@ def test_imagecollection_input():
     assert len(images) == 3
 
 
-class TestImageCollection():
+class TestImageCollection:
     pics = [
         fetch('data/brick.png'),
         fetch('data/color.png'),
