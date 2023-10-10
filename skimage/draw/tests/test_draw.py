@@ -333,6 +333,7 @@ def test_circle_perimeter_aa():
     img = np.zeros((17, 17), 'uint8')
     rr, cc, val = circle_perimeter_aa(8, 8, 7)
     img[rr, cc] = val * 255
+    # fmt: off
     img_ = np.array(
         [[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
          [  0,   0,   0,   0,   0,  82, 180, 236, 255, 236, 180,  82,   0,   0,   0,   0,   0],
@@ -352,6 +353,7 @@ def test_circle_perimeter_aa():
          [  0,   0,   0,   0,   0,  82, 180, 236, 255, 236, 180,  82,   0,   0,   0,   0,   0],
          [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0]]
     )
+    # fmt: on
     assert_array_equal(img, img_)
 
 

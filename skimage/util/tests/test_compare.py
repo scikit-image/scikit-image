@@ -40,8 +40,10 @@ def test_compare_images_checkerboard_default():
     img1 = np.zeros((2**4, 2**4), dtype=np.uint8)
     img2 = np.full(img1.shape, fill_value=255, dtype=np.uint8)
     res = compare_images(img1, img2, method='checkerboard')
+    # fmt: off
     exp_row1 = np.array([0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.])
     exp_row2 = np.array([1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.])
+    # fmt: on
     for i in (0, 1, 4, 5, 8, 9, 12, 13):
         assert_array_equal(res[i, :], exp_row1)
     for i in (2, 3, 6, 7, 10, 11, 14, 15):
