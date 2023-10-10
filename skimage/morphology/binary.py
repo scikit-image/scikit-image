@@ -95,7 +95,7 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
 
     border_value = False if mode == 'min' else True
 
-    footprint = pad_footprint(footprint, right=True)
+    footprint = pad_footprint(footprint, pad_end=True)
 
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_erosion, image, footprint, out,
@@ -172,7 +172,7 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
 
     border_value = True if mode == 'max' else False
 
-    footprint = pad_footprint(footprint, right=True)
+    footprint = pad_footprint(footprint, pad_end=True)
 
     if _footprint_is_sequence(footprint):
         return _iterate_binary_func(ndi.binary_dilation, image, footprint, out,

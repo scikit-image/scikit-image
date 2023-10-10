@@ -202,7 +202,7 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
-    footprint = pad_footprint(footprint, right=False)
+    footprint = pad_footprint(footprint, pad_end=False)
 
     if _footprint_is_sequence(footprint):
         return _iterate_gray_func(ndi.grey_erosion, image, footprint, out,
@@ -306,7 +306,7 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
-    footprint = pad_footprint(footprint, right=False)
+    footprint = pad_footprint(footprint, pad_end=False)
     # Note that `ndi.grey_dilation` mirrors the footprint and this
     # additional inversion should be removed in skimage2, see gh-6676.
     footprint = mirror_footprint(footprint)
@@ -391,7 +391,7 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = pad_footprint(footprint, right=False)
+    footprint = pad_footprint(footprint, pad_end=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
     out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode,
                    cval=cval)
@@ -469,7 +469,7 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = pad_footprint(footprint, right=False)
+    footprint = pad_footprint(footprint, pad_end=False)
     dilated = dilation(image, footprint, mode=mode, cval=cval)
     out = erosion(dilated, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
     return out

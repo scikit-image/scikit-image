@@ -962,7 +962,7 @@ def star(a, dtype=np.uint8):
 
 
 def mirror_footprint(footprint):
-    """Mirror the footprint.
+    """Mirror each dimension in the footprint.
 
     Parameters
     ----------
@@ -972,11 +972,13 @@ def mirror_footprint(footprint):
     Returns
     -------
     inverted : ndarray or tuple
-        The footprint, mirrored.
+        The footprint, mirrored along each dimension.
 
     Examples
     --------
-    >>> footprint = np.array([[0, 0, 0], [0, 1, 1], [0, 1, 1]], np.uint8)
+    >>> footprint = np.array([[0, 0, 0],
+    ...                       [0, 1, 1],
+    ...                       [0, 1, 1]], np.uint8)
     >>> mirror_footprint(footprint)
     array([[1, 1, 0],
            [1, 1, 0],
@@ -989,24 +991,27 @@ def mirror_footprint(footprint):
     return footprint[(slice(None, None, -1),) * footprint.ndim]
 
 
-def pad_footprint(footprint, right=True):
-    """Pads the footprint to an odd size.
+def pad_footprint(footprint, *, pad_end=True):
+    """Pad the footprint to an odd size along each dimension.
 
     Parameters
     ----------
     footprint : ndarray or tuple
         The input footprint or sequence of footprints
-    right : bool, optional
-        If ``True``, pads on the right side, otherwise pads on the left.
+    pad_end : bool, optional
+        If ``True``, pads at the end of each dimension (right side), otherwise
+        pads on the front (left side).
 
     Returns
     -------
     padded : ndarray or tuple
-        The footprint, padded to an odd size.
+        The footprint, padded to an odd size along each dimension.
 
     Examples
     --------
-    >>> footprint = np.array([[0, 0], [1, 1], [1, 1]], np.uint8)
+    >>> footprint = np.array([[0, 0],
+    ...                       [1, 1],
+    ...                       [1, 1]], np.uint8)
     >>> pad_footprint(footprint)
     array([[0, 0, 0],
            [1, 1, 0],
@@ -1014,9 +1019,9 @@ def pad_footprint(footprint, right=True):
 
     """
     if _footprint_is_sequence(footprint):
-        return tuple((pad_footprint(fp, right), n) for fp, n in footprint)
+        return tuple((pad_footprint(fp, pad_end=pad_end), n) for fp, n in footprint)
     footprint = np.asarray(footprint)
     padding = []
     for sz in footprint.shape:
-        padding.append(((0, 1) if right else (1, 0)) if sz % 2 == 0 else (0, 0))
+        padding.append(((0, 1) if pad_end else (1, 0)) if sz % 2 == 0 else (0, 0))
     return np.pad(footprint, padding)
