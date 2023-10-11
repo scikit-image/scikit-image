@@ -23,7 +23,7 @@ jobs:
           stale-issue-message: >
             Hello scikit-image core devs! There hasn't been any activity on
             this issue for more than 180 days. I have marked it as "dormant" to
-            make it easy to find. You can remove the dormant tag by adding some
+            make it easy to find. You can remove the dormant label by adding some
             new activity.
 
             To our contributors, thank you for your contribution and apologies
@@ -39,7 +39,7 @@ jobs:
           stale-pr-message: >
             Hello scikit-image core devs! There hasn't been any activity on
             this PR for more than 180 days. I have marked it as "dormant" to
-            make it easy to find. You can remove the dormant tag by adding some
+            make it easy to find. You can remove the dormant label by adding some
             new activity.
 
             To our contributors, thank you for your contribution and apologies
