@@ -107,7 +107,7 @@ jobs:
           choco upgrade llvm
 
           ## To list all installed packages:
-          # choco list --localonly
+          choco list
 
           # Remove other gcc compilers
 
