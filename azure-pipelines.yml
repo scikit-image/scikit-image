@@ -115,9 +115,9 @@ jobs:
           # choco uninstall llvm mingw rtools strawberryperl -x
 
           # Remove mingw gcc
-          rm /c/ProgramData/Chocolatey/bin/gcc
-          rm /c/ProgramData/Chocolatey/bin/g++
-          rm /c/ProgramData/Chocolatey/bin/c++
+          #rm /c/ProgramData/Chocolatey/bin/gcc
+          #rm /c/ProgramData/Chocolatey/bin/g++
+          #rm /c/ProgramData/Chocolatey/bin/c++
           # Remove perl gcc
           rm -rf /c/Strawberry
 
