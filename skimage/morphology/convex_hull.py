@@ -70,8 +70,9 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     return coords_in_hull
 
 
-def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
-                      include_borders=True):
+def convex_hull_image(
+    image, offset_coordinates=True, tolerance=1e-10, include_borders=True
+):
     """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -104,8 +105,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
     """
     ndim = image.ndim
     if np.count_nonzero(image) == 0:
-        warn("Input image is entirely zero, no valid convex hull. "
-             "Returning empty image", UserWarning)
+        warn(
+            "Input image is entirely zero, no valid convex hull. "
+            "Returning empty image",
+            UserWarning,
+        )
         return np.zeros(image.shape, dtype=bool)
     # In 2D, we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
@@ -121,9 +125,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
             try:
                 hull0 = ConvexHull(coords)
             except QhullError as err:
-                warn(f"Failed to get convex hull image. "
-                     f"Returning empty image, see error message below:\n"
-                     f"{err}")
+                warn(
+                    f"Failed to get convex hull image. "
+                    f"Returning empty image, see error message below:\n"
+                    f"{err}"
+                )
                 return np.zeros(image.shape, dtype=bool)
             coords = hull0.points[hull0.vertices]
 
@@ -140,9 +146,11 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
     try:
         hull = ConvexHull(coords)
     except QhullError as err:
-        warn(f"Failed to get convex hull image. "
-             f"Returning empty image, see error message below:\n"
-             f"{err}")
+        warn(
+            f"Failed to get convex hull image. "
+            f"Returning empty image, see error message below:\n"
+            f"{err}"
+        )
         return np.zeros(image.shape, dtype=bool)
     vertices = hull.points[hull.vertices]
 
@@ -153,11 +161,9 @@ def convex_hull_image(image, offset_coordinates=True, tolerance=1e-10,
         # points (3) in the mask, otherwise only the inside of the hull (1)
         mask = labels >= 1 if include_borders else labels == 1
     else:
-        gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))],
-                                (ndim, -1))
+        gridcoords = np.reshape(np.mgrid[tuple(map(slice, image.shape))], (ndim, -1))
 
-        coords_in_hull = _check_coords_in_hull(gridcoords,
-                                               hull.equations, tolerance)
+        coords_in_hull = _check_coords_in_hull(gridcoords, hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
 
     return mask

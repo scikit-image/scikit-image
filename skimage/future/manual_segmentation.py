@@ -137,8 +137,10 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
 
     plt.show(block=True)
 
-    labels = (_mask_from_vertices(vertices, image.shape[:2], i)
-              for i, vertices in enumerate(list_of_vertex_lists, start=1))
+    labels = (
+        _mask_from_vertices(vertices, image.shape[:2], i)
+        for i, vertices in enumerate(list_of_vertex_lists, start=1)
+    )
     if return_all:
         return np.stack(labels)
     else:
@@ -219,8 +221,10 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
 
     plt.show(block=True)
 
-    labels = (_mask_from_vertices(vertices, image.shape[:2], i)
-              for i, vertices in enumerate(list_of_vertex_lists, start=1))
+    labels = (
+        _mask_from_vertices(vertices, image.shape[:2], i)
+        for i, vertices in enumerate(list_of_vertex_lists, start=1)
+    )
     if return_all:
         return np.stack(labels)
     else:

@@ -12,7 +12,12 @@ from scipy.spatial.distance import pdist
 from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
-from ._regionprops_utils import euler_number, perimeter, perimeter_crofton, _normalize_spacing
+from ._regionprops_utils import (
+    euler_number,
+    perimeter,
+    perimeter_crofton,
+    _normalize_spacing,
+)
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
@@ -203,13 +208,18 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     rng = np.random.default_rng()
 
     if intensity and _infer_number_of_required_args(func) == 2:
+
         def _func(mask):
             return func(mask, rng.random(mask.shape))
+
     else:
         _func = func
     props1, props2 = map(_func, propmasks)
-    if (np.isscalar(props1) and np.isscalar(props2)
-            or np.array(props1).shape == np.array(props2).shape):
+    if (
+        np.isscalar(props1)
+        and np.isscalar(props2)
+        or np.array(props1).shape == np.array(props2).shape
+    ):
         dtype = np.array(props1).dtype.type
     else:
         dtype = np.object_
@@ -238,6 +248,7 @@ def only2d(method):
                 f"Property {method.__name__} is not implemented for 3D images"
             )
         return method(self, *args, **kwargs)
+
     return func2d
 
 
@@ -278,28 +289,38 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """
     axis_lengths = []
     for ax in range(2, -1, -1):
-        w = sum(v * -1 if i == ax else v
-                for i, v in enumerate(inertia_tensor_eigvals))
+        w = sum(v * -1 if i == ax else v for i, v in enumerate(inertia_tensor_eigvals))
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
+
 
 class RegionProperties:
     """Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
     """
 
-    def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, *, extra_properties=None, spacing=None,
-                 offset=None):
-
+    def __init__(
+        self,
+        slice,
+        label,
+        label_image,
+        intensity_image,
+        cache_active,
+        *,
+        extra_properties=None,
+        spacing=None,
+        offset=None,
+    ):
         if intensity_image is not None:
             ndim = label_image.ndim
             if not (
-                    intensity_image.shape[:ndim] == label_image.shape
-                    and intensity_image.ndim in [ndim, ndim + 1]
-                    ):
-                raise ValueError('Label and intensity image shapes must match,'
-                                 ' except for channel (last) axis.')
+                intensity_image.shape[:ndim] == label_image.shape
+                and intensity_image.ndim in [ndim, ndim + 1]
+            ):
+                raise ValueError(
+                    'Label and intensity image shapes must match,'
+                    ' except for channel (last) axis.'
+                )
             multichannel = label_image.shape < intensity_image.shape
         else:
             multichannel = False
@@ -320,7 +341,7 @@ class RegionProperties:
         self._multichannel = multichannel
         self._spatial_axes = tuple(range(self._ndim))
         if spacing is None:
-            spacing = np.full(self._ndim, 1.)
+            spacing = np.full(self._ndim, 1.0)
         self._spacing = _normalize_spacing(spacing, self._ndim)
         self._pixel_area = np.prod(self._spacing)
 
@@ -335,9 +356,7 @@ class RegionProperties:
                         f"renaming it."
                     )
                     warn(msg)
-            self._extra_properties = {
-                func.__name__: func for func in extra_properties
-            }
+            self._extra_properties = {func.__name__: func for func in extra_properties}
 
     def __getattr__(self, attr):
         if self._intensity_image is None and attr in _require_intensity_image:
@@ -352,10 +371,10 @@ class RegionProperties:
             if n_args == 2:
                 if self._intensity_image is not None:
                     if self._multichannel:
-                        multichannel_list = [func(self.image,
-                                                  self.image_intensity[..., i])
-                                             for i in range(
-                            self.image_intensity.shape[-1])]
+                        multichannel_list = [
+                            func(self.image, self.image_intensity[..., i])
+                            for i in range(self.image_intensity.shape[-1])
+                        ]
                         return np.stack(multichannel_list, axis=-1)
                     else:
                         return func(self.image, self.image_intensity)
@@ -378,13 +397,11 @@ class RegionProperties:
                 raise AttributeError(
                     f"Attribute '{attr}' unavailable when `intensity_image` "
                     f"has not been specified."
-            )
+                )
             # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
         else:
-            raise AttributeError(
-                f"'{type(self)}' object has no attribute '{attr}'"
-            )
+            raise AttributeError(f"'{type(self)}' object has no attribute '{attr}'")
 
     def __setattr__(self, name, value):
         if name in PROPS:
@@ -410,8 +427,10 @@ class RegionProperties:
         A tuple of the bounding box's start coordinates for each dimension,
         followed by the end coordinates for each dimension
         """
-        return tuple([self.slice[i].start for i in range(self._ndim)] +
-                     [self.slice[i].stop for i in range(self._ndim)])
+        return tuple(
+            [self.slice[i].start for i in range(self._ndim)]
+            + [self.slice[i].stop for i in range(self._ndim)]
+        )
 
     @property
     def area_bbox(self):
@@ -430,22 +449,19 @@ class RegionProperties:
     @_cached
     def image_convex(self):
         from ..morphology.convex_hull import convex_hull_image
+
         return convex_hull_image(self.image)
 
     @property
     def coords_scaled(self):
         indices = np.argwhere(self.image)
-        object_offset = np.array([
-                self.slice[i].start for i in range(self._ndim)
-                ])
+        object_offset = np.array([self.slice[i].start for i in range(self._ndim)])
         return (object_offset + indices) * self._spacing + self._offset
 
     @property
     def coords(self):
         indices = np.argwhere(self.image)
-        object_offset = np.array([
-                self.slice[i].start for i in range(self._ndim)
-                ])
+        object_offset = np.array([self.slice[i].start for i in range(self._ndim)])
         return object_offset + indices + self._offset
 
     @property
@@ -463,8 +479,9 @@ class RegionProperties:
     @property
     def euler_number(self):
         if self._ndim not in [2, 3]:
-            raise NotImplementedError('Euler number is implemented for '
-                                      '2D or 3D images only')
+            raise NotImplementedError(
+                'Euler number is implemented for ' '2D or 3D images only'
+            )
         return euler_number(self.image, self._ndim)
 
     @property
@@ -473,14 +490,15 @@ class RegionProperties:
 
     @property
     def feret_diameter_max(self):
-        identity_convex_hull = np.pad(self.image_convex,
-                                      2, mode='constant', constant_values=0)
+        identity_convex_hull = np.pad(
+            self.image_convex, 2, mode='constant', constant_values=0
+        )
         if self._ndim == 2:
-            coordinates = np.vstack(find_contours(identity_convex_hull, .5,
-                                                  fully_connected='high'))
+            coordinates = np.vstack(
+                find_contours(identity_convex_hull, 0.5, fully_connected='high')
+            )
         elif self._ndim == 3:
-            coordinates, _, _, _ = marching_cubes(identity_convex_hull,
-                                                  level=.5)
+            coordinates, _, _, _ = marching_cubes(identity_convex_hull, level=0.5)
         distances = pdist(coordinates * self._spacing, 'sqeuclidean')
         return sqrt(np.max(distances))
 
@@ -508,8 +526,7 @@ class RegionProperties:
     @property
     @_cached
     def inertia_tensor_eigvals(self):
-        return _moments.inertia_tensor_eigvals(self.image,
-                                               T=self.inertia_tensor)
+        return _moments.inertia_tensor_eigvals(self.image, T=self.inertia_tensor)
 
     @property
     @_cached
@@ -535,7 +552,8 @@ class RegionProperties:
             return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
 
         return np.asarray(
-            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim))
+        )
 
     @property
     def intensity_max(self):
@@ -584,8 +602,12 @@ class RegionProperties:
     @property
     @_cached
     def moments_central(self):
-        mu = _moments.moments_central(self.image.astype(np.uint8),
-                                      self.centroid_local, order=3, spacing=self._spacing)
+        mu = _moments.moments_central(
+            self.image.astype(np.uint8),
+            self.centroid_local,
+            order=3,
+            spacing=self._spacing,
+        )
         return mu
 
     @property
@@ -598,8 +620,9 @@ class RegionProperties:
     @property
     @_cached
     def moments_normalized(self):
-        return _moments.moments_normalized(self.moments_central, 3,
-                                           spacing=self._spacing)
+        return _moments.moments_normalized(
+            self.moments_central, 3, spacing=self._spacing
+        )
 
     @property
     @only2d
@@ -607,9 +630,9 @@ class RegionProperties:
         a, b, b, c = self.inertia_tensor.flat
         if a - c == 0:
             if b < 0:
-                return PI / 4.
+                return PI / 4.0
             else:
-                return -PI / 4.
+                return -PI / 4.0
         else:
             return 0.5 * atan2(-2 * b, c - a)
 
@@ -634,8 +657,10 @@ class RegionProperties:
     @property
     def centroid_weighted(self):
         ctr = self.centroid_weighted_local
-        return tuple(idx + slc.start * spc
-                     for idx, slc, spc in zip(ctr, self.slice, self._spacing))
+        return tuple(
+            idx + slc.start * spc
+            for idx, slc, spc in zip(ctr, self.slice, self._spacing)
+        )
 
     @property
     def centroid_weighted_local(self):
@@ -646,7 +671,8 @@ class RegionProperties:
             return (0,) * axis + (1,) + (0,) * (self._ndim - 1 - axis)
 
         return np.asarray(
-            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim)))
+            tuple(M[_get_element(axis)] / M0 for axis in range(self._ndim))
+        )
 
     @property
     @_cached
@@ -654,8 +680,10 @@ class RegionProperties:
         image = self._image_intensity_double()
         if self._multichannel:
             moments = np.stack(
-                [_moments.moments(image[..., i], order=3, spacing=self._spacing)
-                 for i in range(image.shape[-1])],
+                [
+                    _moments.moments(image[..., i], order=3, spacing=self._spacing)
+                    for i in range(image.shape[-1])
+                ],
                 axis=-1,
             )
         else:
@@ -676,7 +704,9 @@ class RegionProperties:
             ]
             moments = np.stack(moments_list, axis=-1)
         else:
-            moments = _moments.moments_central(image, ctr, order=3, spacing=self._spacing)
+            moments = _moments.moments_central(
+                image, ctr, order=3, spacing=self._spacing
+            )
         return moments
 
     @property
@@ -701,14 +731,16 @@ class RegionProperties:
         if self._multichannel:
             nchannels = self._intensity_image.shape[-1]
             return np.stack(
-                [_moments.moments_normalized(mu[..., i], order=3,
-                                             spacing=self._spacing)
-                 for i in range(nchannels)],
+                [
+                    _moments.moments_normalized(
+                        mu[..., i], order=3, spacing=self._spacing
+                    )
+                    for i in range(nchannels)
+                ],
                 axis=-1,
             )
         else:
-            return _moments.moments_normalized(mu, order=3,
-                                               spacing=self._spacing)
+            return _moments.moments_normalized(mu, order=3, spacing=self._spacing)
 
     def __iter__(self):
         props = PROP_VALS
@@ -733,8 +765,9 @@ class RegionProperties:
         for key in PROP_VALS:
             try:
                 # so that NaNs are equal
-                np.testing.assert_equal(getattr(self, key, None),
-                                        getattr(other, key, None))
+                np.testing.assert_equal(
+                    getattr(self, key, None), getattr(other, key, None)
+                )
             except AssertionError:
                 return False
 
@@ -859,9 +892,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
             modified_props = []
             locs = []
             for ind in np.ndindex(np.shape(rp)):
-                modified_props.append(
-                    separator.join(map(str, (orig_prop,) + ind))
-                )
+                modified_props.append(separator.join(map(str, (orig_prop,) + ind)))
                 locs.append(ind if len(ind) > 1 else ind[0])
 
             # fill temporary column data_array
@@ -880,10 +911,16 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
     return out
 
 
-def regionprops_table(label_image, intensity_image=None,
-                      properties=('label', 'bbox'),
-                      *,
-                      cache=True, separator='-', extra_properties=None, spacing=None):
+def regionprops_table(
+    label_image,
+    intensity_image=None,
+    properties=('label', 'bbox'),
+    *,
+    cache=True,
+    separator='-',
+    extra_properties=None,
+    spacing=None,
+):
     """Compute image properties and return them as a pandas-compatible table.
 
     The table is a dictionary mapping column names to value arrays. See Notes
@@ -1018,35 +1055,47 @@ def regionprops_table(label_image, intensity_image=None,
     4      5       112.50        113.0        114.0
 
     """
-    regions = regionprops(label_image, intensity_image=intensity_image,
-                          cache=cache, extra_properties=extra_properties, spacing=spacing)
+    regions = regionprops(
+        label_image,
+        intensity_image=intensity_image,
+        cache=cache,
+        extra_properties=extra_properties,
+        spacing=spacing,
+    )
     if extra_properties is not None:
-        properties = (
-            list(properties) + [prop.__name__ for prop in extra_properties]
-        )
+        properties = list(properties) + [prop.__name__ for prop in extra_properties]
     if len(regions) == 0:
         ndim = label_image.ndim
         label_image = np.zeros((3,) * ndim, dtype=int)
         label_image[(1,) * ndim] = 1
         if intensity_image is not None:
             intensity_image = np.zeros(
-                    label_image.shape + intensity_image.shape[ndim:],
-                    dtype=intensity_image.dtype
-                    )
-        regions = regionprops(label_image, intensity_image=intensity_image,
-                              cache=cache, extra_properties=extra_properties, spacing=spacing)
+                label_image.shape + intensity_image.shape[ndim:],
+                dtype=intensity_image.dtype,
+            )
+        regions = regionprops(
+            label_image,
+            intensity_image=intensity_image,
+            cache=cache,
+            extra_properties=extra_properties,
+            spacing=spacing,
+        )
 
-        out_d = _props_to_dict(regions, properties=properties,
-                               separator=separator)
+        out_d = _props_to_dict(regions, properties=properties, separator=separator)
         return {k: v[:0] for k, v in out_d.items()}
 
-    return _props_to_dict(
-        regions, properties=properties, separator=separator
-    )
+    return _props_to_dict(regions, properties=properties, separator=separator)
 
 
-def regionprops(label_image, intensity_image=None, cache=True,
-                *, extra_properties=None, spacing=None, offset=None):
+def regionprops(
+    label_image,
+    intensity_image=None,
+    cache=True,
+    *,
+    extra_properties=None,
+    spacing=None,
+    offset=None,
+):
     r"""Measure properties of labeled image regions.
 
     Parameters
@@ -1296,23 +1345,25 @@ def regionprops(label_image, intensity_image=None, cache=True,
     if not np.issubdtype(label_image.dtype, np.integer):
         if np.issubdtype(label_image.dtype, bool):
             raise TypeError(
-                    'Non-integer image types are ambiguous: '
-                    'use skimage.measure.label to label the connected '
-                    'components of label_image, '
-                    'or label_image.astype(np.uint8) to interpret '
-                    'the True values as a single label.')
+                'Non-integer image types are ambiguous: '
+                'use skimage.measure.label to label the connected '
+                'components of label_image, '
+                'or label_image.astype(np.uint8) to interpret '
+                'the True values as a single label.'
+            )
         else:
-            raise TypeError(
-                    'Non-integer label_image types are ambiguous')
+            raise TypeError('Non-integer label_image types are ambiguous')
 
     if offset is None:
         offset_arr = np.zeros((label_image.ndim,), dtype=int)
     else:
         offset_arr = np.asarray(offset)
         if offset_arr.ndim != 1 or offset_arr.size != label_image.ndim:
-            raise ValueError('Offset should be an array-like of integers '
-                             'of shape (label_image.ndim,); '
-                             f'{offset} was provided.')
+            raise ValueError(
+                'Offset should be an array-like of integers '
+                'of shape (label_image.ndim,); '
+                f'{offset} was provided.'
+            )
 
     regions = []
 
@@ -1323,9 +1374,16 @@ def regionprops(label_image, intensity_image=None, cache=True,
 
         label = i + 1
 
-        props = RegionProperties(sl, label, label_image, intensity_image,
-                                 cache, spacing=spacing, extra_properties=extra_properties,
-                                 offset=offset_arr)
+        props = RegionProperties(
+            sl,
+            label,
+            label_image,
+            intensity_image,
+            cache,
+            spacing=spacing,
+            extra_properties=extra_properties,
+            offset=offset_arr,
+        )
         regions.append(props)
 
     return regions
@@ -1336,8 +1394,9 @@ def _parse_docs():
     import textwrap
 
     doc = regionprops.__doc__ or ''
-    matches = re.finditer(r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)',
-                          doc, flags=re.DOTALL)
+    matches = re.finditer(
+        r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL
+    )
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
@@ -1346,8 +1405,7 @@ def _parse_docs():
 def _install_properties_docs():
     prop_doc = _parse_docs()
 
-    for p in [member for member in dir(RegionProperties)
-              if not member.startswith('_')]:
+    for p in [member for member in dir(RegionProperties) if not member.startswith('_')]:
         getattr(RegionProperties, p).__doc__ = prop_doc[p]
 
 

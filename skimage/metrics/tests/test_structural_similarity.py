@@ -21,7 +21,7 @@ def test_structural_similarity_patch_range():
     X = (np.random.rand(N, N) * 255).astype(np.uint8)
     Y = (np.random.rand(N, N) * 255).astype(np.uint8)
 
-    assert(structural_similarity(X, Y, win_size=N) < 0.1)
+    assert structural_similarity(X, Y, win_size=N) < 0.1
     assert_equal(structural_similarity(X, X, win_size=N), 1)
 
 
@@ -34,10 +34,10 @@ def test_structural_similarity_image():
     assert_equal(S0, 1)
 
     S1 = structural_similarity(X, Y, win_size=3)
-    assert(S1 < 0.3)
+    assert S1 < 0.3
 
     S2 = structural_similarity(X, Y, win_size=11, gaussian_weights=True)
-    assert(S2 < 0.3)
+    assert S2 < 0.3
 
     mssim0, S3 = structural_similarity(X, Y, full=True)
     assert_equal(S3.shape, X.shape)
@@ -73,7 +73,8 @@ def test_structural_similarity_grad(seed, dtype):
     assert np.all(g[1] < 0.05)
 
     mssim, grad, s = structural_similarity(
-        X, Y, data_range=255, gradient=True, full=True)
+        X, Y, data_range=255, gradient=True, full=True
+    )
     assert s.dtype == _supported_float_type(dtype)
     assert grad.dtype == _supported_float_type(dtype)
     assert np.all(grad < 0.05)
@@ -124,15 +125,13 @@ def test_structural_similarity_multichannel(channel_axis):
     assert_equal(S3.shape, Xc.shape)
 
     # gradient case
-    m, grad = structural_similarity(Xc, Yc, channel_axis=channel_axis,
-                                    gradient=True)
+    m, grad = structural_similarity(Xc, Yc, channel_axis=channel_axis, gradient=True)
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
-    m, grad, S3 = structural_similarity(Xc, Yc,
-                                        channel_axis=channel_axis,
-                                        full=True,
-                                        gradient=True)
+    m, grad, S3 = structural_similarity(
+        Xc, Yc, channel_axis=channel_axis, full=True, gradient=True
+    )
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
 
@@ -146,7 +145,9 @@ def test_structural_similarity_nD(dtype):
     # test 1D through 4D on small random arrays
     N = 10
     for ndim in range(1, 5):
-        xsize = [N, ] * 5
+        xsize = [
+            N,
+        ] * 5
         X = (np.random.rand(*xsize) * 255).astype(dtype)
         Y = (np.random.rand(*xsize) * 255).astype(dtype)
 
@@ -164,8 +165,9 @@ def test_structural_similarity_multichannel_chelsea():
 
     # multichannel result should be mean of the individual channel results
     mssim = structural_similarity(Xc, Yc, channel_axis=-1)
-    mssim_sep = [structural_similarity(
-        Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])]
+    mssim_sep = [
+        structural_similarity(Yc[..., c], Xc[..., c]) for c in range(Xc.shape[-1])
+    ]
     assert_almost_equal(mssim, np.mean(mssim_sep))
 
     # structural_similarity of image with itself should be 1.0
@@ -173,7 +175,7 @@ def test_structural_similarity_multichannel_chelsea():
 
 
 def test_gaussian_structural_similarity_vs_IPOL():
-    """ Tests vs. imdiff result from the following IPOL article and code:
+    """Tests vs. imdiff result from the following IPOL article and code:
     https://www.ipol.im/pub/art/2011/g_lmii/.
 
     Notes
@@ -193,8 +195,9 @@ def test_gaussian_structural_similarity_vs_IPOL():
     mssim_IPOL = 0.357959091663361
     assert cam.dtype == np.uint8
     assert cam_noisy.dtype == np.uint8
-    mssim = structural_similarity(cam, cam_noisy, gaussian_weights=True,
-                                  use_sample_covariance=False)
+    mssim = structural_similarity(
+        cam, cam_noisy, gaussian_weights=True, use_sample_covariance=False
+    )
     assert_almost_equal(mssim, mssim_IPOL, decimal=3)
 
 
@@ -206,28 +209,32 @@ def test_mssim_vs_legacy(dtype):
     mssim_skimage_0pt17 = 0.3674518327910367
     assert cam.dtype == np.uint8
     assert cam_noisy.dtype == np.uint8
-    mssim = structural_similarity(cam.astype(dtype),
-                                  cam_noisy.astype(dtype), data_range=255)
+    mssim = structural_similarity(
+        cam.astype(dtype), cam_noisy.astype(dtype), data_range=255
+    )
     assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
 def test_ssim_warns_about_data_range():
     mssim = structural_similarity(cam, cam_noisy)
     with expected_warnings(['Setting data_range based on im1.dtype']):
-        mssim_uint16 = structural_similarity(cam.astype(np.uint16),
-                                             cam_noisy.astype(np.uint16))
+        mssim_uint16 = structural_similarity(
+            cam.astype(np.uint16), cam_noisy.astype(np.uint16)
+        )
         # The value computed for mssim_uint16 is wrong, because the
         # dtype of im1 led to infer an erroneous data_range. The user
         # is getting a warning about avoiding mistakes.
         assert mssim_uint16 > 0.99
 
-    with expected_warnings(['Setting data_range based on im1.dtype',
-                            'Inputs have mismatched dtypes']):
+    with expected_warnings(
+        ['Setting data_range based on im1.dtype', 'Inputs have mismatched dtypes']
+    ):
         mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.int32))
 
     # no warning when user supplies data_range
     mssim_mixed = structural_similarity(
-        cam, cam_noisy.astype(np.float32), data_range=255)
+        cam, cam_noisy.astype(np.float32), data_range=255
+    )
 
     assert_almost_equal(mssim, mssim_mixed)
 

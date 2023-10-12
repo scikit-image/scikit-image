@@ -1,11 +1,13 @@
 import numpy as np
 
-from ..feature.util import (FeatureDetector, DescriptorExtractor,
-                            _mask_border_keypoints,
-                            _prepare_grayscale_input_2D)
+from ..feature.util import (
+    FeatureDetector,
+    DescriptorExtractor,
+    _mask_border_keypoints,
+    _prepare_grayscale_input_2D,
+)
 
-from .corner import (corner_fast, corner_orientations, corner_peaks,
-                       corner_harris)
+from .corner import corner_fast, corner_orientations, corner_peaks, corner_harris
 from ..transform import pyramid_gaussian
 from .._shared.utils import check_nD
 
@@ -114,9 +116,15 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     """
 
-    def __init__(self, downscale=1.2, n_scales=8,
-                 n_keypoints=500, fast_n=9, fast_threshold=0.08,
-                 harris_k=0.04):
+    def __init__(
+        self,
+        downscale=1.2,
+        n_scales=8,
+        n_keypoints=500,
+        fast_n=9,
+        fast_threshold=0.08,
+        harris_k=0.04,
+    ):
         self.downscale = downscale
         self.n_scales = n_scales
         self.n_keypoints = n_keypoints
@@ -132,30 +140,31 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     def _build_pyramid(self, image):
         image = _prepare_grayscale_input_2D(image)
-        return list(pyramid_gaussian(image, self.n_scales - 1,
-                                     self.downscale, channel_axis=None))
+        return list(
+            pyramid_gaussian(
+                image, self.n_scales - 1, self.downscale, channel_axis=None
+            )
+        )
 
     def _detect_octave(self, octave_image):
         dtype = octave_image.dtype
         # Extract keypoints for current octave
-        fast_response = corner_fast(octave_image, self.fast_n,
-                                    self.fast_threshold)
+        fast_response = corner_fast(octave_image, self.fast_n, self.fast_threshold)
         keypoints = corner_peaks(fast_response, min_distance=1)
 
         if len(keypoints) == 0:
-            return (np.zeros((0, 2), dtype=dtype),
-                    np.zeros((0, ), dtype=dtype),
-                    np.zeros((0, ), dtype=dtype))
+            return (
+                np.zeros((0, 2), dtype=dtype),
+                np.zeros((0,), dtype=dtype),
+                np.zeros((0,), dtype=dtype),
+            )
 
-        mask = _mask_border_keypoints(octave_image.shape, keypoints,
-                                      distance=16)
+        mask = _mask_border_keypoints(octave_image.shape, keypoints, distance=16)
         keypoints = keypoints[mask]
 
-        orientations = corner_orientations(octave_image, keypoints,
-                                           OFAST_MASK)
+        orientations = corner_orientations(octave_image, keypoints, OFAST_MASK)
 
-        harris_response = corner_harris(octave_image, method='k',
-                                        k=self.harris_k)
+        harris_response = corner_harris(octave_image, method='k', k=self.harris_k)
         responses = harris_response[keypoints[:, 0], keypoints[:, 1]]
 
         return keypoints, orientations, responses
@@ -179,21 +188,23 @@ class ORB(FeatureDetector, DescriptorExtractor):
         responses_list = []
 
         for octave in range(len(pyramid)):
-
             octave_image = np.ascontiguousarray(pyramid[octave])
 
             if np.squeeze(octave_image).ndim < 2:
                 # No further keypoints can be detected if the image is not really 2d
                 break
 
-            keypoints, orientations, responses = self._detect_octave(
-                octave_image)
+            keypoints, orientations, responses = self._detect_octave(octave_image)
 
-            keypoints_list.append(keypoints * self.downscale ** octave)
+            keypoints_list.append(keypoints * self.downscale**octave)
             orientations_list.append(orientations)
-            scales_list.append(np.full(
-                keypoints.shape[0], self.downscale ** octave,
-                dtype=octave_image.dtype))
+            scales_list.append(
+                np.full(
+                    keypoints.shape[0],
+                    self.downscale**octave,
+                    dtype=octave_image.dtype,
+                )
+            )
             responses_list.append(responses)
 
         keypoints = np.vstack(keypoints_list)
@@ -208,19 +219,16 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.responses = responses
         else:
             # Choose best n_keypoints according to Harris corner response
-            best_indices = responses.argsort()[::-1][:self.n_keypoints]
+            best_indices = responses.argsort()[::-1][: self.n_keypoints]
             self.keypoints = keypoints[best_indices]
             self.scales = scales[best_indices]
             self.orientations = orientations[best_indices]
             self.responses = responses[best_indices]
 
     def _extract_octave(self, octave_image, keypoints, orientations):
-        mask = _mask_border_keypoints(octave_image.shape, keypoints,
-                                      distance=20)
-        keypoints = np.array(keypoints[mask], dtype=np.intp, order='C',
-                             copy=False)
-        orientations = np.array(orientations[mask], order='C',
-                                copy=False)
+        mask = _mask_border_keypoints(octave_image.shape, keypoints, distance=20)
+        keypoints = np.array(keypoints[mask], dtype=np.intp, order='C', copy=False)
+        orientations = np.array(orientations[mask], order='C', copy=False)
 
         descriptors = _orb_loop(octave_image, keypoints, orientations)
 
@@ -257,21 +265,19 @@ class ORB(FeatureDetector, DescriptorExtractor):
         octaves = (np.log(scales) / np.log(self.downscale)).astype(np.intp)
 
         for octave in range(len(pyramid)):
-
             # Mask for all keypoints in current octave
             octave_mask = octaves == octave
 
             if np.sum(octave_mask) > 0:
-
                 octave_image = np.ascontiguousarray(pyramid[octave])
 
                 octave_keypoints = keypoints[octave_mask]
-                octave_keypoints /= self.downscale ** octave
+                octave_keypoints /= self.downscale**octave
                 octave_orientations = orientations[octave_mask]
 
-                descriptors, mask = self._extract_octave(octave_image,
-                                                         octave_keypoints,
-                                                         octave_orientations)
+                descriptors, mask = self._extract_octave(
+                    octave_image, octave_keypoints, octave_orientations
+                )
 
                 descriptors_list.append(descriptors)
                 mask_list.append(mask)
@@ -302,15 +308,13 @@ class ORB(FeatureDetector, DescriptorExtractor):
         descriptors_list = []
 
         for octave in range(len(pyramid)):
-
             octave_image = np.ascontiguousarray(pyramid[octave])
 
             if np.squeeze(octave_image).ndim < 2:
                 # No further keypoints can be detected if the image is not really 2d
                 break
 
-            keypoints, orientations, responses = self._detect_octave(
-                octave_image)
+            keypoints, orientations, responses = self._detect_octave(octave_image)
 
             if len(keypoints) == 0:
                 keypoints_list.append(keypoints)
@@ -318,21 +322,25 @@ class ORB(FeatureDetector, DescriptorExtractor):
                 descriptors_list.append(np.zeros((0, 256), dtype=bool))
                 continue
 
-            descriptors, mask = self._extract_octave(octave_image, keypoints,
-                                                     orientations)
+            descriptors, mask = self._extract_octave(
+                octave_image, keypoints, orientations
+            )
 
-            scaled_keypoints = keypoints[mask] * self.downscale ** octave
+            scaled_keypoints = keypoints[mask] * self.downscale**octave
             keypoints_list.append(scaled_keypoints)
             responses_list.append(responses[mask])
             orientations_list.append(orientations[mask])
-            scales_list.append(self.downscale ** octave *
-                               np.ones(scaled_keypoints.shape[0], dtype=np.intp))
+            scales_list.append(
+                self.downscale**octave
+                * np.ones(scaled_keypoints.shape[0], dtype=np.intp)
+            )
             descriptors_list.append(descriptors)
 
         if len(scales_list) == 0:
             raise RuntimeError(
                 "ORB found no features. Try passing in an image containing "
-                "greater intensity contrasts between adjacent pixels.")
+                "greater intensity contrasts between adjacent pixels."
+            )
 
         keypoints = np.vstack(keypoints_list)
         responses = np.hstack(responses_list)
@@ -348,7 +356,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
             self.descriptors = descriptors
         else:
             # Choose best n_keypoints according to Harris corner response
-            best_indices = responses.argsort()[::-1][:self.n_keypoints]
+            best_indices = responses.argsort()[::-1][: self.n_keypoints]
             self.keypoints = keypoints[best_indices]
             self.scales = scales[best_indices]
             self.orientations = orientations[best_indices]

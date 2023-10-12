@@ -96,15 +96,15 @@ def _named_tempfile_func(error_class):
     `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__  # noqa
     for more information.
     """
+
     def named_temp_file(*args, **kwargs):
         raise error_class()
+
     return named_temp_file
 
 
 @pytest.mark.parametrize(
-    'error_class', [
-        FileNotFoundError, FileExistsError, PermissionError, BaseException
-    ]
+    'error_class', [FileNotFoundError, FileExistsError, PermissionError, BaseException]
 )
 def test_failed_temporary_file(monkeypatch, error_class):
     fetch('data/camera.png')

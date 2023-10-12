@@ -14,13 +14,12 @@ if 'indices' in parameters and parameters['indices'].default:
 
 
 class PeakLocalMaxSuite:
-
     def setup(self):
         mask = np.zeros([500, 500], dtype=bool)
         x, y = np.indices((500, 500))
         x_c = x // 20 * 20 + 10
         y_c = y // 20 * 20 + 10
-        mask[(x - x_c)**2 + (y - y_c)**2 < 8**2] = True
+        mask[(x - x_c) ** 2 + (y - y_c) ** 2 < 8**2] = True
 
         # create a mask, label each disk,
         self.labels, num_objs = ndi.label(mask)
@@ -29,6 +28,9 @@ class PeakLocalMaxSuite:
 
     def time_peak_local_max(self):
         peak_local_max(
-            self.dist, labels=self.labels,
-            min_distance=20, exclude_border=False, **peak_kwargs
+            self.dist,
+            labels=self.labels,
+            min_distance=20,
+            exclude_border=False,
+            **peak_kwargs,
         )

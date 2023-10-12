@@ -13,17 +13,18 @@ from skimage.util import img_as_uint, img_as_ubyte
 @pytest.fixture
 def cam_image():
     from skimage import data
+
     return np.ascontiguousarray(data.camera()[64:112, 64:96])
 
 
 @pytest.fixture
 def cell3d_image():
     from skimage import data
+
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
 class TestMorphology:
-
     # These expected outputs were generated with skimage v0.12.1
     # using:
     #
@@ -33,13 +34,24 @@ class TestMorphology:
     #   np.savez_compressed('gray_morph_output.npz', **output)
 
     def _build_expected_output(self):
-        funcs = (gray.erosion, gray.dilation, gray.opening, gray.closing,
-                 gray.white_tophat, gray.black_tophat)
-        footprints_2D = (footprints.square, footprints.diamond,
-                         footprints.disk, footprints.star)
+        funcs = (
+            gray.erosion,
+            gray.dilation,
+            gray.opening,
+            gray.closing,
+            gray.white_tophat,
+            gray.black_tophat,
+        )
+        footprints_2D = (
+            footprints.square,
+            footprints.diamond,
+            footprints.disk,
+            footprints.star,
+        )
 
-        image = img_as_ubyte(transform.downscale_local_mean(
-            color.rgb2gray(data.coffee()), (20, 20)))
+        image = img_as_ubyte(
+            transform.downscale_local_mean(color.rgb2gray(data.coffee()), (20, 20))
+        )
 
         output = {}
         for n in range(1, 4):
@@ -61,9 +73,12 @@ class TestEccentricStructuringElements:
         self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
         self.black_pixel[1, 1] = 0
         self.white_pixel = 255 - self.black_pixel
-        self.footprints = [footprints.square(2), footprints.rectangle(2, 2),
-                           footprints.rectangle(2, 1),
-                           footprints.rectangle(1, 2)]
+        self.footprints = [
+            footprints.square(2),
+            footprints.rectangle(2, 2),
+            footprints.rectangle(2, 1),
+            footprints.rectangle(1, 2),
+        ]
 
     def test_dilate_erode_symmetry(self):
         for s in self.footprints:
@@ -110,27 +125,37 @@ class TestEccentricStructuringElements:
             assert np.all(tophat == 0)
 
 
-gray_functions = [gray.erosion, gray.dilation,
-                  gray.opening, gray.closing,
-                  gray.white_tophat, gray.black_tophat]
+gray_functions = [
+    gray.erosion,
+    gray.dilation,
+    gray.opening,
+    gray.closing,
+    gray.white_tophat,
+    gray.black_tophat,
+]
 
 
 @pytest.mark.parametrize("function", gray_functions)
 def test_default_footprint(function):
     strel = footprints.diamond(radius=1)
-    image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], np.uint8)
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        np.uint8,
+    )
     im_expected = function(image, strel)
     im_test = function(image)
     assert_array_equal(im_expected, im_test)
@@ -175,7 +200,8 @@ def test_3d_fallback_white_tophat():
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings([r'operator.*deprecated|\A\Z']):
         image_expected = ndi.white_tophat(
-            image.view(dtype=np.uint8), footprint=footprint)
+            image.view(dtype=np.uint8), footprint=footprint
+        )
     assert_array_equal(new_image, image_expected)
 
 
@@ -190,7 +216,8 @@ def test_3d_fallback_black_tophat():
     footprint = ndi.generate_binary_structure(3, 1)
     with expected_warnings([r'operator.*deprecated|\A\Z']):
         image_expected = ndi.black_tophat(
-            image.view(dtype=np.uint8), footprint=footprint)
+            image.view(dtype=np.uint8), footprint=footprint
+        )
     assert_array_equal(new_image, image_expected)
 
 
@@ -212,35 +239,55 @@ def test_2d_ndimage_equivalence():
 
 
 # float test images
-im = np.array([[ 0.55,  0.72,  0.6 ,  0.54,  0.42],
-               [ 0.65,  0.44,  0.89,  0.96,  0.38],
-               [ 0.79,  0.53,  0.57,  0.93,  0.07],
-               [ 0.09,  0.02,  0.83,  0.78,  0.87],
-               [ 0.98,  0.8 ,  0.46,  0.78,  0.12]])
+im = np.array(
+    [
+        [0.55, 0.72, 0.6, 0.54, 0.42],
+        [0.65, 0.44, 0.89, 0.96, 0.38],
+        [0.79, 0.53, 0.57, 0.93, 0.07],
+        [0.09, 0.02, 0.83, 0.78, 0.87],
+        [0.98, 0.8, 0.46, 0.78, 0.12],
+    ]
+)
 
-eroded = np.array([[ 0.55,  0.44,  0.54,  0.42,  0.38],
-                   [ 0.44,  0.44,  0.44,  0.38,  0.07],
-                   [ 0.09,  0.02,  0.53,  0.07,  0.07],
-                   [ 0.02,  0.02,  0.02,  0.78,  0.07],
-                   [ 0.09,  0.02,  0.46,  0.12,  0.12]])
+eroded = np.array(
+    [
+        [0.55, 0.44, 0.54, 0.42, 0.38],
+        [0.44, 0.44, 0.44, 0.38, 0.07],
+        [0.09, 0.02, 0.53, 0.07, 0.07],
+        [0.02, 0.02, 0.02, 0.78, 0.07],
+        [0.09, 0.02, 0.46, 0.12, 0.12],
+    ]
+)
 
-dilated = np.array([[ 0.72,  0.72,  0.89,  0.96,  0.54],
-                    [ 0.79,  0.89,  0.96,  0.96,  0.96],
-                    [ 0.79,  0.79,  0.93,  0.96,  0.93],
-                    [ 0.98,  0.83,  0.83,  0.93,  0.87],
-                    [ 0.98,  0.98,  0.83,  0.78,  0.87]])
+dilated = np.array(
+    [
+        [0.72, 0.72, 0.89, 0.96, 0.54],
+        [0.79, 0.89, 0.96, 0.96, 0.96],
+        [0.79, 0.79, 0.93, 0.96, 0.93],
+        [0.98, 0.83, 0.83, 0.93, 0.87],
+        [0.98, 0.98, 0.83, 0.78, 0.87],
+    ]
+)
 
-opened = np.array([[ 0.55,  0.55,  0.54,  0.54,  0.42],
-                   [ 0.55,  0.44,  0.54,  0.44,  0.38],
-                   [ 0.44,  0.53,  0.53,  0.78,  0.07],
-                   [ 0.09,  0.02,  0.78,  0.78,  0.78],
-                   [ 0.09,  0.46,  0.46,  0.78,  0.12]])
+opened = np.array(
+    [
+        [0.55, 0.55, 0.54, 0.54, 0.42],
+        [0.55, 0.44, 0.54, 0.44, 0.38],
+        [0.44, 0.53, 0.53, 0.78, 0.07],
+        [0.09, 0.02, 0.78, 0.78, 0.78],
+        [0.09, 0.46, 0.46, 0.78, 0.12],
+    ]
+)
 
-closed = np.array([[ 0.72,  0.72,  0.72,  0.54,  0.54],
-                   [ 0.72,  0.72,  0.89,  0.96,  0.54],
-                   [ 0.79,  0.79,  0.79,  0.93,  0.87],
-                   [ 0.79,  0.79,  0.83,  0.78,  0.87],
-                   [ 0.98,  0.83,  0.78,  0.78,  0.78]])
+closed = np.array(
+    [
+        [0.72, 0.72, 0.72, 0.54, 0.54],
+        [0.72, 0.72, 0.89, 0.96, 0.54],
+        [0.79, 0.79, 0.79, 0.93, 0.87],
+        [0.79, 0.79, 0.83, 0.78, 0.87],
+        [0.98, 0.83, 0.78, 0.78, 0.78],
+    ]
+)
 
 
 def test_float():
@@ -251,8 +298,9 @@ def test_float():
 
 
 def test_uint16():
-    im16, eroded16, dilated16, opened16, closed16 = (
-        map(img_as_uint, [im, eroded, dilated, opened, closed]))
+    im16, eroded16, dilated16, opened16, closed16 = map(
+        img_as_uint, [im, eroded, dilated, opened, closed]
+    )
     assert_allclose(gray.erosion(im16), eroded16)
     assert_allclose(gray.dilation(im16), dilated16)
     assert_allclose(gray.opening(im16), opened16)
@@ -260,21 +308,29 @@ def test_uint16():
 
 
 def test_discontiguous_out_array():
-    image = np.array([[5, 6, 2],
-                      [7, 2, 2],
-                      [3, 5, 1]], np.uint8)
+    image = np.array([[5, 6, 2], [7, 2, 2], [3, 5, 1]], np.uint8)
     out_array_big = np.zeros((5, 5), np.uint8)
     out_array = out_array_big[::2, ::2]
-    expected_dilation = np.array([[7, 0, 6, 0, 6],
-                                  [0, 0, 0, 0, 0],
-                                  [7, 0, 7, 0, 2],
-                                  [0, 0, 0, 0, 0],
-                                  [7, 0, 5, 0, 5]], np.uint8)
-    expected_erosion = np.array([[5, 0, 2, 0, 2],
-                                 [0, 0, 0, 0, 0],
-                                 [2, 0, 2, 0, 1],
-                                 [0, 0, 0, 0, 0],
-                                 [3, 0, 1, 0, 1]], np.uint8)
+    expected_dilation = np.array(
+        [
+            [7, 0, 6, 0, 6],
+            [0, 0, 0, 0, 0],
+            [7, 0, 7, 0, 2],
+            [0, 0, 0, 0, 0],
+            [7, 0, 5, 0, 5],
+        ],
+        np.uint8,
+    )
+    expected_erosion = np.array(
+        [
+            [5, 0, 2, 0, 2],
+            [0, 0, 0, 0, 0],
+            [2, 0, 2, 0, 1],
+            [0, 0, 0, 0, 0],
+            [3, 0, 1, 0, 1],
+        ],
+        np.uint8,
+    )
     gray.dilation(image, out=out_array)
     assert_array_equal(out_array_big, expected_dilation)
     gray.erosion(image, out=out_array)
@@ -289,8 +345,8 @@ def test_1d_erosion():
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("size", (7,))
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
@@ -308,14 +364,13 @@ def test_square_decomposition(cam_image, function, size, decomposition):
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("nrows", (3, 11))
 @pytest.mark.parametrize("ncols", (3, 11))
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_rectangle_decomposition(cam_image, function, nrows, ncols,
-                                 decomposition):
+def test_rectangle_decomposition(cam_image, function, nrows, ncols, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
@@ -329,8 +384,8 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols,
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("radius", (2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
@@ -348,8 +403,8 @@ def test_diamond_decomposition(cam_image, function, radius, decomposition):
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("m", (0, 1, 3, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3))
@@ -372,8 +427,8 @@ def test_octagon_decomposition(cam_image, function, m, n, decomposition):
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("size", (5,))
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
@@ -391,13 +446,12 @@ def test_cube_decomposition(cell3d_image, function, size, decomposition):
 
 
 @pytest.mark.parametrize(
-    "function", ["erosion", "dilation", "closing", "opening", "white_tophat",
-                 "black_tophat"],
+    "function",
+    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
 )
 @pytest.mark.parametrize("radius", (3,))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-def test_octahedron_decomposition(cell3d_image, function, radius,
-                                  decomposition):
+def test_octahedron_decomposition(cell3d_image, function, radius, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.

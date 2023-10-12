@@ -68,13 +68,17 @@ dtype_limits
 __version__ = '0.23.0rc0.dev0'
 
 from ._shared.version_requirements import ensure_python_version
+
 ensure_python_version((3, 8))
 
 import lazy_loader as lazy
+
 __getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
+
 
 def __dir__():
     return __lazy_dir__() + ['__version__']
+
 
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
@@ -93,6 +97,7 @@ https://scikit-image.org/docs/stable/user_guide/install.html"""
 def _raise_build_error(e):
     # Raise a comprehensible error
     import os.path as osp
+
     local_dir = osp.split(__file__)[0]
     msg = _STANDARD_MSG
     if local_dir == "skimage":
@@ -114,12 +119,14 @@ except NameError:
 
 if __SKIMAGE_SETUP__:
     import sys
+
     sys.stderr.write('Partial import of skimage during the build process.\n')
     # We are not importing the rest of the scikit during the build
     # process, as it may not be compiled yet
 else:
     try:
         from ._shared import geometry
+
         del geometry
     except ImportError as e:
         _raise_build_error(e)
@@ -133,7 +140,7 @@ else:
         img_as_int,
         img_as_uint,
         img_as_ubyte,
-        img_as_bool
+        img_as_bool,
     )
 
     from .util.lookfor import lookfor
@@ -169,11 +176,11 @@ if 'dev' in __version__:
             )
 
             __version__ = '+'.join(
-                [tag for tag in __version__.split('+')
-                 if not tag.startswith('git')]
+                [tag for tag in __version__.split('+') if not tag.startswith('git')]
             )
             __version__ += f'+git{git_date}.{git_hash}'
 
 from skimage._shared.tester import PytestTester  # noqa
+
 test = PytestTester(__name__)
 del PytestTester

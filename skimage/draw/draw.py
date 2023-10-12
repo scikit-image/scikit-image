@@ -2,13 +2,19 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from .._shared.version_requirements import require
-from ._draw import (_coords_inside_image, _line, _line_aa,
-                    _polygon, _ellipse_perimeter,
-                    _circle_perimeter, _circle_perimeter_aa,
-                    _bezier_curve)
+from ._draw import (
+    _coords_inside_image,
+    _line,
+    _line_aa,
+    _polygon,
+    _ellipse_perimeter,
+    _circle_perimeter,
+    _circle_perimeter_aa,
+    _bezier_curve,
+)
 
 
-def _ellipse_in_shape(shape, center, radii, rotation=0.):
+def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
@@ -32,18 +38,19 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
     cols : iterable of ints
         Corresponding column coordinates representing values within the ellipse.
     """
-    r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
+    r_lim, c_lim = np.ogrid[0 : float(shape[0]), 0 : float(shape[1])]
     r_org, c_org = center
     r_rad, c_rad = radii
     rotation %= np.pi
     sin_alpha, cos_alpha = np.sin(rotation), np.cos(rotation)
     r, c = (r_lim - r_org), (c_lim - c_org)
-    distances = ((r * cos_alpha + c * sin_alpha) / r_rad) ** 2 \
-                + ((r * sin_alpha - c * cos_alpha) / c_rad) ** 2
+    distances = ((r * cos_alpha + c * sin_alpha) / r_rad) ** 2 + (
+        (r * sin_alpha - c * cos_alpha) / c_rad
+    ) ** 2
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
+def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
@@ -117,10 +124,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     rotation %= np.pi
 
     # compute rotated radii by given rotation
-    r_radius_rot = abs(r_radius * np.cos(rotation)) \
-                   + c_radius * np.sin(rotation)
-    c_radius_rot = r_radius * np.sin(rotation) \
-                   + abs(c_radius * np.cos(rotation))
+    r_radius_rot = abs(r_radius * np.cos(rotation)) + c_radius * np.sin(rotation)
+    c_radius_rot = r_radius * np.sin(rotation) + abs(c_radius * np.cos(rotation))
     # The upper_left and lower_right corners of the smallest rectangle
     # containing the ellipse.
     radii_rot = np.array([r_radius_rot, c_radius_rot])
@@ -261,8 +266,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
             raise ValueError("Must specify clipping shape")
         clip_box = np.array([0, 0, shape[0] - 1, shape[1] - 1])
     else:
-        clip_box = np.array([np.min(r), np.min(c),
-                             np.max(r), np.max(c)])
+        clip_box = np.array([np.min(r), np.min(c), np.max(r), np.max(c)])
 
     # Do the clipping irrespective of whether clip is set.  This
     # ensures that the returned polygon is closed and is an array.
@@ -332,8 +336,10 @@ def set_color(image, coords, color, alpha=1):
     color = np.array(color, ndmin=1, copy=False)
 
     if image.shape[-1] != color.shape[-1]:
-        raise ValueError(f'Color shape ({color.shape[0]}) must match last '
-                          'image dimension ({image.shape[-1]}).')
+        raise ValueError(
+            f'Color shape ({color.shape[0]}) must match last '
+            'image dimension ({image.shape[-1]}).'
+        )
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
@@ -855,8 +861,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         n_dim = len(start)
         br = np.minimum(shape[0:n_dim], br)
         tl = np.maximum(np.zeros_like(shape[0:n_dim]), tl)
-    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
-                                                               tuple(br))])
+    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl), tuple(br))])
     return coords
 
 
@@ -922,15 +927,11 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
            [0, 0, 1, 1, 1]], dtype=uint8)
 
     """
-    top_left, bottom_right = _rectangle_slice(start=start,
-                                              end=end,
-                                              extent=extent)
+    top_left, bottom_right = _rectangle_slice(start=start, end=end, extent=extent)
 
     top_left -= 1
-    r = [top_left[0], top_left[0], bottom_right[0], bottom_right[0],
-         top_left[0]]
-    c = [top_left[1], bottom_right[1], bottom_right[1], top_left[1],
-         top_left[1]]
+    r = [top_left[0], top_left[0], bottom_right[0], bottom_right[0], top_left[0]]
+    c = [top_left[1], bottom_right[1], bottom_right[1], top_left[1], top_left[1]]
     return polygon_perimeter(r, c, shape=shape, clip=clip)
 
 

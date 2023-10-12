@@ -7,31 +7,32 @@ from .._shared.utils import check_nD, _supported_float_type
 
 
 def _window_sum_2d(image, window_shape):
-
     window_sum = np.cumsum(image, axis=0)
-    window_sum = (window_sum[window_shape[0]:-1]
-                  - window_sum[:-window_shape[0] - 1])
+    window_sum = window_sum[window_shape[0] : -1] - window_sum[: -window_shape[0] - 1]
 
     window_sum = np.cumsum(window_sum, axis=1)
-    window_sum = (window_sum[:, window_shape[1]:-1]
-                  - window_sum[:, :-window_shape[1] - 1])
+    window_sum = (
+        window_sum[:, window_shape[1] : -1] - window_sum[:, : -window_shape[1] - 1]
+    )
 
     return window_sum
 
 
 def _window_sum_3d(image, window_shape):
-
     window_sum = _window_sum_2d(image, window_shape)
 
     window_sum = np.cumsum(window_sum, axis=2)
-    window_sum = (window_sum[:, :, window_shape[2]:-1]
-                  - window_sum[:, :, :-window_shape[2] - 1])
+    window_sum = (
+        window_sum[:, :, window_shape[2] : -1]
+        - window_sum[:, :, : -window_shape[2] - 1]
+    )
 
     return window_sum
 
 
-def match_template(image, template, pad_input=False, mode='constant',
-                   constant_values=0):
+def match_template(
+    image, template, pad_input=False, mode='constant', constant_values=0
+):
     """Match a template to a 2-D or 3-D image using normalized correlation.
 
     The output is an array with values between -1.0 and 1.0. The value at a
@@ -115,8 +116,10 @@ def match_template(image, template, pad_input=False, mode='constant',
     check_nD(image, (2, 3))
 
     if image.ndim < template.ndim:
-        raise ValueError("Dimensionality of template must be less than or "
-                         "equal to the dimensionality of image.")
+        raise ValueError(
+            "Dimensionality of template must be less than or "
+            "equal to the dimensionality of image."
+        )
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
 
@@ -127,8 +130,9 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
-        image = np.pad(image, pad_width=pad_width, mode=mode,
-                       constant_values=constant_values)
+        image = np.pad(
+            image, pad_width=pad_width, mode=mode, constant_values=constant_values
+        )
     else:
         image = np.pad(image, pad_width=pad_width, mode=mode)
 
@@ -136,21 +140,21 @@ def match_template(image, template, pad_input=False, mode='constant',
     # computation of integral images
     if image.ndim == 2:
         image_window_sum = _window_sum_2d(image, template.shape)
-        image_window_sum2 = _window_sum_2d(image ** 2, template.shape)
+        image_window_sum2 = _window_sum_2d(image**2, template.shape)
     elif image.ndim == 3:
         image_window_sum = _window_sum_3d(image, template.shape)
-        image_window_sum2 = _window_sum_3d(image ** 2, template.shape)
+        image_window_sum2 = _window_sum_3d(image**2, template.shape)
 
     template_mean = template.mean()
     template_volume = math.prod(template.shape)
     template_ssd = np.sum((template - template_mean) ** 2)
 
     if image.ndim == 2:
-        xcorr = fftconvolve(image, template[::-1, ::-1],
-                            mode="valid")[1:-1, 1:-1]
+        xcorr = fftconvolve(image, template[::-1, ::-1], mode="valid")[1:-1, 1:-1]
     elif image.ndim == 3:
-        xcorr = fftconvolve(image, template[::-1, ::-1, ::-1],
-                            mode="valid")[1:-1, 1:-1, 1:-1]
+        xcorr = fftconvolve(image, template[::-1, ::-1, ::-1], mode="valid")[
+            1:-1, 1:-1, 1:-1
+        ]
 
     numerator = xcorr - image_window_sum * template_mean
 

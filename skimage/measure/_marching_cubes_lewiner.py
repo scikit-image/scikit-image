@@ -6,9 +6,17 @@ from . import _marching_cubes_lewiner_luts as mcluts
 from . import _marching_cubes_lewiner_cy
 
 
-def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
-                   gradient_direction='descent', step_size=1,
-                   allow_degenerate=True, method='lewiner', mask=None):
+def marching_cubes(
+    volume,
+    level=None,
+    *,
+    spacing=(1.0, 1.0, 1.0),
+    gradient_direction='descent',
+    step_size=1,
+    allow_degenerate=True,
+    method='lewiner',
+    mask=None,
+):
     """Marching cubes algorithm to find surfaces in 3d volumetric data.
 
     In contrast with Lorensen et al. approach [2]_, Lewiner et
@@ -128,15 +136,28 @@ def marching_cubes(volume, level=None, *, spacing=(1., 1., 1.),
         use_classic = True
     elif method != 'lewiner':
         raise ValueError("method should be either 'lewiner' or 'lorensen'")
-    return _marching_cubes_lewiner(volume, level, spacing,
-                                   gradient_direction, step_size,
-                                   allow_degenerate, use_classic=use_classic,
-                                   mask=mask)
+    return _marching_cubes_lewiner(
+        volume,
+        level,
+        spacing,
+        gradient_direction,
+        step_size,
+        allow_degenerate,
+        use_classic=use_classic,
+        mask=mask,
+    )
 
 
-
-def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
-                            step_size, allow_degenerate, use_classic, mask):
+def _marching_cubes_lewiner(
+    volume,
+    level,
+    spacing,
+    gradient_direction,
+    step_size,
+    allow_degenerate,
+    use_classic,
+    mask,
+):
     """Lewiner et al. algorithm for marching cubes. See
     marching_cubes_lewiner for documentation.
 
@@ -147,8 +168,7 @@ def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
         raise ValueError('Input volume should be a 3D numpy array.')
     if volume.shape[0] < 2 or volume.shape[1] < 2 or volume.shape[2] < 2:
         raise ValueError("Input array must be at least 2x2x2.")
-    volume = np.ascontiguousarray(volume,
-                                  np.float32)  # no copy if not necessary
+    volume = np.ascontiguousarray(volume, np.float32)  # no copy if not necessary
 
     # Check/convert other inputs:
     # level
@@ -178,8 +198,9 @@ def _marching_cubes_lewiner(volume, level, spacing, gradient_direction,
 
     # Apply algorithm
     func = _marching_cubes_lewiner_cy.marching_cubes
-    vertices, faces, normals, values = func(volume, level, L,
-                                            step_size, use_classic, mask)
+    vertices, faces, normals, values = func(
+        volume, level, L, step_size, use_classic, mask
+    )
 
     if not len(vertices):
         raise RuntimeError('No surface found at the given iso value.')
@@ -230,33 +251,63 @@ EDGETORELATIVEPOSY = np.array([ [0,0],[0,1],[1,1],[1,0], [0,0],[0,1],[1,1],[1,0]
 EDGETORELATIVEPOSZ = np.array([ [0,0],[0,0],[0,0],[0,0], [1,1],[1,1],[1,1],[1,1], [0,1],[0,1],[0,1],[0,1] ], 'int8')
 # fmt: on
 
+
 def _get_mc_luts():
-    """ Kind of lazy obtaining of the luts.
-    """
+    """Kind of lazy obtaining of the luts."""
     if not hasattr(mcluts, 'THE_LUTS'):
-
         mcluts.THE_LUTS = _marching_cubes_lewiner_cy.LutProvider(
-                EDGETORELATIVEPOSX, EDGETORELATIVEPOSY, EDGETORELATIVEPOSZ,
-
-                _to_array(mcluts.CASESCLASSIC), _to_array(mcluts.CASES),
-
-                _to_array(mcluts.TILING1), _to_array(mcluts.TILING2), _to_array(mcluts.TILING3_1), _to_array(mcluts.TILING3_2),
-                _to_array(mcluts.TILING4_1), _to_array(mcluts.TILING4_2), _to_array(mcluts.TILING5), _to_array(mcluts.TILING6_1_1),
-                _to_array(mcluts.TILING6_1_2), _to_array(mcluts.TILING6_2), _to_array(mcluts.TILING7_1),
-                _to_array(mcluts.TILING7_2), _to_array(mcluts.TILING7_3), _to_array(mcluts.TILING7_4_1),
-                _to_array(mcluts.TILING7_4_2), _to_array(mcluts.TILING8), _to_array(mcluts.TILING9),
-                _to_array(mcluts.TILING10_1_1), _to_array(mcluts.TILING10_1_1_), _to_array(mcluts.TILING10_1_2),
-                _to_array(mcluts.TILING10_2), _to_array(mcluts.TILING10_2_), _to_array(mcluts.TILING11),
-                _to_array(mcluts.TILING12_1_1), _to_array(mcluts.TILING12_1_1_), _to_array(mcluts.TILING12_1_2),
-                _to_array(mcluts.TILING12_2), _to_array(mcluts.TILING12_2_), _to_array(mcluts.TILING13_1),
-                _to_array(mcluts.TILING13_1_), _to_array(mcluts.TILING13_2), _to_array(mcluts.TILING13_2_),
-                _to_array(mcluts.TILING13_3), _to_array(mcluts.TILING13_3_), _to_array(mcluts.TILING13_4),
-                _to_array(mcluts.TILING13_5_1), _to_array(mcluts.TILING13_5_2), _to_array(mcluts.TILING14),
-
-                _to_array(mcluts.TEST3), _to_array(mcluts.TEST4), _to_array(mcluts.TEST6),
-                _to_array(mcluts.TEST7), _to_array(mcluts.TEST10), _to_array(mcluts.TEST12),
-                _to_array(mcluts.TEST13), _to_array(mcluts.SUBCONFIG13),
-                )
+            EDGETORELATIVEPOSX,
+            EDGETORELATIVEPOSY,
+            EDGETORELATIVEPOSZ,
+            _to_array(mcluts.CASESCLASSIC),
+            _to_array(mcluts.CASES),
+            _to_array(mcluts.TILING1),
+            _to_array(mcluts.TILING2),
+            _to_array(mcluts.TILING3_1),
+            _to_array(mcluts.TILING3_2),
+            _to_array(mcluts.TILING4_1),
+            _to_array(mcluts.TILING4_2),
+            _to_array(mcluts.TILING5),
+            _to_array(mcluts.TILING6_1_1),
+            _to_array(mcluts.TILING6_1_2),
+            _to_array(mcluts.TILING6_2),
+            _to_array(mcluts.TILING7_1),
+            _to_array(mcluts.TILING7_2),
+            _to_array(mcluts.TILING7_3),
+            _to_array(mcluts.TILING7_4_1),
+            _to_array(mcluts.TILING7_4_2),
+            _to_array(mcluts.TILING8),
+            _to_array(mcluts.TILING9),
+            _to_array(mcluts.TILING10_1_1),
+            _to_array(mcluts.TILING10_1_1_),
+            _to_array(mcluts.TILING10_1_2),
+            _to_array(mcluts.TILING10_2),
+            _to_array(mcluts.TILING10_2_),
+            _to_array(mcluts.TILING11),
+            _to_array(mcluts.TILING12_1_1),
+            _to_array(mcluts.TILING12_1_1_),
+            _to_array(mcluts.TILING12_1_2),
+            _to_array(mcluts.TILING12_2),
+            _to_array(mcluts.TILING12_2_),
+            _to_array(mcluts.TILING13_1),
+            _to_array(mcluts.TILING13_1_),
+            _to_array(mcluts.TILING13_2),
+            _to_array(mcluts.TILING13_2_),
+            _to_array(mcluts.TILING13_3),
+            _to_array(mcluts.TILING13_3_),
+            _to_array(mcluts.TILING13_4),
+            _to_array(mcluts.TILING13_5_1),
+            _to_array(mcluts.TILING13_5_2),
+            _to_array(mcluts.TILING14),
+            _to_array(mcluts.TEST3),
+            _to_array(mcluts.TEST4),
+            _to_array(mcluts.TEST6),
+            _to_array(mcluts.TEST7),
+            _to_array(mcluts.TEST10),
+            _to_array(mcluts.TEST12),
+            _to_array(mcluts.TEST13),
+            _to_array(mcluts.SUBCONFIG13),
+        )
 
     return mcluts.THE_LUTS
 
@@ -298,4 +349,4 @@ def mesh_surface_area(verts, faces):
     del actual_verts
 
     # Area of triangle in 3D = 1/2 * Euclidean norm of cross product
-    return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.
+    return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.0
