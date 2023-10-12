@@ -1,7 +1,7 @@
 """
-=======================
-Region Adjacency Graphs
-=======================
+=============================
+Region Adjacency Graphs (RAGs)
+=============================
 
 This example demonstrates the use of the `merge_nodes` function of a Region
 Adjacency Graph (RAG). The `RAG` class represents a undirected weighted graph

@@ -1,7 +1,7 @@
 """
-==========================
-Region Boundary based RAGs
-==========================
+====================================================
+Region Boundary based Region adjacency graphs (RAGs)
+====================================================
 
 Construct a region boundary RAG with the ``rag_boundary`` function. The
 function  :py:func:`skimage.graph.rag_boundary` takes an
