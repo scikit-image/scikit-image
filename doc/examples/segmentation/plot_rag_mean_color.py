@@ -1,7 +1,7 @@
 """
-================
-RAG Thresholding
-================
+=========================================
+Region adjacency graph (RAG) Thresholding
+=========================================
 
 This example constructs a Region Adjacency Graph (RAG) and merges regions
 which are similar in color. We construct a RAG and define edges as the
