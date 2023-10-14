@@ -1324,7 +1324,11 @@ class EuclideanTransform(ProjectiveTransform):
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
-    Has the following form in 2D::
+    The similarity transformation extends the Euclidean transformation with a
+    scale factor in addition to the rotation and translation parameters.
+    Let n denote the number of dimensions of the image.
+
+    For n = 2, the similarity transformation has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1338,13 +1342,9 @@ class SimilarityTransform(EuclideanTransform):
          [b0  a0  b1]
          [0   0    1]]
 
-    The similarity transformation extends the Euclidean transformation with a
-    single scaling factor in addition to the rotation and translation
-    parameters.
-
     Parameters
     ----------
-    matrix : (dim+1, dim+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
@@ -1352,12 +1352,12 @@ class SimilarityTransform(EuclideanTransform):
         Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : (x, y[, z, ...]) sequence of float, length D, optional
+    translation : (x, y[, z]) sequence of float, length n, optional
         Translation parameters for each axis. Implemented only for 2D and 3D.
 
     Attributes
     ----------
-    params : (dim+1, dim+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     """
