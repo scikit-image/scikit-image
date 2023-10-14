@@ -101,13 +101,8 @@ jobs:
               export CXXFLAGS="-m32"
           fi
 
-          # Install llvm 16 manually, remove after
-          # https://github.com/actions/runner-images/issues/8125 is resolved and that
-          # version is included in the image by default
-          choco upgrade llvm
-
           ## To list all installed packages:
-          # choco list --localonly
+          choco list
 
           # Remove other gcc compilers
 
@@ -115,9 +110,9 @@ jobs:
           # choco uninstall llvm mingw rtools strawberryperl -x
 
           # Remove mingw gcc
-          rm /c/ProgramData/Chocolatey/bin/gcc
-          rm /c/ProgramData/Chocolatey/bin/g++
-          rm /c/ProgramData/Chocolatey/bin/c++
+          #rm /c/ProgramData/Chocolatey/bin/gcc
+          #rm /c/ProgramData/Chocolatey/bin/g++
+          #rm /c/ProgramData/Chocolatey/bin/c++
           # Remove perl gcc
           rm -rf /c/Strawberry
 

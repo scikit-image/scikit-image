@@ -135,3 +135,6 @@ def write_random_js(app, exception):
 def setup(app):
     app.add_directive('naturalsortedtoctree', NaturalSortedTocTree)
     app.connect('build-finished', write_random_js)
+    return {
+        'parallel_read_safe': True
+    }

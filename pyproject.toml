@@ -51,16 +51,17 @@ build = [
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32',
+    'Cython>=0.29.32,<3.0.3',
     'pythran',
     'numpy>=1.22',
     # Developer UI
-    'spin==0.6',
+    'spin==0.7',
     'build',
 ]
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
+    'ipython',
     "tomli; python_version < '3.11'",
 ]
 docs = [
@@ -121,7 +122,7 @@ requires = [
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32',
+    'Cython>=0.29.32,<3.0.3',
     'pythran',
     'lazy_loader>=0.3',
     "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
@@ -137,19 +138,18 @@ package = 'skimage'
 
 [tool.spin.commands]
 Build = [
-    'spin.build',
-    'spin.test',
-    '.spin/cmds.py:sdist',
+    'spin.cmds.meson.build',
+    'spin.cmds.meson.test',
+    'spin.cmds.build.sdist',
 ]
 Environments = [
-    'spin.shell',
-    'spin.ipython',
-    'spin.python',
+    'spin.cmds.meson.run',
+    '.spin/cmds.py:ipython',
+    'spin.cmds.meson.python',
 ]
 Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.spin/cmds.py:asv',
-    '.spin/cmds.py:coverage',
+    '.spin/cmds.py:asv'
 ]
 
 [tool.ruff]
