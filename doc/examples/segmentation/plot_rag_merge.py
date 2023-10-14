@@ -1,7 +1,7 @@
 """
-===========
-RAG Merging
-===========
+====================================
+Region adjacency graph (RAG) Merging
+====================================
 
 This example constructs a Region Adjacency Graph (RAG) and progressively merges
 regions that are similar in color. Merging two adjacent regions produces
