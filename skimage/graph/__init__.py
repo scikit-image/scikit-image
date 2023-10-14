@@ -1,9 +1,8 @@
 """
-Utilities for graph-based image segmentation, object detection and 
-network analysis.
-This module provides functions for graph-based analysis of images and segmentations,
-e.g. path finding and cost evaluation, merging and cutting of graphs, or finding
-the closest centrality.
+This moddule provides utilities for graph-based image processing.
+This includes creating adjacency graphs of pixels in an image, finding the
+central pixel in an image, finding (minimum-cost) paths across pixels, merging
+and cutting of graphs, etc.
 
 """
 import lazy_loader as lazy
