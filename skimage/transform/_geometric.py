@@ -9,8 +9,9 @@ from .._shared.utils import safe_as_int
 
 
 def _affine_matrix_from_vector(v):
-    """Affine matrix from linearized (d, d + 1) matrix entries."""
+    """Affine matrix from linearized (n, n + 1) matrix entries."""
     nparam = v.size
+    # In the code, d denotes n (dimensionality).
     # solve for d in: d * (d + 1) = nparam
     d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
     dimensionality = int(np.round(d))  # round to prevent approx errors
@@ -23,9 +24,9 @@ def _affine_matrix_from_vector(v):
 
 
 def _center_and_normalize_points(points):
-    """Center and normalize image points.
+    """Center and normalize points of an nD image.
 
-    The points are transformed in a two-step procedure that is expressed
+    The N points are transformed in a two-step procedure that is expressed
     as a transformation matrix. The matrix of the resulting points is usually
     better conditioned than the matrix of the original points.
 
@@ -33,21 +34,21 @@ def _center_and_normalize_points(points):
     origin at the centroid of the image points.
 
     Normalize the image points, such that the mean distance from the points
-    to the origin of the coordinate system is sqrt(D).
+    to the origin of the coordinate system is sqrt(n).
 
     If the points are all identical, the returned values will contain nan.
 
     Parameters
     ----------
-    points : (N, D) array
+    points : (N, n) array
         The coordinates of the image points.
 
     Returns
     -------
-    matrix : (D+1, D+1) array_like
+    matrix : (n+1, n+1) array_like
         The transformation matrix to obtain the new points.
-    new_points : (N, D) array
-        The transformed image points.
+    new_points : (N, n) array
+        Coordinates of the transformed image points.
 
     References
     ----------
@@ -91,20 +92,20 @@ def _center_and_normalize_points(points):
 
 
 def _umeyama(src, dst, estimate_scale):
-    """Estimate N-D similarity transformation with or without scaling.
+    """Estimate nD similarity transformation with or without scaling.
 
     Parameters
     ----------
-    src : (M, N) array_like
+    src : (N, n) array_like
         Source coordinates.
-    dst : (M, N) array_like
+    dst : (N, n) array_like
         Destination coordinates.
     estimate_scale : bool
         Whether to estimate scaling factor.
 
     Returns
     -------
-    T : (N + 1, N + 1)
+    T : (n + 1, n + 1)
         The homogeneous similarity transformation matrix. The matrix contains
         NaN values only if the problem is not well-conditioned.
 
