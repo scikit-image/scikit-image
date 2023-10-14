@@ -568,7 +568,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     dimensionality : int, optional
         The number of dimensions of the transform. This is ignored if
@@ -576,7 +576,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     """
