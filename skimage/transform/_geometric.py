@@ -1177,9 +1177,9 @@ def _euler_rotation_matrix(angles, axes=None):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """Euclidean transformation, also known as a rigid transform.
+    """Euclidean transformation of an nD image.
 
-    Has the following form::
+    For n = 2, the Euclidean transformation has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
@@ -1195,7 +1195,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
-    transformation with a single scaling factor.
+    transformation with a (single) scale factor.
 
     In 2D and 3D, the transformation parameters may be provided either via
     `matrix`, the homogeneous transformation matrix, above, or via the
@@ -1206,7 +1206,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
         Rotation angle, clockwise, as radians. If given as
@@ -1214,14 +1214,14 @@ class EuclideanTransform(ProjectiveTransform):
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
         matrix.
-    translation : (x, y[, z, ...]) sequence of float, length D, optional
+    translation : (x, y[, z, ...]) sequence of float, length n, optional
         Translation parameters for each axis.
     dimensionality : int, optional
         The dimensionality of the transform.
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     References
