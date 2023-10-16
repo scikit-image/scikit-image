@@ -84,13 +84,11 @@ jobs:
           echo "PIP_CACHE_DIR: $PIP_CACHE_DIR"
 
           # Install the build and runtime dependencies of the project
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt  # FIXME: Remove
           $PYTHON -m pip install ${PIP_FLAGS} -r requirements/build.txt
           $PYTHON -m pip list
 
           # Disable C99 complex if PyWavelets needs to be built from source.
           # The compiler used will be MSVC, but C99 may be detected improperly
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt  # FIXME: Remove
           USE_C99_COMPLEX=0 $PYTHON -m pip install ${PIP_FLAGS} -r requirements/default.txt
 
           $PYTHON -m pip list
@@ -104,7 +102,7 @@ jobs:
           fi
 
           ## To list all installed packages:
-          # choco list --localonly
+          choco list
 
           # Remove other gcc compilers
 
@@ -112,9 +110,9 @@ jobs:
           # choco uninstall llvm mingw rtools strawberryperl -x
 
           # Remove mingw gcc
-          rm /c/ProgramData/Chocolatey/bin/gcc
-          rm /c/ProgramData/Chocolatey/bin/g++
-          rm /c/ProgramData/Chocolatey/bin/c++
+          #rm /c/ProgramData/Chocolatey/bin/gcc
+          #rm /c/ProgramData/Chocolatey/bin/g++
+          #rm /c/ProgramData/Chocolatey/bin/c++
           # Remove perl gcc
           rm -rf /c/Strawberry
 

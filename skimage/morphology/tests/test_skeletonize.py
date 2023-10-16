@@ -11,7 +11,7 @@ from skimage.morphology._skeletonize import (G123_LUT, G123P_LUT,
                                              _generate_thin_luts)
 
 
-class TestSkeletonize():
+class TestSkeletonize:
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5, 5))
         result = skeletonize(im)
@@ -110,7 +110,7 @@ class TestSkeletonize():
         assert np.all(result == expected)
 
 
-class TestThin():
+class TestThin:
     @property
     def input_image(self):
         """image to test thinning with"""
@@ -160,7 +160,7 @@ class TestThin():
         assert_array_equal(g123p, G123P_LUT)
 
 
-class TestMedialAxis():
+class TestMedialAxis:
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
         result = medial_axis(np.zeros((10, 10), bool))

@@ -11,6 +11,7 @@ from skimage.restoration import (calibrate_denoiser,
                                  denoise_wavelet)
 from skimage.restoration.j_invariant import denoise_invariant
 from skimage.util import img_as_float, random_noise
+from skimage.restoration.tests.test_denoise import xfail_without_pywt
 
 test_img = img_as_float(camera())
 test_img_color = img_as_float(chelsea())
@@ -22,6 +23,7 @@ noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)
 _denoise_wavelet = functools.partial(denoise_wavelet, rescale_sigma=True)
 
 
+@xfail_without_pywt
 def test_invariant_denoise():
     denoised_img = denoise_invariant(noisy_img, _denoise_wavelet)
 
@@ -30,6 +32,7 @@ def test_invariant_denoise():
     assert_(denoised_mse < original_mse)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_invariant_denoise_color(dtype):
     denoised_img_color = denoise_invariant(
@@ -41,6 +44,7 @@ def test_invariant_denoise_color(dtype):
     assert denoised_img_color.dtype == _supported_float_type(dtype)
 
 
+@xfail_without_pywt
 def test_invariant_denoise_3d():
     denoised_img_3d = denoise_invariant(noisy_img_3d, _denoise_wavelet)
 
@@ -49,6 +53,7 @@ def test_invariant_denoise_3d():
     assert_(denoised_mse < original_mse)
 
 
+@xfail_without_pywt
 def test_calibrate_denoiser_extra_output():
     parameter_ranges = {'sigma': np.linspace(0.1, 1, 5) / 2}
     _, (parameters_tested, losses) = calibrate_denoiser(
@@ -66,6 +71,7 @@ def test_calibrate_denoiser_extra_output():
     assert_(np.argmin(losses) == np.argmin(ground_truth_losses))
 
 
+@xfail_without_pywt
 def test_calibrate_denoiser():
     parameter_ranges = {'sigma': np.linspace(0.1, 1, 5) / 2}
 
@@ -77,6 +83,7 @@ def test_calibrate_denoiser():
     assert_(denoised_mse < original_mse)
 
 
+@xfail_without_pywt
 def test_input_image_not_modified():
     input_image = noisy_img.copy()
 

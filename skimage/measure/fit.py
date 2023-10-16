@@ -576,8 +576,8 @@ class EllipseModel(BaseModel):
         N = data.shape[0]
 
         def fun(t, xi, yi):
-            ct = math.cos(t)
-            st = math.sin(t)
+            ct = math.cos(np.squeeze(t))
+            st = math.sin(np.squeeze(t))
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
             return (xi - xt) ** 2 + (yi - yt) ** 2

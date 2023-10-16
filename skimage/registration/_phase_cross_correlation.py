@@ -10,6 +10,7 @@ import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 from scipy import ndimage as ndi
 
+from skimage._shared.utils import remove_arg
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -136,13 +137,13 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     moving_image : numpy array
         The moving image: applying the shift to this image overlays it on the
         reference image. Must be the same shape as the reference image.
-    shift : tuple of float
+    shift : ndarray
         The shift to apply to each axis of the moving image, *modulo* image
         size. The length of ``shift`` must be equal to ``moving_image.ndim``.
 
     Returns
     -------
-    real_shift : tuple of float
+    real_shift : ndarray
         The shift disambiguated in real space.
     """
     shape = reference_image.shape
@@ -163,7 +164,11 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         moving_tile = np.reshape(shifted[test_slice], -1)
         corr = -1.0
         if reference_tile.size > 2:
-            corr = np.corrcoef(reference_tile, moving_tile)[0, 1]
+            # In the case of zero std, np.corrcoef returns NaN and warns
+            # about division by zero. This is expected and handled below.
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=RuntimeWarning)
+                corr = np.corrcoef(reference_tile, moving_tile)[0, 1]
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
@@ -172,17 +177,16 @@ def _disambiguate_shift(reference_image, moving_image, shift):
             max_slice, positive_shift, negative_shift
             ):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
-    if not subpixel:
-        real_shift = tuple(map(int, real_shift_acc))
-    else:
-        real_shift = tuple(real_shift_acc)
-    return real_shift
+
+    return np.array(real_shift_acc)
 
 
+@remove_arg('return_error', changed_version='0.23')
 def phase_cross_correlation(reference_image, moving_image, *,
                             upsample_factor=1, space="real",
                             disambiguate=False,
-                            return_error=True, reference_mask=None,
+                            return_error=True,
+                            reference_mask=None,
                             moving_mask=None, overlap_ratio=0.3,
                             normalization="phase"):
     """Efficient subpixel image translation registration by cross-correlation.
@@ -218,10 +222,6 @@ def phase_cross_correlation(reference_image, moving_image, *,
         this parameter is set to ``True``, the *real* space cross-correlation
         is computed for each possible shift, and the shift with the highest
         cross-correlation within the overlapping area is returned.
-    return_error : bool, {"always"}, optional
-        Returns error and phase difference if "always" is given. If False, or
-        either ``reference_mask`` or ``moving_mask`` are given, only the shift
-        is returned.
     reference_mask : ndarray
         Boolean mask for ``reference_image``. The mask should evaluate
         to ``True`` (or 1) on valid pixels. ``reference_mask`` should
@@ -252,13 +252,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
     error : float
         Translation invariant normalized RMS error between
         ``reference_image`` and ``moving_image``. For masked cross-correlation
-        this error is not available and NaN is returned if ``return_error``
-        is "always".
+        this error is not available and NaN is returned.
     phasediff : float
         Global phase difference between the two images (should be
         zero if images are non-negative). For masked cross-correlation
-        this phase difference is not available and NaN is returned if
-        ``return_error`` is "always".
+        this phase difference is not available and NaN is returned.
 
     Notes
     -----
@@ -296,27 +294,13 @@ def phase_cross_correlation(reference_image, moving_image, *,
            Pattern Recognition, pp. 2918-2925 (2010).
            :DOI:`10.1109/CVPR.2010.5540032`
     """
-    def warn_return_error():
-        warnings.warn(
-            "In scikit-image 0.22, phase_cross_correlation will start "
-            "returning a tuple or 3 items (shift, error, phasediff) always. "
-            "To enable the new return behavior and silence this warning, use "
-            "return_error='always'.",
-            category=FutureWarning,
-            stacklevel=3,
-        )
-
     if (reference_mask is not None) or (moving_mask is not None):
         shift = _masked_phase_cross_correlation(
             reference_image, moving_image,
             reference_mask, moving_mask,
             overlap_ratio
         )
-        if return_error == "always":
-            return shift, np.nan, np.nan
-        else:
-            warn_return_error()
-            return shift
+        return shift, np.nan, np.nan
 
     # images must be the same shape
     if reference_image.shape != moving_image.shape:
@@ -354,12 +338,11 @@ def phase_cross_correlation(reference_image, moving_image, *,
     shift[shift > midpoint] -= np.array(shape)[shift > midpoint]
 
     if upsample_factor == 1:
-        if return_error:
-            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
-            src_amp /= src_freq.size
-            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
-            target_amp /= target_freq.size
-            CCmax = cross_correlation[maxima]
+        src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+        src_amp /= src_freq.size
+        target_amp = np.sum(np.real(target_freq * target_freq.conj()))
+        target_amp /= target_freq.size
+        CCmax = cross_correlation[maxima]
     # If upsampling > 1, then refine estimate with matrix multiply DFT
     else:
         # Initial shift estimate in upsampled grid
@@ -384,9 +367,8 @@ def phase_cross_correlation(reference_image, moving_image, *,
 
         shift += maxima / upsample_factor
 
-        if return_error:
-            src_amp = np.sum(np.real(src_freq * src_freq.conj()))
-            target_amp = np.sum(np.real(target_freq * target_freq.conj()))
+        src_amp = np.sum(np.real(src_freq * src_freq.conj()))
+        target_amp = np.sum(np.real(target_freq * target_freq.conj()))
 
     # If its only one row or column the shift along that dimension has no
     # effect. We set to zero.
@@ -400,19 +382,15 @@ def phase_cross_correlation(reference_image, moving_image, *,
             moving_image = ifftn(moving_image)
         shift = _disambiguate_shift(reference_image, moving_image, shift)
 
-    if return_error:
-        # Redirect user to masked_phase_cross_correlation if NaNs are observed
-        if np.isnan(CCmax) or np.isnan(src_amp) or np.isnan(target_amp):
-            raise ValueError(
-                "NaN values found, please remove NaNs from your "
-                "input data or use the `reference_mask`/`moving_mask` "
-                "keywords, eg: "
-                "phase_cross_correlation(reference_image, moving_image, "
-                "reference_mask=~np.isnan(reference_image), "
-                "moving_mask=~np.isnan(moving_image))")
+    # Redirect user to masked_phase_cross_correlation if NaNs are observed
+    if np.isnan(CCmax) or np.isnan(src_amp) or np.isnan(target_amp):
+        raise ValueError(
+            "NaN values found, please remove NaNs from your "
+            "input data or use the `reference_mask`/`moving_mask` "
+            "keywords, eg: "
+            "phase_cross_correlation(reference_image, moving_image, "
+            "reference_mask=~np.isnan(reference_image), "
+            "moving_mask=~np.isnan(moving_image))")
 
-        return shift, _compute_error(CCmax, src_amp, target_amp),\
-            _compute_phasediff(CCmax)
-    else:
-        warn_return_error()
-        return shift
+    return shift, _compute_error(CCmax, src_amp, target_amp),\
+        _compute_phasediff(CCmax)
