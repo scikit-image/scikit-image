@@ -12,7 +12,7 @@ cdef extern from "pyport.h":
 cdef VALUE_T inf = Py_HUGE_VAL
 
 # this is handy
-cdef inline INDEX_T index_min(INDEX_T a, INDEX_T b) nogil:
+cdef inline INDEX_T index_min(INDEX_T a, INDEX_T b) noexcept nogil:
     return a if a <= b else b
 
 
@@ -156,7 +156,7 @@ cdef class BinaryHeap:
 
     ## C Maintenance methods
 
-    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) nogil:
+    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove) noexcept nogil:
         # init indexing ints
         cdef INDEX_T i, i1, i2, n
 
@@ -203,7 +203,7 @@ cdef class BinaryHeap:
         self.levels = new_levels
         self._update()
 
-    cdef void _update(self) nogil:
+    cdef void _update(self) noexcept nogil:
         """Update the full tree from the bottom up.
 
         This should be done after resizing.
@@ -227,7 +227,7 @@ cdef class BinaryHeap:
                 else:
                     values[ii] = values[i+1]
 
-    cdef void _update_one(self, INDEX_T i) nogil:
+    cdef void _update_one(self, INDEX_T i) noexcept nogil:
         """Update the tree for one value."""
         # shorter name for values
         cdef VALUE_T *values = self._values
@@ -253,7 +253,7 @@ cdef class BinaryHeap:
             else:
                 i = ii - 1
 
-    cdef void _remove(self, INDEX_T i1) nogil:
+    cdef void _remove(self, INDEX_T i1) noexcept nogil:
         """Remove a value from the heap. By index."""
         cdef LEVELS_T levels = self.levels
         cdef INDEX_T count = self.count
@@ -512,7 +512,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         for i in range(self.max_reference + 1):
             self._crossref[i] = -1
 
-    cdef void _remove(self, INDEX_T i1) nogil:
+    cdef void _remove(self, INDEX_T i1) noexcept nogil:
         """Remove a value from the heap. By index."""
         cdef LEVELS_T levels = self.levels
         cdef INDEX_T count = self.count

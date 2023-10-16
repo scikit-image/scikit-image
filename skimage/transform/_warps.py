@@ -692,7 +692,7 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
         np.clip(output_image, min_val, max_val, out=output_image)
 
 
-def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
+def warp(image, inverse_map, map_args=None, output_shape=None, order=None,
          mode='constant', cval=0., clip=True, preserve_range=False):
     """Warp an image according to a given coordinate transformation.
 
@@ -834,6 +834,8 @@ def warp(image, inverse_map, map_args={}, output_shape=None, order=None,
     >>> warped = warp(cube, coords)
 
     """
+    if map_args is None:
+        map_args = {}
 
     if image.size == 0:
         raise ValueError("Cannot warp empty image with dimensions",

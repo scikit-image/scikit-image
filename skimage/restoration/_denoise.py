@@ -4,7 +4,6 @@ import numbers
 
 import scipy.stats
 import numpy as np
-import pywt
 
 from ..util.dtype import img_as_float
 from .._shared import utils
@@ -661,6 +660,14 @@ def _wavelet_threshold(image, wavelet, method=None, threshold=None,
            by wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
            :DOI:`10.1093/biomet/81.3.425`
     """
+    try:
+        import pywt
+    except ImportError:
+        raise ImportError(
+            'PyWavelets is not installed. Please ensure it is installed in '
+            'order to use this function.'
+        )
+
     wavelet = pywt.Wavelet(wavelet)
     if not wavelet.orthogonal:
         warn(f'Wavelet thresholding was designed for '
@@ -885,6 +892,8 @@ def denoise_wavelet(image, sigma=None, wavelet='db1', mode='soft',
 
     Examples
     --------
+    >>> import pytest
+    >>> _ = pytest.importorskip('pywt')
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
@@ -998,6 +1007,8 @@ def estimate_sigma(image, average_sigmas=False, *,
 
     Examples
     --------
+    >>> import pytest
+    >>> _ = pytest.importorskip('pywt')
     >>> import skimage.data
     >>> from skimage import img_as_float
     >>> img = img_as_float(skimage.data.camera())
@@ -1006,6 +1017,14 @@ def estimate_sigma(image, average_sigmas=False, *,
     >>> img = img + sigma * rng.standard_normal(img.shape)
     >>> sigma_hat = estimate_sigma(img, channel_axis=None)
     """
+    try:
+        import pywt
+    except ImportError:
+        raise ImportError(
+            'PyWavelets is not installed. Please ensure it is installed in '
+            'order to use this function.'
+        )
+
     if channel_axis is not None:
         channel_axis = channel_axis % image.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)

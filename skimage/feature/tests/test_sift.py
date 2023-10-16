@@ -3,14 +3,14 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage import data
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import run_in_parallel
 from skimage.feature import SIFT
 from skimage.util.dtype import _convert
 
 img = data.coins()
 
 
-@test_parallel()
+@run_in_parallel()
 @pytest.mark.parametrize(
     'dtype', ['float32', 'float64', 'uint8', 'uint16', 'int64']
 )

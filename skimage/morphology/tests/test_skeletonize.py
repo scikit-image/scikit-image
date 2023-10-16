@@ -4,14 +4,14 @@ from numpy.testing import assert_array_equal
 from scipy.ndimage import correlate
 
 from skimage import draw
-from skimage._shared.testing import fetch
+from skimage._shared.testing import expected_warnings, fetch
 from skimage.io import imread
 from skimage.morphology import medial_axis, skeletonize, thin
-from skimage.morphology._skeletonize import (_generate_thin_luts,
-                                             G123_LUT, G123P_LUT)
+from skimage.morphology._skeletonize import (G123_LUT, G123P_LUT,
+                                             _generate_thin_luts)
 
 
-class TestSkeletonize():
+class TestSkeletonize:
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5, 5))
         result = skeletonize(im)
@@ -110,7 +110,7 @@ class TestSkeletonize():
         assert np.all(result == expected)
 
 
-class TestThin():
+class TestThin:
     @property
     def input_image(self):
         """image to test thinning with"""
@@ -160,7 +160,7 @@ class TestThin():
         assert_array_equal(g123p, G123P_LUT)
 
 
-class TestMedialAxis():
+class TestMedialAxis:
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
         result = medial_axis(np.zeros((10, 10), bool))
@@ -232,3 +232,8 @@ class TestMedialAxis():
         image[:, 1:-1] = True
         result = medial_axis(image)
         assert np.all(result == image)
+
+    def test_deprecated_random_state(self):
+        """Test medial_axis on an array of all zeros."""
+        with expected_warnings(['`random_state` is a deprecated argument']):
+            medial_axis(np.zeros((10, 10), bool), random_state=None)

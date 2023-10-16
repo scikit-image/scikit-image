@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from skimage._shared.testing import expected_warnings, test_parallel
+from skimage._shared.testing import expected_warnings, run_in_parallel
 from skimage.feature import (graycomatrix, graycoprops,
                              local_binary_pattern, multiblock_lbp)
 from skimage.transform import integral_image
 
 
-class TestGLCM():
+class TestGLCM:
 
     def setup_method(self):
         self.image = np.array([[0, 0, 1, 1],
@@ -15,7 +15,7 @@ class TestGLCM():
                                [0, 2, 2, 2],
                                [2, 2, 3, 3]], dtype=np.uint8)
 
-    @test_parallel()
+    @run_in_parallel()
     def test_output_angles(self):
         result = graycomatrix(
             self.image, [1], [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4], 4
@@ -203,7 +203,7 @@ class TestGLCM():
             graycoprops(result, prop)
 
 
-class TestLBP():
+class TestLBP:
 
     def setup_method(self):
         self.image = np.array([[255,   6, 255,   0,  141,   0],
@@ -214,7 +214,7 @@ class TestLBP():
                                [146, 241, 255,   0,  189, 126]],
                               dtype=np.uint8)
 
-    @test_parallel()
+    @run_in_parallel()
     def test_default(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'default')
         ref = np.array([[  0, 251,   0, 255,  96, 255],
@@ -295,7 +295,7 @@ class TestLBP():
         np.testing.assert_array_almost_equal(lbp, ref)
 
 
-class TestMBLBP():
+class TestMBLBP:
 
     def test_single_mblbp(self):
 

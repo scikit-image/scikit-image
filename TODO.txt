@@ -5,27 +5,30 @@ Version 0.17
 
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.21
+Version 0.23
 ------------
-* In ``skimage/filters/lpi_filter.py``, remove the deprecated function
-  inverse().
-* Set `channel_axis=None` in `skimage._shared.filters.gaussian` and remove
-  `skimage._shared.filters._PatchClassRepr`,
-  `skimage/_shared/filters.ChannelAxisNotSet`, and
-  `skimage.filters.tests.test_gaussian.test_deprecated_automatic_channel_detection`.
-  Also remove the associated warning in `skimage._shared.filters.gaussian`'s
-  docstring.
-* Deprecate ``return_error`` argument in
-  ``skimage.registration.phase_cross_correlation``. The function should always
-  return a tuple of (shift, error, phasediff).
-  Update ``test_phase_cross_correlation_deprecation``, too.
-* Remove ``skimage/future/graph`` and ``skimage/future/tests/test_graph`.
-  Remove the ``future/graph`` entry in ``skimage/conftest.py::collect_ignore``.
-  Remove the ``r'\.future.graph$'`` entry added to
-  ``docwriter.package_skip_patterns`` in
-  ``doc/tools/build_modref_templates.py``.
+* Remove deprecated `random_seed`, `random_state`, and `sample_seed`
+  arguments in favor of `rng`.
+* Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
+* Remove deprecated ``return_error`` in
+  ``skimage.registration.phase_cross_correlation``.
 
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
+* Remove warningsfilter for imageio and Pillow once
+  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
+  version of pillow (probably the release after Pillow 9.5.0).
+* NumPy 1.25.0 is minimal required version:
+    * Remove optional test for a NaN-related deprecation warning from numpy.clip in
+      skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+
+Post numpy 2
+------------
+
+- Remove try except blocks following comment starting
+  `# TODO: when minimum numpy`
+  in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
+  `skimage/measure/_blur_effect.py`, and `skimage/util/tests/test_montage.py`
+- Remove `handle_np2` from `skimage/conftest.py`

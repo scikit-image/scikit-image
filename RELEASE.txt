@@ -28,19 +28,22 @@ the appropriate point in main and the following instructions are still apt.
 
   1. Review and cleanup ``doc/release/release_dev.rst``.
 
-  2. Make a list of merges, contributors, and reviewers by running
-     ``tools/generate_release_notes.py -h`` and following that file's usage.
+  2. Make a list of merges, contributors, and reviewers::
 
-  3. Paste this list at the end of the ``release_dev.txt``.
+       # Set release variables
+       export VERSION=<about-to-be-released version number>
+       export PREVIOUS=<previous version number>
 
-  4. Scan the PR titles for highlights, deprecations, API changes,
-     and bugfixes, and mention these in the relevant sections of the notes.
-     Try to present the information in an expressive way by mentioning
-     the affected functions, elaborating on the changes and their
-     consequences. If possible, organize semantically close PRs in groups.
+       pip install changelist
+       changelist scikit-image/scikit-image v${PREVIOUS} main --version ${VERSION} --out doc/source/release_notes/release_dev.rst --format rst
+
+  4. Scan the PR titles for highlights and mention these in the
+     relevant sections of the notes.
+     Ideally, all changed API objects are mentioned by name,
+     e.g. a new parameter or a deprecated function.
 
   5. Check for duplicate names in the automatically generated list of
-     contributors and reviewers
+     contributors and reviewers.
 
   6. Rename the file to ``doc/release/release_<major>.<minor>.txt``
 
@@ -78,8 +81,9 @@ the appropriate point in main and the following instructions are still apt.
 
   Once everything works as intended, remove those branches and proceed.
 
-- Edit ``doc/source/_static/docversions.js`` in order to
-  add the release, e.g., `0.15.x`, and commit.
+- Edit ``doc/source/_static/docversions.js`` and
+  ``doc/source/_static/version_switcher.json`` in order to add the release, move the
+  key value pair `"preferred": true` to the most recent stable version, and commit.
 
 - Update the version number to stable in ``skimage/__init__.py``, and commit.
 

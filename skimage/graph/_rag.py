@@ -159,7 +159,7 @@ class RAG(nx.Graph):
                 extra_arguments=(self,))
 
     def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
-                    extra_arguments=[], extra_keywords={}):
+                    extra_arguments=None, extra_keywords=None):
         """Merge node `src` and `dst`.
 
         The new combined node is adjacent to all the neighbors of `src`
@@ -196,6 +196,11 @@ class RAG(nx.Graph):
         If `in_place` is `False` the resulting node has a new id, rather than
         `dst`.
         """
+        if extra_arguments is None:
+            extra_arguments = []
+        if extra_keywords is None:
+            extra_keywords = {}
+
         src_nbrs = set(self.neighbors(src))
         dst_nbrs = set(self.neighbors(dst))
         neighbors = (src_nbrs | dst_nbrs) - {src, dst}

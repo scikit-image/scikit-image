@@ -5,27 +5,28 @@ Installing scikit-image
 
 How you should install ``scikit-image`` depends on your needs and skills:
 
-- Simplest solution:
-  `scientific Python distribution <#scientific-python-distributions>`_.
+- First, ensure that you have Python installed.
+  Two popular alternatives are the pip-based
+  `Python.org installers <https://www.python.org/downloads/>`_
+  and the conda-based
+  `miniforge <https://github.com/conda-forge/miniforge>`_.
 
-- If you can install Python packages and work in virtual environments:
+- Install `scikit-image` via `pip <#install-via-pip>`_ or `conda
+  <#install-via-conda>`_, as appropriate.
 
-  - `pip <#install-via-pip>`_
-
-  - `conda <#install-via-conda>`_
-
-- Easy solution but with pitfalls: `system package manager <#system-package-managers>`_ (yum, apt, ...).
-
-- `You're looking to contribute to scikit-image <#installing-scikit-image-for-contributors>`_.
+- Or, `build the package from source
+  <#installing-scikit-image-for-contributors>`_.
+  Do this if you'd like to contribute to development.
 
 Supported platforms
 ------------------------------------------------------------------------------
 
 - Windows 64-bit on x86 processors
-- Mac OS X on x86 processors
+- macOS on x86 and M (ARM) processors
 - Linux 64-bit on x86 processors
 
-For information on other platforms, see `other platforms <#other-platforms>`_.
+While we do not officially support other platforms, you could still
+try `building from source <#building-from-source>`_.
 
 Version check
 ------------------------------------------------------------------------------
@@ -35,8 +36,8 @@ worked, run the following in a Python shell or Jupyter notebook:
 
 .. code-block:: python
 
-  import skimage
-  print(skimage.__version__)
+  import skimage as ski
+  print(ski.__version__)
 
 or, from the command line:
 
@@ -48,28 +49,6 @@ or, from the command line:
 
 You'll see the version number if ``scikit-image`` is installed and
 an error message otherwise.
-
-Scientific Python distributions
-------------------------------------------------------------------------------
-
-In a single install these give you Python,
-``scikit-image`` and libraries it depends on, and other useful scientific
-packages. They install into an isolated environment, so they won't conflict
-with any existing installed programs.
-
-Drawbacks are that the install can be large and you may not get
-the most recent ``scikit-image``.
-
-We recommend one of these distributions:
-
-- `Anaconda <https://www.anaconda.com/distribution/>`_
-- `Python(x,y) <https://python-xy.github.io/>`_
-- `WinPython <https://winpython.github.io/>`_
-
-When using the ``scikit-image``
-documentation, make sure it's for the version you've installed (see
-`Version check <#version-check>`_ above).
-
 
 Installation via pip and conda
 ------------------------------------------------------------------------------
@@ -172,49 +151,10 @@ is installed and then run this command:
 
 .. code-block:: sh
 
-    python -c 'from skimage.data import download_all; download_all()'
+    python -c 'import skimage as ski; ski.data.download_all()'
 
-or call ``download_all()`` in your favourite interactive Python environment
+or call ``ski.data.download_all()`` in your favourite interactive Python environment
 (IPython, Jupyter notebook, ...).
-
-Other platforms
-------------------------------------------------------------------------------
-
-We still support Windows 32-bit on x86 processors but urge switching
-to Windows 64-bit.
-
-Unsupported platforms include:
-
-1. Linux on 32-bit x86 processors.
-2. Linux on 32-bit on ARM processors (Raspberry Pi running Raspbian):
-
-   - While we do not officially support this distribution, we point users to
-     `piwheels <https://wwww.piwheels.org>`_
-     and their
-     `scikit-image's specific page <https://www.piwheels.org/project/scikit-image/>`_.
-
-   - You may need to install additional system dependencies listed for
-     `imagecodecs <https://www.piwheels.org/project/imagecodecs/>`_.
-     See
-     `issue 4721 <https://github.com/scikit-image/scikit-image/issues/4721>`_.
-
-3. Linux on 64-bit ARM processors (Nvidia Jetson):
-
-   - Follow the conversation on
-     `issue 4705 <https://github.com/scikit-image/scikit-image/issues/4705>`_.
-
-Although these platforms lack official support, many of the core
-developers have experience with them and can help with questions.
-
-If you want to install on an unsupported platform, try
-`building from source <#building-from-source>`_.
-
-Tell us which other platforms you'd like to see ``scikit-image`` on!
-We are very interested in how ``scikit-image`` gets
-`used <https://github.com/scikit-image/scikit-image/issues/4375>`_.
-
-If you'd like to package ``scikit-image`` for an as-yet-unsupported platform,
-`reach out on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
 
 
 Additional help
@@ -309,6 +249,7 @@ venv
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
@@ -341,93 +282,49 @@ before you get started.
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
   spin docs
-  # Try the new version
-  spin python
+  # Try the new version in IPython
+  spin ipython
 
 For more information about building and using the ``spin`` package, see ``meson.md``.
-
-Updating the installation
-------------------------------------------------------------------------------
-
-When updating your installation, it is often necessary to recompile submodules
-that have changed. Do so with the following commands:
-
-.. code-block:: sh
-
-    # Grab the latest source
-    git checkout main
-    git pull upstream main
-    # Update the installation
-    pip install -e . -vv
 
 Testing
 -------
 
-``scikit-image`` has an extensive test suite that ensures correct
-execution on your system.  The test suite must pass before a pull
-request can be merged, and tests should be added to cover any
-modifications to the code base.
-
-We use the `pytest <https://docs.pytest.org/en/latest/>`__
-testing framework, with tests located in the various
-``skimage/submodule/tests`` folders.
-
-Our testing requirements are listed below:
-
-.. include:: ../../requirements/test.txt
-   :literal:
-
-
-Run all tests using:
+Test your installation for correct behavior using:
 
 .. code-block:: sh
 
-    pytest skimage
+   pytest skimage
 
-Or the tests for a specific submodule:
+Updating the installation
+------------------------------------------------------------------------------
 
-.. code-block:: sh
-
-    pytest skimage/morphology
-
-Or tests from a specific file:
+Before updating your installation, you typically want to grab the latest
+source:
 
 .. code-block:: sh
 
-    pytest skimage/morphology/tests/test_gray.py
+   git checkout main
+   git pull upstream main
 
-Or a single test within that file:
-
-.. code-block:: sh
-
-    pytest skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat
-
-Use ``--doctest-modules`` to run doctests. For example, run all tests and all
-doctests using:
+And you likely want to create a feature branch from there.
+As you work on this branch, you can re-build scikit-image using:
 
 .. code-block:: sh
 
-    pytest --doctest-modules skimage
+   spin build
 
-Warnings during testing phase
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Scikit-image tries to catch all warnings in its development builds to ensure
-that crucial warnings from dependencies are not missed. This might cause
-certain tests to fail if you are building scikit-image with versions of
-dependencies that were not tested at the time of the release. To disable
-failures on warnings, export the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` with a value of `0` or `False` and run the
-tests:
+Repeated, incremental builds usually work just fine, but if you notice build
+problems, rebuild from scratch using:
 
 .. code-block:: sh
 
-   export SKIMAGE_TEST_STRICT_WARNINGS=False
-   pytest --pyargs skimage
+   spin build --clean
 
 Platform-specific notes
 ------------------------------------------------------------------------------
@@ -452,27 +349,27 @@ Full requirements list
 ----------------------
 **Build Requirements**
 
-.. include:: ../../requirements/build.txt
+.. include:: ../../../requirements/build.txt
    :literal:
 
 **Runtime Requirements**
 
-.. include:: ../../requirements/default.txt
+.. include:: ../../../requirements/default.txt
    :literal:
 
 **Test Requirements**
 
-.. include:: ../../requirements/test.txt
+.. include:: ../../../requirements/test.txt
    :literal:
 
 **Documentation Requirements**
 
-.. include:: ../../requirements/docs.txt
+.. include:: ../../../requirements/docs.txt
    :literal:
 
 **Developer Requirements**
 
-.. include:: ../../requirements/developer.txt
+.. include:: ../../../requirements/developer.txt
    :literal:
 
 **Data Requirements**
@@ -480,7 +377,7 @@ Full requirements list
 The full selection of demo datasets is only available with the
 following installed:
 
-.. include:: ../../requirements/data.txt
+.. include:: ../../../requirements/data.txt
    :literal:
 
 **Optional Requirements**
@@ -503,7 +400,7 @@ functionality is only available with the following installed:
     The ``dask`` module is used to speed up certain functions.
 
 
-.. include:: ../../requirements/optional.txt
+.. include:: ../../../requirements/optional.txt
   :literal:
 
 
