@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -64,15 +64,22 @@ jobs:
             python-version: 3.9
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
+          - platform_id: manylinux_x86_64
+            python-version: 3.12
+            BUILD_DOCS: 0
+        exclude:
+          - python-version: 3.12
+            BUILD_DOCS: 1
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: Build package
         env:
@@ -121,16 +128,18 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: "3.9"
+          - python-version: "3.12"
             OPTIONAL_DEPS: 0
         exclude:
           # Problem with SimpleITK and py 3.9
           - python-version: "3.9"
+            OPTIONAL_DEPS: 1
+          - python-version: "3.12"
             OPTIONAL_DEPS: 1
     env:
       TEST_EXAMPLES: 0
@@ -143,12 +152,13 @@ jobs:
 
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: OSX configuration
         run: |

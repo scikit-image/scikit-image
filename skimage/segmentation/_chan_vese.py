@@ -172,7 +172,7 @@ def _cv_small_disk(image_size):
 def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
     """Generates an initial level set function conditional on input arguments.
     """
-    if type(init_level_set) == str:
+    if isinstance(init_level_set, str):
         if init_level_set == 'checkerboard':
             res = _cv_checkerboard(image_shape, 5, dtype)
         elif init_level_set == 'disk':

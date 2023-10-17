@@ -19,11 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -54,10 +54,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
         cibw_manylinux: [manylinux2014]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -94,12 +94,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
         # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -173,10 +173,10 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
