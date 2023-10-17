@@ -435,9 +435,14 @@ def test_ransac_dynamic_max_trials():
     assert_equal(_dynamic_max_trials(50, 100, 8, 0.99), 1177)
     assert_equal(_dynamic_max_trials(50, 100, 8, 1), 9210)
 
+    # e = 0%, min_samples = 5
+    assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
+    assert_equal(_dynamic_max_trials(1, 100, 5, 1), 360436504051)
+
     # e = 0%, min_samples = 10
+    # Ensure that inlier_ratio ** min_samples == 1 does not fail.
     assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
-    assert_equal(_dynamic_max_trials(1, 100, 10, 1), 162326183972299328)
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1), 162326183972299328)
 
 
 def test_ransac_invalid_input():
