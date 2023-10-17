@@ -439,10 +439,17 @@ def test_ransac_dynamic_max_trials():
     assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
     assert_equal(_dynamic_max_trials(1, 100, 5, 1), 360436504051)
 
+
+def test_ransac_dynamic_max_trials_denom_nearly_1():
+    """Test that the function behaves well when `denom` becomes almost 1.0."""
     # e = 0%, min_samples = 10
-    # Ensure that inlier_ratio ** min_samples == 1 does not fail.
+    # Ensure that (1 - inlier_ratio ** min_samples) approx 1 does not fail.
     assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
-    assert_equal(_dynamic_max_trials(1, 100, 1000, 1), 162326183972299328)
+
+    EPSILON = np.finfo(np.float64).eps
+    desired = np.ceil(np.log(EPSILON) / np.log(1 - EPSILON))
+    assert desired > 0
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1), desired)
 
 
 def test_ransac_invalid_input():
