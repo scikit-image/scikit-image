@@ -290,13 +290,12 @@ def test_hog_output_equivariance_channel_axis(channel_axis):
 
 
 def test_hog_small_image():
-    """
-    tests that an exception is thrown instead of an empty array returned when
-    the image is smaller than it should be for the given parameters
+    """Test that an exception is thrown whenever the input image is
+    too small for the given parameters.
     """
     img = np.zeros((24, 24))
     feature.hog(img, pixels_per_cell=(8, 8), cells_per_block=(3, 3))
 
     img = np.zeros((23, 23))
-    with pytest.raises(ValueError, match=".*image given is not large enough"):
+    with pytest.raises(ValueError, match=".*image is too small given"):
         feature.hog(img, pixels_per_cell=(8, 8), cells_per_block=(3, 3),)

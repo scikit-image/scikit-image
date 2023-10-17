@@ -116,8 +116,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     Raises
     -------
     ValueError
-        If the given image rows or columns is less than 0 after dividing
-        by pixels_per_cell and subtracting cells_per_block
+         If the image is too small given the values of pixels_per_cell and
+        cells_per_block.
 
     References
     ----------
@@ -285,8 +285,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3),
     if n_blocks_col <= 0 or n_blocks_row <= 0:
         min_row = b_row * c_row
         min_col = b_col * c_col
-        raise ValueError('The image given is not large enough for the cells_per_block '
-                         'and pixels_per_cell given, should be at least:'
+        raise ValueError('The input image is too small given the values of '
+                         'pixels_per_cell and cells_per_block. '
+                         'It should have at least: '
                          f' {min_row} rows x {min_col} cols')
     normalized_blocks = np.zeros(
         (n_blocks_row, n_blocks_col, b_row, b_col, orientations),
