@@ -42,7 +42,7 @@ import numpy as np
 from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import invert
 
-from . import _max_tree
+from . import _max_tree_cy
 
 unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
 signed_int_types = [np.int8, np.int16, np.int32, np.int64]
@@ -134,10 +134,15 @@ def max_tree(image, connectivity=1):
     tree_traverser = np.argsort(image.ravel(), kind="stable").astype(np.int64)
 
     # call of cython function.
-    _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                        flat_neighborhood, offset.astype(np.int32),
-                        np.array(image.shape, dtype=np.int32),
-                        parent.ravel(), tree_traverser)
+    _max_tree_cy._max_tree(
+        image.ravel(),
+        mask.ravel().astype(np.uint8),
+        flat_neighborhood,
+        offset.astype(np.int32),
+        np.array(image.shape, dtype=np.int32),
+        parent.ravel(),
+        tree_traverser,
+    )
 
     return parent, tree_traverser
 
@@ -243,10 +248,10 @@ def area_opening(image, area_threshold=64, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    area = _max_tree._compute_area(image.ravel(),
+    area = _max_tree_cy._compute_area(image.ravel(),
                                    parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+    _max_tree_cy._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, area, area_threshold)
     return output
 
@@ -334,11 +339,11 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    diam = _max_tree._compute_extension(image.ravel(),
+    diam = _max_tree_cy._compute_extension(image.ravel(),
                                         np.array(image.shape, dtype=np.int32),
                                         parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
+    _max_tree_cy._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, diam, diameter_threshold)
     return output
 
@@ -455,10 +460,10 @@ def area_closing(image, area_threshold=64, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    area = _max_tree._compute_area(image_inv.ravel(),
+    area = _max_tree_cy._compute_area(image_inv.ravel(),
                                    parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
+    _max_tree_cy._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, area, area_threshold)
 
     # inversion of the output image
@@ -562,12 +567,12 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    diam = _max_tree._compute_extension(image_inv.ravel(),
+    diam = _max_tree_cy._compute_extension(image_inv.ravel(),
                                         np.array(image_inv.shape,
                                                  dtype=np.int32),
                                         parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
+    _max_tree_cy._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
                              tree_traverser, diam, diameter_threshold)
     output = invert(output)
     return output
@@ -658,7 +663,7 @@ def max_tree_local_maxima(image, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    _max_tree._max_tree_local_maxima(image.ravel(), output.ravel(),
+    _max_tree_cy._max_tree_local_maxima(image.ravel(), output.ravel(),
                                      parent.ravel(), tree_traverser)
 
     return output

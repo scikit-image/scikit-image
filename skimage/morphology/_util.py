@@ -1,9 +1,9 @@
 """Utility functions used in the morphology subpackage."""
 
-
 import numpy as np
 from scipy import ndimage as ndi
 
+from skimage.measure._label import label  # noqa: F401
 
 def _validate_connectivity(image_dim, connectivity, offset):
     """Convert any valid connectivity to a footprint and offset.

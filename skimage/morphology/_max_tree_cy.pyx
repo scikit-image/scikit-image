@@ -3,7 +3,7 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""_max_tree.pyx - building a max-tree from an image.
+"""_max_tree_cy.pyx - building a max-tree from an image.
 
 This is an implementation of the max-tree, which is a morphological
 representation of the image. Many morphological operators can be built
