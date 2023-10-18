@@ -17,13 +17,19 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
     (e.g. `scipy.ndimage.binary_erosion`).
     """
     fp, num_iter = footprint[0]
-    binary_func(image, structure=fp, output=out, iterations=num_iter,
-                border_value=border_value)
+    binary_func(
+        image, structure=fp, output=out, iterations=num_iter, border_value=border_value
+    )
     for fp, num_iter in footprint[1:]:
         # Note: out.copy() because the computation cannot be in-place!
         #       SciPy <= 1.7 did not automatically make a copy if needed.
-        binary_func(out.copy(), structure=fp, output=out, iterations=num_iter,
-                    border_value=border_value)
+        binary_func(
+            out.copy(),
+            structure=fp,
+            output=out,
+            iterations=num_iter,
+            border_value=border_value,
+        )
     return out
 
 
@@ -98,12 +104,14 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
     footprint = pad_footprint(footprint, pad_end=True)
 
     if _footprint_is_sequence(footprint):
-        return _iterate_binary_func(ndi.binary_erosion, image, footprint, out,
-                                    border_value)
+        return _iterate_binary_func(
+            ndi.binary_erosion, image, footprint, out, border_value
+        )
 
     print(f"binary_erosion, {border_value=}")
-    ndi.binary_erosion(image, structure=footprint, output=out,
-                       border_value=border_value)
+    ndi.binary_erosion(
+        image, structure=footprint, output=out, border_value=border_value
+    )
     return out
 
 
@@ -175,12 +183,14 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
     footprint = pad_footprint(footprint, pad_end=True)
 
     if _footprint_is_sequence(footprint):
-        return _iterate_binary_func(ndi.binary_dilation, image, footprint, out,
-                                    border_value)
+        return _iterate_binary_func(
+            ndi.binary_dilation, image, footprint, out, border_value
+        )
 
     print(f"binary_dilation, {border_value=}")
-    ndi.binary_dilation(image, structure=footprint, output=out,
-                        border_value=border_value)
+    ndi.binary_dilation(
+        image, structure=footprint, output=out, border_value=border_value
+    )
     return out
 
 

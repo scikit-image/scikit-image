@@ -9,8 +9,16 @@ import warnings
 import numpy as np
 
 # keep .dtype imports first to avoid circular imports
-from .dtype import (dtype_limits, img_as_float, img_as_float32, img_as_float64,
-                    img_as_bool, img_as_int, img_as_ubyte, img_as_uint)
+from .dtype import (
+    dtype_limits,
+    img_as_float,
+    img_as_float32,
+    img_as_float64,
+    img_as_bool,
+    img_as_int,
+    img_as_ubyte,
+    img_as_uint,
+)
 from ._slice_along_axes import slice_along_axes
 from ._invert import invert
 from ._label import label_points

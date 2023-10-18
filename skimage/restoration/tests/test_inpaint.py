@@ -19,16 +19,17 @@ def test_inpaint_biharmonic_2d(dtype, split_into_regions):
     mask[1, 3:] = 1
     mask[0, 4:] = 1
     img[np.where(mask)] = 0
-    out = inpaint.inpaint_biharmonic(img, mask,
-                                     split_into_regions=split_into_regions)
+    out = inpaint.inpaint_biharmonic(img, mask, split_into_regions=split_into_regions)
     assert out.dtype == _supported_float_type(img.dtype)
 
     ref = np.array(
-        [[0., 0.0625, 0.25000000, 0.5625000, 0.73925058],
-         [0., 0.0625, 0.25000000, 0.5478048, 0.76557821],
-         [0., 0.0625, 0.25842878, 0.5623079, 0.85927796],
-         [0., 0.0625, 0.25000000, 0.5625000, 1.00000000],
-         [0., 0.0625, 0.25000000, 0.5625000, 1.00000000]]
+        [
+            [0.0, 0.0625, 0.25000000, 0.5625000, 0.73925058],
+            [0.0, 0.0625, 0.25000000, 0.5478048, 0.76557821],
+            [0.0, 0.0625, 0.25842878, 0.5623079, 0.85927796],
+            [0.0, 0.0625, 0.25000000, 0.5625000, 1.00000000],
+            [0.0, 0.0625, 0.25000000, 0.5625000, 1.00000000],
+        ]
     )
     rtol = 1e-7 if dtype == np.float64 else 1e-6
     assert_allclose(ref, out, rtol=rtol)
@@ -44,8 +45,9 @@ def test_inpaint_biharmonic_2d_color(channel_axis):
     mse_defect = mean_squared_error(img, img_defect)
 
     img_defect = np.moveaxis(img_defect, -1, channel_axis)
-    img_restored = inpaint.inpaint_biharmonic(img_defect, mask,
-                                              channel_axis=channel_axis)
+    img_restored = inpaint.inpaint_biharmonic(
+        img_defect, mask, channel_axis=channel_axis
+    )
     img_restored = np.moveaxis(img_restored, channel_axis, -1)
     mse_restored = mean_squared_error(img, img_restored)
 
@@ -64,11 +66,13 @@ def test_inpaint_biharmonic_2d_float_dtypes(dtype):
     out = inpaint.inpaint_biharmonic(img, mask)
     assert out.dtype == img.dtype
     ref = np.array(
-        [[0., 0.0625, 0.25000000, 0.5625000, 0.73925058],
-         [0., 0.0625, 0.25000000, 0.5478048, 0.76557821],
-         [0., 0.0625, 0.25842878, 0.5623079, 0.85927796],
-         [0., 0.0625, 0.25000000, 0.5625000, 1.00000000],
-         [0., 0.0625, 0.25000000, 0.5625000, 1.00000000]]
+        [
+            [0.0, 0.0625, 0.25000000, 0.5625000, 0.73925058],
+            [0.0, 0.0625, 0.25000000, 0.5478048, 0.76557821],
+            [0.0, 0.0625, 0.25842878, 0.5623079, 0.85927796],
+            [0.0, 0.0625, 0.25000000, 0.5625000, 1.00000000],
+            [0.0, 0.0625, 0.25000000, 0.5625000, 1.00000000],
+        ]
     )
     assert_allclose(ref, out, rtol=1e-5)
 
@@ -82,22 +86,29 @@ def test_inpaint_biharmonic_3d(split_into_regions):
     mask[1, 3:, :] = 1
     mask[0, 4:, :] = 1
     img[np.where(mask)] = 0
-    out = inpaint.inpaint_biharmonic(img, mask,
-                                     split_into_regions=split_into_regions)
-    ref = np.dstack((
-        np.array(
-            [[0.0000, 0.0625, 0.25000000, 0.56250000, 0.53752796],
-             [0.0000, 0.0625, 0.25000000, 0.44443780, 0.53762210],
-             [0.0000, 0.0625, 0.23693666, 0.46621112, 0.68615592],
-             [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000],
-             [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000]]),
-        np.array(
-            [[0.0000, 0.0000, 0.00000000, 0.00000000, 0.19621902],
-             [0.0625, 0.0625, 0.06250000, 0.17470756, 0.30140091],
-             [0.2500, 0.2500, 0.27241289, 0.35155440, 0.43068654],
-             [0.5625, 0.5625, 0.56250000, 0.56250000, 0.56250000],
-             [1.0000, 1.0000, 1.00000000, 1.00000000, 1.00000000]])
-    ))
+    out = inpaint.inpaint_biharmonic(img, mask, split_into_regions=split_into_regions)
+    ref = np.dstack(
+        (
+            np.array(
+                [
+                    [0.0000, 0.0625, 0.25000000, 0.56250000, 0.53752796],
+                    [0.0000, 0.0625, 0.25000000, 0.44443780, 0.53762210],
+                    [0.0000, 0.0625, 0.23693666, 0.46621112, 0.68615592],
+                    [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000],
+                    [0.0000, 0.0625, 0.25000000, 0.56250000, 1.00000000],
+                ]
+            ),
+            np.array(
+                [
+                    [0.0000, 0.0000, 0.00000000, 0.00000000, 0.19621902],
+                    [0.0625, 0.0625, 0.06250000, 0.17470756, 0.30140091],
+                    [0.2500, 0.2500, 0.27241289, 0.35155440, 0.43068654],
+                    [0.5625, 0.5625, 0.56250000, 0.56250000, 0.56250000],
+                    [1.0000, 1.0000, 1.00000000, 1.00000000, 1.00000000],
+                ]
+            ),
+        )
+    )
     assert_allclose(ref, out)
 
 
@@ -163,8 +174,10 @@ def test_inpaint_nrmse(dtype, order, channel_axis, split_into_regions):
 
     image_defect = np.asarray(image_defect, order=order)
     image_result = inpaint.inpaint_biharmonic(
-        image_defect, mask, channel_axis=channel_axis,
-        split_into_regions=split_into_regions
+        image_defect,
+        mask,
+        channel_axis=channel_axis,
+        split_into_regions=split_into_regions,
     )
     assert image_result.dtype == float_dtype
 

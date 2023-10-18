@@ -29,7 +29,7 @@ dependencies = [
     'numpy>=1.22',
     'scipy>=1.8',
     'networkx>=2.8',
-    'pillow>=9.0.1',
+    'pillow>=9.0.1,<10.1.0',
     'imageio>=2.27',
     'tifffile>=2022.8.12',
     'packaging>=21',
@@ -122,7 +122,7 @@ requires = [
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32',
+    'Cython>=0.29.32,<3.0.3',
     'pythran',
     'lazy_loader>=0.3',
     "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
@@ -151,6 +151,10 @@ Documentation = ['.spin/cmds.py:docs']
 Metrics = [
     '.spin/cmds.py:asv'
 ]
+
+[tool.black]
+target-version = ['py39', 'py310', 'py311', 'py312']
+skip-string-normalization = 1
 
 [tool.ruff]
 line-length = 88

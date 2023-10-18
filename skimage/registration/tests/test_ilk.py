@@ -17,16 +17,18 @@ def test_2d_motion(dtype, gaussian, prefilter):
     image1 = image1.astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
     # Estimate the flow
-    flow = optical_flow_ilk(image0, image1, gaussian=gaussian,
-                            prefilter=prefilter, dtype=float_dtype)
+    flow = optical_flow_ilk(
+        image0, image1, gaussian=gaussian, prefilter=prefilter, dtype=float_dtype
+    )
     assert flow.dtype == _supported_float_type(dtype)
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow).mean() < 0.5
 
     if dtype != float_dtype:
         with pytest.raises(ValueError):
-            optical_flow_ilk(image0, image1, gaussian=gaussian,
-                             prefilter=prefilter, dtype=dtype)
+            optical_flow_ilk(
+                image0, image1, gaussian=gaussian, prefilter=prefilter, dtype=dtype
+            )
 
 
 @pytest.mark.parametrize('gaussian', [True, False])
@@ -37,8 +39,9 @@ def test_3d_motion(gaussian, prefilter):
     image0 = rng.normal(size=(50, 55, 60))
     gt_flow, image1 = _sin_flow_gen(image0, npics=3)
     # Estimate the flow
-    flow = optical_flow_ilk(image0, image1, radius=5,
-                            gaussian=gaussian, prefilter=prefilter)
+    flow = optical_flow_ilk(
+        image0, image1, radius=5, gaussian=gaussian, prefilter=prefilter
+    )
 
     # Assert that the average absolute error is less then half a pixel
     assert abs(flow - gt_flow).mean() < 0.5

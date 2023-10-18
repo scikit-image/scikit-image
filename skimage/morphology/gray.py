@@ -6,11 +6,10 @@ import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
-from .footprints import (_footprint_is_sequence, mirror_footprint, pad_footprint)
+from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
 from .misc import default_footprint
 
-__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
-           'black_tophat']
+__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
 
 
 def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
@@ -26,8 +25,7 @@ def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
     for fp, num_iter in footprints[1:]:
         # Note: out.copy() because the computation cannot be in-place!
         for _ in range(num_iter):
-            gray_func(out.copy(), footprint=fp, output=out, mode=mode,
-                      cval=cval)
+            gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     return out
 
 
@@ -79,13 +77,14 @@ def _shift_footprints(footprint, shift_x, shift_y):
     if shift_x is None and shift_y is None:
         return footprint
 
-    warning_msg = ("The parameters `shift_x` and `shift_y` are deprecated "
-                   "since v0.23 and will be removed in v0.26.")
+    warning_msg = (
+        "The parameters `shift_x` and `shift_y` are deprecated "
+        "since v0.23 and will be removed in v0.26."
+    )
     warnings.warn(warning_msg, FutureWarning, stacklevel=4)
 
     if _footprint_is_sequence(footprint):
-        return tuple((_shift_footprint(fp, shift_x, shift_y), n)
-                     for fp, n in footprint)
+        return tuple((_shift_footprint(fp, shift_x, shift_y), n) for fp, n in footprint)
     return _shift_footprint(footprint, shift_x, shift_y)
 
 
@@ -111,8 +110,15 @@ def _min_max_to_constant_mode(dtype, mode, cval):
 
 
 @default_footprint
-def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
-            mode="reflect", cval=0.0):
+def erosion(
+    image,
+    footprint=None,
+    out=None,
+    shift_x=None,
+    shift_y=None,
+    mode="reflect",
+    cval=0.0,
+):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -205,17 +211,22 @@ def erosion(image, footprint=None, out=None, shift_x=None, shift_y=None,
     footprint = pad_footprint(footprint, pad_end=False)
 
     if _footprint_is_sequence(footprint):
-        return _iterate_gray_func(ndi.grey_erosion, image, footprint, out,
-                                  mode, cval)
+        return _iterate_gray_func(ndi.grey_erosion, image, footprint, out, mode, cval)
 
-    ndi.grey_erosion(image, footprint=footprint, output=out, mode=mode,
-                     cval=cval)
+    ndi.grey_erosion(image, footprint=footprint, output=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
-             mode="reflect", cval=0.0):
+def dilation(
+    image,
+    footprint=None,
+    out=None,
+    shift_x=None,
+    shift_y=None,
+    mode="reflect",
+    cval=0.0,
+):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -312,11 +323,9 @@ def dilation(image, footprint=None, out=None, shift_x=None, shift_y=None,
     footprint = mirror_footprint(footprint)
 
     if _footprint_is_sequence(footprint):
-        return _iterate_gray_func(ndi.grey_dilation, image, footprint, out,
-                                  mode, cval)
+        return _iterate_gray_func(ndi.grey_dilation, image, footprint, out, mode, cval)
 
-    ndi.grey_dilation(image, footprint=footprint, output=out, mode=mode,
-                      cval=cval)
+    ndi.grey_dilation(image, footprint=footprint, output=out, mode=mode, cval=cval)
     return out
 
 
@@ -393,8 +402,7 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
     """
     footprint = pad_footprint(footprint, pad_end=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
-    out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode,
-                   cval=cval)
+    out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
     return out
 
 

@@ -140,8 +140,7 @@ registry = {
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
     "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
-    "restoration/tests/astronaut_rl.npy":
-        "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
+    "restoration/tests/astronaut_rl.npy": "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
     "restoration/tests/camera_unsup.npy": "3de10a0b97267352b18886b25d66a967f9e1d78ada61050577d78586cab82baa",
     "restoration/tests/camera_unsup2.npy": "29cdc60605eb528c5f014baa8564d7d1ba0bd4b3170a66522058cbe5aed0960b",
@@ -183,6 +182,5 @@ registry_urls = {
 }
 
 legacy_registry = {
-    ('data/' + filename): registry['data/' + filename]
-    for filename in legacy_datasets
+    ('data/' + filename): registry['data/' + filename] for filename in legacy_datasets
 }

@@ -11,8 +11,7 @@ from ..util import img_as_float
 from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
-def graycomatrix(image, distances, angles, levels=None, symmetric=False,
-                 normed=False):
+def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=False):
     """Calculate the gray-level co-occurrence matrix.
 
     A gray level co-occurrence matrix is a histogram of co-occurring
@@ -115,14 +114,18 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
     image_max = image.max()
 
     if np.issubdtype(image.dtype, np.floating):
-        raise ValueError("Float images are not supported by graycomatrix. "
-                         "Convert the image to an unsigned integer type.")
+        raise ValueError(
+            "Float images are not supported by graycomatrix. "
+            "Convert the image to an unsigned integer type."
+        )
 
     # for image type > 8bit, levels must be set.
     if image.dtype not in (np.uint8, np.int8) and levels is None:
-        raise ValueError("The levels argument is required for data types "
-                         "other than uint8. The resulting matrix will be at "
-                         "least levels ** 2 in size.")
+        raise ValueError(
+            "The levels argument is required for data types "
+            "other than uint8. The resulting matrix will be at "
+            "least levels ** 2 in size."
+        )
 
     if np.issubdtype(image.dtype, np.signedinteger) and np.any(image < 0):
         raise ValueError("Negative-valued images are not supported.")
@@ -131,14 +134,17 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False,
         levels = 256
 
     if image_max >= levels:
-        raise ValueError("The maximum grayscale value in the image should be "
-                         "smaller than the number of levels.")
+        raise ValueError(
+            "The maximum grayscale value in the image should be "
+            "smaller than the number of levels."
+        )
 
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
-    P = np.zeros((levels, levels, len(distances), len(angles)),
-                 dtype=np.uint32, order='C')
+    P = np.zeros(
+        (levels, levels, len(distances), len(angles)), dtype=np.uint32, order='C'
+    )
 
     # count co-occurences
     _glcm_loop(image, distances, angles, levels, P)
@@ -245,7 +251,7 @@ def graycoprops(P, prop='contrast'):
     elif prop == 'dissimilarity':
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
-        weights = 1. / (1. + (I - J) ** 2)
+        weights = 1.0 / (1.0 + (I - J) ** 2)
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
@@ -253,10 +259,10 @@ def graycoprops(P, prop='contrast'):
 
     # compute property for each GLCM
     if prop == 'energy':
-        asm = np.sum(P ** 2, axis=(0, 1))
+        asm = np.sum(P**2, axis=(0, 1))
         results = np.sqrt(asm)
     elif prop == 'ASM':
-        results = np.sum(P ** 2, axis=(0, 1))
+        results = np.sum(P**2, axis=(0, 1))
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
@@ -347,14 +353,15 @@ def local_binary_pattern(image, P, R, method='default'):
         'ror': ord('R'),
         'uniform': ord('U'),
         'nri_uniform': ord('N'),
-        'var': ord('V')
+        'var': ord('V'),
     }
     if np.issubdtype(image.dtype, np.floating):
         warnings.warn(
             "Applying `local_binary_pattern` to floating-point images may "
             "give unexpected results when small numerical differences between "
             "adjacent pixels are present. It is recommended to use this "
-            "function with images of integer dtype.")
+            "function with images of integer dtype."
+        )
     image = np.ascontiguousarray(image, dtype=np.float64)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
@@ -407,12 +414,17 @@ def multiblock_lbp(int_image, r, c, width, height):
     return lbp_code
 
 
-def draw_multiblock_lbp(image, r, c, width, height,
-                        lbp_code=0,
-                        color_greater_block=(1, 1, 1),
-                        color_less_block=(0, 0.69, 0.96),
-                        alpha=0.5
-                        ):
+def draw_multiblock_lbp(
+    image,
+    r,
+    c,
+    width,
+    height,
+    lbp_code=0,
+    color_greater_block=(1, 1, 1),
+    color_less_block=(0, 0.69, 0.96),
+    alpha=0.5,
+):
     """Multi-block local binary pattern visualization.
 
     Blocks with higher sums are colored with alpha-blended white rectangles,
@@ -481,9 +493,16 @@ def draw_multiblock_lbp(image, r, c, width, height,
 
     # Offsets of neighbor rectangles relative to central one.
     # It has order starting from top left and going clockwise.
-    neighbor_rect_offsets = ((-1, -1), (-1, 0), (-1, 1),
-                             (0, 1), (1, 1), (1, 0),
-                             (1, -1), (0, -1))
+    neighbor_rect_offsets = (
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
+        (1, 0),
+        (1, -1),
+        (0, -1),
+    )
 
     # Pre-multiply the offsets with width and height.
     neighbor_rect_offsets = np.array(neighbor_rect_offsets)
@@ -495,24 +514,23 @@ def draw_multiblock_lbp(image, r, c, width, height,
     central_rect_c = c + width
 
     for element_num, offset in enumerate(neighbor_rect_offsets):
-
         offset_r, offset_c = offset
 
         curr_r = central_rect_r + offset_r
         curr_c = central_rect_c + offset_c
 
-        has_greater_value = lbp_code & (1 << (7-element_num))
+        has_greater_value = lbp_code & (1 << (7 - element_num))
 
         # Mix-in the visualization colors.
         if has_greater_value:
-            new_value = ((1-alpha) *
-                         output[curr_r:curr_r+height, curr_c:curr_c+width] +
-                         alpha * color_greater_block)
-            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
+            new_value = (1 - alpha) * output[
+                curr_r : curr_r + height, curr_c : curr_c + width
+            ] + alpha * color_greater_block
+            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
         else:
-            new_value = ((1-alpha) *
-                         output[curr_r:curr_r+height, curr_c:curr_c+width] +
-                         alpha * color_less_block)
-            output[curr_r:curr_r+height, curr_c:curr_c+width] = new_value
+            new_value = (1 - alpha) * output[
+                curr_r : curr_r + height, curr_c : curr_c + width
+            ] + alpha * color_less_block
+            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
 
     return output

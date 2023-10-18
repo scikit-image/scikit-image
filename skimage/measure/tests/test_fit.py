@@ -3,11 +3,17 @@ import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (arch32, assert_almost_equal,
-                                     assert_array_less, assert_equal, xfail)
+from skimage._shared.testing import (
+    arch32,
+    assert_almost_equal,
+    assert_array_less,
+    assert_equal,
+    xfail,
+)
 from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
 from skimage.measure.fit import _dynamic_max_trials
 from skimage.transform import AffineTransform
+
 
 def test_line_model_predict():
     model = LineModelND()
@@ -51,12 +57,15 @@ def test_line_model_nd_predict():
 def test_line_model_nd_estimate():
     # generate original data without noise
     model0 = LineModelND()
-    model0.params = (np.array([0, 0, 0], dtype='float'),
-                     np.array([1, 1, 1], dtype='float')/np.sqrt(3))
+    model0.params = (
+        np.array([0, 0, 0], dtype='float'),
+        np.array([1, 1, 1], dtype='float') / np.sqrt(3),
+    )
     # we scale the unit vector with a factor 10 when generating points on the
     # line in order to compensate for the scale of the random noise
-    data0 = (model0.params[0] +
-             10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1])
+    data0 = (
+        model0.params[0] + 10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1]
+    )
 
     # add gaussian noise to data
     rng = np.random.default_rng(1234)
@@ -71,8 +80,9 @@ def test_line_model_nd_estimate():
     # we use the following geometric property: two aligned vectors have
     # a cross-product equal to zero
     # test if direction vectors are aligned
-    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1],
-                                                model_est.params[1])), 0, 1)
+    assert_almost_equal(
+        np.linalg.norm(np.cross(model0.params[1], model_est.params[1])), 0, 1
+    )
     # test if origins are aligned with the direction
     a = model_est.params[0] - model0.params[0]
     if np.linalg.norm(a) > 0:
@@ -90,8 +100,6 @@ def test_line_model_nd_residuals():
     data = np.array([[10, 0, 0]])
     params = (np.array([0, 0, 0]), np.array([2, 0, 0]))
     assert_equal(abs(model.residuals(data, params=params)), 30)
-
-
 
 
 def test_circle_model_invalid_input():
@@ -142,8 +150,9 @@ def test_circle_model_residuals():
     model = CircleModel()
     model.params = (0, 0, 5)
     assert_almost_equal(abs(model.residuals(np.array([[5, 0]]))), 0)
-    assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
-                        np.sqrt(2 * 6**2) - 5)
+    assert_almost_equal(
+        abs(model.residuals(np.array([[6, 6]]))), np.sqrt(2 * 6**2) - 5
+    )
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
 
 
@@ -169,10 +178,23 @@ def test_circle_model_insufficient_data():
 
 def test_circle_model_estimate_from_small_scale_data():
     params = np.array([1.23e-90, 2.34e-90, 3.45e-100], dtype=np.float64)
-    angles = np.array([
-        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
-        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
-    ], dtype=np.float64)
+    angles = np.array(
+        [
+            0.107,
+            0.407,
+            1.108,
+            1.489,
+            2.216,
+            2.768,
+            3.183,
+            3.969,
+            4.840,
+            5.387,
+            5.792,
+            6.139,
+        ],
+        dtype=np.float64,
+    )
     data = CircleModel().predict_xy(angles, params=params)
     model = CircleModel()
     # assert that far small scale data can be estimated
@@ -219,18 +241,14 @@ def test_ellipse_model_estimate():
 
 
 def test_ellipse_parameter_stability():
-    """The fit should be modified so that a > b
-    """
+    """The fit should be modified so that a > b"""
 
     for angle in np.arange(0, 180 + 1, 1):
         # generate rotation matrix
         theta = np.deg2rad(angle)
         c = np.cos(theta)
         s = np.sin(theta)
-        R = np.array([
-            [c, -s],
-            [s, c]]
-        )
+        R = np.array([[c, -s], [s, c]])
 
         # generate points on ellipse
         t = np.linspace(0, 2 * np.pi, 20)
@@ -250,30 +268,147 @@ def test_ellipse_parameter_stability():
 
 
 def test_ellipse_model_estimate_from_data():
-    data = np.array([
-        [264, 854], [265, 875], [268, 863], [270, 857], [275, 905], [285, 915],
-        [305, 925], [324, 934], [335, 764], [336, 915], [345, 925], [345, 945],
-        [354, 933], [355, 745], [364, 936], [365, 754], [375, 745], [375, 735],
-        [385, 736], [395, 735], [394, 935], [405, 727], [415, 736], [415, 727],
-        [425, 727], [426, 929], [435, 735], [444, 933], [445, 735], [455, 724],
-        [465, 934], [465, 735], [475, 908], [475, 726], [485, 753], [485, 728],
-        [492, 762], [495, 745], [491, 910], [493, 909], [499, 904], [505, 905],
-        [504, 747], [515, 743], [516, 752], [524, 855], [525, 844], [525, 885],
-        [533, 845], [533, 873], [535, 883], [545, 874], [543, 864], [553, 865],
-        [553, 845], [554, 825], [554, 835], [563, 845], [565, 826], [563, 855],
-        [563, 795], [565, 735], [573, 778], [572, 815], [574, 804], [575, 665],
-        [575, 685], [574, 705], [574, 745], [575, 875], [572, 732], [582, 795],
-        [579, 709], [583, 805], [583, 854], [586, 755], [584, 824], [585, 655],
-        [581, 718], [586, 844], [585, 915], [587, 905], [594, 824], [593, 855],
-        [590, 891], [594, 776], [596, 767], [593, 763], [603, 785], [604, 775],
-        [603, 885], [605, 753], [605, 655], [606, 935], [603, 761], [613, 802],
-        [613, 945], [613, 965], [615, 693], [617, 665], [623, 962], [624, 972],
-        [625, 995], [633, 673], [633, 965], [633, 683], [633, 692], [633, 954],
-        [634, 1016], [635, 664], [641, 804], [637, 999], [641, 956], [643, 946],
-        [643, 926], [644, 975], [643, 655], [646, 705], [651, 664], [651, 984],
-        [647, 665], [651, 715], [651, 725], [651, 734], [647, 809], [651, 825],
-        [651, 873], [647, 900], [652, 917], [651, 944], [652, 742], [648, 811],
-        [651, 994], [652, 783], [650, 911], [654, 879]], dtype=np.int32)
+    data = np.array(
+        [
+            [264, 854],
+            [265, 875],
+            [268, 863],
+            [270, 857],
+            [275, 905],
+            [285, 915],
+            [305, 925],
+            [324, 934],
+            [335, 764],
+            [336, 915],
+            [345, 925],
+            [345, 945],
+            [354, 933],
+            [355, 745],
+            [364, 936],
+            [365, 754],
+            [375, 745],
+            [375, 735],
+            [385, 736],
+            [395, 735],
+            [394, 935],
+            [405, 727],
+            [415, 736],
+            [415, 727],
+            [425, 727],
+            [426, 929],
+            [435, 735],
+            [444, 933],
+            [445, 735],
+            [455, 724],
+            [465, 934],
+            [465, 735],
+            [475, 908],
+            [475, 726],
+            [485, 753],
+            [485, 728],
+            [492, 762],
+            [495, 745],
+            [491, 910],
+            [493, 909],
+            [499, 904],
+            [505, 905],
+            [504, 747],
+            [515, 743],
+            [516, 752],
+            [524, 855],
+            [525, 844],
+            [525, 885],
+            [533, 845],
+            [533, 873],
+            [535, 883],
+            [545, 874],
+            [543, 864],
+            [553, 865],
+            [553, 845],
+            [554, 825],
+            [554, 835],
+            [563, 845],
+            [565, 826],
+            [563, 855],
+            [563, 795],
+            [565, 735],
+            [573, 778],
+            [572, 815],
+            [574, 804],
+            [575, 665],
+            [575, 685],
+            [574, 705],
+            [574, 745],
+            [575, 875],
+            [572, 732],
+            [582, 795],
+            [579, 709],
+            [583, 805],
+            [583, 854],
+            [586, 755],
+            [584, 824],
+            [585, 655],
+            [581, 718],
+            [586, 844],
+            [585, 915],
+            [587, 905],
+            [594, 824],
+            [593, 855],
+            [590, 891],
+            [594, 776],
+            [596, 767],
+            [593, 763],
+            [603, 785],
+            [604, 775],
+            [603, 885],
+            [605, 753],
+            [605, 655],
+            [606, 935],
+            [603, 761],
+            [613, 802],
+            [613, 945],
+            [613, 965],
+            [615, 693],
+            [617, 665],
+            [623, 962],
+            [624, 972],
+            [625, 995],
+            [633, 673],
+            [633, 965],
+            [633, 683],
+            [633, 692],
+            [633, 954],
+            [634, 1016],
+            [635, 664],
+            [641, 804],
+            [637, 999],
+            [641, 956],
+            [643, 946],
+            [643, 926],
+            [644, 975],
+            [643, 655],
+            [646, 705],
+            [651, 664],
+            [651, 984],
+            [647, 665],
+            [651, 715],
+            [651, 725],
+            [651, 734],
+            [647, 809],
+            [651, 825],
+            [651, 873],
+            [647, 900],
+            [652, 917],
+            [651, 944],
+            [652, 742],
+            [648, 811],
+            [651, 994],
+            [652, 783],
+            [650, 911],
+            [654, 879],
+        ],
+        dtype=np.int32,
+    )
 
     # estimate parameters of real data
     model = EllipseModel()
@@ -289,10 +424,23 @@ def test_ellipse_model_estimate_from_data():
 
 def test_ellipse_model_estimate_from_far_shifted_data():
     params = np.array([1e6, 2e6, 0.5, 0.1, 0.5], dtype=np.float64)
-    angles = np.array([
-        0.107, 0.407, 1.108, 1.489, 2.216, 2.768,
-        3.183, 3.969, 4.840, 5.387, 5.792, 6.139
-    ], dtype=np.float64)
+    angles = np.array(
+        [
+            0.107,
+            0.407,
+            1.108,
+            1.489,
+            2.216,
+            2.768,
+            3.183,
+            3.969,
+            4.840,
+            5.387,
+            5.792,
+            6.139,
+        ],
+        dtype=np.float64,
+    )
     data = EllipseModel().predict_xy(angles, params=params)
     model = EllipseModel()
     # assert that far shifted data can be estimated
@@ -301,11 +449,15 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     assert_almost_equal(params, model.params)
 
 
-@xfail(condition=arch32,
-       reason=('Known test failure on 32-bit platforms. See links for '
-               'details: '
-               'https://github.com/scikit-image/scikit-image/issues/3091 '
-               'https://github.com/scikit-image/scikit-image/issues/2670'))
+@xfail(
+    condition=arch32,
+    reason=(
+        'Known test failure on 32-bit platforms. See links for '
+        'details: '
+        'https://github.com/scikit-image/scikit-image/issues/3091 '
+        'https://github.com/scikit-image/scikit-image/issues/2670'
+    ),
+)
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
@@ -360,8 +512,7 @@ def test_ransac_geometric():
 
     # generate original data without noise
     src = 100 * rng.random((50, 2))
-    model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
-                             translation=(10, 20))
+    model0 = AffineTransform(scale=(0.5, 0.3), rotation=1, translation=(10, 20))
     dst = model0(src)
 
     # add some faulty data
@@ -371,8 +522,7 @@ def test_ransac_geometric():
     dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20,
-                                rng=rng)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=rng)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -382,9 +532,16 @@ def test_ransac_geometric():
 def test_ransac_is_data_valid():
     def is_data_valid(data):
         return data.shape[0] > 2
+
     with expected_warnings(["No inliers found"]):
-        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_data_valid=is_data_valid, rng=1)
+        model, inliers = ransac(
+            np.empty((10, 2)),
+            LineModelND,
+            2,
+            np.inf,
+            is_data_valid=is_data_valid,
+            rng=1,
+        )
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -392,9 +549,16 @@ def test_ransac_is_data_valid():
 def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
+
     with expected_warnings(["No inliers found"]):
-        model, inliers = ransac(np.empty((10, 2)), LineModelND, 2, np.inf,
-                                is_model_valid=is_model_valid, rng=1)
+        model, inliers = ransac(
+            np.empty((10, 2)),
+            LineModelND,
+            2,
+            np.inf,
+            is_model_valid=is_model_valid,
+            rng=1,
+        )
     assert_equal(model, None)
     assert_equal(inliers, None)
 
@@ -443,32 +607,39 @@ def test_ransac_dynamic_max_trials():
 def test_ransac_invalid_input():
     # `residual_threshold` must be greater than zero
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=2,
-               residual_threshold=-0.5)
+        ransac(np.zeros((10, 2)), None, min_samples=2, residual_threshold=-0.5)
     # "`max_trials` must be greater than zero"
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=2,
-               residual_threshold=0, max_trials=-1)
+        ransac(
+            np.zeros((10, 2)), None, min_samples=2, residual_threshold=0, max_trials=-1
+        )
     # `stop_probability` must be in range (0, 1)
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=2,
-               residual_threshold=0, stop_probability=-1)
+        ransac(
+            np.zeros((10, 2)),
+            None,
+            min_samples=2,
+            residual_threshold=0,
+            stop_probability=-1,
+        )
     # `stop_probability` must be in range (0, 1)
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=2,
-               residual_threshold=0, stop_probability=1.01)
+        ransac(
+            np.zeros((10, 2)),
+            None,
+            min_samples=2,
+            residual_threshold=0,
+            stop_probability=1.01,
+        )
     # `min_samples` as ratio must be in range (0, nb)
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=0,
-               residual_threshold=0)
+        ransac(np.zeros((10, 2)), None, min_samples=0, residual_threshold=0)
     # `min_samples` as ratio must be in range (0, nb]
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=11,
-               residual_threshold=0)
+        ransac(np.zeros((10, 2)), None, min_samples=11, residual_threshold=0)
     # `min_samples` must be greater than zero
     with testing.raises(ValueError):
-        ransac(np.zeros((10, 2)), None, min_samples=-1,
-               residual_threshold=0)
+        ransac(np.zeros((10, 2)), None, min_samples=-1, residual_threshold=0)
 
 
 def test_ransac_sample_duplicates():
@@ -488,31 +659,40 @@ def test_ransac_sample_duplicates():
     # and check that there are no duplicated data points.
     data = np.arange(4)
     with expected_warnings(["No inliers found"]):
-        ransac(data, DummyModel, min_samples=3, residual_threshold=0.0,
-               max_trials=10)
+        ransac(data, DummyModel, min_samples=3, residual_threshold=0.0, max_trials=10)
 
 
 def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
     with expected_warnings(['No inliers found. Model not fitted']):
-        model, inliers = ransac(data, model_class=LineModelND, min_samples=3,
-                                residual_threshold=0, rng=1523427)
+        model, inliers = ransac(
+            data,
+            model_class=LineModelND,
+            min_samples=3,
+            residual_threshold=0,
+            rng=1523427,
+        )
     assert inliers is None
     assert model is None
 
 
 def test_ransac_non_valid_best_model():
     """Example from GH issue #5572"""
-    def is_model_valid(model, *random_data) -> bool:
-        """Allow models with a maximum of 10 degree tilt from the vertical
 
-        """
+    def is_model_valid(model, *random_data) -> bool:
+        """Allow models with a maximum of 10 degree tilt from the vertical"""
         tilt = abs(np.arccos(np.dot(model.params[1], [0, 0, 1])))
         return tilt <= (10 / 180 * np.pi)
 
     rng = np.random.RandomState(1)
     data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
     with expected_warnings(["Estimated model is not valid"]):
-        ransac(data, LineModelND, min_samples=2,
-               residual_threshold=0.3, max_trials=50, rng=0,
-               is_model_valid=is_model_valid)
+        ransac(
+            data,
+            LineModelND,
+            min_samples=2,
+            residual_threshold=0.3,
+            max_trials=50,
+            rng=0,
+            is_model_valid=is_model_valid,
+        )

@@ -14,25 +14,26 @@ from skimage import data
 
 matplotlib.rcParams['font.size'] = 18
 
-images = ('astronaut',
-          'binary_blobs',
-          'brick',
-          'colorwheel',
-          'camera',
-          'cat',
-          'checkerboard',
-          'clock',
-          'coffee',
-          'coins',
-          'eagle',
-          'grass',
-          'gravel',
-          'horse',
-          'logo',
-          'page',
-          'text',
-          'rocket',
-          )
+images = (
+    'astronaut',
+    'binary_blobs',
+    'brick',
+    'colorwheel',
+    'camera',
+    'cat',
+    'checkerboard',
+    'clock',
+    'coffee',
+    'coins',
+    'eagle',
+    'grass',
+    'gravel',
+    'horse',
+    'logo',
+    'page',
+    'text',
+    'rocket',
+)
 
 
 for name in images:

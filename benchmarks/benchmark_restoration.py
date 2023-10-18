@@ -6,6 +6,7 @@ import scipy.ndimage as ndi
 from skimage.data import camera
 from skimage import restoration, data, color
 from skimage.morphology import binary_dilation
+
 try:
     from skimage.morphology import disk
 except ImportError:
@@ -26,9 +27,17 @@ class RestorationSuite:
 
     def setup(self):
         nz = 32
-        self.volume_f64 = np.stack([camera()[::2, ::2], ] * nz,
-                                   axis=-1).astype(float) / 255
-        self.sigma = .05
+        self.volume_f64 = (
+            np.stack(
+                [
+                    camera()[::2, ::2],
+                ]
+                * nz,
+                axis=-1,
+            ).astype(float)
+            / 255
+        )
+        self.sigma = 0.05
         self.volume_f64 += self.sigma * np.random.randn(*self.volume_f64.shape)
         self.volume_f32 = self.volume_f64.astype(np.float32)
 
@@ -36,59 +45,108 @@ class RestorationSuite:
         pass
 
     def time_denoise_nl_means_f64(self):
-        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=False,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f64,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=False,
+            **_channel_kwarg(False),
+        )
 
     def time_denoise_nl_means_f32(self):
-        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=False,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f32,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=False,
+            **_channel_kwarg(False),
+        )
 
     def time_denoise_nl_means_fast_f64(self):
-        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=True,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f64,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=True,
+            **_channel_kwarg(False),
+        )
 
     def time_denoise_nl_means_fast_f32(self):
-        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=True)
+        restoration.denoise_nl_means(
+            self.volume_f32,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=True,
+        )
 
     def peakmem_denoise_nl_means_f64(self):
-        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
-                                     patch_distance=2,  sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=False,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f64,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=False,
+            **_channel_kwarg(False),
+        )
 
     def peakmem_denoise_nl_means_f32(self):
-        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=False)
+        restoration.denoise_nl_means(
+            self.volume_f32,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=False,
+        )
 
     def peakmem_denoise_nl_means_fast_f64(self):
-        restoration.denoise_nl_means(self.volume_f64, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=True,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f64,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=True,
+            **_channel_kwarg(False),
+        )
 
     def peakmem_denoise_nl_means_fast_f32(self):
-        restoration.denoise_nl_means(self.volume_f32, patch_size=3,
-                                     patch_distance=2, sigma=self.sigma,
-                                     h=0.7 * self.sigma, fast_mode=True,
-                                     **_channel_kwarg(False))
+        restoration.denoise_nl_means(
+            self.volume_f32,
+            patch_size=3,
+            patch_distance=2,
+            sigma=self.sigma,
+            h=0.7 * self.sigma,
+            fast_mode=True,
+            **_channel_kwarg(False),
+        )
 
 
 class DeconvolutionSuite:
     """Benchmark for restoration routines in scikit image."""
+
     def setup(self):
         nz = 32
-        self.volume_f64 = np.stack([camera()[::2, ::2], ] * nz,
-                                   axis=-1).astype(float) / 255
-        self.sigma = .02
+        self.volume_f64 = (
+            np.stack(
+                [
+                    camera()[::2, ::2],
+                ]
+                * nz,
+                axis=-1,
+            ).astype(float)
+            / 255
+        )
+        self.sigma = 0.02
         self.psf_f64 = np.ones((5, 5, 5)) / 125
         self.psf_f32 = self.psf_f64.astype(np.float32)
         self.volume_f64 = ndi.convolve(self.volume_f64, self.psf_f64)
@@ -99,21 +157,17 @@ class DeconvolutionSuite:
         pass
 
     def time_richardson_lucy_f64(self):
-        restoration.richardson_lucy(self.volume_f64, self.psf_f64,
-                                    **rl_iter_kwarg)
+        restoration.richardson_lucy(self.volume_f64, self.psf_f64, **rl_iter_kwarg)
 
     def time_richardson_lucy_f32(self):
-        restoration.richardson_lucy(self.volume_f32, self.psf_f32,
-                                    **rl_iter_kwarg)
+        restoration.richardson_lucy(self.volume_f32, self.psf_f32, **rl_iter_kwarg)
 
     # use iterations=1 for peak-memory cases to save time
     def peakmem_richardson_lucy_f64(self):
-        restoration.richardson_lucy(self.volume_f64, self.psf_f64,
-                                    **rl_iter_kwarg)
+        restoration.richardson_lucy(self.volume_f64, self.psf_f64, **rl_iter_kwarg)
 
     def peakmem_richardson_lucy_f32(self):
-        restoration.richardson_lucy(self.volume_f32, self.psf_f32,
-                                    **rl_iter_kwarg)
+        restoration.richardson_lucy(self.volume_f32, self.psf_f32, **rl_iter_kwarg)
 
 
 class RollingBall:
@@ -123,6 +177,7 @@ class RollingBall:
 
     def time_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
+
     time_rollingball.params = [25, 50, 100, 200]
     time_rollingball.param_names = ["radius"]
 
@@ -144,6 +199,7 @@ class RollingBall:
 
     def peakmem_rollingball(self, radius):
         restoration.rolling_ball(data.coins(), radius=radius)
+
     peakmem_rollingball.params = [25, 50, 100, 200]
     peakmem_rollingball.param_names = ["radius"]
 
@@ -152,19 +208,22 @@ class RollingBall:
         pos = np.arange(np.min(image.shape))
         image[pos, pos] = np.nan
         restoration.rolling_ball(image, radius=radius, nansafe=True)
+
     time_rollingball_nan.params = [25, 50, 100, 200]
     time_rollingball_nan.param_names = ["radius"]
 
     def time_rollingball_ndim(self):
         from skimage.restoration._rolling_ball import ellipsoid_kernel
+
         image = data.cells3d()[:, 1, ...]
         kernel = ellipsoid_kernel((1, 100, 100), 100)
-        restoration.rolling_ball(
-            image, kernel=kernel)
+        restoration.rolling_ball(image, kernel=kernel)
+
     time_rollingball_ndim.setup = _skip_slow
 
     def time_rollingball_threads(self, threads):
         restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
+
     time_rollingball_threads.params = (0, 2, 4, 8)
     time_rollingball_threads.param_names = ["threads"]
 
@@ -207,9 +266,11 @@ class Inpaint:
         self.mask = mask
 
     def time_inpaint_rgb(self):
-        restoration.inpaint_biharmonic(self.image_defect, self.mask,
-                                       **_channel_kwarg(True))
+        restoration.inpaint_biharmonic(
+            self.image_defect, self.mask, **_channel_kwarg(True)
+        )
 
     def time_inpaint_grey(self):
-        restoration.inpaint_biharmonic(self.image_defect_gray, self.mask,
-                                       **_channel_kwarg(False))
+        restoration.inpaint_biharmonic(
+            self.image_defect_gray, self.mask, **_channel_kwarg(False)
+        )

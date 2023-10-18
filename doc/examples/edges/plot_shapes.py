@@ -21,10 +21,15 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import (line, polygon, disk,
-                          circle_perimeter,
-                          ellipse, ellipse_perimeter,
-                          bezier_curve)
+from skimage.draw import (
+    line,
+    polygon,
+    disk,
+    circle_perimeter,
+    ellipse,
+    ellipse_perimeter,
+    bezier_curve,
+)
 
 
 fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(10, 6))
@@ -37,13 +42,15 @@ rr, cc = line(120, 123, 20, 400)
 img[rr, cc, 0] = 255
 
 # fill polygon
-poly = np.array((
-    (300, 300),
-    (480, 320),
-    (380, 430),
-    (220, 590),
-    (300, 300),
-))
+poly = np.array(
+    (
+        (300, 300),
+        (480, 320),
+        (380, 430),
+        (220, 590),
+        (300, 300),
+    )
+)
 rr, cc = polygon(poly[:, 0], poly[:, 1], img.shape)
 img[rr, cc, 1] = 1
 
@@ -64,11 +71,11 @@ rr, cc = bezier_curve(70, 100, 10, 10, 150, 100, 1)
 img[rr, cc, :] = (1, 0, 0)
 
 # ellipses
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 4.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 4.0)
 img[rr, cc, :] = (1, 0, 1)
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=-math.pi / 4.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=-math.pi / 4.0)
 img[rr, cc, :] = (0, 0, 1)
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 2.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 2.0)
 img[rr, cc, :] = (1, 1, 1)
 
 ax1.imshow(img)

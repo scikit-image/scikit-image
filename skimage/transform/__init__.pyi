@@ -48,12 +48,9 @@ from .hough_transform import (
     probabilistic_hough_line,
     hough_circle,
     hough_circle_peaks,
-    hough_ellipse
+    hough_ellipse,
 )
-from .radon_transform import (
-    radon, iradon, iradon_sart,
-    order_angles_golden_ratio
-)
+from .radon_transform import radon, iradon, iradon_sart, order_angles_golden_ratio
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
 from ._geometric import (
@@ -66,18 +63,22 @@ from ._geometric import (
     FundamentalMatrixTransform,
     EssentialMatrixTransform,
     PolynomialTransform,
-    PiecewiseAffineTransform
+    PiecewiseAffineTransform,
 )
 from ._warps import (
-    swirl, resize,
-    rotate, rescale,
+    swirl,
+    resize,
+    rotate,
+    rescale,
     downscale_local_mean,
-    warp, warp_coords,
-    warp_polar, resize_local_mean
+    warp,
+    warp_coords,
+    warp_polar,
+    resize_local_mean,
 )
 from .pyramids import (
     pyramid_reduce,
     pyramid_expand,
     pyramid_gaussian,
-    pyramid_laplacian
+    pyramid_laplacian,
 )

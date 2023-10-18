@@ -1,6 +1,7 @@
 import numpy as np
 from skimage import transform
 
+
 class TransformSuite:
     """Benchmark for transform routines in scikit-image."""
 

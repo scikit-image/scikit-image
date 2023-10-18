@@ -8,6 +8,7 @@ def _label_bool(image, background=None, return_num=False, connectivity=None):
     See context: https://github.com/scikit-image/scikit-image/issues/4833
     """
     from ..morphology._util import _resolve_neighborhood
+
     if background == 1:
         image = ~image
 
@@ -114,7 +115,11 @@ def label(label_image, background=None, return_num=False, connectivity=None):
      [0 0 0]]
     """
     if label_image.dtype == bool:
-        return _label_bool(label_image, background=background,
-                           return_num=return_num, connectivity=connectivity)
+        return _label_bool(
+            label_image,
+            background=background,
+            return_num=return_num,
+            connectivity=connectivity,
+        )
     else:
         return clabel(label_image, background, return_num, connectivity)

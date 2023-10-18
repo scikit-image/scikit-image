@@ -170,9 +170,7 @@ html_theme_options = {
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "show_prev_next": False,
     "switcher": {
-        "json_url": (
-            "https://scikit-image.org/docs/dev/_static/version_switcher.json"
-        ),
+        "json_url": ("https://scikit-image.org/docs/dev/_static/version_switcher.json"),
         "version_match": "dev" if "dev" in version else version,
     },
     "show_version_warning_banner": True,
@@ -184,9 +182,7 @@ html_theme_options = {
     "pygment_dark_style": "github-dark",
     "analytics": {
         "plausible_analytics_domain": "scikit-image.org",
-        "plausible_analytics_url": (
-            "https://views.scientific-python.org/js/script.js"
-        ),
+        "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
     },
 }
 
@@ -253,9 +249,9 @@ intersphinx_mapping = {
 
 # -- Source code links -------------------------------------------------------
 
+
 # Function courtesy of NumPy to return URLs containing line numbers
 def linkcode_resolve(domain, info):
-
     """
     Determine the URL corresponding to Python object
     """

@@ -12,8 +12,17 @@ The title of each plot indicates the call of the function.
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-from skimage.morphology import (square, rectangle, diamond, disk, cube,
-                                octahedron, ball, octagon, star)
+from skimage.morphology import (
+    square,
+    rectangle,
+    diamond,
+    disk,
+    cube,
+    octahedron,
+    ball,
+    octagon,
+    star,
+)
 
 # Generate 2D and 3D structuring elements.
 struc_2d = {
@@ -22,14 +31,10 @@ struc_2d = {
     "diamond(7)": diamond(7),
     "disk(7)": disk(7),
     "octagon(7, 4)": octagon(7, 4),
-    "star(5)": star(5)
+    "star(5)": star(5),
 }
 
-struc_3d = {
-    "cube(11)": cube(11),
-    "octahedron(5)": octahedron(5),
-    "ball(5)": ball(5)
-}
+struc_3d = {"cube(11)": cube(11), "octahedron(5)": octahedron(5), "ball(5)": ball(5)}
 
 # Visualize the elements.
 fig = plt.figure(figsize=(8, 8))

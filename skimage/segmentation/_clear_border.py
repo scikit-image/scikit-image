@@ -3,8 +3,7 @@ import numpy as np
 from ..measure import label
 
 
-def clear_border(labels, buffer_size=0, bgval=0, mask=None,
-                 *, out=None):
+def clear_border(labels, buffer_size=0, bgval=0, mask=None, *, out=None):
     """Clear objects connected to the label image border.
 
     Parameters
@@ -69,10 +68,12 @@ def clear_border(labels, buffer_size=0, bgval=0, mask=None,
         out = labels.copy()
 
     if mask is not None:
-        err_msg = (f'labels and mask should have the same shape but '
-                   f'are {out.shape} and {mask.shape}')
+        err_msg = (
+            f'labels and mask should have the same shape but '
+            f'are {out.shape} and {mask.shape}'
+        )
         if out.shape != mask.shape:
-            raise(ValueError, err_msg)
+            raise (ValueError, err_msg)
         if mask.dtype != bool:
             raise TypeError("mask should be of type bool.")
         borders = ~mask

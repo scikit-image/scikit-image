@@ -13,7 +13,6 @@ from skimage.morphology import footprints
 
 
 class TestFootprints:
-
     def test_square_footprint(self):
         """Test square footprints"""
         for k in range(0, 5):
@@ -58,7 +57,7 @@ class TestFootprints:
             # Test center slice for each dimension. This gives a good
             # indication of validity without the need for a 3D reference
             # mask.
-            c = int(expected_mask.shape[0]/2)
+            c = int(expected_mask.shape[0] / 2)
             assert_equal(expected_mask, actual_mask[c, :, :])
             assert_equal(expected_mask, actual_mask[:, c, :])
             assert_equal(expected_mask, actual_mask[:, :, c])
@@ -78,45 +77,48 @@ class TestFootprints:
 
     def test_footprint_octahedron(self):
         """Test octahedron footprints"""
-        self.strel_worker_3d("data/diamond-matlab-output.npz",
-                             footprints.octahedron)
+        self.strel_worker_3d("data/diamond-matlab-output.npz", footprints.octahedron)
 
     def test_footprint_octagon(self):
         """Test octagon footprints"""
-        expected_mask1 = np.array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]],
-                                  dtype=np.uint8)
+        expected_mask1 = np.array(
+            [
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         actual_mask1 = footprints.octagon(5, 3)
-        expected_mask2 = np.array([[0, 1, 0],
-                                   [1, 1, 1],
-                                   [0, 1, 0]], dtype=np.uint8)
+        expected_mask2 = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8)
         actual_mask2 = footprints.octagon(1, 1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
 
     def test_footprint_ellipse(self):
         """Test ellipse footprints"""
-        expected_mask1 = np.array([[0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0]],
-                                  dtype=np.uint8)
+        expected_mask1 = np.array(
+            [
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         actual_mask1 = footprints.ellipse(5, 3)
-        expected_mask2 = np.array([[1, 1, 1],
-                                   [1, 1, 1],
-                                   [1, 1, 1]], dtype=np.uint8)
+        expected_mask2 = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
         actual_mask2 = footprints.ellipse(1, 1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
@@ -125,24 +127,26 @@ class TestFootprints:
 
     def test_footprint_star(self):
         """Test star footprints"""
-        expected_mask1 = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-                                   [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-                                   [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-                                   [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
-                                  dtype=np.uint8)
+        expected_mask1 = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         actual_mask1 = footprints.star(4)
-        expected_mask2 = np.array([[1, 1, 1],
-                                   [1, 1, 1],
-                                   [1, 1, 1]], dtype=np.uint8)
+        expected_mask2 = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
         actual_mask2 = footprints.star(1)
         assert_equal(expected_mask1, actual_mask1)
         assert_equal(expected_mask2, actual_mask2)
@@ -161,11 +165,10 @@ class TestFootprints:
         (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
-    ]
+    ],
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.float64])
-def test_footprint_dtype(function, args, supports_sequence_decomposition,
-                         dtype):
+def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype):
     # make sure footprint dtype matches what was requested
     footprint = function(*args, dtype=dtype)
     assert footprint.dtype == dtype
@@ -176,13 +179,11 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition,
 
 
 @pytest.mark.parametrize("function", ["disk", "ball"])
-@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 75,
-                                    100])
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 75, 100])
 def test_nsphere_series_approximation(function, radius):
     fp_func = getattr(footprints, function)
     expected = fp_func(radius, strict_radius=False, decomposition=None)
-    footprint_sequence = fp_func(radius, strict_radius=False,
-                                 decomposition="sequence")
+    footprint_sequence = fp_func(radius, strict_radius=False, decomposition="sequence")
     approximate = footprints.footprint_from_sequence(footprint_sequence)
     assert approximate.shape == expected.shape
 
@@ -200,8 +201,9 @@ def test_nsphere_series_approximation(function, radius):
 def test_disk_crosses_approximation(radius, strict_radius):
     fp_func = footprints.disk
     expected = fp_func(radius, strict_radius=strict_radius, decomposition=None)
-    footprint_sequence = fp_func(radius, strict_radius=strict_radius,
-                                 decomposition="crosses")
+    footprint_sequence = fp_func(
+        radius, strict_radius=strict_radius, decomposition="crosses"
+    )
     approximate = footprints.footprint_from_sequence(footprint_sequence)
     assert approximate.shape == expected.shape
 
