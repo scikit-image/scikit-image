@@ -206,13 +206,13 @@ fig, axes = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True)
 ax = axes.ravel()
 plt.tight_layout()
 
-fig.colorbar(ax[0].imshow(img, cmap=plt.cm.gray),
-             ax=ax[0], orientation='horizontal')
+fig.colorbar(ax[0].imshow(img, cmap=plt.cm.gray), ax=ax[0], orientation='horizontal')
 ax[0].set_title('Original')
 ax[0].axis('off')
 
-fig.colorbar(ax[1].imshow(local_otsu, cmap=plt.cm.gray),
-             ax=ax[1], orientation='horizontal')
+fig.colorbar(
+    ax[1].imshow(local_otsu, cmap=plt.cm.gray), ax=ax[1], orientation='horizontal'
+)
 ax[1].set_title(f'Local Otsu (radius={radius})')
 ax[1].axis('off')
 

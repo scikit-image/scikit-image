@@ -20,8 +20,7 @@ from scipy import ndimage as ndi
 
 from . import _watershed_cy
 from ..morphology.extrema import local_minima
-from ..morphology._util import (_validate_connectivity,
-                                _offsets_to_raveled_neighbors)
+from ..morphology._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import crop, regular_seeds
 
 
@@ -59,8 +58,10 @@ def _validate_inputs(image, markers, mask, connectivity):
         mask = np.asanyarray(mask, dtype=bool)
         n_pixels = np.sum(mask)
         if mask.shape != image.shape:
-            message = (f'`mask` (shape {mask.shape}) must have same shape '
-                       f'as `image` (shape {image.shape})')
+            message = (
+                f'`mask` (shape {mask.shape}) must have same shape '
+                f'as `image` (shape {image.shape})'
+            )
             raise ValueError(message)
     if markers is None:
         markers_bool = local_minima(image, connectivity=connectivity) * mask
@@ -69,22 +70,28 @@ def _validate_inputs(image, markers, mask, connectivity):
     elif not isinstance(markers, (np.ndarray, list, tuple)):
         # not array-like, assume int
         # given int, assume that number of markers *within mask*.
-        markers = regular_seeds(image.shape,
-                                int(markers / (n_pixels / image.size)))
+        markers = regular_seeds(image.shape, int(markers / (n_pixels / image.size)))
         markers *= mask
     else:
         markers = np.asanyarray(markers) * mask
         if markers.shape != image.shape:
-            message = (f'`markers` (shape {markers.shape}) must have same '
-                       f'shape as `image` (shape {image.shape})')
+            message = (
+                f'`markers` (shape {markers.shape}) must have same '
+                f'shape as `image` (shape {image.shape})'
+            )
             raise ValueError(message)
-    return (image.astype(np.float64),
-            markers,
-            mask.astype(np.int8))
+    return (image.astype(np.float64), markers, mask.astype(np.int8))
 
 
-def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
-              compactness=0, watershed_line=False):
+def watershed(
+    image,
+    markers=None,
+    connectivity=1,
+    offset=None,
+    mask=None,
+    compactness=0,
+    watershed_line=False,
+):
     """Find watershed basins in `image` flooded from given `markers`.
 
     Parameters
@@ -197,8 +204,7 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     separate overlapping spheres.
     """
     image, markers, mask = _validate_inputs(image, markers, mask, connectivity)
-    connectivity, offset = _validate_connectivity(image.ndim, connectivity,
-                                                  offset)
+    connectivity, offset = _validate_connectivity(image.ndim, connectivity, offset)
 
     # pad the image, markers, and mask so that we can use the mask to
     # keep from running off the edges
@@ -208,15 +214,21 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     output = np.pad(markers, pad_width, mode='constant')
 
     flat_neighborhood = _offsets_to_raveled_neighbors(
-        image.shape, connectivity, center=offset)
+        image.shape, connectivity, center=offset
+    )
     marker_locations = np.flatnonzero(output)
     image_strides = np.array(image.strides, dtype=np.intp) // image.itemsize
 
-    _watershed_cy.watershed_raveled(image.ravel(),
-                                    marker_locations, flat_neighborhood,
-                                    mask, image_strides, compactness,
-                                    output.ravel(),
-                                    watershed_line)
+    _watershed_cy.watershed_raveled(
+        image.ravel(),
+        marker_locations,
+        flat_neighborhood,
+        mask,
+        image_strides,
+        compactness,
+        output.ravel(),
+        watershed_line,
+    )
 
     output = crop(output, pad_width, copy=True)
 

@@ -16,19 +16,19 @@ Validation in `test_nsphere_series_approximation` in:
 import numpy as np
 
 from skimage.morphology import ball, disk
-from skimage.morphology.footprints import (_t_shaped_element_series,
-                                           footprint_from_sequence)
+from skimage.morphology.footprints import (
+    _t_shaped_element_series,
+    footprint_from_sequence,
+)
 
 
 def precompute_decompositions(
     ndims=[2, 3], radius_max_per_ndim={2: 200, 3: 100}, strict_radius=False
 ):
-
     assert all(d in radius_max_per_ndim for d in ndims)
 
     best_vals = {}
     for ndim in ndims:
-
         dtype = np.uint8
         # shape (3,) * ndim hyperoctahedron footprint
         # i.e. d = diamond(radius=1) in 2D
@@ -50,15 +50,10 @@ def precompute_decompositions(
 
         radius_max = radius_max_per_ndim[ndim]
         for radius in range(2, radius_max + 1):
-
             if ndim == 2:
-                desired = disk(
-                    radius, decomposition=None, strict_radius=strict_radius
-                )
+                desired = disk(radius, decomposition=None, strict_radius=strict_radius)
             elif ndim == 3:
-                desired = ball(
-                    radius, decomposition=None, strict_radius=strict_radius
-                )
+                desired = ball(radius, decomposition=None, strict_radius=strict_radius)
             else:
                 raise ValueError(f"ndim={ndim} not currently supported")
 
@@ -84,9 +79,7 @@ def precompute_decompositions(
                     actual = footprint_from_sequence(sequence).astype(int)
 
                     all_actual.append(actual)
-                    error = np.sum(
-                        np.abs(desired - actual)
-                    )  # + 0.01 * n_square
+                    error = np.sum(np.abs(desired - actual))  # + 0.01 * n_square
                     if error > err_prev:
                         print(f"break at n_diamond = {n_diamond}")
                         break
@@ -128,7 +121,6 @@ def precompute_decompositions(
 
 
 if __name__ == "__main__":
-
     precompute_decompositions(
         ndims=[2, 3], radius_max_per_ndim={2: 250, 3: 100}, strict_radius=False
     )

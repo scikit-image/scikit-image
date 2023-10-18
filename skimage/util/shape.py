@@ -78,8 +78,7 @@ def view_as_blocks(arr_in, block_shape):
         raise ValueError("'block_shape' elements must be strictly positive")
 
     if block_shape.size != arr_in.ndim:
-        raise ValueError("'block_shape' must have the same length "
-                         "as 'arr_in.shape'")
+        raise ValueError("'block_shape' must have the same length " "as 'arr_in.shape'")
 
     arr_shape = np.array(arr_in.shape)
     if (arr_shape % block_shape).sum() != 0:
@@ -237,8 +236,9 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     indexing_strides = arr_in[slices].strides
 
-    win_indices_shape = (((np.array(arr_in.shape) - np.array(window_shape))
-                          // np.array(step)) + 1)
+    win_indices_shape = (
+        (np.array(arr_in.shape) - np.array(window_shape)) // np.array(step)
+    ) + 1
 
     new_shape = tuple(list(win_indices_shape) + list(window_shape))
     strides = tuple(list(indexing_strides) + list(window_strides))

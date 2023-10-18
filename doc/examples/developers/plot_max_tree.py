@@ -50,6 +50,7 @@ import networkx as nx
 #####################################################################
 # Before we start : a few helper functions
 
+
 def plot_img(ax, image, title, plot_text, image_values):
     """Plot an image, overlaying image values or indices."""
     ax.imshow(image, cmap='gray', aspect='equal', vmin=0, vmax=np.max(image))
@@ -58,19 +59,24 @@ def plot_img(ax, image, title, plot_text, image_values):
     ax.set_xticks([])
 
     for x in np.arange(-0.5, image.shape[0], 1.0):
-        ax.add_artist(Line2D((x, x), (-0.5, image.shape[0] - 0.5),
-                             color='blue', linewidth=2))
+        ax.add_artist(
+            Line2D((x, x), (-0.5, image.shape[0] - 0.5), color='blue', linewidth=2)
+        )
 
     for y in np.arange(-0.5, image.shape[1], 1.0):
-        ax.add_artist(Line2D((-0.5, image.shape[1]), (y, y),
-                             color='blue', linewidth=2))
+        ax.add_artist(Line2D((-0.5, image.shape[1]), (y, y), color='blue', linewidth=2))
 
     if plot_text:
         for i, j in np.ndindex(*image_values.shape):
-            ax.text(j, i, image_values[i, j], fontsize=8,
-                    horizontalalignment='center',
-                    verticalalignment='center',
-                    color='red')
+            ax.text(
+                j,
+                i,
+                image_values[i, j],
+                fontsize=8,
+                horizontalalignment='center',
+                verticalalignment='center',
+                color='red',
+            )
     return
 
 
@@ -80,7 +86,7 @@ def prune(G, node, res):
     res[node] = str(node)
     preds = [p for p in G.predecessors(node)]
     for p in preds:
-        if (G.nodes[p]['value'] == value):
+        if G.nodes[p]['value'] == value:
             res[node] += f", {p}"
             G.remove_node(p)
         else:
@@ -115,13 +121,12 @@ def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
         in_nodes = [y for y in canonical_max_tree.predecessors(node)]
 
         # place the nodes at the same level
-        level_nodes = [y for y in
-                       filter(lambda x: image_rav[x] == value, in_nodes)]
+        level_nodes = [y for y in filter(lambda x: image_rav[x] == value, in_nodes)]
         nb_level_nodes = len(level_nodes) + 1
 
         c = nb_level_nodes // 2
-        i = - c
-        if (len(level_nodes) < 3):
+        i = -c
+        if len(level_nodes) < 3:
             hy = 0
             m = 0
         else:
@@ -129,38 +134,49 @@ def position_nodes_for_max_tree(G, image_rav, root_x=4, delta_x=1.2):
             m = hy / (c - 1)
 
         for level_node in level_nodes:
-            if(i == 0):
+            if i == 0:
                 i += 1
-            if (len(level_nodes) < 3):
+            if len(level_nodes) < 3:
                 pos[level_node] = (pos[node][0] + i * 0.6 * delta_x, value)
             else:
-                pos[level_node] = (pos[node][0] + i * 0.6 * delta_x,
-                                   value + m * (2 * np.abs(i) - c - 1))
+                pos[level_node] = (
+                    pos[node][0] + i * 0.6 * delta_x,
+                    value + m * (2 * np.abs(i) - c - 1),
+                )
             i += 1
 
         # place the nodes at different levels
-        other_level_nodes = [y for y in
-                             filter(lambda x: image_rav[x] > value, in_nodes)]
-        if (len(other_level_nodes) == 1):
+        other_level_nodes = [
+            y for y in filter(lambda x: image_rav[x] > value, in_nodes)
+        ]
+        if len(other_level_nodes) == 1:
             i = 0
         else:
-            i = - len(other_level_nodes) // 2
+            i = -len(other_level_nodes) // 2
         for other_level_node in other_level_nodes:
-            if((len(other_level_nodes) % 2 == 0) and (i == 0)):
+            if (len(other_level_nodes) % 2 == 0) and (i == 0):
                 i += 1
-            pos[other_level_node] = (pos[node][0] + i * delta_x,
-                                     image_rav[other_level_node])
+            pos[other_level_node] = (
+                pos[node][0] + i * delta_x,
+                image_rav[other_level_node],
+            )
             i += 1
 
     return pos
 
 
-def plot_tree(graph, positions, ax, *, title='', labels=None,
-              font_size=8, text_size=8):
+def plot_tree(graph, positions, ax, *, title='', labels=None, font_size=8, text_size=8):
     """Plot max and component trees."""
-    nx.draw_networkx(graph, pos=positions, ax=ax,
-                     node_size=40, node_shape='s', node_color='white',
-                     font_size=font_size, labels=labels)
+    nx.draw_networkx(
+        graph,
+        pos=positions,
+        ax=ax,
+        node_size=40,
+        node_shape='s',
+        node_color='white',
+        font_size=font_size,
+        labels=labels,
+    )
     for v in range(image_rav.min(), image_rav.max() + 1):
         ax.hlines(v - 0.5, -3, 10, linestyles='dotted')
         ax.text(-3, v - 0.15, f"val: {v}", fontsize=text_size)
@@ -176,11 +192,16 @@ def plot_tree(graph, positions, ax, *, title='', labels=None,
 # We define a small test image.
 # For clarity, we choose an example image, where image values cannot be
 # confounded with indices (different range).
-image = np.array([[40, 40, 39, 39, 38],
-                  [40, 41, 39, 39, 39],
-                  [30, 30, 30, 32, 32],
-                  [33, 33, 30, 32, 35],
-                  [30, 30, 30, 33, 36]], dtype=np.uint8)
+image = np.array(
+    [
+        [40, 40, 39, 39, 38],
+        [40, 41, 39, 39, 39],
+        [30, 30, 30, 32, 32],
+        [33, 33, 30, 32, 35],
+        [30, 30, 30, 33, 36],
+    ],
+    dtype=np.uint8,
+)
 
 
 #####################################################################
@@ -210,12 +231,15 @@ raveled_indices = np.arange(image.size).reshape(image.shape)
 
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(9, 3))
 
-plot_img(ax1, image - image.min(), 'Image Values',
-         plot_text=True, image_values=image)
-plot_img(ax2, image - image.min(), 'Raveled Indices',
-         plot_text=True, image_values=raveled_indices)
-plot_img(ax3, image - image.min(), 'Max-tree indices',
-         plot_text=True, image_values=P)
+plot_img(ax1, image - image.min(), 'Image Values', plot_text=True, image_values=image)
+plot_img(
+    ax2,
+    image - image.min(),
+    'Raveled Indices',
+    plot_text=True,
+    image_values=raveled_indices,
+)
+plot_img(ax3, image - image.min(), 'Max-tree indices', plot_text=True, image_values=P)
 
 
 #####################################################################
@@ -229,8 +253,13 @@ fig, axes = plt.subplots(3, 3, sharey=True, sharex=True, figsize=(6, 6))
 thresholds = np.unique(image)
 for k, threshold in enumerate(thresholds):
     bin_img = image >= threshold
-    plot_img(axes[(k // 3), (k % 3)], bin_img, f"Threshold : {threshold}",
-             plot_text=True, image_values=raveled_indices)
+    plot_img(
+        axes[(k // 3), (k % 3)],
+        bin_img,
+        f"Threshold : {threshold}",
+        plot_text=True,
+        image_values=raveled_indices,
+    )
 
 
 #####################################################################
@@ -274,14 +303,20 @@ total = accumulate(nx_max_tree, S[0], labels_ct)
 pos_cmt = position_nodes_for_max_tree(canonical_max_tree, image_rav)
 
 # positions of nodes : max-tree (MT)
-pos_mt = dict(zip(nx_max_tree.nodes, [pos_cmt[node]
-                                      for node in nx_max_tree.nodes]))
+pos_mt = dict(zip(nx_max_tree.nodes, [pos_cmt[node] for node in nx_max_tree.nodes]))
 
 # plot the trees with networkx and matplotlib
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(20, 8))
 
-plot_tree(nx_max_tree, pos_mt, ax1, title='Component tree',
-          labels=labels_ct, font_size=6, text_size=8)
+plot_tree(
+    nx_max_tree,
+    pos_mt,
+    ax1,
+    title='Component tree',
+    labels=labels_ct,
+    font_size=6,
+    text_size=8,
+)
 
 plot_tree(nx_max_tree, pos_mt, ax2, title='Max tree', labels=labels)
 

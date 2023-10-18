@@ -60,13 +60,9 @@ fig = px.imshow(
     animation_frame=0,
     binary_string=True,
     labels={'animation_frame': '6-step time point'},
-    title='Sample of in-vivo human cornea'
+    title='Sample of in-vivo human cornea',
 )
-fig.update_layout(
-    autosize=False,
-    minreducedwidth=250,
-    minreducedheight=250
-)
+fig.update_layout(autosize=False, minreducedwidth=250, minreducedheight=250)
 plotly.io.show(fig)
 
 #####################################################################
@@ -126,17 +122,14 @@ mask_2 = image_med < thresh_2
 # Let us define a convenience function to display two plots side by side, so
 # it is easier for us to compare them:
 
+
 def plot_comparison(plot1, plot2, title1, title2):
-    fig, (ax1, ax2) = plt.subplots(
-        ncols=2,
-        figsize=(12, 6),
-        sharex=True,
-        sharey=True
-    )
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
     ax1.imshow(plot1, cmap='gray')
     ax1.set_title(title1)
     ax2.imshow(plot2, cmap='gray')
     ax2.set_title(title2)
+
 
 plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 
@@ -211,8 +204,7 @@ image_seq_inpainted = np.zeros(image_seq.shape)
 
 for i in range(image_seq.shape[0]):
     image_seq_inpainted[i] = ski.restoration.inpaint_biharmonic(
-        image_seq[i],
-        mask_dilate
+        image_seq[i], mask_dilate
     )
 
 #####################################################################
@@ -248,10 +240,7 @@ sample_result /= sample_result.max()
 # parameter).
 
 color_contours = ski.color.label2rgb(
-    contour_mask,
-    image=sample_result,
-    alpha=0.4,
-    bg_color=(1, 1, 1)
+    contour_mask, image=sample_result, alpha=0.4, bg_color=(1, 1, 1)
 )
 
 fig, ax = plt.subplots(figsize=(6, 6))

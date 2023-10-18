@@ -19,16 +19,15 @@ def test_negative_sigma():
 
 def test_null_sigma():
     a = np.zeros((3, 3))
-    a[1, 1] = 1.
+    a[1, 1] = 1.0
     assert np.all(gaussian(a, 0, preserve_range=True) == a)
 
 
 def test_default_sigma():
     a = np.zeros((3, 3))
-    a[1, 1] = 1.
+    a[1, 1] = 1.0
     assert_array_equal(
-        gaussian(a, preserve_range=True),
-        gaussian(a, preserve_range=True, sigma=1)
+        gaussian(a, preserve_range=True), gaussian(a, preserve_range=True, sigma=1)
     )
 
 
@@ -42,7 +41,7 @@ def test_image_dtype(dtype):
 
 def test_energy_decrease():
     a = np.zeros((3, 3))
-    a[1, 1] = 1.
+    a[1, 1] = 1.0
     gaussian_a = gaussian(a, preserve_range=True, sigma=1, mode='reflect')
     assert gaussian_a.std() < a.std()
 
@@ -52,27 +51,29 @@ def test_multichannel(channel_axis):
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
     a = np.moveaxis(a, -1, channel_axis)
-    gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect', preserve_range=True,
-                              channel_axis=channel_axis)
+    gaussian_rgb_a = gaussian(
+        a, sigma=1, mode='reflect', preserve_range=True, channel_axis=channel_axis
+    )
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
-    spatial_axes = tuple(
-        [ax for ax in range(a.ndim) if ax != channel_axis % a.ndim]
+    spatial_axes = tuple([ax for ax in range(a.ndim) if ax != channel_axis % a.ndim])
+    assert np.allclose(
+        a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes)
     )
-    assert np.allclose(a.mean(axis=spatial_axes),
-                       gaussian_rgb_a.mean(axis=spatial_axes))
 
     if channel_axis % a.ndim == 2:
         # Check that the mean value is conserved in each channel
         # (color channels are not mixed together)
-        assert np.allclose(a.mean(axis=spatial_axes),
-                           gaussian_rgb_a.mean(axis=spatial_axes))
+        assert np.allclose(
+            a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes)
+        )
     # Iterable sigma
-    gaussian_rgb_a = gaussian(a, sigma=[1, 2], mode='reflect',
-                              channel_axis=channel_axis,
-                              preserve_range=True)
-    assert np.allclose(a.mean(axis=spatial_axes),
-                       gaussian_rgb_a.mean(axis=spatial_axes))
+    gaussian_rgb_a = gaussian(
+        a, sigma=[1, 2], mode='reflect', channel_axis=channel_axis, preserve_range=True
+    )
+    assert np.allclose(
+        a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes)
+    )
 
 
 def test_preserve_range():
@@ -83,7 +84,7 @@ def test_preserve_range():
     assert filtered_ones[0, 0] < 1e-10
 
     filtered_preserved = gaussian(ones, preserve_range=True)
-    assert np.all(filtered_preserved == 1.)
+    assert np.all(filtered_preserved == 1.0)
 
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
     gaussian(img, 1)
@@ -106,14 +107,11 @@ def test_4d_ok():
     assert np.allclose(res.sum(), 1)
 
 
-@pytest.mark.parametrize(
-    "dtype", [np.float32, np.float64]
-)
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_preserve_output(dtype):
     image = np.arange(9, dtype=dtype).reshape((3, 3))
     output = np.zeros_like(image, dtype=dtype)
-    gaussian_image = gaussian(image, sigma=1, output=output,
-                              preserve_range=True)
+    gaussian_image = gaussian(image, sigma=1, output=output, preserve_range=True)
     assert gaussian_image is output
 
 
@@ -121,8 +119,7 @@ def test_output_error():
     image = np.arange(9, dtype=np.float32).reshape((3, 3))
     output = np.zeros_like(image, dtype=np.uint8)
     with pytest.raises(ValueError):
-        gaussian(image, sigma=1, output=output,
-                 preserve_range=True)
+        gaussian(image, sigma=1, output=output, preserve_range=True)
 
 
 @pytest.mark.parametrize("s", [1, (2, 3)])

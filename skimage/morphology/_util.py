@@ -47,8 +47,7 @@ def _validate_connectivity(image_dim, connectivity, offset):
 
     if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
-            raise ValueError("Connectivity array must have an unambiguous "
-                             "center")
+            raise ValueError("Connectivity array must have an unambiguous " "center")
 
         offset = np.array(c_connectivity.shape) // 2
 
@@ -56,14 +55,14 @@ def _validate_connectivity(image_dim, connectivity, offset):
 
 
 def _raveled_offsets_and_distances(
-        image_shape,
-        *,
-        footprint=None,
-        connectivity=1,
-        center=None,
-        spacing=None,
-        order='C',
-        ):
+    image_shape,
+    *,
+    footprint=None,
+    connectivity=1,
+    center=None,
+    spacing=None,
+    order='C',
+):
     """Compute offsets to neighboring pixels in raveled coordinate space.
 
     This function also returns the corresponding distances from the center
@@ -117,20 +116,19 @@ def _raveled_offsets_and_distances(
     """
     ndim = len(image_shape)
     if footprint is None:
-        footprint = ndi.generate_binary_structure(
-                rank=ndim, connectivity=connectivity
-                )
+        footprint = ndi.generate_binary_structure(rank=ndim, connectivity=connectivity)
     if center is None:
         center = tuple(s // 2 for s in footprint.shape)
 
     if not footprint.ndim == ndim == len(center):
         raise ValueError(
             "number of dimensions in image shape, footprint and its"
-            "center index does not match")
+            "center index does not match"
+        )
 
-    offsets = np.stack([(idx - c)
-                        for idx, c in zip(np.nonzero(footprint), center)],
-                       axis=-1)
+    offsets = np.stack(
+        [(idx - c) for idx, c in zip(np.nonzero(footprint), center)], axis=-1
+    )
 
     if order == 'F':
         offsets = offsets[:, ::-1]
@@ -203,14 +201,13 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
             9])
     """
     raveled_offsets = _raveled_offsets_and_distances(
-            image_shape, footprint=footprint, center=center, order=order
-            )[0]
+        image_shape, footprint=footprint, center=center, order=order
+    )[0]
 
     return raveled_offsets
 
 
-def _resolve_neighborhood(footprint, connectivity, ndim,
-                          enforce_adjacency=True):
+def _resolve_neighborhood(footprint, connectivity, ndim, enforce_adjacency=True):
     """Validate or create a footprint (structuring element).
 
     Depending on the values of `connectivity` and `footprint` this function
@@ -260,8 +257,7 @@ def _resolve_neighborhood(footprint, connectivity, ndim,
         # Must specify neighbors for all dimensions
         if footprint.ndim != ndim:
             raise ValueError(
-                "number of dimensions in image and footprint do not"
-                "match"
+                "number of dimensions in image and footprint do not" "match"
             )
         # Must only specify direct neighbors
         if enforce_adjacency and any(s != 3 for s in footprint.shape):
@@ -314,8 +310,7 @@ def _set_border_values(image, value, border_width=1):
         raise ValueError('length of `border_width` must match image.ndim')
     for axis, npad in enumerate(border_width):
         if len(npad) != 2:
-            raise ValueError('each sequence in `border_width` must have '
-                             'length 2')
+            raise ValueError('each sequence in `border_width` must have ' 'length 2')
         w_start, w_end = npad
         if w_start == w_end == 0:
             continue

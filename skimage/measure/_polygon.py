@@ -46,12 +46,12 @@ def approximate_polygon(coords, tolerance):
         r1, c1 = coords[end, :]
         dr = r1 - r0
         dc = c1 - c0
-        segment_angle = - np.arctan2(dr, dc)
+        segment_angle = -np.arctan2(dr, dc)
         segment_dist = c0 * np.sin(segment_angle) + r0 * np.cos(segment_angle)
 
         # select points in-between line segment
-        segment_coords = coords[start + 1:end, :]
-        segment_dists = dists[start + 1:end]
+        segment_coords = coords[start + 1 : end, :]
+        segment_dists = dists[start + 1 : end]
 
         # check whether to take perpendicular or euclidean distance with
         # inner product of vectors
@@ -63,9 +63,8 @@ def approximate_polygon(coords, tolerance):
         dc1 = segment_coords[:, 1] - c1
         # vectors points -> start and end projected on start -> end vector
         projected_lengths0 = dr0 * dr + dc0 * dc
-        projected_lengths1 = - dr1 * dr - dc1 * dc
-        perp = np.logical_and(projected_lengths0 > 0,
-                              projected_lengths1 > 0)
+        projected_lengths1 = -dr1 * dr - dc1 * dc
+        perp = np.logical_and(projected_lengths0 > 0, projected_lengths1 > 0)
         eucl = np.logical_not(perp)
         segment_dists[perp] = np.abs(
             segment_coords[perp, 0] * np.cos(segment_angle)
@@ -76,7 +75,7 @@ def approximate_polygon(coords, tolerance):
             # distance to start point
             np.sqrt(dc0[eucl] ** 2 + dr0[eucl] ** 2),
             # distance to end point
-            np.sqrt(dc1[eucl] ** 2 + dr1[eucl] ** 2)
+            np.sqrt(dc1[eucl] ** 2 + dr1[eucl] ** 2),
         )
 
         if np.any(segment_dists > tolerance):
@@ -132,8 +131,7 @@ def subdivide_polygon(coords, degree=2, preserve_ends=False):
     .. [1] http://mrl.nyu.edu/publications/subdiv-course2000/coursenotes00.pdf
     """
     if degree not in _SUBDIVISION_MASKS:
-        raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is "
-                         "supported.")
+        raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is " "supported.")
 
     circular = np.all(coords[0, :] == coords[-1, :])
 
@@ -146,13 +144,15 @@ def subdivide_polygon(coords, degree=2, preserve_ends=False):
 
     mask_even, mask_odd = _SUBDIVISION_MASKS[degree]
     # divide by total weight
-    mask_even = np.array(mask_even, float) / (2 ** degree)
-    mask_odd = np.array(mask_odd, float) / (2 ** degree)
+    mask_even = np.array(mask_even, float) / (2**degree)
+    mask_odd = np.array(mask_odd, float) / (2**degree)
 
-    even = signal.convolve2d(coords.T, np.atleast_2d(mask_even), mode=method,
-                             boundary='wrap')
-    odd = signal.convolve2d(coords.T, np.atleast_2d(mask_odd), mode=method,
-                            boundary='wrap')
+    even = signal.convolve2d(
+        coords.T, np.atleast_2d(mask_even), mode=method, boundary='wrap'
+    )
+    odd = signal.convolve2d(
+        coords.T, np.atleast_2d(mask_odd), mode=method, boundary='wrap'
+    )
 
     out = np.zeros((even.shape[1] + odd.shape[1], 2))
     out[1::2] = even.T

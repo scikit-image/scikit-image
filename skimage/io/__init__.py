@@ -35,8 +35,11 @@ def _update_doc(doc):
     """
     from textwrap import wrap
 
-    info_table = [(p, plugin_info(p).get('description', 'no description'))
-                  for p in available_plugins if not p == 'test']
+    info_table = [
+        (p, plugin_info(p).get('description', 'no description'))
+        for p in available_plugins
+        if not p == 'test'
+    ]
 
     if len(info_table) > 0:
         name_length = max([len(n) for (n, _) in info_table])
@@ -47,7 +50,7 @@ def _update_doc(doc):
     column_lengths = [name_length, description_length]
     _format_plugin_info_table(info_table, column_lengths)
 
-    for (name, plugin_description) in info_table:
+    for name, plugin_description in info_table:
         description_lines = wrap(plugin_description, description_length)
         name_column = [name]
         name_column.extend(['' for _ in range(len(description_lines) - 1)])

@@ -1,11 +1,12 @@
 import numpy as np
 
-from skimage._shared.testing import (assert_array_almost_equal, assert_equal)
+from skimage._shared.testing import assert_array_almost_equal, assert_equal
 from skimage import color, data, img_as_float
 from skimage.filters import threshold_local, gaussian
 from skimage.util.apply_parallel import apply_parallel
 
 import pytest
+
 da = pytest.importorskip('dask.array')
 
 
@@ -15,9 +16,14 @@ def test_apply_parallel():
 
     # apply the filter
     expected1 = threshold_local(a, 3)
-    result1 = apply_parallel(threshold_local, a, chunks=(6, 6), depth=5,
-                             extra_arguments=(3,),
-                             extra_keywords={'mode': 'reflect'})
+    result1 = apply_parallel(
+        threshold_local,
+        a,
+        chunks=(6, 6),
+        depth=5,
+        extra_arguments=(3,),
+        extra_keywords={'mode': 'reflect'},
+    )
 
     assert_array_almost_equal(result1, expected1)
 
@@ -45,15 +51,24 @@ def test_apply_parallel_lazy():
 
     # apply the filter
     expected1 = threshold_local(a, 3)
-    result1 = apply_parallel(threshold_local, a, chunks=(6, 6), depth=5,
-                             extra_arguments=(3,),
-                             extra_keywords={'mode': 'reflect'},
-                             compute=False)
+    result1 = apply_parallel(
+        threshold_local,
+        a,
+        chunks=(6, 6),
+        depth=5,
+        extra_arguments=(3,),
+        extra_keywords={'mode': 'reflect'},
+        compute=False,
+    )
 
     # apply the filter on a Dask Array
-    result2 = apply_parallel(threshold_local, d, depth=5,
-                             extra_arguments=(3,),
-                             extra_keywords={'mode': 'reflect'})
+    result2 = apply_parallel(
+        threshold_local,
+        d,
+        depth=5,
+        extra_arguments=(3,),
+        extra_keywords={'mode': 'reflect'},
+    )
 
     assert isinstance(result1, da.Array)
 
@@ -79,6 +94,7 @@ def test_no_chunks():
 def test_apply_parallel_wrap():
     def wrapped(arr):
         return gaussian(arr, 1, mode='wrap')
+
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian(a, 1, mode='wrap')
     result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
@@ -89,10 +105,12 @@ def test_apply_parallel_wrap():
 def test_apply_parallel_nearest():
     def wrapped(arr):
         return gaussian(arr, 1, mode='nearest')
+
     a = np.arange(144).reshape(12, 12).astype(float)
     expected = gaussian(a, 1, mode='nearest')
-    result = apply_parallel(wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5},
-                            mode='nearest')
+    result = apply_parallel(
+        wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5}, mode='nearest'
+    )
 
     assert_array_almost_equal(result, expected)
 
@@ -101,12 +119,13 @@ def test_apply_parallel_nearest():
 @pytest.mark.parametrize('chunks', (None, (128, 128, 3)))
 @pytest.mark.parametrize('depth', (0, 8, (8, 8, 0)))
 def test_apply_parallel_rgb(depth, chunks, dtype):
-    cat = data.chelsea().astype(dtype) / 255.
+    cat = data.chelsea().astype(dtype) / 255.0
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat)
-    cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
-                               dtype=dtype, channel_axis=-1)
+    cat_ycbcr = apply_parallel(
+        func, cat, chunks=chunks, depth=depth, dtype=dtype, channel_axis=-1
+    )
 
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 
@@ -139,9 +158,15 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
         # explicitly specify the depth for the channel axis
         depth = [8, 8]
         depth.insert(channel_axis % cat.ndim, 0)
-    cat_ycbcr = apply_parallel(func, cat, chunks=chunks, depth=depth,
-                               dtype=cat.dtype, channel_axis=channel_axis,
-                               extra_keywords=dict(channel_axis=channel_axis))
+    cat_ycbcr = apply_parallel(
+        func,
+        cat,
+        chunks=chunks,
+        depth=depth,
+        dtype=cat.dtype,
+        channel_axis=channel_axis,
+        extra_keywords=dict(channel_axis=channel_axis),
+    )
     # move channels of output back to the last dimension
     cat_ycbcr = np.moveaxis(cat_ycbcr, channel_axis, -1)
 
