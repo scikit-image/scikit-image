@@ -26,10 +26,24 @@ def test_string_split():
 
 
 def test_string_sort():
-    filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
-                 'e9.png', 'e10.png', 'em.png']
-    expected_filenames = ['e9.png', 'e10.png', 'em.png', 'f9.9.png',
-                          'f9.10.png', 'f10.9.png', 'f10.10.png']
+    filenames = [
+        'f9.10.png',
+        'f9.9.png',
+        'f10.10.png',
+        'f10.9.png',
+        'e9.png',
+        'e10.png',
+        'em.png',
+    ]
+    expected_filenames = [
+        'e9.png',
+        'e10.png',
+        'em.png',
+        'f9.9.png',
+        'f9.10.png',
+        'f10.9.png',
+        'f10.10.png',
+    ]
     sorted_filenames = sorted(filenames, key=alphanumeric_key)
     assert_equal(expected_filenames, sorted_filenames)
 
@@ -49,7 +63,7 @@ def test_imagecollection_input():
     pics = [
         fetch('data/coffee.png'),
         fetch('data/chessboard_GRAY.png'),
-        fetch('data/rocket.jpg')
+        fetch('data/rocket.jpg'),
     ]
     pattern = [os.path.join(data_dir, pic) for pic in pics]
     images = ImageCollection(pattern)
@@ -57,11 +71,7 @@ def test_imagecollection_input():
 
 
 class TestImageCollection:
-    pics = [
-        fetch('data/brick.png'),
-        fetch('data/color.png'),
-        fetch('data/moon.png')
-    ]
+    pics = [fetch('data/brick.png'), fetch('data/color.png'), fetch('data/moon.png')]
     pattern = pics[:2]
     pattern_same_shape = pics[::2]
 
@@ -81,11 +91,11 @@ class TestImageCollection:
         num = len(self.images)
         for i in range(-num, num):
             assert isinstance(self.images[i], np.ndarray)
-        assert_allclose(self.images[0],
-                        self.images[-num])
+        assert_allclose(self.images[0], self.images[-num])
 
         def return_img(n):
             return self.images[n]
+
         with testing.raises(IndexError):
             return_img(num)
         with testing.raises(IndexError):
@@ -106,6 +116,7 @@ class TestImageCollection:
 
         def set_files(f):
             self.images.files = f
+
         with testing.raises(AttributeError):
             set_files('newfiles')
 
@@ -137,7 +148,6 @@ class TestImageCollection:
         assert len(ic[0]) == 8
 
     def test_custom_load_func(self):
-
         def load_fn(x):
             return x
 

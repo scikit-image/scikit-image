@@ -52,8 +52,7 @@ for x, y in zip(set_bx, set_by):
 
 # Call the Hausdorff function on the coordinates
 metrics.hausdorff_distance(coords_a, coords_b)
-hausdorff_point_a, hausdorff_point_b = metrics.hausdorff_pair(coords_a,
-                                                              coords_b)
+hausdorff_point_a, hausdorff_point_b = metrics.hausdorff_pair(coords_a, coords_b)
 
 # Plot the lines that shows the length of the Hausdorff distance
 x_line = [30, 30]
@@ -72,10 +71,18 @@ ax.add_artist(plt.Circle((15, 30), 10, color='y', fill=None))
 ax.add_artist(plt.Circle((45, 30), 10, color='y', fill=None))
 
 # Annotate the returned pair of points that are Hausdorff distance apart
-ax.annotate('a', xy=hausdorff_point_a, xytext=(35, 15),
-            arrowprops=dict(facecolor='red', shrink=0.005))
-ax.annotate('b', xy=hausdorff_point_b, xytext=(35, 5),
-            arrowprops=dict(facecolor='green', shrink=0.005))
+ax.annotate(
+    'a',
+    xy=hausdorff_point_a,
+    xytext=(35, 15),
+    arrowprops=dict(facecolor='red', shrink=0.005),
+)
+ax.annotate(
+    'b',
+    xy=hausdorff_point_b,
+    xytext=(35, 5),
+    arrowprops=dict(facecolor='green', shrink=0.005),
+)
 
 ax.imshow(image, cmap=plt.cm.gray)
 ax.axis((0, 60, 60, 0))

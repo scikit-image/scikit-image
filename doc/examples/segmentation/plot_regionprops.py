@@ -65,10 +65,10 @@ plt.show()
 # whereas ``skimage.measure.regionprops`` computes them when they come in use
 # (lazy evaluation).
 
-props = regionprops_table(label_img, properties=('centroid',
-                                                 'orientation',
-                                                 'axis_major_length',
-                                                 'axis_minor_length'))
+props = regionprops_table(
+    label_img,
+    properties=('centroid', 'orientation', 'axis_major_length', 'axis_minor_length'),
+)
 
 #####################################################################
 # We now display a table of these selected properties (one region per row),
@@ -97,7 +97,7 @@ mask = morphology.remove_small_holes(mask, 50)
 labels = measure.label(mask)
 
 fig = px.imshow(img, binary_string=True)
-fig.update_traces(hoverinfo='skip') # hover is only for label info
+fig.update_traces(hoverinfo='skip')  # hover is only for label info
 
 props = measure.regionprops(labels, img)
 properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
@@ -111,9 +111,17 @@ for index in range(1, labels.max()):
     hoverinfo = ''
     for prop_name in properties:
         hoverinfo += f'<b>{prop_name}: {getattr(props[index], prop_name):.2f}</b><br>'
-    fig.add_trace(go.Scatter(
-        x=x, y=y, name=label_i,
-        mode='lines', fill='toself', showlegend=False,
-        hovertemplate=hoverinfo, hoveron='points+fills'))
+    fig.add_trace(
+        go.Scatter(
+            x=x,
+            y=y,
+            name=label_i,
+            mode='lines',
+            fill='toself',
+            showlegend=False,
+            hovertemplate=hoverinfo,
+            hoveron='points+fills',
+        )
+    )
 
 plotly.io.show(fig)

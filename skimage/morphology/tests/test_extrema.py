@@ -20,73 +20,71 @@ def diff(a, b):
 
 
 class TestExtrema:
-
     def test_saturated_arithmetic(self):
         """Adding/subtracting a constant and clipping"""
         # Test for unsigned integer
-        data = np.array([[250, 251, 5, 5],
-                         [100, 200, 253, 252],
-                         [4, 10, 1, 3]],
-                        dtype=np.uint8)
+        data = np.array(
+            [[250, 251, 5, 5], [100, 200, 253, 252], [4, 10, 1, 3]], dtype=np.uint8
+        )
         # adding the constant
         img_constant_added = extrema._add_constant_clip(data, 4)
-        expected = np.array([[254, 255, 9, 9],
-                             [104, 204, 255, 255],
-                             [8, 14, 5, 7]],
-                            dtype=np.uint8)
+        expected = np.array(
+            [[254, 255, 9, 9], [104, 204, 255, 255], [8, 14, 5, 7]], dtype=np.uint8
+        )
         error = diff(img_constant_added, expected)
         assert error < eps
         img_constant_subtracted = extrema._subtract_constant_clip(data, 4)
-        expected = np.array([[246, 247, 1, 1],
-                             [96, 196, 249, 248],
-                             [0, 6, 0, 0]],
-                            dtype=np.uint8)
+        expected = np.array(
+            [[246, 247, 1, 1], [96, 196, 249, 248], [0, 6, 0, 0]], dtype=np.uint8
+        )
         error = diff(img_constant_subtracted, expected)
         assert error < eps
 
         # Test for signed integer
-        data = np.array([[32767, 32766],
-                         [-32768, -32767]],
-                        dtype=np.int16)
+        data = np.array([[32767, 32766], [-32768, -32767]], dtype=np.int16)
         img_constant_added = extrema._add_constant_clip(data, 1)
-        expected = np.array([[32767, 32767],
-                             [-32767, -32766]],
-                            dtype=np.int16)
+        expected = np.array([[32767, 32767], [-32767, -32766]], dtype=np.int16)
         error = diff(img_constant_added, expected)
         assert error < eps
         img_constant_subtracted = extrema._subtract_constant_clip(data, 1)
-        expected = np.array([[32766, 32765],
-                             [-32768, -32768]],
-                            dtype=np.int16)
+        expected = np.array([[32766, 32765], [-32768, -32768]], dtype=np.int16)
         error = diff(img_constant_subtracted, expected)
         assert error < eps
 
     def test_h_maxima(self):
         """h-maxima for various data types"""
 
-        data = np.array([[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
-                         [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
-                         [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
-                         [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
-                         [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-                         [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
-                         [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-                         [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
-                         [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
-                         [11, 13, 15, 16, 16, 16, 16, 16, 15, 13]],
-                        dtype=np.uint8)
+        data = np.array(
+            [
+                [10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+                [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
+                [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
+                [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+            ],
+            dtype=np.uint8,
+        )
 
-        expected_result = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                                   dtype=np.uint8)
+        expected_result = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
             data = data.astype(dtype)
             out = extrema.h_maxima(data, 40)
@@ -97,29 +95,37 @@ class TestExtrema:
     def test_h_minima(self):
         """h-minima for various data types"""
 
-        data = np.array([[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
-                         [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
-                         [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
-                         [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
-                         [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-                         [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
-                         [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-                         [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
-                         [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
-                         [11, 13, 15, 16, 16, 16, 16, 16, 15, 13]],
-                        dtype=np.uint8)
+        data = np.array(
+            [
+                [10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+                [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
+                [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
+                [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+            ],
+            dtype=np.uint8,
+        )
         data = 100 - data
-        expected_result = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                                   dtype=np.uint8)
+        expected_result = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         for dtype in [np.uint8, np.uint64, np.int8, np.int64]:
             data = data.astype(dtype)
             out = extrema.h_minima(data, 40)
@@ -130,41 +136,39 @@ class TestExtrema:
 
     def test_extrema_float(self):
         """specific tests for float type"""
-        data = np.array([[0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14,
-                          0.14, 0.13, 0.11],
-                         [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16,
-                          0.16, 0.15, 0.13],
-                         [0.13, 0.15, 0.40, 0.40, 0.18, 0.18, 0.18,
-                          0.60, 0.60, 0.15],
-                         [0.14, 0.16, 0.40, 0.40, 0.19, 0.19, 0.19,
-                          0.60, 0.60, 0.16],
-                         [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19,
-                          0.19, 0.18, 0.16],
-                         [0.15, 0.182, 0.18, 0.19, 0.204, 0.20, 0.19,
-                          0.19, 0.18, 0.16],
-                         [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19,
-                          0.19, 0.18, 0.16],
-                         [0.14, 0.16, 0.80, 0.80, 0.19, 0.19, 0.19,
-                          1.0, 1.0, 0.16],
-                         [0.13, 0.15, 0.80, 0.80, 0.18, 0.18, 0.18,
-                          1.0, 1.0, 0.15],
-                         [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16,
-                          0.16, 0.15, 0.13]],
-                        dtype=np.float32)
+        data = np.array(
+            [
+                [0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14, 0.14, 0.13, 0.11],
+                [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13],
+                [0.13, 0.15, 0.40, 0.40, 0.18, 0.18, 0.18, 0.60, 0.60, 0.15],
+                [0.14, 0.16, 0.40, 0.40, 0.19, 0.19, 0.19, 0.60, 0.60, 0.16],
+                [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
+                [0.15, 0.182, 0.18, 0.19, 0.204, 0.20, 0.19, 0.19, 0.18, 0.16],
+                [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
+                [0.14, 0.16, 0.80, 0.80, 0.19, 0.19, 0.19, 1.0, 1.0, 0.16],
+                [0.13, 0.15, 0.80, 0.80, 0.18, 0.18, 0.18, 1.0, 1.0, 0.15],
+                [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13],
+            ],
+            dtype=np.float32,
+        )
         inverted_data = 1.0 - data
 
         out = extrema.h_maxima(data, 0.003)
-        expected_result = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                                   dtype=np.uint8)
+        expected_result = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
 
         error = diff(expected_result, out)
         assert error < eps
@@ -194,11 +198,16 @@ class TestExtrema:
 
     def test_h_maxima_float_h(self):
         """specific tests for h-maxima float h parameter"""
-        data = np.array([[0, 0, 0, 0, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 3, 4, 3, 0],
-                         [0, 3, 3, 3, 0],
-                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+        data = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 3, 3, 3, 0],
+                [0, 3, 4, 3, 0],
+                [0, 3, 3, 3, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
 
         h_vals = np.linspace(1.0, 2.0, 100)
         failures = 0
@@ -212,30 +221,40 @@ class TestExtrema:
             with expected_warnings(msgs):
                 maxima = extrema.h_maxima(data, h)
 
-            if (maxima[2, 2] == 0):
+            if maxima[2, 2] == 0:
                 failures += 1
 
-        assert (failures == 0)
+        assert failures == 0
 
     def test_h_maxima_large_h(self):
         """test that h-maxima works correctly for large h"""
-        data = np.array([[10, 10, 10, 10, 10],
-                         [10, 13, 13, 13, 10],
-                         [10, 13, 14, 13, 10],
-                         [10, 13, 13, 13, 10],
-                         [10, 10, 10, 10, 10]], dtype=np.uint8)
+        data = np.array(
+            [
+                [10, 10, 10, 10, 10],
+                [10, 13, 13, 13, 10],
+                [10, 13, 14, 13, 10],
+                [10, 13, 13, 13, 10],
+                [10, 10, 10, 10, 10],
+            ],
+            dtype=np.uint8,
+        )
 
         maxima = extrema.h_maxima(data, 5)
-        assert (np.sum(maxima) == 0)
+        assert np.sum(maxima) == 0
 
-        data = np.array([[10, 10, 10, 10, 10],
-                         [10, 13, 13, 13, 10],
-                         [10, 13, 14, 13, 10],
-                         [10, 13, 13, 13, 10],
-                         [10, 10, 10, 10, 10]], dtype=np.float32)
+        data = np.array(
+            [
+                [10, 10, 10, 10, 10],
+                [10, 13, 13, 13, 10],
+                [10, 13, 14, 13, 10],
+                [10, 13, 13, 13, 10],
+                [10, 10, 10, 10, 10],
+            ],
+            dtype=np.float32,
+        )
 
         maxima = extrema.h_maxima(data, 5.0)
-        assert (np.sum(maxima) == 0)
+        assert np.sum(maxima) == 0
 
     def test_h_minima_float_image(self):
         """specific tests for h-minima float image type"""
@@ -258,11 +277,16 @@ class TestExtrema:
 
     def test_h_minima_float_h(self):
         """specific tests for h-minima float h parameter"""
-        data = np.array([[4, 4, 4, 4, 4],
-                         [4, 1, 1, 1, 4],
-                         [4, 1, 0, 1, 4],
-                         [4, 1, 1, 1, 4],
-                         [4, 4, 4, 4, 4]], dtype=np.uint8)
+        data = np.array(
+            [
+                [4, 4, 4, 4, 4],
+                [4, 1, 1, 1, 4],
+                [4, 1, 0, 1, 4],
+                [4, 1, 1, 1, 4],
+                [4, 4, 4, 4, 4],
+            ],
+            dtype=np.uint8,
+        )
 
         h_vals = np.linspace(1.0, 2.0, 100)
         failures = 0
@@ -275,68 +299,91 @@ class TestExtrema:
             with expected_warnings(msgs):
                 minima = extrema.h_minima(data, h)
 
-            if (minima[2, 2] == 0):
+            if minima[2, 2] == 0:
                 failures += 1
 
-        assert (failures == 0)
+        assert failures == 0
 
     def test_h_minima_large_h(self):
         """test that h-minima works correctly for large h"""
-        data = np.array([[14, 14, 14, 14, 14],
-                         [14, 11, 11, 11, 14],
-                         [14, 11, 10, 11, 14],
-                         [14, 11, 11, 11, 14],
-                         [14, 14, 14, 14, 14]], dtype=np.uint8)
+        data = np.array(
+            [
+                [14, 14, 14, 14, 14],
+                [14, 11, 11, 11, 14],
+                [14, 11, 10, 11, 14],
+                [14, 11, 11, 11, 14],
+                [14, 14, 14, 14, 14],
+            ],
+            dtype=np.uint8,
+        )
 
         maxima = extrema.h_minima(data, 5)
-        assert (np.sum(maxima) == 0)
+        assert np.sum(maxima) == 0
 
-        data = np.array([[14, 14, 14, 14, 14],
-                         [14, 11, 11, 11, 14],
-                         [14, 11, 10, 11, 14],
-                         [14, 11, 11, 11, 14],
-                         [14, 14, 14, 14, 14]], dtype=np.float32)
+        data = np.array(
+            [
+                [14, 14, 14, 14, 14],
+                [14, 11, 11, 11, 14],
+                [14, 11, 10, 11, 14],
+                [14, 11, 11, 11, 14],
+                [14, 14, 14, 14, 14],
+            ],
+            dtype=np.float32,
+        )
 
         maxima = extrema.h_minima(data, 5.0)
-        assert (np.sum(maxima) == 0)
+        assert np.sum(maxima) == 0
 
 
 class TestLocalMaxima(unittest.TestCase):
     """Some tests for local_minima are included as well."""
 
     supported_dtypes = [
-        np.uint8, np.uint16, np.uint32, np.uint64,
-        np.int8, np.int16, np.int32, np.int64,
-        np.float32, np.float64
+        np.uint8,
+        np.uint16,
+        np.uint32,
+        np.uint64,
+        np.int8,
+        np.int16,
+        np.int32,
+        np.int64,
+        np.float32,
+        np.float64,
     ]
     image = np.array(
-        [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-         [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-         [0, 0, 0, 2, 0, 0, 3, 3, 0, 0, 4, 0, 2, 0, 0],
-         [0, 1, 0, 0, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0],
-         [0, 2, 0, 1, 0, 2, 1, 0, 0, 0, 0, 3, 0, 0, 0],
-         [0, 0, 2, 0, 2, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0]],
-        dtype=np.uint8
+        [
+            [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 2, 0, 0, 3, 3, 0, 0, 4, 0, 2, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0, 0],
+            [0, 2, 0, 1, 0, 2, 1, 0, 0, 0, 0, 3, 0, 0, 0],
+            [0, 0, 2, 0, 2, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0],
+        ],
+        dtype=np.uint8,
     )
     # Connectivity 2, maxima can touch border, returned with default values
     expected_default = np.array(
-        [[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-         [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
-        dtype=bool
+        [
+            [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=bool,
     )
     # Connectivity 1 (cross), maxima can touch border
     expected_cross = np.array(
-        [[1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-         [1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-         [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
-         [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-         [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]],
-        dtype=bool
+        [
+            [1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
+            [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=bool,
     )
 
     def test_empty(self):
@@ -373,30 +420,34 @@ class TestLocalMaxima(unittest.TestCase):
         tests for all supported dtypes.
         """
         data = np.array(
-            [[10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
-             [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
-             [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
-             [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
-             [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-             [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
-             [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
-             [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
-             [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
-             [11, 13, 15, 16, 16, 16, 16, 16, 15, 13]],
-            dtype=np.uint8
+            [
+                [10, 11, 13, 14, 14, 15, 14, 14, 13, 11],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+                [13, 15, 40, 40, 18, 18, 18, 60, 60, 15],
+                [14, 16, 40, 40, 19, 19, 19, 60, 60, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [15, 16, 18, 19, 19, 20, 19, 19, 18, 16],
+                [14, 16, 18, 19, 19, 19, 19, 19, 18, 16],
+                [14, 16, 80, 80, 19, 19, 19, 100, 100, 16],
+                [13, 15, 80, 80, 18, 18, 18, 100, 100, 15],
+                [11, 13, 15, 16, 16, 16, 16, 16, 15, 13],
+            ],
+            dtype=np.uint8,
         )
         expected = np.array(
-            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-            dtype=bool
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=bool,
         )
         for dtype in self.supported_dtypes:
             image = data.astype(dtype)
@@ -423,10 +474,10 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_footprint(self):
         """Test results if footprint is given."""
-        footprint_cross = np.array(
-            [[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=bool)
+        footprint_cross = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=bool)
         result_footprint_cross = extrema.local_maxima(
-            self.image, footprint=footprint_cross)
+            self.image, footprint=footprint_cross
+        )
         assert result_footprint_cross.dtype == bool
         assert_equal(result_footprint_cross, self.expected_cross)
 
@@ -446,16 +497,17 @@ class TestLocalMaxima(unittest.TestCase):
 
         footprint_x = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]], dtype=bool)
         expected_footprint_x = np.array(
-            [[1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-             [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-             [0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-             [0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]],
-            dtype=bool
+            [
+                [1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+            ],
+            dtype=bool,
         )
-        result_footprint_x = extrema.local_maxima(self.image,
-                                                  footprint=footprint_x)
+        result_footprint_x = extrema.local_maxima(self.image, footprint=footprint_x)
         assert result_footprint_x.dtype == bool
         assert_equal(result_footprint_x, expected_footprint_x)
 
@@ -463,14 +515,12 @@ class TestLocalMaxima(unittest.TestCase):
         """Test output if indices of peaks are desired."""
         # Connectivity 1
         expected_conn1 = np.nonzero(self.expected_cross)
-        result_conn1 = extrema.local_maxima(self.image, connectivity=1,
-                                            indices=True)
+        result_conn1 = extrema.local_maxima(self.image, connectivity=1, indices=True)
         assert_equal(result_conn1, expected_conn1)
 
         # Connectivity 2
         expected_conn2 = np.nonzero(self.expected_default)
-        result_conn2 = extrema.local_maxima(self.image, connectivity=2,
-                                            indices=True)
+        result_conn2 = extrema.local_maxima(self.image, connectivity=2, indices=True)
         assert_equal(result_conn2, expected_conn2)
 
     def test_allow_borders(self):
@@ -478,21 +528,25 @@ class TestLocalMaxima(unittest.TestCase):
         # Use connectivity 1 to allow many maxima, only filtering at border is
         # of interest
         result_with_boder = extrema.local_maxima(
-            self.image, connectivity=1, allow_borders=True)
+            self.image, connectivity=1, allow_borders=True
+        )
         assert result_with_boder.dtype == bool
         assert_equal(result_with_boder, self.expected_cross)
 
         expected_without_border = np.array(
-            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-             [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
-             [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-            dtype=bool
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
+                [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=bool,
         )
         result_without_border = extrema.local_maxima(
-            self.image, connectivity=1, allow_borders=False)
+            self.image, connectivity=1, allow_borders=False
+        )
         assert result_with_boder.dtype == bool
         assert_equal(result_without_border, expected_without_border)
 
@@ -500,8 +554,7 @@ class TestLocalMaxima(unittest.TestCase):
         """Test one- and three-dimensional case."""
         # One-dimension
         x_1d = np.array([1, 1, 0, 1, 2, 3, 0, 2, 1, 2, 0])
-        expected_1d = np.array([1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
-                               dtype=bool)
+        expected_1d = np.array([1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0], dtype=bool)
         result_1d = extrema.local_maxima(x_1d)
         assert result_1d.dtype == bool
         assert_equal(result_1d, expected_1d)
@@ -551,31 +604,35 @@ class TestLocalMaxima(unittest.TestCase):
         """Specific tests for float type."""
         # Copied from old unit test for local_maxma
         image = np.array(
-            [[0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14, 0.14, 0.13, 0.11],
-             [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13],
-             [0.13, 0.15, 0.40, 0.40, 0.18, 0.18, 0.18, 0.60, 0.60, 0.15],
-             [0.14, 0.16, 0.40, 0.40, 0.19, 0.19, 0.19, 0.60, 0.60, 0.16],
-             [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
-             [0.15, 0.182, 0.18, 0.19, 0.204, 0.20, 0.19, 0.19, 0.18, 0.16],
-             [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
-             [0.14, 0.16, 0.80, 0.80, 0.19, 0.19, 0.19, 1.0, 1.0, 0.16],
-             [0.13, 0.15, 0.80, 0.80, 0.18, 0.18, 0.18, 1.0, 1.0, 0.15],
-             [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13]],
-            dtype=np.float32
+            [
+                [0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14, 0.14, 0.13, 0.11],
+                [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13],
+                [0.13, 0.15, 0.40, 0.40, 0.18, 0.18, 0.18, 0.60, 0.60, 0.15],
+                [0.14, 0.16, 0.40, 0.40, 0.19, 0.19, 0.19, 0.60, 0.60, 0.16],
+                [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
+                [0.15, 0.182, 0.18, 0.19, 0.204, 0.20, 0.19, 0.19, 0.18, 0.16],
+                [0.14, 0.16, 0.18, 0.19, 0.19, 0.19, 0.19, 0.19, 0.18, 0.16],
+                [0.14, 0.16, 0.80, 0.80, 0.19, 0.19, 0.19, 1.0, 1.0, 0.16],
+                [0.13, 0.15, 0.80, 0.80, 0.18, 0.18, 0.18, 1.0, 1.0, 0.15],
+                [0.11, 0.13, 0.15, 0.16, 0.16, 0.16, 0.16, 0.16, 0.15, 0.13],
+            ],
+            dtype=np.float32,
         )
         inverted_image = 1.0 - image
         expected_result = np.array(
-            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-            dtype=bool
+            [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            dtype=bool,
         )
 
         # Test for local maxima with automatic step calculation
@@ -592,19 +649,15 @@ class TestLocalMaxima(unittest.TestCase):
         """Test if input validation triggers correct exceptions."""
         # Mismatching number of dimensions
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(
-                self.image, footprint=np.ones((3, 3, 3), dtype=bool))
+            extrema.local_maxima(self.image, footprint=np.ones((3, 3, 3), dtype=bool))
         with raises(ValueError, match="number of dimensions"):
-            extrema.local_maxima(
-                self.image, footprint=np.ones((3,), dtype=bool))
+            extrema.local_maxima(self.image, footprint=np.ones((3,), dtype=bool))
 
         # All dimensions in footprint must be of size 3
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(
-                self.image, footprint=np.ones((2, 3), dtype=bool))
+            extrema.local_maxima(self.image, footprint=np.ones((2, 3), dtype=bool))
         with raises(ValueError, match="dimension size"):
-            extrema.local_maxima(
-                self.image, footprint=np.ones((5, 5), dtype=bool))
+            extrema.local_maxima(self.image, footprint=np.ones((5, 5), dtype=bool))
 
         with raises(TypeError, match="float16 which is not supported"):
             extrema.local_maxima(np.empty(1, dtype=np.float16))

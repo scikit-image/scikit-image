@@ -15,9 +15,7 @@ def _min_limit(x, val=np.finfo(float).eps):
 
 
 def _center(x, oshape):
-    """Return an array of shape ``oshape`` from the center of array ``x``.
-
-    """
+    """Return an array of shape ``oshape`` from the center of array ``x``."""
     start = (np.array(x.shape) - np.array(oshape)) // 2
     out = x[tuple(slice(s, s + n) for s, n in zip(start, oshape))]
     return out
@@ -39,9 +37,7 @@ def _pad(data, shape):
 
 
 class LPIFilter2D:
-    """Linear Position-Invariant Filter (2-dimensional)
-
-    """
+    """Linear Position-Invariant Filter (2-dimensional)"""
 
     def __init__(self, impulse_response, **filter_params):
         """
@@ -81,9 +77,7 @@ class LPIFilter2D:
         self._cache = None
 
     def _prepare(self, data):
-        """Calculate filter and data FFT in preparation for filtering.
-
-        """
+        """Calculate filter and data FFT in preparation for filtering."""
         dshape = np.array(data.shape)
         even_offset = (dshape % 2 == 0).astype(int)
         dshape += even_offset  # all filter dimensions must be uneven
@@ -94,18 +88,21 @@ class LPIFilter2D:
 
         if self._cache is None or np.any(self._cache.shape != oshape):
             coords = np.mgrid[
-                [slice(0 + offset, float(n + offset))
-                 for (n, offset) in zip(dshape, even_offset)]
+                [
+                    slice(0 + offset, float(n + offset))
+                    for (n, offset) in zip(dshape, even_offset)
+                ]
             ]
             # this steps over two sets of coordinates,
             # not over the coordinates individually
             for k, coord in enumerate(coords):
-                coord -= (dshape[k] - 1) / 2.
+                coord -= (dshape[k] - 1) / 2.0
             coords = coords.reshape(2, -1).T  # coordinate pairs (r,c)
             coords = coords.astype(float_dtype, copy=False)
 
-            f = self.impulse_response(coords[:, 0], coords[:, 1],
-                                      **self.filter_params).reshape(dshape)
+            f = self.impulse_response(
+                coords[:, 0], coords[:, 1], **self.filter_params
+            ).reshape(dshape)
 
             f = _pad(f, oshape)
             F = fft.fftn(f)
@@ -133,8 +130,9 @@ class LPIFilter2D:
         return out
 
 
-def filter_forward(data, impulse_response=None, filter_params=None,
-                   predefined_filter=None):
+def filter_forward(
+    data, impulse_response=None, filter_params=None, predefined_filter=None
+):
     """Apply the given filter to data.
 
     Parameters
@@ -172,8 +170,9 @@ def filter_forward(data, impulse_response=None, filter_params=None,
     return predefined_filter(data)
 
 
-def filter_inverse(data, impulse_response=None, filter_params=None, max_gain=2,
-                   predefined_filter=None):
+def filter_inverse(
+    data, impulse_response=None, filter_params=None, max_gain=2, predefined_filter=None
+):
     """Apply the filter in reverse to the given data.
 
     Parameters
@@ -216,8 +215,9 @@ def filter_inverse(data, impulse_response=None, filter_params=None, max_gain=2,
     return _center(np.abs(fft.ifftshift(fft.ifftn(G * F))), data.shape)
 
 
-def wiener(data, impulse_response=None, filter_params=None, K=0.25,
-           predefined_filter=None):
+def wiener(
+    data, impulse_response=None, filter_params=None, K=0.25, predefined_filter=None
+):
     """Minimum Mean Square Error (Wiener) inverse filter.
 
     Parameters

@@ -6,13 +6,19 @@ from scipy import ndimage as ndi
 
 from skimage import draw
 from skimage._shared import testing
-from skimage._shared.testing import (assert_allclose, assert_almost_equal,
-                                     assert_equal)
+from skimage._shared.testing import assert_allclose, assert_almost_equal, assert_equal
 from skimage._shared.utils import _supported_float_type
-from skimage.measure import (centroid, inertia_tensor, inertia_tensor_eigvals,
-                             moments, moments_central, moments_coords,
-                             moments_coords_central, moments_hu,
-                             moments_normalized)
+from skimage.measure import (
+    centroid,
+    inertia_tensor,
+    inertia_tensor_eigvals,
+    moments,
+    moments_central,
+    moments_coords,
+    moments_coords_central,
+    moments_hu,
+    moments_normalized,
+)
 
 
 def compare_moments(m1, m2, thresh=1e-8):
@@ -86,8 +92,9 @@ def test_moments_central(anisotropic):
         # check for proper centroid computation
         mu_calc_centroid = moments_central(image)
     else:
-        mu = moments_central(image, (14.5 * spacing[0], 14.5 * spacing[1]),
-                             spacing=spacing)
+        mu = moments_central(
+            image, (14.5 * spacing[0], 14.5 * spacing[1]), spacing=spacing
+        )
         # check for proper centroid computation
         mu_calc_centroid = moments_central(image, spacing=spacing)
 
@@ -103,9 +110,7 @@ def test_moments_central(anisotropic):
         mu2 = moments_central(image2, (14.5 + 2, 14.5 + 2))
     else:
         mu2 = moments_central(
-            image2,
-            ((14.5 + 2) * spacing[0], (14.5 + 2) * spacing[1]),
-            spacing=spacing
+            image2, ((14.5 + 2) * spacing[0], (14.5 + 2) * spacing[1]), spacing=spacing
         )
     # central moments must be translation invariant
     compare_moments(mu, mu2, thresh=1e-14)
@@ -116,8 +121,9 @@ def test_moments_coords():
     image[13:17, 13:17] = 1
     mu_image = moments(image)
 
-    coords = np.array([[r, c] for r in range(13, 17)
-                       for c in range(13, 17)], dtype=np.float64)
+    coords = np.array(
+        [[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.float64
+    )
     mu_coords = moments_coords(coords)
     assert_almost_equal(mu_coords, mu_image)
 
@@ -131,8 +137,9 @@ def test_moments_coords_dtype(dtype):
     mu_image = moments(image)
     assert mu_image.dtype == expected_dtype
 
-    coords = np.array([[r, c] for r in range(13, 17)
-                       for c in range(13, 17)], dtype=dtype)
+    coords = np.array(
+        [[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=dtype
+    )
     mu_coords = moments_coords(coords)
     assert mu_coords.dtype == expected_dtype
 
@@ -144,8 +151,9 @@ def test_moments_central_coords():
     image[13:17, 13:17] = 1
     mu_image = moments_central(image, (14.5, 14.5))
 
-    coords = np.array([[r, c] for r in range(13, 17)
-                       for c in range(13, 17)], dtype=np.float64)
+    coords = np.array(
+        [[r, c] for r in range(13, 17) for c in range(13, 17)], dtype=np.float64
+    )
     mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
 
@@ -158,8 +166,9 @@ def test_moments_central_coords():
     image[16:20, 16:20] = 1
     mu_image = moments_central(image, (14.5, 14.5))
 
-    coords = np.array([[r, c] for r in range(16, 20)
-                       for c in range(16, 20)], dtype=np.float64)
+    coords = np.array(
+        [[r, c] for r in range(16, 20) for c in range(16, 20)], dtype=np.float64
+    )
     mu_coords = moments_coords_central(coords, (14.5, 14.5))
     assert_almost_equal(mu_coords, mu_image)
 
@@ -222,7 +231,7 @@ def test_analytical_moments_calculation(dtype, order, ndim):
     elif ndim == 3:
         shape = (64, 64, 64)
     else:
-        shape = (16, ) * ndim
+        shape = (16,) * ndim
     rng = np.random.default_rng(1234)
     if np.dtype(dtype).kind in 'iu':
         x = rng.integers(0, 256, shape, dtype=dtype)
@@ -282,7 +291,7 @@ def test_moments_dtype(dtype):
 def test_centroid(dtype):
     image = np.zeros((20, 20), dtype=dtype)
     image[14, 14:16] = 1
-    image[15, 14:16] = 1/3
+    image[15, 14:16] = 1 / 3
     image_centroid = centroid(image)
     if dtype == np.float16:
         rtol = 1e-3
@@ -307,7 +316,7 @@ def test_inertia_tensor_2d(dtype):
     v0, v1 = inertia_tensor_eigvals(image, T=T)
     assert v0.dtype == expected_dtype
     assert v1.dtype == expected_dtype
-    np.testing.assert_allclose(np.sqrt(v0/v1), 3, rtol=0.01, atol=0.05)
+    np.testing.assert_allclose(np.sqrt(v0 / v1), 3, rtol=0.01, atol=0.05)
 
 
 def test_inertia_tensor_3d():
@@ -326,21 +335,26 @@ def test_inertia_tensor_3d():
 
     # Check that axis has rotated by expected amount
     pi, cos, sin = np.pi, np.cos, np.sin
-    R = np.array([[ cos(pi/6), -sin(pi/6), 0],
-                  [ sin(pi/6),  cos(pi/6), 0],
-                  [         0,          0, 1]])
+    R = np.array(
+        [[cos(pi / 6), -sin(pi / 6), 0], [sin(pi / 6), cos(pi / 6), 0], [0, 0, 1]]
+    )
     expected_vr = R @ v0
-    assert (np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or
-            np.allclose(-vr, expected_vr, atol=1e-3, rtol=0.01))
+    assert np.allclose(vr, expected_vr, atol=1e-3, rtol=0.01) or np.allclose(
+        -vr, expected_vr, atol=1e-3, rtol=0.01
+    )
 
 
 def test_inertia_tensor_eigvals():
     # Floating point precision problems could make a positive
     # semidefinite matrix have an eigenvalue that is very slightly
     # negative.  Check that we have caught and fixed this problem.
-    image = np.array([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
+    image = np.array(
+        [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        ]
+    )
     # mu = np.array([[3, 0, 98], [0, 14, 0], [2, 0, 98]])
     eigvals = inertia_tensor_eigvals(image=image)
-    assert (min(eigvals) >= 0)
+    assert min(eigvals) >= 0

@@ -4,9 +4,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 
-STREL_4 = np.array([[0, 1, 0],
-                    [1, 1, 1],
-                    [0, 1, 0]], dtype=np.uint8)
+STREL_4 = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8)
 STREL_8 = np.ones((3, 3), dtype=np.uint8)
 
 
@@ -22,38 +20,266 @@ STREL_8 = np.ones((3, 3), dtype=np.uint8)
 # (see the paper by Ohser et al. for more details).
 EULER_COEFS2D_4 = [0, 1, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, 0]
 EULER_COEFS2D_8 = [0, 0, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0, 0, -1, 0]
-EULER_COEFS3D_26 = np.array([0, 1, 1, 0, 1, 0, -2, -1,
-                            1, -2, 0, -1, 0, -1, -1, 0,
-                            1, 0, -2, -1, -2, -1, -1, -2,
-                            -6, -3, -3, -2, -3, -2, 0, -1,
-                            1, -2, 0, -1, -6, -3, -3, -2,
-                            -2, -1, -1, -2, -3, 0, -2, -1,
-                            0, -1, -1, 0, -3, -2, 0, -1,
-                            -3, 0, -2, -1, 0, 1, 1, 0,
-                            1, -2, -6, -3, 0, -1, -3, -2,
-                            -2, -1, -3, 0, -1, -2, -2, -1,
-                            0, -1, -3, -2, -1, 0, 0, -1,
-                            -3, 0, 0, 1, -2, -1, 1, 0,
-                            -2, -1, -3, 0, -3, 0, 0, 1,
-                            -1, 4, 0, 3, 0, 3, 1, 2,
-                            -1, -2, -2, -1, -2, -1, 1,
-                            0, 0, 3, 1, 2, 1, 2, 2, 1,
-                            1, -6, -2, -3, -2, -3, -1, 0,
-                            0, -3, -1, -2, -1, -2, -2, -1,
-                            -2, -3, -1, 0, -1, 0, 4, 3,
-                            -3, 0, 0, 1, 0, 1, 3, 2,
-                            0, -3, -1, -2, -3, 0, 0, 1,
-                            -1, 0, 0, -1, -2, 1, -1, 0,
-                            -1, -2, -2, -1, 0, 1, 3, 2,
-                            -2, 1, -1, 0, 1, 2, 2, 1,
-                            0, -3, -3, 0, -1, -2, 0, 1,
-                            -1, 0, -2, 1, 0, -1, -1, 0,
-                            -1, -2, 0, 1, -2, -1, 3, 2,
-                            -2, 1, 1, 2, -1, 0, 2, 1,
-                            -1, 0, -2, 1, -2, 1, 1, 2,
-                            -2, 3, -1, 2, -1, 2, 0, 1,
-                            0, -1, -1, 0, -1, 0, 2, 1,
-                            -1, 2, 0, 1, 0, 1, 1, 0, ])
+EULER_COEFS3D_26 = np.array(
+    [
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        -2,
+        -1,
+        1,
+        -2,
+        0,
+        -1,
+        0,
+        -1,
+        -1,
+        0,
+        1,
+        0,
+        -2,
+        -1,
+        -2,
+        -1,
+        -1,
+        -2,
+        -6,
+        -3,
+        -3,
+        -2,
+        -3,
+        -2,
+        0,
+        -1,
+        1,
+        -2,
+        0,
+        -1,
+        -6,
+        -3,
+        -3,
+        -2,
+        -2,
+        -1,
+        -1,
+        -2,
+        -3,
+        0,
+        -2,
+        -1,
+        0,
+        -1,
+        -1,
+        0,
+        -3,
+        -2,
+        0,
+        -1,
+        -3,
+        0,
+        -2,
+        -1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        -2,
+        -6,
+        -3,
+        0,
+        -1,
+        -3,
+        -2,
+        -2,
+        -1,
+        -3,
+        0,
+        -1,
+        -2,
+        -2,
+        -1,
+        0,
+        -1,
+        -3,
+        -2,
+        -1,
+        0,
+        0,
+        -1,
+        -3,
+        0,
+        0,
+        1,
+        -2,
+        -1,
+        1,
+        0,
+        -2,
+        -1,
+        -3,
+        0,
+        -3,
+        0,
+        0,
+        1,
+        -1,
+        4,
+        0,
+        3,
+        0,
+        3,
+        1,
+        2,
+        -1,
+        -2,
+        -2,
+        -1,
+        -2,
+        -1,
+        1,
+        0,
+        0,
+        3,
+        1,
+        2,
+        1,
+        2,
+        2,
+        1,
+        1,
+        -6,
+        -2,
+        -3,
+        -2,
+        -3,
+        -1,
+        0,
+        0,
+        -3,
+        -1,
+        -2,
+        -1,
+        -2,
+        -2,
+        -1,
+        -2,
+        -3,
+        -1,
+        0,
+        -1,
+        0,
+        4,
+        3,
+        -3,
+        0,
+        0,
+        1,
+        0,
+        1,
+        3,
+        2,
+        0,
+        -3,
+        -1,
+        -2,
+        -3,
+        0,
+        0,
+        1,
+        -1,
+        0,
+        0,
+        -1,
+        -2,
+        1,
+        -1,
+        0,
+        -1,
+        -2,
+        -2,
+        -1,
+        0,
+        1,
+        3,
+        2,
+        -2,
+        1,
+        -1,
+        0,
+        1,
+        2,
+        2,
+        1,
+        0,
+        -3,
+        -3,
+        0,
+        -1,
+        -2,
+        0,
+        1,
+        -1,
+        0,
+        -2,
+        1,
+        0,
+        -1,
+        -1,
+        0,
+        -1,
+        -2,
+        0,
+        1,
+        -2,
+        -1,
+        3,
+        2,
+        -2,
+        1,
+        1,
+        2,
+        -1,
+        0,
+        2,
+        1,
+        -1,
+        0,
+        -2,
+        1,
+        -2,
+        1,
+        1,
+        2,
+        -2,
+        3,
+        -1,
+        2,
+        -1,
+        2,
+        0,
+        1,
+        0,
+        -1,
+        -1,
+        0,
+        -1,
+        0,
+        2,
+        1,
+        -1,
+        2,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+    ]
+)
 
 
 def euler_number(image, connectivity=None):
@@ -150,7 +376,6 @@ def euler_number(image, connectivity=None):
     # variable coefs is attributed to each configuration in order to get
     # the Euler characteristic.
     if image.ndim == 2:
-
         config = np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]])
         if connectivity == 1:
             coefs = EULER_COEFS2D_4
@@ -160,12 +385,17 @@ def euler_number(image, connectivity=None):
     else:  # 3D images
         if connectivity == 2:
             raise NotImplementedError(
-                    'For 3D images, Euler number is implemented '
-                    'for connectivities 1 and 3 only')
+                'For 3D images, Euler number is implemented '
+                'for connectivities 1 and 3 only'
+            )
 
-        config = np.array([[[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-                           [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
-                           [[0, 0, 0], [0, 16, 64], [0, 32, 128]]])
+        config = np.array(
+            [
+                [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+                [[0, 0, 0], [0, 1, 4], [0, 2, 8]],
+                [[0, 0, 0], [0, 16, 64], [0, 32, 128]],
+            ]
+        )
         if connectivity == 1:
             coefs = EULER_COEFS3D_26[::-1]
         else:
@@ -236,10 +466,12 @@ def perimeter(image, neighborhood=4):
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
-    perimeter_image = ndi.convolve(border_image, np.array([[10, 2, 10],
-                                                           [2, 1,  2],
-                                                           [10, 2, 10]]),
-                                   mode='constant', cval=0)
+    perimeter_image = ndi.convolve(
+        border_image,
+        np.array([[10, 2, 10], [2, 1, 2], [10, 2, 10]]),
+        mode='constant',
+        cval=0,
+    )
 
     # You can also write
     # return perimeter_weights[perimeter_image].sum()
@@ -301,29 +533,56 @@ def perimeter_crofton(image, directions=4):
     7837.077...
     """
     if image.ndim != 2:
-        raise NotImplementedError(
-            '`perimeter_crofton` supports 2D images only')
+        raise NotImplementedError('`perimeter_crofton` supports 2D images only')
 
     # as image could be a label image, transform it to binary image
     image = (image > 0).astype(np.uint8)
     image = np.pad(image, pad_width=1, mode='constant')
-    XF = ndi.convolve(image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]),
-                      mode='constant', cval=0)
+    XF = ndi.convolve(
+        image, np.array([[0, 0, 0], [0, 1, 4], [0, 2, 8]]), mode='constant', cval=0
+    )
 
     h = np.bincount(XF.ravel(), minlength=16)
 
     # definition of the LUT
     if directions == 2:
-        coefs = [0, np.pi / 2, 0, 0, 0, np.pi / 2, 0, 0,
-                 np.pi / 2, np.pi, 0, 0, np.pi / 2, np.pi, 0, 0]
+        coefs = [
+            0,
+            np.pi / 2,
+            0,
+            0,
+            0,
+            np.pi / 2,
+            0,
+            0,
+            np.pi / 2,
+            np.pi,
+            0,
+            0,
+            np.pi / 2,
+            np.pi,
+            0,
+            0,
+        ]
     else:
-        coefs = [0, np.pi / 4 * (1 + 1 / (np.sqrt(2))),
-                 np.pi / (4 * np.sqrt(2)),
-                 np.pi / (2 * np.sqrt(2)), 0,
-                 np.pi / 4 * (1 + 1 / (np.sqrt(2))),
-                 0, np.pi / (4 * np.sqrt(2)), np.pi / 4, np.pi / 2,
-                 np.pi / (4 * np.sqrt(2)), np.pi / (4 * np.sqrt(2)),
-                 np.pi / 4, np.pi / 2, 0, 0]
+        coefs = [
+            0,
+            np.pi / 4 * (1 + 1 / (np.sqrt(2))),
+            np.pi / (4 * np.sqrt(2)),
+            np.pi / (2 * np.sqrt(2)),
+            0,
+            np.pi / 4 * (1 + 1 / (np.sqrt(2))),
+            0,
+            np.pi / (4 * np.sqrt(2)),
+            np.pi / 4,
+            np.pi / 2,
+            np.pi / (4 * np.sqrt(2)),
+            np.pi / (4 * np.sqrt(2)),
+            np.pi / 4,
+            np.pi / 2,
+            0,
+            0,
+        ]
 
     total_perimeter = coefs @ h
     return total_perimeter

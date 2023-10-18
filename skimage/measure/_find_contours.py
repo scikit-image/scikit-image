@@ -7,10 +7,9 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-def find_contours(image, level=None,
-                  fully_connected='low', positive_orientation='low',
-                  *,
-                  mask=None):
+def find_contours(
+    image, level=None, fully_connected='low', positive_orientation='low', *, mask=None
+):
     """Find iso-valued contours in a 2D array for a given level value.
 
     Uses the "marching squares" method to compute a the iso-valued contours of
@@ -125,27 +124,29 @@ def find_contours(image, level=None,
            [0.5, 0. ]])]
     """
     if fully_connected not in _param_options:
-        raise ValueError('Parameters "fully_connected" must be either '
-                         '"high" or "low".')
+        raise ValueError(
+            'Parameters "fully_connected" must be either ' '"high" or "low".'
+        )
     if positive_orientation not in _param_options:
-        raise ValueError('Parameters "positive_orientation" must be either '
-                         '"high" or "low".')
+        raise ValueError(
+            'Parameters "positive_orientation" must be either ' '"high" or "low".'
+        )
     if image.shape[0] < 2 or image.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
     if image.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     if mask is not None:
         if mask.shape != image.shape:
-            raise ValueError('Parameters "array" and "mask"'
-                             ' must have same shape.')
+            raise ValueError('Parameters "array" and "mask"' ' must have same shape.')
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
     if level is None:
         level = (np.nanmin(image) + np.nanmax(image)) / 2.0
 
-    segments = _get_contour_segments(image.astype(np.float64), float(level),
-                                     fully_connected == 'high', mask=mask)
+    segments = _get_contour_segments(
+        image.astype(np.float64), float(level), fully_connected == 'high', mask=mask
+    )
     contours = _assemble_contours(segments)
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]

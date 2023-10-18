@@ -22,6 +22,7 @@ from .._shared.utils import warn
 # https://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
     from scipy.sparse.linalg.dsolve.linsolve import umfpack
+
     old_del = umfpack.UmfpackContext.__del__
 
     def new_del(self):
@@ -29,6 +30,7 @@ try:
             old_del(self)
         except AttributeError:
             pass
+
     umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
 except ImportError:
@@ -36,6 +38,7 @@ except ImportError:
 
 try:
     from pyamg import ruge_stuben_solver
+
     amg_loaded = True
 except ImportError:
     amg_loaded = False
@@ -69,10 +72,8 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
         Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
-    edges_deep = np.vstack((vertices[..., :-1].ravel(),
-                            vertices[..., 1:].ravel()))
-    edges_right = np.vstack((vertices[:, :-1].ravel(),
-                             vertices[:, 1:].ravel()))
+    edges_deep = np.vstack((vertices[..., :-1].ravel(), vertices[..., 1:].ravel()))
+    edges_right = np.vstack((vertices[:, :-1].ravel(), vertices[:, 1:].ravel()))
     edges_down = np.vstack((vertices[:-1].ravel(), vertices[1:].ravel()))
     edges = np.hstack((edges_deep, edges_right, edges_down))
     return edges
@@ -81,13 +82,29 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 def _compute_weights_3d(data, spacing, beta, eps, multichannel):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sum of gradients ** 2
-    gradients = np.concatenate(
-        [np.diff(data[..., 0], axis=ax).ravel() / spacing[ax]
-         for ax in [2, 1, 0] if data.shape[ax] > 1], axis=0) ** 2
+    gradients = (
+        np.concatenate(
+            [
+                np.diff(data[..., 0], axis=ax).ravel() / spacing[ax]
+                for ax in [2, 1, 0]
+                if data.shape[ax] > 1
+            ],
+            axis=0,
+        )
+        ** 2
+    )
     for channel in range(1, data.shape[-1]):
-        gradients += np.concatenate(
-            [np.diff(data[..., channel], axis=ax).ravel() / spacing[ax]
-             for ax in [2, 1, 0] if data.shape[ax] > 1], axis=0) ** 2
+        gradients += (
+            np.concatenate(
+                [
+                    np.diff(data[..., channel], axis=ax).ravel() / spacing[ax]
+                    for ax in [2, 1, 0]
+                    if data.shape[ax] > 1
+                ],
+                axis=0,
+            )
+            ** 2
+        )
 
     # All channels considered together in this standard deviation
     scale_factor = -beta / (10 * data.std())
@@ -103,15 +120,18 @@ def _compute_weights_3d(data, spacing, beta, eps, multichannel):
 def _build_laplacian(data, spacing, mask, beta, multichannel):
     l_x, l_y, l_z = data.shape[:3]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
-                                  multichannel=multichannel)
+    weights = _compute_weights_3d(
+        data, spacing, beta=beta, eps=1.0e-10, multichannel=multichannel
+    )
     if mask is not None:
         # Remove edges of the graph connected to masked nodes, as well
         # as corresponding weights of the edges.
-        mask0 = np.hstack([mask[..., :-1].ravel(), mask[:, :-1].ravel(),
-                           mask[:-1].ravel()])
-        mask1 = np.hstack([mask[..., 1:].ravel(), mask[:, 1:].ravel(),
-                           mask[1:].ravel()])
+        mask0 = np.hstack(
+            [mask[..., :-1].ravel(), mask[:, :-1].ravel(), mask[:-1].ravel()]
+        )
+        mask1 = np.hstack(
+            [mask[..., 1:].ravel(), mask[:, 1:].ravel(), mask[1:].ravel()]
+        )
         ind_mask = np.logical_and(mask0, mask1)
         edges, weights = edges[:, ind_mask], weights[ind_mask]
 
@@ -124,14 +144,12 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
-    lap = sparse.coo_matrix((data, (i_indices, j_indices)),
-                            shape=(pixel_nb, pixel_nb))
+    lap = sparse.coo_matrix((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
     lap.setdiag(-np.ravel(lap.sum(axis=0)))
     return lap.tocsr()
 
 
-def _build_linear_system(data, spacing, labels, nlabels, mask,
-                         beta, multichannel):
+def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichannel):
     """
     Build the matrix A and rhs B of the linear system to solve.
     A and B are two block of the laplacian of the image graph.
@@ -146,30 +164,33 @@ def _build_linear_system(data, spacing, labels, nlabels, mask,
     unlabeled_indices = indices[~seeds_mask]
     seeds_indices = indices[seeds_mask]
 
-    lap_sparse = _build_laplacian(data, spacing, mask=mask,
-                                  beta=beta, multichannel=multichannel)
+    lap_sparse = _build_laplacian(
+        data, spacing, mask=mask, beta=beta, multichannel=multichannel
+    )
 
     rows = lap_sparse[unlabeled_indices, :]
     lap_sparse = rows[:, unlabeled_indices]
     B = -rows[:, seeds_indices]
 
     seeds = labels[seeds_mask]
-    seeds_mask = sparse.csc_matrix(np.hstack(
-        [np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)]))
+    seeds_mask = sparse.csc_matrix(
+        np.hstack([np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)])
+    )
     rhs = B.dot(seeds_mask)
 
     return lap_sparse, rhs
 
 
 def _solve_linear_system(lap_sparse, B, tol, mode):
-
     if mode is None:
         mode = 'cg_j'
 
     if mode == 'cg_mg' and not amg_loaded:
-        warn('"cg_mg" not available, it requires pyamg to be installed. '
-             'The "cg_j" mode will be used instead.',
-             stacklevel=2)
+        warn(
+            '"cg_mg" not available, it requires pyamg to be installed. '
+            'The "cg_j" mode will be used instead.',
+            stacklevel=2,
+        )
         mode = 'cg_j'
 
     if mode == 'bf':
@@ -178,10 +199,12 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         maxiter = None
         if mode == 'cg':
             if UmfpackContext is None:
-                warn('"cg" mode may be slow because UMFPACK is not available. '
-                     'Consider building Scipy with UMFPACK or use a '
-                     'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
-                     stacklevel=2)
+                warn(
+                    '"cg" mode may be slow because UMFPACK is not available. '
+                    'Consider building Scipy with UMFPACK or use a '
+                    'preconditioned version of CG ("cg_j" or "cg_mg" modes).',
+                    stacklevel=2,
+                )
             M = None
         elif mode == 'cg_j':
             M = sparse.diags(1.0 / lap_sparse.diagonal())
@@ -192,30 +215,35 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(),
-               tol=tol, atol=0, M=M, maxiter=maxiter)
-            for i in range(B.shape[1])]
+            cg(lap_sparse, B[:, i].toarray(), tol=tol, atol=0, M=M, maxiter=maxiter)
+            for i in range(B.shape[1])
+        ]
         if np.any([info > 0 for _, info in cg_out]):
-            warn("Conjugate gradient convergence to tolerance not achieved. "
-                 "Consider decreasing beta to improve system conditionning.",
-                 stacklevel=2)
+            warn(
+                "Conjugate gradient convergence to tolerance not achieved. "
+                "Consider decreasing beta to improve system conditionning.",
+                stacklevel=2,
+            )
         X = np.asarray([x for x, _ in cg_out])
 
     return X
 
 
 def _preprocess(labels):
-
     label_values, inv_idx = np.unique(labels, return_inverse=True)
     if max(label_values) <= 0:
-        raise ValueError('No seeds provided in label image: please ensure '
-                         'it contains at least one positive value')
+        raise ValueError(
+            'No seeds provided in label image: please ensure '
+            'it contains at least one positive value'
+        )
 
     if not (label_values == 0).any():
-        warn('Random walker only segments unlabeled areas, where '
-             'labels == 0. No zero valued areas in labels were '
-             'found. Returning provided labels.',
-             stacklevel=2)
+        warn(
+            'Random walker only segments unlabeled areas, where '
+            'labels == 0. No zero valued areas in labels were '
+            'found. Returning provided labels.',
+            stacklevel=2,
+        )
 
         return labels, None, None, None, None
 
@@ -235,14 +263,16 @@ def _preprocess(labels):
     # exist between pruned zones (they could not be determined)
     if label_values[0] < 0 or np.any(isolated):
         isolated = np.logical_and(
-            np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)),
-            null_mask)
+            np.logical_not(ndi.binary_propagation(pos_mask, mask=mask)), null_mask
+        )
 
         labels[isolated] = -1
         if np.all(isolated[null_mask]):
-            warn('All unlabeled pixels are isolated, they could not be '
-                 'determined by the random walker algorithm.',
-                 stacklevel=2)
+            warn(
+                'All unlabeled pixels are isolated, they could not be '
+                'determined by the random walker algorithm.',
+                stacklevel=2,
+            )
             return labels, None, None, None, None
 
         mask[isolated] = False
@@ -254,7 +284,7 @@ def _preprocess(labels):
     zero_idx = np.searchsorted(label_values, 0)
     labels = np.atleast_3d(inv_idx.reshape(labels.shape) - zero_idx)
 
-    nlabels = label_values[zero_idx + 1:].shape[0]
+    nlabels = label_values[zero_idx + 1 :].shape[0]
 
     inds_isolated_seeds = np.nonzero(isolated)
     isolated_values = labels[inds_isolated_seeds]
@@ -263,9 +293,19 @@ def _preprocess(labels):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
-                  return_full_prob=False, spacing=None,
-                  *, prob_tol=1e-3, channel_axis=None):
+def random_walker(
+    data,
+    labels,
+    beta=130,
+    mode='cg_j',
+    tol=1.0e-3,
+    copy=True,
+    return_full_prob=False,
+    spacing=None,
+    *,
+    prob_tol=1e-3,
+    channel_axis=None,
+):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -427,7 +467,8 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     if mode not in ('cg_mg', 'cg', 'bf', 'cg_j', None):
         raise ValueError(
             f"{mode} is not a valid mode. Valid modes are 'cg_mg', "
-            f"'cg', 'cg_j', 'bf', and None")
+            f"'cg', 'cg_j', 'bf', and None"
+        )
 
     # Spacing kwarg checks
     if spacing is None:
@@ -435,11 +476,13 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     elif len(spacing) == labels.ndim:
         if len(spacing) == 2:
             # Need a dummy spacing for singleton 3rd dim
-            spacing = np.r_[spacing, 1.]
+            spacing = np.r_[spacing, 1.0]
         spacing = np.asarray(spacing)
     else:
-        raise ValueError('Input argument `spacing` incorrect, should be an '
-                         'iterable with one number per spatial dimension.')
+        raise ValueError(
+            'Input argument `spacing` incorrect, should be an '
+            'iterable with one number per spatial dimension.'
+        )
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
@@ -450,15 +493,17 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     multichannel = channel_axis is not None
     if not multichannel:
         if data.ndim not in (2, 3):
-            raise ValueError('For non-multichannel input, data must be of '
-                             'dimension 2 or 3.')
+            raise ValueError(
+                'For non-multichannel input, data must be of ' 'dimension 2 or 3.'
+            )
         if data.shape != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
         data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
         if data.ndim not in (3, 4):
-            raise ValueError('For multichannel input, data must have 3 or 4 '
-                             'dimensions.')
+            raise ValueError(
+                'For multichannel input, data must have 3 or 4 ' 'dimensions.'
+            )
         if data.shape[:-1] != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
         data = img_as_float(data)
@@ -471,22 +516,23 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     if copy:
         labels = np.copy(labels)
 
-    (labels, nlabels, mask,
-     inds_isolated_seeds, isolated_values) = _preprocess(labels)
+    (labels, nlabels, mask, inds_isolated_seeds, isolated_values) = _preprocess(labels)
 
     if isolated_values is None:
         # No non isolated zero valued areas in labels were
         # found. Returning provided labels.
         if return_full_prob:
             # Return the concatenation of the masks of each unique label
-            return np.concatenate([np.atleast_3d(labels == lab)
-                                   for lab in np.unique(labels) if lab > 0],
-                                  axis=-1)
+            return np.concatenate(
+                [np.atleast_3d(labels == lab) for lab in np.unique(labels) if lab > 0],
+                axis=-1,
+            )
         return labels
 
     # Build the linear system (lap_sparse, B)
-    lap_sparse, B = _build_linear_system(data, spacing, labels, nlabels, mask,
-                                         beta, multichannel)
+    lap_sparse, B = _build_linear_system(
+        data, spacing, labels, nlabels, mask, beta, multichannel
+    )
 
     # Solve the linear system lap_sparse X = B
     # where X[i, j] is the probability that a marker of label i arrives
@@ -494,9 +540,11 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
     X = _solve_linear_system(lap_sparse, B, tol, mode)
 
     if X.min() < -prob_tol or X.max() > 1 + prob_tol:
-        warn('The probability range is outside [0, 1] given the tolerance '
-             '`prob_tol`. Consider decreasing `beta` and/or decreasing '
-             '`tol`.')
+        warn(
+            'The probability range is outside [0, 1] given the tolerance '
+            '`prob_tol`. Consider decreasing `beta` and/or decreasing '
+            '`tol`.'
+        )
 
     # Build the output according to return_full_prob value
     # Put back labels of isolated seeds

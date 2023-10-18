@@ -13,8 +13,12 @@ from PIL import Image
 from tifffile import TiffFile
 
 
-__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
-           'imread_collection_wrapper']
+__all__ = [
+    'MultiImage',
+    'ImageCollection',
+    'concatenate_images',
+    'imread_collection_wrapper',
+]
 
 
 def concatenate_images(ic):
@@ -82,16 +86,14 @@ def _is_multipattern(input_pattern):
     """Helping function. Returns True if pattern contains a tuple, list, or a
     string separated with os.pathsep."""
     # Conditions to be accepted by ImageCollection:
-    has_str_ospathsep = (isinstance(input_pattern, str)
-                         and os.pathsep in input_pattern)
+    has_str_ospathsep = isinstance(input_pattern, str) and os.pathsep in input_pattern
     not_a_string = not isinstance(input_pattern, str)
     has_iterable = isinstance(input_pattern, Sequence)
     has_strings = all(isinstance(pat, str) for pat in input_pattern)
 
-    is_multipattern = (has_str_ospathsep or
-                       (not_a_string
-                        and has_iterable
-                        and has_strings))
+    is_multipattern = has_str_ospathsep or (
+        not_a_string and has_iterable and has_strings
+    )
     return is_multipattern
 
 
@@ -202,8 +204,10 @@ class ImageCollection:
     >>> isinstance(ic[0], np.ndarray)
     True
     """
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
-                 **load_func_kwargs):
+
+    def __init__(
+        self, load_pattern, conserve_memory=True, load_func=None, **load_func_kwargs
+    ):
         """Load and manage a collection of images."""
         self._files = []
         if _is_multipattern(load_pattern):
@@ -222,6 +226,7 @@ class ImageCollection:
 
         if load_func is None:
             from ._io import imread
+
             self.load_func = imread
             self._numframes = self._find_images()
         else:
@@ -301,8 +306,7 @@ class ImageCollection:
             n = self._check_imgnum(n)
             idx = n % len(self.data)
 
-            if ((self.conserve_memory and n != self._cached) or
-                    (self.data[idx] is None)):
+            if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
                 kwargs = self.load_func_kwargs
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
@@ -422,8 +426,10 @@ def imread_collection_wrapper(imread):
             time.  Otherwise, images will be cached once they are loaded.
 
         """
-        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
-                               load_func=imread)
+        return ImageCollection(
+            load_pattern, conserve_memory=conserve_memory, load_func=imread
+        )
+
     return imread_collection
 
 
@@ -475,14 +481,12 @@ class MultiImage(ImageCollection):
     (15, 10)
     """
 
-    def __init__(self, filename, conserve_memory=True, dtype=None,
-                 **imread_kwargs):
+    def __init__(self, filename, conserve_memory=True, dtype=None, **imread_kwargs):
         """Load a multi-img."""
         from ._io import imread
 
         self._filename = filename
-        super().__init__(filename, conserve_memory,
-                                         load_func=imread, **imread_kwargs)
+        super().__init__(filename, conserve_memory, load_func=imread, **imread_kwargs)
 
     @property
     def filename(self):

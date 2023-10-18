@@ -152,6 +152,10 @@ Metrics = [
     '.spin/cmds.py:asv'
 ]
 
+[tool.black]
+target-version = ['py39', 'py310', 'py311', 'py312']
+skip-string-normalization = 1
+
 [tool.ruff]
 line-length = 88
 target-version = 'py39'

@@ -33,32 +33,31 @@ def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):
     phiyn = P[1:-1, 1:-1] - P[:-2, 1:-1]
     phiy0 = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
 
-    C1 = 1. / np.sqrt(eta + phixp**2 + phiy0**2)
-    C2 = 1. / np.sqrt(eta + phixn**2 + phiy0**2)
-    C3 = 1. / np.sqrt(eta + phix0**2 + phiyp**2)
-    C4 = 1. / np.sqrt(eta + phix0**2 + phiyn**2)
+    C1 = 1.0 / np.sqrt(eta + phixp**2 + phiy0**2)
+    C2 = 1.0 / np.sqrt(eta + phixn**2 + phiy0**2)
+    C3 = 1.0 / np.sqrt(eta + phix0**2 + phiyp**2)
+    C4 = 1.0 / np.sqrt(eta + phix0**2 + phiyn**2)
 
-    K = (P[1:-1, 2:] * C1 + P[1:-1, :-2] * C2 +
-         P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4)
+    K = P[1:-1, 2:] * C1 + P[1:-1, :-2] * C2 + P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4
 
     Hphi = 1 * (phi > 0)
     (c1, c2) = _cv_calculate_averages(image, Hphi)
 
-    difference_from_average_term = (- lambda1 * (image-c1)**2 +
-                                    lambda2 * (image-c2)**2)
-    new_phi = (phi + (dt*_cv_delta(phi)) *
-               (mu*K + difference_from_average_term))
-    return new_phi / (1 + mu * dt * _cv_delta(phi) * (C1+C2+C3+C4))
+    difference_from_average_term = (
+        -lambda1 * (image - c1) ** 2 + lambda2 * (image - c2) ** 2
+    )
+    new_phi = phi + (dt * _cv_delta(phi)) * (mu * K + difference_from_average_term)
+    return new_phi / (1 + mu * dt * _cv_delta(phi) * (C1 + C2 + C3 + C4))
 
 
-def _cv_heavyside(x, eps=1.):
+def _cv_heavyside(x, eps=1.0):
     """Returns the result of a regularised heavyside function of the
     input value(s).
     """
-    return 0.5 * (1. + (2./np.pi) * np.arctan(x/eps))
+    return 0.5 * (1.0 + (2.0 / np.pi) * np.arctan(x / eps))
 
 
-def _cv_delta(x, eps=1.):
+def _cv_delta(x, eps=1.0):
     """Returns the result of a regularised dirac function of the
     input value(s).
     """
@@ -66,10 +65,9 @@ def _cv_delta(x, eps=1.):
 
 
 def _cv_calculate_averages(image, Hphi):
-    """Returns the average values 'inside' and 'outside'.
-    """
+    """Returns the average values 'inside' and 'outside'."""
     H = Hphi
-    Hinv = 1. - H
+    Hinv = 1.0 - H
     Hsum = np.sum(H)
     Hinvsum = np.sum(Hinv)
     avg_inside = np.sum(image * H)
@@ -86,9 +84,8 @@ def _cv_difference_from_average_term(image, Hphi, lambda_pos, lambda_neg):
     the average value within a region at each point.
     """
     (c1, c2) = _cv_calculate_averages(image, Hphi)
-    Hinv = 1. - Hphi
-    return (lambda_pos * (image-c1)**2 * Hphi +
-            lambda_neg * (image-c2)**2 * Hinv)
+    Hinv = 1.0 - Hphi
+    return lambda_pos * (image - c1) ** 2 * Hphi + lambda_neg * (image - c2) ** 2 * Hinv
 
 
 def _cv_edge_length_term(phi, mu):
@@ -98,7 +95,7 @@ def _cv_edge_length_term(phi, mu):
     P = np.pad(phi, 1, mode='edge')
     fy = (P[2:, 1:-1] - P[:-2, 1:-1]) / 2.0
     fx = (P[1:-1, 2:] - P[1:-1, :-2]) / 2.0
-    return mu * _cv_delta(phi) * np.sqrt(fx ** 2 + fy ** 2)
+    return mu * _cv_delta(phi) * np.sqrt(fx**2 + fy**2)
 
 
 def _cv_energy(image, phi, mu, lambda1, lambda2):
@@ -149,9 +146,9 @@ def _cv_large_disk(image_size):
     The disk covers the whole image along its smallest dimension.
     """
     res = np.ones(image_size)
-    centerY = int((image_size[0]-1) / 2)
-    centerX = int((image_size[1]-1) / 2)
-    res[centerY, centerX] = 0.
+    centerY = int((image_size[0] - 1) / 2)
+    centerX = int((image_size[1] - 1) / 2)
+    res[centerY, centerX] = 0.0
     radius = float(min(centerX, centerY))
     return (radius - distance(res)) / radius
 
@@ -162,16 +159,15 @@ def _cv_small_disk(image_size):
     The disk covers half of the image along its smallest dimension.
     """
     res = np.ones(image_size)
-    centerY = int((image_size[0]-1) / 2)
-    centerX = int((image_size[1]-1) / 2)
-    res[centerY, centerX] = 0.
+    centerY = int((image_size[0] - 1) / 2)
+    centerX = int((image_size[1] - 1) / 2)
+    res[centerY, centerX] = 0.0
     radius = float(min(centerX, centerY)) / 2.0
     return (radius - distance(res)) / (radius * 3)
 
 
 def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
-    """Generates an initial level set function conditional on input arguments.
-    """
+    """Generates an initial level set function conditional on input arguments."""
     if isinstance(init_level_set, str):
         if init_level_set == 'checkerboard':
             res = _cv_checkerboard(image_shape, 5, dtype)
@@ -186,9 +182,17 @@ def _cv_init_level_set(init_level_set, image_shape, dtype=np.float64):
     return res.astype(dtype, copy=False)
 
 
-def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
-              max_num_iter=500, dt=0.5, init_level_set='checkerboard',
-              extended_output=False):
+def chan_vese(
+    image,
+    mu=0.25,
+    lambda1=1.0,
+    lambda2=1.0,
+    tol=1e-3,
+    max_num_iter=500,
+    dt=0.5,
+    init_level_set='checkerboard',
+    extended_output=False,
+):
     """Chan-Vese segmentation algorithm.
 
     Active contour model by evolving a level set. Can be used to
@@ -320,8 +324,10 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
     phi = _cv_init_level_set(init_level_set, image.shape, dtype=float_dtype)
 
     if type(phi) != np.ndarray or phi.shape != image.shape:
-        raise ValueError("The dimensions of initial level set do not "
-                         "match the dimensions of image.")
+        raise ValueError(
+            "The dimensions of initial level set do not "
+            "match the dimensions of image."
+        )
 
     image = image.astype(float_dtype, copy=False)
     image = image - np.min(image)
@@ -334,14 +340,14 @@ def chan_vese(image, mu=0.25, lambda1=1.0, lambda2=1.0, tol=1e-3,
     phivar = tol + 1
     segmentation = phi > 0
 
-    while(phivar > tol and i < max_num_iter):
+    while phivar > tol and i < max_num_iter:
         # Save old level set values
         oldphi = phi
 
         # Calculate new level set
         phi = _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt)
         phi = _cv_reset_level_set(phi)
-        phivar = np.sqrt(((phi-oldphi)**2).mean())
+        phivar = np.sqrt(((phi - oldphi) ** 2).mean())
 
         # Extract energy and compare to previous level set and
         # segmentation to see if continuing is necessary

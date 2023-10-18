@@ -5,7 +5,6 @@ from .._shared.utils import _supported_float_type, check_nD
 
 
 class FeatureDetector:
-
     def __init__(self):
         self.keypoints_ = np.array([])
 
@@ -22,7 +21,6 @@ class FeatureDetector:
 
 
 class DescriptorExtractor:
-
     def __init__(self):
         self.descriptors_ = np.array([])
 
@@ -40,9 +38,18 @@ class DescriptorExtractor:
         raise NotImplementedError()
 
 
-def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
-                 keypoints_color='k', matches_color=None, only_matches=False,
-                 alignment='horizontal'):
+def plot_matches(
+    ax,
+    image1,
+    image2,
+    keypoints1,
+    keypoints2,
+    matches,
+    keypoints_color='k',
+    matches_color=None,
+    only_matches=False,
+    alignment='horizontal',
+):
     """Plot matched features.
 
     Parameters
@@ -91,12 +98,12 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
 
     if new_shape1 != image1.shape:
         new_image1 = np.zeros(new_shape1, dtype=image1.dtype)
-        new_image1[:image1.shape[0], :image1.shape[1]] = image1
+        new_image1[: image1.shape[0], : image1.shape[1]] = image1
         image1 = new_image1
 
     if new_shape2 != image2.shape:
         new_image2 = np.zeros(new_shape2, dtype=image2.dtype)
-        new_image2[:image2.shape[0], :image2.shape[1]] = image2
+        new_image2[: image2.shape[0], : image2.shape[1]] = image2
         image2 = new_image2
 
     offset = np.array(image1.shape)
@@ -107,17 +114,27 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         image = np.concatenate([image1, image2], axis=0)
         offset[1] = 0
     else:
-        mesg = (f"plot_matches accepts either 'horizontal' or 'vertical' for "
-                f"alignment, but '{alignment}' was given. See "
-                f"https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matches "  # noqa
-                f"for details.")
+        mesg = (
+            f"plot_matches accepts either 'horizontal' or 'vertical' for "
+            f"alignment, but '{alignment}' was given. See "
+            f"https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matches "  # noqa
+            f"for details."
+        )
         raise ValueError(mesg)
 
     if not only_matches:
-        ax.scatter(keypoints1[:, 1], keypoints1[:, 0],
-                   facecolors='none', edgecolors=keypoints_color)
-        ax.scatter(keypoints2[:, 1] + offset[1], keypoints2[:, 0] + offset[0],
-                   facecolors='none', edgecolors=keypoints_color)
+        ax.scatter(
+            keypoints1[:, 1],
+            keypoints1[:, 0],
+            facecolors='none',
+            edgecolors=keypoints_color,
+        )
+        ax.scatter(
+            keypoints2[:, 1] + offset[1],
+            keypoints2[:, 0] + offset[0],
+            facecolors='none',
+            edgecolors=keypoints_color,
+        )
 
     ax.imshow(image, cmap='gray')
     ax.axis((0, image1.shape[1] + offset[1], image1.shape[0] + offset[0], 0))
@@ -133,9 +150,12 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         else:
             color = matches_color
 
-        ax.plot((keypoints1[idx1, 1], keypoints2[idx2, 1] + offset[1]),
-                (keypoints1[idx1, 0], keypoints2[idx2, 0] + offset[0]),
-                '-', color=color)
+        ax.plot(
+            (keypoints1[idx1, 1], keypoints2[idx2, 1] + offset[1]),
+            (keypoints1[idx1, 0], keypoints2[idx2, 0] + offset[0]),
+            '-',
+            color=color,
+        )
 
 
 def _prepare_grayscale_input_2D(image):
@@ -177,9 +197,11 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
     rows = image_shape[0]
     cols = image_shape[1]
 
-    mask = (((distance - 1) < keypoints[:, 0])
-            & (keypoints[:, 0] < (rows - distance + 1))
-            & ((distance - 1) < keypoints[:, 1])
-            & (keypoints[:, 1] < (cols - distance + 1)))
+    mask = (
+        ((distance - 1) < keypoints[:, 0])
+        & (keypoints[:, 0] < (rows - distance + 1))
+        & ((distance - 1) < keypoints[:, 1])
+        & (keypoints[:, 1] < (cols - distance + 1))
+    )
 
     return mask
