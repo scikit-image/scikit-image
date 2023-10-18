@@ -353,4 +353,8 @@ def test_hog_small_image():
 
     img = np.zeros((23, 23))
     with pytest.raises(ValueError, match=".*image is too small given"):
-        feature.hog(img, pixels_per_cell=(8, 8), cells_per_block=(3, 3),)
+        feature.hog(
+            img,
+            pixels_per_cell=(8, 8),
+            cells_per_block=(3, 3),
+        )

@@ -311,10 +311,12 @@ def hog(
     if n_blocks_col <= 0 or n_blocks_row <= 0:
         min_row = b_row * c_row
         min_col = b_col * c_col
-        raise ValueError('The input image is too small given the values of '
-                         'pixels_per_cell and cells_per_block. '
-                         'It should have at least: '
-                         f'{min_row} rows and {min_col} cols.')
+        raise ValueError(
+            'The input image is too small given the values of '
+            'pixels_per_cell and cells_per_block. '
+            'It should have at least: '
+            f'{min_row} rows and {min_col} cols.'
+        )
     normalized_blocks = np.zeros(
         (n_blocks_row, n_blocks_col, b_row, b_col, orientations), dtype=float_dtype
     )
