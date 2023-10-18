@@ -16,5 +16,9 @@ from ._contingency_table import contingency_table
 from ._structural_similarity import structural_similarity
 from ._variation_of_information import variation_of_information
 from .set_metrics import hausdorff_distance, hausdorff_pair
-from .simple_metrics import (mean_squared_error, normalized_mutual_information,
-                             normalized_root_mse, peak_signal_noise_ratio)
+from .simple_metrics import (
+    mean_squared_error,
+    normalized_mutual_information,
+    normalized_root_mse,
+    peak_signal_noise_ratio,
+)
