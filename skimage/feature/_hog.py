@@ -122,6 +122,12 @@ def hog(
     hog_image : (M, N) ndarray, optional
         A visualisation of the HOG image. Only provided if `visualize` is True.
 
+    Raises
+    -------
+    ValueError
+        If the image is too small given the values of pixels_per_cell and
+        cells_per_block.
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
@@ -302,6 +308,13 @@ def hog(
 
     n_blocks_row = (n_cells_row - b_row) + 1
     n_blocks_col = (n_cells_col - b_col) + 1
+    if n_blocks_col <= 0 or n_blocks_row <= 0:
+        min_row = b_row * c_row
+        min_col = b_col * c_col
+        raise ValueError('The input image is too small given the values of '
+                         'pixels_per_cell and cells_per_block. '
+                         'It should have at least: '
+                         f'{min_row} rows and {min_col} cols.')
     normalized_blocks = np.zeros(
         (n_blocks_row, n_blocks_col, b_row, b_col, orientations), dtype=float_dtype
     )
