@@ -231,7 +231,7 @@ If you want to take matters into your own hands for some reason, follow the
 instructions detailed below to cut a Debian release yourself.
 
 - Tag the release as per instructions above.
-- git switch debians
+- git switch debian
 - git merge v0.x.x
 - uscan <- not sure if this step is necessary
 - Update changelog (emacs has a good mode, requires package dpkg-dev-el)
