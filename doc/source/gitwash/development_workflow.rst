@@ -77,8 +77,8 @@ what the changes in the branch are for.  For example ``add-ability-to-fly``, or
     # Update the mirror of trunk
     git fetch upstream
     # Make new feature branch starting at current trunk
-    git branch my-new-feature upstream/main
-    git switch my-new-feature
+    git branch cool-new-feature upstream/main
+    git switch -n cool-new-feature
 
 Generally, you will want to keep your feature branches on your public github_
 fork of `scikit-image`_.  To do this, you `git push`_ this new branch up to your
@@ -86,15 +86,15 @@ github repo.  Generally (if you followed the instructions in these pages, and by
 default), git will have a link to your github repo, called ``origin``.  You push
 up to your own repo on github with::
 
-   git push origin my-new-feature
+   git push origin cool-new-feature
 
 In git >= 1.7 you can ensure that the link is correctly set by using the
 ``--set-upstream`` option::
 
-   git push --set-upstream origin my-new-feature
+   git push --set-upstream origin cool-new-feature
 
-From now on git will know that ``my-new-feature`` is related to the
-``my-new-feature`` branch in the github repo.
+From now on git will know that ``cool-new-feature`` is related to the
+``cool-new-feature`` branch in the github repo.
 
 .. _edit-flow:
 
