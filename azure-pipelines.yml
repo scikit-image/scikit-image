@@ -21,18 +21,15 @@ jobs:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
-        Python39:
-          PYTHON_VERSION: "3.9"
+        Python310:
+          PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
         Python39-x64:
-          PYTHON_VERSION: "3.9"
+          PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
           TEST_EXAMPLES: "true"
-          # NOTE(honles): winpty is required by one of the doc dependencies,
-          #               but does not provide a wheel for Python 3.9
-          # TEST_EXAMPLES: 'true'
     continueOnError: false
     timeoutInMinutes: 60
 
