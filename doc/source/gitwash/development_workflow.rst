@@ -78,7 +78,7 @@ what the changes in the branch are for.  For example ``add-ability-to-fly``, or
     git fetch upstream
     # Make new feature branch starting at current trunk
     git branch my-new-feature upstream/main
-    git checkout my-new-feature
+    git switch my-new-feature
 
 Generally, you will want to keep your feature branches on your public github_
 fork of `scikit-image`_.  To do this, you `git push`_ this new branch up to your
@@ -121,7 +121,7 @@ In more detail
      # On branch ny-new-feature
      # Changed but not updated:
      #   (use "git add <file>..." to update what will be committed)
-     #   (use "git checkout -- <file>..." to discard changes in working directory)
+     #   (use "git switch -- <file>..." to discard changes in working directory)
      #
      #	modified:   README
      #
@@ -176,7 +176,7 @@ Delete a branch on github
 
 ::
 
-   git checkout main
+   git switch main
    # delete branch locally
    git branch -D my-unwanted-branch
    # delete branch on github
@@ -271,7 +271,7 @@ To do a rebase on trunk::
     # Update the mirror of trunk
     git fetch upstream
     # go to the feature branch
-    git checkout cool-feature
+    git switch cool-feature
     # make a backup in case you mess up
     git branch tmp cool-feature
     # rebase cool-feature onto trunk
