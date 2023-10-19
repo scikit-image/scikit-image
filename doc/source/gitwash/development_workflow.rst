@@ -271,7 +271,7 @@ To do a rebase on trunk::
     # Update the mirror of trunk
     git fetch upstream
     # go to the feature branch
-    git switch cool-feature
+    git switch -c cool-feature --track someone/cool-feature
     # make a backup in case you mess up
     git branch tmp cool-feature
     # rebase cool-feature onto trunk
