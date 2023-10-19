@@ -30,6 +30,19 @@ from skimage.transform._geometric import (
 )
 from skimage.util.dtype import img_as_float, _convert
 
+try:
+    import xarray as xr
+except ImportError:
+    XR_NOT_INSTALLED = True
+else:
+    XR_NOT_INSTALLED = False
+
+xfail_without_xr = pytest.mark.xfail(
+    condition=XR_NOT_INSTALLED,
+    reason="optional dependency xarray is not installed",
+    raises=ImportError,
+)
+
 
 np.random.seed(0)
 
@@ -129,6 +142,21 @@ def test_warp_clip_image_containing_nans(order):
 
     assert_array_almost_equal(np.nanmin(outx), 1)
     assert_array_almost_equal(np.nanmax(outx), 2)
+
+
+@xfail_without_xr
+@pytest.mark.parametrize('preserve_range', [False, True])
+def test_rescale_clip_xarray(preserve_range):
+    """Test that rescaling works on an image passed as a DataArray.
+
+    Ensure it works even when preserve_range is True.
+    """
+    image = xr.DataArray(np.ones((4, 4)))
+    res = np.ones((2, 2))
+    res_data = rescale(image.data, scale=0.5, preserve_range=preserve_range)
+    res_impl = rescale(image, scale=0.5, preserve_range=preserve_range)
+    np.testing.assert_array_equal(res_data, res)
+    np.testing.assert_array_equal(res_impl, res)
 
 
 @pytest.mark.parametrize('order', [0, 1, 3])
