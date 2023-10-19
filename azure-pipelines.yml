@@ -25,7 +25,7 @@ jobs:
           PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
-        Python39-x64:
+        Python310-x64:
           PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
