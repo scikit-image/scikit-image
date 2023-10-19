@@ -77,7 +77,7 @@ the package versions your application needs. They help avoid a common
 challenge known as
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
-To install the current ``scikit-image`` you'll need at least Python 3.6. If
+To install the current ``scikit-image`` you'll need at least Python 3.10. If
 your Python is older, pip will find the most recent compatible version.
 
 .. code-block:: sh
