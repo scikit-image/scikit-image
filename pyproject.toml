@@ -95,7 +95,6 @@ optional = [
     'pyamg',
     'PyWavelets>=1.1.1',
     'scikit-learn>=1.1',
-    'xarray>=2023.9.0',
 ]
 test = [
     'asv',
