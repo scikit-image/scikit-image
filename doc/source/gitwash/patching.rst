@@ -32,8 +32,7 @@ Overview
    git clone https://github.com/scikit-image/scikit-image.git
    # make a branch for your patching
    cd scikit-image
-   git branch the-fix-im-thinking-of
-   git switch the-fix-im-thinking-of
+   git switch -c the-fix-im-thinking-of
    # hack, hack, hack
    # Tell git about any new files you've made
    git add somewhere/tests/test_my_bug.py
@@ -67,8 +66,7 @@ In detail
    access to an unmodified copy of the code in the main
    branch::
 
-      git branch the-fix-im-thinking-of
-      git switch the-fix-im-thinking-of
+      git switch -c the-fix-im-thinking-of
 
 #. Do some edits, and commit them as you go::
 
