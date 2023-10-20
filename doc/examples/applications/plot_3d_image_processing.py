@@ -48,9 +48,7 @@ import numpy as np
 
 import plotly
 import plotly.express as px
-from skimage import (
-    exposure, util
-)
+from skimage import exposure, util
 from skimage.data import cells3d
 
 
@@ -139,14 +137,18 @@ display(data)
 
 def slice_in_3D(ax, i):
     # From https://stackoverflow.com/questions/44881885/python-draw-3d-cube
-    Z = np.array([[0, 0, 0],
-                  [1, 0, 0],
-                  [1, 1, 0],
-                  [0, 1, 0],
-                  [0, 0, 1],
-                  [1, 0, 1],
-                  [1, 1, 1],
-                  [0, 1, 1]])
+    Z = np.array(
+        [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+        ]
+    )
 
     Z = Z * data.shape
     r = [-1, 1]
@@ -156,38 +158,29 @@ def slice_in_3D(ax, i):
     ax.scatter3D(Z[:, 0], Z[:, 1], Z[:, 2])
 
     # List sides' polygons of figure
-    verts = [[Z[0], Z[1], Z[2], Z[3]],
-             [Z[4], Z[5], Z[6], Z[7]],
-             [Z[0], Z[1], Z[5], Z[4]],
-             [Z[2], Z[3], Z[7], Z[6]],
-             [Z[1], Z[2], Z[6], Z[5]],
-             [Z[4], Z[7], Z[3], Z[0]],
-             [Z[2], Z[3], Z[7], Z[6]]]
+    verts = [
+        [Z[0], Z[1], Z[2], Z[3]],
+        [Z[4], Z[5], Z[6], Z[7]],
+        [Z[0], Z[1], Z[5], Z[4]],
+        [Z[2], Z[3], Z[7], Z[6]],
+        [Z[1], Z[2], Z[6], Z[5]],
+        [Z[4], Z[7], Z[3], Z[0]],
+        [Z[2], Z[3], Z[7], Z[6]],
+    ]
 
     # Plot sides
     ax.add_collection3d(
         Poly3DCollection(
-            verts,
-            facecolors=(0, 1, 1, 0.25),
-            linewidths=1,
-            edgecolors="darkblue"
+            verts, facecolors=(0, 1, 1, 0.25), linewidths=1, edgecolors="darkblue"
         )
     )
 
-    verts = np.array([[[0, 0, 0],
-                       [0, 0, 1],
-                       [0, 1, 1],
-                       [0, 1, 0]]])
+    verts = np.array([[[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]]])
     verts = verts * (60, 256, 256)
     verts += [i, 0, 0]
 
     ax.add_collection3d(
-        Poly3DCollection(
-            verts,
-            facecolors="magenta",
-            linewidths=1,
-            edgecolors="black"
-        )
+        Poly3DCollection(verts, facecolors="magenta", linewidths=1, edgecolors="black")
     )
 
     ax.set_xlabel("plane")
@@ -196,13 +189,13 @@ def slice_in_3D(ax, i):
     ax.set_zlabel("col")
 
     # Autoscale plot axes
-    scaling = np.array([getattr(ax,
-                                f'get_{dim}lim')() for dim in "xyz"])
-    ax.auto_scale_xyz(* [[np.min(scaling), np.max(scaling)]] * 3)
+    scaling = np.array([getattr(ax, f'get_{dim}lim')() for dim in "xyz"])
+    ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]] * 3)
 
 
 def explore_slices(data, cmap="gray"):
     from ipywidgets import interact
+
     N = len(data)
 
     @interact(plane=(0, N - 1))
@@ -309,9 +302,7 @@ d.set_title("Histogram equalization CDF")
 vmin, vmax = np.percentile(data, q=(0.5, 99.5))
 
 clipped_data = exposure.rescale_intensity(
-    data,
-    in_range=(vmin, vmax),
-    out_range=np.float32
+    data, in_range=(vmin, vmax), out_range=np.float32
 )
 
 display(clipped_data)
@@ -324,12 +315,7 @@ display(clipped_data)
 fig = px.imshow(data, animation_frame=0, binary_string=True)
 fig.update_xaxes(showticklabels=False)
 fig.update_yaxes(showticklabels=False)
-fig.update_layout(
-    autosize=False,
-    width=500,
-    height=500,
-    coloraxis_showscale=False
-)
+fig.update_layout(autosize=False, width=500, height=500, coloraxis_showscale=False)
 # Drop animation buttons
 fig['layout'].pop('updatemenus')
 plotly.io.show(fig)

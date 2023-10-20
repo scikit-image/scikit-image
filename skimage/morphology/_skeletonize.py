@@ -7,8 +7,7 @@ from scipy import ndimage as ndi
 from .._shared.utils import check_nD, deprecate_kwarg
 from ..util import crop, img_as_ubyte
 from ._skeletonize_3d_cy import _compute_thin_image
-from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
-                              _table_lookup_index)
+from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
 
 
 def skeletonize(image, *, method=None):
@@ -74,18 +73,19 @@ def skeletonize(image, *, method=None):
 
     """
     if method not in {'zhang', 'lee', None}:
-        raise ValueError(f'skeletonize method should be either "lee" or "zhang", '
-                         f'got {method}.')
+        raise ValueError(
+            f'skeletonize method should be either "lee" or "zhang", ' f'got {method}.'
+        )
     if image.ndim == 2 and (method is None or method == 'zhang'):
         skeleton = skeletonize_2d(image.astype(bool, copy=False))
     elif image.ndim == 3 and method == 'zhang':
-        raise ValueError('skeletonize method "zhang" only works for 2D '
-                         'images.')
+        raise ValueError('skeletonize method "zhang" only works for 2D ' 'images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
         skeleton = skeletonize_3d(image)
     else:
-        raise ValueError(f'skeletonize requires a 2D or 3D image as input, '
-                         f'got {image.ndim}D.')
+        raise ValueError(
+            f'skeletonize requires a 2D or 3D image as input, ' f'got {image.ndim}D.'
+        )
     return skeleton
 
 
@@ -168,6 +168,7 @@ def skeletonize_2d(image):
 
 # --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
 
+
 def _generate_thin_luts():
     """generate LUTs for thinning algorithm (for reference)"""
 
@@ -178,7 +179,7 @@ def _generate_thin_luts():
         s = 0
         bits = nabe(n)
         for i in (0, 2, 4, 6):
-            if not(bits[i]) and (bits[i + 1] or bits[(i + 2) % 8]):
+            if not (bits[i]) and (bits[i + 1] or bits[(i + 2) % 8]):
                 s += 1
         return s == 1
 
@@ -200,11 +201,11 @@ def _generate_thin_luts():
 
     def G3(n):
         bits = nabe(n)
-        return not((bits[1] or bits[2] or not(bits[7])) and bits[0])
+        return not ((bits[1] or bits[2] or not (bits[7])) and bits[0])
 
     def G3p(n):
         bits = nabe(n)
-        return not((bits[5] or bits[6] or not(bits[3])) and bits[4])
+        return not ((bits[5] or bits[6] or not (bits[3])) and bits[4])
 
     g3_lut = np.array([G3(n) for n in range(256)])
     g3p_lut = np.array([G3p(n) for n in range(256)])
@@ -215,35 +216,529 @@ def _generate_thin_luts():
     return g123_lut, g123p_lut
 
 
-G123_LUT = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-                     0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
-                     0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                     0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                     1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0,
-                     0, 1, 1, 0, 0, 1, 0, 0, 0], dtype=bool)
+G123_LUT = np.array(
+    [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+    ],
+    dtype=bool,
+)
 
-G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0,
-                      0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-                      1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
-                      0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
+G123P_LUT = np.array(
+    [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ],
+    dtype=bool,
+)
 
 
 def thin(image, max_num_iter=None):
@@ -319,9 +814,7 @@ def thin(image, max_num_iter=None):
     skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
 
     # neighborhood mask
-    mask = np.array([[ 8,  4,   2],
-                     [16,  0,   1],
-                     [32, 64, 128]], dtype=np.uint8)
+    mask = np.array([[8, 4, 2], [16, 0, 1], [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
     max_num_iter = max_num_iter or np.inf
@@ -350,8 +843,9 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
+@deprecate_kwarg(
+    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
 def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
@@ -448,16 +942,20 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     # 3. Keep if # pixels in neighborhood is 2 or less
     # Note that table is independent of image
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
-    table = (center_is_foreground  # condition 1.
-                &
-            (np.array([ndi.label(_pattern_of(index), _eight_connect)[1] !=
-                       ndi.label(_pattern_of(index & ~ 2**4),
-                                    _eight_connect)[1]
-                       for index in range(512)])  # condition 2
-                |
-        np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)]))
+    table = (
+        center_is_foreground  # condition 1.
+        & (
+            np.array(
+                [
+                    ndi.label(_pattern_of(index), _eight_connect)[1]
+                    != ndi.label(_pattern_of(index & ~(2**4)), _eight_connect)[1]
+                    for index in range(512)
+                ]
+            )  # condition 2
+            | np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)])
+        )
         # condition 3
-            )
+    )
 
     # Build distance transform
     distance = ndi.distance_transform_edt(masked_image)
@@ -472,12 +970,13 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     # We use a cornerness_table lookup table where the score of a
     # configuration is the number of background (0-value) pixels in the
     # 3x3 neighborhood
-    cornerness_table = np.array([9 - np.sum(_pattern_of(index))
-                                 for index in range(512)])
+    cornerness_table = np.array(
+        [9 - np.sum(_pattern_of(index)) for index in range(512)]
+    )
     corner_score = _table_lookup(masked_image, cornerness_table)
 
     # Define arrays for inner loop
-    i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
+    i, j = np.mgrid[0 : image.shape[0], 0 : image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
     i = np.ascontiguousarray(i[result], dtype=np.intp)
@@ -491,9 +990,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     #
     generator = np.random.default_rng(rng)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
-    order = np.lexsort((tiebreaker,
-                        corner_score[masked_image],
-                        distance))
+    order = np.lexsort((tiebreaker, corner_score[masked_image], distance))
     order = np.ascontiguousarray(order, dtype=np.int32)
 
     table = np.ascontiguousarray(table, dtype=np.uint8)
@@ -514,9 +1011,14 @@ def _pattern_of(index):
     Return the pattern represented by an index value
     Byte decomposition of index
     """
-    return np.array([[index & 2**0, index & 2**1, index & 2**2],
-                     [index & 2**3, index & 2**4, index & 2**5],
-                     [index & 2**6, index & 2**7, index & 2**8]], bool)
+    return np.array(
+        [
+            [index & 2**0, index & 2**1, index & 2**2],
+            [index & 2**3, index & 2**4, index & 2**5],
+            [index & 2**6, index & 2**7, index & 2**8],
+        ],
+        bool,
+    )
 
 
 def _table_lookup(image, table):
@@ -555,16 +1057,16 @@ def _table_lookup(image, table):
     if image.shape[0] < 3 or image.shape[1] < 3:
         image = image.astype(bool)
         indexer = np.zeros(image.shape, int)
-        indexer[1:, 1:]   += image[:-1, :-1] * 2**0
-        indexer[1:, :]    += image[:-1, :] * 2**1
-        indexer[1:, :-1]  += image[:-1, 1:] * 2**2
+        indexer[1:, 1:] += image[:-1, :-1] * 2**0
+        indexer[1:, :] += image[:-1, :] * 2**1
+        indexer[1:, :-1] += image[:-1, 1:] * 2**2
 
-        indexer[:, 1:]    += image[:, :-1] * 2**3
-        indexer[:, :]     += image[:, :] * 2**4
-        indexer[:, :-1]   += image[:, 1:] * 2**5
+        indexer[:, 1:] += image[:, :-1] * 2**3
+        indexer[:, :] += image[:, :] * 2**4
+        indexer[:, :-1] += image[:, 1:] * 2**5
 
-        indexer[:-1, 1:]  += image[1:, :-1] * 2**6
-        indexer[:-1, :]   += image[1:, :] * 2**7
+        indexer[:-1, 1:] += image[1:, :-1] * 2**6
+        indexer[:-1, :] += image[1:, :] * 2**7
         indexer[:-1, :-1] += image[1:, 1:] * 2**8
     else:
         indexer = _table_lookup_index(np.ascontiguousarray(image, np.uint8))
@@ -615,8 +1117,10 @@ def skeletonize_3d(image):
     """
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
-        raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
-                         f"got image.ndim = {image.ndim} instead.")
+        raise ValueError(
+            "skeletonize_3d can only handle 2D or 3D images; "
+            f"got image.ndim = {image.ndim} instead."
+        )
     image = np.ascontiguousarray(image)
     image = img_as_ubyte(image, force_copy=False)
 

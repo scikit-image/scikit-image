@@ -57,14 +57,29 @@ from ...util import img_as_ubyte
 from . import generic_cy
 
 
-__all__ = ['autolevel', 'equalize', 'gradient', 'maximum', 'mean',
-           'geometric_mean', 'subtract_mean', 'median', 'minimum', 'modal',
-           'enhance_contrast', 'pop', 'threshold', 'noise_filter',
-           'entropy', 'otsu']
+__all__ = [
+    'autolevel',
+    'equalize',
+    'gradient',
+    'maximum',
+    'mean',
+    'geometric_mean',
+    'subtract_mean',
+    'median',
+    'minimum',
+    'modal',
+    'enhance_contrast',
+    'pop',
+    'threshold',
+    'noise_filter',
+    'entropy',
+    'otsu',
+]
 
 
-def _preprocess_input(image, footprint=None, out=None, mask=None,
-                      out_dtype=None, pixel_size=1):
+def _preprocess_input(
+    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -101,13 +116,15 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
     """
     check_nD(image, 2)
     input_dtype = image.dtype
-    if (input_dtype in (bool, bool) or out_dtype in (bool, bool)):
+    if input_dtype in (bool, bool) or out_dtype in (bool, bool):
         raise ValueError('dtype cannot be bool.')
     if input_dtype not in (np.uint8, np.uint16):
-        message = (f'Possible precision loss converting image of type '
-                   f'{input_dtype} to uint8 as required by rank filters. '
-                   f'Convert manually using skimage.util.img_as_ubyte to '
-                   f'silence this warning.')
+        message = (
+            f'Possible precision loss converting image of type '
+            f'{input_dtype} to uint8 as required by rank filters. '
+            f'Convert manually using skimage.util.img_as_ubyte to '
+            f'silence this warning.'
+        )
         warn(message, stacklevel=5)
         image = img_as_ubyte(image)
 
@@ -118,8 +135,7 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
-        raise ValueError('Image dimensions and neighborhood dimensions'
-                         'do not match')
+        raise ValueError('Image dimensions and neighborhood dimensions' 'do not match')
 
     image = np.ascontiguousarray(image)
 
@@ -145,17 +161,20 @@ def _preprocess_input(image, footprint=None, out=None, mask=None,
         # 1 to the maximum of the image.
         n_bins = int(max(3, image.max())) + 1
 
-    if n_bins > 2 ** 10:
-        warn(f'Bad rank filter performance is expected due to a '
-             f'large number of bins ({n_bins}), equivalent to an approximate '
-             f'bitdepth of {np.log2(n_bins):.1f}.',
-             stacklevel=2)
+    if n_bins > 2**10:
+        warn(
+            f'Bad rank filter performance is expected due to a '
+            f'large number of bins ({n_bins}), equivalent to an approximate '
+            f'bitdepth of {np.log2(n_bins):.1f}.',
+            stacklevel=2,
+        )
 
     return image, footprint, out, mask, n_bins
 
 
-def _handle_input_3D(image, footprint=None, out=None, mask=None,
-                     out_dtype=None, pixel_size=1):
+def _handle_input_3D(
+    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+):
     """Preprocess and verify input for filters.rank methods.
 
     Parameters
@@ -192,17 +211,18 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
     """
     check_nD(image, 3)
     if image.dtype not in (np.uint8, np.uint16):
-        message = (f'Possible precision loss converting image of type '
-                   f'{image.dtype} to uint8 as required by rank filters. '
-                   f'Convert manually using skimage.util.img_as_ubyte to '
-                   f'silence this warning.')
+        message = (
+            f'Possible precision loss converting image of type '
+            f'{image.dtype} to uint8 as required by rank filters. '
+            f'Convert manually using skimage.util.img_as_ubyte to '
+            f'silence this warning.'
+        )
         warn(message, stacklevel=2)
         image = img_as_ubyte(image)
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
-        raise ValueError('Image dimensions and neighborhood dimensions'
-                         'do not match')
+        raise ValueError('Image dimensions and neighborhood dimensions' 'do not match')
     image = np.ascontiguousarray(image)
 
     if mask is None:
@@ -231,16 +251,19 @@ def _handle_input_3D(image, footprint=None, out=None, mask=None,
         n_bins = int(max(3, image.max())) + 1
 
     if n_bins > 2**10:
-        warn(f'Bad rank filter performance is expected due to a '
-             f'large number of bins ({n_bins}), equivalent to an approximate '
-             f'bitdepth of {np.log2(n_bins):.1f}.',
-             stacklevel=2)
+        warn(
+            f'Bad rank filter performance is expected due to a '
+            f'large number of bins ({n_bins}), equivalent to an approximate '
+            f'bitdepth of {np.log2(n_bins):.1f}.',
+            stacklevel=2,
+        )
 
     return image, footprint, out, mask, n_bins
 
 
-def _apply_scalar_per_pixel(func, image, footprint, out, mask, shift_x,
-                            shift_y, out_dtype=None):
+def _apply_scalar_per_pixel(
+    func, image, footprint, out, mask, shift_x, shift_y, out_dtype=None
+):
     """Process the specific cython function to the image.
 
     Parameters
@@ -265,32 +288,48 @@ def _apply_scalar_per_pixel(func, image, footprint, out, mask, shift_x,
 
     """
     # preprocess and verify the input
-    image, footprint, out, mask, n_bins = _preprocess_input(image, footprint,
-                                                            out, mask,
-                                                            out_dtype)
+    image, footprint, out, mask, n_bins = _preprocess_input(
+        image, footprint, out, mask, out_dtype
+    )
 
     # apply cython function
-    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, n_bins=n_bins)
+    func(
+        image,
+        footprint,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        mask=mask,
+        out=out,
+        n_bins=n_bins,
+    )
 
     return np.squeeze(out, axis=-1)
 
 
-def _apply_scalar_per_pixel_3D(func, image, footprint, out, mask, shift_x,
-                               shift_y, shift_z, out_dtype=None):
-
+def _apply_scalar_per_pixel_3D(
+    func, image, footprint, out, mask, shift_x, shift_y, shift_z, out_dtype=None
+):
     image, footprint, out, mask, n_bins = _handle_input_3D(
         image, footprint, out, mask, out_dtype
     )
 
-    func(image, footprint, shift_x=shift_x, shift_y=shift_y, shift_z=shift_z,
-         mask=mask, out=out, n_bins=n_bins)
+    func(
+        image,
+        footprint,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        shift_z=shift_z,
+        mask=mask,
+        out=out,
+        n_bins=n_bins,
+    )
 
     return out.reshape(out.shape[:3])
 
 
-def _apply_vector_per_pixel(func, image, footprint, out, mask, shift_x,
-                            shift_y, out_dtype=None, pixel_size=1):
+def _apply_vector_per_pixel(
+    func, image, footprint, out, mask, shift_x, shift_y, out_dtype=None, pixel_size=1
+):
     """
 
     Parameters
@@ -327,20 +366,27 @@ def _apply_vector_per_pixel(func, image, footprint, out, mask, shift_x,
 
     """
     # preprocess and verify the input
-    image, footprint, out, mask, n_bins = _preprocess_input(image, footprint,
-                                                            out, mask,
-                                                            out_dtype,
-                                                            pixel_size)
+    image, footprint, out, mask, n_bins = _preprocess_input(
+        image, footprint, out, mask, out_dtype, pixel_size
+    )
 
     # apply cython function
-    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, n_bins=n_bins)
+    func(
+        image,
+        footprint,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        mask=mask,
+        out=out,
+        n_bins=n_bins,
+    )
 
     return out
 
 
-def autolevel(image, footprint, out=None, mask=None,
-              shift_x=False, shift_y=False, shift_z=False):
+def autolevel(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of gray values to cover the
@@ -382,21 +428,32 @@ def autolevel(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._autolevel, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._autolevel,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._autolevel_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._autolevel_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def equalize(image, footprint, out=None, mask=None,
-             shift_x=False, shift_y=False, shift_z=False):
+def equalize(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Equalize image using local histogram.
 
     Parameters
@@ -435,21 +492,32 @@ def equalize(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._equalize, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._equalize,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._equalize_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._equalize_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def gradient(image, footprint, out=None, mask=None,
-             shift_x=False, shift_y=False, shift_z=False):
+def gradient(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
@@ -488,21 +556,32 @@ def gradient(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._gradient, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._gradient,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._gradient_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._gradient_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def maximum(image, footprint, out=None, mask=None,
-            shift_x=False, shift_y=False, shift_z=False):
+def maximum(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local maximum of an image.
 
     Parameters
@@ -550,21 +629,32 @@ def maximum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._maximum, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._maximum,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._maximum_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._maximum_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def mean(image, footprint, out=None, mask=None,
-         shift_x=False, shift_y=False, shift_z=False):
+def mean(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local mean of an image.
 
     Parameters
@@ -603,21 +693,32 @@ def mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._mean, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._mean,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._mean_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._mean_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def geometric_mean(image, footprint, out=None, mask=None,
-                   shift_x=False, shift_y=False, shift_z=False):
+def geometric_mean(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local geometric mean of an image.
 
     Parameters
@@ -661,21 +762,32 @@ def geometric_mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._geometric_mean, image,
-                                       footprint, out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._geometric_mean,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._geometric_mean_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._geometric_mean_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def subtract_mean(image, footprint, out=None, mask=None,
-                  shift_x=False, shift_y=False, shift_z=False):
+def subtract_mean(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return image subtracted from its local mean.
 
     Parameters
@@ -722,21 +834,38 @@ def subtract_mean(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._subtract_mean, image,
-                                       footprint, out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._subtract_mean,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._subtract_mean_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._subtract_mean_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def median(image, footprint=None, out=None, mask=None,
-           shift_x=False, shift_y=False, shift_z=False):
+def median(
+    image,
+    footprint=None,
+    out=None,
+    mask=None,
+    shift_x=False,
+    shift_y=False,
+    shift_z=False,
+):
     """Return local median of an image.
 
     Parameters
@@ -783,21 +912,32 @@ def median(image, footprint=None, out=None, mask=None,
     if footprint is None:
         footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._median, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._median,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._median_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._median_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def minimum(image, footprint, out=None, mask=None,
-            shift_x=False, shift_y=False, shift_z=False):
+def minimum(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local minimum of an image.
 
     Parameters
@@ -845,21 +985,32 @@ def minimum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._minimum, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._minimum,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._minimum_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._minimum_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def modal(image, footprint, out=None, mask=None,
-          shift_x=False, shift_y=False, shift_z=False):
+def modal(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
@@ -900,21 +1051,32 @@ def modal(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._modal, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._modal,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._modal_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._modal_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def enhance_contrast(image, footprint, out=None, mask=None,
-                     shift_x=False, shift_y=False, shift_z=False):
+def enhance_contrast(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Enhance contrast of an image.
 
     This replaces each pixel by the local maximum if the pixel gray value is
@@ -957,21 +1119,32 @@ def enhance_contrast(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._enhance_contrast, image,
-                                       footprint, out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._enhance_contrast,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._enhance_contrast_3D,
-                                          image, footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._enhance_contrast_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def pop(image, footprint, out=None, mask=None,
-        shift_x=False, shift_y=False, shift_z=False):
+def pop(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
@@ -1017,21 +1190,32 @@ def pop(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._pop, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._pop,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._pop_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._pop_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def sum(image, footprint, out=None, mask=None,
-        shift_x=False, shift_y=False, shift_z=False):
+def sum(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Return the local sum of pixels.
 
     Note that the sum may overflow depending on the data type of the input
@@ -1077,21 +1261,32 @@ def sum(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._sum, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._sum,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._sum_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._sum_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def threshold(image, footprint, out=None, mask=None,
-              shift_x=False, shift_y=False, shift_z=False):
+def threshold(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Local threshold of an image.
 
     The resulting binary mask is True if the gray value of the center pixel is
@@ -1137,21 +1332,32 @@ def threshold(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._threshold, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._threshold,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._threshold_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._threshold_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def noise_filter(image, footprint, out=None, mask=None,
-                 shift_x=False, shift_y=False, shift_z=False):
+def noise_filter(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Noise feature.
 
     Parameters
@@ -1206,9 +1412,15 @@ def noise_filter(image, footprint, out=None, mask=None,
         footprint_cpy = footprint.copy()
         footprint_cpy[centre_r, centre_c] = 0
 
-        return _apply_scalar_per_pixel(generic_cy._noise_filter, image,
-                                       footprint_cpy, out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._noise_filter,
+            image,
+            footprint_cpy,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
         # ensure that the central pixel in the footprint is empty
         centre_r = int(footprint.shape[0] / 2) + shift_y
@@ -1218,18 +1430,23 @@ def noise_filter(image, footprint, out=None, mask=None,
         footprint_cpy = footprint.copy()
         footprint_cpy[centre_r, centre_c, centre_z] = 0
 
-        return _apply_scalar_per_pixel_3D(generic_cy._noise_filter_3D,
-                                          image, footprint_cpy, out=out,
-                                          mask=mask, shift_x=shift_x,
-                                          shift_y=shift_y, shift_z=shift_z)
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._noise_filter_3D,
+            image,
+            footprint_cpy,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
 
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def entropy(image, footprint, out=None, mask=None,
-            shift_x=False, shift_y=False, shift_z=False):
+def entropy(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
@@ -1276,23 +1493,34 @@ def entropy(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._entropy, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y,
-                                       out_dtype=np.float64)
+        return _apply_scalar_per_pixel(
+            generic_cy._entropy,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            out_dtype=np.float64,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._entropy_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z,
-                                          out_dtype=np.float64)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._entropy_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+            out_dtype=np.float64,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def otsu(image, footprint, out=None, mask=None,
-         shift_x=False, shift_y=False, shift_z=False):
+def otsu(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
@@ -1337,21 +1565,32 @@ def otsu(image, footprint, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._otsu, image, footprint,
-                                       out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._otsu,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._otsu_3D, image,
-                                          footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._otsu_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def windowed_histogram(image, footprint, out=None, mask=None,
-                       shift_x=False, shift_y=False, n_bins=None):
+def windowed_histogram(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, n_bins=None
+):
     """Normalized sliding window histogram
 
     Parameters
@@ -1398,15 +1637,29 @@ def windowed_histogram(image, footprint, out=None, mask=None,
     if n_bins is None:
         n_bins = int(image.max()) + 1
 
-    return _apply_vector_per_pixel(generic_cy._windowed_hist, image, footprint,
-                                   out=out, mask=mask,
-                                   shift_x=shift_x, shift_y=shift_y,
-                                   out_dtype=np.float64,
-                                   pixel_size=n_bins)
+    return _apply_vector_per_pixel(
+        generic_cy._windowed_hist,
+        image,
+        footprint,
+        out=out,
+        mask=mask,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        out_dtype=np.float64,
+        pixel_size=n_bins,
+    )
 
 
-def majority(image, footprint, *, out=None, mask=None,
-             shift_x=False, shift_y=False, shift_z=False):
+def majority(
+    image,
+    footprint,
+    *,
+    out=None,
+    mask=None,
+    shift_x=False,
+    shift_y=False,
+    shift_z=False,
+):
     """Assign to each pixel the most common value within its neighborhood.
 
     Parameters
@@ -1445,14 +1698,24 @@ def majority(image, footprint, *, out=None, mask=None,
 
     np_image = np.asanyarray(image)
     if np_image.ndim == 2:
-        return _apply_scalar_per_pixel(generic_cy._majority, image,
-                                       footprint, out=out, mask=mask,
-                                       shift_x=shift_x, shift_y=shift_y)
+        return _apply_scalar_per_pixel(
+            generic_cy._majority,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+        )
     elif np_image.ndim == 3:
-        return _apply_scalar_per_pixel_3D(generic_cy._majority_3D,
-                                          image, footprint, out=out, mask=mask,
-                                          shift_x=shift_x, shift_y=shift_y,
-                                          shift_z=shift_z)
-    raise ValueError(
-        f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.'
-    )
+        return _apply_scalar_per_pixel_3D(
+            generic_cy._majority_3D,
+            image,
+            footprint,
+            out=out,
+            mask=mask,
+            shift_x=shift_x,
+            shift_y=shift_y,
+            shift_z=shift_z,
+        )
+    raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')

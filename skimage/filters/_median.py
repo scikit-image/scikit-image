@@ -6,8 +6,9 @@ from scipy import ndimage as ndi
 from .rank import generic
 
 
-def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
-           behavior='ndimage'):
+def median(
+    image, footprint=None, out=None, mode='nearest', cval=0.0, behavior='ndimage'
+):
     """Return local median of an image.
 
     Parameters
@@ -67,11 +68,14 @@ def median(image, footprint=None, out=None, mode='nearest', cval=0.0,
     """
     if behavior == 'rank':
         if mode != 'nearest' or not np.isclose(cval, 0.0):
-            warn("Change 'behavior' to 'ndimage' if you want to use the "
-                 "parameters 'mode' or 'cval'. They will be discarded "
-                 "otherwise.")
+            warn(
+                "Change 'behavior' to 'ndimage' if you want to use the "
+                "parameters 'mode' or 'cval'. They will be discarded "
+                "otherwise."
+            )
         return generic.median(image, footprint=footprint, out=out)
     if footprint is None:
         footprint = ndi.generate_binary_structure(image.ndim, image.ndim)
-    return ndi.median_filter(image, footprint=footprint, output=out, mode=mode,
-                             cval=cval)
+    return ndi.median_filter(
+        image, footprint=footprint, output=out, mode=mode, cval=cval
+    )

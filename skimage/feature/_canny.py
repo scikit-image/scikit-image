@@ -55,13 +55,8 @@ def _preprocess(image, mask, sigma, mode, cval):
     on the mask to recover the effect of smoothing from just the significant
     pixels.
     """
-    gaussian_kwargs = dict(
-        sigma=sigma,
-        mode=mode,
-        cval=cval,
-        preserve_range=False
-    )
-    compute_bleedover = (mode == 'constant' or mask is not None)
+    gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval, preserve_range=False)
+    compute_bleedover = mode == 'constant' or mask is not None
     float_type = _supported_float_type(image.dtype)
     if mask is None:
         if compute_bleedover:
@@ -88,8 +83,10 @@ def _preprocess(image, mask, sigma, mode, cval):
         # Compute the fractional contribution of masked pixels by applying
         # the function to the mask (which gets you the fraction of the
         # pixel data that's due to significant points)
-        bleed_over = gaussian(mask.astype(float_type, copy=False),
-                              **gaussian_kwargs) + np.finfo(float_type).eps
+        bleed_over = (
+            gaussian(mask.astype(float_type, copy=False), **gaussian_kwargs)
+            + np.finfo(float_type).eps
+        )
 
     # Smooth the masked image
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
@@ -103,8 +100,17 @@ def _preprocess(image, mask, sigma, mode, cval):
     return smoothed_image, eroded_mask
 
 
-def canny(image, sigma=1., low_threshold=None, high_threshold=None,
-          mask=None, use_quantiles=False, *, mode='constant', cval=0.0):
+def canny(
+    image,
+    sigma=1.0,
+    low_threshold=None,
+    high_threshold=None,
+    mask=None,
+    use_quantiles=False,
+    *,
+    mode='constant',
+    cval=0.0,
+):
     """Edge filter an image using the Canny algorithm.
 
     Parameters
@@ -201,7 +207,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     if low_threshold is None:
         low_threshold = 0.1
     elif use_quantiles:
-        if not(0.0 <= low_threshold <= 1.0):
+        if not (0.0 <= low_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         low_threshold /= dtype_max
@@ -209,7 +215,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     if high_threshold is None:
         high_threshold = 0.2
     elif use_quantiles:
-        if not(0.0 <= high_threshold <= 1.0):
+        if not (0.0 <= high_threshold <= 1.0):
             raise ValueError("Quantile thresholds must be between 0 and 1.")
     else:
         high_threshold /= dtype_max
@@ -228,9 +234,9 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None,
     np.sqrt(magnitude, out=magnitude)
 
     if use_quantiles:
-        low_threshold, high_threshold = np.percentile(magnitude,
-                                                      [100.0 * low_threshold,
-                                                       100.0 * high_threshold])
+        low_threshold, high_threshold = np.percentile(
+            magnitude, [100.0 * low_threshold, 100.0 * high_threshold]
+        )
 
     # Non-maximum suppression
     low_masked = _nonmaximum_suppression_bilinear(

@@ -102,7 +102,7 @@ def _add_edge_filter(values, graph):
     for value in values:
         if value != center and not graph.has_edge(center, value):
             graph.add_edge(center, value)
-    return 0.
+    return 0.0
 
 
 class RAG(nx.Graph):
@@ -132,7 +132,6 @@ class RAG(nx.Graph):
     """
 
     def __init__(self, label_image=None, connectivity=1, data=None, **attr):
-
         super().__init__(data, **attr)
         if self.number_of_nodes() == 0:
             self.max_id = 0
@@ -148,7 +147,7 @@ class RAG(nx.Graph):
             # output, without this, a float array of the same shape as the
             # input image will be created and that could be expensive in
             # memory consumption.
-            output = np.broadcast_to(1., label_image.shape)
+            output = np.broadcast_to(1.0, label_image.shape)
             output.setflags(write=True)
             ndi.generic_filter(
                 label_image,
@@ -156,10 +155,18 @@ class RAG(nx.Graph):
                 footprint=fp,
                 mode='nearest',
                 output=output,
-                extra_arguments=(self,))
+                extra_arguments=(self,),
+            )
 
-    def merge_nodes(self, src, dst, weight_func=min_weight, in_place=True,
-                    extra_arguments=None, extra_keywords=None):
+    def merge_nodes(
+        self,
+        src,
+        dst,
+        weight_func=min_weight,
+        in_place=True,
+        extra_arguments=None,
+        extra_keywords=None,
+    ):
         """Merge node `src` and `dst`.
 
         The new combined node is adjacent to all the neighbors of `src`
@@ -212,12 +219,14 @@ class RAG(nx.Graph):
             self.add_node(new)
 
         for neighbor in neighbors:
-            data = weight_func(self, src, dst, neighbor, *extra_arguments,
-                               **extra_keywords)
+            data = weight_func(
+                self, src, dst, neighbor, *extra_arguments, **extra_keywords
+            )
             self.add_edge(neighbor, new, attr_dict=data)
 
-        self.nodes[new]['labels'] = (self.nodes[src]['labels'] +
-                                     self.nodes[dst]['labels'])
+        self.nodes[new]['labels'] = (
+            self.nodes[src]['labels'] + self.nodes[dst]['labels']
+        )
         self.remove_node(src)
 
         if not in_place:
@@ -298,8 +307,7 @@ class RAG(nx.Graph):
         super().add_node(n)
 
 
-def rag_mean_color(image, labels, connectivity=2, mode='distance',
-                   sigma=255.0):
+def rag_mean_color(image, labels, connectivity=2, mode='distance', sigma=255.0):
     """Compute the Region Adjacency Graph using mean colors.
 
     Given an image and its initial segmentation, this method constructs the
@@ -360,10 +368,13 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
     graph = RAG(labels, connectivity=connectivity)
 
     for n in graph:
-        graph.nodes[n].update({'labels': [n],
-                               'pixel count': 0,
-                               'total color': np.array([0, 0, 0],
-                                                       dtype=np.float64)})
+        graph.nodes[n].update(
+            {
+                'labels': [n],
+                'pixel count': 0,
+                'total color': np.array([0, 0, 0], dtype=np.float64),
+            }
+        )
 
     for index in np.ndindex(labels.shape):
         current = labels[index]
@@ -371,14 +382,15 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
         graph.nodes[current]['total color'] += image[index]
 
     for n in graph:
-        graph.nodes[n]['mean color'] = (graph.nodes[n]['total color'] /
-                                        graph.nodes[n]['pixel count'])
+        graph.nodes[n]['mean color'] = (
+            graph.nodes[n]['total color'] / graph.nodes[n]['pixel count']
+        )
 
     for x, y, d in graph.edges(data=True):
         diff = graph.nodes[x]['mean color'] - graph.nodes[y]['mean color']
         diff = np.linalg.norm(diff)
         if mode == 'similarity':
-            d['weight'] = math.e ** (-(diff ** 2) / sigma)
+            d['weight'] = math.e ** (-(diff**2) / sigma)
         elif mode == 'distance':
             d['weight'] = diff
         else:
@@ -388,7 +400,7 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
 
 def rag_boundary(labels, edge_map, connectivity=2):
-    """ Comouter RAG based on region boundaries
+    """Comouter RAG based on region boundaries
 
     Given an image's initial segmentation and its edge map this method
     constructs the corresponding Region Adjacency Graph (RAG). Each node in the
@@ -421,16 +433,17 @@ def rag_boundary(labels, edge_map, connectivity=2):
     conn = ndi.generate_binary_structure(labels.ndim, connectivity)
     eroded = ndi.grey_erosion(labels, footprint=conn)
     dilated = ndi.grey_dilation(labels, footprint=conn)
-    boundaries0 = (eroded != labels)
-    boundaries1 = (dilated != labels)
+    boundaries0 = eroded != labels
+    boundaries1 = dilated != labels
     labels_small = np.concatenate((eroded[boundaries0], labels[boundaries1]))
     labels_large = np.concatenate((labels[boundaries0], dilated[boundaries1]))
     n = np.max(labels_large) + 1
 
     # use a dummy broadcast array as data for RAG
-    ones = np.broadcast_to(1., labels_small.shape)
-    count_matrix = sparse.coo_matrix((ones, (labels_small, labels_large)),
-                                     dtype=int, shape=(n, n)).tocsr()
+    ones = np.broadcast_to(1.0, labels_small.shape)
+    count_matrix = sparse.coo_matrix(
+        (ones, (labels_small, labels_large)), dtype=int, shape=(n, n)
+    ).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
     data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
@@ -438,10 +451,8 @@ def rag_boundary(labels, edge_map, connectivity=2):
     graph_matrix.data /= count_matrix.data
 
     rag = RAG()
-    rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix),
-                                weight='weight')
-    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix),
-                                weight='count')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(graph_matrix), weight='weight')
+    rag.add_weighted_edges_from(_edge_generator_from_csr(count_matrix), weight='count')
 
     for n in rag.nodes():
         rag.nodes[n].update({'labels': [n]})
@@ -450,8 +461,17 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
 
 @require("matplotlib", ">=3.3")
-def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
-             edge_cmap='magma', img_cmap='bone', in_place=True, ax=None):
+def show_rag(
+    labels,
+    rag,
+    image,
+    border_color='black',
+    edge_width=1.5,
+    edge_cmap='magma',
+    img_cmap='bone',
+    in_place=True,
+    ax=None,
+):
     """Show a Region Adjacency Graph on an image.
 
     Given a labelled image and its corresponding RAG, show the nodes and edges
@@ -550,8 +570,10 @@ def show_rag(labels, rag, image, border_color='black', edge_width=1.5,
     # Defining the end points of the edges
     # The tuple[::-1] syntax reverses a tuple as matplotlib uses (x,y)
     # convention while skimage uses (row, column)
-    lines = [[rag.nodes[n1]['centroid'][::-1], rag.nodes[n2]['centroid'][::-1]]
-              for (n1, n2) in rag.edges()]
+    lines = [
+        [rag.nodes[n1]['centroid'][::-1], rag.nodes[n2]['centroid'][::-1]]
+        for (n1, n2) in rag.edges()
+    ]
 
     lc = LineCollection(lines, linewidths=edge_width, cmap=edge_cmap)
     edge_weights = [d['weight'] for x, y, d in rag.edges(data=True)]

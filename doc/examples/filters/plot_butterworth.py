@@ -28,7 +28,7 @@ from skimage import data, filters
 image = data.camera()
 
 # cutoff frequencies as a fraction of the maximum frequency
-cutoffs = [.02, .08, .16]
+cutoffs = [0.02, 0.08, 0.16]
 
 
 def get_filtered(image, cutoffs, squared_butterworth=True, order=3.0, npad=0):
@@ -108,8 +108,13 @@ lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=True)
 
 fig, axes = plot_filtered(lowpasses, highpasses, cutoffs)
 titledict = dict(fontsize=18, fontweight='bold')
-fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=0)',
-         fontdict=titledict, horizontalalignment='center')
+fig.text(
+    0.5,
+    0.95,
+    '(squared) Butterworth filtering (order=3.0, npad=0)',
+    fontdict=titledict,
+    horizontalalignment='center',
+)
 
 
 #####################################################################
@@ -127,12 +132,16 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=0)',
 # substantially reduced.
 
 
-lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=True,
-                                     npad=32)
+lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=True, npad=32)
 
 fig, axes = plot_filtered(lowpasses, highpasses, cutoffs)
-fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=32)',
-         fontdict=titledict, horizontalalignment='center')
+fig.text(
+    0.5,
+    0.95,
+    '(squared) Butterworth filtering (order=3.0, npad=32)',
+    fontdict=titledict,
+    horizontalalignment='center',
+)
 
 
 #####################################################################
@@ -147,11 +156,15 @@ fig.text(0.5, 0.95, '(squared) Butterworth filtering (order=3.0, npad=32)',
 # sharper in the lowpass case than their squared Butterworth counterparts
 # above.
 
-lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=False,
-                                     npad=32)
+lowpasses, highpasses = get_filtered(image, cutoffs, squared_butterworth=False, npad=32)
 
 fig, axes = plot_filtered(lowpasses, highpasses, cutoffs)
-fig.text(0.5, 0.95, 'Butterworth filtering (order=3.0, npad=32)',
-         fontdict=titledict, horizontalalignment='center')
+fig.text(
+    0.5,
+    0.95,
+    'Butterworth filtering (order=3.0, npad=32)',
+    fontdict=titledict,
+    horizontalalignment='center',
+)
 
 plt.show()

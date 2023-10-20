@@ -7,21 +7,15 @@ import pytest
 
 
 def test_join_segmentations():
-    s1 = np.array([[0, 0, 1, 1],
-                   [0, 2, 1, 1],
-                   [2, 2, 2, 1]])
-    s2 = np.array([[0, 1, 1, 0],
-                   [0, 1, 1, 0],
-                   [0, 1, 1, 1]])
+    s1 = np.array([[0, 0, 1, 1], [0, 2, 1, 1], [2, 2, 2, 1]])
+    s2 = np.array([[0, 1, 1, 0], [0, 1, 1, 0], [0, 1, 1, 1]])
 
     # test correct join
     # NOTE: technically, equality to j_ref is not required, only that there
     # is a one-to-one mapping between j and j_ref. I don't know of an easy way
     # to check this (i.e. not as error-prone as the function being tested)
     j = join_segmentations(s1, s2)
-    j_ref = np.array([[0, 1, 3, 2],
-                      [0, 5, 3, 2],
-                      [4, 5, 5, 3]])
+    j_ref = np.array([[0, 1, 3, 2], [0, 5, 3, 2], [4, 5, 5, 3]])
     assert_array_equal(j, j_ref)
 
     # test correct mapping
@@ -53,7 +47,7 @@ def test_relabel_sequential_offset1():
     fw_ref[42] = 4
     fw_ref[99] = 5
     assert_array_equal(fw, fw_ref)
-    inv_ref = np.array([0,  1,  5,  8, 42, 99])
+    inv_ref = np.array([0, 1, 5, 8, 42, 99])
     assert_array_equal(inv, inv_ref)
 
 
@@ -70,7 +64,7 @@ def test_relabel_sequential_offset5():
     fw_ref[42] = 8
     fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
-    inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
+    inv_ref = np.array([0, 0, 0, 0, 0, 1, 5, 8, 42, 99])
     assert_array_equal(inv, inv_ref)
 
 
@@ -87,7 +81,7 @@ def test_relabel_sequential_offset5_with0():
     fw_ref[42] = 8
     fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
-    inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
+    inv_ref = np.array([0, 0, 0, 0, 0, 1, 5, 8, 42, 99])
     assert_array_equal(inv, inv_ref)
 
 
@@ -104,7 +98,7 @@ def test_relabel_sequential_dtype():
     fw_ref[42] = 8
     fw_ref[99] = 9
     assert_array_equal(fw, fw_ref)
-    inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
+    inv_ref = np.array([0, 0, 0, 0, 0, 1, 5, 8, 42, 99])
     assert_array_equal(inv, inv_ref)
 
 
@@ -112,8 +106,7 @@ def test_relabel_sequential_signed_overflow():
     imax = np.iinfo(np.int32).max
     labels = np.array([0, 1, 99, 42, 42], dtype=np.int32)
     output, fw, inv = relabel_sequential(labels, offset=imax)
-    reference = np.array([0, imax, imax + 2, imax + 1, imax + 1],
-                         dtype=np.uint32)
+    reference = np.array([0, imax, imax + 2, imax + 1, imax + 1], dtype=np.uint32)
     assert_array_equal(output, reference)
     assert output.dtype == reference.dtype
 
@@ -125,12 +118,23 @@ def test_very_large_labels():
     assert np.max(output) == imax + 2
 
 
-@pytest.mark.parametrize('dtype', (np.byte, np.short, np.intc, int,
-                                   np.longlong, np.ubyte, np.ushort,
-                                   np.uintc, np.uint, np.ulonglong))
+@pytest.mark.parametrize(
+    'dtype',
+    (
+        np.byte,
+        np.short,
+        np.intc,
+        int,
+        np.longlong,
+        np.ubyte,
+        np.ushort,
+        np.uintc,
+        np.uint,
+        np.ulonglong,
+    ),
+)
 @pytest.mark.parametrize('data_already_sequential', (False, True))
-def test_relabel_sequential_int_dtype_stability(data_already_sequential,
-                                                dtype):
+def test_relabel_sequential_int_dtype_stability(data_already_sequential, dtype):
     if data_already_sequential:
         ar = np.array([1, 3, 0, 2, 5, 4], dtype=dtype)
     else:
@@ -157,8 +161,7 @@ def test_relabel_sequential_negative_values():
 
 @pytest.mark.parametrize('offset', (0, -3))
 @pytest.mark.parametrize('data_already_sequential', (False, True))
-def test_relabel_sequential_nonpositive_offset(data_already_sequential,
-                                               offset):
+def test_relabel_sequential_nonpositive_offset(data_already_sequential, offset):
     if data_already_sequential:
         ar = np.array([1, 3, 0, 2, 5, 4])
     else:
@@ -170,8 +173,7 @@ def test_relabel_sequential_nonpositive_offset(data_already_sequential,
 @pytest.mark.parametrize('offset', (1, 5))
 @pytest.mark.parametrize('with0', (False, True))
 @pytest.mark.parametrize('input_starts_at_offset', (False, True))
-def test_relabel_sequential_already_sequential(offset, with0,
-                                               input_starts_at_offset):
+def test_relabel_sequential_already_sequential(offset, with0, input_starts_at_offset):
     if with0:
         ar = np.array([1, 3, 0, 2, 5, 4])
     else:

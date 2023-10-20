@@ -128,7 +128,7 @@ def moments_coords_central(coords, center=None, order=3):
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
-    coords = np.stack([coords ** c for c in range(order + 1)], axis=-1)
+    coords = np.stack([coords**c for c in range(order + 1)], axis=-1)
 
     # add extra dimensions for proper broadcasting
     coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
@@ -257,11 +257,9 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     float_dtype = _supported_float_type(image.dtype)
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
-        delta = (
-                np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
-        )
-        powers_of_delta = (
-            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+        delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
+        powers_of_delta = delta[:, np.newaxis] ** np.arange(
+            order + 1, dtype=float_dtype
         )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
@@ -323,7 +321,9 @@ def moments_normalized(mu, order=3, spacing=None):
         if sum(powers) < 2:
             nu[powers] = np.nan
         else:
-            nu[powers] = (mu[powers] / scale ** sum(powers)) / (mu0 ** (sum(powers) / nu.ndim + 1))
+            nu[powers] = (mu[powers] / scale ** sum(powers)) / (
+                mu0 ** (sum(powers) / nu.ndim + 1)
+            )
     return nu
 
 
@@ -395,9 +395,11 @@ def centroid(image, *, spacing=None):
     array([13.16666667, 13.16666667])
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1, spacing=spacing)
-    center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
-                                                       # for each axis
-              / M[(0,) * image.ndim])  # weighted sum of all points
+    center = (
+        M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
+        # for each axis
+        / M[(0,) * image.ndim]
+    )  # weighted sum of all points
     return center
 
 
@@ -431,7 +433,9 @@ def inertia_tensor(image, mu=None, *, spacing=None):
            Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
-        mu = moments_central(image, order=2, spacing=spacing)  # don't need higher-order moments
+        mu = moments_central(
+            image, order=2, spacing=spacing
+        )  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
 
