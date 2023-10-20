@@ -13,6 +13,17 @@ manipulating arrays::
     >>> type(camera)
     <type 'numpy.ndarray'>
 
+.. note::
+    Complex array-like types, such as
+    `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
+    or `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_,
+    are generally not supported in ``scikit-image``. However, data stored in
+    these types can be converted to ndarray with certain assumptions
+    (see ``pandas.DataFrame.to_numpy()`` and ``xarray.DataArray.data``). Particularly,
+    such conversion ignores the sampling coordinates (``DataFrame.index``,
+    ``DataFrame.columns``, or ``DataArray.coords``), which may result in a
+    misrepresented data, for instance, when the original data is irregularly spaced.
+
 Retrieving the geometry of the image and the number of pixels::
 
     >>> camera.shape
