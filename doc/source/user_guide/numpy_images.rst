@@ -20,7 +20,7 @@ manipulating arrays::
     are not natively supported in ``scikit-image``. However, data stored in these types
     can be converted to ``numpy.ndarray`` with certain assumptions
     (see ``pandas.DataFrame.to_numpy()`` and ``xarray.DataArray.data``). Particularly,
-    these conversion ignore the sampling coordinates (``DataFrame.index``,
+    these conversions ignore the sampling coordinates (``DataFrame.index``,
     ``DataFrame.columns``, or ``DataArray.coords``), which may result in
     misrepresented data, for instance, when the original data points are irregularly
     spaced.
