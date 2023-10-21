@@ -32,7 +32,6 @@ looking at someone's changes like this::
     git remote add someone https://github.com/someone/scikit-image.git
     git fetch someone
     git branch cool-feature --track someone/cool-feature
-    git switch cool-feature
 
 So now you are on the branch with the changes to be incorporated upstream.  The
 rest of this section assumes you are on this branch.
