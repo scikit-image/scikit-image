@@ -177,3 +177,16 @@ def test_no_descriptors_extracted_sift():
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+def test_fit():
+    """Test an edge case of a parabola fitting.
+
+    Test a case where 2 * (h[0] + h[2] - 2 * h[1]) returns 0 when h[0] < h[1] == h[2]
+    and h[0] and h[1] are very close.
+    """
+    detector_extractor = SIFT()
+    v = np.float32(1e-2)
+    h = np.array([v - np.spacing(v), v, v], dtype=np.float32)
+    p = detector_extractor._fit(h)
+    assert np.isfinite(p)
