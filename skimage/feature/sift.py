@@ -460,16 +460,12 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return extrema_pos, extrema_scales, extrema_sigmas, octave_indices
 
     def _fit(self, h):
-        """Refine the position of the peak by fitting it to a parabola.
-
-        There are edge cases where h[0] == h[1] == h[2] or h[0] < h[1] == h[2] or
-        h[0] == h[1] > h[2]. If the divisor is computed by 2 * (h[0] + h[2] - 2 * h[1])
-        and h[0] == h[1] > h[2] but h[1] and h[2] are very close, the devisor could be 0
-        due to numerical precision. This also can happen with h[0] < h[1] == h[2].
-        Therefore, the devisor is computed by 2 * ((h[0] - h[1]) + (h[2] - h[1])).
-        It could still return inf when h[0]  == h[1] == h[2].
-        """
-        return (h[0] - h[2]) / (2 * ((h[0] - h[1]) + (h[2] - h[1])))
+        """Refine the position of the peak by fitting it to a parabola"""
+        denom = 2 * (h[0] + h[2] - 2 * h[1])
+        if denom == 0.0:
+            return 0.5
+        else:
+            return (h[0] - h[2]) / denom
 
     def _compute_orientation(
         self, positions_oct, scales_oct, sigmas_oct, octaves, gaussian_scalespace
@@ -562,8 +558,6 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                     # use neighbors to fit a parabola, to get more accurate
                     # result
                     ori = (m + self._fit(hist[neigh]) + 0.5) * 2 * np.pi / self.n_bins
-                    if not np.isfinite(ori):
-                        continue
                     if ori > np.pi:
                         ori -= 2 * np.pi
                     if c == 0:
