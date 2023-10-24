@@ -108,7 +108,6 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
             ndi.binary_erosion, image, footprint, out, border_value
         )
 
-    print(f"binary_erosion, {border_value=}")
     ndi.binary_erosion(
         image, structure=footprint, output=out, border_value=border_value
     )
@@ -187,7 +186,6 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
             ndi.binary_dilation, image, footprint, out, border_value
         )
 
-    print(f"binary_dilation, {border_value=}")
     ndi.binary_dilation(
         image, structure=footprint, output=out, border_value=border_value
     )
