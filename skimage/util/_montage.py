@@ -32,7 +32,7 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
 
     Parameters
     ----------
-    arr_in : (K, M, N[, C]) ndarray
+    arr_in : ndarray, shape (K, M, N[, C])
         An array representing an ensemble of `K` images of equal shape.
     fill : float or array-like of floats or 'mean', optional
         Value to fill the padding areas and/or the extra tiles in
@@ -52,8 +52,6 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
-
-
 
     Returns
     -------

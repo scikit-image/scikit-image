@@ -12,8 +12,8 @@ def view_as_blocks(arr_in, block_shape):
 
     Parameters
     ----------
-    arr_in : ndarray
-        N-d input array.
+    arr_in : ndarray, shape (M[, ...])
+        Input array.
     block_shape : tuple
         The shape of the block. Each dimension must divide evenly into the
         corresponding dimensions of `arr_in`.
@@ -102,8 +102,8 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     Parameters
     ----------
-    arr_in : ndarray
-        N-d input array.
+    arr_in : ndarray, shape (M[, ...])
+        Input array.
     window_shape : integer or tuple of length arr_in.ndim
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
