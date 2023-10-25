@@ -750,7 +750,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 
     Parameters
     ----------
-    regions : (N,) list
+    regions : (K, ) list
         List of RegionProperties objects as returned by :func:`regionprops`.
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary
@@ -893,13 +893,12 @@ def regionprops_table(label_image, intensity_image=None,
 
     Parameters
     ----------
-    label_image : (N, M[, P]) ndarray
+    label_image : (M, N[, P]) ndarray
         Labeled input image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
         Intensity (i.e., input) image with same size as labeled image, plus
-        optionally an extra dimension for multichannel data. Currently,
-        this extra channel dimension, if present, must be the last axis.
-        Default is None.
+        optionally an extra dimension for multichannel data. The channel dimension,
+        if present, must be the last axis. Default is None.
 
         .. versionchanged:: 0.18.0
             The ability to provide an extra dimension for channels was added.
@@ -1128,9 +1127,9 @@ def regionprops(label_image, intensity_image=None, cache=True,
     **centroid_weighted_local** : array
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
-    **coords_scaled** : (N, 2) ndarray
+    **coords_scaled** : (K, 2) ndarray
         Coordinate list ``(row, col)``of the region scaled by ``spacing``.
-    **coords** : (N, 2) ndarray
+    **coords** : (K, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the

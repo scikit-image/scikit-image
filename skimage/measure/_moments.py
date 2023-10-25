@@ -14,7 +14,7 @@ def moments_coords(coords, order=3):
      * Area as: ``M[0, 0]``.
      * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
 
-    Note that raw moments are neither translation, scale nor rotation
+    Note that raw moments are neither translation, scale, nor rotation
     invariant.
 
     Parameters
@@ -163,7 +163,7 @@ def moments(image, order=3, *, spacing=None):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
@@ -209,7 +209,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
@@ -277,7 +277,7 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Parameters
     ----------
-    mu : (M,[ ...,] M) array
+    mu : (M[, ...], M) array
         Central image moments, where M must be greater than or equal
         to ``order``.
     order : int, optional
@@ -285,7 +285,7 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Returns
     -------
-    nu : (``order + 1``,[ ...,] ``order + 1``) array
+    nu : (``order + 1``[, ...], ``order + 1``) array
         Normalized central image moments.
 
     References
