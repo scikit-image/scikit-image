@@ -24,7 +24,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *,
 
     Parameters
     ----------
-    image : (width, height, 3) or (width, height) ndarray
+    image : (M, N[, 3]) ndarray
         Input image.
     scale : float
         Free parameter. Higher means larger clusters.
@@ -42,7 +42,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *,
 
     Returns
     -------
-    segment_mask : (width, height) ndarray
+    segment_mask : (M, N) ndarray
         Integer mask indicating segment labels.
 
     References

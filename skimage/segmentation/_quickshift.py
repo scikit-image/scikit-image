@@ -19,7 +19,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     Parameters
     ----------
-    image : (width, height, channels) ndarray
+    image : (M, N, C) ndarray
         Input image. The axis corresponding to color channels can be specified
         via the `channel_axis` argument.
     ratio : float, optional, between 0 and 1
@@ -50,7 +50,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
 
     Returns
     -------
-    segment_mask : (width, height) ndarray
+    segment_mask : (M, N) ndarray
         Integer mask indicating segment labels.
 
     Notes
@@ -71,7 +71,7 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     image = image.astype(float_dtype, copy=False)
 
     if image.ndim > 3:
-        raise ValueError("only 2D color images are supported")
+        raise ValueError("Only 2D color images are supported")
 
     # move channels to last position as expected by the Cython code
     image = np.moveaxis(image, source=channel_axis, destination=-1)

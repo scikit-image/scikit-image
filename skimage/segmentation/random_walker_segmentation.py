@@ -273,13 +273,12 @@ def random_walker(data, labels, beta=130, mode='cg_j', tol=1.e-3, copy=True,
 
     Parameters
     ----------
-    data : array_like
-        Image to be segmented in phases. Gray-level `data` can be two- or
-        three-dimensional; multichannel data can be three- or four-
-        dimensional with `channel_axis` specifying the dimension containing
+    data : (M, N[, P][, C]) ndarray
+        Image to be segmented in phases. Gray-level `data` can be 2-/3-D; multichannel
+        data can be 3-/4-D with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
-    labels : array of ints, of same shape as `data` without channels dimension
+    labels : (M, N[, P]) array of ints
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
         Negative labels correspond to inactive pixels that are not taken
