@@ -310,9 +310,9 @@ def rag_mean_color(image, labels, connectivity=2, mode='distance',
 
     Parameters
     ----------
-    image : ndarray, shape(M, N, [..., P,] 3)
+    image : ndarray, shape(M, N[, ..., P], 3)
         Input image.
-    labels : ndarray, shape(M, N, [..., P])
+    labels : ndarray, shape(M, N[, ..., P])
         The labelled image. This should have one dimension less than
         `image`. If `image` has dimensions `(M, N, 3)` `labels` should have
         dimensions `(M, N)`.
