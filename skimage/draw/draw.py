@@ -295,13 +295,13 @@ def set_color(image, coords, color, alpha=1):
 
     Parameters
     ----------
-    image : (M, N, D) ndarray
+    image : (M, N, C) ndarray
         Image
-    coords : tuple of ((P,) ndarray, (P,) ndarray)
+    coords : tuple of ((K, ) ndarray, (K, ) ndarray)
         Row and column coordinates of pixels to be colored.
-    color : (D,) ndarray
+    color : (C, ) ndarray
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (N,) ndarray
+    alpha : scalar or (K, ) ndarray
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 
@@ -938,8 +938,8 @@ def _rectangle_slice(start, end=None, extent=None):
     """Return the slice ``(top_left, bottom_right)`` of the rectangle.
 
     Returns
-    =======
-    (top_left, bottomm_right)
+    -------
+    (top_left, bottom_right)
         The slice you would need to select the region in the rectangle defined
         by the parameters.
         Select it like:
