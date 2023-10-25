@@ -11,9 +11,9 @@ that is how the resulting directory will be named.
 In practice, you should use either actual clean tags from a current build or
 something like 'current' as a stable URL for the mest current version of the """
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Imports
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 import os
 import re
 import shutil
@@ -22,18 +22,19 @@ from os import chdir as cd
 
 from subprocess import Popen, PIPE, CalledProcessError, check_call
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Globals
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 pages_dir = 'gh-pages'
 html_dir = 'build/html'
 pdf_dir = 'build/latex'
 pages_repo = 'https://github.com/scikit-image/docs.git'
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Functions
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def sh(cmd):
     """Execute command in a subshell, return status code."""
     return check_call(cmd, shell=True)
@@ -74,9 +75,10 @@ def init_repo(path):
     sh('git checkout gh-pages')
     cd(here)
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # Script starts
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 if __name__ == '__main__':
     # find the version number from skimage/__init__.py
     setup_lines = open('../skimage/__init__.py').readlines()
@@ -110,7 +112,7 @@ if __name__ == '__main__':
     shutil.rmtree(dest, ignore_errors=True)
     shutil.copytree(html_dir, dest)
     # copy pdf file into tree
-    #shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
+    # shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
 
     try:
         cd(pages_dir)

@@ -29,7 +29,7 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     grid = np.meshgrid(*[np.arange(n) for n in image0.shape], indexing='ij')
     grid = np.stack(grid)
     gt_flow = np.zeros_like(grid, dtype=float)
-    gt_flow[0, ...] = max_motion * np.sin(grid[0]/grid[0].max()*npics*np.pi)
+    gt_flow[0, ...] = max_motion * np.sin(grid[0] / grid[0].max() * npics * np.pi)
     image1 = warp(image0, grid - gt_flow, mode='edge')
     return gt_flow, image1
 
@@ -46,11 +46,12 @@ def test_2d_motion(dtype):
     flow = optical_flow_tvl1(image0, image1, attachment=5, dtype=float_dtype)
     assert flow.dtype == float_dtype
     # Assert that the average absolute error is less then half a pixel
-    assert abs(flow - gt_flow) .mean() < 0.5
+    assert abs(flow - gt_flow).mean() < 0.5
 
     if dtype != float_dtype:
         with pytest.raises(ValueError):
             optical_flow_tvl1(image0, image1, attachment=5, dtype=dtype)
+
 
 def test_3d_motion():
     # Generate synthetic data
@@ -60,7 +61,7 @@ def test_3d_motion():
     # Estimate the flow
     flow = optical_flow_tvl1(image0, image1, attachment=10)
     # Assert that the average absolute error is less then half a pixel
-    assert abs(flow - gt_flow) .mean() < 0.5
+    assert abs(flow - gt_flow).mean() < 0.5
 
 
 def test_no_motion_2d():

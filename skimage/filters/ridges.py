@@ -18,8 +18,9 @@ from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
 
 
-def meijering(image, sigmas=range(1, 10, 2), alpha=None,
-              black_ridges=True, mode='reflect', cval=0):
+def meijering(
+    image, sigmas=range(1, 10, 2), alpha=None, black_ridges=True, mode='reflect', cval=0
+):
     """
     Filter an image with the Meijering neuriteness filter.
 
@@ -74,20 +75,21 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
     if alpha is None:
         alpha = 1 / (image.ndim + 1)
-    mtx = linalg.circulant(
-        [1, *[alpha] * (image.ndim - 1)]).astype(image.dtype)
+    mtx = linalg.circulant([1, *[alpha] * (image.ndim - 1)]).astype(image.dtype)
 
     # Generate empty array for storing maximum value
     # from different (sigma) scales
     filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
-        eigvals = hessian_matrix_eigvals(hessian_matrix(
-            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        eigvals = hessian_matrix_eigvals(
+            hessian_matrix(
+                image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+            )
+        )
         # Compute normalized eigenvalues l_i = e_i + sum_{j!=i} alpha * e_j.
         vals = np.tensordot(mtx, eigvals, 1)
         # Get largest normalized eigenvalue (by magnitude) at each pixel.
-        vals = np.take_along_axis(
-            vals, abs(vals).argmax(0)[None], 0).squeeze(0)
+        vals = np.take_along_axis(vals, abs(vals).argmax(0)[None], 0).squeeze(0)
         # Remove negative values.
         vals = np.maximum(vals, 0)
         # Normalize to max = 1 (unless everything is already zero).
@@ -99,8 +101,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
-def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
-         mode='reflect', cval=0):
+def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=0):
     """
     Filter an image with the Sato tubeness filter.
 
@@ -156,22 +157,33 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
     # from different (sigma) scales
     filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
-        eigvals = hessian_matrix_eigvals(hessian_matrix(
-            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        eigvals = hessian_matrix_eigvals(
+            hessian_matrix(
+                image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+            )
+        )
         # Compute normalized tubeness (eqs. (9) and (22), ref. [1]_) as the
         # geometric mean of eigvals other than the lowest one
         # (hessian_matrix_eigvals returns eigvals in decreasing order), clipped
         # to 0, multiplied by sigma^2.
         eigvals = eigvals[:-1]
-        vals = (sigma ** 2
-                * np.prod(np.maximum(eigvals, 0), 0) ** (1 / len(eigvals)))
+        vals = sigma**2 * np.prod(np.maximum(eigvals, 0), 0) ** (1 / len(eigvals))
         filtered_max = np.maximum(filtered_max, vals)
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
-def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
-           scale_step=None, alpha=0.5, beta=0.5, gamma=None,
-           black_ridges=True, mode='reflect', cval=0):
+def frangi(
+    image,
+    sigmas=range(1, 10, 2),
+    scale_range=None,
+    scale_step=None,
+    alpha=0.5,
+    beta=0.5,
+    gamma=None,
+    black_ridges=True,
+    mode='reflect',
+    cval=0,
+):
     """
     Filter an image with the Frangi vesselness filter.
 
@@ -241,9 +253,11 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     .. [3] Ellis, D. G.: https://github.com/ellisdg/frangi3d/tree/master/frangi
     """
     if scale_range is not None and scale_step is not None:
-        warn('Use keyword parameter `sigmas` instead of `scale_range` and '
-             '`scale_range` which will be removed in version 0.17.',
-             stacklevel=2)
+        warn(
+            'Use keyword parameter `sigmas` instead of `scale_range` and '
+            '`scale_range` which will be removed in version 0.17.',
+            stacklevel=2,
+        )
         sigmas = np.arange(scale_range[0], scale_range[1], scale_step)
 
     check_nD(image, [2, 3])  # Check image dimensions.
@@ -255,20 +269,23 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
     # from different (sigma) scales
     filtered_max = np.zeros_like(image)
     for sigma in sigmas:  # Filter for all sigmas.
-        eigvals = hessian_matrix_eigvals(hessian_matrix(
-            image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True))
+        eigvals = hessian_matrix_eigvals(
+            hessian_matrix(
+                image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+            )
+        )
         # Sort eigenvalues by magnitude.
         eigvals = np.take_along_axis(eigvals, abs(eigvals).argsort(0), 0)
         lambda1 = eigvals[0]
         if image.ndim == 2:
-            lambda2, = np.maximum(eigvals[1:], 1e-10)
+            (lambda2,) = np.maximum(eigvals[1:], 1e-10)
             r_a = np.inf  # implied by eq. (15).
             r_b = abs(lambda1) / lambda2  # eq. (15).
         else:  # ndim == 3
             lambda2, lambda3 = np.maximum(eigvals[1:], 1e-10)
             r_a = lambda2 / lambda3  # eq. (11).
             r_b = abs(lambda1) / np.sqrt(lambda2 * lambda3)  # eq. (10).
-        s = np.sqrt((eigvals ** 2).sum(0))  # eq. (12).
+        s = np.sqrt((eigvals**2).sum(0))  # eq. (12).
         if gamma is None:
             gamma = s.max() / 2
             if gamma == 0:
@@ -277,16 +294,25 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
         # blobness exponential factor underflowing to zero whenever the second
         # or third eigenvalues are negative (we clip them to 1e-10, to make r_b
         # very large).
-        vals = 1.0 - np.exp(-r_a**2 / (2 * alpha**2))  # plate sensitivity
-        vals *= np.exp(-r_b**2 / (2 * beta**2))  # blobness
-        vals *= 1.0 - np.exp(-s**2 / (2 * gamma**2))  # structuredness
+        vals = 1.0 - np.exp(-(r_a**2) / (2 * alpha**2))  # plate sensitivity
+        vals *= np.exp(-(r_b**2) / (2 * beta**2))  # blobness
+        vals *= 1.0 - np.exp(-(s**2) / (2 * gamma**2))  # structuredness
         filtered_max = np.maximum(filtered_max, vals)
     return filtered_max  # Return pixel-wise max over all sigmas.
 
 
-def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
-            alpha=0.5, beta=0.5, gamma=15, black_ridges=True, mode='reflect',
-            cval=0):
+def hessian(
+    image,
+    sigmas=range(1, 10, 2),
+    scale_range=None,
+    scale_step=None,
+    alpha=0.5,
+    beta=0.5,
+    gamma=15,
+    black_ridges=True,
+    mode='reflect',
+    cval=0,
+):
     """Filter an image with the Hybrid Hessian filter.
 
     This filter can be used to detect continuous edges, e.g. vessels,
@@ -347,10 +373,18 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
         :DOI:`10.1007/978-3-319-16811-1_40`
     .. [2] Kroon, D. J.: Hessian based Frangi vesselness filter.
     """
-    filtered = frangi(image, sigmas=sigmas, scale_range=scale_range,
-                      scale_step=scale_step, alpha=alpha, beta=beta,
-                      gamma=gamma, black_ridges=black_ridges, mode=mode,
-                      cval=cval)
+    filtered = frangi(
+        image,
+        sigmas=sigmas,
+        scale_range=scale_range,
+        scale_step=scale_step,
+        alpha=alpha,
+        beta=beta,
+        gamma=gamma,
+        black_ridges=black_ridges,
+        mode=mode,
+        cval=cval,
+    )
 
     filtered[filtered <= 0] = 1
     return filtered

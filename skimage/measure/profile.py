@@ -4,9 +4,17 @@ from scipy import ndimage as ndi
 from .._shared.utils import _validate_interpolation_order, _fix_ndimage_mode
 
 
-def profile_line(image, src, dst, linewidth=1,
-                 order=None, mode='reflect', cval=0.0,
-                 *, reduce_func=np.mean):
+def profile_line(
+    image,
+    src,
+    dst,
+    linewidth=1,
+    order=None,
+    mode='reflect',
+    cval=0.0,
+    *,
+    reduce_func=np.mean,
+):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -96,15 +104,22 @@ def profile_line(image, src, dst, linewidth=1,
 
     perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
     if image.ndim == 3:
-        pixels = [ndi.map_coordinates(image[..., i], perp_lines,
-                                      prefilter=order > 1,
-                                      order=order, mode=mode,
-                                      cval=cval) for i in
-                  range(image.shape[2])]
+        pixels = [
+            ndi.map_coordinates(
+                image[..., i],
+                perp_lines,
+                prefilter=order > 1,
+                order=order,
+                mode=mode,
+                cval=cval,
+            )
+            for i in range(image.shape[2])
+        ]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = ndi.map_coordinates(image, perp_lines, prefilter=order > 1,
-                                     order=order, mode=mode, cval=cval)
+        pixels = ndi.map_coordinates(
+            image, perp_lines, prefilter=order > 1, order=order, mode=mode, cval=cval
+        )
     # The outputted array with reduce_func=None gives an array where the
     # row values (axis=1) are flipped. Here, we make this consistent.
     pixels = np.flip(pixels, axis=1)
@@ -160,8 +175,16 @@ def _line_profile_coordinates(src, dst, linewidth=1):
     # distance between pixel centers)
     col_width = (linewidth - 1) * np.sin(-theta) / 2
     row_width = (linewidth - 1) * np.cos(theta) / 2
-    perp_rows = np.stack([np.linspace(row_i - row_width, row_i + row_width,
-                                      linewidth) for row_i in line_row])
-    perp_cols = np.stack([np.linspace(col_i - col_width, col_i + col_width,
-                                      linewidth) for col_i in line_col])
+    perp_rows = np.stack(
+        [
+            np.linspace(row_i - row_width, row_i + row_width, linewidth)
+            for row_i in line_row
+        ]
+    )
+    perp_cols = np.stack(
+        [
+            np.linspace(col_i - col_width, col_i + col_width, linewidth)
+            for col_i in line_col
+        ]
+    )
     return np.stack([perp_rows, perp_cols])

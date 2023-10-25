@@ -24,7 +24,7 @@ y_0 = 354
 width = 100
 height = 100
 
-img = color.rgb2gray(color_image)[y_0:(y_0 + height), x_0:(x_0 + width)]
+img = color.rgb2gray(color_image)[y_0 : (y_0 + height), x_0 : (x_0 + width)]
 
 # the rescaling is done only for visualization purpose.
 # the algorithms would work identically in an unscaled version of the
@@ -41,8 +41,9 @@ img = exposure.rescale_intensity(img)
 # We find all local maxima
 local_maxima = extrema.local_maxima(img)
 label_maxima = label(local_maxima)
-overlay = color.label2rgb(label_maxima, img, alpha=0.7, bg_label=0,
-                          bg_color=None, colors=[(1, 0, 0)])
+overlay = color.label2rgb(
+    label_maxima, img, alpha=0.7, bg_label=0, bg_color=None, colors=[(1, 0, 0)]
+)
 
 # We observed in the previous image, that there are many local maxima
 # that are caused by the noise in the image.
@@ -56,8 +57,9 @@ overlay = color.label2rgb(label_maxima, img, alpha=0.7, bg_label=0,
 h = 0.05
 h_maxima = extrema.h_maxima(img, h)
 label_h_maxima = label(h_maxima)
-overlay_h = color.label2rgb(label_h_maxima, img, alpha=0.7, bg_label=0,
-                            bg_color=None, colors=[(1, 0, 0)])
+overlay_h = color.label2rgb(
+    label_h_maxima, img, alpha=0.7, bg_label=0, bg_color=None, colors=[(1, 0, 0)]
+)
 
 
 ##############################################################

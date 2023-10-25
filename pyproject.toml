@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,7 +12,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
@@ -29,7 +28,7 @@ dependencies = [
     'numpy>=1.22',
     'scipy>=1.8',
     'networkx>=2.8',
-    'pillow>=9.0.1',
+    'pillow>=9.0.1,<10.1.0',
     'imageio>=2.27',
     'tifffile>=2022.8.12',
     'packaging>=21',
@@ -51,16 +50,17 @@ build = [
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32',
+    'Cython>=0.29.32,!=3.0.3',
     'pythran',
     'numpy>=1.22',
     # Developer UI
-    'spin==0.6',
+    'spin==0.7',
     'build',
 ]
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
+    'ipython',
     "tomli; python_version < '3.11'",
 ]
 docs = [
@@ -121,15 +121,14 @@ requires = [
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32',
+    'Cython>=0.29.32,!=3.0.3',
     'pythran',
     'lazy_loader>=0.3',
-    "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
     "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
     "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.9' and platform_python_implementation=='PyPy'",
+    "numpy; python_version>='3.10' and platform_python_implementation=='PyPy'",
 ]
 
 [tool.spin]
@@ -137,24 +136,27 @@ package = 'skimage'
 
 [tool.spin.commands]
 Build = [
-    'spin.build',
-    'spin.test',
-    '.spin/cmds.py:sdist',
+    'spin.cmds.meson.build',
+    'spin.cmds.meson.test',
+    'spin.cmds.build.sdist',
 ]
 Environments = [
-    'spin.shell',
-    'spin.ipython',
-    'spin.python',
+    'spin.cmds.meson.run',
+    '.spin/cmds.py:ipython',
+    'spin.cmds.meson.python',
 ]
 Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.spin/cmds.py:asv',
-    '.spin/cmds.py:coverage',
+    '.spin/cmds.py:asv'
 ]
+
+[tool.black]
+target-version = ['py310', 'py311', 'py312']
+skip-string-normalization = 1
 
 [tool.ruff]
 line-length = 88
-target-version = 'py39'
+target-version = 'py310'
 select = [
     'F',
     'E',

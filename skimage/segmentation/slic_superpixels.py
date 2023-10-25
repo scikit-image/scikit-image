@@ -41,9 +41,7 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
 
     # select n_centroids randomly distributed points from within the mask
     idx_full = np.arange(len(coord), dtype=int)
-    idx = np.sort(rng.choice(idx_full,
-                             min(n_centroids, len(coord)),
-                             replace=False))
+    idx = np.sort(rng.choice(idx_full, min(n_centroids, len(coord)), replace=False))
 
     # To save time, when n_centroids << len(coords), use only a subset of the
     # coordinates when calling k-means. Rather than the full set of coords,
@@ -52,13 +50,11 @@ def _get_mask_centroids(mask, n_centroids, multichannel):
     # 10 times closer together along each axis than the n_centroids samples.
     dense_factor = 10
     ndim_spatial = mask.ndim - 1 if multichannel else mask.ndim
-    n_dense = int((dense_factor ** ndim_spatial) * n_centroids)
+    n_dense = int((dense_factor**ndim_spatial) * n_centroids)
     if len(coord) > n_dense:
         # subset of points to use for the k-means calculation
         # (much denser than idx, but less than the full set)
-        idx_dense = np.sort(rng.choice(idx_full,
-                                       n_dense,
-                                       replace=False))
+        idx_dense = np.sort(rng.choice(idx_full, n_dense, replace=False))
     else:
         idx_dense = Ellipsis
     centroids, _ = kmeans2(coord[idx_dense], coord[idx], iter=5)
@@ -100,20 +96,30 @@ def _get_grid_centroids(image, n_centroids):
     centroids_y = grid_y[slices].ravel()[..., np.newaxis]
     centroids_x = grid_x[slices].ravel()[..., np.newaxis]
 
-    centroids = np.concatenate([centroids_z, centroids_y, centroids_x],
-                               axis=-1)
+    centroids = np.concatenate([centroids_z, centroids_y, centroids_x], axis=-1)
 
-    steps = np.asarray([float(s.step) if s.step is not None else 1.0
-                        for s in slices])
+    steps = np.asarray([float(s.step) if s.step is not None else 1.0 for s in slices])
     return centroids, steps
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
-         spacing=None, convert2lab=None,
-         enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3,
-         slic_zero=False, start_label=1, mask=None, *,
-         channel_axis=-1):
+def slic(
+    image,
+    n_segments=100,
+    compactness=10.0,
+    max_num_iter=10,
+    sigma=0,
+    spacing=None,
+    convert2lab=None,
+    enforce_connectivity=True,
+    min_size_factor=0.5,
+    max_size_factor=3,
+    slic_zero=False,
+    start_label=1,
+    mask=None,
+    *,
+    channel_axis=-1,
+):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -282,7 +288,7 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         raise ValueError("unmasked infinite values in image are not supported")
     image -= imin
     if imax != imin:
-        image /= (imax - imin)
+        image /= imax - imin
 
     use_mask = mask is not None
     dtype = image.dtype
@@ -331,17 +337,25 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         if is_2d:
             if spacing.size != 2:
                 if spacing.size == 3:
-                    warn("Input image is 2D: spacing number of "
-                         "elements must be 2. In the future, a ValueError "
-                         "will be raised.", FutureWarning, stacklevel=2)
+                    warn(
+                        "Input image is 2D: spacing number of "
+                        "elements must be 2. In the future, a ValueError "
+                        "will be raised.",
+                        FutureWarning,
+                        stacklevel=2,
+                    )
                 else:
-                    raise ValueError(f"Input image is 2D, but spacing has "
-                                     f"{spacing.size} elements (expected 2).")
+                    raise ValueError(
+                        f"Input image is 2D, but spacing has "
+                        f"{spacing.size} elements (expected 2)."
+                    )
             else:
                 spacing = np.insert(spacing, 0, 1)
         elif spacing.size != 3:
-            raise ValueError(f"Input image is 3D, but spacing has "
-                             f"{spacing.size} elements (expected 3).")
+            raise ValueError(
+                f"Input image is 3D, but spacing has "
+                f"{spacing.size} elements (expected 3)."
+            )
         spacing = np.ascontiguousarray(spacing, dtype=dtype)
     else:
         raise TypeError("spacing must be None or iterable.")
@@ -354,17 +368,25 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         if is_2d:
             if sigma.size != 2:
                 if spacing.size == 3:
-                    warn("Input image is 2D: sigma number of "
-                         "elements must be 2. In the future, a ValueError "
-                         "will be raised.", FutureWarning, stacklevel=2)
+                    warn(
+                        "Input image is 2D: sigma number of "
+                        "elements must be 2. In the future, a ValueError "
+                        "will be raised.",
+                        FutureWarning,
+                        stacklevel=2,
+                    )
                 else:
-                    raise ValueError(f"Input image is 2D, but sigma has "
-                                     f"{sigma.size} elements (expected 2).")
+                    raise ValueError(
+                        f"Input image is 2D, but sigma has "
+                        f"{sigma.size} elements (expected 2)."
+                    )
             else:
                 sigma = np.insert(sigma, 0, 0)
         elif sigma.size != 3:
-            raise ValueError(f"Input image is 3D, but sigma has "
-                             f"{sigma.size} elements (expected 3).")
+            raise ValueError(
+                f"Input image is 3D, but sigma has "
+                f"{sigma.size} elements (expected 3)."
+            )
 
     if (sigma > 0).any():
         # add zero smoothing for channel dimension
@@ -372,9 +394,10 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         image = gaussian(image, sigma, mode='reflect')
 
     n_centroids = centroids.shape[0]
-    segments = np.ascontiguousarray(np.concatenate(
-        [centroids, np.zeros((n_centroids, image.shape[3]))],
-        axis=-1), dtype=dtype)
+    segments = np.ascontiguousarray(
+        np.concatenate([centroids, np.zeros((n_centroids, image.shape[3]))], axis=-1),
+        dtype=dtype,
+    )
 
     # Scaling of ratio in the same way as in the SLIC paper so the
     # values have the same meaning
@@ -385,13 +408,29 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
 
     if update_centroids:
         # Step 2 of the algorithm [3]_
-        _slic_cython(image, mask, segments, step, max_num_iter, spacing,
-                     slic_zero, ignore_color=True,
-                     start_label=start_label)
+        _slic_cython(
+            image,
+            mask,
+            segments,
+            step,
+            max_num_iter,
+            spacing,
+            slic_zero,
+            ignore_color=True,
+            start_label=start_label,
+        )
 
-    labels = _slic_cython(image, mask, segments, step, max_num_iter,
-                          spacing, slic_zero, ignore_color=False,
-                          start_label=start_label)
+    labels = _slic_cython(
+        image,
+        mask,
+        segments,
+        step,
+        max_num_iter,
+        spacing,
+        slic_zero,
+        ignore_color=False,
+        start_label=start_label,
+    )
 
     if enforce_connectivity:
         if use_mask:
@@ -401,7 +440,8 @@ def slic(image, n_segments=100, compactness=10., max_num_iter=10, sigma=0,
         min_size = int(min_size_factor * segment_size)
         max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(
-            labels, min_size, max_size, start_label=start_label)
+            labels, min_size, max_size, start_label=start_label
+        )
 
     if is_2d:
         labels = labels[0]

@@ -8,12 +8,23 @@ import numpy as np
 
 from ..util import crop
 from ._flood_fill_cy import _flood_fill_equal, _flood_fill_tolerance
-from ._util import (_offsets_to_raveled_neighbors, _resolve_neighborhood,
-                    _set_border_values,)
+from ._util import (
+    _offsets_to_raveled_neighbors,
+    _resolve_neighborhood,
+    _set_border_values,
+)
 
 
-def flood_fill(image, seed_point, new_value, *, footprint=None,
-               connectivity=None, tolerance=None, in_place=False):
+def flood_fill(
+    image,
+    seed_point,
+    new_value,
+    *,
+    footprint=None,
+    connectivity=None,
+    tolerance=None,
+    in_place=False,
+):
     """Perform flood filling on an image.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -99,8 +110,13 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
            [5, 5, 5, 5, 2, 2, 5],
            [5, 5, 5, 5, 5, 5, 3]])
     """
-    mask = flood(image, seed_point, footprint=footprint,
-                 connectivity=connectivity, tolerance=tolerance)
+    mask = flood(
+        image,
+        seed_point,
+        footprint=footprint,
+        connectivity=connectivity,
+        tolerance=tolerance,
+    )
 
     if not in_place:
         image = image.copy()
@@ -109,8 +125,7 @@ def flood_fill(image, seed_point, new_value, *, footprint=None,
     return image
 
 
-def flood(image, seed_point, *, footprint=None, connectivity=None,
-          tolerance=None):
+def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=None):
     """Mask corresponding to a flood fill.
 
     Starting at a specific `seed_point`, connected points equal or within
@@ -227,26 +242,28 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
     seed_point = tuple(np.asarray(seed_point) % image.shape)
 
     footprint = _resolve_neighborhood(
-        footprint, connectivity, image.ndim, enforce_adjacency=False)
+        footprint, connectivity, image.ndim, enforce_adjacency=False
+    )
     center = tuple(s // 2 for s in footprint.shape)
     # Compute padding width as the maximum offset to neighbors on each axis.
     # Generates a 2-tuple of (pad_start, pad_end) for each axis.
-    pad_width = [(np.max(np.abs(idx - c)),) * 2
-                 for idx, c in zip(np.nonzero(footprint), center)]
+    pad_width = [
+        (np.max(np.abs(idx - c)),) * 2 for idx, c in zip(np.nonzero(footprint), center)
+    ]
 
     # Must annotate borders
-    working_image = np.pad(image, pad_width, mode='constant',
-                           constant_values=image.min())
+    working_image = np.pad(
+        image, pad_width, mode='constant', constant_values=image.min()
+    )
     # Stride-aware neighbors - works for both C- and Fortran-contiguity
     ravelled_seed_idx = np.ravel_multi_index(
-        [i + pad_start
-         for i, (pad_start, pad_end) in zip(seed_point, pad_width)],
+        [i + pad_start for i, (pad_start, pad_end) in zip(seed_point, pad_width)],
         working_image.shape,
-        order=order
+        order=order,
     )
     neighbor_offsets = _offsets_to_raveled_neighbors(
-        working_image.shape, footprint, center=center,
-        order=order)
+        working_image.shape, footprint, center=center, order=order
+    )
 
     # Use a set of flags; see _flood_fill_cy.pyx for meanings
     flags = np.zeros(working_image.shape, dtype=np.uint8, order=order)
@@ -265,24 +282,30 @@ def flood(image, seed_point, *, footprint=None, connectivity=None,
             high_tol = min(max_value, seed_value + tolerance)
             low_tol = max(min_value, seed_value - tolerance)
 
-            _flood_fill_tolerance(working_image.ravel(order),
-                                  flags.ravel(order),
-                                  neighbor_offsets,
-                                  ravelled_seed_idx,
-                                  seed_value,
-                                  low_tol,
-                                  high_tol)
+            _flood_fill_tolerance(
+                working_image.ravel(order),
+                flags.ravel(order),
+                neighbor_offsets,
+                ravelled_seed_idx,
+                seed_value,
+                low_tol,
+                high_tol,
+            )
         else:
-            _flood_fill_equal(working_image.ravel(order),
-                              flags.ravel(order),
-                              neighbor_offsets,
-                              ravelled_seed_idx,
-                              seed_value)
+            _flood_fill_equal(
+                working_image.ravel(order),
+                flags.ravel(order),
+                neighbor_offsets,
+                ravelled_seed_idx,
+                seed_value,
+            )
     except TypeError:
         if working_image.dtype == np.float16:
             # Provide the user with clearer error message
-            raise TypeError("dtype of `image` is float16 which is not "
-                            "supported, try upcasting to float32")
+            raise TypeError(
+                "dtype of `image` is float16 which is not "
+                "supported, try upcasting to float32"
+            )
         else:
             raise
 

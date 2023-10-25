@@ -44,23 +44,22 @@ for image in images:
     descriptors.append(detector_extractor.descriptors.astype('float32'))
 
 # Split the data into training and testing subsets
-train_descriptors, test_descriptors, train_targets, test_targets = \
-    train_test_split(descriptors, targets)
+train_descriptors, test_descriptors, train_targets, test_targets = train_test_split(
+    descriptors, targets
+)
 
 # Train a K-mode GMM
 k = 16
 gmm = learn_gmm(train_descriptors, n_modes=k)
 
 # Compute the Fisher vectors
-training_fvs = np.array([
-    fisher_vector(descriptor_mat, gmm)
-    for descriptor_mat in train_descriptors
-])
+training_fvs = np.array(
+    [fisher_vector(descriptor_mat, gmm) for descriptor_mat in train_descriptors]
+)
 
-testing_fvs = np.array([
-    fisher_vector(descriptor_mat, gmm)
-    for descriptor_mat in test_descriptors
-])
+testing_fvs = np.array(
+    [fisher_vector(descriptor_mat, gmm) for descriptor_mat in test_descriptors]
+)
 
 svm = LinearSVC().fit(training_fvs, train_targets)
 

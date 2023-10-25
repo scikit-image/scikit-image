@@ -16,8 +16,9 @@ def _unsharp_mask_single_channel(image, radius, amount, vrange):
     return result
 
 
-def unsharp_mask(image, radius=1.0, amount=1.0,
-                 preserve_range=False, *, channel_axis=None):
+def unsharp_mask(
+    image, radius=1.0, amount=1.0, preserve_range=False, *, channel_axis=None
+):
     """Unsharp masking filter.
 
     The sharp details are identified as the difference between the original
@@ -126,16 +127,15 @@ def unsharp_mask(image, radius=1.0, amount=1.0,
         fimg = img_as_float(image).astype(float_dtype, copy=False)
         negative = np.any(fimg < 0)
         if negative:
-            vrange = [-1., 1.]
+            vrange = [-1.0, 1.0]
         else:
-            vrange = [0., 1.]
+            vrange = [0.0, 1.0]
 
     if channel_axis is not None:
         result = np.empty_like(fimg, dtype=float_dtype)
         for channel in range(image.shape[channel_axis]):
             sl = utils.slice_at_axis(channel, channel_axis)
-            result[sl] = _unsharp_mask_single_channel(
-                fimg[sl], radius, amount, vrange)
+            result[sl] = _unsharp_mask_single_channel(fimg[sl], radius, amount, vrange)
         return result
     else:
         return _unsharp_mask_single_channel(fimg, radius, amount, vrange)

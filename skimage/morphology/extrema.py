@@ -18,31 +18,31 @@ from ._extrema_cy import _local_maxima
 
 
 def _add_constant_clip(image, const_value):
-    """Add constant to the image while handling overflow issues gracefully.
-    """
+    """Add constant to the image while handling overflow issues gracefully."""
     min_dtype, max_dtype = dtype_limits(image, clip_negative=False)
 
     if const_value > (max_dtype - min_dtype):
-        raise ValueError("The added constant is not compatible"
-                         "with the image data type.")
+        raise ValueError(
+            "The added constant is not compatible" "with the image data type."
+        )
 
     result = image + const_value
-    result[image > max_dtype-const_value] = max_dtype
-    return(result)
+    result[image > max_dtype - const_value] = max_dtype
+    return result
 
 
 def _subtract_constant_clip(image, const_value):
-    """Subtract constant from image while handling underflow issues.
-    """
+    """Subtract constant from image while handling underflow issues."""
     min_dtype, max_dtype = dtype_limits(image, clip_negative=False)
 
-    if const_value > (max_dtype-min_dtype):
-        raise ValueError("The subtracted constant is not compatible"
-                         "with the image data type.")
+    if const_value > (max_dtype - min_dtype):
+        raise ValueError(
+            "The subtracted constant is not compatible" "with the image data type."
+        )
 
     result = image - const_value
     result[image < (const_value + min_dtype)] = min_dtype
-    return(result)
+    return result
 
 
 def h_maxima(image, h, footprint=None):
@@ -133,20 +133,20 @@ def h_maxima(image, h, footprint=None):
     #   >>> b[0] == b[1]
     #   True
     #
-    if np.issubdtype(type(h), np.floating) and \
-       np.issubdtype(image.dtype, np.integer):
-        if ((h % 1) != 0):
-            warn('possible precision loss converting image to '
-                 'floating point. To silence this warning, '
-                 'ensure image and h have same data type.',
-                 stacklevel=2)
+    if np.issubdtype(type(h), np.floating) and np.issubdtype(image.dtype, np.integer):
+        if (h % 1) != 0:
+            warn(
+                'possible precision loss converting image to '
+                'floating point. To silence this warning, '
+                'ensure image and h have same data type.',
+                stacklevel=2,
+            )
             image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
-    if (h == 0):
-        raise ValueError("h = 0 is ambiguous, use local_maxima() "
-                         "instead?")
+    if h == 0:
+        raise ValueError("h = 0 is ambiguous, use local_maxima() " "instead?")
 
     if np.issubdtype(image.dtype, np.floating):
         # The purpose of the resolution variable is to allow for the
@@ -167,9 +167,9 @@ def h_maxima(image, h, footprint=None):
     else:
         shifted_img = _subtract_constant_clip(image, h)
 
-    rec_img = grayreconstruct.reconstruction(shifted_img, image,
-                                             method='dilation',
-                                             footprint=footprint)
+    rec_img = grayreconstruct.reconstruction(
+        shifted_img, image, method='dilation', footprint=footprint
+    )
     residue_img = image - rec_img
     return (residue_img >= h).astype(np.uint8)
 
@@ -243,20 +243,20 @@ def h_minima(image, h, footprint=None):
     if h > np.ptp(image):
         return np.zeros(image.shape, dtype=np.uint8)
 
-    if np.issubdtype(type(h), np.floating) and \
-       np.issubdtype(image.dtype, np.integer):
-        if ((h % 1) != 0):
-            warn('possible precision loss converting image to '
-                 'floating point. To silence this warning, '
-                 'ensure image and h have same data type.',
-                 stacklevel=2)
+    if np.issubdtype(type(h), np.floating) and np.issubdtype(image.dtype, np.integer):
+        if (h % 1) != 0:
+            warn(
+                'possible precision loss converting image to '
+                'floating point. To silence this warning, '
+                'ensure image and h have same data type.',
+                stacklevel=2,
+            )
             image = image.astype(float)
         else:
             h = image.dtype.type(h)
 
-    if (h == 0):
-        raise ValueError("h = 0 is ambiguous, use local_minima() "
-                         "instead?")
+    if h == 0:
+        raise ValueError("h = 0 is ambiguous, use local_minima() " "instead?")
 
     if np.issubdtype(image.dtype, np.floating):
         resolution = 2 * np.finfo(image.dtype).resolution * np.abs(image)
@@ -264,15 +264,16 @@ def h_minima(image, h, footprint=None):
     else:
         shifted_img = _add_constant_clip(image, h)
 
-    rec_img = grayreconstruct.reconstruction(shifted_img, image,
-                                             method='erosion',
-                                             footprint=footprint)
+    rec_img = grayreconstruct.reconstruction(
+        shifted_img, image, method='erosion', footprint=footprint
+    )
     residue_img = rec_img - image
     return (residue_img >= h).astype(np.uint8)
 
 
-def local_maxima(image, footprint=None, connectivity=None, indices=False,
-                 allow_borders=True):
+def local_maxima(
+    image, footprint=None, connectivity=None, indices=False, allow_borders=True
+):
     """Find local maxima of n-dimensional array.
 
     The local maxima are defined as connected sets of pixels with equal gray
@@ -403,11 +404,10 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
         warn(
             "maxima can't exist for an image with any dimension smaller 3 "
             "if borders aren't allowed",
-            stacklevel=3
+            stacklevel=3,
         )
     else:
-        footprint = _util._resolve_neighborhood(footprint, connectivity,
-                                                image.ndim)
+        footprint = _util._resolve_neighborhood(footprint, connectivity, image.ndim)
         neighbor_offsets = _util._offsets_to_raveled_neighbors(
             image.shape, footprint, center=((1,) * image.ndim)
         )
@@ -417,8 +417,10 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
         except TypeError:
             if image.dtype == np.float16:
                 # Provide the user with clearer error message
-                raise TypeError("dtype of `image` is float16 which is not "
-                                "supported, try upcasting to float32")
+                raise TypeError(
+                    "dtype of `image` is float16 which is not "
+                    "supported, try upcasting to float32"
+                )
             else:
                 raise  # Otherwise raise original message
 
@@ -435,8 +437,9 @@ def local_maxima(image, footprint=None, connectivity=None, indices=False,
         return flags.view(bool)
 
 
-def local_minima(image, footprint=None, connectivity=None, indices=False,
-                 allow_borders=True):
+def local_minima(
+    image, footprint=None, connectivity=None, indices=False, allow_borders=True
+):
     """Find local minima of n-dimensional array.
 
     The local minima are defined as connected sets of pixels with equal gray
@@ -541,5 +544,5 @@ def local_minima(image, footprint=None, connectivity=None, indices=False,
         footprint=footprint,
         connectivity=connectivity,
         indices=indices,
-        allow_borders=allow_borders
+        allow_borders=allow_borders,
     )

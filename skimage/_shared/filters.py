@@ -12,9 +12,17 @@ from scipy import ndimage as ndi
 from .._shared.utils import _supported_float_type, convert_to_float
 
 
-def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             preserve_range=False, truncate=4.0, *,
-             channel_axis=None):
+def gaussian(
+    image,
+    sigma=1,
+    output=None,
+    mode='nearest',
+    cval=0,
+    preserve_range=False,
+    truncate=4.0,
+    *,
+    channel_axis=None,
+):
     """Multi-dimensional Gaussian filter.
 
     Parameters
@@ -128,5 +136,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     image = image.astype(float_dtype, copy=False)
     if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
         raise ValueError("Provided output data type is not float")
-    return ndi.gaussian_filter(image, sigma, output=output,
-                               mode=mode, cval=cval, truncate=truncate)
+    return ndi.gaussian_filter(
+        image, sigma, output=output, mode=mode, cval=cval, truncate=truncate
+    )

@@ -17,9 +17,11 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = (f'Window size for `threshold_sauvola` or '
-                   f'`threshold_niblack` must not be even on any dimension. '
-                   f'Got {axis_sizes}')
+            msg = (
+                f'Window size for `threshold_sauvola` or '
+                f'`threshold_niblack` must not be even on any dimension. '
+                f'Got {axis_sizes}'
+            )
             raise ValueError(msg)
 
 
@@ -30,8 +32,12 @@ def _get_view(padded, kernel_shape, idx, val):
     in correlate_sparse, then the view created here will match the size of the
     original image.
     """
-    sl_shift = tuple([slice(c, s - (w_ - 1 - c))
-                      for c, w_, s in zip(idx, kernel_shape, padded.shape)])
+    sl_shift = tuple(
+        [
+            slice(c, s - (w_ - 1 - c))
+            for c, w_, s in zip(idx, kernel_shape, padded.shape)
+        ]
+    )
     v = padded[sl_shift]
     if val == 1:
         return v

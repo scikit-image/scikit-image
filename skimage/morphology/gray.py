@@ -10,8 +10,7 @@ from ..util import crop
 from .footprints import _footprint_is_sequence, _shape_from_sequence
 from .misc import default_footprint
 
-__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
-           'black_tophat']
+__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
 
 
 def _iterate_gray_func(gray_func, image, footprints, out):
@@ -122,6 +121,7 @@ def pad_for_eccentric_footprints(func):
     --------
     opening, closing.
     """
+
     @functools.wraps(func)
     def func_out(image, footprint, out=None, *args, **kwargs):
         pad_widths = []
@@ -152,6 +152,7 @@ def pad_for_eccentric_footprints(func):
         else:
             out = out_temp
         return out
+
     return func_out
 
 
@@ -223,8 +224,9 @@ def erosion(image, footprint=None, out=None, shift_x=False, shift_y=False):
         out = np.empty_like(image)
 
     if _footprint_is_sequence(footprint):
-        footprints = tuple((_shift_footprint(fp, shift_x, shift_y), n)
-                           for fp, n in footprint)
+        footprints = tuple(
+            (_shift_footprint(fp, shift_x, shift_y), n) for fp, n in footprint
+        )
         return _iterate_gray_func(ndi.grey_erosion, image, footprints, out)
 
     footprint = np.array(footprint)

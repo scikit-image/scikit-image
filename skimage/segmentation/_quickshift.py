@@ -7,11 +7,21 @@ from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 
 
-@deprecate_kwarg({'random_seed': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
-def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
-               return_tree=False, sigma=0, convert2lab=True, rng=42,
-               *, channel_axis=-1):
+@deprecate_kwarg(
+    {'random_seed': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
+def quickshift(
+    image,
+    ratio=1.0,
+    kernel_size=5,
+    max_dist=10,
+    return_tree=False,
+    sigma=0,
+    convert2lab=True,
+    rng=42,
+    *,
+    channel_axis=-1,
+):
     """Segment image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -88,6 +98,10 @@ def quickshift(image, ratio=1.0, kernel_size=5, max_dist=10,
     image = np.ascontiguousarray(image * ratio)
 
     segment_mask = _quickshift_cython(
-        image, kernel_size=kernel_size, max_dist=max_dist,
-        return_tree=return_tree, rng=rng)
+        image,
+        kernel_size=kernel_size,
+        max_dist=max_dist,
+        return_tree=return_tree,
+        rng=rng,
+    )
     return segment_mask

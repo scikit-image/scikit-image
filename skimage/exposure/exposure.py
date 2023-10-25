@@ -4,17 +4,28 @@ from ..util.dtype import dtype_range, dtype_limits
 from .._shared import utils
 
 
-__all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
-           'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
+__all__ = [
+    'histogram',
+    'cumulative_distribution',
+    'equalize_hist',
+    'rescale_intensity',
+    'adjust_gamma',
+    'adjust_log',
+    'adjust_sigmoid',
+]
 
 
 DTYPE_RANGE = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
-DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
-                    'uint12': (0, 2 ** 12 - 1),
-                    'uint14': (0, 2 ** 14 - 1),
-                    'bool': dtype_range[bool],
-                    'float': dtype_range[np.float64]})
+DTYPE_RANGE.update(
+    {
+        'uint10': (0, 2**10 - 1),
+        'uint12': (0, 2**12 - 1),
+        'uint14': (0, 2**14 - 1),
+        'bool': dtype_range[bool],
+        'float': dtype_range[np.float64],
+    }
+)
 
 
 def _offset_array(arr, low_boundary, high_boundary):
@@ -23,8 +34,9 @@ def _offset_array(arr, low_boundary, high_boundary):
         offset = low_boundary
         dyn_range = high_boundary - low_boundary
         # get smallest dtype that can hold both minimum and offset maximum
-        offset_dtype = np.promote_types(np.min_scalar_type(dyn_range),
-                                        np.min_scalar_type(low_boundary))
+        offset_dtype = np.promote_types(
+            np.min_scalar_type(dyn_range), np.min_scalar_type(low_boundary)
+        )
         if arr.dtype != offset_dtype:
             # prevent overflow errors when offsetting
             arr = arr.astype(offset_dtype)
@@ -35,9 +47,7 @@ def _offset_array(arr, low_boundary, high_boundary):
 def _bincount_histogram_centers(image, source_range):
     """Compute bin centers for bincount-based histogram."""
     if source_range not in ['image', 'dtype']:
-        raise ValueError(
-            f'Incorrect value for `source_range` argument: {source_range}'
-        )
+        raise ValueError(f'Incorrect value for `source_range` argument: {source_range}')
     if source_range == 'image':
         image_min = int(image.min().astype(np.int64))
         image_max = int(image.max().astype(np.int64))
@@ -74,9 +84,7 @@ def _bincount_histogram(image, source_range, bin_centers=None):
         bin_centers = _bincount_histogram_centers(image, source_range)
     image_min, image_max = bin_centers[0], bin_centers[-1]
     image = _offset_array(image, image_min, image_max)
-    hist = np.bincount(
-        image.ravel(), minlength=image_max - min(image_min, 0) + 1
-    )
+    hist = np.bincount(image.ravel(), minlength=image_max - min(image_min, 0) + 1)
     if source_range == 'image':
         idx = max(image_min, 0)
         hist = hist[idx:]
@@ -108,13 +116,10 @@ def _get_outer_edges(image, hist_range):
     if hist_range is not None:
         first_edge, last_edge = hist_range
         if first_edge > last_edge:
-            raise ValueError(
-                "max must be larger than min in hist_range parameter."
-            )
+            raise ValueError("max must be larger than min in hist_range parameter.")
         if not (np.isfinite(first_edge) and np.isfinite(last_edge)):
             raise ValueError(
-                f'supplied hist_range of [{first_edge}, {last_edge}] is '
-                f'not finite'
+                f'supplied hist_range of [{first_edge}, {last_edge}] is ' f'not finite'
             )
     elif image.size == 0:
         # handle empty arrays. Can't determine hist_range, so use 0-1.
@@ -183,8 +188,9 @@ def _get_numpy_hist_range(image, source_range):
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-def histogram(image, nbins=256, source_range='image', normalize=False, *,
-              channel_axis=None):
+def histogram(
+    image, nbins=256, source_range='image', normalize=False, *, channel_axis=None
+):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -238,10 +244,12 @@ def histogram(image, nbins=256, source_range='image', normalize=False, *,
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4 and channel_axis is None:
-        utils.warn('This might be a color image. The histogram will be '
-                   'computed on the flattened image. You can instead '
-                   'apply this function to each color channel, or set '
-                   'channel_axis.')
+        utils.warn(
+            'This might be a color image. The histogram will be '
+            'computed on the flattened image. You can instead '
+            'apply this function to each color channel, or set '
+            'channel_axis.'
+        )
 
     if channel_axis is not None:
         channels = sh[-1]
@@ -292,13 +300,11 @@ def _histogram(image, bins, source_range, normalize):
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         bin_centers = bins if isinstance(bins, np.ndarray) else None
-        hist, bin_centers = _bincount_histogram(
-            image, source_range, bin_centers
-        )
+        hist, bin_centers = _bincount_histogram(image, source_range, bin_centers)
     else:
         hist_range = _get_numpy_hist_range(image, source_range)
         hist, bin_edges = np.histogram(image, bins=bins, range=hist_range)
-        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
 
     if normalize:
         hist = hist / np.sum(hist)
@@ -580,15 +586,16 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         out_dtype = _output_dtype(out_range, image.dtype)
 
     imin, imax = map(float, intensity_range(image, in_range))
-    omin, omax = map(float, intensity_range(image, out_range,
-                                            clip_negative=(imin >= 0)))
+    omin, omax = map(
+        float, intensity_range(image, out_range, clip_negative=(imin >= 0))
+    )
 
     if np.any(np.isnan([imin, imax, omin, omax])):
         utils.warn(
             "One or more intensity levels are NaN. Rescaling will broadcast "
             "NaN to the full image. Provide intensity levels yourself to "
             "avoid this. E.g. with np.nanmin(image), np.nanmax(image).",
-            stacklevel=2
+            stacklevel=2,
         )
 
     image = np.clip(image, imin, imax)
@@ -601,17 +608,16 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
 
 def _assert_non_negative(image):
-
     if np.any(image < 0):
-        raise ValueError('Image Correction methods work correctly only on '
-                         'images with non-negative values. Use '
-                         'skimage.exposure.rescale_intensity.')
+        raise ValueError(
+            'Image Correction methods work correctly only on '
+            'images with non-negative values. Use '
+            'skimage.exposure.rescale_intensity.'
+        )
 
 
 def _adjust_gamma_u8(image, gamma, gain):
-    """LUT based implementation of gamma adjustment.
-
-    """
+    """LUT based implementation of gamma adjustment."""
     lut = 255 * gain * (np.linspace(0, 1, 256) ** gamma)
     lut = np.minimum(np.rint(lut), 255).astype('uint8')
     return lut[image]
@@ -673,8 +679,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     else:
         _assert_non_negative(image)
 
-        scale = float(dtype_limits(image, True)[1]
-                      - dtype_limits(image, True)[0])
+        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
         out = (((image / scale) ** gamma) * scale * gain).astype(dtype)
 
@@ -774,8 +779,13 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     return out.astype(dtype)
 
 
-def is_low_contrast(image, fraction_threshold=0.05, lower_percentile=1,
-                    upper_percentile=99, method='linear'):
+def is_low_contrast(
+    image,
+    fraction_threshold=0.05,
+    lower_percentile=1,
+    upper_percentile=99,
+    method='linear',
+):
     """Determine if an image is low contrast.
 
     Parameters

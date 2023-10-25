@@ -19,8 +19,7 @@ def test_color_2d():
     img += 0.01 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
-               start_label=0)
+    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False, start_label=0)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -60,8 +59,15 @@ def test_gray_2d():
     img += 0.0033 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=4, compactness=1,
-               channel_axis=None, convert2lab=False, start_label=0)
+    seg = slic(
+        img,
+        sigma=0,
+        n_segments=4,
+        compactness=1,
+        channel_axis=None,
+        convert2lab=False,
+        start_label=0,
+    )
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
@@ -74,9 +80,7 @@ def test_gray_2d():
 def test_gray2d_default_channel_axis():
     img = np.zeros((20, 21))
     img[:10, :10] = 0.33
-    with pytest.raises(
-            ValueError, match="channel_axis=-1 indicates multichannel"
-    ):
+    with pytest.raises(ValueError, match="channel_axis=-1 indicates multichannel"):
         slic(img)
     slic(img, channel_axis=None)
 
@@ -150,8 +154,15 @@ def test_gray_3d():
     img += 0.001 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=8, compactness=1,
-               channel_axis=None, convert2lab=False, start_label=0)
+    seg = slic(
+        img,
+        sigma=0,
+        n_segments=8,
+        compactness=1,
+        channel_axis=None,
+        convert2lab=False,
+        start_label=0,
+    )
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
@@ -160,72 +171,88 @@ def test_gray_3d():
 
 def test_list_sigma():
     rng = np.random.default_rng(0)
-    img = np.array([[1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1]], float)
+    img = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rng.normal(size=img.shape)
-    result_sigma = np.array([[0, 0, 0, 1, 1, 1],
-                             [0, 0, 0, 1, 1, 1]], int)
-    with expected_warnings(["Input image is 2D: sigma number of "
-                            "elements must be 2"]):
-        seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1],
-                         channel_axis=None, start_label=0)
+    result_sigma = np.array([[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1]], int)
+    with expected_warnings(
+        ["Input image is 2D: sigma number of " "elements must be 2"]
+    ):
+        seg_sigma = slic(
+            img, n_segments=2, sigma=[1, 50, 1], channel_axis=None, start_label=0
+        )
     assert_equal(seg_sigma, result_sigma)
 
 
 def test_spacing():
     rng = np.random.default_rng(0)
-    img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], float)
-    result_non_spaced = np.array([[0, 0, 0, 1, 1],
-                                  [0, 0, 1, 1, 1]], int)
-    result_spaced = np.array([[0, 0, 0, 0, 0],
-                              [1, 1, 1, 1, 1]], int)
+    img = np.array([[1, 1, 1, 0, 0], [1, 1, 0, 0, 0]], float)
+    result_non_spaced = np.array([[0, 0, 0, 1, 1], [0, 0, 1, 1, 1]], int)
+    result_spaced = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 1, 1]], int)
     img += 0.1 * rng.normal(size=img.shape)
-    seg_non_spaced = slic(img, n_segments=2, sigma=0, channel_axis=None,
-                          compactness=1.0, start_label=0)
-    seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[500, 1],
-                      compactness=1.0, channel_axis=None, start_label=0)
+    seg_non_spaced = slic(
+        img, n_segments=2, sigma=0, channel_axis=None, compactness=1.0, start_label=0
+    )
+    seg_spaced = slic(
+        img,
+        n_segments=2,
+        sigma=0,
+        spacing=[500, 1],
+        compactness=1.0,
+        channel_axis=None,
+        start_label=0,
+    )
     assert_equal(seg_non_spaced, result_non_spaced)
     assert_equal(seg_spaced, result_spaced)
 
 
 def test_invalid_lab_conversion():
-    img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], float) + 1
+    img = np.array([[1, 1, 1, 0, 0], [1, 1, 0, 0, 0]], float) + 1
     with pytest.raises(ValueError):
         slic(img, channel_axis=-1, convert2lab=True, start_label=0)
 
 
 def test_enforce_connectivity():
-    img = np.array([[0, 0, 0, 1, 1, 1],
-                    [1, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0]], float)
+    img = np.array([[0, 0, 0, 1, 1, 1], [1, 0, 0, 1, 1, 0], [0, 0, 0, 1, 1, 0]], float)
 
-    segments_connected = slic(img, 2, compactness=0.0001,
-                              enforce_connectivity=True,
-                              convert2lab=False, start_label=0,
-                              channel_axis=None)
-    segments_disconnected = slic(img, 2, compactness=0.0001,
-                                 enforce_connectivity=False,
-                                 convert2lab=False, start_label=0,
-                                 channel_axis=None)
+    segments_connected = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=True,
+        convert2lab=False,
+        start_label=0,
+        channel_axis=None,
+    )
+    segments_disconnected = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=False,
+        convert2lab=False,
+        start_label=0,
+        channel_axis=None,
+    )
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
-    segments_connected_low_max = slic(img, 2, compactness=0.0001,
-                                      enforce_connectivity=True,
-                                      convert2lab=False,
-                                      max_size_factor=0.8,
-                                      start_label=0,
-                                      channel_axis=None)
+    segments_connected_low_max = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=True,
+        convert2lab=False,
+        max_size_factor=0.8,
+        start_label=0,
+        channel_axis=None,
+    )
 
-    result_connected = np.array([[0, 0, 0, 1, 1, 1],
-                                 [0, 0, 0, 1, 1, 1],
-                                 [0, 0, 0, 1, 1, 1]], float)
+    result_connected = np.array(
+        [[0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1], [0, 0, 0, 1, 1, 1]], float
+    )
 
-    result_disconnected = np.array([[0, 0, 0, 1, 1, 1],
-                                    [1, 0, 0, 1, 1, 0],
-                                    [0, 0, 0, 1, 1, 0]], float)
+    result_disconnected = np.array(
+        [[0, 0, 0, 1, 1, 1], [1, 0, 0, 1, 1, 0], [0, 0, 0, 1, 1, 0]], float
+    )
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
@@ -262,8 +289,15 @@ def test_more_segments_than_pixels():
     img += 0.0033 * rng.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=500, compactness=1,
-               channel_axis=None, convert2lab=False, start_label=0)
+    seg = slic(
+        img,
+        sigma=0,
+        n_segments=500,
+        compactness=1,
+        channel_axis=None,
+        convert2lab=False,
+        start_label=0,
+    )
     assert np.all(seg.ravel() == np.arange(seg.size))
 
 
@@ -277,8 +311,7 @@ def test_color_2d_mask():
     img[10:, 10:, 2] = 1
     img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False,
-               mask=msk)
+    seg = slic(img, n_segments=4, sigma=0, enforce_connectivity=False, mask=msk)
 
     # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
@@ -306,8 +339,7 @@ def test_multichannel_2d_mask():
     img[10:, 10:, 6:8] = 1
     img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, n_segments=4, enforce_connectivity=False,
-               mask=msk)
+    seg = slic(img, n_segments=4, enforce_connectivity=False, mask=msk)
 
     # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
@@ -334,8 +366,15 @@ def test_gray_2d_mask():
     img[10:, 10:] = 1.00
     img += 0.0033 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, sigma=0, n_segments=4, compactness=1,
-               channel_axis=None, convert2lab=False, mask=msk)
+    seg = slic(
+        img,
+        sigma=0,
+        n_segments=4,
+        compactness=1,
+        channel_axis=None,
+        convert2lab=False,
+        mask=msk,
+    )
 
     assert_equal(len(np.unique(seg)), 5)
     assert_equal(seg.shape, img.shape)
@@ -355,13 +394,10 @@ def test_list_sigma_mask():
     rng = np.random.default_rng(0)
     msk = np.zeros((2, 6))
     msk[:, 1:-1] = 1
-    img = np.array([[1, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 1, 1, 1]], float)
+    img = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]], float)
     img += 0.1 * rng.normal(size=img.shape)
-    result_sigma = np.array([[0, 1, 1, 2, 2, 0],
-                             [0, 1, 1, 2, 2, 0]], int)
-    seg_sigma = slic(img, n_segments=2, sigma=[50, 1],
-                     channel_axis=None, mask=msk)
+    result_sigma = np.array([[0, 1, 1, 2, 2, 0], [0, 1, 1, 2, 2, 0]], int)
+    seg_sigma = slic(img, n_segments=2, sigma=[50, 1], channel_axis=None, mask=msk)
     assert_equal(seg_sigma, result_sigma)
 
 
@@ -369,17 +405,22 @@ def test_spacing_mask():
     rng = np.random.default_rng(0)
     msk = np.zeros((2, 5))
     msk[:, 1:-1] = 1
-    img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], float)
-    result_non_spaced = np.array([[0, 1, 1, 2, 0],
-                                  [0, 1, 2, 2, 0]], int)
-    result_spaced = np.array([[0, 1, 1, 1, 0],
-                              [0, 2, 2, 2, 0]], int)
+    img = np.array([[1, 1, 1, 0, 0], [1, 1, 0, 0, 0]], float)
+    result_non_spaced = np.array([[0, 1, 1, 2, 0], [0, 1, 2, 2, 0]], int)
+    result_spaced = np.array([[0, 1, 1, 1, 0], [0, 2, 2, 2, 0]], int)
     img += 0.1 * rng.normal(size=img.shape)
-    seg_non_spaced = slic(img, n_segments=2, sigma=0, channel_axis=None,
-                          compactness=1.0, mask=msk)
-    seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[50, 1],
-                      compactness=1.0, channel_axis=None, mask=msk)
+    seg_non_spaced = slic(
+        img, n_segments=2, sigma=0, channel_axis=None, compactness=1.0, mask=msk
+    )
+    seg_spaced = slic(
+        img,
+        n_segments=2,
+        sigma=0,
+        spacing=[50, 1],
+        compactness=1.0,
+        channel_axis=None,
+        mask=msk,
+    )
     assert_equal(seg_non_spaced, result_non_spaced)
     assert_equal(seg_spaced, result_spaced)
 
@@ -387,32 +428,47 @@ def test_spacing_mask():
 def test_enforce_connectivity_mask():
     msk = np.zeros((3, 6))
     msk[:, 1:-1] = 1
-    img = np.array([[0, 0, 0, 1, 1, 1],
-                    [1, 0, 0, 1, 1, 0],
-                    [0, 0, 0, 1, 1, 0]], float)
+    img = np.array([[0, 0, 0, 1, 1, 1], [1, 0, 0, 1, 1, 0], [0, 0, 0, 1, 1, 0]], float)
 
-    segments_connected = slic(img, 2, compactness=0.0001,
-                              enforce_connectivity=True,
-                              convert2lab=False, mask=msk, channel_axis=None)
-    segments_disconnected = slic(img, 2, compactness=0.0001,
-                                 enforce_connectivity=False,
-                                 convert2lab=False, mask=msk, channel_axis=None)
+    segments_connected = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=True,
+        convert2lab=False,
+        mask=msk,
+        channel_axis=None,
+    )
+    segments_disconnected = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=False,
+        convert2lab=False,
+        mask=msk,
+        channel_axis=None,
+    )
 
     # Make sure nothing fatal occurs (e.g. buffer overflow) at low values of
     # max_size_factor
-    segments_connected_low_max = slic(img, 2, compactness=0.0001,
-                                      enforce_connectivity=True,
-                                      convert2lab=False,
-                                      max_size_factor=0.8, mask=msk,
-                                      channel_axis=None)
+    segments_connected_low_max = slic(
+        img,
+        2,
+        compactness=0.0001,
+        enforce_connectivity=True,
+        convert2lab=False,
+        max_size_factor=0.8,
+        mask=msk,
+        channel_axis=None,
+    )
 
-    result_connected = np.array([[0, 1, 1, 2, 2, 0],
-                                 [0, 1, 1, 2, 2, 0],
-                                 [0, 1, 1, 2, 2, 0]], float)
+    result_connected = np.array(
+        [[0, 1, 1, 2, 2, 0], [0, 1, 1, 2, 2, 0], [0, 1, 1, 2, 2, 0]], float
+    )
 
-    result_disconnected = np.array([[0, 1, 1, 2, 2, 0],
-                                    [0, 1, 1, 2, 2, 0],
-                                    [0, 1, 1, 2, 2, 0]], float)
+    result_disconnected = np.array(
+        [[0, 1, 1, 2, 2, 0], [0, 1, 1, 2, 2, 0], [0, 1, 1, 2, 2, 0]], float
+    )
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
@@ -420,7 +476,6 @@ def test_enforce_connectivity_mask():
 
 
 def test_slic_zero_mask():
-
     rng = np.random.default_rng(0)
     msk = np.zeros((20, 21))
     msk[2:-2, 2:-2] = 1
@@ -430,8 +485,7 @@ def test_slic_zero_mask():
     img[10:, 10:, 2] = 1
     img += 0.01 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, n_segments=4, sigma=0, slic_zero=True,
-               mask=msk)
+    seg = slic(img, n_segments=4, sigma=0, slic_zero=True, mask=msk)
 
     # we expect 4 segments + masked area
     assert_equal(len(np.unique(seg)), 5)
@@ -458,15 +512,21 @@ def test_more_segments_than_pixels_mask():
     img[10:, 10:] = 1.00
     img += 0.0033 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, sigma=0, n_segments=500, compactness=1,
-               channel_axis=None, convert2lab=False, mask=msk)
+    seg = slic(
+        img,
+        sigma=0,
+        n_segments=500,
+        compactness=1,
+        channel_axis=None,
+        convert2lab=False,
+        mask=msk,
+    )
 
     expected = np.arange(seg[2:-2, 2:-2].size) + 1
     assert np.all(seg[2:-2, 2:-2].ravel() == expected)
 
 
 def test_color_3d_mask():
-
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
@@ -492,7 +552,6 @@ def test_color_3d_mask():
 
 
 def test_gray_3d_mask():
-
     msk = np.zeros((20, 21, 22))
     msk[2:-2, 2:-2, 2:-2] = 1
 
@@ -508,8 +567,9 @@ def test_gray_3d_mask():
         img[s] = sh
     img += 0.001 * rng.normal(size=img.shape)
     np.clip(img, 0, 1, out=img)
-    seg = slic(img, sigma=0, n_segments=8, channel_axis=None,
-               convert2lab=False, mask=msk)
+    seg = slic(
+        img, sigma=0, n_segments=8, channel_axis=None, convert2lab=False, mask=msk
+    )
 
     # we expect 8 segments + masked area
     assert_equal(len(np.unique(seg)), 9)
@@ -517,9 +577,7 @@ def test_gray_3d_mask():
         assert_equal(seg[s][2:-2, 2:-2, 2:-2], c)
 
 
-@pytest.mark.parametrize(
-    "dtype", ['float16', 'float32', 'float64', 'uint8', 'int']
-)
+@pytest.mark.parametrize("dtype", ['float16', 'float32', 'float64', 'uint8', 'int'])
 def test_dtype_support(dtype):
     img = np.random.rand(28, 28).astype(dtype)
 
@@ -541,14 +599,20 @@ def test_start_label_fix():
     img = filters.gaussian(img, sigma=1)
 
     start_label = 1
-    superp = slic(img, start_label=start_label, channel_axis=None,
-                  n_segments=6, compactness=0.01, enforce_connectivity=True,
-                  max_num_iter=10)
+    superp = slic(
+        img,
+        start_label=start_label,
+        channel_axis=None,
+        n_segments=6,
+        compactness=0.01,
+        enforce_connectivity=True,
+        max_num_iter=10,
+    )
     assert superp.min() == start_label
 
 
 def test_raises_ValueError_if_input_has_NaN():
-    img = np.zeros((4,5), dtype=float)
+    img = np.zeros((4, 5), dtype=float)
     img[2, 3] = np.nan
     with pytest.raises(ValueError):
         slic(img, channel_axis=None)
@@ -559,7 +623,7 @@ def test_raises_ValueError_if_input_has_NaN():
 
 @pytest.mark.parametrize("inf", [-np.inf, np.inf])
 def test_raises_ValueError_if_input_has_inf(inf):
-    img = np.zeros((4,5), dtype=float)
+    img = np.zeros((4, 5), dtype=float)
     img[2, 3] = inf
     with pytest.raises(ValueError):
         slic(img, channel_axis=None)
