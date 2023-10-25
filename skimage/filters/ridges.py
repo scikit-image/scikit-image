@@ -32,7 +32,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter
@@ -50,7 +50,7 @@ def meijering(image, sigmas=range(1, 10, 2), alpha=None,
 
     Returns
     -------
-    out : (N, M[, ..., P]) ndarray
+    out : (M, N[, ...]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     See also
@@ -114,7 +114,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
     Parameters
     ----------
-    image : (N, M[, P]) ndarray
+    image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
@@ -129,7 +129,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True,
 
     Returns
     -------
-    out : (N, M[, P]) ndarray
+    out : (M, N[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     See also
@@ -185,7 +185,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
     Parameters
     ----------
-    image : (N, M[, P]) ndarray
+    image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter, i.e.,
@@ -215,7 +215,7 @@ def frangi(image, sigmas=range(1, 10, 2), scale_range=None,
 
     Returns
     -------
-    out : (N, M[, P]) ndarray
+    out : (M, N[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     Notes
@@ -299,7 +299,7 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
     Parameters
     ----------
-    image : (N, M[, P]) ndarray
+    image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter, i.e.,
@@ -325,7 +325,7 @@ def hessian(image, sigmas=range(1, 10, 2), scale_range=None, scale_step=None,
 
     Returns
     -------
-    out : (N, M[, P]) ndarray
+    out : (M, N[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
 
     Notes

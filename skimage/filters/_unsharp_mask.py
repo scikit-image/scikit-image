@@ -26,7 +26,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0,
 
     Parameters
     ----------
-    image : [P, ..., ]M[, N][, C] ndarray
+    image : (M[, ...][, C]) ndarray
         Input image.
     radius : scalar or sequence of scalars, optional
         If a scalar is given, then its value is used for all dimensions.
@@ -51,7 +51,7 @@ def unsharp_mask(image, radius=1.0, amount=1.0,
 
     Returns
     -------
-    output : [P, ..., ]M[, N][, C] ndarray of float
+    output : (M[, ...][, C]) ndarray of float
         Image with unsharp mask applied.
 
     Notes
