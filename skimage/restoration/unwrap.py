@@ -18,7 +18,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     Parameters
     ----------
-    image : 1D, 2D or 3D ndarray of floats, optionally a masked array
+    image : (M[, N[, P]]) ndarray or masked array of floats
         The values should be in the range [-pi, pi). If a masked array is
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked

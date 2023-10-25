@@ -17,7 +17,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
     image : ndarray
         The image to be filtered.
     radius : int, optional
-        Radius of a ball shaped kernel to be rolled/translated in the image.
+        Radius of a ball-shaped kernel to be rolled/translated in the image.
         Used if ``kernel = None``.
     kernel : ndarray, optional
         The kernel to be rolled/translated in the image. It must have the
@@ -160,7 +160,7 @@ def ellipsoid_kernel(shape, intensity):
 
     Parameters
     ----------
-    shape : arraylike
+    shape : array-like
         Length of the principal axis of the ellipsoid (excluding
         the intensity axis). The kernel needs to have the same
         dimensionality as the image it will be applied to.
