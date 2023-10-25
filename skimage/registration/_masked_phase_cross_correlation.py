@@ -50,8 +50,7 @@ def _masked_phase_cross_correlation(reference_image, moving_image,
     -------
     shifts : ndarray
         Shift vector (in pixels) required to register ``moving_image``
-        with ``reference_image``. Axis ordering is consistent with
-        numpy (e.g. Z, Y, X)
+        with ``reference_image``. Axis ordering is consistent with numpy.
 
     References
     ----------
