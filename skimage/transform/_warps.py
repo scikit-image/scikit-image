@@ -418,8 +418,8 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
     Parameters
     ----------
-    image : ndarray
-        N-dimensional input image.
+    image : ndarray, shape (M[, ...])
+        Input image.
     factors : array_like
         Array containing down-sampling integer factor along each axis.
     cval : float, optional
@@ -985,23 +985,23 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Parameters
     ----------
-    output_coords : ndarray
-        `(M, 2)` array of `(col, row)` coordinates in the output image
+    output_coords : ndarray, shape (M, 2)
+        Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: ``k_angle = nrows / (2 * np.pi)``
+        image to angle: ``k_angle = nrows / (2 * np.pi)``.
     k_radius : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: ``k_radius = width / np.log(radius)``
+        image: ``k_radius = width / np.log(radius)``.
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
 
     Returns
     -------
-    coords : ndarray
-        `(M, 2)` array of `(col, row)` coordinates in the input image that
+    coords : ndarray, shape (M, 2)
+        Array of `(col, row)` coordinates in the input image that
         correspond to the `output_coords` given as input.
     """
     angle = output_coords[:, 1] / k_angle
@@ -1019,9 +1019,8 @@ def warp_polar(image, center=None, *, radius=None, output_shape=None,
 
     Parameters
     ----------
-    image : ndarray
-        Input image. Only 2-D arrays are accepted by default. 3-D arrays are
-        accepted if a `channel_axis` is specified.
+    image : ndarray, shape (M, N[, C])
+        Input image. For multichannel images `channel_axis` has to be specified.
     center : tuple (row, col), optional
         Point in image that represents the center of the transformation (i.e.,
         the origin in cartesian space). Values can be of type `float`.
