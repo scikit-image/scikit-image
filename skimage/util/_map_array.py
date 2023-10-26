@@ -24,9 +24,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     from ._remap import _map_array
 
     if not np.issubdtype(input_arr.dtype, np.integer):
-        raise TypeError(
-            'The dtype of an array to be remapped should be integer.'
-        )
+        raise TypeError('The dtype of an array to be remapped should be integer.')
     # We ravel the input array for simplicity of iteration in Cython:
     orig_shape = input_arr.shape
     # NumPy docs for `np.ravel()` says:
@@ -103,6 +101,7 @@ class ArrayMap:
     out_values : array, shape (N,)
         The destination values from which to map.
     """
+
     def __init__(self, in_values, out_values):
         self.in_values = in_values
         self.out_values = out_values
@@ -136,19 +135,17 @@ class ArrayMap:
         if len(self.in_values) <= self._max_str_lines + 1:
             rows = range(len(self.in_values))
             string = '\n'.join(
-                ['ArrayMap:'] +
-                [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows]
+                ['ArrayMap:']
+                + [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows]
             )
         else:
             rows0 = list(range(0, self._max_str_lines // 2))
             rows1 = list(range(-self._max_str_lines // 2, 0))
             string = '\n'.join(
-                ['ArrayMap:'] +
-                [f'  {self.in_values[i]} → {self.out_values[i]}'
-                 for i in rows0] +
-                ['  ...'] +
-                [f'  {self.in_values[i]} → {self.out_values[i]}'
-                 for i in rows1]
+                ['ArrayMap:']
+                + [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows0]
+                + ['  ...']
+                + [f'  {self.in_values[i]} → {self.out_values[i]}' for i in rows1]
             )
         return string
 
@@ -161,9 +158,7 @@ class ArrayMap:
             index = np.array([index])
         elif isinstance(index, slice):
             start = index.start or 0  # treat None or 0 the same way
-            stop = (index.stop
-                    if index.stop is not None
-                    else len(self))
+            stop = index.stop if index.stop is not None else len(self)
             step = index.step
             index = np.arange(start, stop, step)
         if index.dtype == bool:

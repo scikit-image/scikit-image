@@ -16,7 +16,7 @@ def test_template(dtype):
     target = target.astype(dtype, copy=False)
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
-        image[x:x + size, y:y + size] = target
+        image[x : x + size, y : y + size] = target
     np.random.seed(1)
     image += 0.1 * np.random.uniform(size=(400, 400)).astype(dtype, copy=False)
 
@@ -51,12 +51,12 @@ def test_normalization():
     ipos, jpos = (2, 3)
     ineg, jneg = (12, 11)
     image = np.full((N, N), 0.5)
-    image[ipos:ipos + n, jpos:jpos + n] = 1
-    image[ineg:ineg + n, jneg:jneg + n] = 0
+    image[ipos : ipos + n, jpos : jpos + n] = 1
+    image[ineg : ineg + n, jneg : jneg + n] = 0
 
     # white square with a black border
     template = np.zeros((n + 2, n + 2))
-    template[1:1 + n, 1:1 + n] = 1
+    template[1 : 1 + n, 1 : 1 + n] = 1
 
     result = match_template(image, template)
 
@@ -110,12 +110,13 @@ def test_pad_input():
     image = 0.5 * np.ones((9, 19))
     mid = slice(2, 7)
     image[mid, :3] -= template[:, -3:]  # half min template centered at 0
-    image[mid, 4:9] += template         # full max template centered at 6
-    image[mid, -9:-4] -= template       # full min template centered at 12
+    image[mid, 4:9] += template  # full max template centered at 6
+    image[mid, -9:-4] -= template  # full min template centered at 12
     image[mid, -3:] += template[:, :3]  # half max template centered at 18
 
-    result = match_template(image, template, pad_input=True,
-                            constant_values=image.mean())
+    result = match_template(
+        image, template, pad_input=True, constant_values=image.mean()
+    )
 
     # get the max and min results.
     sorted_result = np.argsort(result.flat)
@@ -156,8 +157,7 @@ def test_padding_reflect():
     image = np.zeros((10, 10))
     image[2:7, :3] = template[:, -3:]
 
-    result = match_template(image, template, pad_input=True,
-                            mode='reflect')
+    result = match_template(image, template, pad_input=True, mode='reflect')
 
     assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 0))
 

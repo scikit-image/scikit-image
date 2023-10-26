@@ -36,11 +36,11 @@ def _compute_disk_overlap(d, r1, r2):
         Fraction of area of the overlap between the two disks.
     """
 
-    ratio1 = (d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1)
+    ratio1 = (d**2 + r1**2 - r2**2) / (2 * d * r1)
     ratio1 = np.clip(ratio1, -1, 1)
     acos1 = math.acos(ratio1)
 
-    ratio2 = (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2)
+    ratio2 = (d**2 + r2**2 - r1**2) / (2 * d * r2)
     ratio2 = np.clip(ratio2, -1, 1)
     acos2 = math.acos(ratio2)
 
@@ -48,8 +48,7 @@ def _compute_disk_overlap(d, r1, r2):
     b = d - r2 + r1
     c = d + r2 - r1
     d = d + r2 + r1
-    area = (r1 ** 2 * acos1 + r2 ** 2 * acos2 -
-            0.5 * math.sqrt(abs(a * b * c * d)))
+    area = r1**2 * acos1 + r2**2 * acos2 - 0.5 * math.sqrt(abs(a * b * c * d))
     return area / (math.pi * (min(r1, r2) ** 2))
 
 
@@ -77,9 +76,13 @@ def _compute_sphere_overlap(d, r1, r2):
     See for example http://mathworld.wolfram.com/Sphere-SphereIntersection.html
     for more details.
     """
-    vol = (math.pi / (12 * d) * (r1 + r2 - d)**2 *
-           (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2))
-    return vol / (4./3 * math.pi * min(r1, r2) ** 3)
+    vol = (
+        math.pi
+        / (12 * d)
+        * (r1 + r2 - d) ** 2
+        * (d**2 + 2 * d * (r1 + r2) - 3 * (r1**2 + r2**2) + 6 * r1 * r2)
+    )
+    return vol / (4.0 / 3 * math.pi * min(r1, r2) ** 3)
 
 
 def _blob_overlap(blob1, blob2, *, sigma_dim=1):
@@ -129,7 +132,7 @@ def _blob_overlap(blob1, blob2, *, sigma_dim=1):
     pos1 = blob1[:ndim] / (max_sigma * root_ndim)
     pos2 = blob2[:ndim] / (max_sigma * root_ndim)
 
-    d = np.sqrt(np.sum((pos2 - pos1)**2))
+    d = np.sqrt(np.sum((pos2 - pos1) ** 2))
     if d > r1 + r2:  # centers farther than sum of radii, so no overlap
         return 0.0
 
@@ -175,7 +178,7 @@ def _prune_blobs(blobs_array, overlap, *, sigma_dim=1):
     if len(pairs) == 0:
         return blobs_array
     else:
-        for (i, j) in pairs:
+        for i, j in pairs:
             blob1, blob2 = blobs_array[i], blobs_array[j]
             if _blob_overlap(blob1, blob2, sigma_dim=sigma_dim) > overlap:
                 # note: this test works even in the anisotropic case because
@@ -196,12 +199,14 @@ def _format_exclude_border(img_ndim, exclude_border):
         if len(exclude_border) != img_ndim:
             raise ValueError(
                 "`exclude_border` should have the same length as the "
-                "dimensionality of the image.")
+                "dimensionality of the image."
+            )
         for exclude in exclude_border:
             if not isinstance(exclude, int):
                 raise ValueError(
                     "exclude border, when expressed as a tuple, must only "
-                    "contain ints.")
+                    "contain ints."
+                )
         return exclude_border + (0,)
     elif isinstance(exclude_border, int):
         return (exclude_border,) * img_ndim + (0,)
@@ -210,13 +215,20 @@ def _format_exclude_border(img_ndim, exclude_border):
     elif exclude_border is False:
         return (0,) * (img_ndim + 1)
     else:
-        raise ValueError(
-            f'Unsupported value ({exclude_border}) for exclude_border'
-        )
+        raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
-def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
-             overlap=.5, *, threshold_rel=None, exclude_border=False):
+def blob_dog(
+    image,
+    min_sigma=1,
+    max_sigma=50,
+    sigma_ratio=1.6,
+    threshold=0.5,
+    overlap=0.5,
+    *,
+    threshold_rel=None,
+    exclude_border=False,
+):
     r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method [1]_, [2]_.
@@ -349,8 +361,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     k = int(np.mean(np.log(max_sigma / min_sigma) / np.log(sigma_ratio) + 1))
 
     # a geometric progression of standard deviations for gaussian kernels
-    sigma_list = np.array([min_sigma * (sigma_ratio ** i)
-                           for i in range(k + 1)])
+    sigma_list = np.array([min_sigma * (sigma_ratio**i) for i in range(k + 1)])
 
     # computing difference between two successive Gaussian blurred images
     # to obtain an approximation of the scale invariant Laplacian of the
@@ -398,9 +409,18 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=0.5,
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
-def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
-             overlap=.5, log_scale=False, *, threshold_rel=None,
-             exclude_border=False):
+def blob_log(
+    image,
+    min_sigma=1,
+    max_sigma=50,
+    num_sigma=10,
+    threshold=0.2,
+    overlap=0.5,
+    log_scale=False,
+    *,
+    threshold_rel=None,
+    exclude_border=False,
+):
     r"""Finds blobs in the given grayscale image.
 
     Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
@@ -503,9 +523,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     image = image.astype(float_dtype, copy=False)
 
     # if both min and max sigma are scalar, function returns only one sigma
-    scalar_sigma = (
-        True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
-    )
+    scalar_sigma = True if np.isscalar(max_sigma) and np.isscalar(min_sigma) else False
 
     # Gaussian filter requires that sequence-type sigmas have same
     # dimensionality as image. This broadcasts scalar kernels
@@ -529,7 +547,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     image_cube = np.empty(image.shape + (len(sigma_list),), dtype=float_dtype)
     for i, s in enumerate(sigma_list):
         # average s**2 provides scale invariance
-        image_cube[..., i] = -ndi.gaussian_laplace(image, s) * np.mean(s)**2
+        image_cube[..., i] = -ndi.gaussian_laplace(image, s) * np.mean(s) ** 2
 
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
@@ -563,8 +581,17 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
-def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
-             overlap=.5, log_scale=False, *, threshold_rel=None):
+def blob_doh(
+    image,
+    min_sigma=1,
+    max_sigma=30,
+    num_sigma=10,
+    threshold=0.01,
+    overlap=0.5,
+    log_scale=False,
+    *,
+    threshold_rel=None,
+):
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Determinant of Hessian method [1]_. For each blob
@@ -670,11 +697,13 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     for j, s in enumerate(sigma_list):
         image_cube[..., j] = _hessian_matrix_det(image, s)
 
-    local_maxima = peak_local_max(image_cube,
-                                  threshold_abs=threshold,
-                                  threshold_rel=threshold_rel,
-                                  exclude_border=False,
-                                  footprint=np.ones((3,) * image_cube.ndim))
+    local_maxima = peak_local_max(
+        image_cube,
+        threshold_abs=threshold,
+        threshold_rel=threshold_rel,
+        exclude_border=False,
+        footprint=np.ones((3,) * image_cube.ndim),
+    )
 
     # Catch no peaks
     if local_maxima.size == 0:

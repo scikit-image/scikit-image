@@ -55,7 +55,7 @@ def test_45deg_right_upward():
 
 def test_45deg_left_upward():
     prof = profile_line(image, (8, 8), (2, 2), order=1, mode='constant')
-    expected_prof = np.arange(88, 21, -22. / 3)
+    expected_prof = np.arange(88, 21, -22.0 / 3)
     assert_almost_equal(prof, expected_prof)
 
 
@@ -87,119 +87,190 @@ pyth_image[above] = 0.6
 
 
 def test_pythagorean_triangle_right_downward_linewidth():
-    prof = profile_line(pyth_image, (1, 1), (4, 5), linewidth=3, order=0,
-                        mode='constant')
+    prof = profile_line(
+        pyth_image, (1, 1), (4, 5), linewidth=3, order=0, mode='constant'
+    )
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_pythagorean_triangle_right_upward_linewidth():
-    prof = profile_line(pyth_image[::-1, :], (4, 1), (1, 5),
-                        linewidth=3, order=0, mode='constant')
+    prof = profile_line(
+        pyth_image[::-1, :], (4, 1), (1, 5), linewidth=3, order=0, mode='constant'
+    )
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_pythagorean_triangle_transpose_left_down_linewidth():
-    prof = profile_line(pyth_image.T[:, ::-1], (1, 4), (5, 1),
-                        linewidth=3, order=0, mode='constant')
+    prof = profile_line(
+        pyth_image.T[:, ::-1], (1, 4), (5, 1), linewidth=3, order=0, mode='constant'
+    )
     expected_prof = np.ones(6)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_mean():
-    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
-                        reduce_func=np.mean, mode='reflect')
+    prof = profile_line(
+        pyth_image,
+        (0, 1),
+        (3, 1),
+        linewidth=3,
+        order=0,
+        reduce_func=np.mean,
+        mode='reflect',
+    )
     expected_prof = pyth_image[:4, :3].mean(1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_max():
-    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
-                        reduce_func=np.max, mode='reflect')
+    prof = profile_line(
+        pyth_image,
+        (0, 1),
+        (3, 1),
+        linewidth=3,
+        order=0,
+        reduce_func=np.max,
+        mode='reflect',
+    )
     expected_prof = pyth_image[:4, :3].max(1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_sum():
-    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=3, order=0,
-                        reduce_func=np.sum, mode='reflect')
+    prof = profile_line(
+        pyth_image,
+        (0, 1),
+        (3, 1),
+        linewidth=3,
+        order=0,
+        reduce_func=np.sum,
+        mode='reflect',
+    )
     expected_prof = pyth_image[:4, :3].sum(1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_mean_linewidth_1():
-    prof = profile_line(pyth_image, (0, 1), (3, 1), linewidth=1, order=0,
-                        reduce_func=np.mean, mode='constant')
+    prof = profile_line(
+        pyth_image,
+        (0, 1),
+        (3, 1),
+        linewidth=1,
+        order=0,
+        reduce_func=np.mean,
+        mode='constant',
+    )
     expected_prof = pyth_image[:4, 1]
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_None_linewidth_1():
-    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=1,
-                        order=0, reduce_func=None, mode='constant')
+    prof = profile_line(
+        pyth_image,
+        (1, 2),
+        (4, 2),
+        linewidth=1,
+        order=0,
+        reduce_func=None,
+        mode='constant',
+    )
     expected_prof = pyth_image[1:5, 2, np.newaxis]
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_None_linewidth_3():
-    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3,
-                        order=0, reduce_func=None, mode='constant')
+    prof = profile_line(
+        pyth_image,
+        (1, 2),
+        (4, 2),
+        linewidth=3,
+        order=0,
+        reduce_func=None,
+        mode='constant',
+    )
     expected_prof = pyth_image[1:5, 1:4]
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_lambda_linewidth_3():
     def reduce_func(x):
-        return x + x ** 2
-    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
-                        reduce_func=reduce_func, mode='constant')
-    expected_prof = np.apply_along_axis(reduce_func,
-                                        arr=pyth_image[1:5, 1:4], axis=1)
+        return x + x**2
+
+    prof = profile_line(
+        pyth_image,
+        (1, 2),
+        (4, 2),
+        linewidth=3,
+        order=0,
+        reduce_func=reduce_func,
+        mode='constant',
+    )
+    expected_prof = np.apply_along_axis(reduce_func, arr=pyth_image[1:5, 1:4], axis=1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_sqrt_linewidth_3():
     def reduce_func(x):
-        return x ** 0.5
-    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3,
-                        order=0, reduce_func=reduce_func,
-                        mode='constant')
-    expected_prof = np.apply_along_axis(reduce_func,
-                                        arr=pyth_image[1:5, 1:4], axis=1)
+        return x**0.5
+
+    prof = profile_line(
+        pyth_image,
+        (1, 2),
+        (4, 2),
+        linewidth=3,
+        order=0,
+        reduce_func=reduce_func,
+        mode='constant',
+    )
+    expected_prof = np.apply_along_axis(reduce_func, arr=pyth_image[1:5, 1:4], axis=1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_reduce_func_sumofsqrt_linewidth_3():
     def reduce_func(x):
-        return np.sum(x ** 0.5)
-    prof = profile_line(pyth_image, (1, 2), (4, 2), linewidth=3, order=0,
-                        reduce_func=reduce_func, mode='constant')
-    expected_prof = np.apply_along_axis(reduce_func,
-                                        arr=pyth_image[1:5, 1:4], axis=1)
+        return np.sum(x**0.5)
+
+    prof = profile_line(
+        pyth_image,
+        (1, 2),
+        (4, 2),
+        linewidth=3,
+        order=0,
+        reduce_func=reduce_func,
+        mode='constant',
+    )
+    expected_prof = np.apply_along_axis(reduce_func, arr=pyth_image[1:5, 1:4], axis=1)
     assert_almost_equal(prof, expected_prof)
 
 
 def test_oob_coodinates():
     offset = 2
     idx = pyth_image.shape[0] + offset
-    prof = profile_line(pyth_image, (-offset, 2), (idx, 2), linewidth=1,
-                        order=0, reduce_func=None, mode='constant')
-    expected_prof = np.vstack([np.zeros((offset, 1)),
-                               pyth_image[:, 2, np.newaxis],
-                               np.zeros((offset + 1, 1))])
+    prof = profile_line(
+        pyth_image,
+        (-offset, 2),
+        (idx, 2),
+        linewidth=1,
+        order=0,
+        reduce_func=None,
+        mode='constant',
+    )
+    expected_prof = np.vstack(
+        [np.zeros((offset, 1)), pyth_image[:, 2, np.newaxis], np.zeros((offset + 1, 1))]
+    )
     assert_almost_equal(prof, expected_prof)
 
 
 def test_bool_array_input():
-
     shape = (200, 200)
     center_x, center_y = (140, 150)
     radius = 20
     x, y = np.meshgrid(range(shape[1]), range(shape[0]))
-    mask = (y - center_y) ** 2 + (x - center_x) ** 2 < radius ** 2
+    mask = (y - center_y) ** 2 + (x - center_x) ** 2 < radius**2
     src = (center_y, center_x)
-    phi = 4 * np.pi / 9.
+    phi = 4 * np.pi / 9.0
     dy = 31 * np.cos(phi)
     dx = 31 * np.sin(phi)
     dst = (center_y + dy, center_x + dx)

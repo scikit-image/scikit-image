@@ -12,14 +12,14 @@ ctypedef fused dtype_t_out:
     float64_t
 
 
-cdef dtype_t _max(dtype_t a, dtype_t b) nogil
-cdef dtype_t _min(dtype_t a, dtype_t b) nogil
+cdef dtype_t _max(dtype_t a, dtype_t b) noexcept nogil
+cdef dtype_t _min(dtype_t a, dtype_t b) noexcept nogil
 
 
 cdef void _core_3D(void kernel(dtype_t_out*, Py_ssize_t, Py_ssize_t[::1],
                                float64_t, dtype_t, Py_ssize_t, Py_ssize_t,
                                float64_t, float64_t, Py_ssize_t,
-                               Py_ssize_t) nogil,
+                               Py_ssize_t) noexcept nogil,
                    dtype_t[:, :, ::1] image,
                    char[:, :, ::1] footprint,
                    char[:, :, ::1] mask,

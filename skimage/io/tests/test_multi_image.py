@@ -9,17 +9,22 @@ from skimage._shared.testing import assert_equal, assert_allclose
 
 from pytest import fixture
 
+
 @fixture
 def imgs():
     use_plugin('pil')
 
-    paths = [testing.fetch('data/multipage_rgb.tif'),
-             testing.fetch('data/no_time_for_that_tiny.gif')]
-    imgs = [MultiImage(paths[0]),
-            MultiImage(paths[0], conserve_memory=False),
-            MultiImage(paths[1]),
-            MultiImage(paths[1], conserve_memory=False),
-            MultiImage(os.pathsep.join(paths))]
+    paths = [
+        testing.fetch('data/multipage_rgb.tif'),
+        testing.fetch('data/no_time_for_that_tiny.gif'),
+    ]
+    imgs = [
+        MultiImage(paths[0]),
+        MultiImage(paths[0], conserve_memory=False),
+        MultiImage(paths[1]),
+        MultiImage(paths[1], conserve_memory=False),
+        MultiImage(os.pathsep.join(paths)),
+    ]
     yield imgs
 
     reset_plugins()
@@ -30,10 +35,12 @@ def test_shapes(imgs):
     assert imgs[0][0].shape == imgs[0][1].shape
     assert imgs[0][0].shape == (10, 10, 3)
 
+
 def test_len(imgs):
     assert len(imgs[0][0]) == len(imgs[1][0]) == 2
     assert len(imgs[2][0]) == len(imgs[3][0]) == 24
     assert len(imgs[-1]) == 2, len(imgs[-1])
+
 
 def test_slicing(imgs):
     img = imgs[-1]
@@ -45,6 +52,7 @@ def test_slicing(imgs):
     assert_allclose(img[1], img[1:][0])
     assert_allclose(img[-1], img[::-1][0])
     assert_allclose(img[0], img[::-1][-1])
+
 
 def test_getitem(imgs):
     for img in imgs[0]:
@@ -62,6 +70,7 @@ def test_getitem(imgs):
         with testing.raises(IndexError):
             img[-num - 1]
 
+
 def test_files_property(imgs):
     for img in imgs:
         if isinstance(img, MultiImage):
@@ -72,12 +81,14 @@ def test_files_property(imgs):
         with testing.raises(AttributeError):
             img.filename = "newfile"
 
+
 def test_conserve_memory_property(imgs):
     for img in imgs:
         assert isinstance(img.conserve_memory, bool)
 
         with testing.raises(AttributeError):
             img.conserve_memory = True
+
 
 def test_concatenate(imgs):
     for img in imgs:

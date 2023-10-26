@@ -54,7 +54,7 @@ plt.show()
 
 ###############################################################################
 # Compute and display the Hausdorff distance and the corresponding pair of
-# points from the segmentation masks directly:#
+# points from the segmentation masks directly:
 
 distance = metrics.hausdorff_distance_mask(ground_truth, predicted)
 pair = metrics.hausdorff_pair_mask(ground_truth, predicted)

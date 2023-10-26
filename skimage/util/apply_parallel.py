@@ -25,7 +25,7 @@ def _get_chunks(shape, ncpu):
     from math import ceil
 
     chunks = []
-    nchunks_per_dim = int(ceil(ncpu ** (1./len(shape))))
+    nchunks_per_dim = int(ceil(ncpu ** (1.0 / len(shape))))
 
     used_chunks = 1
     for i in shape:
@@ -36,8 +36,9 @@ def _get_chunks(shape, ncpu):
             if regular_chunk == 0:
                 chunk_lens = (remainder_chunk,)
             else:
-                chunk_lens = ((regular_chunk,) * (nchunks_per_dim - 1) +
-                              (remainder_chunk,))
+                chunk_lens = (regular_chunk,) * (nchunks_per_dim - 1) + (
+                    remainder_chunk,
+                )
         else:
             chunk_lens = (i,)
 
@@ -48,15 +49,26 @@ def _get_chunks(shape, ncpu):
 
 def _ensure_dask_array(array, chunks=None):
     import dask.array as da
+
     if isinstance(array, da.Array):
         return array
 
     return da.from_array(array, chunks=chunks)
 
 
-def apply_parallel(function, array, chunks=None, depth=0, mode=None,
-                   extra_arguments=(), extra_keywords=None, *,
-                   dtype=None, compute=None, channel_axis=None):
+def apply_parallel(
+    function,
+    array,
+    chunks=None,
+    depth=0,
+    mode=None,
+    extra_arguments=(),
+    extra_keywords=None,
+    *,
+    dtype=None,
+    compute=None,
+    channel_axis=None,
+):
     """Map a function in parallel across an array.
 
     Split an array into possibly overlapping chunks of a given depth and
@@ -131,8 +143,9 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
         # minimum import path of skimage, we lazy attempt to import dask
         import dask.array as da
     except ImportError:
-        raise RuntimeError("Could not import 'dask'.  Please install "
-                           "using 'pip install dask'")
+        raise RuntimeError(
+            "Could not import 'dask'.  Please install " "using 'pip install dask'"
+        )
 
     if extra_keywords is None:
         extra_keywords = {}
@@ -149,12 +162,13 @@ def apply_parallel(function, array, chunks=None, depth=0, mode=None,
             # since apply_parallel is in the critical import path, we lazy
             # import multiprocessing just when we need it.
             from multiprocessing import cpu_count
+
             ncpu = cpu_count()
         except NotImplementedError:
             ncpu = 4
         if channel_axis is not None:
             # use a single chunk along the channel axis
-            spatial_shape = shape[:channel_axis] + shape[channel_axis + 1:]
+            spatial_shape = shape[:channel_axis] + shape[channel_axis + 1 :]
             chunks = list(_get_chunks(spatial_shape, ncpu))
             chunks.insert(channel_axis, shape[channel_axis])
             chunks = tuple(chunks)

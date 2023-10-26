@@ -13,8 +13,12 @@ from PIL import Image
 from tifffile import TiffFile
 
 
-__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
-           'imread_collection_wrapper']
+__all__ = [
+    'MultiImage',
+    'ImageCollection',
+    'concatenate_images',
+    'imread_collection_wrapper',
+]
 
 
 def concatenate_images(ic):
@@ -82,16 +86,14 @@ def _is_multipattern(input_pattern):
     """Helping function. Returns True if pattern contains a tuple, list, or a
     string separated with os.pathsep."""
     # Conditions to be accepted by ImageCollection:
-    has_str_ospathsep = (isinstance(input_pattern, str)
-                         and os.pathsep in input_pattern)
+    has_str_ospathsep = isinstance(input_pattern, str) and os.pathsep in input_pattern
     not_a_string = not isinstance(input_pattern, str)
     has_iterable = isinstance(input_pattern, Sequence)
     has_strings = all(isinstance(pat, str) for pat in input_pattern)
 
-    is_multipattern = (has_str_ospathsep or
-                       (not_a_string
-                        and has_iterable
-                        and has_strings))
+    is_multipattern = has_str_ospathsep or (
+        not_a_string and has_iterable and has_strings
+    )
     return is_multipattern
 
 
@@ -111,6 +113,8 @@ class ImageCollection:
     ----------------
     load_func : callable
         ``imread`` by default. See notes below.
+    **load_func_kwargs : dict
+        Any other keyword arguments are passed to `load_func`.
 
     Attributes
     ----------
@@ -124,27 +128,27 @@ class ImageCollection:
     Note that files are always returned in alphanumerical order. Also note
     that slicing returns a new ImageCollection, *not* a view into the data.
 
-    ImageCollection can be modified to load images from an arbitrary
-    source by specifying a combination of `load_pattern` and
-    `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
-    ``load_func(load_pattern[5])`` to load the image.
+    ImageCollection image loading can be customized through
+    `load_func`. For an ImageCollection ``ic``, ``ic[5]`` calls
+    ``load_func(load_pattern[5])`` to load that image.
 
-    Imagine, for example, an ImageCollection that loads every third
-    frame from a video file::
+    For example, here is an ImageCollection that, for each video provided,
+    loads every second frame::
 
-      video_file = 'no_time_for_that_tiny.gif'
+      import imageio.v3 as iio3
+      import itertools
 
       def vidread_step(f, step):
-          vid = imageio.get_reader(f)
-          seq = [v for v in vid.iter_data()]
-          return seq[::step]
+          vid = iio3.imiter(f)
+          return list(itertools.islice(vid, None, None, step)
 
-      ic = ImageCollection(video_file, load_func=vidread_step, step=3)
+      video_file = 'no_time_for_that_tiny.gif'
+      ic = ImageCollection(video_file, load_func=vidread_step, step=2)
 
-      ic  # is an ImageCollection object of length 1 because there is 1 file
+      ic  # is an ImageCollection object of length 1 because 1 video is provided
 
-      x = ic[0]  # calls vidread_step(video_file, step=3)
-      x[5]  # is the sixth element of a list of length 8 (24 / 3)
+      x = ic[0]
+      x[5]  # the 10th frame of the first video
 
     Alternatively, if `load_func` is provided and `load_pattern` is a
     sequence, an `ImageCollection` of corresponding length will be created,
@@ -154,12 +158,13 @@ class ImageCollection:
     files (or strings at all). For example, to create an `ImageCollection`
     containing 500 images from a video::
 
-      class vidread_random:
+      class FrameReader:
           def __init__ (self, f):
-              self.vid = imageio.get_reader(f)
-          def __call__ (self, frameno):
-              return self.vid.get_data(frameno)
-      ic = ImageCollection(range(500), load_func=vidread_random('movie.mp4'))
+              self.f = f
+          def __call__ (self, index):
+              return iio3.imread(self.f, index=index)
+
+      ic = ImageCollection(range(500), load_func=FrameReader('movie.mp4'))
 
       ic  # is an ImageCollection object of length 500
 
@@ -172,9 +177,11 @@ class ImageCollection:
 
     Examples
     --------
-    >>> import imageio
+    >>> import imageio.v3 as iio3
     >>> import skimage.io as io
-    >>> from skimage import data_dir
+
+    # Where your images are located
+    >>> data_dir = os.path.join(os.path.dirname(__file__), '../data')
 
     >>> coll = io.ImageCollection(data_dir + '/chess*.png')
     >>> len(coll)
@@ -182,21 +189,25 @@ class ImageCollection:
     >>> coll[0].shape
     (200, 200)
 
-    >>> image_col = io.ImageCollection(['/tmp/work/*.png', '/tmp/other/*.jpg'])
+    >>> image_col = io.ImageCollection([f'{data_dir}/*.png', '{data_dir}/*.jpg'])
 
-    >>> class multiread:
+    >>> class MultiReader:
     ...     def __init__ (self, f):
-    ...         self.vid = imageio.get_reader(f)
-    ...     def __call__ (self, frameno):
-    ...         return self.vid.get_data(frameno)
+    ...         self.f = f
+    ...     def __call__ (self, index):
+    ...         return iio3.imread(self.f, index=index)
     ...
     >>> filename = data_dir + '/no_time_for_that_tiny.gif'
-    >>> image_col = io.ImageCollection(range(24), load_func=multiread(filename))
+    >>> ic = io.ImageCollection(range(24), load_func=MultiReader(filename))
     >>> len(image_col)
-    24
+    23
+    >>> isinstance(ic[0], np.ndarray)
+    True
     """
-    def __init__(self, load_pattern, conserve_memory=True, load_func=None,
-                 **load_func_kwargs):
+
+    def __init__(
+        self, load_pattern, conserve_memory=True, load_func=None, **load_func_kwargs
+    ):
         """Load and manage a collection of images."""
         self._files = []
         if _is_multipattern(load_pattern):
@@ -215,6 +226,7 @@ class ImageCollection:
 
         if load_func is None:
             from ._io import imread
+
             self.load_func = imread
             self._numframes = self._find_images()
         else:
@@ -287,15 +299,14 @@ class ImageCollection:
         if hasattr(n, '__index__'):
             n = n.__index__()
 
-        if type(n) not in [int, slice]:
+        if not isinstance(n, int | slice):
             raise TypeError('slicing must be with an int or slice object')
 
-        if type(n) is int:
+        if isinstance(n, int):
             n = self._check_imgnum(n)
             idx = n % len(self.data)
 
-            if ((self.conserve_memory and n != self._cached) or
-                    (self.data[idx] is None)):
+            if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
                 kwargs = self.load_func_kwargs
                 if self._frame_index:
                     fname, img_num = self._frame_index[n]
@@ -415,8 +426,10 @@ def imread_collection_wrapper(imread):
             time.  Otherwise, images will be cached once they are loaded.
 
         """
-        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
-                               load_func=imread)
+        return ImageCollection(
+            load_pattern, conserve_memory=conserve_memory, load_func=imread
+        )
+
     return imread_collection
 
 
@@ -448,7 +461,8 @@ class MultiImage(ImageCollection):
 
     Examples
     --------
-    >>> from skimage import data_dir
+    # Where your images are located
+    >>> data_dir = os.path.join(os.path.dirname(__file__), '../data')
 
     >>> multipage_tiff = data_dir + '/multipage.tif'
     >>> multi_img = MultiImage(multipage_tiff)
@@ -467,14 +481,12 @@ class MultiImage(ImageCollection):
     (15, 10)
     """
 
-    def __init__(self, filename, conserve_memory=True, dtype=None,
-                 **imread_kwargs):
+    def __init__(self, filename, conserve_memory=True, dtype=None, **imread_kwargs):
         """Load a multi-img."""
         from ._io import imread
 
         self._filename = filename
-        super().__init__(filename, conserve_memory,
-                                         load_func=imread, **imread_kwargs)
+        super().__init__(filename, conserve_memory, load_func=imread, **imread_kwargs)
 
     @property
     def filename(self):

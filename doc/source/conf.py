@@ -150,29 +150,40 @@ html_theme_options = {
             "scikit-image's logo, showing a snake's head overlayed with green "
             "and orange"
         ),
-        "text": "scikit-image"
+        "text": "scikit-image",
+        "link": "https://scikit-image.org",
     },
     "header_links_before_dropdown": 6,
     "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/scikit-image/scikit-image",
+            "icon": "fa-brands fa-github",
+        },
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/scikit-image/",
             "icon": "fa-solid fa-box",
         },
     ],
+    "navbar_align": "left",
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "show_prev_next": False,
     "switcher": {
-        "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
+        "json_url": ("https://scikit-image.org/docs/dev/_static/version_switcher.json"),
         "version_match": "dev" if "dev" in version else version,
     },
-    "github_url": "https://github.com/scikit-image/scikit-image",
+    "show_version_warning_banner": True,
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
     # Other
     "pygment_light_style": "default",
     "pygment_dark_style": "github-dark",
+    "analytics": {
+        "plausible_analytics_domain": "scikit-image.org",
+        "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
+    },
 }
 
 # Custom sidebar templates, maps document names to template names.
@@ -238,9 +249,9 @@ intersphinx_mapping = {
 
 # -- Source code links -------------------------------------------------------
 
+
 # Function courtesy of NumPy to return URLs containing line numbers
 def linkcode_resolve(domain, info):
-
     """
     Determine the URL corresponding to Python object
     """
