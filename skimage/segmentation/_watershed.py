@@ -110,8 +110,8 @@ def watershed(
         the dimension of the image.
     offset : array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
-    mask : (M, N[, ...]) ndarray of bools or 0s and 1s, optional
-        Only points at which mask == True will be labeled.
+    mask : (M, N[, ...]) ndarray of bools or 0's and 1's, optional
+        Only points where mask == True will be labeled.
     compactness : float, optional
         Use compact watershed [3]_ with given compactness parameter.
         Higher values result in more regularly-shaped watershed basins.

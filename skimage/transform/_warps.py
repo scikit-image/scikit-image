@@ -232,11 +232,10 @@ def rescale(
 
     Parameters
     ----------
-    image : ndarray
+    image : (M, N[, ...][, C]) ndarray
         Input image.
     scale : {float, tuple of floats}
-        Scale factors. Separate scale factors can be defined as
-        `(rows, cols[, ...][, dim])`.
+        Scale factors. Separate scale factors can be defined as (m, n[, ...]).
 
     Returns
     -------
@@ -465,7 +464,7 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
     Parameters
     ----------
-    image : ndarray, shape (M[, ...])
+    image : (M[, ...]) ndarray
         Input image.
     factors : array_like
         Array containing down-sampling integer factor along each axis.
@@ -1045,23 +1044,23 @@ def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Parameters
     ----------
-    output_coords : ndarray
-        `(M, 2)` array of `(col, row)` coordinates in the output image
+    output_coords : (M, 2) ndarray
+         Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output
-        image to angle: ``k_angle = nrows / (2 * np.pi)``
+        image to angle: ``k_angle = nrows / (2 * np.pi)``.
     k_radius : float
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
-        image: ``k_radius = ncols / radius``
+        image: ``k_radius = ncols / radius``.
     center : tuple (row, col)
         Coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
 
     Returns
     -------
-    coords : ndarray
-        `(M, 2)` array of `(col, row)` coordinates in the input image that
+    coords : (M, 2) ndarray
+        Array of `(col, row)` coordinates in the input image that
         correspond to the `output_coords` given as input.
     """
     angle = output_coords[:, 1] / k_angle
@@ -1076,7 +1075,7 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
 
     Parameters
     ----------
-    output_coords : ndarray, shape (M, 2)
+    output_coords : (M, 2) ndarray
         Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output
@@ -1085,8 +1084,8 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
         Scaling factor that relates the radius of the circle bounding the
         area to be transformed to the intended number of columns in the output
         image: ``k_radius = width / np.log(radius)``.
-    center : tuple (row, col)
-        Coordinates that represent the center of the circle that bounds the
+    center : 2-tuple
+        `(row, col)` coordinates that represent the center of the circle that bounds the
         area to be transformed in an input image.
 
     Returns
@@ -1117,13 +1116,13 @@ def warp_polar(
 
     Parameters
     ----------
-    image : ndarray, shape (M, N[, C])
+    image : (M, N[, C]) ndarray
         Input image. For multichannel images `channel_axis` has to be specified.
-    center : tuple (row, col), optional
-        Point in image that represents the center of the transformation (i.e.,
-        the origin in cartesian space). Values can be of type `float`.
-        If no value is given, the center is assumed to be the center point
-        of the image.
+    center : 2-tuple, optional
+        `(row, col)` coordinates of the point in `image` that represents the center of
+        the transformation (i.e., the origin in Cartesian space). Values can be of
+        type `float`. If no value is given, the center is assumed to be the center point
+        of `image`.
     radius : float, optional
         Radius of the circle that bounds the area to be transformed.
     output_shape : tuple (row, col), optional
@@ -1278,7 +1277,7 @@ def resize_local_mean(
     ----------
     image : ndarray
         Input image. If this is a multichannel image, the axis corresponding
-        to channels should be specified using `channel_axis`
+        to channels should be specified using `channel_axis`.
     output_shape : iterable
         Size of the generated output image. When `channel_axis` is not None,
         the `channel_axis` should either be omitted from `output_shape` or the

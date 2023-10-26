@@ -30,7 +30,7 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
     projected_value : float
         Ray sum along the projection.
     norm_of_weights :
-        A measure of how long the ray's path through the reconstruction circle was
+        A measure of how long the ray's path through the reconstruction circle was.
     """
     theta = theta / 180. * M_PI
     cdef np_floats radius = image.shape[0] // 2 - 1

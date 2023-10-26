@@ -24,7 +24,7 @@ def _hough_circle(cnp.ndarray img,
 
     Parameters
     ----------
-    img : ndarray, shape (M, N)
+    img : (M, N) ndarray
         Input image with nonzero values representing edges.
     radius : ndarray
         Radii at which to compute the Hough transform.
@@ -107,7 +107,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
 
     Parameters
     ----------
-    img : ndarray, shape (M, N)
+    img : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold: int, optional (default 4)
         Accumulator threshold value.
@@ -250,14 +250,14 @@ def _hough_line(cnp.ndarray img,
 
     Parameters
     ----------
-    img : ndarray, shape (M, N)
+    img : (M, N) ndarray
         Input image with nonzero values representing edges.
     theta : 1D ndarray of float64
         Angles at which to compute the transform, in radians.
 
     Returns
     -------
-    H : ndarray of uint64, shape (P, Q)
+    H : (P, Q) ndarray of uint64
         Hough transform accumulator.
     theta : ndarray
         Angles at which the transform was computed, in radians.
@@ -337,7 +337,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     Parameters
     ----------
-    img : ndarray, shape (M, N)
+    img : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold : int
         Threshold
@@ -347,7 +347,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : ndarray of float64, shape (K, )
+    theta : (K, ) ndarray of float64
         Angles at which to compute the transform, in radians.
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.

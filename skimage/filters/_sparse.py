@@ -93,7 +93,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
         The input array. If mode is 'valid', this array should already be
         padded, as a margin of the same shape as kernel will be stripped
         off.
-    kernel : ndarray, dtype float shape (Q, R[, ...], S)
+    kernel : ndarray, dtype float, shape (Q, R[, ...], S)
         The kernel to be correlated. Must have the same number of
         dimensions as `padded_array`. For high performance, it should
         be sparse (few nonzero entries).

@@ -71,8 +71,8 @@ def uifftn(inarray, dim=None):
     Returns
     -------
     outarray : ndarray
-        The unitary inverse N-D Fourier transform of ``inarray``. Has the shape as
-        inarray.
+        The unitary inverse nD Fourier transform of ``inarray``. Has the same shape as
+        ``inarray``.
 
     Examples
     --------

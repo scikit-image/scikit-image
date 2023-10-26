@@ -292,7 +292,7 @@ def euler_number(image, connectivity=None):
     Parameters
     ----------
     image: (M, N[, P]) ndarray
-        Input image. If image is not binary, all values strictly greater than zero
+        Input image. If image is not binary, all values greater than zero
         are considered as the object.
     connectivity : int, optional
         Maximum number of orthogonal hops to consider a pixel/voxel
@@ -487,7 +487,7 @@ def perimeter_crofton(image, directions=4):
     Parameters
     ----------
     image : (M, N) ndarray
-        Input image. If image is not binary, all values strictly greater than zero
+        Input image. If image is not binary, all values greater than zero
         are considered as the object.
     directions : 2 or 4, optional
         Number of directions used to approximate the Crofton perimeter. By

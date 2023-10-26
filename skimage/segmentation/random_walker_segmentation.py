@@ -314,8 +314,9 @@ def random_walker(
     Parameters
     ----------
     data : (M, N[, P][, C]) ndarray
-        Image to be segmented in phases. Gray-level `data` can be 2-/3-D; multichannel
-        data can be 3-/4-D with `channel_axis` specifying the dimension containing
+        Image to be segmented in phases. Gray-level `data` can be two- or
+        three-dimensional; multichannel data can be three- or four-
+        dimensional with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : (M, N[, P]) array of ints
