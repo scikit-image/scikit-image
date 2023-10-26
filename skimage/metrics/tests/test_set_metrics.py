@@ -4,8 +4,12 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 from scipy.spatial import distance
 
 from skimage._shared._warnings import expected_warnings
-from skimage.metrics import (hausdorff_distance, hausdorff_pair,
-                                hausdorff_distance_mask, hausdorff_pair_mask)
+from skimage.metrics import (
+    hausdorff_distance,
+    hausdorff_pair,
+    hausdorff_distance_mask,
+    hausdorff_pair_mask,
+)
 from skimage.morphology import disk, erosion
 
 
@@ -13,9 +17,7 @@ def test_hausdorff_empty():
     gt = np.zeros((3, 3), dtype=bool)
     pred = np.zeros((3, 3), dtype=bool)
     assert hausdorff_distance(gt, pred) == 0.0  # standard Hausdorff
-    assert (
-        hausdorff_distance(gt, pred, method="modified") == 0.0
-    )  # modified Hausdorff
+    assert hausdorff_distance(gt, pred, method="modified") == 0.0  # modified Hausdorff
     with expected_warnings(["One or both of the images is empty"]):
         assert_array_equal(hausdorff_pair(gt, pred), [(), ()])
     assert hausdorff_distance_mask(gt, pred) == 0.0
@@ -88,9 +90,7 @@ def test_hausdorff_region_single(points_a, points_b):
 
     d = distance.cdist([points_a], [points_b])
     assert_almost_equal(hausdorff_distance(coords_a, coords_b), d)
-    assert_almost_equal(
-        hausdorff_distance(coords_a, coords_b, method="modified"), d
-    )
+    assert_almost_equal(hausdorff_distance(coords_a, coords_b, method="modified"), d)
 
 
 @pytest.mark.parametrize("points_a", [(5, 4), (4, 5), (3, 4), (4, 3)])
@@ -131,14 +131,18 @@ def test_gallery():
     distance = hausdorff_distance(gt_contour, predicted_contour)
     pair = hausdorff_pair(gt_contour, predicted_contour)
 
-    assert_almost_equal(distance, np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(pair[0], pair[1]))))
+    assert_almost_equal(
+        distance, np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(pair[0], pair[1])))
+    )
 
     # From the segmentation masks directly:
     # Computes & display the distance & the corresponding pair of points
     distance = hausdorff_distance_mask(ground_truth, predicted)
     pair = hausdorff_pair_mask(ground_truth, predicted)
 
-    assert_almost_equal(distance, np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(pair[0], pair[1]))))
+    assert_almost_equal(
+        distance, np.sqrt(sum((ca - cb) ** 2 for ca, cb in zip(pair[0], pair[1])))
+    )
 
 
 @pytest.mark.parametrize("points_a", [(0, 0, 1), (0, 1, 0), (1, 0, 0)])

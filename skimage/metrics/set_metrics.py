@@ -5,7 +5,7 @@ from scipy.spatial import cKDTree
 from ..measure import find_contours
 
 
-def _hausdorff_distance_set(a_points, b_points, method = 'standard'):
+def _hausdorff_distance_set(a_points, b_points, method='standard'):
     """Calculate the Hausdorff distance between two sets of points.
 
     Parameters
@@ -135,7 +135,9 @@ def hausdorff_distance(image0, image1, method="standard"):
     if method not in ('standard', 'modified'):
         raise ValueError(f'unrecognized method {method}')
     if image0.shape != image1.shape:
-        raise ValueError(f'shape of image0 {image0.shape} and image1 {image1.shape} should be equal.')
+        raise ValueError(
+            f'shape of image0 {image0.shape} and image1 {image1.shape} should be equal.'
+        )
 
     a_points = np.transpose(np.nonzero(image0))
     b_points = np.transpose(np.nonzero(image1))
@@ -192,7 +194,9 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
     if method not in ('standard', 'modified'):
         raise ValueError(f'unrecognized method {method}')
     if image0.shape != image1.shape:
-        raise ValueError(f'shape of image0 {image0.shape} and image1 {image1.shape} should be equal.')
+        raise ValueError(
+            f'shape of image0 {image0.shape} and image1 {image1.shape} should be equal.'
+        )
 
     # Handle empty images
     if not np.any(image0):  # no nonzero elements in image0
@@ -200,8 +204,8 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
     elif not np.any(image1):
         return np.inf
 
-    a_points = np.concatenate(find_contours(image0>0))
-    b_points = np.concatenate(find_contours(image1>0))
+    a_points = np.concatenate(find_contours(image0 > 0))
+    b_points = np.concatenate(find_contours(image1 > 0))
 
     return _hausdorff_distance_set(a_points, b_points, method)
 
@@ -283,7 +287,7 @@ def hausdorff_pair_mask(image0, image1):
         warnings.warn("One or both of the images is empty.", stacklevel=2)
         return (), ()
 
-    a_points = np.concatenate(find_contours(image0>0))
-    b_points = np.concatenate(find_contours(image1>0))
+    a_points = np.concatenate(find_contours(image0 > 0))
+    b_points = np.concatenate(find_contours(image1 > 0))
 
     return _hausdorff_pair_set(a_points, b_points)
