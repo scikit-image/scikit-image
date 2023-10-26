@@ -1,5 +1,3 @@
-# distutils: language = c++
-
 from libcpp.unordered_map cimport unordered_map
 cimport cython
 from .._shared.fused_numerics cimport np_numeric, np_anyint

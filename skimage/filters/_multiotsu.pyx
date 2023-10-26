@@ -5,7 +5,6 @@
 import numpy as np
 
 cimport numpy as cnp
-cimport cython
 cnp.import_array()
 
 def _get_multiotsu_thresh_indices_lut(cnp.float32_t [::1] prob,
@@ -65,7 +64,7 @@ cdef void _set_var_btwcls_lut(cnp.float32_t [::1] prob,
                               Py_ssize_t nbins,
                               cnp.float32_t [::1] var_btwcls,
                               cnp.float32_t [::1] zeroth_moment,
-                              cnp.float32_t [::1] first_moment) nogil:
+                              cnp.float32_t [::1] first_moment) noexcept nogil:
     """Builds the lookup table containing the variance between classes.
 
     The variance between classes are stored in
@@ -282,7 +281,7 @@ def _get_multiotsu_thresh_indices(cnp.float32_t [::1] prob,
 cdef void _set_moments_lut_first_row(cnp.float32_t [::1] prob,
                                      Py_ssize_t nbins,
                                      cnp.float32_t [::1] zeroth_moment,
-                                     cnp.float32_t [::1] first_moment) nogil:
+                                     cnp.float32_t [::1] first_moment) noexcept nogil:
     """Builds the first rows of the zeroth and first moments lookup table
     necessary to the computation of the variance between class.
 

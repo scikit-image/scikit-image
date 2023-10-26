@@ -20,6 +20,7 @@ except ImportError:
 
 class SlicSegmentation:
     """Benchmark for segmentation routines in scikit-image."""
+
     def setup(self):
         self.image = np.random.random((200, 200, 100))
         self.image[:100, :100, :] += 1
@@ -33,12 +34,20 @@ class SlicSegmentation:
             self.slic_kwargs = {}
 
     def time_slic_basic(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          **_channel_kwarg(False), **self.slic_kwargs)
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            **_channel_kwarg(False),
+            **self.slic_kwargs,
+        )
 
     def time_slic_basic_multichannel(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          **_channel_kwarg(True), **self.slic_kwargs)
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            **_channel_kwarg(True),
+            **self.slic_kwargs,
+        )
 
     def peakmem_setup(self):
         """peakmem includes the memory used by setup.
@@ -58,23 +67,30 @@ class SlicSegmentation:
         pass
 
     def peakmem_slic_basic(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          **_channel_kwarg(False), **self.slic_kwargs)
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            **_channel_kwarg(False),
+            **self.slic_kwargs,
+        )
 
     def peakmem_slic_basic_multichannel(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          **_channel_kwarg(True), **self.slic_kwargs)
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            **_channel_kwarg(True),
+            **self.slic_kwargs,
+        )
 
 
 class MaskSlicSegmentation(SlicSegmentation):
     """Benchmark for segmentation routines in scikit-image."""
+
     def setup(self):
         try:
             mask = np.zeros((64, 64)) > 0
             mask[10:-10, 10:-10] = 1
-            segmentation.slic(
-                np.ones_like(mask), mask=mask, **_channel_kwarg(False)
-            )
+            segmentation.slic(np.ones_like(mask), mask=mask, **_channel_kwarg(False))
         except TypeError:
             raise NotImplementedError("masked slic unavailable")
 
@@ -90,16 +106,23 @@ class MaskSlicSegmentation(SlicSegmentation):
             self.slic_kwargs = {}
 
     def time_mask_slic(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          mask=self.msk, **_channel_kwarg(False))
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            mask=self.msk,
+            **_channel_kwarg(False),
+        )
 
     def time_mask_slic_multichannel(self):
-        segmentation.slic(self.image, enforce_connectivity=False,
-                          mask=self.msk_slice, **_channel_kwarg(True))
+        segmentation.slic(
+            self.image,
+            enforce_connectivity=False,
+            mask=self.msk_slice,
+            **_channel_kwarg(True),
+        )
 
 
 class Watershed:
-
     param_names = ["seed_count", "connectivity", "compactness"]
     params = [(5, 500), (1, 2), (0, 0.01)]
 
@@ -107,8 +130,7 @@ class Watershed:
         self.image = filters.sobel(data.coins())
 
     def time_watershed(self, seed_count, connectivity, compactness):
-        watershed(self.image, seed_count, connectivity,
-                  compactness=compactness)
+        watershed(self.image, seed_count, connectivity, compactness=compactness)
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -127,5 +149,4 @@ class Watershed:
         pass
 
     def peakmem_watershed(self, seed_count, connectivity, compactness):
-        watershed(self.image, seed_count, connectivity,
-                  compactness=compactness)
+        watershed(self.image, seed_count, connectivity, compactness=compactness)

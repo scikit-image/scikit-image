@@ -4,7 +4,7 @@
 #cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sin, cos, abs
+from libc.math cimport sin, cos
 from .._shared.interpolation cimport bilinear_interpolation, round
 from .._shared.transform cimport integrate
 
@@ -12,7 +12,6 @@ cdef extern from "numpy/npy_math.h":
     cnp.float64_t NAN "NPY_NAN"
 
 from .._shared.fused_numerics cimport np_anyint as any_int
-from .._shared.fused_numerics cimport np_real_numeric
 
 cnp.import_array()
 
@@ -326,7 +325,7 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
         Py_ssize_t c_shift = width - 1
 
         Py_ssize_t current_rect_r, current_rect_c
-        Py_ssize_t element_num, i
+        Py_ssize_t element_num
         np_floats current_rect_val
         int has_greater_value
         int lbp_code = 0

@@ -1,10 +1,9 @@
 """Implementations restoration functions"""
-import warnings
 
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_kwarg
 from . import uft
 
 
@@ -73,7 +72,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     unknown original image, the Wiener filter is
 
     .. math::
-       \hat x = F^\dagger (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \hat x = F^\dagger \left( |\Lambda_H|^2 + \lambda |\Lambda_D|^2 \right)^{-1}
        \Lambda_H^\dagger F y
 
     where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
@@ -125,11 +124,11 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         trans_func = psf
 
-    wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
-                                           balance * np.abs(reg) ** 2)
+    wiener_filter = np.conj(trans_func) / (
+        np.abs(trans_func) ** 2 + balance * np.abs(reg) ** 2
+    )
     if is_real:
-        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image),
-                             shape=image.shape)
+        deconv = uft.uirfftn(wiener_filter * uft.urfftn(image), shape=image.shape)
     else:
         deconv = uft.uifftn(wiener_filter * uft.ufftn(image))
 
@@ -140,8 +139,12 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     return deconv
 
 
-def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
-                        clip=True, *, random_state=None):
+@deprecate_kwarg(
+    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
+def unsupervised_wiener(
+    image, psf, reg=None, user_params=None, is_real=True, clip=True, *, rng=None
+):
     """Unsupervised Wiener-Hunt deconvolution.
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -166,13 +169,10 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     clip : boolean, optional
        True by default. If true, pixel values of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
-        used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
-        instance is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
         .. versionadded:: 0.19
 
@@ -243,8 +243,13 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
            https://hal.archives-ouvertes.fr/hal-00674508
     """
-    params = {'threshold': 1e-4, 'max_num_iter': 200,
-              'min_num_iter': 30, 'burnin': 15, 'callback': None}
+    params = {
+        'threshold': 1e-4,
+        'max_num_iter': 200,
+        'min_num_iter': 30,
+        'burnin': 15,
+        'callback': None,
+    }
     params.update(user_params or {})
 
     if reg is None:
@@ -267,7 +272,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     prev_x_postmean = np.zeros(trans_fct.shape, dtype=float_type)
 
     # Difference between two successive mean
-    delta = np.NAN
+    delta = np.nan
 
     # Initial state of the chain
     gn_chain, gx_chain = [1], [1]
@@ -284,7 +289,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     else:
         data_spectrum = uft.ufft2(image)
 
-    rng = np.random.default_rng(random_state)
+    rng = np.random.default_rng(rng)
 
     # Gibbs sampling
     for iteration in range(params['max_num_iter']):
@@ -310,14 +315,17 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(rng.gamma(image.size / 2,
-                                  2 / uft.image_quad_norm(data_spectrum
-                                                          - x_sample
-                                                          * trans_fct)))
+        gn_chain.append(
+            rng.gamma(
+                image.size / 2,
+                2 / uft.image_quad_norm(data_spectrum - x_sample * trans_fct),
+            )
+        )
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(rng.gamma((image.size - 1) / 2,
-                                  2 / uft.image_quad_norm(x_sample * reg)))
+        gx_chain.append(
+            rng.gamma((image.size - 1) / 2, 2 / uft.image_quad_norm(x_sample * reg))
+        )
 
         # current empirical average
         if iteration > params['burnin']:
@@ -327,17 +335,16 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
             current = x_postmean / (iteration - params['burnin'])
             previous = prev_x_postmean / (iteration - params['burnin'] - 1)
 
-            delta = (np.sum(np.abs(current - previous))
-                     / np.sum(np.abs(x_postmean))
-                     / (iteration - params['burnin']))
+            delta = (
+                np.sum(np.abs(current - previous))
+                / np.sum(np.abs(x_postmean))
+                / (iteration - params['burnin'])
+            )
 
         prev_x_postmean = x_postmean
 
         # stop of the algorithm
-        if (
-            (iteration > params['min_num_iter'])
-            and (delta < params['threshold'])
-        ):
+        if (iteration > params['min_num_iter']) and (delta < params['threshold']):
             break
 
     # Empirical average \approx POSTMEAN Eq. 44

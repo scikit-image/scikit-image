@@ -1,13 +1,13 @@
-#cython: cdivision=True
-#cython: boundscheck=False
-#cython: nonecheck=False
-#cython: wraparound=False
-import numpy as np
+# cython: cdivision=True
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: wraparound=False
 
+import numpy as np
 cimport numpy as cnp
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
-from libc.stdlib cimport abs
+from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
@@ -15,6 +15,7 @@ from ..draw import circle_perimeter
 from .._shared.interpolation cimport round
 
 cnp.import_array()
+
 
 def _hough_circle(cnp.ndarray img,
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
@@ -155,7 +156,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
     if not np.any(img):
         return np.zeros((0, 6))
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t[:, ::1] pixels = np.vstack(np.nonzero(img))
 
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
@@ -229,7 +230,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
                             if orientation > M_PI:
                                 orientation = orientation - M_PI / 2.
                                 a, b = b, a
-                        results.append((hist_max, # Accumulator
+                        results.append((hist_max,  # Accumulator
                                         yc, xc,
                                         a, b,
                                         orientation))
@@ -331,7 +332,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              seed=None):
+                              rng=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -348,14 +349,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Increase the parameter to merge broken lines more aggressively.
     theta : 1D ndarray, dtype='float64'
         Angles at which to compute the transform, in radians.
-    seed : {None, int, `numpy.random.Generator`, optional}
-        If `seed` is None the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
-        used.
-
-        Seed to initialize the random number generator.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
     Returns
     -------
@@ -379,9 +376,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         <Py_ssize_t *>PyMem_Malloc(4 * sizeof(Py_ssize_t))
     if not line_end:
         raise MemoryError('could not allocate line_end')
-    cdef Py_ssize_t max_distance, offset, num_indexes, index
+    cdef Py_ssize_t max_distance, offset, index
     cdef cnp.float64_t a, b
-    cdef Py_ssize_t nidxs, i, j, k, x, y, px, py, accum_idx, max_theta
+    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16
@@ -409,7 +406,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     mask[y_idxs, x_idxs] = 1
 
     count = len(x_idxs)
-    random_state = np.random.default_rng(seed)
+    random_state = np.random.default_rng(rng)
     random_ = np.arange(count, dtype=np.intp)
     random_state.shuffle(random_)
     cdef cnp.intp_t[::1] random = random_
@@ -498,8 +495,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     py += dy
 
             # confirm line length is sufficient
-            good_line = (abs(line_end[3] - line_end[1]) >= line_length or
-                         abs(line_end[2] - line_end[0]) >= line_length)
+            good_line = (labs(line_end[3] - line_end[1]) >= line_length or
+                         labs(line_end[2] - line_end[0]) >= line_length)
 
             # pass 2: walk the line again and reset accumulator and mask
             for k in range(2):

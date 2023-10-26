@@ -40,9 +40,8 @@ img = data.immunohistochemistry()
 # Compute a mask
 lum = color.rgb2gray(img)
 mask = morphology.remove_small_holes(
-    morphology.remove_small_objects(
-        lum < 0.7, 500),
-    500)
+    morphology.remove_small_objects(lum < 0.7, 500), 500
+)
 
 mask = morphology.opening(mask, morphology.disk(3))
 

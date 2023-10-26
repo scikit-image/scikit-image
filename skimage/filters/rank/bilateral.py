@@ -30,21 +30,30 @@ from .generic import _preprocess_input
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
-def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1,
-           out_dtype=None):
+def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtype=None):
     check_nD(image, 2)
     image, footprint, out, mask, n_bins = _preprocess_input(
         image, footprint, out, mask, out_dtype
     )
 
-    func(image, footprint, shift_x=shift_x, shift_y=shift_y, mask=mask,
-         out=out, n_bins=n_bins, s0=s0, s1=s1)
+    func(
+        image,
+        footprint,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        mask=mask,
+        out=out,
+        n_bins=n_bins,
+        s0=s0,
+        s1=s1,
+    )
 
     return out.reshape(out.shape[:2])
 
 
-def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
-                   shift_y=False, s0=10, s1=10):
+def mean_bilateral(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+):
     """Apply a flat kernel bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -97,12 +106,22 @@ def mean_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._mean, image, footprint, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+    return _apply(
+        bilateral_cy._mean,
+        image,
+        footprint,
+        out=out,
+        mask=mask,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        s0=s0,
+        s1=s1,
+    )
 
 
-def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
-                  shift_y=False, s0=10, s1=10):
+def pop_bilateral(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+):
     """Return the local number (population) of pixels.
 
 
@@ -153,12 +172,22 @@ def pop_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._pop, image, footprint, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+    return _apply(
+        bilateral_cy._pop,
+        image,
+        footprint,
+        out=out,
+        mask=mask,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        s0=s0,
+        s1=s1,
+    )
 
 
-def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
-                  shift_y=False, s0=10, s1=10):
+def sum_bilateral(
+    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+):
     """Apply a flat kernel bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
@@ -214,5 +243,14 @@ def sum_bilateral(image, footprint, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(bilateral_cy._sum, image, footprint, out=out,
-                  mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+    return _apply(
+        bilateral_cy._sum,
+        image,
+        footprint,
+        out=out,
+        mask=mask,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        s0=s0,
+        s1=s1,
+    )

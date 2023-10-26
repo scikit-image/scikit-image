@@ -2,7 +2,6 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import math
 import numpy as np
 
 cimport numpy as cnp
@@ -134,7 +133,6 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
     cdef list val = list()
 
     cdef int dc = abs(c0 - c1)
-    cdef int dc_prime
 
     cdef int dr = abs(r0 - r1)
     cdef cnp.float64_t err = dc - dr
@@ -193,18 +191,20 @@ def _line_aa(Py_ssize_t r0, Py_ssize_t c0, Py_ssize_t r1, Py_ssize_t c1):
 
 
 def _polygon(r, c, shape):
-    """Generate coordinates of pixels within polygon.
+    """Generate coordinates of pixels inside a polygon.
 
     Parameters
     ----------
-    r : (N,) ndarray
-        Row coordinates of vertices of polygon.
-    c : (N,) ndarray
-        Column coordinates of vertices of polygon.
-    shape : tuple
+    r : (N,) array_like
+        Row coordinates of the polygon's vertices.
+    c : (N,) array_like
+        Column coordinates of the polygon's vertices.
+    shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
-        size. If None, the full extent of the polygon is used.
+        size. If None, the full extent of the polygon is used.  Must be at
+        least length 2. Only the first two values are used to determine the
+        extent of the input image.
 
     Returns
     -------
@@ -212,11 +212,15 @@ def _polygon(r, c, shape):
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
+    Notes
+    -----
+    This function ensures that `rr` and `cc` don't contain negative values.
+    Pixels in the polygon with coordinates smaller than 0 are not drawn.
     """
     r = np.atleast_1d(r)
     c = np.atleast_1d(c)
 
-    cdef Py_ssize_t nr_verts = c.shape[0]
     cdef Py_ssize_t minr = int(max(0, r.min()))
     cdef Py_ssize_t maxr = int(ceil(r.max()))
     cdef Py_ssize_t minc = int(max(0, c.min()))
@@ -294,9 +298,6 @@ def _circle_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t radius,
     cdef Py_ssize_t r = radius
     cdef Py_ssize_t d = 0
 
-    cdef cnp.float64_t dceil = 0
-    cdef cnp.float64_t dceil_prev = 0
-
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
@@ -372,7 +373,6 @@ def _circle_perimeter_aa(Py_ssize_t r_o, Py_ssize_t c_o,
 
     cdef Py_ssize_t c = 0
     cdef Py_ssize_t r = radius
-    cdef Py_ssize_t d = 0
 
     cdef cnp.float64_t dceil = 0
     cdef cnp.float64_t dceil_prev = 0

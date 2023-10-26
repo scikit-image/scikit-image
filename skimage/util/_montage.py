@@ -7,8 +7,15 @@ __all__ = ['montage']
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
-            padding_width=0, *, channel_axis=None):
+def montage(
+    arr_in,
+    fill='mean',
+    rescale_intensity=False,
+    grid_shape=None,
+    padding_width=0,
+    *,
+    channel_axis=None,
+):
     """Create a montage of several single- or multichannel images.
 
     Create a rectangular montage from an input array representing an ensemble
@@ -96,9 +103,11 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
         arr_in = np.asarray(arr_in)[..., np.newaxis]
 
     if arr_in.ndim != 4:
-        raise ValueError('Input array has to be 3-dimensional for grayscale '
-                         'images, or 4-dimensional with a `channel_axis` '
-                         'specified.')
+        raise ValueError(
+            'Input array has to be 3-dimensional for grayscale '
+            'images, or 4-dimensional with a `channel_axis` '
+            'specified.'
+        )
 
     n_images, n_rows, n_cols, n_chan = arr_in.shape
 
@@ -119,18 +128,25 @@ def montage(arr_in, fill='mean', rescale_intensity=False, grid_shape=None,
 
     # Pre-allocate an array with padding for montage
     n_pad = padding_width
-    arr_out = np.empty(((n_rows + n_pad) * ntiles_row + n_pad,
-                        (n_cols + n_pad) * ntiles_col + n_pad,
-                        n_chan), dtype=arr_in.dtype)
+    arr_out = np.empty(
+        (
+            (n_rows + n_pad) * ntiles_row + n_pad,
+            (n_cols + n_pad) * ntiles_col + n_pad,
+            n_chan,
+        ),
+        dtype=arr_in.dtype,
+    )
     for idx_chan in range(n_chan):
         arr_out[..., idx_chan] = fill[idx_chan]
 
-    slices_row = [slice(n_pad + (n_rows + n_pad) * n,
-                        n_pad + (n_rows + n_pad) * n + n_rows)
-                  for n in range(ntiles_row)]
-    slices_col = [slice(n_pad + (n_cols + n_pad) * n,
-                        n_pad + (n_cols + n_pad) * n + n_cols)
-                  for n in range(ntiles_col)]
+    slices_row = [
+        slice(n_pad + (n_rows + n_pad) * n, n_pad + (n_rows + n_pad) * n + n_rows)
+        for n in range(ntiles_row)
+    ]
+    slices_col = [
+        slice(n_pad + (n_cols + n_pad) * n, n_pad + (n_cols + n_pad) * n + n_cols)
+        for n in range(ntiles_col)
+    ]
 
     # Copy the data to the output array
     for idx_image, image in enumerate(arr_in):

@@ -23,11 +23,11 @@ jobs:
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         name: Install Python
         with:
           python-version: "3.10"
@@ -45,8 +45,8 @@ jobs:
         id: prepare-ccache
         shell: bash -l {0}
         run: |
-          echo "::set-output name=key::benchmark-$RUNNER_OS"
-          echo "::set-output name=timestamp::$(date +%Y%m%d-%H%M%S)"
+          echo "key=benchmark-$RUNNER_OS" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
           ccache -p
           ccache -z
 

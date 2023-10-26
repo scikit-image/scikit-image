@@ -114,7 +114,7 @@ def hog_histograms(np_floats[:, ::1] gradient_columns,
                                                 gradient_rows)
     cdef np_floats[:, ::1] orientation = \
         np.rad2deg(np.arctan2(gradient_rows, gradient_columns)) % 180
-    cdef int i, c, r, o, r_i, c_i, cc, cr, c_0, r_0, \
+    cdef int i, c, r, r_i, c_i, cc, cr, c_0, r_0, \
         range_rows_start, range_rows_stop, \
         range_columns_start, range_columns_stop
     cdef np_floats orientation_start, orientation_end, \

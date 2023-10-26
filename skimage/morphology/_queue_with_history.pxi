@@ -115,7 +115,7 @@ cdef inline void queue_exit(QueueWithHistory* self) nogil:
     free(self._buffer_ptr)
 
 
-cdef inline void _queue_grow_buffer(QueueWithHistory* self) nogil:
+cdef inline int _queue_grow_buffer(QueueWithHistory* self) nogil except -1:
     """Double the memory used for the buffer."""
     cdef QueueItem* new_buffer
     self._buffer_size *= 2
@@ -127,3 +127,5 @@ cdef inline void _queue_grow_buffer(QueueWithHistory* self) nogil:
         with gil:
             raise MemoryError("couldn't reallocate buffer")
     self._buffer_ptr = new_buffer_ptr
+
+    return 0

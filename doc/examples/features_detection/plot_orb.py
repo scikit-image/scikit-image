@@ -14,16 +14,14 @@ is preferred for real-time applications.
 """
 from skimage import data
 from skimage import transform
-from skimage.feature import (match_descriptors, corner_harris,
-                             corner_peaks, ORB, plot_matches)
+from skimage.feature import match_descriptors, ORB, plot_matches
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
 
 img1 = rgb2gray(data.astronaut())
 img2 = transform.rotate(img1, 180)
-tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
-                                  translation=(0, -200))
+tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5, translation=(0, -200))
 img3 = transform.warp(img1, tform)
 
 descriptor_extractor = ORB(n_keypoints=200)

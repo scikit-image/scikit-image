@@ -26,7 +26,6 @@ import scipy.fft as fft
 from .._shared.utils import _supported_float_type
 
 
-
 def ufftn(inarray, dim=None):
     """N-dimensional unitary Fourier transform.
 
@@ -335,8 +334,9 @@ def image_quad_norm(inarray):
     """
     # If there is a Hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
-        return (2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) -
-                np.sum(np.abs(inarray[..., 0]) ** 2, axis=-1))
+        return 2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) - np.sum(
+            np.abs(inarray[..., 0]) ** 2, axis=-1
+        )
     else:
         return np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1)
 
@@ -391,16 +391,14 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     if not dim:
         dim = imp_resp.ndim
     # Zero padding and fill
-    irpadded_dtype = _supported_float_type(imp_resp)
+    irpadded_dtype = _supported_float_type(imp_resp.dtype)
     irpadded = np.zeros(shape, dtype=irpadded_dtype)
     irpadded[tuple([slice(0, s) for s in imp_resp.shape])] = imp_resp
     # Roll for zero convention of the fft to avoid the phase
     # problem. Work with odd and even size.
     for axis, axis_size in enumerate(imp_resp.shape):
         if axis >= imp_resp.ndim - dim:
-            irpadded = np.roll(irpadded,
-                               shift=-int(np.floor(axis_size / 2)),
-                               axis=axis)
+            irpadded = np.roll(irpadded, shift=-int(np.floor(axis_size / 2)), axis=axis)
 
     func = fft.rfftn if is_real else fft.fftn
     out = func(irpadded, axes=(range(-dim, 0)))
@@ -443,12 +441,11 @@ def laplacian(ndim, shape, is_real=True):
     """
     impr = np.zeros([3] * ndim)
     for dim in range(ndim):
-        idx = tuple([slice(1, 2)] * dim +
-                    [slice(None)] +
-                    [slice(1, 2)] * (ndim - dim - 1))
-        impr[idx] = np.array([-1.0,
-                              0.0,
-                              -1.0]).reshape([-1 if i == dim else 1
-                                              for i in range(ndim)])
-    impr[(slice(1, 2), ) * ndim] = 2.0 * ndim
+        idx = tuple(
+            [slice(1, 2)] * dim + [slice(None)] + [slice(1, 2)] * (ndim - dim - 1)
+        )
+        impr[idx] = np.array([-1.0, 0.0, -1.0]).reshape(
+            [-1 if i == dim else 1 for i in range(ndim)]
+        )
+    impr[(slice(1, 2),) * ndim] = 2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr
