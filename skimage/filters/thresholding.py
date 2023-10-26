@@ -198,7 +198,7 @@ def threshold_local(
         * 'mean': apply arithmetic mean filter
         * 'median': apply median rank filter
 
-        By default the 'gaussian' method is used.
+        By default, the 'gaussian' method is used.
     offset : float, optional
         Constant subtracted from weighted mean of neighborhood to calculate
         the local threshold value. Default offset is 0.
@@ -569,7 +569,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     # Look only at thresholds that are below the actual all_mean value,
     # for consistency with the threshold being included in the lower pixel
-    # group. Otherwise can get thresholds that are not actually fixed-points
+    # group. Otherwise, can get thresholds that are not actually fixed-points
     # of the isodata algorithm. For float images, this matters less, since
     # there really can't be any guarantees anymore anyway.
     distances = all_mean - bin_centers[:-1]
@@ -874,7 +874,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
         raise RuntimeError('Maximum iteration reached for histogram' 'smoothing')
 
     # Find the lowest point between the maxima
-    threshold_idx = np.argmin(smooth_hist[maximum_idxs[0]:maximum_idxs[1] + 1])
+    threshold_idx = np.argmin(smooth_hist[maximum_idxs[0] : maximum_idxs[1] + 1])
 
     return bin_centers[maximum_idxs[0] + threshold_idx]
 
