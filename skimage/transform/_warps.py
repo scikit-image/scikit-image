@@ -235,7 +235,8 @@ def rescale(
     image : (M, N[, ...][, C]) ndarray
         Input image.
     scale : {float, tuple of floats}
-        Scale factors. Separate scale factors can be defined as (m, n[, ...]).
+        Scale factors for spatial dimensions. Separate scale factors can be defined as
+        (m, n[, ...]).
 
     Returns
     -------
@@ -1045,7 +1046,7 @@ def _linear_polar_mapping(output_coords, k_angle, k_radius, center):
     Parameters
     ----------
     output_coords : (M, 2) ndarray
-         Array of `(col, row)` coordinates in the output image.
+        Array of `(col, row)` coordinates in the output image.
     k_angle : float
         Scaling factor that relates the intended number of rows in the output
         image to angle: ``k_angle = nrows / (2 * np.pi)``.
