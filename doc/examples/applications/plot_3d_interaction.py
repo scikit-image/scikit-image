@@ -80,10 +80,7 @@ plotly.io.show(fig)
 # image is used:
 
 fig = px.imshow(
-    data[n_plane // 2],
-    facet_col=2,
-    binary_string=True,
-    labels={'facet_col': 'channel'}
+    data[n_plane // 2], facet_col=2, binary_string=True, labels={'facet_col': 'channel'}
 )
 plotly.io.show(fig)
 
@@ -102,9 +99,7 @@ print(f'range for channel 2: ({vmin_2}, {vmax_2})')
 # Let us be very specific and pass value ranges on a per-channel basis:
 
 fig = px.imshow(
-    data[n_plane // 2],
-    zmin=[vmin_0, vmin_1, vmin_2],
-    zmax=[vmax_0, vmax_1, vmax_2]
+    data[n_plane // 2], zmin=[vmin_0, vmin_1, vmin_2], zmax=[vmax_0, vmax_1, vmax_2]
 )
 plotly.io.show(fig)
 
@@ -124,7 +119,7 @@ fig = px.imshow(
     zmax=[vmax_0, vmax_1, vmax_2],
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'plane'}
+    labels={'animation_frame': 'plane'},
 )
 plotly.io.show(fig)
 
@@ -137,7 +132,7 @@ fig = px.imshow(
     animation_frame=0,
     facet_col=3,
     binary_string=True,
-    labels={'facet_col': 'channel', 'animation_frame': 'plane'}
+    labels={'facet_col': 'channel', 'animation_frame': 'plane'},
 )
 plotly.io.show(fig)
 

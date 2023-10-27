@@ -21,9 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import (
-    color, feature, filters, measure, morphology, segmentation, util
-)
+from skimage import color, feature, filters, measure, morphology, segmentation, util
 from skimage.data import human_mitosis
 
 image = human_mitosis()
@@ -142,8 +140,7 @@ plt.show()
 higher_threshold = 125
 dividing = image > higher_threshold
 
-smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
-                                      morphology.disk(4))
+smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing), morphology.disk(4))
 
 binary_smoother_dividing = smoother_dividing > 20
 

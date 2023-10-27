@@ -5,8 +5,11 @@ import numpy as np
 from .._shared.filters import gaussian
 from .._shared.utils import check_nD, deprecate_kwarg
 from .brief_cy import _brief_loop
-from .util import (DescriptorExtractor, _mask_border_keypoints,
-                   _prepare_grayscale_input_2D)
+from .util import (
+    DescriptorExtractor,
+    _mask_border_keypoints,
+    _prepare_grayscale_input_2D,
+)
 
 
 class BRIEF(DescriptorExtractor):
@@ -120,11 +123,12 @@ class BRIEF(DescriptorExtractor):
 
     """
 
-    @deprecate_kwarg({'sample_seed': 'rng'}, deprecated_version='0.21',
-                     removed_version='0.23')
-    def __init__(self, descriptor_size=256, patch_size=49,
-                 mode='normal', sigma=1, rng=1):
-
+    @deprecate_kwarg(
+        {'sample_seed': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+    )
+    def __init__(
+        self, descriptor_size=256, patch_size=49, mode='normal', sigma=1, rng=1
+    ):
         mode = mode.lower()
         if mode not in ('normal', 'uniform'):
             raise ValueError("`mode` must be 'normal' or 'uniform'.")
@@ -140,7 +144,7 @@ class BRIEF(DescriptorExtractor):
             # See https://github.com/scikit-learn/scikit-learn/issues/16988#issuecomment-1518037853
             bg = rng._bit_generator
             ss = bg._seed_seq
-            child_ss, = ss.spawn(1)
+            (child_ss,) = ss.spawn(1)
             self.rng = np.random.Generator(type(bg)(child_ss))
         elif rng is None:
             self.rng = np.random.default_rng(np.random.SeedSequence())
@@ -169,9 +173,7 @@ class BRIEF(DescriptorExtractor):
         image = _prepare_grayscale_input_2D(image)
 
         # Gaussian low-pass filtering to alleviate noise sensitivity
-        image = np.ascontiguousarray(
-            gaussian(image, self.sigma, mode='reflect')
-        )
+        image = np.ascontiguousarray(gaussian(image, self.sigma, mode='reflect'))
 
         # Sampling pairs of decision pixels in patch_size x patch_size window
         desc_size = self.descriptor_size
@@ -179,15 +181,16 @@ class BRIEF(DescriptorExtractor):
         if self.mode == 'normal':
             samples = (patch_size / 5.0) * rng.standard_normal(desc_size * 8)
             samples = np.array(samples, dtype=np.int32)
-            samples = samples[(samples < (patch_size // 2))
-                              & (samples > - (patch_size - 2) // 2)]
+            samples = samples[
+                (samples < (patch_size // 2)) & (samples > -(patch_size - 2) // 2)
+            ]
 
-            pos1 = samples[:desc_size * 2].reshape(desc_size, 2)
-            pos2 = samples[desc_size * 2:desc_size * 4].reshape(desc_size, 2)
+            pos1 = samples[: desc_size * 2].reshape(desc_size, 2)
+            pos2 = samples[desc_size * 2 : desc_size * 4].reshape(desc_size, 2)
         elif self.mode == 'uniform':
-            samples = rng.integers(-(patch_size - 2) // 2,
-                                      (patch_size // 2) + 1,
-                                      (desc_size * 2, 2))
+            samples = rng.integers(
+                -(patch_size - 2) // 2, (patch_size // 2) + 1, (desc_size * 2, 2)
+            )
             samples = np.array(samples, dtype=np.int32)
             pos1, pos2 = np.split(samples, 2)
 
@@ -196,13 +199,14 @@ class BRIEF(DescriptorExtractor):
 
         # Removing keypoints that are within (patch_size / 2) distance from the
         # image border
-        self.mask = _mask_border_keypoints(image.shape, keypoints,
-                                           patch_size // 2)
+        self.mask = _mask_border_keypoints(image.shape, keypoints, patch_size // 2)
 
-        keypoints = np.array(keypoints[self.mask, :], dtype=np.int64,
-                             order='C', copy=False)
+        keypoints = np.array(
+            keypoints[self.mask, :], dtype=np.int64, order='C', copy=False
+        )
 
-        self.descriptors = np.zeros((keypoints.shape[0], desc_size),
-                                    dtype=bool, order='C')
+        self.descriptors = np.zeros(
+            (keypoints.shape[0], desc_size), dtype=bool, order='C'
+        )
 
         _brief_loop(image, self.descriptors.view(np.uint8), keypoints, pos1, pos2)

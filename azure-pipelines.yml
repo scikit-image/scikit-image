@@ -21,18 +21,15 @@ jobs:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
-        Python39:
-          PYTHON_VERSION: "3.9"
+        Python310:
+          PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
-        Python39-x64:
-          PYTHON_VERSION: "3.9"
+        Python310-x64:
+          PYTHON_VERSION: "3.10"
           ARCH: "x64"
           PIP_FLAGS: ""
           TEST_EXAMPLES: "true"
-          # NOTE(honles): winpty is required by one of the doc dependencies,
-          #               but does not provide a wheel for Python 3.9
-          # TEST_EXAMPLES: 'true'
     continueOnError: false
     timeoutInMinutes: 60
 
@@ -101,13 +98,8 @@ jobs:
               export CXXFLAGS="-m32"
           fi
 
-          # Install llvm 16 manually, remove after
-          # https://github.com/actions/runner-images/issues/8125 is resolved and that
-          # version is included in the image by default
-          choco upgrade llvm
-
           ## To list all installed packages:
-          # choco list --localonly
+          choco list
 
           # Remove other gcc compilers
 
@@ -115,9 +107,9 @@ jobs:
           # choco uninstall llvm mingw rtools strawberryperl -x
 
           # Remove mingw gcc
-          rm /c/ProgramData/Chocolatey/bin/gcc
-          rm /c/ProgramData/Chocolatey/bin/g++
-          rm /c/ProgramData/Chocolatey/bin/c++
+          #rm /c/ProgramData/Chocolatey/bin/gcc
+          #rm /c/ProgramData/Chocolatey/bin/g++
+          #rm /c/ProgramData/Chocolatey/bin/c++
           # Remove perl gcc
           rm -rf /c/Strawberry
 

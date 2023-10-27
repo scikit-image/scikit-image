@@ -5,12 +5,17 @@ from skimage import io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import (TestCase, assert_array_equal,
-                                     assert_array_almost_equal, fetch)
+from skimage._shared.testing import (
+    TestCase,
+    assert_array_equal,
+    assert_array_almost_equal,
+    fetch,
+)
 
 from pytest import importorskip
 
 importorskip('imread')
+
 
 def setup():
     use_plugin('imread')

@@ -66,10 +66,11 @@ def test_imsave_roundtrip(shape, dtype, tmp_path):
     else:
         info_func = np.iinfo
     expected = np.linspace(
-        info_func(dtype).min, info_func(dtype).max,
+        info_func(dtype).min,
+        info_func(dtype).max,
         endpoint=True,
         num=np.prod(shape),
-        dtype=dtype
+        dtype=dtype,
     )
     expected = expected.reshape(shape)
     file_path = tmp_path / "roundtrip.mha"

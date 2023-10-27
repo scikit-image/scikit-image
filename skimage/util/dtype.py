@@ -4,9 +4,16 @@ from warnings import warn
 import numpy as np
 
 
-__all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
-           'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool', 'dtype_limits']
+__all__ = [
+    'img_as_float32',
+    'img_as_float64',
+    'img_as_float',
+    'img_as_int',
+    'img_as_uint',
+    'img_as_ubyte',
+    'img_as_bool',
+    'dtype_limits',
+]
 
 # For integers Numpy uses `_integer_types` basis internally, and builds a leaky
 # `np.XintYY` abstraction on top of it. This leads to situations when, for
@@ -17,19 +24,28 @@ __all__ = ['img_as_float32', 'img_as_float64', 'img_as_float',
 # For convenience, for these dtypes we indicate also the possible bit depths
 # (some of them are platform specific). For the details, see:
 # http://www.unix.org/whitepapers/64bit.html
-_integer_types = (np.byte, np.ubyte,          # 8 bits
-                  np.short, np.ushort,        # 16 bits
-                  np.intc, np.uintc,          # 16 or 32 or 64 bits
-                  int, np.int_, np.uint,      # 32 or 64 bits
-                  np.longlong, np.ulonglong)  # 64 bits
-_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max)
-                   for t in _integer_types}
-dtype_range = {bool: (False, True),
-               np.bool_: (False, True),
-               float: (-1, 1),
-               np.float16: (-1, 1),
-               np.float32: (-1, 1),
-               np.float64: (-1, 1)}
+_integer_types = (
+    np.byte,
+    np.ubyte,  # 8 bits
+    np.short,
+    np.ushort,  # 16 bits
+    np.intc,
+    np.uintc,  # 16 or 32 or 64 bits
+    int,
+    np.int_,
+    np.uint,  # 32 or 64 bits
+    np.longlong,
+    np.ulonglong,
+)  # 64 bits
+_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max) for t in _integer_types}
+dtype_range = {
+    bool: (False, True),
+    np.bool_: (False, True),
+    float: (-1, 1),
+    np.float16: (-1, 1),
+    np.float32: (-1, 1),
+    np.float64: (-1, 1),
+}
 
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -106,8 +122,11 @@ def _dtype_bits(kind, bits, itemsize=1):
 
     """
 
-    s = next(i for i in (itemsize, ) + (2, 4, 8) if
-             bits < (i * 8) or (bits == (i * 8) and kind == 'u'))
+    s = next(
+        i
+        for i in (itemsize,) + (2, 4, 8)
+        if bits < (i * 8) or (bits == (i * 8) and kind == 'u')
+    )
 
     return np.dtype(kind + str(s))
 
@@ -135,16 +154,18 @@ def _scale(a, n, m, copy=True):
         Output image array. Has the same kind as `a`.
     """
     kind = a.dtype.kind
-    if n > m and a.max() < 2 ** m:
+    if n > m and a.max() < 2**m:
         mnew = int(np.ceil(m / 2) * 2)
         if mnew > m:
             dtype = f'int{mnew}'
         else:
             dtype = f'uint{mnew}'
         n = int(np.ceil(n / 2) * 2)
-        warn(f'Downcasting {a.dtype} to {dtype} without scaling because max '
-             f'value {a.max()} fits in {dtype}',
-             stacklevel=3)
+        warn(
+            f'Downcasting {a.dtype} to {dtype} without scaling because max '
+            f'value {a.max()} fits in {dtype}',
+            stacklevel=3,
+        )
         return a.astype(_dtype_bits(kind, m))
     elif n == m:
         return a.copy() if copy else a
@@ -152,11 +173,10 @@ def _scale(a, n, m, copy=True):
         # downscale with precision loss
         if copy:
             b = np.empty(a.shape, _dtype_bits(kind, m))
-            np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
-                            casting='unsafe')
+            np.floor_divide(a, 2 ** (n - m), out=b, dtype=a.dtype, casting='unsafe')
             return b
         else:
-            a //= 2**(n - m)
+            a //= 2 ** (n - m)
             return a
     elif m % n == 0:
         # exact upscale to a multiple of `n` bits
@@ -175,12 +195,12 @@ def _scale(a, n, m, copy=True):
         if copy:
             b = np.empty(a.shape, _dtype_bits(kind, o))
             np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
-            b //= 2**(o - m)
+            b //= 2 ** (o - m)
             return b
         else:
             a = a.astype(_dtype_bits(kind, o, a.dtype.itemsize), copy=False)
             a *= (2**o - 1) // (2**n - 1)
-            a //= 2**(o - m)
+            a //= 2 ** (o - m)
             return a
 
 
@@ -260,8 +280,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
-        raise ValueError(f'Cannot convert from {dtypeobj_in} to '
-                         f'{dtypeobj_out}.')
+        raise ValueError(f'Cannot convert from {dtypeobj_in} to ' f'{dtypeobj_out}.')
 
     if kind_in in 'ui':
         imin_in = np.iinfo(dtype_in).min
@@ -291,26 +310,27 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             raise ValueError("Images of type float must be between -1 and 1.")
         # floating point -> integer
         # use float type that can represent output integer type
-        computation_type = _dtype_itemsize(itemsize_out, dtype_in,
-                                           np.float32, np.float64)
+        computation_type = _dtype_itemsize(
+            itemsize_out, dtype_in, np.float32, np.float64
+        )
 
         if not uniform:
             if kind_out == 'u':
-                image_out = np.multiply(image, imax_out,
-                                        dtype=computation_type)
+                image_out = np.multiply(image, imax_out, dtype=computation_type)
             else:
-                image_out = np.multiply(image, (imax_out - imin_out) / 2,
-                                        dtype=computation_type)
-                image_out -= 1.0 / 2.
+                image_out = np.multiply(
+                    image, (imax_out - imin_out) / 2, dtype=computation_type
+                )
+                image_out -= 1.0 / 2.0
             np.rint(image_out, out=image_out)
             np.clip(image_out, imin_out, imax_out, out=image_out)
         elif kind_out == 'u':
-            image_out = np.multiply(image, imax_out + 1,
-                                    dtype=computation_type)
+            image_out = np.multiply(image, imax_out + 1, dtype=computation_type)
             np.clip(image_out, 0, imax_out, out=image_out)
         else:
-            image_out = np.multiply(image, (imax_out - imin_out + 1.0) / 2.0,
-                                    dtype=computation_type)
+            image_out = np.multiply(
+                image, (imax_out - imin_out + 1.0) / 2.0, dtype=computation_type
+            )
             np.floor(image_out, out=image_out)
             np.clip(image_out, imin_out, imax_out, out=image_out)
         return image_out.astype(dtype_out)
@@ -318,14 +338,14 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     # signed/unsigned int -> float
     if kind_out == 'f':
         # use float type that can exactly represent input integers
-        computation_type = _dtype_itemsize(itemsize_in, dtype_out,
-                                           np.float32, np.float64)
+        computation_type = _dtype_itemsize(
+            itemsize_in, dtype_out, np.float32, np.float64
+        )
 
         if kind_in == 'u':
             # using np.divide or np.multiply doesn't copy the data
             # until the computation time
-            image = np.multiply(image, 1. / imax_in,
-                                dtype=computation_type)
+            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
             # DirectX uses this conversion also for signed ints
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
@@ -335,8 +355,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             # Every other value is converted to a float (call it c)
             # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
 
-            image = np.multiply(image, 1. / imax_in,
-                                dtype=computation_type)
+            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
             np.maximum(image, -1.0, out=image)
 
         else:
@@ -374,15 +393,20 @@ def _convert(image, dtype, force_copy=False, uniform=False):
 
 
 def convert(image, dtype, force_copy=False, uniform=False):
-    warn("The use of this function is discouraged as its behavior may change "
-         "dramatically in scikit-image 1.0. This function will be removed "
-         "in scikit-image 1.0.", FutureWarning, stacklevel=2)
-    return _convert(image=image, dtype=dtype,
-                    force_copy=force_copy, uniform=uniform)
+    warn(
+        "The use of this function is discouraged as its behavior may change "
+        "dramatically in scikit-image 1.0. This function will be removed "
+        "in scikit-image 1.0.",
+        FutureWarning,
+        stacklevel=2,
+    )
+    return _convert(image=image, dtype=dtype, force_copy=force_copy, uniform=uniform)
 
 
 if _convert.__doc__ is not None:
-    convert.__doc__ = _convert.__doc__ + """
+    convert.__doc__ = (
+        _convert.__doc__
+        + """
 
     Warns
     -----
@@ -393,6 +417,7 @@ if _convert.__doc__ is not None:
         dramatically in scikit-image 1.0. This function will be removed
         in scikit-image 1.0.
     """
+    )
 
 
 def img_as_float32(image, force_copy=False):

@@ -18,8 +18,9 @@ def _smooth(image, sigma, mode, cval, channel_axis):
         sigma = (sigma,) * (image.ndim - 1)
     else:
         channel_axis = None
-    gaussian(image, sigma, output=smoothed, mode=mode, cval=cval,
-             channel_axis=channel_axis)
+    gaussian(
+        image, sigma, output=smoothed, mode=mode, cval=cval, channel_axis=channel_axis
+    )
     return smoothed
 
 
@@ -28,9 +29,17 @@ def _check_factor(factor):
         raise ValueError('scale factor must be greater than 1')
 
 
-def pyramid_reduce(image, downscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0,
-                   preserve_range=False, *, channel_axis=None):
+def pyramid_reduce(
+    image,
+    downscale=2,
+    sigma=None,
+    order=1,
+    mode='reflect',
+    cval=0,
+    preserve_range=False,
+    *,
+    channel_axis=None,
+):
     """Smooth and then downsample image.
 
     Parameters
@@ -90,15 +99,24 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
         sigma = 2 * downscale / 6.0
 
     smoothed = _smooth(image, sigma, mode, cval, channel_axis)
-    out = resize(smoothed, out_shape, order=order, mode=mode, cval=cval,
-                 anti_aliasing=False)
+    out = resize(
+        smoothed, out_shape, order=order, mode=mode, cval=cval, anti_aliasing=False
+    )
 
     return out
 
 
-def pyramid_expand(image, upscale=2, sigma=None, order=1,
-                   mode='reflect', cval=0,
-                   preserve_range=False, *, channel_axis=None):
+def pyramid_expand(
+    image,
+    upscale=2,
+    sigma=None,
+    order=1,
+    mode='reflect',
+    cval=0,
+    preserve_range=False,
+    *,
+    channel_axis=None,
+):
     """Upsample and then smooth image.
 
     Parameters
@@ -156,16 +174,26 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * upscale / 6.0
 
-    resized = resize(image, out_shape, order=order,
-                     mode=mode, cval=cval, anti_aliasing=False)
+    resized = resize(
+        image, out_shape, order=order, mode=mode, cval=cval, anti_aliasing=False
+    )
     out = _smooth(resized, sigma, mode, cval, channel_axis)
 
     return out
 
 
-def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                     mode='reflect', cval=0,
-                     preserve_range=False, *, channel_axis=None):
+def pyramid_gaussian(
+    image,
+    max_layer=-1,
+    downscale=2,
+    sigma=None,
+    order=1,
+    mode='reflect',
+    cval=0,
+    preserve_range=False,
+    *,
+    channel_axis=None,
+):
     """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -235,8 +263,15 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     while layer != max_layer:
         layer += 1
 
-        layer_image = pyramid_reduce(prev_layer_image, downscale, sigma, order,
-                                     mode, cval, channel_axis=channel_axis)
+        layer_image = pyramid_reduce(
+            prev_layer_image,
+            downscale,
+            sigma,
+            order,
+            mode,
+            cval,
+            channel_axis=channel_axis,
+        )
 
         prev_shape = current_shape
         prev_layer_image = layer_image
@@ -249,9 +284,18 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         yield layer_image
 
 
-def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
-                      mode='reflect', cval=0,
-                      preserve_range=False, *, channel_axis=None):
+def pyramid_laplacian(
+    image,
+    max_layer=-1,
+    downscale=2,
+    sigma=None,
+    order=1,
+    mode='reflect',
+    cval=0,
+    preserve_range=False,
+    *,
+    channel_axis=None,
+):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
@@ -337,20 +381,23 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
         max_layer = math.ceil(math.log(max(shape_without_channels), downscale))
 
     for layer in range(max_layer):
-
         if channel_axis is not None:
             out_shape = tuple(
                 math.ceil(d / float(downscale)) if ax != channel_axis else d
                 for ax, d in enumerate(current_shape)
             )
         else:
-            out_shape = tuple(math.ceil(d / float(downscale))
-                              for d in current_shape)
+            out_shape = tuple(math.ceil(d / float(downscale)) for d in current_shape)
 
-        resized_image = resize(smoothed_image, out_shape, order=order,
-                               mode=mode, cval=cval, anti_aliasing=False)
-        smoothed_image = _smooth(resized_image, sigma, mode, cval,
-                                 channel_axis)
+        resized_image = resize(
+            smoothed_image,
+            out_shape,
+            order=order,
+            mode=mode,
+            cval=cval,
+            anti_aliasing=False,
+        )
+        smoothed_image = _smooth(resized_image, sigma, mode, cval, channel_axis)
         current_shape = resized_image.shape
 
         yield resized_image - smoothed_image

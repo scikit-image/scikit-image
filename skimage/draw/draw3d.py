@@ -1,8 +1,8 @@
 import numpy as np
-from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
+from scipy.special import ellipkinc as ellip_F, ellipeinc as ellip_E
 
 
-def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
+def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
     on grid with specified `spacing`.
@@ -36,7 +36,7 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     offset = np.r_[1, 1, 1] * np.r_[spacing]
 
     # Calculate limits, and ensure output volume is odd & symmetric
-    low = np.ceil(- np.r_[a, b, c] - offset)
+    low = np.ceil(-np.r_[a, b, c] - offset)
     high = np.floor(np.r_[a, b, c] + offset + 1)
 
     for dim in range(3):
@@ -47,18 +47,16 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
             low[dim] -= np.max(num[num < 0])
 
     # Generate (anisotropic) spatial grid
-    x, y, z = np.mgrid[low[0]:high[0]:spacing[0],
-                       low[1]:high[1]:spacing[1],
-                       low[2]:high[2]:spacing[2]]
+    x, y, z = np.mgrid[
+        low[0] : high[0] : spacing[0],
+        low[1] : high[1] : spacing[1],
+        low[2] : high[2] : spacing[2],
+    ]
 
     if not levelset:
-        arr = ((x / float(a)) ** 2 +
-               (y / float(b)) ** 2 +
-               (z / float(c)) ** 2) <= 1
+        arr = ((x / float(a)) ** 2 + (y / float(b)) ** 2 + (z / float(c)) ** 2) <= 1
     else:
-        arr = ((x / float(a)) ** 2 +
-               (y / float(b)) ** 2 +
-               (z / float(c)) ** 2) - 1
+        arr = ((x / float(a)) ** 2 + (y / float(b)) ** 2 + (z / float(c)) ** 2) - 1
 
     return arr
 
@@ -97,18 +95,15 @@ def ellipsoid_stats(a, b, c):
     c = abc[2]
 
     # Volume
-    vol = 4 / 3. * np.pi * a * b * c
+    vol = 4 / 3.0 * np.pi * a * b * c
 
     # Analytical ellipsoid surface area
-    phi = np.arcsin((1. - (c ** 2 / (a ** 2.))) ** 0.5)
-    d = float((a ** 2 - c ** 2) ** 0.5)
-    m = (a ** 2 * (b ** 2 - c ** 2) /
-         float(b ** 2 * (a ** 2 - c ** 2)))
+    phi = np.arcsin((1.0 - (c**2 / (a**2.0))) ** 0.5)
+    d = float((a**2 - c**2) ** 0.5)
+    m = a**2 * (b**2 - c**2) / float(b**2 * (a**2 - c**2))
     F = ellip_F(phi, m)
     E = ellip_E(phi, m)
 
-    surf = 2 * np.pi * (c ** 2 +
-                        b * c ** 2 / d * F +
-                        b * d * E)
+    surf = 2 * np.pi * (c**2 + b * c**2 / d * F + b * d * E)
 
     return vol, surf

@@ -5,8 +5,11 @@ from ..transform import integral_image
 from .corner import structure_tensor
 from ..morphology import octagon, star
 from .censure_cy import _censure_dob_loop
-from ..feature.util import (FeatureDetector, _prepare_grayscale_input_2D,
-                            _mask_border_keypoints)
+from ..feature.util import (
+    FeatureDetector,
+    _prepare_grayscale_input_2D,
+    _mask_border_keypoints,
+)
 from .._shared.utils import check_nD
 
 # The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
@@ -14,29 +17,65 @@ from .._shared.utils import check_nD
 # have been extrapolated based on the following statement in the paper.
 # "These octagons scale linearly and were experimentally chosen to correspond
 # to the seven DOBs described in the previous section."
-OCTAGON_OUTER_SHAPE = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
-                       (15, 10), (15, 11), (15, 12), (17, 13), (17, 14)]
-OCTAGON_INNER_SHAPE = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5),
-                       (7, 5), (7, 6), (9, 6), (9, 7)]
+OCTAGON_OUTER_SHAPE = [
+    (5, 2),
+    (5, 3),
+    (7, 3),
+    (9, 4),
+    (9, 7),
+    (13, 7),
+    (15, 10),
+    (15, 11),
+    (15, 12),
+    (17, 13),
+    (17, 14),
+]
+OCTAGON_INNER_SHAPE = [
+    (3, 0),
+    (3, 1),
+    (3, 2),
+    (5, 2),
+    (5, 3),
+    (5, 4),
+    (5, 5),
+    (7, 5),
+    (7, 6),
+    (9, 6),
+    (9, 7),
+]
 
 # The sizes for the STAR shaped filter kernel for different scales have been
 # taken from the OpenCV implementation.
 STAR_SHAPE = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
-STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
-                     (9, 6), (11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
+STAR_FILTER_SHAPE = [
+    (1, 0),
+    (3, 1),
+    (4, 2),
+    (5, 3),
+    (7, 4),
+    (8, 5),
+    (9, 6),
+    (11, 8),
+    (13, 10),
+    (14, 11),
+    (15, 12),
+    (16, 14),
+]
 
 
 def _filter_image(image, min_scale, max_scale, mode):
-
-    response = np.zeros((image.shape[0], image.shape[1],
-                         max_scale - min_scale + 1), dtype=np.float64)
+    response = np.zeros(
+        (image.shape[0], image.shape[1], max_scale - min_scale + 1), dtype=np.float64
+    )
 
     if mode == 'dob':
-
         # make response[:, :, i] contiguous memory block
         item_size = response.itemsize
-        response.strides = (item_size * response.shape[1], item_size,
-                            item_size * response.shape[0] * response.shape[1])
+        response.strides = (
+            item_size * response.shape[1],
+            item_size,
+            item_size * response.shape[0] * response.shape[1],
+        )
 
         integral_img = integral_image(image)
 
@@ -46,11 +85,12 @@ def _filter_image(image, min_scale, max_scale, mode):
             # Constant multipliers for the outer region and the inner region
             # of the bi-level filters with the constraint of keeping the
             # DC bias 0.
-            inner_weight = (1.0 / (2 * n + 1) ** 2)
-            outer_weight = (1.0 / (12 * n ** 2 + 4 * n))
+            inner_weight = 1.0 / (2 * n + 1) ** 2
+            outer_weight = 1.0 / (12 * n**2 + 4 * n)
 
-            _censure_dob_loop(n, integral_img, response[:, :, i],
-                              inner_weight, outer_weight)
+            _censure_dob_loop(
+                n, integral_img, response[:, :, i], inner_weight, outer_weight
+            )
 
     # NOTE : For the Octagon shaped filter, we implemented and evaluated the
     # slanted integral image based image filtering but the performance was
@@ -63,11 +103,9 @@ def _filter_image(image, min_scale, max_scale, mode):
         for i in range(max_scale - min_scale + 1):
             mo, no = OCTAGON_OUTER_SHAPE[min_scale + i - 1]
             mi, ni = OCTAGON_INNER_SHAPE[min_scale + i - 1]
-            response[:, :, i] = convolve(image,
-                                         _octagon_kernel(mo, no, mi, ni))
+            response[:, :, i] = convolve(image, _octagon_kernel(mo, no, mi, ni))
 
     elif mode == 'star':
-
         for i in range(max_scale - min_scale + 1):
             m = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][0]]
             n = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][1]]
@@ -84,9 +122,8 @@ def _octagon_kernel(mo, no, mi, ni):
     c = ((mo + 2 * no) - (mi + 2 * ni)) // 2
     outer_oct = octagon(mo, no)
     inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
-    inner_oct[c: -c, c: -c] = octagon(mi, ni)
-    bfilter = (outer_weight * outer_oct -
-               (outer_weight + inner_weight) * inner_oct)
+    inner_oct[c:-c, c:-c] = octagon(mi, ni)
+    bfilter = outer_weight * outer_oct - (outer_weight + inner_weight) * inner_oct
     return bfilter
 
 
@@ -94,18 +131,16 @@ def _star_kernel(m, n):
     c = m + m // 2 - n - n // 2
     outer_star = star(m)
     inner_star = np.zeros_like(outer_star)
-    inner_star[c: -c, c: -c] = star(n)
+    inner_star[c:-c, c:-c] = star(n)
     outer_weight = 1.0 / (np.sum(outer_star - inner_star))
     inner_weight = 1.0 / np.sum(inner_star)
-    bfilter = (outer_weight * outer_star -
-               (outer_weight + inner_weight) * inner_star)
+    bfilter = outer_weight * outer_star - (outer_weight + inner_weight) * inner_star
     return bfilter
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
     Arr, Arc, Acc = structure_tensor(image, sigma, order='rc')
-    feature_mask[(Arr + Acc) ** 2
-                 > line_threshold * (Arr * Acc - Arc ** 2)] = False
+    feature_mask[(Arr + Acc) ** 2 > line_threshold * (Arr * Acc - Arc**2)] = False
 
 
 class CENSURE(FeatureDetector):
@@ -195,16 +230,22 @@ class CENSURE(FeatureDetector):
 
     """
 
-    def __init__(self, min_scale=1, max_scale=7, mode='DoB',
-                 non_max_threshold=0.15, line_threshold=10):
-
+    def __init__(
+        self,
+        min_scale=1,
+        max_scale=7,
+        mode='DoB',
+        non_max_threshold=0.15,
+        line_threshold=10,
+    ):
         mode = mode.lower()
         if mode not in ('dob', 'octagon', 'star'):
             raise ValueError("`mode` must be one of 'DoB', 'Octagon', 'STAR'.")
 
         if min_scale < 1 or max_scale < 1 or max_scale - min_scale < 2:
-            raise ValueError('The scales must be >= 1 and the number of '
-                             'scales should be >= 3.')
+            raise ValueError(
+                'The scales must be >= 1 and the number of ' 'scales should be >= 3.'
+            )
 
         self.min_scale = min_scale
         self.max_scale = max_scale
@@ -246,8 +287,9 @@ class CENSURE(FeatureDetector):
         image = np.ascontiguousarray(_prepare_grayscale_input_2D(image))
 
         # Generating all the scales
-        filter_response = _filter_image(image, self.min_scale, self.max_scale,
-                                        self.mode)
+        filter_response = _filter_image(
+            image, self.min_scale, self.max_scale, self.mode
+        )
 
         # Suppressing points that are neither minima or maxima in their
         # 3 x 3 x 3 neighborhood to zero
@@ -262,9 +304,12 @@ class CENSURE(FeatureDetector):
             #                                  the kernel's distribution
             # window_size = 7 + 2 * (min_scale - 1 + i)
             # Hence sigma = 1 + (min_scale - 1 + i)/ 3.0
-            _suppress_lines(feature_mask[:, :, i], image,
-                            (1 + (self.min_scale + i - 1) / 3.0),
-                            self.line_threshold)
+            _suppress_lines(
+                feature_mask[:, :, i],
+                image,
+                (1 + (self.min_scale + i - 1) / 3.0),
+                self.line_threshold,
+            )
 
         rows, cols, scales = np.nonzero(feature_mask[..., 1:num_scales])
         keypoints = np.column_stack([rows, cols])
@@ -279,18 +324,21 @@ class CENSURE(FeatureDetector):
 
         if self.mode == 'octagon':
             for i in range(self.min_scale + 1, self.max_scale):
-                c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 \
-                    + OCTAGON_OUTER_SHAPE[i - 1][1]
-                cumulative_mask |= (
-                    _mask_border_keypoints(image.shape, keypoints, c)
-                    & (scales == i))
+                c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 + OCTAGON_OUTER_SHAPE[
+                    i - 1
+                ][1]
+                cumulative_mask |= _mask_border_keypoints(image.shape, keypoints, c) & (
+                    scales == i
+                )
         elif self.mode == 'star':
             for i in range(self.min_scale + 1, self.max_scale):
-                c = STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] \
+                c = (
+                    STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]]
                     + STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] // 2
-                cumulative_mask |= (
-                    _mask_border_keypoints(image.shape, keypoints, c)
-                    & (scales == i))
+                )
+                cumulative_mask |= _mask_border_keypoints(image.shape, keypoints, c) & (
+                    scales == i
+                )
 
         self.keypoints = keypoints[cumulative_mask]
         self.scales = scales[cumulative_mask]
