@@ -187,7 +187,7 @@ def sart_projection_update(np_floats[:, :] image not None,
         Current reconstruction estimate
     theta : float
         Angle of the projection
-    projection : ndarray of float, shape (P, )
+    projection : ndarray of float, shape (P,)
         Projected values, taken from the sinogram
     projection_shift : float
         Shift the position of the projection by this many pixels before

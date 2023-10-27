@@ -301,11 +301,11 @@ def set_color(image, coords, color, alpha=1):
     ----------
     image : (M, N, C) ndarray
         Image
-    coords : tuple of ((K, ) ndarray, (K, ) ndarray)
+    coords : tuple of ((K,) ndarray, (K,) ndarray)
         Row and column coordinates of pixels to be colored.
-    color : (C, ) ndarray
+    color : (C,) ndarray
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (K, ) ndarray
+    alpha : scalar or (K,) ndarray
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 

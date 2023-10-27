@@ -327,7 +327,7 @@ def order_angles_golden_ratio(theta):
 
     Parameters
     ----------
-    theta : array of floats, shape (M, )
+    theta : array of floats, shape (M,)
         Projection angles in degrees. Duplicate angles are not allowed.
 
     Returns
@@ -402,12 +402,12 @@ def iradon_sart(
         tomography rotation axis should lie at the pixel index
         ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : array, shape (N, ), optional
+    theta : array, shape (N,), optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     image : ndarray, shape (M, M), optional
         Image containing an initial reconstruction estimate. Default is an array of zeros.
-    projection_shifts : array, shape (N, ), optional
+    projection_shifts : array, shape (N,), optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.

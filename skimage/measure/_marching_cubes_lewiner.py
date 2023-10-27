@@ -73,7 +73,7 @@ def marching_cubes(
     normals : (V, 3) array
         The normal direction at each vertex, as calculated from the
         data.
-    values : (V, ) array
+    values : (V,) array
         Gives a measure for the maximum value of the data in the local region
         near each vertex. This can be used by visualization tools to apply
         a colormap to the mesh.

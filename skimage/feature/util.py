@@ -179,7 +179,7 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
 
     Parameters
     ----------
-    image_shape : (2, ) array_like
+    image_shape : (2,) array_like
         Shape of the image as ``(rows, cols)``.
     keypoints : (N, 2) array
         Keypoint coordinates as ``(rows, cols)``.
@@ -188,7 +188,7 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
 
     Returns
     -------
-    mask : (N, ) bool array
+    mask : (N,) bool array
         Mask indicating if pixels are within the image (``True``) or in the
         border region of the image (``False``).
 

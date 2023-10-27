@@ -26,10 +26,10 @@ def hough_line_peaks(
     ----------
     hspace : ndarray, shape (M, N)
         Hough space returned by the `hough_line` function.
-    angles : array, shape (N, )
+    angles : array, shape (N,)
         Angles returned by the `hough_line` function. Assumed to be continuous.
         (`angles[-1] - angles[0] == PI`).
-    dists : array, shape (M, )
+    dists : array, shape (M,)
         Distances returned by the `hough_line` function.
     min_distance : int, optional
         Minimum distance separating lines (maximum filter size for first
@@ -188,7 +188,7 @@ def hough_line(image, theta=None):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    theta : ndarray of double, shape (K, ), optional
+    theta : ndarray of double, shape (K,), optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
@@ -256,7 +256,7 @@ def probabilistic_hough_line(
     line_gap : int, optional
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : ndarray of dtype, shape (K, ), optional
+    theta : ndarray of dtype, shape (K,), optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
@@ -316,7 +316,7 @@ def hough_circle_peaks(
     ----------
     hspaces : (M, N, P) array
         Hough spaces returned by the `hough_circle` function.
-    radii : (M, ) array
+    radii : (M,) array
         Radii corresponding to Hough spaces.
     min_xdistance : int, optional
         Minimum distance separating centers in the x dimension.
@@ -423,9 +423,9 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
 
     Parameters
     ----------
-    xs : array, shape (M, )
+    xs : array, shape (M,)
         X coordinates of points.
-    ys : array, shape (M, )
+    ys : array, shape (M,)
         Y coordinates of points.
     min_xdistance : int
         Minimum distance separating points in the x dimension.

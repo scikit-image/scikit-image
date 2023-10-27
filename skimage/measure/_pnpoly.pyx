@@ -72,7 +72,7 @@ def _points_in_poly(points, verts):
 
     Returns
     -------
-    mask : (K, ) array of bool
+    mask : (K,) array of bool
         True if corresponding point is inside the polygon.
 
     """

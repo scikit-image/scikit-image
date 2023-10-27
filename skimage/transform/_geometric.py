@@ -217,7 +217,7 @@ class _GeometricTransform(ABC):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for coordinate.
 
         """
@@ -398,7 +398,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Sampson distance.
 
         """

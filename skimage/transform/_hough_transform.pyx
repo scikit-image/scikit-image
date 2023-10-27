@@ -347,7 +347,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : (K, ) ndarray of float64
+    theta : (K,) ndarray of float64
         Angles at which to compute the transform, in radians.
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.

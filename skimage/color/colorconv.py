@@ -1084,7 +1084,7 @@ def gray2rgb(image, *, channel_axis=-1):
 
     Notes
     -----
-    If the input is a 1-dimensional image of shape ``(M, )``, the output
+    If the input is a 1-dimensional image of shape ``(M,)``, the output
     will be shape ``(M, C=3)``.
     """
     return np.stack(3 * (image,), axis=channel_axis)
