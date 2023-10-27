@@ -41,7 +41,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (M, N) ndarray
         Input image.
     methods : dict, optional
         Names and associated functions.
@@ -111,7 +111,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Parameters
     ----------
-    image : (N, M) ndarray
+    image : (M, N) ndarray
         Input image.
     figsize : tuple, optional
         Figure size (in inches).
@@ -183,7 +183,7 @@ def threshold_local(
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     block_size : int or sequence of int
         Odd size of pixel neighborhood which is used to calculate the
@@ -198,7 +198,7 @@ def threshold_local(
         * 'mean': apply arithmetic mean filter
         * 'median': apply median rank filter
 
-        By default the 'gaussian' method is used.
+        By default, the 'gaussian' method is used.
     offset : float, optional
         Constant subtracted from weighted mean of neighborhood to calculate
         the local threshold value. Default offset is 0.
@@ -216,7 +216,7 @@ def threshold_local(
 
     Returns
     -------
-    threshold : (N, M[, ..., P]) ndarray
+    threshold : (M, N[, ...]) ndarray
         Threshold image. All pixels in the input image higher than the
         corresponding pixel in the threshold image are considered foreground.
 
@@ -338,7 +338,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray, optional
+    image : (M, N[, ...]) ndarray, optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -411,7 +411,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -485,7 +485,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -569,7 +569,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     # Look only at thresholds that are below the actual all_mean value,
     # for consistency with the threshold being included in the lower pixel
-    # group. Otherwise can get thresholds that are not actually fixed-points
+    # group. Otherwise, can get thresholds that are not actually fixed-points
     # of the isodata algorithm. For float images, this matters less, since
     # there really can't be any guarantees anymore anyway.
     distances = all_mean - bin_centers[:-1]
@@ -641,14 +641,12 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
-
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
         is less than this value. By default, this is half the smallest
         difference between intensity values in ``image``.
-
     initial_guess : float or Callable[[array[float]], float], optional
         Li's iterative method uses gradient descent to find the optimal
         threshold. If the image intensity histogram contains more than two
@@ -659,7 +657,6 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
         and return a float value. Example valid callables include
         ``numpy.mean`` (default), ``lambda arr: numpy.quantile(arr, 0.95)``,
         or even :func:`skimage.filters.threshold_otsu`.
-
     iter_callback : Callable[[float], Any], optional
         A function that will be called on the threshold at every iteration of
         the algorithm.
@@ -803,7 +800,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray, optional
+    image : (M, N[, ...]) ndarray, optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -876,7 +873,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     elif counter == max_num_iter - 1:
         raise RuntimeError('Maximum iteration reached for histogram' 'smoothing')
 
-    # Find lowest point between the maxima
+    # Find the lowest point between the maxima
     threshold_idx = np.argmin(smooth_hist[maximum_idxs[0] : maximum_idxs[1] + 1])
 
     return bin_centers[maximum_idxs[0] + threshold_idx]
@@ -887,7 +884,7 @@ def threshold_mean(image):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
 
     Returns
@@ -918,7 +915,7 @@ def threshold_triangle(image, nbins=256):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -1002,7 +999,7 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     w : int, or iterable of int
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1074,7 +1071,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1085,7 +1082,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Returns
     -------
-    threshold : (N, M) ndarray
+    threshold : (M, N[, ...]) ndarray
         Threshold mask. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
@@ -1139,7 +1136,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray
+    image : (M, N[, ...]) ndarray
         Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1153,7 +1150,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Returns
     -------
-    threshold : (N, M) ndarray
+    threshold : (M, N[, ...]) ndarray
         Threshold mask. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
@@ -1191,7 +1188,7 @@ def apply_hysteresis_threshold(image, low, high):
 
     Parameters
     ----------
-    image : array, shape (M,[ N, ..., P])
+    image : (M[, ...]) ndarray
         Grayscale input image.
     low : float, or array of same shape as ``image``
         Lower threshold.
@@ -1200,7 +1197,7 @@ def apply_hysteresis_threshold(image, low, high):
 
     Returns
     -------
-    thresholded : array of bool, same shape as ``image``
+    thresholded : (M[, ...]) array of bool
         Array in which ``True`` indicates the locations where ``image``
         was above the hysteresis threshold.
 
@@ -1242,7 +1239,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (N, M[, ..., P]) ndarray, optional
+    image : (M, N[, ...]) ndarray, optional
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting

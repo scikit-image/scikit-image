@@ -6,11 +6,11 @@ def map_array(input_arr, input_vals, output_vals, out=None):
 
     Parameters
     ----------
-    input_arr : array of int, shape (M[, N][, P][, ...])
+    input_arr : array of int, shape (M[, ...])
         The input label image.
-    input_vals : array of int, shape (N,)
+    input_vals : array of int, shape (K,)
         The values to map from.
-    output_vals : array, shape (N,)
+    output_vals : array, shape (K,)
         The values to map to.
     out: array, same shape as `input_arr`
         The output array. Will be created if not provided. It should
@@ -96,9 +96,9 @@ class ArrayMap:
 
     Parameters
     ----------
-    in_values : array of int, shape (N,)
+    in_values : array of int, shape (K,)
         The source values from which to map.
-    out_values : array, shape (N,)
+    out_values : array, shape (K,)
         The destination values from which to map.
     """
 

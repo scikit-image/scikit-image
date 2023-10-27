@@ -36,11 +36,11 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
     Pixels where the mask is True are nodes in the returned graph, and they are
     connected by edges to their neighbors according to the connectivity
     parameter. By default, the *value* of an edge when a mask is given, or when
-    the image is itself the mask, is the euclidean distance between the pixels.
+    the image is itself the mask, is the Euclidean distance between the pixels.
 
     However, if an int- or float-valued image is given with no mask, the value
     of the edges is the absolute difference in intensity between adjacent
-    pixels, weighted by the euclidean distance.
+    pixels, weighted by the Euclidean distance.
 
     Parameters
     ----------

@@ -12,7 +12,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
 
     Parameters
     ----------
-    image1, image2 : 2-D array
+    image1, image2 : ndarray, shape (M, N)
         Images to process, must be of the same shape.
     method : string, optional
         Method used for the comparison.
@@ -24,7 +24,7 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
 
     Returns
     -------
-    comparison : 2-D array
+    comparison : ndarray, shape (M, N)
         Image showing the differences.
 
     Notes

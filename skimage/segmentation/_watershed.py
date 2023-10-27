@@ -96,9 +96,9 @@ def watershed(
 
     Parameters
     ----------
-    image : ndarray (2-D, 3-D, ...)
+    image : (M, N[, ...]) ndarray
         Data array where the lowest value points are labeled first.
-    markers : int, or ndarray of int with same shape as image, optional
+    markers : int, or (M, N[, ...]) ndarray of int, optional
         The desired number of basins, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
         None, the (default) markers are determined as the local minima of
@@ -114,8 +114,8 @@ def watershed(
         the dimension of the image.
     offset : array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
-    mask : ndarray of bools or 0s and 1s, optional
-        Array of same shape as ``image``. Only points at which mask == True
+    mask : (M, N[, ...]) ndarray of bools or 0's and 1's, optional
+        Array of same shape as `image`. Only points at which mask == True
         will be labeled.
     compactness : float, optional
         Use compact watershed [1]_ with given compactness parameter.
@@ -130,7 +130,7 @@ def watershed(
     Returns
     -------
     out : ndarray
-        A labeled matrix of the same type and shape as ``markers``
+        A labeled matrix of the same type and shape as `markers`.
 
     See Also
     --------

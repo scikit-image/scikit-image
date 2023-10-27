@@ -14,7 +14,7 @@ def moments_coords(coords, order=3):
      * Area as: ``M[0, 0]``.
      * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
 
-    Note that raw moments are neither translation, scale nor rotation
+    Note that raw moments are neither translation, scale, nor rotation
     invariant.
 
     Parameters
@@ -163,11 +163,11 @@ def moments(image, order=3, *, spacing=None):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -209,14 +209,14 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
         is not provided.
     order : int, optional
         The maximum order of moments computed.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -275,7 +275,7 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Parameters
     ----------
-    mu : (M,[ ...,] M) array
+    mu : (M[, ...], M) array
         Central image moments, where M must be greater than or equal
         to ``order``.
     order : int, optional
@@ -283,7 +283,7 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Returns
     -------
-    nu : (``order + 1``,[ ...,] ``order + 1``) array
+    nu : (``order + 1``[, ...], ``order + 1``) array
         Normalized central image moments.
 
     References
@@ -378,7 +378,7 @@ def centroid(image, *, spacing=None):
     ----------
     image : array
         The input image.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -417,7 +417,7 @@ def inertia_tensor(image, mu=None, *, spacing=None):
         (for example, `skimage.measure.regionprops`), then it is more
         efficient to pre-compute them and pass them to the inertia tensor
         call.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -476,7 +476,7 @@ def inertia_tensor_eigvals(image, mu=None, T=None, *, spacing=None):
     T : array, shape ``(image.ndim, image.ndim)``
         The pre-computed inertia tensor. If ``T`` is given, ``mu`` and
         ``image`` are ignored.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns

@@ -108,12 +108,12 @@ class LineModelND(BaseModel):
         ----------
         data : (N, dim) array
             N points in a space of dimension dim.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
         """
         _check_data_atleast_2D(data)
@@ -140,7 +140,7 @@ class LineModelND(BaseModel):
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -181,7 +181,7 @@ class LineModelND(BaseModel):
         ----------
         y : array
             y-coordinates.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -204,7 +204,7 @@ class LineModelND(BaseModel):
         ----------
         x : array
             x-coordinates.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -334,7 +334,7 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
 
         """
@@ -356,7 +356,7 @@ class CircleModel(BaseModel):
         t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (3, ) array, optional
+        params : (3,) array, optional
             Optional custom parameter set.
 
         Returns
@@ -555,7 +555,7 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
 
         """
@@ -613,7 +613,7 @@ class EllipseModel(BaseModel):
         t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (5, ) array, optional
+        params : (5,) array, optional
             Optional custom parameter set.
 
         Returns
@@ -770,7 +770,7 @@ def ransac(
     -------
     model : object
         Best model with largest consensus set.
-    inliers : (N, ) array
+    inliers : (N,) array
         Boolean mask of inliers classified as ``True``.
 
     References

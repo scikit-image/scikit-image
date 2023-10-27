@@ -368,7 +368,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
 
     sequence = []
     if num_t_series > 0:
-        # shape (3, ) * ndim "T-shaped" footprints
+        # shape (3,) * ndim "T-shaped" footprints
         all_t = _t_shaped_element_series(ndim=ndim, dtype=dtype)
         [sequence.append((t, num_t_series)) for t in all_t]
     if num_diamond > 0:
