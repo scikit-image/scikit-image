@@ -55,7 +55,7 @@ def _tvl1(
 
     Returns
     -------
-    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     """
@@ -214,7 +214,7 @@ def optical_flow_tvl1(
 
     Returns
     -------
-    flow : ndarray, shape ((image0.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     Notes
@@ -290,7 +290,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
 
     Returns
     -------
-    flow : ndarray, shape ((reference_image.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape (reference_image.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     """
@@ -385,7 +385,7 @@ def optical_flow_ilk(
 
     Returns
     -------
-    flow : ndarray, shape ((reference_image.ndim, M, N[, P[, ...]])
+    flow : ndarray, shape (reference_image.ndim, M, N[, P[, ...]])
         The estimated optical flow components for each axis.
 
     Notes

@@ -11,14 +11,14 @@ def polygon_clip(rp, cp, r0, c0, r1, c1):
 
     Parameters
     ----------
-    rp, cp : (N,) ndarray of double
+    rp, cp : (K,) ndarray of double
         Row and column coordinates of the polygon.
     (r0, c0), (r1, c1) : double
         Top-left and bottom-right coordinates of the bounding box.
 
     Returns
     -------
-    r_clipped, c_clipped : (M,) ndarray of double
+    r_clipped, c_clipped : (L,) ndarray of double
         Coordinates of clipped polygon.
 
     Notes
@@ -41,7 +41,7 @@ def polygon_area(pr, pc):
 
     Parameters
     ----------
-    pr, pc : (N,) array of float
+    pr, pc : (K,) array of float
         Polygon row and column coordinates.
 
     Returns

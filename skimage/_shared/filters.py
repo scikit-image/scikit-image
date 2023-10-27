@@ -27,14 +27,14 @@ def gaussian(
 
     Parameters
     ----------
-    image : array-like
+    image : ndarray
         Input image (grayscale or color) to filter.
     sigma : scalar or sequence of scalars, optional
         Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    output : array, optional
+    output : ndarray, optional
         The ``output`` parameter passes an array in which to store the
         filter output.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional

@@ -94,7 +94,7 @@ def denoise_invariant(
 
     Parameters
     ----------
-    image : ndarray ([M[, N[, ...P]][, C]) of ints, uints or floats
+    image : ndarray (M[, N[, ...]][, C]) of ints, uints or floats
         Input data to be denoised. `image` can be of any numeric type,
         but it is cast into a ndarray of floats (using `img_as_float`) for the
         computation of the denoised image.
