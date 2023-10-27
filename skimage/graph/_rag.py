@@ -108,8 +108,7 @@ def _add_edge_filter(values, graph):
 class RAG(nx.Graph):
 
     """
-    The Region Adjacency Graph (RAG) of an image, subclasses
-    `networx.Graph <http://networkx.github.io/documentation/latest/reference/classes/graph.html>`_
+    The Region Adjacency Graph (RAG) of an image, subclasses :obj:`networkx.Graph`.
 
     Parameters
     ----------
@@ -121,10 +120,10 @@ class RAG(nx.Graph):
         The connectivity between pixels in ``label_image``. For a 2D image,
         a connectivity of 1 corresponds to immediate neighbors up, down,
         left, and right, while a connectivity of 2 also includes diagonal
-        neighbors. See `scipy.ndimage.generate_binary_structure`.
+        neighbors. See :func:`scipy.ndimage.generate_binary_structure`.
     data : networkx Graph specification, optional
         Initial or additional edges to pass to the NetworkX Graph
-        constructor. See `networkx.Graph`. Valid edge specifications
+        constructor. See :obj:`networkx.Graph`. Valid edge specifications
         include edge list (list of tuples), NumPy arrays, and SciPy
         sparse matrices.
     **attr : keyword arguments, optional
@@ -182,7 +181,7 @@ class RAG(nx.Graph):
             node. For each neighbor `n` for `src` and `dst`, `weight_func` will
             be called as follows: `weight_func(src, dst, n, *extra_arguments,
             **extra_keywords)`. `src`, `dst` and `n` are IDs of vertices in the
-            RAG object which is in turn a subclass of `networkx.Graph`. It is
+            RAG object which is in turn a subclass of :obj:`networkx.Graph`. It is
             expected to return a dict of attributes of the resulting edge.
         in_place : bool, optional
             If set to `True`, the merged node has the id `dst`, else merged
@@ -237,7 +236,7 @@ class RAG(nx.Graph):
     def add_node(self, n, attr_dict=None, **attr):
         """Add node `n` while updating the maximum node id.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :obj:`networkx.Graph.add_node`."""
         if attr_dict is None:  # compatibility with old networkx
             attr_dict = attr
         else:
@@ -248,7 +247,7 @@ class RAG(nx.Graph):
     def add_edge(self, u, v, attr_dict=None, **attr):
         """Add an edge between `u` and `v` while updating max node id.
 
-        .. seealso:: :func:`networkx.Graph.add_edge`."""
+        .. seealso:: :obj:`networkx.Graph.add_edge`."""
         if attr_dict is None:  # compatibility with old networkx
             attr_dict = attr
         else:
@@ -259,7 +258,7 @@ class RAG(nx.Graph):
     def copy(self):
         """Copy the graph with its max node id.
 
-        .. seealso:: :func:`networkx.Graph.copy`."""
+        .. seealso:: :obj:`networkx.Graph.copy`."""
         g = super().copy()
         g.max_id = self.max_id
         return g
@@ -303,7 +302,7 @@ class RAG(nx.Graph):
 
         This is a convenience method used internally.
 
-        .. seealso:: :func:`networkx.Graph.add_node`."""
+        .. seealso:: :obj:`networkx.Graph.add_node`."""
         super().add_node(n)
 
 

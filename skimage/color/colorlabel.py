@@ -113,7 +113,7 @@ def label2rgb(
         `bg_color` is `None`, and `kind` is `overlay`,
         background is not painted by any colors.
     bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
+        Background color. Must be a name in 'color_dict' or RGB float values
         between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.

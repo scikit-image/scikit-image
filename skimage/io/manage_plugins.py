@@ -3,11 +3,11 @@
 To improve performance, plugins are only loaded as needed. As a result, there
 can be multiple states for a given plugin:
 
-    available: Defined in an *ini file located in `skimage.io._plugins`.
-        See also `skimage.io.available_plugins`.
+    available: Defined in an *ini file located in ``skimage.io._plugins``.
+        See also :func:`skimage.io.available_plugins`.
     partial definition: Specified in an *ini file, but not defined in the
         corresponding plugin module. This will raise an error when loaded.
-    available but not on this system: Defined in `skimage.io._plugins`, but
+    available but not on this system: Defined in ``skimage.io._plugins``, but
         a dependent library (e.g. Qt, PIL) is not available on your system.
         This will raise an error when loaded.
     loaded: The real availability is determined when it's explicitly loaded,

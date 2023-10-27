@@ -64,7 +64,7 @@ plt.show()
 #####################################################################
 # In the scatterplot, many points seem to be overlapping at low area values.
 # To get a better sense of the distribution, we may want to add some 'jitter'
-# to the visualization. To this end, we use `stripplot` (from `seaborn`, the
+# to the visualization. To this end, we use `stripplot` (from ``seaborn``, the
 # Python library dedicated to statistical data visualization) with argument
 # `jitter=True`.
 

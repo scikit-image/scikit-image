@@ -76,7 +76,7 @@ New Features
   (#3850)
 - Pooch -- on the fly download of datasets from github: we introduced the
   possibility to include larger datasets in the `data` submodule, thanks to the
-  `pooch` library. `data.download_all` fetches all datasets. (#3945)
+  ``pooch`` library. `data.download_all` fetches all datasets. (#3945)
 - Starting with this version, our gallery examples now have links to run the
   example notebook on a binder instance. (#4543)
 

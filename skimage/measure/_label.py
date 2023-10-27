@@ -73,8 +73,8 @@ def label(label_image, background=None, return_num=False, connectivity=None):
 
     See Also
     --------
-    regionprops
-    regionprops_table
+    :func:`skimage.measure.regionprops`
+    :func:`skimage.measure.regionprops_table`
 
     References
     ----------
