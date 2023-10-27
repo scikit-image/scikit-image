@@ -22,7 +22,7 @@ def edges_each(image):
 
 @adapt_rgb(each_channel)
 def smooth_each(image, sigma):
-    return filters.gaussian(image, sigma)
+    return filters.gaussian(image, sigma=sigma)
 
 
 @adapt_rgb(each_channel)
@@ -39,7 +39,7 @@ def edges_hsv(image):
 
 @adapt_rgb(hsv_value)
 def smooth_hsv(image, sigma):
-    return filters.gaussian(image, sigma)
+    return filters.gaussian(image, sigma=sigma)
 
 
 @adapt_rgb(hsv_value)

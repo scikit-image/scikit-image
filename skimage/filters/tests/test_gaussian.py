@@ -20,7 +20,7 @@ def test_negative_sigma():
 def test_null_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.0
-    assert np.all(gaussian(a, 0, preserve_range=True) == a)
+    assert np.all(gaussian(a, sigma=0, preserve_range=True) == a)
 
 
 def test_default_sigma():
@@ -87,7 +87,7 @@ def test_preserve_range():
     assert np.all(filtered_preserved == 1.0)
 
     img = np.array([[10.0, -10.0], [-4, 3]], dtype=np.float32)
-    gaussian(img, 1)
+    gaussian(img, sigma=1)
 
 
 def test_1d_ok():
@@ -103,23 +103,23 @@ def test_1d_ok():
 def test_4d_ok():
     img = np.zeros((5,) * 4)
     img[2, 2, 2, 2] = 1
-    res = gaussian(img, 1, mode='reflect', preserve_range=True)
+    res = gaussian(img, sigma=1, mode='reflect', preserve_range=True)
     assert np.allclose(res.sum(), 1)
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_preserve_output(dtype):
     image = np.arange(9, dtype=dtype).reshape((3, 3))
-    output = np.zeros_like(image, dtype=dtype)
-    gaussian_image = gaussian(image, sigma=1, output=output, preserve_range=True)
-    assert gaussian_image is output
+    out = np.zeros_like(image, dtype=dtype)
+    gaussian_image = gaussian(image, sigma=1, out=out, preserve_range=True)
+    assert gaussian_image is out
 
 
 def test_output_error():
     image = np.arange(9, dtype=np.float32).reshape((3, 3))
-    output = np.zeros_like(image, dtype=np.uint8)
+    out = np.zeros_like(image, dtype=np.uint8)
     with pytest.raises(ValueError):
-        gaussian(image, sigma=1, output=output, preserve_range=True)
+        gaussian(image, sigma=1, out=out, preserve_range=True)
 
 
 @pytest.mark.parametrize("s", [1, (2, 3)])
@@ -130,8 +130,8 @@ def test_difference_of_gaussians(s, s2, channel_axis):
     if channel_axis is not None:
         n_channels = 5
         image = np.stack((image,) * n_channels, channel_axis)
-    im1 = gaussian(image, s, preserve_range=True, channel_axis=channel_axis)
-    im2 = gaussian(image, s2, preserve_range=True, channel_axis=channel_axis)
+    im1 = gaussian(image, sigma=s, preserve_range=True, channel_axis=channel_axis)
+    im2 = gaussian(image, sigma=s2, preserve_range=True, channel_axis=channel_axis)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2, channel_axis=channel_axis)
     assert np.allclose(dog, dog2)
@@ -140,9 +140,9 @@ def test_difference_of_gaussians(s, s2, channel_axis):
 @pytest.mark.parametrize("s", [1, (1, 2)])
 def test_auto_sigma2(s):
     image = np.random.rand(10, 10)
-    im1 = gaussian(image, s, preserve_range=True)
+    im1 = gaussian(image, sigma=s, preserve_range=True)
     s2 = 1.6 * np.array(s)
-    im2 = gaussian(image, s2, preserve_range=True)
+    im2 = gaussian(image, sigma=s2, preserve_range=True)
     dog = im1 - im2
     dog2 = difference_of_gaussians(image, s, s2)
     assert np.allclose(dog, dog2)
@@ -164,3 +164,34 @@ def test_dog_invalid_sigma2():
         difference_of_gaussians(image, 3, 2)
     with pytest.raises(ValueError):
         difference_of_gaussians(image, (1, 5), (2, 4))
+
+
+@pytest.mark.parametrize("positional_count", range(1, 5))
+def test_deprecated_positional_args(positional_count):
+    """More than 1 positionl argument are deprecated."""
+    image = np.array([0, 1, 0], dtype=float)
+    args = [1, None, 'nearest', 0, False, 4.0]
+    desired = np.array([0.24197145, 0.39894347, 0.24197145])
+    with pytest.warns(
+        FutureWarning,
+        match="Passing more than 1 positional argument to `gaussian` is deprecated",
+    ) as _warnings:
+        result = gaussian(image, *args[:positional_count])
+    np.testing.assert_almost_equal(desired, result)
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__
+
+
+def test_deprecated_gaussian_output():
+    image = np.array([0, 1, 0], dtype=float)
+    desired = np.array([0.24197145, 0.39894347, 0.24197145])
+    with pytest.warns(
+        FutureWarning,
+        match="`output` is a deprecated argument name for `gaussian`",
+    ) as _warnings:
+        gaussian(image, output=image)
+    np.testing.assert_almost_equal(desired, image)
+    # Check that stacklevel is correct
+    assert len(_warnings) == 1
+    assert _warnings[0].filename == __file__

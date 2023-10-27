@@ -300,7 +300,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(
             image,
-            self.upsampling * math.sqrt(self.sigma_min**2 - self.sigma_in**2),
+            sigma=self.upsampling * math.sqrt(self.sigma_min**2 - self.sigma_in**2),
             mode='reflect',
         )
 
@@ -333,9 +333,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # blur new scale assuming sigma of the last one
                 gaussian(
                     octave[s - 1],
-                    gaussian_sigmas[o, s - 1],
+                    sigma=gaussian_sigmas[o, s - 1],
                     mode='reflect',
-                    output=octave[s],
+                    out=octave[s],
                 )
             # move scales to last axis as expected by other methods
             scalespace.append(np.moveaxis(octave, 0, -1))

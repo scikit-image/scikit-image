@@ -4,7 +4,9 @@ These are defined here to avoid circular imports.
 
 The unit tests remain under skimage/filters/tests/
 """
+import warnings
 from collections.abc import Iterable
+from functools import wraps
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -12,6 +14,37 @@ from scipy import ndimage as ndi
 from .._shared.utils import _supported_float_type, convert_to_float
 
 
+def _deprecate_gaussian_positional_args(func):
+    """Help deprecate `output` in `gaussian` in favor of `out`.
+
+    We can't simply use deprecate_kwarg or remove_arg, as `output` can also be
+    passed as a positional argument. Instead, deprecate passing more than 1
+    positional argument and at the same time, refactor `output` to `out`.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if len(args) > 1:
+            warnings.warn(
+                "Passing more than 1 positional argument to `gaussian` is deprecated "
+                "and will stop working in version 0.25 or later. Please use keyword "
+                "arguments instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        elif "output" in kwargs:
+            warnings.warn(
+                "`output` is a deprecated argument name for `gaussian`. It will be "
+                "removed in version 0.25 or later. Please use `out` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@_deprecate_gaussian_positional_args
 def gaussian(
     image,
     sigma=1,
@@ -22,8 +55,15 @@ def gaussian(
     truncate=4.0,
     *,
     channel_axis=None,
+    out=None,
 ):
     """Multi-dimensional Gaussian filter.
+
+    .. warning::
+
+        Passing more than 1 positional argument to `gaussian` is deprecated
+        and will stop working in version 0.25 or later. Please use keyword
+        arguments instead.
 
     Parameters
     ----------
@@ -34,9 +74,8 @@ def gaussian(
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    output : ndarray, optional
-        The ``output`` parameter passes an array in which to store the
-        filter output.
+    output : DEPRECATED
+        Deprecated in favor of `out`
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
@@ -61,16 +100,12 @@ def gaussian(
 
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
+    out : ndarray, optional
+        The ``out`` parameter passes an array in which to store the
+        filter output.
 
-        .. warning::
-
-            Automatic detection of the color channel based on the old deprecated
-            `multichannel=None` was broken in version 0.19. In 0.20 this
-            behavior is fixed. The last axis of an `image` with dimensions
-            (M, N, 3) is interpreted as a color channel if `channel_axis` is not
-            set by the user (signaled by the default proxy value
-            `ChannelAxisNotSet`). Starting with 0.22, `channel_axis=None` will
-            be used as the new default value.
+        .. versionadded:: 0.23
+            `out` was added in 0.23.
 
     Returns
     -------
@@ -83,8 +118,8 @@ def gaussian(
 
     Integer arrays are converted to float.
 
-    The ``output`` should be floating point data type since gaussian converts
-    to float provided ``image``. If ``output`` is not provided, another array
+    `out` should be a floating point data type since gaussian converts
+    to float provided `image`. If `out` is not provided, another array
     will be allocated and returned as the result.
 
     The multi-dimensional filter is implemented as a sequence of
@@ -96,32 +131,34 @@ def gaussian(
 
     Examples
     --------
-
+    >>> import skimage as ski
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
     >>> a
     array([[0., 0., 0.],
            [0., 1., 0.],
            [0., 0., 0.]])
-    >>> gaussian(a, sigma=0.4)  # mild smoothing
+    >>> ski.filters.gaussian(a, sigma=0.4)  # mild smoothing
     array([[0.00163116, 0.03712502, 0.00163116],
            [0.03712502, 0.84496158, 0.03712502],
            [0.00163116, 0.03712502, 0.00163116]])
-    >>> gaussian(a, sigma=1)  # more smoothing
+    >>> ski.filters.gaussian(a, sigma=1)  # more smoothing
     array([[0.05855018, 0.09653293, 0.05855018],
            [0.09653293, 0.15915589, 0.09653293],
            [0.05855018, 0.09653293, 0.05855018]])
     >>> # Several modes are possible for handling boundaries
-    >>> gaussian(a, sigma=1, mode='reflect')
+    >>> ski.filters.gaussian(a, sigma=1, mode='reflect')
     array([[0.08767308, 0.12075024, 0.08767308],
            [0.12075024, 0.16630671, 0.12075024],
            [0.08767308, 0.12075024, 0.08767308]])
     >>> # For RGB images, each is filtered separately
-    >>> from skimage.data import astronaut
-    >>> image = astronaut()
-    >>> filtered_img = gaussian(image, sigma=1, channel_axis=-1)
+    >>> image = ski.data.astronaut()
+    >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
+    if output is not None:
+        out = output
+
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
     if channel_axis is not None:
@@ -134,8 +171,8 @@ def gaussian(
     image = convert_to_float(image, preserve_range)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
-    if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
-        raise ValueError("Provided output data type is not float")
+    if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
+        raise ValueError("Provided out data type is not float")
     return ndi.gaussian_filter(
-        image, sigma, output=output, mode=mode, cval=cval, truncate=truncate
+        image, sigma, output=out, mode=mode, cval=cval, truncate=truncate
     )
