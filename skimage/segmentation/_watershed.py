@@ -94,12 +94,12 @@ def watershed(image, markers=None, connectivity=1, offset=None, mask=None,
     markers : int, or ndarray of int with same shape as image, optional
         The desired number of basins, or an array marking the basins with the
         values to be assigned in the label matrix. Zero means not a marker. If
-        None (no markers given), the local minima of the image are used as
-        markers. Note that, in this case, the local minima are determined in
-        such a way that it is equivalent to applying
-        :func:`skimage.morphology.local_minima` onto ``image`` followed by
-        :func:`skimage.morphology.label` onto the result
-        only if setting ``connectivity=2``.
+        None, the (default) markers are determined as the local minima of
+        ``image``. Specifically, the computation is equivalent to applying
+        :func:`skimage.morphology.local_minima` onto ``image``, followed by
+        :func:`skimage.measure.label` onto the result (with the same given
+        ``connectivity``). Generally speaking, users are encouraged to pass
+        markers explicitly.
     connectivity : ndarray, optional
         An array with the same number of dimensions as ``image`` whose
         non-zero elements indicate neighbors for connection.
