@@ -25,6 +25,7 @@ env:
   WITHOUT_POOCH: 0
   SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
   EAGER_IMPORT: 0
+  SPHINXOPTS: "-j auto -W"
 
 jobs:
   wheels:

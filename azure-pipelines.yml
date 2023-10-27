@@ -188,7 +188,6 @@ jobs:
           # Build the documentation
           choco install optipng
           export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS=-W
           make -C doc html
         condition: eq(variables['BUILD_DOCS'], 'true')
         displayName: "Documentation testing"
