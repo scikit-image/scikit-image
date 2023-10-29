@@ -32,7 +32,7 @@ contour
 contrast
     Differences of intensity or color in an image, which make objects
     distinguishable. Several functions to manipulate the contrast of an
-    image are available in {mod}`skimage.exposure`.
+    image are available in {mod}`skimage.exposure`. See {ref}`exposure`.
 
 disk
     A filled-in {term}`circle`.
@@ -41,7 +41,7 @@ float
     Representation of real numbers, for example as {obj}`numpy.float32` or
     {obj}`numpy.float64`. See {ref}`data_types`. Some operations on images
     need a float datatype (such as multiplying image values with
-    exponential prefactors in {func}`skimage.filters.gaussian`, so that
+    exponential prefactors in {func}`skimage.filters.gaussian`), so that
     images of integer type are often converted to float type internally. Also
     see {term}`int` values.
 
