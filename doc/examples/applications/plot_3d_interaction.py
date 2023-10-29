@@ -59,7 +59,7 @@ vmin, vmax = data.min(), data.max()
 print(f'range: ({vmin}, {vmax})')
 
 #####################################################################
-# We turn to ``plotly``'s implementation of the `imshow` function, for it
+# We turn to Plotly's implementation of the :func:`plotly.express.imshow` function, for it
 # supports `value ranges
 # <https://plotly.com/python/imshow/#defining-the-data-range-covered-by-the-color-range-with-zmin-and-zmax>`_
 # beyond ``(0.0, 1.0)`` for floats and ``(0, 255)`` for integers.
