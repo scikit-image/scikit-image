@@ -20,10 +20,10 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
 
     Parameters
     ----------
-    image : array_like
+    image : ndarray
         Input image. The rotation axis will be located in the pixel with
         indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
-    theta : array_like, optional
+    theta : array, optional
         Projection angles (in degrees). If `None`, the value is set to
         np.arange(180).
     circle : boolean, optional
@@ -198,13 +198,13 @@ def iradon(
 
     Parameters
     ----------
-    radon_image : array
+    radon_image : ndarray
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different
         angle. The tomography rotation axis should lie at the pixel
         index ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : array_like, optional
+    theta : array, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int, optional
@@ -327,7 +327,7 @@ def order_angles_golden_ratio(theta):
 
     Parameters
     ----------
-    theta : 1D array of floats
+    theta : array of floats, shape (M,)
         Projection angles in degrees. Duplicate angles are not allowed.
 
     Returns
@@ -396,20 +396,18 @@ def iradon_sart(
 
     Parameters
     ----------
-    radon_image : 2D array
+    radon_image : ndarray, shape (M, N)
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different angle. The
         tomography rotation axis should lie at the pixel index
         ``radon_image.shape[0] // 2`` along the 0th dimension of
         ``radon_image``.
-    theta : 1D array, optional
+    theta : array, shape (N,), optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    image : 2D array, optional
-        Image containing an initial reconstruction estimate. Shape of this
-        array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
-        default is an array of zeros.
-    projection_shifts : 1D array, optional
+    image : ndarray, shape (M, M), optional
+        Image containing an initial reconstruction estimate. Default is an array of zeros.
+    projection_shifts : array, shape (N,), optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.

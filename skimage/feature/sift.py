@@ -161,13 +161,13 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         Keypoint coordinates as ``(row, col)``.
     positions : (N, 2) array
         Subpixel-precision keypoint coordinates as ``(row, col)``.
-    sigmas : (N, ) array
+    sigmas : (N,) array
         The corresponding sigma (blur) value of a keypoint.
-    scales : (N, ) array
+    scales : (N,) array
         The corresponding scale of a keypoint.
-    orientations : (N, ) array
+    orientations : (N,) array
         The orientations of the gradient around every keypoint.
-    octaves : (N, ) array
+    octaves : (N,) array
         The corresponding octave of a keypoint.
     descriptors : (N, n_hist*n_hist*n_ori) array
         The descriptors of a keypoint.

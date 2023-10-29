@@ -31,9 +31,9 @@ def active_contour(
 
     Parameters
     ----------
-    image : (N, M) or (N, M, 3) ndarray
+    image : (M, N) or (M, N, 3) ndarray
         Input image.
-    snake : (N, 2) ndarray
+    snake : (K, 2) ndarray
         Initial snake coordinates. For periodic boundary conditions, endpoints
         must not be duplicated.
     alpha : float, optional
@@ -66,7 +66,7 @@ def active_contour(
 
     Returns
     -------
-    snake : (N, 2) ndarray
+    snake : (K, 2) ndarray
         Optimised snake, same shape as input parameter.
 
     References

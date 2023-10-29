@@ -23,9 +23,9 @@ def profile_line(
         The image, either grayscale (2D array) or multichannel
         (3D array, where the final axis contains the channel
         information).
-    src : array_like, shape (2, )
+    src : array_like, shape (2,)
         The coordinates of the start point of the scan line.
-    dst : array_like, shape (2, )
+    dst : array_like, shape (2,)
         The coordinates of the end point of the scan
         line. The destination point is *included* in the profile, in
         contrast to standard numpy indexing.
