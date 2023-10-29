@@ -11,7 +11,7 @@ def _sift_read(filelike, mode='SIFT'):
     http://www.vision.ee.ethz.ch/~surf/.
 
     This routine *does not* generate SIFT/SURF features from an image.  These
-    algorithms are patent encumbered.  Please use `skimage.feature.CENSURE`
+    algorithms are patent encumbered.  Please use :obj:`skimage.feature.CENSURE`
     instead.
 
     Parameters

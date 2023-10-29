@@ -21,8 +21,6 @@ class FeatureDetector:
 
 
 class DescriptorExtractor:
-    """"""
-
     def __init__(self):
         self.descriptors_ = np.array([])
 

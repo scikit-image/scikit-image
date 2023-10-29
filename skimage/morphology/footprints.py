@@ -79,13 +79,13 @@ def footprint_from_sequence(footprints):
     footprints : tuple of 2-tuples
         A sequence of footprint tuples where the first element of each tuple
         is an array corresponding to a footprint and the second element is the
-        number of times it is to be applied. Currently all footprints should
+        number of times it is to be applied. Currently, all footprints should
         have odd size.
 
     Returns
     -------
     footprint : ndarray
-        An single array equivalent to applying the sequence of `footprints`.
+        An single array equivalent to applying the sequence of ``footprints``.
     """
 
     # Create a single pixel image of sufficient size and apply binary dilation.
@@ -113,10 +113,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but often with
+        give an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        axis. Whether 'sequence' or 'separable' is computationally faster may
         be architecture-dependent.
 
     Returns

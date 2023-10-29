@@ -249,8 +249,30 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
+    "plotly": ("https://plotly.com/python-api-reference/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
 }
 
+nitpicky = True
+nitpick_ignore = [
+    ("py:obj", "color_dict"),
+    ("py:class", "skimage.transform._geometric._GeometricTransform"),
+    ("py:class", "skimage.transform._geometric.ProjectiveTransform"),
+    ("py:class", "skimage.feature.util.DescriptorExtractor"),
+    ("py:class", "skimage.feature.util.FeatureDetector"),
+    ("py:class", "skimage.measure.fit.BaseModel"),
+    ("py:exc", "NetworkXError"),
+    ("py:obj", "Graph"),
+    ("py:obj", "Graph.__iter__"),
+    ("py:obj", "__len__"),
+    ("py:class", "_GeometricTransform"),
+    ("py:obj", "convert"),
+    ("py:obj", "available_plugins"),
+    ("py:obj", "skimage.io.collection"),
+    ("py:obj", "skimage.io.manage_plugins"),
+    ("py:obj", "skimage.io.sift"),
+    ("py:obj", "skimage.io.util"),
+]
 # -- Source code links -------------------------------------------------------
 
 

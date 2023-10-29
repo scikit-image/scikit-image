@@ -93,7 +93,7 @@ def mean_bilateral(
 
     See also
     --------
-    :func:`skimage.restoration.denoise_bilateral`
+    skimage.restoration.denoise_bilateral
 
     Examples
     --------
@@ -230,7 +230,7 @@ def sum_bilateral(
 
     See also
     --------
-    :func:`skimage.restoration.denoise_bilateral`
+    skimage.restoration.denoise_bilateral
 
     Examples
     --------

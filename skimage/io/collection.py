@@ -36,7 +36,8 @@ def concatenate_images(ic):
 
     See Also
     --------
-    ImageCollection.concatenate, MultiImage.concatenate
+    ImageCollection.concatenate
+    MultiImage.concatenate
 
     Raises
     ------
@@ -106,13 +107,13 @@ class ImageCollection:
         Pattern string or list of strings to load. The filename path can be
         absolute or relative.
     conserve_memory : bool, optional
-        If True, `ImageCollection` does not keep more than one in memory at a
-        specific time. Otherwise, images will be cached once they are loaded.
+        If True, :class:`skimage.io.ImageCollection` does not keep more than one in
+        memory at a specific time. Otherwise, images will be cached once they are loaded.
 
     Other parameters
     ----------------
     load_func : callable
-        ``imread`` by default. See notes below.
+        ``imread`` by default. See Notes below.
     **load_func_kwargs : dict
         Any other keyword arguments are passed to `load_func`.
 
@@ -125,8 +126,8 @@ class ImageCollection:
 
     Notes
     -----
-    Note that files are always returned in alphanumerical order. Also note
-    that slicing returns a new ImageCollection, *not* a view into the data.
+    Note that files are always returned in alphanumerical order. Also note that slicing
+    returns a new :class:`skimage.io.ImageCollection`, *not* a view into the data.
 
     ImageCollection image loading can be customized through
     `load_func`. For an ImageCollection ``ic``, ``ic[5]`` calls
@@ -151,11 +152,11 @@ class ImageCollection:
       x[5]  # the 10th frame of the first video
 
     Alternatively, if `load_func` is provided and `load_pattern` is a
-    sequence, an `ImageCollection` of corresponding length will be created,
-    and the individual images will be loaded by calling `load_func` with the
+    sequence, an :class:`skimage.io.ImageCollection` of corresponding length will
+    be created, and the individual images will be loaded by calling `load_func` with the
     matching element of the `load_pattern` as its first argument. In this
     case, the elements of the sequence do not need to be names of existing
-    files (or strings at all). For example, to create an `ImageCollection`
+    files (or strings at all). For example, to create an :class:`skimage.io.ImageCollection`
     containing 500 images from a video::
 
       class FrameReader:
@@ -292,7 +293,7 @@ class ImageCollection:
 
         Returns
         -------
-        img : ndarray or ImageCollection.
+        img : ndarray or :class:`skimage.io.ImageCollection`
             The `n`-th image in the collection, or a new ImageCollection with
             the selected images.
         """
@@ -395,12 +396,13 @@ class ImageCollection:
 
         See Also
         --------
-        concatenate_images
+        skimage.io.concatenate_images
 
         Raises
         ------
         ValueError
-            If images in the `ImageCollection` don't have identical shapes.
+            If images in the :class:`skimage.io.ImageCollection` do not have identical
+            shapes.
         """
         return concatenate_images(self)
 

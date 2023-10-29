@@ -230,7 +230,8 @@ def use_plugin(name, kind=None):
 
     See Also
     --------
-    available_plugins : List of available plugins
+    available_plugins
+        List of available plugins.
 
     Examples
     --------
@@ -239,8 +240,8 @@ def use_plugin(name, kind=None):
     >>> from skimage import io
     >>> io.use_plugin('matplotlib', 'imread')
 
-    To see a list of available plugins run ``io.available_plugins``. Note that
-    this lists plugins that are defined, but the full list may not be usable
+    To see a list of available plugins run `available_plugins`. Note
+    that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 
     """
