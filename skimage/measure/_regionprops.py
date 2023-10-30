@@ -575,7 +575,7 @@ class RegionProperties:
     @property
     def intensity_std(self):
         vals = self.image_intensity[self.image]
-        return np.std(vals)
+        return np.std(vals, axis=0)
 
     @property
     def axis_major_length(self):
