@@ -255,8 +255,10 @@ intersphinx_mapping = {
 
 nitpicky = True
 nitpick_ignore = [
-    ("py:class", "skimage.transform._geometric._GeometricTransform"),
-    # ^ skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
+    (
+        "py:class",
+        "skimage.transform._geometric._GeometricTransform",
+    ),  # skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
     (
         "py:class",
         "skimage.feature.util.DescriptorExtractor",
