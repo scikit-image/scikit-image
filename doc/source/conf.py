@@ -184,6 +184,9 @@ html_theme_options = {
         "plausible_analytics_domain": "scikit-image.org",
         "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
     },
+    # Silence warning in pydata-sphinx-theme v0.14.2
+    # can be removed after >=0.15 is released and pinned
+    "navigation_with_keys": False,
 }
 
 # Custom sidebar templates, maps document names to template names.
