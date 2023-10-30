@@ -223,15 +223,11 @@ def use_plugin(name, kind=None):
     Parameters
     ----------
     name : str
-        Name of plugin.
+        Name of plugin. See ``skimage.io.available_plugins`` for a list of available
+        plugins.
     kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
-
-    See Also
-    --------
-    available_plugins
-        List of available plugins.
 
     Examples
     --------
@@ -240,7 +236,7 @@ def use_plugin(name, kind=None):
     >>> from skimage import io
     >>> io.use_plugin('matplotlib', 'imread')
 
-    To see a list of available plugins run `available_plugins`. Note
+    To see a list of available plugins run ``skimage.io.available_plugins``. Note
     that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 

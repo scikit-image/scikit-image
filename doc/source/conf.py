@@ -255,23 +255,36 @@ intersphinx_mapping = {
 
 nitpicky = True
 nitpick_ignore = [
-    ("py:obj", "color_dict"),
     ("py:class", "skimage.transform._geometric._GeometricTransform"),
-    ("py:class", "skimage.transform._geometric.ProjectiveTransform"),
-    ("py:class", "skimage.feature.util.DescriptorExtractor"),
-    ("py:class", "skimage.feature.util.FeatureDetector"),
-    ("py:class", "skimage.measure.fit.BaseModel"),
-    ("py:exc", "NetworkXError"),
-    ("py:obj", "Graph"),
-    ("py:obj", "Graph.__iter__"),
-    ("py:obj", "__len__"),
-    ("py:class", "_GeometricTransform"),
-    ("py:obj", "convert"),
-    ("py:obj", "available_plugins"),
-    ("py:obj", "skimage.io.collection"),
-    ("py:obj", "skimage.io.manage_plugins"),
-    ("py:obj", "skimage.io.sift"),
-    ("py:obj", "skimage.io.util"),
+    # ^ skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
+    (
+        "py:class",
+        "skimage.feature.util.DescriptorExtractor",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.feature.util.FeatureDetector",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.measure.fit.BaseModel",
+    ),  # skimage.measure.fit.{CircleModel/EllipseModel/LineModelND}
+    ("py:exc", "NetworkXError"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "Graph"),  # networkx.classes.graph.Graph.to_undirected
+    ("py:obj", "Graph.__iter__"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "__len__"),  # networkx.classes.graph.Graph.{number_of_nodes/order}
+    (
+        "py:class",
+        "_GeometricTransform",
+    ),  # skimage.transform._geometric.estimate_transform
+    ("py:obj", "convert"),  # skimage.graph._rag.RAG.__init__
+    ("py:obj", "skimage.io.collection"),  # (generated) doc/source/api/skimage.io.rst
+    (
+        "py:obj",
+        "skimage.io.manage_plugins",
+    ),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.sift"),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.util"),  # (generated) doc/source/api/skimage.io.rst
 ]
 # -- Source code links -------------------------------------------------------
 

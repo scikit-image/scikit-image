@@ -106,9 +106,7 @@ def _add_edge_filter(values, graph):
 
 
 class RAG(nx.Graph):
-
-    """
-    The Region Adjacency Graph (RAG) of an image, subclasses :obj:`networkx.Graph`.
+    """The Region Adjacency Graph (RAG) of an image, subclasses :obj:`networkx.Graph`.
 
     Parameters
     ----------
@@ -121,11 +119,10 @@ class RAG(nx.Graph):
         a connectivity of 1 corresponds to immediate neighbors up, down,
         left, and right, while a connectivity of 2 also includes diagonal
         neighbors. See :func:`scipy.ndimage.generate_binary_structure`.
-    data : networkx Graph specification, optional
-        Initial or additional edges to pass to the NetworkX Graph
-        constructor. See :obj:`networkx.Graph`. Valid edge specifications
-        include edge list (list of tuples), NumPy arrays, and SciPy
-        sparse matrices.
+    data : :obj:`networkx.Graph` specification, optional
+        Initial or additional edges to pass to :obj:`networkx.Graph`
+        constructor. Valid edge specifications include edge list (list of tuples),
+        NumPy arrays, and SciPy sparse matrices.
     **attr : keyword arguments, optional
         Additional attributes to add to the graph.
     """
