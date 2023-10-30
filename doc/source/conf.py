@@ -253,7 +253,9 @@ intersphinx_mapping = {
     "seaborn": ("https://seaborn.pydata.org/", None),
 }
 
-nitpicky = True
+# Do not (yet) use nitpicky mode for checking cross-references
+nitpicky = False
+# nitpick_ignore is only considered when nitpicky=True
 nitpick_ignore = [
     (
         "py:class",
