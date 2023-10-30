@@ -66,7 +66,7 @@ plt.show()
 # To get a better sense of the distribution, we may want to add some 'jitter'
 # to the visualization. To this end, we use :obj:`seaborn.stripplot` (from
 # `seaborn library <https://seaborn.pydata.org/>`_ for statistical data visualization)
-# with argument `jitter=True`.
+# with argument ``jitter=True``.
 
 fig, ax = plt.subplots()
 sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True, ax=ax)
