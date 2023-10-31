@@ -55,14 +55,14 @@ class ApiDocWriter:
             first dot in the package path, after *package_name* - so,
             if *package_name* is ``sphinx``, then ``sphinx.util`` will
             result in ``.util`` being passed for searching by these
-            regexps.  If is None, gives default. Default is ['\.tests$'].
+            regexps.  If is None, gives default. Default is ``['\.tests$']``.
         module_skip_patterns : None or sequence
             Sequence of strings giving URIs of modules to be excluded
             Operates on the module name including preceding URI path,
             back to the first dot after *package_name*.  For example
             ``sphinx.util.console`` results in the string to search of
             ``.util.console``.
-            If is None, gives default. Default is ['\.setup$', '\._'].
+            If is None, gives default. Default is ``['\.setup$', '\._']``.
         """
         if package_skip_patterns is None:
             package_skip_patterns = ['\\.tests$']
