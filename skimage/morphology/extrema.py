@@ -81,9 +81,9 @@ def h_maxima(image, h, footprint=None):
 
     See Also
     --------
-    skimage.morphology.extrema.h_minima
-    skimage.morphology.extrema.local_maxima
-    skimage.morphology.extrema.local_minima
+    skimage.morphology.h_minima
+    skimage.morphology.local_maxima
+    skimage.morphology.local_minima
 
     References
     ----------
@@ -210,9 +210,9 @@ def h_minima(image, h, footprint=None):
 
     See Also
     --------
-    skimage.morphology.extrema.h_maxima
-    skimage.morphology.extrema.local_maxima
-    skimage.morphology.extrema.local_minima
+    skimage.morphology.h_maxima
+    skimage.morphology.local_maxima
+    skimage.morphology.local_minima
 
     References
     ----------

@@ -22,7 +22,6 @@ for i in range(-15, 16):
 
 
 class ORB(FeatureDetector, DescriptorExtractor):
-
     """Oriented FAST and rotated BRIEF feature detector and binary descriptor
     extractor.
 

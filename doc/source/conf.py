@@ -248,8 +248,48 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
+    "plotly": ("https://plotly.com/python-api-reference/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
 }
 
+# Do not (yet) use nitpicky mode for checking cross-references
+nitpicky = False
+# nitpick_ignore is only considered when nitpicky=True
+nitpick_ignore = [
+    (
+        "py:class",
+        "skimage.transform._geometric._GeometricTransform",
+    ),  # skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
+    (
+        "py:class",
+        "skimage.feature.util.DescriptorExtractor",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.feature.util.FeatureDetector",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.measure.fit.BaseModel",
+    ),  # skimage.measure.fit.{CircleModel/EllipseModel/LineModelND}
+    ("py:exc", "NetworkXError"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "Graph"),  # networkx.classes.graph.Graph.to_undirected
+    ("py:obj", "Graph.__iter__"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "__len__"),  # networkx.classes.graph.Graph.{number_of_nodes/order}
+    (
+        "py:class",
+        "_GeometricTransform",
+    ),  # skimage.transform._geometric.estimate_transform
+    ("py:obj", "convert"),  # skimage.graph._rag.RAG.__init__
+    ("py:obj", "skimage.io.collection"),  # (generated) doc/source/api/skimage.io.rst
+    (
+        "py:obj",
+        "skimage.io.manage_plugins",
+    ),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.sift"),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.util"),  # (generated) doc/source/api/skimage.io.rst
+]
 # -- Source code links -------------------------------------------------------
 
 
