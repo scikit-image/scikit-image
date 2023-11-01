@@ -21,7 +21,7 @@ def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
     `mode` and `cval` keyword arguments (e.g. `scipy.ndimage.grey_erosion`).
     """
     fp, num_iter = footprints[0]
-    gray_func(image, footprint=fp, output=out)
+    gray_func(image, footprint=fp, output=out, mode=mode, cval=cval)
     for _ in range(1, num_iter):
         gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     for fp, num_iter in footprints[1:]:
