@@ -131,6 +131,7 @@ def erosion(
     out=None,
     shift_x=DEPRECATED,
     shift_y=DEPRECATED,
+    *,
     mode="reflect",
     cval=0.0,
 ):
@@ -241,6 +242,7 @@ def dilation(
     out=None,
     shift_x=DEPRECATED,
     shift_y=DEPRECATED,
+    *,
     mode="reflect",
     cval=0.0,
 ):
@@ -349,7 +351,7 @@ def dilation(
 
 
 @default_footprint
-def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
+def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
@@ -426,7 +428,7 @@ def opening(image, footprint=None, out=None, mode="reflect", cval=0.0):
 
 
 @default_footprint
-def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
+def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
@@ -503,7 +505,7 @@ def closing(image, footprint=None, out=None, mode="reflect", cval=0.0):
 
 
 @default_footprint
-def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
+def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -596,7 +598,7 @@ def white_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
 
 
 @default_footprint
-def black_tophat(image, footprint=None, out=None, mode="reflect", cval=0.0):
+def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus

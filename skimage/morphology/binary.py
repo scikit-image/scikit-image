@@ -37,7 +37,7 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
-def binary_erosion(image, footprint=None, out=None, mode='ignore'):
+def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -117,7 +117,7 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
 
 
 @default_footprint
-def binary_dilation(image, footprint=None, out=None, mode='ignore'):
+def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -197,7 +197,7 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
 
 
 @default_footprint
-def binary_opening(image, footprint=None, out=None, mode='ignore'):
+def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as grayscale opening but performs
@@ -258,7 +258,7 @@ def binary_opening(image, footprint=None, out=None, mode='ignore'):
 
 
 @default_footprint
-def binary_closing(image, footprint=None, out=None, mode='ignore'):
+def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as grayscale closing but performs
