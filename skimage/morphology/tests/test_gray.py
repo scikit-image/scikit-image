@@ -67,6 +67,28 @@ class TestMorphology:
         calculated = self._build_expected_output()
         assert_equal(expected, calculated)
 
+    def test_gray_closing_extensive(self):
+        img = data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+        # Default mode="reflect" is not extensive for backwards-compatibility
+        result_default = gray.closing(img, footprint=footprint)
+        assert not np.all(result_default >= img)
+
+        result = gray.closing(img, footprint=footprint, mode="ignore")
+        assert np.all(result >= img)
+
+    def test_gray_opening_anti_extensive(self):
+        img = data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+        # Default mode="reflect" is not extensive for backwards-compatibility
+        result_default = gray.opening(img, footprint=footprint)
+        assert not np.all(result_default <= img)
+
+        result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
+        assert np.all(result_ignore <= img)
+
 
 class TestEccentricStructuringElements:
     def setup_class(self):

@@ -40,11 +40,33 @@ def test_binary_closing():
     assert_array_equal(binary_res, gray_res)
 
 
+def test_binary_closing_extensive():
+    footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+    result_default = binary.binary_closing(bw_img, footprint=footprint)
+    assert np.all(result_default >= bw_img)
+
+    # mode="min" is expected to be not extensive
+    result_min = binary.binary_closing(img, footprint=footprint, mode="min")
+    assert not np.all(result_min >= bw_img)
+
+
 def test_binary_opening():
     footprint = morphology.square(3)
     binary_res = binary.binary_opening(bw_img, footprint)
     gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
+
+
+def test_binary_opening_anti_extensive():
+    footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+    result_default = binary.binary_opening(bw_img, footprint=footprint)
+    assert np.all(result_default <= bw_img)
+
+    # mode="max" is expected to be not extensive
+    result_max = binary.binary_opening(bw_img, footprint=footprint, mode="max")
+    assert not np.all(result_max <= bw_img)
 
 
 def _get_decomp_test_data(function, ndim=2):
