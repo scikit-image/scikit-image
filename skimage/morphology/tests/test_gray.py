@@ -1,3 +1,5 @@
+import inspect
+
 import numpy as np
 import pytest
 from scipy import ndimage as ndi
@@ -499,3 +501,19 @@ def test_octahedron_decomposition(cell3d_image, function, radius, decomposition)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize("func", [gray.erosion, gray.dilation])
+@pytest.mark.parametrize("shift_x", [True, False, None])
+@pytest.mark.parametrize("shift_y", [True, False, None])
+def test_deprecated_shift(func, shift_x, shift_y):
+    img = np.ones(10)
+    func(img)  # Shouldn't warn
+
+    regex = "`shift_x` and `shift_y` are deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(img, shift_x=shift_x, shift_y=shift_y)
+        expected_lineno = inspect.currentframe().f_lineno - 1
+    # Assert correct stacklevel
+    assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__

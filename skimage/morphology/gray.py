@@ -8,6 +8,8 @@ from scipy import ndimage as ndi
 
 from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
 from .misc import default_footprint
+from .._shared.utils import DEPRECATED
+
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
 
@@ -74,12 +76,13 @@ def _shift_footprints(footprint, shift_x, shift_y):
 
     See `_shift_footprint`, which is called for each array in the sequence.
     """
-    if shift_x is None and shift_y is None:
+    if shift_x is DEPRECATED and shift_y is DEPRECATED:
         return footprint
 
     warning_msg = (
-        "The parameters `shift_x` and `shift_y` are deprecated "
-        "since v0.23 and will be removed in v0.26."
+        "The parameters `shift_x` and `shift_y` are deprecated since v0.23 and "
+        "will be removed in v0.26. Use `pad_footprint` or modify the footprint"
+        "manually instead."
     )
     warnings.warn(warning_msg, FutureWarning, stacklevel=4)
 
@@ -126,8 +129,8 @@ def erosion(
     image,
     footprint=None,
     out=None,
-    shift_x=None,
-    shift_y=None,
+    shift_x=DEPRECATED,
+    shift_y=DEPRECATED,
     mode="reflect",
     cval=0.0,
 ):
@@ -236,8 +239,8 @@ def dilation(
     image,
     footprint=None,
     out=None,
-    shift_x=None,
-    shift_y=None,
+    shift_x=DEPRECATED,
+    shift_y=DEPRECATED,
     mode="reflect",
     cval=0.0,
 ):
