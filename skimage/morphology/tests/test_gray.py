@@ -504,15 +504,15 @@ def test_octahedron_decomposition(cell3d_image, function, radius, decomposition)
 
 
 @pytest.mark.parametrize("func", [gray.erosion, gray.dilation])
-@pytest.mark.parametrize("shift_x", [True, False, None])
-@pytest.mark.parametrize("shift_y", [True, False, None])
-def test_deprecated_shift(func, shift_x, shift_y):
+@pytest.mark.parametrize("name", ["shift_x", "shift_y"])
+@pytest.mark.parametrize("value", [True, False, None])
+def test_deprecated_shift(func, name, value):
     img = np.ones(10)
     func(img)  # Shouldn't warn
 
     regex = "`shift_x` and `shift_y` are deprecated"
     with pytest.warns(FutureWarning, match=regex) as record:
-        func(img, shift_x=shift_x, shift_y=shift_y)
+        func(img, **{name: value})
         expected_lineno = inspect.currentframe().f_lineno - 1
     # Assert correct stacklevel
     assert record[0].lineno == expected_lineno
