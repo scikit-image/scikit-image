@@ -227,11 +227,17 @@ def erosion(
 
     footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, pad_end=False)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
 
-    if _footprint_is_sequence(footprint):
-        return _iterate_gray_func(ndi.grey_erosion, image, footprint, out, mode, cval)
-
-    ndi.grey_erosion(image, footprint=footprint, output=out, mode=mode, cval=cval)
+    out = _iterate_gray_func(
+        gray_func=ndi.grey_erosion,
+        image=image,
+        footprints=footprint,
+        out=out,
+        mode=mode,
+        cval=cval,
+    )
     return out
 
 
@@ -342,11 +348,17 @@ def dilation(
     # Note that `ndi.grey_dilation` mirrors the footprint and this
     # additional inversion should be removed in skimage2, see gh-6676.
     footprint = mirror_footprint(footprint)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
 
-    if _footprint_is_sequence(footprint):
-        return _iterate_gray_func(ndi.grey_dilation, image, footprint, out, mode, cval)
-
-    ndi.grey_dilation(image, footprint=footprint, output=out, mode=mode, cval=cval)
+    out = _iterate_gray_func(
+        gray_func=ndi.grey_dilation,
+        image=image,
+        footprints=footprint,
+        out=out,
+        mode=mode,
+        cval=cval,
+    )
     return out
 
 
