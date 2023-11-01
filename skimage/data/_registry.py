@@ -179,6 +179,7 @@ registry_urls = {
     "data/protein_transport.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/NPCsingleNucleus.tif",
     "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
+    "data/gray_morph_output.npz": "https://gitlab.com/scikit-image/data/-/raw/806548e112bcf2b708a9a32275d335cb592480fd/Tests_besides_Equalize_Otsu/gray_morph_output.npz",
 }
 
 legacy_registry = {
