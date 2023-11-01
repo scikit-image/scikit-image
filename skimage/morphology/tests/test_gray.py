@@ -24,6 +24,16 @@ def cell3d_image():
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
+gray_morphology_funcs = (
+    gray.erosion,
+    gray.dilation,
+    gray.opening,
+    gray.closing,
+    gray.white_tophat,
+    gray.black_tophat,
+)
+
+
 class TestMorphology:
     # These expected outputs were generated with skimage v0.22.0 + PR #6695
     # using:
@@ -34,14 +44,6 @@ class TestMorphology:
     #   np.savez_compressed('gray_morph_output.npz', **output)
 
     def _build_expected_output(self):
-        funcs = (
-            gray.erosion,
-            gray.dilation,
-            gray.opening,
-            gray.closing,
-            gray.white_tophat,
-            gray.black_tophat,
-        )
         footprints_2D = (
             footprints.square,
             footprints.diamond,
@@ -56,7 +58,7 @@ class TestMorphology:
         output = {}
         for n in range(1, 4):
             for strel in footprints_2D:
-                for func in funcs:
+                for func in gray_morphology_funcs:
                     key = f'{strel.__name__}_{n}_{func.__name__}'
                     output[key] = func(image, strel(n))
 
@@ -88,6 +90,19 @@ class TestMorphology:
 
         result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
         assert np.all(result_ignore <= img)
+
+    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
+    def test_supported_mode(self, func, mode):
+        img = np.ones((10, 10))
+        func(img, mode=mode)
+
+    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("mode", ["", "symmetric", 3, None])
+    def test_unsupported_mode(self, func, mode):
+        img = np.ones((10, 10))
+        with pytest.raises(ValueError, match="unsupported mode"):
+            func(img, mode=mode)
 
 
 class TestEccentricStructuringElements:

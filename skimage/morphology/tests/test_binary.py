@@ -235,6 +235,21 @@ binary_functions = [
 ]
 
 
+@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize("mode", ['max', 'min', 'ignore'])
+def test_supported_mode(func, mode):
+    img = np.ones((10, 10), dtype=bool)
+    func(img, mode=mode)
+
+
+@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize("mode", ["reflect", 3, None])
+def test_unsupported_mode(func, mode):
+    img = np.ones((10, 10))
+    with pytest.raises(ValueError, match="unsupported mode"):
+        func(img, mode=mode)
+
+
 @pytest.mark.parametrize("function", binary_functions)
 def test_default_footprint(function):
     footprint = morphology.diamond(radius=1)

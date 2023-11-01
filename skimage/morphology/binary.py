@@ -99,6 +99,8 @@ def binary_erosion(image, footprint=None, out=None, mode='ignore'):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
+    if mode not in {"max", "min", "ignore"}:
+        raise ValueError(f"unsupported mode, got {mode!r}")
     border_value = False if mode == 'min' else True
 
     footprint = pad_footprint(footprint, pad_end=True)
@@ -177,6 +179,8 @@ def binary_dilation(image, footprint=None, out=None, mode='ignore'):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
+    if mode not in {"max", "min", "ignore"}:
+        raise ValueError(f"unsupported mode, got {mode!r}")
     border_value = True if mode == 'max' else False
 
     footprint = pad_footprint(footprint, pad_end=True)

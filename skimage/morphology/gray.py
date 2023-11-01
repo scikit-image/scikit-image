@@ -109,6 +109,18 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     return mode, cval
 
 
+_SUPPORTED_MODES = {
+    "reflect",
+    "constant",
+    "nearest",
+    "mirror",
+    "wrap",
+    "max",
+    "min",
+    "ignore",
+}
+
+
 @default_footprint
 def erosion(
     image,
@@ -203,6 +215,8 @@ def erosion(
     if out is None:
         out = np.empty_like(image)
 
+    if mode not in _SUPPORTED_MODES:
+        raise ValueError(f"unsupported mode, got {mode!r}")
     if mode == "ignore":
         mode = "max"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
@@ -312,6 +326,8 @@ def dilation(
     if out is None:
         out = np.empty_like(image)
 
+    if mode not in _SUPPORTED_MODES:
+        raise ValueError(f"unsupported mode, got {mode!r}")
     if mode == "ignore":
         mode = "min"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
