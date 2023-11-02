@@ -4,11 +4,12 @@ from scipy.stats import entropy
 from ..util.dtype import dtype_range
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
-__all__ = ['mean_squared_error',
-           'normalized_root_mse',
-           'peak_signal_noise_ratio',
-           'normalized_mutual_information',
-           ]
+__all__ = [
+    'mean_squared_error',
+    'normalized_root_mse',
+    'peak_signal_noise_ratio',
+    'normalized_mutual_information',
+]
 
 
 def _as_floats(image0, image1):
@@ -143,14 +144,17 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
 
     if data_range is None:
         if image_true.dtype != image_test.dtype:
-            warn("Inputs have mismatched dtype.  Setting data_range based on "
-                 "image_true.")
+            warn(
+                "Inputs have mismatched dtype.  Setting data_range based on "
+                "image_true."
+            )
         dmin, dmax = dtype_range[image_true.dtype.type]
         true_min, true_max = np.min(image_true), np.max(image_true)
         if true_max > dmax or true_min < dmin:
             raise ValueError(
                 "image_true has intensity values outside the range expected "
-                "for its data type. Please manually specify the data_range.")
+                "for its data type. Please manually specify the data_range."
+            )
         if true_min >= 0:
             # most common case (255 for uint8, 1 for float)
             data_range = dmax
@@ -160,7 +164,7 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     image_true, image_test = _as_floats(image_true, image_test)
 
     err = mean_squared_error(image_true, image_test)
-    return 10 * np.log10((data_range ** 2) / err)
+    return 10 * np.log10((data_range**2) / err)
 
 
 def _pad_to(arr, shape):
@@ -184,9 +188,11 @@ def _pad_to(arr, shape):
     array([[1, 0, 0]])
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
-        raise ValueError(f'Target shape {shape} cannot be smaller than input'
-                         f'shape {arr.shape} along any axis.')
-    padding = [(0, s-i) for s, i in zip(shape, arr.shape)]
+        raise ValueError(
+            f'Target shape {shape} cannot be smaller than input'
+            f'shape {arr.shape} along any axis.'
+        )
+    padding = [(0, s - i) for s, i in zip(shape, arr.shape)]
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
 
@@ -238,9 +244,11 @@ def normalized_mutual_information(image0, image1, *, bins=100):
            :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     if image0.ndim != image1.ndim:
-        raise ValueError(f'NMI requires images of same number of dimensions. '
-                         f'Got {image0.ndim}D for `image0` and '
-                         f'{image1.ndim}D for `image1`.')
+        raise ValueError(
+            f'NMI requires images of same number of dimensions. '
+            f'Got {image0.ndim}D for `image0` and '
+            f'{image1.ndim}D for `image1`.'
+        )
     if image0.shape != image1.shape:
         max_shape = np.maximum(image0.shape, image1.shape)
         padded0 = _pad_to(image0, max_shape)
@@ -249,10 +257,10 @@ def normalized_mutual_information(image0, image1, *, bins=100):
         padded0, padded1 = image0, image1
 
     hist, bin_edges = np.histogramdd(
-            [np.reshape(padded0, -1), np.reshape(padded1, -1)],
-            bins=bins,
-            density=True,
-            )
+        [np.reshape(padded0, -1), np.reshape(padded1, -1)],
+        bins=bins,
+        density=True,
+    )
 
     H0 = entropy(np.sum(hist, axis=0))
     H1 = entropy(np.sum(hist, axis=1))

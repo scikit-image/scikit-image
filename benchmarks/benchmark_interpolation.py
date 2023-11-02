@@ -5,17 +5,17 @@ from skimage import transform
 
 
 class InterpolationResize:
-
     param_names = ['new_shape', 'order', 'mode', 'dtype', 'anti_aliasing']
     params = [
         ((500, 800), (2000, 4000), (80, 80, 80), (150, 150, 150)),  # new_shape
-        (0, 1, 3, 5),    # order
+        (0, 1, 3, 5),  # order
         ('symmetric',),  # mode
-        (np.float64, ),  # dtype
-        (True,),         # anti_aliasing
+        (np.float64,),  # dtype
+        (True,),  # anti_aliasing
     ]
 
     """Benchmark for filter routines in scikit-image."""
+
     def setup(self, new_shape, order, mode, dtype, anti_aliasing):
         ndim = len(new_shape)
         if ndim == 2:
@@ -25,17 +25,20 @@ class InterpolationResize:
         self.image = image.astype(dtype, copy=False)
 
     def time_resize(self, new_shape, order, mode, dtype, anti_aliasing):
-        transform.resize(self.image, new_shape, order=order, mode=mode,
-                         anti_aliasing=anti_aliasing)
+        transform.resize(
+            self.image, new_shape, order=order, mode=mode, anti_aliasing=anti_aliasing
+        )
 
     def time_rescale(self, new_shape, order, mode, dtype, anti_aliasing):
         scale = tuple(s2 / s1 for s2, s1 in zip(new_shape, self.image.shape))
-        transform.rescale(self.image, scale, order=order, mode=mode,
-                          anti_aliasing=anti_aliasing)
+        transform.rescale(
+            self.image, scale, order=order, mode=mode, anti_aliasing=anti_aliasing
+        )
 
     def peakmem_resize(self, new_shape, order, mode, dtype, anti_aliasing):
-        transform.resize(self.image, new_shape, order=order, mode=mode,
-                         anti_aliasing=anti_aliasing)
+        transform.resize(
+            self.image, new_shape, order=order, mode=mode, anti_aliasing=anti_aliasing
+        )
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.

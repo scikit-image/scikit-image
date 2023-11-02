@@ -11,9 +11,10 @@ _nonstandard_colormap = 'viridis'
 _diverging_colormap = 'RdBu'
 
 
-ImageProperties = namedtuple('ImageProperties',
-                             ['signed', 'out_of_range_float',
-                              'low_data_range', 'unsupported_dtype'])
+ImageProperties = namedtuple(
+    'ImageProperties',
+    ['signed', 'out_of_range_float', 'low_data_range', 'unsupported_dtype'],
+)
 
 
 def _get_image_properties(image):
@@ -47,14 +48,15 @@ def _get_image_properties(image):
         lo, hi = immin, immax
 
     signed = immin < 0
-    out_of_range_float = (np.issubdtype(image.dtype, np.floating) and
-                          (immin < lo or immax > hi))
-    low_data_range = (immin != immax and
-                      is_low_contrast(image))
+    out_of_range_float = np.issubdtype(image.dtype, np.floating) and (
+        immin < lo or immax > hi
+    )
+    low_data_range = immin != immax and is_low_contrast(image)
     unsupported_dtype = image.dtype not in dtypes._supported_types
 
-    return ImageProperties(signed, out_of_range_float,
-                           low_data_range, unsupported_dtype)
+    return ImageProperties(
+        signed, out_of_range_float, low_data_range, unsupported_dtype
+    )
 
 
 def _raise_warnings(image_properties):
@@ -67,14 +69,21 @@ def _raise_warnings(image_properties):
     """
     ip = image_properties
     if ip.unsupported_dtype:
-        warn("Non-standard image type; displaying image with "
-             "stretched contrast.", stacklevel=3)
+        warn(
+            "Non-standard image type; displaying image with " "stretched contrast.",
+            stacklevel=3,
+        )
     if ip.low_data_range:
-        warn("Low image data range; displaying image with "
-             "stretched contrast.", stacklevel=3)
+        warn(
+            "Low image data range; displaying image with " "stretched contrast.",
+            stacklevel=3,
+        )
     if ip.out_of_range_float:
-        warn("Float image out of standard range; displaying "
-             "image with stretched contrast.", stacklevel=3)
+        warn(
+            "Float image out of standard range; displaying "
+            "image with stretched contrast.",
+            stacklevel=3,
+        )
 
 
 def _get_display_range(image):
@@ -180,7 +189,7 @@ def imshow_collection(ic, *args, **kwargs):
     # The target is to plot images on a grid with aspect ratio 4:3
     num_images = len(ic)
     # Two pairs of `nrows, ncols` are possible
-    k = (num_images * 12)**0.5
+    k = (num_images * 12) ** 0.5
     r1 = max(1, floor(k / 4))
     r2 = ceil(k / 4)
     c1 = ceil(num_images / r1)
@@ -201,9 +210,11 @@ def imshow_collection(ic, *args, **kwargs):
 
 def imread(*args, **kwargs):
     import matplotlib.image
+
     return matplotlib.image.imread(*args, **kwargs)
 
 
 def _app_show():
     from matplotlib.pyplot import show
+
     show()

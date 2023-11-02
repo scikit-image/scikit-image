@@ -548,7 +548,7 @@ It contains the following 186 merged pull requests by 67 committers:
 - Deprecate `visualise` in favor of `visualize` in `skimage.feature.hog` (#2705)
 - Remove alpha channel when saving to jpg format (#2706)
 - Tweak in-place installation instructions (#2712)
-- Add `skimage.lookfor` function (#2713)
+- Add ``skimage.lookfor`` function (#2713)
 - Speedup image dtype conversion by switching to `asarray` (#2715)
 - MAINT reorganizing CI-related scripts (#2718)
 - added rect function to draw module (#2719)

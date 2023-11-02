@@ -9,9 +9,8 @@ import base64
 
 
 def create_luts(fname):
-
     # Get the lines in the C header file
-    text = open(fname,'rb').read().decode('utf-8')
+    text = open(fname, 'rb').read().decode('utf-8')
     lines1 = [line.rstrip() for line in text.splitlines()]
 
     # Init lines for Python
@@ -29,7 +28,7 @@ def create_luts(fname):
     ii = 0
     for casenr in range(99):
         # Get table
-        more_lines, ii = get_table(lines1, 'static const char tiling', ii+1)
+        more_lines, ii = get_table(lines1, 'static const char tiling', ii + 1)
         if ii < 0:
             break
         else:
@@ -39,7 +38,7 @@ def create_luts(fname):
     ii = 0
     for casenr in range(99):
         # Get table
-        more_lines, ii = get_table(lines1, 'static const char test', ii+1)
+        more_lines, ii = get_table(lines1, 'static const char test', ii + 1)
         if ii < 0:
             break
         else:
@@ -49,7 +48,7 @@ def create_luts(fname):
     ii = 0
     for casenr in range(99):
         # Get table
-        more_lines, ii = get_table(lines1, 'static const char subconfig', ii+1)
+        more_lines, ii = get_table(lines1, 'static const char subconfig', ii + 1)
         if ii < 0:
             break
         else:
@@ -59,7 +58,6 @@ def create_luts(fname):
 
 
 def get_table(lines1, needle, i):
-
     # Try to find the start
     ii = search_line(lines1, needle, i)
     if ii < 0:
@@ -71,21 +69,21 @@ def get_table(lines1, needle, i):
     # Get size and name
     front, dummu, back = lines1[ii].partition('[')
     name = front.split(' ')[-1].upper()
-    size = int(back.split(']',1)[0])
+    size = int(back.split(']', 1)[0])
     cdes = lines1[ii].rstrip(' {=')
 
     # Write name
     lines2.append(f'{name} = np.array([')
 
     # Get elements
-    for i in range(ii+1, ii+1+9999999):
+    for i in range(ii + 1, ii + 1 + 9999999):
         line1 = lines1[i]
         front, dummy, back = line1.partition('*/')
         if not back:
             front, back = back, front
         line2 = '    '
-        line2 += back.strip().replace('{', '[').replace('}',']').replace(';','')
-        line2 += front.replace('/*','  #').rstrip()
+        line2 += back.strip().replace('{', '[').replace('}', ']').replace(';', '')
+        line2 += front.replace('/*', '  #').rstrip()
         lines2.append(line2)
         if line1.endswith('};'):
             break
@@ -93,11 +91,11 @@ def get_table(lines1, needle, i):
     # Close and return
     lines2.append("    , 'int8')")
     lines2.append('')
-    #return lines2, ii+size
+    # return lines2, ii+size
 
     # Execute code and get array as base64 text
     code = '\n'.join(lines2)
-    code = code.split('=',1)[1]
+    code = code.split('=', 1)[1]
     array = eval(code)
     array64 = base64.encodebytes(array.tostring()).decode('utf-8')
     # Reverse: bytes = base64.decodebytes(text.encode('utf-8'))
@@ -105,10 +103,10 @@ def get_table(lines1, needle, i):
 
     # Build actual lines
     lines2 = []
-    lines2.append( '#' + cdes)
+    lines2.append('#' + cdes)
     lines2.append(text)
     lines2.append('')
-    return lines2, ii+size
+    return lines2, ii + size
 
 
 def search_line(lines, refline, start=0):
@@ -120,6 +118,7 @@ def search_line(lines, refline, start=0):
 
 if __name__ == '__main__':
     import os
+
     fname = os.path.join(os.getcwd(), 'LookUpTable.h')
 
     with open(os.path.join(os.getcwd(), 'mcluts.py'), 'w') as f:

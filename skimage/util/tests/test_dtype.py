@@ -1,7 +1,13 @@
 import numpy as np
 import itertools
-from skimage import (img_as_float, img_as_float32, img_as_float64,
-                     img_as_int, img_as_uint, img_as_ubyte)
+from skimage import (
+    img_as_float,
+    img_as_float32,
+    img_as_float64,
+    img_as_int,
+    img_as_uint,
+    img_as_ubyte,
+)
 from skimage.util.dtype import _convert
 
 from skimage._shared._warnings import expected_warnings
@@ -9,16 +15,17 @@ from skimage._shared import testing
 from skimage._shared.testing import assert_equal, parametrize
 
 
-dtype_range = {np.uint8: (0, 255),
-               np.uint16: (0, 65535),
-               np.int8: (-128, 127),
-               np.int16: (-32768, 32767),
-               np.float32: (-1.0, 1.0),
-               np.float64: (-1.0, 1.0)}
+dtype_range = {
+    np.uint8: (0, 255),
+    np.uint16: (0, 65535),
+    np.int8: (-128, 127),
+    np.int16: (-32768, 32767),
+    np.float32: (-1.0, 1.0),
+    np.float64: (-1.0, 1.0),
+}
 
 
-img_funcs = (img_as_int, img_as_float64, img_as_float32,
-             img_as_uint, img_as_ubyte)
+img_funcs = (img_as_int, img_as_float64, img_as_float32, img_as_uint, img_as_ubyte)
 dtypes_for_img_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
 img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
 
@@ -29,8 +36,7 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@parametrize("dtype, f_and_dt",
-             itertools.product(dtype_range, img_funcs_and_types))
+@parametrize("dtype, f_and_dt", itertools.product(dtype_range, img_funcs_and_types))
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
@@ -45,21 +51,25 @@ def test_range(dtype, f_and_dt):
         omin = 0
         imin = 0
 
-    _verify_range(f"From {np.dtype(dtype)} to {np.dtype(dt)}",
-                  y, omin, omax, np.dtype(dt))
+    _verify_range(
+        f"From {np.dtype(dtype)} to {np.dtype(dt)}", y, omin, omax, np.dtype(dt)
+    )
 
 
 # Add non-standard data types that are allowed by the `_convert` function.
 dtype_range_extra = dtype_range.copy()
-dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
-                          np.uint32: (0, 4294967295)})
+dtype_range_extra.update(
+    {np.int32: (-2147483648, 2147483647), np.uint32: (0, 4294967295)}
+)
 
-dtype_pairs = [(np.uint8, np.uint32),
-               (np.int8, np.uint32),
-               (np.int8, np.int32),
-               (np.int32, np.int8),
-               (np.float64, np.float32),
-               (np.int32, np.float32)]
+dtype_pairs = [
+    (np.uint8, np.uint32),
+    (np.int8, np.uint32),
+    (np.int8, np.int32),
+    (np.int32, np.int8),
+    (np.float64, np.float32),
+    (np.int32, np.float32),
+]
 
 
 @parametrize("dtype_in, dt", dtype_pairs)
@@ -72,8 +82,9 @@ def test_range_extra_dtypes(dtype_in, dt):
     y = _convert(x, dt)
 
     omin, omax = dtype_range_extra[dt]
-    _verify_range(f"From {np.dtype(dtype_in)} to {np.dtype(dt)}",
-                  y, omin, omax, np.dtype(dt))
+    _verify_range(
+        f"From {np.dtype(dtype_in)} to {np.dtype(dt)}", y, omin, omax, np.dtype(dt)
+    )
 
 
 def test_downcast():
@@ -94,7 +105,7 @@ def test_float_out_of_range():
 
 
 def test_float_float_all_ranges():
-    arr_in = np.array([[-10., 10., 1e20]], dtype=np.float32)
+    arr_in = np.array([[-10.0, 10.0, 1e20]], dtype=np.float32)
     np.testing.assert_array_equal(img_as_float(arr_in), arr_in)
 
 
@@ -112,10 +123,12 @@ def test_bool():
     img8 = np.zeros((10, 10), np.bool_)
     img_[1, 1] = True
     img8[1, 1] = True
-    for (func, dt) in [(img_as_int, np.int16),
-                       (img_as_float, np.float64),
-                       (img_as_uint, np.uint16),
-                       (img_as_ubyte, np.ubyte)]:
+    for func, dt in [
+        (img_as_int, np.int16),
+        (img_as_float, np.float64),
+        (img_as_uint, np.uint16),
+        (img_as_ubyte, np.ubyte),
+    ]:
         converted_ = func(img_)
         assert np.sum(converted_) == dtype_range[dt][1]
         converted8 = func(img8)
@@ -136,7 +149,7 @@ def test_clobber():
 
 
 def test_signed_scaling_float32():
-    x = np.array([-128,  127], dtype=np.int8)
+    x = np.array([-128, 127], dtype=np.int8)
     y = img_as_float32(x)
     assert_equal(y.max(), 1)
 
@@ -147,8 +160,16 @@ def test_float32_passthrough():
     assert_equal(y.dtype, x.dtype)
 
 
-float_dtype_list = [float, float, np.float64, np.single, np.float32,
-                    np.float64, 'float32', 'float64']
+float_dtype_list = [
+    float,
+    float,
+    np.float64,
+    np.single,
+    np.float32,
+    np.float64,
+    'float32',
+    'float64',
+]
 
 
 def test_float_conversion_dtype():
@@ -156,8 +177,9 @@ def test_float_conversion_dtype():
     x = np.array([-1, 1])
 
     # Test all combinations of dtypes conversions
-    dtype_combin = np.array(np.meshgrid(float_dtype_list,
-                                        float_dtype_list)).T.reshape(-1, 2)
+    dtype_combin = np.array(np.meshgrid(float_dtype_list, float_dtype_list)).T.reshape(
+        -1, 2
+    )
 
     for dtype_in, dtype_out in dtype_combin:
         x = x.astype(dtype_in)
@@ -168,11 +190,13 @@ def test_float_conversion_dtype():
 def test_float_conversion_dtype_warns():
     """Test that convert issues a warning when called"""
     from skimage.util.dtype import convert
+
     x = np.array([-1, 1])
 
     # Test all combinations of dtypes conversions
-    dtype_combin = np.array(np.meshgrid(float_dtype_list,
-                                        float_dtype_list)).T.reshape(-1, 2)
+    dtype_combin = np.array(np.meshgrid(float_dtype_list, float_dtype_list)).T.reshape(
+        -1, 2
+    )
 
     for dtype_in, dtype_out in dtype_combin:
         x = x.astype(dtype_in)

@@ -92,9 +92,9 @@ def _warp_fast(np_floats[:, :] image, np_floats[:, :] H, output_shape=None,
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray, shape (M, N)
         Input image.
-    H : array of shape ``(3, 3)``
+    H : array, shape (3, 3)
         Transformation matrix H that defines the homography.
     output_shape : tuple (rows, cols), optional
         Shape of the output image generated (default None).

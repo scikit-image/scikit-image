@@ -1,2 +1,1 @@
-pygithub
-tqdm
+changelist==0.4

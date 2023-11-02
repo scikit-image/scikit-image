@@ -19,7 +19,7 @@ def test_empty_input():
 
 
 def test_float16():
-    image = np.array([9., 0.1, 42], dtype=np.float16)
+    image = np.array([9.0, 0.1, 42], dtype=np.float16)
     with pytest.raises(TypeError, match="dtype of `image` is float16"):
         flood_fill(image, 0, 1)
 
@@ -36,58 +36,79 @@ def test_overrange_tolerance_int():
 def test_overrange_tolerance_float():
     max_value = np.finfo(np.float32).max
 
-    image = np.random.uniform(size=(64, 64), low=-1., high=1.).astype(
-        np.float32)
+    image = np.random.uniform(size=(64, 64), low=-1.0, high=1.0).astype(np.float32)
     image *= max_value
 
     expected = np.ones_like(image)
-    output = flood_fill(image, (0, 1), 1., tolerance=max_value * 10)
+    output = flood_fill(image, (0, 1), 1.0, tolerance=max_value * 10)
 
     np.testing.assert_equal(output, expected)
 
 
 def test_inplace_int():
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]])
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [1, 0, 0, 0, 0, 0, 3],
+            [0, 1, 1, 1, 3, 3, 4],
+        ]
+    )
 
     flood_fill(image, (0, 0), 5, in_place=True)
 
-    expected = np.array([[5, 5, 5, 5, 5, 5, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [5, 1, 1, 5, 2, 2, 5],
-                         [1, 5, 5, 5, 5, 5, 3],
-                         [5, 1, 1, 1, 3, 3, 4]])
+    expected = np.array(
+        [
+            [5, 5, 5, 5, 5, 5, 5],
+            [5, 1, 1, 5, 2, 2, 5],
+            [5, 1, 1, 5, 2, 2, 5],
+            [1, 5, 5, 5, 5, 5, 3],
+            [5, 1, 1, 1, 3, 3, 4],
+        ]
+    )
 
     np.testing.assert_array_equal(image, expected)
 
 
 def test_inplace_float():
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [1, 0, 0, 0, 0, 0, 3],
+            [0, 1, 1, 1, 3, 3, 4],
+        ],
+        dtype=np.float32,
+    )
 
     flood_fill(image, (0, 0), 5, in_place=True)
 
-    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [1., 5., 5., 5., 5., 5., 3.],
-                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
+    expected = np.array(
+        [
+            [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0],
+            [5.0, 1.0, 1.0, 5.0, 2.0, 2.0, 5.0],
+            [5.0, 1.0, 1.0, 5.0, 2.0, 2.0, 5.0],
+            [1.0, 5.0, 5.0, 5.0, 5.0, 5.0, 3.0],
+            [5.0, 1.0, 1.0, 1.0, 3.0, 3.0, 4.0],
+        ],
+        dtype=np.float32,
+    )
 
     np.testing.assert_allclose(image, expected)
 
 
 def test_inplace_noncontiguous():
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]])
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [1, 0, 0, 0, 0, 0, 3],
+            [0, 1, 1, 1, 3, 3, 4],
+        ]
+    )
 
     # Transpose is noncontiguous
     image2 = image[::2, ::2]
@@ -95,18 +116,20 @@ def test_inplace_noncontiguous():
     flood_fill(image2, (0, 0), 5, in_place=True)
 
     # The inplace modified result
-    expected2 = np.array([[5, 5, 5, 5],
-                          [5, 1, 2, 5],
-                          [5, 1, 3, 4]])
+    expected2 = np.array([[5, 5, 5, 5], [5, 1, 2, 5], [5, 1, 3, 4]])
 
     np.testing.assert_allclose(image2, expected2)
 
     # Projected back through the view, `image` also modified
-    expected = np.array([[5, 0, 5, 0, 5, 0, 5],
-                         [0, 1, 1, 0, 2, 2, 0],
-                         [5, 1, 1, 0, 2, 2, 5],
-                         [1, 0, 0, 0, 0, 0, 3],
-                         [5, 1, 1, 1, 3, 3, 4]])
+    expected = np.array(
+        [
+            [5, 0, 5, 0, 5, 0, 5],
+            [0, 1, 1, 0, 2, 2, 0],
+            [5, 1, 1, 0, 2, 2, 5],
+            [1, 0, 0, 0, 0, 0, 3],
+            [5, 1, 1, 1, 3, 3, 4],
+        ]
+    )
 
     np.testing.assert_allclose(image, expected)
 
@@ -128,11 +151,15 @@ def test_wraparound():
     test = np.zeros((5, 7), dtype=np.float64)
     test[:, 3] = 100
 
-    expected = np.array([[-1., -1., -1., 100., 0., 0., 0.],
-                         [-1., -1., -1., 100., 0., 0., 0.],
-                         [-1., -1., -1., 100., 0., 0., 0.],
-                         [-1., -1., -1., 100., 0., 0., 0.],
-                         [-1., -1., -1., 100., 0., 0., 0.]])
+    expected = np.array(
+        [
+            [-1.0, -1.0, -1.0, 100.0, 0.0, 0.0, 0.0],
+            [-1.0, -1.0, -1.0, 100.0, 0.0, 0.0, 0.0],
+            [-1.0, -1.0, -1.0, 100.0, 0.0, 0.0, 0.0],
+            [-1.0, -1.0, -1.0, 100.0, 0.0, 0.0, 0.0],
+            [-1.0, -1.0, -1.0, 100.0, 0.0, 0.0, 0.0],
+        ]
+    )
 
     np.testing.assert_equal(flood_fill(test, (0, 0), -1), expected)
 
@@ -142,11 +169,15 @@ def test_neighbors():
     test = np.zeros((5, 7), dtype=np.float64)
     test[:, 3] = 100
 
-    expected = np.array([[0, 0, 0, 255, 0, 0, 0],
-                         [0, 0, 0, 255, 0, 0, 0],
-                         [0, 0, 0, 255, 0, 0, 0],
-                         [0, 0, 0, 255, 0, 0, 0],
-                         [0, 0, 0, 255, 0, 0, 0]])
+    expected = np.array(
+        [
+            [0, 0, 0, 255, 0, 0, 0],
+            [0, 0, 0, 255, 0, 0, 0],
+            [0, 0, 0, 255, 0, 0, 0],
+            [0, 0, 0, 255, 0, 0, 0],
+            [0, 0, 0, 255, 0, 0, 0],
+        ]
+    )
     output = flood_fill(test, (0, 3), 255)
 
     np.testing.assert_equal(output, expected)
@@ -161,33 +192,41 @@ def test_neighbors():
 
 def test_footprint():
     # Basic tests for nonstandard footprints
-    footprint = np.array([[0, 1, 1],
-                          [0, 1, 1],
-                          [0, 0, 0]])  # Cannot grow left or down
+    footprint = np.array([[0, 1, 1], [0, 1, 1], [0, 0, 0]])  # Cannot grow left or down
 
-    output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (3, 1), 255,
-                        footprint=footprint)
+    output = flood_fill(
+        np.zeros((5, 6), dtype=np.uint8), (3, 1), 255, footprint=footprint
+    )
 
-    expected = np.array([[0, 255, 255, 255, 255, 255],
-                         [0, 255, 255, 255, 255, 255],
-                         [0, 255, 255, 255, 255, 255],
-                         [0, 255, 255, 255, 255, 255],
-                         [0,   0,   0,   0,   0,   0]], dtype=np.uint8)
+    expected = np.array(
+        [
+            [0, 255, 255, 255, 255, 255],
+            [0, 255, 255, 255, 255, 255],
+            [0, 255, 255, 255, 255, 255],
+            [0, 255, 255, 255, 255, 255],
+            [0, 0, 0, 0, 0, 0],
+        ],
+        dtype=np.uint8,
+    )
 
     np.testing.assert_equal(output, expected)
 
-    footprint = np.array([[0, 0, 0],
-                          [1, 1, 0],
-                          [1, 1, 0]])  # Cannot grow right or up
+    footprint = np.array([[0, 0, 0], [1, 1, 0], [1, 1, 0]])  # Cannot grow right or up
 
-    output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (1, 4), 255,
-                        footprint=footprint)
+    output = flood_fill(
+        np.zeros((5, 6), dtype=np.uint8), (1, 4), 255, footprint=footprint
+    )
 
-    expected = np.array([[  0,   0,   0,   0,   0,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0],
-                         [255, 255, 255, 255, 255,   0]], dtype=np.uint8)
+    expected = np.array(
+        [
+            [0, 0, 0, 0, 0, 0],
+            [255, 255, 255, 255, 255, 0],
+            [255, 255, 255, 255, 255, 0],
+            [255, 255, 255, 255, 255, 0],
+            [255, 255, 255, 255, 255, 0],
+        ],
+        dtype=np.uint8,
+    )
 
     np.testing.assert_equal(output, expected)
 
@@ -205,21 +244,28 @@ def test_basic_nd():
 
         # Test that the entire array is as expected
         np.testing.assert_equal(
-            filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant'))
+            filled, np.pad(np.ones((3,) * dimension) * 2, 1, 'constant')
+        )
 
 
 @pytest.mark.parametrize("tolerance", [None, 0])
 def test_f_order(tolerance):
-    image = np.array([
-        [0, 0, 0, 0],
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-    ], order="F")
-    expected = np.array([
-        [0, 0, 0, 0],
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-    ], dtype=bool)
+    image = np.array(
+        [
+            [0, 0, 0, 0],
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+        ],
+        order="F",
+    )
+    expected = np.array(
+        [
+            [0, 0, 0, 0],
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+        ],
+        dtype=bool,
+    )
 
     mask = flood(image, seed_point=(1, 0), tolerance=tolerance)
     np.testing.assert_array_equal(expected, mask)
@@ -229,17 +275,27 @@ def test_f_order(tolerance):
 
 
 def test_negative_indexing_seed_point():
-    image = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [0, 1, 1, 0, 2, 2, 0],
-                      [1, 0, 0, 0, 0, 0, 3],
-                      [0, 1, 1, 1, 3, 3, 4]], dtype=np.float32)
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [0, 1, 1, 0, 2, 2, 0],
+            [1, 0, 0, 0, 0, 0, 3],
+            [0, 1, 1, 1, 3, 3, 4],
+        ],
+        dtype=np.float32,
+    )
 
-    expected = np.array([[5., 5., 5., 5., 5., 5., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [5., 1., 1., 5., 2., 2., 5.],
-                         [1., 5., 5., 5., 5., 5., 3.],
-                         [5., 1., 1., 1., 3., 3., 4.]], dtype=np.float32)
+    expected = np.array(
+        [
+            [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0],
+            [5.0, 1.0, 1.0, 5.0, 2.0, 2.0, 5.0],
+            [5.0, 1.0, 1.0, 5.0, 2.0, 2.0, 5.0],
+            [1.0, 5.0, 5.0, 5.0, 5.0, 5.0, 3.0],
+            [5.0, 1.0, 1.0, 1.0, 3.0, 3.0, 4.0],
+        ],
+        dtype=np.float32,
+    )
 
     image = flood_fill(image, (0, -1), 5)
 
@@ -248,39 +304,57 @@ def test_negative_indexing_seed_point():
 
 def test_non_adjacent_footprint():
     # Basic tests for non-adjacent footprints
-    footprint = np.array([[1, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0],
-                          [0, 0, 1, 0, 0],
-                          [0, 0, 0, 0, 0],
-                          [1, 0, 0, 0, 1]])
+    footprint = np.array(
+        [
+            [1, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 1],
+        ]
+    )
 
-    output = flood_fill(np.zeros((5, 6), dtype=np.uint8), (2, 3), 255,
-                        footprint=footprint)
+    output = flood_fill(
+        np.zeros((5, 6), dtype=np.uint8), (2, 3), 255, footprint=footprint
+    )
 
-    expected = np.array([[0, 255,   0,   0,   0, 255],
-                         [0,   0,   0,   0,   0,   0],
-                         [0,   0,   0, 255,   0,   0],
-                         [0,   0,   0,   0,   0,   0],
-                         [0, 255,   0,   0,   0, 255]], dtype=np.uint8)
+    expected = np.array(
+        [
+            [0, 255, 0, 0, 0, 255],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 255, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 255, 0, 0, 0, 255],
+        ],
+        dtype=np.uint8,
+    )
 
     np.testing.assert_equal(output, expected)
 
-    footprint = np.array([[1, 1, 1, 1, 1],
-                          [1, 1, 1, 1, 1],
-                          [1, 1, 1, 1, 1],
-                          [1, 1, 1, 1, 1],
-                          [1, 1, 1, 1, 1]])
+    footprint = np.array(
+        [
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1],
+        ]
+    )
 
     image = np.zeros((5, 10), dtype=np.uint8)
     image[:, (3, 7, 8)] = 100
 
     output = flood_fill(image, (0, 0), 255, footprint=footprint)
 
-    expected = np.array([[255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
-                         [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
-                         [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
-                         [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
-                         [255, 255, 255, 100, 255, 255, 255, 100, 100, 0]],
-                        dtype=np.uint8)
+    expected = np.array(
+        [
+            [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
+            [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
+            [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
+            [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
+            [255, 255, 255, 100, 255, 255, 255, 100, 100, 0],
+        ],
+        dtype=np.uint8,
+    )
 
     np.testing.assert_equal(output, expected)

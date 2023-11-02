@@ -2,8 +2,7 @@ import math
 
 import numpy as np
 
-from .draw import (polygon as draw_polygon, disk as draw_disk,
-                   ellipse as draw_ellipse)
+from .draw import polygon as draw_polygon, disk as draw_disk, ellipse as draw_ellipse
 from .._shared.utils import deprecate_kwarg, warn
 
 
@@ -47,19 +46,21 @@ def _generate_rectangle_mask(point, image, shape, random):
     # Pick random widths and heights.
     r = shape[0] + random.integers(max(1, available_height)) - 1
     c = shape[0] + random.integers(max(1, available_width)) - 1
-    rectangle = draw_polygon([
-        point[0],
-        point[0] + r,
-        point[0] + r,
-        point[0],
-    ], [
-        point[1],
-        point[1],
-        point[1] + c,
-        point[1] + c,
-    ])
-    label = ('rectangle', ((point[0], point[0] + r + 1),
-                           (point[1], point[1] + c + 1)))
+    rectangle = draw_polygon(
+        [
+            point[0],
+            point[0] + r,
+            point[0] + r,
+            point[0],
+        ],
+        [
+            point[1],
+            point[1],
+            point[1] + c,
+            point[1] + c,
+        ],
+    )
+    label = ('rectangle', ((point[0], point[0] + r + 1), (point[1], point[1] + c + 1)))
 
     return rectangle, label
 
@@ -103,8 +104,7 @@ def _generate_circle_mask(point, image, shape, random):
     right = image[1] - point[1]
     top = point[0]
     bottom = image[0] - point[0]
-    available_radius = min(left, right, top,
-                           bottom, max_radius) - min_radius
+    available_radius = min(left, right, top, bottom, max_radius) - min_radius
     if available_radius < 0:
         raise ArithmeticError('cannot fit shape to image')
     radius = int(min_radius + random.integers(max(1, available_radius)))
@@ -116,8 +116,13 @@ def _generate_circle_mask(point, image, shape, random):
     # https://github.com/scikit-image/scikit-image/pull/4428
     disk = draw_disk((point[0], point[1]), radius)
     # Until a deprecation path is decided, always return `'circle'`
-    label = ('circle', ((point[0] - radius + 1, point[0] + radius),
-                        (point[1] - radius + 1, point[1] + radius)))
+    label = (
+        'circle',
+        (
+            (point[0] - radius + 1, point[0] + radius),
+            (point[1] - radius + 1, point[1] + radius),
+        ),
+    )
 
     return disk, label
 
@@ -157,21 +162,25 @@ def _generate_triangle_mask(point, image, shape, random):
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('dimension must be > 1 for triangles')
-    available_side = min(image[1] - point[1], point[0],
-                         shape[1]) - shape[0]
+    available_side = min(image[1] - point[1], point[0], shape[1]) - shape[0]
     side = shape[0] + random.integers(max(1, available_side)) - 1
     triangle_height = int(np.ceil(np.sqrt(3 / 4.0) * side))
-    triangle = draw_polygon([
-        point[0],
-        point[0] - triangle_height,
-        point[0],
-    ], [
-        point[1],
-        point[1] + side // 2,
-        point[1] + side,
-    ])
-    label = ('triangle', ((point[0] - triangle_height, point[0] + 1),
-                          (point[1], point[1] + side + 1)))
+    triangle = draw_polygon(
+        [
+            point[0],
+            point[0] - triangle_height,
+            point[0],
+        ],
+        [
+            point[1],
+            point[1] + side // 2,
+            point[1] + side,
+        ],
+    )
+    label = (
+        'triangle',
+        ((point[0] - triangle_height, point[0] + 1), (point[1], point[1] + side + 1)),
+    )
 
     return triangle, label
 
@@ -250,7 +259,8 @@ SHAPE_GENERATORS = dict(
     rectangle=_generate_rectangle_mask,
     circle=_generate_circle_mask,
     triangle=_generate_triangle_mask,
-    ellipse=_generate_ellipse_mask)
+    ellipse=_generate_ellipse_mask,
+)
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
@@ -284,29 +294,31 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
 
     """
     if num_channels == 1:
-        intensity_range = (intensity_range, )
+        intensity_range = (intensity_range,)
     elif len(intensity_range) == 1:
         intensity_range = intensity_range * num_channels
-    colors = [random.integers(r[0], r[1] + 1, size=num_colors)
-              for r in intensity_range]
+    colors = [random.integers(r[0], r[1] + 1, size=num_colors) for r in intensity_range]
     return np.transpose(colors)
 
 
-@deprecate_kwarg({'random_seed': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
-def random_shapes(image_shape,
-                  max_shapes,
-                  min_shapes=1,
-                  min_size=2,
-                  max_size=None,
-                  num_channels=3,
-                  shape=None,
-                  intensity_range=None,
-                  allow_overlap=False,
-                  num_trials=100,
-                  rng=None,
-                  *,
-                  channel_axis=-1):
+@deprecate_kwarg(
+    {'random_seed': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
+def random_shapes(
+    image_shape,
+    max_shapes,
+    min_shapes=1,
+    min_size=2,
+    max_size=None,
+    num_channels=3,
+    shape=None,
+    intensity_range=None,
+    allow_overlap=False,
+    num_trials=100,
+    rng=None,
+    *,
+    channel_axis=-1,
+):
     """Generate an image with random shapes, labeled with bounding boxes.
 
     The image is populated with random shapes with random sizes, random
@@ -395,9 +407,9 @@ def random_shapes(image_shape,
         num_channels = 1
 
     if intensity_range is None:
-        intensity_range = (0, 254) if num_channels == 1 else ((0, 254), )
+        intensity_range = (0, 254) if num_channels == 1 else ((0, 254),)
     else:
-        tmp = (intensity_range, ) if num_channels == 1 else intensity_range
+        tmp = (intensity_range,) if num_channels == 1 else intensity_range
         for intensity_pair in tmp:
             for intensity in intensity_pair:
                 if not (0 <= intensity <= 255):
@@ -437,8 +449,10 @@ def random_shapes(image_shape,
                 labels.append(label)
                 break
         else:
-            warn('Could not fit any shapes to image, '
-                 'consider reducing the minimum dimension')
+            warn(
+                'Could not fit any shapes to image, '
+                'consider reducing the minimum dimension'
+            )
 
     if channel_axis is None:
         image = np.squeeze(image, axis=2)

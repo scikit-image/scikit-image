@@ -23,7 +23,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
 
     Parameters
     ----------
-    image : (width, height, channels) ndarray
+    image : (M, N, C) ndarray
         Input image.
     kernel_size : float
         Width of Gaussian kernel used in smoothing the
@@ -42,7 +42,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
 
     Returns
     -------
-    segment_mask : (width, height) ndarray
+    segment_mask : (M, N) ndarray
         Integer mask indicating segment labels.
     """
 
