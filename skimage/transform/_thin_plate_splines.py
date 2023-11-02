@@ -5,10 +5,10 @@ import scipy as sp
 class TpsTransform:
     """Thin plate splines transformation.
 
-    Apply thin plates spline transformation between a set of control points.
+    Apply thin-plate spline transformation between a set of control points.
     It interpolates a surface that passes through each control point.
     Control points are position constraints on a bending surface. The ideal
-    surface is one that bends the least.
+    surface is the one that bends least.
 
     Attributes
     ----------
@@ -32,7 +32,7 @@ class TpsTransform:
     >>> tps.estimate(src, dst)
     True
 
-    Apply the transformation
+    Apply the transformation:
 
     >>> trans_coord = tps(t_coords)
     >>> xx_trans = trans_coord[:, 0]
@@ -86,7 +86,7 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate how close is the deformed source to the target.
+        """Estimate how close the deformed source is to the target.
 
         Number of source and destination points must match.
 
