@@ -26,8 +26,9 @@ image = data.chelsea()
 
 matched = match_histograms(image, reference, channel_axis=-1)
 
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3),
-                                    sharex=True, sharey=True)
+fig, (ax1, ax2, ax3) = plt.subplots(
+    nrows=1, ncols=3, figsize=(8, 3), sharex=True, sharey=True
+)
 for aa in (ax1, ax2, ax3):
     aa.set_axis_off()
 

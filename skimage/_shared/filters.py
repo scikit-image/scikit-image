@@ -12,21 +12,29 @@ from scipy import ndimage as ndi
 from .._shared.utils import _supported_float_type, convert_to_float
 
 
-def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
-             preserve_range=False, truncate=4.0, *,
-             channel_axis=None):
+def gaussian(
+    image,
+    sigma=1,
+    output=None,
+    mode='nearest',
+    cval=0,
+    preserve_range=False,
+    truncate=4.0,
+    *,
+    channel_axis=None,
+):
     """Multi-dimensional Gaussian filter.
 
     Parameters
     ----------
-    image : array-like
+    image : ndarray
         Input image (grayscale or color) to filter.
     sigma : scalar or sequence of scalars, optional
         Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    output : array, optional
+    output : ndarray, optional
         The ``output`` parameter passes an array in which to store the
         filter output.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
@@ -71,7 +79,7 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
 
     Notes
     -----
-    This function is a wrapper around :func:`scipy.ndi.gaussian_filter`.
+    This function is a wrapper around :func:`scipy.ndimage.gaussian_filter`.
 
     Integer arrays are converted to float.
 
@@ -128,5 +136,6 @@ def gaussian(image, sigma=1, output=None, mode='nearest', cval=0,
     image = image.astype(float_dtype, copy=False)
     if (output is not None) and (not np.issubdtype(output.dtype, np.floating)):
         raise ValueError("Provided output data type is not float")
-    return ndi.gaussian_filter(image, sigma, output=output,
-                               mode=mode, cval=cval, truncate=truncate)
+    return ndi.gaussian_filter(
+        image, sigma, output=output, mode=mode, cval=cval, truncate=truncate
+    )

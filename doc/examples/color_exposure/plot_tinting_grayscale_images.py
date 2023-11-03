@@ -28,8 +28,7 @@ image = color.gray2rgb(grayscale_image)
 red_multiplier = [1, 0, 0]
 yellow_multiplier = [1, 1, 0]
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4),
-                               sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
 
@@ -62,8 +61,9 @@ all_hues = color.hsv2rgb(hsv)
 
 fig, ax = plt.subplots(figsize=(5, 2))
 # Set image extent so hues go from 0 to 1 and the image is a nice aspect ratio.
-ax.imshow(all_hues, extent=(0 - 0.5 / len(hue_gradient),
-                            1 + 0.5 / len(hue_gradient), 0, 0.2))
+ax.imshow(
+    all_hues, extent=(0 - 0.5 / len(hue_gradient), 1 + 0.5 / len(hue_gradient), 0, 0.2)
+)
 ax.set_axis_off()
 
 ######################################################################
@@ -80,7 +80,7 @@ ax.set_axis_off()
 
 
 def colorize(image, hue, saturation=1):
-    """ Add color of the given hue to an RGB image.
+    """Add color of the given hue to an RGB image.
 
     By default, set the saturation to 1 so that the colors pop!
     """
@@ -135,8 +135,9 @@ textured_regions = noisy > 4.25
 masked_image = image.copy()
 masked_image[textured_regions, :] *= red_multiplier
 
-fig, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4),
-                               sharex=True, sharey=True)
+fig, (ax1, ax2) = plt.subplots(
+    ncols=2, nrows=1, figsize=(8, 4), sharex=True, sharey=True
+)
 ax1.imshow(sliced_image)
 ax2.imshow(masked_image)
 

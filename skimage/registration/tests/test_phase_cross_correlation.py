@@ -12,7 +12,8 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, binary_blobs, eagle
 from skimage.registration._phase_cross_correlation import (
-    phase_cross_correlation, _upsampled_dft
+    phase_cross_correlation,
+    _upsampled_dft,
 )
 
 
@@ -23,10 +24,9 @@ def test_correlation(normalization):
     shifted_image = fourier_shift(reference_image, shift)
 
     # pixel precision
-    result, _, _ = phase_cross_correlation(reference_image,
-                                           shifted_image,
-                                           space="fourier",
-                                           normalization=normalization)
+    result, _, _ = phase_cross_correlation(
+        reference_image, shifted_image, space="fourier", normalization=normalization
+    )
     assert_allclose(result[:2], -np.array(shift))
 
 
@@ -38,10 +38,9 @@ def test_correlation_invalid_normalization(normalization):
 
     # pixel precision
     with pytest.raises(ValueError):
-        phase_cross_correlation(reference_image,
-                                shifted_image,
-                                space="fourier",
-                                normalization=normalization)
+        phase_cross_correlation(
+            reference_image, shifted_image, space="fourier", normalization=normalization
+        )
 
 
 @pytest.mark.parametrize('normalization', [None, 'phase'])
@@ -51,11 +50,13 @@ def test_subpixel_precision(normalization):
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
     # subpixel precision
-    result, _, _ = phase_cross_correlation(reference_image,
-                                           shifted_image,
-                                           upsample_factor=100,
-                                           space="fourier",
-                                           normalization=normalization)
+    result, _, _ = phase_cross_correlation(
+        reference_image,
+        shifted_image,
+        upsample_factor=100,
+        space="fourier",
+        normalization=normalization,
+    )
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
 
@@ -67,9 +68,9 @@ def test_real_input(dtype):
     shifted_image = fft.ifftn(shifted_image).real.astype(dtype, copy=False)
 
     # subpixel precision
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       upsample_factor=100)
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, upsample_factor=100
+    )
     assert result.dtype == _supported_float_type(dtype)
     assert_allclose(result[:2], -np.array(subpixel_shift), atol=0.05)
 
@@ -81,41 +82,37 @@ def test_size_one_dimension_input():
     shifted_image = fourier_shift(reference_image, subpixel_shift)
 
     # subpixel precision
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       upsample_factor=20,
-                                                       space="fourier")
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, upsample_factor=20, space="fourier"
+    )
     assert_allclose(result[:2], -np.array((-2.4, 0)), atol=0.05)
 
 
 def test_3d_input():
     phantom = img_as_float(binary_blobs(length=32, n_dim=3))
     reference_image = fft.fftn(phantom)
-    shift = (-2., 1., 5.)
+    shift = (-2.0, 1.0, 5.0)
     shifted_image = fourier_shift(reference_image, shift)
 
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       space="fourier")
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, space="fourier"
+    )
     assert_allclose(result, -np.array(shift), atol=0.05)
 
     # subpixel precision now available for 3-D data
 
     subpixel_shift = (-2.3, 1.7, 5.4)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       upsample_factor=100,
-                                                       space="fourier")
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, upsample_factor=100, space="fourier"
+    )
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
 def test_unknown_space_input():
     image = np.ones((5, 5))
     with pytest.raises(ValueError):
-        phase_cross_correlation(
-            image, image,
-            space="frank")
+        phase_cross_correlation(image, image, space="frank")
 
 
 def test_wrong_input():
@@ -150,11 +147,11 @@ def test_wrong_input():
 def test_4d_input_pixel():
     phantom = img_as_float(binary_blobs(length=32, n_dim=4))
     reference_image = fft.fftn(phantom)
-    shift = (-2., 1., 5., -3)
+    shift = (-2.0, 1.0, 5.0, -3)
     shifted_image = fourier_shift(reference_image, shift)
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       space="fourier")
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, space="fourier"
+    )
     assert_allclose(result, -np.array(shift), atol=0.05)
 
 
@@ -163,30 +160,26 @@ def test_4d_input_subpixel():
     reference_image = fft.fftn(phantom)
     subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
     shifted_image = fourier_shift(reference_image, subpixel_shift)
-    result, error, diffphase = phase_cross_correlation(reference_image,
-                                                       shifted_image,
-                                                       upsample_factor=10,
-                                                       space="fourier")
+    result, error, diffphase = phase_cross_correlation(
+        reference_image, shifted_image, upsample_factor=10, space="fourier"
+    )
     assert_allclose(result, -np.array(subpixel_shift), atol=0.05)
 
 
 def test_mismatch_upsampled_region_size():
     with pytest.raises(ValueError):
-        _upsampled_dft(
-            np.ones((4, 4)),
-            upsampled_region_size=[3, 2, 1, 4])
+        _upsampled_dft(np.ones((4, 4)), upsampled_region_size=[3, 2, 1, 4])
 
 
 def test_mismatch_offsets_size():
     with pytest.raises(ValueError):
-        _upsampled_dft(np.ones((4, 4)), 3,
-                       axis_offsets=[3, 2, 1, 4])
+        _upsampled_dft(np.ones((4, 4)), 3, axis_offsets=[3, 2, 1, 4])
 
 
 @pytest.mark.parametrize(
-        ('shift0', 'shift1'),
-        itertools.product((100, -100, 350, -350), (100, -100, 350, -350)),
-        )
+    ('shift0', 'shift1'),
+    itertools.product((100, -100, 350, -350), (100, -100, 350, -350)),
+)
 def test_disambiguate_2d(shift0, shift1):
     image = eagle()[500:, 900:]  # use a highly textured part of image
     shift = (shift0, shift1)
@@ -197,13 +190,15 @@ def test_disambiguate_2d(shift0, shift1):
         else:
             origin0.append(-s)
     origin1 = np.array(origin0) + shift
-    slice0 = tuple(slice(o, o+450) for o in origin0)
-    slice1 = tuple(slice(o, o+450) for o in origin1)
+    slice0 = tuple(slice(o, o + 450) for o in origin0)
+    slice1 = tuple(slice(o, o + 450) for o in origin1)
     reference = image[slice0]
     moving = image[slice1]
     computed_shift, _, _ = phase_cross_correlation(
-            reference, moving, disambiguate=True,
-            )
+        reference,
+        moving,
+        disambiguate=True,
+    )
     np.testing.assert_equal(shift, computed_shift)
 
 
@@ -228,15 +223,15 @@ def test_disambiguate_zero_shift(disambiguate):
     """
     image = camera()
     computed_shift, _, _ = phase_cross_correlation(
-        image, image, disambiguate=disambiguate,
+        image,
+        image,
+        disambiguate=disambiguate,
     )
     assert isinstance(computed_shift, np.ndarray)
-    np.testing.assert_array_equal(computed_shift, np.array((0., 0.)))
+    np.testing.assert_array_equal(computed_shift, np.array((0.0, 0.0)))
 
 
-@pytest.mark.parametrize(
-    "return_error", [False, True, "always"]
-)
+@pytest.mark.parametrize("return_error", [False, True, "always"])
 def test_deprecated_return_error(return_error):
     img = np.ones((10, 10))
     with pytest.warns() as record:

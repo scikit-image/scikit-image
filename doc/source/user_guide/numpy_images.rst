@@ -1,4 +1,4 @@
-.. _numpy:
+.. _numpy_images:
 
 ==================================
 A crash course on NumPy for images

@@ -83,8 +83,7 @@ def binary_erosion(image, footprint=None, out=None):
         binary_func = functools.partial(ndi.binary_erosion, border_value=True)
         return _iterate_binary_func(binary_func, image, footprint, out)
 
-    ndi.binary_erosion(image, structure=footprint, output=out,
-                       border_value=True)
+    ndi.binary_erosion(image, structure=footprint, output=out, border_value=True)
     return out
 
 

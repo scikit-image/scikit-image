@@ -53,9 +53,11 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
     except OSError as e:
         site = "http://pillow.readthedocs.org/en/latest/installation.html#external-libraries"
         pillow_error_message = str(e)
-        error_message = (f"Could not load '{image.filename}' \n"
-                         f"Reason: '{pillow_error_message}'\n"
-                         f"Please see documentation at: {site}")
+        error_message = (
+            f"Could not load '{image.filename}' \n"
+            f"Reason: '{pillow_error_message}'\n"
+            f"Please see documentation at: {site}"
+        )
         raise ValueError(error_message)
     frames = []
     grayscale = None
@@ -145,7 +147,7 @@ def _palette_is_grayscale(pil_image):
     palette = np.asarray(pil_image.getpalette()).reshape((-1, 3))
     # Not all palette colors are used; unused colors have junk values.
     start, stop = pil_image.getextrema()
-    valid_palette = palette[start:stop + 1]
+    valid_palette = palette[start : stop + 1]
     # Image is grayscale if channel differences (R - G and G - B)
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)
@@ -240,8 +242,7 @@ def imsave(fname, arr, format_str=None, **kwargs):
     if not isinstance(fname, str) and format_str is None:
         format_str = "PNG"
     # Check for png in filename
-    if (isinstance(fname, str)
-            and fname.lower().endswith(".png")):
+    if isinstance(fname, str) and fname.lower().endswith(".png"):
         format_str = "PNG"
 
     arr = np.asanyarray(arr)

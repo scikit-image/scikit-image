@@ -3,6 +3,7 @@ from skimage.feature import multiscale_basic_features
 try:
     from sklearn.exceptions import NotFittedError
     from sklearn.ensemble import RandomForestClassifier
+
     has_sklearn = True
 except ImportError:
     has_sklearn = False
@@ -132,7 +133,7 @@ def predict_segmenter(features, clf):
         scikit-learn's API, for example an instance of
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier. The
         classifier must be already trained, for example with
-        :func:`skimage.segmentation.fit_segmenter`.
+        :func:`skimage.future.fit_segmenter`.
 
     Returns
     -------
@@ -153,9 +154,10 @@ def predict_segmenter(features, clf):
     except ValueError as err:
         if err.args and 'x must consist of vectors of length' in err.args[0]:
             raise ValueError(
-                err.args[0] + '\n' +
-                "Maybe you did not use the same type of features for training the classifier."
-                )
+                err.args[0]
+                + '\n'
+                + "Maybe you did not use the same type of features for training the classifier."
+            )
         else:
             raise err
     output = predicted_labels.reshape(sh[:-1])
