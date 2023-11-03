@@ -756,7 +756,9 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
             min_val = min(min_val, cval)
             max_val = max(max_val, cval)
 
-        np.clip(output_image, np.array(min_val), np.array(max_val), out=output_image)
+        # Convert array-like types to ndarrays (gh-7159)
+        min_val, max_val = np.array(min_val), np.array(max_val)
+        np.clip(output_image, min_val, max_val, out=output_image)
 
 
 def warp(
