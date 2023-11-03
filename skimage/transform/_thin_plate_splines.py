@@ -51,9 +51,10 @@ class TpsTransform:
     >>> np.allclose(yy_trans, expected_yy)
     True
     """
+
     def __init__(self):
         self._estimated = False
-        self.parameters = None
+        self.coefficients = None
         self.src = None
 
     def __call__(self, coords):
@@ -69,9 +70,9 @@ class TpsTransform:
         transformed_coords: (N, D) array
             Destination coordinates
         """
-        if self.parameters is None:
-            raise ValueError(f"{self.parameters}. Compute the `estimate`")
-        coeffs = self.parameters
+        if self.coefficients is None:
+            raise ValueError(f"{self.coefficients}. Compute the `estimate`")
+        coeffs = self.coefficients
         coords = np.array(coords)
 
         if not coords.ndim == 2 or coords.shape[1] != 2:
@@ -86,9 +87,8 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate how close the deformed source is to the target.
+        """Estimate optimal coefficients that describes the deformation of points.
 
-        Number of source and destination points must match.
 
         Parameters
         ----------
@@ -100,7 +100,11 @@ class TpsTransform:
         Returns
         -------
         success: bool
-            True, if all pieces of the model are successfully estimated.
+            True, indicates the model was successfully estimated.
+
+        Notes
+        -----
+        -  The number of source and destination points must match (N).
         """
 
         src = _ensure_2d(src)
@@ -109,21 +113,18 @@ class TpsTransform:
         if src.shape != dst.shape:
             raise ValueError("src and dst shape must be identical")
 
-        # if src.shape[-1] != 2 and dst.shape[-1] != 2:
-        #     raise ValueError("src and dst must have shape (N,2)")
-
         self.src = src
         self.dst = dst
         n, d = src.shape
 
         K = self._radial_distance(src)
         P = np.hstack([np.ones((n, 1)), src])
-        L = np.zeros((n+3, n+3), dtype=np.float32)
+        L = np.zeros((n + 3, n + 3), dtype=np.float32)
         L[:n, :n] = K
         L[:n, -3:] = P
         L[-3:, :n] = P.T
         V = np.concatenate([dst, np.zeros((d + 1, d))])
-        self.parameters = np.dot(np.linalg.inv(L), V)
+        self.coefficients = np.dot(np.linalg.inv(L), V)
         self._estimated = True
         return self._estimated
 
@@ -195,12 +196,7 @@ def _ensure_2d(arr):
 
 
 def tps_warp(
-    image,
-    src,
-    dst,
-    output_region=None,
-    interpolation_order=1,
-    grid_scaling=None
+    image, src, dst, output_region=None, interpolation_order=1, grid_scaling=None
 ):
     """Return an array of warped images.
 
@@ -301,12 +297,8 @@ def tps_warp(
         x_indices = np.clip(x_indices, 0, x_steps - 1)
         y_indices = np.clip(y_indices, 0, y_steps - 1)
 
-        transform_x = sp.ndimage.map_coordinates(
-            transform[0], [x_indices, y_indices]
-        )
-        transform_y = sp.ndimage.map_coordinates(
-            transform[1], [x_indices, y_indices]
-        )
+        transform_x = sp.ndimage.map_coordinates(transform[0], [x_indices, y_indices])
+        transform_y = sp.ndimage.map_coordinates(transform[1], [x_indices, y_indices])
         transform = [transform_x, transform_y]
     if image.ndim == 2:
         warped_image = sp.ndimage.map_coordinates(
