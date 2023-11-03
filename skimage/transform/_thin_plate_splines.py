@@ -87,7 +87,7 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate optimal coefficients that describes the deformation of points.
+        """Estimate optimal coefficients that describes the deformation of the points.
 
 
         Parameters
@@ -100,7 +100,7 @@ class TpsTransform:
         Returns
         -------
         success: bool
-            True, indicates the model was successfully estimated.
+            True, indicates that the coefficients were successfully estimated.
 
         Notes
         -----
