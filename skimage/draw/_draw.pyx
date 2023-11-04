@@ -524,6 +524,13 @@ def _ellipse_perimeter(Py_ssize_t r_o, Py_ssize_t c_o, Py_ssize_t r_radius,
         rr.extend(rr_t)
         cc.extend(cc_t)
 
+    # sorting on the basis of angle
+    rr = np.array(rr, dtype=np.intp)
+    cc = np.array(cc, dtype=np.intp)
+    angle = np.argsort(np.arctan2(cc-np.mean(cc),rr-np.mean(rr)))
+    rr = np.take(rr, angle, axis=0)
+    cc = np.take(cc, angle, axis=0)
+
     if shape is not None:
         return _coords_inside_image(np.array(rr, dtype=np.intp),
                                     np.array(cc, dtype=np.intp), shape)
