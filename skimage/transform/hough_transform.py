@@ -133,6 +133,13 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
         If None, the value is set to half of the smaller
         image dimension.
 
+    Returns
+    -------
+    result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)].
+        Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
+        axes, respectively. The `orientation` value follows
+        `skimage.draw.ellipse_perimeter` convention.
+
     Examples
     --------
     >>> from skimage.transform import hough_ellipse
@@ -146,7 +153,6 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
 
     Notes
     -----
-
     Potential ellipses in the image are characterized by their major and
     minor axis lengths. For any pair of nonzero pixels in the image that
     are at least half of `min_size` apart, an accumulator keeps track of
