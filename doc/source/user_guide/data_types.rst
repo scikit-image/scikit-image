@@ -104,7 +104,7 @@ be automatically rescaled.
     (dtype('float64'), 0.0147, 0.9456, (152, 192))
     >>> rescaled = ski.transform.rescale(image, 0.5, preserve_range=True)
     >>> (rescaled.dtype, np.round(rescaled.min()),
-    ...  np.round(rescaled.max()), rescaled.shape
+    ...  np.round(rescaled.max()), rescaled.shape)
     (dtype('float64'), 4.0, 241.0, (152, 192))
 
 
