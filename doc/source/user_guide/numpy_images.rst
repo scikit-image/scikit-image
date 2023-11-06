@@ -202,7 +202,7 @@ Many functions in ``scikit-image`` can operate on 3D images directly::
     >>> rng = np.random.default_rng()
     >>> im3d = rng.random((100, 1000, 1000))
     >>> seeds = sp.ndimage.label(im3d < 0.1)[0]
-    >>> ws = ski.morphology.watershed(im3d, seeds)
+    >>> ws = ski.segmentation.watershed(im3d, seeds)
 
 In many cases, however, the third spatial dimension has lower resolution
 than the other two. Some ``scikit-image`` functions provide a ``spacing``
