@@ -35,7 +35,7 @@ Of course, it is also possible to load your own images as NumPy arrays
 from image files, using :func:`skimage.io.imread`: ::
 
     >>> import os
-    >>> filename = os.path.join(skimage.data_dir, 'moon.png')
+    >>> filename = os.path.join(ski.data_dir, 'moon.png')
     >>> moon = ski.io.imread(filename)
 
 Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
