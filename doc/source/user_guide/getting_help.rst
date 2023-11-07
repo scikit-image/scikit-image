@@ -1,5 +1,5 @@
 =================================
-Getting help on using ``skimage``
+Getting help on using scikit-image
 =================================
 
 API Reference
