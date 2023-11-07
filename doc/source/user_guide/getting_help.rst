@@ -32,7 +32,7 @@ API Discovery
 We provide a ``lookfor`` function to search API functions::
 
    import skimage as ski
-   ski.lookfor('eigenvector')
+   ski.lookfor('eigenvalue')
 
 Also see NumPy's ``lookfor``.
 
