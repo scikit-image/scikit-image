@@ -45,10 +45,10 @@ def match_template(
 
     Parameters
     ----------
-    image : (M, N[, D]) array
+    image : (M, N[, P]) array
         2-D or 3-D input image.
-    template : (m, n[, d]) array
-        Template to locate. It must be `(m <= M, n <= N[, d <= D])`.
+    template : (m, n[, p]) array
+        Template to locate. It must be `(m <= M, n <= N[, p <= P])`.
     pad_input : bool
         If True, pad `image` so that output is the same size as the image, and
         output values correspond to the template center. Otherwise, the output

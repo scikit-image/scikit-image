@@ -24,12 +24,12 @@ def hough_line_peaks(
 
     Parameters
     ----------
-    hspace : (N, M) array
+    hspace : ndarray, shape (M, N)
         Hough space returned by the `hough_line` function.
-    angles : (M,) array
+    angles : array, shape (N,)
         Angles returned by the `hough_line` function. Assumed to be continuous.
         (`angles[-1] - angles[0] == PI`).
-    dists : (N, ) array
+    dists : array, shape (M,)
         Distances returned by the `hough_line` function.
     min_distance : int, optional
         Minimum distance separating lines (maximum filter size for first
@@ -84,22 +84,22 @@ def hough_circle(image, radius, normalize=True, full_output=False):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray, shape (M, N)
         Input image with nonzero values representing edges.
     radius : scalar or sequence of scalars
         Radii at which to compute the Hough transform.
         Floats are converted to integers.
-    normalize : boolean, optional (default True)
+    normalize : boolean, optional
         Normalize the accumulator with the number
         of pixels used to draw the radius.
-    full_output : boolean, optional (default False)
+    full_output : boolean, optional
         Extend the output size by twice the largest
         radius in order to detect centers outside the
         input picture.
 
     Returns
     -------
-    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+    H : ndarray, shape (radius index, M + 2R, N + 2R)
         Hough transform accumulator for each radius.
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
@@ -198,14 +198,14 @@ def hough_line(image, theta=None):
     ----------
     image : (M, N) ndarray
         Input image with nonzero values representing edges.
-    theta : 1D ndarray of double, optional
+    theta : ndarray of double, shape (K,), optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
 
     Returns
     -------
-    hspace : 2-D ndarray of uint64
+    hspace : ndarray of uint64, shape (P, Q)
         Hough transform accumulator.
     angles : ndarray
         Angles at which the transform is computed, in radians.
@@ -256,7 +256,7 @@ def probabilistic_hough_line(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray, shape (M, N)
         Input image with nonzero values representing edges.
     threshold : int, optional
         Threshold
@@ -266,7 +266,7 @@ def probabilistic_hough_line(
     line_gap : int, optional
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : 1D ndarray, dtype=double, optional
+    theta : ndarray of dtype, shape (K,), optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
@@ -324,7 +324,7 @@ def hough_circle_peaks(
 
     Parameters
     ----------
-    hspaces : (N, M) array
+    hspaces : (M, N, P) array
         Hough spaces returned by the `hough_circle` function.
     radii : (M,) array
         Radii corresponding to Hough spaces.
@@ -428,14 +428,14 @@ def hough_circle_peaks(
 def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
     """Keep points that are separated by certain distance in each dimension.
 
-    The first point is always accpeted and all subsequent points are selected
+    The first point is always accepted and all subsequent points are selected
     so that they are distant from all their preceding ones.
 
     Parameters
     ----------
-    xs : array
+    xs : array, shape (M,)
         X coordinates of points.
-    ys : array
+    ys : array, shape (M,)
         Y coordinates of points.
     min_xdistance : int
         Minimum distance separating points in the x dimension.

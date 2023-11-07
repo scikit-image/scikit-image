@@ -82,15 +82,15 @@ def imread_collection(load_pattern, conserve_memory=True, plugin=None, **plugin_
     ----------
     load_pattern : str or list
         List of objects to load. These are usually filenames, but may
-        vary depending on the currently active plugin.  See the docstring
-        for ``ImageCollection`` for the default behaviour of this parameter.
+        vary depending on the currently active plugin. See :class:`ImageCollection`
+        for the default behaviour of this parameter.
     conserve_memory : bool, optional
         If True, never keep more than one in memory at a specific
         time.  Otherwise, images will be cached once they are loaded.
 
     Returns
     -------
-    ic : ImageCollection
+    ic : :class:`ImageCollection`
         Collection of images.
 
     Other Parameters
@@ -129,9 +129,9 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     Notes
     -----
     When saving a JPEG, the compression ratio may be controlled using the
-    ``quality`` keyword argument which is an integer with values in [1, 100]
-    where 1 is worst quality and smallest file size, and 100 is best quality
-    and largest file size (default 75).  This is only available when using
+    ``quality`` keyword argument which is an integer with values in [1, 100],
+    where 1 is worst quality and smallest file size, and 100 is the best quality
+    and largest file size (default 75). This is only available when using
     the PIL and imageio plugins.
     """
     if isinstance(fname, pathlib.Path):
@@ -161,8 +161,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Image data or name of image file.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with imageio) until a suitable
-        candidate is found.
+        tried (starting with imageio) until a suitable candidate is found.
 
     Other Parameters
     ----------------
@@ -180,7 +179,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
 
     Parameters
     ----------
-    ic : ImageCollection
+    ic : :class:`ImageCollection`
         Collection to display.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
@@ -196,9 +195,9 @@ def imshow_collection(ic, plugin=None, **plugin_args):
 
 
 def show():
-    '''Display pending images.
+    """Display pending images.
 
-    Launch the event loop of the current gui plugin, and display all
+    Launch the event loop of the current GUI plugin, and display all
     pending images, queued via `imshow`. This is required when using
     `imshow` from non-interactive scripts.
 
@@ -214,5 +213,5 @@ def show():
     ...     ax_im = io.imshow(rng.random((50, 50)))
     >>> io.show() # doctest: +SKIP
 
-    '''
+    """
     return call_plugin('_app_show')

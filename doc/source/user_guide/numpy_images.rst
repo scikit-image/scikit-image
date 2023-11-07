@@ -1,4 +1,4 @@
-.. _numpy:
+.. _numpy_images:
 
 ==================================
 A crash course on NumPy for images
@@ -12,6 +12,18 @@ manipulating arrays::
     >>> camera = ski.data.camera()
     >>> type(camera)
     <type 'numpy.ndarray'>
+
+.. note::
+    Labeled array-like data types, such as
+    `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
+    or `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_,
+    are not natively supported in ``scikit-image``. However, data stored in these types
+    can be converted to ``numpy.ndarray`` with certain assumptions
+    (see ``pandas.DataFrame.to_numpy()`` and ``xarray.DataArray.data``). Particularly,
+    these conversions ignore the sampling coordinates (``DataFrame.index``,
+    ``DataFrame.columns``, or ``DataArray.coords``), which may result in
+    misrepresented data, for instance, when the original data points are irregularly
+    spaced.
 
 Retrieving the geometry of the image and the number of pixels::
 
