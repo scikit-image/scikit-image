@@ -31,16 +31,18 @@ import numpy as np
 
 # Sample image.
 SAMPLE = np.array(
-    [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-     [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-     [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-     [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
-     [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
-     [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]]
+    [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+        [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+    ]
 )
 SAMPLE = np.pad(SAMPLE, 1, mode='constant')
 
@@ -53,9 +55,11 @@ holes_nb_4 = object_nb_4 - e4
 e8 = euler_number(SAMPLE, connectivity=2)
 object_nb_8 = label(SAMPLE, connectivity=2).max()
 holes_nb_8 = object_nb_8 - e8
-ax.set_title(f'Euler number for N4: {e4} ({object_nb_4} objects, {holes_nb_4} '
-             f'holes), \n for N8: {e8} ({object_nb_8} objects, '
-             f'{holes_nb_8} holes)')
+ax.set_title(
+    f'Euler number for N4: {e4} ({object_nb_4} objects, {holes_nb_4} '
+    f'holes), \n for N8: {e8} ({object_nb_8} objects, '
+    f'{holes_nb_8} holes)'
+)
 plt.show()
 
 ######################################################################
@@ -85,6 +89,7 @@ def explode(data):
     data_e = np.zeros(size - 1, dtype=data.dtype)
     data_e[::2, ::2, ::2] = data
     return data_e
+
 
 # shrink the gaps between voxels
 
@@ -138,12 +143,12 @@ def display_voxels(volume):
 n = 7
 cube = np.ones((n, n, n), dtype=bool)
 # Add a tunnel
-c = int(n/2)
+c = int(n / 2)
 cube[c, :, c] = False
 # Add a new hole
-cube[int(3*n/4), c-1, c-1] = False
+cube[int(3 * n / 4), c - 1, c - 1] = False
 # Add a hole in neighborhood of previous one
-cube[int(3*n/4), c, c] = False
+cube[int(3 * n / 4), c, c] = False
 # Add a second tunnel
-cube[:, c, int(3*n/4)] = False
+cube[:, c, int(3 * n / 4)] = False
 display_voxels(cube)

@@ -1,0 +1,53 @@
+# Mark issues and pull requests without activity as dormant
+# See https://github.com/actions/stale for documentation and configuration
+
+name: Mark dormant issues
+on:
+  schedule:
+    - cron: "15 2 * * *" # trigger every day at 2:15
+  workflow_dispatch: # or run manually
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@3de2653986ebd134983c79fe2be5d45cc3d9f4e1 # v6.0.0
+        with:
+          days-before-stale: 180
+          days-before-close: -1 # never close
+          stale-issue-label: ":sleeping: Dormant"
+          stale-pr-label: ":sleeping: Dormant"
+          remove-stale-when-updated: true
+          stale-issue-message: >
+            Hello scikit-image core devs! There hasn't been any activity on
+            this issue for more than 180 days. I have marked it as "dormant" to
+            make it easy to find.
+
+            To our contributors, thank you for your contribution and apologies
+            if this issue fell through the cracks! Hopefully this ping will
+            help bring some fresh attention to the issue. If you need help, you
+            can always reach out on our
+            [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
+
+            If you think that this issue is no longer relevant, you may close
+            it, or we may do it at some point (either way, it will be done
+            manually).
+
+          stale-pr-message: >
+            Hello scikit-image core devs! There hasn't been any activity on
+            this PR for more than 180 days. I have marked it as "dormant" to
+            make it easy to find.
+
+            To our contributors, thank you for your contribution and apologies
+            if this contribution fell through the cracks! Hopefully this ping
+            will help bring some fresh attention to the review. If you need
+            help, you can always reach out on our
+            [forum](https://discuss.scientific-python.org/c/contributor/skimage/22)
+
+            If you think that this PR is no longer relevant, you may close
+            it, or we may do it at some point (either way, it will be done
+            manually). If you think the PR is valuable but you no longer have
+            the bandwidth to update it, please let us know, so that someone can
+            take it over. 🙏

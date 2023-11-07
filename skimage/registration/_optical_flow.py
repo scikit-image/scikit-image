@@ -14,8 +14,17 @@ from ..transform import warp
 from ._optical_flow_utils import coarse_to_fine, get_warp_points
 
 
-def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
-          num_warp, num_iter, tol, prefilter):
+def _tvl1(
+    reference_image,
+    moving_image,
+    flow0,
+    attachment,
+    tightness,
+    num_warp,
+    num_iter,
+    tol,
+    prefilter,
+):
     """TV-L1 solver for optical flow estimation.
 
     Parameters
@@ -52,9 +61,11 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
     """
 
     dtype = reference_image.dtype
-    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
-                         for n in reference_image.shape],
-                       indexing='ij', sparse=True)
+    grid = np.meshgrid(
+        *[np.arange(n, dtype=dtype) for n in reference_image.shape],
+        indexing='ij',
+        sparse=True,
+    )
 
     dt = 0.5 / reference_image.ndim
     reg_num_iter = 2
@@ -65,41 +76,54 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
     flow_current = flow_previous = flow0
 
     g = np.zeros((reference_image.ndim,) + reference_image.shape, dtype=dtype)
-    proj = np.zeros((reference_image.ndim, reference_image.ndim,)
-                    + reference_image.shape, dtype=dtype)
+    proj = np.zeros(
+        (
+            reference_image.ndim,
+            reference_image.ndim,
+        )
+        + reference_image.shape,
+        dtype=dtype,
+    )
 
-    s_g = [slice(None), ] * g.ndim
-    s_p = [slice(None), ] * proj.ndim
-    s_d = [slice(None), ] * (proj.ndim-2)
+    s_g = [
+        slice(None),
+    ] * g.ndim
+    s_p = [
+        slice(None),
+    ] * proj.ndim
+    s_d = [
+        slice(None),
+    ] * (proj.ndim - 2)
 
     for _ in range(num_warp):
         if prefilter:
-            flow_current = ndi.median_filter(flow_current,
-                                             [1] + reference_image.ndim * [3])
+            flow_current = ndi.median_filter(
+                flow_current, [1] + reference_image.ndim * [3]
+            )
 
-        image1_warp = warp(moving_image, get_warp_points(grid, flow_current),
-                           mode='edge')
+        image1_warp = warp(
+            moving_image, get_warp_points(grid, flow_current), mode='edge'
+        )
         grad = np.array(np.gradient(image1_warp))
-        NI = (grad*grad).sum(0)
+        NI = (grad * grad).sum(0)
         NI[NI == 0] = 1
 
         rho_0 = image1_warp - reference_image - (grad * flow_current).sum(0)
 
         for _ in range(num_iter):
-
             # Data term
 
-            rho = rho_0 + (grad*flow_current).sum(0)
+            rho = rho_0 + (grad * flow_current).sum(0)
 
             idx = abs(rho) <= f0 * NI
 
             flow_auxiliary = flow_current
 
-            flow_auxiliary[:, idx] -= rho[idx]*grad[:, idx]/NI[idx]
+            flow_auxiliary[:, idx] -= rho[idx] * grad[:, idx] / NI[idx]
 
             idx = ~idx
             srho = f0 * np.sign(rho[idx])
-            flow_auxiliary[:, idx] -= srho*grad[:, idx]
+            flow_auxiliary[:, idx] -= srho * grad[:, idx]
 
             # Regularization term
             flow_current = flow_auxiliary.copy()
@@ -109,13 +133,13 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
                 for _ in range(reg_num_iter):
                     for ax in range(reference_image.ndim):
                         s_g[0] = ax
-                        s_g[ax+1] = slice(0, -1)
+                        s_g[ax + 1] = slice(0, -1)
                         g[tuple(s_g)] = np.diff(flow_current[idx], axis=ax)
-                        s_g[ax+1] = slice(None)
+                        s_g[ax + 1] = slice(None)
 
-                    norm = np.sqrt((g ** 2).sum(0))[np.newaxis, ...]
+                    norm = np.sqrt((g**2).sum(0))[np.newaxis, ...]
                     norm *= f1
-                    norm += 1.
+                    norm += 1.0
                     proj[idx] -= dt * g
                     proj[idx] /= norm
 
@@ -123,16 +147,16 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
                     d = -proj[idx].sum(0)
                     for ax in range(reference_image.ndim):
                         s_p[1] = ax
-                        s_p[ax+2] = slice(0, -1)
+                        s_p[ax + 2] = slice(0, -1)
                         s_d[ax] = slice(1, None)
                         d[tuple(s_d)] += proj[tuple(s_p)]
-                        s_p[ax+2] = slice(None)
+                        s_p[ax + 2] = slice(None)
                         s_d[ax] = slice(None)
 
                     flow_current[idx] = flow_auxiliary[idx] + d
 
         flow_previous -= flow_current  # The difference as stopping criteria
-        if (flow_previous*flow_previous).sum() < tol:
+        if (flow_previous * flow_previous).sum() < tol:
             break
 
         flow_previous = flow_current
@@ -140,10 +164,18 @@ def _tvl1(reference_image, moving_image, flow0, attachment, tightness,
     return flow_current
 
 
-def optical_flow_tvl1(reference_image, moving_image,
-                      *,
-                      attachment=15, tightness=0.3, num_warp=5, num_iter=10,
-                      tol=1e-4, prefilter=False, dtype=np.float32):
+def optical_flow_tvl1(
+    reference_image,
+    moving_image,
+    *,
+    attachment=15,
+    tightness=0.3,
+    num_warp=5,
+    num_iter=10,
+    tol=1e-4,
+    prefilter=False,
+    dtype=np.float32,
+):
     r"""Coarse to fine optical flow estimator.
 
     The TV-L1 solver is applied at each level of the image
@@ -217,9 +249,15 @@ def optical_flow_tvl1(reference_image, moving_image,
 
     """
 
-    solver = partial(_tvl1, attachment=attachment,
-                     tightness=tightness, num_warp=num_warp, num_iter=num_iter,
-                     tol=tol, prefilter=prefilter)
+    solver = partial(
+        _tvl1,
+        attachment=attachment,
+        tightness=tightness,
+        num_warp=num_warp,
+        num_iter=num_iter,
+        tol=tol,
+        prefilter=prefilter,
+    )
 
     if np.dtype(dtype) != _supported_float_type(dtype):
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
@@ -228,8 +266,7 @@ def optical_flow_tvl1(reference_image, moving_image,
     return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
-def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
-         prefilter):
+def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefilter):
     """Iterative Lucas-Kanade (iLK) solver for optical flow estimation.
 
     Parameters
@@ -262,32 +299,31 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
     size = 2 * radius + 1
 
     if gaussian:
-        sigma = ndim * (size / 4, )
+        sigma = ndim * (size / 4,)
         filter_func = partial(gaussian_filter, sigma=sigma, mode='mirror')
     else:
-        filter_func = partial(ndi.uniform_filter, size=ndim * (size, ),
-                              mode='mirror')
+        filter_func = partial(ndi.uniform_filter, size=ndim * (size,), mode='mirror')
 
     flow = flow0
     # For each pixel location (i, j), the optical flow X = flow[:, i, j]
     # is the solution of the ndim x ndim linear system
     # A[i, j] * X = b[i, j]
     A = np.zeros(reference_image.shape + (ndim, ndim), dtype=dtype)
-    b = np.zeros(reference_image.shape + (ndim, ), dtype=dtype)
+    b = np.zeros(reference_image.shape + (ndim,), dtype=dtype)
 
-    grid = np.meshgrid(*[np.arange(n, dtype=dtype)
-                         for n in reference_image.shape],
-                       indexing='ij', sparse=True)
+    grid = np.meshgrid(
+        *[np.arange(n, dtype=dtype) for n in reference_image.shape],
+        indexing='ij',
+        sparse=True,
+    )
 
     for _ in range(num_warp):
         if prefilter:
-            flow = ndi.median_filter(flow, (1, ) + ndim * (3, ))
+            flow = ndi.median_filter(flow, (1,) + ndim * (3,))
 
-        moving_image_warp = warp(moving_image, get_warp_points(grid, flow),
-                                 mode='edge')
+        moving_image_warp = warp(moving_image, get_warp_points(grid, flow), mode='edge')
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
-        error_image = ((grad * flow).sum(axis=0)
-                       + reference_image - moving_image_warp)
+        error_image = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
         # Local linear systems creation
         for i, j in combinations_with_replacement(range(ndim), 2):
@@ -307,9 +343,16 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian,
     return flow
 
 
-def optical_flow_ilk(reference_image, moving_image, *,
-                     radius=7, num_warp=10, gaussian=False,
-                     prefilter=False, dtype=np.float32):
+def optical_flow_ilk(
+    reference_image,
+    moving_image,
+    *,
+    radius=7,
+    num_warp=10,
+    gaussian=False,
+    prefilter=False,
+    dtype=np.float32,
+):
     """Coarse to fine optical flow estimator.
 
     The iterative Lucas-Kanade (iLK) solver is applied at each level
@@ -374,8 +417,9 @@ def optical_flow_ilk(reference_image, moving_image, *,
 
     """
 
-    solver = partial(_ilk, radius=radius, num_warp=num_warp, gaussian=gaussian,
-                     prefilter=prefilter)
+    solver = partial(
+        _ilk, radius=radius, num_warp=num_warp, gaussian=gaussian, prefilter=prefilter
+    )
 
     if np.dtype(dtype) != _supported_float_type(dtype):
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"

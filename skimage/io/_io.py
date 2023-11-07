@@ -9,8 +9,14 @@ from ..io.manage_plugins import call_plugin
 from .util import file_or_url_context
 
 
-__all__ = ['imread', 'imsave', 'imshow', 'show',
-           'imread_collection', 'imshow_collection']
+__all__ = [
+    'imread',
+    'imsave',
+    'imshow',
+    'show',
+    'imread_collection',
+    'imshow_collection',
+]
 
 
 def imread(fname, as_gray=False, plugin=None, **plugin_args):
@@ -68,8 +74,7 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
     return img
 
 
-def imread_collection(load_pattern, conserve_memory=True,
-                      plugin=None, **plugin_args):
+def imread_collection(load_pattern, conserve_memory=True, plugin=None, **plugin_args):
     """
     Load a collection of images.
 
@@ -94,8 +99,9 @@ def imread_collection(load_pattern, conserve_memory=True,
         Passed to the given plugin.
 
     """
-    return call_plugin('imread_collection', load_pattern, conserve_memory,
-                       plugin=plugin, **plugin_args)
+    return call_plugin(
+        'imread_collection', load_pattern, conserve_memory, plugin=plugin, **plugin_args
+    )
 
 
 def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
@@ -134,9 +140,12 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if arr.dtype == bool:
-        warn(f'{fname} is a boolean image: setting True to 255 and False to 0. '
-             'To silence this warning, please convert the image using '
-             'img_as_ubyte.', stacklevel=2)
+        warn(
+            f'{fname} is a boolean image: setting True to 255 and False to 0. '
+            'To silence this warning, please convert the image using '
+            'img_as_ubyte.',
+            stacklevel=2,
+        )
         arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
         warn(f'{fname} is a low contrast image')

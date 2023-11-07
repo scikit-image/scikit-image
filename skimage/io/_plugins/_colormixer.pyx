@@ -210,7 +210,7 @@ def gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-cdef void rgb_2_hsv(cnp.float32_t* RGB, cnp.float32_t* HSV) nogil:
+cdef void rgb_2_hsv(cnp.float32_t* RGB, cnp.float32_t* HSV) noexcept nogil:
     cdef cnp.float32_t R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
     G = RGB[1]
@@ -273,7 +273,7 @@ cdef void rgb_2_hsv(cnp.float32_t* RGB, cnp.float32_t* HSV) nogil:
     HSV[2] = V
 
 
-cdef void hsv_2_rgb(cnp.float32_t* HSV, cnp.float32_t* RGB) nogil:
+cdef void hsv_2_rgb(cnp.float32_t* HSV, cnp.float32_t* RGB) noexcept nogil:
     cdef cnp.float32_t H, S, V
     cdef cnp.float32_t f, p, q, t, r, g, b
     cdef Py_ssize_t hi

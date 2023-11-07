@@ -2,17 +2,27 @@ import numpy as np
 
 from .._shared import utils
 from .._shared.utils import convert_to_float
-from ._nl_means_denoising import (_nl_means_denoising_2d,
-                                  _nl_means_denoising_3d,
-                                  _fast_nl_means_denoising_2d,
-                                  _fast_nl_means_denoising_3d,
-                                  _fast_nl_means_denoising_4d)
+from ._nl_means_denoising import (
+    _nl_means_denoising_2d,
+    _nl_means_denoising_3d,
+    _fast_nl_means_denoising_2d,
+    _fast_nl_means_denoising_3d,
+    _fast_nl_means_denoising_4d,
+)
 
 
 @utils.channel_as_last_axis()
-def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
-                     fast_mode=True, sigma=0., *,
-                     preserve_range=False, channel_axis=None):
+def denoise_nl_means(
+    image,
+    patch_size=7,
+    patch_distance=11,
+    h=0.1,
+    fast_mode=True,
+    sigma=0.0,
+    *,
+    preserve_range=False,
+    channel_axis=None,
+):
     """Perform non-local means denoising on 2D-4D grayscale or RGB images.
 
     Parameters
@@ -149,7 +159,8 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
     if (ndim_no_channel < 2) or (ndim_no_channel > 4):
         raise NotImplementedError(
             "Non-local means denoising is only implemented for 2D, "
-            "3D or 4D grayscale or multichannel images.")
+            "3D or 4D grayscale or multichannel images."
+        )
 
     image = convert_to_float(image, preserve_range)
     if not image.flags.c_contiguous:
@@ -157,12 +168,10 @@ def denoise_nl_means(image, patch_size=7, patch_distance=11, h=0.1,
 
     kwargs = dict(s=patch_size, d=patch_distance, h=h, var=sigma * sigma)
     if ndim_no_channel == 2:
-        nlm_func = (_fast_nl_means_denoising_2d if fast_mode else
-                    _nl_means_denoising_2d)
+        nlm_func = _fast_nl_means_denoising_2d if fast_mode else _nl_means_denoising_2d
     elif ndim_no_channel == 3:
         if multichannel and not fast_mode:
-            raise NotImplementedError(
-                "Multichannel 3D requires fast_mode to be True.")
+            raise NotImplementedError("Multichannel 3D requires fast_mode to be True.")
         if fast_mode:
             nlm_func = _fast_nl_means_denoising_3d
         else:

@@ -140,8 +140,7 @@ registry = {
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
     "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
-    "restoration/tests/astronaut_rl.npy":
-        "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
+    "restoration/tests/astronaut_rl.npy": "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
     "restoration/tests/camera_unsup.npy": "3de10a0b97267352b18886b25d66a967f9e1d78ada61050577d78586cab82baa",
     "restoration/tests/camera_unsup2.npy": "29cdc60605eb528c5f014baa8564d7d1ba0bd4b3170a66522058cbe5aed0960b",
@@ -154,6 +153,7 @@ registry = {
     "registration/tests/data/TransformedX75Y75.png": "a1e9ead5f8e4a0f604271e1f9c50e89baf53f068f1d19fab2876af4938e695ea",
     "data/brain.tiff": "bcdbaf424fbad7b1fb0f855f608c68e5a838f35affc323ff04ea17f678eef5c6",
     "data/cells3d.tif": "afc7c7d80d38bfde09788b4064ac1e64ec14e88454ab785ebdc8dbba5ca3b222",
+    "data/palisades_of_vogt.tif": "7f205b626407e194974cead67c4d3909344cf59c42d229a349da0198183e5bd0",
     "data/kidney.tif": "80c0799bc58b08cf6eaa53ecd202305eb42fd7bc73746cb6c5064dbeae7e8476",
     "data/lily.tif": "395c2f0194c25b9824a8cd79266920362a0816bc9e906dd392adce2d8309af03",
     "data/mitosis.tif": "2751ba667c4067c5d30817cff004aa06f6f6287f1cdbb5b8c9c6a500308cb456",
@@ -167,6 +167,7 @@ registry = {
 registry_urls = {
     "data/brain.tiff": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/brain.tiff",
     "data/cells3d.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/cells3d.tif",
+    "data/palisades_of_vogt.tif": "https://gitlab.com/scikit-image/data/-/raw/b2bc880f3bac23a583724befe8388dae368c52fe/in-vivo-cornea-spots.tif",
     "data/eagle.png": "https://gitlab.com/scikit-image/data/-/raw/1e4f62ac31ba4553d176d4473a5967ad1b076d62/eagle.png",
     "data/kidney.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/kidney-tissue-fluorescence.tif",
     "data/lily.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/lily-of-the-valley-fluorescence.tif",
@@ -181,6 +182,5 @@ registry_urls = {
 }
 
 legacy_registry = {
-    ('data/' + filename): registry['data/' + filename]
-    for filename in legacy_datasets
+    ('data/' + filename): registry['data/' + filename] for filename in legacy_datasets
 }

@@ -8,7 +8,7 @@ cdef struct Heapitem:
     Py_ssize_t source
 
 
-cdef inline int smaller(Heapitem *a, Heapitem *b) nogil:
+cdef inline int smaller(Heapitem *a, Heapitem *b) noexcept nogil:
     if a.value != b.value:
         return a.value < b.value
     return a.age < b.age

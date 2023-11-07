@@ -19,7 +19,7 @@ include "heap_watershed.pxi"
 @cython.overflowcheck(False)
 @cython.unraisable_tracebacks(False)
 cdef inline cnp.float64_t _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
-                                       cnp.intp_t[::1] strides) nogil:
+                                       cnp.intp_t[::1] strides) noexcept nogil:
     """Return the Euclidean distance between raveled points pt0 and pt1."""
     cdef cnp.float64_t result = 0
     cdef cnp.float64_t curr = 0
@@ -38,7 +38,7 @@ cdef inline cnp.float64_t _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
 cdef inline DTYPE_BOOL_t _diff_neighbors(np_anyint[::1] output,
                                          cnp.intp_t[::1] structure,
                                          DTYPE_BOOL_t[::1] mask,
-                                         Py_ssize_t index) nogil:
+                                         Py_ssize_t index) noexcept nogil:
     """
     Return ``True`` and set ``mask[index]`` to ``False`` if the neighbors of
     ``index`` (as given by the offsets in ``structure``) have more than one

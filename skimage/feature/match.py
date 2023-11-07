@@ -2,8 +2,15 @@ import numpy as np
 from scipy.spatial.distance import cdist
 
 
-def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
-                      max_distance=np.inf, cross_check=True, max_ratio=1.0):
+def match_descriptors(
+    descriptors1,
+    descriptors2,
+    metric=None,
+    p=2,
+    max_distance=np.inf,
+    cross_check=True,
+    max_ratio=1.0,
+):
     """Brute-force matching of descriptors.
 
     For each descriptor in the first set this matcher finds the closest
@@ -85,8 +92,7 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         distances[indices1, indices2] = np.inf
         second_best_indices2 = np.argmin(distances[indices1], axis=1)
         second_best_distances = distances[indices1, second_best_indices2]
-        second_best_distances[second_best_distances == 0] \
-            = np.finfo(np.float64).eps
+        second_best_distances[second_best_distances == 0] = np.finfo(np.float64).eps
         ratio = best_distances / second_best_distances
         mask = ratio < max_ratio
         indices1 = indices1[mask]

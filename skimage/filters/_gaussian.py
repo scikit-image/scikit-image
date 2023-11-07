@@ -6,9 +6,16 @@ from ..util import img_as_float
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
-def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
-                            mode='nearest', cval=0, channel_axis=None,
-                            truncate=4.0):
+def difference_of_gaussians(
+    image,
+    low_sigma,
+    high_sigma=None,
+    *,
+    mode='nearest',
+    cval=0,
+    channel_axis=None,
+    truncate=4.0,
+):
     """Find features between ``low_sigma`` and ``high_sigma`` in size.
 
     This function uses the Difference of Gaussians method for applying
@@ -120,25 +127,42 @@ def difference_of_gaussians(image, low_sigma, high_sigma=None, *,
         spatial_dims = image.ndim
 
     if len(low_sigma) != 1 and len(low_sigma) != spatial_dims:
-        raise ValueError('low_sigma must have length equal to number of'
-                         ' spatial dimensions of input')
+        raise ValueError(
+            'low_sigma must have length equal to number of'
+            ' spatial dimensions of input'
+        )
     if len(high_sigma) != 1 and len(high_sigma) != spatial_dims:
-        raise ValueError('high_sigma must have length equal to number of'
-                         ' spatial dimensions of input')
+        raise ValueError(
+            'high_sigma must have length equal to number of'
+            ' spatial dimensions of input'
+        )
 
     low_sigma = low_sigma * np.ones(spatial_dims)
     high_sigma = high_sigma * np.ones(spatial_dims)
 
     if any(high_sigma < low_sigma):
-        raise ValueError('high_sigma must be equal to or larger than'
-                         'low_sigma for all axes')
+        raise ValueError(
+            'high_sigma must be equal to or larger than' 'low_sigma for all axes'
+        )
 
-    im1 = gaussian(image, low_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate,
-                   preserve_range=False)
+    im1 = gaussian(
+        image,
+        low_sigma,
+        mode=mode,
+        cval=cval,
+        channel_axis=channel_axis,
+        truncate=truncate,
+        preserve_range=False,
+    )
 
-    im2 = gaussian(image, high_sigma, mode=mode, cval=cval,
-                   channel_axis=channel_axis, truncate=truncate,
-                   preserve_range=False)
+    im2 = gaussian(
+        image,
+        high_sigma,
+        mode=mode,
+        cval=cval,
+        channel_axis=channel_axis,
+        truncate=truncate,
+        preserve_range=False,
+    )
 
     return im1 - im2

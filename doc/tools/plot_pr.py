@@ -20,32 +20,31 @@ cache = '_pr_cache.txt'
 # The first two releases are commented out.
 # This was in the era before PRs.
 #
-releases = OrderedDict([
-    #('0.1', u'2009-10-07 13:52:19 +0200'),
-    #('0.2', u'2009-11-12 14:48:45 +0200'),
-    #('0.3', u'2011-10-10 03:28:47 -0700'),
-    ('0.4', '2011-12-03 14:31:32 -0800'),
-    ('0.5', '2012-02-26 21:00:51 -0800'),
-    ('0.6', '2012-06-24 21:37:05 -0700'),
-    ('0.7', '2012-09-29 18:08:49 -0700'),
-    ('0.8', '2013-03-04 20:46:09 +0100')])
+releases = OrderedDict(
+    [
+        # ('0.1', u'2009-10-07 13:52:19 +0200'),
+        # ('0.2', u'2009-11-12 14:48:45 +0200'),
+        # ('0.3', u'2011-10-10 03:28:47 -0700'),
+        ('0.4', '2011-12-03 14:31:32 -0800'),
+        ('0.5', '2012-02-26 21:00:51 -0800'),
+        ('0.6', '2012-06-24 21:37:05 -0700'),
+        ('0.7', '2012-09-29 18:08:49 -0700'),
+        ('0.8', '2013-03-04 20:46:09 +0100'),
+    ]
+)
 
 
 month_duration = 24
 
 
 def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
-    params = {'state': state,
-              'per_page': 100,
-              'page': 1}
+    params = {'state': state, 'per_page': 100, 'page': 1}
 
     data = []
     page_data = True
 
     while page_data:
-        config = {'user': user,
-                  'repo': repo,
-                  'params': urllib.urlencode(params)}
+        config = {'user': user, 'repo': repo, 'params': urllib.urlencode(params)}
 
         fetch_status = (
             f"Fetching page {params['page']} (state={params['state']})"
@@ -77,11 +76,12 @@ def seconds_from_epoch(dates):
 
 def get_month_bins(dates):
     now = datetime.now(tz=dates[0].tzinfo)
-    this_month = datetime(year=now.year, month=now.month, day=1,
-                          tzinfo=dates[0].tzinfo)
+    this_month = datetime(year=now.year, month=now.month, day=1, tzinfo=dates[0].tzinfo)
 
-    bins = [this_month - relativedelta(months=i)
-            for i in reversed(range(-1, month_duration))]
+    bins = [
+        this_month - relativedelta(months=i)
+        for i in reversed(range(-1, month_duration))
+    ]
     return seconds_from_epoch(bins)
 
 
@@ -134,8 +134,9 @@ mixed_transform = blended_transform_factory(ax.transData, ax.transAxes)
 for version, date in releases.items():
     date = seconds_from_epoch([date])[0]
     ax.axvline(date, color='black', linestyle=':', label=version)
-    ax.text(date, 1, version, color='r', va='bottom', ha='center',
-            transform=mixed_transform)
+    ax.text(
+        date, 1, version, color='r', va='bottom', ha='center', transform=mixed_transform
+    )
 
 ax.set_title('Pull request activity').set_y(1.05)
 ax.set_xlabel('Date')

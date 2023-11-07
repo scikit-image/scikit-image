@@ -8,7 +8,8 @@ except ImportError:
     raise ImportError(
         "Astropy could not be found. It is needed to read FITS files.\n"
         "Please refer to https://www.astropy.org for installation\n"
-        "instructions.")
+        "instructions."
+    )
 
 
 def imread(fname):
@@ -42,8 +43,7 @@ def imread(fname):
         # such as binary tables, and get the first image data array:
         img_array = None
         for hdu in hdulist:
-            if isinstance(hdu, fits.ImageHDU) or \
-               isinstance(hdu, fits.PrimaryHDU):
+            if isinstance(hdu, fits.ImageHDU) or isinstance(hdu, fits.PrimaryHDU):
                 if hdu.data is not None:
                     img_array = hdu.data
                     break
@@ -84,8 +84,7 @@ def imread_collection(load_pattern, conserve_memory=True):
     for filename in load_pattern:
         with fits.open(filename) as hdulist:
             for n, hdu in zip(range(len(hdulist)), hdulist):
-                if isinstance(hdu, fits.ImageHDU) or \
-                   isinstance(hdu, fits.PrimaryHDU):
+                if isinstance(hdu, fits.ImageHDU) or isinstance(hdu, fits.PrimaryHDU):
                     # Ignore (primary) header units with no data (use '.size'
                     # rather than '.data' to avoid actually loading the image):
                     try:
@@ -95,8 +94,9 @@ def imread_collection(load_pattern, conserve_memory=True):
                     if data_size > 0:
                         ext_list.append((filename, n))
 
-    return io.ImageCollection(ext_list, load_func=FITSFactory,
-                              conserve_memory=conserve_memory)
+    return io.ImageCollection(
+        ext_list, load_func=FITSFactory, conserve_memory=conserve_memory
+    )
 
 
 def FITSFactory(image_ext):
@@ -123,15 +123,13 @@ def FITSFactory(image_ext):
     filename = image_ext[0]
     extnum = image_ext[1]
 
-    if type(filename) is not str or type(extnum) is not int:
+    if not (isinstance(filename, str) and isinstance(extnum, int)):
         raise ValueError("Expected a (filename, extension) tuple")
 
     with fits.open(filename) as hdulist:
         data = hdulist[extnum].data
 
     if data is None:
-        raise RuntimeError(
-            f"Extension {extnum} of {filename} has no data"
-        )
+        raise RuntimeError(f"Extension {extnum} of {filename} has no data")
 
     return data

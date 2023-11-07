@@ -5,8 +5,7 @@ from .._shared import utils
 
 
 @utils.channel_as_last_axis(multichannel_output=False)
-def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *,
-                 channel_axis=-1):
+def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
@@ -62,9 +61,9 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *,
     >>> segments = felzenszwalb(img, scale=3.0, sigma=0.95, min_size=5)
     """
     if channel_axis is None and image.ndim > 2:
-        raise ValueError("This algorithm works only on single or "
-                         "multi-channel 2d images. ")
+        raise ValueError(
+            "This algorithm works only on single or " "multi-channel 2d images. "
+        )
 
     image = np.atleast_3d(image)
-    return _felzenszwalb_cython(image, scale=scale, sigma=sigma,
-                                min_size=min_size)
+    return _felzenszwalb_cython(image, scale=scale, sigma=sigma, min_size=min_size)

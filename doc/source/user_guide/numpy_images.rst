@@ -8,8 +8,8 @@ Images in ``scikit-image`` are represented by NumPy ndarrays. Hence, many
 common operations can be achieved using standard NumPy methods for
 manipulating arrays::
 
-    >>> from skimage import data
-    >>> camera = data.camera()
+    >>> import skimage as ski
+    >>> camera = ski.data.camera()
     >>> type(camera)
     <type 'numpy.ndarray'>
 
@@ -67,6 +67,7 @@ Masking (indexing with masks of booleans)::
 
 Fancy indexing (indexing with sets of indices)::
 
+    >>> import numpy as np
     >>> inds_r = np.arange(len(camera))
     >>> inds_c = 4 * inds_r % len(camera)
     >>> camera[inds_r, inds_c] = 0
@@ -101,7 +102,7 @@ Color images
 All of the above remains true for color images. A color image is a
 NumPy array with an additional trailing dimension for the channels::
 
-    >>> cat = data.chelsea()
+    >>> cat = ski.data.chelsea()
     >>> type(cat)
     <type 'numpy.ndarray'>
     >>> cat.shape
@@ -121,16 +122,15 @@ We can also use 2D boolean masks for 2D multichannel images, as we did with
 the grayscale image above:
 
 .. plot::
+   :caption: Using a 2D mask on a 2D color image
 
-    Using a 2D mask on a 2D color image
+   import skimage as ski
+   cat = ski.data.chelsea()
+   reddish = cat[:, :, 0] > 160
+   cat[reddish] = [0, 255, 0]
+   plt.imshow(cat)
 
-    >>> from skimage import data
-    >>> cat = data.chelsea()
-    >>> reddish = cat[:, :, 0] > 160
-    >>> cat[reddish] = [0, 255, 0]
-    >>> plt.imshow(cat)
-
-The example color images included in ``skimage.data`` have channels stored
+The example color images included in :mod:`skimage.data` have channels stored
 along the last axis, although other software may follow different conventions.
 The scikit-image library functions supporting color images have a
 ``channel_axis`` argument that can be used to specify which axis of an array
@@ -143,7 +143,7 @@ Coordinate conventions
 
 Because ``scikit-image`` represents images using NumPy arrays, the
 coordinate conventions must match. Two-dimensional (2D) grayscale images
-(such as `camera` above) are indexed by rows and columns (abbreviated to
+(such as ``camera`` above) are indexed by rows and columns (abbreviated to
 either ``(row, col)`` or ``(r, c)``), with the lowest element ``(0, 0)``
 at the top-left corner. In various parts of the library, you will
 also see ``rr`` and ``cc`` refer to lists of row and column
@@ -184,29 +184,28 @@ argument.
 
 Many functions in ``scikit-image`` can operate on 3D images directly::
 
+    >>> import numpy as np
+    >>> import scipy as sp
+    >>> import skimage as ski
     >>> rng = np.random.default_rng()
     >>> im3d = rng.random((100, 1000, 1000))
-    >>> from skimage import morphology
-    >>> from scipy import ndimage as ndi
-    >>> seeds = ndi.label(im3d < 0.1)[0]
-    >>> ws = morphology.watershed(im3d, seeds)
+    >>> seeds = sp.ndimage.label(im3d < 0.1)[0]
+    >>> ws = ski.morphology.watershed(im3d, seeds)
 
 In many cases, however, the third spatial dimension has lower resolution
 than the other two. Some ``scikit-image`` functions provide a ``spacing``
 keyword argument to help handle this kind of data::
 
-    >>> from skimage import segmentation
-    >>> slics = segmentation.slic(im3d, spacing=[5, 1, 1], channel_axis=None)
+    >>> slics = ski.segmentation.slic(im3d, spacing=[5, 1, 1], channel_axis=None)
 
 Other times, the processing must be done plane-wise. When planes are stacked
 along the leading dimension (in agreement with our convention), the following
 syntax can be used::
 
-    >>> from skimage import filters
     >>> edges = np.empty_like(im3d)
     >>> for pln, image in enumerate(im3d):
     ...     # Iterate over the leading dimension
-    ...     edges[pln] = filters.sobel(image)
+    ...     edges[pln] = ski.filters.sobel(image)
 
 
 Notes on the order of array dimensions

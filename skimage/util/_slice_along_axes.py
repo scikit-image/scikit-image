@@ -56,10 +56,13 @@ def slice_along_axes(image, slices, axes=None, copy=False):
         raise ValueError("`axes` must be unique")
 
     if not all(a >= 0 and a < image.ndim for a in axes):
-        raise ValueError(f"axes {axes} out of range; image has only "
-                         f"{image.ndim} dimensions")
+        raise ValueError(
+            f"axes {axes} out of range; image has only " f"{image.ndim} dimensions"
+        )
 
-    _slices = [slice(None),] * image.ndim
+    _slices = [
+        slice(None),
+    ] * image.ndim
     for (a, b), ax in zip(slices, axes):
         if a < 0:
             a %= image.shape[ax]
@@ -70,7 +73,9 @@ def slice_along_axes(image, slices, axes=None, copy=False):
                 f"Invalid slice ({a}, {b}): must be ordered `(min_val, max_val)`"
             )
         if a < 0 or b > image.shape[ax]:
-            raise ValueError(f"Invalid slice ({a}, {b}) for image with dimensions {image.shape}")
+            raise ValueError(
+                f"Invalid slice ({a}, {b}) for image with dimensions {image.shape}"
+            )
         _slices[ax] = slice(a, b)
 
     image_slice = image[tuple(_slices)]

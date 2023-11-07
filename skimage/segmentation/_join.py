@@ -48,8 +48,10 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     True
     """
     if s1.shape != s2.shape:
-        raise ValueError("Cannot join segmentations of different shape. "
-                         f"s1.shape: {s1.shape}, s2.shape: {s2.shape}")
+        raise ValueError(
+            "Cannot join segmentations of different shape. "
+            f"s1.shape: {s1.shape}, s2.shape: {s2.shape}"
+        )
     # Reindex input label images
     s1_relabeled, _, backward_map1 = relabel_sequential(s1)
     s2_relabeled, _, backward_map2 = relabel_sequential(s2)
@@ -62,8 +64,12 @@ def join_segmentations(s1, s2, return_mapping: bool = False):
     # Determine label mapping
     labels_j = np.unique(j_initial)
     labels_s1_relabeled, labels_s2_relabeled = np.divmod(labels_j, factor)
-    map_j_to_s1 = ArrayMap(map_j_to_j_initial.in_values, backward_map1[labels_s1_relabeled])
-    map_j_to_s2 = ArrayMap(map_j_to_j_initial.in_values, backward_map2[labels_s2_relabeled])
+    map_j_to_s1 = ArrayMap(
+        map_j_to_j_initial.in_values, backward_map1[labels_s1_relabeled]
+    )
+    map_j_to_s2 = ArrayMap(
+        map_j_to_j_initial.in_values, backward_map2[labels_s2_relabeled]
+    )
     return j, map_j_to_s1, map_j_to_s2
 
 
@@ -146,11 +152,9 @@ def relabel_sequential(label_field, offset=1):
     in_vals = np.unique(label_field)
     if in_vals[0] == 0:
         # always map 0 to 0
-        out_vals = np.concatenate(
-            [[0], np.arange(offset, offset+len(in_vals)-1)]
-        )
+        out_vals = np.concatenate([[0], np.arange(offset, offset + len(in_vals) - 1)])
     else:
-        out_vals = np.arange(offset, offset+len(in_vals))
+        out_vals = np.arange(offset, offset + len(in_vals))
     input_type = label_field.dtype
     if input_type.kind not in "iu":
         raise TypeError("label_field must have an integer dtype")
