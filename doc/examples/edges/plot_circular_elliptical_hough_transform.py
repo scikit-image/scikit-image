@@ -83,7 +83,7 @@ plt.show()
 # assumes that these two points form the major axis. A loop on all the
 # other points determines the minor axis length for candidate ellipses.
 # The latter are included in the results if enough 'valid' candidates have
-# similar minor axis lengths. By valid, we mean candidates for which the 
+# similar minor axis lengths. By valid, we mean candidates for which the
 # minor and major axis lengths fall within the prescribed bounds.
 # A full description of the algorithm can be found in reference [1]_.
 #
