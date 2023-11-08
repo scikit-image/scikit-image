@@ -80,12 +80,11 @@ plt.show()
 # -------------------
 #
 # The algorithm takes two different points belonging to the ellipse. It
-# assumes that it is the major axis. A loop on all the other points determines
-# the minor axis length for candidate ellipses. The latter are included in the
-# results if enough valid (by valid, we are referring to candidates where the
-# minor and major axis lengths fall within the prescribed bounds) candidates
-# have similar minor axis lengths.
-#
+# assumes that these two points form the major axis. A loop on all the
+# other points determines the minor axis length for candidate ellipses.
+# The latter are included in the results if enough 'valid' candidates have
+# similar minor axis lengths. By valid, we mean candidates for which the 
+# minor and major axis lengths fall within the prescribed bounds.
 # A full description of the algorithm can be found in reference [1]_.
 #
 # References
@@ -111,7 +110,7 @@ edges = canny(image_gray, sigma=2.0, low_threshold=0.55, high_threshold=0.8)
 # A higher `accuracy` value will lead to more ellipses being found, at the
 # cost of a lower precision on the minor axis length estimation.
 # A higher `threshold` will lead to less ellipses being found, filtering out those
-# that have fewer edge points on their perimeter.
+# with fewer edge points (as found above by the Canny detector) on their perimeter.
 result = hough_ellipse(edges, accuracy=20, threshold=250, min_size=100, max_size=120)
 result.sort(order='accumulator')
 
