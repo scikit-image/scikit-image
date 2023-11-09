@@ -2,7 +2,8 @@ import warnings
 
 import numpy as np
 from scipy.spatial import cKDTree
-from ..measure import find_contours
+
+from ..morphology import erosion
 
 
 def _hausdorff_distance_set(a_points, b_points, method='standard'):
@@ -148,6 +149,9 @@ def hausdorff_distance(image0, image1, method="standard"):
 def hausdorff_distance_mask(image0, image1, method='standard'):
     """Calculate the Hausdorff distance between the contours of two segmentation masks.
 
+    The contours are computed as the difference between the mask and their
+    erosion by the structuring element `[[0, 1, 0], [1, 1, 1], [0, 1, 0]]`.
+
     Parameters
     ----------
     image0, image1 : ndarray
@@ -204,10 +208,14 @@ def hausdorff_distance_mask(image0, image1, method='standard'):
     elif not np.any(image1):
         return np.inf
 
-    a_points = np.concatenate(find_contours(image0 > 0))
-    b_points = np.concatenate(find_contours(image1 > 0))
+    se = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    contour0 = image0 ^ erosion(image0, se)
+    contour_points0 = np.transpose(np.nonzero(contour0))
+    contour1 = image1 ^ erosion(image1, se)
+    contour_points1 = np.transpose(np.nonzero(contour1))
+    _hausdorff_distance_set(contour_points0, contour_points1)
 
-    return _hausdorff_distance_set(a_points, b_points, method)
+    return _hausdorff_distance_set(contour_points0, contour_points1, method)
 
 
 def hausdorff_pair(image0, image1):
@@ -254,6 +262,9 @@ def hausdorff_pair_mask(image0, image1):
     """Returns pair of points that are Hausdorff's Distance apart between
     the contours of two segmentation masks.
 
+    The contours are computed as the difference between the mask and their
+    erosion by the structuring element `[[0, 1, 0], [1, 1, 1], [0, 1, 0]]`.
+
     The Hausdorff distance [1]_ is the maximum distance between any point on
     ``image0`` and its nearest point on ``image1``, and vice-versa.
 
@@ -287,7 +298,11 @@ def hausdorff_pair_mask(image0, image1):
         warnings.warn("One or both of the images is empty.", stacklevel=2)
         return (), ()
 
-    a_points = np.concatenate(find_contours(image0 > 0))
-    b_points = np.concatenate(find_contours(image1 > 0))
+    se = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    contour0 = image0 ^ erosion(image0, se)
+    contour_points0 = np.transpose(np.nonzero(contour0))
+    contour1 = image1 ^ erosion(image1, se)
+    contour_points1 = np.transpose(np.nonzero(contour1))
+    _hausdorff_distance_set(contour_points0, contour_points1)
 
-    return _hausdorff_pair_set(a_points, b_points)
+    return _hausdorff_pair_set(contour_points0, contour_points1)
