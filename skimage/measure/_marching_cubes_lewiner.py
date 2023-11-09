@@ -26,7 +26,7 @@ def marching_cubes(
 
     Parameters
     ----------
-    volume : (M, N, P) array
+    volume : (M, N, P) ndarray
         Input data volume to find isosurfaces. Will internally be
         converted to float32 if necessary.
     level : float, optional
@@ -73,7 +73,7 @@ def marching_cubes(
     normals : (V, 3) array
         The normal direction at each vertex, as calculated from the
         data.
-    values : (V, ) array
+    values : (V,) array
         Gives a measure for the maximum value of the data in the local region
         near each vertex. This can be used by visualization tools to apply
         a colormap to the mesh.
@@ -318,7 +318,7 @@ def mesh_surface_area(verts, faces):
     Parameters
     ----------
     verts : (V, 3) array of floats
-        Array containing (x, y, z) coordinates for V unique mesh vertices.
+        Array containing coordinates for V unique mesh vertices.
     faces : (F, 3) array of ints
         List of length-3 lists of integers, referencing vertex coordinates as
         provided in `verts`.

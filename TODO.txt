@@ -13,6 +13,12 @@ Version 0.23
 * Remove deprecated ``return_error`` in
   ``skimage.registration.phase_cross_correlation``.
 
+Version 0.26
+------------
+* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
+  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
+  function ``_shift_footprint``.
+
 Other (2022)
 ------------
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
@@ -23,6 +29,9 @@ Other (2022)
 * NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+* pydata-sphinx-theme 0.15.0 is minimal version: remove obsolete config option
+  ``"navigation_with_keys": False,`` in doc/source/conf.py::html_theme_options.
+
 
 Post numpy 2
 ------------

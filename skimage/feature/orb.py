@@ -22,7 +22,6 @@ for i in range(-15, 16):
 
 
 class ORB(FeatureDetector, DescriptorExtractor):
-
     """Oriented FAST and rotated BRIEF feature detector and binary descriptor
     extractor.
 
@@ -61,11 +60,11 @@ class ORB(FeatureDetector, DescriptorExtractor):
     ----------
     keypoints : (N, 2) array
         Keypoint coordinates as ``(row, col)``.
-    scales : (N, ) array
+    scales : (N,) array
         Corresponding scales.
-    orientations : (N, ) array
+    orientations : (N,) array
         Corresponding orientations in radians.
-    responses : (N, ) array
+    responses : (N,) array
         Corresponding Harris corner responses.
     descriptors : (Q, `descriptor_size`) array of dtype bool
         2D array of binary descriptors of size `descriptor_size` for Q
@@ -248,9 +247,9 @@ class ORB(FeatureDetector, DescriptorExtractor):
             Input image.
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-        scales : (N, ) array
+        scales : (N,) array
             Corresponding scales.
-        orientations : (N, ) array
+        orientations : (N,) array
             Corresponding orientations in radians.
 
         """

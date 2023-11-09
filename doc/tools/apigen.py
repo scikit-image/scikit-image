@@ -1,5 +1,5 @@
 """
-Attempt to generate templates for module reference with Sphinx
+Attempt to generate templates for module reference with Sphinx.
 
 To include extension modules, first identify them as valid in the
 ``_uri2path`` method, then handle them in the ``_parse_module_with_import``
@@ -28,8 +28,7 @@ DEBUG = True
 
 
 class ApiDocWriter:
-    '''Class for automatic detection and parsing of API docs
-    to Sphinx-parsable reST format'''
+    """Automatic detection and parsing of API docs to Sphinx-parsable reST format."""
 
     # only separating first two levels
     rst_section_levels = ['*', '=', '-', '~', '^']
@@ -41,32 +40,30 @@ class ApiDocWriter:
         package_skip_patterns=None,
         module_skip_patterns=None,
     ):
-        r'''Initialize package for parsing
+        r"""Initialize package for parsing
 
         Parameters
         ----------
         package_name : string
-            Name of the top-level package.  *package_name* must be the
-            name of an importable package
+            Name of the top-level package. *package_name* must be the
+            name of an importable package.
         rst_extension : string, optional
-            Extension for reST files, default '.rst'
+            Extension for reST files, default '.rst'.
         package_skip_patterns : None or sequence of {strings, regexps}
             Sequence of strings giving URIs of packages to be excluded
             Operates on the package path, starting at (including) the
             first dot in the package path, after *package_name* - so,
             if *package_name* is ``sphinx``, then ``sphinx.util`` will
-            result in ``.util`` being passed for earching by these
-            regexps.  If is None, gives default. Default is:
-            ['\.tests$']
+            result in ``.util`` being passed for searching by these
+            regexps.  If is None, gives default. Default is ``['\.tests$']``.
         module_skip_patterns : None or sequence
             Sequence of strings giving URIs of modules to be excluded
             Operates on the module name including preceding URI path,
             back to the first dot after *package_name*.  For example
             ``sphinx.util.console`` results in the string to search of
-            ``.util.console``
-            If is None, gives default. Default is:
-            ['\.setup$', '\._']
-        '''
+            ``.util.console``.
+            If is None, gives default. Default is ``['\.setup$', '\._']``.
+        """
         if package_skip_patterns is None:
             package_skip_patterns = ['\\.tests$']
         if module_skip_patterns is None:
@@ -80,7 +77,7 @@ class ApiDocWriter:
         return self._package_name
 
     def set_package_name(self, package_name):
-        '''Set package_name
+        """Set package_name
 
         >>> docwriter = ApiDocWriter('sphinx')
         >>> import sphinx
@@ -90,7 +87,7 @@ class ApiDocWriter:
         >>> import docutils
         >>> docwriter.root_path == docutils.__path__[0]
         True
-        '''
+        """
         # It's also possible to imagine caching the module parsing here
         self._package_name = package_name
         root_module = self._import(package_name)
@@ -102,7 +99,7 @@ class ApiDocWriter:
     )
 
     def _import(self, name):
-        '''Import namespace package'''
+        """Import namespace package."""
         mod = __import__(name)
         components = name.split('.')
         for comp in components[1:]:
@@ -110,7 +107,8 @@ class ApiDocWriter:
         return mod
 
     def _get_object_name(self, line):
-        '''Get second token in line
+        """Get second token in line.
+
         >>> docwriter = ApiDocWriter('sphinx')
         >>> docwriter._get_object_name("  def func():  ")
         'func'
@@ -118,14 +116,14 @@ class ApiDocWriter:
         'Klass'
         >>> docwriter._get_object_name("  class Klass:  ")
         'Klass'
-        '''
+        """
         name = line.split()[1].split('(')[0].strip()
         # in case we have classes which are not derived from object
         # ie. old style classes
         return name.rstrip(':')
 
     def _uri2path(self, uri):
-        '''Convert uri to absolute filepath
+        """Convert uri to absolute filepath.
 
         Parameters
         ----------
@@ -151,7 +149,7 @@ class ApiDocWriter:
         True
         >>> docwriter._uri2path('sphinx.does_not_exist')
 
-        '''
+        """
         if uri == self.package_name:
             return os.path.join(self.root_path, '__init__.py')
         path = uri.replace(self.package_name + '.', '')
@@ -167,7 +165,7 @@ class ApiDocWriter:
         return path
 
     def _path2uri(self, dirpath):
-        '''Convert directory path to uri'''
+        """Convert directory path to uri."""
         package_dir = self.package_name.replace('.', os.path.sep)
         relpath = dirpath.replace(self.root_path, package_dir)
         if relpath.startswith(os.path.sep):
@@ -175,7 +173,7 @@ class ApiDocWriter:
         return relpath.replace(os.path.sep, '.')
 
     def _parse_module(self, uri):
-        '''Parse module defined in *uri*'''
+        """Parse module defined in uri."""
         filename = self._uri2path(uri)
         if filename is None:
             print(filename, 'erk')
@@ -187,7 +185,7 @@ class ApiDocWriter:
         return functions, classes
 
     def _parse_module_with_import(self, uri):
-        """Look for functions and classes in an importable module.
+        """Look for functions and classes in the importable module.
 
         Parameters
         ----------
@@ -234,7 +232,7 @@ class ApiDocWriter:
         return functions, classes, submodules
 
     def _parse_lines(self, linesource):
-        '''Parse lines of text for functions and classes'''
+        """Parse lines of text for functions and classes."""
         functions = []
         classes = []
         for line in linesource:
@@ -255,18 +253,18 @@ class ApiDocWriter:
         return functions, classes
 
     def generate_api_doc(self, uri):
-        '''Make autodoc documentation template string for a module
+        """Make autodoc documentation template string for a module.
 
         Parameters
         ----------
         uri : string
-            python location of module - e.g 'sphinx.builder'
+            Python location of module - e.g 'sphinx.builder'.
 
         Returns
         -------
         S : string
-            Contents of API doc
-        '''
+            Contents of API doc.
+        """
         # get the names of all classes and functions
         functions, classes, submodules = self._parse_module_with_import(uri)
         if not (len(functions) or len(classes) or len(submodules)) and DEBUG:
@@ -293,7 +291,7 @@ class ApiDocWriter:
             ad += '   ' + uri + '.' + c + '\n'
         ad += '\n'
         for m in submodules:
-            ad += '    ' + uri + '.' + m + '\n'
+            ad += '   ' + uri + '.' + m + '\n'
         ad += '\n'
 
         for f in functions:
@@ -318,9 +316,9 @@ class ApiDocWriter:
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
-        '''Returns True if *matchstr* does not match patterns
+        """Return True if matchstr does not match patterns.
 
-        ``self.package_name`` removed from front of string if present
+        Removes ``self.package_name`` from the beginning of the string if present.
 
         Examples
         --------
@@ -337,7 +335,7 @@ class ApiDocWriter:
         >>> dw.module_skip_patterns.append('^\\.badmod$')
         >>> dw._survives_exclude('sphinx.badmod', 'module')
         False
-        '''
+        """
         if match_type == 'module':
             patterns = self.module_skip_patterns
         elif match_type == 'package':
@@ -358,17 +356,12 @@ class ApiDocWriter:
         return True
 
     def discover_modules(self):
-        r'''Return module sequence discovered from ``self.package_name``
-
-
-        Parameters
-        ----------
-        None
+        r"""Return module sequence discovered from ``self.package_name``.
 
         Returns
         -------
         mods : sequence
-            Sequence of module names within ``self.package_name``
+            Sequence of module names within ``self.package_name``.
 
         Examples
         --------
@@ -380,7 +373,7 @@ class ApiDocWriter:
         >>> 'sphinx.util' in dw.discover_modules()
         False
         >>>
-        '''
+        """
         modules = [self.package_name]
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):
@@ -417,16 +410,12 @@ class ApiDocWriter:
         Parameters
         ----------
         outdir : string
-            Directory name in which to store files
-            We create automatic filenames for each module
-
-        Returns
-        -------
-        None
+            Directory name in which to store the files. Filenames for each module
+            are automatically created.
 
         Notes
         -----
-        Sets self.written_modules to list of written modules
+        Sets self.written_modules to list of written modules.
         """
         if not os.path.exists(outdir):
             os.mkdir(outdir)
@@ -435,19 +424,19 @@ class ApiDocWriter:
         self.write_modules_api(modules, outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
-        """Make a reST API index file from written files
+        """Make a reST API index file from the written files.
 
         Parameters
         ----------
         outdir : string
-            Directory to which to write generated index file
+            Directory to which to write generated index file.
         froot : string, optional
-            root (filename without extension) of filename to write to
-            Defaults to 'gen'.  We add ``self.rst_extension``.
+            Root (filename without extension) of filename to write to
+            Defaults to 'gen'. We add ``self.rst_extension``.
         relative_to : string
-            path to which written filenames are relative.  This
+            Path to which written filenames are relative. This
             component of the written file path will be removed from
-            outdir, in the generated index.  Default is None, meaning,
+            outdir, in the generated index. Default is None, meaning,
             leave path as it is.
         """
         if self.written_modules is None:

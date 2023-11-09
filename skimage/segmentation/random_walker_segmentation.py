@@ -313,13 +313,13 @@ def random_walker(
 
     Parameters
     ----------
-    data : array_like
+    data : (M, N[, P][, C]) ndarray
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional with `channel_axis` specifying the dimension containing
         channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
-    labels : array of ints, of same shape as `data` without channels dimension
+    labels : (M, N[, P]) array of ints
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
         Negative labels correspond to inactive pixels that are not taken
@@ -388,7 +388,7 @@ def random_walker(
 
     See Also
     --------
-    skimage.morphology.watershed : watershed segmentation
+    skimage.segmentation.watershed
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 

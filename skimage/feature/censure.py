@@ -175,7 +175,7 @@ class CENSURE(FeatureDetector):
     ----------
     keypoints : (N, 2) array
         Keypoint coordinates as ``(row, col)``.
-    scales : (N, ) array
+    scales : (N,) array
         Corresponding scales.
 
     References
