@@ -35,8 +35,8 @@ For further information on TPS Transformation, see:
 Image Deformation
 =================
 
-In this example we will see how to use thin plates spline interpolation in the
-context of deforming an astronaut image. To deform the image, the displacement of every
+In this example we will see how to use the thin plates spline interpolation in the
+to deform an image. To deform the image, the displacement of every
 pixel is needed. In our image we define 6 source and destination points labelled 1-6: 1-4 in the image
 corners, 5 near the smile corner and 6 in an eye. At the corners, there are no
 displacements. The smile corner moved upward and the eye position moved down.
@@ -102,9 +102,9 @@ plt.show()
 #
 # Interpolation
 # =============
-# In this example thin-plate spline is applied to source coordinates and to
-# each target coordinates to derive an interpolation function and coefficients for
-# each target points. These coefficients is then used to transforms an arbitrary
+# In this example thin-plate spline is applied to each source and target
+# coordinate to derive an interpolation function and coefficients for
+# each target point. These coefficients are then used to transform an arbitrary
 # point associated with the reference to an interpolated location on the target.
 
 import matplotlib.pyplot as plt

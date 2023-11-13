@@ -13,9 +13,9 @@ class TpsTransform:
     Attributes
     ----------
     parameters : (N, D) array_like
-        Coefficients for every control points.
+        Coefficients for every control point.
     src : (N, 2) array_like
-        Control point at source coordinates
+        Control point at source coordinates.
 
     Examples
     --------
@@ -167,13 +167,15 @@ def _radial_basis_function(r):
         Input array representing the norm distance between interlandmark
         distances for the source form and based on the (x,y) coordinates
         for each of these points.
+
     Returns
     -------
     ndarray
         Calculated kernel function U.
     """
     _small = 1e-8  # Small value to avoid divide-by-zero
-    return np.where(r == 0.0, 0.0, (r**2) * np.log((r**2) + _small))
+    r_sq = r**2
+    return np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
 
 
 def _ensure_2d(arr):
@@ -266,7 +268,8 @@ def tps_warp(
     if output_region is not None:
         if not isinstance(output_region, tuple) or len(output_region) != 4:
             raise ValueError("Output region should be a tuple of 4 values.")
-    output_region = output_region or (0, 0, image.shape[0], image.shape[1])
+    else:
+        output_region = (0, 0, image.shape[0], image.shape[1])
 
     x_min, y_min, x_max, y_max = output_region
     if grid_scaling is None:
