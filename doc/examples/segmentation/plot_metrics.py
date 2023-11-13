@@ -7,7 +7,7 @@ When trying out different segmentation methods, how do you know which one is
 best? If you have a *ground truth* or *gold standard* segmentation, you can use
 various metrics to check how close each automated method comes to the truth.
 In this example we use an easy-to-segment image as an example of how to
-interpret various segmentation metrics. We will use the the adapted Rand error
+interpret various segmentation metrics. We will use the adapted Rand error
 and the variation of information as example metrics, and see how
 *oversegmentation* (splitting of true segments into too many sub-segments) and
 *undersegmentation* (merging of different true segments into a single segment)
@@ -58,7 +58,7 @@ edges = sobel(image)
 im_test1 = watershed(edges, markers=468, compactness=0.001)
 
 ###############################################################################
-# The next approach uses the Canny edge filter, :func:`skimage.filters.canny`.
+# The next approach uses the Canny edge filter, :func:`skimage.feature.canny`.
 # This is a very good edge finder, and gives balanced results.
 
 edges = canny(image)

@@ -1,3 +1,5 @@
+import inspect
+
 import numpy as np
 import pytest
 from scipy import ndimage as ndi
@@ -24,8 +26,18 @@ def cell3d_image():
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
+gray_morphology_funcs = (
+    gray.erosion,
+    gray.dilation,
+    gray.opening,
+    gray.closing,
+    gray.white_tophat,
+    gray.black_tophat,
+)
+
+
 class TestMorphology:
-    # These expected outputs were generated with skimage v0.12.1
+    # These expected outputs were generated with skimage v0.22.0 + PR #6695
     # using:
     #
     #   from skimage.morphology.tests.test_gray import TestMorphology
@@ -34,14 +46,6 @@ class TestMorphology:
     #   np.savez_compressed('gray_morph_output.npz', **output)
 
     def _build_expected_output(self):
-        funcs = (
-            gray.erosion,
-            gray.dilation,
-            gray.opening,
-            gray.closing,
-            gray.white_tophat,
-            gray.black_tophat,
-        )
         footprints_2D = (
             footprints.square,
             footprints.diamond,
@@ -56,7 +60,7 @@ class TestMorphology:
         output = {}
         for n in range(1, 4):
             for strel in footprints_2D:
-                for func in funcs:
+                for func in gray_morphology_funcs:
                     key = f'{strel.__name__}_{n}_{func.__name__}'
                     output[key] = func(image, strel(n))
 
@@ -67,11 +71,46 @@ class TestMorphology:
         calculated = self._build_expected_output()
         assert_equal(expected, calculated)
 
+    def test_gray_closing_extensive(self):
+        img = data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+        # Default mode="reflect" is not extensive for backwards-compatibility
+        result_default = gray.closing(img, footprint=footprint)
+        assert not np.all(result_default >= img)
+
+        result = gray.closing(img, footprint=footprint, mode="ignore")
+        assert np.all(result >= img)
+
+    def test_gray_opening_anti_extensive(self):
+        img = data.coins()
+        footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+        # Default mode="reflect" is not extensive for backwards-compatibility
+        result_default = gray.opening(img, footprint=footprint)
+        assert not np.all(result_default <= img)
+
+        result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
+        assert np.all(result_ignore <= img)
+
+    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
+    def test_supported_mode(self, func, mode):
+        img = np.ones((10, 10))
+        func(img, mode=mode)
+
+    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("mode", ["", "symmetric", 3, None])
+    def test_unsupported_mode(self, func, mode):
+        img = np.ones((10, 10))
+        with pytest.raises(ValueError, match="unsupported mode"):
+            func(img, mode=mode)
+
 
 class TestEccentricStructuringElements:
     def setup_class(self):
-        self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
-        self.black_pixel[1, 1] = 0
+        self.black_pixel = 255 * np.ones((6, 6), dtype=np.uint8)
+        self.black_pixel[2, 2] = 0
         self.white_pixel = 255 - self.black_pixel
         self.footprints = [
             footprints.square(2),
@@ -112,7 +151,7 @@ class TestEccentricStructuringElements:
     def test_black_tophat_black_pixel(self):
         for s in self.footprints:
             tophat = gray.black_tophat(self.black_pixel, s)
-            assert np.all(tophat == (255 - self.black_pixel))
+            assert np.all(tophat == self.white_pixel)
 
     def test_white_tophat_black_pixel(self):
         for s in self.footprints:
@@ -462,3 +501,19 @@ def test_octahedron_decomposition(cell3d_image, function, radius, decomposition)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
+
+
+@pytest.mark.parametrize("func", [gray.erosion, gray.dilation])
+@pytest.mark.parametrize("name", ["shift_x", "shift_y"])
+@pytest.mark.parametrize("value", [True, False, None])
+def test_deprecated_shift(func, name, value):
+    img = np.ones(10)
+    func(img)  # Shouldn't warn
+
+    regex = "`shift_x` and `shift_y` are deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(img, **{name: value})
+        expected_lineno = inspect.currentframe().f_lineno - 1
+    # Assert correct stacklevel
+    assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__

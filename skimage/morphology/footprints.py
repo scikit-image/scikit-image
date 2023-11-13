@@ -79,13 +79,13 @@ def footprint_from_sequence(footprints):
     footprints : tuple of 2-tuples
         A sequence of footprint tuples where the first element of each tuple
         is an array corresponding to a footprint and the second element is the
-        number of times it is to be applied. Currently all footprints should
+        number of times it is to be applied. Currently, all footprints should
         have odd size.
 
     Returns
     -------
     footprint : ndarray
-        An single array equivalent to applying the sequence of `footprints`.
+        An single array equivalent to applying the sequence of ``footprints``.
     """
 
     # Create a single pixel image of sufficient size and apply binary dilation.
@@ -113,10 +113,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but often with
+        give an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        axis. Whether 'sequence' or 'separable' is computationally faster may
         be architecture-dependent.
 
     Returns
@@ -368,7 +368,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
 
     sequence = []
     if num_t_series > 0:
-        # shape (3, ) * ndim "T-shaped" footprints
+        # shape (3,) * ndim "T-shaped" footprints
         all_t = _t_shaped_element_series(ndim=ndim, dtype=dtype)
         [sequence.append((t, num_t_series)) for t in all_t]
     if num_diamond > 0:
@@ -962,3 +962,69 @@ def star(a, dtype=np.uint8):
     footprint[footprint > 0] = 1
 
     return footprint.astype(dtype)
+
+
+def mirror_footprint(footprint):
+    """Mirror each dimension in the footprint.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+
+    Returns
+    -------
+    inverted : ndarray or tuple
+        The footprint, mirrored along each dimension.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0, 0],
+    ...                       [0, 1, 1],
+    ...                       [0, 1, 1]], np.uint8)
+    >>> mirror_footprint(footprint)
+    array([[1, 1, 0],
+           [1, 1, 0],
+           [0, 0, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((mirror_footprint(fp), n) for fp, n in footprint)
+    footprint = np.asarray(footprint)
+    return footprint[(slice(None, None, -1),) * footprint.ndim]
+
+
+def pad_footprint(footprint, *, pad_end=True):
+    """Pad the footprint to an odd size along each dimension.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+    pad_end : bool, optional
+        If ``True``, pads at the end of each dimension (right side), otherwise
+        pads on the front (left side).
+
+    Returns
+    -------
+    padded : ndarray or tuple
+        The footprint, padded to an odd size along each dimension.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0],
+    ...                       [1, 1],
+    ...                       [1, 1]], np.uint8)
+    >>> pad_footprint(footprint)
+    array([[0, 0, 0],
+           [1, 1, 0],
+           [1, 1, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((pad_footprint(fp, pad_end=pad_end), n) for fp, n in footprint)
+    footprint = np.asarray(footprint)
+    padding = []
+    for sz in footprint.shape:
+        padding.append(((0, 1) if pad_end else (1, 0)) if sz % 2 == 0 else (0, 0))
+    return np.pad(footprint, padding)

@@ -133,7 +133,7 @@ registry = {
     "data/no_time_for_that_tiny.gif": "20abe94ba9e45f18de416c5fbef8d1f57a499600be40f9a200fae246010eefce",
     "data/foo3x5x4indexed.png": "48a64c25c6da000ffdb5fcc34ebafe9ba3b1c9b61d7984ea7ca6dc54f9312dfa",
     "data/mssim_matlab_output.npz": "cc11a14bfa040c75b02db32282439f2e2e3e96779196c171498afaa70528ed7a",
-    "data/gray_morph_output.npz": "3012eb994e864e1dca1f66fada6b4375f84eac63658d049886b710488c2394d1",
+    "data/gray_morph_output.npz": "49a0dae607cd8d31e134b4bfcbf0d86b13751fdce9667d8bf1ade93d435191b1",
     "data/disk-matlab-output.npz": "8a39d5c866f6216d6a9c9166312aa4bbf4d18fab3d0dcd963c024985bde5856b",
     "data/diamond-matlab-output.npz": "02fca68907e2b252b501dfe977eef71ae39fadaaa3702ebdc855195422ae1cc2",
     "data/bw_text.png": "308c2b09f8975a69b212e103b18520e8cbb7a4eccfce0f757836cd371f1b9094",
@@ -179,6 +179,7 @@ registry_urls = {
     "data/protein_transport.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/NPCsingleNucleus.tif",
     "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
+    "data/gray_morph_output.npz": "https://gitlab.com/scikit-image/data/-/raw/806548e112bcf2b708a9a32275d335cb592480fd/Tests_besides_Equalize_Otsu/gray_morph_output.npz",
 }
 
 legacy_registry = {

@@ -45,7 +45,7 @@ def precompute_decompositions(
         # shape (3,) * ndim hypercube footprint
         sq3 = np.ones((3,) * ndim, dtype=dtype)
 
-        # shape (3, ) * ndim "T-shaped" footprints
+        # shape (3,) * ndim "T-shaped" footprints
         all_t = _t_shaped_element_series(ndim=ndim, dtype=dtype)
 
         radius_max = radius_max_per_ndim[ndim]

@@ -124,10 +124,10 @@ def slic(
 
     Parameters
     ----------
-    image : 2D, 3D or 4D ndarray
-        Input image, which can be 2D or 3D, and grayscale or multichannel
+    image : (M, N[, P][, C]) ndarray
+        Input image. Can be 2D or 3D, and grayscale or multichannel
         (see `channel_axis` parameter).
-        Input image must either be NaN-free or the NaN's must be masked out
+        Input image must either be NaN-free or the NaN's must be masked out.
     n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
     compactness : float, optional

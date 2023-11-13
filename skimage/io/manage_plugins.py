@@ -3,11 +3,11 @@
 To improve performance, plugins are only loaded as needed. As a result, there
 can be multiple states for a given plugin:
 
-    available: Defined in an *ini file located in `skimage.io._plugins`.
-        See also `skimage.io.available_plugins`.
+    available: Defined in an *ini file located in ``skimage.io._plugins``.
+        See also :func:`skimage.io.available_plugins`.
     partial definition: Specified in an *ini file, but not defined in the
         corresponding plugin module. This will raise an error when loaded.
-    available but not on this system: Defined in `skimage.io._plugins`, but
+    available but not on this system: Defined in ``skimage.io._plugins``, but
         a dependent library (e.g. Qt, PIL) is not available on your system.
         This will raise an error when loaded.
     loaded: The real availability is determined when it's explicitly loaded,
@@ -223,14 +223,11 @@ def use_plugin(name, kind=None):
     Parameters
     ----------
     name : str
-        Name of plugin.
+        Name of plugin. See ``skimage.io.available_plugins`` for a list of available
+        plugins.
     kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
-
-    See Also
-    --------
-    available_plugins : List of available plugins
 
     Examples
     --------
@@ -239,8 +236,8 @@ def use_plugin(name, kind=None):
     >>> from skimage import io
     >>> io.use_plugin('matplotlib', 'imread')
 
-    To see a list of available plugins run ``io.available_plugins``. Note that
-    this lists plugins that are defined, but the full list may not be usable
+    To see a list of available plugins run ``skimage.io.available_plugins``. Note
+    that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 
     """

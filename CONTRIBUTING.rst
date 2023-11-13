@@ -559,8 +559,8 @@ Here, the creation of the image is completed in the ``setup`` method, and not
 included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
-more about the features of `asv`, please refer to the official
-`airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+more about the features, please refer to the official
+`airspeed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
 
 Also, the benchmark files need to be importable when benchmarking old versions
 of scikit-image. So if anything from scikit-image is imported at the top level,

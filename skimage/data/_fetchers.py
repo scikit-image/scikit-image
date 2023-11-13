@@ -268,7 +268,7 @@ def download_all(directory=None):
     scikit-image will only search for images stored in the default directory.
     Only specify the directory if you wish to download the images to your own
     folder for a particular reason. You can access the location of the default
-    data directory by inspecting the variable `skimage.data.data_dir`.
+    data directory by inspecting the variable ``skimage.data.data_dir``.
     """
 
     if _image_fetcher is None:
