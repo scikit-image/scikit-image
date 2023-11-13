@@ -41,7 +41,7 @@ __all__ = [
     'pyramid_gaussian',
     'pyramid_laplacian',
     'tps_warp',
-    'TpsTransform'
+    'TpsTransform',
 ]
 
 from .hough_transform import (

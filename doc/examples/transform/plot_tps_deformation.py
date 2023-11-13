@@ -54,26 +54,47 @@ src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 10
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
 # Fit the thin plate spline from output to input
-warped_img = ski.transform.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
+warped_img = ski.transform.tps_warp(
+    astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1
+)
 
 
 fig, axs = plt.subplots(1, 2)
 
-labels = ['1', '2', '3', '4', '5', '6']  # Adjust the number of labels to match the number of points
+labels = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+]  # Adjust the number of labels to match the number of points
 
 axs[0].imshow(astronaut, cmap='gray')
-axs[0].scatter(src[:, 0], src[:, 1] , marker='x', color='cyan')
+axs[0].scatter(src[:, 0], src[:, 1], marker='x', color='cyan')
 
 for i, label in enumerate(labels):
-    axs[0].annotate(label, (src[:, 0][i], src[:, 1][i] ),
-                    textcoords="offset points", xytext=(0, 5), ha='center', color='red')
+    axs[0].annotate(
+        label,
+        (src[:, 0][i], src[:, 1][i]),
+        textcoords="offset points",
+        xytext=(0, 5),
+        ha='center',
+        color='red',
+    )
 
 axs[1].imshow(warped_img, cmap='gray')
-axs[1].scatter(dst[:, 0] , dst[:, 1] , marker='x', color='cyan')
+axs[1].scatter(dst[:, 0], dst[:, 1], marker='x', color='cyan')
 
 for i, label in enumerate(labels):
-    axs[1].annotate(label, (dst[:, 0][i] , dst[:, 1][i] ),
-                    textcoords="offset points", xytext=(0, 5), ha='center', color='red')
+    axs[1].annotate(
+        label,
+        (dst[:, 0][i], dst[:, 1][i]),
+        textcoords="offset points",
+        xytext=(0, 5),
+        ha='center',
+        color='red',
+    )
 
 plt.show()
 
@@ -97,7 +118,7 @@ xx, yy = np.meshgrid(samp, samp)
 source_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 # Make target points
-yy[:, [0, 3]] *=2
+yy[:, [0, 3]] *= 2
 target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 
@@ -121,7 +142,12 @@ ax0.legend(loc="upper center")
 ax0.set_title('Source and Test Coordinates')
 
 ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target Points')
-ax1.scatter(transformed_xy[:,0], transformed_xy[:,1], c="orange", label='Transformed Test Points')
+ax1.scatter(
+    transformed_xy[:, 0],
+    transformed_xy[:, 1],
+    c="orange",
+    label='Transformed Test Points',
+)
 ax1.legend(loc="upper center")
 ax1.set_title("Target and Transformed Coordinates")
 plt.show()
