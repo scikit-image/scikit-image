@@ -10,9 +10,6 @@ According to [3]_, the basic solution of the biharmonic function was expanded.
 Given corresponding source and target control points, TPS is used to transform a space.
 In this case our space is a 2D image.
 
-It should be noted that the commonly used in image processing
-Affine Transformation [4]_ can be understood as special variant of TPS.
-
 This script shows how to use the Thine Plate Spine Transformation for
 image warping.
 
@@ -28,16 +25,13 @@ For further information on TPS Transformation, see:
        decomposition of deformations." IEEE Transactions on pattern analysis and
        machine intelligence 11.6 (1989): 567–585.
 
-.. [4] Wikipedia, Affine transformation
-       https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation
-
 
 Image Deformation
 =================
 
-In this example we will see how to use the thin plates spline interpolation in the
-to deform an image. To deform the image, the displacement of every
-pixel is needed. In our image we define 6 source and destination points labelled 1-6: 1-4 in the image
+In this example we will see how to use the thin plates spline interpolation to deform an image.
+To deform the image, the displacement of every pixel is needed.
+In our image, we define 6 source and destination points labelled 1-6: 1-4 in the image
 corners, 5 near the smile corner and 6 in an eye. At the corners, there are no
 displacements. The smile corner moved upward and the eye position moved down.
 
@@ -54,6 +48,7 @@ src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 10
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
 # Fit the thin plate spline from output to input
+
 warped_img = ski.transform.tps_warp(
     astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1
 )
