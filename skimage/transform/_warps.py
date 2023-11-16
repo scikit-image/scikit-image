@@ -301,6 +301,8 @@ def rescale(
 
     """
     scale = np.atleast_1d(scale)
+    if channel_axis is None and image.ndim == 3 and image.shape[-1] in [3, 4]:
+        channel_axis = -1  # Assuming channel-last format for RGB/RGBA images
     multichannel = channel_axis is not None
     if len(scale) > 1:
         if (not multichannel and len(scale) != image.ndim) or (
