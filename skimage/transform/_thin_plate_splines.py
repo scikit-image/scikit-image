@@ -114,7 +114,6 @@ class TpsTransform:
             raise ValueError("src and dst shape must be identical")
 
         self.src = src
-        self.dst = dst
         n, d = src.shape
 
         K = self._radial_distance(src)
@@ -125,8 +124,7 @@ class TpsTransform:
         L[-3:, :n] = P.T
         V = np.concatenate([dst, np.zeros((d + 1, d))])
         self.coefficients = np.dot(np.linalg.inv(L), V)
-        self._estimated = True
-        return self._estimated
+        return True
 
     def _spline_function(self, x, y, coeffs):
         """Solve the spline function in the X and Y directions"""
@@ -158,24 +156,25 @@ class TpsTransform:
         return _radial_basis_function(dist)
 
 
-def _radial_basis_function(r):
-    """Compute basis kernel function for thine-plate splines.
+def _radial_basis_kernel(r):
+    """Compute basis kernel for thine-plate splines.
 
     Parameters
     ----------
-    r : ndarray
+    r : (4, N) ndarray
         Input array representing the norm distance between interlandmark
         distances for the source form and based on the (x,y) coordinates
         for each of these points.
 
     Returns
     -------
-    ndarray
+    U : (4, N) ndarray
         Calculated kernel function U.
     """
     _small = 1e-8  # Small value to avoid divide-by-zero
     r_sq = r**2
-    return np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
+    U = np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
+    return U
 
 
 def _ensure_2d(arr):

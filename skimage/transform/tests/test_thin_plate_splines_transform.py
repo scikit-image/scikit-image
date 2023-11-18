@@ -57,13 +57,11 @@ class TestTpsTransform:
         assert tform.src is None
 
         # Perform estimation
-        tform.estimate(src, dst)
-        assert len(tform.src) > 0
-
-        assert len(tform.coefficients) > 0
-        assert tform.coefficients.shape[0] == src.shape[0] + 3
-
+        assert tform.estimate(src, dst) is True
         np.testing.assert_array_equal(tform.src, src)
+
+        assert tform.coefficients.shape == (src.shape[0] + 3, 2)
+
         np.testing.assert_allclose(
             tform.coefficients[:, 0],
             np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]),
