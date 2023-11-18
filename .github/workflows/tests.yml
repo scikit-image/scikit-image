@@ -64,12 +64,6 @@ jobs:
             python-version: "3.10"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
-          - platform_id: manylinux_x86_64
-            python-version: "3.12"
-            BUILD_DOCS: 0
-        exclude:
-          - python-version: "3.12"
-            BUILD_DOCS: 1
 
     steps:
       - name: Checkout scikit-image
@@ -132,12 +126,6 @@ jobs:
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
-        include:
-          - python-version: "3.12"
-            OPTIONAL_DEPS: 0
-        exclude:
-          - python-version: "3.12"
-            OPTIONAL_DEPS: 1
     env:
       TEST_EXAMPLES: 0
       CC: /usr/bin/clang
