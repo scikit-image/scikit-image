@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+from .._shared.utils import check_nD
 
 
 class TpsTransform:
@@ -107,8 +108,11 @@ class TpsTransform:
         -  The number of source and destination points must match (N).
         """
 
-        src = _ensure_2d(src)
-        dst = _ensure_2d(dst)
+        check_nD(src, 2)
+        check_nD(dst, 2)
+
+        if len(src) < 3 or len(dst) < 3:
+            raise ValueError(f"{src} points less than 3 is considered undefined.")
 
         if src.shape != dst.shape:
             raise ValueError("src and dst shape must be identical")
@@ -116,7 +120,8 @@ class TpsTransform:
         self.src = src
         n, d = src.shape
 
-        K = self._radial_distance(src)
+        dist = sp.spatial.distance.cdist(self.src, self.src)
+        K = _radial_basis_kernel(dist)
         P = np.hstack([np.ones((n, 1)), src])
         L = np.zeros((n + 3, n + 3), dtype=np.float32)
         L[:n, :n] = K
@@ -136,24 +141,9 @@ class TpsTransform:
         dx = Pi_x[:, np.newaxis] - x
         dy = Pi_y[:, np.newaxis] - y
         r = np.sqrt(dx**2 + dy**2)
-        radial_dist = _radial_basis_function(r)
+        radial_dist = _radial_basis_kernel(r)
         summation = np.dot(w, radial_dist)
         return a1 + ax * x + ay * y + summation
-
-    def _radial_distance(self, points):
-        """Compute the pairwise radial distances of the given points to the control points.
-
-        Parameters
-        ----------
-        points : ndarray
-            N points in the source space
-        Returns
-        -------
-        ndarray :
-            The radial distance for each `N` point to a control point.
-        """
-        dist = sp.spatial.distance.cdist(self.src, points)
-        return _radial_basis_function(dist)
 
 
 def _radial_basis_kernel(r):
@@ -177,23 +167,23 @@ def _radial_basis_kernel(r):
     return U
 
 
-def _ensure_2d(arr):
-    """Ensure that `array` is a 2d array.
+# def _ensure_2d(arr):
+#     """Ensure that `array` is a 2d array.
 
-    In case given 1d array, expand the last dimension.
-    """
-    array = np.asarray(arr)
+#     In case given 1d array, expand the last dimension.
+#     """
+#     array = np.asarray(arr)
 
-    if array.ndim not in (1, 2):
-        raise ValueError("Array must be be 2D.")
-    # Expand last dim in order to interpret this as (n, 1) points
-    if array.ndim == 1:
-        array = array[:, None]
-    if array.size == 0:
-        raise ValueError("Array of points can not be empty.")
-    if len(array) < 3:
-        raise ValueError("Array points less than 3 is undefined.")
-    return array
+#     if array.ndim not in (1, 2):
+#         raise ValueError("Array must be be 2D.")
+#     # Expand last dim in order to interpret this as (n, 1) points
+#     if array.ndim == 1:
+#         array = array[:, None]
+#     if array.size == 0:
+#         raise ValueError("Array of points can not be empty.")
+#     if len(array) < 3:
+#         raise ValueError("Array points less than 3 is undefined.")
+#     return array
 
 
 def tps_warp(

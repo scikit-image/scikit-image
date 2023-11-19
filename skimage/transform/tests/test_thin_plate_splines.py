@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_array_equal
 
-from skimage.transform._thin_plate_splines import TpsTransform, _ensure_2d, tps_warp
+from skimage.transform._thin_plate_splines import TpsTransform, tps_warp
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 
@@ -23,34 +22,21 @@ class TestTpsTransform:
         with pytest.raises(NotImplementedError):
             tps.inverse()
 
-    def test_tps_transform_ensure_2d(self):
-        assert_array_equal(_ensure_2d(SRC), SRC)
-        assert_array_equal(_ensure_2d(DST), DST)
-
-        array_1d = np.array([0, 5, 10])
-        expected = np.array([[0], [5], [10]])
-        assert_array_equal(_ensure_2d(array_1d), expected)
-
-        empty_array = np.array([])
-        with pytest.raises(ValueError, match="Array of points can not be empty."):
-            _ensure_2d(empty_array)
-
-        scalar = 5
-        with pytest.raises(ValueError, match="Array must be be 2D."):
-            _ensure_2d(scalar)
-
-        array_3d = np.array([[[0, 5], [10, 15]], [[20, 25], [30, 35]]])
-        with pytest.raises(ValueError, match="Array must be be 2D."):
-            _ensure_2d(array_3d)
-
-        control_pts_less_than_3 = np.array([[0, 0], [0, 0]])
-        with pytest.raises(ValueError, match="Array points less than 3 is undefined."):
-            _ensure_2d(control_pts_less_than_3)
-
     def test_tps_transform_estimation(self):
         src = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
         dst = np.array([[0, 0.75], [-1, 0.25], [0, -1.25], [1, 0.25]], dtype=np.float32)
         tform = TpsTransform()
+        desired_coefficients = np.array(
+            [
+                [0.0, -0.0902],
+                [0.0, 0.0902],
+                [0.0, -0.0902],
+                [0.0, 0.0902],
+                [0.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 1.0],
+            ]
+        )
 
         # Ensure that the initial state is as expected
         assert tform.coefficients is None
@@ -63,14 +49,8 @@ class TestTpsTransform:
         assert tform.coefficients.shape == (src.shape[0] + 3, 2)
 
         np.testing.assert_allclose(
-            tform.coefficients[:, 0],
-            np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]),
-            rtol=0.1,
-            atol=1e-16,
-        )
-        np.testing.assert_allclose(
-            tform.coefficients[:, 1],
-            np.array([-0.0902, 0.0902, -0.0902, 0.0902, 0.0, 0.0, 1.0]),
+            tform.coefficients,
+            desired_coefficients,
             rtol=0.1,
             atol=1e-16,
         )
@@ -89,6 +69,26 @@ class TestTpsTransform:
         # Perform the estimation, which should fail due to the mismatched number of points
         with pytest.raises(ValueError, match=".*shape must be identical"):
             tform.estimate(src, dst)
+
+        # # Check if src and dst have fewer than 3 points
+        with pytest.raises(
+            ValueError, match=".*points less than 3 is considered undefined."
+        ):
+            src_less_than_3pts = np.array([[0, 0], [0, 5]])
+            tform.estimate(src_less_than_3pts, dst)
+
+            dst_less_than_3pts = np.array([[0, 0], [0, 5]])
+            tform.estimate(src, dst_less_than_3pts)
+
+            tform.estimate(src_less_than_3pts, dst_less_than_3pts)
+
+        # Check if src or dst not being (N, 2)
+        with pytest.raises(ValueError):
+            src_not_2d = np.array([0, 1, 2, 3])
+            tform.estimate(src_not_2d, dst)
+
+            dst_not_2d = np.array([[1, 2, 3], [4, 5, 6]])
+            tform.estimate(src, dst_not_2d)
 
         # Check if the estimation failed and the instance attributes remain unchanged
         assert tform._estimated is False
