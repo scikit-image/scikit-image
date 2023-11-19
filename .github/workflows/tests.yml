@@ -29,16 +29,14 @@ jobs:
         EAGER_IMPORT: [0]
         include:
           - platform_id: manylinux_x86_64
-            python-version: "3.12"
+            python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
-            # Test minimum requirements (don't build docs there is a problem
-            # with dask and astropy)
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: "3.12"
+            python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
@@ -47,7 +45,6 @@ jobs:
             python-version: "3.12"
             PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
-            # test prereleases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
