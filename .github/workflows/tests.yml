@@ -29,7 +29,7 @@ jobs:
         EAGER_IMPORT: [0]
         include:
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.12"
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
@@ -38,30 +38,30 @@ jobs:
             # with dask and astropy)
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.12"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: "3.11"
+            python-version: "3.12"
             PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             # test prereleases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.12"
             BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.12"
             PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             BUILD_DOCS: 0
             OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.12"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
 
