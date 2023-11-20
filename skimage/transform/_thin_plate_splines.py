@@ -79,8 +79,14 @@ class TpsTransform:
         if not coords.ndim == 2 or coords.shape[1] != 2:
             raise ValueError("Input 'coords' must have shape (N,2)")
 
-        x_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 0])
-        y_warp = self._spline_function(coords[:, 0], coords[:, 1], coeffs[:, 1])
+        radial_dist = self._radial_distance(coords[:, 0], coords[:, 1])
+
+        x_warp = self._spline_function(
+            coords[:, 0], coords[:, 1], radial_dist, coeffs[:, 0]
+        )
+        y_warp = self._spline_function(
+            coords[:, 0], coords[:, 1], radial_dist, coeffs[:, 1]
+        )
         return np.vstack([x_warp, y_warp]).T
 
     @property
@@ -131,10 +137,8 @@ class TpsTransform:
         self.coefficients = np.dot(np.linalg.inv(L), V)
         return True
 
-    def _spline_function(self, x, y, coeffs):
-        """Solve the spline function in the X and Y directions"""
-        w = coeffs[:-3]
-        a1, ax, ay = coeffs[-3:]
+    def _radial_distance(self, x, y):
+        """Compute the radial distance"""
         Pi_x = self.src[:, 0]
         Pi_y = self.src[:, 1]
 
@@ -142,6 +146,12 @@ class TpsTransform:
         dy = Pi_y[:, np.newaxis] - y
         r = np.sqrt(dx**2 + dy**2)
         radial_dist = _radial_basis_kernel(r)
+        return radial_dist
+
+    def _spline_function(self, x, y, radial_dist, coeffs):
+        """Solve the spline function in the X and Y directions"""
+        w = coeffs[:-3]
+        a1, ax, ay = coeffs[-3:]
         summation = np.dot(w, radial_dist)
         return a1 + ax * x + ay * y + summation
 
@@ -165,25 +175,6 @@ def _radial_basis_kernel(r):
     r_sq = r**2
     U = np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
     return U
-
-
-# def _ensure_2d(arr):
-#     """Ensure that `array` is a 2d array.
-
-#     In case given 1d array, expand the last dimension.
-#     """
-#     array = np.asarray(arr)
-
-#     if array.ndim not in (1, 2):
-#         raise ValueError("Array must be be 2D.")
-#     # Expand last dim in order to interpret this as (n, 1) points
-#     if array.ndim == 1:
-#         array = array[:, None]
-#     if array.size == 0:
-#         raise ValueError("Array of points can not be empty.")
-#     if len(array) < 3:
-#         raise ValueError("Array points less than 3 is undefined.")
-#     return array
 
 
 def tps_warp(
