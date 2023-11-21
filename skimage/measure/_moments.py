@@ -280,6 +280,8 @@ def moments_normalized(mu, order=3, spacing=None):
         to ``order``.
     order : int, optional
         Maximum order of moments. Default is 3.
+    spacing: tuple of float, shape (ndim,)
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
