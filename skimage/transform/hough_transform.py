@@ -148,7 +148,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
     -------
     result : ndarray with fields [(accumulator, yc, xc, a, b, orientation)].
         Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
-        axes, respectively. The `orientation` value follows
+        axes, respectively. The `orientation` value follows the
         `skimage.draw.ellipse_perimeter` convention.
 
     Examples
