@@ -286,7 +286,7 @@ cdef class BinaryHeap:
 
     ## C Public methods
 
-    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil:
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) noexcept nogil:
         """The c-method for fast pushing.
 
         Returns the index relative to the start of the last level in the heap.
@@ -311,7 +311,7 @@ cdef class BinaryHeap:
         # return
         return count
 
-    cdef VALUE_T pop_fast(self) nogil:
+    cdef VALUE_T pop_fast(self) noexcept nogil:
         """The c-method for fast popping.
 
         Returns the minimum value. The reference is put in self._popped_ref.
@@ -549,7 +549,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
             self._update_one(i1)
             self._update_one(i2)
 
-    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil:
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) noexcept nogil:
         """The c method for fast pushing.
 
         If the reference is already present, will update its value, otherwise
@@ -582,7 +582,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         return ir
 
     cdef INDEX_T push_if_lower_fast(self, VALUE_T value,
-                                    REFERENCE_T reference) nogil:
+                                    REFERENCE_T reference) noexcept nogil:
         """If the reference is already present, will update its value ONLY if
         the new value is lower than the old one. If the reference is not
         present, this append it. If a value was appended, self._pushed is
