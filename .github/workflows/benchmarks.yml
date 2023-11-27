@@ -23,7 +23,7 @@ jobs:
     steps:
       # We need the full repo to avoid this issue
       # https://github.com/actions/checkout/issues/23
-      - uses: actions/checkout@v4 
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
