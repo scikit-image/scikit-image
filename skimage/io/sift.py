@@ -10,8 +10,8 @@ def _sift_read(filelike, mode='SIFT'):
     http://people.cs.ubc.ca/~lowe/keypoints/ and
     http://www.vision.ee.ethz.ch/~surf/.
 
-    This routine *does not* generate SIFT/SURF features from an image.  These
-    algorithms are patent encumbered.  Please use `skimage.feature.CENSURE`
+    This routine *does not* generate SIFT/SURF features from an image. These
+    algorithms are patent encumbered. Please use :obj:`skimage.feature.CENSURE`
     instead.
 
     Parameters
@@ -47,16 +47,28 @@ def _sift_read(filelike, mode='SIFT'):
 
     if mode == 'SIFT':
         nr_features, feature_len = map(int, f.readline().split())
-        datatype = np.dtype([('row', float), ('column', float),
-                             ('scale', float), ('orientation', float),
-                             ('data', (float, feature_len))])
+        datatype = np.dtype(
+            [
+                ('row', float),
+                ('column', float),
+                ('scale', float),
+                ('orientation', float),
+                ('data', (float, feature_len)),
+            ]
+        )
     else:
         mode = 'SURF'
         feature_len = int(f.readline()) - 1
         nr_features = int(f.readline())
-        datatype = np.dtype([('column', float), ('row', float),
-                             ('second_moment', (float, 3)),
-                             ('sign', float), ('data', (float, feature_len))])
+        datatype = np.dtype(
+            [
+                ('column', float),
+                ('row', float),
+                ('second_moment', (float, 3)),
+                ('sign', float),
+                ('data', (float, feature_len)),
+            ]
+        )
 
     data = np.fromfile(f, sep=' ')
     if data.size != nr_features * datatype.itemsize / np.dtype(float).itemsize:

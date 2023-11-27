@@ -25,8 +25,8 @@ cdef class BinaryHeap:
     cdef void _update_one(self, INDEX_T i) noexcept nogil
     cdef void _remove(self, INDEX_T i) noexcept nogil
 
-    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) nogil
-    cdef VALUE_T pop_fast(self) nogil
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference) noexcept nogil
+    cdef VALUE_T pop_fast(self) noexcept nogil
 
 cdef class FastUpdateBinaryHeap(BinaryHeap):
     cdef readonly REFERENCE_T max_reference
@@ -36,4 +36,4 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
 
     cdef VALUE_T value_of_fast(self, REFERENCE_T reference)
     cdef INDEX_T push_if_lower_fast(self, VALUE_T value,
-                                    REFERENCE_T reference) nogil
+                                    REFERENCE_T reference) noexcept nogil

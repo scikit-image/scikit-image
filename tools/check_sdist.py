@@ -6,8 +6,9 @@ from pathlib import Path
 import tarfile
 
 parser = ArgumentParser(description='Check a created sdist')
-parser.add_argument('sdist_name', type=str, nargs=1,
-                    help='The name of the sdist file to check')
+parser.add_argument(
+    'sdist_name', type=str, nargs=1, help='The name of the sdist file to check'
+)
 args = parser.parse_args()
 sdist_name = args.sdist_name[0]
 
@@ -17,18 +18,34 @@ with tarfile.open(sdist_name) as tar:
 # The very first item contains the name of the archive
 top_parent = Path(members[0].name)
 
-filenames = ['./' + str(Path(m.name).relative_to(top_parent))
-             for m in members[1:]]
+filenames = ['./' + str(Path(m.name).relative_to(top_parent)) for m in members[1:]]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
-ignore_dirs = ['./build', './dist', './tools', './doc',
-               './downloads', './scikit_image.egg-info', './benchmarks']
-ignore_files = ['./TODO.md', './README.md', './MANIFEST',
-                './CODE_OF_CONDUCT.md',
-                './.gitignore', './.travis.yml', './.gitmodules',
-                './.mailmap', './.coveragerc', './azure-pipelines.yml',
-                './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
-                './.codecov.yml']
+ignore_dirs = [
+    './build',
+    './dist',
+    './tools',
+    './doc',
+    './downloads',
+    './scikit_image.egg-info',
+    './benchmarks',
+]
+ignore_files = [
+    './TODO.md',
+    './README.md',
+    './MANIFEST',
+    './CODE_OF_CONDUCT.md',
+    './.gitignore',
+    './.travis.yml',
+    './.gitmodules',
+    './.mailmap',
+    './.coveragerc',
+    './azure-pipelines.yml',
+    './.appveyor.yml',
+    './.pep8speaks.yml',
+    './asv.conf.json',
+    './.codecov.yml',
+]
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
@@ -43,7 +60,6 @@ for root, dirs, files in os.walk('./'):
         if root.startswith(d):
             break
     else:
-
         if root.startswith('./.'):
             continue
 

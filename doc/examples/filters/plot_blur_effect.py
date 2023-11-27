@@ -24,9 +24,7 @@ import scipy.ndimage as ndi
 
 import plotly
 import plotly.express as px
-from skimage import (
-    color, data, measure
-)
+from skimage import color, data, measure
 
 
 #####################################################################
@@ -48,7 +46,7 @@ fig = px.imshow(
     img_stack,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'blur strength ~'}
+    labels={'animation_frame': 'blur strength ~'},
 )
 plotly.io.show(fig)
 
@@ -61,15 +59,16 @@ plotly.io.show(fig)
 
 B = pd.DataFrame(
     data=np.zeros((len(blurred_images), 3)),
-    columns=['h_size = 3', 'h_size = 11', 'h_size = 30']
+    columns=['h_size = 3', 'h_size = 11', 'h_size = 30'],
 )
 for ind, im in enumerate(blurred_images):
     B.loc[ind, 'h_size = 3'] = measure.blur_effect(im, h_size=3)
     B.loc[ind, 'h_size = 11'] = measure.blur_effect(im, h_size=11)
     B.loc[ind, 'h_size = 30'] = measure.blur_effect(im, h_size=30)
 
-B.plot().set(xlabel='blur strength (half the size of uniform filter)',
-             ylabel='blur metric')
+B.plot().set(
+    xlabel='blur strength (half the size of uniform filter)', ylabel='blur metric'
+)
 
 plt.show()
 

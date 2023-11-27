@@ -5,9 +5,11 @@ from ...util.dtype import _convert
 try:
     import imread as _imread
 except ImportError:
-    raise ImportError("Imread could not be found"
-                      "Please refer to http://pypi.python.org/pypi/imread/ "
-                      "for further instructions.")
+    raise ImportError(
+        "Imread could not be found"
+        "Please refer to http://pypi.python.org/pypi/imread/ "
+        "for further instructions."
+    )
 
 
 def imread(fname, dtype=None):

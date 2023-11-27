@@ -38,7 +38,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     """Estimate a Gaussian mixture model (GMM) given a set of descriptors and
     number of modes (i.e. Gaussians). This function is essentially a wrapper
     around the scikit-learn implementation of GMM, namely the
-    :func:`sklearn.mixture.GaussianMixture` class.
+    :class:`sklearn.mixture.GaussianMixture` class.
 
     Due to the nature of the Fisher vector, the only enforced parameter of the
     underlying scikit-learn class is the covariance_type, which must be 'diag'.
@@ -65,11 +65,11 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         The number of modes/Gaussians to estimate during the GMM estimate.
     gm_args : dict
         Keyword arguments that can be passed into the underlying scikit-learn
-        :func:`sklearn.mixture.GaussianMixture` class.
+        :class:`sklearn.mixture.GaussianMixture` class.
 
     Returns
     -------
-    gmm : :func:`sklearn.mixture.GaussianMixture`
+    gmm : :class:`sklearn.mixture.GaussianMixture`
         The estimated GMM object, which contains the necessary parameters
         needed to compute the Fisher vector.
 
@@ -97,7 +97,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
             'order to use the Fisher vector functionality.'
         )
 
-    if not isinstance(descriptors, (list, np.ndarray)):
+    if not isinstance(descriptors, list | np.ndarray):
         raise DescriptorException(
             'Please ensure descriptors are either a NumPY array, '
             'or a list of NumPy arrays.'
@@ -114,8 +114,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         ranks = [len(e.shape) == len(expected_shape) for e in descriptors]
         if not all(ranks):
             raise DescriptorException(
-                'Please ensure all elements of your descriptor list '
-                'are of rank 2.'
+                'Please ensure all elements of your descriptor list ' 'are of rank 2.'
             )
         dims = [e.shape[1] == descriptors[0].shape[1] for e in descriptors]
         if not all(dims):
@@ -124,9 +123,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
             )
 
     if not isinstance(n_modes, int) or n_modes <= 0:
-        raise FisherVectorException(
-            'Please ensure n_modes is a positive integer.'
-        )
+        raise FisherVectorException('Please ensure n_modes is a positive integer.')
 
     if gm_args:
         has_cov_type = 'covariance_type' in gm_args
@@ -140,9 +137,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     if gm_args:
         has_cov_type = 'covariance_type' in gm_args
         if has_cov_type:
-            gmm = GaussianMixture(
-                n_components=n_modes, **gm_args
-            )
+            gmm = GaussianMixture(n_components=n_modes, **gm_args)
         else:
             gmm = GaussianMixture(
                 n_components=n_modes, covariance_type='diag', **gm_args
@@ -164,7 +159,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     descriptors : np.ndarray, shape=(n_descriptors, descriptor_length)
         NumPy array of the descriptors for which the Fisher vector
         representation is to be computed.
-    gmm : sklearn.mixture.GaussianMixture
+    gmm : :class:`sklearn.mixture.GaussianMixture`
         An estimated GMM object, which contains the necessary parameters needed
         to compute the Fisher vector.
     improved : bool, default=False
@@ -216,9 +211,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
         )
 
     if not isinstance(descriptors, np.ndarray):
-        raise DescriptorException(
-            'Please ensure descriptors is a NumPy array.'
-        )
+        raise DescriptorException('Please ensure descriptors is a NumPy array.')
 
     if not isinstance(gmm, GaussianMixture):
         raise FisherVectorException(
@@ -241,9 +234,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     # Statistics necessary to compute GMM gradients wrt its parameters
     pp_sum = posterior_probabilities.mean(axis=0, keepdims=True).T
     pp_x = posterior_probabilities.T.dot(descriptors) / num_descriptors
-    pp_x_2 = posterior_probabilities.T.dot(
-        np.power(descriptors, 2)
-    ) / num_descriptors
+    pp_x_2 = posterior_probabilities.T.dot(np.power(descriptors, 2)) / num_descriptors
 
     # Compute GMM gradients wrt its parameters
     d_pi = pp_sum.squeeze() - mixture_weights
@@ -265,8 +256,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     fisher_vector = np.hstack((d_pi, d_mu.ravel(), d_sigma.ravel()))
 
     if improved:
-        fisher_vector = \
-            np.sign(fisher_vector) * np.power(np.abs(fisher_vector), alpha)
+        fisher_vector = np.sign(fisher_vector) * np.power(np.abs(fisher_vector), alpha)
         fisher_vector = fisher_vector / np.linalg.norm(fisher_vector)
 
     return fisher_vector

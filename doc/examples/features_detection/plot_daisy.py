@@ -17,8 +17,9 @@ import matplotlib.pyplot as plt
 
 
 img = data.camera()
-descs, descs_img = daisy(img, step=180, radius=58, rings=2, histograms=6,
-                         orientations=8, visualize=True)
+descs, descs_img = daisy(
+    img, step=180, radius=58, rings=2, histograms=6, orientations=8, visualize=True
+)
 
 fig, ax = plt.subplots()
 ax.axis("off")

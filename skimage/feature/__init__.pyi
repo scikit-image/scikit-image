@@ -64,7 +64,8 @@ from .corner import (
     corner_shi_tomasi,
     corner_foerstner,
     corner_subpix,
-    corner_peaks, corner_fast,
+    corner_peaks,
+    corner_fast,
     structure_tensor,
     structure_tensor_eigenvalues,
     hessian_matrix,
@@ -72,7 +73,7 @@ from .corner import (
     hessian_matrix_det,
     corner_moravec,
     corner_orientations,
-    shape_index
+    shape_index,
 )
 from .template import match_template
 from .brief import BRIEF
@@ -82,10 +83,6 @@ from .sift import SIFT
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
-from .haar import (
-    haar_like_feature,
-    haar_like_feature_coord,
-    draw_haar_like_feature
-)
+from .haar import haar_like_feature, haar_like_feature_coord, draw_haar_like_feature
 from ._basic_features import multiscale_basic_features
 from ._fisher_vector import learn_gmm, fisher_vector

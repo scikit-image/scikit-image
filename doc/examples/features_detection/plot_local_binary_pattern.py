@@ -58,11 +58,13 @@ fig, axes = plt.subplots(ncols=5, figsize=(7, 2))
 
 titles = ['flat', 'flat', 'edge', 'corner', 'non-uniform']
 
-binary_patterns = [np.zeros(8),
-                   np.ones(8),
-                   np.hstack([np.ones(4), np.zeros(4)]),
-                   np.hstack([np.zeros(3), np.ones(5)]),
-                   [1, 0, 0, 1, 1, 1, 0, 0]]
+binary_patterns = [
+    np.zeros(8),
+    np.ones(8),
+    np.hstack([np.ones(4), np.zeros(4)]),
+    np.hstack([np.zeros(3), np.ones(5)]),
+    [1, 0, 0, 1, 1, 1, 0, 0],
+]
 
 for ax, values, name in zip(axes, binary_patterns, titles):
     plot_lbp_model(ax, values)
@@ -107,8 +109,9 @@ lbp = local_binary_pattern(image, n_points, radius, METHOD)
 
 def hist(ax, lbp):
     n_bins = int(lbp.max() + 1)
-    return ax.hist(lbp.ravel(), density=True, bins=n_bins, range=(0, n_bins),
-                   facecolor='0.5')
+    return ax.hist(
+        lbp.ravel(), density=True, bins=n_bins, range=(0, n_bins), facecolor='0.5'
+    )
 
 
 # plot histograms of LBP of textures
@@ -119,10 +122,11 @@ titles = ('edge', 'flat', 'corner')
 w = width = radius - 1
 edge_labels = range(n_points // 2 - w, n_points // 2 + w + 1)
 flat_labels = list(range(0, w + 1)) + list(range(n_points - w, n_points + 2))
-i_14 = n_points // 4            # 1/4th of the histogram
-i_34 = 3 * (n_points // 4)      # 3/4th of the histogram
-corner_labels = (list(range(i_14 - w, i_14 + w + 1)) +
-                 list(range(i_34 - w, i_34 + w + 1)))
+i_14 = n_points // 4  # 1/4th of the histogram
+i_34 = 3 * (n_points // 4)  # 3/4th of the histogram
+corner_labels = list(range(i_14 - w, i_14 + w + 1)) + list(
+    range(i_34 - w, i_34 + w + 1)
+)
 
 label_sets = (edge_labels, flat_labels, corner_labels)
 
@@ -168,8 +172,7 @@ def match(refs, img):
     n_bins = int(lbp.max() + 1)
     hist, _ = np.histogram(lbp, density=True, bins=n_bins, range=(0, n_bins))
     for name, ref in refs.items():
-        ref_hist, _ = np.histogram(ref, density=True, bins=n_bins,
-                                   range=(0, n_bins))
+        ref_hist, _ = np.histogram(ref, density=True, bins=n_bins, range=(0, n_bins))
         score = kullback_leibler_divergence(hist, ref_hist)
         if score < best_score:
             best_score = score
@@ -184,21 +187,26 @@ gravel = data.gravel()
 refs = {
     'brick': local_binary_pattern(brick, n_points, radius, METHOD),
     'grass': local_binary_pattern(grass, n_points, radius, METHOD),
-    'gravel': local_binary_pattern(gravel, n_points, radius, METHOD)
+    'gravel': local_binary_pattern(gravel, n_points, radius, METHOD),
 }
 
 # classify rotated textures
 print('Rotated images matched against references using LBP:')
-print('original: brick, rotated: 30deg, match result: ',
-      match(refs, rotate(brick, angle=30, resize=False)))
-print('original: brick, rotated: 70deg, match result: ',
-      match(refs, rotate(brick, angle=70, resize=False)))
-print('original: grass, rotated: 145deg, match result: ',
-      match(refs, rotate(grass, angle=145, resize=False)))
+print(
+    'original: brick, rotated: 30deg, match result: ',
+    match(refs, rotate(brick, angle=30, resize=False)),
+)
+print(
+    'original: brick, rotated: 70deg, match result: ',
+    match(refs, rotate(brick, angle=70, resize=False)),
+)
+print(
+    'original: grass, rotated: 145deg, match result: ',
+    match(refs, rotate(grass, angle=145, resize=False)),
+)
 
 # plot histograms of LBP of textures
-fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,
-                                                       figsize=(9, 6))
+fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3, figsize=(9, 6))
 plt.gray()
 
 ax1.imshow(brick)

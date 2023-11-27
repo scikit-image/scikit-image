@@ -133,15 +133,14 @@ registry = {
     "data/no_time_for_that_tiny.gif": "20abe94ba9e45f18de416c5fbef8d1f57a499600be40f9a200fae246010eefce",
     "data/foo3x5x4indexed.png": "48a64c25c6da000ffdb5fcc34ebafe9ba3b1c9b61d7984ea7ca6dc54f9312dfa",
     "data/mssim_matlab_output.npz": "cc11a14bfa040c75b02db32282439f2e2e3e96779196c171498afaa70528ed7a",
-    "data/gray_morph_output.npz": "3012eb994e864e1dca1f66fada6b4375f84eac63658d049886b710488c2394d1",
+    "data/gray_morph_output.npz": "49a0dae607cd8d31e134b4bfcbf0d86b13751fdce9667d8bf1ade93d435191b1",
     "data/disk-matlab-output.npz": "8a39d5c866f6216d6a9c9166312aa4bbf4d18fab3d0dcd963c024985bde5856b",
     "data/diamond-matlab-output.npz": "02fca68907e2b252b501dfe977eef71ae39fadaaa3702ebdc855195422ae1cc2",
     "data/bw_text.png": "308c2b09f8975a69b212e103b18520e8cbb7a4eccfce0f757836cd371f1b9094",
     "data/bw_text_skeleton.npy": "9ff4fc23c6a01497d7987f14e3a97cbcc39cce54b2b3b7ee33b84c1b661d0ae1",
     "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
     "data/checker_bilevel.png": "2e207e486545874a2a3e69ba653b28fdef923157be9017559540e65d1bcb8e28",
-    "restoration/tests/astronaut_rl.npy":
-        "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
+    "restoration/tests/astronaut_rl.npy": "3f8373e2c6182a89366e51cef6624e3625deac75fdda1079cbdad2a33322152c",
     "restoration/tests/camera_rl.npy": "fd4f59af84dd471fbbe79ee70c1b7e68a69864c461f0db5ac587e7975363f78f",
     "restoration/tests/camera_unsup.npy": "3de10a0b97267352b18886b25d66a967f9e1d78ada61050577d78586cab82baa",
     "restoration/tests/camera_unsup2.npy": "29cdc60605eb528c5f014baa8564d7d1ba0bd4b3170a66522058cbe5aed0960b",
@@ -180,9 +179,9 @@ registry_urls = {
     "data/protein_transport.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/NPCsingleNucleus.tif",
     "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
+    "data/gray_morph_output.npz": "https://gitlab.com/scikit-image/data/-/raw/806548e112bcf2b708a9a32275d335cb592480fd/Tests_besides_Equalize_Otsu/gray_morph_output.npz",
 }
 
 legacy_registry = {
-    ('data/' + filename): registry['data/' + filename]
-    for filename in legacy_datasets
+    ('data/' + filename): registry['data/' + filename] for filename in legacy_datasets
 }

@@ -50,7 +50,7 @@ cdef struct QueueWithHistory:
     Py_ssize_t _index_consumed  # Index to most recently consumed item
 
 
-cdef inline void queue_init(QueueWithHistory* self, Py_ssize_t buffer_size) nogil:
+cdef inline void queue_init(QueueWithHistory* self, Py_ssize_t buffer_size) noexcept nogil:
     """Initialize the queue and its buffer size.
 
     The size is defined as the number of queue items to fit into the initial
@@ -67,7 +67,7 @@ cdef inline void queue_init(QueueWithHistory* self, Py_ssize_t buffer_size) nogi
     self._index_valid = -1
 
 
-cdef inline void queue_push(QueueWithHistory* self, QueueItem* item_ptr) nogil:
+cdef inline void queue_push(QueueWithHistory* self, QueueItem* item_ptr) noexcept nogil:
     """Enqueue a new item."""
     self._index_valid += 1
     if self._buffer_size <= self._index_valid:
@@ -76,7 +76,7 @@ cdef inline void queue_push(QueueWithHistory* self, QueueItem* item_ptr) nogil:
 
 
 cdef inline unsigned char queue_pop(QueueWithHistory* self,
-                                    QueueItem* item_ptr) nogil:
+                                    QueueItem* item_ptr) noexcept nogil:
     """If not empty pop an item and return 1 otherwise return 0.
 
     The item is still preserved in the internal buffer and can be restored with
@@ -89,7 +89,7 @@ cdef inline unsigned char queue_pop(QueueWithHistory* self,
     return 0
 
 
-cdef inline void queue_restore(QueueWithHistory* self) nogil:
+cdef inline void queue_restore(QueueWithHistory* self) noexcept nogil:
     """Restore all consumed items to the queue.
 
     The order of the restored queue is the same as previous one, meaning older
@@ -98,7 +98,7 @@ cdef inline void queue_restore(QueueWithHistory* self) nogil:
     self._index_consumed = -1
 
 
-cdef inline void queue_clear(QueueWithHistory* self) nogil:#
+cdef inline void queue_clear(QueueWithHistory* self) noexcept nogil:#
     """Remove all consumable items.
 
     After this the old items can't be restored with `queue_restore`.
@@ -107,7 +107,7 @@ cdef inline void queue_clear(QueueWithHistory* self) nogil:#
     self._index_valid = -1
 
 
-cdef inline void queue_exit(QueueWithHistory* self) nogil:
+cdef inline void queue_exit(QueueWithHistory* self) noexcept nogil:
     """Free the buffer of the queue.
 
     Don't use the queue after this command unless `queue_init` is called again.
@@ -115,7 +115,7 @@ cdef inline void queue_exit(QueueWithHistory* self) nogil:
     free(self._buffer_ptr)
 
 
-cdef inline int _queue_grow_buffer(QueueWithHistory* self) nogil except -1:
+cdef inline int _queue_grow_buffer(QueueWithHistory* self) except -1 nogil:
     """Double the memory used for the buffer."""
     cdef QueueItem* new_buffer
     self._buffer_size *= 2

@@ -49,7 +49,8 @@ def test_rag_merge():
 
 
 @pytest.mark.parametrize(
-    "in_place", [True, False],
+    "in_place",
+    [True, False],
 )
 def test_rag_merge_gh5360(in_place):
     # Add another test case covering the gallery example plot_rag.py.
@@ -77,7 +78,6 @@ def test_rag_merge_gh5360(in_place):
 
 
 def test_threshold_cut():
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -101,7 +101,6 @@ def test_threshold_cut():
 
 
 def test_cut_normalized():
-
     img = np.zeros((100, 100, 3), dtype='uint8')
     img[:50, :50] = 255, 255, 255
     img[:50, 50:] = 254, 254, 254
@@ -132,8 +131,7 @@ def test_rag_error():
     labels[:5, :] = 0
     labels[5:, :] = 1
     with testing.raises(ValueError):
-        graph.rag_mean_color(img, labels,
-                             2, 'non existent mode')
+        graph.rag_mean_color(img, labels, 2, 'non existent mode')
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -145,15 +143,23 @@ def _weight_mean_color(graph, src, dst, n):
 def _pre_merge_mean_color(graph, src, dst):
     graph.nodes[dst]['total color'] += graph.nodes[src]['total color']
     graph.nodes[dst]['pixel count'] += graph.nodes[src]['pixel count']
-    graph.nodes[dst]['mean color'] = (graph.nodes[dst]['total color'] /
-                                      graph.nodes[dst]['pixel count'])
+    graph.nodes[dst]['mean color'] = (
+        graph.nodes[dst]['total color'] / graph.nodes[dst]['pixel count']
+    )
 
 
-def merge_hierarchical_mean_color(labels, rag, thresh, rag_copy=True,
-                                  in_place_merge=False):
-    return graph.merge_hierarchical(labels, rag, thresh, rag_copy,
-                                    in_place_merge, _pre_merge_mean_color,
-                                    _weight_mean_color)
+def merge_hierarchical_mean_color(
+    labels, rag, thresh, rag_copy=True, in_place_merge=False
+):
+    return graph.merge_hierarchical(
+        labels,
+        rag,
+        thresh,
+        rag_copy,
+        in_place_merge,
+        _pre_merge_mean_color,
+        _weight_mean_color,
+    )
 
 
 def test_rag_hierarchical():
@@ -174,20 +180,19 @@ def test_rag_hierarchical():
     thresh = 20  # more than 11*sqrt(3) but less than
 
     result = merge_hierarchical_mean_color(labels, g, thresh)
-    assert(np.all(result[:, :4] == result[0, 0]))
-    assert(np.all(result[:, 4:] == result[-1, -1]))
+    assert np.all(result[:, :4] == result[0, 0])
+    assert np.all(result[:, 4:] == result[-1, -1])
 
-    result = merge_hierarchical_mean_color(labels, g2, thresh,
-                                           in_place_merge=True)
-    assert(np.all(result[:, :4] == result[0, 0]))
-    assert(np.all(result[:, 4:] == result[-1, -1]))
+    result = merge_hierarchical_mean_color(labels, g2, thresh, in_place_merge=True)
+    assert np.all(result[:, :4] == result[0, 0])
+    assert np.all(result[:, 4:] == result[-1, -1])
 
     result = graph.cut_threshold(labels, g, thresh)
     assert np.all(result == result[0, 0])
 
 
 def test_ncut_stable_subgraph():
-    """ Test to catch an error thrown when subgraph has all equal edges. """
+    """Test to catch an error thrown when subgraph has all equal edges."""
 
     img = np.zeros((100, 100, 3), dtype='uint8')
 
@@ -207,16 +212,15 @@ def test_reproducibility():
     when specifying random seed
     """
     img = data.coffee()
-    labels1 = segmentation.slic(
-        img, compactness=30, n_segments=400, start_label=0)
+    labels1 = segmentation.slic(img, compactness=30, n_segments=400, start_label=0)
     g = graph.rag_mean_color(img, labels1, mode='similarity')
     results = [None] * 4
     for i in range(len(results)):
         results[i] = graph.cut_normalized(
-            labels1, g, in_place=False, thresh=1e-3, rng=1234)
+            labels1, g, in_place=False, thresh=1e-3, rng=1234
+        )
     with expected_warnings(['`random_state` is a deprecated argument']):
-        graph.cut_normalized(
-            labels1, g, in_place=False, thresh=1e-3, random_state=1234)
+        graph.cut_normalized(labels1, g, in_place=False, thresh=1e-3, random_state=1234)
 
     for i in range(len(results) - 1):
         assert_array_equal(results[i], results[i + 1])

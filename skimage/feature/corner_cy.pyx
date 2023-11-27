@@ -93,7 +93,7 @@ def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
 cdef inline np_floats _corner_fast_response(np_floats curr_pixel,
                                             np_floats* circle_intensities,
                                             signed char* bins, signed char
-                                            state, char n) nogil:
+                                            state, char n) noexcept nogil:
     cdef char consecutive_count = 0
     cdef np_floats curr_response
     cdef Py_ssize_t l, m
