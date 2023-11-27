@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import skimage as ski
 from skimage.transform._thin_plate_splines import TpsTransform, tps_warp
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
@@ -116,7 +117,7 @@ class TestTpsWarp:
 
     def test_tps_warp_valid_output_region(self):
         img = np.zeros((100, 100))
-        valid_output_region = (0, 0, 100, 100)
+        valid_output_region = (0, 0, 99, 99)
         result = tps_warp(img, SRC, DST, output_region=valid_output_region)
         assert result.shape == img.shape
 
@@ -152,11 +153,48 @@ class TestTpsWarp:
         # fmt: on
         np.testing.assert_allclose(yy_trans, expected_yy)
 
-    def test_tps_warp_resizing(self):
-        pass
+    def test_zoom_in(self):
+        # fmt: off
+        image = np.array(
+            [[9, 9, 9, 9, 9, 9, 9],
+             [9, 0, 0, 0, 0, 0, 9],
+             [9, 0, 1, 1, 1, 0, 9],
+             [9, 0, 1, 2, 1, 0, 9],
+             [9, 0, 1, 1, 1, 0, 9],
+             [9, 0, 0, 0, 0, 0, 9],
+             [9, 9, 9, 9, 9, 9, 9]],
+            dtype=float,
+        )
+        desired = np.array(
+            [[0.25, 0.5 , 0.5 , 0.5 , 0.5 , 0.5 , 0.25],
+             [0.5 , 1.  , 1.  , 1.  , 1.  , 1.  , 0.5 ],
+             [0.5 , 1.  , 1.25, 1.5 , 1.25, 1.  , 0.5 ],
+             [0.5 , 1.  , 1.5 , 2.  , 1.5 , 1.  , 0.5 ],
+             [0.5 , 1.  , 1.25, 1.5 , 1.25, 1.  , 0.5 ],
+             [0.5 , 1.  , 1.  , 1.  , 1.  , 1.  , 0.5 ],
+             [0.25, 0.5 , 0.5 , 0.5 , 0.5 , 0.5 , 0.25]]
+        )
+        # fmt: on
+        src = np.array([[2, 2], [2, 4], [4, 4], [4, 2]])
+        dst = np.array([[1, 1], [1, 5], [5, 5], [5, 1]])
+        result = tps_warp(image, src=src, dst=dst)
+        np.testing.assert_array_equal(result, desired)
 
-    def test_tps_warp_rotation(self):
-        pass
+    @pytest.mark.parametrize("quadrant_shift", [1, -1, 2, -2, 3, -3, 4, -4])
+    def test_rotate(self, quadrant_shift):
+        image = np.linspace(1, 9, num=9).reshape((3, 3))
+        desired = ski.transform.rotate(image, angle=90 * quadrant_shift)
+        src = np.array([[0, 0], [0, 2], [2, 2], [2, 0]])
+        dst = np.roll(src, shift=quadrant_shift, axis=0)
+        result = tps_warp(image, src=src, dst=dst)
+        np.testing.assert_allclose(result, desired)
 
     def test_tps_warp_translation(self):
-        pass
+        image = np.zeros((5, 5))
+        image[:2, :2] = 1
+        desired = np.zeros((5, 5))
+        desired[2:4, 2:4] = 1
+        src = np.array([[1, 1], [1, 2], [2, 2], [2, 1]])
+        dst = src + 2
+        result = tps_warp(image, src=src, dst=dst)
+        np.testing.assert_array_equal(result, desired)

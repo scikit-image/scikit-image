@@ -249,13 +249,13 @@ def tps_warp(
         if not isinstance(output_region, tuple) or len(output_region) != 4:
             raise ValueError("Output region should be a tuple of 4 values.")
     else:
-        output_region = (0, 0, image.shape[0], image.shape[1])
+        output_region = (0, 0, image.shape[0] - 1, image.shape[1] - 1)
 
     x_min, y_min, x_max, y_max = output_region
     if grid_scaling is None:
         grid_scaling = 1
-    x_steps = (x_max - x_min) // grid_scaling
-    y_steps = (y_max - y_min) // grid_scaling
+    x_steps = (x_max - x_min + 1) // grid_scaling
+    y_steps = (y_max - y_min + 1) // grid_scaling
 
     if x_steps <= 0 or y_steps <= 0:
         RuntimeError(f"Invalid or empty `output_region`: {output_region}")
