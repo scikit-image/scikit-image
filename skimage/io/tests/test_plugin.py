@@ -49,8 +49,7 @@ def test_load_preferred_plugins_all():
     from skimage.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
-        manage_plugins.preferred_plugins = {'all': ['pil'],
-                                            'imshow': ['matplotlib']}
+        manage_plugins.preferred_plugins = {'all': ['pil'], 'imshow': ['matplotlib']}
         manage_plugins.reset_plugins()
 
         for plugin_type in ('imread', 'imsave'):

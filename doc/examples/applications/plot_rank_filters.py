@@ -147,8 +147,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -259,35 +258,30 @@ image = data.camera()
 
 footprint = disk(20)
 loc_autolevel = autolevel(image, footprint=footprint)
-loc_perc_autolevel0 = autolevel_percentile(
-    image, footprint=footprint, p0=.01, p1=.99
-)
-loc_perc_autolevel1 = autolevel_percentile(
-    image, footprint=footprint, p0=.05, p1=.95
-)
-loc_perc_autolevel2 = autolevel_percentile(
-    image, footprint=footprint, p0=.1, p1=.9
-)
-loc_perc_autolevel3 = autolevel_percentile(
-    image, footprint=footprint, p0=.15, p1=.85
-)
+loc_perc_autolevel0 = autolevel_percentile(image, footprint=footprint, p0=0.01, p1=0.99)
+loc_perc_autolevel1 = autolevel_percentile(image, footprint=footprint, p0=0.05, p1=0.95)
+loc_perc_autolevel2 = autolevel_percentile(image, footprint=footprint, p0=0.1, p1=0.9)
+loc_perc_autolevel3 = autolevel_percentile(image, footprint=footprint, p0=0.15, p1=0.85)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
 
-title_list = ['Original',
-              'auto_level',
-              'auto-level 1%',
-              'auto-level 5%',
-              'auto-level 10%',
-              'auto-level 15%']
-image_list = [image,
-              loc_autolevel,
-              loc_perc_autolevel0,
-              loc_perc_autolevel1,
-              loc_perc_autolevel2,
-              loc_perc_autolevel3]
+title_list = [
+    'Original',
+    'auto_level',
+    'auto-level 1%',
+    'auto-level 5%',
+    'auto-level 10%',
+    'auto-level 15%',
+]
+image_list = [
+    image,
+    loc_autolevel,
+    loc_perc_autolevel0,
+    loc_perc_autolevel1,
+    loc_perc_autolevel2,
+    loc_perc_autolevel3,
+]
 
 for i in range(0, len(image_list)):
     ax[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
@@ -307,8 +301,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -334,10 +327,9 @@ from skimage.filters.rank import enhance_contrast_percentile
 
 noisy_image = img_as_ubyte(data.camera())
 
-penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
+penh = enhance_contrast_percentile(noisy_image, disk(5), p0=0.1, p1=0.9)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -390,8 +382,7 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
 ax = axes.ravel()
 
 fig.colorbar(ax[0].imshow(p8, cmap=plt.cm.gray), ax=ax[0])
@@ -427,8 +418,7 @@ loc_otsu = brain >= t_loc_otsu
 t_glob_otsu = threshold_otsu(brain)
 glob_otsu = brain >= t_glob_otsu
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
 ax = axes.ravel()
 
 slice_index = 3
@@ -462,8 +452,7 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-fig, ax = plt.subplots(ncols=2, figsize=(10, 5),
-                       sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
 ax[0].imshow(m, cmap=plt.cm.gray)
 ax[0].set_title('Original')
@@ -495,8 +484,7 @@ closing = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -578,12 +566,14 @@ from skimage.filters.rank import median, maximum
 
 def exec_and_timeit(func):
     """Decorator that returns both function results and execution time."""
+
     def wrapper(*arg):
         t1 = time()
         res = func(*arg)
         t2 = time()
         ms = (t2 - t1) * 1000.0
         return (res, ms)
+
     return wrapper
 
 
@@ -605,6 +595,7 @@ def cm_dil(image, footprint):
 @exec_and_timeit
 def ndi_med(image, n):
     return percentile_filter(image, 50, size=n * 2 - 1)
+
 
 ######################################################################
 #  Comparison between

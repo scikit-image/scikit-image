@@ -7,13 +7,24 @@ from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import run_in_parallel
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
-from skimage.feature import (corner_fast, corner_foerstner, corner_harris,
-                             corner_kitchen_rosenfeld, corner_moravec,
-                             corner_orientations, corner_peaks,
-                             corner_shi_tomasi, corner_subpix, hessian_matrix,
-                             hessian_matrix_det, hessian_matrix_eigvals,
-                             peak_local_max, shape_index, structure_tensor,
-                             structure_tensor_eigenvalues)
+from skimage.feature import (
+    corner_fast,
+    corner_foerstner,
+    corner_harris,
+    corner_kitchen_rosenfeld,
+    corner_moravec,
+    corner_orientations,
+    corner_peaks,
+    corner_shi_tomasi,
+    corner_subpix,
+    hessian_matrix,
+    hessian_matrix_det,
+    hessian_matrix_eigvals,
+    peak_local_max,
+    shape_index,
+    structure_tensor,
+    structure_tensor_eigenvalues,
+)
 from skimage.morphology import cube, octagon
 
 
@@ -33,21 +44,42 @@ def test_structure_tensor(dtype):
     Arr, Arc, Acc = structure_tensor(square, sigma=0.1, order='rc')
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (Arr, Arc, Acc))
-    assert_array_equal(Acc, np.array([[0, 0, 0, 0, 0],
-                                      [0, 1, 0, 1, 0],
-                                      [0, 4, 0, 4, 0],
-                                      [0, 1, 0, 1, 0],
-                                      [0, 0, 0, 0, 0]]))
-    assert_array_equal(Arc, np.array([[0, 0, 0, 0, 0],
-                                      [0, 1, 0, -1, 0],
-                                      [0, 0, 0, -0, 0],
-                                      [0, -1, -0, 1, 0],
-                                      [0, 0, 0, 0, 0]]))
-    assert_array_equal(Arr, np.array([[0, 0, 0, 0, 0],
-                                      [0, 1, 4, 1, 0],
-                                      [0, 0, 0, 0, 0],
-                                      [0, 1, 4, 1, 0],
-                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(
+        Acc,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 0, 1, 0],
+                [0, 4, 0, 4, 0],
+                [0, 1, 0, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
+    assert_array_equal(
+        Arc,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 0, -1, 0],
+                [0, 0, 0, -0, 0],
+                [0, -1, -0, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
+    assert_array_equal(
+        Arr,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 4, 1, 0],
+                [0, 0, 0, 0, 0],
+                [0, 1, 4, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -57,21 +89,42 @@ def test_structure_tensor_3d(dtype):
     A_elems = structure_tensor(cube, sigma=0.1)
     assert all(a.dtype == _supported_float_type(dtype) for a in A_elems)
     assert_equal(len(A_elems), 6)
-    assert_array_equal(A_elems[0][:, 1, :], np.array([[0, 0, 0, 0, 0],
-                                                      [0, 1, 4, 1, 0],
-                                                      [0, 0, 0, 0, 0],
-                                                      [0, 1, 4, 1, 0],
-                                                      [0, 0, 0, 0, 0]]))
-    assert_array_equal(A_elems[0][1], np.array([[0, 0, 0, 0, 0],
-                                                [0, 1, 4, 1, 0],
-                                                [0, 4, 16, 4, 0],
-                                                [0, 1, 4, 1, 0],
-                                                [0, 0, 0, 0, 0]]))
-    assert_array_equal(A_elems[3][2], np.array([[0, 0, 0, 0, 0],
-                                                [0, 4, 16, 4, 0],
-                                                [0, 0, 0, 0, 0],
-                                                [0, 4, 16, 4, 0],
-                                                [0, 0, 0, 0, 0]]))
+    assert_array_equal(
+        A_elems[0][:, 1, :],
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 4, 1, 0],
+                [0, 0, 0, 0, 0],
+                [0, 1, 4, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
+    assert_array_equal(
+        A_elems[0][1],
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 4, 1, 0],
+                [0, 4, 16, 4, 0],
+                [0, 1, 4, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
+    assert_array_equal(
+        A_elems[3][2],
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 4, 16, 4, 0],
+                [0, 0, 0, 0, 0],
+                [0, 4, 16, 4, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
 
 def test_structure_tensor_3d_rc_only():
@@ -112,28 +165,50 @@ def test_structure_tensor_sigma(ndim):
 def test_hessian_matrix(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 4
-    Hrr, Hrc, Hcc = hessian_matrix(square, sigma=0.1, order='rc',
-                                   use_gaussian_derivatives=False)
+    Hrr, Hrc, Hcc = hessian_matrix(
+        square, sigma=0.1, order='rc', use_gaussian_derivatives=False
+    )
 
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (Hrr, Hrc, Hcc))
-    assert_almost_equal(Hrr, np.array([[0, 0,  2, 0, 0],
-                                       [0, 0,  0, 0, 0],
-                                       [0, 0, -2, 0, 0],
-                                       [0, 0,  0, 0, 0],
-                                       [0, 0,  2, 0, 0]]))
+    assert_almost_equal(
+        Hrr,
+        np.array(
+            [
+                [0, 0, 2, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, -2, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 2, 0, 0],
+            ]
+        ),
+    )
 
-    assert_almost_equal(Hrc, np.array([[0,  0, 0,  0, 0],
-                                       [0,  1, 0, -1, 0],
-                                       [0,  0, 0,  0, 0],
-                                       [0, -1, 0,  1, 0],
-                                       [0,  0, 0,  0, 0]]))
+    assert_almost_equal(
+        Hrc,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 0, -1, 0],
+                [0, 0, 0, 0, 0],
+                [0, -1, 0, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
-    assert_almost_equal(Hcc, np.array([[0, 0,  0, 0, 0],
-                                       [0, 0,  0, 0, 0],
-                                       [2, 0, -2, 0, 2],
-                                       [0, 0,  0, 0, 0],
-                                       [0, 0,  0, 0, 0]]))
+    assert_almost_equal(
+        Hcc,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [2, 0, -2, 0, 2],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
     with expected_warnings(["use_gaussian_derivatives currently defaults"]):
         # FutureWarning warning when use_gaussian_derivatives is not
@@ -147,12 +222,12 @@ def test_hessian_matrix_order(use_gaussian_derivatives):
     square[2, 2] = 4
 
     Hxx, Hxy, Hyy = hessian_matrix(
-        square, sigma=0.1, order="xy",
-        use_gaussian_derivatives=use_gaussian_derivatives)
+        square, sigma=0.1, order="xy", use_gaussian_derivatives=use_gaussian_derivatives
+    )
 
     Hrr, Hrc, Hcc = hessian_matrix(
-        square, sigma=0.1, order="rc",
-        use_gaussian_derivatives=use_gaussian_derivatives)
+        square, sigma=0.1, order="rc", use_gaussian_derivatives=use_gaussian_derivatives
+    )
 
     # verify results are equivalent, just reversed in order
     assert_array_equal(Hxx, Hcc)
@@ -163,36 +238,56 @@ def test_hessian_matrix_order(use_gaussian_derivatives):
 def test_hessian_matrix_3d():
     cube = np.zeros((5, 5, 5))
     cube[2, 2, 2] = 4
-    Hs = hessian_matrix(cube, sigma=0.1, order='rc',
-                        use_gaussian_derivatives=False)
-    assert len(Hs) == 6, (f"incorrect number of Hessian images ({len(Hs)}) for 3D")
+    Hs = hessian_matrix(cube, sigma=0.1, order='rc', use_gaussian_derivatives=False)
+    assert len(Hs) == 6, f"incorrect number of Hessian images ({len(Hs)}) for 3D"
     # This test didn't catch the fix in gh-6624 (passes with and without) ...
-    assert_almost_equal(Hs[2][:, 2, :], np.array([[0,  0,  0,  0,  0],
-                                                  [0,  1,  0, -1,  0],
-                                                  [0,  0,  0,  0,  0],
-                                                  [0, -1,  0,  1,  0],
-                                                  [0,  0,  0,  0,  0]]))
+    assert_almost_equal(
+        Hs[2][:, 2, :],
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 0, -1, 0],
+                [0, 0, 0, 0, 0],
+                [0, -1, 0, 1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
     # ... so we add another test that fails for the not-fixed hessian_matrix
-    assert_almost_equal(Hs[0][:, 2, :], np.array([[0,  0,  2,  0,  0],
-                                                  [0,  0,  0,  0,  0],
-                                                  [0,  0, -2,  0,  0],
-                                                  [0,  0,  0,  0,  0],
-                                                  [0,  0,  2,  0,  0]]))
+    assert_almost_equal(
+        Hs[0][:, 2, :],
+        np.array(
+            [
+                [0, 0, 2, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, -2, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 2, 0, 0],
+            ]
+        ),
+    )
 
 
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
 def test_hessian_matrix_3d_xy(use_gaussian_derivatives):
-
     img = np.ones((5, 5, 5))
 
     # order="xy" is only permitted for 2D
     with pytest.raises(ValueError):
-        hessian_matrix(img, sigma=0.1, order="xy",
-                       use_gaussian_derivatives=use_gaussian_derivatives)
+        hessian_matrix(
+            img,
+            sigma=0.1,
+            order="xy",
+            use_gaussian_derivatives=use_gaussian_derivatives,
+        )
 
     with pytest.raises(ValueError):
-        hessian_matrix(img, sigma=0.1, order='nonexistant',
-                       use_gaussian_derivatives=use_gaussian_derivatives)
+        hessian_matrix(
+            img,
+            sigma=0.1,
+            order='nonexistant',
+            use_gaussian_derivatives=use_gaussian_derivatives,
+        )
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -203,22 +298,37 @@ def test_structure_tensor_eigenvalues(dtype):
     l1, l2 = structure_tensor_eigenvalues(A_elems)
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (l1, l2))
-    assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
-                                     [0, 2, 4, 2, 0],
-                                     [0, 4, 0, 4, 0],
-                                     [0, 2, 4, 2, 0],
-                                     [0, 0, 0, 0, 0]]))
-    assert_array_equal(l2, np.array([[0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0],
-                                     [0, 0, 0, 0, 0]]))
+    assert_array_equal(
+        l1,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 2, 4, 2, 0],
+                [0, 4, 0, 4, 0],
+                [0, 2, 4, 2, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
+    assert_array_equal(
+        l2,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
 
 def test_structure_tensor_eigenvalues_3d():
     image = np.pad(cube(9), 5, mode='constant') * 1000
-    boundary = (np.pad(cube(9), 5, mode='constant')
-                - np.pad(cube(7), 6, mode='constant')).astype(bool)
+    boundary = (
+        np.pad(cube(9), 5, mode='constant') - np.pad(cube(7), 6, mode='constant')
+    ).astype(bool)
     A_elems = structure_tensor(image, sigma=0.1)
     e0, e1, e2 = structure_tensor_eigenvalues(A_elems)
     # e0 should detect facets
@@ -229,21 +339,34 @@ def test_structure_tensor_eigenvalues_3d():
 def test_hessian_matrix_eigvals(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 4
-    H = hessian_matrix(square, sigma=0.1, order='rc',
-                       use_gaussian_derivatives=False)
+    H = hessian_matrix(square, sigma=0.1, order='rc', use_gaussian_derivatives=False)
     l1, l2 = hessian_matrix_eigvals(H)
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (l1, l2))
-    assert_almost_equal(l1, np.array([[0, 0,  2, 0, 0],
-                                      [0, 1,  0, 1, 0],
-                                      [2, 0, -2, 0, 2],
-                                      [0, 1,  0, 1, 0],
-                                      [0, 0,  2, 0, 0]]))
-    assert_almost_equal(l2, np.array([[0,  0,  0,  0, 0],
-                                      [0, -1,  0, -1, 0],
-                                      [0,  0, -2,  0, 0],
-                                      [0, -1,  0, -1, 0],
-                                      [0,  0,  0,  0, 0]]))
+    assert_almost_equal(
+        l1,
+        np.array(
+            [
+                [0, 0, 2, 0, 0],
+                [0, 1, 0, 1, 0],
+                [2, 0, -2, 0, 2],
+                [0, 1, 0, 1, 0],
+                [0, 0, 2, 0, 0],
+            ]
+        ),
+    )
+    assert_almost_equal(
+        l2,
+        np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, -1, 0, -1, 0],
+                [0, 0, -2, 0, 0],
+                [0, -1, 0, -1, 0],
+                [0, 0, 0, 0, 0],
+            ]
+        ),
+    )
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -260,9 +383,10 @@ def test_hessian_matrix_eigvals_3d(im3d, dtype):
 
     E0, E1, E2 = E[:, E.shape[1] // 2]  # cross section
     row_center, col_center = np.array(E0.shape) // 2
-    circles = [draw.circle_perimeter(row_center, col_center, radius,
-                                     shape=E0.shape)
-               for radius in range(1, E0.shape[1] // 2 - 1)]
+    circles = [
+        draw.circle_perimeter(row_center, col_center, radius, shape=E0.shape)
+        for radius in range(1, E0.shape[1] // 2 - 1)
+    ]
     response0 = np.array([np.mean(E0[c]) for c in circles])
     response2 = np.array([np.mean(E2[c]) for c in circles])
     # eigenvalues are negative just inside the sphere, positive just outside
@@ -289,8 +413,10 @@ def test_hessian_matrix_det_3d(im3d, dtype):
     # testing in 3D is hard. We test this by showing that you get the
     # expected flat-then-low-then-high 2nd derivative response in a circle
     # around the midplane of the sphere.
-    circles = [draw.circle_perimeter(row_center, col_center, r, shape=D0.shape)
-               for r in range(1, D0.shape[1] // 2 - 1)]
+    circles = [
+        draw.circle_perimeter(row_center, col_center, r, shape=D0.shape)
+        for r in range(1, D0.shape[1] // 2 - 1)
+    ]
     response = np.array([np.mean(D0[c]) for c in circles])
     lowest = np.argmin(response)
     highest = np.argmax(response)
@@ -307,18 +433,23 @@ def test_shape_index():
     with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
         s = shape_index(square, sigma=0.1)
     assert_almost_equal(
-        s, np.array([[ np.nan, np.nan,   -0.5, np.nan, np.nan],
-                     [ np.nan,      0, np.nan,      0, np.nan],
-                     [   -0.5, np.nan,     -1, np.nan,   -0.5],
-                     [ np.nan,      0, np.nan,      0, np.nan],
-                     [ np.nan, np.nan,   -0.5, np.nan, np.nan]])
+        s,
+        np.array(
+            [
+                [np.nan, np.nan, -0.5, np.nan, np.nan],
+                [np.nan, 0, np.nan, 0, np.nan],
+                [-0.5, np.nan, -1, np.nan, -0.5],
+                [np.nan, 0, np.nan, 0, np.nan],
+                [np.nan, np.nan, -0.5, np.nan, np.nan],
+            ]
+        ),
     )
 
 
 @run_in_parallel()
 def test_square_image():
     im = np.zeros((50, 50)).astype(float)
-    im[:25, :25] = 1.
+    im[:25, :25] = 1.0
 
     # Moravec
     results = corner_moravec(im) > 0
@@ -326,19 +457,20 @@ def test_square_image():
     assert np.count_nonzero(results) == 92
 
     # Harris
-    results = peak_local_max(corner_harris(im, method='k'),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+    )
     # interest at corner
     assert len(results) == 1
 
-    results = peak_local_max(corner_harris(im, method='eps'),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+    )
     # interest at corner
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
     # interest at corner
     assert len(results) == 1
 
@@ -351,11 +483,11 @@ def test_square_image():
         corner_harris,
         corner_shi_tomasi,
         corner_kitchen_rosenfeld,
-    ]
+    ],
 )
 def test_corner_dtype(dtype, func):
     im = np.zeros((50, 50), dtype=dtype)
-    im[:25, :25] = 1.
+    im[:25, :25] = 1.0
     out_dtype = _supported_float_type(dtype)
     corners = func(im)
     assert corners.dtype == out_dtype
@@ -364,34 +496,36 @@ def test_corner_dtype(dtype, func):
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_corner_foerstner_dtype(dtype):
     im = np.zeros((50, 50), dtype=dtype)
-    im[:25, :25] = 1.
+    im[:25, :25] = 1.0
     out_dtype = _supported_float_type(dtype)
     assert all(arr.dtype == out_dtype for arr in corner_foerstner(im))
 
 
 def test_noisy_square_image():
     im = np.zeros((50, 50)).astype(float)
-    im[:25, :25] = 1.
+    im[:25, :25] = 1.0
     rng = np.random.default_rng(1234)
-    im = im + rng.uniform(size=im.shape) * .2
+    im = im + rng.uniform(size=im.shape) * 0.2
 
     # Moravec
-    results = peak_local_max(corner_moravec(im),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_moravec(im), min_distance=10, threshold_rel=0)
     # undefined number of interest points
     assert results.any()
 
     # Harris
-    results = peak_local_max(corner_harris(im, method='k'),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_harris(im, method='k'), min_distance=10, threshold_rel=0
+    )
     assert len(results) == 1
-    results = peak_local_max(corner_harris(im, method='eps'),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_harris(im, method='eps'), min_distance=10, threshold_rel=0
+    )
     assert len(results) == 1
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im, sigma=1.5),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(
+        corner_shi_tomasi(im, sigma=1.5), min_distance=10, threshold_rel=0
+    )
     assert len(results) == 1
 
 
@@ -403,13 +537,11 @@ def test_squared_dot():
     # Moravec fails
 
     # Harris
-    results = peak_local_max(corner_harris(im),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_harris(im), min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
     # Shi-Tomasi
-    results = peak_local_max(corner_shi_tomasi(im),
-                             min_distance=10, threshold_rel=0)
+    results = peak_local_max(corner_shi_tomasi(im), min_distance=10, threshold_rel=0)
     assert (results == np.array([[6, 6]])).all()
 
 
@@ -445,8 +577,9 @@ def test_subpix_edge(dtype):
     img = np.zeros((50, 50), dtype=dtype)
     img[:25, :25] = 255
     img[25:, 25:] = 255
-    corner = peak_local_max(corner_harris(img),
-                            min_distance=10, threshold_rel=0, num_peaks=1)
+    corner = peak_local_max(
+        corner_harris(img), min_distance=10, threshold_rel=0, num_peaks=1
+    )
     subpix = corner_subpix(img, corner)
     assert subpix.dtype == _supported_float_type(dtype)
     assert_array_equal(subpix[0], (24.5, 24.5))
@@ -455,8 +588,9 @@ def test_subpix_edge(dtype):
 def test_subpix_dot():
     img = np.zeros((50, 50))
     img[25, 25] = 255
-    corner = peak_local_max(corner_harris(img),
-                            min_distance=10, threshold_rel=0, num_peaks=1)
+    corner = peak_local_max(
+        corner_harris(img), min_distance=10, threshold_rel=0, num_peaks=1
+    )
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (25, 25))
 
@@ -467,8 +601,9 @@ def test_subpix_no_class():
     assert_array_equal(subpix[0], (np.nan, np.nan))
 
     img[25, 25] = 1e-10
-    corner = peak_local_max(corner_harris(img),
-                            min_distance=10, threshold_rel=0, num_peaks=1)
+    corner = peak_local_max(
+        corner_harris(img), min_distance=10, threshold_rel=0, num_peaks=1
+    )
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (np.nan, np.nan))
 
@@ -479,13 +614,17 @@ def test_subpix_border():
     img[25:-1, 25:-1] = 255
     corner = corner_peaks(corner_harris(img), threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
-    ref = np.array([[24.5, 24.5],
-                    [0.52040816, 0.52040816],
-                    [0.52040816, 24.47959184],
-                    [24.47959184, 0.52040816],
-                    [24.52040816, 48.47959184],
-                    [48.47959184, 24.52040816],
-                    [48.47959184, 48.47959184]])
+    ref = np.array(
+        [
+            [24.5, 24.5],
+            [0.52040816, 0.52040816],
+            [0.52040816, 24.47959184],
+            [24.47959184, 0.52040816],
+            [24.52040816, 48.47959184],
+            [48.47959184, 24.52040816],
+            [48.47959184, 48.47959184],
+        ]
+    )
 
     assert_almost_equal(subpix, ref)
 
@@ -501,9 +640,10 @@ def test_num_peaks():
 
     for i in range(20):
         n = np.random.randint(1, 21)
-        results = peak_local_max(img_corners,
-                                 min_distance=10, threshold_rel=0, num_peaks=n)
-        assert (results.shape[0] == n)
+        results = peak_local_max(
+            img_corners, min_distance=10, threshold_rel=0, num_peaks=n
+        )
+        assert results.shape[0] == n
 
 
 def test_corner_peaks():
@@ -511,19 +651,22 @@ def test_corner_peaks():
     response[2:5, 2:5] = 1
     response[8:10, 0:2] = 1
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=10,
-                           threshold_rel=0)
+    corners = corner_peaks(
+        response, exclude_border=False, min_distance=10, threshold_rel=0
+    )
     assert corners.shape == (1, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=5,
-                           threshold_rel=0)
+    corners = corner_peaks(
+        response, exclude_border=False, min_distance=5, threshold_rel=0
+    )
     assert corners.shape == (2, 2)
 
     corners = corner_peaks(response, exclude_border=False, min_distance=1)
     assert corners.shape == (5, 2)
 
-    corners = corner_peaks(response, exclude_border=False, min_distance=1,
-                           indices=False)
+    corners = corner_peaks(
+        response, exclude_border=False, min_distance=1, indices=False
+    )
     assert np.sum(corners) == 5
 
 
@@ -533,8 +676,13 @@ def test_blank_image_nans():
     be fixed by now. We test whether each detector returns something
     finite in the case of constant input"""
 
-    detectors = [corner_moravec, corner_harris, corner_shi_tomasi,
-                 corner_kitchen_rosenfeld, corner_foerstner]
+    detectors = [
+        corner_moravec,
+        corner_harris,
+        corner_shi_tomasi,
+        corner_kitchen_rosenfeld,
+        corner_foerstner,
+    ]
     constant_image = np.zeros((20, 20))
 
     for det in detectors:
@@ -551,87 +699,108 @@ def test_corner_fast_image_unsupported_error():
 @run_in_parallel()
 def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())
-    expected = np.array([[444, 310],
-                         [374, 171],
-                         [249, 171],
-                         [492, 139],
-                         [403, 162],
-                         [496, 266],
-                         [362, 328],
-                         [476, 250],
-                         [353, 172],
-                         [346, 279],
-                         [494, 169],
-                         [177, 156],
-                         [413, 181],
-                         [213, 117],
-                         [390, 149],
-                         [140, 205],
-                         [232, 266],
-                         [489, 155],
-                         [387, 195],
-                         [101, 198],
-                         [363, 192],
-                         [364, 147],
-                         [300, 244],
-                         [325, 245],
-                         [141, 242],
-                         [401, 197],
-                         [197, 148],
-                         [339, 242],
-                         [188, 113],
-                         [362, 252],
-                         [379, 183],
-                         [358, 307],
-                         [245, 137],
-                         [369, 159],
-                         [464, 251],
-                         [305,  57],
-                         [223, 375]])
-    actual = corner_peaks(corner_fast(img, 12, 0.3),
-                          min_distance=10, threshold_rel=0)
+    expected = np.array(
+        [
+            [444, 310],
+            [374, 171],
+            [249, 171],
+            [492, 139],
+            [403, 162],
+            [496, 266],
+            [362, 328],
+            [476, 250],
+            [353, 172],
+            [346, 279],
+            [494, 169],
+            [177, 156],
+            [413, 181],
+            [213, 117],
+            [390, 149],
+            [140, 205],
+            [232, 266],
+            [489, 155],
+            [387, 195],
+            [101, 198],
+            [363, 192],
+            [364, 147],
+            [300, 244],
+            [325, 245],
+            [141, 242],
+            [401, 197],
+            [197, 148],
+            [339, 242],
+            [188, 113],
+            [362, 252],
+            [379, 183],
+            [358, 307],
+            [245, 137],
+            [369, 159],
+            [464, 251],
+            [305, 57],
+            [223, 375],
+        ]
+    )
+    actual = corner_peaks(corner_fast(img, 12, 0.3), min_distance=10, threshold_rel=0)
     assert_array_equal(actual, expected)
 
 
 def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
     with pytest.raises(ValueError):
-        corner_orientations(
-            img,
-            np.asarray([[7, 7]]), np.ones((3, 3)))
+        corner_orientations(img, np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
 def test_corner_orientations_even_shape_error():
     img = np.zeros((20, 20))
     with pytest.raises(ValueError):
-        corner_orientations(
-            img,
-            np.asarray([[7, 7]]), np.ones((4, 4)))
+        corner_orientations(img, np.asarray([[7, 7]]), np.ones((4, 4)))
 
 
 @run_in_parallel()
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
-    corners = corner_peaks(corner_fast(img, 11, 0.35),
-                           min_distance=10, threshold_abs=0, threshold_rel=0.1)
-    expected = np.array([-4.40598471e-01, -1.46554357e+00,
-                         2.39291733e+00, -1.63869275e+00,
-                         1.45931342e+00, -1.64397304e+00,
-                         -1.76069982e+00, 1.09650167e+00,
-                         -1.65449964e+00, 1.19134149e+00,
-                         5.46905279e-02, 2.17103132e+00,
-                         8.12701702e-01, -1.22091334e-01,
-                         -2.01162417e+00, 1.25854853e+00,
-                         3.05330950e+00, 2.01197383e+00,
-                         1.07812134e+00, 3.09780364e+00,
-                         -3.49561988e-01, 2.43573659e+00,
-                         3.14918803e-01, -9.88548213e-01,
-                         -1.88247204e-01, 2.47305654e+00,
-                         -2.99143370e+00, 1.47154532e+00,
-                         -6.61151410e-01, -1.68885773e+00,
-                         -3.09279990e-01, -2.81524886e+00,
-                         -1.75220190e+00, -1.69230287e+00,
-                         -7.52950306e-04])
+    corners = corner_peaks(
+        corner_fast(img, 11, 0.35), min_distance=10, threshold_abs=0, threshold_rel=0.1
+    )
+    expected = np.array(
+        [
+            -4.40598471e-01,
+            -1.46554357e00,
+            2.39291733e00,
+            -1.63869275e00,
+            1.45931342e00,
+            -1.64397304e00,
+            -1.76069982e00,
+            1.09650167e00,
+            -1.65449964e00,
+            1.19134149e00,
+            5.46905279e-02,
+            2.17103132e00,
+            8.12701702e-01,
+            -1.22091334e-01,
+            -2.01162417e00,
+            1.25854853e00,
+            3.05330950e00,
+            2.01197383e00,
+            1.07812134e00,
+            3.09780364e00,
+            -3.49561988e-01,
+            2.43573659e00,
+            3.14918803e-01,
+            -9.88548213e-01,
+            -1.88247204e-01,
+            2.47305654e00,
+            -2.99143370e00,
+            1.47154532e00,
+            -6.61151410e-01,
+            -1.68885773e00,
+            -3.09279990e-01,
+            -2.81524886e00,
+            -1.75220190e00,
+            -1.69230287e00,
+            -7.52950306e-04,
+        ]
+    )
 
     actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
@@ -641,11 +810,9 @@ def test_corner_orientations_astronaut():
 def test_corner_orientations_square(dtype):
     square = np.zeros((12, 12), dtype=dtype)
     square[3:9, 3:9] = 1
-    corners = corner_peaks(corner_fast(square, 9),
-                           min_distance=1, threshold_rel=0)
+    corners = corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     assert actual_orientations.dtype == _supported_float_type(dtype)
     actual_orientations_degrees = np.rad2deg(actual_orientations)
     expected_orientations_degree = np.array([45, 135, -45, -135])
-    assert_array_equal(actual_orientations_degrees,
-                       expected_orientations_degree)
+    assert_array_equal(actual_orientations_degrees, expected_orientations_degree)

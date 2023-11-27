@@ -20,7 +20,7 @@ __all__ = [
     'random_shapes',
     'rectangle',
     'rectangle_perimeter',
-    'polygon2mask'
+    'polygon2mask',
 ]
 
 from .draw3d import ellipsoid, ellipsoid_stats
@@ -38,7 +38,8 @@ from .draw import (
     ellipse_perimeter,
     circle_perimeter,
     circle_perimeter_aa,
-    disk, bezier_curve,
+    disk,
+    bezier_curve,
     rectangle,
-    rectangle_perimeter
+    rectangle_perimeter,
 )

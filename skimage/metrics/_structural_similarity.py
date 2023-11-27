@@ -12,11 +12,18 @@ from ..util.dtype import dtype_range
 __all__ = ['structural_similarity']
 
 
-def structural_similarity(im1, im2,
-                          *,
-                          win_size=None, gradient=False, data_range=None,
-                          channel_axis=None,
-                          gaussian_weights=False, full=False, **kwargs):
+def structural_similarity(
+    im1,
+    im2,
+    *,
+    win_size=None,
+    gradient=False,
+    data_range=None,
+    channel_axis=None,
+    gaussian_weights=False,
+    full=False,
+    **kwargs,
+):
     """
     Compute the mean structural similarity index between two images.
     Please pay attention to the `data_range` parameter with floating-point images.
@@ -113,12 +120,14 @@ def structural_similarity(im1, im2,
 
     if channel_axis is not None:
         # loop over channels
-        args = dict(win_size=win_size,
-                    gradient=gradient,
-                    data_range=data_range,
-                    channel_axis=None,
-                    gaussian_weights=gaussian_weights,
-                    full=full)
+        args = dict(
+            win_size=win_size,
+            gradient=gradient,
+            data_range=data_range,
+            channel_axis=None,
+            gaussian_weights=gaussian_weights,
+            full=full,
+        )
         args.update(kwargs)
         nch = im1.shape[channel_axis]
         mssim = np.empty(nch, dtype=float_type)
@@ -130,8 +139,7 @@ def structural_similarity(im1, im2,
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
-            ch_result = structural_similarity(im1[_at(ch)],
-                                              im2[_at(ch)], **args)
+            ch_result = structural_similarity(im1[_at(ch)], im2[_at(ch)], **args)
             if gradient and full:
                 mssim[ch], G[_at(ch)], S[_at(ch)] = ch_result
             elif gradient:
@@ -172,7 +180,7 @@ def structural_similarity(im1, im2,
             r = int(truncate * sigma + 0.5)  # radius as in ndimage
             win_size = 2 * r + 1
         else:
-            win_size = 7   # backwards compatibility
+            win_size = 7  # backwards compatibility
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
@@ -183,28 +191,36 @@ def structural_similarity(im1, im2,
             'less than or equal to the smaller side of your '
             'images. If your images are multichannel '
             '(with color channels), set channel_axis to '
-            'the axis number corresponding to the channels.')
+            'the axis number corresponding to the channels.'
+        )
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
 
     if data_range is None:
-        if (np.issubdtype(im1.dtype, np.floating) or
-            np.issubdtype(im2.dtype, np.floating)):
+        if np.issubdtype(im1.dtype, np.floating) or np.issubdtype(
+            im2.dtype, np.floating
+        ):
             raise ValueError(
                 'Since image dtype is floating point, you must specify '
                 'the data_range parameter. Please read the documentation '
                 'carefully (including the note). It is recommended that '
-                'you always specify the data_range anyway.')
+                'you always specify the data_range anyway.'
+            )
         if im1.dtype != im2.dtype:
-            warn("Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
-                 stacklevel=2)
+            warn(
+                "Inputs have mismatched dtypes. Setting data_range based on im1.dtype.",
+                stacklevel=2,
+            )
         dmin, dmax = dtype_range[im1.dtype.type]
         data_range = dmax - dmin
         if np.issubdtype(im1.dtype, np.integer) and (im1.dtype != np.uint8):
-            warn("Setting data_range based on im1.dtype. " +
-                 f"data_range = {data_range:.0f}. " +
-                 "Please specify data_range explicitly to avoid mistakes.", stacklevel=2)
+            warn(
+                "Setting data_range based on im1.dtype. "
+                + f"data_range = {data_range:.0f}. "
+                + "Please specify data_range explicitly to avoid mistakes.",
+                stacklevel=2,
+            )
 
     ndim = im1.ndim
 
@@ -219,7 +235,7 @@ def structural_similarity(im1, im2,
     im1 = im1.astype(float_type, copy=False)
     im2 = im2.astype(float_type, copy=False)
 
-    NP = win_size ** ndim
+    NP = win_size**ndim
 
     # filter has already normalized by NP
     if use_sample_covariance:
@@ -243,10 +259,12 @@ def structural_similarity(im1, im2,
     C1 = (K1 * R) ** 2
     C2 = (K2 * R) ** 2
 
-    A1, A2, B1, B2 = ((2 * ux * uy + C1,
-                       2 * vxy + C2,
-                       ux ** 2 + uy ** 2 + C1,
-                       vx + vy + C2))
+    A1, A2, B1, B2 = (
+        2 * ux * uy + C1,
+        2 * vxy + C2,
+        ux**2 + uy**2 + C1,
+        vx + vy + C2,
+    )
     D = B1 * B2
     S = (A1 * A2) / D
 
@@ -260,9 +278,8 @@ def structural_similarity(im1, im2,
         # The following is Eqs. 7-8 of Avanaki 2009.
         grad = filter_func(A1 / D, **filter_args) * im1
         grad += filter_func(-S / B2, **filter_args) * im2
-        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D,
-                            **filter_args)
-        grad *= (2 / im1.size)
+        grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
+        grad *= 2 / im1.size
 
         if full:
             return mssim, grad, S

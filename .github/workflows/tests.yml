@@ -15,7 +15,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
         PIP_FLAGS: [""]
         MINIMUM_REQUIREMENTS: [0]
         BUILD_DOCS: [1]
@@ -29,39 +29,36 @@ jobs:
         EAGER_IMPORT: [0]
         include:
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
             BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
-            # Test minimum requirements (don't build docs there is a problem
-            # with dask and astropy)
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.11
+            python-version: "3.12"
             PIP_FLAGS: "--pre"
             SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
-            # test prereleases
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: "3.12"
             BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: "3.12"
             PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             BUILD_DOCS: 0
             OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
-            python-version: 3.9
+            python-version: "3.12"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
 
@@ -73,6 +70,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: Build package
         env:
@@ -121,17 +119,10 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
         OPTIONAL_DEPS: [1]
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
-        include:
-          - python-version: "3.9"
-            OPTIONAL_DEPS: 0
-        exclude:
-          # Problem with SimpleITK and py 3.9
-          - python-version: "3.9"
-            OPTIONAL_DEPS: 1
     env:
       TEST_EXAMPLES: 0
       CC: /usr/bin/clang
@@ -149,6 +140,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
 
       - name: OSX configuration
         run: |

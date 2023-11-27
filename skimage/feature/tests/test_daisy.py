@@ -19,16 +19,14 @@ def test_daisy_desc_dims():
     rings = 2
     histograms = 4
     orientations = 3
-    descs = daisy(img, rings=rings, histograms=histograms,
-                  orientations=orientations)
-    assert(descs.shape[2] == (rings * histograms + 1) * orientations)
+    descs = daisy(img, rings=rings, histograms=histograms, orientations=orientations)
+    assert descs.shape[2] == (rings * histograms + 1) * orientations
 
     rings = 4
     histograms = 5
     orientations = 13
-    descs = daisy(img, rings=rings, histograms=histograms,
-                  orientations=orientations)
-    assert(descs.shape[2] == (rings * histograms + 1) * orientations)
+    descs = daisy(img, rings=rings, histograms=histograms, orientations=orientations)
+    assert descs.shape[2] == (rings * histograms + 1) * orientations
 
 
 def test_descs_shape():
@@ -36,15 +34,15 @@ def test_descs_shape():
     radius = 20
     step = 8
     descs = daisy(img, radius=radius, step=step)
-    assert(descs.shape[0] == ceil((img.shape[0] - radius * 2) / float(step)))
-    assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
+    assert descs.shape[0] == ceil((img.shape[0] - radius * 2) / float(step))
+    assert descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step))
 
     img = img[:-1, :-2]
     radius = 5
     step = 3
     descs = daisy(img, radius=radius, step=step)
-    assert(descs.shape[0] == ceil((img.shape[0] - radius * 2) / float(step)))
-    assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
+    assert descs.shape[0] == ceil((img.shape[0] - radius * 2) / float(step))
+    assert descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step))
 
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
@@ -85,8 +83,9 @@ def test_daisy_normalization():
     for i in range(descs.shape[0]):
         for j in range(descs.shape[1]):
             for k in range(0, desc_dims, orientations):
-                assert_almost_equal(sqrt(np.sum(
-                    descs[i, j, k:k + orientations] ** 2)), 1)
+                assert_almost_equal(
+                    sqrt(np.sum(descs[i, j, k : k + orientations] ** 2)), 1
+                )
 
     img = np.zeros((50, 50))
     descs = daisy(img, normalization='off')
@@ -101,4 +100,4 @@ def test_daisy_normalization():
 def test_daisy_visualization():
     img = img_as_float(data.astronaut()[:32, :32].mean(axis=2))
     descs, descs_img = daisy(img, visualize=True)
-    assert(descs_img.shape == (32, 32, 3))
+    assert descs_img.shape == (32, 32, 3)

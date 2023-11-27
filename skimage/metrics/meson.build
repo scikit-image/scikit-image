@@ -1,6 +1,7 @@
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_adapted_rand_error.py',
   '_contingency_table.py',
   '_structural_similarity.py',

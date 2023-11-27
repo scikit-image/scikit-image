@@ -40,9 +40,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pywt
 
-from skimage import (
-    data, restoration, util
-)
+from skimage import data, restoration, util
 
 
 def plot_result(image, background):
@@ -176,15 +174,9 @@ plt.show()
 
 normalized_radius = 70.5 / 255
 image = util.img_as_float(data.coins())
-kernel = restoration.ellipsoid_kernel(
-    (70.5 * 2, 70.5 * 2),
-    normalized_radius * 2
-)
+kernel = restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), normalized_radius * 2)
 
-background = restoration.rolling_ball(
-    image,
-    kernel=kernel
-)
+background = restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -207,15 +199,9 @@ plt.show()
 # specifies an ellipsoid shaped kernel.
 
 image = data.coins()
-kernel = restoration.ellipsoid_kernel(
-    (70.5 * 2, 70.5 * 2),
-    70.5 * 2
-)
+kernel = restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), 70.5 * 2)
 
-background = restoration.rolling_ball(
-    image,
-    kernel=kernel
-)
+background = restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -226,15 +212,9 @@ plt.show()
 
 image = data.coins()
 
-kernel = restoration.ellipsoid_kernel(
-    (10 * 2, 10 * 2),
-    255 * 2
-)
+kernel = restoration.ellipsoid_kernel((10 * 2, 10 * 2), 255 * 2)
 
-background = restoration.rolling_ball(
-    image,
-    kernel=kernel
-)
+background = restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -250,11 +230,7 @@ plt.show()
 
 image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
-    image,
-    kernel=restoration.ellipsoid_kernel(
-        (1, 21, 21),
-        0.1
-    )
+    image, kernel=restoration.ellipsoid_kernel((1, 21, 21), 0.1)
 )
 
 plot_result(image[30, ...], background[30, ...])
@@ -269,11 +245,7 @@ plt.show()
 
 image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
-    image,
-    kernel=restoration.ellipsoid_kernel(
-        (5, 21, 21),
-        0.1
-    )
+    image, kernel=restoration.ellipsoid_kernel((5, 21, 21), 0.1)
 )
 
 plot_result(image[30, ...], background[30, ...])
@@ -285,11 +257,7 @@ plt.show()
 
 image = data.cells3d()[:, 1, ...]
 background = restoration.rolling_ball(
-    image,
-    kernel=restoration.ellipsoid_kernel(
-        (100, 1, 1),
-        0.1
-    )
+    image, kernel=restoration.ellipsoid_kernel((100, 1, 1), 0.1)
 )
 
 plot_result(image[30, ...], background[30, ...])

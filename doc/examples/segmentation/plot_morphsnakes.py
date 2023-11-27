@@ -50,10 +50,12 @@ References
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data, img_as_float
-from skimage.segmentation import (morphological_chan_vese,
-                                  morphological_geodesic_active_contour,
-                                  inverse_gaussian_gradient,
-                                  checkerboard_level_set)
+from skimage.segmentation import (
+    morphological_chan_vese,
+    morphological_geodesic_active_contour,
+    inverse_gaussian_gradient,
+    checkerboard_level_set,
+)
 
 
 def store_evolution_in(lst):
@@ -75,8 +77,9 @@ init_ls = checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_chan_vese(image, num_iter=35, init_level_set=init_ls,
-                             smoothing=3, iter_callback=callback)
+ls = morphological_chan_vese(
+    image, num_iter=35, init_level_set=init_ls, smoothing=3, iter_callback=callback
+)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.flatten()
@@ -109,11 +112,15 @@ init_ls[10:-10, 10:-10] = 1
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_geodesic_active_contour(gimage, num_iter=230,
-                                           init_level_set=init_ls,
-                                           smoothing=1, balloon=-1,
-                                           threshold=0.69,
-                                           iter_callback=callback)
+ls = morphological_geodesic_active_contour(
+    gimage,
+    num_iter=230,
+    init_level_set=init_ls,
+    smoothing=1,
+    balloon=-1,
+    threshold=0.69,
+    iter_callback=callback,
+)
 
 ax[2].imshow(image, cmap="gray")
 ax[2].set_axis_off()

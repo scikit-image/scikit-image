@@ -12,11 +12,17 @@ from tempfile import NamedTemporaryFile
 import numpy as np
 from numpy import testing
 from numpy.testing import (
-    TestCase, assert_, assert_warns, assert_no_warnings,
-    assert_equal, assert_almost_equal,
-    assert_array_equal, assert_allclose,
-    assert_array_almost_equal, assert_array_almost_equal_nulp,
-    assert_array_less
+    TestCase,
+    assert_,
+    assert_warns,
+    assert_no_warnings,
+    assert_equal,
+    assert_almost_equal,
+    assert_array_equal,
+    assert_allclose,
+    assert_array_almost_equal,
+    assert_array_almost_equal_nulp,
+    assert_array_less,
 )
 
 import warnings
@@ -55,6 +61,7 @@ else:
     except ValueError:
         _error_on_warnings = False
 
+
 def assert_less(a, b, msg=None):
     message = f"{a!r} is not lower than {b!r}"
     if msg is not None:
@@ -70,7 +77,7 @@ def assert_greater(a, b, msg=None):
 
 
 def doctest_skip_parser(func):
-    """ Decorator replaces custom skip test markup in doctests
+    """Decorator replaces custom skip test markup in doctests
 
     Say a function has a docstring::
 
@@ -209,7 +216,6 @@ def setup_test():
     warnings.simplefilter('default')
 
     if _error_on_warnings:
-
         np.random.seed(0)
 
         warnings.simplefilter('error')
@@ -223,39 +229,38 @@ def setup_test():
         warnings.filterwarnings(
             'default',
             message='Conversion of the second argument of issubdtype',
-            category=FutureWarning
+            category=FutureWarning,
         )
 
         warnings.filterwarnings(
             'default',
             message='the matrix subclass is not the recommended way',
-            category=PendingDeprecationWarning, module='numpy'
+            category=PendingDeprecationWarning,
+            module='numpy',
         )
 
         warnings.filterwarnings(
             'default',
             message='Your installed pillow version',
             category=UserWarning,
-            module='skimage.io'
+            module='skimage.io',
         )
 
         # ignore warning from cycle_spin about Dask not being installed
         warnings.filterwarnings(
             'default',
             message='The optional dask dependency is not installed.',
-            category=UserWarning
+            category=UserWarning,
         )
 
         warnings.filterwarnings(
-            'default',
-            message='numpy.ufunc size changed',
-            category=RuntimeWarning
+            'default', message='numpy.ufunc size changed', category=RuntimeWarning
         )
 
         warnings.filterwarnings(
             'default',
             message='\n\nThe scipy.sparse array containers',
-            category=DeprecationWarning
+            category=DeprecationWarning,
         )
 
         # ignore dtype deprecation warning from NumPy arising from use of SciPy
@@ -264,7 +269,7 @@ def setup_test():
         warnings.filterwarnings(
             'default',
             message=('`np.int0` is a deprecated alias for `np.intp`'),
-            category=DeprecationWarning
+            category=DeprecationWarning,
         )
 
         # Temporary warning raised by imageio about change in Pillow. May be removed
@@ -291,7 +296,6 @@ def setup_test():
             category=DeprecationWarning,
         )
 
-
         warnings.filterwarnings(
             "default",
             message=("The figure layout has changed to tight"),
@@ -314,8 +318,7 @@ def fetch(data_filename):
     try:
         return _fetch(data_filename)
     except (ConnectionError, ModuleNotFoundError):
-        pytest.skip(f'Unable to download {data_filename}',
-                    allow_module_level=True)
+        pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
 def run_in_parallel(num_threads=2, warnings_matching=None):
@@ -345,8 +348,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
             with expected_warnings(warnings_matching):
                 threads = []
                 for i in range(num_threads - 1):
-                    thread = threading.Thread(target=func, args=args,
-                                              kwargs=kwargs)
+                    thread = threading.Thread(target=func, args=args, kwargs=kwargs)
                     threads.append(thread)
                 for thread in threads:
                     thread.start()

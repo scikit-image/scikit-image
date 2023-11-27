@@ -12,8 +12,7 @@ from skimage.restoration._rolling_ball import ellipsoid_kernel
 
 
 @pytest.mark.parametrize(
-    'dtype',
-    [np.uint8, np.int32, np.float16, np.float32, np.float64]
+    'dtype', [np.uint8, np.int32, np.float16, np.float32, np.float64]
 )
 def test_ellipsoid_const(dtype):
     img = 155 * np.ones((100, 100), dtype=dtype)
@@ -29,19 +28,13 @@ def test_nan_const():
     img[50, 53] = np.nan
 
     kernel_shape = (10, 10)
-    x = np.arange(-kernel_shape[1] // 2,
-                  kernel_shape[1] // 2 + 1)[np.newaxis, :]
-    y = np.arange(-kernel_shape[0] // 2,
-                  kernel_shape[0] // 2 + 1)[:, np.newaxis]
+    x = np.arange(-kernel_shape[1] // 2, kernel_shape[1] // 2 + 1)[np.newaxis, :]
+    y = np.arange(-kernel_shape[0] // 2, kernel_shape[0] // 2 + 1)[:, np.newaxis]
     expected_img = np.zeros_like(img)
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
     kernel = ellipsoid_kernel(kernel_shape, 100)
-    background = rolling_ball(
-        img,
-        kernel=kernel,
-        nansafe=True
-    )
+    background = rolling_ball(img, kernel=kernel, nansafe=True)
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
@@ -57,7 +50,7 @@ def test_radial_gradient():
     # spot light source at top left corner
     spot_radius = 50
     x, y = np.meshgrid(range(5), range(5))
-    img = np.sqrt(np.clip(spot_radius ** 2 - y ** 2 - x ** 2, 0, None))
+    img = np.sqrt(np.clip(spot_radius**2 - y**2 - x**2, 0, None))
 
     background = rolling_ball(img, radius=5)
     assert np.allclose(img - background, np.zeros_like(img))
@@ -66,7 +59,7 @@ def test_radial_gradient():
 def test_linear_gradient():
     # linear light source centered at top left corner
     x, y = np.meshgrid(range(100), range(100))
-    img = (y * 20 + x * 20)
+    img = y * 20 + x * 20
 
     expected_img = 19 * np.ones_like(img)
     expected_img[0, 0] = 0

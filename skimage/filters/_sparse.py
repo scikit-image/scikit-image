@@ -17,9 +17,11 @@ def _validate_window_size(axis_sizes):
     """
     for axis_size in axis_sizes:
         if axis_size % 2 == 0:
-            msg = (f'Window size for `threshold_sauvola` or '
-                   f'`threshold_niblack` must not be even on any dimension. '
-                   f'Got {axis_sizes}')
+            msg = (
+                f'Window size for `threshold_sauvola` or '
+                f'`threshold_niblack` must not be even on any dimension. '
+                f'Got {axis_sizes}'
+            )
             raise ValueError(msg)
 
 
@@ -30,8 +32,12 @@ def _get_view(padded, kernel_shape, idx, val):
     in correlate_sparse, then the view created here will match the size of the
     original image.
     """
-    sl_shift = tuple([slice(c, s - (w_ - 1 - c))
-                      for c, w_, s in zip(idx, kernel_shape, padded.shape)])
+    sl_shift = tuple(
+        [
+            slice(c, s - (w_ - 1 - c))
+            for c, w_, s in zip(idx, kernel_shape, padded.shape)
+        ]
+    )
     v = padded[sl_shift]
     if val == 1:
         return v
@@ -83,11 +89,11 @@ def correlate_sparse(image, kernel, mode='reflect'):
 
     Parameters
     ----------
-    image : ndarray, dtype float, shape (M, N,[ ...,] P)
+    image : ndarray, dtype float, shape (M, N[, ...], P)
         The input array. If mode is 'valid', this array should already be
         padded, as a margin of the same shape as kernel will be stripped
         off.
-    kernel : ndarray, dtype float shape (Q, R,[ ...,] S)
+    kernel : ndarray, dtype float, shape (Q, R[, ...], S)
         The kernel to be correlated. Must have the same number of
         dimensions as `padded_array`. For high performance, it should
         be sparse (few nonzero entries).
@@ -99,9 +105,9 @@ def correlate_sparse(image, kernel, mode='reflect'):
 
     Returns
     -------
-    result : array of float, shape (M, N,[ ...,] P)
+    result : array of float, shape (M, N[, ...], P)
         The result of cross-correlating `image` with `kernel`. If mode
-        'valid' is used, the resulting shape is (M-Q+1, N-R+1,[ ...,] P-S+1).
+        'valid' is used, the resulting shape is (M-Q+1, N-R+1[, ...], P-S+1).
     """
     kernel = np.asarray(kernel)
 
