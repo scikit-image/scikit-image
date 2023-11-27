@@ -13,7 +13,6 @@ env:
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-  CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
 
 permissions:
   contents: read
@@ -21,6 +20,8 @@ permissions:
 jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
+    with:
+      CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
 
   upload_anaconda:
     permissions:
