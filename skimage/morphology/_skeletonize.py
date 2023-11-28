@@ -258,9 +258,9 @@ def thin(image, max_num_iter=None):
     Parameters
     ----------
     image : binary (M, N) ndarray
-        The image to skeletonize. If this input isn't already a binary image
-        it is converted into one, in which case zero values are considered as
-        the background (False) and any nonzero value as the foreground (True).
+        The image to skeletonize. If this input isn't already a binary image,
+        it gets converted into one: In this case, zero values are considered
+        background (False), nonzero values are considered foreground (True).
     max_num_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -366,7 +366,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     image : binary ndarray, shape (M, N)
         The image of the shape to skeletonize. If this input isn't already a
         binary image, it gets converted into one: In this case, zero values are
-        considered background (False), any nonzero values are considered
+        considered background (False), nonzero values are considered
         foreground (True).
     mask : binary ndarray, shape (M, N), optional
         If a mask is given, only those elements in `image` with a true
