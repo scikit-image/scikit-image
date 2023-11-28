@@ -255,8 +255,9 @@ def thin(image, max_num_iter=None):
     Parameters
     ----------
     image : binary (M, N) ndarray
-        The image to be thinned. Zeros represent background, nonzero values are
-        foreground.
+        The image to skeletonize. If this input isn't already a binary image
+        it is converted into one, in which case zero values are considered as
+        the background (False) and any nonzero value as the foreground (True).
     max_num_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -361,8 +362,10 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     Parameters
     ----------
     image : binary ndarray, shape (M, N)
-        The image of the shape to be skeletonized. Zeros represent background, nonzero
-        values are foreground.
+        The image of the shape to skeletonize. If this input isn't already a
+        binary image it is converted into one, in which case zero values are
+        considered as the background (False) and any nonzero value as the
+        foreground (True).
     mask : binary ndarray, shape (M, N), optional
         If a mask is given, only those elements in `image` with a true
         value in `mask` are used for computing the medial axis.
@@ -624,7 +627,7 @@ def skeletonize_3d(image):
 
     image_io = image.astype(bool, copy=False)
 
-    # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
+    # make a 2D input image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
     if image.ndim == 2:
         image_io = image_io[np.newaxis, ...]
