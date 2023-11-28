@@ -9,7 +9,7 @@ from skimage.morphology import binary, footprints, gray
 
 
 img = color.rgb2gray(data.astronaut())
-bw_img = img > 100 / 255.
+bw_img = img > 100 / 255.0
 
 
 def test_non_square_image():
@@ -40,6 +40,17 @@ def test_binary_closing():
     assert_array_equal(binary_res, gray_res)
 
 
+def test_binary_closing_extensive():
+    footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+    result_default = binary.binary_closing(bw_img, footprint=footprint)
+    assert np.all(result_default >= bw_img)
+
+    # mode="min" is expected to be not extensive
+    result_min = binary.binary_closing(img, footprint=footprint, mode="min")
+    assert not np.all(result_min >= bw_img)
+
+
 def test_binary_opening():
     footprint = morphology.square(3)
     binary_res = binary.binary_opening(bw_img, footprint)
@@ -47,12 +58,23 @@ def test_binary_opening():
     assert_array_equal(binary_res, gray_res)
 
 
+def test_binary_opening_anti_extensive():
+    footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+
+    result_default = binary.binary_opening(bw_img, footprint=footprint)
+    assert np.all(result_default <= bw_img)
+
+    # mode="max" is expected to be not extensive
+    result_max = binary.binary_opening(bw_img, footprint=footprint, mode="max")
+    assert not np.all(result_max <= bw_img)
+
+
 def _get_decomp_test_data(function, ndim=2):
     if function == 'binary_erosion':
-        img = np.ones((17, ) * ndim, dtype=np.uint8)
+        img = np.ones((17,) * ndim, dtype=np.uint8)
         img[8, 8] = 0
     elif function == 'binary_dilation':
-        img = np.zeros((17, ) * ndim, dtype=np.uint8)
+        img = np.zeros((17,) * ndim, dtype=np.uint8)
         img[8, 8] = 1
     else:
         img = data.binary_blobs(32, n_dim=ndim, rng=1)
@@ -205,26 +227,50 @@ def test_out_argument():
         assert_array_equal(out, func(img, footprint))
 
 
-binary_functions = [binary.binary_erosion, binary.binary_dilation,
-                    binary.binary_opening, binary.binary_closing]
+binary_functions = [
+    binary.binary_erosion,
+    binary.binary_dilation,
+    binary.binary_opening,
+    binary.binary_closing,
+]
+
+
+@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize("mode", ['max', 'min', 'ignore'])
+def test_supported_mode(func, mode):
+    img = np.ones((10, 10), dtype=bool)
+    func(img, mode=mode)
+
+
+@pytest.mark.parametrize("func", binary_functions)
+@pytest.mark.parametrize("mode", ["reflect", 3, None])
+def test_unsupported_mode(func, mode):
+    img = np.ones((10, 10))
+    with pytest.raises(ValueError, match="unsupported mode"):
+        func(img, mode=mode)
 
 
 @pytest.mark.parametrize("function", binary_functions)
 def test_default_footprint(function):
     footprint = morphology.diamond(radius=1)
-    image = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], np.uint8)
+    image = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        np.uint8,
+    )
     im_expected = function(image, footprint)
     im_test = function(image)
     assert_array_equal(im_expected, im_test)
@@ -262,7 +308,7 @@ def test_2d_ndimage_equivalence():
     image = np.zeros((9, 9), np.uint16)
     image[2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3] = 2**15
-    image[4, 4] = 2**16-1
+    image[4, 4] = 2**16 - 1
 
     bin_opened = binary.binary_opening(image)
     bin_closed = binary.binary_closing(image)
@@ -279,7 +325,7 @@ def test_binary_output_2d():
     image = np.zeros((9, 9), np.uint16)
     image[2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3] = 2**15
-    image[4, 4] = 2**16-1
+    image[4, 4] = 2**16 - 1
 
     bin_opened = binary.binary_opening(image)
     bin_closed = binary.binary_closing(image)
@@ -300,7 +346,7 @@ def test_binary_output_3d():
     image = np.zeros((9, 9, 9), np.uint16)
     image[2:-2, 2:-2, 2:-2] = 2**14
     image[3:-3, 3:-3, 3:-3] = 2**15
-    image[4, 4, 4] = 2**16-1
+    image[4, 4, 4] = 2**16 - 1
 
     bin_opened = binary.binary_opening(image)
     bin_closed = binary.binary_closing(image)

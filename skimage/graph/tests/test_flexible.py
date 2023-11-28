@@ -9,7 +9,7 @@ a[1::2] *= 2.0
 
 
 class FlexibleMCP(mcp.MCP_Flexible):
-    """ Simple MCP subclass that allows the front to travel
+    """Simple MCP subclass that allows the front to travel
     a certain distance from the seed point, and uses a constant
     cost factor that is independent of the cost array.
     """
@@ -41,10 +41,9 @@ def test_flexible():
 
     # Check that inner part is correct. This basically
     # tests whether travel_cost works.
-    assert_array_equal(costs[:4, :4], [[1, 2, 3, 4],
-                                       [2, 2, 3, 4],
-                                       [3, 3, 3, 4],
-                                       [4, 4, 4, 4]])
+    assert_array_equal(
+        costs[:4, :4], [[1, 2, 3, 4], [2, 2, 3, 4], [3, 3, 3, 4], [4, 4, 4, 4]]
+    )
 
     # Test that the algorithm stopped at the right distance.
     # Note that some of the costs are filled in but not yet frozen,

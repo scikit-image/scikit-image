@@ -46,39 +46,30 @@ from skimage.feature import shape_index
 from skimage.draw import disk
 
 
-def create_test_image(
-        image_size=256, spot_count=30, spot_radius=5, cloud_noise_size=4):
+def create_test_image(image_size=256, spot_count=30, spot_radius=5, cloud_noise_size=4):
     """
     Generate a test image with random noise, uneven illumination and spots.
     """
     rng = np.random.default_rng()
-    image = rng.normal(
-        loc=0.25,
-        scale=0.25,
-        size=(image_size, image_size)
-    )
+    image = rng.normal(loc=0.25, scale=0.25, size=(image_size, image_size))
 
     for _ in range(spot_count):
         rr, cc = disk(
-            (rng.integers(image.shape[0]),
-             rng.integers(image.shape[1])),
+            (rng.integers(image.shape[0]), rng.integers(image.shape[1])),
             spot_radius,
-            shape=image.shape
+            shape=image.shape,
         )
         image[rr, cc] = 1
 
     image *= rng.normal(loc=1.0, scale=0.1, size=image.shape)
 
     image *= ndi.zoom(
-        rng.normal(
-            loc=1.0,
-            scale=0.5,
-            size=(cloud_noise_size, cloud_noise_size)
-        ),
-        image_size / cloud_noise_size
+        rng.normal(loc=1.0, scale=0.5, size=(cloud_noise_size, cloud_noise_size)),
+        image_size / cloud_noise_size,
     )
 
     return ndi.gaussian_filter(image, sigma=2.0)
+
 
 # First create the test image and its shape index
 
@@ -120,20 +111,12 @@ ax1.scatter(point_x_s, point_y_s, color='green', **scatter_settings)
 
 ax2 = fig.add_subplot(1, 3, 2, projection='3d', sharex=ax1, sharey=ax1)
 
-x, y = np.meshgrid(
-    np.arange(0, image.shape[0], 1),
-    np.arange(0, image.shape[1], 1)
-)
+x, y = np.meshgrid(np.arange(0, image.shape[0], 1), np.arange(0, image.shape[1], 1))
 
 ax2.plot_surface(x, y, image, linewidth=0, alpha=0.5)
 
 ax2.scatter(
-    point_x,
-    point_y,
-    point_z,
-    color='blue',
-    label='$|s - 1|<0.05$',
-    **scatter_settings
+    point_x, point_y, point_z, color='blue', label='$|s - 1|<0.05$', **scatter_settings
 )
 
 ax2.scatter(
@@ -142,7 +125,7 @@ ax2.scatter(
     point_z_s,
     color='green',
     label='$|s\' - 1|<0.05$',
-    **scatter_settings
+    **scatter_settings,
 )
 
 ax2.legend(loc='lower left')

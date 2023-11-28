@@ -14,7 +14,7 @@ cdef extern from "unwrap_2d_ljmu.h":
             int image_width, int image_height,
             int wrap_around_x, int wrap_around_y,
             char use_seed, unsigned int seed
-            ) nogil
+            ) noexcept nogil
 
 
 def unwrap_2d(cnp.float64_t[:, ::1] image,

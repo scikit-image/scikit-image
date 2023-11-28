@@ -13,8 +13,13 @@ extracting features at different scales.
 """
 from skimage import data
 from skimage import transform
-from skimage.feature import (match_descriptors, corner_peaks, corner_harris,
-                             plot_matches, BRIEF)
+from skimage.feature import (
+    match_descriptors,
+    corner_peaks,
+    corner_harris,
+    plot_matches,
+    BRIEF,
+)
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
@@ -24,12 +29,9 @@ tform = transform.AffineTransform(scale=(1.2, 1.2), translation=(0, -100))
 img2 = transform.warp(img1, tform)
 img3 = transform.rotate(img1, 25)
 
-keypoints1 = corner_peaks(corner_harris(img1), min_distance=5,
-                          threshold_rel=0.1)
-keypoints2 = corner_peaks(corner_harris(img2), min_distance=5,
-                          threshold_rel=0.1)
-keypoints3 = corner_peaks(corner_harris(img3), min_distance=5,
-                          threshold_rel=0.1)
+keypoints1 = corner_peaks(corner_harris(img1), min_distance=5, threshold_rel=0.1)
+keypoints2 = corner_peaks(corner_harris(img2), min_distance=5, threshold_rel=0.1)
+keypoints3 = corner_peaks(corner_harris(img3), min_distance=5, threshold_rel=0.1)
 
 extractor = BRIEF()
 

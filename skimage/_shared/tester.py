@@ -4,6 +4,7 @@ import sys
 
 def _show_skimage_info():
     import skimage
+
     print(f"skimage version {skimage.__version__}")
 
 
@@ -32,11 +33,20 @@ class PytestTester:
         The name of the module to test.
 
     """
+
     def __init__(self, module_name):
         self.module_name = module_name
 
-    def __call__(self, label='fast', verbose=1, extra_argv=None,
-                 doctests=False, coverage=False, durations=-1, tests=None):
+    def __call__(
+        self,
+        label='fast',
+        verbose=1,
+        extra_argv=None,
+        doctests=False,
+        coverage=False,
+        durations=-1,
+        tests=None,
+    ):
         """
         Run tests for module using pytest.
 
@@ -82,7 +92,8 @@ class PytestTester:
         pytest_args += [
             "-W ignore:Not importing directory",
             "-W ignore:numpy.dtype size changed",
-            "-W ignore:numpy.ufunc size changed", ]
+            "-W ignore:numpy.ufunc size changed",
+        ]
 
         if doctests:
             raise ValueError("Doctests not supported")

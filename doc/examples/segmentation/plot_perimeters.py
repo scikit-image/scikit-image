@@ -21,12 +21,12 @@ from skimage.transform import rotate
 scale = 10
 
 # Construct two objects, a square and a disk
-square = np.zeros((100*scale, 100*scale))
-square[40*scale:60*scale, 40*scale:60*scale] = 1
+square = np.zeros((100 * scale, 100 * scale))
+square[40 * scale : 60 * scale, 40 * scale : 60 * scale] = 1
 
-[X, Y] = np.meshgrid(np.linspace(0, 100*scale), np.linspace(0, 100*scale))
+[X, Y] = np.meshgrid(np.linspace(0, 100 * scale), np.linspace(0, 100 * scale))
 R = 20 * scale
-disk = (X-50*scale)**2+(Y-50*scale)**2 <= R**2
+disk = (X - 50 * scale) ** 2 + (Y - 50 * scale) ** 2 <= R**2
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 5))
 ax = axes.flatten()
@@ -37,7 +37,6 @@ true_perimeters = [80 * scale, 2 * np.pi * R / dX]
 # For each type of object, estimate its perimeter as the object is rotated,
 # according to different approximations
 for index, obj in enumerate([square, disk]):
-
     # `neighborhood` value can be 4 or 8 for the classic perimeter estimator
     for n in [4, 8]:
         p = []
@@ -58,10 +57,16 @@ for index, obj in enumerate([square, disk]):
 
     ax[index].axhline(true_perimeters[index], linestyle='--', color='k')
     ax[index].set_xlabel('Rotation angle')
-    ax[index].legend(['N4 perimeter', 'N8 perimeter',
-                      'Crofton 2 directions', 'Crofton 4 directions',
-                      'Ground truth'],
-                      loc='best')
+    ax[index].legend(
+        [
+            'N4 perimeter',
+            'N8 perimeter',
+            'Crofton 2 directions',
+            'Crofton 4 directions',
+            'Ground truth',
+        ],
+        loc='best',
+    )
     ax[index].set_ylabel('Perimeter of the rotated object')
 
 ax[0].set_title('Square')
