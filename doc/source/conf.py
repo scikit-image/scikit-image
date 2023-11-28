@@ -78,8 +78,7 @@ if v.release is None:
 if v.is_devrelease:
     binder_branch = "main"
 else:
-    major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
+    binder_branch = f"v{release}"
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 

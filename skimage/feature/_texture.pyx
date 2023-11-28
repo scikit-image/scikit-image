@@ -70,7 +70,7 @@ def _glcm_loop(any_int[:, ::1] image, cnp.float64_t[:] distances,
                             out[i, j, d_idx, a_idx] += 1
 
 
-cdef inline int _bit_rotate_right(int value, int length) nogil:
+cdef inline int _bit_rotate_right(int value, int length) noexcept nogil:
     """Cyclic bit shift to the right.
 
     Parameters
@@ -284,7 +284,7 @@ cpdef int _multiblock_lbp(np_floats[:, ::1] int_image,
                           Py_ssize_t r,
                           Py_ssize_t c,
                           Py_ssize_t width,
-                          Py_ssize_t height) nogil:
+                          Py_ssize_t height) noexcept nogil:
     """Multi-block local binary pattern (MB-LBP) [1]_.
 
     Parameters
