@@ -258,7 +258,7 @@ def thin(image, max_num_iter=None):
     Parameters
     ----------
     image : binary (M, N) ndarray
-        The image to skeletonize. If this input isn't already a binary image,
+        The image to thin. If this input isn't already a binary image,
         it gets converted into one: In this case, zero values are considered
         background (False), nonzero values are considered foreground (True).
     max_num_iter : int, number of iterations, optional
