@@ -230,9 +230,9 @@ def threshold_local(
     --------
     >>> from skimage.data import camera
     >>> image = camera()[:50, :50]
-    >>> binary_image1 = image > threshold_local(image, 15, 'mean')
+    >>> binary_image0 = image > threshold_local(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
-    >>> binary_image2 = image > threshold_local(image, 15, 'generic',
+    >>> binary_image1 = image > threshold_local(image, 15, 'generic',
     ...                                         param=func)
 
     """
