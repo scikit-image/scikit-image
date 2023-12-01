@@ -178,7 +178,7 @@ def _radial_basis_kernel(r):
 
 
 def tps_warp(
-    image, src, dst, output_region=None, interpolation_order=1, grid_scaling=None
+    image, *, src, dst, output_region=None, interpolation_order=1, grid_scaling=1
 ):
     """Return an array of warped images.
 
@@ -252,8 +252,7 @@ def tps_warp(
         output_region = (0, 0, image.shape[0] - 1, image.shape[1] - 1)
 
     x_min, y_min, x_max, y_max = output_region
-    if grid_scaling is None:
-        grid_scaling = 1
+
     x_steps = (x_max - x_min + 1) // grid_scaling
     y_steps = (y_max - y_min + 1) // grid_scaling
 
