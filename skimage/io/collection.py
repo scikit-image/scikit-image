@@ -104,14 +104,15 @@ class ImageCollection:
     Parameters
     ----------
     load_pattern : str or sequence
-        A glob-like pattern or sequence of patterns to load files. The pattern can be
-        absolute or relative. If a sequence of objects other than strings is passed,
-        e.g. a range of numbers, each item will be passed directly to `load_func`.
+        A glob-like pattern or sequence of patterns to load files. If a
+        sequence of objects other than strings is passed, e.g. a range of
+        numbers, each item will be passed independently to `load_func` and
+        will represent an item in the collection.
     conserve_memory : bool, optional
         If True, `ImageCollection` does not keep more than one in memory at a
         specific time. Otherwise, images will be cached once they are loaded.
     load_func : callable, optional
-        Load images with a custom callable.
+        Load images with a custom callable that accepts a single
         Defaults to :func:`skimage.io.imread`.
     **load_func_kwargs : dict, optional
         Passed to `load_func` as additional keyword arguments on each call.
@@ -142,8 +143,32 @@ class ImageCollection:
     strings, an `ImageCollection` of corresponding length will be created, and the
     individual images will be loaded by calling `load_func` with the matching element
     of the `load_pattern` as its first argument. In this case, the elements of the
-    sequence do not need to be names of existing files (or strings at all). For example,
-    to create an `ImageCollection` of frames based on an iterable of integers:
+    sequence do not need to be names of existing files (or strings at all).
+
+    E.g. `load_func` can be used to access frames in format's such as TIF, GIF
+    or MP4 by their (page) index. E.g.:
+
+    >>> import imageio.v3 as iio
+    >>> path = ski.data.data_dir + "/palisades_of_vogt.tif"
+    >>> collection = ski.io.ImageCollection(
+    ...     range(60), load_func=lambda i: iio.imread(path, page=i)
+    ... )
+    >>> len(collection)
+    60
+    >>> collection[10].shape
+    (1440, 1440)
+
+    The above example needs to re-open the file for each frame. If you
+    anticipate that this might be a bottleneck, open the file before:
+
+    >>> with iio.imopen(path, io_mode="r") as file:
+    ...     collection = ski.io.ImageCollection(
+    ...         range(60), load_func=lambda i: file.read(page=i)
+    ...     )
+    ...     collection[10].shape
+    (1440, 1440)
+
+    `load_func` can also be used to create data on the fly:
 
     >>> def render_flower(petal_count, width):
     ...     length = np.linspace(-1, 1, width)
@@ -154,7 +179,9 @@ class ImageCollection:
     ...     image = ski.util.img_as_ubyte(np.abs(phi * r))
     ...     return image
     ...
-    >>> collection = ski.io.ImageCollection(range(10), load_func=render_flower, width=5)
+    >>> collection = ski.io.ImageCollection(
+    ...     range(10), load_func=render_flower, width=5
+    ... )
     >>> len(collection)
     10
     >>> collection[4]
