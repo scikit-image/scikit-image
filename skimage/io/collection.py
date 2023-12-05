@@ -131,6 +131,7 @@ class ImageCollection:
 
     Examples
     --------
+    >>> import pytest; _ = pytest.importorskip("pooch")  # Skip without pooch
     >>> import skimage as ski
     >>> ski.data.download_all()  # Make sure all files are present in data_dir
     >>> collection = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
