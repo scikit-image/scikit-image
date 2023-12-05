@@ -141,9 +141,9 @@ def notebook_modification_function(notebook_content, notebook_filename):
                 "pyodide_http.patch_all()",
             ]
         )
-    # Use cdn.statically.io for CORS proxy that supports gitlab.com
+        # Use cdn.statically.io for CORS proxy that supports gitlab.com
         code_lines.extend(
-    r"""
+            r"""
 import re
 
 import skimage.data._registry
@@ -196,7 +196,7 @@ sphinx_gallery_conf = {
     "remove_config_comments": True,
     "jupyterlite": {"notebook_modification_function": notebook_modification_function},
     # Can be disabled during development to accelerate build
-    "plot_gallery": True
+    "plot_gallery": True,
 }
 
 
