@@ -38,9 +38,7 @@ matplotlib.rcParams['font.size'] = 9
 
 
 def plot_img_and_hist(image, axes, bins=256):
-    """Plot an image along with its histogram and cumulative histogram.
-
-    """
+    """Plot an image along with its histogram and cumulative histogram."""
     ax_img, ax_hist = axes
     ax_cdf = ax_hist.twinx()
 
@@ -114,9 +112,7 @@ matplotlib.rcParams['font.size'] = 9
 
 
 def plot_img_and_hist(image, axes, bins=256):
-    """Plot an image along with its histogram and cumulative histogram.
-
-    """
+    """Plot an image along with its histogram and cumulative histogram."""
     ax_img, ax_hist = axes
     ax_cdf = ax_hist.twinx()
 

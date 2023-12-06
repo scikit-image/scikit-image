@@ -6,6 +6,7 @@ raw moments into central moments in ``skimage/measure/_moments_analytical.py``
 from sympy import symbols, binomial, Sum
 from sympy import IndexedBase, Idx
 from sympy.printing.pycode import pycode
+
 # from sympy import init_printing, pprint
 # init_printing(use_unicode=True)
 
@@ -36,16 +37,19 @@ if ndim == 2:
             # https://en.wikipedia.org/wiki/Image_moment#Central_moments
             expr = Sum(
                 (
-                    binomial(p, i) * binomial(q, j)
-                    * (-cx)**(p - i) * (-cy)**(q - j)
+                    binomial(p, i)
+                    * binomial(q, j)
+                    * (-cx) ** (p - i)
+                    * (-cy) ** (q - j)
                     * M[i, j]
                 ),
-                (i, 0, p), (j, 0, q)
+                (i, 0, p),
+                (j, 0, q),
             ).doit()
 
             # substitute back in the c_x and c_y symbols
-            expr = expr.subs(M[1, 0]/M[0, 0], c_x)
-            expr = expr.subs(M[0, 1]/M[0, 0], c_y)
+            expr = expr.subs(M[1, 0] / M[0, 0], c_x)
+            expr = expr.subs(M[0, 1] / M[0, 0], c_y)
 
             # print python code for generation of the central moment
             python_code = f"moments_central[{p}, {q}] = {pycode(expr)}\n"
@@ -55,7 +59,6 @@ if ndim == 2:
             print(python_code)
 
 elif ndim == 3:
-
     # symbols for the centroid components
     c_x, c_y, c_z = symbols('c_x c_y c_z')
     # indices into the moments matrix, M
@@ -79,17 +82,23 @@ elif ndim == 3:
                 # https://en.wikipedia.org/wiki/Image_moment#Central_moments
                 expr = Sum(
                     (
-                        binomial(p, i) * binomial(q, j) * binomial(r, k)
-                        * (-cx)**(p - i) * (-cy)**(q - j) * (-cz)**(r - k)
+                        binomial(p, i)
+                        * binomial(q, j)
+                        * binomial(r, k)
+                        * (-cx) ** (p - i)
+                        * (-cy) ** (q - j)
+                        * (-cz) ** (r - k)
                         * M[i, j, k]
                     ),
-                    (i, 0, p), (j, 0, q), (k, 0, r)
+                    (i, 0, p),
+                    (j, 0, q),
+                    (k, 0, r),
                 ).doit()
 
                 # substitute back in c_x, c_y, c_z
-                expr = expr.subs(M[1, 0, 0]/M[0, 0, 0], c_x)
-                expr = expr.subs(M[0, 1, 0]/M[0, 0, 0], c_y)
-                expr = expr.subs(M[0, 0, 1]/M[0, 0, 0], c_z)
+                expr = expr.subs(M[1, 0, 0] / M[0, 0, 0], c_x)
+                expr = expr.subs(M[0, 1, 0] / M[0, 0, 0], c_y)
+                expr = expr.subs(M[0, 0, 1] / M[0, 0, 0], c_z)
 
                 # print python code for generation of the central moment
 

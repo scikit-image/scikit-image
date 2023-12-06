@@ -85,9 +85,8 @@ quantized_img = img // 16
 
 # Select the coin from the 4th column, second row.
 # Coordinate ordering: [x1,y1,x2,y2]
-coin_coords = [184, 100, 228, 148]   # 44 x 44 region
-coin = quantized_img[coin_coords[1]:coin_coords[3],
-                     coin_coords[0]:coin_coords[2]]
+coin_coords = [184, 100, 228, 148]  # 44 x 44 region
+coin = quantized_img[coin_coords[1] : coin_coords[3], coin_coords[0] : coin_coords[2]]
 
 # Compute coin histogram and normalize
 coin_hist, _ = np.histogram(coin.flatten(), bins=16, range=(0, 16))
@@ -99,17 +98,18 @@ coin_hist = coin_hist.astype(float) / np.sum(coin_hist)
 footprint = disk(30)
 
 # Compute the similarity across the complete image
-similarity = windowed_histogram_similarity(quantized_img, footprint, coin_hist,
-                                           coin_hist.shape[0])
+similarity = windowed_histogram_similarity(
+    quantized_img, footprint, coin_hist, coin_hist.shape[0]
+)
 
 # Now try a rotated image
 rotated_img = img_as_ubyte(transform.rotate(img, 45.0, resize=True))
 # Quantize to 16 levels as before
 quantized_rotated_image = rotated_img // 16
 # Similarity on rotated image
-rotated_similarity = windowed_histogram_similarity(quantized_rotated_image,
-                                                   footprint, coin_hist,
-                                                   coin_hist.shape[0])
+rotated_similarity = windowed_histogram_similarity(
+    quantized_rotated_image, footprint, coin_hist, coin_hist.shape[0]
+)
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
 

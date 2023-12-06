@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
-from libc.stdlib cimport abs
+from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
@@ -38,7 +38,7 @@ def _hough_circle(cnp.ndarray img,
 
     Returns
     -------
-    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+    H : ndarray, shape (radius index, M + 2R, N + 2R)
         Hough transform accumulator for each radius.
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
@@ -156,7 +156,7 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
     if not np.any(img):
         return np.zeros((0, 6))
 
-    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t[:, ::1] pixels = np.vstack(np.nonzero(img))
 
     cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
@@ -257,7 +257,7 @@ def _hough_line(cnp.ndarray img,
 
     Returns
     -------
-    H : 2-D ndarray of uint64
+    H : (P, Q) ndarray of uint64
         Hough transform accumulator.
     theta : ndarray
         Angles at which the transform was computed, in radians.
@@ -332,7 +332,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              seed=None):
+                              rng=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -347,22 +347,18 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : 1D ndarray, dtype='float64'
+    theta : (K,) ndarray of float64
         Angles at which to compute the transform, in radians.
-    seed : {None, int, `numpy.random.Generator`, optional}
-        If `seed` is None the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance then that instance is
-        used.
-
-        Seed to initialize the random number generator.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
     Returns
     -------
     lines : list
-      List of lines identified, lines in format ((x0, y0), (x1, y1)),
-      indicating line start and end.
+        List of lines identified, lines in format ((x0, y0), (x1, y1)),
+        indicating line start and end.
 
     References
     ----------
@@ -410,7 +406,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     mask[y_idxs, x_idxs] = 1
 
     count = len(x_idxs)
-    random_state = np.random.default_rng(seed)
+    random_state = np.random.default_rng(rng)
     random_ = np.arange(count, dtype=np.intp)
     random_state.shuffle(random_)
     cdef cnp.intp_t[::1] random = random_
@@ -499,8 +495,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     py += dy
 
             # confirm line length is sufficient
-            good_line = (abs(line_end[3] - line_end[1]) >= line_length or
-                         abs(line_end[2] - line_end[0]) >= line_length)
+            good_line = (labs(line_end[3] - line_end[1]) >= line_length or
+                         labs(line_end[2] - line_end[0]) >= line_length)
 
             # pass 2: walk the line again and reset accumulator and mask
             for k in range(2):

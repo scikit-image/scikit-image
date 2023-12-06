@@ -7,7 +7,7 @@ When trying out different segmentation methods, how do you know which one is
 best? If you have a *ground truth* or *gold standard* segmentation, you can use
 various metrics to check how close each automated method comes to the truth.
 In this example we use an easy-to-segment image as an example of how to
-interpret various segmentation metrics. We will use the the adapted Rand error
+interpret various segmentation metrics. We will use the adapted Rand error
 and the variation of information as example metrics, and see how
 *oversegmentation* (splitting of true segments into too many sub-segments) and
 *undersegmentation* (merging of different true segments into a single segment)
@@ -19,17 +19,18 @@ import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
 
 from skimage import data
-from skimage.metrics import (adapted_rand_error,
-                              variation_of_information)
+from skimage.metrics import adapted_rand_error, variation_of_information
 from skimage.filters import sobel
 from skimage.measure import label
 from skimage.util import img_as_float
 from skimage.feature import canny
 from skimage.morphology import remove_small_objects
-from skimage.segmentation import (morphological_geodesic_active_contour,
-                                  inverse_gaussian_gradient,
-                                  watershed,
-                                  mark_boundaries)
+from skimage.segmentation import (
+    morphological_geodesic_active_contour,
+    inverse_gaussian_gradient,
+    watershed,
+    mark_boundaries,
+)
 
 image = data.coins()
 
@@ -57,7 +58,7 @@ edges = sobel(image)
 im_test1 = watershed(edges, markers=468, compactness=0.001)
 
 ###############################################################################
-# The next approach uses the Canny edge filter, :func:`skimage.filters.canny`.
+# The next approach uses the Canny edge filter, :func:`skimage.feature.canny`.
 # This is a very good edge finder, and gives balanced results.
 
 edges = canny(image)
@@ -77,14 +78,21 @@ image = img_as_float(image)
 gradient = inverse_gaussian_gradient(image)
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
-im_test3 = morphological_geodesic_active_contour(gradient, num_iter=100,
-                                                 init_level_set=init_ls,
-                                                 smoothing=1, balloon=-1,
-                                                 threshold=0.69)
+im_test3 = morphological_geodesic_active_contour(
+    gradient,
+    num_iter=100,
+    init_level_set=init_ls,
+    smoothing=1,
+    balloon=-1,
+    threshold=0.69,
+)
 im_test3 = label(im_test3)
 
-method_names = ['Compact watershed', 'Canny filter',
-                'Morphological Geodesic Active Contours']
+method_names = [
+    'Compact watershed',
+    'Canny filter',
+    'Morphological Geodesic Active Contours',
+]
 short_method_names = ['Compact WS', 'Canny', 'GAC']
 
 precision_list = []
@@ -110,16 +118,14 @@ ax = axes.ravel()
 
 ax[0].scatter(merge_list, split_list)
 for i, txt in enumerate(short_method_names):
-    ax[0].annotate(txt, (merge_list[i], split_list[i]),
-                   verticalalignment='center')
+    ax[0].annotate(txt, (merge_list[i], split_list[i]), verticalalignment='center')
 ax[0].set_xlabel('False Merges (bits)')
 ax[0].set_ylabel('False Splits (bits)')
 ax[0].set_title('Split Variation of Information')
 
 ax[1].scatter(precision_list, recall_list)
 for i, txt in enumerate(short_method_names):
-    ax[1].annotate(txt, (precision_list[i], recall_list[i]),
-                   verticalalignment='center')
+    ax[1].annotate(txt, (precision_list[i], recall_list[i]), verticalalignment='center')
 ax[1].set_xlabel('Precision')
 ax[1].set_ylabel('Recall')
 ax[1].set_title('Adapted Rand precision vs. recall')

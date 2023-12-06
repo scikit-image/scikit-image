@@ -5,6 +5,8 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
+from .._shared.utils import deprecate_kwarg
+
 _EPSILON = np.spacing(1)
 
 
@@ -19,7 +21,6 @@ def _check_data_atleast_2D(data):
 
 
 class BaseModel:
-
     def __init__(self):
         self.params = None
 
@@ -107,12 +108,12 @@ class LineModelND(BaseModel):
         ----------
         data : (N, dim) array
             N points in a space of dimension dim.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
         """
         _check_data_atleast_2D(data)
@@ -124,8 +125,9 @@ class LineModelND(BaseModel):
             raise ValueError('Parameters are defined by 2 sets.')
 
         origin, direction = params
-        res = (data - origin) - \
-              ((data - origin) @ direction)[..., np.newaxis] * direction
+        res = (data - origin) - ((data - origin) @ direction)[
+            ..., np.newaxis
+        ] * direction
         return np.linalg.norm(res, axis=1)
 
     def predict(self, x, axis=0, params=None):
@@ -138,7 +140,7 @@ class LineModelND(BaseModel):
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -179,7 +181,7 @@ class LineModelND(BaseModel):
         ----------
         y : array
             y-coordinates.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -202,7 +204,7 @@ class LineModelND(BaseModel):
         ----------
         x : array
             x-coordinates.
-        params : (2, ) array, optional
+        params : (2,) array, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
@@ -300,10 +302,8 @@ class CircleModel(BaseModel):
         # Adapted from a spherical estimator covered in a blog post by Charles
         # Jeckel (see also reference 1 above):
         # https://jekel.me/2015/Least-Squares-Sphere-Fit/
-        A = np.append(data * 2,
-                      np.ones((data.shape[0], 1), dtype=float_type),
-                      axis=1)
-        f = np.sum(data ** 2, axis=1)
+        A = np.append(data * 2, np.ones((data.shape[0], 1), dtype=float_type), axis=1)
+        f = np.sum(data**2, axis=1)
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
@@ -312,7 +312,7 @@ class CircleModel(BaseModel):
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
-        r = np.sqrt(np.mean(distances ** 2))
+        r = np.sqrt(np.mean(distances**2))
 
         # revert normalization and set params
         center *= scale
@@ -334,7 +334,7 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
 
         """
@@ -346,7 +346,7 @@ class CircleModel(BaseModel):
         x = data[:, 0]
         y = data[:, 1]
 
-        return r - np.sqrt((x - xc)**2 + (y - yc)**2)
+        return r - np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
 
     def predict_xy(self, t, params=None):
         """Predict x- and y-coordinates using the estimated model.
@@ -356,7 +356,7 @@ class CircleModel(BaseModel):
         t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (3, ) array, optional
+        params : (3,) array, optional
             Optional custom parameter set.
 
         Returns
@@ -405,12 +405,12 @@ class EllipseModel(BaseModel):
     --------
 
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
-    ...                                params=(10, 15, 4, 8, np.deg2rad(30)))
+    ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
     >>> ellipse = EllipseModel()
     >>> ellipse.estimate(xy)
     True
     >>> np.round(ellipse.params, 2)
-    array([10.  , 15.  ,  4.  ,  8.  ,  0.52])
+    array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -465,7 +465,7 @@ class EllipseModel(BaseModel):
         y = data[:, 1]
 
         # Quadratic part of design matrix [eqn. 15] from [1]
-        D1 = np.vstack([x ** 2, x * y, y ** 2]).T
+        D1 = np.vstack([x**2, x * y, y**2]).T
         # Linear part of design matrix [eqn. 16] from [1]
         D2 = np.vstack([x, y, np.ones_like(x)]).T
 
@@ -475,7 +475,7 @@ class EllipseModel(BaseModel):
         S3 = D2.T @ D2
 
         # Constraint matrix [eqn. 18]
-        C1 = np.array([[0., 0., 2.], [0., -1., 0.], [2., 0., 0.]])
+        C1 = np.array([[0.0, 0.0, 2.0], [0.0, -1.0, 0.0], [2.0, 0.0, 0.0]])
 
         try:
             # Reduced scatter matrix [eqn. 29]
@@ -488,8 +488,9 @@ class EllipseModel(BaseModel):
         eig_vals, eig_vecs = np.linalg.eig(M)
 
         # eigenvector must meet constraint 4ac - b^2 to be valid.
-        cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) \
-               - np.power(eig_vecs[1, :], 2)
+        cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) - np.power(
+            eig_vecs[1, :], 2
+        )
         a1 = eig_vecs[:, (cond > 0)]
         # seeks for empty matrix
         if 0 in a1.shape or len(a1.ravel()) != 3:
@@ -502,33 +503,42 @@ class EllipseModel(BaseModel):
 
         # eigenvectors are the coefficients of an ellipse in general form
         # a*x^2 + 2*b*x*y + c*y^2 + 2*d*x + 2*f*y + g = 0 (eqn. 15) from [2]
-        b /= 2.
-        d /= 2.
-        f /= 2.
+        b /= 2.0
+        d /= 2.0
+        f /= 2.0
 
         # finding center of ellipse [eqn.19 and 20] from [2]
-        x0 = (c * d - b * f) / (b ** 2. - a * c)
-        y0 = (a * f - b * d) / (b ** 2. - a * c)
+        x0 = (c * d - b * f) / (b**2.0 - a * c)
+        y0 = (a * f - b * d) / (b**2.0 - a * c)
 
         # Find the semi-axes lengths [eqn. 21 and 22] from [2]
-        numerator = a * f ** 2 + c * d ** 2 + g * b ** 2 \
-                    - 2 * b * d * f - a * c * g
-        term = np.sqrt((a - c) ** 2 + 4 * b ** 2)
-        denominator1 = (b ** 2 - a * c) * (term - (a + c))
-        denominator2 = (b ** 2 - a * c) * (- term - (a + c))
+        numerator = a * f**2 + c * d**2 + g * b**2 - 2 * b * d * f - a * c * g
+        term = np.sqrt((a - c) ** 2 + 4 * b**2)
+        denominator1 = (b**2 - a * c) * (term - (a + c))
+        denominator2 = (b**2 - a * c) * (-term - (a + c))
         width = np.sqrt(2 * numerator / denominator1)
         height = np.sqrt(2 * numerator / denominator2)
 
         # angle of counterclockwise rotation of major-axis of ellipse
         # to x-axis [eqn. 23] from [2].
-        phi = 0.5 * np.arctan((2. * b) / (a - c))
+        phi = 0.5 * np.arctan((2.0 * b) / (a - c))
         if a > c:
             phi += 0.5 * np.pi
+
+        # stabilize parameters:
+        # sometimes small fluctuations in data can cause
+        # height and width to swap
+        if width < height:
+            width, height = height, width
+            phi += np.pi / 2
+
+        phi %= np.pi
 
         # revert normalization and set params
         params = np.nan_to_num([x0, y0, width, height, phi]).real
         params[:4] *= scale
         params[:2] += origin
+
         self.params = tuple(float(p) for p in params)
 
         return True
@@ -545,7 +555,7 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        residuals : (N, ) array
+        residuals : (N,) array
             Residual for each data point.
 
         """
@@ -563,8 +573,8 @@ class EllipseModel(BaseModel):
         N = data.shape[0]
 
         def fun(t, xi, yi):
-            ct = math.cos(t)
-            st = math.sin(t)
+            ct = math.cos(np.squeeze(t))
+            st = math.sin(np.squeeze(t))
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
             return (xi - xt) ** 2 + (yi - yt) ** 2
@@ -580,7 +590,7 @@ class EllipseModel(BaseModel):
         #                                + b * ctheta * ct)
         #     return [dfx_t + dfy_t]
 
-        residuals = np.empty((N, ), dtype=np.float64)
+        residuals = np.empty((N,), dtype=np.float64)
 
         # initial guess for parameter t of closest point on ellipse
         t0 = np.arctan2(y - yc, x - xc) - theta
@@ -603,7 +613,7 @@ class EllipseModel(BaseModel):
         t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (5, ) array, optional
+        params : (5,) array, optional
             Optional custom parameter set.
 
         Returns
@@ -655,14 +665,27 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
         return np.inf
     inlier_ratio = n_inliers / n_samples
     nom = max(_EPSILON, 1 - probability)
-    denom = max(_EPSILON, 1 - inlier_ratio ** min_samples)
+    denom = max(_EPSILON, 1 - inlier_ratio**min_samples)
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-def ransac(data, model_class, min_samples, residual_threshold,
-           is_data_valid=None, is_model_valid=None,
-           max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0,
-           stop_probability=1, random_state=None, initial_inliers=None):
+@deprecate_kwarg(
+    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
+def ransac(
+    data,
+    model_class,
+    min_samples,
+    residual_threshold,
+    is_data_valid=None,
+    is_model_valid=None,
+    max_trials=100,
+    stop_sample_num=np.inf,
+    stop_residuals_sum=0,
+    stop_probability=1,
+    rng=None,
+    initial_inliers=None,
+):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
@@ -735,13 +758,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         where the probability (confidence) is typically set to a high value
         such as 0.99, e is the current fraction of inliers w.r.t. the
         total number of samples, and m is the min_samples value.
-    random_state : {None, int, `numpy.random.Generator`}, optional
-        If `random_state` is None the `numpy.random.Generator` singleton is
-        used.
-        If `random_state` is an int, a new ``Generator`` instance is used,
-        seeded with `random_state`.
-        If `random_state` is already a ``Generator`` instance then that
-        instance is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
 
@@ -750,7 +770,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     -------
     model : object
         Best model with largest consensus set.
-    inliers : (N, ) array
+    inliers : (N,) array
         Boolean mask of inliers classified as ``True``.
 
     References
@@ -789,7 +809,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
-    >>> abs(np.round(ransac_model.params))
+    >>> abs(np.round(ransac_model.params))  # doctest: +SKIP
     array([20., 30., 10.,  6.,  2.])
     >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
@@ -816,9 +836,13 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[2] = (50, 50)
     >>> ratio = 0.5  # use half of the samples
     >>> min_samples = int(ratio * len(src))
-    >>> model, inliers = ransac((src, dst), SimilarityTransform, min_samples,
-    ...                         10,
-    ...                         initial_inliers=np.ones(len(src), dtype=bool))
+    >>> model, inliers = ransac(
+    ...     (src, dst),
+    ...     SimilarityTransform,
+    ...     min_samples,
+    ...     10,
+    ...     initial_inliers=np.ones(len(src), dtype=bool),
+    ... )  # doctest: +SKIP
     >>> inliers  # doctest: +SKIP
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -835,15 +859,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
     validate_model = is_model_valid is not None
     validate_data = is_data_valid is not None
 
-    random_state = np.random.default_rng(random_state)
+    rng = np.random.default_rng(rng)
 
     # in case data is not pair of input and output, male it like it
-    if not isinstance(data, (tuple, list)):
-        data = (data, )
+    if not isinstance(data, tuple | list):
+        data = (data,)
     num_samples = len(data[0])
 
-    if not (0 < min_samples < num_samples):
-        raise ValueError(f"`min_samples` must be in range (0, {num_samples})")
+    if not (0 < min_samples <= num_samples):
+        raise ValueError(f"`min_samples` must be in range (0, {num_samples}]")
 
     if residual_threshold < 0:
         raise ValueError("`residual_threshold` must be greater than zero")
@@ -861,12 +885,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
             f"samples ({num_samples}). The vector of initial inliers should "
             f"have the same length as the number of samples and contain only "
             f"True (this sample is an initial inlier) and False (this one "
-            f"isn't) values.")
+            f"isn't) values."
+        )
 
     # for the first run use initial guess of inliers
-    spl_idxs = (initial_inliers if initial_inliers is not None
-                else random_state.choice(num_samples, min_samples,
-                                         replace=False))
+    spl_idxs = (
+        initial_inliers
+        if initial_inliers is not None
+        else rng.choice(num_samples, min_samples, replace=False)
+    )
 
     # estimate model for current random sample set
     model = model_class()
@@ -881,7 +908,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         # for next iteration choose random sample set and be sure that
         # no samples repeat
-        spl_idxs = random_state.choice(num_samples, min_samples, replace=False)
+        spl_idxs = rng.choice(num_samples, min_samples, replace=False)
 
         # optional check if random sample set is valid
         if validate_data and not is_data_valid(*samples):
@@ -907,18 +934,24 @@ def ransac(data, model_class, min_samples, residual_threshold,
             # more inliers
             inliers_count > best_inlier_num
             # same number of inliers but less "error" in terms of residuals
-            or (inliers_count == best_inlier_num
-                and residuals_sum < best_inlier_residuals_sum)):
+            or (
+                inliers_count == best_inlier_num
+                and residuals_sum < best_inlier_residuals_sum
+            )
+        ):
             best_inlier_num = inliers_count
             best_inlier_residuals_sum = residuals_sum
             best_inliers = inliers
-            max_trials = min(max_trials,
-                             _dynamic_max_trials(best_inlier_num,
-                                                 num_samples,
-                                                 min_samples,
-                                                 stop_probability))
-            if (best_inlier_num >= stop_sample_num
-                    or best_inlier_residuals_sum <= stop_residuals_sum):
+            max_trials = min(
+                max_trials,
+                _dynamic_max_trials(
+                    best_inlier_num, num_samples, min_samples, stop_probability
+                ),
+            )
+            if (
+                best_inlier_num >= stop_sample_num
+                or best_inlier_residuals_sum <= stop_residuals_sum
+            ):
                 break
 
     # estimate final model using all inliers

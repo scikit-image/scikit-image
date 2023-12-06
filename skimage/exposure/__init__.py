@@ -1,19 +1,3 @@
-from .exposure import histogram, equalize_hist, \
-                      rescale_intensity, cumulative_distribution, \
-                      adjust_gamma, adjust_sigmoid, adjust_log, \
-                      is_low_contrast
+import lazy_loader as lazy
 
-from ._adapthist import equalize_adapthist
-from .histogram_matching import match_histograms
-
-
-__all__ = ['histogram',
-           'equalize_hist',
-           'equalize_adapthist',
-           'rescale_intensity',
-           'cumulative_distribution',
-           'adjust_gamma',
-           'adjust_sigmoid',
-           'adjust_log',
-           'is_low_contrast',
-           'match_histograms']
+__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)

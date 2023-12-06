@@ -2,13 +2,19 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from .._shared.version_requirements import require
-from ._draw import (_coords_inside_image, _line, _line_aa,
-                    _polygon, _ellipse_perimeter,
-                    _circle_perimeter, _circle_perimeter_aa,
-                    _bezier_curve)
+from ._draw import (
+    _coords_inside_image,
+    _line,
+    _line_aa,
+    _polygon,
+    _ellipse_perimeter,
+    _circle_perimeter,
+    _circle_perimeter_aa,
+    _bezier_curve,
+)
 
 
-def _ellipse_in_shape(shape, center, radii, rotation=0.):
+def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
@@ -32,18 +38,19 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.):
     cols : iterable of ints
         Corresponding column coordinates representing values within the ellipse.
     """
-    r_lim, c_lim = np.ogrid[0:float(shape[0]), 0:float(shape[1])]
+    r_lim, c_lim = np.ogrid[0 : float(shape[0]), 0 : float(shape[1])]
     r_org, c_org = center
     r_rad, c_rad = radii
     rotation %= np.pi
     sin_alpha, cos_alpha = np.sin(rotation), np.cos(rotation)
     r, c = (r_lim - r_org), (c_lim - c_org)
-    distances = ((r * cos_alpha + c * sin_alpha) / r_rad) ** 2 \
-                + ((r * sin_alpha - c * cos_alpha) / c_rad) ** 2
+    distances = ((r * cos_alpha + c * sin_alpha) / r_rad) ** 2 + (
+        (r * sin_alpha - c * cos_alpha) / c_rad
+    ) ** 2
     return np.nonzero(distances < 1)
 
 
-def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
+def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
@@ -117,10 +124,8 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.):
     rotation %= np.pi
 
     # compute rotated radii by given rotation
-    r_radius_rot = abs(r_radius * np.cos(rotation)) \
-                   + c_radius * np.sin(rotation)
-    c_radius_rot = r_radius * np.sin(rotation) \
-                   + abs(c_radius * np.cos(rotation))
+    r_radius_rot = abs(r_radius * np.cos(rotation)) + c_radius * np.sin(rotation)
+    c_radius_rot = r_radius * np.sin(rotation) + abs(c_radius * np.cos(rotation))
     # The upper_left and lower_right corners of the smallest rectangle
     # containing the ellipse.
     radii_rot = np.array([r_radius_rot, c_radius_rot])
@@ -261,8 +266,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
             raise ValueError("Must specify clipping shape")
         clip_box = np.array([0, 0, shape[0] - 1, shape[1] - 1])
     else:
-        clip_box = np.array([np.min(r), np.min(c),
-                             np.max(r), np.max(c)])
+        clip_box = np.array([np.min(r), np.min(c), np.max(r), np.max(c)])
 
     # Do the clipping irrespective of whether clip is set.  This
     # ensures that the returned polygon is closed and is an array.
@@ -295,13 +299,13 @@ def set_color(image, coords, color, alpha=1):
 
     Parameters
     ----------
-    image : (M, N, D) ndarray
+    image : (M, N, C) ndarray
         Image
-    coords : tuple of ((P,) ndarray, (P,) ndarray)
+    coords : tuple of ((K,) ndarray, (K,) ndarray)
         Row and column coordinates of pixels to be colored.
-    color : (D,) ndarray
+    color : (C,) ndarray
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (N,) ndarray
+    alpha : scalar or (K,) ndarray
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 
@@ -332,8 +336,10 @@ def set_color(image, coords, color, alpha=1):
     color = np.array(color, ndmin=1, copy=False)
 
     if image.shape[-1] != color.shape[-1]:
-        raise ValueError(f'Color shape ({color.shape[0]}) must match last '
-                          'image dimension ({image.shape[-1]}).')
+        raise ValueError(
+            f'Color shape ({color.shape[0]}) must match last '
+            'image dimension ({image.shape[-1]}).'
+        )
 
     if np.isscalar(alpha):
         # Can be replaced by ``full_like`` when numpy 1.8 becomes
@@ -435,14 +441,14 @@ def line_aa(r0, c0, r1, c1):
 
 
 def polygon(r, c, shape=None):
-    """Generate coordinates of pixels within polygon.
+    """Generate coordinates of pixels inside a polygon.
 
     Parameters
     ----------
-    r : (N,) ndarray
-        Row coordinates of vertices of polygon.
-    c : (N,) ndarray
-        Column coordinates of vertices of polygon.
+    r : (N,) array_like
+        Row coordinates of the polygon's vertices.
+    c : (N,) array_like
+        Column coordinates of the polygon's vertices.
     shape : tuple, optional
         Image shape which is used to determine the maximum extent of output
         pixel coordinates. This is useful for polygons that exceed the image
@@ -457,13 +463,23 @@ def polygon(r, c, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
+    See Also
+    --------
+    polygon2mask:
+        Create a binary mask from a polygon.
+
+    Notes
+    -----
+    This function ensures that `rr` and `cc` don't contain negative values.
+    Pixels of the polygon that whose coordinates are smaller 0, are not drawn.
+
     Examples
     --------
-    >>> from skimage.draw import polygon
-    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> import skimage as ski
     >>> r = np.array([1, 2, 8])
     >>> c = np.array([1, 7, 4])
-    >>> rr, cc = polygon(r, c)
+    >>> rr, cc = ski.draw.polygon(r, c)
+    >>> img = np.zeros((10, 10), dtype=int)
     >>> img[rr, cc] = 1
     >>> img
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -475,8 +491,29 @@ def polygon(r, c, shape=None):
            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
+    If the image `shape` is defined and vertices / points of the `polygon` are
+    outside this coordinate space, only a part (or none at all) of the polygon's
+    pixels is returned. Shifting the polygon's vertices by an offset can be used
+    to move the polygon around and potentially draw an arbitrary sub-region of
+    the polygon.
+
+    >>> offset = (2, -4)
+    >>> rr, cc = ski.draw.polygon(r - offset[0], c - offset[1], shape=img.shape)
+    >>> img = np.zeros((10, 10), dtype=int)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     """
     return _polygon(r, c, shape)
 
@@ -824,8 +861,7 @@ def rectangle(start, end=None, extent=None, shape=None):
         n_dim = len(start)
         br = np.minimum(shape[0:n_dim], br)
         tl = np.maximum(np.zeros_like(shape[0:n_dim]), tl)
-    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl),
-                                                               tuple(br))])
+    coords = np.meshgrid(*[np.arange(st, en) for st, en in zip(tuple(tl), tuple(br))])
     return coords
 
 
@@ -891,15 +927,11 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
            [0, 0, 1, 1, 1]], dtype=uint8)
 
     """
-    top_left, bottom_right = _rectangle_slice(start=start,
-                                              end=end,
-                                              extent=extent)
+    top_left, bottom_right = _rectangle_slice(start=start, end=end, extent=extent)
 
     top_left -= 1
-    r = [top_left[0], top_left[0], bottom_right[0], bottom_right[0],
-         top_left[0]]
-    c = [top_left[1], bottom_right[1], bottom_right[1], top_left[1],
-         top_left[1]]
+    r = [top_left[0], top_left[0], bottom_right[0], bottom_right[0], top_left[0]]
+    c = [top_left[1], bottom_right[1], bottom_right[1], top_left[1], top_left[1]]
     return polygon_perimeter(r, c, shape=shape, clip=clip)
 
 
@@ -907,8 +939,8 @@ def _rectangle_slice(start, end=None, extent=None):
     """Return the slice ``(top_left, bottom_right)`` of the rectangle.
 
     Returns
-    =======
-    (top_left, bottomm_right)
+    -------
+    (top_left, bottom_right)
         The slice you would need to select the region in the rectangle defined
         by the parameters.
         Select it like:

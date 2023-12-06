@@ -44,7 +44,7 @@ _ = ax.set_title('Human retina')
 
 retina = color.rgb2gray(retina_source)
 t0, t1 = filters.threshold_multiotsu(retina, classes=3)
-mask = (retina > t0)
+mask = retina > t0
 vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
 
 _, axes = plt.subplots(nrows=1, ncols=2)
@@ -79,8 +79,8 @@ binary = labeled == largest_nonzero_label
 skeleton = morphology.skeletonize(binary)
 g, nodes = graph.pixel_graph(skeleton, connectivity=2)
 px, distances = graph.central_pixel(
-        g, nodes=nodes, shape=skeleton.shape, partition_size=100
-        )
+    g, nodes=nodes, shape=skeleton.shape, partition_size=100
+)
 
 centroid = measure.centroid(labeled > 0)
 
