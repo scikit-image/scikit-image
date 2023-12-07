@@ -266,3 +266,10 @@ def test_disambiguate_zero_shift():
             image, image, disambiguate=True, return_error='always'
             )
     assert computed_shift == (0, 0)
+
+
+def test_disambiguate_empty_image():
+    """When the image is empty, disambiguation becomes degenerate."""
+    image = camera()
+    with expected_warnings(["shift disambiguation inconclusive"]):
+        phase_cross_correlation(image, image * 0, disambiguate=True)
