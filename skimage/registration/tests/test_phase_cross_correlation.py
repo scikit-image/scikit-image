@@ -271,5 +271,10 @@ def test_disambiguate_zero_shift():
 def test_disambiguate_empty_image():
     """When the image is empty, disambiguation becomes degenerate."""
     image = camera()
-    with expected_warnings(["shift disambiguation inconclusive"]):
+    regex = "shift disambiguation inconclusive"
+    with pytest.warns(UserWarning, match=regex) as record:
         phase_cross_correlation(image, image * 0, disambiguate=True)
+        expected_lineno = inspect.currentframe().f_lineno - 1
+    # Assert correct stacklevel
+    assert record[0].lineno == expected_lineno
+    assert record[0].filename == __file__
