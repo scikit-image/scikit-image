@@ -1,4 +1,5 @@
 import itertools
+import inspect
 import warnings
 
 import numpy as np
