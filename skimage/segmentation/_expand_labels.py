@@ -87,8 +87,7 @@ def expand_labels(label_image, distance=1):
     # in contrast to [1] this implementation supports label arrays
     # of any dimension
     masked_nearest_label_coords = [
-        dimension_indices[dilate_mask]
-        for dimension_indices in nearest_label_coords
+        dimension_indices[dilate_mask] for dimension_indices in nearest_label_coords
     ]
     nearest_labels = label_image[tuple(masked_nearest_label_coords)]
     labels_out[dilate_mask] = nearest_labels

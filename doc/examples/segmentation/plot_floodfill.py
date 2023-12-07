@@ -164,14 +164,11 @@ mask = flood(img_hsv[..., 0], (313, 160), tolerance=0.016)
 img_hsv[mask, 0] = 0.5
 # Post-processing in order to improve the result
 # Remove white pixels from flag, using saturation channel
-mask_postprocessed = np.logical_and(mask,
-                                    img_hsv_copy[..., 1] > 0.4)
+mask_postprocessed = np.logical_and(mask, img_hsv_copy[..., 1] > 0.4)
 # Remove thin structures with binary opening
-mask_postprocessed = morphology.binary_opening(mask_postprocessed,
-                                               np.ones((3, 3)))
+mask_postprocessed = morphology.binary_opening(mask_postprocessed, np.ones((3, 3)))
 # Fill small holes with binary closing
-mask_postprocessed = morphology.binary_closing(
-                mask_postprocessed, morphology.disk(20))
+mask_postprocessed = morphology.binary_closing(mask_postprocessed, morphology.disk(20))
 img_hsv_copy[mask_postprocessed, 0] = 0.5
 
 fig, ax = plt.subplots(1, 2, figsize=(8, 4))

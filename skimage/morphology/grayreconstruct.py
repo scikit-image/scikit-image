@@ -116,11 +116,15 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """
     assert tuple(seed.shape) == tuple(mask.shape)
     if method == 'dilation' and np.any(seed > mask):
-        raise ValueError("Intensity of seed image must be less than that "
-                         "of the mask image for reconstruction by dilation.")
+        raise ValueError(
+            "Intensity of seed image must be less than that "
+            "of the mask image for reconstruction by dilation."
+        )
     elif method == 'erosion' and np.any(seed < mask):
-        raise ValueError("Intensity of seed image must be greater than that "
-                         "of the mask image for reconstruction by erosion.")
+        raise ValueError(
+            "Intensity of seed image must be greater than that "
+            "of the mask image for reconstruction by erosion."
+        )
 
     if footprint is None:
         footprint = np.ones([3] * seed.ndim, dtype=bool)
@@ -152,8 +156,10 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     elif method == 'erosion':
         pad_value = np.max(seed)
     else:
-        raise ValueError("Reconstruction method can be one of 'erosion' "
-                         f"or 'dilation'. Got '{method}'.")
+        raise ValueError(
+            "Reconstruction method can be one of 'erosion' "
+            f"or 'dilation'. Got '{method}'."
+        )
     float_dtype = _supported_float_type(mask.dtype)
     images = np.full(dims, pad_value, dtype=float_dtype)
     images[(0, *inside_slices)] = seed
@@ -170,12 +176,17 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     # a flattened array
     value_stride = np.array(images.strides[1:]) // images.dtype.itemsize
     image_stride = images.strides[0] // images.dtype.itemsize
-    footprint_mgrid = np.mgrid[[slice(-o, d - o)
-                                for d, o in zip(footprint.shape, offset)]]
+    footprint_mgrid = np.mgrid[
+        [slice(-o, d - o) for d, o in zip(footprint.shape, offset)]
+    ]
     footprint_offsets = footprint_mgrid[:, footprint].transpose()
-    nb_strides = np.array([np.sum(value_stride * footprint_offset)
-                           for footprint_offset in footprint_offsets],
-                          signed_int_dtype)
+    nb_strides = np.array(
+        [
+            np.sum(value_stride * footprint_offset)
+            for footprint_offset in footprint_offsets
+        ],
+        signed_int_dtype,
+    )
     images = images.reshape(-1)
 
     # Erosion goes smallest to largest; dilation goes largest to smallest.
@@ -198,8 +209,7 @@ def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
 
     start = index_sorted[0]
     value_rank = value_rank.astype(unsigned_int_dtype, copy=False)
-    reconstruction_loop(value_rank, prev, next, nb_strides, start,
-                        image_stride)
+    reconstruction_loop(value_rank, prev, next, nb_strides, start, image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]

@@ -12,7 +12,7 @@ __all__ = [
     'adjust_sigmoid',
     'adjust_log',
     'is_low_contrast',
-    'match_histograms'
+    'match_histograms',
 ]
 
 from ._adapthist import equalize_adapthist
@@ -25,5 +25,5 @@ from .exposure import (
     adjust_gamma,
     adjust_sigmoid,
     adjust_log,
-    is_low_contrast
+    is_low_contrast,
 )

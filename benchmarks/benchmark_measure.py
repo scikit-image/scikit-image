@@ -1,6 +1,7 @@
 import numpy as np
 
 from skimage import data, filters, measure
+
 try:
     from skimage.measure._regionprops import PROP_VALS
 except ImportError:
@@ -17,7 +18,6 @@ def init_regionprops_data():
 
 
 class RegionpropsTableIndividual:
-
     param_names = ['prop']
     params = sorted(list(PROP_VALS))
 
@@ -30,14 +30,14 @@ class RegionpropsTableIndividual:
         self.label_image, self.intensity_image = init_regionprops_data()
 
     def time_single_region_property(self, prop):
-        measure.regionprops_table(self.label_image, self.intensity_image,
-                                  properties=[prop], cache=True)
+        measure.regionprops_table(
+            self.label_image, self.intensity_image, properties=[prop], cache=True
+        )
 
     # omit peakmem tests to save time (memory usage was minimal)
 
 
 class RegionpropsTableAll:
-
     param_names = ['cache']
     params = (False, True)
 
@@ -50,19 +50,23 @@ class RegionpropsTableAll:
         self.label_image, self.intensity_image = init_regionprops_data()
 
     def time_regionprops_table_all(self, cache):
-        measure.regionprops_table(self.label_image, self.intensity_image,
-                                  properties=PROP_VALS, cache=cache)
+        measure.regionprops_table(
+            self.label_image, self.intensity_image, properties=PROP_VALS, cache=cache
+        )
 
     # omit peakmem tests to save time (memory usage was minimal)
 
 
 class MomentsSuite:
-    params = ([(64, 64), (4096, 2048), (32, 32, 32), (256, 256, 192)],
-              [np.uint8, np.float32, np.float64],
-              [1, 2, 3])
+    params = (
+        [(64, 64), (4096, 2048), (32, 32, 32), (256, 256, 192)],
+        [np.uint8, np.float32, np.float64],
+        [1, 2, 3],
+    )
     param_names = ['shape', 'dtype', 'order']
 
     """Benchmark for filter routines in scikit-image."""
+
     def setup(self, shape, dtype, *args):
         rng = np.random.default_rng(1234)
         if np.dtype(dtype).kind in 'iu':

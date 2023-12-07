@@ -123,7 +123,7 @@ from .colorconv import (
     rgb_from_ahx,
     ahx_from_rgb,
     rgb_from_hpx,
-    hpx_from_rgb
+    hpx_from_rgb,
 )
 
 from .colorlabel import color_dict, label2rgb

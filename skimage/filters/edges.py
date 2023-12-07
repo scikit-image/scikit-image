@@ -18,30 +18,31 @@ HSCHARR_WEIGHTS = SCHARR_EDGE.reshape((3, 1)) * SCHARR_SMOOTH.reshape((1, 3))
 VSCHARR_WEIGHTS = HSCHARR_WEIGHTS.T
 
 PREWITT_EDGE = np.array([1, 0, -1])
-PREWITT_SMOOTH = np.full((3,), 1/3)
-HPREWITT_WEIGHTS = (PREWITT_EDGE.reshape((3, 1))
-                    * PREWITT_SMOOTH.reshape((1, 3)))
+PREWITT_SMOOTH = np.full((3,), 1 / 3)
+HPREWITT_WEIGHTS = PREWITT_EDGE.reshape((3, 1)) * PREWITT_SMOOTH.reshape((1, 3))
 VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 # 2D-only filter weights
-ROBERTS_PD_WEIGHTS = np.array([[1, 0],
-                               [0, -1]], dtype=np.float64)
-ROBERTS_ND_WEIGHTS = np.array([[0, 1],
-                               [-1, 0]], dtype=np.float64)
+ROBERTS_PD_WEIGHTS = np.array([[1, 0], [0, -1]], dtype=np.float64)
+ROBERTS_ND_WEIGHTS = np.array([[0, 1], [-1, 0]], dtype=np.float64)
 
 # These filter weights can be found in Farid & Simoncelli (2004),
 # Table 1 (3rd and 4th row). Additional decimal places were computed
 # using the code found at https://www.cs.dartmouth.edu/farid/
-farid_smooth = np.array([[0.0376593171958126,
-                          0.249153396177344,
-                          0.426374573253687,
-                          0.249153396177344,
-                          0.0376593171958126]])
-farid_edge = np.array([[0.109603762960254,
-                        0.276690988455557,
-                        0,
-                        -0.276690988455557,
-                        -0.109603762960254]])
+farid_smooth = np.array(
+    [
+        [
+            0.0376593171958126,
+            0.249153396177344,
+            0.426374573253687,
+            0.249153396177344,
+            0.0376593171958126,
+        ]
+    ]
+)
+farid_edge = np.array(
+    [[0.109603762960254, 0.276690988455557, 0, -0.276690988455557, -0.109603762960254]]
+)
 HFARID_WEIGHTS = farid_edge.T * farid_smooth
 VFARID_WEIGHTS = np.copy(HFARID_WEIGHTS.T)
 
@@ -83,7 +84,9 @@ def _kernel_shape(ndim, dim):
     >>> _kernel_shape(4, -1)
     [1, 1, 1, -1]
     """
-    shape = [1, ] * ndim
+    shape = [
+        1,
+    ] * ndim
     shape[dim] = -1
     return shape
 
@@ -120,8 +123,16 @@ def _reshape_nd(arr, ndim, dim):
     return np.reshape(arr, kernel_shape)
 
 
-def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
-                         axis=None, mode='reflect', cval=0.0, mask=None):
+def _generic_edge_filter(
+    image,
+    *,
+    smooth_weights,
+    edge_weights=[1, 0, -1],
+    axis=None,
+    mode='reflect',
+    cval=0.0,
+    mask=None,
+):
     """Apply a generic, n-dimensional edge filter.
 
     The filter is computed by applying the edge weights along one dimension
@@ -162,7 +173,7 @@ def _generic_edge_filter(image, *, smooth_weights, edge_weights=[1, 0, -1],
         axes = [axis]
     else:
         axes = axis
-    return_magnitude = (len(axes) > 1)
+    return_magnitude = len(axes) > 1
 
     if image.dtype.kind == 'f':
         float_dtype = _supported_float_type(image.dtype)
@@ -236,8 +247,9 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.sobel(camera)
     """
-    output = _generic_edge_filter(image, smooth_weights=SOBEL_SMOOTH,
-                                  axis=axis, mode=mode, cval=cval)
+    output = _generic_edge_filter(
+        image, smooth_weights=SOBEL_SMOOTH, axis=axis, mode=mode, cval=cval
+    )
     output = _mask_filter_result(output, mask)
     return output
 
@@ -357,8 +369,9 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.scharr(camera)
     """
-    output = _generic_edge_filter(image, smooth_weights=SCHARR_SMOOTH,
-                                  axis=axis, mode=mode, cval=cval)
+    output = _generic_edge_filter(
+        image, smooth_weights=SCHARR_SMOOTH, axis=axis, mode=mode, cval=cval
+    )
     output = _mask_filter_result(output, mask)
     return output
 
@@ -484,8 +497,9 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> camera = data.camera()
     >>> edges = filters.prewitt(camera)
     """
-    output = _generic_edge_filter(image, smooth_weights=PREWITT_SMOOTH,
-                                  axis=axis, mode=mode, cval=cval)
+    output = _generic_edge_filter(
+        image, smooth_weights=PREWITT_SMOOTH, axis=axis, mode=mode, cval=cval
+    )
     output = _mask_filter_result(output, mask)
     return output
 
@@ -581,8 +595,9 @@ def roberts(image, mask=None):
 
     """
     check_nD(image, 2)
-    out = np.sqrt(roberts_pos_diag(image, mask) ** 2 +
-                  roberts_neg_diag(image, mask) ** 2)
+    out = np.sqrt(
+        roberts_pos_diag(image, mask) ** 2 + roberts_neg_diag(image, mask) ** 2
+    )
     out /= np.sqrt(2)
     return out
 
@@ -759,9 +774,14 @@ def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     >>> from skimage import filters
     >>> edges = filters.farid(camera)
     """
-    output = _generic_edge_filter(image, smooth_weights=farid_smooth,
-                                  edge_weights=farid_edge, axis=axis,
-                                  mode=mode, cval=cval)
+    output = _generic_edge_filter(
+        image,
+        smooth_weights=farid_smooth,
+        edge_weights=farid_edge,
+        axis=axis,
+        mode=mode,
+        cval=cval,
+    )
     output = _mask_filter_result(output, mask)
     return output
 

@@ -1,16 +1,15 @@
 """
 Binary morphological operations
 """
-import functools
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .footprints import _footprint_is_sequence
+from .footprints import _footprint_is_sequence, pad_footprint
 from .misc import default_footprint
 
 
-def _iterate_binary_func(binary_func, image, footprint, out):
+def _iterate_binary_func(binary_func, image, footprint, out, border_value):
     """Helper to call `binary_func` for each footprint in a sequence.
 
     binary_func is a binary morphology function that accepts "structure",
@@ -18,11 +17,19 @@ def _iterate_binary_func(binary_func, image, footprint, out):
     (e.g. `scipy.ndimage.binary_erosion`).
     """
     fp, num_iter = footprint[0]
-    binary_func(image, structure=fp, output=out, iterations=num_iter)
+    binary_func(
+        image, structure=fp, output=out, iterations=num_iter, border_value=border_value
+    )
     for fp, num_iter in footprint[1:]:
         # Note: out.copy() because the computation cannot be in-place!
         #       SciPy <= 1.7 did not automatically make a copy if needed.
-        binary_func(out.copy(), structure=fp, output=out, iterations=num_iter)
+        binary_func(
+            out.copy(),
+            structure=fp,
+            output=out,
+            iterations=num_iter,
+            border_value=border_value,
+        )
     return out
 
 
@@ -30,7 +37,7 @@ def _iterate_binary_func(binary_func, image, footprint, out):
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
-def binary_erosion(image, footprint=None, out=None):
+def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
 
     This function returns the same result as grayscale erosion but performs
@@ -52,6 +59,15 @@ def binary_erosion(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'max' or 'ignore', pixels outside the image domain are assumed
+        to be `True`, which causes them to not influence the result.
+        Default is 'ignore'.
+
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -68,8 +84,12 @@ def binary_erosion(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
+
+    For even-sized footprints, :func:`skimage.morphology.erosion` and
+    this function produce an output that differs: one is shifted by one pixel
+    compared to the other.
 
     See also
     --------
@@ -79,17 +99,26 @@ def binary_erosion(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
-    if _footprint_is_sequence(footprint):
-        binary_func = functools.partial(ndi.binary_erosion, border_value=True)
-        return _iterate_binary_func(binary_func, image, footprint, out)
+    if mode not in {"max", "min", "ignore"}:
+        raise ValueError(f"unsupported mode, got {mode!r}")
+    border_value = False if mode == 'min' else True
 
-    ndi.binary_erosion(image, structure=footprint, output=out,
-                       border_value=True)
+    footprint = pad_footprint(footprint, pad_end=True)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
+
+    out = _iterate_binary_func(
+        binary_func=ndi.binary_erosion,
+        image=image,
+        footprint=footprint,
+        out=out,
+        border_value=border_value,
+    )
     return out
 
 
 @default_footprint
-def binary_dilation(image, footprint=None, out=None):
+def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
 
     This function returns the same result as grayscale dilation but performs
@@ -111,6 +140,15 @@ def binary_dilation(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'min' or 'ignore', pixels outside the image domain are assumed
+        to be `False`, which causes them to not influence the result.
+        Default is 'ignore'.
+
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -127,8 +165,12 @@ def binary_dilation(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
+
+    For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
+    and :func:`skimage.morphology.dilation` produce an output that differs:
+    `binary_dilation` mirrors the footprint, whereas `dilation` does not.
 
     See also
     --------
@@ -138,15 +180,26 @@ def binary_dilation(image, footprint=None, out=None):
     if out is None:
         out = np.empty(image.shape, dtype=bool)
 
-    if _footprint_is_sequence(footprint):
-        return _iterate_binary_func(ndi.binary_dilation, image, footprint, out)
+    if mode not in {"max", "min", "ignore"}:
+        raise ValueError(f"unsupported mode, got {mode!r}")
+    border_value = True if mode == 'max' else False
 
-    ndi.binary_dilation(image, structure=footprint, output=out)
+    footprint = pad_footprint(footprint, pad_end=True)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
+
+    out = _iterate_binary_func(
+        binary_func=ndi.binary_dilation,
+        image=image,
+        footprint=footprint,
+        out=out,
+        border_value=border_value,
+    )
     return out
 
 
 @default_footprint
-def binary_opening(image, footprint=None, out=None):
+def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological opening of an image.
 
     This function returns the same result as grayscale opening but performs
@@ -169,6 +222,15 @@ def binary_opening(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed to be `True`
+        for the erosion and `False` for the dilation, which causes them to not
+        influence the result. Default is 'ignore'.
+
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -184,7 +246,7 @@ def binary_opening(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
     See also
@@ -192,13 +254,13 @@ def binary_opening(image, footprint=None, out=None):
     skimage.morphology.isotropic_opening
 
     """
-    eroded = binary_erosion(image, footprint)
-    out = binary_dilation(eroded, footprint, out=out)
+    tmp = binary_erosion(image, footprint, mode=mode)
+    out = binary_dilation(tmp, footprint, out=out, mode=mode)
     return out
 
 
 @default_footprint
-def binary_closing(image, footprint=None, out=None):
+def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological closing of an image.
 
     This function returns the same result as grayscale closing but performs
@@ -221,6 +283,15 @@ def binary_closing(image, footprint=None, out=None):
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
+    mode : str, optional
+        The `mode` parameter determines how the array borders are handled.
+        Valid modes are: 'max', 'min', 'ignore'.
+        If 'ignore', pixels outside the image domain are assumed to be `True`
+        for the erosion and `False` for the dilation, which causes them to not
+        influence the result. Default is 'ignore'.
+
+        .. versionadded:: 0.23
+            `mode` was added in 0.23.
 
     Returns
     -------
@@ -236,7 +307,7 @@ def binary_closing(image, footprint=None, out=None):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    ``skimage.morphology.disk`` provide an option to automatically generate a
+    :func:`skimage.morphology.disk` provide an option to automatically generate a
     footprint sequence of this type.
 
     See also
@@ -244,6 +315,6 @@ def binary_closing(image, footprint=None, out=None):
     skimage.morphology.isotropic_closing
 
     """
-    dilated = binary_dilation(image, footprint)
-    out = binary_erosion(dilated, footprint, out=out)
+    tmp = binary_dilation(image, footprint, mode=mode)
+    out = binary_erosion(tmp, footprint, out=out, mode=mode)
     return out

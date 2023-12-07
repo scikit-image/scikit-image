@@ -12,7 +12,7 @@ def test_fits_plugin_import():
     try:
         io.use_plugin('fits')
     except ImportError:
-        raise()
+        raise ()
 
 
 def teardown():

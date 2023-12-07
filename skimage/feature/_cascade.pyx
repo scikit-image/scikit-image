@@ -491,7 +491,7 @@ cdef class Cascade:
         self._load_xml(xml_file, eps)
 
     cdef bint classify(self, cnp.float32_t[:, ::1] int_img, Py_ssize_t row,
-                       Py_ssize_t col, cnp.float32_t scale) nogil:
+                       Py_ssize_t col, cnp.float32_t scale) noexcept nogil:
         """Classify the provided image patch i.e. check if the classifier
         detects an object in the given image patch.
 

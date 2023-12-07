@@ -29,8 +29,7 @@ from skimage import transform
 #
 # First we create a transformation using explicit parameters:
 
-tform = transform.SimilarityTransform(scale=1, rotation=math.pi/2,
-                                      translation=(0, 1))
+tform = transform.SimilarityTransform(scale=1, rotation=math.pi / 2, translation=(0, 1))
 print(tform.params)
 
 ######################################################################
@@ -58,8 +57,9 @@ print(tform2.inverse(tform(coord)))
 
 text = data.text()
 
-tform = transform.SimilarityTransform(scale=1, rotation=math.pi/4,
-                                      translation=(text.shape[0]/2, -100))
+tform = transform.SimilarityTransform(
+    scale=1, rotation=math.pi / 4, translation=(text.shape[0] / 2, -100)
+)
 
 rotated = transform.warp(text, tform)
 back_rotated = transform.warp(rotated, tform.inverse)

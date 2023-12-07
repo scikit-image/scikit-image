@@ -10,10 +10,8 @@ def test_blur_effect():
     """Test that the blur metric increases with more blurring."""
     image = astronaut()
     B0 = blur_effect(image, channel_axis=-1)
-    B1 = blur_effect(gaussian(image, sigma=1, channel_axis=-1),
-                        channel_axis=-1)
-    B2 = blur_effect(gaussian(image, sigma=4, channel_axis=-1),
-                        channel_axis=-1)
+    B1 = blur_effect(gaussian(image, sigma=1, channel_axis=-1), channel_axis=-1)
+    B2 = blur_effect(gaussian(image, sigma=4, channel_axis=-1), channel_axis=-1)
     assert 0 <= B0 < 1
     assert B0 < B1 < B2
 

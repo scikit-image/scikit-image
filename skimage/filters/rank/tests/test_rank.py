@@ -3,8 +3,13 @@ import pytest
 
 from skimage import data, morphology, util
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_allclose, assert_array_almost_equal,
-                                     assert_equal, fetch, run_in_parallel)
+from skimage._shared.testing import (
+    assert_allclose,
+    assert_array_almost_equal,
+    assert_equal,
+    fetch,
+    run_in_parallel,
+)
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import subtract_mean
@@ -20,20 +25,14 @@ def test_otsu_edge_case():
     # To better understand, see
     # https://mybinder.org/v2/gist/hmaarrfk/4afae1cfded1d78e44c9e4f58285d552/master
 
-    footprint = np.array([[0, 1, 0],
-                          [1, 1, 1],
-                          [0, 1, 0]], dtype=np.uint8)
+    footprint = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8)
 
-    img = np.array([[  0,  41,   0],
-                    [ 30,  81, 106],
-                    [  0, 147,   0]], dtype=np.uint8)
+    img = np.array([[0, 41, 0], [30, 81, 106], [0, 147, 0]], dtype=np.uint8)
 
     result = rank.otsu(img, footprint)
     assert result[1, 1] in [41, 81]
 
-    img = np.array([[  0, 214,   0],
-                    [229, 104, 141],
-                    [  0, 172,   0]], dtype=np.uint8)
+    img = np.array([[0, 214, 0], [229, 104, 141], [0, 172, 0]], dtype=np.uint8)
     result = rank.otsu(img, footprint)
     assert result[1, 1] in [141, 172]
 
@@ -79,15 +78,13 @@ ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
         rank.noise_filter,
         rank.entropy,
         rank.otsu,
-        rank.majority
+        rank.majority,
     ],
 )
 def test_1d_input_raises_error(func):
     image = np.arange(10)
     footprint = disk(3)
-    with pytest.raises(
-        ValueError, match='`image` must have 2 or 3 dimensions, got 1'
-    ):
+    with pytest.raises(ValueError, match='`image` must have 2 or 3 dimensions, got 1'):
         func(image, footprint)
 
 
@@ -125,7 +122,7 @@ class TestRank:
                 if outdt is not None:
                     # Adjust expected precision
                     expected = expected.astype(outdt)
-                assert_allclose(expected, result, atol=0, rtol=1E-15)
+                assert_allclose(expected, result, atol=0, rtol=1e-15)
             elif filter == "otsu":
                 # OTSU May also have some optimization dependent failures
                 # See the discussions in
@@ -154,16 +151,31 @@ class TestRank:
     def test_rank_filter_footprint_sequence_unsupported(self, filter):
         footprint_sequence = morphology.diamond(3, decomposition="sequence")
         with pytest.raises(ValueError):
-            getattr(rank, filter)(self.image.astype(np.uint8),
-                                  footprint_sequence)
+            getattr(rank, filter)(self.image.astype(np.uint8), footprint_sequence)
 
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize(
-        'filter', ['equalize', 'otsu', 'autolevel', 'gradient',
-                   'majority', 'maximum', 'mean', 'geometric_mean',
-                   'subtract_mean', 'median', 'minimum', 'modal',
-                   'enhance_contrast', 'pop', 'sum', 'threshold',
-                   'noise_filter', 'entropy']
+        'filter',
+        [
+            'equalize',
+            'otsu',
+            'autolevel',
+            'gradient',
+            'majority',
+            'maximum',
+            'mean',
+            'geometric_mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'sum',
+            'threshold',
+            'noise_filter',
+            'entropy',
+        ],
     )
     def test_rank_filters_3D(self, filter, outdt):
         @run_in_parallel(warnings_matching=['Possible precision loss'])
@@ -173,8 +185,7 @@ class TestRank:
                 out = np.zeros_like(expected, dtype=outdt)
             else:
                 out = None
-            result = getattr(rank, filter)(self.volume, self.footprint_3d,
-                                           out=out)
+            result = getattr(rank, filter)(self.volume, self.footprint_3d, out=out)
             if outdt is not None:
                 # Avoid rounding issues comparing to expected result
                 if filter == 'sum':
@@ -189,7 +200,6 @@ class TestRank:
 
         check()
 
-
     def test_random_sizes(self):
         # make sure the size is not a problem
 
@@ -199,43 +209,95 @@ class TestRank:
 
             image8 = np.ones((m, n), dtype=np.uint8)
             out8 = np.empty_like(image8)
-            rank.mean(image=image8, footprint=elem, mask=mask, out=out8,
-                      shift_x=0, shift_y=0)
+            rank.mean(
+                image=image8, footprint=elem, mask=mask, out=out8, shift_x=0, shift_y=0
+            )
             assert_equal(image8.shape, out8.shape)
-            rank.mean(image=image8, footprint=elem, mask=mask, out=out8,
-                      shift_x=+1, shift_y=+1)
+            rank.mean(
+                image=image8,
+                footprint=elem,
+                mask=mask,
+                out=out8,
+                shift_x=+1,
+                shift_y=+1,
+            )
             assert_equal(image8.shape, out8.shape)
 
-            rank.geometric_mean(image=image8, footprint=elem, mask=mask,
-                                out=out8, shift_x=0, shift_y=0)
+            rank.geometric_mean(
+                image=image8, footprint=elem, mask=mask, out=out8, shift_x=0, shift_y=0
+            )
             assert_equal(image8.shape, out8.shape)
-            rank.geometric_mean(image=image8, footprint=elem, mask=mask,
-                                out=out8, shift_x=+1, shift_y=+1)
+            rank.geometric_mean(
+                image=image8,
+                footprint=elem,
+                mask=mask,
+                out=out8,
+                shift_x=+1,
+                shift_y=+1,
+            )
             assert_equal(image8.shape, out8.shape)
 
             image16 = np.ones((m, n), dtype=np.uint16)
             out16 = np.empty_like(image8, dtype=np.uint16)
-            rank.mean(image=image16, footprint=elem, mask=mask, out=out16,
-                      shift_x=0, shift_y=0)
+            rank.mean(
+                image=image16,
+                footprint=elem,
+                mask=mask,
+                out=out16,
+                shift_x=0,
+                shift_y=0,
+            )
             assert_equal(image16.shape, out16.shape)
-            rank.mean(image=image16, footprint=elem, mask=mask, out=out16,
-                      shift_x=+1, shift_y=+1)
+            rank.mean(
+                image=image16,
+                footprint=elem,
+                mask=mask,
+                out=out16,
+                shift_x=+1,
+                shift_y=+1,
+            )
             assert_equal(image16.shape, out16.shape)
 
-            rank.geometric_mean(image=image16, footprint=elem, mask=mask,
-                                out=out16, shift_x=0, shift_y=0)
+            rank.geometric_mean(
+                image=image16,
+                footprint=elem,
+                mask=mask,
+                out=out16,
+                shift_x=0,
+                shift_y=0,
+            )
             assert_equal(image16.shape, out16.shape)
-            rank.geometric_mean(image=image16, footprint=elem, mask=mask,
-                                out=out16, shift_x=+1, shift_y=+1)
+            rank.geometric_mean(
+                image=image16,
+                footprint=elem,
+                mask=mask,
+                out=out16,
+                shift_x=+1,
+                shift_y=+1,
+            )
             assert_equal(image16.shape, out16.shape)
 
-            rank.mean_percentile(image=image16, mask=mask, out=out16,
-                                 footprint=elem, shift_x=0, shift_y=0, p0=.1,
-                                 p1=.9)
+            rank.mean_percentile(
+                image=image16,
+                mask=mask,
+                out=out16,
+                footprint=elem,
+                shift_x=0,
+                shift_y=0,
+                p0=0.1,
+                p1=0.9,
+            )
             assert_equal(image16.shape, out16.shape)
-            rank.mean_percentile(image=image16, mask=mask, out=out16,
-                                 footprint=elem, shift_x=+1, shift_y=+1, p0=.1,
-                                 p1=.9)
+            rank.mean_percentile(
+                image=image16,
+                mask=mask,
+                out=out16,
+                footprint=elem,
+                shift_x=+1,
+                shift_y=+1,
+                p0=0.1,
+                p1=0.9,
+            )
             assert_equal(image16.shape, out16.shape)
 
     def test_compare_with_gray_dilation(self):
@@ -272,16 +334,23 @@ class TestRank:
         mask = np.ones((100, 100), dtype=np.uint8)
 
         for i in range(8, 13):
-            max_val = 2 ** i - 1
+            max_val = 2**i - 1
             image = np.full((100, 100), max_val, dtype=np.uint16)
             if i > 10:
                 expected = ["Bad rank filter performance"]
             else:
                 expected = []
             with expected_warnings(expected):
-                rank.mean_percentile(image=image, footprint=elem, mask=mask,
-                                     out=out, shift_x=0, shift_y=0, p0=.1,
-                                     p1=.9)
+                rank.mean_percentile(
+                    image=image,
+                    footprint=elem,
+                    mask=mask,
+                    out=out,
+                    shift_x=0,
+                    shift_y=0,
+                    p0=0.1,
+                    p1=0.9,
+                )
 
     def test_population(self):
         # check the number of valid pixels in the neighborhood
@@ -292,22 +361,30 @@ class TestRank:
         mask = np.ones(image.shape, dtype=np.uint8)
 
         rank.pop(image=image, footprint=elem, out=out, mask=mask)
-        r = np.array([[4, 6, 6, 6, 4],
-                      [6, 9, 9, 9, 6],
-                      [6, 9, 9, 9, 6],
-                      [6, 9, 9, 9, 6],
-                      [4, 6, 6, 6, 4]])
+        r = np.array(
+            [
+                [4, 6, 6, 6, 4],
+                [6, 9, 9, 9, 6],
+                [6, 9, 9, 9, 6],
+                [6, 9, 9, 9, 6],
+                [4, 6, 6, 6, 4],
+            ]
+        )
         assert_equal(r, out)
 
     def test_structuring_element8(self):
         # check the output for a custom footprint
 
-        r = np.array([[0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0],
-                      [0, 0, 255, 0, 0, 0],
-                      [0, 0, 255, 255, 255, 0],
-                      [0, 0, 0, 255, 255, 0],
-                      [0, 0, 0, 0, 0, 0]])
+        r = np.array(
+            [
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 255, 0, 0, 0],
+                [0, 0, 255, 255, 255, 0],
+                [0, 0, 0, 255, 255, 0],
+                [0, 0, 0, 0, 0, 0],
+            ]
+        )
 
         # 8-bit
         image = np.zeros((6, 6), dtype=np.uint8)
@@ -316,8 +393,9 @@ class TestRank:
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
 
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=1, shift_y=1)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=1, shift_y=1
+        )
         assert_equal(r, out)
 
         # 16-bit
@@ -325,14 +403,15 @@ class TestRank:
         image[2, 2] = 255
         out = np.empty_like(image)
 
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=1, shift_y=1)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=1, shift_y=1
+        )
         assert_equal(r, out)
 
     def test_pass_on_bitdepth(self):
         # should pass because data bitdepth is not too high for the function
 
-        image = np.full((100, 100), 2 ** 11, dtype=np.uint16)
+        image = np.full((100, 100), 2**11, dtype=np.uint16)
         elem = np.ones((3, 3), dtype=np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
@@ -356,9 +435,9 @@ class TestRank:
 
         footprint = disk(20)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
-        loc_perc_autolevel = rank.autolevel_percentile(image,
-                                                       footprint=footprint,
-                                                       p0=.0, p1=1.)
+        loc_perc_autolevel = rank.autolevel_percentile(
+            image, footprint=footprint, p0=0.0, p1=1.0
+        )
 
         assert_equal(loc_autolevel, loc_perc_autolevel)
 
@@ -370,20 +449,26 @@ class TestRank:
 
         footprint = disk(20)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
-        loc_perc_autolevel = rank.autolevel_percentile(image,
-                                                       footprint=footprint,
-                                                       p0=.0, p1=1.)
+        loc_perc_autolevel = rank.autolevel_percentile(
+            image, footprint=footprint, p0=0.0, p1=1.0
+        )
 
         assert_equal(loc_autolevel, loc_perc_autolevel)
 
     def test_compare_ubyte_vs_float(self):
-
         # Create signed int8 image that and convert it to uint8
         image_uint = img_as_ubyte(data.camera()[:50, :50])
         image_float = img_as_float(image_uint)
 
-        methods = ['autolevel', 'equalize', 'gradient', 'threshold',
-                   'subtract_mean', 'enhance_contrast', 'pop']
+        methods = [
+            'autolevel',
+            'equalize',
+            'gradient',
+            'threshold',
+            'subtract_mean',
+            'enhance_contrast',
+            'pop',
+        ]
 
         for method in methods:
             func = getattr(rank, method)
@@ -393,18 +478,31 @@ class TestRank:
             assert_equal(out_u, out_f)
 
     def test_compare_ubyte_vs_float_3d(self):
-
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
-        volume_uint = np.random.randint(0, high=256,
-                                        size=(10, 20, 30), dtype=np.uint8)
+        volume_uint = np.random.randint(0, high=256, size=(10, 20, 30), dtype=np.uint8)
         volume_float = img_as_float(volume_uint)
 
-        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
-                     'majority', 'maximum', 'mean', 'geometric_mean',
-                     'subtract_mean', 'median', 'minimum', 'modal',
-                     'enhance_contrast', 'pop', 'sum', 'threshold',
-                     'noise_filter', 'entropy']
+        methods_3d = [
+            'equalize',
+            'otsu',
+            'autolevel',
+            'gradient',
+            'majority',
+            'maximum',
+            'mean',
+            'geometric_mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'sum',
+            'threshold',
+            'noise_filter',
+            'entropy',
+        ]
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -424,9 +522,21 @@ class TestRank:
         image_u = img_as_ubyte(image_s)
         assert_equal(image_u, img_as_ubyte(image_s))
 
-        methods = ['autolevel', 'equalize', 'gradient', 'maximum',
-                   'mean', 'geometric_mean', 'subtract_mean', 'median', 'minimum',
-                   'modal', 'enhance_contrast', 'pop', 'threshold']
+        methods = [
+            'autolevel',
+            'equalize',
+            'gradient',
+            'maximum',
+            'mean',
+            'geometric_mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'threshold',
+        ]
 
         for method in methods:
             func = getattr(rank, method)
@@ -441,16 +551,30 @@ class TestRank:
 
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
-        volume_s = np.random.randint(0, high=127,
-                                     size=(10, 20, 30), dtype=np.int8)
+        volume_s = np.random.randint(0, high=127, size=(10, 20, 30), dtype=np.int8)
         volume_u = img_as_ubyte(volume_s)
         assert_equal(volume_u, img_as_ubyte(volume_s))
 
-        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
-                     'majority', 'maximum', 'mean', 'geometric_mean',
-                     'subtract_mean', 'median', 'minimum', 'modal',
-                     'enhance_contrast', 'pop', 'sum', 'threshold',
-                     'noise_filter', 'entropy']
+        methods_3d = [
+            'equalize',
+            'otsu',
+            'autolevel',
+            'gradient',
+            'majority',
+            'maximum',
+            'mean',
+            'geometric_mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'sum',
+            'threshold',
+            'noise_filter',
+            'entropy',
+        ]
 
         for method in methods_3d:
             func = getattr(rank, method)
@@ -460,9 +584,21 @@ class TestRank:
             assert_equal(out_u, out_s)
 
     @pytest.mark.parametrize(
-        'method', ['autolevel', 'equalize', 'gradient', 'maximum',
-                   'mean', 'subtract_mean', 'median', 'minimum', 'modal',
-                   'enhance_contrast', 'pop', 'threshold']
+        'method',
+        [
+            'autolevel',
+            'equalize',
+            'gradient',
+            'maximum',
+            'mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'threshold',
+        ],
     )
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image or 16-bit image (having only real 8-bit
@@ -472,22 +608,36 @@ class TestRank:
         assert_equal(image8, image16)
 
         np.random.seed(0)
-        volume8 = np.random.randint(128, high=256,
-                                    size=(10, 10, 10), dtype=np.uint8)
+        volume8 = np.random.randint(128, high=256, size=(10, 10, 10), dtype=np.uint8)
         volume16 = volume8.astype(np.uint16)
 
-        methods_3d = ['equalize', 'otsu', 'autolevel', 'gradient',
-                     'majority', 'maximum', 'mean', 'geometric_mean',
-                     'subtract_mean', 'median', 'minimum', 'modal',
-                     'enhance_contrast', 'pop', 'sum', 'threshold',
-                     'noise_filter', 'entropy']
+        methods_3d = [
+            'equalize',
+            'otsu',
+            'autolevel',
+            'gradient',
+            'majority',
+            'maximum',
+            'mean',
+            'geometric_mean',
+            'subtract_mean',
+            'median',
+            'minimum',
+            'modal',
+            'enhance_contrast',
+            'pop',
+            'sum',
+            'threshold',
+            'noise_filter',
+            'entropy',
+        ]
 
         func = getattr(rank, method)
         f8 = func(image8, disk(3))
         f16 = func(image16, disk(3))
         assert_equal(f8, f16)
 
-        if (method in methods_3d):
+        if method in methods_3d:
             f8 = func(volume8, ball(3))
             f16 = func(volume16, ball(3))
 
@@ -505,17 +655,19 @@ class TestRank:
         image[1, 2] = 16
 
         elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
-        rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                  shift_x=0, shift_y=0)
+        rank.mean(image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0)
         assert_equal(image, out)
-        rank.geometric_mean(image=image, footprint=elem, out=out, mask=mask,
-                            shift_x=0, shift_y=0)
+        rank.geometric_mean(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.minimum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.minimum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
 
     def test_trivial_footprint16(self):
@@ -530,17 +682,19 @@ class TestRank:
         image[1, 2] = 16
 
         elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=np.uint8)
-        rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                  shift_x=0, shift_y=0)
+        rank.mean(image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0)
         assert_equal(image, out)
-        rank.geometric_mean(image=image, footprint=elem, out=out, mask=mask,
-                            shift_x=0, shift_y=0)
+        rank.geometric_mean(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.minimum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.minimum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
 
     def test_smallest_footprint8(self):
@@ -555,14 +709,15 @@ class TestRank:
         image[1, 2] = 16
 
         elem = np.array([[1]], dtype=np.uint8)
-        rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                  shift_x=0, shift_y=0)
+        rank.mean(image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0)
         assert_equal(image, out)
-        rank.minimum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.minimum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
 
     def test_smallest_footprint16(self):
@@ -577,17 +732,19 @@ class TestRank:
         image[1, 2] = 16
 
         elem = np.array([[1]], dtype=np.uint8)
-        rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                  shift_x=0, shift_y=0)
+        rank.mean(image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0)
         assert_equal(image, out)
-        rank.geometric_mean(image=image, footprint=elem, out=out, mask=mask,
-                            shift_x=0, shift_y=0)
+        rank.geometric_mean(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.minimum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.minimum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(image, out)
 
     def test_empty_footprint(self):
@@ -603,26 +760,46 @@ class TestRank:
 
         elem = np.array([[0, 0, 0], [0, 0, 0]], dtype=np.uint8)
 
-        rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                  shift_x=0, shift_y=0)
+        rank.mean(image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0)
         assert_equal(res, out)
-        rank.geometric_mean(image=image, footprint=elem, out=out, mask=mask,
-                            shift_x=0, shift_y=0)
+        rank.geometric_mean(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(res, out)
-        rank.minimum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.minimum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(res, out)
-        rank.maximum(image=image, footprint=elem, out=out, mask=mask,
-                     shift_x=0, shift_y=0)
+        rank.maximum(
+            image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+        )
         assert_equal(res, out)
 
     def test_otsu(self):
         # test the local Otsu segmentation on a synthetic image
         # (left to right ramp * sinus)
 
-        test = np.tile([128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
-                        127, 225, 23, 127],
-                       (16, 1))
+        test = np.tile(
+            [
+                128,
+                145,
+                103,
+                127,
+                165,
+                83,
+                127,
+                185,
+                63,
+                127,
+                205,
+                43,
+                127,
+                225,
+                23,
+                127,
+            ],
+            (16, 1),
+        )
         test = test.astype(np.uint8)
         res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1], (16, 1))
         footprint = np.ones((6, 6), dtype=np.uint8)
@@ -635,38 +812,36 @@ class TestRank:
         footprint = np.ones((16, 16), dtype=np.uint8)
         # 1 bit per pixel
         data = np.tile(np.asarray([0, 1]), (100, 100)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 1)
+        assert np.max(rank.entropy(data, footprint)) == 1
 
         # 2 bit per pixel
         data = np.tile(np.asarray([[0, 1], [2, 3]]), (10, 10)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 2)
+        assert np.max(rank.entropy(data, footprint)) == 2
 
         # 3 bit per pixel
-        data = np.tile(
-            np.asarray([[0, 1, 2, 3], [4, 5, 6, 7]]), (10, 10)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 3)
+        data = np.tile(np.asarray([[0, 1, 2, 3], [4, 5, 6, 7]]), (10, 10)).astype(
+            np.uint8
+        )
+        assert np.max(rank.entropy(data, footprint)) == 3
 
         # 4 bit per pixel
-        data = np.tile(
-            np.reshape(np.arange(16), (4, 4)), (10, 10)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 4)
+        data = np.tile(np.reshape(np.arange(16), (4, 4)), (10, 10)).astype(np.uint8)
+        assert np.max(rank.entropy(data, footprint)) == 4
 
         # 6 bit per pixel
-        data = np.tile(
-            np.reshape(np.arange(64), (8, 8)), (10, 10)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 6)
+        data = np.tile(np.reshape(np.arange(64), (8, 8)), (10, 10)).astype(np.uint8)
+        assert np.max(rank.entropy(data, footprint)) == 6
 
         # 8-bit per pixel
-        data = np.tile(
-            np.reshape(np.arange(256), (16, 16)), (10, 10)).astype(np.uint8)
-        assert(np.max(rank.entropy(data, footprint)) == 8)
+        data = np.tile(np.reshape(np.arange(256), (16, 16)), (10, 10)).astype(np.uint8)
+        assert np.max(rank.entropy(data, footprint)) == 8
 
         # 12 bit per pixel
         footprint = np.ones((64, 64), dtype=np.uint8)
         data = np.zeros((65, 65), dtype=np.uint16)
         data[:64, :64] = np.reshape(np.arange(4096), (64, 64))
         with expected_warnings(['Bad rank filter performance']):
-            assert(np.max(rank.entropy(data, footprint)) == 12)
+            assert np.max(rank.entropy(data, footprint)) == 12
 
         # make sure output is of dtype double
         with expected_warnings(['Bad rank filter performance']):
@@ -674,7 +849,6 @@ class TestRank:
         assert out.dtype == np.float64
 
     def test_footprint_dtypes(self):
-
         image = np.zeros((5, 5), dtype=np.uint8)
         out = np.zeros_like(image)
         mask = np.ones_like(image, dtype=np.uint8)
@@ -682,17 +856,27 @@ class TestRank:
         image[2, 3] = 128
         image[1, 2] = 16
 
-        for dtype in (bool, np.uint8, np.uint16, np.int32, np.int64,
-                      np.float32, np.float64):
+        for dtype in (
+            bool,
+            np.uint8,
+            np.uint16,
+            np.int32,
+            np.int64,
+            np.float32,
+            np.float64,
+        ):
             elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
-            rank.mean(image=image, footprint=elem, out=out, mask=mask,
-                      shift_x=0, shift_y=0)
+            rank.mean(
+                image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+            )
             assert_equal(image, out)
-            rank.geometric_mean(image=image, footprint=elem, out=out,
-                                mask=mask, shift_x=0, shift_y=0)
+            rank.geometric_mean(
+                image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+            )
             assert_equal(image, out)
-            rank.mean_percentile(image=image, footprint=elem, out=out,
-                                 mask=mask, shift_x=0, shift_y=0)
+            rank.mean_percentile(
+                image=image, footprint=elem, out=out, mask=mask, shift_x=0, shift_y=0
+            )
             assert_equal(image, out)
 
     def test_16bit(self):
@@ -700,7 +884,7 @@ class TestRank:
         footprint = np.ones((3, 3), dtype=np.uint8)
 
         for bitdepth in range(17):
-            value = 2 ** bitdepth - 1
+            value = 2**bitdepth - 1
             image[10, 10] = value
             if bitdepth >= 11:
                 expected = ['Bad rank filter performance']
@@ -747,11 +931,11 @@ class TestRank:
         img16 = img.astype(np.uint16)
         footprint = disk(15)
         # check for 8bit
-        img_p0 = rank.percentile(img, footprint=footprint, p0=1.)
+        img_p0 = rank.percentile(img, footprint=footprint, p0=1.0)
         img_max = rank.maximum(img, footprint=footprint)
         assert_equal(img_p0, img_max)
         # check for 16bit
-        img_p0 = rank.percentile(img16, footprint=footprint, p0=1.)
+        img_p0 = rank.percentile(img16, footprint=footprint, p0=1.0)
         img_max = rank.maximum(img16, footprint=footprint)
         assert_equal(img_p0, img_max)
 
@@ -761,95 +945,141 @@ class TestRank:
         img16 = img.astype(np.uint16)
         footprint = disk(15)
         # check for 8bit
-        img_p0 = rank.percentile(img, footprint=footprint, p0=.5)
+        img_p0 = rank.percentile(img, footprint=footprint, p0=0.5)
         img_max = rank.median(img, footprint=footprint)
         assert_equal(img_p0, img_max)
         # check for 16bit
-        img_p0 = rank.percentile(img16, footprint=footprint, p0=.5)
+        img_p0 = rank.percentile(img16, footprint=footprint, p0=0.5)
         img_max = rank.median(img16, footprint=footprint)
         assert_equal(img_p0, img_max)
 
     def test_sum(self):
         # check the number of valid pixels in the neighborhood
 
-        image8 = np.array([[0, 0, 0, 0, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-        image16 = 400 * np.array([[0, 0, 0, 0, 0],
-                                  [0, 1, 1, 1, 0],
-                                  [0, 1, 1, 1, 0],
-                                  [0, 1, 1, 1, 0],
-                                  [0, 0, 0, 0, 0]], dtype=np.uint16)
+        image8 = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
+        image16 = 400 * np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint16,
+        )
         elem = np.ones((3, 3), dtype=np.uint8)
         out8 = np.empty_like(image8)
         out16 = np.empty_like(image16)
         mask = np.ones(image8.shape, dtype=np.uint8)
 
-        r = np.array([[1, 2, 3, 2, 1],
-                      [2, 4, 6, 4, 2],
-                      [3, 6, 9, 6, 3],
-                      [2, 4, 6, 4, 2],
-                      [1, 2, 3, 2, 1]], dtype=np.uint8)
+        r = np.array(
+            [
+                [1, 2, 3, 2, 1],
+                [2, 4, 6, 4, 2],
+                [3, 6, 9, 6, 3],
+                [2, 4, 6, 4, 2],
+                [1, 2, 3, 2, 1],
+            ],
+            dtype=np.uint8,
+        )
         rank.sum(image=image8, footprint=elem, out=out8, mask=mask)
         assert_equal(r, out8)
         rank.sum_percentile(
-            image=image8, footprint=elem, out=out8, mask=mask, p0=.0, p1=1.)
+            image=image8, footprint=elem, out=out8, mask=mask, p0=0.0, p1=1.0
+        )
         assert_equal(r, out8)
         rank.sum_bilateral(
-            image=image8, footprint=elem, out=out8, mask=mask, s0=255, s1=255)
+            image=image8, footprint=elem, out=out8, mask=mask, s0=255, s1=255
+        )
         assert_equal(r, out8)
 
-        r = 400 * np.array([[1, 2, 3, 2, 1],
-                            [2, 4, 6, 4, 2],
-                            [3, 6, 9, 6, 3],
-                            [2, 4, 6, 4, 2],
-                            [1, 2, 3, 2, 1]], dtype=np.uint16)
+        r = 400 * np.array(
+            [
+                [1, 2, 3, 2, 1],
+                [2, 4, 6, 4, 2],
+                [3, 6, 9, 6, 3],
+                [2, 4, 6, 4, 2],
+                [1, 2, 3, 2, 1],
+            ],
+            dtype=np.uint16,
+        )
         rank.sum(image=image16, footprint=elem, out=out16, mask=mask)
         assert_equal(r, out16)
         rank.sum_percentile(
-            image=image16, footprint=elem, out=out16, mask=mask, p0=.0, p1=1.)
+            image=image16, footprint=elem, out=out16, mask=mask, p0=0.0, p1=1.0
+        )
         assert_equal(r, out16)
         rank.sum_bilateral(
-            image=image16, footprint=elem, out=out16, mask=mask, s0=1000,
-            s1=1000
+            image=image16, footprint=elem, out=out16, mask=mask, s0=1000, s1=1000
         )
         assert_equal(r, out16)
 
     def test_windowed_histogram(self):
         # check the number of valid pixels in the neighborhood
 
-        image8 = np.array([[0, 0, 0, 0, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 1, 1, 1, 0],
-                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+        image8 = np.array(
+            [
+                [0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0],
+            ],
+            dtype=np.uint8,
+        )
         elem = np.ones((3, 3), dtype=np.uint8)
         outf = np.empty(image8.shape + (2,), dtype=float)
         mask = np.ones(image8.shape, dtype=np.uint8)
 
         # Population so we can normalize the expected output while maintaining
         # code readability
-        pop = np.array([[4, 6, 6, 6, 4],
-                        [6, 9, 9, 9, 6],
-                        [6, 9, 9, 9, 6],
-                        [6, 9, 9, 9, 6],
-                        [4, 6, 6, 6, 4]], dtype=float)
-
-        r0 = np.array([[3, 4, 3, 4, 3],
-                       [4, 5, 3, 5, 4],
-                       [3, 3, 0, 3, 3],
-                       [4, 5, 3, 5, 4],
-                       [3, 4, 3, 4, 3]], dtype=float) / pop
-        r1 = np.array([[1, 2, 3, 2, 1],
-                       [2, 4, 6, 4, 2],
-                       [3, 6, 9, 6, 3],
-                       [2, 4, 6, 4, 2],
-                       [1, 2, 3, 2, 1]], dtype=float) / pop
-        rank.windowed_histogram(
-            image=image8, footprint=elem, out=outf, mask=mask
+        pop = np.array(
+            [
+                [4, 6, 6, 6, 4],
+                [6, 9, 9, 9, 6],
+                [6, 9, 9, 9, 6],
+                [6, 9, 9, 9, 6],
+                [4, 6, 6, 6, 4],
+            ],
+            dtype=float,
         )
+
+        r0 = (
+            np.array(
+                [
+                    [3, 4, 3, 4, 3],
+                    [4, 5, 3, 5, 4],
+                    [3, 3, 0, 3, 3],
+                    [4, 5, 3, 5, 4],
+                    [3, 4, 3, 4, 3],
+                ],
+                dtype=float,
+            )
+            / pop
+        )
+        r1 = (
+            np.array(
+                [
+                    [1, 2, 3, 2, 1],
+                    [2, 4, 6, 4, 2],
+                    [3, 6, 9, 6, 3],
+                    [2, 4, 6, 4, 2],
+                    [1, 2, 3, 2, 1],
+                ],
+                dtype=float,
+            )
+            / pop
+        )
+        rank.windowed_histogram(image=image8, footprint=elem, out=outf, mask=mask)
         assert_equal(r0, outf[:, :, 0])
         assert_equal(r1, outf[:, :, 1])
 
@@ -870,8 +1100,7 @@ class TestRank:
     def test_majority(self):
         img = data.camera()
         elem = np.ones((3, 3), dtype=np.uint8)
-        expected = rank.windowed_histogram(
-            img, elem).argmax(-1).astype(np.uint8)
+        expected = rank.windowed_histogram(img, elem).argmax(-1).astype(np.uint8)
         assert_equal(expected, rank.majority(img, elem))
 
     def test_output_same_dtype(self):

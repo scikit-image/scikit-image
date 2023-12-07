@@ -47,10 +47,9 @@ proteinA = np.zeros_like(nucleus, dtype="float64")
 proteinA_seg = np.zeros_like(nucleus, dtype="float64")
 
 for blob_seed in range(10):
-    blobs = data.binary_blobs(180,
-                              blob_size_fraction=0.5,
-                              volume_fraction=(50/(180**2)),
-                              rng=blob_seed)
+    blobs = data.binary_blobs(
+        180, blob_size_fraction=0.5, volume_fraction=(50 / (180**2)), rng=blob_seed
+    )
     blobs_image = filters.gaussian(blobs, sigma=1.5) * rng.integers(50, 256)
     proteinA += blobs_image
     proteinA_seg += blobs
