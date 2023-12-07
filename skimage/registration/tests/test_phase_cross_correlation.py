@@ -232,7 +232,7 @@ def test_disambiguate_zero_shift(disambiguate):
     assert isinstance(computed_shift, np.ndarray)
     np.testing.assert_array_equal(computed_shift, np.array((0.0, 0.0)))
 
-    
+
 def test_disambiguate_empty_image():
     """When the image is empty, disambiguation becomes degenerate."""
     image = camera()
