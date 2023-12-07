@@ -7,12 +7,6 @@ on:
     branches:
       - maintenance/**
 
-env:
-  CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
-  CIBW_TEST_COMMAND: pytest --pyargs skimage
-  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
-
 permissions:
   contents: read
 
