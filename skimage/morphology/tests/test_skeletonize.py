@@ -17,32 +17,32 @@ class TestSkeletonize:
         assert_array_equal(result, np.zeros((5, 5)))
 
     def test_skeletonize_wrong_dim1(self):
-        im = np.zeros(5)
+        im = np.zeros(5, dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im)
 
     def test_skeletonize_wrong_dim2(self):
-        im = np.zeros((5, 5, 5))
+        im = np.zeros((5, 5, 5), dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im, method='zhang')
 
     def test_skeletonize_wrong_method(self):
-        im = np.ones((5, 5))
+        im = np.ones((5, 5), dtype=bool)
         with pytest.raises(ValueError):
             skeletonize(im, method='foo')
 
     def test_skeletonize_all_foreground(self):
-        im = np.ones((3, 4))
+        im = np.ones((3, 4), dtype=bool)
         skeletonize(im)
 
     def test_skeletonize_single_point(self):
-        im = np.zeros((5, 5), np.uint8)
+        im = np.zeros((5, 5), dtype=bool)
         im[3, 3] = 1
         result = skeletonize(im)
         assert_array_equal(result, im)
 
     def test_skeletonize_already_thinned(self):
-        im = np.zeros((5, 5), np.uint8)
+        im = np.zeros((5, 5), dtype=bool)
         im[3, 1:-1] = 1
         im[2, -1] = 1
         im[4, 0] = 1
@@ -59,14 +59,15 @@ class TestSkeletonize:
         expected = np.load(fetch("data/bw_text_skeleton.npy"))
         assert_array_equal(result, expected)
 
-    def test_skeletonize_num_neighbors(self):
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_skeletonize_num_neighbors(self, dtype):
         # an empty image
-        image = np.zeros((300, 300))
+        image = np.zeros((300, 300), dtype=dtype)
 
         # foreground object 1
-        image[10:-10, 10:100] = 1
-        image[-100:-10, 10:-10] = 1
-        image[10:-10, -100:-10] = 1
+        image[10:-10, 10:100] = 2
+        image[-100:-10, 10:-10] = 2
+        image[10:-10, -100:-10] = 2
 
         # foreground object 2
         rs, cs = draw.line(250, 150, 10, 280)
@@ -74,7 +75,7 @@ class TestSkeletonize:
             image[rs + i, cs] = 1
         rs, cs = draw.line(10, 150, 250, 280)
         for i in range(20):
-            image[rs + i, cs] = 1
+            image[rs + i, cs] = 3
 
         # foreground object 3
         ir, ic = np.indices(image.shape)
@@ -90,7 +91,7 @@ class TestSkeletonize:
         assert not np.any(blocks == 4)
 
     def test_lut_fix(self):
-        im = np.zeros((6, 6), np.uint8)
+        im = np.zeros((6, 6), dtype=bool)
         im[1, 2] = 1
         im[2, 2] = 1
         im[2, 3] = 1
@@ -108,7 +109,7 @@ class TestSkeletonize:
                 [0, 0, 0, 0, 0, 1],
                 [0, 0, 0, 0, 0, 0],
             ],
-            dtype=np.uint8,
+            dtype=bool,
         )
         assert np.all(result == expected)
 
@@ -120,22 +121,25 @@ class TestThin:
         ii = np.array(
             [
                 [0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 1, 1, 1, 1, 0],
+                [0, 1, 2, 3, 4, 5, 0],
                 [0, 1, 0, 1, 1, 1, 0],
                 [0, 1, 1, 1, 1, 1, 0],
-                [0, 1, 1, 1, 1, 1, 0],
+                [0, 6, 1, 1, 1, 1, 0],
                 [0, 1, 1, 1, 1, 1, 0],
                 [0, 0, 0, 0, 0, 0, 0],
             ],
-            dtype=np.uint8,
+            dtype=float,
         )
         return ii
 
     def test_zeros(self):
-        assert np.all(thin(np.zeros((10, 10))) == False)
+        image = np.zeros((10, 10), dtype=bool)
+        assert np.all(thin(image) == False)
 
-    def test_iter_1(self):
-        result = thin(self.input_image, 1).astype(np.uint8)
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_iter_1(self, dtype):
+        image = self.input_image.astype(dtype)
+        result = thin(image, 1).astype(bool)
         expected = np.array(
             [
                 [0, 0, 0, 0, 0, 0, 0],
@@ -146,12 +150,14 @@ class TestThin:
                 [0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0],
             ],
-            dtype=np.uint8,
+            dtype=bool,
         )
         assert_array_equal(result, expected)
 
-    def test_noiter(self):
-        result = thin(self.input_image).astype(np.uint8)
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_noiter(self, dtype):
+        image = self.input_image.astype(dtype)
+        result = thin(image).astype(bool)
         expected = np.array(
             [
                 [0, 0, 0, 0, 0, 0, 0],
@@ -162,12 +168,12 @@ class TestThin:
                 [0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0],
             ],
-            dtype=np.uint8,
+            dtype=bool,
         )
         assert_array_equal(result, expected)
 
     def test_baddim(self):
-        for ii in [np.zeros(3), np.zeros((3, 3, 3))]:
+        for ii in [np.zeros(3, dtype=bool), np.zeros((3, 3, 3), dtype=bool)]:
             with pytest.raises(ValueError):
                 thin(ii)
 
@@ -189,12 +195,13 @@ class TestMedialAxis:
         result = medial_axis(np.zeros((10, 10), bool), np.zeros((10, 10), bool))
         assert np.all(result == False)
 
-    def test_vertical_line(self):
+    @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_vertical_line(self, dtype):
         '''Test a thick vertical line, issue #3861'''
-        img = np.zeros((9, 9))
+        img = np.zeros((9, 9), dtype=dtype)
         img[:, 2] = 1
-        img[:, 3] = 1
-        img[:, 4] = 1
+        img[:, 3] = 2
+        img[:, 4] = 3
 
         expected = np.full(img.shape, False)
         expected[:, 3] = True
