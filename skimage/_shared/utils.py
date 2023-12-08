@@ -23,8 +23,8 @@ __all__ = [
 ]
 
 
-def _get_stack_rank(func):
-    """Return function rank in the call stack."""
+def _count_wrappers(func):
+    """Count the number of wrappers around `func`."""
     unwrapped = func
     count = 0
     while hasattr(unwrapped, "__wrapped__"):
@@ -49,7 +49,7 @@ def _warning_stacklevel(func):
         The stacklevel. Minimum of 2.
     """
     # Count number of wrappers around `func`
-    wrapped_count = _get_stack_rank(func)
+    wrapped_count = _count_wrappers(func)
 
     # Count number of total wrappers around global version of `func`
     module = sys.modules.get(func.__module__)
@@ -62,7 +62,7 @@ def _warning_stacklevel(func):
             f" may be a closure. Set stacklevel manually. ",
         ) from e
     else:
-        global_wrapped_count = _get_stack_rank(global_func)
+        global_wrapped_count = _count_wrappers(global_func)
 
     stacklevel = global_wrapped_count - wrapped_count + 1
     return max(stacklevel, 2)
@@ -71,7 +71,7 @@ def _warning_stacklevel(func):
 def _get_stack_length(func):
     """Return function call stack length."""
     _func = func.__globals__.get(func.__name__, func)
-    length = _get_stack_rank(_func)
+    length = _count_wrappers(_func)
     return length
 
 
@@ -122,7 +122,7 @@ class change_default_value(_DecoratorBaseClass):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -362,7 +362,7 @@ class remove_arg(_DecoratorBaseClass):
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -480,7 +480,7 @@ class deprecate_kwarg(_DecoratorBaseClass):
         self.deprecated_version = deprecated_version
 
     def __call__(self, func):
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -637,7 +637,7 @@ class deprecate_func(_DecoratorBaseClass):
             # Prepend space and make sure it closes with "."
             message += f" {self.hint.rstrip('.')}."
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
