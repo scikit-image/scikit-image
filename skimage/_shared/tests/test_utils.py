@@ -351,8 +351,8 @@ def test_deprecate_func():
     assert record[0].filename == __file__
 
 
-@deprecate_parameter('old1', start_version="0.10", stop_version='0.12')
-@deprecate_parameter('old0', start_version="0.10", stop_version='0.12')
+@deprecate_parameter("old1", start_version="0.10", stop_version="0.12")
+@deprecate_parameter("old0", start_version="0.10", stop_version="0.12")
 def _func_deprecated_params(arg0, old0=DEPRECATED, old1=DEPRECATED, arg1=None):
     """Expected docstring.
 
@@ -366,8 +366,8 @@ def _func_deprecated_params(arg0, old0=DEPRECATED, old1=DEPRECATED, arg1=None):
     return arg0, old0, old1, arg1
 
 
-@deprecate_parameter("old1", new_name="new0", start_version="0.10", stop_version='0.12')
-@deprecate_parameter("old0", new_name="new1", start_version="0.10", stop_version='0.12')
+@deprecate_parameter("old1", new_name="new0", start_version="0.10", stop_version="0.12")
+@deprecate_parameter("old0", new_name="new1", start_version="0.10", stop_version="0.12")
 def _func_replace_params(
     arg0, old0=DEPRECATED, old1=DEPRECATED, new0=None, new1=None, arg1=None
 ):
@@ -550,7 +550,7 @@ class Test_deprecate_parameter:
 
     def test_missing_DEPRECATED(self):
         decorate = deprecate_parameter(
-            'old', start_version="0.10", stop_version='0.12', stacklevel=2
+            "old", start_version="0.10", stop_version="0.12", stacklevel=2
         )
 
         def foo(arg0, old=None):
@@ -566,9 +566,9 @@ class Test_deprecate_parameter:
 
     def test_new_keyword_only(self):
         @deprecate_parameter(
-            'old',
-            new_name='new',
-            start_version='0.19',
+            "old",
+            new_name="new",
+            start_version="0.19",
             stop_version="0.21",
         )
         def foo(arg0, old=DEPRECATED, *, new=1, arg3=None):
@@ -616,14 +616,14 @@ class Test_deprecate_parameter:
     def test_wrong_param_name(self):
         with pytest.raises(ValueError, match="'old' is not in list"):
 
-            @deprecate_parameter("old", start_version="0.10", stop_version='0.12')
+            @deprecate_parameter("old", start_version="0.10", stop_version="0.12")
             def foo(arg0):
                 pass
 
         with pytest.raises(ValueError, match="'new' is not in list"):
 
             @deprecate_parameter(
-                "old", new_name="new", start_version="0.10", stop_version='0.12'
+                "old", new_name="new", start_version="0.10", stop_version="0.12"
             )
             def bar(arg0, old, arg1):
                 pass
@@ -640,8 +640,8 @@ class Test_deprecate_parameter:
 
     def test_stacklevel(self):
         @deprecate_parameter(
-            'old',
-            start_version='0.19',
+            "old",
+            start_version="0.19",
             stop_version="0.21",
         )
         def foo(arg0, old=DEPRECATED):
@@ -651,8 +651,8 @@ class Test_deprecate_parameter:
             foo(0, 1)
 
         @deprecate_parameter(
-            'old',
-            start_version='0.19',
+            "old",
+            start_version="0.19",
             stop_version="0.21",
             stacklevel=2,
         )
