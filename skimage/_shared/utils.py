@@ -25,21 +25,47 @@ __all__ = [
 
 def _get_stack_rank(func):
     """Return function rank in the call stack."""
-    if _is_wrapped(func):
-        return 1 + _get_stack_rank(func.__wrapped__)
-    else:
-        return 0
+    unwrapped = func
+    count = 0
+    while hasattr(unwrapped, "__wrapped__"):
+        unwrapped = unwrapped.__wrapped__
+        count += 1
+    return count
 
 
-def _is_wrapped(func):
-    return "__wrapped__" in dir(func)
+def _warning_stacklevel(func):
+    """Find stacklevel for a warning raised from a wrapper around `func`.
+
+    Try to determine the number of
+
+    Parameters
+    ----------
+    func : Callable
 
 
-def _full_stack_rank(func):
+    Returns
+    -------
+    stacklevel : int
+        The stacklevel. Minimum of 2.
+    """
+    # Count number of wrappers around `func`
+    wrapped_count = _get_stack_rank(func)
+
+    # Count number of total wrappers around global version of `func`
     module = sys.modules.get(func.__module__)
-    fully_wrapped_func = getattr(module, func.__name__)
-    wrapped_count = _get_stack_rank(fully_wrapped_func)
-    return wrapped_count
+    try:
+        for name in func.__qualname__.split("."):
+            global_func = getattr(module, name)
+    except AttributeError as e:
+        raise RuntimeError(
+            f"Could not access `{func.__qualname__}` in {module!r}, "
+            f" may be a closure. Set stacklevel manually. ",
+        ) from e
+    else:
+        global_wrapped_count = _get_stack_rank(global_func)
+
+    stacklevel = global_wrapped_count - wrapped_count + 1
+    return max(stacklevel, 2)
 
 
 def _get_stack_length(func):
@@ -156,6 +182,12 @@ class deprecate_parameter:
     modify_docstring : bool, optional
         If the wrapped function has a docstring, add the deprecated parameters
         to the "Other Parameters" section.
+    stacklevel : int, optional
+        This decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. If this fails, e.g. due to
+        decorating a closure, you can set the stacklevel manually. The
+        outermost decorator should have the stacklevel 2, the next inner one
+        the level 3, etc.
 
     Notes
     -----
@@ -169,15 +201,17 @@ class deprecate_parameter:
     --------
     >>> from skimage._shared.utils import deprecate_parameter, DEPRECATED
     >>> @deprecate_parameter(
-    ...     "b", new_name="c", start_version="0.1", stop_version="0.3",
+    ...     "b", new_name="c", start_version="0.1", stop_version="0.3"
     ... )
     ... def foo(a, b=DEPRECATED, *, c=None):
     ...     return a, c
 
-    >>> import warnings
-    >>> with warnings.catch_warnings() as record:
-    ...     foo(1, b=2)  # decorator reassigns value of `b` to `c` automatically
-    (1, 2)
+    Calling ``foo(1, b=2)``  will warn with::
+
+        FutureWarning: Parameter `b` is deprecated since version 0.1 and will
+        be removed in 0.3 (or later). To avoid this warning, please use the
+        parameter `c` instead. For more details, see the documentation of
+        `foo`.
     """
 
     DEPRECATED = DEPRECATED  # Make signal value accessible for convenience
@@ -206,6 +240,7 @@ class deprecate_parameter:
         template=None,
         new_name=None,
         modify_docstring=True,
+        stacklevel=None,
     ):
         self.deprecated_name = deprecated_name
         self.new_name = new_name
@@ -213,6 +248,7 @@ class deprecate_parameter:
         self.start_version = start_version
         self.stop_version = stop_version
         self.modify_docstring = modify_docstring
+        self.stacklevel = stacklevel
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
@@ -242,8 +278,6 @@ class deprecate_parameter:
             new_name=self.new_name,
         )
 
-        stack_rank = _get_stack_rank(func)
-
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
             deprecated_value = DEPRECATED
@@ -265,8 +299,14 @@ class deprecate_parameter:
                 new_value = kwargs[self.new_name]
 
             if deprecated_value is not DEPRECATED:
-                stacklevel = 1 + self.get_stack_length(func) - stack_rank
-                warnings.warn(warning_message, FutureWarning, stacklevel=stacklevel)
+                stacklevel = (
+                    self.stacklevel
+                    if self.stacklevel is not None
+                    else _warning_stacklevel(func)
+                )
+                warnings.warn(
+                    warning_message, category=FutureWarning, stacklevel=stacklevel
+                )
 
                 if new_value is not DEPRECATED:
                     raise ValueError(

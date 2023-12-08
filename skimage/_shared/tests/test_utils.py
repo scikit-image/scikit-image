@@ -630,3 +630,30 @@ class Test_deprecate_parameter:
         assert records[0].lineno == expected_lineno
         assert records[1].filename == __file__
         assert records[1].lineno == expected_lineno
+
+    def test_stacklevel(self):
+        @deprecate_parameter(
+            'old',
+            start_version='0.19',
+            stop_version="0.21",
+        )
+        def foo(arg0, old=DEPRECATED):
+            pass
+
+        with pytest.raises(RuntimeError, match="Set stacklevel manually"):
+            foo(0, 1)
+
+        @deprecate_parameter(
+            'old',
+            start_version='0.19',
+            stop_version="0.21",
+            stacklevel=2,
+        )
+        def bar(arg0, old=DEPRECATED):
+            pass
+
+        with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
+            bar(0, 1)
+            expected_lineno = inspect.currentframe().f_lineno - 1
+        assert records[0].lineno == expected_lineno
+        assert records[0].filename == __file__
