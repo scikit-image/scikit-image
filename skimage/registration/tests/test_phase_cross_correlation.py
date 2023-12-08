@@ -240,7 +240,8 @@ def test_disambiguate_empty_image():
         phase_cross_correlation(image, image * 0, disambiguate=True)
         expected_lineno = inspect.currentframe().f_lineno - 1
     # Assert correct stacklevel
-    assert (record[0].filename, record[0].lineno) == (__file__, expected_lineno)
+    assert record[0].filename == __file__
+    assert record[0].lineno == expected_lineno
 
 
 @pytest.mark.parametrize("return_error", [False, True, "always"])
