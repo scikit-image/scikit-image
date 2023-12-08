@@ -260,7 +260,7 @@ class deprecate_parameter:
 
         if parameters[self.deprecated_name].default is not DEPRECATED:
             raise RuntimeError(
-                f"Expected `{self.deprecated_name}` to have the value DEPRECATED "
+                f"Expected `{self.deprecated_name}` to have the value {DEPRECATED!r} "
                 f"to indicate its status in the rendered signature."
             )
 
@@ -405,11 +405,13 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
 
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
-        desc = [
-            f'Deprecated in favor of `{new_arg}`.',
-            '',
-            f'.. deprecated:: {deprecated_version}',
-        ]
+        desc = []
+        if new_arg is None:
+            desc.append(f'`{old_arg}` is deprecated.')
+        else:
+            desc.append(f'Deprecated in favor of `{new_arg}`.')
+
+        desc += ['', f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg, type='DEPRECATED', desc=desc)
         )

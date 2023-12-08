@@ -351,8 +351,8 @@ def test_deprecate_func():
     assert record[0].filename == __file__
 
 
-@deprecate_parameter('old0', start_version="0.10", stop_version='0.12')
 @deprecate_parameter('old1', start_version="0.10", stop_version='0.12')
+@deprecate_parameter('old0', start_version="0.10", stop_version='0.12')
 def _func_deprecated_params(arg0, old0=DEPRECATED, old1=DEPRECATED, arg1=None):
     """Expected docstring.
 
@@ -366,8 +366,8 @@ def _func_deprecated_params(arg0, old0=DEPRECATED, old1=DEPRECATED, arg1=None):
     return arg0, old0, old1, arg1
 
 
-@deprecate_parameter("old0", new_name="new1", start_version="0.10", stop_version='0.12')
 @deprecate_parameter("old1", new_name="new0", start_version="0.10", stop_version='0.12')
+@deprecate_parameter("old0", new_name="new1", start_version="0.10", stop_version='0.12')
 def _func_replace_params(
     arg0, old0=DEPRECATED, old1=DEPRECATED, new0=None, new1=None, arg1=None
 ):
@@ -503,7 +503,7 @@ class Test_deprecate_parameter:
                 None,
             )
 
-        with pytest.warns(FutureWarning, match=match) as record:
+        with pytest.warns(FutureWarning, match=match) as records:
             assert _func_replace_params(1, 2, 3) == (
                 1,
                 DEPRECATED,
@@ -512,9 +512,9 @@ class Test_deprecate_parameter:
                 2,
                 None,
             )
-        assert len(record) == 2
-        assert "`old0` is deprecated" in record[0].message.args[0]
-        assert "`old1` is deprecated" in record[1].message.args[0]
+        assert len(records) == 2
+        assert "`old1` is deprecated" in records[0].message.args[0]
+        assert "`old0` is deprecated" in records[1].message.args[0]
 
         with pytest.warns(FutureWarning, match=match):
             assert _func_replace_params(1, old0=2) == (
@@ -549,12 +549,14 @@ class Test_deprecate_parameter:
         assert len(record) == 0
 
     def test_missing_DEPRECATED(self):
-        decorate = deprecate_parameter('old', start_version="0.10", stop_version='0.12')
+        decorate = deprecate_parameter(
+            'old', start_version="0.10", stop_version='0.12', stacklevel=2
+        )
 
         def foo(arg0, old=None):
             return arg0, old
 
-        with pytest.raises(RuntimeError, match="Expected .* DEPRECATED"):
+        with pytest.raises(RuntimeError, match="Expected .* <DEPRECATED>"):
             decorate(foo)
 
         def bar(arg0, old=DEPRECATED):
@@ -585,26 +587,31 @@ class Test_deprecate_parameter:
         assert len(recorded) == 0
 
     def test_conflicting_old_and_new(self):
-        with pytest.raises(ValueError, match=".* avoid conflicting values"):
-            _func_replace_params(1, old0=2, new1=2)
-        with pytest.raises(ValueError, match=".* avoid conflicting values"):
-            _func_replace_params(1, old1=2, new0=2)
-        with pytest.raises(ValueError, match=".* avoid conflicting values"):
-            _func_replace_params(1, old0=1, old1=1, new0=1, new1=1)
+        match = r".*`old[0,1]` is deprecated"
+        with pytest.warns(FutureWarning, match=match):
+            with pytest.raises(ValueError, match=".* avoid conflicting values"):
+                _func_replace_params(1, old0=2, new1=2)
+
+        with pytest.warns(FutureWarning, match=match):
+            with pytest.raises(ValueError, match=".* avoid conflicting values"):
+                _func_replace_params(1, old1=2, new0=2)
+
+        with pytest.warns(FutureWarning, match=match):
+            with pytest.raises(ValueError, match=".* avoid conflicting values"):
+                _func_replace_params(1, old0=1, old1=1, new0=1, new1=1)
 
     def test_wrong_call_signature(self):
         """Check that normal errors for faulty calls are unchanged."""
-
-        @deprecate_parameter('old', start_version="0.10", stop_version='0.12')
-        def foo(arg0, old=DEPRECATED, arg2=None):
-            return arg0, old, arg2
-
         with pytest.raises(
             TypeError, match=r".* required positional argument\: 'arg0'"
         ):
-            foo()
-        with pytest.raises(TypeError, match=".* multiple values for argument 'old'"):
-            foo(1, 2, old=3)
+            _func_replace_params()
+
+        with pytest.warns(FutureWarning, match=r".*`old[0,1]` is deprecated"):
+            with pytest.raises(
+                TypeError, match=".* multiple values for argument 'old0'"
+            ):
+                _func_deprecated_params(1, 2, old0=2)
 
     def test_wrong_param_name(self):
         with pytest.raises(ValueError, match="'old' is not in list"):
