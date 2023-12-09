@@ -241,9 +241,9 @@ def test_disambiguate_empty_image():
             image, image * 0, disambiguate=True
         )
         expected_lineno = inspect.currentframe().f_lineno - 3
-    np.testing.assert_array_equal(shift, np.array([0., 0.]))
+    np.testing.assert_array_equal(shift, np.array([0.0, 0.0]))
     assert np.isnan(error)
-    assert phasediff == 0.
+    assert phasediff == 0.0
     # Assert correct stacklevel
     assert record[0].filename == __file__
     assert record[0].lineno == expected_lineno
