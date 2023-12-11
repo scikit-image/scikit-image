@@ -1,0 +1,20 @@
+# Copied from NumPy https://github.com/numpy/numpy/pull/24603
+# https://github.com/numpy/numpy/blob/328a9a488c3a146497be704d2cee2f9134e43b5b/tools/ci/emscripten.meson.cross
+
+[binaries]
+c = 'emcc'
+cpp = 'em++'
+ar = 'emar'
+fortran = '/usr/bin/gfortran'
+
+cmake = ['emmake', 'cmake']
+sdl2-config = ['emconfigure', 'sdl2-config']
+
+[host_machine]
+system = 'emscripten'
+cpu_family = 'wasm32'
+cpu = 'wasm'
+endian = 'little'
+
+[properties]
+longdouble_format = 'IEEE_QUAD_LE'
