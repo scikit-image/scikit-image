@@ -181,7 +181,8 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     if max_slice is None:
         warnings.warn(
             f"Could not determine real-space shift for the periodic shift {shift!r} "
-            f"as requested with `disambiguate=True`", stacklevel=4
+            f"as requested with `disambiguate=True`",
+            stacklevel=4,
         )
         return shift
     real_shift_acc = []
