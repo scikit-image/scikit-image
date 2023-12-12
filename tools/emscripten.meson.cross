@@ -15,6 +15,3 @@ system = 'emscripten'
 cpu_family = 'wasm32'
 cpu = 'wasm'
 endian = 'little'
-
-[properties]
-longdouble_format = 'IEEE_QUAD_LE'

@@ -64,7 +64,7 @@ jobs:
           # tl;dr this needs some work, and it seems like cross-compilation is
           # hard because Pyodide doesn't ship its own Python interpreter that
           # we can actually target during a direct cross build.
-          python -m build --wheel -Csetup-args=--cross-file=$PWD/tools/emscripten.meson.cross -Csetup-args=-Dallow-noblas=true
+          python -m build --wheel -Csetup-args=--cross-file=$PWD/tools/emscripten.meson.cross
 
       - name: set up node
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
@@ -82,4 +82,4 @@ jobs:
         run: |
           source .venv-pyodide/bin/activate
           cd ..
-          pytest --pyargs numpy -m "not slow"
+          pytest --doctest-modules --cov=skimage --showlocals --pyargs skimage
