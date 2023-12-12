@@ -180,7 +180,8 @@ def _disambiguate_shift(reference_image, moving_image, shift):
             max_slice = test_slice
     if max_slice is None:
         warnings.warn(
-            'Phase cross correlation shift disambiguation inconclusive', stacklevel=4
+            f"Could not determine real-space shift for the periodic shift {shift!r} "
+            f"as requested with `disambiguate=True`", stacklevel=4
         )
         return shift
     real_shift_acc = []
