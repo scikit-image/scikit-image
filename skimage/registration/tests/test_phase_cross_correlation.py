@@ -235,7 +235,7 @@ def test_disambiguate_zero_shift(disambiguate):
 def test_disambiguate_empty_image():
     """When the image is empty, disambiguation becomes degenerate."""
     image = camera()
-    regex = "shift disambiguation inconclusive"
+    regex = "Could not determine real-space shift"
     with pytest.warns(UserWarning, match=regex) as record:
         shift, error, phasediff = phase_cross_correlation(
             image, image * 0, disambiguate=True
