@@ -18,9 +18,6 @@ def _map_array(np_anyint[:] inarr, np_numeric[:] outarr,
         lut[inval[i]] = outval[i]
     # apply the map to the array
     n_array = inarr.shape[0]
-    # The prange option gave some compilation warnings
-    #  "Unsigned index type not allowed before OpenMP 3.0"
-    # and didn't seem to be any faster
     for i in prange(n_array, nogil=True): #
         it = lut.find(inarr[i])
         if it != lut.end():
