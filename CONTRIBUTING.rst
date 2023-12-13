@@ -115,19 +115,33 @@ For a more detailed discussion, read these :doc:`detailed documents
 
    * A pull request must be approved by two core team members before merging.
 
-5. Document changes
+.. _documenting-changes:
 
-   If your change introduces any API modifications, please update
-   ``doc/release/release_dev.rst``.
+5. Document changes
 
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.
 
+   If your change introduces any API modifications, or impacts users directly
+   (e.g. bug fixes, performance improvements) please describe the change inside
+   the pull request description inside a code block which is compiled by
+   `changelist <https://github.com/scientific-python/changelist>`_ into the
+   release notes::
+
+       ```release-note
+       One or two sentences describing the change in imperative mood.
+       ```
+
+   For trivial changes that are adequately summarized by the PR title, this
+   block can be left empty (``...``). If a public function, class or parameter
+   is referenced the the full import path should be used to do so, e.g.
+   ``skimage.submodule.function``. Refer to :doc:`/release_notes/index` for
+   examples.
+
 .. note::
 
-   To reviewers: if it is not obvious from the PR description, add a short
-   explanation of what a branch did to the merge message and, if closing a
-   bug, also add "Closes #123" where 123 is the issue number.
+   To reviewers: if it is not obvious from the PR description, make sure that
+   the reason and context for a change are described in the merge message.
 
 
 Divergence between ``upstream main`` and your feature branch

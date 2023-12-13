@@ -18,8 +18,9 @@
 
 ## Release note
 
-Summarize the introduced changes in the code block below in one or a few sentences. The
-summary will be included in the next release notes automatically:
+We use [changelist](https://github.com/scientific-python/changelist) to
+compile each pull request into an item in our release notes. Please refer to
+[documenting changes](https://scikit-image.org/docs/stable/development/contribute.html#documenting-changes) and past [release notes](https://scikit-image.org/docs/stable/release_notes/index.html) for guidance and examples.
 
 ```release-note
 ...
