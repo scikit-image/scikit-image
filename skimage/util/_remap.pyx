@@ -22,4 +22,4 @@ def _map_array(np_anyint[:] inarr, np_numeric[:] outarr,
     for i in prange(n_array):
         it = lut.find(inarr[i])
         if it != lut.end():
-            outarr[i] = dereference(it).second 
+            outarr[i] = dereference(it).second
