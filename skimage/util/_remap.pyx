@@ -1,5 +1,8 @@
 from libcpp.unordered_map cimport unordered_map
 cimport cython
+from cython.operator import dereference
+from cython.parallel import prange
+
 from .._shared.fused_numerics cimport np_numeric, np_anyint
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -18,8 +21,7 @@ def _map_array(np_anyint[:] inarr, np_numeric[:] outarr,
     # The prange option gave some compilation warnings
     #  "Unsigned index type not allowed before OpenMP 3.0"
     # and didn't seem to be any faster
-    # for i in prange(n_array, nogil=True): #
-    for i in prange(n_array):
+    for i in prange(n_array, nogil=True): #
         it = lut.find(inarr[i])
         if it != lut.end():
             outarr[i] = dereference(it).second
