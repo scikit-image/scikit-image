@@ -20,6 +20,18 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     -------
     out : array, same shape as `input_arr`
         The array of mapped values.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> ski.util.map_array(
+    ...    input_arr=np.array([[0, 2, 2, 0], [3, 4, 5, 0]]),
+    ...    input_vals=np.array([1, 2, 3, 4, 6]),
+    ...    output_vals=np.array([6, 7, 8, 9, 10]),
+    ... )
+    array([[0, 7, 7, 0],
+           [8, 9, 0, 0]])
     """
     from ._remap import _map_array
 
