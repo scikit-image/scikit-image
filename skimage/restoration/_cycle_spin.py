@@ -1,5 +1,8 @@
+import typing as ty
 from itertools import product
+
 import numpy as np
+from numpy.typing import ArrayLike
 from .._shared import utils
 from .._shared.utils import warn
 
@@ -11,7 +14,12 @@ except ImportError:
     dask_available = False
 
 
-def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
+def _generate_shifts(
+    ndim: int,
+    multichannel: bool,
+    max_shifts: int | tuple[int, ...],
+    shift_steps: int | tuple[int, ...] = 1,
+) -> product[tuple[int, ...]]:
     """Returns all combinations of shifts in n dimensions over the specified
     max_shifts and step sizes.
 
@@ -22,14 +30,14 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
     """
     mc = int(multichannel)
-    if np.isscalar(max_shifts):
+    if isinstance(max_shifts, int):
         max_shifts = (max_shifts,) * (ndim - mc) + (0,) * mc
     elif multichannel and len(max_shifts) == ndim - 1:
         max_shifts = tuple(max_shifts) + (0,)
     elif len(max_shifts) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
-    if np.isscalar(shift_steps):
+    if isinstance(shift_steps, int):
         shift_steps = (shift_steps,) * (ndim - mc) + (1,) * mc
     elif multichannel and len(shift_steps) == ndim - 1:
         shift_steps = tuple(shift_steps) + (1,)
@@ -49,15 +57,15 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
 @utils.channel_as_last_axis()
 def cycle_spin(
-    x,
-    func,
-    max_shifts,
-    shift_steps=1,
-    num_workers=None,
-    func_kw=None,
+    x: ArrayLike,
+    func: ty.Callable,
+    max_shifts: int | tuple[int, ...],
+    shift_steps: int | tuple[int, ...] = 1,
+    num_workers: int = None,
+    func_kw: dict = None,
     *,
-    channel_axis=None,
-):
+    channel_axis: int = None,
+) -> np.ndarray:
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
@@ -128,7 +136,6 @@ def cycle_spin(
     """
     if func_kw is None:
         func_kw = {}
-
     x = np.asanyarray(x)
     multichannel = channel_axis is not None
     all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts, shift_steps)

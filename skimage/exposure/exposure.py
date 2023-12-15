@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-DTYPE_RANGE = dtype_range.copy()
+DTYPE_RANGE: dict = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
 DTYPE_RANGE.update(
     {

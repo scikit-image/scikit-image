@@ -37,8 +37,8 @@ _integer_types = (
     np.longlong,
     np.ulonglong,
 )  # 64 bits
-_integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max) for t in _integer_types}
-dtype_range = {
+_integer_ranges: dict = {t: (np.iinfo(t).min, np.iinfo(t).max) for t in _integer_types}
+dtype_range: dict = {
     bool: (False, True),
     np.bool_: (False, True),
     float: (-1, 1),

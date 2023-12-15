@@ -3,7 +3,8 @@ import numpy as np
 from scipy.sparse import linalg
 
 from .._shared.utils import deprecate_kwarg
-from . import _ncut, _ncut_cy
+from . import _ncut
+from . import _ncut_cy  # type: ignore
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):

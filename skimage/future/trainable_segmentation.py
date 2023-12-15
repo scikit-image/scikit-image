@@ -8,7 +8,7 @@ try:
 except ImportError:
     has_sklearn = False
 
-    class NotFittedError(Exception):
+    class NotFittedError(Exception):  # type: ignore
         pass
 
 

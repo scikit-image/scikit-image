@@ -24,7 +24,7 @@ References
 """
 
 from ..._shared.utils import check_nD
-from . import bilateral_cy
+from . import bilateral_cy  # type: ignore
 from .generic import _preprocess_input
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
