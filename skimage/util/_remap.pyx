@@ -22,3 +22,5 @@ def _map_array(np_anyint[:] inarr, np_numeric[:] outarr,
         it = lut.find(inarr[i])
         if it != lut.end():
             outarr[i] = dereference(it).second
+        else:
+            outarr[i] = 0

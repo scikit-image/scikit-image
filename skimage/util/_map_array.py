@@ -44,7 +44,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     # arr.reshape(-1) may be preferable."
     input_arr = input_arr.reshape(-1)
     if out is None:
-        out = np.zeros(orig_shape, dtype=output_vals.dtype)
+        out = np.empty(orig_shape, dtype=output_vals.dtype)
     elif out.shape != orig_shape:
         raise ValueError(
             'If out array is provided, it should have the same shape as '
