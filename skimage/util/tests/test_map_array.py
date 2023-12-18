@@ -37,6 +37,7 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
     assert result.dtype == dtype_out
     if out_array:
         np.testing.assert_array_equal(out, desired)
+        assert out is result
 
 
 def test_map_array_incorrect_output_shape():

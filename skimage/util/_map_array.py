@@ -21,6 +21,11 @@ def map_array(input_arr, input_vals, output_vals, out=None):
     out : array, same shape as `input_arr`
         The array of mapped values.
 
+    Notes
+    -----
+    If `input_arr` contains values that aren't covered by `input_vals`, they
+    are set to 0.
+
     Examples
     --------
     >>> import numpy as np
