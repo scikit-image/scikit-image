@@ -29,7 +29,7 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
     desired = np.array([0, 7, 0, 8, 9, 0, 0], dtype=dtype_out)
     out = None
     if out_array:
-        out = np.random.randint(2**23, size=desired.shape).astype(dtype_out)
+        out = np.full(desired.shape, 11, dtype=dtype_out)
     result = map_array(
         input_arr=input_arr, input_vals=input_vals, output_vals=output_vals, out=out
     )
