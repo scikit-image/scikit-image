@@ -178,6 +178,13 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
+    if max_slice is None:
+        warnings.warn(
+            f"Could not determine real-space shift for periodic shift {shift!r} "
+            f"as requested by `disambiguate=True` (disambiguation is degenerate).",
+            stacklevel=4,
+        )
+        return shift
     real_shift_acc = []
     for sl, pos_shift, neg_shift in zip(max_slice, positive_shift, negative_shift):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
