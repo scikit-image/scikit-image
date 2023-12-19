@@ -10,11 +10,13 @@ from packaging import version as _version
 from apigen import ApiDocWriter
 
 
-#*****************************************************************************
+# *****************************************************************************
+
 
 def abort(error):
     print(f'*WARNING* API documentation not generated: {error}')
     exit()
+
 
 if __name__ == '__main__':
     package = 'skimage'

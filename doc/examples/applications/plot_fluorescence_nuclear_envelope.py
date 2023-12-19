@@ -35,9 +35,7 @@ import plotly.io
 import plotly.express as px
 from scipy import ndimage as ndi
 
-from skimage import (
-    filters, measure, morphology, segmentation
-)
+from skimage import filters, measure, morphology, segmentation
 from skimage.data import protein_transport
 
 
@@ -60,7 +58,7 @@ fig = px.imshow(
     zmin=vmin,
     zmax=vmax,
     binary_string=True,
-    labels={'animation_frame': 'time point', 'facet_col': 'channel'}
+    labels={'animation_frame': 'time point', 'facet_col': 'channel'},
 )
 plotly.io.show(fig)
 
@@ -173,7 +171,7 @@ fig.tight_layout()
 props = measure.regionprops_table(
     mask.astype(np.uint8),
     intensity_image=image_t_0_channel_1,
-    properties=('label', 'area', 'intensity_mean')
+    properties=('label', 'area', 'intensity_mean'),
 )
 
 #####################################################################
@@ -275,12 +273,13 @@ mask_sequence *= labels[:, np.newaxis, np.newaxis]
 props = measure.regionprops_table(
     mask_sequence,
     intensity_image=image_sequence[:, 1, :, :],
-    properties=('label', 'area', 'intensity_mean')
+    properties=('label', 'area', 'intensity_mean'),
 )
 np.testing.assert_array_equal(props['label'], np.arange(n_z) + 1)
 
-fluorescence_change = [props['area'][i] * props['intensity_mean'][i]
-                       for i in range(n_z)]
+fluorescence_change = [
+    props['area'][i] * props['intensity_mean'][i] for i in range(n_z)
+]
 
 fluorescence_change /= fluorescence_change[0]  # normalization
 

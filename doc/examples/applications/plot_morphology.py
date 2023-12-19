@@ -38,9 +38,7 @@ ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 
 def plot_comparison(original, filtered, filter_name):
-
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True,
-                                   sharey=True)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')
@@ -59,8 +57,7 @@ def plot_comparison(original, filtered, filter_name):
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
-from skimage.morphology import (erosion, dilation, opening, closing,  # noqa
-                                white_tophat)
+from skimage.morphology import erosion, dilation, opening, closing, white_tophat  # noqa
 from skimage.morphology import black_tophat, skeletonize, convex_hull_image  # noqa
 from skimage.morphology import disk  # noqa
 

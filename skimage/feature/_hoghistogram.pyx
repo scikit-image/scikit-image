@@ -16,7 +16,7 @@ cdef np_floats cell_hog(np_floats[:, ::1] magnitude,
                         int column_index, int row_index,
                         int size_columns, int size_rows,
                         int range_rows_start, int range_rows_stop,
-                        int range_columns_start, int range_columns_stop) nogil:
+                        int range_columns_start, int range_columns_stop) noexcept nogil:
     """Calculation of the cell's HOG value
 
     Parameters

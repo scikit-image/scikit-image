@@ -38,7 +38,7 @@ def _hough_circle(cnp.ndarray img,
 
     Returns
     -------
-    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+    H : ndarray, shape (radius index, M + 2R, N + 2R)
         Hough transform accumulator for each radius.
         R designates the larger radius if full_output is True.
         Otherwise, R = 0.
@@ -257,7 +257,7 @@ def _hough_line(cnp.ndarray img,
 
     Returns
     -------
-    H : 2-D ndarray of uint64
+    H : (P, Q) ndarray of uint64
         Hough transform accumulator.
     theta : ndarray
         Angles at which the transform was computed, in radians.
@@ -347,7 +347,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     line_gap : int
         Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggressively.
-    theta : 1D ndarray, dtype='float64'
+    theta : (K,) ndarray of float64
         Angles at which to compute the transform, in radians.
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.
@@ -357,8 +357,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     Returns
     -------
     lines : list
-      List of lines identified, lines in format ((x0, y0), (x1, y1)),
-      indicating line start and end.
+        List of lines identified, lines in format ((x0, y0), (x1, y1)),
+        indicating line start and end.
 
     References
     ----------

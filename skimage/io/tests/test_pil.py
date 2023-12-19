@@ -8,17 +8,21 @@ from PIL import Image
 from skimage._shared import testing
 from skimage._shared._tempfile import temporary_file
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import (assert_allclose,
-                                     assert_array_almost_equal,
-                                     assert_array_equal, assert_equal,
-                                     color_check, fetch, mono_check)
+from skimage._shared.testing import (
+    assert_allclose,
+    assert_array_almost_equal,
+    assert_array_equal,
+    assert_equal,
+    color_check,
+    fetch,
+    mono_check,
+)
 from skimage.metrics import structural_similarity
 
 from ... import img_as_float
 from ...color import rgb2lab
 from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
-from .._plugins.pil_plugin import (_palette_is_grayscale, ndarray_to_pil,
-                                   pil_to_ndarray)
+from .._plugins.pil_plugin import _palette_is_grayscale, ndarray_to_pil, pil_to_ndarray
 
 
 @pytest.fixture(autouse=True)
@@ -44,7 +48,7 @@ def test_png_round_trip():
     imsave(fname, I)
     Ip = img_as_float(imread(fname))
     os.remove(fname)
-    assert np.sum(np.abs(Ip-I)) < 1e-3
+    assert np.sum(np.abs(Ip - I)) < 1e-3
 
 
 def test_imread_as_gray():
@@ -93,21 +97,32 @@ def test_imread_palette():
 def test_imread_index_png_with_alpha():
     # The file `foo3x5x4indexed.png` was created with this array
     # (3x5 is (height)x(width)):
-    dfoo = np.array([[[127, 0, 255, 255],
-                      [127, 0, 255, 255],
-                      [127, 0, 255, 255],
-                      [127, 0, 255, 255],
-                      [127, 0, 255, 255]],
-                     [[192, 192, 255, 0],
-                      [192, 192, 255, 0],
-                      [0, 0, 255, 0],
-                      [0, 0, 255, 0],
-                      [0, 0, 255, 0]],
-                     [[0, 31, 255, 255],
-                      [0, 31, 255, 255],
-                      [0, 31, 255, 255],
-                      [0, 31, 255, 255],
-                      [0, 31, 255, 255]]], dtype=np.uint8)
+    dfoo = np.array(
+        [
+            [
+                [127, 0, 255, 255],
+                [127, 0, 255, 255],
+                [127, 0, 255, 255],
+                [127, 0, 255, 255],
+                [127, 0, 255, 255],
+            ],
+            [
+                [192, 192, 255, 0],
+                [192, 192, 255, 0],
+                [0, 0, 255, 0],
+                [0, 0, 255, 0],
+                [0, 0, 255, 0],
+            ],
+            [
+                [0, 31, 255, 255],
+                [0, 31, 255, 255],
+                [0, 31, 255, 255],
+                [0, 31, 255, 255],
+                [0, 31, 255, 255],
+            ],
+        ],
+        dtype=np.uint8,
+    )
     img = imread(fetch('data/foo3x5x4indexed.png'))
     assert_array_equal(img, dfoo)
 
@@ -145,8 +160,8 @@ def test_jpg_quality_arg():
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
         sim = structural_similarity(
-            chessboard, im,
-            data_range=chessboard.max() - chessboard.min())
+            chessboard, im, data_range=chessboard.max() - chessboard.min()
+        )
         assert sim > 0.99
 
 
@@ -178,12 +193,10 @@ class TestSave:
                 x = np.ones(shape, dtype=dtype) * np.random.rand(*shape)
 
                 if np.issubdtype(dtype, np.floating):
-                    yield (self.verify_roundtrip, dtype, x,
-                           roundtrip_function(x), 255)
+                    yield (self.verify_roundtrip, dtype, x, roundtrip_function(x), 255)
                 else:
                     x = (x * 255).astype(dtype)
-                    yield (self.verify_roundtrip, dtype, x,
-                           roundtrip_function(x))
+                    yield (self.verify_roundtrip, dtype, x, roundtrip_function(x))
 
     def test_imsave_roundtrip_file(self):
         self.verify_imsave_roundtrip(self.roundtrip_file)
@@ -228,8 +241,7 @@ def test_imsave_boolean_input():
     s = BytesIO()
 
     # save to file-like object
-    with expected_warnings(
-            ['is a boolean image: setting True to 255 and False to 0']):
+    with expected_warnings(['is a boolean image: setting True to 255 and False to 0']):
         imsave(s, image)
 
     # read from file-like object
@@ -262,8 +274,7 @@ def test_all_mono():
 def test_multi_page_gif():
     img = imread(fetch('data/no_time_for_that_tiny.gif'))
     assert img.shape == (24, 25, 14, 3), img.shape
-    img2 = imread(fetch('data/no_time_for_that_tiny.gif'),
-                  img_num=5)
+    img2 = imread(fetch('data/no_time_for_that_tiny.gif'), img_num=5)
     assert img2.shape == (25, 14, 3)
     assert_allclose(img[5], img2)
 
@@ -291,8 +302,7 @@ def test_cmyk():
     for i in range(3):
         newi = np.ascontiguousarray(new_lab[:, :, i])
         refi = np.ascontiguousarray(ref_lab[:, :, i])
-        sim = structural_similarity(refi, newi,
-                                    data_range=refi.max() - refi.min())
+        sim = structural_similarity(refi, newi, data_range=refi.max() - refi.min())
         assert sim > 0.99
 
 

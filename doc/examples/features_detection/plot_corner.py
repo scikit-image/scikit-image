@@ -18,10 +18,8 @@ from skimage.transform import warp, AffineTransform
 from skimage.draw import ellipse
 
 # Sheared checkerboard
-tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7,
-                        translation=(110, 30))
-image = warp(data.checkerboard()[:90, :90], tform.inverse,
-             output_shape=(200, 310))
+tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7, translation=(110, 30))
+image = warp(data.checkerboard()[:90, :90], tform.inverse, output_shape=(200, 310))
 # Ellipse
 rr, cc = ellipse(160, 175, 10, 100)
 image[rr, cc] = 1
@@ -34,8 +32,9 @@ coords_subpix = corner_subpix(image, coords, window_size=13)
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap=plt.cm.gray)
-ax.plot(coords[:, 1], coords[:, 0], color='cyan', marker='o',
-        linestyle='None', markersize=6)
+ax.plot(
+    coords[:, 1], coords[:, 0], color='cyan', marker='o', linestyle='None', markersize=6
+)
 ax.plot(coords_subpix[:, 1], coords_subpix[:, 0], '+r', markersize=15)
 ax.axis((0, 310, 200, 0))
 plt.show()

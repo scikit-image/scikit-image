@@ -87,6 +87,7 @@ def as_gray(image_filter, image, *args, **kwargs):
     gray_image = rgb2gray(image)
     return image_filter(gray_image, *args, **kwargs)
 
+
 ######################################################################
 # It's important to create a signature that uses ``*args`` and ``**kwargs``
 # to pass arguments along to the filter so that the decorated function is
