@@ -7,8 +7,8 @@ Thin-plate splines (TPS) refer to a method for interpolating data [1]_.
 In an image context, we use a 2D generalization of TPS, i.e., a two-dimensional
 simulation of a 1D cubic spline, which is the solution of the biharmonic equation [2]_.
 According to [3]_, the basic solution of the biharmonic function was expanded.
-Given corresponding source and target control points, TPS is used to transform a space.
-In this case our space is a 2D image.
+Given pairs of source and target control points, TPS is used to transform a space,
+which, in our case, is a 2D image.
 
 This script shows how to use the Thine Plate Spine Transformation for
 image warping.
@@ -29,10 +29,10 @@ For further information on TPS Transformation, see:
 Image Deformation
 =================
 
-In this example we will see how to use the thin plates spline interpolation to deform an image.
-To deform the image, the displacement of every pixel is needed.
-In our image, we define 6 source and destination points labelled 1-6: 1-4 in the image
-corners, 5 near the smile corner and 6 in an eye. At the corners, there are no
+In this example, we use the TPS interpolation to deform an image.
+Deforming an image implies displacing each pixel in it.
+In our image, we define 6 source and destination points labelled "1-6": "1-4" in the image
+corners, "5" near the smile corner and "6" in an eye. At the corners, there are no
 displacements. The smile corner moved upward and the eye position moved down.
 
 Thin Plate Splines provides a very handy interpolator for image deformation.
@@ -95,8 +95,8 @@ plt.show()
 
 ######################################################################
 #
-# Interpolation
-# =============
+# Derive an interpolation function
+# ================================
 # In this example thin-plate spline is applied to each source and target
 # coordinate to derive an interpolation function and coefficients for
 # each target point. These coefficients are then used to transform an arbitrary
@@ -109,10 +109,10 @@ import skimage as ski
 samp = np.linspace(-2, 2, 4)
 xx, yy = np.meshgrid(samp, samp)
 
-# Make source points
+# Create source points
 source_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
-# Make target points
+# Create target points
 yy[:, [0, 3]] *= 2
 target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
@@ -122,25 +122,25 @@ trans = ski.transform.TpsTransform()
 trans.estimate(source_xy, target_xy)
 
 
-# Make another arbitiary point
+# Create another arbitrary point
 samp2 = np.linspace(-1.8, 1.8, 10)
 test_xy = np.tile(samp2, [2, 1]).T
 
-# Estimate transformed points from given sets of source and targets points.
+# Estimate transformed points from given sets of source and targets points
 transformed_xy = trans(test_xy)
 
-fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(8, 3))
+fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(8, 3))
 
 ax0.scatter(source_xy[:, 0], source_xy[:, 1], label='Source Points')
-ax0.scatter(test_xy[:, 0], test_xy[:, 1], c="orange", label='Test Points')
-ax0.legend(loc="upper center")
+ax0.scatter(test_xy[:, 0], test_xy[:, 1], c='orange', label='Test Points')
+ax0.legend(loc='upper center')
 ax0.set_title('Source and Test Coordinates')
 
 ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target Points')
 ax1.scatter(
     transformed_xy[:, 0],
     transformed_xy[:, 1],
-    c="orange",
+    c='orange',
     label='Transformed Test Points',
 )
 ax1.legend(loc="upper center")

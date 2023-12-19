@@ -4,7 +4,7 @@ from .._shared.utils import check_nD
 
 
 class TpsTransform:
-    """Thin plate splines transformation.
+    """Thin-plate splines transformation.
 
     Apply thin-plate spline transformation between a set of control points.
     It interpolates a surface that passes through each control point.
