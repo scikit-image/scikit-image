@@ -44,6 +44,7 @@ def all_warnings():
     # _warnings.py is on the critical import path.
     # Since this is a testing only function, we lazy import inspect.
     import inspect
+
     # Whenever a warning is triggered, Python adds a __warningregistry__
     # member to the *calling* module.  The exercise here is to find
     # and eradicate all those breadcrumbs that were left lying around.
@@ -108,8 +109,9 @@ def expected_warnings(matching):
 
     """
     if isinstance(matching, str):
-        raise ValueError('``matching`` should be a list of strings and not '
-                         'a string itself.')
+        raise ValueError(
+            '``matching`` should be a list of strings and not ' 'a string itself.'
+        )
 
     # Special case for disabling the context manager
     if matching is None:

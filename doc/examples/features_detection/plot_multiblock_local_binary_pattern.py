@@ -56,8 +56,7 @@ int_img = integral_image(test_img)
 
 lbp_code = multiblock_lbp(int_img, 0, 0, 90, 90)
 
-img = draw_multiblock_lbp(test_img, 0, 0, 90, 90,
-                          lbp_code=lbp_code, alpha=0.5)
+img = draw_multiblock_lbp(test_img, 0, 0, 90, 90, lbp_code=lbp_code, alpha=0.5)
 
 
 plt.imshow(img)

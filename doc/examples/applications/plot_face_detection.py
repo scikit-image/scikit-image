@@ -76,18 +76,15 @@ detector = Cascade(trained_file)
 
 img = data.astronaut()
 
-detected = detector.detect_multi_scale(img=img,
-                                       scale_factor=1.2,
-                                       step_ratio=1,
-                                       min_size=(60, 60),
-                                       max_size=(123, 123))
+detected = detector.detect_multi_scale(
+    img=img, scale_factor=1.2, step_ratio=1, min_size=(60, 60), max_size=(123, 123)
+)
 
 plt.imshow(img)
 img_desc = plt.gca()
 plt.set_cmap('gray')
 
 for patch in detected:
-
     img_desc.add_patch(
         patches.Rectangle(
             (patch['c'], patch['r']),
@@ -95,7 +92,7 @@ for patch in detected:
             patch['height'],
             fill=False,
             color='r',
-            linewidth=2
+            linewidth=2,
         )
     )
 

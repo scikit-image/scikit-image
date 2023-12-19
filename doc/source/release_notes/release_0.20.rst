@@ -24,7 +24,7 @@ This release completes the transition to a more flexible
 includes several other deprecations that make the API more consistent and
 expressive.
 
-Finally, in preparation for the removal of `distutils` in the upcoming
+Finally, in preparation for the removal of ``distutils`` in the upcoming
 Python 3.12 release, we replaced our build system with `meson` and a
 static `pyproject.toml` specification.
 

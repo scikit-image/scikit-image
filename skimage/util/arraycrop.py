@@ -64,8 +64,7 @@ def crop(ar, crop_width, copy=False, order='K'):
             f'a single pair, or a single integer'
         )
 
-    slices = tuple(slice(a, ar.shape[i] - b)
-                   for i, (a, b) in enumerate(crops))
+    slices = tuple(slice(a, ar.shape[i] - b) for i, (a, b) in enumerate(crops))
     if copy:
         cropped = np.array(ar[slices], order=order, copy=True)
     else:

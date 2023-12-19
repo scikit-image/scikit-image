@@ -35,8 +35,7 @@ original = img_as_float(data.chelsea()[100:250, 50:300])
 sigma = 0.155
 noisy = random_noise(original, var=sigma**2)
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4),
-                       sharex=False, sharey=False)
+fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(10, 4), sharex=False, sharey=False)
 ax = ax.ravel()
 
 psnr_noisy = peak_signal_noise_ratio(original, noisy)
@@ -51,23 +50,27 @@ ax[0].set_title(f'Noisy\nPSNR={psnr_noisy:0.4g}')
 # max_shift = 3 -> shifts of (0, 1, 2, 3) along each axis
 # etc...
 
-denoise_kwargs = dict(channel_axis=-1, convert2ycbcr=True, wavelet='db1',
-                      rescale_sigma=True)
+denoise_kwargs = dict(
+    channel_axis=-1, convert2ycbcr=True, wavelet='db1', rescale_sigma=True
+)
 
 all_psnr = []
 max_shifts = [0, 1, 3, 5]
 for n, s in enumerate(max_shifts):
-    im_bayescs = cycle_spin(noisy, func=denoise_wavelet, max_shifts=s,
-                            func_kw=denoise_kwargs, channel_axis=-1)
-    ax[n+1].imshow(im_bayescs)
-    ax[n+1].axis('off')
+    im_bayescs = cycle_spin(
+        noisy,
+        func=denoise_wavelet,
+        max_shifts=s,
+        func_kw=denoise_kwargs,
+        channel_axis=-1,
+    )
+    ax[n + 1].imshow(im_bayescs)
+    ax[n + 1].axis('off')
     psnr = peak_signal_noise_ratio(original, im_bayescs)
     if s == 0:
-        ax[n+1].set_title(
-            f'Denoised: no cycle shifts\nPSNR={psnr:0.4g}')
+        ax[n + 1].set_title(f'Denoised: no cycle shifts\nPSNR={psnr:0.4g}')
     else:
-        ax[n+1].set_title(
-            f'Denoised: {s+1}x{s+1} shifts\nPSNR={psnr:0.4g}')
+        ax[n + 1].set_title(f'Denoised: {s+1}x{s+1} shifts\nPSNR={psnr:0.4g}')
     all_psnr.append(psnr)
 
 # plot PSNR as a function of the degree of cycle shifting
@@ -79,12 +82,17 @@ plt.subplots_adjust(wspace=0.35, hspace=0.35)
 
 # Annotate with a cyan arrow on the 6x6 case vs. no cycle shift case to
 # illustrate a region with reduced block-like artifact with cycle shifting
-arrowprops = dict(arrowstyle="simple,tail_width=0.1,head_width=0.5",
-                  connectionstyle="arc3",
-                  color='c')
+arrowprops = dict(
+    arrowstyle="simple,tail_width=0.1,head_width=0.5", connectionstyle="arc3", color='c'
+)
 for i in [1, 4]:
-    ax[i].annotate("", xy=(101, 39), xycoords='data',
-                   xytext=(70, 70), textcoords='data',
-                   arrowprops=arrowprops)
+    ax[i].annotate(
+        "",
+        xy=(101, 39),
+        xycoords='data',
+        xytext=(70, 70),
+        textcoords='data',
+        arrowprops=arrowprops,
+    )
 
 plt.show()

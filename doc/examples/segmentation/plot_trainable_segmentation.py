@@ -39,13 +39,17 @@ training_labels[150:200, 720:860] = 4
 
 sigma_min = 1
 sigma_max = 16
-features_func = partial(feature.multiscale_basic_features,
-                        intensity=True, edges=False, texture=True,
-                        sigma_min=sigma_min, sigma_max=sigma_max,
-                        channel_axis=-1)
+features_func = partial(
+    feature.multiscale_basic_features,
+    intensity=True,
+    edges=False,
+    texture=True,
+    sigma_min=sigma_min,
+    sigma_max=sigma_max,
+    channel_axis=-1,
+)
 features = features_func(img)
-clf = RandomForestClassifier(n_estimators=50, n_jobs=-1,
-                             max_depth=10, max_samples=0.05)
+clf = RandomForestClassifier(n_estimators=50, n_jobs=-1, max_depth=10, max_samples=0.05)
 clf = future.fit_segmenter(training_labels, features, clf)
 result = future.predict_segmenter(features, clf)
 
@@ -71,13 +75,17 @@ fig.tight_layout()
 fig, ax = plt.subplots(1, 2, figsize=(9, 4))
 l = len(clf.feature_importances_)
 feature_importance = (
-        clf.feature_importances_[:l//3],
-        clf.feature_importances_[l//3:2*l//3],
-        clf.feature_importances_[2*l//3:])
+    clf.feature_importances_[: l // 3],
+    clf.feature_importances_[l // 3 : 2 * l // 3],
+    clf.feature_importances_[2 * l // 3 :],
+)
 sigmas = np.logspace(
-        np.log2(sigma_min), np.log2(sigma_max),
-        num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
-        base=2, endpoint=True)
+    np.log2(sigma_min),
+    np.log2(sigma_max),
+    num=int(np.log2(sigma_max) - np.log2(sigma_min) + 1),
+    base=2,
+    endpoint=True,
+)
 for ch, color in zip(range(3), ['r', 'g', 'b']):
     ax[0].plot(sigmas, feature_importance[ch][::3], 'o', color=color)
     ax[0].set_title("Intensity features")
