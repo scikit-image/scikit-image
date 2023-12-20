@@ -1263,9 +1263,9 @@ class EuclideanTransform(ProjectiveTransform):
 
     where the homogeneous transformation matrix is::
 
-        [[a0  -b0  a1]
+        [[a0 -b0  a1]
          [b0  a0  b1]
-         [0   0    1]]
+         [0   0   1 ]]
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
@@ -1413,9 +1413,9 @@ class SimilarityTransform(EuclideanTransform):
 
     where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
-        [[a0  -b0  a1]
+        [[a0 -b0  a1]
          [b0  a0  b1]
-         [0   0    1]]
+         [0   0   1 ]]
 
     The similarity transformation extends the Euclidean transformation with a
     single scaling factor in addition to the rotation and translation
