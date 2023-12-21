@@ -163,6 +163,8 @@ if 'dev' in __version__:
         )
     except FileNotFoundError:
         pass
+    except OSError:
+        pass  # If skimage is built with emscripten which does not support processes
     else:
         out, err = p.communicate()
         if p.returncode == 0:
