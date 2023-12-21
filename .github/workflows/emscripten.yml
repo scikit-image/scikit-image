@@ -24,13 +24,13 @@ jobs:
     runs-on: ubuntu-22.04
     if: "github.repository == 'scikit-image/scikit-image'"
     env:
-      PYODIDE_VERSION: 0.23.1
+      PYODIDE_VERSION: 0.25.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
       # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-      PYTHON_VERSION: 3.11.2
-      EMSCRIPTEN_VERSION: 3.1.32
+      PYTHON_VERSION: 3.11.3
+      EMSCRIPTEN_VERSION: 3.1.45
       NODE_VERSION: 18
     steps:
       - name: Checkout scikit-image
@@ -52,19 +52,7 @@ jobs:
 
       - name: Build
         run: |
-          # Note that we need to cross-compile here. Using `pyodide build`
-          # fails on not having a cross file. The `source() function in
-          # `pyodide_build/cli/build.py` needs a --backend-flags parameter so
-          # that we can pass config-settings arguments to the backend.
-          # We'll then run into static assert issues in `pyconfig.h` due to:
-          # https://github.com/pyodide/pyodide/pull/2494#issuecomment-1118500743
-          # See also https://github.com/pyodide/pyodide/pull/2238 and the patches
-          # to _numpyconfig.h in https://github.com/pyodide/pyodide/tree/main/packages/numpy
-          #
-          # tl;dr this needs some work, and it seems like cross-compilation is
-          # hard because Pyodide doesn't ship its own Python interpreter that
-          # we can actually target during a direct cross build.
-          python -m build --wheel -Csetup-args=--cross-file=$PWD/tools/emscripten.meson.cross
+          pyodide build
 
       - name: set up node
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
