@@ -1,12 +1,17 @@
 name: Build and Test Wheels
 on:
   workflow_call:
+    inputs:
+      CIBW_BUILD_FRONTEND:
+        required: false
+        type: string
 
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+  CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
 
 permissions:
   contents: read
