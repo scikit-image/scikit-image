@@ -16,18 +16,29 @@ class TpsTransform:
     parameters : (N, D) array_like
         Coefficients for every control point.
     src : (N, 2) array_like
-        Control point at source coordinates.
+        Coordinates of control points in source image.
+
+    References
+    ----------
+    .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
+           decomposition of deformations," IEEE Transactions on pattern analysis
+           and machine intelligence 11.6 (1989): 567–585. DOI:`10.1109/34.24792`
 
     Examples
     --------
     >>> import skimage as ski
 
-    Define source and destination points and generate meshgrid for transformation:
+    Define source and destination control points:
 
     >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
     >>> dst = np.roll(src, 1, axis=0)
+    
+     Generate meshgrid:
+     
     >>> coords = np.meshgrid(np.arange(5), np.arange(5))
     >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
+
+     Estimate transformation:
 
     >>> tps = ski.transform.TpsTransform()
     >>> tps.estimate(src, dst)
@@ -77,7 +88,7 @@ class TpsTransform:
         coords = np.array(coords)
 
         if not coords.ndim == 2 or coords.shape[1] != 2:
-            raise ValueError("Input 'coords' must have shape (N,2)")
+            raise ValueError("Input `coords` must have shape (N, 2)")
 
         radial_dist = self._radial_distance(coords[:, 0], coords[:, 1])
 
@@ -107,7 +118,7 @@ class TpsTransform:
         Returns
         -------
         success: bool
-            True, indicates that the coefficients were successfully estimated.
+            True indicates that the coefficients were successfully estimated.
 
         Notes
         -----
@@ -121,7 +132,7 @@ class TpsTransform:
             raise ValueError(f"{src} points less than 3 is considered undefined.")
 
         if src.shape != dst.shape:
-            raise ValueError("src and dst shape must be identical")
+            raise ValueError("The shape of source and destination coordinates must match.")
 
         self.src = src
         n, d = src.shape
@@ -138,7 +149,7 @@ class TpsTransform:
         return True
 
     def _radial_distance(self, x, y):
-        """Compute the radial distance"""
+        """Compute the radial distance."""
         Pi_x = self.src[:, 0]
         Pi_y = self.src[:, 1]
 
@@ -157,7 +168,7 @@ class TpsTransform:
 
 
 def _radial_basis_kernel(r):
-    """Compute basis kernel for thine-plate splines.
+    """Compute basis kernel for thin-plate splines.
 
     Parameters
     ----------
@@ -191,15 +202,15 @@ def tps_warp(
     image : ndarray
         Input image.
     src : (N, 2)
-        Control point at source coordinates.
+        Control points at source coordinates.
     dst : (N, 2)
-        Control point at target coordinates.
+        Control points at target coordinates.
     output_region : tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.
         xmin <= x <= xmax)
     interpolation_order : int, optional
-        If value is 1, then use linear interpolation else use
+        If 1, use linear interpolation, otherwise use
         nearest-neighbor interpolation.
     grid_scaling : int, optional
         If grid_scaling is greater than 1, say x, then the transform is

@@ -97,8 +97,9 @@ plt.show()
 #
 # Derive an interpolation function
 # ================================
-# In this example thin-plate spline is applied to each source and target
-# coordinate to derive an interpolation function and coefficients for
+# In this second example, we start with a set of source and target coordinates.
+# TPS is applied to each source and target coordinate to derive an interpolation
+# function and coefficients.
 # each target point. These coefficients are then used to transform an arbitrary
 # point associated with the reference to an interpolated location on the target.
 
