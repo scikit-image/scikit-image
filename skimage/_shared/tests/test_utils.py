@@ -393,7 +393,7 @@ def _func_replace_params(
 
 class Test_deprecate_parameter:
     def test_remove_docstring(self):
-        # Function name and doc is preserved
+        # function name and doc are preserved
         assert _func_deprecated_params.__name__ == "_func_deprecated_params"
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
