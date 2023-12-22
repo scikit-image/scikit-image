@@ -14,7 +14,7 @@ class TpsTransform:
     Attributes
     ----------
     parameters : (N, D) array_like
-        Coefficients for every control point.
+        spline_mappings for every control point.
     src : (N, 2) array_like
         Coordinates of control points in source image.
 
@@ -32,9 +32,9 @@ class TpsTransform:
 
     >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
     >>> dst = np.roll(src, 1, axis=0)
-    
+
      Generate meshgrid:
-     
+
     >>> coords = np.meshgrid(np.arange(5), np.arange(5))
     >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
 
@@ -66,7 +66,7 @@ class TpsTransform:
 
     def __init__(self):
         self._estimated = False
-        self.coefficients = None
+        self.spline_mappings = None
         self.src = None
 
     def __call__(self, coords):
@@ -82,9 +82,9 @@ class TpsTransform:
         transformed_coords: (N, D) array
             Destination coordinates
         """
-        if self.coefficients is None:
-            raise ValueError(f"{self.coefficients}. Compute the `estimate`")
-        coeffs = self.coefficients
+        if self.spline_mappings is None:
+            raise ValueError(f"{self.spline_mappings}. Compute the `estimate`")
+        coeffs = self.spline_mappings
         coords = np.array(coords)
 
         if not coords.ndim == 2 or coords.shape[1] != 2:
@@ -105,7 +105,7 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate optimal coefficients that describes the deformation of the points.
+        """Estimate optimal spline_mappings that describes the deformation of the points.
 
 
         Parameters
@@ -118,7 +118,7 @@ class TpsTransform:
         Returns
         -------
         success: bool
-            True indicates that the coefficients were successfully estimated.
+            True indicates that the spline_mappings were successfully estimated.
 
         Notes
         -----
@@ -132,7 +132,9 @@ class TpsTransform:
             raise ValueError(f"{src} points less than 3 is considered undefined.")
 
         if src.shape != dst.shape:
-            raise ValueError("The shape of source and destination coordinates must match.")
+            raise ValueError(
+                "The shape of source and destination coordinates must match."
+            )
 
         self.src = src
         n, d = src.shape
@@ -145,7 +147,7 @@ class TpsTransform:
         L[:n, -3:] = P
         L[-3:, :n] = P.T
         V = np.concatenate([dst, np.zeros((d + 1, d))])
-        self.coefficients = np.dot(np.linalg.inv(L), V)
+        self.spline_mappings = np.dot(np.linalg.inv(L), V)
         return True
 
     def _radial_distance(self, x, y):
@@ -240,9 +242,6 @@ def tps_warp(
     >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
     >>> dst = np.array([[512, 0], [0, 0], [0, 512],[512, 512]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
-    >>> tform = ski.transform.TpsTransform()
-    >>> tform.estimate(src, dst)
-    True
     >>> warped_image = ski.transform.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )

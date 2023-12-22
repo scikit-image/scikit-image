@@ -15,7 +15,7 @@ class TestTpsTransform:
 
         # Test that _estimated is initialized to False
         assert tform._estimated is False
-        assert tform.coefficients is None
+        assert tform.spline_mappings is None
         assert tform.src is None
 
     def test_tps_transform_inverse(self):
@@ -27,7 +27,7 @@ class TestTpsTransform:
         src = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
         dst = np.array([[0, 0.75], [-1, 0.25], [0, -1.25], [1, 0.25]], dtype=np.float32)
         tform = TpsTransform()
-        desired_coefficients = np.array(
+        desired_spline_mappings = np.array(
             [
                 [0.0, -0.0902],
                 [0.0, 0.0902],
@@ -40,18 +40,18 @@ class TestTpsTransform:
         )
 
         # Ensure that the initial state is as expected
-        assert tform.coefficients is None
+        assert tform.spline_mappings is None
         assert tform.src is None
 
         # Perform estimation
         assert tform.estimate(src, dst) is True
         np.testing.assert_array_equal(tform.src, src)
 
-        assert tform.coefficients.shape == (src.shape[0] + 3, 2)
+        assert tform.spline_mappings.shape == (src.shape[0] + 3, 2)
 
         np.testing.assert_allclose(
-            tform.coefficients,
-            desired_coefficients,
+            tform.spline_mappings,
+            desired_spline_mappings,
             rtol=0.1,
             atol=1e-16,
         )
@@ -64,11 +64,11 @@ class TestTpsTransform:
 
         # Ensure that the initial state is as expected
         assert tform._estimated is False
-        assert tform.coefficients is None
+        assert tform.spline_mappings is None
         assert tform.src is None
 
         # Perform the estimation, which should fail due to the mismatched number of points
-        with pytest.raises(ValueError, match=".*shape must be identical"):
+        with pytest.raises(ValueError, match=".*coordinates must match"):
             tform.estimate(src, dst)
 
         # # Check if src and dst have fewer than 3 points
@@ -93,7 +93,7 @@ class TestTpsTransform:
 
         # Check if the estimation failed and the instance attributes remain unchanged
         assert tform._estimated is False
-        assert tform.coefficients is None
+        assert tform.spline_mappings is None
         assert tform.src is None
 
 

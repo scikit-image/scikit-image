@@ -10,10 +10,6 @@ According to [3]_, the basic solution of the biharmonic function was expanded.
 Given pairs of source and target control points, TPS is used to transform a space,
 which, in our case, is a 2D image.
 
-This script shows how to use the Thine Plate Spine Transformation for
-image warping.
-
-For further information on TPS Transformation, see:
 
 .. [1] Wikipedia, Thin plate spline
        https://en.wikipedia.org/wiki/Thin_plate_spline
