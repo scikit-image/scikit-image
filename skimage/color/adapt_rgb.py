@@ -61,7 +61,7 @@ def adapt_rgb(apply_to_rgb):
             -------
             filtered_image : array
                 Filtered image obtained by applying the image filter function.
-                """
+            """
             if is_rgb_like(image):
                 return apply_to_rgb(image_filter, image, *args, **kwargs)
             else:
