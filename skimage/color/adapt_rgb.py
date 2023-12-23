@@ -33,18 +33,17 @@ def adapt_rgb(apply_to_rgb):
     """
 
     def decorator(image_filter):
+        """Decorator to adapt an image filter function for both RGB-like and non-RGB-like images.
+        
+        Parameters
+        ----------
+        image_filter : function
+            Function that filters an image.
+
+        Returns
+        -------
+        image_filter_adapted : function
         """
-    Decorator to adapt an image filter function for both RGB-like and non-RGB-like images.
-
-    Parameters
-    ----------
-    image_filter : function
-        Function that filters an image.
-
-    Returns
-    -------
-    image_filter_adapted : function
-    """
         @functools.wraps(image_filter)
         def image_filter_adapted(image, *args, **kwargs):
             """Adapted image filter function to handle both RGB-like and non-RGB-like images.
