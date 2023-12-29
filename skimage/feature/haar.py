@@ -10,9 +10,7 @@ from ..color import gray2rgb
 from ..draw import rectangle
 from ..util import img_as_float
 
-FEATURE_TYPE = ('type-2-x', 'type-2-y',
-                'type-3-x', 'type-3-y',
-                'type-4')
+FEATURE_TYPE = ('type-2-x', 'type-2-y', 'type-3-x', 'type-3-y', 'type-4')
 
 
 def _validate_feature_type(feature_type):
@@ -27,8 +25,9 @@ def _validate_feature_type(feature_type):
         for feat_t in feature_type_:
             if feat_t not in FEATURE_TYPE:
                 raise ValueError(
-                                f'The given feature type is unknown. Got {feat_t} instead of one '
-                                f'of {FEATURE_TYPE}.')
+                    f'The given feature type is unknown. Got {feat_t} instead of one '
+                    f'of {FEATURE_TYPE}.'
+                )
     return feature_type_
 
 
@@ -75,16 +74,19 @@ tuple coord
     """
     feature_type_ = _validate_feature_type(feature_type)
 
-    feat_coord, feat_type = zip(*[haar_like_feature_coord_wrapper(width,
-                                                                  height,
-                                                                  feat_t)
-                                  for feat_t in feature_type_])
+    feat_coord, feat_type = zip(
+        *[
+            haar_like_feature_coord_wrapper(width, height, feat_t)
+            for feat_t in feature_type_
+        ]
+    )
 
     return np.concatenate(feat_coord), np.hstack(feat_type)
 
 
-def haar_like_feature(int_image, r, c, width, height, feature_type=None,
-                      feature_coord=None):
+def haar_like_feature(
+    int_image, r, c, width, height, feature_type=None, feature_coord=None
+):
     """Compute the Haar-like features for a region of interest (ROI) of an
     integral image.
 
@@ -194,22 +196,35 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
     if feature_coord is None:
         feature_type_ = _validate_feature_type(feature_type)
 
-        return np.hstack(list(chain.from_iterable(
-            haar_like_feature_wrapper(int_image, r, c, width, height, feat_t,
-                                      feature_coord)
-            for feat_t in feature_type_)))
+        return np.hstack(
+            list(
+                chain.from_iterable(
+                    haar_like_feature_wrapper(
+                        int_image, r, c, width, height, feat_t, feature_coord
+                    )
+                    for feat_t in feature_type_
+                )
+            )
+        )
     else:
         if feature_coord.shape[0] != feature_type.shape[0]:
-            raise ValueError("Inconsistent size between feature coordinates"
-                             "and feature types.")
+            raise ValueError(
+                "Inconsistent size between feature coordinates" "and feature types."
+            )
 
         mask_feature = [feature_type == feat_t for feat_t in FEATURE_TYPE]
         haar_feature_idx, haar_feature = zip(
-            *[(np.flatnonzero(mask),
-               haar_like_feature_wrapper(int_image, r, c, width, height,
-                                         feat_t, feature_coord[mask]))
-              for mask, feat_t in zip(mask_feature, FEATURE_TYPE)
-              if np.count_nonzero(mask)])
+            *[
+                (
+                    np.flatnonzero(mask),
+                    haar_like_feature_wrapper(
+                        int_image, r, c, width, height, feat_t, feature_coord[mask]
+                    ),
+                )
+                for mask, feat_t in zip(mask_feature, FEATURE_TYPE)
+                if np.count_nonzero(mask)
+            ]
+        )
 
         haar_feature_idx = np.concatenate(haar_feature_idx)
         haar_feature = np.concatenate(haar_feature)
@@ -218,13 +233,22 @@ def haar_like_feature(int_image, r, c, width, height, feature_type=None,
         return haar_feature
 
 
-@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
-def draw_haar_like_feature(image, r, c, width, height,
-                           feature_coord,
-                           color_positive_block=(1., 0., 0.),
-                           color_negative_block=(0., 1., 0.),
-                           alpha=0.5, max_n_features=None, rng=None):
+@deprecate_kwarg(
+    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
+)
+def draw_haar_like_feature(
+    image,
+    r,
+    c,
+    width,
+    height,
+    feature_coord,
+    color_positive_block=(1.0, 0.0, 0.0),
+    color_negative_block=(0.0, 1.0, 0.0),
+    alpha=0.5,
+    max_n_features=None,
+    rng=None,
+):
     """Visualization of Haar-like features.
 
     Parameters
@@ -296,9 +320,7 @@ def draw_haar_like_feature(image, r, c, width, height,
     if max_n_features is None:
         feature_coord_ = feature_coord
     else:
-        feature_coord_ = rng.choice(feature_coord,
-                                    size=max_n_features,
-                                    replace=False)
+        feature_coord_ = rng.choice(feature_coord, size=max_n_features, replace=False)
 
     output = np.copy(image)
     if len(image.shape) < 3:
@@ -313,11 +335,9 @@ def draw_haar_like_feature(image, r, c, width, height,
             rr, cc = rectangle(coord_start, coord_end)
 
             if ((idx_rect + 1) % 2) == 0:
-                new_value = ((1 - alpha) *
-                             output[rr, cc] + alpha * color_positive_block)
+                new_value = (1 - alpha) * output[rr, cc] + alpha * color_positive_block
             else:
-                new_value = ((1 - alpha) *
-                             output[rr, cc] + alpha * color_negative_block)
+                new_value = (1 - alpha) * output[rr, cc] + alpha * color_negative_block
             output[rr, cc] = new_value
 
     return output

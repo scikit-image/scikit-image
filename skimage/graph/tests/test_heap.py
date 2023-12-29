@@ -45,6 +45,6 @@ def _test_heap(n, fast_update):
 
     # verify
     for i in range(1, len(b)):
-        assert(b[i] >= b[i - 1])
+        assert b[i] >= b[i - 1]
 
     return t1 - t0

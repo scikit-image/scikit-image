@@ -40,8 +40,7 @@ def label_points(coords, output_shape):
     - Negative coordinates raise a ValueError
     """
     if coords.shape[1] != len(output_shape):
-        raise ValueError("Dimensionality of points should match the "
-                         "output shape")
+        raise ValueError("Dimensionality of points should match the " "output shape")
 
     if np.any(coords < 0):
         raise ValueError("Coordinates should be positive and start from 0")

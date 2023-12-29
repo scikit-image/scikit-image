@@ -62,6 +62,7 @@ PyAV's API reflects the way frames are stored in a video file.
 
 .. code-block:: python
 
+   import numpy as np
    for packet in container.demux():
        for frame in packet.decode():
            if frame.type == 'video':
@@ -117,7 +118,7 @@ supports a wide range of other image file formats as well.
     filename = '/tmp/file.mp4'
     vid = imageio.get_reader(filename,  'ffmpeg')
 
-    for num, image in vid.iter_data():
+    for image in vid.iter_data():
         print(image.mean())
 
     metadata = vid.get_meta_data()

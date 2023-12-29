@@ -9,12 +9,12 @@ def unique_rows(ar):
 
     Parameters
     ----------
-    ar : 2-D ndarray
+    ar : ndarray, shape (M, N)
         The input array.
 
     Returns
     -------
-    ar_out : 2-D ndarray
+    ar_out : ndarray, shape (P, N)
         A copy of the input array with repeated rows removed.
 
     Raises
@@ -37,8 +37,9 @@ def unique_rows(ar):
            [1, 0, 1]], dtype=uint8)
     """
     if ar.ndim != 2:
-        raise ValueError("unique_rows() only makes sense for 2D arrays, "
-                         f"got {ar.ndim}")
+        raise ValueError(
+            "unique_rows() only makes sense for 2D arrays, " f"got {ar.ndim}"
+        )
     # the view in the next line only works if the array is C-contiguous
     ar = np.ascontiguousarray(ar)
     # np.unique() finds identical items in a raveled array. To make it

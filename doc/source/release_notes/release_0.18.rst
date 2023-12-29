@@ -171,11 +171,11 @@ Documentation
   <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_regionprops.html>`_
   (#5010).
 - Documentation has been added to explain
-  `how to download example datasets <https://scikit-image.org/docs/dev/install.html#downloading-all-demo-datasets>`_
+  `how to download example datasets <https://scikit-image.org/docs/dev/user_guide/install.html#downloading-all-demo-datasets>`_
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/development/contribute.html#benchmarks>`_
   has been expanded (#4905).
 - Added links to the image.sc forum in example pages (#5094, #5096)
 - Added missing datasets to gallery examples (#5116, #5118)

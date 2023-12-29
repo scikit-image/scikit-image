@@ -34,8 +34,9 @@ labeled_images = [measure.label(image) for image in images]
 
 properties = ['label', 'area']
 
-tables = [measure.regionprops_table(image, properties=properties)
-          for image in labeled_images]
+tables = [
+    measure.regionprops_table(image, properties=properties) for image in labeled_images
+]
 tables = [pd.DataFrame(table) for table in tables]
 
 for fraction, table in zip(fractions, tables):
@@ -63,13 +64,12 @@ plt.show()
 #####################################################################
 # In the scatterplot, many points seem to be overlapping at low area values.
 # To get a better sense of the distribution, we may want to add some 'jitter'
-# to the visualization. To this end, we use `stripplot` (from `seaborn`, the
-# Python library dedicated to statistical data visualization) with argument
-# `jitter=True`.
+# to the visualization. To this end, we use :obj:`seaborn.stripplot` (from
+# `seaborn library <https://seaborn.pydata.org/>`_ for statistical data visualization)
+# with argument ``jitter=True``.
 
 fig, ax = plt.subplots()
-sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True,
-              ax=ax)
+sns.stripplot(x='volume fraction', y='area', data=areas, jitter=True, ax=ax)
 # Fix floating point rendering
 ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])
 plt.show()
@@ -83,15 +83,15 @@ plt.show()
 # <https://en.wikipedia.org/wiki/Percolation_threshold>`_ in statistical
 # physics and graph theory.
 
-images = [data.binary_blobs(length=128, n_dim=3, volume_fraction=f)
-          for f in fractions]
+images = [data.binary_blobs(length=128, n_dim=3, volume_fraction=f) for f in fractions]
 
 labeled_images = [measure.label(image) for image in images]
 
 properties = ['label', 'area']
 
-tables = [measure.regionprops_table(image, properties=properties)
-          for image in labeled_images]
+tables = [
+    measure.regionprops_table(image, properties=properties) for image in labeled_images
+]
 tables = [pd.DataFrame(table) for table in tables]
 
 for fraction, table in zip(fractions, tables):
@@ -100,8 +100,7 @@ for fraction, table in zip(fractions, tables):
 blob_volumes = pd.concat(tables, axis=0)
 
 fig, ax = plt.subplots()
-sns.stripplot(x='volume fraction', y='area', data=blob_volumes, jitter=True,
-              ax=ax)
+sns.stripplot(x='volume fraction', y='area', data=blob_volumes, jitter=True, ax=ax)
 ax.set_ylabel('blob size (3D)')
 # Fix floating point rendering
 ax.set_xticklabels([f'{frac:.2f}' for frac in fractions])

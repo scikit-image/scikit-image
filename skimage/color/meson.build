@@ -1,6 +1,7 @@
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   'adapt_rgb.py',
   'colorconv.py',
   'colorlabel.py',

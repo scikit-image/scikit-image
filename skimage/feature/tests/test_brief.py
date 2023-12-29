@@ -22,21 +22,27 @@ def test_normal_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for normal mode."""
     img = data.coins().astype(dtype)
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5,
-                             threshold_abs=0, threshold_rel=0.1)
+    keypoints = corner_peaks(
+        corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1
+    )
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[1, 1, 1, 0, 1, 1, 0, 1],
-                         [0, 1, 1, 0, 1, 1, 0, 0],
-                         [1, 1, 1, 0, 1, 1, 0, 1],
-                         [0, 0, 0, 1, 0, 0, 1, 0],
-                         [0, 1, 1, 0, 1, 1, 0, 0],
-                         [0, 1, 1, 0, 1, 1, 1, 0],
-                         [1, 1, 1, 0, 1, 1, 0, 1],
-                         [1, 0, 1, 0, 0, 1, 1, 0]], dtype=bool)
+    expected = np.array(
+        [
+            [1, 1, 1, 0, 1, 1, 0, 1],
+            [0, 1, 1, 0, 1, 1, 0, 0],
+            [1, 1, 1, 0, 1, 1, 0, 1],
+            [0, 0, 0, 1, 0, 0, 1, 0],
+            [0, 1, 1, 0, 1, 1, 0, 0],
+            [0, 1, 1, 0, 1, 1, 1, 0],
+            [1, 1, 1, 0, 1, 1, 0, 1],
+            [1, 0, 1, 0, 0, 1, 1, 0],
+        ],
+        dtype=bool,
+    )
 
     assert_array_equal(extractor.descriptors, expected)
 
@@ -46,8 +52,9 @@ def test_uniform_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
     img = data.coins().astype(dtype)
 
-    keypoints = corner_peaks(corner_harris(img), min_distance=5,
-                             threshold_abs=0, threshold_rel=0.1)
+    keypoints = corner_peaks(
+        corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1
+    )
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)
     with testing.expected_warnings(['`sample_seed` is a deprecated argument']):
@@ -55,14 +62,19 @@ def test_uniform_mode(dtype):
 
     extractor.extract(img, keypoints[:8])
 
-    expected = np.array([[0, 1, 0, 1, 0, 1, 1, 0],
-                         [0, 1, 0, 0, 0, 1, 0, 1],
-                         [0, 1, 0, 0, 0, 1, 1, 1],
-                         [1, 0, 1, 0, 1, 0, 1, 1],
-                         [0, 0, 1, 0, 0, 1, 0, 1],
-                         [0, 1, 0, 1, 0, 1, 0, 1],
-                         [0, 1, 0, 0, 0, 1, 1, 1],
-                         [1, 0, 1, 1, 1, 0, 0, 1]], dtype=bool)
+    expected = np.array(
+        [
+            [0, 1, 0, 1, 0, 1, 1, 0],
+            [0, 1, 0, 0, 0, 1, 0, 1],
+            [0, 1, 0, 0, 0, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1],
+            [0, 0, 1, 0, 0, 1, 0, 1],
+            [0, 1, 0, 1, 0, 1, 0, 1],
+            [0, 1, 0, 0, 0, 1, 1, 1],
+            [1, 0, 1, 1, 1, 0, 0, 1],
+        ],
+        dtype=bool,
+    )
 
     assert_array_equal(extractor.descriptors, expected)
 

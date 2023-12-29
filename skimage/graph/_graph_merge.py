@@ -39,7 +39,7 @@ def _revalidate_node_edges(rag, node, heap_list):
 
 
 def _rename_node(graph, node_id, copy_id):
-    """ Rename `node_id` in `graph` to `copy_id`. """
+    """Rename `node_id` in `graph` to `copy_id`."""
 
     graph._add_node_silent(copy_id)
     graph.nodes[copy_id].update(graph.nodes[node_id])
@@ -52,12 +52,13 @@ def _rename_node(graph, node_id, copy_id):
 
 
 def _invalidate_edge(graph, n1, n2):
-    """ Invalidates the edge (n1, n2) in the heap. """
+    """Invalidates the edge (n1, n2) in the heap."""
     graph[n1][n2]['heap item'][3] = False
 
 
-def merge_hierarchical(labels, rag, thresh, rag_copy, in_place_merge,
-                       merge_func, weight_func):
+def merge_hierarchical(
+    labels, rag, thresh, rag_copy, in_place_merge, merge_func, weight_func
+):
     """Perform hierarchical merging of a RAG.
 
     Greedily merges the most similar pair of nodes until no edges lower than

@@ -2,13 +2,10 @@ name: Nightly Wheel builder
 on:
   workflow_dispatch:
   schedule:
-    # this cron is ran every Sunday at midnight UTC
-    - cron: "0 0 * * 0"
-env:
-  CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
-  CIBW_TEST_COMMAND: pytest --pyargs skimage
-  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+    - cron: "27 11 * * SUN" # every Sunday at 11:27 UTC
+  push:
+    branches:
+      - maintenance/**
 
 permissions:
   contents: read
@@ -16,7 +13,8 @@ permissions:
 jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
-    if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
+    with:
+      CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
 
   upload_anaconda:
     permissions:
@@ -26,6 +24,12 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: wheels
+          path: ./dist
+
       - name: Upload wheel
         uses: scientific-python/upload-nightly-action@main
         with:

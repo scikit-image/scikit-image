@@ -5,9 +5,20 @@
         "url": "https://scikit-image.org/docs/dev/"
     },
     {
-        "name": "0.20 (stable)",
+        "name": "0.22 (stable)",
+        "version":"0.22.0",
+        "url": "https://scikit-image.org/docs/stable/",
+        "preferred": true
+    },
+    {
+        "name": "0.21",
+        "version":"0.21.0",
+        "url": "https://scikit-image.org/docs/0.21.x/"
+    },
+    {
+        "name": "0.20",
         "version":"0.20.0",
-        "url": "https://scikit-image.org/docs/stable/"
+        "url": "https://scikit-image.org/docs/0.20.x/"
     },
     {
         "name": "0.19",

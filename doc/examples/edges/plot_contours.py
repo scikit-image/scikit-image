@@ -22,8 +22,8 @@ from skimage import measure
 
 
 # Construct some test data
-x, y = np.ogrid[-np.pi:np.pi:100j, -np.pi:np.pi:100j]
-r = np.sin(np.exp(np.sin(x)**3 + np.cos(y)**2))
+x, y = np.ogrid[-np.pi : np.pi : 100j, -np.pi : np.pi : 100j]
+r = np.sin(np.exp(np.sin(x) ** 3 + np.cos(y) ** 2))
 
 # Find contours at a constant value of 0.8
 contours = measure.find_contours(r, 0.8)

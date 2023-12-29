@@ -36,7 +36,7 @@ def test_imread_multipage_rgb_tif():
     assert img.shape == (2, 10, 10, 3), img.shape
 
 
-def test_tifffile_kwarg_passthrough ():
+def test_tifffile_kwarg_passthrough():
     img = imread(fetch('data/multipage.tif'), key=[1], is_ome=True)
     assert img.shape == (15, 10), img.shape
 
@@ -50,7 +50,6 @@ def test_imread_handle():
 
 
 class TestSave:
-
     def roundtrip(self, dtype, x, use_pathlib=False, **kwargs):
         with NamedTemporaryFile(suffix='.tif') as f:
             fname = f.name
@@ -68,8 +67,9 @@ class TestSave:
     @pytest.mark.parametrize("dtype", dtypes)
     @pytest.mark.parametrize("use_pathlib", [False, True])
     @pytest.mark.parametrize('explicit_photometric_kwarg', [False, True])
-    def test_imsave_roundtrip(self, shape, dtype, use_pathlib,
-                              explicit_photometric_kwarg):
+    def test_imsave_roundtrip(
+        self, shape, dtype, use_pathlib, explicit_photometric_kwarg
+    ):
         x = np.random.rand(*shape)
 
         if not np.issubdtype(dtype, np.floating):

@@ -14,17 +14,18 @@ from skimage import data
 
 matplotlib.rcParams['font.size'] = 18
 
-images = ('hubble_deep_field',
-          'immunohistochemistry',
-          'lily',
-          'microaneurysms',
-          'moon',
-          'retina',
-          'shepp_logan_phantom',
-          'skin',
-          'cell',
-          'human_mitosis',
-          )
+images = (
+    'hubble_deep_field',
+    'immunohistochemistry',
+    'lily',
+    'microaneurysms',
+    'moon',
+    'retina',
+    'shepp_logan_phantom',
+    'skin',
+    'cell',
+    'human_mitosis',
+)
 
 
 for name in images:
@@ -61,9 +62,3 @@ for xpos in [100, 150, 200]:
     further_img[150 - 10 : 150 + 10, xpos - 10 : xpos + 10] = 0
 axs[2, 2].imshow(further_img, cmap=plt.cm.gray)
 plt.subplots_adjust(wspace=-0.3, hspace=0.1)
-
-# %%
-# .. warning::
-#
-#   This example does not run in JupyterLite, due to a limitation
-#   when downloading large datasets.

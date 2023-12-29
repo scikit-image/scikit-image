@@ -11,10 +11,10 @@ permissions:
 
 env:
   PIP_FLAGS: >-
-    --extra-index-url
-    https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
     --upgrade
     --pre
+    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --extra-index-url https://pypi.org/simple
   MINIMUM_REQUIREMENTS: 0
   BUILD_DOCS: 0
   PYTHONOPTIMIZE: 0
@@ -31,12 +31,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Build package
         run: |
