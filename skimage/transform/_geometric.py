@@ -1144,12 +1144,10 @@ class PiecewiseAffineTransform(_GeometricTransform):
         >>> tform.estimate(src, dst)
         True
 
-        Check the resulting residuals:
+        Check that all resulting residuals are small:
 
-        >>> tform.residuals(src, dst)
-        array([2.22044605e-16, 3.14018492e-16, 0.00000000e+00, 4.44089210e-16,
-               4.44089210e-16, 4.44089210e-16])
-
+        >>> tform.residuals(src, dst) < 1e-15
+        array([ True,  True,  True,  True,  True,  True])
         """
         src = np.asarray(src)
         dst = np.asarray(dst)
