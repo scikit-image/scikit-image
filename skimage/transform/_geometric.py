@@ -1120,18 +1120,18 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Examples
         --------
-        >> import numpy as np
-        >> import skimage as ski
+        >>> import numpy as np
+        >>> import skimage as ski
 
         Define source and destination points:
 
-        >> src = np.array([[0, 3],
+        >>> src = np.array([[0, 3],
         ...                [0, -1],
         ...                [1, 2],
         ...                [-1, 0],
         ...                [1, 1],
         ...                [-1, 1]])
-        >> dst = np.array([[0, 0],
+        >>> dst = np.array([[0, 0],
         ...                [1, 0],
         ...                [1, 1],
         ...                [1, 2],
@@ -1140,15 +1140,15 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Estimate the transformation matrix:
 
-        >> tform = ski.transform.PiecewiseAffineTransform()
-        >> tform.estimate(src, dst)
+        >>> tform = ski.transform.PiecewiseAffineTransform()
+        >>> tform.estimate(src, dst)
         True
 
         Check the resulting residuals:
 
-        >> tform.residuals(src, dst)
+        >>> tform.residuals(src, dst)
         array([2.22044605e-16, 3.14018492e-16, 0.00000000e+00, 4.44089210e-16,
-            4.44089210e-16, 4.44089210e-16])
+               4.44089210e-16, 4.44089210e-16])
 
         """
         src = np.asarray(src)
