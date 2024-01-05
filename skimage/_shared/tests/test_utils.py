@@ -392,7 +392,7 @@ def _func_replace_params(
 
 
 class Test_deprecate_parameter:
-    def test_remove_docstring(self):
+    def test_docstring_removed_param(self):
         # function name and doc are preserved
         assert _func_deprecated_params.__name__ == "_func_deprecated_params"
         if sys.flags.optimize < 2:
@@ -422,7 +422,7 @@ class Test_deprecate_parameter:
 """
             )
 
-    def test_replace_docstring(self):
+    def test_docstring_replaced_param(self):
         assert _func_replace_params.__name__ == "_func_replace_params"
         if sys.flags.optimize < 2:
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
@@ -459,7 +459,7 @@ class Test_deprecate_parameter:
 """
             )
 
-    def test_remove_warning(self):
+    def test_warning_removed_param(self):
         match = (
             r".*`old[01]` is deprecated since version 0\.10 and will be removed "
             r"in 0\.12.* see the documentation of .*_func_deprecated_params`."
@@ -487,7 +487,7 @@ class Test_deprecate_parameter:
             assert _func_deprecated_params(1, arg1=3) == (1, DEPRECATED, DEPRECATED, 3)
         assert len(record) == 0
 
-    def test_replace_warning(self):
+    def test_warning_replaced_param(self):
         match = (
             r".*`old[0,1]` is deprecated since version 0\.10 and will be removed "
             r"in 0\.12.* see the documentation of .*_func_replace_params`."
