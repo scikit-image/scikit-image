@@ -45,12 +45,12 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
     'numpy>=1.22',
     # Developer UI
@@ -117,11 +117,11 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
     'numpy>=1.25',
