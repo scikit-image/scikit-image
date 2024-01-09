@@ -184,10 +184,10 @@ class deprecate_parameter:
         to the "Other Parameters" section.
     stacklevel : int, optional
         This decorator attempts to detect the appropriate stacklevel for the
-        deprecation warning automatically. If this fails, e.g. due to
+        deprecation warning automatically. If this fails, e.g., due to
         decorating a closure, you can set the stacklevel manually. The
-        outermost decorator should have the stacklevel 2, the next inner one
-        the level 3, etc.
+        outermost decorator should have stacklevel 2, the next inner one
+        stacklevel 3, etc.
 
     Notes
     -----
@@ -312,7 +312,7 @@ class deprecate_parameter:
                     raise ValueError(
                         f"both deprecated parameter `{self.deprecated_name}` "
                         f"and new parameter `{self.new_name}` are used, use "
-                        f"the latter to avoid conflicting values"
+                        f"only the latter to avoid conflicting values"
                     )
                 elif self.new_name is not None:
                     # Assign old value to new one
