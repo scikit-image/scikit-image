@@ -5,7 +5,7 @@ sphinx-gallery>=0.14
 numpydoc>=1.6
 sphinx-copybutton
 pytest-runner
-matplotlib>=3.5
+matplotlib>=3.6
 dask[array]>=2022.9.2
 pandas>=1.5
 seaborn>=0.11
