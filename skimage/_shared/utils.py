@@ -310,9 +310,9 @@ class deprecate_parameter:
 
                 if new_value is not DEPRECATED:
                     raise ValueError(
-                        f"both deprecated parameter `{self.deprecated_name}` "
-                        f"and new parameter `{self.new_name}` are used, use "
-                        f"only the latter to avoid conflicting values"
+                        f"Both deprecated parameter `{self.deprecated_name}` "
+                        f"and new parameter `{self.new_name}` are used. Use "
+                        f"only the latter to avoid conflicting values."
                     )
                 elif self.new_name is not None:
                     # Assign old value to new one
