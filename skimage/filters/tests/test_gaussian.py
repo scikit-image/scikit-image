@@ -166,30 +166,10 @@ def test_dog_invalid_sigma2():
         difference_of_gaussians(image, (1, 5), (2, 4))
 
 
-@pytest.mark.parametrize("positional_count", range(1, 5))
-def test_deprecated_positional_args(positional_count):
-    """More than 1 positionl argument are deprecated."""
-    image = np.array([0, 1, 0], dtype=float)
-    args = [1, None, 'nearest', 0, False, 4.0]
-    desired = np.array([0.24197145, 0.39894347, 0.24197145])
-    with pytest.warns(
-        FutureWarning,
-        match="Passing more than 1 positional argument to `gaussian` is deprecated",
-    ) as _warnings:
-        result = gaussian(image, *args[:positional_count])
-    np.testing.assert_almost_equal(desired, result)
-    # Check that stacklevel is correct
-    assert len(_warnings) == 1
-    assert _warnings[0].filename == __file__
-
-
 def test_deprecated_gaussian_output():
     image = np.array([0, 1, 0], dtype=float)
     desired = np.array([0.24197145, 0.39894347, 0.24197145])
-    with pytest.warns(
-        FutureWarning,
-        match="`output` is a deprecated argument name for `gaussian`",
-    ) as _warnings:
+    with pytest.warns(FutureWarning, match="Parameter `output` is") as _warnings:
         gaussian(image, output=image)
     np.testing.assert_almost_equal(desired, image)
     # Check that stacklevel is correct

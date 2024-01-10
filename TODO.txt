@@ -18,10 +18,10 @@ Version 0.26
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
-* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`.
-  Make arguments other than the first keyword only: `gaussian(image, *, ...)`.
-  See `test_deprecated_positional_args`, `test_deprecated_gaussian_output`,
-  `_deprecate_gaussian_positional_args`, and `gaussian`'s docstring.
+* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
+  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
+  Make arguments after the deprecated `output` parameter, keyword only:
+  `gaussian(image, sigma, *, ...)`.
 
 Other (2022)
 ------------

@@ -4,51 +4,26 @@ These are defined here to avoid circular imports.
 
 The unit tests remain under skimage/filters/tests/
 """
-import warnings
 from collections.abc import Iterable
-from functools import wraps
 
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import _supported_float_type, convert_to_float
+from .._shared.utils import (
+    _supported_float_type,
+    convert_to_float,
+    deprecate_parameter,
+    DEPRECATED,
+)
 
 
-def _deprecate_gaussian_positional_args(func):
-    """Help deprecate `output` in `gaussian` in favor of `out`.
-
-    We can't simply use deprecate_kwarg or remove_arg, as `output` can also be
-    passed as a positional argument. Instead, deprecate passing more than 1
-    positional argument and at the same time, refactor `output` to `out`.
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if len(args) > 1:
-            warnings.warn(
-                "Passing more than 1 positional argument to `gaussian` is deprecated "
-                "and will stop working in version 0.25 or later. Please use keyword "
-                "arguments instead.",
-                FutureWarning,
-                stacklevel=2,
-            )
-        elif "output" in kwargs:
-            warnings.warn(
-                "`output` is a deprecated argument name for `gaussian`. It will be "
-                "removed in version 0.25 or later. Please use `out` instead.",
-                FutureWarning,
-                stacklevel=2,
-            )
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-@_deprecate_gaussian_positional_args
+@deprecate_parameter(
+    "output", new_name="out", start_version="0.23", stop_version="0.26"
+)
 def gaussian(
     image,
     sigma=1,
-    output=None,
+    output=DEPRECATED,
     mode='nearest',
     cval=0,
     preserve_range=False,
@@ -59,12 +34,6 @@ def gaussian(
 ):
     """Multi-dimensional Gaussian filter.
 
-    .. warning::
-
-        Passing more than 1 positional argument to `gaussian` is deprecated
-        and will stop working in version 0.25 or later. Please use keyword
-        arguments instead.
-
     Parameters
     ----------
     image : ndarray
@@ -74,8 +43,6 @@ def gaussian(
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    output : DEPRECATED
-        Deprecated in favor of `out`
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled, where ``cval`` is the value when mode is equal to
@@ -156,9 +123,6 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    if output is not None:
-        out = output
-
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
     if channel_axis is not None:
