@@ -4,8 +4,8 @@ Region Adjacency Graphs (RAGs)
 ==============================
 
 This example demonstrates the use of the `merge_nodes` function of a Region
-Adjacency Graph (RAG). The `RAG` class represents a undirected weighted graph
-which inherits from `networkx.graph` class. When a new node is formed by
+Adjacency Graph (RAG). The `RAG` class represents an undirected weighted graph
+which inherits from :obj:`networkx.Graph` class. When a new node is formed by
 merging two nodes, the edge weight of all the edges incident on the resulting
 node can be updated by a user defined function `weight_func`.
 

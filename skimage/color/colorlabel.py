@@ -37,7 +37,7 @@ def _rgb_vector(color):
     Parameters
     ----------
     color : str or array
-        Color name in `color_dict` or RGB float values between [0, 1].
+        Color name in ``skimage.color.color_dict`` or RGB float values between [0, 1].
     """
     if isinstance(color, str):
         color = color_dict[color]
@@ -113,8 +113,8 @@ def label2rgb(
         `bg_color` is `None`, and `kind` is `overlay`,
         background is not painted by any colors.
     bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+        Background color. Must be a name in ``skimage.color.color_dict`` or RGB float
+        values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
     kind : string, one of {'overlay', 'avg'}
@@ -133,7 +133,7 @@ def label2rgb(
         `image` that corresponds to channels.
 
         .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
+            ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -183,8 +183,8 @@ def _label2rgb_overlay(
         Label that's treated as the background. If `bg_label` is specified and
         `bg_color` is `None`, background is not painted by any colors.
     bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+        Background color. Must be a name in ``skimage.color.color_dict`` or RGB float
+        values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
     saturation : float [0, 1], optional

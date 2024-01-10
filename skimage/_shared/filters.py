@@ -114,7 +114,7 @@ def gaussian(
 
     Notes
     -----
-    This function is a wrapper around :func:`scipy.ndi.gaussian_filter`.
+    This function is a wrapper around :func:`scipy.ndimage.gaussian_filter`.
 
     Integer arrays are converted to float.
 

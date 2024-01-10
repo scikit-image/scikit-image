@@ -18,24 +18,61 @@ __all__ = [
     'reshape_nd',
     'identity',
     'slice_at_axis',
+    "deprecate_parameter",
+    "DEPRECATED",
 ]
 
 
-def _get_stack_rank(func):
-    """Return function rank in the call stack."""
-    if _is_wrapped(func):
-        return 1 + _get_stack_rank(func.__wrapped__)
+def _count_wrappers(func):
+    """Count the number of wrappers around `func`."""
+    unwrapped = func
+    count = 0
+    while hasattr(unwrapped, "__wrapped__"):
+        unwrapped = unwrapped.__wrapped__
+        count += 1
+    return count
+
+
+def _warning_stacklevel(func):
+    """Find stacklevel for a warning raised from a wrapper around `func`.
+
+    Try to determine the number of
+
+    Parameters
+    ----------
+    func : Callable
+
+
+    Returns
+    -------
+    stacklevel : int
+        The stacklevel. Minimum of 2.
+    """
+    # Count number of wrappers around `func`
+    wrapped_count = _count_wrappers(func)
+
+    # Count number of total wrappers around global version of `func`
+    module = sys.modules.get(func.__module__)
+    try:
+        for name in func.__qualname__.split("."):
+            global_func = getattr(module, name)
+    except AttributeError as e:
+        raise RuntimeError(
+            f"Could not access `{func.__qualname__}` in {module!r}, "
+            f" may be a closure. Set stacklevel manually. ",
+        ) from e
     else:
-        return 0
+        global_wrapped_count = _count_wrappers(global_func)
 
-
-def _is_wrapped(func):
-    return "__wrapped__" in dir(func)
+    stacklevel = global_wrapped_count - wrapped_count + 1
+    return max(stacklevel, 2)
 
 
 def _get_stack_length(func):
     """Return function call stack length."""
-    return _get_stack_rank(func.__globals__.get(func.__name__, func))
+    _func = func.__globals__.get(func.__name__, func)
+    length = _count_wrappers(_func)
+    return length
 
 
 class _DecoratorBaseClass:
@@ -53,7 +90,8 @@ class _DecoratorBaseClass:
     _stack_length = {}
 
     def get_stack_length(self, func):
-        return self._stack_length.get(func.__name__, _get_stack_length(func))
+        length = self._stack_length.get(func.__name__, _get_stack_length(func))
+        return length
 
 
 class change_default_value(_DecoratorBaseClass):
@@ -84,7 +122,7 @@ class change_default_value(_DecoratorBaseClass):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -103,6 +141,190 @@ class change_default_value(_DecoratorBaseClass):
                 # warn that arg_name default value changed:
                 warnings.warn(self.warning_msg, FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
+
+        return fixed_func
+
+
+class PatchClassRepr(type):
+    """Control class representations in rendered signatures."""
+
+    def __repr__(cls):
+        return f"<{cls.__name__}>"
+
+
+class DEPRECATED(metaclass=PatchClassRepr):
+    """Signal value to help with deprecating parameters that use None.
+
+    This is a proxy object, used to signal that a parameter has not been set.
+    This is useful if ``None`` is already used for a different purpose or just
+    to highlight a deprecated parameter in the signature.
+    """
+
+
+class deprecate_parameter:
+    """Deprecate a parameter of a function.
+
+    Parameters
+    ----------
+    deprecated_name : str
+        The name of the deprecated parameter.
+    start_version : str
+        The package version in which the warning was introduced.
+    stop_version : str
+        The package version in which the warning will be replaced by
+        an error / the deprecation is completed.
+    template : str, optional
+        If given, this message template is used instead of the default one.
+    new_name : str, optional
+        If given, the default message will recommend the new parameter name and an
+        error will be raised if the user uses both old and new names for the
+        same parameter.
+    modify_docstring : bool, optional
+        If the wrapped function has a docstring, add the deprecated parameters
+        to the "Other Parameters" section.
+    stacklevel : int, optional
+        This decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. If this fails, e.g., due to
+        decorating a closure, you can set the stacklevel manually. The
+        outermost decorator should have stacklevel 2, the next inner one
+        stacklevel 3, etc.
+
+    Notes
+    -----
+    Assign `DEPRECATED` as the new default value for the deprecated parameter.
+    This marks the status of the parameter also in the signature and rendered
+    HTML docs.
+
+    This decorator can be stacked to deprecate more than one parameter.
+
+    Examples
+    --------
+    >>> from skimage._shared.utils import deprecate_parameter, DEPRECATED
+    >>> @deprecate_parameter(
+    ...     "b", new_name="c", start_version="0.1", stop_version="0.3"
+    ... )
+    ... def foo(a, b=DEPRECATED, *, c=None):
+    ...     return a, c
+
+    Calling ``foo(1, b=2)``  will warn with::
+
+        FutureWarning: Parameter `b` is deprecated since version 0.1 and will
+        be removed in 0.3 (or later). To avoid this warning, please use the
+        parameter `c` instead. For more details, see the documentation of
+        `foo`.
+    """
+
+    DEPRECATED = DEPRECATED  # Make signal value accessible for convenience
+
+    remove_parameter_template = (
+        "Parameter `{deprecated_name}` is deprecated since version "
+        "{deprecated_version} and will be removed in {changed_version} (or "
+        "later). To avoid this warning, please do not use the parameter "
+        "`{deprecated_name}`. For more details, see the documentation of "
+        "`{func_name}`."
+    )
+
+    replace_parameter_template = (
+        "Parameter `{deprecated_name}` is deprecated since version "
+        "{deprecated_version} and will be removed in {changed_version} (or "
+        "later). To avoid this warning, please use the parameter `{new_name}` "
+        "instead. For more details, see the documentation of `{func_name}`."
+    )
+
+    def __init__(
+        self,
+        deprecated_name,
+        *,
+        start_version,
+        stop_version,
+        template=None,
+        new_name=None,
+        modify_docstring=True,
+        stacklevel=None,
+    ):
+        self.deprecated_name = deprecated_name
+        self.new_name = new_name
+        self.template = template
+        self.start_version = start_version
+        self.stop_version = stop_version
+        self.modify_docstring = modify_docstring
+        self.stacklevel = stacklevel
+
+    def __call__(self, func):
+        parameters = inspect.signature(func).parameters
+        deprecated_idx = list(parameters.keys()).index(self.deprecated_name)
+        if self.new_name:
+            new_idx = list(parameters.keys()).index(self.new_name)
+        else:
+            new_idx = False
+
+        if parameters[self.deprecated_name].default is not DEPRECATED:
+            raise RuntimeError(
+                f"Expected `{self.deprecated_name}` to have the value {DEPRECATED!r} "
+                f"to indicate its status in the rendered signature."
+            )
+
+        if self.template is not None:
+            template = self.template
+        elif self.new_name is not None:
+            template = self.replace_parameter_template
+        else:
+            template = self.remove_parameter_template
+        warning_message = template.format(
+            deprecated_name=self.deprecated_name,
+            deprecated_version=self.start_version,
+            changed_version=self.stop_version,
+            func_name=func.__qualname__,
+            new_name=self.new_name,
+        )
+
+        @functools.wraps(func)
+        def fixed_func(*args, **kwargs):
+            deprecated_value = DEPRECATED
+            new_value = DEPRECATED
+
+            # Extract value of deprecated parameter
+            if len(args) > deprecated_idx:
+                deprecated_value = args[deprecated_idx]
+                args = (
+                    args[:deprecated_idx] + (DEPRECATED,) + args[deprecated_idx + 1 :]
+                )
+            if self.deprecated_name in kwargs.keys():
+                deprecated_value = kwargs[self.deprecated_name]
+                kwargs[self.deprecated_name] = DEPRECATED
+            # Extract value of new parameter (if present)
+            if new_idx is not False and len(args) > new_idx:
+                new_value = args[new_idx]
+            if self.new_name and self.new_name in kwargs.keys():
+                new_value = kwargs[self.new_name]
+
+            if deprecated_value is not DEPRECATED:
+                stacklevel = (
+                    self.stacklevel
+                    if self.stacklevel is not None
+                    else _warning_stacklevel(func)
+                )
+                warnings.warn(
+                    warning_message, category=FutureWarning, stacklevel=stacklevel
+                )
+
+                if new_value is not DEPRECATED:
+                    raise ValueError(
+                        f"Both deprecated parameter `{self.deprecated_name}` "
+                        f"and new parameter `{self.new_name}` are used. Use "
+                        f"only the latter to avoid conflicting values."
+                    )
+                elif self.new_name is not None:
+                    # Assign old value to new one
+                    kwargs[self.new_name] = deprecated_value
+
+            return func(*args, **kwargs)
+
+        if self.modify_docstring and func.__doc__ is not None:
+            newdoc = _docstring_add_deprecated(
+                func, {self.deprecated_name: self.new_name}, self.start_version
+            )
+            fixed_func.__doc__ = newdoc
 
         return fixed_func
 
@@ -140,7 +362,7 @@ class remove_arg(_DecoratorBaseClass):
         if self.help_msg is not None:
             warning_msg += f' {self.help_msg}'
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -183,11 +405,13 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
 
     Doc = FunctionDoc(func)
     for old_arg, new_arg in kwarg_mapping.items():
-        desc = [
-            f'Deprecated in favor of `{new_arg}`.',
-            '',
-            f'.. deprecated:: {deprecated_version}',
-        ]
+        desc = []
+        if new_arg is None:
+            desc.append(f'`{old_arg}` is deprecated.')
+        else:
+            desc.append(f'Deprecated in favor of `{new_arg}`.')
+
+        desc += ['', f'.. deprecated:: {deprecated_version}']
         Doc['Other Parameters'].append(
             Parameter(name=old_arg, type='DEPRECATED', desc=desc)
         )
@@ -256,7 +480,7 @@ class deprecate_kwarg(_DecoratorBaseClass):
         self.deprecated_version = deprecated_version
 
     def __call__(self, func):
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
@@ -413,7 +637,7 @@ class deprecate_func(_DecoratorBaseClass):
             # Prepend space and make sure it closes with "."
             message += f" {self.hint.rstrip('.')}."
 
-        stack_rank = _get_stack_rank(func)
+        stack_rank = _count_wrappers(func)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):

@@ -1,4 +1,5 @@
 import itertools
+import inspect
 import warnings
 
 import numpy as np
@@ -229,6 +230,23 @@ def test_disambiguate_zero_shift(disambiguate):
     )
     assert isinstance(computed_shift, np.ndarray)
     np.testing.assert_array_equal(computed_shift, np.array((0.0, 0.0)))
+
+
+def test_disambiguate_empty_image():
+    """When the image is empty, disambiguation becomes degenerate."""
+    image = camera()
+    regex = "Could not determine real-space shift"
+    with pytest.warns(UserWarning, match=regex) as record:
+        shift, error, phasediff = phase_cross_correlation(
+            image, image * 0, disambiguate=True
+        )
+        expected_lineno = inspect.currentframe().f_lineno - 3
+    np.testing.assert_array_equal(shift, np.array([0.0, 0.0]))
+    assert np.isnan(error)
+    assert phasediff == 0.0
+    # Assert correct stacklevel
+    assert record[0].filename == __file__
+    assert record[0].lineno == expected_lineno
 
 
 @pytest.mark.parametrize("return_error", [False, True, "always"])

@@ -7,7 +7,7 @@ Cropping, resizing and rescaling images
 
 .. currentmodule:: skimage.transform
 
-Images being NumPy arrays (as described in the :ref:`numpy` section), cropping
+Images being NumPy arrays (as described in the :ref:`numpy_images` section), cropping
 an image can be done with simple slicing operations. Below we crop a 100x100
 square corresponding to the top-left corner of the astronaut image. Note that
 this operation is done for all color channels (the color dimension is the last,
@@ -74,7 +74,7 @@ represented with finite coordinates.
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
    img = ski.util.img_as_float(ski.data.chelsea())
-   tf_img = ski.util.transform.warp(img, tform.inverse)
+   tf_img = ski.transform.warp(img, tform.inverse)
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_transform_types_001.png
    :target: ../auto_examples/transform/plot_transform_types.html
@@ -134,7 +134,7 @@ The ``estimate`` method is point-based, that is, it uses only a set of points
 from the source and destination images. For estimating translations (shifts),
 it is also possible to use a *full-field* method using all pixels, based on
 Fourier-space cross-correlation. This method is implemented by
-:func:`skimage.registration.register_translation` and explained in the
+:func:`skimage.registration.phase_cross_correlation` and explained in the
 :ref:`sphx_glr_auto_examples_registration_plot_register_translation.py`
 tutorial.
 

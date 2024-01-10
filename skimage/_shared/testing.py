@@ -290,8 +290,8 @@ def setup_test():
         warnings.filterwarnings(
             "default",
             message=(
-                "'scipy.sparse.linalg.cg' keyword argument 'tol' is deprecated in "
-                "favor of 'rtol' and will be removed in SciPy v.1.14.0."
+                "'scipy.sparse.linalg.cg' keyword argument `tol` is deprecated in "
+                "favor of `rtol`"
             ),
             category=DeprecationWarning,
         )

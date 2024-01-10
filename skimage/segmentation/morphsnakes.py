@@ -341,11 +341,11 @@ def morphological_geodesic_active_contour(
         original image. Instead, this is usually a preprocessed version of the
         original image that enhances and highlights the borders (or other
         structures) of the object to segment.
-        `morphological_geodesic_active_contour` will try to stop the contour
+        :func:`morphological_geodesic_active_contour` will try to stop the contour
         evolution in areas where `gimage` is small. See
-        `morphsnakes.inverse_gaussian_gradient` as an example function to
+        :func:`inverse_gaussian_gradient` as an example function to
         perform this preprocessing. Note that the quality of
-        `morphological_geodesic_active_contour` might greatly depend on this
+        :func:`morphological_geodesic_active_contour` might greatly depend on this
         preprocessing.
     num_iter : uint
         Number of num_iter to run.
@@ -362,7 +362,7 @@ def morphological_geodesic_active_contour(
         segmentations.
     threshold : float, optional
         Areas of the image with a value smaller than this threshold will be
-        considered borders. The evolution of the contour will stop in this
+        considered borders. The evolution of the contour will stop in these
         areas.
     balloon : float, optional
         Balloon force to guide the contour in non-informative areas of the

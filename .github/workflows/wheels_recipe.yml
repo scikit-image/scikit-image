@@ -1,12 +1,17 @@
 name: Build and Test Wheels
 on:
   workflow_call:
+    inputs:
+      CIBW_BUILD_FRONTEND:
+        required: false
+        type: string
 
 env:
   CIBW_BUILD_VERBOSITY: 2
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_TEST_COMMAND: pytest --pyargs skimage
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+  CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
 
 permissions:
   contents: read
@@ -29,7 +34,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel
@@ -63,9 +68,9 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Install cibuildwheel
@@ -106,7 +111,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install cibuildwheel
         run: |
@@ -183,7 +188,7 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |

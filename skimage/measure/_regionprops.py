@@ -68,6 +68,7 @@ PROPS = {
     'mean_intensity': 'intensity_mean',
     'MinIntensity': 'intensity_min',
     'min_intensity': 'intensity_min',
+    'std_intensity': 'intensity_std',
     'MinorAxisLength': 'axis_minor_length',
     'minor_axis_length': 'axis_minor_length',
     'Moments': 'moments',
@@ -122,6 +123,7 @@ COL_DTYPES = {
     'intensity_max': float,
     'intensity_mean': float,
     'intensity_min': float,
+    'intensity_std': float,
     'label': int,
     'moments': float,
     'moments_central': float,
@@ -148,6 +150,7 @@ _require_intensity_image = (
     'intensity_max',
     'intensity_mean',
     'intensity_min',
+    'intensity_std',
     'moments_weighted',
     'moments_weighted_central',
     'centroid_weighted',
@@ -568,6 +571,11 @@ class RegionProperties:
     def intensity_min(self):
         vals = self.image_intensity[self.image]
         return np.min(vals, axis=0).astype(np.float64, copy=False)
+
+    @property
+    def intensity_std(self):
+        vals = self.image_intensity[self.image]
+        return np.std(vals, axis=0)
 
     @property
     def axis_major_length(self):
@@ -1219,6 +1227,8 @@ def regionprops(
         Value with the mean intensity in the region.
     **intensity_min** : float
         Value with the least intensity in the region.
+    **intensity_std** : float
+        Standard deviation of the intensity in the region.
     **label** : int
         The label in the labeled input image.
     **moments** : (3, 3) ndarray

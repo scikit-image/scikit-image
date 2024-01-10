@@ -275,7 +275,7 @@ _neighb_idx = [[2, 1, 11, 10, 5, 4, 14],      # NEB
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef bint is_Euler_invariant(pixel_type neighbors[],
-                             int[::1] lut) nogil:
+                             int[::1] lut) noexcept nogil:
     """Check if a point is Euler invariant.
 
     Calculate Euler characteristic for each octant and sum up.
@@ -318,7 +318,7 @@ cdef inline bint is_endpoint(pixel_type neighbors[]) noexcept nogil:
     return s == 2
 
 
-cdef bint is_simple_point(pixel_type neighbors[]) nogil:
+cdef bint is_simple_point(pixel_type neighbors[]) noexcept nogil:
     """Check is a point is a Simple Point.
 
     A point is simple iff its deletion does not change connectivity in
