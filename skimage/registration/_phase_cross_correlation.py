@@ -117,9 +117,16 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     target_amp : float
         The normalized average image intensity of the target image
     """
-    error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / (
-        src_amp * target_amp
-    )
+    amp = src_amp * target_amp
+    if amp == 0:
+        warnings.warn(
+            "Could not determine RMS error for normalized average image intensity "
+            f"of {amp}, either the reference or moving image may be empty",
+            UserWarning,
+            stacklevel=4,
+        )
+    with np.errstate(invalid="ignore"):
+        error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / amp
     return np.sqrt(np.abs(error))
 
 
