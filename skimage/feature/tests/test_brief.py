@@ -57,8 +57,7 @@ def test_uniform_mode(dtype):
     )
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)
-    with testing.expected_warnings(['`sample_seed` is a deprecated argument']):
-        BRIEF(descriptor_size=8, sigma=2, mode='uniform', sample_seed=1)
+    BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)
 
     extractor.extract(img, keypoints[:8])
 
