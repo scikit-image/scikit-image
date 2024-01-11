@@ -4,11 +4,7 @@ set -evx
 
 python -m pip install $PIP_FLAGS -r requirements/test.txt
 
-export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-if -n ${MPL_DI}R ]; then
-  mkdir -p $MPL_DIR
-  touch $MPL_DIR/matplotlibrc
-fi
+
 
 TEST_ARGS="--doctest-modules --cov=skimage --showlocals"
 
@@ -29,8 +25,16 @@ if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   echo Build or run examples
   python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
   python -m pip list
-  echo 'backend : Template' > $MPL_DIR/matplotlibrc
+
+  export MPL_DIR
+  MPL_DIR=$(python -c 'import matplotlib; print(matplotlib.get_configdir())')
+  if [[ -n "${MPL_DIR}" ]]; then
+    mkdir -p "${MPL_DIR}"
+    touch "${MPL_DIR}/matplotlibrc"
+    echo 'backend : Template' > "${MPL_DIR}/matplotlibrc"
+  fi
 fi
+
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   echo Build docs
   export SPHINXCACHE=${HOME}/.cache/sphinx; make -C doc html
