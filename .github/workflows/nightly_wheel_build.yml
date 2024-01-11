@@ -15,6 +15,10 @@ jobs:
     uses: ./.github/workflows/wheels_recipe.yml
     with:
       CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
+      CIBW_TEST_COMMAND: >
+        # assert NumPy 2.0 before running tests
+        pip list --pre --format=freeze | grep -q 'numpy==2' &&
+        pytest --pyargs skimage
 
   upload_anaconda:
     permissions:
