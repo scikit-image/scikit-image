@@ -52,7 +52,7 @@ build = [
     'ninja',
     'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.23',
+    'numpy>=1.25',
     # Developer UI
     'spin==0.7',
     'build',
