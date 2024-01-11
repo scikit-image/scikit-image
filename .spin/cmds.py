@@ -77,12 +77,6 @@ def asv(asv_args):
     util.run(['asv'] + list(asv_args))
 
 
-@click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`."""
-    util.run(['python', '-m', 'build', '.', '--sdist'])
-
-
 @click.command(context_settings={'ignore_unknown_options': True})
 @click.argument("ipython_args", metavar='', nargs=-1)
 @click.pass_context
