@@ -181,7 +181,7 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         warnings.warn(
             f"Could not determine real-space shift for periodic shift {shift!r} "
             f"as requested by `disambiguate=True` (disambiguation is degenerate).",
-            stacklevel=4,
+            stacklevel=3,
         )
         return shift
     real_shift_acc = []
