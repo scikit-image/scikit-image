@@ -1,18 +1,13 @@
 Remember to list any API changes below in `doc/release/release_dev.rst`.
 
-Version 0.17
-------------
-
-* Finalize ``skimage.future.manual_segmentation`` API.
-
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
 
-Other (2022)
-------------
+Other
+-----
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
 * Remove warningsfilter for imageio and Pillow once
@@ -21,10 +16,11 @@ Other (2022)
 * NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+* Finalize ``skimage.future.manual_segmentation`` API,
+  see https://github.com/scikit-image/scikit-image/issues/2624
 
 Post numpy 2
 ------------
-
 - Remove try except blocks following comment starting
   `# TODO: when minimum numpy`
   in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
