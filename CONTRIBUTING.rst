@@ -480,7 +480,7 @@ Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
-``skimage._shared.utils.deprecate_kwarg`` and
+``skimage._shared.utils.deprecate_parameter`` and
 ``skimage._shared.utils.deprecate_func`` utility functions can be used
 to perform the above procedure.
 
