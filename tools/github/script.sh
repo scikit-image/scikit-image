@@ -3,9 +3,12 @@
 set -evx
 
 python -m pip install $PIP_FLAGS -r requirements/test.txt
+
 export MPL_DIR=`python -c 'import matplotlib; print(matplotlib.get_configdir())'`
-mkdir -p $MPL_DIR
-touch $MPL_DIR/matplotlibrc
+if -n ${MPL_DI}R ]; then
+  mkdir -p $MPL_DIR
+  touch $MPL_DIR/matplotlibrc
+fi
 
 TEST_ARGS="--doctest-modules --cov=skimage --showlocals"
 
