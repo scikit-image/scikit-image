@@ -15,6 +15,7 @@ env:
   CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
   CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
   CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
+  CIBW_TEST_COMMAND: ${{inputs.CIBW_TEST_COMMAND}}
 
 permissions:
   contents: read
