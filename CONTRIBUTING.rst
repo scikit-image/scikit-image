@@ -264,7 +264,7 @@ Run:
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
 - Run all tests and **doctests**:
-  ``spin test -- --doctest-modules skimage``
+  ``spin test -- --doctest-plus skimage``
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
