@@ -248,7 +248,7 @@ def test_disambiguate_empty_image(null_images):
     # Check warnings
     assert len(records) == 2
     assert "Could not determine real-space shift" in records[0].message.args[0]
-    assert "RMS error for normalized average image" in records[1].message.args[0]
+    assert "Could not determine RMS error between images" in records[1].message.args[0]
     # Assert correct stacklevel
     for record in records:
         assert record.filename == __file__

@@ -120,8 +120,9 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     amp = src_amp * target_amp
     if amp == 0:
         warnings.warn(
-            "Could not determine RMS error for normalized average image intensity "
-            f"of {amp}, either the reference or moving image may be empty",
+            "Could not determine RMS error between images with the normalized "
+            f"average intensities {src_amp!r} and {target_amp!r}. Either the "
+            "reference or moving image may be empty.",
             UserWarning,
             stacklevel=4,
         )
