@@ -5,11 +5,6 @@ Version 0.17
 
 * Finalize ``skimage.future.manual_segmentation`` API.
 
-Version 0.23
-------------
-* Remove deprecated ``return_error`` in
-  ``skimage.registration.phase_cross_correlation``.
-
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``

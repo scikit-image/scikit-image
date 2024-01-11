@@ -10,7 +10,6 @@ import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 from scipy import ndimage as ndi
 
-from skimage._shared.utils import remove_arg
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -192,7 +191,6 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     return np.array(real_shift_acc)
 
 
-@remove_arg('return_error', changed_version='0.23')
 def phase_cross_correlation(
     reference_image,
     moving_image,
@@ -200,7 +198,6 @@ def phase_cross_correlation(
     upsample_factor=1,
     space="real",
     disambiguate=False,
-    return_error=True,
     reference_mask=None,
     moving_mask=None,
     overlap_ratio=0.3,
