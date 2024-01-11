@@ -14,7 +14,9 @@ jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
     with:
-      CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
+      CIBW_ENVIRONMENT: >
+        PIP_PRE=1
+        PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
       # assert NumPy 2.0 before running tests
       CIBW_TEST_COMMAND: >
         pip list --pre --format=freeze | grep -q 'numpy==2' &&
