@@ -123,7 +123,7 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
             f"average intensities {src_amp!r} and {target_amp!r}. Either the "
             "reference or moving image may be empty.",
             UserWarning,
-            stacklevel=4,
+            stacklevel=3,
         )
     with np.errstate(invalid="ignore"):
         error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / amp
