@@ -31,7 +31,7 @@ def test_imread_as_gray():
     assert img.dtype == np.float64
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
 def test_imread_palette():
