@@ -311,7 +311,7 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     out_v = arr.max(-1)
 
     # -- S channel
-    delta = arr.ptp(-1)
+    delta = np.ptp(arr, axis=-1)
     # Ignore warning for zero divided by zero
     old_settings = np.seterr(invalid='ignore')
     out_s = delta / out_v
