@@ -1,4 +1,3 @@
-import inspect
 import sys
 import warnings
 
@@ -322,9 +321,7 @@ def test_deprecate_kwarg_location():
     """
     with pytest.warns(FutureWarning) as record:
         _function_with_deprecated_kwarg(old_kwarg=True)
-        expected_lineno = inspect.currentframe().f_lineno - 1
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__
+        testing.assert_stacklevel(*record)
 
 
 @deprecate_func(
@@ -341,14 +338,13 @@ def _deprecated_func():
 def test_deprecate_func():
     with pytest.warns(FutureWarning) as record:
         _deprecated_func()
-        expected_lineno = inspect.currentframe().f_lineno - 1
+        testing.assert_stacklevel(*record)
 
+    assert len(record) == 1
     assert record[0].message.args[0] == (
         "`_deprecated_func` is deprecated since version x and will be removed in "
         "version y. You are on your own."
     )
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__
 
 
 @deprecate_parameter("old1", start_version="0.10", stop_version="0.12")
@@ -631,12 +627,8 @@ class Test_deprecate_parameter:
     def test_warning_location(self):
         with pytest.warns(FutureWarning) as records:
             _func_deprecated_params(1, old0=2, old1=2)
-            expected_lineno = inspect.currentframe().f_lineno - 1
+            testing.assert_stacklevel(*records)
         assert len(records) == 2
-        assert records[0].filename == __file__
-        assert records[0].lineno == expected_lineno
-        assert records[1].filename == __file__
-        assert records[1].lineno == expected_lineno
 
     def test_stacklevel(self):
         @deprecate_parameter(
@@ -661,6 +653,4 @@ class Test_deprecate_parameter:
 
         with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
             bar(0, 1)
-            expected_lineno = inspect.currentframe().f_lineno - 1
-        assert records[0].lineno == expected_lineno
-        assert records[0].filename == __file__
+            testing.assert_stacklevel(*records)
