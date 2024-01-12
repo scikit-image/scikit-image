@@ -1,7 +1,10 @@
-import numpy as np
 import sys
 
+from .._shared.utils import deprecate_func
+from .._vendored.numpy_lookfor import lookfor as _lookfor
 
+
+@deprecate_func(deprecated_version="0.23", removed_version="0.26")
 def lookfor(what):
     """Do a keyword search on scikit-image docstrings.
 
@@ -21,4 +24,4 @@ def lookfor(what):
     skimage.util.regular_grid
         Find `n_points` regularly spaced along `ar_shape`.
     """
-    return np.lookfor(what, sys.modules[__name__.split('.')[0]])
+    return _lookfor(what, sys.modules[__name__.split('.')[0]])

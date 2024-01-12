@@ -18,6 +18,8 @@ Version 0.26
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
+* Remove deprecated `skimage.lookfor`, `skimage/_vendored/numpy_lookfor.py`,
+  the associated note in `LICENSE.txt` and everything else associated with it.
 
 Other (2022)
 ------------
