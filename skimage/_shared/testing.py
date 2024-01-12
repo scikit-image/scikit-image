@@ -7,6 +7,7 @@ import re
 import struct
 import threading
 import functools
+import inspect
 from tempfile import NamedTemporaryFile
 
 import numpy as np
@@ -361,3 +362,51 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
         return inner
 
     return wrapper
+
+
+def assert_stacklevel(*records, offset=-1):
+    """Assert correct stacklevel on a captured warnings.
+
+    When scikit-image raises warnings the stacklevel should usually be set in
+    such a way that the origin of the warning will point to the public function
+    that was called by the user and not some internal function or the place
+    the warning was emitted. This utility functions helps with checking that
+    the stacklevel was set correctly on warnings captured by `pytest.warns`.
+
+    Parameters
+    ----------
+    records : tuple[WarningMessage]
+        Warnings that were captured by `pytest.warns`.
+    offset : int, optional
+        Offset from the line this function is called to the line were the
+        warning is supposed to originate from. For multiline calls, the
+        first line is relevant. Defaults to -1 which corresponds to the line
+        directly above were this function is called from.
+
+    Raises
+    ------
+    AssertionError
+        If a warning in `records` does not match the expected line number or
+        file name.
+
+    Examples
+    --------
+    >>> def test_something():
+    ...     with pytest.warns(UserWarning, match="some message") as records:
+    ...         something_raising_a_warning()
+    ...     assert_stacklevel(*records)
+    ...
+    >>> def test_another_thing():
+    ...     with pytest.warns(UserWarning, match="some message") as records:
+    ...         iam_raising_many_warnings(
+    ...             "A long argument that forces the call to wrap."
+    ...         )
+    ...     assert_stacklevel(*records, offset=-3)
+    """
+    frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
+    line_number = frame.f_lineno + offset
+    filename = frame.f_code.co_filename
+    expected = f"{filename}:{line_number}"
+    for record in records:
+        actual = f"{record.filename}:{record.lineno}"
+        assert actual == expected
