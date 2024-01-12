@@ -25,7 +25,7 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.22',
+    'numpy>=1.23',
     'scipy>=1.8',
     'networkx>=2.8',
     'pillow>=9.1',
@@ -45,16 +45,16 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.22',
+    'numpy>=1.23',
     # Developer UI
-    'spin==0.7',
+    'spin==0.8',
     'build',
 ]
 data = ['pooch>=1.6.0']
@@ -69,7 +69,7 @@ docs = [
     'numpydoc>=1.6',
     'sphinx-copybutton',
     'pytest-runner',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
     'seaborn>=0.11',
@@ -90,7 +90,7 @@ optional = [
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
     'PyWavelets>=1.1.1',
@@ -98,7 +98,7 @@ optional = [
 ]
 test = [
     'asv',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'numpydoc>=1.5',
     'pooch>=1.6.0',
     'pytest>=7.0',
@@ -117,11 +117,11 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
     'numpy>=1.25',
