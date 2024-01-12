@@ -364,7 +364,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     return wrapper
 
 
-def assert_stacklevel(*records, offset=-1):
+def assert_stacklevel(*warnings, offset=-1):
     """Assert correct stacklevel on a captured warnings.
 
     When scikit-image raises warnings the stacklevel should usually be set in
@@ -375,7 +375,7 @@ def assert_stacklevel(*records, offset=-1):
 
     Parameters
     ----------
-    records : tuple[WarningMessage]
+    warnings : tuple[warning.WarningMessage]
         Warnings that were captured by `pytest.warns`.
     offset : int, optional
         Offset from the line this function is called to the line were the
@@ -386,27 +386,27 @@ def assert_stacklevel(*records, offset=-1):
     Raises
     ------
     AssertionError
-        If a warning in `records` does not match the expected line number or
+        If a warning in `warnings` does not match the expected line number or
         file name.
 
     Examples
     --------
     >>> def test_something():
-    ...     with pytest.warns(UserWarning, match="some message") as records:
+    ...     with pytest.warns(UserWarning, match="some message") as record:
     ...         something_raising_a_warning()
-    ...     assert_stacklevel(*records)
+    ...     assert_stacklevel(*record)
     ...
     >>> def test_another_thing():
-    ...     with pytest.warns(UserWarning, match="some message") as records:
+    ...     with pytest.warns(UserWarning, match="some message") as record:
     ...         iam_raising_many_warnings(
     ...             "A long argument that forces the call to wrap."
     ...         )
-    ...     assert_stacklevel(*records, offset=-3)
+    ...     assert_stacklevel(*record, offset=-3)
     """
     frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
     line_number = frame.f_lineno + offset
     filename = frame.f_code.co_filename
     expected = f"{filename}:{line_number}"
-    for record in records:
-        actual = f"{record.filename}:{record.lineno}"
-        assert actual == expected
+    for warning in warnings:
+        actual = f"{warning.filename}:{warning.lineno}"
+        assert actual == expected, f"{actual} != {expected}"

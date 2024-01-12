@@ -256,6 +256,6 @@ def test_deprecated_return_error(return_error):
     img = np.ones((10, 10))
     with pytest.warns() as record:
         phase_cross_correlation(img, img, return_error=return_error)
+    assert_stacklevel(*record)
     assert len(record) == 1
     assert "return_error argument is deprecated" in record[0].message.args[0]
-    assert record[0].filename == __file__
