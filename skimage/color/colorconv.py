@@ -1437,19 +1437,20 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(float).eps
+    eps = np.finfo(arr.dtype).eps
 
     # compute y_r and L
-    xyz_ref_white = np.array(
-        xyz_tristimulus_values(illuminant=illuminant, observer=observer)
+    xyz_ref_white = xyz_tristimulus_values(
+        illuminant=illuminant, observer=observer, dtype=arr.dtype
     )
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116.0 * np.cbrt(L[mask]) - 16.0
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / ([1, 15, 3] @ xyz_ref_white)
+    uv_weights = np.array([1, 15, 3], dtype=arr.dtype)
+    u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
@@ -1518,18 +1519,20 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(float).eps
+    eps = np.finfo(arr.dtype).eps
 
     # compute y
     y = L.copy()
     mask = y > 7.999625
     y[mask] = np.power((y[mask] + 16.0) / 116.0, 3.0)
     y[~mask] = y[~mask] / 903.3
-    xyz_ref_white = xyz_tristimulus_values(illuminant=illuminant, observer=observer)
+    xyz_ref_white = xyz_tristimulus_values(
+        illuminant=illuminant, observer=observer, dtype=arr.dtype
+    )
     y *= xyz_ref_white[1]
 
     # reference white x,z
-    uv_weights = np.array([1, 15, 3])
+    uv_weights = np.array([1, 15, 3], dtype=arr.dtype)
     u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
     v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
