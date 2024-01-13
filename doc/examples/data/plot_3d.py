@@ -37,3 +37,9 @@ fig = px.imshow(
 fig.layout.annotations[0]["text"] = "Cell membranes"
 fig.layout.annotations[1]["text"] = "Nuclei"
 plotly.io.show(fig)
+
+# %%
+# .. warning::
+#
+#   This example does not run in JupyterLite, due to a limitation
+#   when downloading large datasets.
