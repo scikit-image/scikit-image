@@ -1046,15 +1046,10 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         RGBA image. A new dimension of length 4 is added to input
         image shape.
     """
-
     arr = np.asarray(image)
-
-    alpha_min, alpha_max = dtype_limits(arr, clip_negative=False)
-
     if alpha is None:
-        alpha = alpha_max
-
-    if not np.can_cast(alpha, arr.dtype):
+        _, alpha = dtype_limits(arr, clip_negative=False)
+    if np.result_type(alpha, arr.dtype) != arr.dtype:
         warn(
             f'alpha cannot be safely cast to image dtype {arr.dtype.name}', stacklevel=2
         )
