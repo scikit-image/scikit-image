@@ -1049,15 +1049,16 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
     arr = np.asarray(image)
     if alpha is None:
         _, alpha = dtype_limits(arr, clip_negative=False)
-    if np.result_type(alpha, arr.dtype) != arr.dtype:
+    alpha_arr = np.asarray(alpha).astype(arr.dtype)
+    if not np.array_equal(alpha_arr, alpha):
         warn(
             f'alpha cannot be safely cast to image dtype {arr.dtype.name}', stacklevel=2
         )
-    if np.isscalar(alpha):
-        alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
-    elif alpha.shape != arr.shape:
-        raise ValueError("alpha.shape must match image.shape")
-    rgba = np.stack((arr,) * 3 + (alpha,), axis=channel_axis)
+    try:
+        alpha_arr = np.broadcast_to(alpha_arr, arr.shape)
+    except ValueError as e:
+        raise ValueError("alpha.shape must match image.shape") from e
+    rgba = np.stack((arr,) * 3 + (alpha_arr,), axis=channel_axis)
     return rgba
 
 
