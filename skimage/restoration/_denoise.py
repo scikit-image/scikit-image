@@ -959,8 +959,9 @@ def denoise_wavelet(
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('pywt')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('pywt')
+
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
@@ -1084,8 +1085,9 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('pywt')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('pywt')
+
     >>> import skimage.data
     >>> from skimage import img_as_float
     >>> img = img_as_float(skimage.data.camera())

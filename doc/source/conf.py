@@ -55,6 +55,7 @@ extensions = [
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
 ]
 
