@@ -498,8 +498,7 @@ def test_ransac_shape():
 
     # estimate parameters of corrupted data
     model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=1)
-    with expected_warnings(['`random_state` is a deprecated argument']):
-        ransac(data0, CircleModel, 3, 5, random_state=1)
+    ransac(data0, CircleModel, 3, 5, rng=1)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)

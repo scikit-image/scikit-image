@@ -56,7 +56,7 @@ model, inliers = ransac(
     min_samples=8,
     residual_threshold=1,
     max_trials=5000,
-    random_state=rng,
+    rng=rng,
 )
 
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]

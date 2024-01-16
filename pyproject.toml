@@ -52,7 +52,7 @@ build = [
     'ninja',
     'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.23',
+    'numpy>=1.25',
     # Developer UI
     'spin==0.8',
     'build',
@@ -82,7 +82,7 @@ docs = [
     'kaleido',
     'scikit-learn>=1.1',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.14.1',
+    'pydata-sphinx-theme>=0.15.1',
     'PyWavelets>=1.1.1',
 ]
 optional = [

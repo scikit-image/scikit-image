@@ -10,7 +10,6 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import astronaut, camera
 from skimage.restoration import uft
-from skimage._shared._warnings import expected_warnings
 
 
 test_img = util.img_as_float(camera())
@@ -77,8 +76,7 @@ def test_unsupervised_wiener(dtype):
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
     deconvolved, _ = restoration.unsupervised_wiener(data, psf, rng=seed)
-    with expected_warnings(['`random_state` is a deprecated argument']):
-        restoration.unsupervised_wiener(data, psf, random_state=seed)
+    restoration.unsupervised_wiener(data, psf, rng=seed)
     float_type = _supported_float_type(dtype)
     assert deconvolved.dtype == float_type
 

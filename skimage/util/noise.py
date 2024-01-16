@@ -3,7 +3,6 @@ __all__ = ['random_noise']
 
 import numpy as np
 from .dtype import img_as_float
-from .._shared.utils import deprecate_kwarg
 
 
 def _bernoulli(p, shape, *, rng):
@@ -37,7 +36,6 @@ def _bernoulli(p, shape, *, rng):
     return rng.random(shape) <= p
 
 
-@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21', removed_version='0.23')
 def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
