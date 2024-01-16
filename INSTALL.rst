@@ -400,7 +400,7 @@ functionality is only available with the following installed:
     The ``dask`` module is used to speed up certain functions.
 
 * `Matplotlib <https://matplotlib.org>`__
-    Used in various functions, e.g. for drawing, segmenting, reading images.
+    Used in various functions, e.g., for drawing, segmenting, reading images.
 
 .. include:: ../../../requirements/optional.txt
   :literal:
