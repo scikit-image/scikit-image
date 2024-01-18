@@ -68,8 +68,7 @@ def gaussian(
         .. versionadded:: 0.19
            ``channel_axis`` was added in 0.19.
     out : ndarray, optional
-        The ``out`` parameter passes an array in which to store the
-        filter output.
+        If given, the filtered array will be stored in this array.
 
         .. versionadded:: 0.23
             `out` was added in 0.23.
@@ -85,8 +84,8 @@ def gaussian(
 
     Integer arrays are converted to float.
 
-    `out` should be a floating point data type since gaussian converts
-    to float provided `image`. If `out` is not provided, another array
+    `out` should be of floating-point data type since `gaussian` converts the
+    provided `image` to float. If `out` is not provided, another array
     will be allocated and returned as the result.
 
     The multi-dimensional filter is implemented as a sequence of
@@ -136,7 +135,7 @@ def gaussian(
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
-        raise ValueError("Provided out data type is not float")
+        raise ValueError(f"dtype of `out` must be a floating type, was {out.dtype!r}")
     return ndi.gaussian_filter(
         image, sigma, output=out, mode=mode, cval=cval, truncate=truncate
     )
