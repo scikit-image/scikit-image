@@ -6,7 +6,7 @@ python -m pip install $PIP_FLAGS -r requirements/test.txt
 
 
 
-TEST_ARGS="--doctest-modules --cov=skimage --showlocals"
+TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
 
 if [[ ${WITHOUT_POOCH} == "1" ]]; then
   # remove pooch (previously installed via requirements/test.txt)

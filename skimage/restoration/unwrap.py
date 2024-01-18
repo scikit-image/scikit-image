@@ -1,14 +1,12 @@
 import numpy as np
 
 from .._shared.utils import warn
-from .._shared.utils import deprecate_kwarg
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
-@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21', removed_version='0.23')
 def unwrap_phase(image, wrap_around=False, rng=None):
     '''Recover the original from a wrapped phase image.
 

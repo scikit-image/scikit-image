@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
-from .._shared.utils import deprecate_kwarg
 from . import _ncut, _ncut_cy
 
 
@@ -68,9 +67,6 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def cut_normalized(
     labels,
     rag,

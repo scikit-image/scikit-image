@@ -3,7 +3,6 @@ from scipy.spatial import cKDTree
 
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
-from .._shared.utils import deprecate_kwarg
 
 
 def hough_line_peaks(
@@ -248,7 +247,6 @@ def hough_line(image, theta=None):
     return _hough_line(image, theta=theta)
 
 
-@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21', removed_version='0.23')
 def probabilistic_hough_line(
     image, threshold=10, line_length=50, line_gap=10, theta=None, rng=None
 ):

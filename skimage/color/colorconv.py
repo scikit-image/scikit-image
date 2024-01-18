@@ -61,7 +61,6 @@ from .._shared.utils import (
     identity,
     reshape_nd,
     slice_at_axis,
-    deprecate_func,
 )
 from ..util import dtype, dtype_limits
 
@@ -628,43 +627,6 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
             f'Unknown illuminant/observer combination '
             f'(`{illuminant}`, `{observer}`)'
         )
-
-
-@deprecate_func(
-    hint="Use `skimage.color.xyz_tristimulus_values` instead.",
-    deprecated_version="0.21",
-    removed_version="0.23",
-)
-def get_xyz_coords(illuminant, observer, dtype=float):
-    """Get the XYZ coordinates of the given illuminant and observer [1]_.
-
-    Parameters
-    ----------
-    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
-        The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10", "R"}, optional
-        One of: 2-degree observer, 10-degree observer, or 'R' observer as in
-        R function grDevices::convertColor.
-    dtype: dtype, optional
-        Output data type.
-
-    Returns
-    -------
-    out : array
-        Array with 3 elements containing the XYZ coordinates of the given
-        illuminant.
-
-    Raises
-    ------
-    ValueError
-        If either the illuminant or the observer angle are not supported or
-        unknown.
-
-    References
-    ----------
-    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
-    """
-    return xyz_tristimulus_values(illuminant=illuminant, observer=observer, dtype=dtype)
 
 
 # Haematoxylin-Eosin-DAB colorspace
