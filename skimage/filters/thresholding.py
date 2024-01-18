@@ -137,8 +137,8 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('matplotlib')  # not required for example below
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> from skimage.data import text
     >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)

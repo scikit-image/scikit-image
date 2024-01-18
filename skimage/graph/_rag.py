@@ -507,8 +507,8 @@ def show_rag(
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('matplotlib')  # not required for example below
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> from skimage import data, segmentation, graph
     >>> import matplotlib.pyplot as plt

@@ -208,8 +208,8 @@ def show():
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('matplotlib')  # not required for example below
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> import skimage.io as io
     >>> rng = np.random.default_rng()
