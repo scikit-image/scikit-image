@@ -10,7 +10,6 @@ import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 from scipy import ndimage as ndi
 
-from skimage._shared.utils import remove_arg
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
@@ -117,9 +116,17 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     target_amp : float
         The normalized average image intensity of the target image
     """
-    error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / (
-        src_amp * target_amp
-    )
+    amp = src_amp * target_amp
+    if amp == 0:
+        warnings.warn(
+            "Could not determine RMS error between images with the normalized "
+            f"average intensities {src_amp!r} and {target_amp!r}. Either the "
+            "reference or moving image may be empty.",
+            UserWarning,
+            stacklevel=3,
+        )
+    with np.errstate(invalid="ignore"):
+        error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / amp
     return np.sqrt(np.abs(error))
 
 
@@ -182,7 +189,7 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         warnings.warn(
             f"Could not determine real-space shift for periodic shift {shift!r} "
             f"as requested by `disambiguate=True` (disambiguation is degenerate).",
-            stacklevel=4,
+            stacklevel=3,
         )
         return shift
     real_shift_acc = []
@@ -192,7 +199,6 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     return np.array(real_shift_acc)
 
 
-@remove_arg('return_error', changed_version='0.23')
 def phase_cross_correlation(
     reference_image,
     moving_image,
@@ -200,7 +206,6 @@ def phase_cross_correlation(
     upsample_factor=1,
     space="real",
     disambiguate=False,
-    return_error=True,
     reference_mask=None,
     moving_mask=None,
     overlap_ratio=0.3,

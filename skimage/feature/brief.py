@@ -3,7 +3,7 @@ import copy
 import numpy as np
 
 from .._shared.filters import gaussian
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD
 from .brief_cy import _brief_loop
 from .util import (
     DescriptorExtractor,
@@ -123,9 +123,6 @@ class BRIEF(DescriptorExtractor):
 
     """
 
-    @deprecate_kwarg(
-        {'sample_seed': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-    )
     def __init__(
         self, descriptor_size=256, patch_size=49, mode='normal', sigma=1, rng=1
     ):
