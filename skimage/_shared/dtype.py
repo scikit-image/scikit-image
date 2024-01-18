@@ -48,13 +48,13 @@ def numeric_dtype_min_max(dtype):
     --------
     >>> import numpy as np
     >>> numeric_dtype_min_max(np.uint8)
-    (np.uint8(0), np.uint8(255))
+    (0, 255)
     >>> numeric_dtype_min_max(bool)
-    (np.False_, np.True_)
+    (False, True)
     >>> numeric_dtype_min_max(np.float64)
-    np.float64(-1.7976931348623157e+308), np.float64(1.7976931348623157e+308))
+    (-1.7976931348623157e+308, 1.7976931348623157e+308)
     >>> numeric_dtype_min_max(int)
-    (np.int64(-9223372036854775808), np.int64(9223372036854775807))
+    (-9223372036854775808, 9223372036854775807)
     """
     dtype = np.dtype(dtype)
     if np.issubdtype(dtype, np.integer):
