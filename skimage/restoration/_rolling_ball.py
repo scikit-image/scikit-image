@@ -1,10 +1,21 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_parameter, DEPRECATED
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
+@deprecate_parameter(
+    "num_threads", new_name="num_workers", start_version="0.23", stop_version="0.26"
+)
+def rolling_ball(
+    image,
+    *,
+    radius=100,
+    kernel=None,
+    nansafe=False,
+    num_threads=DEPRECATED,
+    num_workers=None,
+):
     """Estimate background intensity by rolling/translating a kernel.
 
     This rolling ball algorithm estimates background intensity for a
@@ -25,11 +36,15 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     nansafe: bool, optional
         If ``False`` (default) assumes that none of the values in ``image``
         are ``np.nan``, and uses a faster implementation.
-    num_threads: int, optional
+    num_workers: int, optional
         The maximum number of threads to use. If ``None`` use the OpenMP
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
+
+        .. versionchanged:: 0.23
+
+            Replaced old parameter `num_threads` in 0.23.
 
     Returns
     -------
@@ -81,8 +96,8 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     float_type = _supported_float_type(image.dtype)
     img = image.astype(float_type, copy=False)
 
-    if num_threads is None:
-        num_threads = 0
+    if num_workers is None:
+        num_workers = 0
 
     if kernel is None:
         kernel = ball_kernel(radius, image.ndim)
@@ -109,7 +124,7 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape.astype(np.intp),
-        num_threads,
+        num_workers,
     )
 
     background = background.astype(image.dtype, copy=False)

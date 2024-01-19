@@ -321,7 +321,7 @@ def fetch(data_filename):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
-def run_in_parallel(num_threads=2, warnings_matching=None):
+def run_in_parallel(num_workers=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -329,7 +329,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
 
     Parameters
     ----------
-    num_threads : int, optional
+    num_workers : int, optional
         The number of times the function is run in parallel.
 
     warnings_matching: list or None
@@ -340,14 +340,14 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
 
     """
 
-    assert num_threads > 0
+    assert num_workers > 0
 
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
             with expected_warnings(warnings_matching):
                 threads = []
-                for i in range(num_threads - 1):
+                for i in range(num_workers - 1):
                     thread = threading.Thread(target=func, args=args, kwargs=kwargs)
                     threads.append(thread)
                 for thread in threads:
