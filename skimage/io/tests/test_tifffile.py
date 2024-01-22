@@ -1,3 +1,5 @@
+from packaging.version import Version
+
 import pathlib
 from tempfile import NamedTemporaryFile
 
@@ -24,6 +26,10 @@ def test_imread_uint16():
     assert_array_almost_equal(img, expected)
 
 
+@pytest.mark.xfail(
+    Version(np.__version__) >= Version('2.0.0.dev0'),
+    reason='tifffile uses deprecated attribute `ndarray.newbyteorder`',
+)
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
