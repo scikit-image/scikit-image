@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from .draw import polygon as draw_polygon, disk as draw_disk, ellipse as draw_ellipse
-from .._shared.utils import deprecate_kwarg, warn
+from .._shared.utils import warn
 
 
 def _generate_rectangle_mask(point, image, shape, random):
@@ -301,9 +301,6 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
     return np.transpose(colors)
 
 
-@deprecate_kwarg(
-    {'random_seed': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def random_shapes(
     image_shape,
     max_shapes,

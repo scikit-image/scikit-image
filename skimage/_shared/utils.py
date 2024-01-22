@@ -329,52 +329,6 @@ class deprecate_parameter:
         return fixed_func
 
 
-class remove_arg(_DecoratorBaseClass):
-    """Decorator to remove an argument from function's signature.
-
-    Parameters
-    ----------
-    arg_name: str
-        The name of the argument to be removed.
-    changed_version : str
-        The package version in which the warning will be replaced by
-        an error.
-    help_msg: str
-        Optional message appended to the generic warning message.
-
-    """
-
-    def __init__(self, arg_name, *, changed_version, help_msg=None):
-        self.arg_name = arg_name
-        self.help_msg = help_msg
-        self.changed_version = changed_version
-
-    def __call__(self, func):
-        parameters = inspect.signature(func).parameters
-        arg_idx = list(parameters.keys()).index(self.arg_name)
-        warning_msg = (
-            f'{self.arg_name} argument is deprecated and will be removed '
-            f'in version {self.changed_version}. To avoid this warning, '
-            f'please do not use the {self.arg_name} argument. Please '
-            f'see {func.__name__} documentation for more details.'
-        )
-
-        if self.help_msg is not None:
-            warning_msg += f' {self.help_msg}'
-
-        stack_rank = _count_wrappers(func)
-
-        @functools.wraps(func)
-        def fixed_func(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
-            if len(args) > arg_idx or self.arg_name in kwargs.keys():
-                # warn that arg_name is deprecated
-                warnings.warn(warning_msg, FutureWarning, stacklevel=stacklevel)
-            return func(*args, **kwargs)
-
-        return fixed_func
-
-
 def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     """Add deprecated kwarg(s) to the "Other Params" section of a docstring.
 
@@ -383,8 +337,8 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     func : function
         The function whose docstring we wish to update.
     kwarg_mapping : dict
-        A dict containing {old_arg: new_arg} key/value pairs as used by
-        `deprecate_kwarg`.
+        A dict containing {old_arg: new_arg} key/value pairs, see
+        `deprecate_parameter`.
     deprecated_version : str
         A major.minor version string specifying when old_arg was
         deprecated.
@@ -439,75 +393,6 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     # strip any extra spaces from ends of lines
     final_docstring = '\n'.join([line.rstrip() for line in final_docstring.split('\n')])
     return final_docstring
-
-
-class deprecate_kwarg(_DecoratorBaseClass):
-    """Decorator ensuring backward compatibility when argument names are
-    modified in a function definition.
-
-    Parameters
-    ----------
-    kwarg_mapping: dict
-        Mapping between the function's old argument names and the new
-        ones.
-    deprecated_version : str
-        The package version in which the argument was first deprecated.
-    warning_msg: str
-        Optional warning message. If None, a generic warning message
-        is used.
-    removed_version : str
-        The package version in which the deprecated argument will be
-        removed.
-
-    """
-
-    def __init__(
-        self, kwarg_mapping, deprecated_version, warning_msg=None, removed_version=None
-    ):
-        self.kwarg_mapping = kwarg_mapping
-        if warning_msg is None:
-            self.warning_msg = (
-                "`{old_arg}` is a deprecated argument name " "for `{func_name}`. "
-            )
-            if removed_version is not None:
-                self.warning_msg += (
-                    f'It will be removed in ' f'version {removed_version}. '
-                )
-            self.warning_msg += "Please use `{new_arg}` instead."
-        else:
-            self.warning_msg = warning_msg
-
-        self.deprecated_version = deprecated_version
-
-    def __call__(self, func):
-        stack_rank = _count_wrappers(func)
-
-        @functools.wraps(func)
-        def fixed_func(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
-
-            for old_arg, new_arg in self.kwarg_mapping.items():
-                if old_arg in kwargs:
-                    #  warn that the function interface has changed:
-                    warnings.warn(
-                        self.warning_msg.format(
-                            old_arg=old_arg, func_name=func.__name__, new_arg=new_arg
-                        ),
-                        FutureWarning,
-                        stacklevel=stacklevel,
-                    )
-                    # Substitute new_arg to old_arg
-                    kwargs[new_arg] = kwargs.pop(old_arg)
-
-            # Call the function with the fixed arguments
-            return func(*args, **kwargs)
-
-        if func.__doc__ is not None:
-            newdoc = _docstring_add_deprecated(
-                func, self.kwarg_mapping, self.deprecated_version
-            )
-            fixed_func.__doc__ = newdoc
-        return fixed_func
 
 
 class channel_as_last_axis:

@@ -264,7 +264,7 @@ Run:
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
 - Run all tests and **doctests**:
-  ``spin test -- --doctest-modules skimage``
+  ``spin test -- --doctest-plus skimage``
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -480,7 +480,7 @@ Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
-``skimage._shared.utils.deprecate_kwarg`` and
+``skimage._shared.utils.deprecate_parameter`` and
 ``skimage._shared.utils.deprecate_func`` utility functions can be used
 to perform the above procedure.
 

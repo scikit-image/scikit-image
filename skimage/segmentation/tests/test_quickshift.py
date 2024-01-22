@@ -22,10 +22,7 @@ def test_grey(dtype):
     img += 0.05 * rng.normal(size=img.shape)
     img = img.astype(dtype, copy=False)
     seg = quickshift(img, kernel_size=2, max_dist=3, rng=0, convert2lab=False, sigma=0)
-    with testing.expected_warnings(['`random_seed` is a deprecated argument']):
-        quickshift(
-            img, kernel_size=2, max_dist=3, random_seed=0, convert2lab=False, sigma=0
-        )
+    quickshift(img, kernel_size=2, max_dist=3, rng=0, convert2lab=False, sigma=0)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     # that mostly respect the 4 regions:
