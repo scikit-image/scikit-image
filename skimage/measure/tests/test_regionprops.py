@@ -1368,8 +1368,8 @@ def test_column_dtypes_correct():
 
 
 def test_all_documented_items_in_col_dtypes():
-    numpydoc = pytest.importorskip("numpydoc")
-    docstring = numpydoc.docscrape.FunctionDoc(regionprops)
+    numpydoc_docscrape = pytest.importorskip("numpydoc.docscrape")
+    docstring = numpydoc_docscrape.FunctionDoc(regionprops)
     notes_lines = docstring['Notes']
     property_lines = filter(lambda line: line.startswith('**'), notes_lines)
     pattern = r'\*\*(?P<property_name>[a-z_]+)\*\*.*'
