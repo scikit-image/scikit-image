@@ -60,16 +60,16 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
 
     # get rank of bg_label
-    bg_label_rank_list = mapped_labels[label.flat == bg_label]
+    bg_label_rank_list = mapped_labels[label == bg_label]
 
     # The rank of each label is the index of the color it is matched to in
     # color cycle. bg_label should always be mapped to the first color, so
     # its rank must be 0. Other labels should be ranked from small to large
     # from 1.
     if len(bg_label_rank_list) > 0:
-        bg_label_rank = bg_label_rank_list[0]
+        bg_label_rank = bg_label_rank_list.flat[0]
         mapped_labels[mapped_labels < bg_label_rank] += 1
-        mapped_labels[label.flat == bg_label] = 0
+        mapped_labels[label == bg_label] = 0
     else:
         mapped_labels += 1
 
@@ -77,7 +77,7 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     color_cycle = itertools.cycle(colors)
     color_cycle = itertools.chain([bg_color], color_cycle)
 
-    return mapped_labels, color_cycle
+    return mapped_labels.reshape(-1), color_cycle
 
 
 def label2rgb(
