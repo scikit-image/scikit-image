@@ -36,7 +36,7 @@ repos:
         args: [--no-pycodestyle, --max-line-length=88]
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: a5d7f70a9792311ac09a74de7eb1feb6fb82d84d # frozen: 24.1.0
+    rev: 3de533c80a7e95bb6efb213169d269267e9b234b # frozen: 23.12.1
     hooks:
       - id: black
 
