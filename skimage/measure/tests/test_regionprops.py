@@ -4,7 +4,7 @@ import re
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
-import numpydoc
+import numpydoc.docscrape
 from numpy.testing import (
     assert_allclose,
     assert_almost_equal,
