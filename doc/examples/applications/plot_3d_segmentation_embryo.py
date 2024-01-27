@@ -15,6 +15,9 @@ We use sample data from [1]_, more precisely from embryo B at time point 184.
 
 """
 
+import io
+import requests
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
@@ -35,7 +38,8 @@ import skimage as ski
 #     np.save('sample_3D_frame_184', sample)
 
 sample_url = 'https://github.com/mkcor/draft-notebooks/raw/main/embryo/data/sample_3D_frame_184.npy'
-im3d = np.load(sample_url)
+response = requests.get(sample_url)
+im3d = np.load(io.BytesIO(response.content))
 
 print(f'The shape of the image is: {im3d.shape}')
 
@@ -148,7 +152,8 @@ ax[1].axis('off')
 # The output (segmentation result) is a KLB file; we save it into a Numpy array.
 
 res_url = 'https://github.com/mkcor/draft-notebooks/blob/main/embryo/data/tgmm_conn74_tau14.npy'
-gt = np.load(res_url)
+resp = requests.get(res_url)
+gt = np.load(io.BytesIO(resp.content))
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(ski.color.label2rgb(gt[25, :, :], bg_label=0))
