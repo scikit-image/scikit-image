@@ -63,7 +63,7 @@ binary_local = im3d > local_thresh
 #####################################################################
 # Let us view the mid-stack `xy` section.
 
-fig, axes = plt.subplots(ncols=3, figsize=(10, 30))
+fig, axes = plt.subplots(ncols=3, figsize=(12, 4))
 ax = axes.ravel()
 
 ax[0].imshow(im3d[25, :, :])
