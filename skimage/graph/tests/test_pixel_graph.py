@@ -51,7 +51,7 @@ def test_default_edge_func():
 def test_no_mask_with_edge_func():
     image = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 
-    def func(x, y, z):
+    def func(x: np.ndarray, y: np.ndarray, z: np.ndarray):
         return np.abs(x - y)
 
     pixel_graph(image, edge_function=func)  # Should not return TypeError
