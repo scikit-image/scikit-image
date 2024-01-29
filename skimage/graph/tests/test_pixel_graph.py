@@ -46,3 +46,12 @@ def test_default_edge_func():
     assert num_edges == 12  # lattice in a (3, 3) grid
     np.testing.assert_almost_equal(g[0, 1], 0.78 * np.abs(image[0, 0] - image[0, 1]))
     np.testing.assert_array_equal(n, np.arange(image.size))
+
+
+def test_no_mask_with_edge_func():
+    image = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+    def func(x, y, z):
+        return np.abs(x - y)
+
+    pixel_graph(image, edge_function=func)  # Should not return TypeError
