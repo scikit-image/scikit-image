@@ -72,8 +72,9 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
     """
     if image.dtype == bool and mask is None:
         mask = image
-    if mask is None and edge_function is None:
+    if mask is None:
         mask = np.ones_like(image, dtype=bool)
+    if edge_function is None:
         edge_function = _weighted_abs_diff
 
     # Strategy: we are going to build the (i, j, data) arrays of a scipy
