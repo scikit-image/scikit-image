@@ -102,7 +102,7 @@ cells_noisy = smooth > thresholds[1]
 cells = ski.morphology.opening(cells_noisy, footprint=np.ones((3, 5, 5)))
 
 #####################################################################
-# We use the watershed algorithm to find single nuclei when they are touching
+# We use the watershed algorithm to separate nuclei when they are touching
 # or overlapping.
 
 distance = ndi.distance_transform_edt(cells)
@@ -118,7 +118,7 @@ fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells[25, :, :], cmap='gray')
 ax[0].set_title('Touching nuclei')
 ax[0].axis('off')
-ax[1].imshow(ski.color.label2rgb(segmented_cells, bg_label=0)[25, :, :])
+ax[1].imshow(ski.color.label2rgb(segmented_cells[25, :, :], bg_label=0))
 ax[1].set_title('Segmented nuclei')
 ax[1].axis('off')
 
@@ -145,7 +145,7 @@ ax[1].axis('off')
 #     ProcessStack sample_3D_frame_184_seg_conn74_rad2.bin 14 50
 #
 # Chose tau=14 because persistanceSegmentationTau=14 in config file.
-# A value of tau=2 clearly yiels oversegmentation (yields 1597 nuclei).
+# A value of tau=2 clearly yields over-segmentation (yields 1597 nuclei).
 # Chose minSuperVoxelSzPx=50 because minNucleiSize=50 in config file.
 # Not much difference between minSuperVoxelSzPx=50 (yiels 517 nuclei) and
 # minSuperVoxelSzPx=14 (yiels 541 nuclei).
@@ -159,7 +159,7 @@ fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(ski.color.label2rgb(gt[25, :, :], bg_label=0))
 ax[0].set_title('TGMM output')
 ax[0].axis('off')
-ax[1].imshow(ski.color.label2rgb(segmented_cells, bg_label=0)[25, :, :])
+ax[1].imshow(ski.color.label2rgb(segmented_cells[25, :, :], bg_label=0))
 ax[1].set_title('Our output')
 ax[1].axis('off')
 
