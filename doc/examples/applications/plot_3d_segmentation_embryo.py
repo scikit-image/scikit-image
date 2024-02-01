@@ -155,6 +155,13 @@ res_url = 'https://github.com/mkcor/draft-notebooks/blob/main/embryo/data/tgmm_c
 resp = requests.get(res_url)
 gt = np.load(io.BytesIO(resp.content))
 
+# Ensure TGMM result is an image of type "labeled"
+assert gt.dtype in [np.uint16, np.uint32, np.uint64]
+assert gt.min() == 0
+assert gt.max() == np.unique(gt).shape[0] - 1
+
+print(f'TGMM finds {gt.max()} nuclei.')
+
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(ski.color.label2rgb(gt[25, :, :], bg_label=0))
 ax[0].set_title('TGMM output')
