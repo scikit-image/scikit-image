@@ -320,8 +320,9 @@ def _random_circle(shape):
     np.random.seed(98312871)
     image = np.random.rand(*shape)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
-    radius = min(shape) // 2
+    center = np.array(shape) / 2 - 0.5
+    r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
+    radius = min(shape) / 2 - 0.5
     image[r > radius] = 0.0
     return image
 
@@ -334,8 +335,9 @@ def test_radon_circle():
     # Synthetic data, circular symmetry
     shape = (61, 79)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
-    radius = min(shape) // 2
+    center = np.array(shape) / 2 - 0.5
+    r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
+    radius = min(shape)  / 2 - 0.5
     image = np.clip(radius - r, 0, np.inf)
     image = _rescale_intensity(image)
     angles = np.linspace(0, 180, min(shape), endpoint=False)
