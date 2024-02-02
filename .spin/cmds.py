@@ -26,7 +26,7 @@ from spin import util
     default=True,
     help="Sphinx gallery: enable/disable plots",
 )
-@click.option("--jobs", "-j", default="auto", help="Number of parallel build jobs")
+@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
 @click.option(
     "--install-deps/--no-install-deps",
     default=False,

@@ -13,8 +13,6 @@ from skimage._shared.utils import (
     channel_as_last_axis,
     check_nD,
     deprecate_func,
-    deprecate_kwarg,
-    remove_arg,
     deprecate_parameter,
     DEPRECATED,
 )
@@ -30,68 +28,6 @@ try:
     have_numpydoc = True
 except ImportError:
     pass
-
-
-def test_remove_argument():
-    @remove_arg('arg1', changed_version='0.12')
-    def foo(arg0, arg1=0, arg2=1):
-        """Expected docstring"""
-        return arg0, arg1, arg2
-
-    @remove_arg(
-        'arg1', changed_version='0.12', help_msg="Some indication on future behavior"
-    )
-    def bar(arg0, arg1=0, arg2=1):
-        """Expected docstring"""
-        return arg0, arg1, arg2
-
-    # Assert warning messages
-    expected_msg = (
-        "arg1 argument is deprecated and will be removed "
-        "in version 0.12. To avoid this warning, "
-        "please do not use the arg1 argument. Please see "
-        "foo documentation for more details."
-    )
-
-    with pytest.warns(FutureWarning) as record:
-        assert foo(0, 1) == (0, 1, 1)
-
-    assert str(record[0].message) == expected_msg
-
-    with pytest.warns(FutureWarning) as record:
-        assert foo(0, arg1=1) == (0, 1, 1)
-
-    assert str(record[0].message) == expected_msg
-
-    expected_msg = (
-        "arg1 argument is deprecated and will be removed "
-        "in version 0.12. To avoid this warning, "
-        "please do not use the arg1 argument. Please see "
-        "bar documentation for more details."
-        " Some indication on future behavior"
-    )
-
-    with pytest.warns(FutureWarning) as record:
-        assert bar(0, 1) == (0, 1, 1)
-
-    assert str(record[0].message) == expected_msg
-
-    with pytest.warns(FutureWarning) as record:
-        assert bar(0, arg1=1) == (0, 1, 1)
-
-    assert str(record[0].message) == expected_msg
-    with warnings.catch_warnings(record=True) as recorded:
-        # No kwargs
-        assert foo(0) == (0, 0, 1)
-        assert foo(0, arg2=0) == (0, 0, 0)
-
-        # Function name and doc is preserved
-        assert foo.__name__ == 'foo'
-        if sys.flags.optimize < 2:
-            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            assert foo.__doc__ == 'Expected docstring'
-    # Assert no warnings were raised
-    assert len(recorded) == 0
 
 
 def test_change_default_value():
@@ -137,70 +73,6 @@ def test_change_default_value():
             # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
             assert foo.__doc__ == 'Expected docstring'
     # Assert no warnings were raised
-    assert len(recorded) == 0
-
-
-def test_deprecate_kwarg():
-    @deprecate_kwarg({'old_arg1': 'new_arg1'}, '0.19')
-    def foo(arg0, new_arg1=1, arg2=None):
-        """Expected docstring"""
-        return arg0, new_arg1, arg2
-
-    @deprecate_kwarg(
-        {'old_arg1': 'new_arg1'},
-        deprecated_version='0.19',
-        warning_msg="Custom warning message",
-    )
-    def bar(arg0, new_arg1=1, arg2=None):
-        """Expected docstring"""
-        return arg0, new_arg1, arg2
-
-    # Assert that the DeprecationWarning is raised when the deprecated
-    # argument name is used and that the reasult is valid
-    with pytest.warns(FutureWarning) as record:
-        assert foo(0, old_arg1=1) == (0, 1, None)
-        assert bar(0, old_arg1=1) == (0, 1, None)
-
-    msg = (
-        "`old_arg1` is a deprecated argument name "
-        "for `foo`. Please use `new_arg1` instead."
-    )
-    assert str(record[0].message) == msg
-    assert str(record[1].message) == "Custom warning message"
-
-    # Assert that nothing happens when the function is called with the
-    # new API
-    with warnings.catch_warnings(record=True) as recorded:
-        # No kwargs
-        assert foo(0) == (0, 1, None)
-        assert foo(0, 2) == (0, 2, None)
-        assert foo(0, 1, 2) == (0, 1, 2)
-        # Kwargs without deprecated argument
-        assert foo(0, new_arg1=1, arg2=2) == (0, 1, 2)
-        assert foo(0, new_arg1=2) == (0, 2, None)
-        assert foo(0, arg2=2) == (0, 1, 2)
-        assert foo(0, 1, arg2=2) == (0, 1, 2)
-        # Function name and doc is preserved
-        assert foo.__name__ == 'foo'
-        if sys.flags.optimize < 2:
-            # if PYTHONOPTIMIZE is set to 2, docstrings are stripped
-            if not have_numpydoc:
-                assert foo.__doc__ == """Expected docstring"""
-            else:
-                assert (
-                    foo.__doc__
-                    == """Expected docstring
-
-
-    Other Parameters
-    ----------------
-    old_arg1 : DEPRECATED
-        Deprecated in favor of `new_arg1`.
-
-        .. deprecated:: 0.19
-"""
-                )
-
     assert len(recorded) == 0
 
 
@@ -311,22 +183,6 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size == x.shape[channel_axis]
 
 
-@deprecate_kwarg({"old_kwarg": "new_kwarg"}, deprecated_version="x.y.z")
-def _function_with_deprecated_kwarg(*, new_kwarg):
-    pass
-
-
-def test_deprecate_kwarg_location():
-    """Assert that warning message issued by deprecate_kwarg points to
-    file and line number where decorated function is called.
-    """
-    with pytest.warns(FutureWarning) as record:
-        _function_with_deprecated_kwarg(old_kwarg=True)
-        expected_lineno = inspect.currentframe().f_lineno - 1
-    assert record[0].lineno == expected_lineno
-    assert record[0].filename == __file__
-
-
 @deprecate_func(
     deprecated_version="x", removed_version="y", hint="You are on your own."
 )
@@ -392,6 +248,7 @@ def _func_replace_params(
 
 
 class Test_deprecate_parameter:
+    @pytest.mark.skipif(not have_numpydoc, reason="requires numpydoc")
     def test_docstring_removed_param(self):
         # function name and doc are preserved
         assert _func_deprecated_params.__name__ == "_func_deprecated_params"
@@ -422,6 +279,7 @@ class Test_deprecate_parameter:
 """
             )
 
+    @pytest.mark.skipif(not have_numpydoc, reason="requires numpydoc")
     def test_docstring_replaced_param(self):
         assert _func_replace_params.__name__ == "_func_replace_params"
         if sys.flags.optimize < 2:

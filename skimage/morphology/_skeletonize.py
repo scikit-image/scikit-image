@@ -4,7 +4,7 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD
 from ..util import crop
 from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
@@ -355,9 +355,6 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
