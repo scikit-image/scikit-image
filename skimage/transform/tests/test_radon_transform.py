@@ -337,7 +337,7 @@ def test_radon_circle():
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
     center = np.array(shape) / 2 - 0.5
     r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
-    radius = min(shape)  / 2 - 0.5
+    radius = min(shape) / 2 - 0.5
     image = np.clip(radius - r, 0, np.inf)
     image = _rescale_intensity(image)
     angles = np.linspace(0, 180, min(shape), endpoint=False)
