@@ -385,7 +385,7 @@ def _apply_vector_per_pixel(
 
 
 def autolevel(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Auto-level image using local histogram.
 
@@ -452,7 +452,7 @@ def autolevel(
 
 
 def equalize(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Equalize image using local histogram.
 
@@ -516,7 +516,7 @@ def equalize(
 
 
 def gradient(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -580,7 +580,7 @@ def gradient(
 
 
 def maximum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local maximum of an image.
 
@@ -653,7 +653,7 @@ def maximum(
 
 
 def mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local mean of an image.
 
@@ -717,7 +717,7 @@ def mean(
 
 
 def geometric_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local geometric mean of an image.
 
@@ -786,7 +786,7 @@ def geometric_mean(
 
 
 def subtract_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return image subtracted from its local mean.
 
@@ -862,9 +862,9 @@ def median(
     footprint=None,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Return local median of an image.
 
@@ -936,7 +936,7 @@ def median(
 
 
 def minimum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local minimum of an image.
 
@@ -1009,7 +1009,7 @@ def minimum(
 
 
 def modal(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local mode of an image.
 
@@ -1075,7 +1075,7 @@ def modal(
 
 
 def enhance_contrast(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Enhance contrast of an image.
 
@@ -1143,7 +1143,7 @@ def enhance_contrast(
 
 
 def pop(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return the local number (population) of pixels.
 
@@ -1214,7 +1214,7 @@ def pop(
 
 
 def sum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return the local sum of pixels.
 
@@ -1285,7 +1285,7 @@ def sum(
 
 
 def threshold(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Local threshold of an image.
 
@@ -1356,7 +1356,7 @@ def threshold(
 
 
 def noise_filter(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Noise feature.
 
@@ -1445,7 +1445,7 @@ def noise_filter(
 
 
 def entropy(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Local entropy.
 
@@ -1519,7 +1519,7 @@ def entropy(
 
 
 def otsu(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Local Otsu's threshold value for each pixel.
 
@@ -1589,7 +1589,7 @@ def otsu(
 
 
 def windowed_histogram(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, n_bins=None
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, n_bins=None
 ):
     """Normalized sliding window histogram
 
@@ -1656,9 +1656,9 @@ def majority(
     *,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Assign to each pixel the most common value within its neighborhood.
 
