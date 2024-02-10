@@ -723,7 +723,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     elif callable(initial_guess):
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
-        t_next = initial_guess - image_min
+        t_next = initial_guess - float(image_min)
         image_max = np.max(image) + image_min
         if not 0 < t_next < np.max(image):
             msg = (
@@ -732,6 +732,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
                 f'{image_min} and max {image_max}.'
             )
             raise ValueError(msg)
+        t_next = image.dtype.type(t_next)
     else:
         raise TypeError(
             'Incorrect type for `initial_guess`; should be '
