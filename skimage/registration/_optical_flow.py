@@ -192,7 +192,7 @@ def optical_flow_tvl1(
         Attachment parameter (:math:`\lambda` in [1]_). The smaller
         this parameter is, the smoother the returned result will be.
     tightness : float, optional
-        Tightness parameter (:math:`\tau` in [1]_). It should have
+        Tightness parameter (:math:`\theta` in [1]_). It should have
         a small value in order to maintain attachment and
         regularization parts in correspondence.
     num_warp : int, optional
