@@ -27,6 +27,9 @@ def _weighted_abs_diff(values0, values1, distances):
     edge_values : array of float
         The computed values: abs(values0 - values1) * distances.
     """
+    # Avoid subtracting bools in the case value0/value1 are bool
+    values0 = values0.astype(float)
+    values1 = values1.astype(float)
     return np.abs(values0 - values1) * distances
 
 
