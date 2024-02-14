@@ -27,7 +27,7 @@ def _weighted_abs_diff(values0, values1, distances):
     edge_values : array of float
         The computed values: abs(values0 - values1) * distances.
     """
-    return np.abs(values0 ^ values1) * distances
+    return np.abs(values0 - values1) * distances
 
 
 def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing=None):
