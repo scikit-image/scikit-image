@@ -70,12 +70,12 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
     """
-    if image.dtype == bool and mask is None:
-        mask = image
     if mask is None:
-        mask = np.ones_like(image, dtype=bool)
-    if edge_function is None:
-        edge_function = _weighted_abs_diff
+        if image.dtype == bool:
+            mask = image
+        else:
+            mask = np.ones_like(image, dtype=bool)
+            edge_function = _weighted_abs_diff
 
     # Strategy: we are going to build the (i, j, data) arrays of a scipy
     # sparse COO matrix, then convert to CSR (which is fast).
