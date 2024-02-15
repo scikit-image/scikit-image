@@ -55,4 +55,6 @@ def test_no_mask_with_edge_func():
     def func(x, y, z):
         return np.abs(x - y)
 
-    pixel_graph(image, edge_function=func)  # Should not return TypeError
+    g = pixel_graph(image, edge_function=func)
+    assert g.shape == (9, 9)
+    assert len(g.data) == 24
