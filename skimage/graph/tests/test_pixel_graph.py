@@ -49,6 +49,7 @@ def test_default_edge_func():
 
 
 def test_no_mask_with_edge_func():
+    """Ensure function `pixel_graph` runs when passing `edge_function` but not `mask`."""
     image = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 
     def func(x, y, z):
