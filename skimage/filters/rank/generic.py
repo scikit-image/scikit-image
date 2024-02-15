@@ -384,9 +384,7 @@ def _apply_vector_per_pixel(
     return out
 
 
-def autolevel(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of gray values to cover the
@@ -451,9 +449,7 @@ def autolevel(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def equalize(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Equalize image using local histogram.
 
     Parameters
@@ -515,9 +511,7 @@ def equalize(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def gradient(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
@@ -579,9 +573,7 @@ def gradient(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def maximum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local maximum of an image.
 
     Parameters
@@ -652,9 +644,7 @@ def maximum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mean of an image.
 
     Parameters
@@ -717,7 +707,7 @@ def mean(
 
 
 def geometric_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local geometric mean of an image.
 
@@ -786,7 +776,7 @@ def geometric_mean(
 
 
 def subtract_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return image subtracted from its local mean.
 
@@ -862,9 +852,9 @@ def median(
     footprint=None,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Return local median of an image.
 
@@ -935,9 +925,7 @@ def median(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def minimum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local minimum of an image.
 
     Parameters
@@ -1008,9 +996,7 @@ def minimum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def modal(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
@@ -1075,7 +1061,7 @@ def modal(
 
 
 def enhance_contrast(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Enhance contrast of an image.
 
@@ -1142,9 +1128,7 @@ def enhance_contrast(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def pop(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
@@ -1213,9 +1197,7 @@ def pop(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def sum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local sum of pixels.
 
     Note that the sum may overflow depending on the data type of the input
@@ -1284,9 +1266,7 @@ def sum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def threshold(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local threshold of an image.
 
     The resulting binary mask is True if the gray value of the center pixel is
@@ -1356,7 +1336,7 @@ def threshold(
 
 
 def noise_filter(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Noise feature.
 
@@ -1444,9 +1424,7 @@ def noise_filter(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def entropy(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
@@ -1518,9 +1496,7 @@ def entropy(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def otsu(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
@@ -1589,7 +1565,7 @@ def otsu(
 
 
 def windowed_histogram(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, n_bins=None
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, n_bins=None
 ):
     """Normalized sliding window histogram
 
@@ -1656,9 +1632,9 @@ def majority(
     *,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Assign to each pixel the most common value within its neighborhood.
 

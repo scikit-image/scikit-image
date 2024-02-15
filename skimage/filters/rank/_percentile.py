@@ -60,7 +60,7 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, p0, p1, out_dtyp
 
 
 def autolevel_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return grayscale local autolevel of an image.
 
@@ -108,7 +108,7 @@ def autolevel_percentile(
 
 
 def gradient_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -153,7 +153,7 @@ def gradient_percentile(
 
 
 def mean_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return local mean of an image.
 
@@ -198,7 +198,7 @@ def mean_percentile(
 
 
 def subtract_mean_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return image subtracted from its local mean.
 
@@ -243,7 +243,7 @@ def subtract_mean_percentile(
 
 
 def enhance_contrast_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Enhance contrast of an image.
 
@@ -291,9 +291,7 @@ def enhance_contrast_percentile(
     )
 
 
-def percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0
-):
+def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0):
     """Return local percentile of an image.
 
     Returns the value of the p0 lower percentile of the local grayvalue
@@ -339,7 +337,7 @@ def percentile(
 
 
 def pop_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return the local number (population) of pixels.
 
@@ -387,7 +385,7 @@ def pop_percentile(
 
 
 def sum_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0, p1=1
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
     """Return the local sum of pixels.
 
@@ -435,7 +433,7 @@ def sum_percentile(
 
 
 def threshold_percentile(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, p0=0
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 ):
     """Local threshold of an image.
 
