@@ -1,4 +1,5 @@
 import itertools
+import inspect
 import warnings
 
 import numpy as np
@@ -231,11 +232,24 @@ def test_disambiguate_zero_shift(disambiguate):
     np.testing.assert_array_equal(computed_shift, np.array((0.0, 0.0)))
 
 
-@pytest.mark.parametrize("return_error", [False, True, "always"])
-def test_deprecated_return_error(return_error):
-    img = np.ones((10, 10))
-    with pytest.warns() as record:
-        phase_cross_correlation(img, img, return_error=return_error)
-    assert len(record) == 1
-    assert "return_error argument is deprecated" in record[0].message.args[0]
-    assert record[0].filename == __file__
+@pytest.mark.parametrize('null_images', [(1, 0), (0, 1), (0, 0)])
+def test_disambiguate_empty_image(null_images):
+    """When the image is empty, disambiguation becomes degenerate."""
+    image = camera()
+    with pytest.warns(UserWarning) as records:
+        shift, error, phasediff = phase_cross_correlation(
+            image * null_images[0], image * null_images[1], disambiguate=True
+        )
+        expected_lineno = inspect.currentframe().f_lineno - 3
+    np.testing.assert_array_equal(shift, np.array([0.0, 0.0]))
+    assert np.isnan(error)
+    assert phasediff == 0.0
+
+    # Check warnings
+    assert len(records) == 2
+    assert "Could not determine real-space shift" in records[0].message.args[0]
+    assert "Could not determine RMS error between images" in records[1].message.args[0]
+    # Assert correct stacklevel
+    for record in records:
+        assert record.filename == __file__
+        assert record.lineno == expected_lineno
