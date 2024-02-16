@@ -1,5 +1,3 @@
-Remember to list any API changes below in `doc/release/release_dev.rst`.
-
 Version 0.25
 ------------
 * In `skimage/feature/util.py`, remove deprecated function `plot_matches` as
