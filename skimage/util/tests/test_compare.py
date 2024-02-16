@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage._shared.testing import assert_array_equal
 from skimage._shared import testing
@@ -22,6 +23,18 @@ def test_compare_images_diff():
     expected_result[3:8, 0:3] = 1
     result = compare_images(img1, img2, method='diff')
     assert_array_equal(result, expected_result)
+
+
+def test_compare_images_replaced_param():
+    img1 = np.zeros((10, 10), dtype=np.uint8)
+    img1[3:8, 3:8] = 255
+    img2 = np.zeros_like(img1)
+    img2[3:8, 0:8] = 255
+    compare_images(image0=img1, image1=img2)
+    with pytest.warns(FutureWarning):
+        compare_images(img1, image2=img2)
+    with pytest.raises(ValueError):
+        compare_images(image1=img1, image2=img2)
 
 
 def test_compare_images_blend():
