@@ -181,36 +181,36 @@ def plot_matched_features(
     only_matches=False,
     alignment='horizontal',
 ):
-    """Plot matched features.
+    """Plot matched features between two images.
 
     .. versionadded:: 0.23
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
-        Matches and image are drawn in this ax.
+        The Axes object where the images and their matched features are drawn.
     image0 : (N, M [, 3]) array
-        First grayscale or color image.
+        First image.
     image1 : (N, M [, 3]) array
-        Second grayscale or color image.
+        Second image.
     keypoints0 : (K1, 2) array
         First keypoint coordinates as ``(row, col)``.
     keypoints1 : (K2, 2) array
         Second keypoint coordinates as ``(row, col)``.
     matches : (Q, 2) array
-        Indices of corresponding matches in first and second set of
-        descriptors, where ``matches[:, 0]`` denote the indices in the first
-        and ``matches[:, 1]`` the indices in the second set of descriptors.
+        Indices of corresponding matches in first and second sets of
+        descriptors, where `matches[:, 0]` (resp. `matches[:, 1]`) contains
+        the indices in the first (resp. second) set of descriptors.
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
     matches_color : matplotlib color, optional
         Color for lines which connect keypoint matches. By default the
         color is chosen randomly.
     only_matches : bool, optional
-        Whether to only plot matches and not plot the keypoint locations.
+        Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
-        Whether to show images side by side, ``'horizontal'``, or one above
-        the other, ``'vertical'``.
+        Whether to show the two images side by side (`'horizontal'`), or one above
+        the other (`'vertical'`).
 
     """
     image0 = img_as_float(image0)
