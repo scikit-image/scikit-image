@@ -1,5 +1,3 @@
-Remember to list any API changes below in `doc/release/release_dev.rst`.
-
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
