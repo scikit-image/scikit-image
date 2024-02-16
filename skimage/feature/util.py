@@ -61,6 +61,8 @@ def plot_matches(
 ):
     """Plot matched features.
 
+    .. deprecated:: 0.23
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes
@@ -180,6 +182,8 @@ def plot_matched_features(
     alignment='horizontal',
 ):
     """Plot matched features.
+
+    .. versionadded:: 0.23
 
     Parameters
     ----------

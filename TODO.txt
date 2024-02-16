@@ -1,5 +1,10 @@
 Remember to list any API changes below in `doc/release/release_dev.rst`.
 
+Version 0.25
+------------
+* In `skimage/feature/util.py`, remove deprecated function `plot_matches` as
+  well as `test_plot_matches` in `skimage/feature/tests/test_util.py`.
+
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
