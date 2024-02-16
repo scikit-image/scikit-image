@@ -248,6 +248,7 @@ def _func_replace_params(
 
 
 class Test_deprecate_parameter:
+    @pytest.mark.skipif(not have_numpydoc, reason="requires numpydoc")
     def test_docstring_removed_param(self):
         # function name and doc are preserved
         assert _func_deprecated_params.__name__ == "_func_deprecated_params"
@@ -278,6 +279,7 @@ class Test_deprecate_parameter:
 """
             )
 
+    @pytest.mark.skipif(not have_numpydoc, reason="requires numpydoc")
     def test_docstring_replaced_param(self):
         assert _func_replace_params.__name__ == "_func_replace_params"
         if sys.flags.optimize < 2:
