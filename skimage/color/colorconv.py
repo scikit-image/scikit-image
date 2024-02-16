@@ -1011,7 +1011,8 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
     arr = np.asarray(image)
     if alpha is None:
         _, alpha = dtype_limits(arr, clip_negative=False)
-    alpha_arr = np.asarray(alpha).astype(arr.dtype)
+    with np.errstate(over="ignore", under="ignore"):
+        alpha_arr = np.asarray(alpha).astype(arr.dtype)
     if not np.array_equal(alpha_arr, alpha):
         warn(
             f'alpha cannot be safely cast to image dtype {arr.dtype.name}', stacklevel=2
