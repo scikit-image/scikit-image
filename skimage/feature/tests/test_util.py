@@ -105,25 +105,25 @@ def test_plot_matched_features():
         ((12, 12), (10, 10)),
     )
 
+    keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
-    keypoints2 = 10 * np.random.rand(10, 2)
+    idxs0 = np.random.randint(10, size=10)
     idxs1 = np.random.randint(10, size=10)
-    idxs2 = np.random.randint(10, size=10)
-    matches = np.column_stack((idxs1, idxs2))
+    matches = np.column_stack((idxs0, idxs1))
 
-    for shape1, shape2 in shapes:
+    for shape0, shape1 in shapes:
+        img0 = np.zeros(shape0)
         img1 = np.zeros(shape1)
-        img2 = np.zeros(shape2)
-        plot_matched_features(ax, img1, img2, keypoints1, keypoints2, matches)
+        plot_matched_features(ax, img0, img1, keypoints0, keypoints1, matches)
         plot_matched_features(
-            ax, img1, img2, keypoints1, keypoints2, matches, only_matches=True
+            ax, img0, img1, keypoints0, keypoints1, matches, only_matches=True
         )
         plot_matched_features(
-            ax, img1, img2, keypoints1, keypoints2, matches, keypoints_color='r'
+            ax, img0, img1, keypoints0, keypoints1, matches, keypoints_color='r'
         )
         plot_matched_features(
-            ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r'
+            ax, img0, img1, keypoints0, keypoints1, matches, matches_color='r'
         )
         plot_matched_features(
-            ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
+            ax, img0, img1, keypoints0, keypoints1, matches, alignment='vertical'
         )
