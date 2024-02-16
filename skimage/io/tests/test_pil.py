@@ -1,5 +1,3 @@
-from packaging.version import Version
-
 import os
 from io import BytesIO
 from tempfile import NamedTemporaryFile
@@ -167,15 +165,10 @@ def test_jpg_quality_arg():
         assert sim > 0.99
 
 
-@pytest.mark.xfail(
-    Version(np.__version__) >= Version('2.0.0.dev0'),
-    reason='use_plugin("pil") seems broken for now and tifffile is used instead! '
-    'tifffile uses deprecated attribute `ndarray.newbyteorder`',
-)
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'), plugin="pil")
-    assert img.dtype == np.uint16
+    assert img.dtype == np.dtype(">u2")
     assert_array_almost_equal(img, expected)
 
 
