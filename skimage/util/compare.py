@@ -3,8 +3,18 @@ import numpy as np
 from .dtype import img_as_float
 from itertools import product
 
+from skimage._shared.utils import (
+    deprecate_parameter,
+    DEPRECATED,
+)
 
-def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
+
+@deprecate_parameter(
+    "image2", new_name="image1", start_version="0.23", stop_version="0.25"
+)
+def compare_images(
+    image0, image1=None, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)
+):
     """
     Return an image showing the differences between two images.
 
@@ -12,15 +22,33 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
 
     Parameters
     ----------
-    image1, image2 : ndarray, shape (M, N)
-        Images to process, must be of the same shape.
+    image0 : ndarray, shape (M, N)
+        First input image.
+
+        .. versionadded:: 0.23
+    image1 : ndarray, shape (M, N)
+        Second input image. Must be of the same shape as `image0`.
+
+        .. versionchanged:: 0.23
+            `image1` changed from being the name of the first image to that of
+            the second image.
     method : string, optional
         Method used for the comparison.
         Valid values are {'diff', 'blend', 'checkerboard'}.
         Details are provided in the note section.
+
+    .. versionchanged:: 0.23
+            This parameter is now keyword-only.
     n_tiles : tuple, optional
         Used only for the `checkerboard` method. Specifies the number
         of tiles (row, column) to divide the image.
+
+    Other Parameters
+    ----------------
+    image2 : DEPRECATED
+        Deprecated in favor of `image1`.
+
+        .. deprecated:: 0.23
 
     Returns
     -------
@@ -34,6 +62,9 @@ def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
+    if image2 is DEPRECATED:
+        image2 = image1
+        image1 = image0
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 
