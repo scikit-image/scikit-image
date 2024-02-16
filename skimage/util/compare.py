@@ -12,9 +12,7 @@ from skimage._shared.utils import (
 @deprecate_parameter(
     "image2", new_name="image1", start_version="0.23", stop_version="0.25"
 )
-def compare_images(
-    image0, image1=None, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)
-):
+def compare_images(image0, image1, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)):
     """
     Return an image showing the differences between two images.
 
