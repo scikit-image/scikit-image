@@ -1,7 +1,11 @@
 import numpy as np
 
 from ..util import img_as_float
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import (
+    _supported_float_type,
+    check_nD,
+    deprecate_func,
+)
 
 
 class FeatureDetector:
@@ -38,6 +42,11 @@ class DescriptorExtractor:
         raise NotImplementedError()
 
 
+@deprecate_func(
+    deprecated_version="0.23",
+    removed_version="0.25",
+    hint="Use `skimage.feature.plot_matched_features` instead.",
+)
 def plot_matches(
     ax,
     image1,
@@ -153,6 +162,126 @@ def plot_matches(
         ax.plot(
             (keypoints1[idx1, 1], keypoints2[idx2, 1] + offset[1]),
             (keypoints1[idx1, 0], keypoints2[idx2, 0] + offset[0]),
+            '-',
+            color=color,
+        )
+
+
+def plot_matched_features(
+    ax,
+    image0,
+    image1,
+    keypoints0,
+    keypoints1,
+    matches,
+    keypoints_color='k',
+    matches_color=None,
+    only_matches=False,
+    alignment='horizontal',
+):
+    """Plot matched features.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Matches and image are drawn in this ax.
+    image0 : (N, M [, 3]) array
+        First grayscale or color image.
+    image1 : (N, M [, 3]) array
+        Second grayscale or color image.
+    keypoints0 : (K1, 2) array
+        First keypoint coordinates as ``(row, col)``.
+    keypoints1 : (K2, 2) array
+        Second keypoint coordinates as ``(row, col)``.
+    matches : (Q, 2) array
+        Indices of corresponding matches in first and second set of
+        descriptors, where ``matches[:, 0]`` denote the indices in the first
+        and ``matches[:, 1]`` the indices in the second set of descriptors.
+    keypoints_color : matplotlib color, optional
+        Color for keypoint locations.
+    matches_color : matplotlib color, optional
+        Color for lines which connect keypoint matches. By default the
+        color is chosen randomly.
+    only_matches : bool, optional
+        Whether to only plot matches and not plot the keypoint locations.
+    alignment : {'horizontal', 'vertical'}, optional
+        Whether to show images side by side, ``'horizontal'``, or one above
+        the other, ``'vertical'``.
+
+    """
+    image0 = img_as_float(image0)
+    image1 = img_as_float(image1)
+
+    new_shape0 = list(image0.shape)
+    new_shape1 = list(image1.shape)
+
+    if image0.shape[0] < image1.shape[0]:
+        new_shape0[0] = image1.shape[0]
+    elif image0.shape[0] > image1.shape[0]:
+        new_shape1[0] = image0.shape[0]
+
+    if image0.shape[1] < image1.shape[1]:
+        new_shape0[1] = image1.shape[1]
+    elif image0.shape[1] > image1.shape[1]:
+        new_shape1[1] = image0.shape[1]
+
+    if new_shape0 != image0.shape:
+        new_image0 = np.zeros(new_shape0, dtype=image0.dtype)
+        new_image0[: image0.shape[0], : image0.shape[1]] = image0
+        image0 = new_image0
+
+    if new_shape1 != image1.shape:
+        new_image1 = np.zeros(new_shape1, dtype=image1.dtype)
+        new_image1[: image1.shape[0], : image1.shape[1]] = image1
+        image1 = new_image1
+
+    offset = np.array(image0.shape)
+    if alignment == 'horizontal':
+        image = np.concatenate([image0, image1], axis=1)
+        offset[0] = 0
+    elif alignment == 'vertical':
+        image = np.concatenate([image0, image1], axis=0)
+        offset[1] = 0
+    else:
+        mesg = (
+            f"`plot_matched_features` accepts either 'horizontal' or 'vertical' for "
+            f"alignment, but '{alignment}' was given. See "
+            f"https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matched_features "  # noqa
+            f"for details."
+        )
+        raise ValueError(mesg)
+
+    if not only_matches:
+        ax.scatter(
+            keypoints0[:, 1],
+            keypoints0[:, 0],
+            facecolors='none',
+            edgecolors=keypoints_color,
+        )
+        ax.scatter(
+            keypoints1[:, 1] + offset[1],
+            keypoints1[:, 0] + offset[0],
+            facecolors='none',
+            edgecolors=keypoints_color,
+        )
+
+    ax.imshow(image, cmap='gray')
+    ax.axis((0, image0.shape[1] + offset[1], image0.shape[0] + offset[0], 0))
+
+    rng = np.random.default_rng()
+
+    for i in range(matches.shape[0]):
+        idx0 = matches[i, 0]
+        idx1 = matches[i, 1]
+
+        if matches_color is None:
+            color = rng.random(3)
+        else:
+            color = matches_color
+
+        ax.plot(
+            (keypoints0[idx0, 1], keypoints1[idx1, 1] + offset[1]),
+            (keypoints0[idx0, 0], keypoints1[idx1, 0] + offset[0]),
             '-',
             color=color,
         )
