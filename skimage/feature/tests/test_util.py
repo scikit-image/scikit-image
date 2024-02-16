@@ -114,16 +114,47 @@ def test_plot_matched_features():
     for shape0, shape1 in shapes:
         img0 = np.zeros(shape0)
         img1 = np.zeros(shape1)
-        plot_matched_features(ax, img0, img1, keypoints0, keypoints1, matches)
         plot_matched_features(
-            ax, img0, img1, keypoints0, keypoints1, matches, only_matches=True
+            img0,
+            img1,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            ax=ax,
         )
         plot_matched_features(
-            ax, img0, img1, keypoints0, keypoints1, matches, keypoints_color='r'
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            only_matches=True,
         )
         plot_matched_features(
-            ax, img0, img1, keypoints0, keypoints1, matches, matches_color='r'
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            keypoints_color='r',
         )
         plot_matched_features(
-            ax, img0, img1, keypoints0, keypoints1, matches, alignment='vertical'
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            matches_color='r',
+        )
+        plot_matched_features(
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            alignment='vertical',
         )
