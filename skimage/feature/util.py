@@ -170,12 +170,13 @@ def plot_matches(
 
 
 def plot_matched_features(
-    ax,
     image0,
     image1,
+    *,
     keypoints0,
     keypoints1,
     matches,
+    ax,
     keypoints_color='k',
     matches_color=None,
     only_matches=False,
