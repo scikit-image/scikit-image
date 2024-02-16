@@ -188,8 +188,6 @@ def plot_matched_features(
 
     Parameters
     ----------
-    ax : matplotlib.axes.Axes
-        The Axes object where the images and their matched features are drawn.
     image0 : (N, M [, 3]) array
         First image.
     image1 : (N, M [, 3]) array
@@ -202,6 +200,8 @@ def plot_matched_features(
         Indices of corresponding matches in first and second sets of
         descriptors, where `matches[:, 0]` (resp. `matches[:, 1]`) contains
         the indices in the first (resp. second) set of descriptors.
+    ax : matplotlib.axes.Axes
+        The Axes object where the images and their matched features are drawn.
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
     matches_color : matplotlib color, optional
