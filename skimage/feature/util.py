@@ -40,10 +40,10 @@ class DescriptorExtractor:
 
 def plot_matches(
     ax,
-    image0,
     image1,
-    keypoints0,
+    image2,
     keypoints1,
+    keypoints2,
     matches,
     keypoints_color='k',
     matches_color=None,
@@ -56,9 +56,9 @@ def plot_matches(
     ----------
     ax : matplotlib.axes.Axes
         Matches and image are drawn in this ax.
-    image0 : (N, M [, 3]) array
-        First grayscale or color image.
     image1 : (N, M [, 3]) array
+        First grayscale or color image.
+    image2 : (N, M [, 3]) array
         Second grayscale or color image.
     keypoints1 : (K1, 2) array
         First keypoint coordinates as ``(row, col)``.
@@ -80,8 +80,8 @@ def plot_matches(
         the other, ``'vertical'``.
 
     """
-    image1 = img_as_float(image0)
-    image2 = img_as_float(image1)
+    image1 = img_as_float(image1)
+    image2 = img_as_float(image2)
 
     new_shape1 = list(image1.shape)
     new_shape2 = list(image2.shape)
@@ -124,14 +124,14 @@ def plot_matches(
 
     if not only_matches:
         ax.scatter(
-            keypoints0[:, 1],
-            keypoints0[:, 0],
+            keypoints1[:, 1],
+            keypoints1[:, 0],
             facecolors='none',
             edgecolors=keypoints_color,
         )
         ax.scatter(
-            keypoints1[:, 1] + offset[1],
-            keypoints1[:, 0] + offset[0],
+            keypoints2[:, 1] + offset[1],
+            keypoints2[:, 0] + offset[0],
             facecolors='none',
             edgecolors=keypoints_color,
         )
@@ -151,8 +151,8 @@ def plot_matches(
             color = matches_color
 
         ax.plot(
-            (keypoints0[idx1, 1], keypoints1[idx2, 1] + offset[1]),
-            (keypoints0[idx1, 0], keypoints1[idx2, 0] + offset[0]),
+            (keypoints1[idx1, 1], keypoints2[idx2, 1] + offset[1]),
+            (keypoints1[idx1, 0], keypoints2[idx2, 0] + offset[0]),
             '-',
             color=color,
         )

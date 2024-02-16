@@ -4,7 +4,7 @@ from .dtype import img_as_float
 from itertools import product
 
 
-def compare_images(image0, image1, method='diff', *, n_tiles=(8, 8)):
+def compare_images(image1, image2, method='diff', *, n_tiles=(8, 8)):
     """
     Return an image showing the differences between two images.
 
@@ -12,7 +12,7 @@ def compare_images(image0, image1, method='diff', *, n_tiles=(8, 8)):
 
     Parameters
     ----------
-    image0, image1 : ndarray, shape (M, N)
+    image1, image2 : ndarray, shape (M, N)
         Images to process, must be of the same shape.
     method : string, optional
         Method used for the comparison.
@@ -34,11 +34,11 @@ def compare_images(image0, image1, method='diff', *, n_tiles=(8, 8)):
     ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
-    if image0.shape != image1.shape:
+    if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 
-    img1 = img_as_float(image0)
-    img2 = img_as_float(image1)
+    img1 = img_as_float(image1)
+    img2 = img_as_float(image2)
 
     if method == 'diff':
         comparison = np.abs(img2 - img1)
