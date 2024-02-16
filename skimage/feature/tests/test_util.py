@@ -8,6 +8,7 @@ from skimage.feature.util import (
     _prepare_grayscale_input_2D,
     _mask_border_keypoints,
     plot_matches,
+    plot_matched_features,
 )
 
 
@@ -84,5 +85,45 @@ def test_plot_matches():
         )
         plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r')
         plot_matches(
+            ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
+        )
+
+
+@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+def test_plot_matched_features():
+    from matplotlib import pyplot as plt
+
+    fig, ax = plt.subplots()
+
+    shapes = (
+        ((10, 10), (10, 10)),
+        ((10, 10), (12, 10)),
+        ((10, 10), (10, 12)),
+        ((10, 10), (12, 12)),
+        ((12, 10), (10, 10)),
+        ((10, 12), (10, 10)),
+        ((12, 12), (10, 10)),
+    )
+
+    keypoints1 = 10 * np.random.rand(10, 2)
+    keypoints2 = 10 * np.random.rand(10, 2)
+    idxs1 = np.random.randint(10, size=10)
+    idxs2 = np.random.randint(10, size=10)
+    matches = np.column_stack((idxs1, idxs2))
+
+    for shape1, shape2 in shapes:
+        img1 = np.zeros(shape1)
+        img2 = np.zeros(shape2)
+        plot_matched_features(ax, img1, img2, keypoints1, keypoints2, matches)
+        plot_matched_features(
+            ax, img1, img2, keypoints1, keypoints2, matches, only_matches=True
+        )
+        plot_matched_features(
+            ax, img1, img2, keypoints1, keypoints2, matches, keypoints_color='r'
+        )
+        plot_matched_features(
+            ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r'
+        )
+        plot_matched_features(
             ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
         )
