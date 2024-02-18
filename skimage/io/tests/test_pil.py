@@ -168,7 +168,7 @@ def test_jpg_quality_arg():
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'), plugin="pil")
-    assert img.dtype == np.dtype(">u2")
+    assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)
 
 

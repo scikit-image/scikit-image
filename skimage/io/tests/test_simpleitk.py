@@ -1,4 +1,3 @@
-from packaging.version import Version
 import numpy as np
 import pytest
 
@@ -53,14 +52,10 @@ def test_imread_uint16():
     np.testing.assert_array_almost_equal(img, expected)
 
 
-@pytest.mark.xfail(
-    Version(np.__version__) >= Version('2.0.0.dev0'),
-    reason='use_plugin("simpleitk") seems broken for now and tifffile is used instead! '
-    'tifffile uses deprecated attribute `ndarray.newbyteorder`',
-)
 def test_imread_uint16_big_endian():
     expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'))
+    img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'), plugin="simpleitk")
+    assert img.dtype.type == np.uint16
     np.testing.assert_array_almost_equal(img, expected)
 
 
