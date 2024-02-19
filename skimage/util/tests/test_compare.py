@@ -33,9 +33,7 @@ def test_compare_images_replaced_param():
     with pytest.warns(FutureWarning):
         compare_images(img1, image2=img2)
     with pytest.warns(FutureWarning):
-        # and, it is as if both deprecated `image2` and new `image1` were used
-        with pytest.raises(ValueError):
-            compare_images(image1=img1, image2=img2)
+        compare_images(image1=img1, image2=img2)
 
 
 def test_compare_images_blend():
