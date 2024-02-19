@@ -1,18 +1,17 @@
+import warnings
+from itertools import product
+
 import numpy as np
 
 from .dtype import img_as_float
-from itertools import product
-
 from skimage._shared.utils import (
-    deprecate_parameter,
     DEPRECATED,
 )
 
 
-@deprecate_parameter(
-    "image2", new_name="image1", start_version="0.23", stop_version="0.25"
-)
-def compare_images(image0, image1, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)):
+def compare_images(
+    image0=None, image1=None, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)
+):
     """
     Return an image showing the differences between two images.
 
@@ -60,9 +59,25 @@ def compare_images(image0, image1, image2=DEPRECATED, *, method='diff', n_tiles=
     ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
     alternatively the first and the second image.
     """
-    if image2 is DEPRECATED:
+    warning_message = (
+        "Since version 0.23, the two input images are named "
+        "`image0` and `image1` (instead of `image1` and `image2`). Please use "
+        "`image0, image1` to avoid this warning for now, and avoid an error "
+        "from version 0.25 onwards."
+    )
+    if image0 is None:
+        if image1 is None:
+            raise ValueError("You must pass two input images.")
+        else:
+            warnings.warn(warning_message, category=FutureWarning)
+    elif image2 is DEPRECATED:
         image2 = image1
         image1 = image0
+        warnings.warn(warning_message, category=FutureWarning)
+    else:
+        if image1 is None:
+            image1 = image0
+            warnings.warn(warning_message, category=FutureWarning)
     if image1.shape != image2.shape:
         raise ValueError('Images must have the same shape.')
 
