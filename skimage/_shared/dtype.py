@@ -71,3 +71,42 @@ def numeric_dtype_min_max(dtype):
     else:
         raise ValueError(f"unsupported dtype {dtype!r}")
     return min_, max_
+
+
+def to_py_scalar(x):
+    """Convert a NumPy scalar to the corresponding Python scalar.
+
+    Casts the given scalar to int, float, complex or bool depending on the
+    scalar dtype.
+
+    Parameters
+    ----------
+    x : NumPy scalar
+        The scalar to convert.
+
+    Returns
+    -------
+    y : Python scalar
+        The corresponding Python scalar.
+
+    Examples
+    --------
+    >>> type(to_py_scalar(np.dtype(bool).type(True)))
+    <class 'bool'>
+    >>> type(to_py_scalar(np.uint8(3)))
+    <class 'int'>
+    >>> type(to_py_scalar(np.float64(3)))
+    <class 'float'>
+    >>> type(to_py_scalar(np.complex64(3j)))
+    <class 'complex'>
+    """
+    if np.issubdtype(x, np.integer):
+        return int(x)
+    elif np.issubdtype(x, np.floating):
+        return float(x)
+    elif np.issubdtype(x, np.complexfloating):
+        return complex(x)
+    elif np.issubdtype(x, np.dtype(bool)):
+        return bool(x)
+    else:
+        raise ValueError(f"unsupported scalar type {type(x)}")
