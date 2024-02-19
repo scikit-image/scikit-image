@@ -15,28 +15,18 @@ __all__ = [
     'dtype_limits',
 ]
 
-# For integers Numpy uses `_integer_types` basis internally, and builds a leaky
-# `np.XintYY` abstraction on top of it. This leads to situations when, for
-# example, there are two np.Xint64 dtypes with the same attributes but
-# different object references. In order to avoid any potential issues,
-# we use the basis dtypes here. For more information, see:
-# - https://github.com/scikit-image/scikit-image/issues/3043
-# For convenience, for these dtypes we indicate also the possible bit depths
-# (some of them are platform specific). For the details, see:
-# http://www.unix.org/whitepapers/64bit.html
 _integer_types = (
-    np.byte,
-    np.ubyte,  # 8 bits
-    np.short,
-    np.ushort,  # 16 bits
-    np.intc,
-    np.uintc,  # 16 or 32 or 64 bits
-    int,
-    np.int_,
-    np.uint,  # 32 or 64 bits
-    np.longlong,
-    np.ulonglong,
-)  # 64 bits
+    np.int8,
+    np.int16,
+    np.int32,
+    np.int64,
+    np.intp,
+    np.uint8,
+    np.uint16,
+    np.uint32,
+    np.uint64,
+    np.uintp,
+)
 _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max) for t in _integer_types}
 dtype_range = {
     bool: (False, True),
