@@ -7,8 +7,9 @@ from skimage.util.compare import compare_images
 def test_compate_images_ValueError_shape():
     img1 = np.zeros((10, 10), dtype=np.uint8)
     img2 = np.zeros((10, 1), dtype=np.uint8)
-    with pytest.raises(ValueError):
-        compare_images(img1, img2)
+    with pytest.warns(FutureWarning):
+        with pytest.raises(ValueError):
+            compare_images(img1, img2)
 
 
 def test_compare_images_diff():
@@ -18,7 +19,8 @@ def test_compare_images_diff():
     img2[3:8, 0:8] = 255
     expected_result = np.zeros_like(img1, dtype=np.float64)
     expected_result[3:8, 0:3] = 1
-    result = compare_images(img1, img2, method='diff')
+    with pytest.warns(FutureWarning):
+        result = compare_images(img1, img2, method='diff')
     np.testing.assert_array_equal(result, expected_result)
 
 
@@ -27,7 +29,8 @@ def test_compare_images_replaced_param():
     img1[3:8, 3:8] = 255
     img2 = np.zeros_like(img1)
     img2[3:8, 0:8] = 255
-    compare_images(image0=img1, image1=img2)
+    with pytest.warns(FutureWarning):
+        compare_images(image0=img1, image1=img2)
     with pytest.warns(FutureWarning):
         compare_images(image0=img1, image2=img2)
     with pytest.warns(FutureWarning):
@@ -44,14 +47,16 @@ def test_compare_images_blend():
     expected_result = np.zeros_like(img1, dtype=np.float64)
     expected_result[3:8, 3:8] = 1
     expected_result[3:8, 0:3] = 0.5
-    result = compare_images(img1, img2, method='blend')
+    with pytest.warns(FutureWarning):
+        result = compare_images(img1, img2, method='blend')
     np.testing.assert_array_equal(result, expected_result)
 
 
 def test_compare_images_checkerboard_default():
     img1 = np.zeros((2**4, 2**4), dtype=np.uint8)
     img2 = np.full(img1.shape, fill_value=255, dtype=np.uint8)
-    res = compare_images(img1, img2, method='checkerboard')
+    with pytest.warns(FutureWarning):
+        res = compare_images(img1, img2, method='checkerboard')
     # fmt: off
     exp_row1 = np.array([0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.])
     exp_row2 = np.array([1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.])
@@ -65,7 +70,8 @@ def test_compare_images_checkerboard_default():
 def test_compare_images_checkerboard_tuple():
     img1 = np.zeros((2**4, 2**4), dtype=np.uint8)
     img2 = np.full(img1.shape, fill_value=255, dtype=np.uint8)
-    res = compare_images(img1, img2, method='checkerboard', n_tiles=(4, 8))
+    with pytest.warns(FutureWarning):
+        res = compare_images(img1, img2, method='checkerboard', n_tiles=(4, 8))
     exp_row1 = np.array(
         [0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     )
