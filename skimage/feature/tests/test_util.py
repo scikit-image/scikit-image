@@ -94,6 +94,7 @@ def test_plot_matches(shapes):
         plot_matches(
             ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
         )
+    plt.close()
 
 
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
@@ -167,3 +168,4 @@ def test_plot_matched_features(shapes):
         matches=matches,
         alignment='vertical',
     )
+    plt.close()
