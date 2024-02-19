@@ -80,11 +80,20 @@ def test_plot_matches(shapes):
     shape1, shape2 = shapes
     img1 = np.zeros(shape1)
     img2 = np.zeros(shape2)
-    plot_matches(ax, img1, img2, keypoints1, keypoints2, matches)
-    plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, only_matches=True)
-    plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, keypoints_color='r')
-    plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r')
-    plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical')
+    with pytest.warns(FutureWarning):
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches)
+    with pytest.warns(FutureWarning):
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, only_matches=True)
+    with pytest.warns(FutureWarning):
+        plot_matches(
+            ax, img1, img2, keypoints1, keypoints2, matches, keypoints_color='r'
+        )
+    with pytest.warns(FutureWarning):
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r')
+    with pytest.warns(FutureWarning):
+        plot_matches(
+            ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
+        )
 
 
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
