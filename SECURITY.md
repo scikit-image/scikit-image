@@ -1,5 +1,5 @@
-# Security Policy
+# Security contact information
 
-## Reporting a Vulnerability
-
-Please report security issues to `skimage-core@discuss.scientific-python.org`
+To report a security vulnerability, please use the
+[Tidelift security contact](https://tidelift.com/security).
+Tidelift will coordinate the fix and disclosure.
