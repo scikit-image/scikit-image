@@ -947,7 +947,6 @@ def test_moments_weighted_central():
         ]
     )
 
-    np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
     # Verify test function

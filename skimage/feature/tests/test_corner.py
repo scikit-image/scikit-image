@@ -325,7 +325,7 @@ def test_structure_tensor_eigenvalues(dtype):
 
 
 def test_structure_tensor_eigenvalues_3d():
-    image = np.pad(cube(9), 5, mode='constant') * 1000
+    image = np.pad(cube(9, dtype=np.int64), 5, mode='constant') * 1000
     boundary = (
         np.pad(cube(9), 5, mode='constant') - np.pad(cube(7), 6, mode='constant')
     ).astype(bool)

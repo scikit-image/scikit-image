@@ -294,9 +294,13 @@ def frangi(
         # blobness exponential factor underflowing to zero whenever the second
         # or third eigenvalues are negative (we clip them to 1e-10, to make r_b
         # very large).
-        vals = 1.0 - np.exp(-(r_a**2) / (2 * alpha**2))  # plate sensitivity
-        vals *= np.exp(-(r_b**2) / (2 * beta**2))  # blobness
-        vals *= 1.0 - np.exp(-(s**2) / (2 * gamma**2))  # structuredness
+        vals = 1.0 - np.exp(
+            -(r_a**2) / (2 * alpha**2), dtype=image.dtype
+        )  # plate sensitivity
+        vals *= np.exp(-(r_b**2) / (2 * beta**2), dtype=image.dtype)  # blobness
+        vals *= 1.0 - np.exp(
+            -(s**2) / (2 * gamma**2), dtype=image.dtype
+        )  # structuredness
         filtered_max = np.maximum(filtered_max, vals)
     return filtered_max  # Return pixel-wise max over all sigmas.
 

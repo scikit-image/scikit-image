@@ -193,7 +193,7 @@ def _generic_edge_filter(
         output += ax_output
 
     if return_magnitude:
-        output = np.sqrt(output) / np.sqrt(ndim)
+        output = np.sqrt(output) / np.sqrt(ndim, dtype=output.dtype)
     return output
 
 
