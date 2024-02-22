@@ -67,7 +67,7 @@ def _tvl1(
         sparse=True,
     )
 
-    # dt corresponds to tau in [1]_, i.e. the time step
+    # dt corresponds to tau in [3]_, i.e. the time step
     dt = 0.5 / reference_image.ndim
     reg_num_iter = 2
     f0 = attachment * tightness
