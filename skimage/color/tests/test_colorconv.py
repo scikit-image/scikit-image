@@ -953,6 +953,22 @@ def test_gray2rgba_alpha():
     assert expected_err_msg == str(err.value)
 
 
+@pytest.mark.parametrize(
+    "alpha,dtype",
+    [
+        (-1, np.uint8),
+        (300, np.int8),
+        (0.5, int),
+        (0.5, np.uint8),
+        (np.finfo(np.float64).max, np.float32),
+    ],
+)
+def test_gray2rgba_alpha_fail_cast(alpha, dtype):
+    image = np.ones((5, 5), dtype=dtype)
+    with pytest.warns(UserWarning, match="alpha cannot be safely cast"):
+        gray2rgba(image, alpha=alpha)
+
+
 @pytest.mark.parametrize("func", [rgb2gray, gray2rgb, gray2rgba])
 @pytest.mark.parametrize(
     "shape", ([(3,), (2, 3), (4, 5, 3), (5, 4, 5, 3), (4, 5, 4, 5, 3)])

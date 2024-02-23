@@ -30,9 +30,9 @@ def _tvl1(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
     attachment : float
@@ -67,6 +67,7 @@ def _tvl1(
         sparse=True,
     )
 
+    # dt corresponds to tau in [3]_, i.e. the time step
     dt = 0.5 / reference_image.ndim
     reg_num_iter = 2
     f0 = attachment * tightness
@@ -185,9 +186,9 @@ def optical_flow_tvl1(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     attachment : float, optional
         Attachment parameter (:math:`\lambda` in [1]_). The smaller
         this parameter is, the smoother the returned result will be.
@@ -272,9 +273,9 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     flow0 : ndarray, shape (reference_image.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
     radius : int
@@ -363,9 +364,9 @@ def optical_flow_ilk(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     radius : int, optional
         Radius of the window considered around each pixel.
     num_warp : int, optional
