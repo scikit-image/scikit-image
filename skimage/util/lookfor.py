@@ -18,13 +18,13 @@ def lookfor(what):
 
     Examples
     --------
-    >>> import skimage
-    >>> skimage.lookfor('regular_grid')
+    >>> import skimage as ski
+    >>> ski.util.lookfor('regular_grid')
     Search results for 'regular_grid'
     ---------------------------------
     skimage.util.regular_grid
         Find `n_points` regularly spaced along `ar_shape`.
-    skimage.util.lookfor.lookfor
-        Do a keyword search on scikit-image docstrings.
+    skimage.util.lookfor
+        Do a keyword search on scikit-image docstrings and print results.
     """
     return _lookfor(what, sys.modules[__name__.split('.')[0]])
