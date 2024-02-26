@@ -141,7 +141,7 @@ class Test_assert_stacklevel:
 
     @pytest.mark.parametrize("level", [1, 3])
     def test_wrong_stacklevel(self, level):
-        # Assertion should be raised for wrong stacklevel
+        # AssertionError should be raised for wrong stacklevel
         with pytest.warns(UserWarning, match="wrong") as record:
             self.raise_warning("wrong", UserWarning, stacklevel=level)
         # Check that message contains expected line on right side

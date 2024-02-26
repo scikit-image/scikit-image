@@ -365,12 +365,13 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
 
 
 def assert_stacklevel(*warnings, offset=-1):
-    """Assert correct stacklevel on a captured warnings.
+    """Assert correct stacklevel of captured warnings.
 
-    When scikit-image raises warnings the stacklevel should usually be set in
-    such a way that the origin of the warning will point to the public function
-    that was called by the user and not some internal function or the place
-    the warning was emitted. This utility functions helps with checking that
+    When scikit-image raises warnings, the stacklevel should ideally be set
+    so that the origin of the warnings will point to the public function
+    that was called by the user and not necessarily the very place where the
+    warnings were emitted (which may be inside of some internal function).
+    This utility function helps with checking that
     the stacklevel was set correctly on warnings captured by `pytest.warns`.
 
     Parameters
@@ -381,7 +382,7 @@ def assert_stacklevel(*warnings, offset=-1):
         Offset from the line this function is called to the line were the
         warning is supposed to originate from. For multiline calls, the
         first line is relevant. Defaults to -1 which corresponds to the line
-        directly above were this function is called from.
+        right above the one where this function is called.
 
     Raises
     ------
