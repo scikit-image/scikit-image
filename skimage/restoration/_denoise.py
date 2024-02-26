@@ -127,7 +127,7 @@ def denoise_bilateral(
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         How to handle values outside the image borders. See
         `numpy.pad` for detail.
-    cval : string
+    cval : int or float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     channel_axis : int or None, optional

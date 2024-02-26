@@ -624,8 +624,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             )
 
             for k in range(len(p_max)):
-                rad_k = radius[k]
-                ori = orientations[k]
+                rad_k = float(radius[k])
+                ori = float(orientations[k])
                 histograms = np.zeros(
                     (self.n_hist, self.n_hist, self.n_ori), dtype=self.float_dtype
                 )
@@ -651,7 +651,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradient_col = gradient[1][r, c, scales[k]]
                 # compute the (relative) gradient orientation
                 theta = np.arctan2(gradient_col, gradient_row) - ori
-                lam_sig = self.lambda_descr * sigma[k]
+                lam_sig = self.lambda_descr * float(sigma[k])
                 # Gaussian weighted kernel magnitude
                 kernel = np.exp(
                     (r_norm * r_norm + c_norm * c_norm) / (-2 * lam_sig**2)

@@ -14,7 +14,13 @@ jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
     with:
-      CIBW_BUILD_FRONTEND: 'pip; args: --pre --extra-index-url "https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"'
+      CIBW_ENVIRONMENT: >
+        PIP_PRE=1
+        PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+      # assert NumPy 2.0 before running tests
+      CIBW_TEST_COMMAND: >
+        pip list --pre --format=freeze | grep -q 'numpy==2' &&
+        pytest --pyargs skimage
 
   upload_anaconda:
     permissions:
@@ -31,7 +37,7 @@ jobs:
           path: ./dist
 
       - name: Upload wheel
-        uses: scientific-python/upload-nightly-action@main
+        uses: scientific-python/upload-nightly-action@b67d7fcc0396e1128a474d1ab2b48aa94680f9fc # 0.5.0
         with:
           artifacts_path: dist
           anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}
