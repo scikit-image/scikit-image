@@ -55,7 +55,20 @@ def test_no_mask_with_edge_func():
     def func(x, y, z):
         return np.abs(x - y)
 
+    expected_g = np.array(
+        [
+            [0.0, 1.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [1.0, 0.0, 1.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0],
+            [3.0, 0.0, 0.0, 0.0, 1.0, 0.0, 3.0, 0.0, 0.0],
+            [0.0, 3.0, 0.0, 1.0, 0.0, 1.0, 0.0, 3.0, 0.0],
+            [0.0, 0.0, 3.0, 0.0, 1.0, 0.0, 0.0, 0.0, 3.0],
+            [0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 3.0, 0.0, 1.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 0.0, 1.0, 0.0],
+        ]
+    )
+
     g, n = pixel_graph(image, edge_function=func)
-    assert g.shape == (9, 9)
-    assert len(g.data) == 24
     np.testing.assert_array_equal(n, np.arange(image.size))
+    np.testing.assert_array_equal(g, expected_g)
