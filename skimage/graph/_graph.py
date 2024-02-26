@@ -75,7 +75,8 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
             mask = image
         else:
             mask = np.ones_like(image, dtype=bool)
-            edge_function = _weighted_abs_diff
+    if edge_function is None:
+        edge_function = _weighted_abs_diff
 
     # Strategy: we are going to build the (i, j, data) arrays of a scipy
     # sparse COO matrix, then convert to CSR (which is fast).
