@@ -18,7 +18,7 @@ from .._shared.utils import (
 
 
 @deprecate_parameter(
-    "output", new_name="out", start_version="0.23", stop_version="0.26"
+    "output", new_name="out", start_version="0.23", stop_version="0.25"
 )
 def gaussian(
     image,
