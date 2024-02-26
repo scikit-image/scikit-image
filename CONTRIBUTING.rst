@@ -122,21 +122,21 @@ For a more detailed discussion, read these :doc:`detailed documents
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.
 
-   If your change introduces any API modifications, or impacts users directly
-   (e.g. bug fixes, performance improvements) please describe the change inside
-   the pull request description inside a code block which is compiled by
-   `changelist <https://github.com/scientific-python/changelist>`_ into the
-   release notes::
+   scikit-image uses `changelist <https://github.com/scientific-python/changelist>`_
+   to generate a list of release notes automatically from pull requests. By
+   default, changelist will use the title of a pull request and its GitHub
+   labels to sort it into the appropriate section. However, for more complex
+   changes we encourage you to describe the change inside the pull request
+   description inside a more detailed code block like::
 
        ```release-note
-       One or two sentences describing the change in imperative mood.
+       Remove the deprecated function `skimage.color.blue`. Blend
+       `skimage.color.cyan` and `skimage.color.magenta` instead.
        ```
 
-   For trivial changes that are adequately summarized by the PR title, this
-   block can be left empty (``...``). If a public function, class or parameter
-   is referenced the the full import path should be used to do so, e.g.
-   ``skimage.submodule.function``. Refer to :doc:`/release_notes/index` for
-   examples.
+   You can refer to :doc:`/release_notes/index` for examples and to
+   `changelist's documentation <https://github.com/scientific-python/changelist>`_
+   for more details.
 
 .. note::
 
