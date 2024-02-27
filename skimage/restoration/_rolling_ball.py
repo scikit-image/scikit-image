@@ -5,7 +5,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 @deprecate_parameter(
-    "num_threads", new_name="num_workers", start_version="0.23", stop_version="0.26"
+    "num_threads", new_name="num_workers", start_version="0.23", stop_version="0.25"
 )
 def rolling_ball(
     image,
