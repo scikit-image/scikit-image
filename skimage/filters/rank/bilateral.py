@@ -33,7 +33,13 @@ __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtype=None):
     check_nD(image, 2)
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        shift_x=shift_x,
+        shift_y=shift_y,
     )
 
     func(

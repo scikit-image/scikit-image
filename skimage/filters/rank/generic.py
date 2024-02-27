@@ -48,6 +48,7 @@ References
 
 """
 
+
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -78,7 +79,14 @@ __all__ = [
 
 
 def _preprocess_input(
-    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+    image,
+    footprint=None,
+    out=None,
+    mask=None,
+    out_dtype=None,
+    pixel_size=1,
+    shift_x=None,
+    shift_y=None,
 ):
     """Preprocess and verify input for filters.rank methods.
 
@@ -98,6 +106,9 @@ def _preprocess_input(
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
+    shift_x, shift_y : int, optional
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -169,11 +180,28 @@ def _preprocess_input(
             stacklevel=2,
         )
 
+    for name, value in zip(("shift_x", "shift_y"), (shift_x, shift_y)):
+        if np.dtype(type(value)) == bool:
+            warn(
+                f"Paramter `{name}` is boolean and will be interpreted as int. "
+                "This is not officially supported, use int instead.",
+                category=UserWarning,
+                stacklevel=4,
+            )
+
     return image, footprint, out, mask, n_bins
 
 
 def _handle_input_3D(
-    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+    image,
+    footprint=None,
+    out=None,
+    mask=None,
+    out_dtype=None,
+    pixel_size=1,
+    shift_x=None,
+    shift_y=None,
+    shift_z=None,
 ):
     """Preprocess and verify input for filters.rank methods.
 
@@ -193,6 +221,9 @@ def _handle_input_3D(
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
+    shift_x, shift_y, shift_z : int, optional
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint sizes (center must be inside the given footprint).
 
     Returns
     -------
@@ -258,6 +289,17 @@ def _handle_input_3D(
             stacklevel=2,
         )
 
+    for name, value in zip(
+        ("shift_x", "shift_y", "shift_z"), (shift_x, shift_y, shift_z)
+    ):
+        if np.dtype(type(value)) == bool:
+            warn(
+                f"Parameter `{name}` is boolean and will be interpreted as int. "
+                "This is not officially supported, use int instead.",
+                category=UserWarning,
+                stacklevel=4,
+            )
+
     return image, footprint, out, mask, n_bins
 
 
@@ -289,7 +331,7 @@ def _apply_scalar_per_pixel(
     """
     # preprocess and verify the input
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype
+        image, footprint, out, mask, out_dtype, shift_x=shift_x, shift_y=shift_y
     )
 
     # apply cython function
@@ -310,7 +352,14 @@ def _apply_scalar_per_pixel_3D(
     func, image, footprint, out, mask, shift_x, shift_y, shift_z, out_dtype=None
 ):
     image, footprint, out, mask, n_bins = _handle_input_3D(
-        image, footprint, out, mask, out_dtype
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        shift_z=shift_z,
     )
 
     func(
@@ -367,7 +416,14 @@ def _apply_vector_per_pixel(
     """
     # preprocess and verify the input
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype, pixel_size
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        pixel_size,
+        shift_x=shift_x,
+        shift_y=shift_y,
     )
 
     # apply cython function
