@@ -13,8 +13,8 @@ class TpsTransform:
 
     Attributes
     ----------
-    parameters : (N, D) array_like
-        spline_mappings for every control point.
+    spline_mappings : (N, D) array_like
+        Spline mappings for every control point.
     src : (N, 2) array_like
         Coordinates of control points in source image.
 
@@ -105,7 +105,7 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate optimal spline_mappings that describes the deformation of the points.
+        """Estimate optimal spline mappings that describe the deformation of the points.
 
 
         Parameters
@@ -118,7 +118,7 @@ class TpsTransform:
         Returns
         -------
         success: bool
-            True indicates that the spline_mappings were successfully estimated.
+            True indicates that the estimation was successful.
 
         Notes
         -----
