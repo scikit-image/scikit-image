@@ -1,3 +1,8 @@
+Version 0.25
+------------
+* Remove all traces of deprecated parameter `num_threads` in
+  `skimage.restoration.rolling_ball`.
+
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
