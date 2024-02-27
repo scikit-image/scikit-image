@@ -126,8 +126,8 @@ For a more detailed discussion, read these :doc:`detailed documents
    to generate a list of release notes automatically from pull requests. By
    default, changelist will use the title of a pull request and its GitHub
    labels to sort it into the appropriate section. However, for more complex
-   changes we encourage you to describe the change inside the pull request
-   description inside a more detailed code block like::
+   changes, we encourage you to describe them in more detail using the
+   `release-note` code block within the pull request description; e.g.::
 
        ```release-note
        Remove the deprecated function `skimage.color.blue`. Blend
