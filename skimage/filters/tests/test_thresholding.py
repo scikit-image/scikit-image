@@ -409,7 +409,7 @@ def test_li_arbitrary_start_point():
 
 def test_li_negative_inital_guess():
     coins = data.coins()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=".*initial guess.*must be within the range"):
         threshold_li(coins, initial_guess=-5)
 
 

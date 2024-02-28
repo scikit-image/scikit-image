@@ -66,6 +66,9 @@ def integrate(ii, start, end):
     S : scalar or ndarray
         Integral (sum) over the given window(s).
 
+    See Also
+    --------
+    integral_image : Create an integral image / summed area table.
 
     Examples
     --------
@@ -136,7 +139,7 @@ def integrate(ii, start, end):
         )  # find corner for each row
 
         S += [
-            sign * ii[tuple(corner_points[r])] if (not bad[r]) else 0
+            sign * float(ii[tuple(corner_points[r])]) if (not bad[r]) else 0
             for r in range(rows)
         ]  # add only good rows
     return S
