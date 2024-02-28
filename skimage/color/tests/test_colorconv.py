@@ -690,7 +690,7 @@ class TestColorconv:
             lab[:, :, 0] = value
             with pytest.warns(UserWarning, match=regex) as record:
                 lab2xyz(lab)
-            assert_stacklevel(*record)
+            assert_stacklevel(record)
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_lch_roundtrip(self, channel_axis):
@@ -820,7 +820,7 @@ class TestColorconv:
         )
         with pytest.warns(UserWarning, match=regex) as messages:
             func(lab=[[[0, 0, 300.0]]])
-        assert_stacklevel(*messages)
+        assert_stacklevel(messages)
         assert len(messages) == 1
         assert messages[0].filename == __file__, "warning points at wrong file"
 

@@ -196,7 +196,7 @@ def _deprecated_func():
 def test_deprecate_func():
     with pytest.warns(FutureWarning) as record:
         _deprecated_func()
-        testing.assert_stacklevel(*record)
+        testing.assert_stacklevel(record)
 
     assert len(record) == 1
     assert record[0].message.args[0] == (
@@ -485,7 +485,7 @@ class Test_deprecate_parameter:
     def test_warning_location(self):
         with pytest.warns(FutureWarning) as records:
             _func_deprecated_params(1, old0=2, old1=2)
-            testing.assert_stacklevel(*records)
+            testing.assert_stacklevel(records)
         assert len(records) == 2
 
     def test_stacklevel(self):
@@ -511,4 +511,4 @@ class Test_deprecate_parameter:
 
         with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
             bar(0, 1)
-            testing.assert_stacklevel(*records)
+            testing.assert_stacklevel(records)

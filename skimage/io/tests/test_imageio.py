@@ -78,7 +78,7 @@ class TestSave:
             a = np.zeros((5, 5), bool)
             a[2, 2] = True
             imsave(fname, a)
-        assert_stacklevel(*record)
+        assert_stacklevel(record)
 
 
 def test_return_class():

@@ -137,7 +137,7 @@ class Test_assert_stacklevel:
         # Should pass if stacklevel is set correctly
         with pytest.warns(UserWarning, match="passes") as record:
             self.raise_warning("passes", UserWarning, stacklevel=2)
-        assert_stacklevel(*record)
+        assert_stacklevel(record)
 
     @pytest.mark.parametrize("level", [1, 3])
     def test_wrong_stacklevel(self, level):
@@ -148,4 +148,4 @@ class Test_assert_stacklevel:
         line_number = inspect.currentframe().f_lineno - 2
         regex = ".*" + re.escape(f"!= {__file__}:{line_number}")
         with pytest.raises(AssertionError, match=regex):
-            assert_stacklevel(*record, offset=-5)
+            assert_stacklevel(record, offset=-5)

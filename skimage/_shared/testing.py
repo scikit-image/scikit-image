@@ -364,7 +364,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     return wrapper
 
 
-def assert_stacklevel(*warnings, offset=-1):
+def assert_stacklevel(warnings, *, offset=-1):
     """Assert correct stacklevel of captured warnings.
 
     When scikit-image raises warnings, the stacklevel should ideally be set
@@ -376,7 +376,7 @@ def assert_stacklevel(*warnings, offset=-1):
 
     Parameters
     ----------
-    warnings : tuple[warning.WarningMessage]
+    warnings : collections.abc.Iterable[warning.WarningMessage]
         Warnings that were captured by `pytest.warns`.
     offset : int, optional
         Offset from the line this function is called to the line were the
@@ -395,14 +395,14 @@ def assert_stacklevel(*warnings, offset=-1):
     >>> def test_something():
     ...     with pytest.warns(UserWarning, match="some message") as record:
     ...         something_raising_a_warning()
-    ...     assert_stacklevel(*record)
+    ...     assert_stacklevel(record)
     ...
     >>> def test_another_thing():
     ...     with pytest.warns(UserWarning, match="some message") as record:
     ...         iam_raising_many_warnings(
     ...             "A long argument that forces the call to wrap."
     ...         )
-    ...     assert_stacklevel(*record, offset=-3)
+    ...     assert_stacklevel(record, offset=-3)
     """
     frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
     line_number = frame.f_lineno + offset

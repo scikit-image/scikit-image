@@ -511,4 +511,4 @@ def test_deprecated_shift(func, name, value):
     regex = "`shift_x` and `shift_y` are deprecated"
     with pytest.warns(FutureWarning, match=regex) as record:
         func(img, **{name: value})
-    assert_stacklevel(*record)
+    assert_stacklevel(record)

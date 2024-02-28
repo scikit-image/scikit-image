@@ -172,7 +172,7 @@ def test_circle_model_insufficient_data():
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    assert_stacklevel(*_warnings)
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
 
@@ -467,7 +467,7 @@ def test_ellipse_model_estimate_failers():
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    assert_stacklevel(*_warnings)
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))

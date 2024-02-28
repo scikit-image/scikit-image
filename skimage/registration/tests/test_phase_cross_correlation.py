@@ -240,7 +240,7 @@ def test_disambiguate_empty_image(null_images):
         shift, error, phasediff = phase_cross_correlation(
             image * null_images[0], image * null_images[1], disambiguate=True
         )
-        assert_stacklevel(*records, offset=-3)
+        assert_stacklevel(records, offset=-3)
     np.testing.assert_array_equal(shift, np.array([0.0, 0.0]))
     assert np.isnan(error)
     assert phasediff == 0.0

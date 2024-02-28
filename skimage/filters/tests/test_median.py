@@ -34,7 +34,7 @@ def test_median_warning(image, mode, cval, behavior, warning_type):
     if warning_type:
         with pytest.warns(warning_type) as record:
             median(image, mode=mode, behavior=behavior)
-        assert_stacklevel(*record)
+        assert_stacklevel(record)
     else:
         median(image, mode=mode, behavior=behavior)
 
