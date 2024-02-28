@@ -71,7 +71,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     Parameters
     ----------
     I : ndarray
-        The image to be preprocessed (Gray scale or RGB).
+        The image to be preprocessed (Grayscale or RGB).
     downscale : float
         The pyramid downscale factor.
     nlevel : int
@@ -107,9 +107,9 @@ def coarse_to_fine(
     Parameters
     ----------
     I0 : ndarray
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     I1 : ndarray
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     solver : callable
         The solver applied at each pyramid level.
     downscale : float

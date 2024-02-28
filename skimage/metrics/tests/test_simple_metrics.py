@@ -82,7 +82,7 @@ def test_NRMSE(dtype):
     y = np.asarray([0.0, 2.0, 2.0, 2.0], dtype=dtype)
     nrmse = normalized_root_mse(y, x, normalization='mean')
     assert nrmse.dtype == np.float64
-    assert_equal(nrmse, 1 / np.mean(y))
+    assert_equal(nrmse, 1 / np.mean(y, dtype=np.float64))
     assert_equal(normalized_root_mse(y, x, normalization='euclidean'), 1 / np.sqrt(3))
     assert_equal(
         normalized_root_mse(y, x, normalization='min-max'), 1 / (y.max() - y.min())
