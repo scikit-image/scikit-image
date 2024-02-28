@@ -94,7 +94,7 @@ def active_contour(
 
     Fit spline to image:
 
-    >>> snake = active_contour(img, init, w_edge=0, w_line=1, coordinates='rc')  # doctest: +SKIP
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1)  # doctest: +SKIP
     >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)  # doctest: +SKIP
     >>> int(np.mean(dist))  # doctest: +SKIP
     25
