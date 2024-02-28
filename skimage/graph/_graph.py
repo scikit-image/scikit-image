@@ -70,11 +70,20 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
     """
-    if image.dtype == bool and mask is None:
-        mask = image
-    if mask is None and edge_function is None:
-        mask = np.ones_like(image, dtype=bool)
-        edge_function = _weighted_abs_diff
+    if mask is None:
+        if image.dtype == bool:
+            mask = image
+        else:
+            mask = np.ones_like(image, dtype=bool)
+
+    if edge_function is None:
+        if image.dtype == bool:
+
+            def edge_function(x, y, distances):
+                return distances
+
+        else:
+            edge_function = _weighted_abs_diff
 
     # Strategy: we are going to build the (i, j, data) arrays of a scipy
     # sparse COO matrix, then convert to CSR (which is fast).
@@ -118,13 +127,12 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
     neighbor_indices = neighbors[neighbors_mask]
     neighbor_distances = neighbor_distances_full[neighbors_mask]
     neighbor_indices_sequential = map_array(neighbor_indices, nodes, nodes_sequential)
-    if edge_function is None:
-        data = neighbor_distances
-    else:
-        image_r = image.reshape(-1)
-        data = edge_function(
-            image_r[indices], image_r[neighbor_indices], neighbor_distances
-        )
+
+    image_r = image.reshape(-1)
+    data = edge_function(
+        image_r[indices], image_r[neighbor_indices], neighbor_distances
+    )
+
     m = nodes_sequential.size
     mat = sparse.coo_matrix(
         (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
