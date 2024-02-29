@@ -29,7 +29,7 @@ def test_imread_as_gray():
     assert img.dtype == np.float64
     img = imread(testing.fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
 def test_bilevel():
@@ -54,7 +54,8 @@ def test_imread_uint16():
 
 def test_imread_uint16_big_endian():
     expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'))
+    img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'), plugin="simpleitk")
+    assert img.dtype.type == np.uint16
     np.testing.assert_array_almost_equal(img, expected)
 
 

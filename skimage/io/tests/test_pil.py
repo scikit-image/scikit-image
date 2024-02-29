@@ -57,7 +57,7 @@ def test_imread_as_gray():
     assert img.dtype == np.float64
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
 @pytest.mark.parametrize('explicit_kwargs', [False, True])
@@ -167,8 +167,8 @@ def test_jpg_quality_arg():
 
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
-    img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
-    assert img.dtype == np.uint16
+    img = imread(fetch('data/chessboard_GRAY_U16B.tif'), plugin="pil")
+    assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)
 
 

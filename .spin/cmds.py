@@ -26,7 +26,7 @@ from spin import util
     default=True,
     help="Sphinx gallery: enable/disable plots",
 )
-@click.option("--jobs", "-j", default="auto", help="Number of parallel build jobs")
+@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
 @click.option(
     "--install-deps/--no-install-deps",
     default=False,
@@ -75,12 +75,6 @@ def asv(asv_args):
 
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
     util.run(['asv'] + list(asv_args))
-
-
-@click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`."""
-    util.run(['python', '-m', 'build', '.', '--sdist'])
 
 
 @click.command(context_settings={'ignore_unknown_options': True})

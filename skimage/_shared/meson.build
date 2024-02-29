@@ -37,6 +37,7 @@ python_sources = [
   '_tempfile.py',
   '_warnings.py',
   'coord.py',
+  'dtype.py',
   'filters.py',
   'tester.py',
   'testing.py',

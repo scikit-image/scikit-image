@@ -63,11 +63,6 @@ def test_generates_correct_bounding_boxes_for_rectangles():
     assert (image == 255).all()
 
 
-def test_random_seed_deprecation():
-    with expected_warnings(['`random_seed` is a deprecated argument']):
-        random_shapes((128, 128), max_shapes=1, shape='rectangle', random_seed=42)
-
-
 def test_generates_correct_bounding_boxes_for_triangles():
     image, labels = random_shapes((128, 128), max_shapes=1, shape='triangle', rng=42)
     assert len(labels) == 1
