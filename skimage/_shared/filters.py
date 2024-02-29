@@ -66,9 +66,9 @@ def gaussian(
         to channels.
 
         .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
+           `channel_axis` was added in 0.19.
     out : ndarray, optional
-        If given, the filtered array will be stored in this array.
+        If given, the filtered image will be stored in this array.
 
         .. versionadded:: 0.23
             `out` was added in 0.23.
@@ -85,7 +85,7 @@ def gaussian(
     Integer arrays are converted to float.
 
     `out` should be of floating-point data type since `gaussian` converts the
-    provided `image` to float. If `out` is not provided, another array
+    input `image` to float. If `out` is not provided, another array
     will be allocated and returned as the result.
 
     The multi-dimensional filter is implemented as a sequence of
