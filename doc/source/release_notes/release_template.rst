@@ -1,7 +1,7 @@
 :orphan:
 
-scikit-image 0.X.0 release notes
-================================
+scikit-image 0.X.0 (YYYY-MM-DD)
+===============================
 
 scikit-image is an image processing library for the scientific Python
 ecosystem that includes algorithms for segmentation, geometric

@@ -71,7 +71,8 @@ def median(
             warn(
                 "Change 'behavior' to 'ndimage' if you want to use the "
                 "parameters 'mode' or 'cval'. They will be discarded "
-                "otherwise."
+                "otherwise.",
+                stacklevel=2,
             )
         return generic.median(image, footprint=footprint, out=out)
     if footprint is None:
