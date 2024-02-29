@@ -115,9 +115,29 @@ class TestTpsWarp:
         ):
             tps_warp(img, SRC, DST)
 
+    @pytest.mark.parametrize("image_array", [(2, 2, 2, 2), (4, 4, 4, 4)])
+    def test_tps_warp_invalid_image_dimension(self, image_array):
+        with pytest.raises(ValueError, match="Only 2D and 3D images are supported"):
+            tps_warp(image_array, SRC, DST)
+
+    @pytest.mark.parametrize("invalid_grid_scaling", [0, -10])
+    def test_invalid_grid_scaling(self, invalid_grid_scaling):
+        img = np.zeros((100, 100))
+        with pytest.raises(
+            ValueError, match="Grid scaling must be equal to or greater than 1."
+        ):
+            tps_warp(img, SRC, DST, grid_scaling=invalid_grid_scaling)
+
+    @pytest.mark.parametrize("valid_grid_scaling", [1, 2, 7])
+    def test_valid_grid_scaling(self, valid_grid_scaling):
+        img = np.zeros((100, 100))
+
+        result = tps_warp(img, SRC, DST, grid_scaling=valid_grid_scaling)
+        assert result.shape == img.shape
+
     def test_tps_warp_valid_output_region(self):
         img = np.zeros((100, 100))
-        valid_output_region = (0, 0, 99, 99)
+        valid_output_region = (0, 0, 100, 100)
         result = tps_warp(img, SRC, DST, output_region=valid_output_region)
         assert result.shape == img.shape
 
@@ -127,6 +147,28 @@ class TestTpsWarp:
 
         with pytest.raises(ValueError):
             tps_warp(img, SRC, DST, output_region=invalid_output_region)
+
+    @pytest.mark.parametrize(
+        "invalid_output_region", [(0, 0, 10, 0), (0, 0, 0, 10), (1, 1, 0, 10)]
+    )
+    def test_output_region(self, invalid_output_region):
+        img = np.zeros((100, 100))
+        # Test case where x_steps and y_steps are both zero
+        with pytest.raises(RuntimeError):
+            tps_warp(img, SRC, DST, output_region=invalid_output_region)
+
+    @pytest.mark.parametrize("valid_grid_scaling", [1, 2, 7])
+    def test_rgb_image_channels(self, valid_grid_scaling):
+        rgb_img = np.zeros((100, 100, 3), dtype=np.uint8)
+
+        rgb_img[:, :, 0] = 255
+        rgb_img[:, :, 1] = 0
+        rgb_img[:, :, 2] = 0
+
+        result = tps_warp(rgb_img, SRC, DST, grid_scaling=valid_grid_scaling)
+        assert result.shape[-1] == rgb_img.shape[-1]
+        assert np.min(result) >= 0
+        assert np.max(result) <= 255
 
     def test_tps_transform_call(self):
         # Test __call__ method without esitmate
