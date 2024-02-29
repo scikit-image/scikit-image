@@ -4,7 +4,6 @@ import numpy as np
 from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
-from skimage._shared._warnings import expected_warnings
 
 
 def max_edge(g, src, dst, n):
@@ -219,8 +218,7 @@ def test_reproducibility():
         results[i] = graph.cut_normalized(
             labels1, g, in_place=False, thresh=1e-3, rng=1234
         )
-    with expected_warnings(['`random_state` is a deprecated argument']):
-        graph.cut_normalized(labels1, g, in_place=False, thresh=1e-3, random_state=1234)
+    graph.cut_normalized(labels1, g, in_place=False, thresh=1e-3, rng=1234)
 
     for i in range(len(results) - 1):
         assert_array_equal(results[i], results[i + 1])

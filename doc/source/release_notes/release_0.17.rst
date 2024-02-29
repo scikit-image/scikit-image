@@ -1,5 +1,5 @@
-scikit-image 0.17.2 release notes
-=================================
+scikit-image 0.17.2 (2020-05-13)
+================================
 
 We're happy to announce the release of scikit-image v0.17.2, which is a bug-fix
 release.
@@ -34,8 +34,8 @@ Bug fixes
 
 
 
-scikit-image 0.17.1 release notes
-=================================
+scikit-image 0.17.1 (2020-05-08)
+================================
 
 We're happy to announce the release of scikit-image v0.17.1!
 

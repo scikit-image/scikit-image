@@ -11,7 +11,7 @@ from scipy import ndimage as ndi
 from .._shared.filters import gaussian as gaussian_filter
 from .._shared.utils import _supported_float_type
 from ..transform import warp
-from ._optical_flow_utils import coarse_to_fine, get_warp_points
+from ._optical_flow_utils import _coarse_to_fine, _get_warp_points
 
 
 def _tvl1(
@@ -30,9 +30,9 @@ def _tvl1(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     flow0 : ndarray, shape (image0.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
     attachment : float
@@ -67,6 +67,7 @@ def _tvl1(
         sparse=True,
     )
 
+    # dt corresponds to tau in [3]_, i.e. the time step
     dt = 0.5 / reference_image.ndim
     reg_num_iter = 2
     f0 = attachment * tightness
@@ -102,7 +103,7 @@ def _tvl1(
             )
 
         image1_warp = warp(
-            moving_image, get_warp_points(grid, flow_current), mode='edge'
+            moving_image, _get_warp_points(grid, flow_current), mode='edge'
         )
         grad = np.array(np.gradient(image1_warp))
         NI = (grad * grad).sum(0)
@@ -185,14 +186,14 @@ def optical_flow_tvl1(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     attachment : float, optional
         Attachment parameter (:math:`\lambda` in [1]_). The smaller
         this parameter is, the smoother the returned result will be.
     tightness : float, optional
-        Tightness parameter (:math:`\tau` in [1]_). It should have
+        Tightness parameter (:math:`\theta` in [1]_). It should have
         a small value in order to maintain attachment and
         regularization parts in correspondence.
     num_warp : int, optional
@@ -263,7 +264,7 @@ def optical_flow_tvl1(
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
-    return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
+    return _coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
 
 
 def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefilter):
@@ -272,9 +273,9 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     flow0 : ndarray, shape (reference_image.ndim, M, N[, P[, ...]])
         Initialization for the vector field.
     radius : int
@@ -321,7 +322,9 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
         if prefilter:
             flow = ndi.median_filter(flow, (1,) + ndim * (3,))
 
-        moving_image_warp = warp(moving_image, get_warp_points(grid, flow), mode='edge')
+        moving_image_warp = warp(
+            moving_image, _get_warp_points(grid, flow), mode='edge'
+        )
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
         error_image = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
 
@@ -363,9 +366,9 @@ def optical_flow_ilk(
     Parameters
     ----------
     reference_image : ndarray, shape (M, N[, P[, ...]])
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     moving_image : ndarray, shape (M, N[, P[, ...]])
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     radius : int, optional
         Radius of the window considered around each pixel.
     num_warp : int, optional
@@ -425,4 +428,4 @@ def optical_flow_ilk(
         msg = f"dtype={dtype} is not supported. Try 'float32' or 'float64.'"
         raise ValueError(msg)
 
-    return coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)
+    return _coarse_to_fine(reference_image, moving_image, solver, dtype=dtype)

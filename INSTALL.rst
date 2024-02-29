@@ -399,6 +399,8 @@ functionality is only available with the following installed:
 * `Dask <https://dask.org/>`__
     The ``dask`` module is used to speed up certain functions.
 
+* `Matplotlib <https://matplotlib.org>`__
+    Used in various functions, e.g., for drawing, segmenting, reading images.
 
 .. include:: ../../../requirements/optional.txt
   :literal:
