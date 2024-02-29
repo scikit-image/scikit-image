@@ -118,7 +118,7 @@ def test_preserve_output(dtype):
 def test_output_error():
     image = np.arange(9, dtype=np.float32).reshape((3, 3))
     out = np.zeros_like(image, dtype=np.uint8)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="dtype of `out` must be float"):
         gaussian(image, sigma=1, out=out, preserve_range=True)
 
 

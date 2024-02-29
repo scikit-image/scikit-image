@@ -135,7 +135,7 @@ def gaussian(
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
     if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
-        raise ValueError(f"dtype of `out` must be a floating type, was {out.dtype!r}")
+        raise ValueError(f"dtype of `out` must be float; got {out.dtype!r}.")
     return ndi.gaussian_filter(
         image, sigma, output=out, mode=mode, cval=cval, truncate=truncate
     )
