@@ -1,9 +1,7 @@
-# Copied from NumPy https://github.com/numpy/numpy/pull/24603
-# https://github.com/numpy/numpy/blob/328a9a488c3a146497be704d2cee2f9134e43b5b/.github/workflows/emscripten.yml
+# Copied from NumPy https://github.com/numpy/numpy/pull/25894
+# https://github.com/numpy/numpy/blob/d2d2c25fa81b47810f5cbd85ea6485eb3a3ffec3/.github/workflows/emscripten.yml
 #
-# To enable this workflow on a fork, comment out:
-#
-# if: github.repository == 'scikit-image/scikit-image'
+
 name: Test Emscripten/Pyodide build
 
 on:
@@ -11,6 +9,12 @@ on:
     branches:
       - main
       - maintenance/**
+  # TODO: remove after ready to merge
+  push:
+    # branches:
+    #   - main
+    #   - maintenance/**
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -21,41 +25,44 @@ permissions:
 
 jobs:
   build-wasm-emscripten:
+    name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-22.04
-    if: "github.repository == 'scikit-image/scikit-image'"
+    # To enable this workflow on a fork, comment out:
+    # if: github.repository == 'scikit-image/scikit-image'
     env:
-      PYODIDE_VERSION: 0.25.0a2
+      PYODIDE_VERSION: 0.25.0
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
       # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
       PYTHON_VERSION: 3.11.3
-      EMSCRIPTEN_VERSION: 3.1.45
+      EMSCRIPTEN_VERSION: 3.1.46
       NODE_VERSION: 18
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: set up python
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
-        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - uses: mymindstorm/setup-emsdk@ab889da2abbcbb280f91ec4c215d3bb4f3a8f775 # v12
+      - name: Set up Emscripten toolchain
+        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
           version: ${{ env.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install "pydantic<2" build pyodide-build==$PYODIDE_VERSION
+        run: pip install "pydantic<2" pyodide-build==${{ env.PYODIDE_VERSION }}
 
-      - name: Build
+      - name: Build scikit-image for Pyodide
         run: |
           pyodide build
 
-      - name: set up node
-        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+      - name: Set up Node.js
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -64,9 +71,9 @@ jobs:
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
-          python -c "import sys; print(sys.platform)"
           pip install matplotlib>=3.5 numpydoc>=1.5 pooch>=1.6.0 pytest>=7.0 pytest-cov>=2.11.0 pytest-localserver pytest-faulthandler
-      - name: Test
+
+      - name: Test scikit-image for Pyodide
         run: |
           source .venv-pyodide/bin/activate
           cd ..
