@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+
 from .._shared.utils import check_nD
 
 
@@ -218,7 +219,8 @@ def tps_warp(
         If grid_scaling is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
-        This is fairly accurate for values up to 10 or so.
+        This is fairly accurate for values up to 10 or so. Must be equal to or
+        greater than 1.
 
     Returns
     -------
@@ -249,6 +251,10 @@ def tps_warp(
     """
     image = np.asarray(image)
 
+    # Check if grid_scaling is equal to or greater than 1
+    if grid_scaling < 1:
+        raise ValueError("Grid scaling must be equal to or greater than 1.")
+
     if image.size == 0:
         raise ValueError(f"Cannot warp empty image with dimensions {image.shape!r}")
 
@@ -258,6 +264,8 @@ def tps_warp(
     if output_region is not None:
         if not isinstance(output_region, tuple) or len(output_region) != 4:
             raise ValueError("Output region should be a tuple of 4 values.")
+        x_min, y_min, x_max, y_max = output_region
+        output_region = (x_min, y_min, x_max - 1, y_max - 1)
     else:
         output_region = (0, 0, image.shape[0] - 1, image.shape[1] - 1)
 
@@ -267,7 +275,7 @@ def tps_warp(
     y_steps = (y_max - y_min + 1) // grid_scaling
 
     if x_steps <= 0 or y_steps <= 0:
-        RuntimeError(f"Invalid or empty `output_region`: {output_region}")
+        raise RuntimeError("Invalid or empty `output_region`.")
 
     xx, yy = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
     coords = np.vstack([xx.ravel(), yy.ravel()]).T
@@ -278,11 +286,11 @@ def tps_warp(
 
     transform = transform.reshape((x_steps, y_steps, 2))
     transform = [transform[..., 0], transform[..., 1]]
-
     if grid_scaling != 1:
         # linearly interpolate the zoomed transform grid
-        new_x, new_y = np.mgrid[x_min:x_max, y_min:y_max]
-        # new_x, new_y = np.mgrid[x_min:x_max+1, y_min:y_max+1]
+
+        # new_x, new_y = np.mgrid[x_min:x_max, y_min:y_max]
+        new_x, new_y = np.mgrid[x_min : x_max + 1, y_min : y_max + 1]
         x_indices = (x_steps - 1) * (new_x - x_min) / float(x_max - x_min)
         y_indices = (y_steps - 1) * (new_y - y_min) / float(y_max - y_min)
 
@@ -305,5 +313,4 @@ def tps_warp(
             for channel in range(channels)
         ]
         warped_image = np.concatenate(warped_channels, axis=-1)
-
     return warped_image
