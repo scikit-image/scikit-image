@@ -65,7 +65,7 @@ class TestMorphology:
         return output
 
     def test_gray_morphology(self):
-        expected = dict(np.load(fetch('data/gray_morph_output.npz')))
+        expected = dict(np.load(fetch('data/gray_morph_output.npz'))['data'])
         calculated = self._build_expected_output()
         assert_equal(expected, calculated)
 

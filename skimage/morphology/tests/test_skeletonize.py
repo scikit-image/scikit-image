@@ -56,7 +56,7 @@ class TestSkeletonize:
         im = im == 0
         result = skeletonize(im)
 
-        expected = np.load(fetch("data/bw_text_skeleton.npy"))
+        expected = np.load(fetch("data/bw_text_skeleton.npz"))["data"]
         assert_array_equal(result, expected)
 
     @pytest.mark.parametrize("dtype", [bool, float, int])

@@ -143,7 +143,7 @@ def test_bilevel():
 
 
 def test_imread_uint16():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
     img = imread(fetch('data/chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
@@ -155,7 +155,7 @@ def test_imread_truncated_jpg():
 
 
 def test_jpg_quality_arg():
-    chessboard = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    chessboard = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
     with temporary_file(suffix='.jpg') as jpg:
         imsave(jpg, chessboard, quality=95)
         im = imread(jpg)
@@ -166,7 +166,7 @@ def test_jpg_quality_arg():
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'), plugin="pil")
     assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)

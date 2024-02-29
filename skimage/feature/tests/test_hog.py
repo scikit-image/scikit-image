@@ -25,7 +25,7 @@ def test_hog_output_size():
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l1_norm(dtype):
     img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
-    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npy'))
+    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npz'))['data']
 
     output = feature.hog(
         img,
@@ -46,7 +46,7 @@ def test_hog_output_correctness_l1_norm(dtype):
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l2hys_norm(dtype):
     img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
-    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npy'))
+    correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npz'))['data']
 
     output = feature.hog(
         img,

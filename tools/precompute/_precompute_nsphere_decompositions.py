@@ -6,8 +6,8 @@ retains the one that has the minimum error between the composite footprint and
 the desired one.
 
 The generated footprints were stored as
-    skimage/morphology/ball_decompositions.npy
-    skimage/morphology/disk_decompositions.npy
+    skimage/morphology/ball_decompositions.npz
+    skimage/morphology/disk_decompositions.npz
 
 Validation in `test_nsphere_series_approximation` in:
     skimage/morphology/tests/test_footprints.py
@@ -110,14 +110,14 @@ def precompute_decompositions(
             opt_vals[i, :] = best_vals[(ndim, i)]
 
         if ndim == 3:
-            fname = "ball_decompositions.npy"
+            fname = "ball_decompositions.npz"
         elif ndim == 2:
-            fname = "disk_decompositions.npy"
+            fname = "disk_decompositions.npz"
         else:
-            fname = f"{ndim}sphere_decompositions.npy"
+            fname = f"{ndim}sphere_decompositions.npz"
         if strict_radius:
-            fname = fname.replace(".npy", "_strict.npy")
-        np.save(fname, opt_vals)
+            fname = fname.replace(".npz", "_strict.npz")
+        np.savez(fname, data=opt_vals)
 
 
 if __name__ == "__main__":
