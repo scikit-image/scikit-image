@@ -10,7 +10,7 @@ from skimage._shared.utils import (
 
 
 def compare_images(
-    image0=None, image1=None, image2=DEPRECATED, *, method='diff', n_tiles=(8, 8)
+    image0, image1, image2=DEPRECATED, method='diff', *, n_tiles=(8, 8)
 ):
     """
     Return an image showing the differences between two images.
