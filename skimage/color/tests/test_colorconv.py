@@ -15,7 +15,7 @@ from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import fetch
+from skimage._shared.testing import fetch, assert_stacklevel
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.color import (
     rgb2hsv,
@@ -688,8 +688,9 @@ class TestColorconv:
         )
         for value in [0, 10, 20]:
             lab[:, :, 0] = value
-            with pytest.warns(UserWarning, match=regex):
+            with pytest.warns(UserWarning, match=regex) as record:
                 lab2xyz(lab)
+            assert_stacklevel(record)
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_lch_roundtrip(self, channel_axis):
@@ -819,6 +820,7 @@ class TestColorconv:
         )
         with pytest.warns(UserWarning, match=regex) as messages:
             func(lab=[[[0, 0, 300.0]]])
+        assert_stacklevel(messages)
         assert len(messages) == 1
         assert messages[0].filename == __file__, "warning points at wrong file"
 
@@ -951,6 +953,22 @@ def test_gray2rgba_alpha():
     with pytest.raises(ValueError) as err:
         rgba = gray2rgba(img, alpha)
     assert expected_err_msg == str(err.value)
+
+
+@pytest.mark.parametrize(
+    "alpha,dtype",
+    [
+        (-1, np.uint8),
+        (300, np.int8),
+        (0.5, int),
+        (0.5, np.uint8),
+        (np.finfo(np.float64).max, np.float32),
+    ],
+)
+def test_gray2rgba_alpha_fail_cast(alpha, dtype):
+    image = np.ones((5, 5), dtype=dtype)
+    with pytest.warns(UserWarning, match="alpha cannot be safely cast"):
+        gray2rgba(image, alpha=alpha)
 
 
 @pytest.mark.parametrize("func", [rgb2gray, gray2rgb, gray2rgba])

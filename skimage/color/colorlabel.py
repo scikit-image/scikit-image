@@ -58,6 +58,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
     # map labels to their ranks among all labels from small to large
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
+    # unique_inverse is no longer flat in NumPy 2.0
+    mapped_labels = mapped_labels.reshape(-1)
 
     # get rank of bg_label
     bg_label_rank_list = mapped_labels[label.flat == bg_label]

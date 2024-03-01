@@ -13,6 +13,7 @@ from ._util import (
     _resolve_neighborhood,
     _set_border_values,
 )
+from .._shared.dtype import numeric_dtype_min_max
 
 
 def flood_fill(
@@ -271,16 +272,12 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
 
     try:
         if tolerance is not None:
-            # Check if tolerance could create overflow problems
-            try:
-                max_value = np.finfo(working_image.dtype).max
-                min_value = np.finfo(working_image.dtype).min
-            except ValueError:
-                max_value = np.iinfo(working_image.dtype).max
-                min_value = np.iinfo(working_image.dtype).min
-
-            high_tol = min(max_value, seed_value + tolerance)
-            low_tol = max(min_value, seed_value - tolerance)
+            tolerance = abs(tolerance)
+            # Account for over- & underflow problems with seed_value ± tolerance
+            # in a way that works with NumPy 1 & 2
+            min_value, max_value = numeric_dtype_min_max(seed_value.dtype)
+            low_tol = max(min_value, seed_value.item() - tolerance)
+            high_tol = min(max_value, seed_value.item() + tolerance)
 
             _flood_fill_tolerance(
                 working_image.ravel(order),

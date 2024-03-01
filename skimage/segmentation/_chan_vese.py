@@ -40,7 +40,7 @@ def _cv_calculate_variation(image, phi, mu, lambda1, lambda2, dt):
 
     K = P[1:-1, 2:] * C1 + P[1:-1, :-2] * C2 + P[2:, 1:-1] * C3 + P[:-2, 1:-1] * C4
 
-    Hphi = 1 * (phi > 0)
+    Hphi = (phi > 0).astype(image.dtype)
     (c1, c2) = _cv_calculate_averages(image, Hphi)
 
     difference_from_average_term = (

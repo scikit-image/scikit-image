@@ -1,5 +1,5 @@
-scikit-image 0.21.0 release notes
-=================================
+scikit-image 0.21.0 (2023-06-02)
+================================
 
 We're happy to announce the release of scikit-image 0.21.0!
 scikit-image is an image processing toolbox for SciPy that includes algorithms
