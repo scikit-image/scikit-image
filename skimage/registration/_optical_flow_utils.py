@@ -9,7 +9,7 @@ from ..transform import pyramid_reduce
 from ..util.dtype import _convert
 
 
-def get_warp_points(grid, flow):
+def _get_warp_points(grid, flow):
     """Compute warp point coordinates.
 
     Parameters
@@ -32,7 +32,7 @@ def get_warp_points(grid, flow):
     return out
 
 
-def resize_flow(flow, shape):
+def _resize_flow(flow, shape):
     """Rescale the values of the vector field (u, v) to the desired shape.
 
     The values of the output vector field are scaled to the new
@@ -65,7 +65,7 @@ def resize_flow(flow, shape):
     return rflow
 
 
-def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
+def _get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     """Construct image pyramid.
 
     Parameters
@@ -99,7 +99,7 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     return pyramid[::-1]
 
 
-def coarse_to_fine(
+def _coarse_to_fine(
     I0, I1, solver, downscale=2, nlevel=10, min_size=16, dtype=np.float32
 ):
     """Generic coarse to fine solver.
@@ -136,8 +136,8 @@ def coarse_to_fine(
 
     pyramid = list(
         zip(
-            get_pyramid(_convert(I0, dtype), downscale, nlevel, min_size),
-            get_pyramid(_convert(I1, dtype), downscale, nlevel, min_size),
+            _get_pyramid(_convert(I0, dtype), downscale, nlevel, min_size),
+            _get_pyramid(_convert(I1, dtype), downscale, nlevel, min_size),
         )
     )
 
@@ -147,6 +147,6 @@ def coarse_to_fine(
     flow = solver(pyramid[0][0], pyramid[0][1], flow)
 
     for J0, J1 in pyramid[1:]:
-        flow = solver(J0, J1, resize_flow(flow, J0.shape))
+        flow = solver(J0, J1, _resize_flow(flow, J0.shape))
 
     return flow
