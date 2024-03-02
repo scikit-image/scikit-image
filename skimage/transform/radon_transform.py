@@ -34,9 +34,9 @@ def radon(image, theta=None, circle=True, *, preserve_range=False, center=None):
         image is converted according to the conventions of `img_as_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     center : array_like, optional
-        It specifies the rotation center of the image. By default, the rotation
-        axis will be located in the position:
-        ``((image.shape[0] - 1) / 2, (image.shape[1] - 1) / 2)``
+        Coordinates of the rotation axis. If None, the rotation axis will be
+        located in the pixel with coordinates:
+        ``(image.shape[0] // 2, image.shape[1] // 2)``
 
     Returns
     -------
