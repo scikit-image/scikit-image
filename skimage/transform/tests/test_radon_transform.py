@@ -9,6 +9,7 @@ from skimage._shared.testing import run_in_parallel
 from skimage._shared.utils import _supported_float_type, convert_to_float
 from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, iradon, iradon_sart, rescale
+from skimage.transform.radon_transform import _get_default_center
 
 
 PHANTOM = shepp_logan_phantom()[::2, ::2]
@@ -86,7 +87,7 @@ def check_radon_center(shape, circle, dtype, preserve_range, center_disp):
 
 def check_radon_center_default(shape, circle, dtype, preserve_range):
     # Create a test image with intensity in the origin
-    center = (np.array(shape, dtype=np.float32) - 1) / 2
+    center = _get_default_center(np.array(shape, dtype=np.float32))
     int_coords = [
         (np.abs(np.arange(s) - c) < 1).astype(dtype) for s, c in zip(shape, center)
     ]
@@ -99,7 +100,7 @@ def check_radon_center_default(shape, circle, dtype, preserve_range):
 
     # The sinogram should be a straight, horizontal line, in the center
     new_shape = sinogram.shape[0]
-    new_center = (new_shape - 1) / 2
+    new_center = _get_default_center(new_shape)
     sino_coords = np.arange(new_shape) - new_center
     sinogram_max = np.sum(sinogram * sino_coords[:, None], axis=0) / np.sum(
         sinogram, axis=0
@@ -143,7 +144,7 @@ def check_iradon_center(size, theta, circle):
     else:
         sino_size = int(np.ceil(np.sqrt(2) * size))
 
-    center = (sino_size - 1) / 2
+    center = _get_default_center(sino_size)
     sinogram = np.abs(np.arange(sino_size) - center) < 1.0
     sinogram = sinogram.astype(np.float32)[:, None] / sinogram.sum()
 
@@ -320,9 +321,9 @@ def _random_circle(shape):
     np.random.seed(98312871)
     image = np.random.rand(*shape)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    center = np.array(shape) / 2 - 0.5
+    center = _get_default_center(np.array(shape))
     r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
-    radius = min(shape) / 2 - 0.5
+    radius = _get_default_center(min(shape))
     image[r > radius] = 0.0
     return image
 
@@ -335,9 +336,9 @@ def test_radon_circle():
     # Synthetic data, circular symmetry
     shape = (61, 79)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    center = np.array(shape) / 2 - 0.5
+    center = _get_default_center(np.array(shape))
     r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
-    radius = min(shape) / 2 - 0.5
+    radius = _get_default_center(min(shape))
     image = np.clip(radius - r, 0, np.inf)
     image = _rescale_intensity(image)
     angles = np.linspace(0, 180, min(shape), endpoint=False)
@@ -382,7 +383,7 @@ def test_sinogram_circle_to_square(size):
 def check_radon_iradon_circle(interpolation, shape, output_size):
     # Forward and inverse radon on synthetic data
     image = _random_circle(shape)
-    radius = min(shape) // 2
+    radius = _get_default_center(min(shape))
     sinogram_rectangle = radon(image, circle=False)
     reconstruction_rectangle = iradon(
         sinogram_rectangle,
@@ -399,12 +400,13 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     )
     # Crop rectangular reconstruction to match circle=True reconstruction
     width = reconstruction_circle.shape[0]
+    center = _get_default_center(width)
     excess = int(np.ceil((reconstruction_rectangle.shape[0] - width) / 2))
     s = np.s_[excess : width + excess, excess : width + excess]
     reconstruction_rectangle = reconstruction_rectangle[s]
     # Find the reconstruction circle, set reconstruction to zero outside
     c0, c1 = np.ogrid[0:width, 0:width]
-    r = np.sqrt((c0 - width // 2) ** 2 + (c1 - width // 2) ** 2)
+    r = np.sqrt((c0 - center) ** 2 + (c1 - center) ** 2)
     reconstruction_rectangle[r > radius] = 0.0
     print(reconstruction_circle.shape)
     print(reconstruction_rectangle.shape)
