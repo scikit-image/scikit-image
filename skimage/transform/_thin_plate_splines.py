@@ -26,6 +26,7 @@ class TpsTransform:
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
            decomposition of deformations," IEEE Transactions on pattern analysis
            and machine intelligence 11.6 (1989): 567–585. DOI:`10.1109/34.24792`
+           https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
     Examples
     --------
@@ -133,7 +134,9 @@ class TpsTransform:
         check_nD(dst, 2)
 
         if len(src) < 3 or len(dst) < 3:
-            raise ValueError(f"There should be at least 3 points in both sets (source and destination).")
+            raise ValueError(
+                "There should be at least 3 points in both sets (source and destination)."
+            )
 
         if src.shape != dst.shape:
             raise ValueError(
@@ -166,7 +169,7 @@ class TpsTransform:
         return radial_dist
 
     def _spline_function(self, x, y, radial_dist, coeffs):
-        """Solve the spline function in the X and Y directions"""
+        """Calculate the value of a spline function in the X and Y directions"""
         w = coeffs[:-3]
         a1, ax, ay = coeffs[-3:]
         summation = np.dot(w, radial_dist)
@@ -180,7 +183,7 @@ def _radial_basis_kernel(r):
     ----------
     r : (4, N) ndarray
         Input array representing the norm distance between interlandmark
-        distances for the source form and based on the (x,y) coordinates
+        distances for the source (control) points and based on the (x,y) coordinates
         for each of these points.
 
     Returns

@@ -20,19 +20,21 @@ which, in our case, is a 2D image.
 .. [3] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
        decomposition of deformations." IEEE Transactions on pattern analysis and
        machine intelligence 11.6 (1989): 567–585.
+       https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
 
 Image Deformation
 =================
 
-In this example, we use the TPS interpolation to deform an image.
-Deforming an image implies displacing each pixel in it.
-In our image, we define 6 source and destination points labelled "1-6": "1-4" in the image
+Image deformation implies displacing the pixels of an image relatively to one another.
+In this example, we deform the (2D) image of an astronaut by using thin-plate splines.
+In our image, we define 6 source and target points labelled "1-6": "1-4" in the image
 corners, "5" near the smile corner and "6" in an eye. At the corners, there are no
 displacements. The smile corner moved upward and the eye position moved down.
 
 Thin Plate Splines provides a very handy interpolator for image deformation.
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 

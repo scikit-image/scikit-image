@@ -73,7 +73,7 @@ class TestTpsTransform:
 
         # # Check if src and dst have fewer than 3 points
         with pytest.raises(
-            ValueError, match=".*points less than 3 is considered undefined."
+            ValueError, match="There should be at least 3 points in both sets*."
         ):
             src_less_than_3pts = np.array([[0, 0], [0, 5]])
             tform.estimate(src_less_than_3pts, dst)
@@ -83,7 +83,7 @@ class TestTpsTransform:
 
             tform.estimate(src_less_than_3pts, dst_less_than_3pts)
 
-        # Check if src or dst not being (N, 2)
+        # Check that src or dst not being (N, 2) does error
         with pytest.raises(ValueError):
             src_not_2d = np.array([0, 1, 2, 3])
             tform.estimate(src_not_2d, dst)
@@ -102,9 +102,7 @@ class TestTpsWarp:
     def test_tps_warp_invalid_image_shape(self, image_shape):
         img = np.zeros(image_shape)
 
-        with pytest.raises(
-            ValueError, match="Cannot warp empty image"
-        ):
+        with pytest.raises(ValueError, match="Cannot warp empty image"):
             tps_warp(img, SRC, DST)
 
     @pytest.mark.parametrize("image_array", [(2, 2, 2, 2), (4, 4, 4, 4)])
