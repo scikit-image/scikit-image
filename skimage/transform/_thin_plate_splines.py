@@ -7,9 +7,11 @@ from .._shared.utils import check_nD
 class TpsTransform:
     """Thin-plate splines transformation.
 
-    Apply thin-plate spline transformation between a set of control points.
+    Given a set of control points (source and destination points), this class
+    can be used to estimate the thin-plate spline (TPS) transformation which
+    transforms the source points into the destination points.
     It interpolates a surface that passes through each control point.
-    Control points are position constraints on a bending surface. The ideal
+    Control points are seen as position constraints on a bending surface. The ideal
     surface is the one that bends least.
 
     Attributes
@@ -34,12 +36,12 @@ class TpsTransform:
     >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
     >>> dst = np.roll(src, 1, axis=0)
 
-     Generate meshgrid:
+    Generate meshgrid:
 
     >>> coords = np.meshgrid(np.arange(5), np.arange(5))
     >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
 
-     Estimate transformation:
+    Estimate transformation:
 
     >>> tps = ski.transform.TpsTransform()
     >>> tps.estimate(src, dst)
@@ -106,15 +108,16 @@ class TpsTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate optimal spline mappings that describe the deformation of the points.
+        """Estimate optimal spline mappings that describe the deformation of source
+        points into destination points.
 
 
         Parameters
         ----------
         src : (N, 2) array_like
-            Control point at source coordinates
+            Control points at source coordinates.
         dst : (N, 2) array_like
-            Control point at destination coordinates
+            Control points at destination coordinates.
 
         Returns
         -------
@@ -123,14 +126,14 @@ class TpsTransform:
 
         Notes
         -----
-        -  The number of source and destination points must match (N).
+        The number of source and destination points must match (N).
         """
 
         check_nD(src, 2)
         check_nD(dst, 2)
 
         if len(src) < 3 or len(dst) < 3:
-            raise ValueError(f"{src} points less than 3 is considered undefined.")
+            raise ValueError(f"There should be at least 3 points in both sets (source and destination).")
 
         if src.shape != dst.shape:
             raise ValueError(
@@ -197,7 +200,7 @@ def tps_warp(
     """Return an array of warped images.
 
     Define a thin-plate-spline warping transform that warps from the
-    src to the dst, and then warp the given images by
+    `src` to the `dst` points, and then warp the given image by
     that transform.
 
     Parameters
@@ -210,13 +213,13 @@ def tps_warp(
         Control points at target coordinates.
     output_region : tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
-        image that should be produced. (Note: The region is inclusive, i.e.
+        image that should be produced. (Note: The region is inclusive, i.e.,
         xmin <= x <= xmax)
     interpolation_order : int, optional
         If 1, use linear interpolation, otherwise use
         nearest-neighbor interpolation.
     grid_scaling : int, optional
-        If grid_scaling is greater than 1, say x, then the transform is
+        If `grid_scaling` is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
         This is fairly accurate for values up to 10 or so. Must be equal to or
@@ -224,7 +227,7 @@ def tps_warp(
 
     Returns
     -------
-    warped : array_like
+    warped : ndarray
         The warped input image.
 
 
@@ -256,7 +259,7 @@ def tps_warp(
         raise ValueError("Grid scaling must be equal to or greater than 1.")
 
     if image.size == 0:
-        raise ValueError(f"Cannot warp empty image with dimensions {image.shape!r}")
+        raise ValueError(f"Cannot warp empty image; got shape {image.shape!r}.")
 
     if image.ndim not in (2, 3):
         raise ValueError("Only 2D and 3D images are supported")

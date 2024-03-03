@@ -91,7 +91,7 @@ class TestTpsTransform:
             dst_not_2d = np.array([[1, 2, 3], [4, 5, 6]])
             tform.estimate(src, dst_not_2d)
 
-        # Check if the estimation failed and the instance attributes remain unchanged
+        # Check that, when the estimation fails, the instance attributes remain unchanged
         assert tform._estimated is False
         assert tform.spline_mappings is None
         assert tform.src is None
@@ -103,15 +103,7 @@ class TestTpsWarp:
         img = np.zeros(image_shape)
 
         with pytest.raises(
-            ValueError, match="Cannot warp empty image with dimensions."
-        ):
-            tps_warp(img, SRC, DST)
-        with pytest.raises(
-            ValueError, match="Cannot warp empty image with dimensions."
-        ):
-            tps_warp(img, SRC, DST)
-        with pytest.raises(
-            ValueError, match="Cannot warp empty image with dimensions."
+            ValueError, match="Cannot warp empty image"
         ):
             tps_warp(img, SRC, DST)
 
