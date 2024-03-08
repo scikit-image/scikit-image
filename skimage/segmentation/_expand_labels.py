@@ -2,14 +2,14 @@ import numpy as np
 from scipy.ndimage import distance_transform_edt
 
 
-def expand_labels(label_image, distance=1, sampling=1):
+def expand_labels(label_image, distance=1, spacing=1):
     """Expand labels in label image by ``distance`` pixels without overlapping.
 
     Given a label image, ``expand_labels`` grows label regions (connected components)
     outwards by up to ``distance`` units without overflowing into neighboring regions.
     More specifically, each background pixel that is within Euclidean distance
     of <= ``distance`` pixels of a connected component is assigned the label of that
-    connected component. The `sampling` parameter can be used to specify the sampling
+    connected component. The `spacing` parameter can be used to specify the spacing
     rate of the distance transform used to calculate the Euclidean distance for anisotropic
     images.
     Where multiple connected components are within ``distance`` pixels of a background
@@ -22,7 +22,7 @@ def expand_labels(label_image, distance=1, sampling=1):
         label image
     distance : float
         Euclidean distance in pixels by which to grow the labels. Default is one.
-    sampling : float, or sequence of float, optional
+    spacing : float, or sequence of float, optional
         Spacing of elements along each dimension. If a sequence, must be of length
         equal to the input rank; if a single number, this is used for all axes. If
         not specified, a grid spacing of unity is implied.
@@ -82,14 +82,14 @@ def expand_labels(label_image, distance=1, sampling=1):
     array([[2, 1, 1, 0],
            [2, 2, 0, 0],
            [2, 3, 3, 0]])
-    >>> expand_labels(labels2d, 1, sampling=[1, 0.5])
+    >>> expand_labels(labels2d, 1, spacing=[1, 0.5])
     array([[1, 1, 1, 1],
            [2, 2, 2, 0],
            [3, 3, 3, 3]])
     """
 
     distances, nearest_label_coords = distance_transform_edt(
-        label_image == 0, sampling=sampling, return_indices=True
+        label_image == 0, sampling=spacing, return_indices=True
     )
     labels_out = np.zeros_like(label_image)
     dilate_mask = distances <= distance
