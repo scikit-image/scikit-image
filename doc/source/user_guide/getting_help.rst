@@ -1,6 +1,6 @@
-=================================
-Getting help on using ``skimage``
-=================================
+==================================
+Getting help on using scikit-image
+==================================
 
 API Reference
 -------------
@@ -25,16 +25,6 @@ Search field
 Use the ``quick search`` field in the navigation bar of the online
 documentation to find mentions of keywords (segmentation,
 rescaling, denoising, etc.) in the documentation.
-
-API Discovery
--------------
-
-We provide a ``lookfor`` function to search API functions::
-
-   import skimage as ski
-   ski.lookfor('eigenvector')
-
-Also see NumPy's ``lookfor``.
 
 Ask for help
 ------------

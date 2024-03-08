@@ -30,19 +30,17 @@ def _weighted_abs_diff(values0, values1, distances):
     return np.abs(values0 - values1) * distances
 
 
-def pixel_graph(
-        image, *, mask=None, edge_function=None, connectivity=1, spacing=None
-        ):
+def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing=None):
     """Create an adjacency graph of pixels in an image.
 
     Pixels where the mask is True are nodes in the returned graph, and they are
     connected by edges to their neighbors according to the connectivity
     parameter. By default, the *value* of an edge when a mask is given, or when
-    the image is itself the mask, is the euclidean distance between the pixels.
+    the image is itself the mask, is the Euclidean distance between the pixels.
 
     However, if an int- or float-valued image is given with no mask, the value
     of the edges is the absolute difference in intensity between adjacent
-    pixels, weighted by the euclidean distance.
+    pixels, weighted by the Euclidean distance.
 
     Parameters
     ----------
@@ -72,11 +70,20 @@ def pixel_graph(
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
     """
-    if image.dtype == bool and mask is None:
-        mask = image
-    if mask is None and edge_function is None:
-        mask = np.ones_like(image, dtype=bool)
-        edge_function = _weighted_abs_diff
+    if mask is None:
+        if image.dtype == bool:
+            mask = image
+        else:
+            mask = np.ones_like(image, dtype=bool)
+
+    if edge_function is None:
+        if image.dtype == bool:
+
+            def edge_function(x, y, distances):
+                return distances
+
+        else:
+            edge_function = _weighted_abs_diff
 
     # Strategy: we are going to build the (i, j, data) arrays of a scipy
     # sparse COO matrix, then convert to CSR (which is fast).
@@ -104,12 +111,10 @@ def pixel_graph(
     padded = np.pad(mask, 1, mode='constant', constant_values=False)
     nodes_padded = np.flatnonzero(padded)
     neighbor_offsets_padded, distances_padded = _raveled_offsets_and_distances(
-            padded.shape, connectivity=connectivity, spacing=spacing
-            )
+        padded.shape, connectivity=connectivity, spacing=spacing
+    )
     neighbors_padded = nodes_padded[:, np.newaxis] + neighbor_offsets_padded
-    neighbor_distances_full = np.broadcast_to(
-            distances_padded, neighbors_padded.shape
-            )
+    neighbor_distances_full = np.broadcast_to(distances_padded, neighbors_padded.shape)
     nodes = np.flatnonzero(mask)
     nodes_sequential = np.arange(nodes.size)
     # neighbors outside the mask get mapped to 0, which is a valid index,
@@ -121,21 +126,17 @@ def pixel_graph(
     indices_sequential = np.repeat(nodes_sequential, num_neighbors)
     neighbor_indices = neighbors[neighbors_mask]
     neighbor_distances = neighbor_distances_full[neighbors_mask]
-    neighbor_indices_sequential = map_array(
-            neighbor_indices, nodes, nodes_sequential
-            )
-    if edge_function is None:
-        data = neighbor_distances
-    else:
-        image_r = image.reshape(-1)
-        data = edge_function(
-                image_r[indices], image_r[neighbor_indices], neighbor_distances
-                )
+    neighbor_indices_sequential = map_array(neighbor_indices, nodes, nodes_sequential)
+
+    image_r = image.reshape(-1)
+    data = edge_function(
+        image_r[indices], image_r[neighbor_indices], neighbor_distances
+    )
+
     m = nodes_sequential.size
     mat = sparse.coo_matrix(
-            (data, (indices_sequential, neighbor_indices_sequential)),
-            shape=(m, m)
-            )
+        (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
+    )
     graph = mat.tocsr()
     return graph, nodes
 
@@ -183,13 +184,9 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     idxs = np.arange(graph.shape[0])
     total_shortest_path_len_list = []
     for partition in np.array_split(idxs, num_splits):
-        shortest_paths = csgraph.shortest_path(
-                graph, directed=False, indices=partition
-                )
+        shortest_paths = csgraph.shortest_path(graph, directed=False, indices=partition)
         shortest_paths_no_inf = np.nan_to_num(shortest_paths)
-        total_shortest_path_len_list.append(
-                np.sum(shortest_paths_no_inf, axis=1)
-                )
+        total_shortest_path_len_list.append(np.sum(shortest_paths_no_inf, axis=1))
     total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
     nonzero = np.flatnonzero(total_shortest_path_len)
     min_sp = np.argmin(total_shortest_path_len[nonzero])

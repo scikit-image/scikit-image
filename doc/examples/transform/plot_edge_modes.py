@@ -25,8 +25,12 @@ ax = axes.flatten()
 for n, mode in enumerate(modes):
     img_padded = np.pad(img, pad_width=img.shape[0], mode=mode)
     ax[n].imshow(img_padded, cmap=plt.cm.gray)
-    ax[n].plot([15.5, 15.5, 31.5, 31.5, 15.5],
-               [15.5, 31.5, 31.5, 15.5, 15.5], 'y--', linewidth=0.5)
+    ax[n].plot(
+        [15.5, 15.5, 31.5, 31.5, 15.5],
+        [15.5, 31.5, 31.5, 15.5, 15.5],
+        'y--',
+        linewidth=0.5,
+    )
     ax[n].set_title(mode)
 
 for a in ax:

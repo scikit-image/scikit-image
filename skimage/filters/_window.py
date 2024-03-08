@@ -99,7 +99,7 @@ def window(window_type, shape, warp_kwargs=None):
     """
 
     if np.isscalar(shape):
-        shape = safe_as_int(shape),
+        shape = (safe_as_int(shape),)
     else:
         shape = tuple(safe_as_int(shape))
     if any(s < 0 for s in shape):
@@ -111,7 +111,7 @@ def window(window_type, shape, warp_kwargs=None):
 
     max_size = functools.reduce(max, shape)
     w = get_window(window_type, max_size, fftbins=False)
-    w = np.reshape(w, (-1,) + (1,) * (ndim-1))
+    w = np.reshape(w, (-1,) + (1,) * (ndim - 1))
 
     # Create coords for warping following `ndimage.map_coordinates` convention.
     L = [np.arange(s, dtype=np.float32) * (max_size / s) for s in shape]
@@ -128,4 +128,4 @@ def window(window_type, shape, warp_kwargs=None):
     if warp_kwargs is None:
         warp_kwargs = {}
 
-    return warp(w, coords, mode='constant', cval=0., **warp_kwargs)
+    return warp(w, coords, mode='constant', cval=0.0, **warp_kwargs)

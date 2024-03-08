@@ -112,7 +112,8 @@ numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  'conftest.py'
+  'conftest.py',
+  'py.typed'
 ]
 
 py3.install_sources(
@@ -141,6 +142,7 @@ cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
 
 subdir('_shared')
+subdir('_vendored')
 subdir('color')
 subdir('data')
 subdir('draw')

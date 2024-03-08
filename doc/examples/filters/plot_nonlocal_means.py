@@ -49,28 +49,27 @@ noisy = random_noise(astro, var=sigma**2)
 sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
 print(f'estimated noise standard deviation = {sigma_est}')
 
-patch_kw = dict(patch_size=5,      # 5x5 patches
-                patch_distance=6,  # 13x13 search area
-                channel_axis=-1)
+patch_kw = dict(
+    patch_size=5, patch_distance=6, channel_axis=-1  # 5x5 patches  # 13x13 search area
+)
 
 # slow algorithm
-denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False,
-                           **patch_kw)
+denoise = denoise_nl_means(noisy, h=1.15 * sigma_est, fast_mode=False, **patch_kw)
 
 # slow algorithm, sigma provided
-denoise2 = denoise_nl_means(noisy, h=0.8 * sigma_est, sigma=sigma_est,
-                            fast_mode=False, **patch_kw)
+denoise2 = denoise_nl_means(
+    noisy, h=0.8 * sigma_est, sigma=sigma_est, fast_mode=False, **patch_kw
+)
 
 # fast algorithm
-denoise_fast = denoise_nl_means(noisy, h=0.8 * sigma_est, fast_mode=True,
-                                **patch_kw)
+denoise_fast = denoise_nl_means(noisy, h=0.8 * sigma_est, fast_mode=True, **patch_kw)
 
 # fast algorithm, sigma provided
-denoise2_fast = denoise_nl_means(noisy, h=0.6 * sigma_est, sigma=sigma_est,
-                                 fast_mode=True, **patch_kw)
+denoise2_fast = denoise_nl_means(
+    noisy, h=0.6 * sigma_est, sigma=sigma_est, fast_mode=True, **patch_kw
+)
 
-fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6),
-                       sharex=True, sharey=True)
+fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 6), sharex=True, sharey=True)
 
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')

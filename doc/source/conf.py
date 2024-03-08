@@ -55,6 +55,7 @@ extensions = [
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
 ]
 
@@ -78,8 +79,7 @@ if v.release is None:
 if v.is_devrelease:
     binder_branch = "main"
 else:
-    major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
+    binder_branch = f"v{release}"
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 
@@ -156,24 +156,34 @@ html_theme_options = {
     "header_links_before_dropdown": 6,
     "icon_links": [
         {
+            "name": "GitHub",
+            "url": "https://github.com/scikit-image/scikit-image",
+            "icon": "fa-brands fa-github",
+        },
+        {
             "name": "PyPI",
             "url": "https://pypi.org/project/scikit-image/",
             "icon": "fa-solid fa-box",
         },
     ],
+    "navbar_align": "left",
     "navbar_end": ["version-switcher", "navbar-icon-links"],
     "show_prev_next": False,
     "switcher": {
-        "json_url": "https://scikit-image.org/docs/dev/_static/version_switcher.json",
+        "json_url": ("https://scikit-image.org/docs/dev/_static/version_switcher.json"),
         "version_match": "dev" if "dev" in version else version,
     },
-    "github_url": "https://github.com/scikit-image/scikit-image",
+    "show_version_warning_banner": True,
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
     # Other
     "pygment_light_style": "default",
     "pygment_dark_style": "github-dark",
+    "analytics": {
+        "plausible_analytics_domain": "scikit-image.org",
+        "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
+    },
 }
 
 # Custom sidebar templates, maps document names to template names.
@@ -235,13 +245,53 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
+    "plotly": ("https://plotly.com/python-api-reference/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
 }
 
+# Do not (yet) use nitpicky mode for checking cross-references
+nitpicky = False
+# nitpick_ignore is only considered when nitpicky=True
+nitpick_ignore = [
+    (
+        "py:class",
+        "skimage.transform._geometric._GeometricTransform",
+    ),  # skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
+    (
+        "py:class",
+        "skimage.feature.util.DescriptorExtractor",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.feature.util.FeatureDetector",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.measure.fit.BaseModel",
+    ),  # skimage.measure.fit.{CircleModel/EllipseModel/LineModelND}
+    ("py:exc", "NetworkXError"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "Graph"),  # networkx.classes.graph.Graph.to_undirected
+    ("py:obj", "Graph.__iter__"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "__len__"),  # networkx.classes.graph.Graph.{number_of_nodes/order}
+    (
+        "py:class",
+        "_GeometricTransform",
+    ),  # skimage.transform._geometric.estimate_transform
+    ("py:obj", "convert"),  # skimage.graph._rag.RAG.__init__
+    ("py:obj", "skimage.io.collection"),  # (generated) doc/source/api/skimage.io.rst
+    (
+        "py:obj",
+        "skimage.io.manage_plugins",
+    ),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.sift"),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.util"),  # (generated) doc/source/api/skimage.io.rst
+]
 # -- Source code links -------------------------------------------------------
+
 
 # Function courtesy of NumPy to return URLs containing line numbers
 def linkcode_resolve(domain, info):
-
     """
     Determine the URL corresponding to Python object
     """

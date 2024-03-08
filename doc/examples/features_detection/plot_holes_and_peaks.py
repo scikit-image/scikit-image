@@ -65,11 +65,11 @@ ax[1].imshow(filled, cmap='gray')
 ax[1].set_title('after filling holes')
 ax[1].axis('off')
 
-ax[2].imshow(image-filled, cmap='gray')
+ax[2].imshow(image - filled, cmap='gray')
 ax[2].set_title('holes')
 ax[2].axis('off')
 
-ax[3].imshow(image-rec, cmap='gray')
+ax[3].imshow(image - rec, cmap='gray')
 ax[3].set_title('peaks')
 ax[3].axis('off')
 plt.show()

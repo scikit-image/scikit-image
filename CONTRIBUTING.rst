@@ -206,7 +206,11 @@ Stylistic Guidelines
 
    import numpy as np
    import matplotlib.pyplot as plt
-   from scipy import ndimage as ndi
+   import scipy as sp
+   import skimage as ski
+
+   sp.ndimage.label(...)
+   ski.measure.label(...)
 
    # only in Cython code
    cimport numpy as cnp
@@ -260,7 +264,7 @@ Run:
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
 - Run all tests and **doctests**:
-  ``spin test -- --doctest-modules skimage``
+  ``spin test -- --doctest-plus skimage``
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -476,7 +480,7 @@ Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
-``skimage._shared.utils.deprecate_kwarg`` and
+``skimage._shared.utils.deprecate_parameter`` and
 ``skimage._shared.utils.deprecate_func`` utility functions can be used
 to perform the above procedure.
 
@@ -555,8 +559,8 @@ Here, the creation of the image is completed in the ``setup`` method, and not
 included in the reported time of the benchmark.
 
 It is also possible to benchmark features such as peak memory usage. To learn
-more about the features of `asv`, please refer to the official
-`airpseed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
+more about the features, please refer to the official
+`airspeed velocity documentation <https://asv.readthedocs.io/en/latest/writing_benchmarks.html>`_.
 
 Also, the benchmark files need to be importable when benchmarking old versions
 of scikit-image. So if anything from scikit-image is imported at the top level,

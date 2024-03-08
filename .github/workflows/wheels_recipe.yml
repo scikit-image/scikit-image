@@ -1,12 +1,29 @@
 name: Build and Test Wheels
 on:
   workflow_call:
+    inputs:
+      CIBW_ENVIRONMENT:
+        required: false
+        type: string
+        default: PIP_PREFER_BINARY=1
+      CIBW_BUILD_FRONTEND:
+        required: false
+        type: string
+      CIBW_TEST_REQUIRES:
+        required: false
+        type: string
+        default: "-r requirements/default.txt -r requirements/test.txt"
+      CIBW_TEST_COMMAND:
+        required: false
+        type: string
+        default: "pytest --pyargs skimage"
 
 env:
   CIBW_BUILD_VERBOSITY: 2
-  CIBW_TEST_REQUIRES: "-r requirements/default.txt -r requirements/test.txt"
-  CIBW_TEST_COMMAND: pytest --pyargs skimage
-  CIBW_ENVIRONMENT: PIP_PREFER_BINARY=1
+  CIBW_TEST_REQUIRES: ${{ inputs.CIBW_TEST_REQUIRES }}
+  CIBW_ENVIRONMENT: ${{ inputs.CIBW_ENVIRONMENT }}
+  CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
+  CIBW_TEST_COMMAND: ${{inputs.CIBW_TEST_COMMAND }}
 
 permissions:
   contents: read
@@ -19,28 +36,21 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Temporarily upperpin NumPy
-        run: |
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' pyproject.toml  # FIXME: Remove
+        run: python -m pip install cibuildwheel
       - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
+        run: python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
@@ -61,31 +71,24 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
         cibw_manylinux: [manylinux2014]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-      - name: Temporarily upperpin NumPy
-        run: |
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/default.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' requirements/build.txt  # FIXME: Remove
-          sed -i 's/numpy>=1.22/numpy>=1.22,<1.25/g' pyproject.toml  # FIXME: Remove
+        run: python -m pip install cibuildwheel
       - name: Build the wheel
-        run: |
-          python -m cibuildwheel --output-dir dist
+        run: python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_SKIP: "*-musllinux_*"
@@ -108,19 +111,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
         # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.9"
+          python-version: "3.12"
 
       - name: Install cibuildwheel
         run: |
@@ -187,17 +190,17 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: "3.9"
+          python-version: "3.12"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |

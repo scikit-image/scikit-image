@@ -20,8 +20,7 @@ def test_uint8_array():
 
 
 def test_float_array():
-    ar = np.array([[1.1, 0.0, 1.1], [0.0, 1.1, 0.0], [1.1, 0.0, 1.1]],
-                  float)
+    ar = np.array([[1.1, 0.0, 1.1], [0.0, 1.1, 0.0], [1.1, 0.0, 1.1]], float)
     ar_out = unique_rows(ar)
     desired_ar_out = np.array([[0.0, 1.1, 0.0], [1.1, 0.0, 1.1]], float)
     assert_equal(ar_out, desired_ar_out)
