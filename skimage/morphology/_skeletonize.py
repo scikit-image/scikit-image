@@ -73,7 +73,7 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    image = image.astype(bool, copy=False)
+    image = image.astype(bool, order="C", copy=False)
 
     if method not in {'zhang', 'lee', None}:
         raise ValueError(
@@ -163,8 +163,6 @@ def _skeletonize_2d(image):
     """
     if image.ndim != 2:
         raise ValueError("Zhang's skeletonize method requires a 2D array")
-
-    image = image.astype(bool, order="C")
     return _fast_skeletonize(image)
 
 
@@ -646,13 +644,13 @@ def _skeletonize_3d(image):
             f"got image.ndim = {image.ndim} instead."
         )
 
-    image_io = image.astype(bool, copy=False)
+    image_o = image.astype(bool, order="C", copy=False)
 
     # make a 2D input image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
     if image.ndim == 2:
-        image_io = image_io[np.newaxis, ...]
-    image_o = np.pad(image_io, pad_width=1, mode='constant')  # copies
+        image_o = image_o[np.newaxis, ...]
+    image_o = np.pad(image_o, pad_width=1, mode='constant')  # copies
 
     # do the computation
     image_o = _compute_thin_image(image_o)
