@@ -1,6 +1,7 @@
 from skimage._shared.interpolation import coord_map_py
 from skimage._shared.testing import assert_array_equal
 
+
 def test_coord_map():
     symmetric = [coord_map_py(4, n, 'S') for n in range(-6, 6)]
     expected_symmetric = [2, 3, 3, 2, 1, 0, 0, 1, 2, 3, 3, 2]

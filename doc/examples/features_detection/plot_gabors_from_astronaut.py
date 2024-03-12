@@ -58,7 +58,7 @@ fb1 = fb1.reshape((-1,) + patch_shape)
 fb1_montage = montage(fb1, rescale_intensity=True)
 
 # -- filterbank2 LGN-like image
-astro_dog = ndi.gaussian_filter(astro, .5) - ndi.gaussian_filter(astro, 1)
+astro_dog = ndi.gaussian_filter(astro, 0.5) - ndi.gaussian_filter(astro, 1)
 patches2 = view_as_windows(astro_dog, patch_shape)
 patches2 = patches2.reshape(-1, patch_shape[0] * patch_shape[1])[::8]
 fb2, _ = kmeans2(patches2, n_filters, minit='points')

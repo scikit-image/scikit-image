@@ -12,7 +12,7 @@ def polygon2mask(image_shape, polygon):
         The shape of the mask.
     polygon : (N, 2) array_like
         The polygon coordinates of shape (N, 2) where N is
-        the number of points.
+        the number of points. The coordinates are (row, column).
 
     Returns
     -------
@@ -67,7 +67,8 @@ def polygon2mask(image_shape, polygon):
     polygon = np.asarray(polygon)
     vertex_row_coords, vertex_col_coords = polygon.T
     fill_row_coords, fill_col_coords = draw.polygon(
-        vertex_row_coords, vertex_col_coords, image_shape)
+        vertex_row_coords, vertex_col_coords, image_shape
+    )
     mask = np.zeros(image_shape, dtype=bool)
     mask[fill_row_coords, fill_col_coords] = True
     return mask

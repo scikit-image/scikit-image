@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
-from .._shared.utils import deprecate_kwarg
 from . import _ncut, _ncut_cy
 
 
@@ -51,8 +50,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
         rag = rag.copy()
 
     # Because deleting edges while iterating through them produces an error.
-    to_remove = [(x, y) for x, y, d in rag.edges(data=True)
-                 if d['weight'] >= thresh]
+    to_remove = [(x, y) for x, y, d in rag.edges(data=True) if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
 
     comps = nx.connected_components(rag)
@@ -69,13 +67,16 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
-def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0,
-                   *,
-                   rng=None,
-                   ):
+def cut_normalized(
+    labels,
+    rag,
+    thresh=0.001,
+    num_cuts=10,
+    in_place=True,
+    max_edge=1.0,
+    *,
+    rng=None,
+):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -276,8 +277,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         A = d2 * (d - w) * d2
         # Initialize the vector to ensure reproducibility.
         v0 = random_generator.random(A.shape[0])
-        vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
-                                     k=min(100, m - 2))
+        vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
@@ -286,7 +286,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         ev = vectors[:, index2]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-        if (mcut < thresh):
+        if mcut < thresh:
             # Sub divide and perform N-cut again
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)

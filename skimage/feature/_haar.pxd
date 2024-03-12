@@ -12,7 +12,7 @@ cdef inline void set_rectangle_feature(Rectangle* rectangle,
                                        Py_ssize_t top_y,
                                        Py_ssize_t top_x,
                                        Py_ssize_t bottom_y,
-                                       Py_ssize_t bottom_x) nogil:
+                                       Py_ssize_t bottom_x) noexcept nogil:
     rectangle[0].top_left.row = top_y
     rectangle[0].top_left.col = top_x
     rectangle[0].bottom_right.row = bottom_y

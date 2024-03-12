@@ -26,8 +26,7 @@ from matplotlib import pyplot as plt
 
 from skimage import data
 from skimage.util import img_as_float
-from skimage.feature import (corner_harris, corner_subpix, corner_peaks,
-                             plot_matches)
+from skimage.feature import corner_harris, corner_subpix, corner_peaks, plot_matches
 from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
 from skimage.color import rgb2gray
@@ -38,9 +37,9 @@ from skimage.measure import ransac
 checkerboard = img_as_float(data.checkerboard())
 img_orig = np.zeros(list(checkerboard.shape) + [3])
 img_orig[..., 0] = checkerboard
-gradient_r, gradient_c = (np.mgrid[0:img_orig.shape[0],
-                                   0:img_orig.shape[1]]
-                          / float(img_orig.shape[0]))
+gradient_r, gradient_c = np.mgrid[0 : img_orig.shape[0], 0 : img_orig.shape[1]] / float(
+    img_orig.shape[0]
+)
 img_orig[..., 1] = gradient_r
 img_orig[..., 2] = gradient_c
 img_orig = rescale_intensity(img_orig)
@@ -52,19 +51,20 @@ img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
 img_warped_gray = rgb2gray(img_warped)
 
 # extract corners using Harris' corner measure
-coords_orig = corner_peaks(corner_harris(img_orig_gray), threshold_rel=0.001,
-                           min_distance=5)
-coords_warped = corner_peaks(corner_harris(img_warped_gray),
-                             threshold_rel=0.001, min_distance=5)
+coords_orig = corner_peaks(
+    corner_harris(img_orig_gray), threshold_rel=0.001, min_distance=5
+)
+coords_warped = corner_peaks(
+    corner_harris(img_warped_gray), threshold_rel=0.001, min_distance=5
+)
 
 # determine sub-pixel corner position
 coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=9)
-coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped,
-                                     window_size=9)
+coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped, window_size=9)
 
 
 def gaussian_weights(window_ext, sigma=1):
-    y, x = np.mgrid[-window_ext:window_ext+1, -window_ext:window_ext+1]
+    y, x = np.mgrid[-window_ext : window_ext + 1, -window_ext : window_ext + 1]
     g = np.zeros(y.shape, dtype=np.double)
     g[:] = np.exp(-0.5 * (x**2 / sigma**2 + y**2 / sigma**2))
     g /= 2 * np.pi * sigma * sigma
@@ -73,8 +73,9 @@ def gaussian_weights(window_ext, sigma=1):
 
 def match_corner(coord, window_ext=5):
     r, c = np.round(coord).astype(np.intp)
-    window_orig = img_orig[r-window_ext:r+window_ext+1,
-                           c-window_ext:c+window_ext+1, :]
+    window_orig = img_orig[
+        r - window_ext : r + window_ext + 1, c - window_ext : c + window_ext + 1, :
+    ]
 
     # weight pixels depending on distance to center pixel
     weights = gaussian_weights(window_ext, 3)
@@ -83,9 +84,12 @@ def match_corner(coord, window_ext=5):
     # compute sum of squared differences to all corners in warped image
     SSDs = []
     for cr, cc in coords_warped:
-        window_warped = img_warped[cr-window_ext:cr+window_ext+1,
-                                   cc-window_ext:cc+window_ext+1, :]
-        SSD = np.sum(weights * (window_orig - window_warped)**2)
+        window_warped = img_warped[
+            cr - window_ext : cr + window_ext + 1,
+            cc - window_ext : cc + window_ext + 1,
+            :,
+        ]
+        SSD = np.sum(weights * (window_orig - window_warped) ** 2)
         SSDs.append(SSD)
 
     # use corner with minimum SSD as correspondence
@@ -108,27 +112,34 @@ model = AffineTransform()
 model.estimate(src, dst)
 
 # robustly estimate affine transform model with RANSAC
-model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
-                               residual_threshold=2, max_trials=100)
-outliers = (inliers == False)
+model_robust, inliers = ransac(
+    (src, dst), AffineTransform, min_samples=3, residual_threshold=2, max_trials=100
+)
+outliers = inliers == False
 
 
 # compare "true" and estimated transform parameters
 print("Ground truth:")
-print(f'Scale: ({tform.scale[1]:.4f}, {tform.scale[0]:.4f}), '
-      f'Translation: ({tform.translation[1]:.4f}, '
-      f'{tform.translation[0]:.4f}), '
-      f'Rotation: {-tform.rotation:.4f}')
+print(
+    f'Scale: ({tform.scale[1]:.4f}, {tform.scale[0]:.4f}), '
+    f'Translation: ({tform.translation[1]:.4f}, '
+    f'{tform.translation[0]:.4f}), '
+    f'Rotation: {-tform.rotation:.4f}'
+)
 print("Affine transform:")
-print(f'Scale: ({model.scale[0]:.4f}, {model.scale[1]:.4f}), '
-      f'Translation: ({model.translation[0]:.4f}, '
-      f'{model.translation[1]:.4f}), '
-      f'Rotation: {model.rotation:.4f}')
+print(
+    f'Scale: ({model.scale[0]:.4f}, {model.scale[1]:.4f}), '
+    f'Translation: ({model.translation[0]:.4f}, '
+    f'{model.translation[1]:.4f}), '
+    f'Rotation: {model.rotation:.4f}'
+)
 print("RANSAC:")
-print(f'Scale: ({model_robust.scale[0]:.4f}, {model_robust.scale[1]:.4f}), '
-      f'Translation: ({model_robust.translation[0]:.4f}, '
-      f'{model_robust.translation[1]:.4f}), '
-      f'Rotation: {model_robust.rotation:.4f}')
+print(
+    f'Scale: ({model_robust.scale[0]:.4f}, {model_robust.scale[1]:.4f}), '
+    f'Translation: ({model_robust.translation[0]:.4f}, '
+    f'{model_robust.translation[1]:.4f}), '
+    f'Rotation: {model_robust.rotation:.4f}'
+)
 
 # visualize correspondence
 fig, ax = plt.subplots(nrows=2, ncols=1)
@@ -136,14 +147,28 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 plt.gray()
 
 inlier_idxs = np.nonzero(inliers)[0]
-plot_matches(ax[0], img_orig_gray, img_warped_gray, src, dst,
-             np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
+plot_matches(
+    ax[0],
+    img_orig_gray,
+    img_warped_gray,
+    src,
+    dst,
+    np.column_stack((inlier_idxs, inlier_idxs)),
+    matches_color='b',
+)
 ax[0].axis('off')
 ax[0].set_title('Correct correspondences')
 
 outlier_idxs = np.nonzero(outliers)[0]
-plot_matches(ax[1], img_orig_gray, img_warped_gray, src, dst,
-             np.column_stack((outlier_idxs, outlier_idxs)), matches_color='r')
+plot_matches(
+    ax[1],
+    img_orig_gray,
+    img_warped_gray,
+    src,
+    dst,
+    np.column_stack((outlier_idxs, outlier_idxs)),
+    matches_color='r',
+)
 ax[1].axis('off')
 ax[1].set_title('Faulty correspondences')
 

@@ -4,8 +4,7 @@ from .._shared.utils import _supported_float_type
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ball(image, *, radius=100, kernel=None,
-                 nansafe=False, num_threads=None):
+def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
     """Estimate background intensity by rolling/translating a kernel.
 
     This rolling ball algorithm estimates background intensity for a
@@ -17,7 +16,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
     image : ndarray
         The image to be filtered.
     radius : int, optional
-        Radius of a ball shaped kernel to be rolled/translated in the image.
+        Radius of a ball-shaped kernel to be rolled/translated in the image.
         Used if ``kernel = None``.
     kernel : ndarray, optional
         The kernel to be rolled/translated in the image. It must have the
@@ -90,16 +89,17 @@ def rolling_ball(image, *, radius=100, kernel=None,
 
     kernel = kernel.astype(float_type)
     kernel_shape = np.asarray(kernel.shape)
-    kernel_center = (kernel_shape // 2)
+    kernel_center = kernel_shape // 2
     center_intensity = kernel[tuple(kernel_center)]
 
     intensity_difference = center_intensity - kernel
-    intensity_difference[kernel == np.Inf] = np.Inf
+    intensity_difference[kernel == np.inf] = np.inf
     intensity_difference = intensity_difference.astype(img.dtype)
     intensity_difference = intensity_difference.reshape(-1)
 
-    img = np.pad(img, kernel_center[:, np.newaxis],
-                 constant_values=np.Inf, mode="constant")
+    img = np.pad(
+        img, kernel_center[:, np.newaxis], constant_values=np.inf, mode="constant"
+    )
 
     func = apply_kernel_nan if nansafe else apply_kernel
     background = func(
@@ -109,7 +109,7 @@ def rolling_ball(image, *, radius=100, kernel=None,
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape.astype(np.intp),
-        num_threads
+        num_threads,
     )
 
     background = background.astype(image.dtype, copy=False)
@@ -141,16 +141,15 @@ def ball_kernel(radius, ndim):
 
     kernel_coords = np.stack(
         np.meshgrid(
-            *[np.arange(-x, x + 1) for x in [np.ceil(radius)] * ndim],
-            indexing='ij'
+            *[np.arange(-x, x + 1) for x in [np.ceil(radius)] * ndim], indexing='ij'
         ),
-        axis=-1
+        axis=-1,
     )
 
-    sum_of_squares = np.sum(kernel_coords ** 2, axis=-1)
+    sum_of_squares = np.sum(kernel_coords**2, axis=-1)
     distance_from_center = np.sqrt(sum_of_squares)
-    kernel = np.sqrt(np.clip(radius ** 2 - sum_of_squares, 0, None))
-    kernel[distance_from_center > radius] = np.Inf
+    kernel = np.sqrt(np.clip(radius**2 - sum_of_squares, 0, None))
+    kernel[distance_from_center > radius] = np.inf
 
     return kernel
 
@@ -160,7 +159,7 @@ def ellipsoid_kernel(shape, intensity):
 
     Parameters
     ----------
-    shape : arraylike
+    shape : array-like
         Length of the principal axis of the ellipsoid (excluding
         the intensity axis). The kernel needs to have the same
         dimensionality as the image it will be applied to.
@@ -182,14 +181,11 @@ def ellipsoid_kernel(shape, intensity):
     semi_axis = np.clip(shape // 2, 1, None)
 
     kernel_coords = np.stack(
-        np.meshgrid(
-            *[np.arange(-x, x + 1) for x in semi_axis],
-            indexing='ij'
-        ),
-        axis=-1)
+        np.meshgrid(*[np.arange(-x, x + 1) for x in semi_axis], indexing='ij'), axis=-1
+    )
 
     intensity_scaling = 1 - np.sum((kernel_coords / semi_axis) ** 2, axis=-1)
     kernel = intensity * np.sqrt(np.clip(intensity_scaling, 0, None))
-    kernel[intensity_scaling < 0] = np.Inf
+    kernel[intensity_scaling < 0] = np.inf
 
     return kernel

@@ -48,8 +48,7 @@ ax = axes.ravel()
 
 l_resized = ndi.zoom(l, 2, order=3)
 ax[0].set_title("Original rescaled with\n spline interpolation (order=3)")
-ax[0].imshow(l_resized, extent=(-0.5, 128.5, 128.5, -0.5),
-             cmap=cm.Greys_r)
+ax[0].imshow(l_resized, extent=(-0.5, 128.5, 128.5, -0.5), cmap=cm.Greys_r)
 
 ax[1].set_title("Block view with\n local mean pooling")
 ax[1].imshow(mean_view, cmap=cm.Greys_r)

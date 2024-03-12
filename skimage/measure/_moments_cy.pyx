@@ -14,7 +14,7 @@ def moments_hu(np_floats[:, :] nu):
     else:
         dtype = np.float64
 
-    cdef np_floats[::1] hu = np.zeros((7, ), dtype=dtype)
+    cdef np_floats[::1] hu = np.zeros((7,), dtype=dtype)
     cdef np_floats t0 = nu[3, 0] + nu[1, 2]
     cdef np_floats t1 = nu[2, 1] + nu[0, 3]
     cdef np_floats q0 = t0 * t0

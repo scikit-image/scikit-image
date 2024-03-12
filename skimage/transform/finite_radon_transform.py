@@ -10,18 +10,17 @@ from numpy import roll, newaxis
 
 
 def frt2(a):
-    """Compute the 2-dimensional finite radon transform (FRT) for an n x n
-    integer array.
+    """Compute the 2-dimensional finite Radon transform (FRT) for the input array.
 
     Parameters
     ----------
-    a : array_like
-        A 2-D square n x n integer array.
+    a : ndarray of int, shape (M, M)
+        Input array.
 
     Returns
     -------
-    FRT : 2-D ndarray
-        Finite Radon Transform array of (n+1) x n integer coefficients.
+    FRT : ndarray of int, shape (M+1, M)
+        Finite Radon Transform array of coefficients.
 
     See Also
     --------
@@ -29,7 +28,7 @@ def frt2(a):
 
     Notes
     -----
-    The FRT has a unique inverse if and only if n is prime. [FRT]
+    The FRT has a unique inverse if and only if M is prime. [FRT]
     The idea for this algorithm is due to Vlad Negnevitski.
 
     Examples
@@ -69,18 +68,17 @@ def frt2(a):
 
 
 def ifrt2(a):
-    """Compute the 2-dimensional inverse finite radon transform (iFRT) for
-    an (n+1) x n integer array.
+    """Compute the 2-dimensional inverse finite Radon transform (iFRT) for the input array.
 
     Parameters
     ----------
-    a : array_like
-        A 2-D (n+1) row x n column integer array.
+    a : ndarray of int, shape (M+1, M)
+        Input array.
 
     Returns
     -------
-    iFRT : 2-D n x n ndarray
-        Inverse Finite Radon Transform array of n x n integer coefficients.
+    iFRT : ndarray of int, shape (M, M)
+        Inverse Finite Radon Transform coefficients.
 
     See Also
     --------
@@ -88,7 +86,7 @@ def ifrt2(a):
 
     Notes
     -----
-    The FRT has a unique inverse if and only if n is prime.
+    The FRT has a unique inverse if and only if M is prime.
     See [1]_ for an overview.
     The idea for this algorithm is due to Vlad Negnevitski.
 

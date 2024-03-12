@@ -96,7 +96,7 @@ def _local_maxima(dtype_t[::1] image not None,
 
 
 cdef inline void _mark_candidates_in_last_dimension(
-        dtype_t[::1] image, unsigned char[::1] flags) nogil:
+        dtype_t[::1] image, unsigned char[::1] flags) noexcept nogil:
     """Mark local maxima in last dimension.
 
     This function considers only the last dimension of the image and marks
@@ -143,7 +143,7 @@ cdef inline void _mark_candidates_in_last_dimension(
             i += 1
 
 
-cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
+cdef inline void _mark_candidates_all(unsigned char[::1] flags) noexcept nogil:
     """Mark all pixels as potential maxima, exclude border pixels.
 
     This function marks pixels with the "CANDIDATE" flag if they aren't the
@@ -165,7 +165,7 @@ cdef inline void _mark_candidates_all(unsigned char[::1] flags) nogil:
 cdef inline void _fill_plateau(
         dtype_t[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
-        Py_ssize_t start_index) nogil:
+        Py_ssize_t start_index) noexcept nogil:
     """Fill with 1 if plateau is local maximum else with 0.
 
     Parameters

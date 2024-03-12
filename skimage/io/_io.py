@@ -3,14 +3,21 @@ import pathlib
 import numpy as np
 
 from .._shared.utils import warn
+from .._shared.version_requirements import require
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin
 from .util import file_or_url_context
 
 
-__all__ = ['imread', 'imsave', 'imshow', 'show',
-           'imread_collection', 'imshow_collection']
+__all__ = [
+    'imread',
+    'imsave',
+    'imshow',
+    'show',
+    'imread_collection',
+    'imshow_collection',
+]
 
 
 def imread(fname, as_gray=False, plugin=None, **plugin_args):
@@ -68,8 +75,7 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
     return img
 
 
-def imread_collection(load_pattern, conserve_memory=True,
-                      plugin=None, **plugin_args):
+def imread_collection(load_pattern, conserve_memory=True, plugin=None, **plugin_args):
     """
     Load a collection of images.
 
@@ -77,15 +83,15 @@ def imread_collection(load_pattern, conserve_memory=True,
     ----------
     load_pattern : str or list
         List of objects to load. These are usually filenames, but may
-        vary depending on the currently active plugin.  See the docstring
-        for ``ImageCollection`` for the default behaviour of this parameter.
+        vary depending on the currently active plugin. See :class:`ImageCollection`
+        for the default behaviour of this parameter.
     conserve_memory : bool, optional
         If True, never keep more than one in memory at a specific
         time.  Otherwise, images will be cached once they are loaded.
 
     Returns
     -------
-    ic : ImageCollection
+    ic : :class:`ImageCollection`
         Collection of images.
 
     Other Parameters
@@ -94,8 +100,9 @@ def imread_collection(load_pattern, conserve_memory=True,
         Passed to the given plugin.
 
     """
-    return call_plugin('imread_collection', load_pattern, conserve_memory,
-                       plugin=plugin, **plugin_args)
+    return call_plugin(
+        'imread_collection', load_pattern, conserve_memory, plugin=plugin, **plugin_args
+    )
 
 
 def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
@@ -123,9 +130,9 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     Notes
     -----
     When saving a JPEG, the compression ratio may be controlled using the
-    ``quality`` keyword argument which is an integer with values in [1, 100]
-    where 1 is worst quality and smallest file size, and 100 is best quality
-    and largest file size (default 75).  This is only available when using
+    ``quality`` keyword argument which is an integer with values in [1, 100],
+    where 1 is worst quality and smallest file size, and 100 is the best quality
+    and largest file size (default 75). This is only available when using
     the PIL and imageio plugins.
     """
     if isinstance(fname, pathlib.Path):
@@ -134,9 +141,12 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
         if fname.lower().endswith(('.tiff', '.tif')):
             plugin = 'tifffile'
     if arr.dtype == bool:
-        warn(f'{fname} is a boolean image: setting True to 255 and False to 0. '
-             'To silence this warning, please convert the image using '
-             'img_as_ubyte.', stacklevel=2)
+        warn(
+            f'{fname} is a boolean image: setting True to 255 and False to 0. '
+            'To silence this warning, please convert the image using '
+            'img_as_ubyte.',
+            stacklevel=2,
+        )
         arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
         warn(f'{fname} is a low contrast image')
@@ -152,8 +162,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Image data or name of image file.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
-        tried (starting with imageio) until a suitable
-        candidate is found.
+        tried (starting with imageio) until a suitable candidate is found.
 
     Other Parameters
     ----------------
@@ -171,7 +180,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
 
     Parameters
     ----------
-    ic : ImageCollection
+    ic : :class:`ImageCollection`
         Collection to display.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
@@ -186,10 +195,11 @@ def imshow_collection(ic, plugin=None, **plugin_args):
     return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
 
 
+@require("matplotlib", ">=3.3")
 def show():
-    '''Display pending images.
+    """Display pending images.
 
-    Launch the event loop of the current gui plugin, and display all
+    Launch the event loop of the current GUI plugin, and display all
     pending images, queued via `imshow`. This is required when using
     `imshow` from non-interactive scripts.
 
@@ -198,12 +208,14 @@ def show():
 
     Examples
     --------
-    >>> import skimage.io as io
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
 
+    >>> import skimage.io as io
     >>> rng = np.random.default_rng()
     >>> for i in range(4):
     ...     ax_im = io.imshow(rng.random((50, 50)))
     >>> io.show() # doctest: +SKIP
 
-    '''
+    """
     return call_plugin('_app_show')

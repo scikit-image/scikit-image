@@ -59,8 +59,9 @@ plt.show()
 print(f'Detected pixel offset (y, x): {shift}')
 
 # subpixel precision
-shift, error, diffphase = phase_cross_correlation(image, offset_image,
-                                                  upsample_factor=100)
+shift, error, diffphase = phase_cross_correlation(
+    image, offset_image, upsample_factor=100
+)
 
 fig = plt.figure(figsize=(8, 3))
 ax1 = plt.subplot(1, 3, 1)
@@ -78,7 +79,7 @@ ax2.set_title('Offset image')
 # Calculate the upsampled DFT, again to show what the algorithm is doing
 # behind the scenes.  Constants correspond to calculated values in routine.
 # See source code for details.
-cc_image = _upsampled_dft(image_product, 150, 100, (shift*100)+75).conj()
+cc_image = _upsampled_dft(image_product, 150, 100, (shift * 100) + 75).conj()
 ax3.imshow(cc_image.real)
 ax3.set_axis_off()
 ax3.set_title("Supersampled XC sub-area")

@@ -48,8 +48,8 @@ Any plugin in the ``_plugins`` directory is automatically examined by
 ``skimage.io`` upon import.  You may list all the plugins on your
 system::
 
-  >>> import skimage.io as io
-  >>> io.find_available_plugins()
+  >>> import skimage as ski
+  >>> ski.io.find_available_plugins()
   {'gtk': ['imshow'],
    'matplotlib': ['imshow', 'imread', 'imread_collection'],
    'pil': ['imread', 'imsave', 'imread_collection'],
@@ -57,27 +57,26 @@ system::
 
 or only those already loaded::
 
-  >>> io.find_available_plugins(loaded=True)
+  >>> ski.io.find_available_plugins(loaded=True)
   {'matplotlib': ['imshow', 'imread', 'imread_collection'],
    'pil': ['imread', 'imsave', 'imread_collection']}
 
 A plugin is loaded using the ``use_plugin`` command::
 
-  >>> import skimage.io as io
-  >>> io.use_plugin('pil') # Use all capabilities provided by PIL
+  >>> ski.io.use_plugin('pil') # Use all capabilities provided by PIL
 
 or
 
 ::
 
-  >>> io.use_plugin('pil', 'imread') # Use only the imread capability of PIL
+  >>> ski.io.use_plugin('pil', 'imread') # Use only the imread capability of PIL
 
 Note that, if more than one plugin provides certain functionality, the
 last plugin loaded is used.
 
 To query a plugin's capabilities, use ``plugin_info``::
 
-  >>> io.plugin_info('pil')
+  >>> ski.io.plugin_info('pil')
   >>>
   {'description': 'Image reading via the Python Imaging Library',
    'provides': 'imread, imsave'}

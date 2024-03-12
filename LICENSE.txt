@@ -74,6 +74,10 @@ File: skimage/feature/_fisher_vector.py
 Copyright: 2014 2014 Dan Oneata
 License: MIT
 
+File: skimage/_vendored/numpy_lookfor.py
+Copyright: 2005-2023, NumPy Developers
+License: BSD-3-Clause
+
 
 License: BSD-2-Clause
 
