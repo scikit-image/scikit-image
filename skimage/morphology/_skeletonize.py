@@ -166,18 +166,6 @@ def _skeletonize_2d(image):
     return _fast_skeletonize(image)
 
 
-def skeletonize_2d(image):
-    return _skeletonize_2d(image)
-
-
-skeletonize_2d.__doc__ = _skeletonize_2d.__doc__
-skeletonize_2d = deprecate_func(
-    deprecated_version="0.23",
-    removed_version="0.25",
-    hint="Use `skimage.morphology.skeletonize` instead.",
-)(skeletonize_2d)
-
-
 # --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
 
 
