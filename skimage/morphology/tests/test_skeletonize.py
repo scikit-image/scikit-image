@@ -113,6 +113,15 @@ class TestSkeletonize:
         )
         assert np.all(result == expected)
 
+    @pytest.mark.parametrize("ndim", [2, 3])
+    def test_skeletonize_copies_input(self, ndim):
+        """Skeletonize mustn't modify the original input image."""
+        image = np.ones((3,) * ndim, dtype=bool)
+        image = np.pad(image, 1)
+        original = image.copy()
+        skeletonize(image)
+        np.testing.assert_array_equal(image, original)
+
 
 class TestThin:
     @property

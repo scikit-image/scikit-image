@@ -2,6 +2,8 @@ Version 0.25
 ------------
 * In `skimage/feature/util.py`, remove deprecated function `plot_matches` as
   well as `test_plot_matches` in `skimage/feature/tests/test_util.py`.
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
+  tests related to that deprecation.
 
 Version 0.26
 ------------
