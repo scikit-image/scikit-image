@@ -6,6 +6,7 @@ python_sources = [
   'test_dtype.py',
   'test_invert.py',
   'test_labels.py',
+  'test_lookfor.py',
   'test_map_array.py',
   'test_montage.py',
   'test_random_noise.py',

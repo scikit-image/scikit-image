@@ -281,20 +281,20 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
     >>> tform_matrix.estimate(src, dst)
     True
-    >>> tform_matrix.params  # doctest: +FLOAT_CMP
+    >>> tform_matrix.params
     array([[-0.21785884,  0.41928191, -0.03430748],
            [-0.07179414,  0.04516432,  0.02160726],
            [ 0.24806211, -0.42947814,  0.02210191]])
 
     Compute the Sampson distance:
 
-    >>> tform_matrix.residuals(src, dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.residuals(src, dst)
     array([0.0053886 , 0.00526101, 0.08689701, 0.01850534, 0.09418259,
            0.00185967, 0.06160489, 0.02655136])
 
     Apply inverse transformation:
 
-    >>> tform_matrix.inverse(dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.inverse(dst)
     array([[-0.0513591 ,  0.04170974,  0.01213043],
            [-0.21599496,  0.29193419,  0.00978184],
            [-0.0079222 ,  0.03758889, -0.00915389],
@@ -531,7 +531,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [0.642616, 1.028681]])
     >>> tform_matrix.estimate(src, dst)
     True
-    >>> tform_matrix.residuals(src, dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.residuals(src, dst)
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
