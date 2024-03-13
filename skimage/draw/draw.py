@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from .._shared.version_requirements import require
+from .._shared.compat import NP_COPY_IF_NEEDED
 from ._draw import (
     _coords_inside_image,
     _line,
@@ -336,7 +337,7 @@ def set_color(image, coords, color, alpha=1):
     if image.ndim == 2:
         image = image[..., np.newaxis]
 
-    color = np.array(color, ndmin=1, copy=False)
+    color = np.array(color, ndmin=1, copy=NP_COPY_IF_NEEDED)
 
     if image.shape[-1] != color.shape[-1]:
         raise ValueError(
