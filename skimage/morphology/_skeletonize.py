@@ -101,8 +101,8 @@ def _skeletonize_2d(image):
     Parameters
     ----------
     image : numpy.ndarray
-        An image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
@@ -593,8 +593,8 @@ def _skeletonize_3d(image):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        An image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
