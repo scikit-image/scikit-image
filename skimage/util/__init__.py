@@ -31,6 +31,7 @@ from .compare import compare_images
 from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
+from .lookfor import lookfor
 
 
 __all__ = [
@@ -56,4 +57,5 @@ __all__ = [
     'invert',
     'unique_rows',
     'label_points',
+    'lookfor',
 ]
