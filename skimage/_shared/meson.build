@@ -36,6 +36,7 @@ python_sources = [
   '_geometry.py',
   '_tempfile.py',
   '_warnings.py',
+  'compat.py',
   'coord.py',
   'dtype.py',
   'filters.py',
