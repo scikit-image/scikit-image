@@ -276,8 +276,8 @@ def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=Non
             # Account for over- & underflow problems with seed_value ± tolerance
             # in a way that works with NumPy 1 & 2
             min_value, max_value = numeric_dtype_min_max(seed_value.dtype)
-            low_tol = max(min_value, seed_value.item() - tolerance)
-            high_tol = min(max_value, seed_value.item() + tolerance)
+            low_tol = max(min_value.item(), seed_value.item() - tolerance)
+            high_tol = min(max_value.item(), seed_value.item() + tolerance)
 
             _flood_fill_tolerance(
                 working_image.ravel(order),
