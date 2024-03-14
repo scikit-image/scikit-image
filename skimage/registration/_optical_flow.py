@@ -310,7 +310,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
     # is the solution of the ndim x ndim linear system
     # A[i, j] * X = b[i, j]
     A = np.zeros(reference_image.shape + (ndim, ndim), dtype=dtype)
-    b = np.zeros(reference_image.shape + (ndim,), dtype=dtype)
+    b = np.zeros(reference_image.shape + (ndim, 1), dtype=dtype)
 
     grid = np.meshgrid(
         *[np.arange(n, dtype=dtype) for n in reference_image.shape],
@@ -333,7 +333,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
             A[..., i, j] = A[..., j, i] = filter_func(grad[i] * grad[j])
 
         for i in range(ndim):
-            b[..., i] = filter_func(grad[i] * error_image)
+            b[..., i, 0] = filter_func(grad[i] * error_image)
 
         # Don't consider badly conditioned linear systems
         idx = abs(np.linalg.det(A)) < 1e-14
@@ -341,7 +341,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
         b[idx] = 0
 
         # Solve the local linear systems
-        flow = np.moveaxis(np.linalg.solve(A, b), ndim, 0)
+        flow = np.moveaxis(np.linalg.solve(A, b)[..., 0], ndim, 0)
 
     return flow
 
