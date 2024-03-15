@@ -1236,6 +1236,16 @@ def test_cache():
     assert np.any(f0 != f1)
 
 
+def test_cache_memory():
+    SAMPLE_mod = SAMPLE.copy()
+    region = regionprops(SAMPLE_mod, cache=False)[0]
+    # Acces one property
+    _ = region.image_filled
+
+    # Cache should be empty
+    assert not region._cache
+
+
 def test_docstrings_and_props():
     def foo():
         """foo"""
