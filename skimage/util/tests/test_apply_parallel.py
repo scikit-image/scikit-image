@@ -28,14 +28,14 @@ def test_apply_parallel():
     assert_array_almost_equal(result1, expected1)
 
     def wrapped_gauss(arr):
-        return gaussian(arr, 1, mode='reflect')
+        return gaussian(arr, sigma=1, mode='reflect')
 
-    expected2 = gaussian(a, 1, mode='reflect')
+    expected2 = gaussian(a, sigma=1, mode='reflect')
     result2 = apply_parallel(wrapped_gauss, a, chunks=(6, 6), depth=5)
 
     assert_array_almost_equal(result2, expected2)
 
-    expected3 = gaussian(a, 1, mode='reflect')
+    expected3 = gaussian(a, sigma=1, mode='reflect')
     result3 = apply_parallel(
         wrapped_gauss, da.from_array(a, chunks=(6, 6)), depth=5, compute=True
     )
@@ -93,10 +93,10 @@ def test_no_chunks():
 
 def test_apply_parallel_wrap():
     def wrapped(arr):
-        return gaussian(arr, 1, mode='wrap')
+        return gaussian(arr, sigma=1, mode='wrap')
 
     a = np.arange(144).reshape(12, 12).astype(float)
-    expected = gaussian(a, 1, mode='wrap')
+    expected = gaussian(a, sigma=1, mode='wrap')
     result = apply_parallel(wrapped, a, chunks=(6, 6), depth=5, mode='wrap')
 
     assert_array_almost_equal(result, expected)
@@ -104,10 +104,10 @@ def test_apply_parallel_wrap():
 
 def test_apply_parallel_nearest():
     def wrapped(arr):
-        return gaussian(arr, 1, mode='nearest')
+        return gaussian(arr, sigma=1, mode='nearest')
 
     a = np.arange(144).reshape(12, 12).astype(float)
-    expected = gaussian(a, 1, mode='nearest')
+    expected = gaussian(a, sigma=1, mode='nearest')
     result = apply_parallel(
         wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5}, mode='nearest'
     )
