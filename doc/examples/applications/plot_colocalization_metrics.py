@@ -132,7 +132,7 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 proteinB = proteinA + rng.normal(loc=100, scale=10, size=proteinA.shape)
 
 # plot images
-fig, ax = plt.subplots(1, 3, figsize=(8, 8), sharey=True)
+fig, ax = plt.subplots(1, 2, figsize=(8, 8), sharey=True)
 
 ax[0].imshow(proteinA, cmap=black_magenta)
 ax[0].set_title('Protein A')
@@ -145,7 +145,7 @@ for a in ax.ravel():
     a.set_axis_off()
 
 # plot pixel intensity scatter
-fig, ax = plt.subplots(15, 10)
+fig, ax = plt.subplots()
 ax.scatter(proteinA, proteinB)
 ax.set_title('Pixel intensity')
 ax.set_xlabel('Protein A intensity')
