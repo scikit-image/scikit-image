@@ -4,6 +4,10 @@ Version 0.25
   well as `test_plot_matches` in `skimage/feature/tests/test_util.py`.
 * Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
   tests related to that deprecation.
+* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
+  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
+  Make arguments after the deprecated `output` parameter, keyword only:
+  `gaussian(image, sigma, *, ...)`.
 
 Version 0.26
 ------------
@@ -36,5 +40,3 @@ Post numpy 2
   dependencies. Also remove temporary assert for NumPy 2.0 in
   `nightly_wheel_build.yml`.
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
-- Remove `skimage._shared.compat.NP_COPY_IF_NEEDED` and all usages of it
-  once NumPy 2.0.0 is minimal required version.

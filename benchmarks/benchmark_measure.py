@@ -9,7 +9,7 @@ except ImportError:
 
 
 def init_regionprops_data():
-    image = filters.gaussian(data.coins().astype(float), 3)
+    image = filters.gaussian(data.coins().astype(float), sigma=3)
     # increase size to (2048, 2048) by tiling
     image = np.tile(image, (4, 4))
     label_image = measure.label(image > 130, connectivity=image.ndim)
