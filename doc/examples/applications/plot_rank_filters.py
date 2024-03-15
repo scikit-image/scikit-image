@@ -47,7 +47,7 @@ hist, hist_centers = histogram(noisy_image)
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
-ax[0].axis('off')
+ax[0].set_axis_off()
 
 ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Gray-level histogram')
@@ -88,7 +88,7 @@ ax[3].imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[3].set_title('Median $r=20$')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -125,7 +125,7 @@ ax[1].imshow(loc_mean, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[1].set_title('Local mean $r=10$')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -161,7 +161,7 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(bilat[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -199,19 +199,19 @@ fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12, 12))
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
-ax[0].axis('off')
+ax[0].set_axis_off()
 
 ax[1].plot(hist[1][:-1], hist[0], lw=2)
 ax[1].set_title('Histogram of gray values')
 
 ax[2].imshow(glob, cmap=plt.cm.gray)
-ax[2].axis('off')
+ax[2].set_axis_off()
 
 ax[3].plot(glob_hist[1][:-1], glob_hist[0], lw=2)
 ax[3].set_title('Histogram of gray values')
 
 ax[4].imshow(loc, cmap=plt.cm.gray)
-ax[4].axis('off')
+ax[4].set_axis_off()
 
 ax[5].plot(loc_hist[1][:-1], loc_hist[0], lw=2)
 ax[5].set_title('Histogram of gray values')
@@ -241,7 +241,7 @@ ax[1].imshow(auto, cmap=plt.cm.gray)
 ax[1].set_title('Local autolevel')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -286,7 +286,7 @@ image_list = [
 for i in range(0, len(image_list)):
     ax[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     ax[i].set_title(title_list[i])
-    ax[i].axis('off')
+    ax[i].set_axis_off()
 
 plt.tight_layout()
 
@@ -315,7 +315,7 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(enh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -343,7 +343,7 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(penh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -398,7 +398,7 @@ ax[3].imshow(glob_otsu, cmap=plt.cm.gray)
 ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -436,7 +436,7 @@ ax[3].imshow(glob_otsu[slice_index], cmap=plt.cm.gray)
 ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 fig.tight_layout()
 
@@ -461,7 +461,7 @@ ax[1].imshow(m >= t, cmap=plt.cm.gray)
 ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -500,7 +500,7 @@ ax[3].imshow(grad, cmap=plt.cm.gray)
 ax[3].set_title('Morphological gradient')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -540,7 +540,7 @@ fig.colorbar(ax[1].imshow(entropy(image, disk(5)), cmap=plt.cm.gray), ax=ax[1])
 ax[1].set_title('Entropy')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 
@@ -690,7 +690,7 @@ ax[1].set_title('scipy.ndimage.percentile')
 ax[1].imshow(rndi, cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.tight_layout()
 

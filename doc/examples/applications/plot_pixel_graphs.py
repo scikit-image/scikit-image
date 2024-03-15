@@ -35,7 +35,7 @@ retina_source = data.retina()
 _, ax = plt.subplots()
 ax.imshow(retina_source)
 ax.set_axis_off()
-_ = ax.set_title('Human retina')
+ax.set_title('Human retina')
 
 ###############################################################################
 # We convert the image to grayscale, then use the
@@ -47,13 +47,13 @@ t0, t1 = filters.threshold_multiotsu(retina, classes=3)
 mask = retina > t0
 vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
 
-_, axes = plt.subplots(nrows=1, ncols=2)
-axes[0].imshow(retina, cmap='gray')
-axes[0].set_axis_off()
-axes[0].set_title('grayscale')
-axes[1].imshow(vessels, cmap='magma')
-axes[1].set_axis_off()
-_ = axes[1].set_title('Sato vesselness')
+fig, ax = plt.subplots(nrows=1, ncols=2)
+ax[0].imshow(retina, cmap='gray')
+ax[0].set_axis_off()
+ax[0].set_title('grayscale')
+ax[1].imshow(vessels, cmap='magma')
+ax[1].set_axis_off()
+ax[1].set_title('Sato vesselness')
 
 ###############################################################################
 # Based on the observed vesselness values, we use
@@ -66,7 +66,7 @@ labeled = ndi.label(thresholded)[0]
 _, ax = plt.subplots()
 ax.imshow(color.label2rgb(labeled, retina))
 ax.set_axis_off()
-_ = ax.set_title('thresholded vesselness')
+ax.set_title('Thresholded vesselness')
 
 ###############################################################################
 # Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
@@ -90,7 +90,7 @@ ax.scatter(px[1], px[0], label='graph center')
 ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
 ax.set_axis_off()
-ax.set_title('vessel graph center vs centroid')
+ax.set_title('Vessel graph center vs centroid')
 # sphinx_gallery_thumbnail_number = 4
 
 plt.show()

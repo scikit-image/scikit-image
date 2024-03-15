@@ -124,11 +124,11 @@ mask_2 = image_med < thresh_2
 
 
 def plot_comparison(plot1, plot2, title1, title2):
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
-    ax1.imshow(plot1, cmap='gray')
-    ax1.set_title(title1)
-    ax2.imshow(plot2, cmap='gray')
-    ax2.set_title(title2)
+    fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
+    ax[0].imshow(plot1, cmap='gray')
+    ax[0].set_title(title1)
+    ax[1].imshow(plot2, cmap='gray')
+    ax[1].set_title(title2)
 
 
 plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
@@ -147,7 +147,7 @@ thresh_0 = ski.filters.threshold_local(image_med, block_size=43)
 
 mask_0 = image_med < thresh_0
 
-plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
+plot_comparison(mask_0, mask_2, "No offset", "Offset = 15")
 
 #####################################################################
 # Remove fine-grained features
@@ -166,7 +166,7 @@ plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
 
 footprint = ski.morphology.diamond(3)
 mask_open = ski.morphology.opening(mask_2, footprint)
-plot_comparison(mask_2, mask_open, "mask before", "after opening")
+plot_comparison(mask_2, mask_open, "Mask before", "After opening")
 
 #####################################################################
 # Since "opening" an image starts with an erosion operation, bright regions
@@ -184,7 +184,7 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 # Next, we can make the detected areas wider by applying a dilation filter:
 
 mask_dilate = ski.morphology.dilation(mask_open, footprint)
-plot_comparison(mask_open, mask_dilate, "before", "after dilation")
+plot_comparison(mask_open, mask_dilate, "Before", "After dilation")
 
 #####################################################################
 # Dilation enlarges bright regions and shrinks dark regions.

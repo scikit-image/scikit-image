@@ -25,7 +25,7 @@ smallest window size is the size of window that was used in training. This size
 is specified in the xml file with trained parameters. The ``scale_ratio``
 parameter specifies by which ratio the search window is increased on each
 step. If you increase this parameter, the search time decreases and the
-accuracy decreases. So, faces on some scales can be not detected.
+accuracy decreases. So, faces on some scales cannot be detected.
 
 ``step_ratio`` specifies the step of sliding window that is used to search for
 faces on each scale of the image. If this parameter is equal to one, then all
@@ -45,14 +45,14 @@ time is spent on searching on the smallest scales.
 
 ``min_neighbor_number`` and ``intersection_score_threshold`` parameters are
 made to cluster the excessive detections of the same face and to filter out
-false detections.  True faces usually has a lot of detections around them and
+false detections.  True faces usually have a lot of detections around them and
 false ones usually have single detection. First algorithm searches for
 clusters: two rectangle detections are placed in the same cluster if the
 intersection score between them is larger then
 ``intersection_score_threshold``. The intersection score is computed using the
 equation (intersection area) / (small rectangle ratio). The described
 intersection criteria was chosen over intersection over union to avoid a corner
-case when small rectangle inside of a big one have small intersection score.
+case when small rectangle inside of a big one has small intersection score.
 Then each cluster is thresholded using ``min_neighbor_number`` parameter which
 leaves the clusters that have a same or bigger number of detections in them.
 
@@ -80,12 +80,11 @@ detected = detector.detect_multi_scale(
     img=img, scale_factor=1.2, step_ratio=1, min_size=(60, 60), max_size=(123, 123)
 )
 
-plt.imshow(img)
-img_desc = plt.gca()
-plt.set_cmap('gray')
+fig, ax = plt.subplots()
+ax.imshow(img, cmap='gray')
 
 for patch in detected:
-    img_desc.add_patch(
+    ax.axes.add_patch(
         patches.Rectangle(
             (patch['c'], patch['r']),
             patch['width'],

@@ -94,7 +94,7 @@ except TypeError as e:
 
 def show_plane(ax, plane, cmap="gray", title=None):
     ax.imshow(plane, cmap=cmap)
-    ax.axis("off")
+    ax.set_axis_off()
 
     if title:
         ax.set_title(title)

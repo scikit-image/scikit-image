@@ -33,7 +33,7 @@ blend_rotated = compare_images(img1, img2, method='blend')
 # The `checkerboard` method alternates tiles from the first and the second
 # images.
 
-fig = plt.figure(figsize=(8, 9))
+fig, ax = plt.subplots(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -46,8 +46,10 @@ ax1.imshow(img1_equalized, cmap='gray')
 ax1.set_title('Equalized')
 ax2.imshow(comp_equalized, cmap='gray')
 ax2.set_title('Checkerboard comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
+    a.set_axis_off()
+
 plt.tight_layout()
 plt.plot()
 
@@ -57,7 +59,7 @@ plt.plot()
 #
 # The `diff` method computes the absolute difference between the two images.
 
-fig = plt.figure(figsize=(8, 9))
+fig, ax = plt.subplots(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -70,8 +72,10 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(diff_rotated, cmap='gray')
 ax2.set_title('Diff comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
+    a.set_axis_off()
+
 plt.tight_layout()
 plt.plot()
 
@@ -81,7 +85,8 @@ plt.plot()
 #
 # `blend` is the result of the average of the two images.
 
-fig = plt.figure(figsize=(8, 9))
+
+fig, ax = plt.subplots(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -94,7 +99,9 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(blend_rotated, cmap='gray')
 ax2.set_title('Blend comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
+    a.set_axis_off()
+
 plt.tight_layout()
 plt.plot()
