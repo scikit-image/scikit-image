@@ -77,8 +77,7 @@ what the changes in the branch are for.  For example ``add-ability-to-fly``, or
     # Update the mirror of trunk
     git fetch upstream
     # Make new feature branch starting at current trunk
-    git branch my-new-feature upstream/main
-    git checkout my-new-feature
+    git switch -c cool-new-feature upstream/main
 
 Generally, you will want to keep your feature branches on your public github_
 fork of `scikit-image`_.  To do this, you `git push`_ this new branch up to your
@@ -86,15 +85,15 @@ github repo.  Generally (if you followed the instructions in these pages, and by
 default), git will have a link to your github repo, called ``origin``.  You push
 up to your own repo on github with::
 
-   git push origin my-new-feature
+   git push origin cool-new-feature
 
 In git >= 1.7 you can ensure that the link is correctly set by using the
 ``--set-upstream`` option::
 
-   git push --set-upstream origin my-new-feature
+   git push --set-upstream origin cool-new-feature
 
-From now on git will know that ``my-new-feature`` is related to the
-``my-new-feature`` branch in the github repo.
+From now on git will know that ``cool-new-feature`` is related to the
+``cool-new-feature`` branch in the github repo.
 
 .. _edit-flow:
 
@@ -121,7 +120,7 @@ In more detail
      # On branch ny-new-feature
      # Changed but not updated:
      #   (use "git add <file>..." to update what will be committed)
-     #   (use "git checkout -- <file>..." to discard changes in working directory)
+     #   (use "git switch -- <file>..." to discard changes in working directory)
      #
      #	modified:   README
      #
@@ -176,7 +175,7 @@ Delete a branch on github
 
 ::
 
-   git checkout main
+   git switch main
    # delete branch locally
    git branch -D my-unwanted-branch
    # delete branch on github
@@ -271,7 +270,7 @@ To do a rebase on trunk::
     # Update the mirror of trunk
     git fetch upstream
     # go to the feature branch
-    git checkout cool-feature
+    git switch -c cool-feature --track someone/cool-feature
     # make a backup in case you mess up
     git branch tmp cool-feature
     # rebase cool-feature onto trunk
