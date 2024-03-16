@@ -33,8 +33,34 @@ def adapt_rgb(apply_to_rgb):
     """
 
     def decorator(image_filter):
+        """Decorator to adapt an image filter function for both RGB-like and non-RGB-like images.
+        
+        Parameters
+        ----------
+        image_filter : function
+            Function that filters an image.
+
+        Returns
+        -------
+        image_filter_adapted : function
+        """
         @functools.wraps(image_filter)
         def image_filter_adapted(image, *args, **kwargs):
+            """Adapted image filter function to handle both RGB-like and non-RGB-like images.
+
+            Parameters
+            ----------
+            image : array
+                Input image. The format should be checked using the `is_rgb_like` function.
+
+            *args, **kwargs : additional arguments
+                Additional arguments to be passed to the underlying image filter function.
+
+            Returns
+            -------
+            filtered_image : array
+                Filtered image obtained by applying the image filter function.
+            """
             if is_rgb_like(image):
                 return apply_to_rgb(image_filter, image, *args, **kwargs)
             else:
@@ -56,6 +82,13 @@ def hsv_value(image_filter, image, *args, **kwargs):
         Function that filters a gray-scale image.
     image : array
         Input image. Note that RGBA images are treated as RGB.
+    *args, **kwargs : additional arguments
+        Additional arguments to be passed to the `image_filter` function.
+    
+    Returns
+    -------
+    rgb_image : array
+        Color image obtained by applying the `image_filter` on the HSV-value of the input image.
     """
     # Slice the first three channels so that we remove any alpha channels.
     hsv = color.rgb2hsv(image[:, :, :3])
