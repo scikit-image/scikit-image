@@ -706,6 +706,21 @@ class ProjectiveTransform(_GeometricTransform):
         coords_out : (N, D) array
             Destination coordinates.
 
+        Examples
+        --------
+        The call method enables the class instance
+        to behave like functions. The user can call
+        these instances like functions.
+
+        >>> matrix = [[1, 2, 3],
+        ...           [4, 5, 6],
+        ...           [7, 8, 9]]
+        
+        >>> A = ProjectiveTransform(matrix)  # instance created.
+        >>> B = A(coords) # calling instance A as a function
+        >>> print(B)
+                        with "coords" as argument.
+
         """
         return self._apply_mat(coords, self.params)
 
