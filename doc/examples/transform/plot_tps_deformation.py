@@ -3,21 +3,20 @@ r"""
 Interpolate images with thin-plate splines
 ==========================================
 
-Thin-plate splines (TPS) refer to a method for interpolating data [1]_.
-In an image context, we use a 2D generalization of TPS, i.e., a two-dimensional
-simulation of a 1D cubic spline, which is the solution of the biharmonic equation [2]_.
-According to [3]_, the basic solution of the biharmonic function was expanded.
-Given pairs of source and target control points, TPS is used to transform a space,
-which, in our case, is a 2D image.
+One conventional tool for interpolating surfaces over a set of data points is
+thin-plate splines (TPS). TPS refer to a technique for data interpolation [1]_.
+According to [2]_, for interpolation of a surface over a fixed set data points in the plane,
+the bending energy is a quadratic form in the heights of assigned surface. The spline is the
+superposition of eigenvectors of the bending energy matrix over a titled flat plane having
+no bending energy at all.
+In an image context, given pairs of source and target control points, TPS can be used to
+transform a space, which, in our case, is a 2D image.
 
 
 .. [1] Wikipedia, Thin plate spline
        https://en.wikipedia.org/wiki/Thin_plate_spline
 
-.. [2] Weisstein, Eric W. "Biharmonic Equation." From MathWorld--A Wolfram Web Resource
-       https://mathworld.wolfram.com/BiharmonicEquation.html
-
-.. [3] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
+.. [2] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
        decomposition of deformations." IEEE Transactions on pattern analysis and
        machine intelligence 11.6 (1989): 567–585.
        https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
@@ -32,7 +31,7 @@ In our image, we define 6 source and target points labelled "1-6": "1-4" are fou
 corners, "5" near the left smile corner, and "6" in the right eye. At the "1-4" points, there is no
 displacement. Point "5" is displaced upward and point "6" downward.
 
-Thin Plate Splines provides a very handy interpolator for image deformation.
+We use TPS to provide a very handy interpolator for image deformation.
 """
 
 import matplotlib.pyplot as plt

@@ -169,7 +169,7 @@ class TpsTransform:
         return radial_dist
 
     def _spline_function(self, x, y, radial_dist, coeffs):
-        """Calculate the value of a spline function in the X and Y directions"""
+        """Estimate the spline function in X and Y directions."""
         w = coeffs[:-3]
         a1, ax, ay = coeffs[-3:]
         summation = np.dot(w, radial_dist)
