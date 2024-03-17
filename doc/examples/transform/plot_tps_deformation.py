@@ -23,14 +23,14 @@ which, in our case, is a 2D image.
        https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
 
-Image Deformation
-=================
+Deform an image
+===============
 
 Image deformation implies displacing the pixels of an image relatively to one another.
 In this example, we deform the (2D) image of an astronaut by using thin-plate splines.
-In our image, we define 6 source and target points labelled "1-6": "1-4" in the image
-corners, "5" near the smile corner and "6" in an eye. At the corners, there are no
-displacements. The smile corner moved upward and the eye position moved down.
+In our image, we define 6 source and target points labelled "1-6": "1-4" are found near the image
+corners, "5" near the left smile corner, and "6" in the right eye. At the "1-4" points, there is no
+displacement. Point "5" is displaced upward and point "6" downward.
 
 Thin Plate Splines provides a very handy interpolator for image deformation.
 """

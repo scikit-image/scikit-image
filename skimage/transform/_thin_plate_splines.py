@@ -5,7 +5,7 @@ from .._shared.utils import check_nD
 
 
 class TpsTransform:
-    """Thin-plate splines transformation.
+    """Thin-plate spline transformation.
 
     Given a set of control points (source and destination points), this class
     can be used to estimate the thin-plate spline (TPS) transformation which
@@ -217,7 +217,7 @@ def tps_warp(
     output_region : tuple of integers, optional
         The region ``(xmin, ymin, xmax, ymax)`` of the output
         image that should be produced. (Note: The region is inclusive, i.e.,
-        xmin <= x <= xmax)
+        ``xmin <= x <= xmax``.)
     interpolation_order : int, optional
         If 1, use linear interpolation, otherwise use
         nearest-neighbor interpolation.
