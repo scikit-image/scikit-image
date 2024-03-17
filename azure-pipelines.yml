@@ -12,6 +12,10 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
+        Python32-x64:
+          PYTHON_VERSION: "3.12"
+          ARCH: "x64"
+          PIP_FLAGS: ""
         Python311-x64:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
@@ -164,7 +168,7 @@ jobs:
           export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
           # Run unit tests with pytest
-          # We don't test docstring examples (--doctest-modules) on
+          # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
           export TEST_ARGS="-v --cov=skimage"

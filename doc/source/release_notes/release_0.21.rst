@@ -1,5 +1,5 @@
-scikit-image 0.21.0 release notes
-=================================
+scikit-image 0.21.0 (2023-06-02)
+================================
 
 We're happy to announce the release of scikit-image 0.21.0!
 scikit-image is an image processing toolbox for SciPy that includes algorithms
@@ -35,9 +35,9 @@ seeds and NumPy Generators. Please see the related `SciPy discussion`_, as well 
 
 - Unify API on seed keyword for random seeds / generator
   (`#6258 <https://github.com/scikit-image/scikit-image/pull/6258>`_).
-- Refactor `_invariant_denoise` to `denoise_invariant`
+- Refactor ``_invariant_denoise`` to ``denoise_invariant``
   (`#6660 <https://github.com/scikit-image/scikit-image/pull/6660>`_).
-- Expose `color.get_xyz_coords` in public API
+- Expose ``color.get_xyz_coords`` in public API
   (`#6696 <https://github.com/scikit-image/scikit-image/pull/6696>`_).
 - Make join_segmentations return array maps from output to input labels
   (`#6786 <https://github.com/scikit-image/scikit-image/pull/6786>`_).
@@ -54,9 +54,9 @@ Enhancements
   (`#6752 <https://github.com/scikit-image/scikit-image/pull/6752>`_).
 - Make join_segmentations return array maps from output to input labels
   (`#6786 <https://github.com/scikit-image/scikit-image/pull/6786>`_).
-- Check if `spacing` parameter is tuple in `regionprops`
+- Check if ``spacing`` parameter is tuple in ``regionprops``
   (`#6907 <https://github.com/scikit-image/scikit-image/pull/6907>`_).
-- Enable use of `rescale_intensity` with dask array
+- Enable use of ``rescale_intensity`` with dask array
   (`#6910 <https://github.com/scikit-image/scikit-image/pull/6910>`_).
 
 Performance
@@ -72,21 +72,21 @@ Performance
 
 Bug Fixes
 ---------
-- Fix and refactor `deprecated` decorator to `deprecate_func`
+- Fix and refactor ``deprecated`` decorator to ``deprecate_func``
   (`#6594 <https://github.com/scikit-image/scikit-image/pull/6594>`_).
-- Refactor `_invariant_denoise` to `denoise_invariant`
+- Refactor ``_invariant_denoise`` to ``denoise_invariant``
   (`#6660 <https://github.com/scikit-image/scikit-image/pull/6660>`_).
-- Expose `color.get_xyz_coords` in public API
+- Expose ``color.get_xyz_coords`` in public API
   (`#6696 <https://github.com/scikit-image/scikit-image/pull/6696>`_).
 - shift and normalize data before fitting circle or ellipse
   (`#6703 <https://github.com/scikit-image/scikit-image/pull/6703>`_).
 - Showcase pydata-sphinx-theme
   (`#6714 <https://github.com/scikit-image/scikit-image/pull/6714>`_).
-- Fix matrix calculation for shear angle in `AffineTransform`
+- Fix matrix calculation for shear angle in ``AffineTransform``
   (`#6717 <https://github.com/scikit-image/scikit-image/pull/6717>`_).
 - Fix threshold_li(): prevent log(0) on single-value background.
   (`#6745 <https://github.com/scikit-image/scikit-image/pull/6745>`_).
-- Fix copy-paste error in `footprints.diamond` test case
+- Fix copy-paste error in ``footprints.diamond`` test case
   (`#6756 <https://github.com/scikit-image/scikit-image/pull/6756>`_).
 - Update .devpy/cmds.py to match latest devpy
   (`#6789 <https://github.com/scikit-image/scikit-image/pull/6789>`_).
@@ -96,9 +96,9 @@ Bug Fixes
   (`#6805 <https://github.com/scikit-image/scikit-image/pull/6805>`_).
 - Sign error fix in measure.regionprops for orientations of 45 degrees
   (`#6836 <https://github.com/scikit-image/scikit-image/pull/6836>`_).
-- Fix returned data type in `segmentation.watershed`
+- Fix returned data type in ``segmentation.watershed``
   (`#6839 <https://github.com/scikit-image/scikit-image/pull/6839>`_).
-- Handle NaNs when clipping in `transform.resize`
+- Handle NaNs when clipping in ``transform.resize``
   (`#6852 <https://github.com/scikit-image/scikit-image/pull/6852>`_).
 - Fix failing regionprop_table for multichannel properties
   (`#6861 <https://github.com/scikit-image/scikit-image/pull/6861>`_).
@@ -108,7 +108,7 @@ Bug Fixes
   (`#6881 <https://github.com/scikit-image/scikit-image/pull/6881>`_).
 - Fix LPI filter for data with even dimensions
   (`#6883 <https://github.com/scikit-image/scikit-image/pull/6883>`_).
-- Use legacy datasets without creating a `data_dir`
+- Use legacy datasets without creating a ``data_dir``
   (`#6886 <https://github.com/scikit-image/scikit-image/pull/6886>`_).
 - Raise error when source_range is not correct
   (`#6898 <https://github.com/scikit-image/scikit-image/pull/6898>`_).
@@ -116,9 +116,9 @@ Bug Fixes
   (`#6900 <https://github.com/scikit-image/scikit-image/pull/6900>`_).
 - Corrected energy calculation in Chan Vese
   (`#6902 <https://github.com/scikit-image/scikit-image/pull/6902>`_).
-- Add missing backticks to DOI role in docstring of `area_opening`
+- Add missing backticks to DOI role in docstring of ``area_opening``
   (`#6913 <https://github.com/scikit-image/scikit-image/pull/6913>`_).
-- Fix inclusion of `random.js` in HTML output
+- Fix inclusion of ``random.js`` in HTML output
   (`#6935 <https://github.com/scikit-image/scikit-image/pull/6935>`_).
 - Fix URL of random gallery links
   (`#6937 <https://github.com/scikit-image/scikit-image/pull/6937>`_).
@@ -129,11 +129,11 @@ Bug Fixes
 
 Maintenance
 -----------
-- Fix and refactor `deprecated` decorator to `deprecate_func`
+- Fix and refactor ``deprecated`` decorator to ``deprecate_func``
   (`#6594 <https://github.com/scikit-image/scikit-image/pull/6594>`_).
 - allow trivial ransac call
   (`#6755 <https://github.com/scikit-image/scikit-image/pull/6755>`_).
-- Fix copy-paste error in `footprints.diamond` test case
+- Fix copy-paste error in ``footprints.diamond`` test case
   (`#6756 <https://github.com/scikit-image/scikit-image/pull/6756>`_).
 - Use imageio v3 API
   (`#6764 <https://github.com/scikit-image/scikit-image/pull/6764>`_).
@@ -151,7 +151,7 @@ Maintenance
   (`#6847 <https://github.com/scikit-image/scikit-image/pull/6847>`_).
 - Specify kernel for ipywidgets
   (`#6849 <https://github.com/scikit-image/scikit-image/pull/6849>`_).
-- Make `image_fetcher` and `create_image_fetcher` in `data` private
+- Make ``image_fetcher`` and ``create_image_fetcher`` in ``data`` private
   (`#6855 <https://github.com/scikit-image/scikit-image/pull/6855>`_).
 - Update references to outdated dev.py with spin
   (`#6856 <https://github.com/scikit-image/scikit-image/pull/6856>`_).
@@ -167,11 +167,11 @@ Maintenance
   (`#6875 <https://github.com/scikit-image/scikit-image/pull/6875>`_).
 - Don't use mutable types as default values for arguments
   (`#6876 <https://github.com/scikit-image/scikit-image/pull/6876>`_).
-- Point `version_switcher.json` URL at dev docs
+- Point ``version_switcher.json`` URL at dev docs
   (`#6882 <https://github.com/scikit-image/scikit-image/pull/6882>`_).
 - Add back parallel tests that were removed as part of Meson build
   (`#6884 <https://github.com/scikit-image/scikit-image/pull/6884>`_).
-- Use legacy datasets without creating a `data_dir`
+- Use legacy datasets without creating a ``data_dir``
   (`#6886 <https://github.com/scikit-image/scikit-image/pull/6886>`_).
 - Remove old doc cruft
   (`#6901 <https://github.com/scikit-image/scikit-image/pull/6901>`_).
@@ -183,9 +183,9 @@ Maintenance
   (`#6931 <https://github.com/scikit-image/scikit-image/pull/6931>`_).
 - Follow-up to move to pydata-sphinx-theme
   (`#6933 <https://github.com/scikit-image/scikit-image/pull/6933>`_).
-- Mark functions as `noexcept` to support Cython 3
+- Mark functions as ``noexcept`` to support Cython 3
   (`#6936 <https://github.com/scikit-image/scikit-image/pull/6936>`_).
-- Skip unstable test in `ransac`'s docstring
+- Skip unstable test in ``ransac``'s docstring
   (`#6938 <https://github.com/scikit-image/scikit-image/pull/6938>`_).
 - Stabilize EllipseModel fitting parameters
   (`#6943 <https://github.com/scikit-image/scikit-image/pull/6943>`_).
@@ -195,7 +195,7 @@ Maintenance
   (`#6948 <https://github.com/scikit-image/scikit-image/pull/6948>`_).
 - Skip ransac doctest
   (`#6953 <https://github.com/scikit-image/scikit-image/pull/6953>`_).
-- Expose `GeometricTransform.residuals` in HTML doc
+- Expose ``GeometricTransform.residuals`` in HTML doc
   (`#6968 <https://github.com/scikit-image/scikit-image/pull/6968>`_).
 - Fix NumPy 1.25 deprecation warnings
   (`#6969 <https://github.com/scikit-image/scikit-image/pull/6969>`_).
@@ -210,15 +210,15 @@ Maintenance
 
 Documentation
 -------------
-- Document boundary behavior of `draw.polygon` and `draw.polygon2mask`
+- Document boundary behavior of ``draw.polygon`` and ``draw.polygon2mask``
   (`#6690 <https://github.com/scikit-image/scikit-image/pull/6690>`_).
 - Showcase pydata-sphinx-theme
   (`#6714 <https://github.com/scikit-image/scikit-image/pull/6714>`_).
 - Merge duplicate instructions for setting up build environment.
   (`#6770 <https://github.com/scikit-image/scikit-image/pull/6770>`_).
-- Add docstring to `skimage.color` module
+- Add docstring to ``skimage.color`` module
   (`#6777 <https://github.com/scikit-image/scikit-image/pull/6777>`_).
-- DOC: Fix underline length in `docstring_add_deprecated`
+- DOC: Fix underline length in ``docstring_add_deprecated``
   (`#6778 <https://github.com/scikit-image/scikit-image/pull/6778>`_).
 - Link full license to README
   (`#6779 <https://github.com/scikit-image/scikit-image/pull/6779>`_).
@@ -228,13 +228,13 @@ Documentation
   (`#6782 <https://github.com/scikit-image/scikit-image/pull/6782>`_).
 - Remove outdated build instructions from README
   (`#6788 <https://github.com/scikit-image/scikit-image/pull/6788>`_).
-- Add docstring to the `transform` module
+- Add docstring to the ``transform`` module
   (`#6797 <https://github.com/scikit-image/scikit-image/pull/6797>`_).
 - Handle pip-only dependencies when using conda.
   (`#6806 <https://github.com/scikit-image/scikit-image/pull/6806>`_).
 - Added examples to the EssentialMatrixTransform class and its estimation function
   (`#6832 <https://github.com/scikit-image/scikit-image/pull/6832>`_).
-- Fix returned data type in `segmentation.watershed`
+- Fix returned data type in ``segmentation.watershed``
   (`#6839 <https://github.com/scikit-image/scikit-image/pull/6839>`_).
 - Update references to outdated dev.py with spin
   (`#6856 <https://github.com/scikit-image/scikit-image/pull/6856>`_).
@@ -242,13 +242,13 @@ Documentation
   (`#6859 <https://github.com/scikit-image/scikit-image/pull/6859>`_).
 - Update _warps_cy.pyx
   (`#6867 <https://github.com/scikit-image/scikit-image/pull/6867>`_).
-- Point `version_switcher.json` URL at dev docs
+- Point ``version_switcher.json`` URL at dev docs
   (`#6882 <https://github.com/scikit-image/scikit-image/pull/6882>`_).
 - Fix docstring underline lengths
   (`#6895 <https://github.com/scikit-image/scikit-image/pull/6895>`_).
 - ENH Add JupyterLite button to gallery examples
   (`#6911 <https://github.com/scikit-image/scikit-image/pull/6911>`_).
-- Add missing backticks to DOI role in docstring of `area_opening`
+- Add missing backticks to DOI role in docstring of ``area_opening``
   (`#6913 <https://github.com/scikit-image/scikit-image/pull/6913>`_).
 - Add 0.21 release notes
   (`#6925 <https://github.com/scikit-image/scikit-image/pull/6925>`_).
@@ -266,7 +266,7 @@ Documentation
   (`#6949 <https://github.com/scikit-image/scikit-image/pull/6949>`_).
 - fix bad link in CODE_OF_CONDUCT.md
   (`#6952 <https://github.com/scikit-image/scikit-image/pull/6952>`_).
-- Expose `GeometricTransform.residuals` in HTML doc
+- Expose ``GeometricTransform.residuals`` in HTML doc
   (`#6968 <https://github.com/scikit-image/scikit-image/pull/6968>`_).
 
 Infrastructure
@@ -287,7 +287,7 @@ Infrastructure
   (`#6846 <https://github.com/scikit-image/scikit-image/pull/6846>`_).
 - Update pre-commits
   (`#6870 <https://github.com/scikit-image/scikit-image/pull/6870>`_).
-- Remove `codecov` dependency which disappeared from PyPI
+- Remove ``codecov`` dependency which disappeared from PyPI
   (`#6887 <https://github.com/scikit-image/scikit-image/pull/6887>`_).
 - Add CircleCI API token; fixes status link to built docs
   (`#6894 <https://github.com/scikit-image/scikit-image/pull/6894>`_).
@@ -297,11 +297,11 @@ Infrastructure
   (`#6917 <https://github.com/scikit-image/scikit-image/pull/6917>`_).
 - Use official meson-python release
   (`#6928 <https://github.com/scikit-image/scikit-image/pull/6928>`_).
-- Fix inclusion of `random.js` in HTML output
+- Fix inclusion of ``random.js`` in HTML output
   (`#6935 <https://github.com/scikit-image/scikit-image/pull/6935>`_).
 - Fix URL of random gallery links
   (`#6937 <https://github.com/scikit-image/scikit-image/pull/6937>`_).
-- Respect SPHINXOPTS and add --install-deps flags to `spin docs`
+- Respect SPHINXOPTS and add --install-deps flags to ``spin docs``
   (`#6940 <https://github.com/scikit-image/scikit-image/pull/6940>`_).
 - Build skimage before generating docs
   (`#6946 <https://github.com/scikit-image/scikit-image/pull/6946>`_).

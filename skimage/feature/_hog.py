@@ -123,7 +123,7 @@ def hog(
         A visualisation of the HOG image. Only provided if `visualize` is True.
 
     Raises
-    -------
+    ------
     ValueError
         If the image is too small given the values of pixels_per_cell and
         cells_per_block.

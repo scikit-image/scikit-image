@@ -133,7 +133,7 @@ def predict_segmenter(features, clf):
         scikit-learn's API, for example an instance of
         ``RandomForestClassifier`` or ``LogisticRegression`` classifier. The
         classifier must be already trained, for example with
-        :func:`skimage.segmentation.fit_segmenter`.
+        :func:`skimage.future.fit_segmenter`.
 
     Returns
     -------

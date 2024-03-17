@@ -4,7 +4,6 @@ import re
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
-import numpydoc
 from numpy.testing import (
     assert_allclose,
     assert_almost_equal,
@@ -709,6 +708,11 @@ def test_intensity_min():
     assert_almost_equal(intensity, 1)
 
 
+def test_intensity_std():
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_std
+    assert_almost_equal(intensity, 0.16433554953054486)
+
+
 def test_axis_minor_length():
     length = regionprops(SAMPLE)[0].axis_minor_length
     # MATLAB has different interpretation of ellipse than found in literature,
@@ -943,7 +947,6 @@ def test_moments_weighted_central():
         ]
     )
 
-    np.set_printoptions(precision=10)
     assert_array_almost_equal(wmu, ref)
 
     # Verify test function
@@ -1364,7 +1367,8 @@ def test_column_dtypes_correct():
 
 
 def test_all_documented_items_in_col_dtypes():
-    docstring = numpydoc.docscrape.FunctionDoc(regionprops)
+    numpydoc_docscrape = pytest.importorskip("numpydoc.docscrape")
+    docstring = numpydoc_docscrape.FunctionDoc(regionprops)
     notes_lines = docstring['Notes']
     property_lines = filter(lambda line: line.startswith('**'), notes_lines)
     pattern = r'\*\*(?P<property_name>[a-z_]+)\*\*.*'

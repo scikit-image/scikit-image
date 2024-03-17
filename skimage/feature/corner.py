@@ -124,7 +124,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
 
     # structure tensor
     A_elems = [
-        gaussian(der0 * der1, sigma, mode=mode, cval=cval)
+        gaussian(der0 * der1, sigma=sigma, mode=mode, cval=cval)
         for der0, der1 in combinations_with_replacement(derivatives, 2)
     ]
 

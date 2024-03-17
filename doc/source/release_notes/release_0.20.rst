@@ -1,5 +1,5 @@
-scikit-image 0.20.0 release notes
-=================================
+scikit-image 0.20.0 (2023-02-28)
+================================
 
 scikit-image is an image processing toolbox built on SciPy that
 includes algorithms for segmentation, geometric transformations, color
@@ -24,7 +24,7 @@ This release completes the transition to a more flexible
 includes several other deprecations that make the API more consistent and
 expressive.
 
-Finally, in preparation for the removal of `distutils` in the upcoming
+Finally, in preparation for the removal of ``distutils`` in the upcoming
 Python 3.12 release, we replaced our build system with `meson` and a
 static `pyproject.toml` specification.
 

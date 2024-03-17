@@ -19,7 +19,12 @@ def _smooth(image, sigma, mode, cval, channel_axis):
     else:
         channel_axis = None
     gaussian(
-        image, sigma, output=smoothed, mode=mode, cval=cval, channel_axis=channel_axis
+        image,
+        sigma=sigma,
+        out=smoothed,
+        mode=mode,
+        cval=cval,
+        channel_axis=channel_axis,
     )
     return smoothed
 

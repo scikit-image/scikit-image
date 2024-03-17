@@ -25,11 +25,11 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.22',
-    'scipy>=1.8',
+    'numpy>=1.23',
+    'scipy>=1.9',
     'networkx>=2.8',
-    'pillow>=9.0.1,<10.1.0',
-    'imageio>=2.27',
+    'pillow>=9.1',
+    'imageio>=2.33',
     'tifffile>=2022.8.12',
     'packaging>=21',
     'lazy_loader>=0.3',
@@ -45,16 +45,16 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.22',
+    'numpy>=1.25',
     # Developer UI
-    'spin==0.7',
+    'spin==0.8',
     'build',
 ]
 data = ['pooch>=1.6.0']
@@ -69,7 +69,7 @@ docs = [
     'numpydoc>=1.6',
     'sphinx-copybutton',
     'pytest-runner',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
     'seaborn>=0.11',
@@ -82,15 +82,16 @@ docs = [
     'kaleido',
     'scikit-learn>=1.1',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.14.1',
+    'pydata-sphinx-theme>=0.15.2',
     'PyWavelets>=1.1.1',
+    'pytest-doctestplus',
 ]
 optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
     'PyWavelets>=1.1.1',
@@ -98,13 +99,13 @@ optional = [
 ]
 test = [
     'asv',
-    'matplotlib>=3.5',
     'numpydoc>=1.5',
     'pooch>=1.6.0',
     'pytest>=7.0',
     'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
+    'pytest-doctestplus',
 ]
 
 [project.urls]
@@ -117,18 +118,14 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32,!=3.0.3',
+    'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
-    "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
-    "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.10' and platform_python_implementation=='PyPy'",
+    'numpy>=1.25',
 ]
 
 [tool.spin]

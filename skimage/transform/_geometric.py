@@ -6,6 +6,7 @@ import numpy as np
 from scipy import spatial
 
 from .._shared.utils import safe_as_int
+from .._shared.compat import NP_COPY_IF_NEEDED
 
 
 def _affine_matrix_from_vector(v):
@@ -252,6 +253,58 @@ class FundamentalMatrixTransform(_GeometricTransform):
     params : (3, 3) array
         Fundamental matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
+
+    Define source and destination points:
+
+    >>> src = np.array([1.839035, 1.924743,
+    ...                 0.543582, 0.375221,
+    ...                 0.473240, 0.142522,
+    ...                 0.964910, 0.598376,
+    ...                 0.102388, 0.140092,
+    ...                15.994343, 9.622164,
+    ...                 0.285901, 0.430055,
+    ...                 0.091150, 0.254594]).reshape(-1, 2)
+    >>> dst = np.array([1.002114, 1.129644,
+    ...                 1.521742, 1.846002,
+    ...                 1.084332, 0.275134,
+    ...                 0.293328, 0.588992,
+    ...                 0.839509, 0.087290,
+    ...                 1.779735, 1.116857,
+    ...                 0.878616, 0.602447,
+    ...                 0.642616, 1.028681]).reshape(-1, 2)
+
+    Estimate the transformation matrix:
+
+    >>> tform_matrix.estimate(src, dst)
+    True
+    >>> tform_matrix.params
+    array([[-0.21785884,  0.41928191, -0.03430748],
+           [-0.07179414,  0.04516432,  0.02160726],
+           [ 0.24806211, -0.42947814,  0.02210191]])
+
+    Compute the Sampson distance:
+
+    >>> tform_matrix.residuals(src, dst)
+    array([0.0053886 , 0.00526101, 0.08689701, 0.01850534, 0.09418259,
+           0.00185967, 0.06160489, 0.02655136])
+
+    Apply inverse transformation:
+
+    >>> tform_matrix.inverse(dst)
+    array([[-0.0513591 ,  0.04170974,  0.01213043],
+           [-0.21599496,  0.29193419,  0.00978184],
+           [-0.0079222 ,  0.03758889, -0.00915389],
+           [ 0.14187184, -0.27988959,  0.02476507],
+           [ 0.05890075, -0.07354481, -0.00481342],
+           [-0.21985267,  0.36717464, -0.01482408],
+           [ 0.01339569, -0.03388123,  0.00497605],
+           [ 0.03420927, -0.1135812 ,  0.02228236]])
+
     """
 
     def __init__(self, matrix=None, *, dimensionality=2):
@@ -480,8 +533,8 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     >>> tform_matrix.estimate(src, dst)
     True
     >>> tform_matrix.residuals(src, dst)
-    array([0.4245518687, 0.0146044753, 0.1384703409, 0.1214095141,
-           0.2775934609, 0.3245311807, 0.0021077555, 0.2651228318])
+    array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
+           0.32453118, 0.00210776, 0.26512283])
 
     """
 
@@ -620,7 +673,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     def _apply_mat(self, coords, matrix):
         ndim = matrix.shape[0] - 1
-        coords = np.array(coords, copy=False, ndmin=2)
+        coords = np.array(coords, copy=NP_COPY_IF_NEEDED, ndmin=2)
 
         src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
         dst = src @ matrix.T

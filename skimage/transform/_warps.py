@@ -562,7 +562,7 @@ def swirl(
         the range 0-5. See `skimage.transform.warp` for detail.
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}, optional
         Points outside the boundaries of the input are filled according
-        to the given mode, with 'constant' used as the default. Modes match
+        to the given mode, with 'reflect' used as the default. Modes match
         the behaviour of `numpy.pad`.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
@@ -756,6 +756,8 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
             min_val = min(min_val, cval)
             max_val = max(max_val, cval)
 
+        # Convert array-like types to ndarrays (gh-7159)
+        min_val, max_val = np.asarray(min_val), np.asarray(max_val)
         np.clip(output_image, min_val, max_val, out=output_image)
 
 

@@ -14,7 +14,7 @@ cdef DTYPE_t BG_NODE_NULL = -999
 cdef struct s_shpinfo
 
 ctypedef s_shpinfo shape_info
-ctypedef size_t (* fun_ravel)(size_t, size_t, size_t, shape_info *) nogil
+ctypedef size_t (* fun_ravel)(size_t, size_t, size_t, shape_info *) noexcept nogil
 
 
 # For having stuff concerning background in one place
@@ -167,7 +167,7 @@ cdef inline void join_trees_wrapper(DTYPE_t *data_p, DTYPE_t *forest_p,
 
 
 cdef size_t ravel_index1D(size_t x, size_t y, size_t z,
-                          shape_info *shapeinfo) nogil:
+                          shape_info *shapeinfo) noexcept nogil:
     """
     Ravel index of a 1D array - trivial. y and z are ignored.
     """
@@ -175,7 +175,7 @@ cdef size_t ravel_index1D(size_t x, size_t y, size_t z,
 
 
 cdef size_t ravel_index2D(size_t x, size_t y, size_t z,
-                          shape_info *shapeinfo) nogil:
+                          shape_info *shapeinfo) noexcept nogil:
     """
     Ravel index of a 2D array. z is ignored
     """
@@ -184,7 +184,7 @@ cdef size_t ravel_index2D(size_t x, size_t y, size_t z,
 
 
 cdef size_t ravel_index3D(size_t x, size_t y, size_t z,
-                          shape_info *shapeinfo) nogil:
+                          shape_info *shapeinfo) noexcept nogil:
     """
     Ravel index of a 3D array
     """
@@ -216,7 +216,7 @@ cdef size_t ravel_index3D(size_t x, size_t y, size_t z,
 # discovered and trees begin to surface.
 # When we found out that label 5 and 3 are the same, we assign array[5] = 3.
 
-cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n) nogil:
+cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n) noexcept nogil:
     """Find the root of node n.
     Given the example above, for any integer from 1 to 9, 1 is always returned
     """
@@ -403,7 +403,7 @@ def label_cython(input_, background=None, return_num=False,
 
 
 cdef DTYPE_t resolve_labels(DTYPE_t *data_p, DTYPE_t *forest_p,
-                            shape_info *shapeinfo, bginfo *bg) nogil:
+                            shape_info *shapeinfo, bginfo *bg) noexcept nogil:
     """
     We iterate through the provisional labels and assign final labels based on
     our knowledge of prov. labels relationship.

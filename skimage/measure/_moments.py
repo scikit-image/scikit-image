@@ -252,9 +252,9 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
         #       The centroid will be obtained from the raw moments.
         moments_raw = moments(image, order=order, spacing=spacing)
         return moments_raw_to_central(moments_raw)
-    if spacing is None:
-        spacing = np.ones(image.ndim)
     float_dtype = _supported_float_type(image.dtype)
+    if spacing is None:
+        spacing = np.ones(image.ndim, dtype=float_dtype)
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
@@ -280,6 +280,8 @@ def moments_normalized(mu, order=3, spacing=None):
         to ``order``.
     order : int, optional
         Maximum order of moments. Default is 3.
+    spacing: tuple of float, shape (ndim,)
+        The pixel spacing along each axis of the image.
 
     Returns
     -------

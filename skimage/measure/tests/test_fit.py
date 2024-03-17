@@ -9,6 +9,7 @@ from skimage._shared.testing import (
     assert_array_less,
     assert_equal,
     xfail,
+    assert_stacklevel,
 )
 from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
 from skimage.measure.fit import _dynamic_max_trials
@@ -171,9 +172,8 @@ def test_circle_model_insufficient_data():
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    # Check that stacklevel is correct
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
-    assert _warnings[0].filename == __file__
 
 
 def test_circle_model_estimate_from_small_scale_data():
@@ -467,9 +467,8 @@ def test_ellipse_model_estimate_failers():
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    # Check that stacklevel is correct
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
-    assert _warnings[0].filename == __file__
 
     assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
 
@@ -498,8 +497,7 @@ def test_ransac_shape():
 
     # estimate parameters of corrupted data
     model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=1)
-    with expected_warnings(['`random_state` is a deprecated argument']):
-        ransac(data0, CircleModel, 3, 5, random_state=1)
+    ransac(data0, CircleModel, 3, 5, rng=1)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)

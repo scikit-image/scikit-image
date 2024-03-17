@@ -388,7 +388,7 @@ def random_walker(
 
     See Also
     --------
-    skimage.morphology.watershed : watershed segmentation
+    skimage.segmentation.watershed
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 

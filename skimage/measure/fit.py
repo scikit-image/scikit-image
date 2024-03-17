@@ -5,7 +5,6 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import deprecate_kwarg
 
 _EPSILON = np.spacing(1)
 
@@ -669,9 +668,6 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def ransac(
     data,
     model_class,

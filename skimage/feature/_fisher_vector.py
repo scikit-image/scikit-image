@@ -38,7 +38,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     """Estimate a Gaussian mixture model (GMM) given a set of descriptors and
     number of modes (i.e. Gaussians). This function is essentially a wrapper
     around the scikit-learn implementation of GMM, namely the
-    :func:`sklearn.mixture.GaussianMixture` class.
+    :class:`sklearn.mixture.GaussianMixture` class.
 
     Due to the nature of the Fisher vector, the only enforced parameter of the
     underlying scikit-learn class is the covariance_type, which must be 'diag'.
@@ -65,11 +65,11 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         The number of modes/Gaussians to estimate during the GMM estimate.
     gm_args : dict
         Keyword arguments that can be passed into the underlying scikit-learn
-        :func:`sklearn.mixture.GaussianMixture` class.
+        :class:`sklearn.mixture.GaussianMixture` class.
 
     Returns
     -------
-    gmm : :func:`sklearn.mixture.GaussianMixture`
+    gmm : :class:`sklearn.mixture.GaussianMixture`
         The estimated GMM object, which contains the necessary parameters
         needed to compute the Fisher vector.
 
@@ -79,8 +79,9 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('sklearn')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('sklearn')
+
     >>> from skimage.feature import fisher_vector
     >>> rng = np.random.Generator(np.random.PCG64())
     >>> sift_for_images = [rng.standard_normal((10, 128)) for _ in range(10)]
@@ -159,7 +160,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     descriptors : np.ndarray, shape=(n_descriptors, descriptor_length)
         NumPy array of the descriptors for which the Fisher vector
         representation is to be computed.
-    gmm : sklearn.mixture.GaussianMixture
+    gmm : :class:`sklearn.mixture.GaussianMixture`
         An estimated GMM object, which contains the necessary parameters needed
         to compute the Fisher vector.
     improved : bool, default=False
@@ -191,8 +192,9 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('sklearn')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('sklearn')
+
     >>> from skimage.feature import fisher_vector, learn_gmm
     >>> sift_for_images = [np.random.random((10, 128)) for _ in range(10)]
     >>> num_modes = 16
