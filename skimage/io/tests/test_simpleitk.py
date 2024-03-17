@@ -61,6 +61,7 @@ def test_imread_uint16_big_endian():
 
 @pytest.mark.parametrize("shape", [(10, 10), (10, 10, 3), (10, 10, 4)])
 @pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32, np.float64])
+@pytest.mark.filterwarnings("default")
 def test_imsave_roundtrip(shape, dtype, tmp_path):
     if np.issubdtype(dtype, np.floating):
         info_func = np.finfo
