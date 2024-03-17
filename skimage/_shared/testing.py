@@ -49,18 +49,6 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 arch32 = struct.calcsize("P") * 8 == 32
 
 
-_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
-if _error_on_warnings.lower() == 'true':
-    _error_on_warnings = True
-elif _error_on_warnings.lower() == 'false':
-    _error_on_warnings = False
-else:
-    try:
-        _error_on_warnings = bool(int(_error_on_warnings))
-    except ValueError:
-        _error_on_warnings = False
-
-
 def assert_less(a, b, msg=None):
     message = f"{a!r} is not lower than {b!r}"
     if msg is not None:
@@ -202,22 +190,6 @@ def mono_check(plugin, fmt='png'):
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img5)
-
-
-def setup_test():
-    """Default package level setup routine for skimage tests.
-
-    Set the random seed to zero.
-    """
-    if _error_on_warnings:
-        np.random.seed(0)
-
-
-def teardown_test():
-    """Default package level teardown routine for skimage tests.
-
-    Restore warnings to default behavior
-    """
 
 
 def fetch(data_filename):
