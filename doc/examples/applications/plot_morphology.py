@@ -38,13 +38,13 @@ ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 
 def plot_comparison(original, filtered, filter_name):
-    fig, ax = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
-    ax[0].imshow(original, cmap=plt.cm.gray)
-    ax[0].set_title('original')
-    ax[0].set_axis_off()
-    ax[1].imshow(filtered, cmap=plt.cm.gray)
-    ax[1].set_title(filter_name)
-    ax[1].set_axis_off()
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
+    ax1.imshow(original, cmap=plt.cm.gray)
+    ax1.set_title('original')
+    ax1.set_axis_off()
+    ax2.imshow(filtered, cmap=plt.cm.gray)
+    ax2.set_title(filter_name)
+    ax2.set_axis_off()
 
 
 ######################################################################

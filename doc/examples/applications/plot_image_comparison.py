@@ -33,7 +33,7 @@ blend_rotated = compare_images(img1, img2, method='blend')
 # The `checkerboard` method alternates tiles from the first and the second
 # images.
 
-fig, ax = plt.subplots(figsize=(8, 9))
+fig = plt.figure(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -51,7 +51,7 @@ for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
 plt.tight_layout()
-plt.plot()
+
 
 ######################################################################
 # Diff
@@ -59,7 +59,7 @@ plt.plot()
 #
 # The `diff` method computes the absolute difference between the two images.
 
-fig, ax = plt.subplots(figsize=(8, 9))
+fig = plt.figure(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -77,7 +77,7 @@ for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
 plt.tight_layout()
-plt.plot()
+
 
 ######################################################################
 # Blend
@@ -85,8 +85,7 @@ plt.plot()
 #
 # `blend` is the result of the average of the two images.
 
-
-fig, ax = plt.subplots(figsize=(8, 9))
+fig = plt.figure(figsize=(8, 9))
 
 gs = GridSpec(3, 2)
 ax0 = fig.add_subplot(gs[0, 0])
@@ -104,4 +103,5 @@ for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
 plt.tight_layout()
-plt.plot()
+
+plt.show()

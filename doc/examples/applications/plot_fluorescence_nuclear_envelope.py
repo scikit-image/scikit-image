@@ -150,15 +150,15 @@ fig.tight_layout()
 image_t_0_channel_1 = image_sequence[0, 1, :, :]
 selection = np.where(mask, image_t_0_channel_1, 0)
 
-fig, ax = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
 
-ax[0].imshow(image_t_0_channel_1)
-ax[0].set_title('Second channel (raw)')
-ax[0].set_axis_off()
+ax0.imshow(image_t_0_channel_1)
+ax0.set_title('Second channel (raw)')
+ax0.set_axis_off()
 
-ax[1].imshow(selection)
-ax[1].set_title('Selection')
-ax[1].set_axis_off()
+ax1.imshow(selection)
+ax1.set_title('Selection')
+ax1.set_axis_off()
 
 fig.tight_layout()
 
