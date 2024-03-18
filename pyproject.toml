@@ -204,24 +204,6 @@ python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
-#    "default:unclosed file:ResourceWarning",
-#    # Ignore other warnings only seen when using older versions of dependencies.
-#    "default:Conversion of the second argument of issubdtype:FutureWarning",
-#    "default:the matrix subclass is not the recommended way:PendingDeprecationWarning:numpy",
-#    "default:Your installed pillow version:UserWarning:skimage.io",
-#    # ignore warning from cycle_spin about Dask not being installed
-#    "default:The optional dask dependency is not installed:UserWarning",
-#    "default:numpy.ufunc size changed:RuntimeWarning",
-#    "default:\n\nThe scipy.sparse array containers:DeprecationWarning",
-#    # ignore dtype deprecation warning from NumPy arising from use of SciPy
-#    # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
-#    # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
-#    "default:`np.int0` is a deprecated alias for `np.intp`:DeprecationWarning",
-#    # Temporary warning raised by imageio about change in Pillow. May be removed
-#    # once https://github.com/python-pillow/Pillow/pull/7125 is shipped in the
-#    # minimal required version of pillow (probably the release after Pillow 9.5.0)
-#    "default:Loading 16-bit \\(uint16\\) PNG as int32 .* pillow:UserWarning",
-#    "default:The figure layout has changed to tight:UserWarning",
 ]
 
 [tool.coverage.run]
