@@ -1236,7 +1236,7 @@ def test_cache():
     assert np.any(f0 != f1)
 
 
-def test_cache_memory():
+def test_disabled_cache_is_empty():
     SAMPLE_mod = SAMPLE.copy()
     region = regionprops(SAMPLE_mod, cache=False)[0]
     # Acces one property
