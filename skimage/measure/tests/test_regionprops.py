@@ -1243,7 +1243,7 @@ def test_disabled_cache_is_empty():
     _ = region.image_filled
 
     # Cache should be empty
-    assert not region._cache
+    assert region._cache == dict()
 
 
 def test_docstrings_and_props():
