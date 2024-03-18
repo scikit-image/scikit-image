@@ -17,11 +17,11 @@ from skimage.exposure import histogram
 coins = data.coins()
 hist, hist_centers = histogram(coins)
 
-fig, ax = plt.subplots(1, 2, figsize=(8, 3))
-ax[0].imshow(coins, cmap=plt.cm.gray)
-ax[0].set_axis_off()
-ax[1].plot(hist_centers, hist, lw=2)
-ax[1].set_title('histogram of gray values')
+fig, axes = plt.subplots(1, 2, figsize=(8, 3))
+axes[0].imshow(coins, cmap=plt.cm.gray)
+axes[0].set_axis_off()
+axes[1].plot(hist_centers, hist, lw=2)
+axes[1].set_title('histogram of gray values')
 
 ######################################################################
 #
@@ -33,15 +33,15 @@ ax[1].set_title('histogram of gray values')
 # binary image that either misses significant parts of the coins or merges
 # parts of the background with the coins:
 
-fig, ax = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
 
-ax[0].imshow(coins > 100, cmap=plt.cm.gray)
-ax[0].set_title('coins > 100')
+axes[0].imshow(coins > 100, cmap=plt.cm.gray)
+axes[0].set_title('coins > 100')
 
-ax[1].imshow(coins > 150, cmap=plt.cm.gray)
-ax[1].set_title('coins > 150')
+axes[1].imshow(coins > 150, cmap=plt.cm.gray)
+axes[1].set_title('coins > 150')
 
-for a in ax:
+for a in axes:
     a.set_axis_off()
 
 plt.tight_layout()
@@ -144,12 +144,12 @@ segmentation_coins = ndi.binary_fill_holes(segmentation_coins - 1)
 labeled_coins, _ = ndi.label(segmentation_coins)
 image_label_overlay = label2rgb(labeled_coins, image=coins, bg_label=0)
 
-fig, ax = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
-ax[0].imshow(coins, cmap=plt.cm.gray)
-ax[0].contour(segmentation_coins, [0.5], linewidths=1.2, colors='y')
-ax[1].imshow(image_label_overlay)
+fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
+axes[0].imshow(coins, cmap=plt.cm.gray)
+axes[0].contour(segmentation_coins, [0.5], linewidths=1.2, colors='y')
+axes[1].imshow(image_label_overlay)
 
-for a in ax:
+for a in axes:
     a.set_axis_off()
 
 plt.tight_layout()

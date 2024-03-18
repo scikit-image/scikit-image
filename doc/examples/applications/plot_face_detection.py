@@ -25,7 +25,7 @@ smallest window size is the size of window that was used in training. This size
 is specified in the xml file with trained parameters. The ``scale_ratio``
 parameter specifies by which ratio the search window is increased on each
 step. If you increase this parameter, the search time decreases and the
-accuracy decreases. So, faces on some scales cannot be detected.
+accuracy decreases. So, faces on some scales can be not detected.
 
 ``step_ratio`` specifies the step of sliding window that is used to search for
 faces on each scale of the image. If this parameter is equal to one, then all
