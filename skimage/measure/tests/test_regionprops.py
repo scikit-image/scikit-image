@@ -1239,7 +1239,7 @@ def test_cache():
 def test_disabled_cache_is_empty():
     SAMPLE_mod = SAMPLE.copy()
     region = regionprops(SAMPLE_mod, cache=False)[0]
-    # Acces one property
+    # Access one property to trigger cache
     _ = region.image_filled
 
     # Cache should be empty
