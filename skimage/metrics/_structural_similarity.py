@@ -42,7 +42,7 @@ def structural_similarity(
         The data range of the input image (difference between maximum and
         minimum possible values). By default, this is estimated from the image
         data type. This estimate may be wrong for floating-point image data.
-        Therefore it is recommended to always pass this value explicitly
+        Therefore it is recommended to always pass this scalar value explicitly
         (see note below).
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
