@@ -16,6 +16,9 @@ on:
     #   - maintenance/**
   workflow_dispatch:
 
+env:
+  FORCE_COLOR: 3
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -66,16 +69,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Set up Pyodide virtual environment
-        run: |
-          pyodide venv .venv-pyodide
-          source .venv-pyodide/bin/activate
-          pip install dist/*.whl
-          # Remove pooch for now due to problems with downloading data files
-          pip install matplotlib>=3.5 numpydoc>=1.5 pytest>=7.0 pytest-cov>=2.11.0 pytest-localserver pytest-faulthandler
+      # - name: Set up Pyodide virtual environment
+      #   run: |
+      #     pyodide venv .venv-pyodide
+      #     source .venv-pyodide/bin/activate
+      #     pip install dist/*.whl
+      #     Remove pooch for now due to problems with downloading data files
+      #     pip install matplotlib>=3.5 numpydoc>=1.5 pytest>=7.0 pytest-cov>=2.11.0 pytest-localserver pytest-faulthandler
 
       - name: Test scikit-image for Pyodide
         run: |
+          pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
-          cd ..
-          pytest --doctest-modules --cov=skimage --showlocals --pyargs skimage
+
+          # pytest --doctest-modules --cov=skimage --showlocals --pyargs skimage
+
+          # use the test.js script instead and don't run in venv
+          npm install pyodide@${{ env.PYODIDE_VERSION }}
+          node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
