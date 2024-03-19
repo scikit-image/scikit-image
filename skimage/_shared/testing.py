@@ -3,9 +3,10 @@ Testing utilities.
 """
 
 import os
+import platform
 import re
 import struct
-import threading
+import sys
 import functools
 import inspect
 from tempfile import NamedTemporaryFile
@@ -44,6 +45,7 @@ fixture = pytest.fixture
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
+IS_WASM = (sys.platform == "emscripten") or (platform.machine() in ["wasm32", "wasm64"])
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
@@ -322,11 +324,16 @@ def fetch(data_filename):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
+# Ref: about the lack of threading support in WASM, please see
+# https://github.com/pyodide/pyodide/issues/237
 def run_in_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
     concurrently and correctly while releasing the GIL.
+
+    It is currently skipped when running on WASM-based platforms, as
+    the threading module is not supported.
 
     Parameters
     ----------
@@ -346,18 +353,22 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            with expected_warnings(warnings_matching):
-                threads = []
-                for i in range(num_threads - 1):
-                    thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-                    threads.append(thread)
-                for thread in threads:
-                    thread.start()
+            if not IS_WASM:
+                with expected_warnings(warnings_matching):
+                    threads = []
+                    for i in range(num_threads - 1):
+                        import threading
+                        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                        threads.append(thread)
+                    for thread in threads:
+                        thread.start()
 
+                    func(*args, **kwargs)
+
+                    for thread in threads:
+                        thread.join()
+            else:
                 func(*args, **kwargs)
-
-                for thread in threads:
-                    thread.join()
 
         return inner
 
