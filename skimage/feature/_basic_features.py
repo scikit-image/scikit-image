@@ -1,9 +1,18 @@
 from itertools import combinations_with_replacement
 import itertools
+import sys
+import platform
 import numpy as np
 from skimage import filters, feature
 from skimage.util.dtype import img_as_float32
-from concurrent.futures import ThreadPoolExecutor
+
+# Guard threading import for Emscripten
+threading_available = True
+if not (sys.platform == "emscripten") or (
+    platform.machine() in ["wasm32", "wasm64"]):
+    from concurrent.futures import ThreadPoolExecutor
+else:
+    threading_available = False
 
 
 def _texture_filter(gaussian_filtered):
@@ -83,16 +92,26 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    with ThreadPoolExecutor(max_workers=num_workers) as ex:
-        out_sigmas = list(
-            ex.map(
-                lambda s: _singlescale_basic_features_singlechannel(
-                    img, s, intensity=intensity, edges=edges, texture=texture
-                ),
-                sigmas,
+    if threading_available:
+        with ThreadPoolExecutor(max_workers=num_workers) as ex:
+            out_sigmas = list(
+                ex.map(
+                    lambda s: _singlescale_basic_features_singlechannel(
+                        img, s, intensity=intensity, edges=edges, texture=texture
+                    ),
+                    sigmas,
+                )
             )
+        features = itertools.chain.from_iterable(out_sigmas)
+    # assumed threading is not available, so we use a serial version
+    else:
+        out_sigmas = [
+        _singlescale_basic_features_singlechannel(
+            img, s, intensity=intensity, edges=edges, texture=texture
         )
-    features = itertools.chain.from_iterable(out_sigmas)
+        for s in sigmas
+        ]
+        features = itertools.chain.from_iterable(out_sigmas)
     return features
 
 
