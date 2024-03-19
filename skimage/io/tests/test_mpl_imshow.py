@@ -3,6 +3,7 @@ import pytest
 
 from skimage import io
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import IS_WASM
 
 plt = pytest.importorskip("matplotlib.pyplot")
 
@@ -30,7 +31,7 @@ imshow_expected_warnings = [
     r"The figure layout has changed to tight|\A\Z",
 ]
 
-
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def n_subplots(ax_im):
     """Return the number of subplots in the figure containing an ``AxesImage``.
 
@@ -53,6 +54,7 @@ def n_subplots(ax_im):
     return len(ax_im.get_figure().get_axes())
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_uint8():
     plt.figure()
     with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
@@ -63,6 +65,7 @@ def test_uint8():
     assert ax_im.colorbar is None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_uint16():
     plt.figure()
     with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
@@ -73,6 +76,7 @@ def test_uint16():
     assert ax_im.colorbar is None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_float():
     plt.figure()
     with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
@@ -83,6 +87,7 @@ def test_float():
     assert ax_im.colorbar is None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_low_data_range():
     with expected_warnings(
         imshow_expected_warnings + ["Low image data range|CObject type is marked"]
@@ -93,6 +98,7 @@ def test_low_data_range():
     assert ax_im.colorbar is not None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_outside_standard_range():
     plt.figure()
     # Warning raised by matplotlib on Windows:
@@ -108,6 +114,7 @@ def test_outside_standard_range():
     assert ax_im.colorbar is not None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_nonstandard_type():
     plt.figure()
     # Warning raised by matplotlib on Windows:
@@ -123,6 +130,7 @@ def test_nonstandard_type():
     assert ax_im.colorbar is not None
 
 
+pytest.mark.skipif(IS_WASM, reason="matplotlib usage is limited in WASM")
 def test_signed_image():
     plt.figure()
     im_signed = np.array([[-0.5, -0.2], [0.1, 0.4]])

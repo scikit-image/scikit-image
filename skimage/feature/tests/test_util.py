@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from skimage._shared._dependency_checks import has_mpl
+from skimage._shared.testing import IS_WASM
 from skimage.feature.util import (
     FeatureDetector,
     DescriptorExtractor,
@@ -53,6 +54,7 @@ def test_mask_border_keypoints():
     )
 
 
+@pytest.mark.skipif(IS_WASM, reason="Matplotlib usage is limited in WASM")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",
@@ -97,6 +99,7 @@ def test_plot_matches(shapes):
     plt.close()
 
 
+@pytest.mark.skipif(IS_WASM, reason="Matplotlib usage is limited in WASM")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",
