@@ -33,6 +33,7 @@ from .. import data, io
 from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
+from ._dependency_checks import is_wasm
 
 import pytest
 
@@ -44,8 +45,6 @@ raises = pytest.raises
 fixture = pytest.fixture
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
-
-IS_WASM = (sys.platform == "emscripten") or (platform.machine() in ["wasm32", "wasm64"])
 
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
@@ -353,7 +352,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            if not IS_WASM:
+            if not is_wasm:
                 with expected_warnings(warnings_matching):
                     threads = []
                     for i in range(num_threads - 1):

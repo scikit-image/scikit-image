@@ -12,7 +12,7 @@ from skimage._shared.testing import (
     assert_stacklevel,
 )
 from skimage._shared import testing
-from skimage._shared.testing import IS_WASM
+from skimage._shared._dependency_checks import is_wasm
 
 from skimage._shared._warnings import expected_warnings
 from warnings import warn
@@ -82,7 +82,7 @@ def test_skipper():
         doctest_skip_parser(c)
 
 
-@pytest.mark.skipif(IS_WASM, reason="Cannot start threads in WASM")
+@pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
 def test_run_in_parallel():
     state = []
 
