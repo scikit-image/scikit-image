@@ -53,7 +53,6 @@ def test_mask_border_keypoints():
     )
 
 
-@pytest.mark.skipif(is_wasm, reason="Matplotlib usage is limited in WASM")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",
@@ -98,7 +97,6 @@ def test_plot_matches(shapes):
     plt.close()
 
 
-@pytest.mark.skipif(is_wasm, reason="Matplotlib usage is limited in WASM")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",

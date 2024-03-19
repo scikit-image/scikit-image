@@ -78,6 +78,9 @@ jobs:
       #     pip install matplotlib>=3.5 numpydoc>=1.5 pytest>=7.0 pytest-cov>=2.11.0 pytest-localserver pytest-faulthandler
 
       - name: Test scikit-image for Pyodide
+        env:
+          # Avoid using the default TkAgg backend, which requires GUI support
+          MPLBACKEND: "Agg"
         run: |
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
