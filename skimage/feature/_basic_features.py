@@ -6,14 +6,6 @@ import numpy as np
 from skimage import filters, feature
 from skimage.util.dtype import img_as_float32
 
-# Guard threading import for Emscripten
-threading_available = True
-if not (sys.platform == "emscripten") or (
-    platform.machine() in ["wasm32", "wasm64"]):
-    from concurrent.futures import ThreadPoolExecutor
-else:
-    threading_available = False
-
 
 def _texture_filter(gaussian_filtered):
     H_elems = [
@@ -81,6 +73,15 @@ def _mutiscale_basic_features_singlechannel(
     features : list
         List of features, each element of the list is an array of shape as img.
     """
+    # Guard threading import for Emscripten
+    threading_available = True
+    if (sys.platform == "emscripten") or (
+    platform.machine() in ["wasm32", "wasm64"]):
+        threading_available = False
+    else:
+        from concurrent.futures import ThreadPoolExecutor
+
+
     # computations are faster as float32
     img = np.ascontiguousarray(img_as_float32(img))
     if num_sigma is None:
