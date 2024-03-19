@@ -303,6 +303,13 @@ def setup_test():
             category=UserWarning,
         )
 
+    warnings.filterwarnings(
+        action="ignore",
+        message=".*Use imageio or a similar package instead.*",
+        category=FutureWarning,
+        module="skimage",
+    )
+
 
 def teardown_test():
     """Default package level teardown routine for skimage tests.
