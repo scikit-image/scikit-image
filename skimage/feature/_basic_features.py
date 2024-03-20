@@ -75,12 +75,10 @@ def _mutiscale_basic_features_singlechannel(
     """
     # Guard threading import for Emscripten
     threading_available = True
-    if (sys.platform == "emscripten") or (
-    platform.machine() in ["wasm32", "wasm64"]):
+    if (sys.platform == "emscripten") or (platform.machine() in ["wasm32", "wasm64"]):
         threading_available = False
     else:
         from concurrent.futures import ThreadPoolExecutor
-
 
     # computations are faster as float32
     img = np.ascontiguousarray(img_as_float32(img))
@@ -107,10 +105,10 @@ def _mutiscale_basic_features_singlechannel(
     # assumed threading is not available, so we use a serial version
     else:
         out_sigmas = [
-        _singlescale_basic_features_singlechannel(
-            img, s, intensity=intensity, edges=edges, texture=texture
-        )
-        for s in sigmas
+            _singlescale_basic_features_singlechannel(
+                img, s, intensity=intensity, edges=edges, texture=texture
+            )
+            for s in sigmas
         ]
         features = itertools.chain.from_iterable(out_sigmas)
     return features

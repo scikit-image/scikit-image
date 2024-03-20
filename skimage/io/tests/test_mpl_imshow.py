@@ -3,9 +3,6 @@ import pytest
 
 from skimage import io
 from skimage._shared._warnings import expected_warnings
-from skimage._shared._dependency_checks import is_wasm
-
-import os
 
 plt = pytest.importorskip("matplotlib.pyplot")
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skimage._shared._dependency_checks import has_mpl, is_wasm
+from skimage._shared._dependency_checks import has_mpl
 from skimage.feature.util import (
     FeatureDetector,
     DescriptorExtractor,

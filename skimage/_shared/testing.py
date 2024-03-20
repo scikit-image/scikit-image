@@ -357,6 +357,7 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
                     threads = []
                     for i in range(num_threads - 1):
                         import threading
+
                         thread = threading.Thread(target=func, args=args, kwargs=kwargs)
                         threads.append(thread)
                     for thread in threads:
