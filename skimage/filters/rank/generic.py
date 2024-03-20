@@ -108,7 +108,7 @@ def _preprocess_input(
         Dimension of each pixel. Default value is 1.
     shift_x, shift_y : int, optional
         Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
+        footprint size (center must be inside of the given footprint).
 
     Returns
     -------
