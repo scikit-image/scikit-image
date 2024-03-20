@@ -124,11 +124,11 @@ mask_2 = image_med < thresh_2
 
 
 def plot_comparison(plot1, plot2, title1, title2):
-    fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
-    ax[0].imshow(plot1, cmap='gray')
-    ax[0].set_title(title1)
-    ax[1].imshow(plot2, cmap='gray')
-    ax[1].set_title(title2)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
+    ax1.imshow(plot1, cmap='gray')
+    ax1.set_title(title1)
+    ax2.imshow(plot2, cmap='gray')
+    ax2.set_title(title2)
 
 
 plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
