@@ -90,7 +90,6 @@ __all__ = [
     'remove_small_holes',
     'remove_small_objects',
     'skeletonize',
-    'skeletonize_3d',
     'square',
     'star',
     'thin',
