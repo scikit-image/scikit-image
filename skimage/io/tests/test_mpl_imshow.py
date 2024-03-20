@@ -6,6 +6,9 @@ from skimage._shared._warnings import expected_warnings
 
 plt = pytest.importorskip("matplotlib.pyplot")
 
+if plt:
+    plt.switch_backend("Agg")
+
 
 def setup():
     io.reset_plugins()
