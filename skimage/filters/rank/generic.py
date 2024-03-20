@@ -223,7 +223,7 @@ def _handle_input_3D(
         Dimension of each pixel. Default value is 1.
     shift_x, shift_y, shift_z : int, optional
         Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
+        footprint size (center must be inside of the given footprint).
 
     Returns
     -------
