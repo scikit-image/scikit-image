@@ -57,6 +57,14 @@ jobs:
           version: ${{ env.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
 
+      # We need to apply a patch to the Emscripten SDK to work around a bug in
+      # the file system API. This patch is already applied in the Emscripten SDK
+      # upstream, but we need to apply it here because we are using an older
+      # version of the Emscripten SDK with Pyodide.
+      - name: Apply necessary patch(es)
+        run: |
+          patch -d $EMSDK/upstream/emscripten/src/ -p1 < tools/emscripten/patches/0001-fix-npy-file-access.patch
+
       - name: Install pyodide-build
         run: pip install "pydantic<2" pyodide-build==${{ env.PYODIDE_VERSION }}
 
