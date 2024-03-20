@@ -39,10 +39,10 @@ def structural_similarity(
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     data_range : float, optional
-        The data range of the input image (distance between minimum and
-        maximum possible values). By default, this is estimated from the image
+        The data range of the input image (difference between maximum and
+        minimum possible values). By default, this is estimated from the image
         data type. This estimate may be wrong for floating-point image data.
-        Therefore it is recommended to always pass this value explicitly
+        Therefore it is recommended to always pass this scalar value explicitly
         (see note below).
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -86,7 +86,7 @@ def structural_similarity(
     estimate yields a result double the value of the desired range, as the
     `dtype_range` in `skimage.util.dtype.py` has defined intervals from -1 to
     +1. This yields an estimate of 2, instead of 1, which is most often
-    required when working with image data (as negative light intentsities are
+    required when working with image data (as negative light intensities are
     nonsensical). In case of working with YCbCr-like color data, note that
     these ranges are different per channel (Cb and Cr have double the range
     of Y), so one cannot calculate a channel-averaged SSIM with a single call

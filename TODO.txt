@@ -1,5 +1,13 @@
 Version 0.25
 ------------
+* In `skimage/feature/util.py`, remove deprecated function `plot_matches` as
+  well as `test_plot_matches` in `skimage/feature/tests/test_util.py`.
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
+  tests related to that deprecation.
+* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
+  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
+  Make arguments after the deprecated `output` parameter, keyword only:
+  `gaussian(image, sigma, *, ...)`.
 * In `skimage/util/compare.py`, remove deprecated parameter `image2` as
   well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
   (and all `pytest.warns(FutureWarning)` context managers there).
@@ -11,8 +19,6 @@ Version 0.26
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
-* Remove deprecated `skimage.lookfor`, `skimage/_vendored/numpy_lookfor.py`,
-  the associated note in `LICENSE.txt` and everything else associated with it.
 
 Other
 -----

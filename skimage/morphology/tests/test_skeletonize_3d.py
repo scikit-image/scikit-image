@@ -25,7 +25,7 @@ def test_skeletonize_wrong_dim():
 def test_skeletonize_1D_old_api():
     # a corner case of an image of a shape(1, N)
     im = np.ones((5, 1), dtype=bool)
-    res = skeletonize_3d(im)
+    res = skeletonize(im)
     assert_equal(res, im)
 
 
@@ -75,7 +75,7 @@ def test_dtype_conv():
     orig = img.copy()
     res = skeletonize(img, method='lee')
 
-    assert_equal(res.dtype, bool)
+    assert res.dtype == bool
     assert_equal(img, orig)  # operation does not clobber the original
 
 
@@ -184,3 +184,12 @@ def test_3d_vs_fiji():
     img_s = skeletonize(img)
     img_f = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif")).astype(bool)
     assert_equal(img_s, img_f)
+
+
+def test_deprecated_skeletonize_3d():
+    image = np.ones((10, 10), dtype=bool)
+    regex = "Use `skimage\\.morphology\\.skeletonize"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        skeletonize_3d(image)
+    assert len(record) == 1
+    assert record[0].filename == __file__, "warning points at wrong file"

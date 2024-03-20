@@ -147,7 +147,7 @@ def difference_of_gaussians(
 
     im1 = gaussian(
         image,
-        low_sigma,
+        sigma=low_sigma,
         mode=mode,
         cval=cval,
         channel_axis=channel_axis,
@@ -157,7 +157,7 @@ def difference_of_gaussians(
 
     im2 = gaussian(
         image,
-        high_sigma,
+        sigma=high_sigma,
         mode=mode,
         cval=cval,
         channel_axis=channel_axis,
