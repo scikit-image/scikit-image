@@ -63,7 +63,7 @@ jobs:
       # version of the Emscripten SDK with Pyodide.
       - name: Apply necessary patch(es)
         run: |
-          patch -d $EMSDK/upstream/emscripten/src/ -p1 < tools/emscripten/patches/0001-fix-npy-file-access.patch
+          patch -d $EMSDK/upstream/emscripten/ -p1 < tools/emscripten/patches/0001-fix-npy-file-access.patch
 
       - name: Install pyodide-build
         run: pip install "pydantic<2" pyodide-build==${{ env.PYODIDE_VERSION }}
