@@ -21,7 +21,7 @@ ax.figure.figimage(img, resize=True)
 ax.text(0, 0.99, "I am stefan's cat.", fontsize=32, va="top")
 fig.canvas.draw()
 annotated_img = np.asarray(fig.canvas.renderer.buffer_rgba())
-plt.close(fig)
+fig.close()
 
 
 ###############################################################################
