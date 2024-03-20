@@ -52,7 +52,7 @@ ax[0].set_axis_off()
 ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Gray-level histogram')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -90,7 +90,7 @@ ax[3].set_title('Median $r=20$')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -127,7 +127,7 @@ ax[1].set_title('Local mean $r=10$')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -163,7 +163,7 @@ ax[3].imshow(bilat[100:250, 350:450], cmap=plt.cm.gray)
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # One can see that the large continuous part of the image (e.g. sky) is
@@ -216,7 +216,7 @@ ax[4].set_axis_off()
 ax[5].plot(loc_hist[1][:-1], loc_hist[0], lw=2)
 ax[5].set_title('Histogram of gray values')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Another way to maximize the number of gray-levels used for an image is to
@@ -243,7 +243,7 @@ ax[1].set_title('Local autolevel')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # This filter is very sensitive to local outliers. One can
@@ -288,7 +288,7 @@ for i in range(0, len(image_list)):
     ax[i].set_title(title_list[i])
     ax[i].set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The morphological contrast enhancement filter replaces the central pixel by
@@ -317,7 +317,7 @@ ax[3].imshow(enh[100:250, 350:450], cmap=plt.cm.gray)
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The percentile version of the local morphological contrast enhancement uses
@@ -345,7 +345,7 @@ ax[3].imshow(penh[100:250, 350:450], cmap=plt.cm.gray)
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -400,7 +400,7 @@ ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The example below performs the same comparison, using a 3D image this time.
@@ -463,7 +463,7 @@ ax[1].set_title(f'Local Otsu ($r={radius}$)')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Image morphology
@@ -502,7 +502,7 @@ ax[3].set_title('Morphological gradient')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -542,7 +542,7 @@ ax[1].set_title('Entropy')
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -624,7 +624,7 @@ ax.set_xlabel('Element radius')
 ax.plot(e_range, rec)
 ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # and increasing image size:
@@ -649,7 +649,7 @@ ax.set_xlabel('Image size')
 ax.plot(s_range, rec)
 ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Comparison between:
@@ -692,7 +692,7 @@ ax[1].imshow(rndi, cmap=plt.cm.gray)
 for a in ax:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # on increasing image size:
@@ -717,6 +717,6 @@ ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()

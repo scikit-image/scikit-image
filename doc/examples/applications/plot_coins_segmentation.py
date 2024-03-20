@@ -44,7 +44,7 @@ axes[1].set_title('coins > 150')
 for a in axes:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Edge-based segmentation
@@ -152,6 +152,6 @@ axes[1].imshow(image_label_overlay)
 for a in axes:
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()

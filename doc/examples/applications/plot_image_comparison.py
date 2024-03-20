@@ -50,7 +50,7 @@ ax2.set_title('Checkerboard comparison')
 for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 
 ######################################################################
@@ -76,7 +76,7 @@ ax2.set_title('Diff comparison')
 for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 
 ######################################################################
@@ -102,6 +102,6 @@ ax2.set_title('Blend comparison')
 for a in (ax0, ax1, ax2):
     a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()
