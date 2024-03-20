@@ -36,7 +36,7 @@ class TestFootprints:
             assert_equal(expected_mask, actual_mask)
 
     def strel_worker(self, fn, func):
-        matlab_masks = np.load(fetch(fn))['data']
+        matlab_masks = np.load(fetch(fn))
         k = 0
         for arrname in sorted(matlab_masks):
             expected_mask = matlab_masks[arrname]
@@ -47,7 +47,7 @@ class TestFootprints:
             k = k + 1
 
     def strel_worker_3d(self, fn, func):
-        matlab_masks = np.load(fetch(fn))['data']
+        matlab_masks = np.load(fetch(fn))
         k = 0
         for arrname in sorted(matlab_masks):
             expected_mask = matlab_masks[arrname]

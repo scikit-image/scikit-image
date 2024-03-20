@@ -18,14 +18,14 @@ def teardown():
 
 
 def test_imread_uint16():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
     assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)
@@ -42,7 +42,7 @@ def test_tifffile_kwarg_passthrough():
 
 
 def test_imread_handle():
-    expected = np.load(fetch('data/chessboard_GRAY_U8.npz'))['data']
+    expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     with open(fetch('data/chessboard_GRAY_U16.tif'), 'rb') as fh:
         img = imread(fh)
     assert img.dtype == np.uint16

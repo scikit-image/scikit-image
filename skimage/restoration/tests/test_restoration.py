@@ -51,8 +51,8 @@ def test_wiener(dtype, ndim):
 
     if ndim == 2:
         rtol, atol = _get_rtol_atol(dtype)
-        path = fetch('restoration/tests/camera_wiener.npz')
-        np.testing.assert_allclose(deconvolved, np.load(path)['data'], rtol=rtol, atol=atol)
+        path = fetch('restoration/tests/camera_wiener.npy')
+        np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(ndim, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
@@ -61,7 +61,7 @@ def test_wiener(dtype, ndim):
     assert deconvolved.real.dtype == _supported_float_type(dtype)
     if ndim == 2:
         np.testing.assert_allclose(
-            np.real(deconvolved), np.load(path)['data'], rtol=rtol, atol=atol
+            np.real(deconvolved), np.load(path), rtol=rtol, atol=atol
         )
 
 
@@ -71,7 +71,7 @@ def test_unsupervised_wiener(dtype):
     data = convolve2d(test_img, psf, 'same')
     seed = 16829302
     # keep old-style RandomState here for compatibility with previously stored
-    # reference data in camera_unsup.npz and camera_unsup2.npz
+    # reference data in camera_unsup.npy and camera_unsup2.npy
     rng = np.random.RandomState(seed)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     data = data.astype(dtype, copy=False)
@@ -81,8 +81,8 @@ def test_unsupervised_wiener(dtype):
     assert deconvolved.dtype == float_type
 
     rtol, atol = _get_rtol_atol(dtype)
-    path = fetch('restoration/tests/camera_unsup.npz')
-    np.testing.assert_allclose(deconvolved, np.load(path)['data'], rtol=rtol, atol=atol)
+    path = fetch('restoration/tests/camera_unsup.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=rtol, atol=atol)
 
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
@@ -100,9 +100,9 @@ def test_unsupervised_wiener(dtype):
         rng=seed,
     )[0]
     assert deconvolved2.real.dtype == float_type
-    path = fetch('restoration/tests/camera_unsup2.npz')
+    path = fetch('restoration/tests/camera_unsup2.npy')
     np.testing.assert_allclose(
-        np.real(deconvolved2), np.load(path)['data'], rtol=rtol, atol=atol
+        np.real(deconvolved2), np.load(path), rtol=rtol, atol=atol
     )
 
 
@@ -158,8 +158,8 @@ def test_richardson_lucy(ndim):
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
 
     if ndim == 2:
-        path = fetch('restoration/tests/camera_rl.npz')
-        np.testing.assert_allclose(deconvolved, np.load(path)['data'], rtol=1e-3)
+        path = fetch('restoration/tests/camera_rl.npy')
+        np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
 
 
 @pytest.mark.parametrize('dtype_image', [np.float16, np.float32, np.float64])
@@ -178,5 +178,5 @@ def test_richardson_lucy_filtered(dtype_image, dtype_psf):
     deconvolved = restoration.richardson_lucy(data, psf, 5, filter_epsilon=1e-6)
     assert deconvolved.dtype == _supported_float_type(data.dtype)
 
-    path = fetch('restoration/tests/astronaut_rl.npz')
-    np.testing.assert_allclose(deconvolved, np.load(path)['data'], rtol=1e-3, atol=atol)
+    path = fetch('restoration/tests/astronaut_rl.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3, atol=atol)

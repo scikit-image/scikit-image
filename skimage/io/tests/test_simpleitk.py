@@ -46,14 +46,14 @@ def test_imread_truncated_jpg():
 
 
 def test_imread_uint16():
-    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npz'))['data']
+    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(testing.fetch('data/chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     np.testing.assert_array_almost_equal(img, expected)
 
 
 def test_imread_uint16_big_endian():
-    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npz'))['data']
+    expected = np.load(testing.fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(testing.fetch('data/chessboard_GRAY_U16B.tif'), plugin="simpleitk")
     assert img.dtype.type == np.uint16
     np.testing.assert_array_almost_equal(img, expected)

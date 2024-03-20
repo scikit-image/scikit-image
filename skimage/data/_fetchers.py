@@ -174,7 +174,7 @@ def _fetch(data_filename):
     ----------
     data_filename : str
         Name of the file in the scikit-image repository. e.g.
-        'restoration/tess/camera_rl.npz'.
+        'restoration/tess/camera_rl.npy'.
 
     Returns
     -------
@@ -1139,7 +1139,7 @@ def lfw_subset():
     .. [2] http://vis-www.cs.umass.edu/lfw/
 
     """
-    return np.load(_fetch('data/lfw_subset.npz'))['data']
+    return np.load(_fetch('data/lfw_subset.npy'))
 
 
 def skin():

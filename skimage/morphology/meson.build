@@ -50,8 +50,8 @@ python_sources = [
 ]
 
 data_files = [
-  'ball_decompositions.npz',
-  'disk_decompositions.npz',
+  'ball_decompositions.npy',
+  'disk_decompositions.npy'
 ]
 
 py3.install_sources(

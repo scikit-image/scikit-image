@@ -8,7 +8,7 @@ recursive-include . meson.build
 include requirements/README.md
 include Makefile
 include skimage/restoration/unwrap_*_ljmu.c
-recursive-include skimage *.pyx *.pxd *.pxi *.py *.pyi *.h *.ini *.npy *.npz *.txt *.in *.md
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.pyi *.h *.ini *.npy *.txt *.in *.md
 recursive-include skimage/data *
 recursive-include skimage/*/tests/data *
 

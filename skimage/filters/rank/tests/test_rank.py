@@ -54,8 +54,8 @@ def test_subtract_mean_underflow_correction(dtype):
 
 # Note: Explicitly read all values into a dict. Otherwise, stochastic test
 #       failures related to I/O can occur during parallel test cases.
-ref_data = dict(np.load(fetch("data/rank_filter_tests.npz"))["data"])
-ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz'))["data"])
+ref_data = dict(np.load(fetch("data/rank_filter_tests.npz")))
+ref_data_3d = dict(np.load(fetch('data/rank_filters_tests_3d.npz')))
 
 
 @pytest.mark.parametrize(

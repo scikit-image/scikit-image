@@ -32,7 +32,7 @@ py3.install_sources([
   'hubble_deep_field.jpg',
   'ihc.png',
   'lbpcascade_frontalface_opencv.xml',
-  'lfw_subset.npz',
+  'lfw_subset.npy',
   'logo.png',
   'microaneurysms.png',
   'moon.png',

@@ -15,11 +15,11 @@ from skimage import morphology
 # See _nsphere_series_decomposition for full details.
 _nsphere_decompositions = {}
 _nsphere_decompositions[2] = np.load(
-    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npz')
-)['data']
+    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npy')
+)
 _nsphere_decompositions[3] = np.load(
-    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npz')
-)['data']
+    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy')
+)
 
 
 def _footprint_is_sequence(footprint):
