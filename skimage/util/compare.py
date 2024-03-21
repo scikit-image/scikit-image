@@ -148,7 +148,8 @@ def compare_images(image0, image1, image2=DEPRECATED, method='diff', *, n_tiles=
     ``'diff'`` computes the absolute difference between the two images.
     ``'blend'`` computes the mean value.
     ``'checkerboard'`` makes tiles of dimension `n_tiles` that display
-    alternatively the first and the second image.
+    alternatively the first and the second image. Note that images must be
+    2-dimensional to be compared with the checkerboard method.
     """
 
     if image1.shape != image0.shape:
@@ -162,6 +163,11 @@ def compare_images(image0, image1, image2=DEPRECATED, method='diff', *, n_tiles=
     elif method == 'blend':
         comparison = 0.5 * (img2 + img1)
     elif method == 'checkerboard':
+        if img1.ndim != 2:
+            raise ValueError(
+                'Images must be 2-dimensional to be compared with the '
+                'checkerboard method.'
+            )
         shapex, shapey = img1.shape
         mask = np.full((shapex, shapey), False)
         stepx = int(shapex / n_tiles[0])
