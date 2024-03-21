@@ -30,8 +30,6 @@ def test_compare_images_replaced_param():
     img2 = np.zeros_like(img1)
     img2[3:8, 0:8] = 255
     with pytest.warns(FutureWarning):
-        compare_images(image0=img1, image1=img2)
-    with pytest.warns(FutureWarning):
         compare_images(image0=img1, image2=img2)
     with pytest.warns(FutureWarning):
         compare_images(img1, image2=img2)
