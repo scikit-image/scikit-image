@@ -145,11 +145,11 @@ for a in ax.ravel():
     a.set_axis_off()
 
 # plot pixel intensity scatter
-plt.figure()
-plt.scatter(proteinA, proteinB)
-plt.title('Pixel intensity')
-plt.xlabel('Protein A intensity')
-plt.ylabel('Protein B intensity')
+fig, ax = plt.subplots()
+ax.scatter(proteinA, proteinB)
+ax.set_title('Pixel intensity')
+ax.set_xlabel('Protein A intensity')
+ax.set_ylabel('Protein B intensity')
 
 #####################################################################
 # The intensities look linearly correlated so Pearson's Correlation Coefficient

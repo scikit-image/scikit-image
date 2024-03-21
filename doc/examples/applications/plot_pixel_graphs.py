@@ -66,7 +66,7 @@ labeled = ndi.label(thresholded)[0]
 _, ax = plt.subplots()
 ax.imshow(color.label2rgb(labeled, retina))
 ax.set_axis_off()
-_ = ax.set_title('thresholded vesselness')
+_ = ax.set_title('Thresholded vesselness')
 
 ###############################################################################
 # Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
@@ -90,7 +90,7 @@ ax.scatter(px[1], px[0], label='graph center')
 ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
 ax.set_axis_off()
-ax.set_title('vessel graph center vs centroid')
+ax.set_title('Vessel graph center vs centroid')
 # sphinx_gallery_thumbnail_number = 4
 
 plt.show()
