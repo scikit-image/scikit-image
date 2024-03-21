@@ -11,6 +11,13 @@ def test_compare_images_ValueError_shape():
         compare_images(img1, img2)
 
 
+def test_compare_images_ValueError_args():
+    a = np.ones((10, 10)) * 3
+    b = np.zeros((10, 10))
+    with pytest.raises(ValueError):
+        compare_images(a, b, "unknown")
+
+
 def test_compare_images_diff():
     img1 = np.zeros((10, 10), dtype=np.uint8)
     img1[3:8, 3:8] = 255
