@@ -12,14 +12,21 @@ __all__ = [
     "peak_signal_noise_ratio",
     "structural_similarity",
     "hausdorff_distance",
+    "hausdorff_distance_mask",
     "hausdorff_pair",
+    "hausdorff_pair_mask",
 ]
 
 from ._adapted_rand_error import adapted_rand_error
 from ._contingency_table import contingency_table
 from ._structural_similarity import structural_similarity
 from ._variation_of_information import variation_of_information
-from .set_metrics import hausdorff_distance, hausdorff_pair
+from .set_metrics import (
+    hausdorff_distance,
+    hausdorff_distance_mask,
+    hausdorff_pair,
+    hausdorff_pair_mask,
+)
 from .simple_metrics import (
     mean_squared_error,
     normalized_mutual_information,
