@@ -29,7 +29,7 @@ def _rename_image_params(func):
             zip(args, ["image0", "image1", "method", "n_tiles"])
         ):
             if i >= 2:
-                warnings.warn(wm_method, category=FutureWarning)
+                warnings.warn(wm_method, category=FutureWarning, stacklevel=2)
             if param in kwargs:
                 raise ValueError(
                     f"{param} passed both as positional and keyword argument."
@@ -40,7 +40,7 @@ def _rename_image_params(func):
 
         # Account for `image2` if given
         if "image2" in kwargs.keys():
-            warnings.warn(wm_images, category=FutureWarning)
+            warnings.warn(wm_images, category=FutureWarning, stacklevel=2)
 
             # Safely move `image2` to `image1` if that's empty
             if "image1" in kwargs.keys():
@@ -59,7 +59,7 @@ def _rename_image_params(func):
 
 
 @_rename_image_params
-def compare_images(image0, image1, method='diff', *, n_tiles=(8, 8)):
+def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
     """
     Return an image showing the differences between two images.
 
@@ -68,15 +68,12 @@ def compare_images(image0, image1, method='diff', *, n_tiles=(8, 8)):
     Parameters
     ----------
     image0 : ndarray, shape (M, N)
-        First input image.
-
-        .. versionadded:: 0.23
-    image1 : ndarray, shape (M, N)
-        Second input image. Must be of the same shape as `image0`.
+    image0, image1 : ndarray, shape (M, N)
+        Images to process, must be of the same shape.
 
         .. versionchanged:: 0.23
-            `image1` changed from being the name of the first image to that of
-            the second image.
+            `image1` and `image2` where renamed to `image0` and `image1`
+            respecitively.
     method : string, optional
         Method used for the comparison.
         Valid values are {'diff', 'blend', 'checkerboard'}.

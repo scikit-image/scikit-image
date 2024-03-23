@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from skimage.util.compare import compare_images
+from skimage._shared.testing import assert_stacklevel
 
 
 def test_compare_images_ValueError_shape():
@@ -36,12 +37,32 @@ def test_compare_images_replaced_param():
     img1[3:8, 3:8] = 255
     img2 = np.zeros_like(img1)
     img2[3:8, 0:8] = 255
-    with pytest.warns(FutureWarning):
-        compare_images(image1=img1, image2=img2)
-    with pytest.warns(FutureWarning):
-        compare_images(image0=img1, image2=img2)
-    with pytest.warns(FutureWarning):
-        compare_images(img1, image2=img2)
+    expected_result = np.zeros_like(img1, dtype=np.float64)
+    expected_result[3:8, 0:3] = 1
+
+    regex = ".*Please use `image0, image1`.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = compare_images(image1=img1, image2=img2)
+    assert_stacklevel(record)
+    np.testing.assert_array_equal(result, expected_result)
+
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = compare_images(image0=img1, image2=img2)
+    assert_stacklevel(record)
+    np.testing.assert_array_equal(result, expected_result)
+
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = compare_images(img1, image2=img2)
+    assert_stacklevel(record)
+    np.testing.assert_array_equal(result, expected_result)
+
+    # Test making "method" keyword-only here as well
+    # so whole test can be removed in one go
+    regex = ".*Please pass `method=`.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = compare_images(img1, img2, "diff")
+    assert_stacklevel(record)
+    np.testing.assert_array_equal(result, expected_result)
 
 
 def test_compare_images_blend():
