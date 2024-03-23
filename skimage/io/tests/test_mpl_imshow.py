@@ -7,7 +7,8 @@ from skimage._shared._warnings import expected_warnings
 plt = pytest.importorskip("matplotlib.pyplot")
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _reset_plugins():
     io.reset_plugins()
 
 

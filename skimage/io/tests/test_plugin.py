@@ -10,11 +10,10 @@ from skimage.io import manage_plugins
 priority_plugin = 'pil'
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _use_pil_plugin():
     io.use_plugin('pil')
-
-
-def teardown_module():
+    yield
     io.reset_plugins()
 
 

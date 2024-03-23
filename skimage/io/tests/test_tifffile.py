@@ -8,12 +8,12 @@ from skimage._shared.testing import fetch
 from skimage.io import imread, imsave, reset_plugins, use_plugin
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _use_tifffile_plugin():
+    """Ensure that PIL plugin is used in tests here."""
     use_plugin('tifffile')
     np.random.seed(0)
-
-
-def teardown():
+    yield
     reset_plugins()
 
 

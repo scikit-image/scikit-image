@@ -12,16 +12,16 @@ from skimage._shared.testing import (
     fetch,
 )
 
-from pytest import importorskip
+import pytest
 
-importorskip('imread')
+pytest.importorskip('imread')
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _use_imread_plugin():
+    """Ensure that PIL plugin is used in tests here."""
     use_plugin('imread')
-
-
-def teardown():
+    yield
     reset_plugins()
 
 
