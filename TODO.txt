@@ -8,6 +8,18 @@ Version 0.25
   and remove `test_gaussian.py::test_deprecated_gaussian_output`.
   Make arguments after the deprecated `output` parameter, keyword only:
   `gaussian(image, sigma, *, ...)`.
+* Complete deprecation of plugin infrastructure by removing the following:
+  - skimage/io/_plugins
+  - skimage/io/manage_plugins.py
+  - skimage/io/__init__.py::{
+        _hide_repeated_plugin_deprecation_warnings,
+        _deprecate_plugin_function,
+        __getattr__
+    }
+  - skimage/io/_io.py::{imread_collection, imshow, imshow_collection, show}
+  - TODO ...
+  as well as related tests, imports, etc...
+
 
 Version 0.26
 ------------
