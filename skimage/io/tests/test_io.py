@@ -7,6 +7,7 @@ import pytest
 
 from skimage import io
 from skimage._shared.testing import assert_array_equal, fetch
+from skimage._shared._dependency_checks import is_wasm
 from skimage.data import data_dir
 
 
@@ -47,6 +48,7 @@ def test_imread_file_url():
     assert image.shape == (512, 512)
 
 
+@pytest.mark.skipif(is_wasm, reason="no access to pytest-localserver")
 def test_imread_http_url(httpserver):
     # httpserver is a fixture provided by pytest-localserver
     # https://bitbucket.org/pytest-dev/pytest-localserver/
