@@ -15,9 +15,8 @@ def test_compare_images_ValueError_shape():
 def test_compare_images_ValueError_args():
     a = np.ones((10, 10)) * 3
     b = np.zeros((10, 10))
-    with pytest.warns(FutureWarning):
-        with pytest.raises(ValueError):
-            compare_images(a, b, "unknown")
+    with pytest.raises(ValueError):
+        compare_images(a, b, method="unknown")
 
 
 def test_compare_images_diff():
@@ -27,8 +26,7 @@ def test_compare_images_diff():
     img2[3:8, 0:8] = 255
     expected_result = np.zeros_like(img1, dtype=np.float64)
     expected_result[3:8, 0:3] = 1
-    with pytest.warns(FutureWarning):
-        result = compare_images(img1, img2, 'diff')
+    result = compare_images(img1, img2, method='diff')
     np.testing.assert_array_equal(result, expected_result)
 
 
