@@ -11,8 +11,6 @@ Version 0.25
 * In `skimage/util/compare.py`, remove deprecated parameter `image2` as
   well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
   (and all `pytest.warns(FutureWarning)` context managers there).
-  Make all arguments from `method` (inclusive) keyword-only:
-  `compare_images(image0, image1, *, method='diff', ...)`.
 
 Version 0.26
 ------------
