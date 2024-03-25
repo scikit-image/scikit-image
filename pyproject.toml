@@ -206,3 +206,9 @@ filterwarnings = []
 
 [tool.coverage.run]
 omit = ['*/tests/*']
+
+[tool.changelist]
+ignored_user_logins = [
+    "web-flow",
+    "pre-commit-ci[bot]"
+]

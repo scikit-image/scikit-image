@@ -46,10 +46,12 @@ ax1.imshow(img1_equalized, cmap='gray')
 ax1.set_title('Equalized')
 ax2.imshow(comp_equalized, cmap='gray')
 ax2.set_title('Checkerboard comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
 
 ######################################################################
 # Diff
@@ -70,10 +72,12 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(diff_rotated, cmap='gray')
 ax2.set_title('Diff comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
 
 ######################################################################
 # Blend
@@ -94,7 +98,10 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(blend_rotated, cmap='gray')
 ax2.set_title('Blend comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
+plt.show()
