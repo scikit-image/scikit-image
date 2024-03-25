@@ -19,6 +19,7 @@ python_sources = [
   '__init__.pyi',
   '_geometric.py',
   '_warps.py',
+  '_thin_plate_splines.py',
   'finite_radon_transform.py',
   'hough_transform.py',
   'integral.py',
