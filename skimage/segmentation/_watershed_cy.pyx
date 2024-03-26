@@ -2,6 +2,7 @@
 """
 from libc.math cimport sqrt
 from .._shared.fused_numerics cimport np_anyint
+import numpy as np
 
 cimport numpy as cnp
 cimport cython
@@ -38,7 +39,9 @@ cdef inline cnp.float64_t _euclid_dist(Py_ssize_t pt0, Py_ssize_t pt1,
 cdef inline DTYPE_BOOL_t _diff_neighbors(np_anyint[::1] output,
                                          cnp.intp_t[::1] structure,
                                          DTYPE_BOOL_t[::1] mask,
-                                         Py_ssize_t index) noexcept nogil:
+                                         Py_ssize_t index,
+                                         np_anyint label,
+                                         ) noexcept nogil:
     """
     Return ``True`` and set ``mask[index]`` to ``False`` if the neighbors of
     ``index`` (as given by the offsets in ``structure``) have more than one
@@ -46,23 +49,19 @@ cdef inline DTYPE_BOOL_t _diff_neighbors(np_anyint[::1] output,
     """
     cdef:
         Py_ssize_t i, neighbor_index
-        np_anyint neighbor_label0, neighbor_label1
+        np_anyint neighbor_label
         Py_ssize_t nneighbors = structure.shape[0]
 
     if not mask[index]:
         return True
 
-    neighbor_label0, neighbor_label1 = 0, 0
     for i in range(nneighbors):
         neighbor_index = structure[i] + index
         if mask[neighbor_index]:  # neighbor not a watershed line
-            if not neighbor_label0:
-                neighbor_label0 = output[neighbor_index]
-            else:
-                neighbor_label1 = output[neighbor_index]
-                if neighbor_label1 and neighbor_label1 != neighbor_label0:
-                    mask[index] = False
-                    return True
+            neighbor_label = output[neighbor_index]
+            if neighbor_label and neighbor_label != label:
+                mask[index] = False
+                return True
     return False
 
 @cython.boundscheck(False)
@@ -74,7 +73,8 @@ def watershed_raveled(cnp.float64_t[::1] image,
                       cnp.intp_t[::1] strides,
                       cnp.float64_t compactness,
                       np_anyint[::1] output,
-                      DTYPE_BOOL_t wsl):
+                      DTYPE_BOOL_t wsl,
+                      DTYPE_BOOL_t from_minima):
     """Perform watershed algorithm using a raveled image and neighborhood.
 
     Parameters
@@ -108,6 +108,10 @@ def watershed_raveled(cnp.float64_t[::1] image,
     wsl : bool
         Parameter indicating whether the watershed line is calculated.
         If wsl is set to True, the watershed line is calculated.
+    from_minima : bool
+        Parameter indicating whether the watershed is calculated from minima.
+        If from_minima is set to True, the watershed markers are the minima.
+        When False (from markers) it is set to the minimum possible value (-inf).
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
@@ -117,13 +121,17 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t index = 0
     cdef Py_ssize_t neighbor_index = 0
     cdef DTYPE_BOOL_t compact = (compactness > 0)
+    cdef cnp.float64_t neg_inf = -np.inf
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
     with nogil:
         for i in range(marker_locations.shape[0]):
             index = marker_locations[i]
-            elem.value = image[index]
+            if from_minima:
+                elem.value = image[index]
+            else:
+                elem.value = neg_inf
             elem.age = 0
             elem.index = index
             elem.source = index
@@ -144,12 +152,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 if output[elem.index] and elem.index != elem.source:
                     # non-marker, already visited from another neighbor
                     continue
-                if wsl:
-                    # if the current element has different-labeled neighbors and we
-                    # want to preserve watershed lines, we mask it and move on
-                    if _diff_neighbors(output, structure, mask, elem.index):
-                        continue
-                output[elem.index] = output[elem.source]
+
+                # when `wsl` is `True`, label is only set for pixels without a neighbor of different label
+                # NOTE: `_diff_neighbors` sets `mask[elem.index]` to `False` if
+                #        neighbor has different label
+                if compact or not _diff_neighbors(output, structure, mask, elem.index, output[elem.source]):
+                    output[elem.index] = output[elem.source]
 
             for i in range(nneighbors):
                 # get the flattened address of the neighbor
@@ -181,6 +189,11 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 new_elem.age = age
                 new_elem.index = neighbor_index
                 new_elem.source = elem.source
+
+                # watershed cost of moving to neighbor is at least the cost of
+                # its own neighboring pixel
+                if new_elem.value < elem.value:
+                    new_elem.value = elem.value
 
                 heappush(hp, &new_elem)
 
