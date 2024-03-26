@@ -1,5 +1,4 @@
 import os
-import shutil
 import sys
 
 import click
@@ -8,23 +7,35 @@ from spin import util
 
 
 @click.command()
+@click.argument("sphinx_target", default="html")
 @click.option(
-    "--clean", is_flag=True,
+    "--clean",
+    is_flag=True,
     default=False,
-    help="Clean previously built docs before building"
+    help="Clean previously built docs before building",
 )
+@click.option(
+    "--build/--no-build",
+    "first_build",
+    default=True,
+    help="Build project before generating docs",
+)
+@click.option(
+    "--plot/--no-plot",
+    "sphinx_gallery_plot",
+    default=True,
+    help="Sphinx gallery: enable/disable plots",
+)
+@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
 @click.option(
     "--install-deps/--no-install-deps",
-    default=True,
-    help="Install dependencies before building"
-)
-@click.option(
-    '--build/--no-build',
-    default=True,
-    help="Build skimage before generating docs"
+    default=False,
+    help="Install dependencies before building",
 )
 @click.pass_context
-def docs(ctx, clean, install_deps, build):
+def docs(
+    ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, install_deps
+):
     """📖 Build documentation
 
     By default, SPHINXOPTS="-W", raising errors on warnings.
@@ -32,38 +43,18 @@ def docs(ctx, clean, install_deps, build):
 
       SPHINXOPTS="" spin docs
 
+    The command is roughly equivalent to `cd doc && make SPHINX_TARGET`.
+    To get a list of viable `SPHINX_TARGET`:
+
+      spin docs help
+
     """
-    if clean:
-        doc_dirs = [
-            "./doc/build/",
-            "./doc/source/api/",
-            "./doc/source/auto_examples/",
-            "./doc/source/jupyterlite_contents/",
-        ]
-        for doc_dir in doc_dirs:
-            if os.path.isdir(doc_dir):
-                print(f"Removing {doc_dir!r}")
-                shutil.rmtree(doc_dir)
-
-    if build:
-        click.secho(
-            "Invoking `build` prior to running tests:", bold=True, fg="bright_green"
-        )
-        ctx.invoke(meson.build)
-
-    try:
-        site_path = meson._get_site_packages()
-    except FileNotFoundError:
-        print("No built scikit-image found; run `spin build` first.")
-        sys.exit(1)
-
     if install_deps:
         util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
-    os.environ['SPHINXOPTS'] = os.environ.get('SPHINXOPTS', "-W")
-
-    os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
-    util.run(['make', '-C', 'doc', 'html'], replace=True)
+    for extra_param in ('install_deps',):
+        del ctx.params[extra_param]
+    ctx.forward(meson.docs)
 
 
 @click.command()
@@ -86,15 +77,25 @@ def asv(asv_args):
     util.run(['asv'] + list(asv_args))
 
 
-@click.command()
-def coverage():
-    """📊 Generate coverage report
-    """
-    util.run(['python', '-m', 'spin', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+@click.command(context_settings={'ignore_unknown_options': True})
+@click.argument("ipython_args", metavar='', nargs=-1)
+@click.pass_context
+def ipython(ctx, ipython_args):
+    """💻 Launch IPython shell with PYTHONPATH set
 
+    OPTIONS are passed through directly to IPython, e.g.:
 
-@click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`.
+    spin ipython -i myscript.py
     """
-    util.run(['python', '-m', 'build', '.', '--sdist'])
+    env = os.environ
+    env['PYTHONWARNINGS'] = env.get('PYTHONWARNINGS', 'all')
+
+    preimport = (
+        r"import skimage as ski; "
+        r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
+    )
+    ctx.params['ipython_args'] = (
+        f"--TerminalIPythonApp.exec_lines={preimport}",
+    ) + ipython_args
+
+    ctx.forward(meson.ipython)

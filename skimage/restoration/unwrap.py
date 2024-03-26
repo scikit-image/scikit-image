@@ -1,15 +1,12 @@
 import numpy as np
 
 from .._shared.utils import warn
-from .._shared.utils import deprecate_kwarg
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 
 
-@deprecate_kwarg({'seed': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
 def unwrap_phase(image, wrap_around=False, rng=None):
     '''Recover the original from a wrapped phase image.
 
@@ -18,7 +15,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     Parameters
     ----------
-    image : 1D, 2D or 3D ndarray of floats, optionally a masked array
+    image : (M[, N[, P]]) ndarray or masked array of floats
         The values should be in the range [-pi, pi). If a masked array is
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked
@@ -75,46 +72,45 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         raise ValueError('Image must be 1, 2, or 3 dimensional')
     if isinstance(wrap_around, bool):
         wrap_around = [wrap_around] * image.ndim
-    elif (hasattr(wrap_around, '__getitem__')
-          and not isinstance(wrap_around, str)):
+    elif hasattr(wrap_around, '__getitem__') and not isinstance(wrap_around, str):
         if len(wrap_around) != image.ndim:
-            raise ValueError('Length of `wrap_around` must equal the '
-                             'dimensionality of image')
+            raise ValueError(
+                'Length of `wrap_around` must equal the ' 'dimensionality of image'
+            )
         wrap_around = [bool(wa) for wa in wrap_around]
     else:
-        raise ValueError('`wrap_around` must be a bool or a sequence with '
-                         'length equal to the dimensionality of image')
+        raise ValueError(
+            '`wrap_around` must be a bool or a sequence with '
+            'length equal to the dimensionality of image'
+        )
     if image.ndim == 1:
         if np.ma.isMaskedArray(image):
             raise ValueError('1D masked images cannot be unwrapped')
         if wrap_around[0]:
             raise ValueError('`wrap_around` is not supported for 1D images')
     if image.ndim in (2, 3) and 1 in image.shape:
-        warn('Image has a length 1 dimension. Consider using an '
-             'array of lower dimensionality to use a more efficient '
-             'algorithm')
+        warn(
+            'Image has a length 1 dimension. Consider using an '
+            'array of lower dimensionality to use a more efficient '
+            'algorithm'
+        )
 
     if np.ma.isMaskedArray(image):
         mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
         mask = np.zeros_like(image, dtype=np.uint8, order='C')
 
-    image_not_masked = np.asarray(
-        np.ma.getdata(image), dtype=np.float64, order='C')
-    image_unwrapped = np.empty_like(image, dtype=np.float64, order='C',
-                                    subok=False)
+    image_not_masked = np.asarray(np.ma.getdata(image), dtype=np.float64, order='C')
+    image_unwrapped = np.empty_like(image, dtype=np.float64, order='C', subok=False)
 
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
     elif image.ndim == 2:
-        unwrap_2d(image_not_masked, mask, image_unwrapped,
-                  wrap_around, rng)
+        unwrap_2d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
     elif image.ndim == 3:
-        unwrap_3d(image_not_masked, mask, image_unwrapped,
-                  wrap_around, rng)
+        unwrap_3d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
 
     if np.ma.isMaskedArray(image):
-        return np.ma.array(image_unwrapped, mask=mask,
-                           fill_value=image.fill_value)
+        return np.ma.array(image_unwrapped, mask=mask, fill_value=image.fill_value)
     else:
         return image_unwrapped

@@ -3,11 +3,12 @@ from scipy.stats import pearsonr
 
 from .._shared.utils import check_shape_equality, as_binary_ndarray
 
-__all__ = ['pearson_corr_coeff',
-           'manders_coloc_coeff',
-           'manders_overlap_coeff',
-           'intersection_coeff',
-           ]
+__all__ = [
+    'pearson_corr_coeff',
+    'manders_coloc_coeff',
+    'manders_overlap_coeff',
+    'intersection_coeff',
+]
 
 
 def pearson_corr_coeff(image0, image1, mask=None):
@@ -93,7 +94,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
         image0 = image0.reshape(-1)
         image1 = image1.reshape(-1)
 
-    return pearsonr(image0, image1)
+    return tuple(float(v) for v in pearsonr(image0, image1))
 
 
 def manders_coloc_coeff(image0, image1_mask, mask=None):
@@ -173,7 +174,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
         raise ValueError("image contains negative values")
 
     sum = np.sum(image0)
-    if (sum == 0):
+    if sum == 0:
         return 0
     return np.sum(image0 * image1_mask) / sum
 

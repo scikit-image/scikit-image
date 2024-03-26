@@ -21,9 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import (
-    color, feature, filters, measure, morphology, segmentation, util
-)
+from skimage import color, feature, filters, measure, morphology, segmentation, util
 from skimage.data import human_mitosis
 
 image = human_mitosis()
@@ -78,10 +76,10 @@ regions = np.digitize(image, bins=thresholds)
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0].set_axis_off()
 ax[1].imshow(regions)
 ax[1].set_title('Multi-Otsu thresholding')
-ax[1].axis('off')
+ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
@@ -113,13 +111,13 @@ print(labeled_cells.max())
 fig, ax = plt.subplots(ncols=3, figsize=(15, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0].set_axis_off()
 ax[2].imshow(cells)
 ax[2].set_title('All nuclei?')
-ax[2].axis('off')
+ax[2].set_axis_off()
 ax[1].imshow(dividing)
 ax[1].set_title('Dividing nuclei?')
-ax[1].axis('off')
+ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
@@ -142,15 +140,14 @@ plt.show()
 higher_threshold = 125
 dividing = image > higher_threshold
 
-smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
-                                      morphology.disk(4))
+smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing), morphology.disk(4))
 
 binary_smoother_dividing = smoother_dividing > 20
 
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.imshow(binary_smoother_dividing)
 ax.set_title('Dividing nuclei')
-ax.axis('off')
+ax.set_axis_off()
 plt.show()
 
 #####################################################################
@@ -182,10 +179,10 @@ segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
 ax[0].set_title('Overlapping nuclei')
-ax[0].axis('off')
+ax[0].set_axis_off()
 ax[1].imshow(color.label2rgb(segmented_cells, bg_label=0))
 ax[1].set_title('Segmented nuclei')
-ax[1].axis('off')
+ax[1].set_axis_off()
 plt.show()
 
 #####################################################################

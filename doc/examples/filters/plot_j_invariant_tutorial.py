@@ -26,10 +26,13 @@ from matplotlib import gridspec
 from skimage.data import chelsea, hubble_deep_field
 from skimage.metrics import mean_squared_error as mse
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.restoration import (calibrate_denoiser,
-                                 denoise_wavelet,
-                                 denoise_tv_chambolle, denoise_nl_means,
-                                 estimate_sigma)
+from skimage.restoration import (
+    calibrate_denoiser,
+    denoise_wavelet,
+    denoise_tv_chambolle,
+    denoise_nl_means,
+    estimate_sigma,
+)
 from skimage.util import img_as_float, random_noise
 from skimage.color import rgb2gray
 from functools import partial
@@ -38,32 +41,34 @@ _denoise_wavelet = partial(denoise_wavelet, rescale_sigma=True)
 
 image = img_as_float(chelsea())
 sigma = 0.2
-noisy = random_noise(image, var=sigma ** 2)
+noisy = random_noise(image, var=sigma**2)
 
 # Parameters to test when calibrating the denoising algorithm
-parameter_ranges = {'sigma': np.arange(0.1, 0.3, 0.02),
-                    'wavelet': ['db1', 'db2'],
-                    'convert2ycbcr': [True, False],
-                    'channel_axis': [-1]}
+parameter_ranges = {
+    'sigma': np.arange(0.1, 0.3, 0.02),
+    'wavelet': ['db1', 'db2'],
+    'convert2ycbcr': [True, False],
+    'channel_axis': [-1],
+}
 
 # Denoised image using default parameters of `denoise_wavelet`
 default_output = denoise_wavelet(noisy, channel_axis=-1, rescale_sigma=True)
 
 # Calibrate denoiser
-calibrated_denoiser = calibrate_denoiser(noisy,
-                                         _denoise_wavelet,
-                                         denoise_parameters=parameter_ranges
-                                         )
+calibrated_denoiser = calibrate_denoiser(
+    noisy, _denoise_wavelet, denoise_parameters=parameter_ranges
+)
 
 # Denoised image using calibrated denoiser
 calibrated_output = calibrated_denoiser(noisy)
 
 fig, axes = plt.subplots(1, 3, sharex=True, sharey=True, figsize=(15, 5))
 
-for ax, img, title in zip(axes,
-                          [noisy, default_output, calibrated_output],
-                          ['Noisy Image', 'Denoised (Default)',
-                           'Denoised (Calibrated)']):
+for ax, img, title in zip(
+    axes,
+    [noisy, default_output, calibrated_output],
+    ['Noisy Image', 'Denoised (Default)', 'Denoised (Calibrated)'],
+):
     ax.imshow(img)
     ax.set_title(title)
     ax.set_yticks([])
@@ -97,15 +102,17 @@ for ax, img, title in zip(axes,
 
 from skimage.restoration import denoise_invariant
 
-sigma_range = np.arange(sigma/2, 1.5*sigma, 0.025)
+sigma_range = np.arange(sigma / 2, 1.5 * sigma, 0.025)
 
-parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2',
-                      'channel_axis': -1}
-                     for sigma in sigma_range]
+parameters_tested = [
+    {'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2', 'channel_axis': -1}
+    for sigma in sigma_range
+]
 
-denoised_invariant = [denoise_invariant(noisy, _denoise_wavelet,
-                                        denoiser_kwargs=params)
-                      for params in parameters_tested]
+denoised_invariant = [
+    denoise_invariant(noisy, _denoise_wavelet, denoiser_kwargs=params)
+    for params in parameters_tested
+]
 
 self_supervised_loss = [mse(img, noisy) for img in denoised_invariant]
 ground_truth_loss = [mse(img, image) for img in denoised_invariant]
@@ -113,8 +120,10 @@ ground_truth_loss = [mse(img, image) for img in denoised_invariant]
 opt_idx = np.argmin(self_supervised_loss)
 plot_idx = [0, opt_idx, len(sigma_range) - 1]
 
+
 def get_inset(x):
     return x[25:225, 100:300]
+
 
 plt.figure(figsize=(10, 12))
 
@@ -123,20 +132,34 @@ ax1 = plt.subplot(gs[0, :])
 ax2 = plt.subplot(gs[1, :])
 ax_image = [plt.subplot(gs[2, i]) for i in range(3)]
 
-ax1.plot(sigma_range, self_supervised_loss, color='C0',
-         label='Self-Supervised Loss')
-ax1.scatter(sigma_range[opt_idx], self_supervised_loss[opt_idx] + 0.0003,
-            marker='v', color='red', label='optimal sigma')
+ax1.plot(sigma_range, self_supervised_loss, color='C0', label='Self-Supervised Loss')
+ax1.scatter(
+    sigma_range[opt_idx],
+    self_supervised_loss[opt_idx] + 0.0003,
+    marker='v',
+    color='red',
+    label='optimal sigma',
+)
 
 ax1.set_ylabel('MSE')
 ax1.set_xticks([])
 ax1.legend()
 ax1.set_title('Self-Supervised Loss')
 
-ax2.plot(sigma_range, ground_truth_loss, color='C0', linestyle='--',
-         label='Ground Truth Loss')
-ax2.scatter(sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.0003,
-            marker='v', color='red', label='optimal sigma')
+ax2.plot(
+    sigma_range,
+    ground_truth_loss,
+    color='C0',
+    linestyle='--',
+    label='Ground Truth Loss',
+)
+ax2.scatter(
+    sigma_range[opt_idx],
+    ground_truth_loss[opt_idx] + 0.0003,
+    marker='v',
+    color='red',
+    label='optimal sigma',
+)
 ax2.set_ylabel('MSE')
 ax2.legend()
 ax2.set_xlabel('sigma')
@@ -170,28 +193,38 @@ for spine in ax_image[1].spines.values():
 # imperceptibly worse at larger values.
 #
 
-parameters_tested = [{'sigma': sigma, 'convert2ycbcr': True,
-                      'wavelet': 'db2', 'channel_axis': -1}
-                     for sigma in sigma_range]
+parameters_tested = [
+    {'sigma': sigma, 'convert2ycbcr': True, 'wavelet': 'db2', 'channel_axis': -1}
+    for sigma in sigma_range
+]
 
-denoised_original = [_denoise_wavelet(noisy, **params)
-                     for params in parameters_tested]
+denoised_original = [_denoise_wavelet(noisy, **params) for params in parameters_tested]
 
 ground_truth_loss_invariant = [mse(img, image) for img in denoised_invariant]
 ground_truth_loss_original = [mse(img, image) for img in denoised_original]
 
 fig, ax = plt.subplots(figsize=(10, 4))
 
-ax.plot(sigma_range, ground_truth_loss_invariant, color='C0', linestyle='--',
-        label='J-invariant')
-ax.plot(sigma_range, ground_truth_loss_original, color='C1', linestyle='--',
-        label='Original')
-ax.scatter(sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.001,
-           marker='v', color='red')
+ax.plot(
+    sigma_range,
+    ground_truth_loss_invariant,
+    color='C0',
+    linestyle='--',
+    label='J-invariant',
+)
+ax.plot(
+    sigma_range,
+    ground_truth_loss_original,
+    color='C1',
+    linestyle='--',
+    label='Original',
+)
+ax.scatter(
+    sigma_range[opt_idx], ground_truth_loss[opt_idx] + 0.001, marker='v', color='red'
+)
 ax.legend()
 ax.set_title(
-    'J-Invariant Denoiser Has Comparable Or '
-    'Better Performance At Same Parameters'
+    'J-Invariant Denoiser Has Comparable Or ' 'Better Performance At Same Parameters'
 )
 ax.set_ylabel('MSE')
 ax.set_xlabel('sigma')
@@ -214,19 +247,21 @@ ax.set_xlabel('sigma')
 image = rgb2gray(img_as_float(hubble_deep_field()[100:250, 50:300]))
 
 sigma = 0.4
-noisy = random_noise(image, mode='speckle', var=sigma ** 2)
+noisy = random_noise(image, mode='speckle', var=sigma**2)
 
 parameter_ranges_tv = {'weight': np.arange(0.01, 0.3, 0.02)}
 _, (parameters_tested_tv, losses_tv) = calibrate_denoiser(
-                                    noisy,
-                                    denoise_tv_chambolle,
-                                    denoise_parameters=parameter_ranges_tv,
-                                    extra_output=True)
+    noisy,
+    denoise_tv_chambolle,
+    denoise_parameters=parameter_ranges_tv,
+    extra_output=True,
+)
 print(f'Minimum self-supervised loss TV: {np.min(losses_tv):.4f}')
 
 best_parameters_tv = parameters_tested_tv[np.argmin(losses_tv)]
-denoised_calibrated_tv = denoise_invariant(noisy, denoise_tv_chambolle,
-                                           denoiser_kwargs=best_parameters_tv)
+denoised_calibrated_tv = denoise_invariant(
+    noisy, denoise_tv_chambolle, denoiser_kwargs=best_parameters_tv
+)
 denoised_default_tv = denoise_tv_chambolle(noisy, **best_parameters_tv)
 
 psnr_calibrated_tv = psnr(image, denoised_calibrated_tv)
@@ -234,16 +269,14 @@ psnr_default_tv = psnr(image, denoised_default_tv)
 
 parameter_ranges_wavelet = {'sigma': np.arange(0.01, 0.3, 0.03)}
 _, (parameters_tested_wavelet, losses_wavelet) = calibrate_denoiser(
-                                                noisy,
-                                                _denoise_wavelet,
-                                                parameter_ranges_wavelet,
-                                                extra_output=True)
+    noisy, _denoise_wavelet, parameter_ranges_wavelet, extra_output=True
+)
 print(f'Minimum self-supervised loss wavelet: {np.min(losses_wavelet):.4f}')
 
 best_parameters_wavelet = parameters_tested_wavelet[np.argmin(losses_wavelet)]
 denoised_calibrated_wavelet = denoise_invariant(
-        noisy, _denoise_wavelet,
-        denoiser_kwargs=best_parameters_wavelet)
+    noisy, _denoise_wavelet, denoiser_kwargs=best_parameters_wavelet
+)
 denoised_default_wavelet = _denoise_wavelet(noisy, **best_parameters_wavelet)
 
 psnr_calibrated_wavelet = psnr(image, denoised_calibrated_wavelet)
@@ -251,19 +284,21 @@ psnr_default_wavelet = psnr(image, denoised_default_wavelet)
 
 sigma_est = estimate_sigma(noisy)
 
-parameter_ranges_nl = {'sigma': np.arange(0.6, 1.4, 0.2) * sigma_est,
-                       'h': np.arange(0.6, 1.2, 0.2) * sigma_est}
+parameter_ranges_nl = {
+    'sigma': np.arange(0.6, 1.4, 0.2) * sigma_est,
+    'h': np.arange(0.6, 1.2, 0.2) * sigma_est,
+}
 
 parameter_ranges_nl = {'sigma': np.arange(0.01, 0.3, 0.03)}
-_, (parameters_tested_nl, losses_nl) = calibrate_denoiser(noisy,
-                                                        denoise_nl_means,
-                                                        parameter_ranges_nl,
-                                                        extra_output=True)
+_, (parameters_tested_nl, losses_nl) = calibrate_denoiser(
+    noisy, denoise_nl_means, parameter_ranges_nl, extra_output=True
+)
 print(f'Minimum self-supervised loss NL means: {np.min(losses_nl):.4f}')
 
 best_parameters_nl = parameters_tested_nl[np.argmin(losses_nl)]
-denoised_calibrated_nl = denoise_invariant(noisy, denoise_nl_means,
-                                           denoiser_kwargs=best_parameters_nl)
+denoised_calibrated_nl = denoise_invariant(
+    noisy, denoise_nl_means, denoiser_kwargs=best_parameters_nl
+)
 denoised_default_nl = denoise_nl_means(noisy, **best_parameters_nl)
 
 psnr_calibrated_nl = psnr(image, denoised_calibrated_nl)
@@ -283,8 +318,10 @@ plt.xticks([])
 plt.yticks([])
 plt.title('Noisy Image')
 
+
 def get_inset(x):
     return x[0:100, -140:]
+
 
 fig, axes = plt.subplots(ncols=3, nrows=2, figsize=(15, 8))
 

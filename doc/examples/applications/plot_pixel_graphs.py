@@ -44,7 +44,7 @@ _ = ax.set_title('Human retina')
 
 retina = color.rgb2gray(retina_source)
 t0, t1 = filters.threshold_multiotsu(retina, classes=3)
-mask = (retina > t0)
+mask = retina > t0
 vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
 
 _, axes = plt.subplots(nrows=1, ncols=2)
@@ -66,7 +66,7 @@ labeled = ndi.label(thresholded)[0]
 _, ax = plt.subplots()
 ax.imshow(color.label2rgb(labeled, retina))
 ax.set_axis_off()
-_ = ax.set_title('thresholded vesselness')
+_ = ax.set_title('Thresholded vesselness')
 
 ###############################################################################
 # Finally, we can `skeletonize <skimage.morphology.skeletonize>` this label
@@ -79,8 +79,8 @@ binary = labeled == largest_nonzero_label
 skeleton = morphology.skeletonize(binary)
 g, nodes = graph.pixel_graph(skeleton, connectivity=2)
 px, distances = graph.central_pixel(
-        g, nodes=nodes, shape=skeleton.shape, partition_size=100
-        )
+    g, nodes=nodes, shape=skeleton.shape, partition_size=100
+)
 
 centroid = measure.centroid(labeled > 0)
 
@@ -90,7 +90,7 @@ ax.scatter(px[1], px[0], label='graph center')
 ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()
 ax.set_axis_off()
-ax.set_title('vessel graph center vs centroid')
+ax.set_title('Vessel graph center vs centroid')
 # sphinx_gallery_thumbnail_number = 4
 
 plt.show()

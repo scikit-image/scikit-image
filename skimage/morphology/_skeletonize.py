@@ -1,14 +1,14 @@
 """
 Algorithms for computing the skeleton of a binary image
 """
+
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg
-from ..util import crop, img_as_ubyte
+from .._shared.utils import check_nD, deprecate_func
+from ..util import crop
 from ._skeletonize_3d_cy import _compute_thin_image
-from ._skeletonize_cy import (_fast_skeletonize, _skeletonize_loop,
-                              _table_lookup_index)
+from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
 
 
 def skeletonize(image, *, method=None):
@@ -20,8 +20,8 @@ def skeletonize(image, *, method=None):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        An image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
@@ -29,7 +29,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : ndarray
+    skeleton : ndarray of bool
         The thinned image.
 
     See Also
@@ -49,8 +49,8 @@ def skeletonize(image, *, method=None):
     Examples
     --------
     >>> X, Y = np.ogrid[0:9, 0:9]
-    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
-    >>> ellipse
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
+    >>> ellipse.view(np.uint8)
     array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -61,7 +61,7 @@ def skeletonize(image, *, method=None):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -73,23 +73,26 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    image = image.astype(bool, order="C", copy=False)
+
     if method not in {'zhang', 'lee', None}:
-        raise ValueError(f'skeletonize method should be either "lee" or "zhang", '
-                         f'got {method}.')
+        raise ValueError(
+            f'skeletonize method should be either "lee" or "zhang", ' f'got {method}.'
+        )
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image.astype(bool, copy=False))
+        skeleton = _skeletonize_2d(image)
     elif image.ndim == 3 and method == 'zhang':
-        raise ValueError('skeletonize method "zhang" only works for 2D '
-                         'images.')
+        raise ValueError('skeletonize method "zhang" only works for 2D ' 'images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
-        skeleton = skeletonize_3d(image)
+        skeleton = _skeletonize_3d(image)
     else:
-        raise ValueError(f'skeletonize requires a 2D or 3D image as input, '
-                         f'got {image.ndim}D.')
+        raise ValueError(
+            f'skeletonize requires a 2D or 3D image as input, ' f'got {image.ndim}D.'
+        )
     return skeleton
 
 
-def skeletonize_2d(image):
+def _skeletonize_2d(image):
     """Return the skeleton of a 2D binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -98,9 +101,8 @@ def skeletonize_2d(image):
     Parameters
     ----------
     image : numpy.ndarray
-        A binary image containing the objects to be skeletonized. '1'
-        represents foreground, and '0' represents background. It
-        also accepts arrays of boolean values where True is foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
@@ -109,7 +111,7 @@ def skeletonize_2d(image):
 
     See Also
     --------
-    medial_axis
+    medial_axis, skeletonize, skeletonize_3d, thin
 
     Notes
     -----
@@ -135,8 +137,8 @@ def skeletonize_2d(image):
     Examples
     --------
     >>> X, Y = np.ogrid[0:9, 0:9]
-    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
-    >>> ellipse
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
+    >>> ellipse.view(np.uint8)
     array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -147,7 +149,7 @@ def skeletonize_2d(image):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -159,14 +161,13 @@ def skeletonize_2d(image):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
     if image.ndim != 2:
         raise ValueError("Zhang's skeletonize method requires a 2D array")
-
     return _fast_skeletonize(image)
 
 
 # --------- Skeletonization and thinning based on Guo and Hall 1989 ---------
+
 
 def _generate_thin_luts():
     """generate LUTs for thinning algorithm (for reference)"""
@@ -178,7 +179,7 @@ def _generate_thin_luts():
         s = 0
         bits = nabe(n)
         for i in (0, 2, 4, 6):
-            if not(bits[i]) and (bits[i + 1] or bits[(i + 2) % 8]):
+            if not (bits[i]) and (bits[i + 1] or bits[(i + 2) % 8]):
                 s += 1
         return s == 1
 
@@ -200,11 +201,11 @@ def _generate_thin_luts():
 
     def G3(n):
         bits = nabe(n)
-        return not((bits[1] or bits[2] or not(bits[7])) and bits[0])
+        return not ((bits[1] or bits[2] or not (bits[7])) and bits[0])
 
     def G3p(n):
         bits = nabe(n)
-        return not((bits[5] or bits[6] or not(bits[3])) and bits[4])
+        return not ((bits[5] or bits[6] or not (bits[3])) and bits[4])
 
     g3_lut = np.array([G3(n) for n in range(256)])
     g3p_lut = np.array([G3p(n) for n in range(256)])
@@ -215,6 +216,7 @@ def _generate_thin_luts():
     return g123_lut, g123p_lut
 
 
+# fmt: off
 G123_LUT = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
                      0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1,
@@ -244,6 +246,7 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
                       0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool)
+# fmt: on
 
 
 def thin(image, max_num_iter=None):
@@ -253,7 +256,9 @@ def thin(image, max_num_iter=None):
     Parameters
     ----------
     image : binary (M, N) ndarray
-        The image to be thinned.
+        The image to thin. If this input isn't already a binary image,
+        it gets converted into one: In this case, zero values are considered
+        background (False), nonzero values are considered foreground (True).
     max_num_iter : int, number of iterations, optional
         Regardless of the value of this parameter, the thinned image
         is returned immediately if an iteration produces no change.
@@ -291,10 +296,10 @@ def thin(image, max_num_iter=None):
 
     Examples
     --------
-    >>> square = np.zeros((7, 7), dtype=np.uint8)
+    >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
     >>> square[0, 1] =  1
-    >>> square
+    >>> square.view(np.uint8)
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
@@ -303,7 +308,7 @@ def thin(image, max_num_iter=None):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     >>> skel = thin(square)
-    >>> skel.astype(np.uint8)
+    >>> skel.view(np.uint8)
     array([[0, 1, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],
@@ -316,12 +321,10 @@ def thin(image, max_num_iter=None):
     check_nD(image, 2)
 
     # convert image to uint8 with values in {0, 1}
-    skel = np.asanyarray(image, dtype=bool).astype(np.uint8)
+    skel = np.asanyarray(image, dtype=bool).view(np.uint8)
 
     # neighborhood mask
-    mask = np.array([[ 8,  4,   2],
-                     [16,  0,   1],
-                     [32, 64, 128]], dtype=np.uint8)
+    mask = np.array([[8, 4, 2], [16, 0, 1], [32, 64, 128]], dtype=np.uint8)
 
     # iterate until convergence, up to the iteration limit
     max_num_iter = max_num_iter or np.inf
@@ -350,15 +353,16 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg({'random_state': 'rng'}, deprecated_version='0.21',
-                 removed_version='0.23')
 def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
     Parameters
     ----------
     image : binary ndarray, shape (M, N)
-        The image of the shape to be skeletonized.
+        The image of the shape to skeletonize. If this input isn't already a
+        binary image, it gets converted into one: In this case, zero values are
+        considered background (False), nonzero values are considered
+        foreground (True).
     mask : binary ndarray, shape (M, N), optional
         If a mask is given, only those elements in `image` with a true
         value in `mask` are used for computing the medial axis.
@@ -384,7 +388,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     See Also
     --------
-    skeletonize
+    skeletonize, thin
 
     Notes
     -----
@@ -411,9 +415,9 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     Examples
     --------
-    >>> square = np.zeros((7, 7), dtype=np.uint8)
+    >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
-    >>> square
+    >>> square.view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
@@ -421,7 +425,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-    >>> medial_axis(square).astype(np.uint8)
+    >>> medial_axis(square).view(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 1, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],
@@ -448,16 +452,20 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     # 3. Keep if # pixels in neighborhood is 2 or less
     # Note that table is independent of image
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
-    table = (center_is_foreground  # condition 1.
-                &
-            (np.array([ndi.label(_pattern_of(index), _eight_connect)[1] !=
-                       ndi.label(_pattern_of(index & ~ 2**4),
-                                    _eight_connect)[1]
-                       for index in range(512)])  # condition 2
-                |
-        np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)]))
+    table = (
+        center_is_foreground  # condition 1.
+        & (
+            np.array(
+                [
+                    ndi.label(_pattern_of(index), _eight_connect)[1]
+                    != ndi.label(_pattern_of(index & ~(2**4)), _eight_connect)[1]
+                    for index in range(512)
+                ]
+            )  # condition 2
+            | np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)])
+        )
         # condition 3
-            )
+    )
 
     # Build distance transform
     distance = ndi.distance_transform_edt(masked_image)
@@ -472,12 +480,13 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     # We use a cornerness_table lookup table where the score of a
     # configuration is the number of background (0-value) pixels in the
     # 3x3 neighborhood
-    cornerness_table = np.array([9 - np.sum(_pattern_of(index))
-                                 for index in range(512)])
+    cornerness_table = np.array(
+        [9 - np.sum(_pattern_of(index)) for index in range(512)]
+    )
     corner_score = _table_lookup(masked_image, cornerness_table)
 
     # Define arrays for inner loop
-    i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
+    i, j = np.mgrid[0 : image.shape[0], 0 : image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
     i = np.ascontiguousarray(i[result], dtype=np.intp)
@@ -491,9 +500,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     #
     generator = np.random.default_rng(rng)
     tiebreaker = generator.permutation(np.arange(masked_image.sum()))
-    order = np.lexsort((tiebreaker,
-                        corner_score[masked_image],
-                        distance))
+    order = np.lexsort((tiebreaker, corner_score[masked_image], distance))
     order = np.ascontiguousarray(order, dtype=np.int32)
 
     table = np.ascontiguousarray(table, dtype=np.uint8)
@@ -514,9 +521,14 @@ def _pattern_of(index):
     Return the pattern represented by an index value
     Byte decomposition of index
     """
-    return np.array([[index & 2**0, index & 2**1, index & 2**2],
-                     [index & 2**3, index & 2**4, index & 2**5],
-                     [index & 2**6, index & 2**7, index & 2**8]], bool)
+    return np.array(
+        [
+            [index & 2**0, index & 2**1, index & 2**2],
+            [index & 2**3, index & 2**4, index & 2**5],
+            [index & 2**6, index & 2**7, index & 2**8],
+        ],
+        bool,
+    )
 
 
 def _table_lookup(image, table):
@@ -555,16 +567,16 @@ def _table_lookup(image, table):
     if image.shape[0] < 3 or image.shape[1] < 3:
         image = image.astype(bool)
         indexer = np.zeros(image.shape, int)
-        indexer[1:, 1:]   += image[:-1, :-1] * 2**0
-        indexer[1:, :]    += image[:-1, :] * 2**1
-        indexer[1:, :-1]  += image[:-1, 1:] * 2**2
+        indexer[1:, 1:] += image[:-1, :-1] * 2**0
+        indexer[1:, :] += image[:-1, :] * 2**1
+        indexer[1:, :-1] += image[:-1, 1:] * 2**2
 
-        indexer[:, 1:]    += image[:, :-1] * 2**3
-        indexer[:, :]     += image[:, :] * 2**4
-        indexer[:, :-1]   += image[:, 1:] * 2**5
+        indexer[:, 1:] += image[:, :-1] * 2**3
+        indexer[:, :] += image[:, :] * 2**4
+        indexer[:, :-1] += image[:, 1:] * 2**5
 
-        indexer[:-1, 1:]  += image[1:, :-1] * 2**6
-        indexer[:-1, :]   += image[1:, :] * 2**7
+        indexer[:-1, 1:] += image[1:, :-1] * 2**6
+        indexer[:-1, :] += image[1:, :] * 2**7
         indexer[:-1, :-1] += image[1:, 1:] * 2**8
     else:
         indexer = _table_lookup_index(np.ascontiguousarray(image, np.uint8))
@@ -572,7 +584,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(image):
+def _skeletonize_3d(image):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -581,12 +593,12 @@ def skeletonize_3d(image):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
-    skeleton : ndarray
+    skeleton : ndarray of bool
         The thinned image.
 
     See Also
@@ -615,29 +627,37 @@ def skeletonize_3d(image):
     """
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
-        raise ValueError("skeletonize_3d can only handle 2D or 3D images; "
-                         f"got image.ndim = {image.ndim} instead.")
-    image = np.ascontiguousarray(image)
-    image = img_as_ubyte(image, force_copy=False)
+        raise ValueError(
+            "skeletonize_3d can only handle 2D or 3D images; "
+            f"got image.ndim = {image.ndim} instead."
+        )
 
-    # make an in image 3D and pad it w/ zeros to simplify dealing w/ boundaries
+    image_o = image.astype(bool, order="C", copy=False)
+
+    # make a 2D input image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
-    image_o = image
     if image.ndim == 2:
-        image_o = image[np.newaxis, ...]
-    image_o = np.pad(image_o, pad_width=1, mode='constant')
-
-    # normalize to binary
-    maxval = image_o.max()
-    image_o[image_o != 0] = 1
+        image_o = image_o[np.newaxis, ...]
+    image_o = np.pad(image_o, pad_width=1, mode='constant')  # copies
 
     # do the computation
-    image_o = np.asarray(_compute_thin_image(image_o))
+    image_o = _compute_thin_image(image_o)
 
     # crop it back and restore the original intensity range
     image_o = crop(image_o, crop_width=1)
     if image.ndim == 2:
         image_o = image_o[0]
-    image_o *= maxval
 
     return image_o
+
+
+def skeletonize_3d(image):
+    return _skeletonize_3d(image)
+
+
+skeletonize_3d.__doc__ = _skeletonize_3d.__doc__
+skeletonize_3d = deprecate_func(
+    deprecated_version="0.23",
+    removed_version="0.25",
+    hint="Use `skimage.morphology.skeletonize` instead.",
+)(skeletonize_3d)

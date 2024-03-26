@@ -77,7 +77,7 @@ the package versions your application needs. They help avoid a common
 challenge known as
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
-To install the current ``scikit-image`` you'll need at least Python 3.6. If
+To install the current ``scikit-image`` you'll need at least Python 3.10. If
 your Python is older, pip will find the most recent compatible version.
 
 .. code-block:: sh
@@ -249,6 +249,7 @@ venv
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
@@ -281,12 +282,13 @@ before you get started.
   pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
+  # The new version lives under `${PWD}/build-install/.../site-packages`.
   # Test your installation
   spin test
   # Build docs
   spin docs
-  # Try the new version
-  spin python
+  # Try the new version in IPython
+  spin ipython
 
 For more information about building and using the ``spin`` package, see ``meson.md``.
 
@@ -302,16 +304,27 @@ Test your installation for correct behavior using:
 Updating the installation
 ------------------------------------------------------------------------------
 
-When updating your installation, it is often necessary to recompile submodules
-that have changed. Do so with the following commands:
+Before updating your installation, you typically want to grab the latest
+source:
 
 .. code-block:: sh
 
-    # Grab the latest source
-    git checkout main
-    git pull upstream main
-    # Update the installation
-    pip install -e . -vv
+   git checkout main
+   git pull upstream main
+
+And you likely want to create a feature branch from there.
+As you work on this branch, you can re-build scikit-image using:
+
+.. code-block:: sh
+
+   spin build
+
+Repeated, incremental builds usually work just fine, but if you notice build
+problems, rebuild from scratch using:
+
+.. code-block:: sh
+
+   spin build --clean
 
 Platform-specific notes
 ------------------------------------------------------------------------------
@@ -386,6 +399,8 @@ functionality is only available with the following installed:
 * `Dask <https://dask.org/>`__
     The ``dask`` module is used to speed up certain functions.
 
+* `Matplotlib <https://matplotlib.org>`__
+    Used in various functions, e.g., for drawing, segmenting, reading images.
 
 .. include:: ../../../requirements/optional.txt
   :literal:
