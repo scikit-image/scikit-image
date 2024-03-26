@@ -794,11 +794,16 @@ def test_compact_watershed():
     )
     np.testing.assert_equal(compact, expected)
     normal = watershed(image, seeds)
-    expected = np.array([[1, 1, 1, 1, 2, 2],
-                         [1, 1, 1, 1, 2, 2],
-                         [1, 1, 1, 1, 2, 2],
-                         [1, 1, 1, 1, 2, 2],
-                         [1, 1, 1, 1, 2, 2]], dtype=int)
+    expected = np.array(
+        [
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+        ],
+        dtype=int,
+    )
     np.testing.assert_equal(normal, expected)
 
     # checks that compact watershed labels with watershed lines are
@@ -818,8 +823,8 @@ def test_watershed_with_markers_offset():
     x, y = np.indices((80, 80))
     x1, y1, x2, y2 = 28, 28, 44, 52
     r1, r2 = 16, 20
-    mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
-    mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+    mask_circle1 = (x - x1) ** 2 + (y - y1) ** 2 < r1**2
+    mask_circle2 = (x - x2) ** 2 + (y - y2) ** 2 < r2**2
     image = np.logical_or(mask_circle1, mask_circle2)
 
     # Now we want to separate the two objects in image
@@ -836,7 +841,9 @@ def test_watershed_with_markers_offset():
         mask[tuple(coords.T)] = True
         markers, _ = ndi.label(mask)
         solutions.append(watershed(-distance, markers, mask=image))
-        solutions_wsl.append(watershed(-distance, markers, mask=image, watershed_line=True))
+        solutions_wsl.append(
+            watershed(-distance, markers, mask=image, watershed_line=True)
+        )
 
     np.testing.assert_array_equal(solutions[0], solutions[1])
     np.testing.assert_array_equal(solutions_wsl[0], solutions_wsl[1])
