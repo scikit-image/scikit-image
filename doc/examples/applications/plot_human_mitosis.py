@@ -163,9 +163,11 @@ print(cleaned_dividing.max())
 # ==============
 # To separate overlapping nuclei, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
-# To visualize the segmentation conveniently, we colour-code the labelled
-# regions using the `color.label2rgb` function, specifying the background
-# label with argument `bg_label=0`.
+# The idea of the algorithm is to find watershed basins as if flooded from
+# given `markers`. We generate these markers as the local maxima of the
+# distance function to the background. Given the typical size of the nuclei,
+# we pass ``min_distance=7`` so that local maxima and, hence, markers will lie
+# at least 7 pixels away from one another.
 
 distance = ndi.distance_transform_edt(cells)
 
@@ -175,6 +177,11 @@ local_max_mask[tuple(local_max_coords.T)] = True
 markers = measure.label(local_max_mask)
 
 segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
+
+#####################################################################
+# To visualize the segmentation conveniently, we colour-code the labelled
+# regions using the `color.label2rgb` function, specifying the background
+# label with argument `bg_label=0`.
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
