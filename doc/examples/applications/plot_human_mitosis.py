@@ -163,18 +163,29 @@ print(cleaned_dividing.max())
 # ==============
 # To separate overlapping nuclei, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
-# To visualize the segmentation conveniently, we colour-code the labelled
-# regions using the `color.label2rgb` function, specifying the background
-# label with argument `bg_label=0`.
+# The idea of the algorithm is to find watershed basins as if flooded from
+# given `markers`. We generate these markers as the local maxima of the
+# distance function to the background. Given the typical size of the nuclei,
+# we pass ``min_distance=7`` so that local maxima and, hence, markers will lie
+# at least 7 pixels away from one another.
+# We also use ``exclude_border=False`` so that all nuclei touching the image
+# border will be included.
 
 distance = ndi.distance_transform_edt(cells)
 
-local_max_coords = feature.peak_local_max(distance, min_distance=7)
+local_max_coords = feature.peak_local_max(
+    distance, min_distance=7, exclude_border=False
+)
 local_max_mask = np.zeros(distance.shape, dtype=bool)
 local_max_mask[tuple(local_max_coords.T)] = True
 markers = measure.label(local_max_mask)
 
 segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
+
+#####################################################################
+# To visualize the segmentation conveniently, we colour-code the labelled
+# regions using the `color.label2rgb` function, specifying the background
+# label with argument `bg_label=0`.
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
@@ -186,15 +197,9 @@ ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
-# Additionally, we may use function `color.label2rgb` to overlay the original
-# image with the segmentation result, using transparency (alpha parameter).
+# Make sure that the watershed algorithm has led to identifying more nuclei:
 
-color_labels = color.label2rgb(segmented_cells, image, alpha=0.4, bg_label=0)
-
-fig, ax = plt.subplots(figsize=(5, 5))
-ax.imshow(color_labels)
-ax.set_title('Segmentation result over raw image')
-plt.show()
+assert segmented_cells.max() >= measure.label(cells).max()
 
 #####################################################################
 # Finally, we find a total number of
