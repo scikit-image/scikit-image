@@ -168,10 +168,14 @@ print(cleaned_dividing.max())
 # distance function to the background. Given the typical size of the nuclei,
 # we pass ``min_distance=7`` so that local maxima and, hence, markers will lie
 # at least 7 pixels away from one another.
+# We also use ``exclude_border=False`` so that all nuclei touching the image
+# border will be included.
 
 distance = ndi.distance_transform_edt(cells)
 
-local_max_coords = feature.peak_local_max(distance, min_distance=7)
+local_max_coords = feature.peak_local_max(
+    distance, min_distance=7, exclude_border=False
+)
 local_max_mask = np.zeros(distance.shape, dtype=bool)
 local_max_mask[tuple(local_max_coords.T)] = True
 markers = measure.label(local_max_mask)
@@ -191,6 +195,11 @@ ax[1].imshow(color.label2rgb(segmented_cells, bg_label=0))
 ax[1].set_title('Segmented nuclei')
 ax[1].set_axis_off()
 plt.show()
+
+#####################################################################
+# Make sure that the watershed algorithm has led to identifying more nuclei:
+
+assert segmented_cells.max() >= measure.label(cells).max()
 
 #####################################################################
 # Finally, we find a total number of
