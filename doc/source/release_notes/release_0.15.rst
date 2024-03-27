@@ -1,5 +1,5 @@
-scikit-image 0.15.0 release notes
-=================================
+scikit-image 0.15.0 (2019-04-03)
+================================
 
 We're happy to announce the release of scikit-image v0.15.0!
 

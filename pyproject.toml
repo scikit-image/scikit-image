@@ -26,7 +26,7 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'numpy>=1.23',
-    'scipy>=1.8',
+    'scipy>=1.9',
     'networkx>=2.8',
     'pillow>=9.1',
     'imageio>=2.33',
@@ -99,7 +99,6 @@ optional = [
 ]
 test = [
     'asv',
-    'matplotlib>=3.6',
     'numpydoc>=1.5',
     'pooch>=1.6.0',
     'pytest>=7.0',
@@ -207,3 +206,9 @@ filterwarnings = []
 
 [tool.coverage.run]
 omit = ['*/tests/*']
+
+[tool.changelist]
+ignored_user_logins = [
+    "web-flow",
+    "pre-commit-ci[bot]"
+]

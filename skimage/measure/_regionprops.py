@@ -235,7 +235,10 @@ def _cached(f):
         cache = obj._cache
         prop = f.__name__
 
-        if not ((prop in cache) and obj._cache_active):
+        if not obj._cache_active:
+            return f(obj)
+
+        if prop not in cache:
             cache[prop] = f(obj)
 
         return cache[prop]

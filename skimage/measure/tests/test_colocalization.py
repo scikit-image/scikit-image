@@ -52,7 +52,9 @@ def test_invalid_input():
 def test_pcc():
     # simple example
     img1 = np.array([[i + j for j in range(4)] for i in range(4)])
-    assert pearson_corr_coeff(img1, img1) == (1.0, 0.0)
+    np.testing.assert_almost_equal(
+        pearson_corr_coeff(img1, img1), (1.0, 0.0), decimal=14
+    )
 
     img2 = np.where(img1 <= 2, 0, img1)
     np.testing.assert_almost_equal(

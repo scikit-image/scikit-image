@@ -137,6 +137,9 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Examples
     --------
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
+
     >>> from skimage.data import text
     >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
@@ -260,7 +263,7 @@ def threshold_local(
             sigma = tuple([(b - 1) / 6.0 for b in block_size])
         else:
             sigma = param
-        gaussian(image, sigma, output=thresh_image, mode=mode, cval=cval)
+        gaussian(image, sigma=sigma, out=thresh_image, mode=mode, cval=cval)
     elif method == 'mean':
         ndi.uniform_filter(image, block_size, output=thresh_image, mode=mode, cval=cval)
     elif method == 'median':
@@ -720,7 +723,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     elif callable(initial_guess):
         t_next = initial_guess(image)
     elif np.isscalar(initial_guess):  # convert to new, positive image range
-        t_next = initial_guess - image_min
+        t_next = initial_guess - float(image_min)
         image_max = np.max(image) + image_min
         if not 0 < t_next < np.max(image):
             msg = (
@@ -729,6 +732,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
                 f'{image_min} and max {image_max}.'
             )
             raise ValueError(msg)
+        t_next = image.dtype.type(t_next)
     else:
         raise TypeError(
             'Incorrect type for `initial_guess`; should be '

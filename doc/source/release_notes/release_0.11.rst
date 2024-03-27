@@ -1,5 +1,5 @@
-scikit-image 0.11.0 release notes
-=================================
+scikit-image 0.11.0 (2015-03-04)
+================================
 
 We're happy to announce the release of scikit-image v0.11.0!
 
