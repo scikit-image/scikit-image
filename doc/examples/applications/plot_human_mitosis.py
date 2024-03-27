@@ -186,17 +186,6 @@ ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
-# Additionally, we may use function `color.label2rgb` to overlay the original
-# image with the segmentation result, using transparency (alpha parameter).
-
-color_labels = color.label2rgb(segmented_cells, image, alpha=0.4, bg_label=0)
-
-fig, ax = plt.subplots(figsize=(5, 5))
-ax.imshow(color_labels)
-ax.set_title('Segmentation result over raw image')
-plt.show()
-
-#####################################################################
 # Finally, we find a total number of
 
 print(segmented_cells.max())
