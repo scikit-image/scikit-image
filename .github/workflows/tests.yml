@@ -25,7 +25,6 @@ jobs:
         OPTIONS_NAME: ["default"]
         INSTALL_FROM_SDIST: [0]
         WITHOUT_POOCH: [0]
-        SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: [0]
         EAGER_IMPORT: [0]
         include:
           - platform_id: manylinux_x86_64
@@ -44,7 +43,6 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: "3.12"
             PIP_FLAGS: "--pre"
-            SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 1
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
@@ -94,15 +92,13 @@ jobs:
         env:
           # Set variables here that are used by the run script below
           # (including those used within tools/github/script.sh)
-          # Also includes the EAGER_IMPORT and
-          # SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL env vars that skimage checks.
+          # Also includes the EAGER_IMPORT that skimage checks.
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
           TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-          SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: ${{ matrix.SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL }}
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
           source tools/github/script.sh

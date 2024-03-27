@@ -13,6 +13,7 @@ from scipy import sparse, ndimage as ndi
 
 from .._shared import utils
 from .._shared.utils import warn
+from .._shared.compat import SCIPY_CG_TOL_PARAM_NAME
 
 # executive summary for next code block: try to import umfpack from
 # scipy, but make sure not to raise a fuss if it fails since it's only
@@ -214,8 +215,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
+        rtol = {SCIPY_CG_TOL_PARAM_NAME: tol}
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), tol=tol, atol=0, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, i].toarray(), **rtol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])
         ]
         if np.any([info > 0 for _, info in cg_out]):

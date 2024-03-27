@@ -26,8 +26,6 @@ from numpy.testing import (
     assert_array_less,
 )
 
-import warnings
-
 from .. import data, io
 from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
@@ -49,18 +47,6 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 # Calculate the size of a void * pointer in bits
 # https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
-
-
-_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
-if _error_on_warnings.lower() == 'true':
-    _error_on_warnings = True
-elif _error_on_warnings.lower() == 'false':
-    _error_on_warnings = False
-else:
-    try:
-        _error_on_warnings = bool(int(_error_on_warnings))
-    except ValueError:
-        _error_on_warnings = False
 
 
 def assert_less(a, b, msg=None):
@@ -204,114 +190,6 @@ def mono_check(plugin, fmt='png'):
     img5 = img_as_uint(img)
     r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img5)
-
-
-def setup_test():
-    """Default package level setup routine for skimage tests.
-
-    Import packages known to raise warnings, and then
-    force warnings to raise errors.
-
-    Also set the random seed to zero.
-    """
-    warnings.simplefilter('default')
-
-    if _error_on_warnings:
-        np.random.seed(0)
-
-        warnings.simplefilter('error')
-
-        warnings.filterwarnings(
-            'default', message='unclosed file', category=ResourceWarning
-        )
-
-        # Ignore other warnings only seen when using older versions of
-        # dependencies.
-        warnings.filterwarnings(
-            'default',
-            message='Conversion of the second argument of issubdtype',
-            category=FutureWarning,
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='the matrix subclass is not the recommended way',
-            category=PendingDeprecationWarning,
-            module='numpy',
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='Your installed pillow version',
-            category=UserWarning,
-            module='skimage.io',
-        )
-
-        # ignore warning from cycle_spin about Dask not being installed
-        warnings.filterwarnings(
-            'default',
-            message='The optional dask dependency is not installed.',
-            category=UserWarning,
-        )
-
-        warnings.filterwarnings(
-            'default', message='numpy.ufunc size changed', category=RuntimeWarning
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='\n\nThe scipy.sparse array containers',
-            category=DeprecationWarning,
-        )
-
-        # ignore dtype deprecation warning from NumPy arising from use of SciPy
-        # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
-        # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
-        warnings.filterwarnings(
-            'default',
-            message=('`np.int0` is a deprecated alias for `np.intp`'),
-            category=DeprecationWarning,
-        )
-
-        # Temporary warning raised by imageio about change in Pillow. May be removed
-        # once https://github.com/python-pillow/Pillow/pull/7125 is shipped in the
-        # minimal required version of pillow (probably the release after Pillow 9.5.0)
-        warnings.filterwarnings(
-            "default",
-            message=(
-                r"Loading 16-bit \(uint16\) PNG as int32 due to limitations in "
-                r"pillow's PNG decoder\. This will be fixed in a future version of "
-                r"pillow which will make this warning dissapear\."
-            ),
-            category=UserWarning,
-        )
-
-        # Temporary warning raised by scipy. May be removed when scipy 1.12 is
-        # minimum supported version and we replace tol with rtol
-        warnings.filterwarnings(
-            "default",
-            message=(
-                "'scipy.sparse.linalg.cg' keyword argument `tol` is deprecated in "
-                "favor of `rtol`"
-            ),
-            category=DeprecationWarning,
-        )
-
-        warnings.filterwarnings(
-            "default",
-            message=("The figure layout has changed to tight"),
-            category=UserWarning,
-        )
-
-
-def teardown_test():
-    """Default package level teardown routine for skimage tests.
-
-    Restore warnings to default behavior
-    """
-    if _error_on_warnings:
-        warnings.resetwarnings()
-        warnings.simplefilter('default')
 
 
 def fetch(data_filename):
