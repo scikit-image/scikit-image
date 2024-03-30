@@ -164,7 +164,7 @@ print(cleaned_dividing.max())
 # To separate overlapping nuclei, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
 # The idea of the algorithm is to find watershed basins as if flooded from
-# given `markers`. We generate these markers as the local maxima of the
+# a set of `markers`. We generate these markers as the local maxima of the
 # distance function to the background. Given the typical size of the nuclei,
 # we pass ``min_distance=7`` so that local maxima and, hence, markers will lie
 # at least 7 pixels away from one another.
@@ -199,7 +199,7 @@ plt.show()
 #####################################################################
 # Make sure that the watershed algorithm has led to identifying more nuclei:
 
-assert segmented_cells.max() >= measure.label(cells).max()
+assert segmented_cells.max() > labeled_cells.max()
 
 #####################################################################
 # Finally, we find a total number of
