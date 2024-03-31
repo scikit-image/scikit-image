@@ -959,8 +959,8 @@ def test_connectivity():
     assert np.unique(labels_c2).shape[0] == 5
 
     # checking via area of each individual segment.
-    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1301, 11278]):
+    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1300, 11279]):
         assert np.sum(labels_c1 == lab) == area
 
-    for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
+    for lab, area in zip(range(5), [61824, 3653, 20466, 12385, 11292]):
         assert np.sum(labels_c2 == lab) == area

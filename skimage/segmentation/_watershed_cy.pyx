@@ -73,8 +73,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
                       cnp.intp_t[::1] strides,
                       cnp.float64_t compactness,
                       np_anyint[::1] output,
-                      DTYPE_BOOL_t wsl,
-                      DTYPE_BOOL_t from_minima):
+                      DTYPE_BOOL_t wsl):
     """Perform watershed algorithm using a raveled image and neighborhood.
 
     Parameters
@@ -108,10 +107,6 @@ def watershed_raveled(cnp.float64_t[::1] image,
     wsl : bool
         Parameter indicating whether the watershed line is calculated.
         If wsl is set to True, the watershed line is calculated.
-    from_minima : bool
-        Parameter indicating whether the watershed is calculated from minima.
-        If from_minima is set to True, the watershed markers are the minima.
-        When False (from markers) it is set to the minimum possible value (-inf).
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
@@ -128,10 +123,7 @@ def watershed_raveled(cnp.float64_t[::1] image,
     with nogil:
         for i in range(marker_locations.shape[0]):
             index = marker_locations[i]
-            if from_minima:
-                elem.value = image[index]
-            else:
-                elem.value = neg_inf
+            elem.value = neg_inf
             elem.age = 0
             elem.index = index
             elem.source = index

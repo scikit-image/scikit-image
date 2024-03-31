@@ -209,7 +209,6 @@ def watershed(
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    from_minima = markers is None
     image, markers, mask = _validate_inputs(image, markers, mask, connectivity)
     connectivity, offset = _validate_connectivity(image.ndim, connectivity, offset)
 
@@ -235,7 +234,6 @@ def watershed(
         compactness,
         output.ravel(),
         watershed_line,
-        from_minima,
     )
 
     output = crop(output, pad_width, copy=True)
