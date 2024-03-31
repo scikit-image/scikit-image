@@ -33,7 +33,7 @@ jobs:
     # To enable this workflow on a fork, comment out:
     # if: github.repository == 'scikit-image/scikit-image'
     env:
-      PYODIDE_VERSION: 0.25.0
+      PYODIDE_VERSION: 0.25.1
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
