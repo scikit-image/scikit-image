@@ -16,14 +16,14 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # v3.1.0
+    rev: v4.0.0-alpha.8 # v3.1.0
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 1d42195ebc67a509991eaf68c2353e0181003a95 # frozen: v0.1.14
+    rev: 0ccbb5b7942d83fbcf7cb5e0fd99633efd2351d7  # frozen: v0.3.5
 
     hooks:
       - id: ruff
@@ -36,7 +36,7 @@ repos:
         args: [--no-pycodestyle, --max-line-length=88]
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 3de533c80a7e95bb6efb213169d269267e9b234b # frozen: 23.12.1
+    rev: 1aca2956f585f85e2f3935c3afdc5341f3c40a73  # frozen: 24.3.0
     hooks:
       - id: black
 
