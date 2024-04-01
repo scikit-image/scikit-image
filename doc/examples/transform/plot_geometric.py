@@ -7,7 +7,6 @@ In this example, we will see how to use geometric transformations in the context
 of image processing.
 """
 
-
 import math
 import numpy as np
 import matplotlib.pyplot as plt

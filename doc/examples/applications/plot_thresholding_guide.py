@@ -28,6 +28,7 @@ mechanisms.
    Presentation on
    :ref:`sphx_glr_auto_examples_applications_plot_rank_filters.py`.
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data

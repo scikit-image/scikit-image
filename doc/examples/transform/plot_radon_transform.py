@@ -58,7 +58,6 @@ provided by the projections), and we follow that rule here. Below is the
 original image and its Radon transform, often known as its *sinogram*:
 """
 
-
 import numpy as np
 import matplotlib.pyplot as plt
 

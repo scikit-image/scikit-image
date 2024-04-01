@@ -144,7 +144,6 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
 
 
 class CENSURE(FeatureDetector):
-
     """CENSURE keypoint detector.
 
     min_scale : int, optional
