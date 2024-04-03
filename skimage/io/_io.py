@@ -1,14 +1,17 @@
 import pathlib
+import warnings
 
 import numpy as np
+import imageio.v3 as iio
 
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 from .._shared.version_requirements import require
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
-from ..io.manage_plugins import call_plugin
+from ..io.manage_plugins import call_plugin, plugin_order
 from .util import file_or_url_context
 
+from . import _deprecate_plugin_function
 
 __all__ = [
     'imread',
@@ -20,7 +23,17 @@ __all__ = [
 ]
 
 
-def imread(fname, as_gray=False, plugin=None, **plugin_args):
+@deprecate_parameter(
+    deprecated_name="plugin",
+    start_version="0.23",
+    stop_version="0.25",
+    template="Parameter `{deprecated_name}` is deprecated since version "
+    "{deprecated_version} and will be removed in {changed_version} (or "
+    "later). To avoid this warning, please do not use the parameter "
+    "`{deprecated_name}`. Use imageio or other 3rd party libraries directly "
+    "for more advanced IO features.",
+)
+def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
     """Load an image from file.
 
     Parameters
@@ -30,16 +43,13 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
     as_gray : bool, optional
         If True, convert color images to gray-scale (64-bit floats).
         Images that are already in gray-scale format are not converted.
-    plugin : str, optional
-        Name of plugin to use.  By default, the different plugins are
-        tried (starting with imageio) until a suitable
-        candidate is found.  If not given and fname is a tiff file, the
-        tifffile plugin will be used.
 
     Other Parameters
     ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
+    **plugin_args : DEPRECATED
+        `plugin_args` is deprecated.
+
+        .. deprecated:: 0.23
 
     Returns
     -------
@@ -49,15 +59,42 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
         RGB-image MxNx3 and an RGBA-image MxNx4.
 
     """
-    if isinstance(fname, pathlib.Path):
-        fname = str(fname.resolve())
+    if plugin_args:
+        warnings.warn(
+            "Additional keyword arguments are deprecated since version "
+            "0.23 and will be removed in 0.25 (or later). To avoid this "
+            "warning, please do not use additional keyword arguments. "
+            "Use imageio or a similar package instead.",
+            category=FutureWarning,
+            stacklevel=2,
+        )
 
-    if plugin is None and hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            plugin = 'tifffile'
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message=".*Use imageio or a similar package instead.*",
+            category=FutureWarning,
+            module="skimage.io",
+        )
+        use_plugin = (
+            plugin is not DEPRECATED
+            or plugin_args
+            or plugin_order()["imread"][0] != "imageio"
+        )
+        if use_plugin:
+            plugin = None if plugin is DEPRECATED else plugin
+            if isinstance(fname, pathlib.Path):
+                fname = str(fname.resolve())
 
-    with file_or_url_context(fname) as fname:
-        img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+            if plugin is None and hasattr(fname, 'lower'):
+                if fname.lower().endswith(('.tiff', '.tif')):
+                    plugin = 'tifffile'
+
+            with file_or_url_context(fname) as fname:
+                img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+        else:
+            with file_or_url_context(fname) as fname:
+                img = iio.imread(fname)
 
     if not hasattr(img, 'ndim'):
         return img
@@ -75,6 +112,7 @@ def imread(fname, as_gray=False, plugin=None, **plugin_args):
     return img
 
 
+@_deprecate_plugin_function
 def imread_collection(load_pattern, conserve_memory=True, plugin=None, **plugin_args):
     """
     Load a collection of images.
@@ -105,7 +143,17 @@ def imread_collection(load_pattern, conserve_memory=True, plugin=None, **plugin_
     )
 
 
-def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
+@deprecate_parameter(
+    deprecated_name="plugin",
+    start_version="0.23",
+    stop_version="0.25",
+    template="Parameter `{deprecated_name}` is deprecated since version "
+    "{deprecated_version} and will be removed in {changed_version} (or "
+    "later). To avoid this warning, please do not use the parameter "
+    "`{deprecated_name}`. Use imageio or other 3rd party libraries directly "
+    "for more advanced IO features.",
+)
+def imsave(fname, arr, plugin=DEPRECATED, check_contrast=True, **plugin_args):
     """Save an image to file.
 
     Parameters
@@ -135,24 +183,52 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     and largest file size (default 75). This is only available when using
     the PIL and imageio plugins.
     """
-    if isinstance(fname, pathlib.Path):
-        fname = str(fname.resolve())
-    if plugin is None and hasattr(fname, 'lower'):
-        if fname.lower().endswith(('.tiff', '.tif')):
-            plugin = 'tifffile'
+    if plugin_args:
+        warnings.warn(
+            "Additional keyword arguments are deprecated since version "
+            "0.23 and will be removed in 0.25 (or later). To avoid this "
+            "warning, please do not use additional keyword arguments. "
+            "Use imageio or a similar package instead.",
+            category=FutureWarning,
+            stacklevel=2,
+        )
+
     if arr.dtype == bool:
         warn(
             f'{fname} is a boolean image: setting True to 255 and False to 0. '
             'To silence this warning, please convert the image using '
             'img_as_ubyte.',
-            stacklevel=2,
+            stacklevel=3,
         )
         arr = arr.astype('uint8') * 255
     if check_contrast and is_low_contrast(arr):
-        warn(f'{fname} is a low contrast image')
-    return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
+        warn(f'{fname} is a low contrast image', stacklevel=3)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message=".*Use imageio or a similar package instead.*",
+            category=FutureWarning,
+            module="skimage.io",
+        )
+        use_plugin = (
+            plugin is not DEPRECATED
+            or plugin_args
+            or plugin_order()["imsave"][0] != "imageio"
+        )
+        if use_plugin:
+            plugin = None if plugin is DEPRECATED else plugin
+            if isinstance(fname, pathlib.Path):
+                fname = str(fname.resolve())
+            if plugin is None and hasattr(fname, 'lower'):
+                if fname.lower().endswith(('.tiff', '.tif')):
+                    plugin = 'tifffile'
+            return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
+
+    return iio.imwrite(fname, arr)
 
 
+@_deprecate_plugin_function
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
 
@@ -170,11 +246,14 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    if isinstance(arr, str):
-        arr = call_plugin('imread', arr, plugin=plugin)
-    return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        if isinstance(arr, str):
+            arr = call_plugin('imread', arr, plugin=plugin)
+        return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 
 
+@_deprecate_plugin_function
 def imshow_collection(ic, plugin=None, **plugin_args):
     """Display a collection of images.
 
@@ -192,9 +271,12 @@ def imshow_collection(ic, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
+    from ..io.manage_plugins import call_plugin
+
     return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
 
 
+@_deprecate_plugin_function
 @require("matplotlib", ">=3.3")
 def show():
     """Display pending images.

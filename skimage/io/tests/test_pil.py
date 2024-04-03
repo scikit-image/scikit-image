@@ -260,14 +260,14 @@ def test_imexport_imimport():
 
 
 def test_all_color():
-    with expected_warnings(['.* is a boolean image']):
+    with pytest.warns(UserWarning, match='.* is a boolean image'):
         color_check('pil')
-    with expected_warnings(['.* is a boolean image']):
+    with pytest.warns(UserWarning, match='.* is a boolean image'):
         color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    with expected_warnings(['.* is a boolean image']):
+    with pytest.warns(UserWarning, match='.* is a boolean image'):
         mono_check('pil')
 
 

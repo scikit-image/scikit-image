@@ -15,12 +15,14 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+
 import os.path
 import warnings
 from configparser import ConfigParser
 from glob import glob
 
 from .collection import imread_collection_wrapper
+from . import _deprecate_plugin_function, _hide_repeated_plugin_deprecation_warnings
 
 __all__ = [
     'use_plugin',
@@ -29,7 +31,7 @@ __all__ = [
     'plugin_order',
     'reset_plugins',
     'find_available_plugins',
-    'available_plugins',
+    '_available_plugins',
 ]
 
 # The plugin store will save a list of *loaded* io functions for each io type
@@ -64,9 +66,6 @@ def _clear_plugins():
     }
 
 
-_clear_plugins()
-
-
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
     io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection', 'imread']
@@ -80,7 +79,7 @@ def _load_preferred_plugins():
 
 def _set_plugin(plugin_type, plugin_list):
     for plugin in plugin_list:
-        if plugin not in available_plugins:
+        if plugin not in _available_plugins:
             continue
         try:
             use_plugin(plugin, kind=plugin_type)
@@ -89,6 +88,7 @@ def _set_plugin(plugin_type, plugin_list):
             pass
 
 
+@_deprecate_plugin_function
 def reset_plugins():
     _clear_plugins()
     _load_preferred_plugins()
@@ -141,9 +141,7 @@ def _scan_plugins():
         plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 
-_scan_plugins()
-
-
+@_deprecate_plugin_function
 def find_available_plugins(loaded=False):
     """List available plugins.
 
@@ -173,9 +171,7 @@ def find_available_plugins(loaded=False):
     return d
 
 
-available_plugins = find_available_plugins()
-
-
+@_deprecate_plugin_function
 def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
@@ -216,6 +212,7 @@ def call_plugin(kind, *args, **kwargs):
     return func(*args, **kwargs)
 
 
+@_deprecate_plugin_function
 def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
     will be loaded if it hasn't been already.
@@ -312,6 +309,7 @@ def _load(plugin):
             store.append((plugin, func))
 
 
+@_deprecate_plugin_function
 def plugin_info(plugin):
     """Return plugin meta-data.
 
@@ -332,6 +330,7 @@ def plugin_info(plugin):
         raise ValueError(f'No information on plugin "{plugin}"')
 
 
+@_deprecate_plugin_function
 def plugin_order():
     """Return the currently preferred plugin order.
 
@@ -346,3 +345,10 @@ def plugin_order():
     for func in plugin_store:
         p[func] = [plugin_name for (plugin_name, f) in plugin_store[func]]
     return p
+
+
+with _hide_repeated_plugin_deprecation_warnings():
+    _clear_plugins()
+    _scan_plugins()
+    _available_plugins = find_available_plugins()
+    reset_plugins()  # Formerly called in skimage.io.__init__
