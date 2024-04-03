@@ -9,6 +9,7 @@ from skimage._shared.testing import run_in_parallel
 from skimage._shared.utils import _supported_float_type, convert_to_float
 from skimage.data import shepp_logan_phantom
 from skimage.transform import radon, iradon, iradon_sart, rescale
+from skimage.transform.radon_transform import _get_default_center
 
 
 PHANTOM = shepp_logan_phantom()[::2, ::2]
@@ -66,13 +67,17 @@ def test_iradon_bias_circular_phantom():
     assert roi_err < tol
 
 
-def check_radon_center(shape, circle, dtype, preserve_range):
+def check_radon_center(shape, circle, dtype, preserve_range, center_disp):
     # Create a test image with only a single non-zero pixel at the origin
     image = np.zeros(shape, dtype=dtype)
-    image[(shape[0] // 2, shape[1] // 2)] = 1.0
+    center = (shape[0] // 2 + center_disp[0], shape[1] // 2 + center_disp[1])
+    image[center[0], center[1]] = 1
+
     # Calculate the sinogram
     theta = np.linspace(0.0, 180.0, max(shape), endpoint=False)
-    sinogram = radon(image, theta=theta, circle=circle, preserve_range=preserve_range)
+    sinogram = radon(
+        image, theta=theta, circle=circle, preserve_range=preserve_range, center=center
+    )
     assert sinogram.dtype == _supported_float_type(sinogram.dtype)
     # The sinogram should be a straight, horizontal line
     sinogram_max = np.argmax(sinogram, axis=0)
@@ -80,20 +85,54 @@ def check_radon_center(shape, circle, dtype, preserve_range):
     assert np.std(sinogram_max) < 1e-6
 
 
+def check_radon_center_default(shape, circle, dtype, preserve_range):
+    # Create a test image with intensity in the origin
+    center = _get_default_center(np.array(shape, dtype=np.float32))
+    int_coords = [
+        (np.abs(np.arange(s) - c) < 1).astype(dtype) for s, c in zip(shape, center)
+    ]
+    image = np.outer(int_coords[0], int_coords[1])
+
+    # Calculate the sinogram
+    theta = np.linspace(0.0, 180.0, max(shape), endpoint=False)
+    sinogram = radon(image, theta=theta, circle=circle, preserve_range=preserve_range)
+    assert sinogram.dtype == _supported_float_type(sinogram.dtype)
+
+    # The sinogram should be a straight, horizontal line, in the center
+    new_shape = sinogram.shape[0]
+    new_center = _get_default_center(new_shape)
+    sino_coords = np.arange(new_shape) - new_center
+    sinogram_max = np.sum(sinogram * sino_coords[:, None], axis=0) / np.sum(
+        sinogram, axis=0
+    )
+    assert np.isclose(np.mean(sinogram_max), 0, atol=1e-6)
+    assert np.isclose(np.std(sinogram_max), 0, atol=1e-6)
+
+
 @pytest.mark.parametrize("shape", [(16, 16), (17, 17)])
 @pytest.mark.parametrize("circle", [False, True])
 @pytest.mark.parametrize("dtype", [np.float64, np.float32, np.float16, np.uint8, bool])
 @pytest.mark.parametrize("preserve_range", [False, True])
-def test_radon_center(shape, circle, dtype, preserve_range):
-    check_radon_center(shape, circle, dtype, preserve_range)
+@pytest.mark.parametrize("center_disp", [(-2, 0), (0, 0), (1, 3)])
+def test_radon_center(shape, circle, dtype, preserve_range, center_disp):
+    check_radon_center(shape, circle, dtype, preserve_range, center_disp)
+
+
+@pytest.mark.parametrize("shape", [(16, 16), (17, 17)])
+@pytest.mark.parametrize("circle", [False, True])
+@pytest.mark.parametrize("dtype", [np.float64, np.float32, np.float16, np.uint8, bool])
+@pytest.mark.parametrize("preserve_range", [False, True])
+def test_radon_center_default(shape, circle, dtype, preserve_range):
+    check_radon_center_default(shape, circle, dtype, preserve_range)
 
 
 @pytest.mark.parametrize("shape", [(32, 16), (33, 17)])
 @pytest.mark.parametrize("circle", [False])
 @pytest.mark.parametrize("dtype", [np.float64, np.float32, np.uint8, bool])
 @pytest.mark.parametrize("preserve_range", [False, True])
-def test_radon_center_rectangular(shape, circle, dtype, preserve_range):
-    check_radon_center(shape, circle, dtype, preserve_range)
+@pytest.mark.parametrize("center_disp", [(-2, 0), (0, 0), (1, 3)])
+def test_radon_center_rectangular(shape, circle, dtype, preserve_range, center_disp):
+    check_radon_center(shape, circle, dtype, preserve_range, center_disp)
 
 
 def check_iradon_center(size, theta, circle):
@@ -101,12 +140,16 @@ def check_iradon_center(size, theta, circle):
     # Create a test sinogram corresponding to a single projection
     # with a single non-zero pixel at the rotation center
     if circle:
-        sinogram = np.zeros((size, 1), dtype=float)
-        sinogram[size // 2, 0] = 1.0
+        sino_size = size
     else:
-        diagonal = int(np.ceil(np.sqrt(2) * size))
-        sinogram = np.zeros((diagonal, 1), dtype=float)
-        sinogram[sinogram.shape[0] // 2, 0] = 1.0
+        sino_size = int(np.ceil(np.sqrt(2) * size))
+
+    center = _get_default_center(sino_size)
+    sinogram = np.abs(np.arange(sino_size) - center) < 1.0
+    sinogram = sinogram.astype(np.float32)[:, None] / sinogram.sum()
+
+    center = np.ones(2, dtype=np.float32) * center
+
     maxpoint = np.unravel_index(np.argmax(sinogram), sinogram.shape)
     print('shape of generated sinogram', sinogram.shape)
     print('maximum in generated sinogram', maxpoint)
@@ -195,27 +238,33 @@ def test_iradon_angles():
     size = 100
     # Synthetic data
     image = np.tri(size) + np.tri(size)[::-1]
+    image_rescaled = _rescale_intensity(image)
+
     # Large number of projections: a good quality is expected
     nb_angles = 200
     theta = np.linspace(0, 180, nb_angles, endpoint=False)
     radon_image_200 = radon(image, theta=theta, circle=False)
-    reconstructed = iradon(radon_image_200, circle=False)
-    delta_200 = np.mean(
-        abs(_rescale_intensity(image) - _rescale_intensity(reconstructed))
-    )
+
+    reconstructed_200 = iradon(radon_image_200, circle=False)
+    reconstructed_200_rescaled = _rescale_intensity(reconstructed_200)
+    delta_200 = np.mean(abs(image_rescaled - reconstructed_200_rescaled))
     assert delta_200 < 0.03
+
     # Lower number of projections
     nb_angles = 80
+    theta = np.linspace(0, 180, nb_angles, endpoint=False)
     radon_image_80 = radon(image, theta=theta, circle=False)
+
+    reconstructed_80 = iradon(radon_image_80, circle=False)
+    reconstructed_80_rescaled = _rescale_intensity(reconstructed_80)
+    delta_80 = np.mean(abs(image_rescaled - reconstructed_80_rescaled))
+
+    # Loss of quality when the number of projections is reduced
+    assert delta_80 > delta_200
+
     # Test whether the sum of all projections is approximately the same
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
-    reconstructed = iradon(radon_image_80, circle=False)
-    delta_80 = np.mean(
-        abs(image / np.max(image) - reconstructed / np.max(reconstructed))
-    )
-    # Loss of quality when the number of projections is reduced
-    assert delta_80 > delta_200
 
 
 def check_radon_iradon_minimal(shape, slices):
@@ -228,6 +277,7 @@ def check_radon_iradon_minimal(shape, slices):
     print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
     if debug and has_mpl:
         _debug_plot(image, reconstructed, sinogram)
+
     if image.sum() == 1:
         assert np.unravel_index(
             np.argmax(reconstructed), image.shape
@@ -271,8 +321,9 @@ def _random_circle(shape):
     np.random.seed(98312871)
     image = np.random.rand(*shape)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
-    radius = min(shape) // 2
+    center = _get_default_center(np.array(shape))
+    r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
+    radius = _get_default_center(min(shape))
     image[r > radius] = 0.0
     return image
 
@@ -285,8 +336,9 @@ def test_radon_circle():
     # Synthetic data, circular symmetry
     shape = (61, 79)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
-    r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
-    radius = min(shape) // 2
+    center = _get_default_center(np.array(shape))
+    r = np.sqrt((c0 - center[0]) ** 2 + (c1 - center[1]) ** 2)
+    radius = _get_default_center(min(shape))
     image = np.clip(radius - r, 0, np.inf)
     image = _rescale_intensity(image)
     angles = np.linspace(0, 180, min(shape), endpoint=False)
@@ -331,7 +383,7 @@ def test_sinogram_circle_to_square(size):
 def check_radon_iradon_circle(interpolation, shape, output_size):
     # Forward and inverse radon on synthetic data
     image = _random_circle(shape)
-    radius = min(shape) // 2
+    radius = _get_default_center(min(shape))
     sinogram_rectangle = radon(image, circle=False)
     reconstruction_rectangle = iradon(
         sinogram_rectangle,
@@ -348,12 +400,13 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     )
     # Crop rectangular reconstruction to match circle=True reconstruction
     width = reconstruction_circle.shape[0]
+    center = _get_default_center(width)
     excess = int(np.ceil((reconstruction_rectangle.shape[0] - width) / 2))
     s = np.s_[excess : width + excess, excess : width + excess]
     reconstruction_rectangle = reconstruction_rectangle[s]
     # Find the reconstruction circle, set reconstruction to zero outside
     c0, c1 = np.ogrid[0:width, 0:width]
-    r = np.sqrt((c0 - width // 2) ** 2 + (c1 - width // 2) ** 2)
+    r = np.sqrt((c0 - center) ** 2 + (c1 - center) ** 2)
     reconstruction_rectangle[r > radius] = 0.0
     print(reconstruction_circle.shape)
     print(reconstruction_rectangle.shape)
