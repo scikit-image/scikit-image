@@ -1,6 +1,5 @@
 """Data structures to hold collections of images, with optional caching."""
 
-
 import os
 from glob import glob
 import re
@@ -436,7 +435,6 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-
     """A class containing all frames from multi-frame TIFF images.
 
     Parameters

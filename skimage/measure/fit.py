@@ -217,7 +217,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::

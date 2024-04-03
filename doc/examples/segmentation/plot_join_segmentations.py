@@ -10,6 +10,7 @@ placed in the same segment if and only if it is in the same segment in
 *both* segmentations.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

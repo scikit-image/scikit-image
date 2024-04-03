@@ -5,6 +5,7 @@ textbooks. Expressions for higher orders and dimensions were generated in SymPy
 using ``tools/precompute/moments_sympy.py`` in the GitHub repository.
 
 """
+
 import itertools
 import math
 

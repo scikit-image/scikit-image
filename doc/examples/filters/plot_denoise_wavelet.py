@@ -27,6 +27,7 @@ where a unique threshold is estimated for each wavelet subband.  This generally
 results in an improvement over what can be obtained with a single threshold.
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.restoration import denoise_wavelet, estimate_sigma
