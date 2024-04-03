@@ -202,7 +202,9 @@ xfail_strict = true
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
-filterwarnings = []
+filterwarnings = [
+    "error",
+]
 
 [tool.coverage.run]
 omit = ['*/tests/*']
