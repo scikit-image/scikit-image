@@ -52,7 +52,7 @@ build = [
     'ninja',
     'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.25',
+    'numpy>=2.0.0rc1',
     # Developer UI
     'spin==0.8',
     'build',
@@ -99,7 +99,7 @@ optional = [
 ]
 test = [
     'asv',
-    'numpydoc>=1.5',
+    'numpydoc>=1.7',
     'pooch>=1.6.0',
     'pytest>=7.0',
     'pytest-cov>=2.11.0',
@@ -125,7 +125,7 @@ requires = [
     'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
-    'numpy>=1.25',
+    'numpy>=2.0.0rc1',
 ]
 
 [tool.spin]
