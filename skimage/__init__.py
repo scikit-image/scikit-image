@@ -67,10 +67,6 @@ dtype_limits
 
 __version__ = '0.23.0rc3.dev0'
 
-from ._shared.version_requirements import ensure_python_version
-
-ensure_python_version((3, 8))
-
 import lazy_loader as lazy
 
 __getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
