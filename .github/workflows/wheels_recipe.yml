@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
@@ -59,7 +59,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
@@ -99,7 +99,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -120,7 +120,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
@@ -177,7 +177,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_TEST_SKIP: "*-macosx_arm64"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -197,7 +197,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
@@ -235,7 +235,7 @@ jobs:
           # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
