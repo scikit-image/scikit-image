@@ -145,6 +145,20 @@ def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
                 lower_threshold = curr_pixel - threshold
                 upper_threshold = curr_pixel + threshold
 
+                # High speed test for n >= 12
+                if n >= 12:
+                    speed_sum_b = 0
+                    speed_sum_d = 0
+                    pixel = 0
+                    for k in range(0, 16, 4):
+                        pixel = image[i + rp[k], j + cp[k]]
+                        if pixel > upper_threshold:
+                            speed_sum_b += 1
+                        elif pixel < lower_threshold:
+                            speed_sum_d += 1
+                    if speed_sum_d < 3 and speed_sum_b < 3:
+                        continue
+
                 for k in range(16):
                     circle_intensities[k] = image[i + rp[k], j + cp[k]]
                     if circle_intensities[k] > upper_threshold:
@@ -156,18 +170,6 @@ def _corner_fast(np_floats[:, ::1] image, signed char n, np_floats threshold):
                     else:
                         # Similar pixel
                         bins[k] = b's'
-
-                # High speed test for n >= 12
-                if n >= 12:
-                    speed_sum_b = 0
-                    speed_sum_d = 0
-                    for k in range(0, 16, 4):
-                        if bins[k] == b'b':
-                            speed_sum_b += 1
-                        elif bins[k] == b'd':
-                            speed_sum_d += 1
-                    if speed_sum_d < 3 and speed_sum_b < 3:
-                        continue
 
                 # Test for bright pixels
                 curr_response = _corner_fast_response[np_floats](curr_pixel,
