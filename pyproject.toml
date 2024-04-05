@@ -32,7 +32,7 @@ dependencies = [
     'imageio>=2.33',
     'tifffile>=2022.8.12',
     'packaging>=21',
-    'lazy_loader>=0.3',
+    'lazy-loader>=0.4',
 ]
 
 [[project.maintainers]]
