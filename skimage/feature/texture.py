@@ -233,6 +233,12 @@ def graycoprops(P, prop='contrast'):
            [1.25      , 2.75      ]])
 
     """
+
+    def glcm_mean():
+        I = np.arange(num_level).reshape((num_level, 1, 1, 1))
+        mean = np.sum(I * P, axis=(0, 1))
+        return I, mean
+
     check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
@@ -269,19 +275,16 @@ def graycoprops(P, prop='contrast'):
     elif prop == 'ASM':
         results = np.sum(P**2, axis=(0, 1))
     elif prop == 'mean':
-        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
-        results = np.sum(I * P, axis=(0, 1))
+        _, results = glcm_mean()
     elif prop == 'variance':
-        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
-        mean = np.sum(I * P, axis=(0, 1))
+        I, mean = glcm_mean()
         results = np.sum(P * ((I - mean) ** 2), axis=(0, 1))
     elif prop == 'std':
-        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
-        mean = np.sum(I * P, axis=(0, 1))
+        I, mean = glcm_mean()
         var = np.sum(P * ((I - mean) ** 2), axis=(0, 1))
         results = np.sqrt(var)
     elif prop == 'entropy':
-        ln = -np.log(P, where=(P != 0))
+        ln = -np.log(P, where=(P != 0), out=np.zeros_like(P))
         results = np.sum(P * ln, axis=(0, 1))
 
     elif prop == 'correlation':
