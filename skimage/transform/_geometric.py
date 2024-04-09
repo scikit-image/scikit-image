@@ -1264,7 +1264,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     where the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
+        [[a0  -b0  a1]
          [b0  a0  b1]
          [0   0    1]]
 
