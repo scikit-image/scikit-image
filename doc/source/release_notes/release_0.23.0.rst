@@ -1,13 +1,23 @@
-scikit-image 0.X.0 (not released)
-=================================
+scikit-image 0.23.0
+===================
+
+We're happy to announce the release of scikit-image 0.23.0!
+
+Highlights
+----------
+
+- Ensure ``skimage.morphology.closing`` and ``skimage.morphology.opening`` are extensive and anti-extensive, respectively, if the footprint is not mirror symmetric (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
+- Add parameters ``mode`` and ``cval`` to ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology``. These new parameters determine how array borders are handled (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
+- Add parameter ``mode`` to ``binary_erosion``, ``binary_dilation``, ``binary_opening`` and ``binary_closing`` in ``skimage.morphology``. These new parameters determine how array borders are handled (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
+- Speedup ``skimage.util.map_array`` by parallelization with Cython's ``prange`` (`#7266 <https://github.com/scikit-image/scikit-image/pull/7266>`_).
 
 New Features
 ------------
 
 - Add new ``intensity_std`` property to ``skimage.measure.regionprops`` which computes the standard deviation of the intensity in a region (`#6712 <https://github.com/scikit-image/scikit-image/pull/6712>`_).
-- Add functions ``mirror_footprint`` and ``pad_footprint`` to ``skimage.morphology`` (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
 - Add parameters ``mode`` and ``cval`` to ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology``. These new parameters determine how array borders are handled (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
 - Add parameter ``mode`` to ``binary_erosion``, ``binary_dilation``, ``binary_opening`` and ``binary_closing`` in ``skimage.morphology``. These new parameters determine how array borders are handled (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
+- Add functions ``mirror_footprint`` and ``pad_footprint`` to ``skimage.morphology`` (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
 - Add new parameter ``spacing`` to ``segmentation.expand_labels`` to support anisotropic images (`#7080 <https://github.com/scikit-image/scikit-image/pull/7080>`_).
 
 API Changes
@@ -17,7 +27,7 @@ API Changes
 - Parameters ``shift_x`` and ``shift_y`` in ``skimage.morphology.erosion`` and ``skimage.morphology.dilation`` are deprecated. Use ``pad_footprint`` or modify the footprint manually instead (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
 - Remove unexpected value scaling in ``skimage.morphology.skeletonize_3d`` for non-binary input images. ``skeletonize_3d`` now always returns a binary array like similar functions (`#7095 <https://github.com/scikit-image/scikit-image/pull/7095>`_).
 - Deprecate function ``skimage.feature.plot_matches`` in favor of ``skimage.feature.plot_matched_features`` (`#7255 <https://github.com/scikit-image/scikit-image/pull/7255>`_).
-- Deprecate ``skimage.morphology.skeletonize_3d`` in favor of just skimage.morphology.skeletonize`` (`#7094 <https://github.com/scikit-image/scikit-image/pull/7094>`_).
+- Deprecate ``skimage.morphology.skeletonize_3d`` in favor of just ``skimage.morphology.skeletonize`` (`#7094 <https://github.com/scikit-image/scikit-image/pull/7094>`_).
 - Deprecate parameter ``output`` in ``skimage.filters.gaussian``; use ``out`` instead (`#7225 <https://github.com/scikit-image/scikit-image/pull/7225>`_).
 - Change the default value of the parameters ``shift_x``, ``shift_y`` and ``shift_z`` from ``False`` to ``0`` in the ``skimage.filters.rank`` functions. This has not impact on the  results. Warn in case boolean shifts are provided from now on (`#7320 <https://github.com/scikit-image/scikit-image/pull/7320>`_).
 
@@ -54,7 +64,7 @@ Documentation
 - Point binder tag/branch to commit corresponding to docs/release (`#7252 <https://github.com/scikit-image/scikit-image/pull/7252>`_).
 - Add example to FundamentalMatrixTransform class (`#6863 <https://github.com/scikit-image/scikit-image/pull/6863>`_).
 - Adds explanation of what the optional dependency on Matplotlib offers to the install instructions (`#7286 <https://github.com/scikit-image/scikit-image/pull/7286>`_).
-- Function docstring was changed to follow the conventions adopted in the original paper. τ was replaced with θ (`#7314 <https://github.com/scikit-image/scikit-image/pull/7314>`_).
+- Use correct symbol θ for tightness in the docstring of  ``skimage.registration.optical_flow_tvl1`` (`#7314 <https://github.com/scikit-image/scikit-image/pull/7314>`_).
 - The description of the parameter cval is modified in "int or float". cval is a numerical value not a string (`#7319 <https://github.com/scikit-image/scikit-image/pull/7319>`_).
 - Remove obsolete instruction about documenting changes (`#7321 <https://github.com/scikit-image/scikit-image/pull/7321>`_).
 - Added comment to clarify that dt corresponds to tau, i.e. the time step. Changed gray scale in grayscale in the entire registration module (`#7324 <https://github.com/scikit-image/scikit-image/pull/7324>`_).
@@ -64,6 +74,8 @@ Documentation
 - Update description of how to document pull requests for inclusion in the release notes (`#7267 <https://github.com/scikit-image/scikit-image/pull/7267>`_).
 - Clarify description of ``data_range`` parameter in ``skimage.metrics.structural_similarity`` (`#7345 <https://github.com/scikit-image/scikit-image/pull/7345>`_).
 - Use  object-oriented Matplotlib style in longer gallery examples and demonstrations (doc/examples/applications) (`#7346 <https://github.com/scikit-image/scikit-image/pull/7346>`_).
+- In the gallery example on segmenting human cells (in mitosis), include the border when generating basin markers for watershed (`#7362 <https://github.com/scikit-image/scikit-image/pull/7362>`_).
+- Add missing minus sign in docstring of ``skimage.transform.EuclideanTransform`` (`#7097 <https://github.com/scikit-image/scikit-image/pull/7097>`_).
 
 Infrastructure
 --------------
@@ -121,7 +133,10 @@ Maintenance
 - Update numpydoc to version 1.7 (`#7355 <https://github.com/scikit-image/scikit-image/pull/7355>`_).
 - [pre-commit.ci] pre-commit autoupdate (`#7365 <https://github.com/scikit-image/scikit-image/pull/7365>`_).
 - Simplify warning filters in test suite (`#7349 <https://github.com/scikit-image/scikit-image/pull/7349>`_).
-- Build against NumPy 2 (`#7367 <https://github.com/scikit-image/scikit-image/pull/7367>`_).
+- Build against NumPy >=2.0.0rc1 (`#7367 <https://github.com/scikit-image/scikit-image/pull/7367>`_).
+- Remove ``ensure_python_version`` function (`#7370 <https://github.com/scikit-image/scikit-image/pull/7370>`_).
+- Update GitHub actions to ``setup-python@v5``, ``cache@v4``, ``upload-artifact@v4``,  and ``download-artifact@v4`` (`#7368 <https://github.com/scikit-image/scikit-image/pull/7368>`_).
+- Update lazyloader to v0.4 (`#7373 <https://github.com/scikit-image/scikit-image/pull/7373>`_).
 
 Contributors
 ------------
@@ -182,5 +197,4 @@ Contributors
 - Sebastian Berg (`@seberg <https://github.com/seberg>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-_These lists are automatically generated, and may not be complete or may contain
-duplicates._
+_These lists are automatically generated, and may not be complete or may contain duplicates._

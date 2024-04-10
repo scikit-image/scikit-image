@@ -42,17 +42,17 @@ Example `version number`
 
       export VERSION=<version number>
       export PREVIOUS=<previous version number>
-      export ORG="networkx"
-      export REPO="networkx"
+      export ORG="scikit-image"
+      export REPO="scikit-image"
 
   If this is a prerelease:
 
-      export NOTES="doc/release/release_dev.rst"
+      export NOTES="doc/source/release_notes/release_dev.rst"
 
   If this is release:
 
-      export NOTES="doc/release/release_${VERSION}.rst"
-      git rm doc/release/release_dev.rst
+      export NOTES="doc/source/release_notes/release_${VERSION}.rst"
+      git rm doc/source/release_notes/release_dev.rst
 
 - Autogenerate release notes:
 
