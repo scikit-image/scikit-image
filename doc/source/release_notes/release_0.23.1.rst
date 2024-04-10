@@ -1,7 +1,13 @@
-scikit-image 0.23.0
+scikit-image 0.23.1
 ===================
 
-We're happy to announce the release of scikit-image 0.23.0!
+We're happy to announce the release of scikit-image 0.23.1!
+
+.. note::
+
+   Due to an issue with the CI system scikit-image 0.23.0 was never released.
+   This release is identical to what 0.23.0 would have been other than the CI
+   fix and the version number.
 
 Highlights
 ----------
