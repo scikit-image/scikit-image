@@ -154,6 +154,16 @@ skip-string-normalization = 1
 [tool.ruff]
 line-length = 88
 target-version = 'py310'
+exclude = [
+    '.git',
+    '.ruff_cache',
+    'build',
+    'build-install',
+    'dist',
+    'doc/source/auto_examples',
+]
+
+[tool.ruff.lint]
 select = [
     'F',
     'E',
@@ -165,16 +175,8 @@ ignore = [
     'E741',
     'E712',
 ]
-exclude = [
-    '.git',
-    '.ruff_cache',
-    'build',
-    'build-install',
-    'dist',
-    'doc/source/auto_examples',
-]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = [
     'E402',
     'F401',
@@ -190,7 +192,7 @@ exclude = [
 "skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = 'numpy'
 
 [tool.pytest.ini_options]
