@@ -69,6 +69,8 @@ Example `version number`
   - Check for duplicate names in the automatically generated list of
     contributors and reviewers.
 
+  - Append the release date to the title similar to previous iterations.
+
 - If this is a release:
 
   - update the file ``skimage/data/_fetchers.py`` to point the pooch
