@@ -33,8 +33,9 @@ jobs:
       - uses: actions/download-artifact@v4
         id: download
         with:
-          name: wheels
+          name: skimage-wheels-*
           path: ./dist
+          merge-multiple: true
 
       - name: Upload wheel
         uses: scientific-python/upload-nightly-action@b67d7fcc0396e1128a474d1ab2b48aa94680f9fc # 0.5.0
