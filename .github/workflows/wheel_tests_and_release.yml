@@ -38,8 +38,9 @@ jobs:
       - uses: actions/download-artifact@v4
         id: download
         with:
-          name: wheels
+          name: skimage-wheels-*
           path: ./dist
+          merge-multiple: true
 
       - name: Build the source distribution
         run: |

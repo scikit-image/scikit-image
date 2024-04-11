@@ -61,7 +61,7 @@ jobs:
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: skimage-wheels-${{ matrix.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_linux_aarch64_wheels:
@@ -101,7 +101,7 @@ jobs:
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: skimage-wheels-${{ matrix.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_macos_wheels:
@@ -179,7 +179,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: skimage-wheels-${{ matrix.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_windows_wheels:
@@ -237,5 +237,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: skimage-wheels-${{ matrix.os }}-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
