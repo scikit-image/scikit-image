@@ -151,17 +151,6 @@ Metrics = [
 target-version = ['py310', 'py311', 'py312']
 skip-string-normalization = 1
 
-[tool.ruff]
-line-length = 88
-exclude = [
-    '.git',
-    '.ruff_cache',
-    'build',
-    'build-install',
-    'dist',
-    'doc/source/auto_examples',
-]
-
 [tool.ruff.lint]
 select = [
     'F',
