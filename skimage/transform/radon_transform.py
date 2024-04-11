@@ -77,9 +77,11 @@ def radon(image, theta=None, circle=True, *, preserve_range=False):
             )
         # Crop image to make it square
         slices = tuple(
-            slice(int(np.ceil(excess / 2)), int(np.ceil(excess / 2) + shape_min))
-            if excess > 0
-            else slice(None)
+            (
+                slice(int(np.ceil(excess / 2)), int(np.ceil(excess / 2) + shape_min))
+                if excess > 0
+                else slice(None)
+            )
             for excess in (img_shape - shape_min)
         )
         padded_image = image[slices]

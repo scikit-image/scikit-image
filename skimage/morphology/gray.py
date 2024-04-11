@@ -1,6 +1,7 @@
 """
 Grayscale morphological operations
 """
+
 import warnings
 
 import numpy as np

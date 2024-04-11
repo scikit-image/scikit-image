@@ -79,6 +79,7 @@ References
        pp. 91-110.
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.feature import hog

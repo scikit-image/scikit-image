@@ -30,6 +30,7 @@ In this demo, ``h``, was hand-tuned to give the approximate best-case performanc
 of each variant.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

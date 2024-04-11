@@ -23,6 +23,7 @@ Origin Author: Dan Oneata (Author of the original implementation for the Fisher
 vector computation using scikit-learn and NumPy. Subsequently ported to
 scikit-image (here) by other authors.)
 """
+
 import numpy as np
 
 

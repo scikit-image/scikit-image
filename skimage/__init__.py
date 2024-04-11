@@ -65,11 +65,7 @@ dtype_limits
 
 """
 
-__version__ = '0.23.0rc1.dev0'
-
-from ._shared.version_requirements import ensure_python_version
-
-ensure_python_version((3, 8))
+__version__ = '0.23.1.post0.dev0'
 
 import lazy_loader as lazy
 
