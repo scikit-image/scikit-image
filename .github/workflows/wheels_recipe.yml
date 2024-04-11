@@ -59,7 +59,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -99,7 +99,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -177,7 +177,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_TEST_SKIP: "*-macosx_arm64"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
@@ -235,7 +235,7 @@ jobs:
           # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: ./dist/*.whl
