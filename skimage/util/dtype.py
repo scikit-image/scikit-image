@@ -15,17 +15,29 @@ __all__ = [
     'dtype_limits',
 ]
 
+# Some of these may or may not be aliases depending on architecture & platform
 _integer_types = (
     np.int8,
+    np.byte,
     np.int16,
+    np.short,
     np.int32,
     np.int64,
+    np.longlong,
+    np.int_,
     np.intp,
+    np.intc,
+    int,
     np.uint8,
+    np.ubyte,
     np.uint16,
+    np.ushort,
     np.uint32,
     np.uint64,
+    np.ulonglong,
+    np.uint,
     np.uintp,
+    np.uintc,
 )
 _integer_ranges = {t: (np.iinfo(t).min, np.iinfo(t).max) for t in _integer_types}
 dtype_range = {
