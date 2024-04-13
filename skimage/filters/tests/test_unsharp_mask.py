@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pytest
 
@@ -38,7 +40,17 @@ def test_unsharp_masking_output_type_and_shape(
     radius, amount, shape, multichannel, dtype, offset, preserve
 ):
     array = np.random.random(shape)
-    array = ((array + offset) * 128).astype(dtype)
+    array = (array + offset) * 128
+    with warnings.catch_warnings():
+        # Ignore arch specific warning on arm64, armhf, ppc64el, riscv64, s390x
+        # https://github.com/scikit-image/scikit-image/issues/7391
+        warnings.filterwarnings(
+            action="ignore",
+            category=RuntimeWarning,
+            message="invalid value encountered in cast",
+        )
+        array = array.astype(dtype)
+
     if (preserve is False) and (dtype in [np.float32, np.float64]):
         array /= max(np.abs(array).max(), 1.0)
     channel_axis = -1 if multichannel else None
