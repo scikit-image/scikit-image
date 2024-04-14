@@ -35,12 +35,11 @@ jobs:
         run: |
           pip install twine
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         id: download
         with:
-          name: skimage-wheels-*
+          name: wheels
           path: ./dist
-          merge-multiple: true
 
       - name: Build the source distribution
         run: |

@@ -30,12 +30,11 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         id: download
         with:
-          name: skimage-wheels-*
+          name: wheels
           path: ./dist
-          merge-multiple: true
 
       - name: Upload wheel
         uses: scientific-python/upload-nightly-action@b67d7fcc0396e1128a474d1ab2b48aa94680f9fc # 0.5.0
