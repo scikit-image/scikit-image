@@ -230,7 +230,10 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     def wrapper(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            if not is_wasm:
+            if is_wasm:
+                # Threading isn't supported on WASM, return early
+                func(*args, **kwargs)
+            else:
                 with expected_warnings(warnings_matching):
                     threads = []
                     for i in range(num_threads - 1):
@@ -245,8 +248,6 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
 
                     for thread in threads:
                         thread.join()
-            else:
-                func(*args, **kwargs)
 
         return inner
 
