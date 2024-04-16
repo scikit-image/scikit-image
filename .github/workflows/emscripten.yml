@@ -78,9 +78,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
-        env:
-          # Avoid using the default TkAgg backend, which requires GUI support
-          MPLBACKEND: "Agg"
         run: |
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
