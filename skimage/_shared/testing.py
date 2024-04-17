@@ -228,26 +228,26 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     assert num_threads > 0
 
     def wrapper(func):
+        if is_wasm:
+            # Threading isn't supported on WASM, return early
+            return func
+
+        import threading
+
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            if is_wasm:
-                # Threading isn't supported on WASM, return early
+            with expected_warnings(warnings_matching):
+                threads = []
+                for i in range(num_threads - 1):
+                    thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+                    threads.append(thread)
+                for thread in threads:
+                    thread.start()
+
                 func(*args, **kwargs)
-            else:
-                with expected_warnings(warnings_matching):
-                    threads = []
-                    for i in range(num_threads - 1):
-                        import threading
 
-                        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-                        threads.append(thread)
-                    for thread in threads:
-                        thread.start()
-
-                    func(*args, **kwargs)
-
-                    for thread in threads:
-                        thread.join()
+                for thread in threads:
+                    thread.join()
 
         return inner
 
