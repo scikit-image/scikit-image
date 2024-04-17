@@ -40,8 +40,6 @@ __all__ = [
     'pyramid_expand',
     'pyramid_gaussian',
     'pyramid_laplacian',
-    'tps_warp',
-    'TpsTransform',
 ]
 
 from .hough_transform import (
@@ -84,4 +82,3 @@ from .pyramids import (
     pyramid_gaussian,
     pyramid_laplacian,
 )
-from ._thin_plate_splines import TpsTransform, tps_warp

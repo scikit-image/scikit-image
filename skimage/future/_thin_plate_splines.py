@@ -44,7 +44,7 @@ class TpsTransform:
 
     Estimate transformation:
 
-    >>> tps = ski.transform.TpsTransform()
+    >>> tps = ski.future.TpsTransform()
     >>> tps.estimate(src, dst)
     True
 
@@ -250,7 +250,7 @@ def tps_warp(
     >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
     >>> dst = np.array([[512, 0], [0, 0], [0, 512],[512, 512]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
-    >>> warped_image = ski.transform.tps_warp(
+    >>> warped_image = ski.future.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
 

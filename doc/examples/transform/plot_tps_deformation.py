@@ -46,9 +46,7 @@ dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 10
 
 # Fit the thin plate spline from output to input
 
-warped_img = ski.transform.tps_warp(
-    astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1
-)
+warped_img = ski.future.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
 
 
 fig, axs = plt.subplots(1, 2)
@@ -116,7 +114,7 @@ target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 
 # Compute the coefficient
-trans = ski.transform.TpsTransform()
+trans = ski.future.TpsTransform()
 trans.estimate(source_xy, target_xy)
 
 

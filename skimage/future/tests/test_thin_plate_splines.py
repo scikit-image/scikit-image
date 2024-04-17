@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import skimage as ski
-from skimage.transform._thin_plate_splines import TpsTransform, tps_warp
+from skimage.future import TpsTransform, tps_warp
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 
