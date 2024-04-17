@@ -9,6 +9,7 @@ provides the related functions h-maxima and h-minima.
 Soille, P. (2003). Morphological Image Analysis: Principles and Applications
 (2nd ed.), Chapter 6. Springer-Verlag New York, Inc.
 """
+
 import numpy as np
 
 from .._shared.utils import warn

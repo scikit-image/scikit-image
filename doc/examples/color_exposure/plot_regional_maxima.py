@@ -13,6 +13,7 @@ border to be the pixel values in the original image. These maximal pixels will
 get dilated in order to reconstruct the background image.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

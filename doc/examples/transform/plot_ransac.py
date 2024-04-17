@@ -31,6 +31,7 @@ the special stop criteria are met. The final model is estimated using all the
 inlier samples of the previously determined best model.
 
 """
+
 import numpy as np
 from matplotlib import pyplot as plt
 

@@ -1236,6 +1236,16 @@ def test_cache():
     assert np.any(f0 != f1)
 
 
+def test_disabled_cache_is_empty():
+    SAMPLE_mod = SAMPLE.copy()
+    region = regionprops(SAMPLE_mod, cache=False)[0]
+    # Access one property to trigger cache
+    _ = region.image_filled
+
+    # Cache should be empty
+    assert region._cache == dict()
+
+
 def test_docstrings_and_props():
     def foo():
         """foo"""

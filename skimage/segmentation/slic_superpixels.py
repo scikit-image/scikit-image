@@ -391,7 +391,7 @@ def slic(
     if (sigma > 0).any():
         # add zero smoothing for channel dimension
         sigma = list(sigma) + [0]
-        image = gaussian(image, sigma, mode='reflect')
+        image = gaussian(image, sigma=sigma, mode='reflect')
 
     n_centroids = centroids.shape[0]
     segments = np.ascontiguousarray(

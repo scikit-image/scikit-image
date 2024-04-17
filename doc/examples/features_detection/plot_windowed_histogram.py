@@ -63,7 +63,7 @@ def windowed_histogram_similarity(image, footprint, reference_hist, n_bins):
 
     num = (X - Y) ** 2
     denom = X + Y
-    denom[denom == 0] = np.infty
+    denom[denom == 0] = np.inf
     frac = num / denom
 
     chi_sqr = 0.5 * np.sum(frac, axis=2)

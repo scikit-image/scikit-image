@@ -85,7 +85,7 @@ def active_contour(
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian(img, 2, preserve_range=False)
+    >>> img = gaussian(img, sigma=2, preserve_range=False)
 
     Initialize spline:
 

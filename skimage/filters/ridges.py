@@ -8,7 +8,6 @@ image intensities to detect tube-like structures where the intensity changes
 perpendicular but not along the structure.
 """
 
-
 from warnings import warn
 
 import numpy as np

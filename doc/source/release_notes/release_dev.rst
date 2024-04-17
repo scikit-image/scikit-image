@@ -1,42 +1,42 @@
-:orphan:
+scikit-image 0.23.2rc1
+======================
 
-scikit-image 0.X.0 (not released)
-=================================
+We're happy to announce the release of scikit-image 0.23.2rc1!
 
-scikit-image is an image processing library for the scientific Python
-ecosystem that includes algorithms for segmentation, geometric
-transformations, feature detection, registration, color space
-manipulation, analysis, filtering, morphology, and more.
+Bug Fixes
+---------
 
-For more information, examples, and documentation, please visit our website:
+- Make sure ``skimage.util.img_as_ubyte`` supports the edge case where ``dtype('uint64').type`` of the provided image is ``np.ulonglong`` instead of ``np.uint64`` (`#7392 <https://github.com/scikit-image/scikit-image/pull/7392>`_).
 
-https://scikit-image.org
+Documentation
+-------------
 
+- Add date to 0.23.1 release notes (`#7384 <https://github.com/scikit-image/scikit-image/pull/7384>`_).
+- Fix docstring of ``connectivity`` parameter in ``skimage.segmentation.watershed`` (`#7360 <https://github.com/scikit-image/scikit-image/pull/7360>`_).
 
-New Features
+Maintenance
+-----------
+
+- Use ``numpy.inf`` instead of deprecated ``numpy.infty`` (`#7386 <https://github.com/scikit-image/scikit-image/pull/7386>`_).
+- Update Ruff config (`#7387 <https://github.com/scikit-image/scikit-image/pull/7387>`_).
+- Update matrix and names of Azure pipelines configuration (`#7390 <https://github.com/scikit-image/scikit-image/pull/7390>`_).
+- Ignore arch specific cast warnings originating from ``astype`` in tests (`#7393 <https://github.com/scikit-image/scikit-image/pull/7393>`_).
+- Update link to numpydoc example.py (`#7395 <https://github.com/scikit-image/scikit-image/pull/7395>`_).
+
+Contributors
 ------------
 
-- Add parameters ``mode`` and ``cval`` to ``erosion``, ``dilation``, ``opening``, ``closing``, ``white_tophat``, and ``black_tophat`` in ``skimage.morphology``;
-  add parameter ``mode`` to ``binary_erosion``, ``binary_dilation``, ``binary_opening`` and ``binary_closing`` in ``skimage.morphology``;
-  add functions ``mirror_footprint`` and ``pad_footprint`` to ``skimage.morphology``;
-  (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
+4 authors added to this release (alphabetically):
 
-Improvements
-------------
+- `@pitkajuh <https://github.com/pitkajuh>`_
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
 
+3 reviewers added to this release (alphabetically):
 
+- Egor Panfilov (`@soupault <https://github.com/soupault>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
 
-Bugfixes
---------
-
-- ``skimage.morphology.closing`` and ``skimage.morphology.opening`` were not extensive and anti-extensive, respectively, if the footprint was not mirror symmetric
-  (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
-
-Deprecations
-------------
-
-- Parameters ``shift_x`` and ``shift_y`` in ``skimage.morphology.erosion`` and ``skimage.morphology.dilation`` are deprecated and a warning is emitted if they are given.
-  (`#6695 <https://github.com/scikit-image/scikit-image/pull/6695>`_).
-
-Contributors to this release
-----------------------------
+_These lists are automatically generated, and may not be complete or may contain duplicates._
