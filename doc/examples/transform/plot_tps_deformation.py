@@ -3,14 +3,10 @@ r"""
 Interpolate images with thin-plate splines
 ==========================================
 
-One conventional tool for interpolating surfaces over a set of data points is
-thin-plate splines (TPS). TPS refer to a technique for data interpolation [1]_.
-According to [2]_, for interpolation of a surface over a fixed set data points in the plane,
-the bending energy is a quadratic form in the heights of assigned surface. The spline is the
-superposition of eigenvectors of the bending energy matrix over a titled flat plane having
-no bending energy at all.
-In an image context, given pairs of source and target control points, TPS can be used to
-transform a space, which, in our case, is a 2D image.
+A conventional technique for interpolating surfaces over a set of data points
+are thin-plate splines (TPS). [1]_ [2]_
+In an image context, given pairs of source and target control points, TPS can
+be used to transform a space, which, in our case, is a 2D image.
 
 
 .. [1] Wikipedia, Thin plate spline
@@ -25,13 +21,14 @@ transform a space, which, in our case, is a 2D image.
 Deform an image
 ===============
 
-Image deformation implies displacing the pixels of an image relatively to one another.
+Image deformation implies displacing the pixels of an image relative to one another.
 In this example, we deform the (2D) image of an astronaut by using thin-plate splines.
-In our image, we define 6 source and target points labelled "1-6": "1-4" are found near the image
-corners, "5" near the left smile corner, and "6" in the right eye. At the "1-4" points, there is no
-displacement. Point "5" is displaced upward and point "6" downward.
+In our image, we define 6 source and target points labeled "1-6": "1-4" are found near
+the image corners, "5" near the left smile corner, and "6" in the right eye.
+At the "1-4" points, there is no displacement.
+Point "5" is displaced upward and point "6" downward.
 
-We use TPS to provide a very handy interpolator for image deformation.
+We use TPS to provide as a very handy interpolator for image deformation.
 """
 
 import matplotlib.pyplot as plt
@@ -95,8 +92,8 @@ plt.show()
 # In this second example, we start with a set of source and target coordinates.
 # TPS is applied to each source and target coordinate to derive an interpolation
 # function and coefficients.
-# each target point. These coefficients are then used to transform an arbitrary
-# point associated with the reference to an interpolated location on the target.
+# These coefficients are then used to transform an arbitrary point associated
+# with the reference to an interpolated location on the target.
 
 import matplotlib.pyplot as plt
 
