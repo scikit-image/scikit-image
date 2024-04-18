@@ -63,6 +63,13 @@ autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = ".rst"
 
+show_warning_types = True
+suppress_warnings = [
+    # Ignore new warning in Sphinx 7.3.0 while pickling environment:
+    #   WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
+    "config.cache",
+]
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
