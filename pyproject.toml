@@ -64,7 +64,7 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.2',
+    'sphinx>=7.3',
     'sphinx-gallery>=0.14',
     'numpydoc>=1.7',
     'sphinx-copybutton',
