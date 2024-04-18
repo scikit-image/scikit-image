@@ -4,7 +4,7 @@ Interpolate images with thin-plate splines
 ==========================================
 
 A conventional technique for interpolating surfaces over a set of data points
-are thin-plate splines (TPS). [1]_ [2]_
+are thin-plate splines (TPS) [1]_ [2]_.
 In an image context, given pairs of source and target control points, TPS can
 be used to transform a space, which, in our case, is a 2D image.
 
@@ -15,6 +15,7 @@ be used to transform a space, which, in our case, is a 2D image.
 .. [2] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
        decomposition of deformations." IEEE Transactions on pattern analysis and
        machine intelligence 11.6 (1989): 567–585.
+       :DOI:`10.1109/34.24792`
        https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
 
@@ -28,7 +29,7 @@ the image corners, "5" near the left smile corner, and "6" in the right eye.
 At the "1-4" points, there is no displacement.
 Point "5" is displaced upward and point "6" downward.
 
-We use TPS to provide as a very handy interpolator for image deformation.
+We use TPS as a very handy interpolator for image deformation.
 """
 
 import matplotlib.pyplot as plt
@@ -41,7 +42,7 @@ astronaut = ski.data.astronaut()
 src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 100]])
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
-# Fit the thin plate spline from output to input
+# Fit the thin-plate spline from source (src) to target (dst) points
 
 warped_img = ski.future.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
 
@@ -119,7 +120,7 @@ trans.estimate(source_xy, target_xy)
 samp2 = np.linspace(-1.8, 1.8, 10)
 test_xy = np.tile(samp2, [2, 1]).T
 
-# Estimate transformed points from given sets of source and targets points
+# Estimate transformed points from given sets of source and target points
 transformed_xy = trans(test_xy)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(8, 3))

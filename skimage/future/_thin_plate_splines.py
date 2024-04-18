@@ -25,7 +25,8 @@ class TpsTransform:
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
            decomposition of deformations," IEEE Transactions on pattern analysis
-           and machine intelligence 11.6 (1989): 567–585. DOI:`10.1109/34.24792`
+           and machine intelligence 11.6 (1989): 567–585.
+           DOI:`10.1109/34.24792`
            https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
     Examples
