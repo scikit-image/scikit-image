@@ -11,6 +11,7 @@ from skimage import exposure
 
 class ExposureSuite:
     """Benchmark for exposure routines in scikit-image."""
+
     def setup(self):
         self.image_u8 = data.moon()
         self.image = img_as_float(self.image_u8)
@@ -23,18 +24,18 @@ class ExposureSuite:
         # note that this is not needed as asv does this kind of averaging by
         # default, but this loop remains here to maintain benchmark continuity
         for i in range(10):
-            result = exposure.equalize_hist(self.image)
+            exposure.equalize_hist(self.image)
 
     def time_equalize_adapthist(self):
-        result = exposure.equalize_adapthist(self.image, clip_limit=0.03)
+        exposure.equalize_adapthist(self.image, clip_limit=0.03)
 
     def time_rescale_intensity(self):
-        result = exposure.rescale_intensity(self.image,
-                                            in_range=(self.p2, self.p98))
+        exposure.rescale_intensity(self.image, in_range=(self.p2, self.p98))
+
     def time_histogram(self):
         # Running it 10 times to achieve significant performance time.
         for i in range(10):
-            result = exposure.histogram(self.image)
+            exposure.histogram(self.image)
 
     def time_gamma_adjust_u8(self):
         for i in range(10):
@@ -42,7 +43,6 @@ class ExposureSuite:
 
 
 class MatchHistogramsSuite:
-
     param_names = ["shape", "dtype", "multichannel"]
     params = [
         ((64, 64), (256, 256), (1024, 1024)),
@@ -60,13 +60,13 @@ class MatchHistogramsSuite:
         return image[sl]
 
     """Benchmark for exposure routines in scikit-image."""
+
     def setup(self, shape, dtype, multichannel):
         self.image = data.moon().astype(dtype, copy=False)
         self.reference = data.camera().astype(dtype, copy=False)
 
         self.image = self._tile_to_shape(self.image, shape, multichannel)
-        self.reference = self._tile_to_shape(self.reference, shape,
-                                             multichannel)
+        self.reference = self._tile_to_shape(self.reference, shape, multichannel)
         channel_axis = -1 if multichannel else None
         self.kwargs = {'channel_axis': channel_axis}
 

@@ -2,10 +2,10 @@ import time
 import random
 import skimage.graph.heap as heap
 
-from skimage._shared.testing import test_parallel
+from skimage._shared.testing import run_in_parallel
 
 
-@test_parallel()
+@run_in_parallel()
 def test_heap():
     _test_heap(100000, True)
     _test_heap(100000, False)
@@ -45,6 +45,6 @@ def _test_heap(n, fast_update):
 
     # verify
     for i in range(1, len(b)):
-        assert(b[i] >= b[i - 1])
+        assert b[i] >= b[i - 1]
 
     return t1 - t0

@@ -1,0 +1,43 @@
+name: Nightly Wheel builder
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 11 * * SUN" # every Sunday at 11:27 UTC
+  push:
+    branches:
+      - maintenance/**
+
+permissions:
+  contents: read
+
+jobs:
+  call-workflow-build-wheels:
+    uses: ./.github/workflows/wheels_recipe.yml
+    with:
+      CIBW_ENVIRONMENT: >
+        PIP_PRE=1
+        PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
+      # assert NumPy 2.0 before running tests
+      CIBW_TEST_COMMAND: >
+        pip list --pre --format=freeze | grep -q 'numpy==2' &&
+        pytest --pyargs skimage
+
+  upload_anaconda:
+    permissions:
+      contents: write # for softprops/action-gh-release to create GitHub release
+    name: Release
+    needs: call-workflow-build-wheels
+    if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: wheels
+          path: ./dist
+
+      - name: Upload wheel
+        uses: scientific-python/upload-nightly-action@b67d7fcc0396e1128a474d1ab2b48aa94680f9fc # 0.5.0
+        with:
+          artifacts_path: dist
+          anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}

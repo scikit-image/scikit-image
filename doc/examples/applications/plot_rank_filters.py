@@ -47,12 +47,12 @@ hist, hist_centers = histogram(noisy_image)
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
-ax[0].axis('off')
+ax[0].set_axis_off()
 
 ax[1].plot(hist_centers, hist, lw=2)
 ax[1].set_title('Gray-level histogram')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -88,9 +88,9 @@ ax[3].imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[3].set_title('Median $r=20$')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -125,9 +125,9 @@ ax[1].imshow(loc_mean, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[1].set_title('Local mean $r=10$')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -147,8 +147,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -162,9 +161,9 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(bilat[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # One can see that the large continuous part of the image (e.g. sky) is
@@ -200,24 +199,24 @@ fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(12, 12))
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
-ax[0].axis('off')
+ax[0].set_axis_off()
 
 ax[1].plot(hist[1][:-1], hist[0], lw=2)
 ax[1].set_title('Histogram of gray values')
 
 ax[2].imshow(glob, cmap=plt.cm.gray)
-ax[2].axis('off')
+ax[2].set_axis_off()
 
 ax[3].plot(glob_hist[1][:-1], glob_hist[0], lw=2)
 ax[3].set_title('Histogram of gray values')
 
 ax[4].imshow(loc, cmap=plt.cm.gray)
-ax[4].axis('off')
+ax[4].set_axis_off()
 
 ax[5].plot(loc_hist[1][:-1], loc_hist[0], lw=2)
 ax[5].set_title('Histogram of gray values')
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Another way to maximize the number of gray-levels used for an image is to
@@ -242,9 +241,9 @@ ax[1].imshow(auto, cmap=plt.cm.gray)
 ax[1].set_title('Local autolevel')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # This filter is very sensitive to local outliers. One can
@@ -259,42 +258,37 @@ image = data.camera()
 
 footprint = disk(20)
 loc_autolevel = autolevel(image, footprint=footprint)
-loc_perc_autolevel0 = autolevel_percentile(
-    image, footprint=footprint, p0=.01, p1=.99
-)
-loc_perc_autolevel1 = autolevel_percentile(
-    image, footprint=footprint, p0=.05, p1=.95
-)
-loc_perc_autolevel2 = autolevel_percentile(
-    image, footprint=footprint, p0=.1, p1=.9
-)
-loc_perc_autolevel3 = autolevel_percentile(
-    image, footprint=footprint, p0=.15, p1=.85
-)
+loc_perc_autolevel0 = autolevel_percentile(image, footprint=footprint, p0=0.01, p1=0.99)
+loc_perc_autolevel1 = autolevel_percentile(image, footprint=footprint, p0=0.05, p1=0.95)
+loc_perc_autolevel2 = autolevel_percentile(image, footprint=footprint, p0=0.1, p1=0.9)
+loc_perc_autolevel3 = autolevel_percentile(image, footprint=footprint, p0=0.15, p1=0.85)
 
-fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
 
-title_list = ['Original',
-              'auto_level',
-              'auto-level 1%',
-              'auto-level 5%',
-              'auto-level 10%',
-              'auto-level 15%']
-image_list = [image,
-              loc_autolevel,
-              loc_perc_autolevel0,
-              loc_perc_autolevel1,
-              loc_perc_autolevel2,
-              loc_perc_autolevel3]
+title_list = [
+    'Original',
+    'auto_level',
+    'auto-level 1%',
+    'auto-level 5%',
+    'auto-level 10%',
+    'auto-level 15%',
+]
+image_list = [
+    image,
+    loc_autolevel,
+    loc_perc_autolevel0,
+    loc_perc_autolevel1,
+    loc_perc_autolevel2,
+    loc_perc_autolevel3,
+]
 
 for i in range(0, len(image_list)):
     ax[i].imshow(image_list[i], cmap=plt.cm.gray, vmin=0, vmax=255)
     ax[i].set_title(title_list[i])
-    ax[i].axis('off')
+    ax[i].set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The morphological contrast enhancement filter replaces the central pixel by
@@ -307,8 +301,7 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -322,9 +315,9 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(enh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The percentile version of the local morphological contrast enhancement uses
@@ -334,10 +327,9 @@ from skimage.filters.rank import enhance_contrast_percentile
 
 noisy_image = img_as_ubyte(data.camera())
 
-penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
+penh = enhance_contrast_percentile(noisy_image, disk(5), p0=0.1, p1=0.9)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex='row', sharey='row')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -351,9 +343,9 @@ ax[2].imshow(noisy_image[100:250, 350:450], cmap=plt.cm.gray)
 ax[3].imshow(penh[100:250, 350:450], cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -390,8 +382,7 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
 ax = axes.ravel()
 
 fig.colorbar(ax[0].imshow(p8, cmap=plt.cm.gray), ax=ax[0])
@@ -407,9 +398,9 @@ ax[3].imshow(glob_otsu, cmap=plt.cm.gray)
 ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # The example below performs the same comparison, using a 3D image this time.
@@ -427,8 +418,7 @@ loc_otsu = brain >= t_loc_otsu
 t_glob_otsu = threshold_otsu(brain)
 glob_otsu = brain >= t_glob_otsu
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
 ax = axes.ravel()
 
 slice_index = 3
@@ -446,7 +436,7 @@ ax[3].imshow(glob_otsu[slice_index], cmap=plt.cm.gray)
 ax[3].set_title(f'Global Otsu ($t={t_glob_otsu}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 fig.tight_layout()
 
@@ -462,8 +452,7 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-fig, ax = plt.subplots(ncols=2, figsize=(10, 5),
-                       sharex=True, sharey=True)
+fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
 ax[0].imshow(m, cmap=plt.cm.gray)
 ax[0].set_title('Original')
@@ -472,9 +461,9 @@ ax[1].imshow(m >= t, cmap=plt.cm.gray)
 ax[1].set_title(f'Local Otsu ($r={radius}$)')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Image morphology
@@ -495,8 +484,7 @@ closing = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10),
-                         sharex=True, sharey=True)
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
 
 ax[0].imshow(noisy_image, cmap=plt.cm.gray)
@@ -512,9 +500,9 @@ ax[3].imshow(grad, cmap=plt.cm.gray)
 ax[3].set_title('Morphological gradient')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -552,9 +540,9 @@ fig.colorbar(ax[1].imshow(entropy(image, disk(5)), cmap=plt.cm.gray), ax=ax[1])
 ax[1].set_title('Entropy')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 #
@@ -578,12 +566,14 @@ from skimage.filters.rank import median, maximum
 
 def exec_and_timeit(func):
     """Decorator that returns both function results and execution time."""
+
     def wrapper(*arg):
         t1 = time()
         res = func(*arg)
         t2 = time()
         ms = (t2 - t1) * 1000.0
         return (res, ms)
+
     return wrapper
 
 
@@ -605,6 +595,7 @@ def cm_dil(image, footprint):
 @exec_and_timeit
 def ndi_med(image, n):
     return percentile_filter(image, 50, size=n * 2 - 1)
+
 
 ######################################################################
 #  Comparison between
@@ -633,7 +624,7 @@ ax.set_xlabel('Element radius')
 ax.plot(e_range, rec)
 ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # and increasing image size:
@@ -658,7 +649,7 @@ ax.set_xlabel('Image size')
 ax.plot(s_range, rec)
 ax.legend(['filters.rank.maximum', 'morphology.dilate'])
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Comparison between:
@@ -699,9 +690,9 @@ ax[1].set_title('scipy.ndimage.percentile')
 ax[1].imshow(rndi, cmap=plt.cm.gray)
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # on increasing image size:
@@ -726,6 +717,6 @@ ax.legend(['filters.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()

@@ -1,0 +1,48 @@
+# Workflow to build and test against nightly wheels
+name: Test Nightly
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  PIP_FLAGS: >-
+    --upgrade
+    --pre
+    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --extra-index-url https://pypi.org/simple
+  MINIMUM_REQUIREMENTS: 0
+  BUILD_DOCS: 0
+  PYTHONOPTIMIZE: 0
+  TEST_EXAMPLES: 0
+  OPTIONAL_DEPS: 0
+  OPTIONS_NAME: "default"
+  INSTALL_FROM_SDIST: 0
+  WITHOUT_POOCH: 0
+  EAGER_IMPORT: 0
+
+jobs:
+  wheels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build package
+        run: |
+          set -ex
+          source tools/github/before_install.sh
+          set -ex
+          pip install -vv --no-build-isolation .;
+
+      - name: Run tests
+        run: source tools/github/script.sh

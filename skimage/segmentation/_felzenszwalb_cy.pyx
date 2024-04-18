@@ -19,7 +19,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
     """Felzenszwalb's efficient graph based segmentation for
     single or multiple channels.
 
-    Produces an oversegmentation of a single or multi-channel image
+    Produces an oversegmentation of a single or multichannel image
     using a fast, minimum spanning tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
@@ -27,7 +27,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
 
     Parameters
     ----------
-    image : (N, M, C) ndarray
+    image : (M, N, C) ndarray
         Input image.
     scale : float, optional (default 1)
         Sets the observation level. Higher means larger clusters.
@@ -39,7 +39,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
 
     Returns
     -------
-    segment_mask : (N, M) ndarray
+    segment_mask : (M, N) ndarray
         Integer mask indicating segment labels.
     """
 
@@ -95,7 +95,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
     # inner cost of segments
     cdef cnp.ndarray[cnp.float64_t, ndim=1] cint = np.zeros(width * height)
     cdef cnp.intp_t seg0, seg1, seg_new, e
-    cdef cnp.float32_t cost, inner_cost0, inner_cost1
+    cdef cnp.float32_t inner_cost0, inner_cost1
     cdef Py_ssize_t num_costs = costs.size
 
     with nogil:

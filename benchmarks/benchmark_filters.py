@@ -8,6 +8,7 @@ from skimage.filters.thresholding import threshold_li
 
 class FiltersSuite:
     """Benchmark for filter routines in scikit-image."""
+
     def setup(self):
         self.image = np.random.random((4000, 4000))
         self.image[:2000, :2000] += 1
@@ -19,6 +20,7 @@ class FiltersSuite:
 
 class FiltersSobel3D:
     """Benchmark for 3d sobel filters."""
+
     def setup(self):
         try:
             filters.sobel(np.ones((8, 8, 8)))
@@ -32,13 +34,11 @@ class FiltersSobel3D:
 
 class MultiOtsu:
     """Benchmarks for MultiOtsu threshold."""
+
     param_names = ['classes']
     params = [3, 4, 5]
+
     def setup(self, *args):
-        try:
-            from skimage.filters import threshold_multiotsu
-        except ImportError:
-            raise NotImplementedError("threshold_multiotsu unavailable")
         self.image = data.camera()
 
     def time_threshold_multiotsu(self, classes):
@@ -67,7 +67,6 @@ class MultiOtsu:
 class ThresholdSauvolaSuite:
     """Benchmark for transform routines in scikit-image."""
 
-
     def setup(self):
         self.image = np.zeros((2000, 2000), dtype=np.uint8)
         self.image3D = np.zeros((30, 300, 300), dtype=np.uint8)
@@ -82,10 +81,10 @@ class ThresholdSauvolaSuite:
         self.image3D[:, idx3D, idx3D] = 255
 
     def time_sauvola(self):
-        result = filters.threshold_sauvola(self.image, window_size=51)
+        filters.threshold_sauvola(self.image, window_size=51)
 
     def time_sauvola_3d(self):
-        result = filters.threshold_sauvola(self.image3D, window_size=51)
+        filters.threshold_sauvola(self.image3D, window_size=51)
 
 
 class ThresholdLi:
@@ -99,10 +98,10 @@ class ThresholdLi:
         self.image_float32 = self.image.astype(np.float32)
 
     def time_integer_image(self):
-        result1 = threshold_li(self.image)
+        threshold_li(self.image)
 
     def time_float32_image(self):
-        result1 = threshold_li(self.image_float32)
+        threshold_li(self.image_float32)
 
 
 class RidgeFilters:

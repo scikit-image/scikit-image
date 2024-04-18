@@ -6,6 +6,7 @@ Scientific images
 The title of each image indicates the name of the function.
 
 """
+
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -14,17 +15,18 @@ from skimage import data
 
 matplotlib.rcParams['font.size'] = 18
 
-images = ('hubble_deep_field',
-          'immunohistochemistry',
-          'lily',
-          'microaneurysms',
-          'moon',
-          'retina',
-          'shepp_logan_phantom',
-          'skin',
-          'cell',
-          'human_mitosis',
-          )
+images = (
+    'hubble_deep_field',
+    'immunohistochemistry',
+    'lily',
+    'microaneurysms',
+    'moon',
+    'retina',
+    'shepp_logan_phantom',
+    'skin',
+    'cell',
+    'human_mitosis',
+)
 
 
 for name in images:

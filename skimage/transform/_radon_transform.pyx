@@ -6,7 +6,7 @@ import numpy as np
 
 cimport numpy as cnp
 cimport cython
-from libc.math cimport cos, sin, floor, ceil, sqrt, abs, M_PI
+from libc.math cimport cos, sin, floor, ceil, sqrt, M_PI
 from .._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
@@ -18,20 +18,19 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
 
     Parameters
     ----------
-    image : 2D array, dtype=float
+    image : ndarray of float, shape (M, N)
         Image to project.
     theta : float
-        Angle of the projection
+        Angle of the projection.
     ray_position : float
-        Position of the ray within the projection
+        Position of the ray within the projection.
 
     Returns
     -------
     projected_value : float
-        Ray sum along the projection
+        Ray sum along the projection.
     norm_of_weights :
-        A measure of how long the ray's path through the reconstruction
-        circle was
+        A measure of how long the ray's path through the reconstruction circle was.
     """
     theta = theta / 180. * M_PI
     cdef np_floats radius = image.shape[0] // 2 - 1
@@ -98,9 +97,9 @@ cdef bilinear_ray_update(np_floats[:, :] image,
 
     Parameters
     ----------
-    image : 2D array, dtype=float
+    image : ndarray of float, shape (M, N)
         Current reconstruction estimate.
-    image_update : 2D array, dtype=float
+    image_update : ndarray of float, shape (M, N)
         Array of same shape as ``image``. Updates will be added to this array.
     theta : float
         Angle of the projection.
@@ -184,11 +183,11 @@ def sart_projection_update(np_floats[:, :] image not None,
 
     Parameters
     ----------
-    image : 2D array, dtype=float
+    image : ndarray of float, shape (M, N)
         Current reconstruction estimate
     theta : float
         Angle of the projection
-    projection : 1D array, dtype=float
+    projection : ndarray of float, shape (P,)
         Projected values, taken from the sinogram
     projection_shift : float
         Shift the position of the projection by this many pixels before
@@ -196,7 +195,7 @@ def sart_projection_update(np_floats[:, :] image not None,
 
     Returns
     -------
-    image_update : 2D array, dtype=float
+    image_update : ndarray of float, shape (M, N)
         Array of same shape as ``image`` containing updates that should be
         added to ``image`` to improve the reconstruction estimate
     """

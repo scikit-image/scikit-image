@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import (assert_almost_equal, assert_array_almost_equal,
-                           assert_equal)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
 
 from skimage._shared.utils import _supported_float_type
 from skimage.filters._gabor import _sigma_prefactor, gabor, gabor_kernel
@@ -54,8 +53,9 @@ def test_gabor_kernel_sum():
     for sigma_x in range(1, 10, 2):
         for sigma_y in range(1, 10, 2):
             for frequency in range(0, 10, 2):
-                kernel = gabor_kernel(frequency + 0.1, theta=0,
-                                      sigma_x=sigma_x, sigma_y=sigma_y)
+                kernel = gabor_kernel(
+                    frequency + 0.1, theta=0, sigma_x=sigma_x, sigma_y=sigma_y
+                )
                 # make sure gaussian distribution is covered nearly 100%
                 assert_almost_equal(np.abs(kernel).sum(), 1, 2)
 
@@ -65,13 +65,14 @@ def test_gabor_kernel_theta():
         for sigma_y in range(1, 10, 2):
             for frequency in range(0, 10, 2):
                 for theta in range(0, 10, 2):
-                    kernel0 = gabor_kernel(frequency + 0.1, theta=theta,
-                                           sigma_x=sigma_x, sigma_y=sigma_y)
-                    kernel180 = gabor_kernel(frequency, theta=theta + np.pi,
-                                             sigma_x=sigma_x, sigma_y=sigma_y)
+                    kernel0 = gabor_kernel(
+                        frequency + 0.1, theta=theta, sigma_x=sigma_x, sigma_y=sigma_y
+                    )
+                    kernel180 = gabor_kernel(
+                        frequency, theta=theta + np.pi, sigma_x=sigma_x, sigma_y=sigma_y
+                    )
 
-                    assert_array_almost_equal(np.abs(kernel0),
-                                              np.abs(kernel180))
+                    assert_array_almost_equal(np.abs(kernel0), np.abs(kernel180))
 
 
 def test_gabor():
@@ -84,8 +85,9 @@ def test_gabor():
         return np.mean(np.hypot(*gabor_responses))
 
     # Gabor scores: diagonals are frequency-matched, off-diagonals are not.
-    responses = np.array([[match_score(image, f) for f in frequencies]
-                          for image in wave_images])
+    responses = np.array(
+        [[match_score(image, f) for f in frequencies] for image in wave_images]
+    )
     assert responses[0, 0] > responses[0, 1]
     assert responses[1, 1] > responses[0, 1]
     assert responses[0, 0] > responses[1, 0]

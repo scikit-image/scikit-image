@@ -6,13 +6,12 @@ from .._shared.utils import check_shape_equality
 __all__ = ['variation_of_information']
 
 
-def variation_of_information(image0=None, image1=None, *, table=None,
-                             ignore_labels=()):
+def variation_of_information(image0=None, image1=None, *, table=None, ignore_labels=()):
     """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
     If X is the ground-truth segmentation, then H(X|Y) can be interpreted
-    as the amount of under-segmentation and H(X|Y) as the amount
+    as the amount of under-segmentation and H(Y|X) as the amount
     of over-segmentation. In other words, a perfect over-segmentation
     will have H(X|Y)=0 and a perfect under-segmentation will have H(Y|X)=0.
 
@@ -40,8 +39,7 @@ def variation_of_information(image0=None, image1=None, *, table=None,
         distance, Journal of Multivariate Analysis, Volume 98, Issue 5,
         Pages 873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
     """
-    h0g1, h1g0 = _vi_tables(image0, image1, table=table,
-                            ignore_labels=ignore_labels)
+    h0g1, h1g0 = _vi_tables(image0, image1, table=table, ignore_labels=ignore_labels)
     # false splits, false merges
     return np.array([h1g0.sum(), h0g1.sum()])
 
@@ -94,8 +92,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     if table is None:
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
-            im_true, im_test,
-            ignore_labels=ignore_labels, normalize=True
+            im_true, im_test, ignore_labels=ignore_labels, normalize=True
         )
 
     else:

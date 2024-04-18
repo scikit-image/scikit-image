@@ -20,6 +20,7 @@ diaminobenzidine (DAB) which gives a brown color.
        PMID: 11531144
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -66,10 +67,16 @@ fig.tight_layout()
 from skimage.exposure import rescale_intensity
 
 # Rescale hematoxylin and DAB channels and give them a fluorescence look
-h = rescale_intensity(ihc_hed[:, :, 0], out_range=(0, 1),
-                      in_range=(0, np.percentile(ihc_hed[:, :, 0], 99)))
-d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1),
-                      in_range=(0, np.percentile(ihc_hed[:, :, 2], 99)))
+h = rescale_intensity(
+    ihc_hed[:, :, 0],
+    out_range=(0, 1),
+    in_range=(0, np.percentile(ihc_hed[:, :, 0], 99)),
+)
+d = rescale_intensity(
+    ihc_hed[:, :, 2],
+    out_range=(0, 1),
+    in_range=(0, np.percentile(ihc_hed[:, :, 2], 99)),
+)
 
 # Cast the two channels into an RGB image, as the blue and green channels
 # respectively

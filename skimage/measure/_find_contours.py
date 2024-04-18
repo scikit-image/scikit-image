@@ -7,10 +7,9 @@ from collections import deque
 _param_options = ('high', 'low')
 
 
-def find_contours(image, level=None,
-                  fully_connected='low', positive_orientation='low',
-                  *,
-                  mask=None):
+def find_contours(
+    image, level=None, fully_connected='low', positive_orientation='low', *, mask=None
+):
     """Find iso-valued contours in a 2D array for a given level value.
 
     Uses the "marching squares" method to compute a the iso-valued contours of
@@ -19,7 +18,7 @@ def find_contours(image, level=None,
 
     Parameters
     ----------
-    image : 2D ndarray of double
+    image : (M, N) ndarray of double
         Input image in which to find contours.
     level : float, optional
         Value along which to find contours in the array. By default, the level
@@ -37,16 +36,15 @@ def find_contours(image, level=None,
          contours will wind counter- clockwise around elements below the
          iso-value. Alternately, this means that low-valued elements are always
          on the left of the contour. (See below for details.)
-    mask : 2D ndarray of bool, or None
+    mask : (M, N) ndarray of bool or None
         A boolean mask, True where we want to draw contours.
         Note that NaN values are always excluded from the considered region
         (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
-    contours : list of (n,2)-ndarrays
-        Each contour is an ndarray of shape ``(n, 2)``,
-        consisting of n ``(row, column)`` coordinates along the contour.
+    contours : list of (K, 2) ndarrays
+        Each contour is a ndarray of ``(row, column)`` coordinates along the contour.
 
     See Also
     --------
@@ -125,27 +123,29 @@ def find_contours(image, level=None,
            [0.5, 0. ]])]
     """
     if fully_connected not in _param_options:
-        raise ValueError('Parameters "fully_connected" must be either '
-                         '"high" or "low".')
+        raise ValueError(
+            'Parameters "fully_connected" must be either ' '"high" or "low".'
+        )
     if positive_orientation not in _param_options:
-        raise ValueError('Parameters "positive_orientation" must be either '
-                         '"high" or "low".')
+        raise ValueError(
+            'Parameters "positive_orientation" must be either ' '"high" or "low".'
+        )
     if image.shape[0] < 2 or image.shape[1] < 2:
         raise ValueError("Input array must be at least 2x2.")
     if image.ndim != 2:
         raise ValueError('Only 2D arrays are supported.')
     if mask is not None:
         if mask.shape != image.shape:
-            raise ValueError('Parameters "array" and "mask"'
-                             ' must have same shape.')
+            raise ValueError('Parameters "array" and "mask"' ' must have same shape.')
         if not np.can_cast(mask.dtype, bool, casting='safe'):
             raise TypeError('Parameter "mask" must be a binary array.')
         mask = mask.astype(np.uint8, copy=False)
     if level is None:
         level = (np.nanmin(image) + np.nanmax(image)) / 2.0
 
-    segments = _get_contour_segments(image.astype(np.float64), float(level),
-                                     fully_connected == 'high', mask=mask)
+    segments = _get_contour_segments(
+        image.astype(np.float64), float(level), fully_connected == 'high', mask=mask
+    )
     contours = _assemble_contours(segments)
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]

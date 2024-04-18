@@ -14,7 +14,7 @@ cdef extern from "unwrap_3d_ljmu.h":
             int volume_width, int volume_height, int volume_depth,
             int wrap_around_x, int wrap_around_y, int wrap_around_z,
             char use_seed, unsigned int seed
-            ) nogil
+            ) noexcept nogil
 
 
 

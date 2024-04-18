@@ -644,11 +644,6 @@ void unwrapImage(PIXELM *pixel, int image_width, int image_height) {
 // set the masked pixels (mask = 0) to the minimum of the unwrapper phase
 void maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width,
                int image_height) {
-  int image_width_plus_one = image_width + 1;
-  int image_height_plus_one = image_height + 1;
-  int image_width_minus_one = image_width - 1;
-  int image_height_minus_one = image_height - 1;
-
   PIXELM *pointer_pixel = pixel;
   unsigned char *IMP = input_mask;  // input mask pointer
   double min = DBL_MAX;

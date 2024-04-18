@@ -3,6 +3,7 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from datetime import date
 import inspect
 import os
 import sys
@@ -23,7 +24,7 @@ filterwarnings(
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "skimage"
-copyright = "2013, the scikit-image team"
+copyright = f"2013-{date.today().year}, the scikit-image team"
 
 with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
@@ -51,8 +52,11 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "doi_role",
     "numpydoc",
+    "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "pytest_doctestplus.sphinx.doctestplus",
+    "skimage_extensions",
 ]
 
 autosummary_generate = True
@@ -75,8 +79,7 @@ if v.release is None:
 if v.is_devrelease:
     binder_branch = "main"
 else:
-    major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
+    binder_branch = f"v{release}"
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 
@@ -131,16 +134,62 @@ if _has_optipng():
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# https://pydata-sphinx-theme.readthedocs.io/en/latest/user_guide/branding.html
 
-html_theme = "scikit-image"
-html_theme_path = ["themes"]
-html_title = f"skimage v{version} docs"
+html_theme = "pydata_sphinx_theme"
 html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
+html_logo = "_static/logo.png"
+
+html_css_files = ['theme_overrides.css']
+
+html_theme_options = {
+    # Navigation bar
+    "logo": {
+        "alt_text": (
+            "scikit-image's logo, showing a snake's head overlayed with green "
+            "and orange"
+        ),
+        "text": "scikit-image",
+        "link": "https://scikit-image.org",
+    },
+    "header_links_before_dropdown": 6,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/scikit-image/scikit-image",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/scikit-image/",
+            "icon": "fa-solid fa-box",
+        },
+    ],
+    "navbar_align": "left",
+    "navbar_end": ["version-switcher", "navbar-icon-links"],
+    "show_prev_next": False,
+    "switcher": {
+        "json_url": ("https://scikit-image.org/docs/dev/_static/version_switcher.json"),
+        "version_match": "dev" if "dev" in version else version,
+    },
+    "show_version_warning_banner": True,
+    # Footer
+    "footer_start": ["copyright"],
+    "footer_end": ["sphinx-version", "theme-version"],
+    # Other
+    "pygment_light_style": "default",
+    "pygment_dark_style": "github-dark",
+    "analytics": {
+        "plausible_analytics_domain": "scikit-image.org",
+        "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
+    },
+}
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-    "**": ["searchbox.html", "navigation.html", "localtoc.html", "versions.html"],
+    # "**": ["sidebar-nav-bs", "sidebar-ethical-ads"],
+    "auto_examples/index": []  # Hide sidebar in example gallery
 }
 
 # Output file base name for HTML help builder.
@@ -189,33 +238,60 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 # -- intersphinx --------------------------------------------------------------
-_python_version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
-_python_doc_base = "https://docs.python.org/" + _python_version_str
 intersphinx_mapping = {
-    "python": (_python_doc_base, None),
-    "numpy": (
-        "https://numpy.org/doc/stable/",
-        (None, "./_intersphinx/numpy-objects.inv"),
-    ),
-    "scipy": (
-        "https://docs.scipy.org/doc/scipy/",
-        (None, "./_intersphinx/scipy-objects.inv"),
-    ),
-    "sklearn": (
-        "https://scikit-learn.org/stable/",
-        (None, "./_intersphinx/sklearn-objects.inv"),
-    ),
-    "matplotlib": (
-        "https://matplotlib.org/stable/",
-        (None, "./_intersphinx/matplotlib-objects.inv"),
-    ),
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "neps": ("https://numpy.org/neps/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
+    "plotly": ("https://plotly.com/python-api-reference/", None),
+    "seaborn": ("https://seaborn.pydata.org/", None),
 }
 
+# Do not (yet) use nitpicky mode for checking cross-references
+nitpicky = False
+# nitpick_ignore is only considered when nitpicky=True
+nitpick_ignore = [
+    (
+        "py:class",
+        "skimage.transform._geometric._GeometricTransform",
+    ),  # skimage.transform._geometric.{FundamentalMatrixTransform,PiecewiseAffineTransform,PolynomialTransform,ProjectiveTransform}
+    (
+        "py:class",
+        "skimage.feature.util.DescriptorExtractor",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.feature.util.FeatureDetector",
+    ),  # skimage.feature.{censure.CENSURE/orb.ORB/sift.SIFT}
+    (
+        "py:class",
+        "skimage.measure.fit.BaseModel",
+    ),  # skimage.measure.fit.{CircleModel/EllipseModel/LineModelND}
+    ("py:exc", "NetworkXError"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "Graph"),  # networkx.classes.graph.Graph.to_undirected
+    ("py:obj", "Graph.__iter__"),  # networkx.classes.graph.Graph.nbunch_iter
+    ("py:obj", "__len__"),  # networkx.classes.graph.Graph.{number_of_nodes/order}
+    (
+        "py:class",
+        "_GeometricTransform",
+    ),  # skimage.transform._geometric.estimate_transform
+    ("py:obj", "convert"),  # skimage.graph._rag.RAG.__init__
+    ("py:obj", "skimage.io.collection"),  # (generated) doc/source/api/skimage.io.rst
+    (
+        "py:obj",
+        "skimage.io.manage_plugins",
+    ),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.sift"),  # (generated) doc/source/api/skimage.io.rst
+    ("py:obj", "skimage.io.util"),  # (generated) doc/source/api/skimage.io.rst
+]
 # -- Source code links -------------------------------------------------------
+
 
 # Function courtesy of NumPy to return URLs containing line numbers
 def linkcode_resolve(domain, info):
-
     """
     Determine the URL corresponding to Python object
     """
@@ -233,7 +309,7 @@ def linkcode_resolve(domain, info):
     for part in fullname.split("."):
         try:
             obj = getattr(obj, part)
-        except:
+        except AttributeError:
             return None
 
     # Strip decorators which would resolve to the source of the decorator
@@ -241,14 +317,15 @@ def linkcode_resolve(domain, info):
 
     try:
         fn = inspect.getsourcefile(obj)
-    except:
+    except TypeError:
         fn = None
+
     if not fn:
         return None
 
     try:
         source, start_line = inspect.getsourcelines(obj)
-    except:
+    except OSError:
         linespec = ""
     else:
         stop_line = start_line + len(source) - 1

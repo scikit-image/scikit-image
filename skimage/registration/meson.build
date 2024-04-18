@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_masked_phase_cross_correlation.py',
   '_optical_flow.py',
   '_optical_flow_utils.py',

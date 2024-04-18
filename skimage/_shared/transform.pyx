@@ -6,7 +6,7 @@
 
 cdef np_real_numeric integrate(np_real_numeric[:, ::1] sat,
                                Py_ssize_t r0, Py_ssize_t c0,
-                               Py_ssize_t r1, Py_ssize_t c1) nogil:
+                               Py_ssize_t r1, Py_ssize_t c1) noexcept nogil:
     """
     Using a summed area table / integral image, calculate the sum
     over a given window.

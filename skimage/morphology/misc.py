@@ -1,4 +1,5 @@
 """Miscellaneous morphology functions."""
+
 import numpy as np
 import functools
 from scipy import ndimage as ndi
@@ -14,8 +15,14 @@ funcs = ('erosion', 'dilation', 'opening', 'closing')
 skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
-funcs = ('binary_erosion', 'binary_dilation', 'binary_opening',
-         'binary_closing', 'black_tophat', 'white_tophat')
+funcs = (
+    'binary_erosion',
+    'binary_dilation',
+    'binary_opening',
+    'binary_closing',
+    'black_tophat',
+    'white_tophat',
+)
 skimage2ndimage.update({x: x for x in funcs})
 
 
@@ -35,6 +42,7 @@ def default_footprint(func):
         as the input image with connectivity 1.
 
     """
+
     @functools.wraps(func)
     def func_out(image, footprint=None, *args, **kwargs):
         if footprint is None:
@@ -47,8 +55,9 @@ def default_footprint(func):
 def _check_dtype_supported(ar):
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
-        raise TypeError("Only bool or integer image types are supported. "
-                        f"Got {ar.dtype}.")
+        raise TypeError(
+            "Only bool or integer image types are supported. " f"Got {ar.dtype}."
+        )
 
 
 def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
@@ -131,13 +140,17 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     try:
         component_sizes = np.bincount(ccs.ravel())
     except ValueError:
-        raise ValueError("Negative value labels are not supported. Try "
-                         "relabeling the input with `scipy.ndimage.label` or "
-                         "`skimage.morphology.label`.")
+        raise ValueError(
+            "Negative value labels are not supported. Try "
+            "relabeling the input with `scipy.ndimage.label` or "
+            "`skimage.morphology.label`."
+        )
 
     if len(component_sizes) == 2 and out.dtype != bool:
-        warn("Only one label was provided to `remove_small_objects`. "
-             "Did you mean to use a boolean array?")
+        warn(
+            "Only one label was provided to `remove_small_objects`. "
+            "Did you mean to use a boolean array?"
+        )
 
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]
@@ -209,8 +222,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
 
     # Creates warning if image is an integer image
     if ar.dtype != bool:
-        warn("Any labeled images will be returned as a boolean array. "
-             "Did you mean to use a boolean array?", UserWarning)
+        warn(
+            "Any labeled images will be returned as a boolean array. "
+            "Did you mean to use a boolean array?",
+            UserWarning,
+        )
 
     if out is not None:
         if out.dtype != bool:
@@ -282,7 +298,7 @@ def _max_priority(label_image, *, priority_image):
     # Max priority is now stored at positions corresponding to values in
     # `unique_ids`, but we want the position correspond to the index of the
     # label ID.
-    priority[unique_ids] = priority[:len(unique_ids)]
+    priority[unique_ids] = priority[: len(unique_ids)]
 
     return priority
 
@@ -373,9 +389,7 @@ def remove_near_objects(
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]])
     """
     if minimal_distance < 0:
-        raise ValueError(
-            f"minimal_distance must be >= 0, was {minimal_distance}"
-        )
+        raise ValueError(f"minimal_distance must be >= 0, was {minimal_distance}")
     if not np.issubdtype(label_image.dtype, np.integer):
         raise ValueError(
             f"`label_image` must be of integer dtype, got {label_image.dtype}"

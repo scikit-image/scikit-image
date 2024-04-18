@@ -1,17 +1,8 @@
 [project]
-name = "scikit-image"
-license = {file = "LICENSE.txt"}
-description = "Image processing in Python"
-maintainers = [
-    {name = "scikit-image developers", email="skimage-core@discuss.scientific-python.org"},
-]
-requires-python = ">=3.8"
-dependencies = [
-    # TODO: update to "pin-compatible" once possible, see
-    # https://github.com/FFY00/meson-python/issues/29
-    "numpy>=1.21.1",
-]
-readme = "README.md"
+name = 'scikit-image'
+description = 'Image processing in Python'
+requires-python = '>=3.10'
+readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
     'Environment :: Console',
@@ -21,11 +12,11 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3 :: Only',
-    "Topic :: Software Development :: Libraries",
+    'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: POSIX',
@@ -33,55 +24,184 @@ classifiers = [
     'Operating System :: MacOS',
 ]
 dynamic = ['version']
-
-[project.urls]
-homepage = "https://scikit-image.org"
-documentation = "https://scikit-image.org/docs/stable"
-source = "https://github.com/scikit-image/scikit-image"
-download = "https://pypi.org/project/scikit-image/#files"
-tracker = "https://github.com/scikit-image/scikit-image/issues"
-
-[build-system]
-build-backend = "mesonpy"
-requires = [
-    "meson-python @ git+https://github.com/mesonbuild/meson-python@babdf709618fbeeaf59634bc2b4331ca5f7924ce",
-    # `wheel` is needed for non-isolated builds, given that `meson-python`
-    # doesn't list it as a runtime requirement (at least in 0.10.0)
-    # See https://github.com/FFY00/meson-python/blob/main/pyproject.toml#L4
-    "wheel",
-    "setuptools<=65.5",
-    "packaging",
-    "Cython>=0.29.24",
-    "pythran",
-    "lazy_loader>=0.1",
-
-    # We follow scipy for much of these pinnings
-    # https://github.com/scipy/scipy/blob/main/pyproject.toml
-
-    # On Windows we need to avoid 1.21.6, 1.22.0 and 1.22.1 because they were
-    # built with vc142. 1.22.3 is the first version that has 32-bit Windows
-    # wheels *and* was built with vc141. So use that:
-    "numpy==1.22.3; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
-
-    # default numpy requirements
-    "numpy==1.21.1; python_version=='3.8' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.1; python_version=='3.9' and platform_python_implementation != 'PyPy'",
-    "numpy==1.21.6; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
-
-    # For Python versions which aren't yet officially supported,
-    # we specify an unpinned NumPy which allows source distributions
-    # to be used and allows wheels to be used as soon as they
-    # become available.
-    "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.8' and platform_python_implementation=='PyPy'",
+dependencies = [
+    'numpy>=1.23',
+    'scipy>=1.9',
+    'networkx>=2.8',
+    'pillow>=9.1',
+    'imageio>=2.33',
+    'tifffile>=2022.8.12',
+    'packaging>=21',
+    'lazy-loader>=0.4',
 ]
 
-[tool.devpy]
+[[project.maintainers]]
+name = 'scikit-image developers'
+email = 'skimage-core@discuss.scientific-python.org'
+
+[project.license]
+file = 'LICENSE.txt'
+
+[project.optional-dependencies]
+build = [
+    # Also update [build-system] -> requires
+    'meson-python>=0.15',
+    'wheel',
+    'setuptools>=67',
+    'packaging>=21',
+    'ninja',
+    'Cython>=3.0.4',
+    'pythran',
+    'numpy>=2.0.0rc1',
+    # Developer UI
+    'spin==0.8',
+    'build',
+]
+data = ['pooch>=1.6.0']
+developer = [
+    'pre-commit',
+    'ipython',
+    "tomli; python_version < '3.11'",
+]
+docs = [
+    'sphinx>=7.2',
+    'sphinx-gallery>=0.14',
+    'numpydoc>=1.7',
+    'sphinx-copybutton',
+    'pytest-runner',
+    'matplotlib>=3.6',
+    'dask[array]>=2022.9.2',
+    'pandas>=1.5',
+    'seaborn>=0.11',
+    'pooch>=1.6',
+    'tifffile>=2022.8.12',
+    'myst-parser',
+    'ipywidgets',
+    'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
+    'plotly>=5.10',
+    'kaleido',
+    'scikit-learn>=1.1',
+    'sphinx_design>=0.5',
+    'pydata-sphinx-theme>=0.15.2',
+    'PyWavelets>=1.1.1',
+    'pytest-doctestplus',
+]
+optional = [
+    'SimpleITK',
+    'astropy>=5.0',
+    'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
+    'dask[array]>=2021.1.0',
+    'matplotlib>=3.6',
+    'pooch>=1.6.0',
+    'pyamg',
+    'PyWavelets>=1.1.1',
+    'scikit-learn>=1.1',
+]
+test = [
+    'asv',
+    'numpydoc>=1.7',
+    'pooch>=1.6.0',
+    'pytest>=7.0',
+    'pytest-cov>=2.11.0',
+    'pytest-localserver',
+    'pytest-faulthandler',
+    'pytest-doctestplus',
+]
+
+[project.urls]
+homepage = 'https://scikit-image.org'
+documentation = 'https://scikit-image.org/docs/stable'
+source = 'https://github.com/scikit-image/scikit-image'
+download = 'https://pypi.org/project/scikit-image/#files'
+tracker = 'https://github.com/scikit-image/scikit-image/issues'
+
+[build-system]
+build-backend = 'mesonpy'
+requires = [
+    'meson-python>=0.15',
+    'wheel',
+    'setuptools>=67',
+    'packaging>=21',
+    'Cython>=3.0.4',
+    'pythran',
+    'lazy_loader>=0.3',
+    'numpy>=2.0.0rc1',
+]
+
+[tool.spin]
 package = 'skimage'
 
-[tool.devpy.commands]
-"Build" = ["devpy.build", "devpy.test"]
-"Environments" = ["devpy.shell", "devpy.ipython", "devpy.python"]
-"Documentation" = [".devpy/cmds.py:docs"]
-"Metrics" = [".devpy/cmds.py:asv", ".devpy/cmds.py:coverage"]
+[tool.spin.commands]
+Build = [
+    'spin.cmds.meson.build',
+    'spin.cmds.meson.test',
+    'spin.cmds.build.sdist',
+]
+Environments = [
+    'spin.cmds.meson.run',
+    '.spin/cmds.py:ipython',
+    'spin.cmds.meson.python',
+]
+Documentation = ['.spin/cmds.py:docs']
+Metrics = [
+    '.spin/cmds.py:asv'
+]
+
+[tool.black]
+target-version = ['py310', 'py311', 'py312']
+skip-string-normalization = 1
+
+[tool.ruff.lint]
+select = [
+    'F',
+    'E',
+    'W',
+    'UP',
+    'NPY201',
+]
+ignore = [
+    'E501',
+    'E741',
+    'E712',
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = [
+    'E402',
+    'F401',
+    'F403',
+    'F405',
+]
+"**/__init__.pyi" = [
+    'E402',
+    'F401',
+    'F403',
+    'F405',
+]
+"skimage/_shared/testing.py" = ['F401']
+"doc/examples/**/*.py" = ['E402']
+
+[tool.ruff.lint.pydocstyle]
+convention = 'numpy'
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra  --strict-config  --strict-markers"
+log_cli_level = "INFO"
+xfail_strict = true
+#testpaths = ["skimage", "../../../../../benchmarks"]
+python_files = ["benchmark_*.py", "test_*.py"]
+python_classes = ["Test*", "*Suite"]
+python_functions = ["time_*", "test_*", "peakmem_*"]
+filterwarnings = [
+    "error",
+]
+
+[tool.coverage.run]
+omit = ['*/tests/*']
+
+[tool.changelist]
+ignored_user_logins = [
+    "web-flow",
+    "pre-commit-ci[bot]"
+]

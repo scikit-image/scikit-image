@@ -26,7 +26,6 @@ area?
 # and assume that whatever is not in the nucleus is in the cytoplasm.
 # The protein, "protein A", will be simulated as blobs and segmented.
 
-import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +33,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from scipy import ndimage as ndi
 from skimage import data, filters, measure, segmentation
 
-random.seed(36)
+rng = np.random.default_rng()
 
 # segment nucleus
 nucleus = data.protein_transport()[0, 0, :, :180]
@@ -48,11 +47,10 @@ proteinA = np.zeros_like(nucleus, dtype="float64")
 proteinA_seg = np.zeros_like(nucleus, dtype="float64")
 
 for blob_seed in range(10):
-    blobs = data.binary_blobs(180,
-                              blob_size_fraction=0.5,
-                              volume_fraction=(50/(180**2)),
-                              seed=blob_seed)
-    blobs_image = filters.gaussian(blobs, sigma=1.5)*random.randint(50, 256)
+    blobs = data.binary_blobs(
+        180, blob_size_fraction=0.5, volume_fraction=(50 / (180**2)), rng=blob_seed
+    )
+    blobs_image = filters.gaussian(blobs, sigma=1.5) * rng.integers(50, 256)
     proteinA += blobs_image
     proteinA_seg += blobs
 
@@ -131,7 +129,6 @@ measure.manders_coloc_coeff(proteinA, nucleus_seg)
 # every pixel to see the relationship between them.
 
 # generating protein B data that is correlated to protein A for demo
-rng = np.random.default_rng()
 proteinB = proteinA + rng.normal(loc=100, scale=10, size=proteinA.shape)
 
 # plot images
@@ -148,11 +145,11 @@ for a in ax.ravel():
     a.set_axis_off()
 
 # plot pixel intensity scatter
-plt.figure()
-plt.scatter(proteinA, proteinB)
-plt.title('Pixel intensity')
-plt.xlabel('Protein A intensity')
-plt.ylabel('Protein B intensity')
+fig, ax = plt.subplots()
+ax.scatter(proteinA, proteinB)
+ax.set_title('Pixel intensity')
+ax.set_xlabel('Protein A intensity')
+ax.set_ylabel('Protein B intensity')
 
 #####################################################################
 # The intensities look linearly correlated so Pearson's Correlation Coefficient
@@ -167,3 +164,4 @@ print(f"PCC: {pcc:0.3g}, p-val: {pval:0.3g}")
 # <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html>`_
 # might give a more accurate measure of the non-linear relationship in that
 # case.
+plt.show()

@@ -16,7 +16,7 @@ from ._orb_descriptor_positions import POS, POS0, POS1
 def _orb_loop(np_floats[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
               np_floats[:] orientations):
 
-    cdef Py_ssize_t i, d, kr, kc, pr0, pr1, pc0, pc1, spr0, spc0, spr1, spc1
+    cdef Py_ssize_t i, kr, kc, pr0, pr1, pc0, pc1, spr0, spc0, spr1, spc1
     cdef np_floats angle, sin_a, cos_a
     cdef unsigned char[:, ::1] descriptors = np.zeros(
         (keypoints.shape[0], POS.shape[0]), dtype=np.uint8)

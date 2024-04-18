@@ -5,14 +5,14 @@
 
 cimport numpy as cnp
 import numpy as np
-from libc.math cimport exp, fabs, sqrt
+from libc.math cimport sqrt
 from libc.float cimport DBL_MAX
 from .._shared.interpolation cimport get_pixel3d
 from .._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 
-cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) nogil:
+cdef inline Py_ssize_t Py_ssize_t_min(Py_ssize_t value1, Py_ssize_t value2) noexcept nogil:
     if value1 < value2:
         return value1
     else:
@@ -32,7 +32,7 @@ def _denoise_bilateral(np_floats[:, :, ::1] image, cnp.float64_t max_value,
         Py_ssize_t window_ext = (win_size - 1) / 2
         Py_ssize_t max_color_lut_bin = bins - 1
 
-        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr, color_lut_bin
+        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, color_lut_bin
         np_floats value, weight, dist, total_weight, csigma_color, color_weight, \
                range_weight, t
         np_floats dist_scale
@@ -103,13 +103,9 @@ def _denoise_tv_bregman(np_floats[:, :, ::1] image, np_floats weight,
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]
         Py_ssize_t dims = image.shape[2]
-        Py_ssize_t rows2 = rows + 2
-        Py_ssize_t cols2 = cols + 2
         Py_ssize_t r, c, k
 
         Py_ssize_t total = rows * cols * dims
-
-    shape_ext = (rows2, cols2, dims)
 
     cdef:
         np_floats[:, :, ::1] dx = out.copy()

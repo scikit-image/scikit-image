@@ -6,11 +6,13 @@ python_sources = [
   'test_dtype.py',
   'test_invert.py',
   'test_labels.py',
+  'test_lookfor.py',
   'test_map_array.py',
   'test_montage.py',
   'test_random_noise.py',
   'test_regular_grid.py',
   'test_shape.py',
+  'test_slice_along_axes.py',
   'test_unique_rows.py'
 ]
 
