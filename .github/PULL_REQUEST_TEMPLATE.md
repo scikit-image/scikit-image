@@ -18,11 +18,7 @@
 
 ## Release note
 
-We use [changelist](https://github.com/scientific-python/changelist) to
-compile each pull request into an item of the release notes. Please refer to
-the [instructions](https://scikit-image.org/docs/stable/development/contribute.html#documenting-changes)
-and [past release notes](https://scikit-image.org/docs/stable/release_notes/index.html)
-for guidance and examples.
+For maintainers and optionally contributors, please refer to the [instructions](https://scikit-image.org/docs/stable/development/contribute.html#documenting-changes) on how to document this PR for the release notes.
 
 ```release-note
 ...
