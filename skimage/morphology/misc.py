@@ -245,64 +245,6 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     return out
 
 
-def _max_priority(label_image, *, priority_image):
-    """Find maximum priority for each label.
-
-    If the priority is given as an array with the same shape as `label_image`,
-    it's not guaranteed that each pixel of an object holds the same priority
-    value. This function finds the highest priority for each labeled object
-    and returns it.
-
-    Parameters
-    ----------
-    label_image : ndarray of integers
-        An n-dimensional array of containing objects, e.g. as returned by
-        :func:`~.label`. A value of zero denotes is considered background, all
-        other object IDs must be positive integers.
-    priority_image : ndarray
-        An array with the same shape as `label_image`. The priority of each
-        object is derived from the corresponding pixels. If an object's pixels
-        are assigned different priorities the hightest takes precedence.
-
-    Returns
-    -------
-    priority : ndarray
-        A 1-dimensional array of length
-        :func:`np.amax(label_image) <numpy.amax>` that contains the priority for
-        each object ID at the respective index.
-
-    Examples
-    --------
-    >>> label_image = np.array([[0, 1, 2], [2, 9, 9]])
-    >>> priority_image = np.array([[5, 3, 1], [9, 2, 7]], dtype=np.uint8)
-    >>> _max_priority(label_image, priority_image=priority_image)
-    array([3, 9, 7, 0, 0, 0, 0, 0, 7], dtype=uint8)
-    """
-    unique_ids, inverse = np.unique(label_image.ravel(), return_inverse=True)
-    max_id = unique_ids[-1]
-
-    # New array to hold maximum priority for each label ID, fill it with the
-    # smallest possible value of that dtype to ensure that real priorities
-    # take precedence.
-    priority = np.empty((max_id + 1,), dtype=priority_image.dtype)
-    if np.issubdtype(priority.dtype, np.floating):
-        min_value = np.finfo(priority.dtype).min
-    else:
-        min_value = np.iinfo(priority.dtype).min
-    priority.fill(min_value)
-
-    # Store max priority at the label positions corresponding to `unique_ids`.
-    # Equivalent to np.maximum(priority[inverse], priority_image.ravel()) while
-    # taking into account elements that are indexed by inverse more than once.
-    np.maximum.at(priority, inverse, priority_image.ravel())
-    # Max priority is now stored at positions corresponding to values in
-    # `unique_ids`, but we want the position correspond to the index of the
-    # label ID.
-    priority[unique_ids] = priority[: len(unique_ids)]
-
-    return priority
-
-
 def remove_near_objects(
     label_image,
     minimal_distance,
