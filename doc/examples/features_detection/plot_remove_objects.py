@@ -16,19 +16,20 @@ either by removing objects
 """
 
 import matplotlib.pyplot as plt
-from skimage import data, morphology, color, filters
+import skimage as ski
 
 # Extract foreground by thresholding an image taken by the Hubble Telescope
-image = color.rgb2gray(data.hubble_deep_field())
-foreground = image > filters.threshold_li(image)
+image = ski.color.rgb2gray(ski.data.hubble_deep_field())
+foreground = image > ski.filters.threshold_li(image)
+objects = ski.measure.label(foreground)
 
 # Separate objects into regions larger and smaller than 100 pixels
-large_objects = morphology.remove_small_objects(foreground, min_size=100)
-small_objects = foreground ^ large_objects
+large_objects = ski.morphology.remove_small_objects(objects, min_size=100)
+small_objects = objects ^ large_objects
 
 # Remove objects until remaining ones are at least 100 pixels apart,
 # smaller ones are removed in favor of larger ones by default
-spaced_objects = morphology.remove_near_objects(foreground, minimal_distance=100)
+spaced_objects = ski.morphology.remove_near_objects(objects, minimal_distance=100)
 
 # Plot the results
 fig, ax = plt.subplots(2, 2, figsize=(10, 10))
