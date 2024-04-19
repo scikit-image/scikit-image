@@ -288,7 +288,8 @@ class Test_remove_near_objects:
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("dtype", supported_dtypes)
-    def test_handcrafted_2d(self, dtype):
+    @pytest.mark.parametrize("order", ["C", "F"])
+    def test_handcrafted_2d(self, dtype, order):
         label = np.array(
             [
                 [8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -301,6 +302,7 @@ class Test_remove_near_objects:
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7],
             ],
             dtype=dtype,
+            order=order,
         )
         priority = np.arange(10)
         desired = np.array(
@@ -317,6 +319,7 @@ class Test_remove_near_objects:
             dtype=dtype,
         )
         result = remove_near_objects(label, minimal_distance=3, priority=priority)
+        assert result.flags["C_CONTIGUOUS"]
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("ndim", [1, 2, 3, 4, 5])
@@ -331,7 +334,7 @@ class Test_remove_near_objects:
         result = remove_near_objects(labels, minimal_distance=2)
         assert_array_equal(result, desired)
 
-    @pytest.mark.parametrize("value", [1, 0])
+    @pytest.mark.parametrize("value", [0, 1])
     @pytest.mark.parametrize("dtype", supported_dtypes)
     def test_constant(self, value, dtype):
         labels = np.empty((10, 10), dtype=dtype)
@@ -365,21 +368,20 @@ class Test_remove_near_objects:
         desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
-    def test_out(self):
-        labels = np.array([1, 0, 2])
-        labels_copy = labels.copy()
-        desired = np.array([0, 0, 2])
+    @pytest.mark.parametrize("order", ["C", "F"])
+    def test_out(self, order):
+        labels_original = np.array([[1, 0, 2], [1, 0, 2]], order=order)
+        desired = np.array([[0, 0, 2], [0, 0, 2]], order=order)
 
         # By default, input image is not modified
+        labels = labels_original.copy(order=order)
         remove_near_objects(labels, minimal_distance=2)
-        assert_array_equal(labels, labels_copy)
+        assert_array_equal(labels, labels_original)
 
+        # But modified if passed to `out`
         remove_near_objects(labels, minimal_distance=2, out=labels)
+        assert labels.flags[f"{order}_CONTIGUOUS"]
         assert_array_equal(labels, desired)
-
-        label_fortran = np.array(labels, order="F", copy=True)
-        remove_near_objects(labels, minimal_distance=2, out=label_fortran)
-        assert_array_equal(label_fortran, desired)
 
     @pytest.mark.parametrize("minimal_distance", [-10, -0.1])
     def test_negative_minimal_distance(self, minimal_distance):
@@ -440,11 +442,6 @@ class Test_remove_near_objects:
             remove_near_objects(
                 np.array([1, 0, 0]), minimal_distance=3, priority=np.ones((1,))
             )
-
-    def test_noncontiguous(self):
-        labels = np.zeros(12, dtype=int)[::2]
-        with pytest.raises(ValueError, match="ndarray is not C-contiguous"):
-            remove_near_objects(labels, minimal_distance=2, out=labels)
 
     def test_negative_label_ids(self):
         labels = np.array(

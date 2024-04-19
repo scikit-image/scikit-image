@@ -399,6 +399,8 @@ def remove_near_objects(
         out = label_image.copy(order="C")
     else:
         out[:] = label_image
+    # May create a copy if order is not C, account for that later
+    out_raveled = out.ravel(order="C")
 
     if priority is None:
         priority = np.bincount(out.ravel())
@@ -426,10 +428,10 @@ def remove_near_objects(
         # sorting of objects. Because each pixel in an object has the same
         # priority we don't need to worry about separating objects.
         indices = indices[
-            np.argsort(priority[out.ravel()[indices]], kind="stable")[::-1]
+            np.argsort(priority[out_raveled[indices]], kind="stable")[::-1]
         ]
     except IndexError as error:
-        expected_shape = (np.amax(out) + 1,)
+        expected_shape = (np.amax(out_raveled) + 1,)
         if priority.shape != expected_shape:
             raise ValueError(
                 "shape of `priority` must be (np.amax(label_image) + 1,), "
@@ -444,10 +446,6 @@ def remove_near_objects(
         balanced_tree=True,
     )
 
-    # Raise error if raveling is not possible without copying
-    out_raveled = out.view()
-    out_raveled.shape = (out.size,)
-
     _remove_near_objects(
         labels=out_raveled,
         indices=indices,
@@ -456,4 +454,7 @@ def remove_near_objects(
         p_norm=p_norm,
         shape=label_image.shape,
     )
+
+    if out_raveled.base is not out:
+        out[:] = out_raveled.reshape(out.shape)
     return out
