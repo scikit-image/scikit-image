@@ -87,17 +87,18 @@ cdef inline _remove_object(
     cdef:
         Py_ssize_t k_indices, k_labels, remove_id
 
-    remove_id = labels[indices[starting_j_indices]]
+    with nogil:
+        remove_id = labels[indices[starting_j_indices]]
 
-    for k_indices in range(starting_j_indices, -1, -1):
-        k_labels = indices[k_indices]
-        if remove_id == labels[k_labels]:
-            labels[k_labels] = 0
-        else:
-            break
-    for k_indices in range(starting_j_indices + 1, indices.size):
-        k_labels = indices[k_indices]
-        if remove_id == labels[k_labels]:
-            labels[k_labels] = 0
-        else:
-            break
+        for k_indices in range(starting_j_indices, -1, -1):
+            k_labels = indices[k_indices]
+            if remove_id == labels[k_labels]:
+                labels[k_labels] = 0
+            else:
+                break
+        for k_indices in range(starting_j_indices + 1, indices.shape[0]):
+            k_labels = indices[k_indices]
+            if remove_id == labels[k_labels]:
+                labels[k_labels] = 0
+            else:
+                break
