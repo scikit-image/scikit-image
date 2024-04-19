@@ -28,9 +28,7 @@ small_objects = foreground ^ large_objects
 
 # Remove objects until remaining ones are at least 100 pixels apart,
 # smaller ones are removed in favor of larger ones by default
-spaced_objects = morphology.remove_near_objects(
-    foreground, minimal_distance=100
-)
+spaced_objects = morphology.remove_near_objects(foreground, minimal_distance=100)
 
 # Plot the results
 fig, ax = plt.subplots(2, 2, figsize=(10, 10))
