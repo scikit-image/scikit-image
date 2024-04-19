@@ -10,7 +10,7 @@
 import numpy as np
 cimport numpy as cnp
 
-from .._shared.fused_numerics cimport np_anyint, np_numeric
+from .._shared.fused_numerics cimport np_anyint
 
 
 def _remove_near_objects(
@@ -65,8 +65,6 @@ def _remove_near_objects(
         # Skip if point is part of a removed object
         if object_id == 0:
             continue
-        elif object_id < 0:
-            raise ValueError("smaller 0")
 
         in_range = kdtree.query_ball_point(
             np.unravel_index(i_labels, shape),

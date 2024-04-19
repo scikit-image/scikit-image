@@ -452,7 +452,7 @@ class Test_remove_near_objects:
                 [3, 3, 3, 3, 3, 3],
             ]
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=".*object with negative ID"):
             remove_near_objects(labels, minimal_distance=1, priority=np.ones(4))
 
     def test_objects_with_inside(self):

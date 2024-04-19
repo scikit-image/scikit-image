@@ -403,9 +403,7 @@ def remove_near_objects(
     out_raveled = out.ravel(order="C")
 
     if priority is None:
-        priority = np.bincount(out.ravel())
-        # Priority value for the background (ID 0) is not expected
-        priority = priority
+        priority = np.bincount(out_raveled)
 
     # Safely ignore points that don't lie on an object's surface
     # This reduces the size of the KDTree and the number of points that
@@ -418,11 +416,18 @@ def remove_near_objects(
     # indices = np.nonzero(surfaces.ravel())[0]
     # del surfaces
 
-    indices = np.nonzero(out.ravel())[0]
+    indices = np.nonzero(out_raveled)[0]
+    if indices.size == 0:
+        # Image with no labels, return early
+        return out
+
     # Sort by label ID first, so that IDs of the same object are contiguous
     # in the sorted index. This allows fast discovery of the whole object by
     # simple iteration up or down the index!
-    indices = indices[np.argsort(out.ravel()[indices])]
+    indices = indices[np.argsort(out_raveled[indices])]
+    lowest_obj_id = out_raveled[indices[0]]
+    if lowest_obj_id < 0:
+        raise ValueError(f"found object with negative ID {lowest_obj_id!r}")
     try:
         # Sort by priority second using a stable sort to preserve the contiguous
         # sorting of objects. Because each pixel in an object has the same
