@@ -23,25 +23,24 @@ def _remove_near_objects(
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that are True) inside an image
-    and removes neighboring objects until all remaining ones are at least a
-    minimal distance from each other.
+    Iterates over all objects (pixels that aren't zero) inside an image and
+    removes "nearby" objects until all remaining ones are spaced more than a
+    given minimal distance from each other.
 
     Parameters
     ----------
     labels :
         An array with labels for each object in `image` matching it in shape.
     indices :
-        Indices into `labels` that determine the iteration order and
-        thus which objects take precedence.
+        Indices into `labels` that determine the iteration order; objects that
+        are indexed first are preserved.
     kdtree : scipy.spatial.cKDTree
         A KDTree containing the coordinates of all objects in `image`.
     minimal_distance :
         The minimal allowed distance between objects.
     p_norm :
-        Which Minkowski p-norm to use to calculate the distance between
-        objects. Defaults to 2 which corresponds to the Euclidean distance
-        while 1 corresponds to the Manatten distance.
+        The Minkowski p-norm used to calculate the distance between objects.
+        Defaults to 2 which corresponds to the Euclidean distance.
     shape :
         The shape of the unraveled `image`.
 

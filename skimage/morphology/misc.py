@@ -255,34 +255,33 @@ def remove_near_objects(
 ):
     """Remove objects until a minimal distance is ensured.
 
-    Iterates over all objects (connected pixels that aren't zero) inside an
-    image and removes neighboring objects until all remaining ones are more than
-    a minimal distance from each other.
+    Iterates over all objects (pixels that aren't zero) inside an image and
+    removes "nearby" objects until all remaining ones are spaced more than a
+    given minimal distance from each other.
 
     Parameters
     ----------
     label_image : ndarray of integers
-        An n-dimensional array of containing objects, e.g. as returned by
-        :func:`~.label`. A value of zero denotes is considered background, all
-        other object IDs must be integers.
+        An n-dimensional array containing object labels, e.g. as returned by
+        :func:`~.label`. A value of zero is considered background, all other
+        object IDs must be positive integers.
     minimal_distance : int or float
-        Objects whose distance is not greater than this value are considered
-        to close. Must be positive.
+        Remove objects with lower priority whose distance is not greater than
+        this positive value.
     priority : ndarray, optional
         Defines the priority with which objects that are to close to each other
         are removed. Expects a 1-dimensional array of length
         :func:`np.amax(label_image) + 1 <numpy.amax>` that contains the priority
         for each object ID at the respective index. Objects with a lower value
         are removed first until all remaining objects fulfill the distance
-        requirement. If not given, priority is derived form the number of
-        samples of an object.
+        requirement. If not given, priority is given to objects with a higher
+        number of samples and their ID second.
     p_norm : int or float, optional
         The Minkowski p-norm used to calculate the distance between objects.
         Defaults to 2 which corresponds to the Euclidean distance.
     out : ndarray, optional
         Array of the same shape and dtype as `image`, into which the output is
-        placed. Its memory layout must be C-contiguous. By default, a new array
-        is created.
+        placed. By default, a new array is created.
 
     Returns
     -------
@@ -299,15 +298,18 @@ def remove_near_objects(
     Setting `p_norm` to 1 will calculate the distance between objects as the
     Manhatten distance while ``np.inf`` corresponds to the Chebyshev distance.
 
-    References
-    ----------
-    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.label.html
+    Constructs a kd-tree with :func:`scipy.spatial.cKDTree` of all objects
+    internally.
 
     Examples
     --------
     >>> import skimage as ski
-    >>> ski.morphology.remove_near_objects(np.array([True, False, True]), 2)
-    array([False, False,  True])
+    >>> ski.morphology.remove_near_objects(np.array([2, 0, 1, 1]), 2)
+    array([0, 0, 1, 1])
+    >>> ski.morphology.remove_near_objects(
+    ...     np.array([2, 0, 1, 1]), 2, priority=np.array([0, 1, 9])
+    ... )
+    array([2, 0, 0, 0])
     >>> label_image = np.array(
     ...     [[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
     ...      [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -346,17 +348,6 @@ def remove_near_objects(
 
     if priority is None:
         priority = np.bincount(out_raveled)
-
-    # Safely ignore points that don't lie on an object's surface
-    # This reduces the size of the KDTree and the number of points that
-    # need to be evaluated
-    # footprint = np.ones((3,) * out.ndim, dtype=out.dtype)
-    # surfaces = out * footprint.sum()
-    # surfaces -= ndi.convolve(out, footprint)  # edges are non-zero
-    #
-    # # Create index, that will define the iteration order of pixels later.
-    # indices = np.nonzero(surfaces.ravel())[0]
-    # del surfaces
 
     indices = np.nonzero(out_raveled)[0]
     if indices.size == 0:
