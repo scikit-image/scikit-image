@@ -27,18 +27,18 @@ objects = ski.measure.label(foreground)
 large_objects = ski.morphology.remove_small_objects(objects, min_size=100)
 small_objects = objects ^ large_objects
 
-# Remove objects until remaining ones are at least 100 pixels apart,
-# smaller ones are removed in favor of larger ones by default
+# Remove objects until remaining ones are at least 100 pixels apart.
+# By default, larger ones take precedence.
 spaced_objects = ski.morphology.remove_near_objects(objects, minimal_distance=100)
 
 # Plot the results
-fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-ax[0, 0].set_title("original")
-ax[0, 0].imshow(foreground)
+fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)
+ax[0, 0].set_title("labeled objects")
+ax[0, 0].imshow(ski.color.label2rgb(objects, image=image, bg_label=0))
 ax[0, 1].set_title("large objects")
-ax[0, 1].imshow(large_objects)
+ax[0, 1].imshow(ski.color.label2rgb(large_objects, bg_label=0))
 ax[1, 1].set_title("small objects")
-ax[1, 1].imshow(small_objects)
+ax[1, 1].imshow(ski.color.label2rgb(small_objects, bg_label=0))
 ax[1, 0].set_title("spaced objects (nearest removed)")
-ax[1, 0].imshow(spaced_objects)
+ax[1, 0].imshow(ski.color.label2rgb(spaced_objects, bg_label=0))
 plt.show()
