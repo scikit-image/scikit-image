@@ -11,7 +11,7 @@ permissions (if not, you will need to ask an owner to grant you
 access), specifically to:
 
   - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/scikit-image-web
+  - https://github.com/scikit-image/skimage-web
 
 
 - Check ``TODO.txt`` for any outstanding tasks.
@@ -73,7 +73,8 @@ Example `version number`
 
 - If this is a release:
 
-  - update the file ``skimage/data/_fetchers.py`` to point the pooch
+  - (Only needed if you create a new branch)
+    update the file ``skimage/data/_fetchers.py`` to point the pooch
     repository to the new branch instead of main during testing.
     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
     change it to the newly created branch name.
