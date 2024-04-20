@@ -251,6 +251,7 @@ def remove_near_objects(
     *,
     priority=None,
     p_norm=2,
+    spacing=None,
     out=None,
 ):
     """Remove objects until a minimal distance is ensured.
@@ -280,6 +281,9 @@ def remove_near_objects(
         The Minkowski p-norm used to calculate the distance between objects.
         The default ``2`` corresponds to the Euclidean distance, ``1`` to the
         "Manhatten" distance, and ``np.inf`` to the Chebyshev distance.
+    spacing : sequence of float, optional
+        The pixel spacing along each axis of `label_image`. If not specified,
+        a grid spacing of unity (1) is implied.
     out : ndarray, optional
         Array of the same shape and dtype as `image`, into which the output is
         placed. By default, a new array is created.
@@ -410,6 +414,18 @@ def remove_near_objects(
             raise
 
     unraveled_indices = np.unravel_index(border_indices, label_image.shape)
+    if spacing is not None:
+        spacing = np.array(spacing)
+        if spacing.shape != (out.ndim,) or spacing.min() <= 0:
+            raise ValueError(
+                "`spacing` must contain exactly one positive factor "
+                "for each dimension of `label_image`"
+            )
+        # Scale indices by spacing
+        unraveled_indices = tuple(
+            unraveled_indices[dim] * spacing[dim] for dim in range(out.ndim)
+        )
+
     kdtree = cKDTree(
         data=np.asarray(unraveled_indices, dtype=np.float64).transpose(),
         balanced_tree=True,

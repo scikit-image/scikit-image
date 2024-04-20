@@ -1,11 +1,13 @@
 import numpy as np
 import pytest
-import scipy.ndimage as ndi
+import scipy as sp
 
 from skimage.morphology import (
     remove_small_objects,
     remove_small_holes,
     remove_near_objects,
+    local_maxima,
+    label,
 )
 
 from skimage._shared import testing
@@ -279,7 +281,7 @@ class Test_remove_near_objects:
         d = int(np.floor(minimal_distance))
         labels = np.zeros(d * 3 + 2, dtype=dtype)
         labels[[0, d, 2 * d, 3 * d + 1]] = 1
-        labels, _ = ndi.label(labels, output=dtype)
+        labels, _ = sp.ndimage.label(labels, output=dtype)
         desired = labels.copy()
         desired[d] = 0
 
@@ -327,12 +329,33 @@ class Test_remove_near_objects:
         shape = (5,) * ndim
         a = np.ones(shape, dtype=np.uint8)
         a[-2, ...] = 0
-        labels, _ = ndi.label(a)
+        labels, _ = sp.ndimage.label(a)
         desired = labels.copy()
         desired[-2:, ...] = 0
 
         result = remove_near_objects(labels, minimal_distance=2)
         assert_array_equal(result, desired)
+
+    @pytest.mark.parametrize("distance", [5, 50, 100])
+    def test_random(self, distance):
+        rng = np.random.default_rng(1713648513)
+        image = rng.random(size=(400, 400))
+        maxima = local_maxima(image)
+        objects = label(maxima)
+
+        spaced_objects = remove_near_objects(objects, distance)
+        kdtree = sp.spatial.cKDTree(
+            np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
+        )
+
+        # Compute distance between all objects that are equal or smaller `distance`
+        distances = kdtree.sparse_distance_matrix(kdtree, max_distance=distance)
+        # There should be no objects left
+        assert distances.count_nonzero() == 0
+
+        # But increasing by 1 should reveal a few objects
+        distances = kdtree.sparse_distance_matrix(kdtree, max_distance=distance + 1)
+        assert distances.count_nonzero() > 0
 
     @pytest.mark.parametrize("value", [0, 1])
     @pytest.mark.parametrize("dtype", supported_dtypes)
@@ -474,3 +497,31 @@ class Test_remove_near_objects:
         )
         result = remove_near_objects(labels, minimal_distance=1, priority=np.arange(4))
         assert_array_equal(result, desired)
+
+    def test_spacing(self):
+        labels = np.array(
+            [[1, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [3, 0, 0, 4]], dtype=int
+        )
+
+        # Stretch second dimension
+        result = remove_near_objects(labels, 3, spacing=(1, 3))
+        expected = np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [3, 0, 0, 4]], dtype=int
+        )
+        np.testing.assert_array_equal(result, expected)
+
+        # Compress second dimension
+        result = remove_near_objects(labels, 1, spacing=(1, 1 / 3))
+        expected = np.array(
+            [[0, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 4]], dtype=int
+        )
+        np.testing.assert_array_equal(result, expected)
+
+    @pytest.mark.parametrize("spacing", [(-1, -1), (1,), (1, 1, 1), [[1, 1]], 1])
+    def test_spacing_raises(self, spacing):
+        labels = np.array(
+            [[1, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [3, 0, 0, 4]], dtype=int
+        )
+        regex = ".*must contain exactly one positive factor for each dimension"
+        with pytest.raises(ValueError, match=regex):
+            remove_near_objects(labels, 3, spacing=spacing)

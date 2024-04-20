@@ -3,11 +3,8 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-
 """Cython code used in `remove_near_objects` function."""
 
-
-import numpy as np
 cimport numpy as cnp
 
 from .._shared.fused_numerics cimport np_anyint
@@ -64,7 +61,7 @@ def _remove_near_objects(
             continue
 
         neighborhood = kdtree.query_ball_point(
-            np.unravel_index(i_out, shape),
+            kdtree.data[i_indices, ...],
             r=minimal_distance,
             p=p_norm,
         )
