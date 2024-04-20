@@ -255,8 +255,3 @@ Contributors
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
 _These lists are automatically generated, and may not be complete or may contain duplicates._
-
-scikit-image 0.23.0
-===================
-
-Unreleased due to an issue with the CI system.
