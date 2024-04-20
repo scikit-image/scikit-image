@@ -278,7 +278,8 @@ def remove_near_objects(
         number of samples and their ID second.
     p_norm : int or float, optional
         The Minkowski p-norm used to calculate the distance between objects.
-        Defaults to 2 which corresponds to the Euclidean distance.
+        The default ``2`` corresponds to the Euclidean distance, ``1`` to the
+        "Manhatten" distance, and ``np.inf`` to the Chebyshev distance.
     out : ndarray, optional
         Array of the same shape and dtype as `image`, into which the output is
         placed. By default, a new array is created.
@@ -296,11 +297,23 @@ def remove_near_objects(
 
     Notes
     -----
-    Setting `p_norm` to 1 will calculate the distance between objects as the
-    Manhatten distance while ``np.inf`` corresponds to the Chebyshev distance.
+    The basic steps of this algorithm work as follows:
 
-    Constructs a kd-tree with :func:`scipy.spatial.cKDTree` of all objects
-    internally.
+    1. If `priority` is not given, use :func:`numpy.bincount` as a fallback.
+    2. Find the indices for of all given objects and separate them depending on
+       if they point to an object's border or not.
+    3. Sort indices by their object ID, ensuring all indices pointing to the
+       same object are next to each other. This optimization allows to find
+       all parts of an object simply steping to the neighboring indices.
+    4. Sort boundary indices by priority. Use a stable-sort to preserve the
+       contiguousness from the previous sorting step.
+    5. Constructs a kd-tree with :func:`scipy.spatial.cKDTree` from the
+       boundary indices.
+    6. Iterate all boundary indices in the sorted order, and query the kd-tree
+       for objects that are too close. Remove ones that are.
+
+    The performance of this algorithm benefits significantly from removing the
+    number of samples in `label_image` that belong to an object's border.
 
     Examples
     --------
@@ -357,34 +370,34 @@ def remove_near_objects(
     # the size of the critical loop significantly! Remaining indices are only
     # used to remove the inner parts of objects as well.
     footprint = ndi.generate_binary_structure(out.ndim, out.ndim)
-    boundaries = (
+    border = (
         ndi.maximum_filter(out, footprint=footprint)
         != ndi.minimum_filter(out, footprint=footprint)
     ).ravel()[indices]
-    boundary_indices = indices[boundaries]
-    inner_indices = indices[~boundaries]
+    border_indices = indices[border]
+    inner_indices = indices[~border]
 
-    if boundary_indices.size == 0:
+    if border_indices.size == 0:
         # Image without or only one object, return early
         return out
 
     # Sort by label ID first, so that IDs of the same object are contiguous
     # in the sorted index. This allows fast discovery of the whole object by
     # simple iteration up or down the index!
-    boundary_indices = boundary_indices[np.argsort(out_raveled[boundary_indices])]
+    border_indices = border_indices[np.argsort(out_raveled[border_indices])]
     inner_indices = inner_indices[np.argsort(out_raveled[inner_indices])]
 
     # `priority` only makes sense with positive object IDs
-    # `boundary_indices` still contains all unique IDs so check the lowest / first
-    smallest_id = out_raveled[boundary_indices[0]]
+    # `border_indices` still contains all unique IDs so check the lowest / first
+    smallest_id = out_raveled[border_indices[0]]
     if smallest_id < 0:
         raise ValueError(f"found object with negative ID {smallest_id!r}")
     try:
         # Sort by priority second using a stable sort to preserve the contiguous
         # sorting of objects. Because each pixel in an object has the same
         # priority we don't need to worry about separating objects.
-        boundary_indices = boundary_indices[
-            np.argsort(priority[out_raveled[boundary_indices]], kind="stable")[::-1]
+        border_indices = border_indices[
+            np.argsort(priority[out_raveled[border_indices]], kind="stable")[::-1]
         ]
     except IndexError as error:
         expected_shape = (np.amax(out_raveled) + 1,)
@@ -396,7 +409,7 @@ def remove_near_objects(
         else:
             raise
 
-    unraveled_indices = np.unravel_index(boundary_indices, label_image.shape)
+    unraveled_indices = np.unravel_index(border_indices, label_image.shape)
     kdtree = cKDTree(
         data=np.asarray(unraveled_indices, dtype=np.float64).transpose(),
         balanced_tree=True,
@@ -404,7 +417,7 @@ def remove_near_objects(
 
     _remove_near_objects(
         out=out_raveled,
-        boundary_indices=boundary_indices,
+        border_indices=border_indices,
         inner_indices=inner_indices,
         kdtree=kdtree,
         minimal_distance=minimal_distance,
@@ -413,5 +426,6 @@ def remove_near_objects(
     )
 
     if out_raveled.base is not out:
+        # `out_raveled` is a copy, re-assign
         out[:] = out_raveled.reshape(out.shape)
     return out

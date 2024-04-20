@@ -15,7 +15,7 @@ from .._shared.fused_numerics cimport np_anyint
 
 def _remove_near_objects(
     np_anyint[::1] out not None,
-    Py_ssize_t[::1] boundary_indices not None,
+    Py_ssize_t[::1] border_indices not None,
     Py_ssize_t[::1] inner_indices not None,
     kdtree,
     cnp.float64_t p_norm,
@@ -32,9 +32,9 @@ def _remove_near_objects(
     ----------
     out :
         An array with labels for each object in `image` matching it in shape.
-    boundary_indices, inner_indices :
-        Indices into `out` for the boundary of objects (`boundary_indices`) and
-        the inner part of objects (`inner_indices`). `boundary_indices`
+    border_indices, inner_indices :
+        Indices into `out` for the border of objects (`border_indices`) and
+        the inner part of objects (`inner_indices`). `border_indices`
         determines the iteration order; objects that are indexed first are
         preserved. Indices must be sorted such, that indices pointing to the
         same object are next to each other.
@@ -56,8 +56,8 @@ def _remove_near_objects(
         set remembered_ids
 
     remembered_ids = set()
-    for i_indices in range(boundary_indices.shape[0]):
-        i_out = boundary_indices[i_indices]
+    for i_indices in range(border_indices.shape[0]):
+        i_out = border_indices[i_indices]
         object_id = out[i_out]
         # Skip if sample is part of a removed object
         if object_id == 0:
@@ -70,11 +70,11 @@ def _remove_near_objects(
         )
         for j_indices in neighborhood:
             # Check object IDs in neighborhood
-            other_id = out[boundary_indices[j_indices]]
+            other_id = out[border_indices[j_indices]]
             if other_id != 0 and other_id != object_id:
                 # If neighbor ID wasn't already removed or is the current one
                 # remove the boundary and remember the ID
-                _remove_object(out, boundary_indices, j_indices)
+                _remove_object(out, border_indices, j_indices)
                 remembered_ids.add(other_id)
 
     # Delete inner parts of remembered objects
