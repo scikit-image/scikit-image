@@ -12,7 +12,6 @@ extensions = [
   '_flood_fill_cy',
   '_grayreconstruct',
   '_max_tree',
-  '_misc_cy',
   '_skeletonize_cy'
 ]
 
@@ -28,6 +27,14 @@ endforeach
 
 py3.extension_module('_skeletonize_3d_cy',
   cython_gen_cpp.process(_skeletonize_3d_cy),
+  cpp_args: cython_cpp_args,
+  include_directories: [incdir_numpy, '../_shared'],
+  install: true,
+  subdir: 'skimage/morphology'
+)
+
+py3.extension_module('_misc_cy',
+  cython_gen_cpp.process('_misc_cy.pyx'),
   cpp_args: cython_cpp_args,
   include_directories: [incdir_numpy, '../_shared'],
   install: true,
