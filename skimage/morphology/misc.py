@@ -270,7 +270,7 @@ def remove_near_objects(
         Remove objects with lower priority whose distance is not greater than
         this positive value.
     priority : ndarray, optional
-        Defines the priority with which objects that are to close to each other
+        Defines the priority with which objects that are too close to each other
         are removed. Expects a 1-dimensional array of length
         :func:`np.amax(label_image) + 1 <numpy.amax>` that contains the priority
         for each object ID at the respective index. Objects with a lower value
@@ -278,9 +278,9 @@ def remove_near_objects(
         requirement. If not given, priority is given to objects with a higher
         number of samples and their ID second.
     p_norm : int or float, optional
-        The Minkowski p-norm used to calculate the distance between objects.
+        The Minkowski p-norm, used to calculate the distance between objects.
         The default ``2`` corresponds to the Euclidean distance, ``1`` to the
-        "Manhatten" distance, and ``np.inf`` to the Chebyshev distance.
+        "Manhattan" distance, and ``np.inf`` to the Chebyshev distance.
     spacing : sequence of float, optional
         The pixel spacing along each axis of `label_image`. If not specified,
         a grid spacing of unity (1) is implied.
@@ -291,7 +291,7 @@ def remove_near_objects(
     Returns
     -------
     out : ndarray
-        Array of the same shape as `label_image` for which objects that violate
+        Array of the same shape as `label_image`, for which objects that violate
         the `min_distance` condition were removed.
 
     See Also
@@ -307,16 +307,17 @@ def remove_near_objects(
     2. Find the indices for of all given objects and separate them depending on
        if they point to an object's border or not.
     3. Sort indices by their object ID, ensuring all indices pointing to the
-       same object are next to each other. This optimization allows to find
-       all parts of an object simply steping to the neighboring indices.
+       same object are next to each other. This optimization allows finding
+       all parts of an object, simply by stepping to the neighboring indices.
     4. Sort boundary indices by priority. Use a stable-sort to preserve the
        contiguousness from the previous sorting step.
-    5. Constructs a kd-tree with :func:`scipy.spatial.cKDTree` from the
+    5. Construct a kd-tree with :func:`scipy.spatial.cKDTree` from the
        boundary indices.
     6. Iterate all boundary indices in the sorted order, and query the kd-tree
-       for objects that are too close. Remove ones that are.
+       for objects that are too close. Remove ones that are and skip them on
+       during the iteration.
 
-    The performance of this algorithm benefits significantly from removing the
+    The performance of this algorithm benefits significantly from reducing the
     number of samples in `label_image` that belong to an object's border.
 
     Examples

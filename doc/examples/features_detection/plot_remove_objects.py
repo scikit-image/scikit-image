@@ -4,11 +4,11 @@ Removing objects
 ================
 
 scikit-image supports several ways to remove objects inside N-dimensional
-images. In this context "objects" (and "holes") are defined as groups of
+images. In this context, "objects" (and "holes") are defined as groups of
 connected samples that are distinct from the background. A binary image can
 contain several objects that are not connected to each other.
 
-The code snippet below demonstrates two ways to remove objects inside an image
+The code snippet below demonstrates two ways to remove objects inside an image,
 either by removing objects
 
 - based on the number of samples that make up each object
