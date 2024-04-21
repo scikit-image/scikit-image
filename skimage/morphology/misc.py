@@ -359,22 +359,30 @@ def remove_near_objects(
         )
     if out is None:
         out = label_image.copy(order="C")
-    else:
+    elif out is not label_image:
         out[:] = label_image
-
     # May create a copy if order is not C, account for that later
     out_raveled = out.ravel(order="C")
 
-    if priority is None:
-        priority = np.bincount(out_raveled)
+    if spacing is not None:
+        spacing = np.array(spacing)
+        if spacing.shape != (out.ndim,) or spacing.min() <= 0:
+            raise ValueError(
+                "`spacing` must contain exactly one positive factor "
+                "for each dimension of `label_image`"
+            )
 
     indices = np.nonzero(out_raveled)[0]
-
     # Optimization: Split indices into those on the object boundaries and inner
     # ones. The KDTree is built only from the boundary indices, which reduces
     # the size of the critical loop significantly! Remaining indices are only
     # used to remove the inner parts of objects as well.
-    footprint = ndi.generate_binary_structure(out.ndim, out.ndim)
+    if (spacing is None or np.all(spacing[0] == spacing)) and p_norm <= 2:
+        # For unity spacing we can make the borders more sparse by using a
+        # lower connectivity
+        footprint = ndi.generate_binary_structure(out.ndim, 1)
+    else:
+        footprint = ndi.generate_binary_structure(out.ndim, out.ndim)
     border = (
         ndi.maximum_filter(out, footprint=footprint)
         != ndi.minimum_filter(out, footprint=footprint)
@@ -383,7 +391,7 @@ def remove_near_objects(
     inner_indices = indices[~border]
 
     if border_indices.size == 0:
-        # Image without or only one object, return early
+        # Image without any or only one object, return early
         return out
 
     # Sort by label ID first, so that IDs of the same object are contiguous
@@ -392,11 +400,14 @@ def remove_near_objects(
     border_indices = border_indices[np.argsort(out_raveled[border_indices])]
     inner_indices = inner_indices[np.argsort(out_raveled[inner_indices])]
 
-    # `priority` only makes sense with positive object IDs
-    # `border_indices` still contains all unique IDs so check the lowest / first
+    if priority is None:
+        priority = np.bincount(out_raveled)
+    # `priority` can only be indexed by positive object IDs,
+    # `border_indices` contains all unique sorted IDs so check the lowest / first
     smallest_id = out_raveled[border_indices[0]]
     if smallest_id < 0:
         raise ValueError(f"found object with negative ID {smallest_id!r}")
+
     try:
         # Sort by priority second using a stable sort to preserve the contiguous
         # sorting of objects. Because each pixel in an object has the same
@@ -405,6 +416,7 @@ def remove_near_objects(
             np.argsort(priority[out_raveled[border_indices]], kind="stable")[::-1]
         ]
     except IndexError as error:
+        # Use np.amax only for the exception path to provide a nicer error message
         expected_shape = (np.amax(out_raveled) + 1,)
         if priority.shape != expected_shape:
             raise ValueError(
@@ -414,19 +426,12 @@ def remove_near_objects(
         else:
             raise
 
-    unraveled_indices = np.unravel_index(border_indices, label_image.shape)
+    # Construct kd-tree from unraveled border indices (optionally scale by `spacing`)
+    unraveled_indices = np.unravel_index(border_indices, out.shape)
     if spacing is not None:
-        spacing = np.array(spacing)
-        if spacing.shape != (out.ndim,) or spacing.min() <= 0:
-            raise ValueError(
-                "`spacing` must contain exactly one positive factor "
-                "for each dimension of `label_image`"
-            )
-        # Scale indices by spacing
         unraveled_indices = tuple(
             unraveled_indices[dim] * spacing[dim] for dim in range(out.ndim)
         )
-
     kdtree = cKDTree(data=np.asarray(unraveled_indices, dtype=np.float64).T)
 
     _remove_near_objects(
