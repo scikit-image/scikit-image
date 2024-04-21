@@ -134,6 +134,7 @@ Example `version number`
   - Update the docs
 
       git switch gh-pages
+      git branch -C gh-pages gh-pages-backup
       cp -a dev ../.
       git reset --hard <commit from last release>
       git rm -rf dev
