@@ -247,7 +247,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
 
 def remove_near_objects(
     label_image,
-    minimal_distance,
+    min_distance,
     *,
     priority=None,
     p_norm=2,
@@ -266,7 +266,7 @@ def remove_near_objects(
         An n-dimensional array containing object labels, e.g. as returned by
         :func:`~.label`. A value of zero is considered background, all other
         object IDs must be positive integers.
-    minimal_distance : int or float
+    min_distance : int or float
         Remove objects with lower priority whose distance is not greater than
         this positive value.
     priority : ndarray, optional
@@ -292,7 +292,7 @@ def remove_near_objects(
     -------
     out : ndarray
         Array of the same shape as `label_image` for which objects that violate
-        the `minimal_distance` condition were removed.
+        the `min_distance` condition were removed.
 
     See Also
     --------
@@ -339,7 +339,7 @@ def remove_near_objects(
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
     >>> ski.morphology.remove_near_objects(
-    ...     label_image, minimal_distance=3
+    ...     label_image, min_distance=3
     ... )
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
            [8, 8, 8, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -350,8 +350,8 @@ def remove_near_objects(
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]])
     """
-    if minimal_distance < 0:
-        raise ValueError(f"minimal_distance must be >= 0, was {minimal_distance}")
+    if min_distance < 0:
+        raise ValueError(f"min_distance must be >= 0, was {min_distance}")
     if not np.issubdtype(label_image.dtype, np.integer):
         raise ValueError(
             f"`label_image` must be of integer dtype, got {label_image.dtype}"
@@ -426,17 +426,14 @@ def remove_near_objects(
             unraveled_indices[dim] * spacing[dim] for dim in range(out.ndim)
         )
 
-    kdtree = cKDTree(
-        data=np.asarray(unraveled_indices, dtype=np.float64).transpose(),
-        balanced_tree=True,
-    )
+    kdtree = cKDTree(data=np.asarray(unraveled_indices, dtype=np.float64).T)
 
     _remove_near_objects(
         out=out_raveled,
         border_indices=border_indices,
         inner_indices=inner_indices,
         kdtree=kdtree,
-        minimal_distance=minimal_distance,
+        min_distance=min_distance,
         p_norm=p_norm,
         shape=label_image.shape,
     )

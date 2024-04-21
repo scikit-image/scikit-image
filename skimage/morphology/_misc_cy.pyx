@@ -16,7 +16,7 @@ def _remove_near_objects(
     Py_ssize_t[::1] inner_indices not None,
     kdtree,
     cnp.float64_t p_norm,
-    cnp.float64_t minimal_distance,
+    cnp.float64_t min_distance,
     tuple shape,
 ):
     """Remove objects until a minimal distance is ensured.
@@ -37,7 +37,7 @@ def _remove_near_objects(
         same object are next to each other.
     kdtree : scipy.spatial.cKDTree
         A KDTree containing the coordinates of all objects in `image`.
-    minimal_distance :
+    min_distance :
         The minimal allowed distance between objects.
     p_norm :
         The Minkowski p-norm used to calculate the distance between objects.
@@ -62,7 +62,7 @@ def _remove_near_objects(
 
         neighborhood = kdtree.query_ball_point(
             kdtree.data[i_indices, ...],
-            r=minimal_distance,
+            r=min_distance,
             p=p_norm,
         )
         for j_indices in neighborhood:

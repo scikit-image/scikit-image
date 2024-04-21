@@ -255,7 +255,7 @@ class LocalMaxima:
 
 class RemoveNearObjects:
 
-    param_names = ["minimal_distance"]
+    param_names = ["min_distance"]
     params = [5, 100]
 
     def setup(self, *args):
@@ -264,8 +264,8 @@ class RemoveNearObjects:
         objects = image > 0.18  # Chosen with threshold_li
         self.labels, _ = scipy.ndimage.label(objects)
 
-    def time_remove_near_objects(self, minimal_distance):
-        morphology.remove_near_objects(self.labels, minimal_distance=minimal_distance)
+    def time_remove_near_objects(self, min_distance):
+        morphology.remove_near_objects(self.labels, min_distance=min_distance)
 
     def peakmem_reference(self, *args):
         """Provide reference for memory measurement with empty benchmark.
@@ -283,8 +283,8 @@ class RemoveNearObjects:
         """
         pass
 
-    def peakmem_remove_near_objects(self, minimal_distance):
+    def peakmem_remove_near_objects(self, min_distance):
         morphology.remove_near_objects(
             self.labels,
-            minimal_distance=minimal_distance,
+            min_distance=min_distance,
         )
