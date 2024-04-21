@@ -337,24 +337,29 @@ class Test_remove_near_objects:
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("distance", [5, 50, 100])
-    def test_random(self, distance):
+    @pytest.mark.parametrize("p_norm", [1, 2, np.inf])
+    def test_random(self, distance, p_norm):
         rng = np.random.default_rng(1713648513)
         image = rng.random(size=(400, 400))
         maxima = local_maxima(image)
         objects = label(maxima)
 
-        spaced_objects = remove_near_objects(objects, distance)
+        spaced_objects = remove_near_objects(objects, distance, p_norm=p_norm)
         kdtree = sp.spatial.cKDTree(
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
 
         # Compute distance between all objects that are equal or smaller `distance`
-        distances = kdtree.sparse_distance_matrix(kdtree, max_distance=distance)
+        distances = kdtree.sparse_distance_matrix(
+            kdtree, max_distance=distance, p=p_norm
+        )
         # There should be no objects left
         assert distances.count_nonzero() == 0
 
         # But increasing by 1 should reveal a few objects
-        distances = kdtree.sparse_distance_matrix(kdtree, max_distance=distance + 1)
+        distances = kdtree.sparse_distance_matrix(
+            kdtree, max_distance=distance + 1, p=p_norm
+        )
         assert distances.count_nonzero() > 0
 
     @pytest.mark.parametrize("value", [0, 1])
