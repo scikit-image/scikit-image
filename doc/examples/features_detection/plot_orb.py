@@ -12,6 +12,7 @@ employing the very efficient Hamming distance metric for matching. As such, it
 is preferred for real-time applications.
 
 """
+
 from skimage import data
 from skimage import transform
 from skimage.feature import match_descriptors, ORB, plot_matches

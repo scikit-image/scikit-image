@@ -43,3 +43,4 @@ Post numpy 2
   dependencies. Also remove temporary assert for NumPy 2.0 in
   `nightly_wheel_build.yml`.
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
+- scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.

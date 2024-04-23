@@ -30,6 +30,7 @@ the noise power and the image frequency power.
        https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
        https://hal.archives-ouvertes.fr/hal-00674508
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
