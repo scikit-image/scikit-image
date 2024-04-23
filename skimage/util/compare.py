@@ -9,17 +9,17 @@ from .dtype import img_as_float
 
 def _rename_image_params(func):
     wm_images = (
-        "Since version 0.23, the two input images are named `image0` and "
+        "Since version 0.24, the two input images are named `image0` and "
         "`image1` (instead of `image1` and `image2`, respectively). Please use "
         "`image0, image1` to avoid this warning for now, and avoid an error "
-        "from version 0.25 onwards."
+        "from version 0.26 onwards."
     )
 
     wm_method = (
-        "Starting in version 0.25, all arguments following `image0, image1` "
+        "Starting in version 0.24, all arguments following `image0, image1` "
         "(including `method`) will be keyword-only. Please pass `method=` "
         "in the function call to avoid this warning for now, and avoid an error "
-        "from version 0.25 onwards."
+        "from version 0.26 onwards."
     )
 
     @functools.wraps(func)
@@ -70,7 +70,7 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
     image0, image1 : ndarray, shape (M, N)
         Images to process, must be of the same shape.
 
-        .. versionchanged:: 0.23
+        .. versionchanged:: 0.24
             `image1` and `image2` were renamed into `image0` and `image1`
             respectively.
     method : string, optional
@@ -78,7 +78,7 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
         Valid values are {'diff', 'blend', 'checkerboard'}.
         Details are provided in the note section.
 
-    .. versionchanged:: 0.23
+    .. versionchanged:: 0.24
             This parameter became keyword-only.
     n_tiles : tuple, optional
         Used only for the `checkerboard` method. Specifies the number
@@ -89,7 +89,7 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
     image2 : DEPRECATED
         Deprecated in favor of `image1`.
 
-        .. deprecated:: 0.23
+        .. deprecated:: 0.24
 
     Returns
     -------
