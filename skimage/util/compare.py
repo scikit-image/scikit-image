@@ -78,18 +78,11 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
         Valid values are {'diff', 'blend', 'checkerboard'}.
         Details are provided in the note section.
 
-    .. versionchanged:: 0.24
-            This parameter became keyword-only.
+        .. versionchanged:: 0.24
+            This parameter and following ones are keyword-only.
     n_tiles : tuple, optional
         Used only for the `checkerboard` method. Specifies the number
         of tiles (row, column) to divide the image.
-
-    Other Parameters
-    ----------------
-    image2 : DEPRECATED
-        Deprecated in favor of `image1`.
-
-        .. deprecated:: 0.24
 
     Returns
     -------
