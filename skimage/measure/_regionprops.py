@@ -1188,7 +1188,7 @@ def regionprops(
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
     **coords_scaled** : (K, 2) ndarray
-        Coordinate list ``(row, col)``of the region scaled by ``spacing``.
+        Coordinate list ``(row, col)`` of the region scaled by ``spacing``.
     **coords** : (K, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
