@@ -123,10 +123,14 @@ jobs:
       TEST_EXAMPLES: 0
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
-      CPPFLAGS: "-Xpreprocessor -fopenmp"
+      CPPFLAGS: "-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include"
       CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
       CXXFLAGS: "-I/usr/local/opt/libomp/include"
-      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+      LDFLAGS: >-
+        -Wl,-rpath,/usr/local/opt/libomp/lib
+        -L/usr/local/opt/libomp/lib
+        -L/opt/homebrew/opt/libomp/lib
+        -lomp
 
     steps:
       - name: Checkout scikit-image
