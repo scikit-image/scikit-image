@@ -2,9 +2,10 @@ from itertools import product, combinations_with_replacement
 from functools import partial
 import numpy as np
 from scipy import ndimage
-from skimage.registration._optical_flow_utils import _get_pyramid
 from scipy.optimize import minimize
 from skimage.metrics import normalized_mutual_information
+from skimage.transform import pyramid_gaussian
+from math import log, floor
 
 """Parametric image registration
 
@@ -21,9 +22,8 @@ def _coarse_to_fine_parametric(
     I1,
     weights,
     solver,
-    downscale=2,
-    nlevel=10,
-    min_size=16,
+    pyramid_downscale=2,
+    pyramid_minimum_size=16,
     matrix=None,
     dtype=np.float32,
 ):
@@ -39,7 +39,7 @@ def _coarse_to_fine_parametric(
         Weight array the same shape as I0
     solver : callable
         The solver applied at each pyramid level I0,I1,A,v.
-    downscale : float
+    pyramid_downscale : float
         The pyramid downscale factor.
     nlevel : int
         The maximum number of pyramid levels.
@@ -66,11 +66,26 @@ def _coarse_to_fine_parametric(
 
     ndim = I0.ndim
 
-    # uses _get_pyramid as pyramid_gaussian is not in the right order
+    max_layer = int(
+        floor(
+            log(min(I0.shape), pyramid_downscale)
+            - log(pyramid_minimum_size, pyramid_downscale)
+        )
+    )
+
     pyramid = list(
         zip(
             *[
-                _get_pyramid(x.astype(dtype), downscale, nlevel, min_size)
+                reversed(
+                    list(
+                        pyramid_gaussian(
+                            x.astype(dtype),
+                            max_layer=max_layer,
+                            downscale=pyramid_downscale,
+                            preserve_range=True,
+                        )
+                    )
+                )
                 for x in [I0, I1, weights]
             ]
         )
@@ -83,7 +98,7 @@ def _coarse_to_fine_parametric(
 
     for J0, J1, W in pyramid[1:]:
         scaled_matrix = matrix
-        scaled_matrix[:ndim, -1] = downscale * scaled_matrix[:ndim, -1]
+        scaled_matrix[:ndim, -1] = pyramid_downscale * scaled_matrix[:ndim, -1]
         matrix = solver(J0, J1, W, matrix=scaled_matrix)
 
     return matrix
@@ -245,9 +260,8 @@ def parametric_ilk(
     weights=None,
     num_warp=100,
     tol=1e-3,
-    downscale=2,
-    nlevel=20,
-    min_size=16,
+    pyramid_downscale=2,
+    pyramid_minimum_size=16,
     matrix=None,
     dtype=np.float32,
 ):
@@ -263,14 +277,12 @@ def parametric_ilk(
     weights : ndarray or None
         The weights array with same shape as reference_image
     num_warp : int
-        Number of inner iteration
+        Maximumnumber of inner iteration
     tol : float
         Tolerance for inner iterations
-    downscale : float
+    pyramid_scale : float
         The pyramid downscale factor.
-    nlevel : int
-        The maximum number of pyramid levels.
-    min_size : int
+    pyramid_minimum_size : int
         The minimum size for any dimension of the pyramid levels.
     matrix : ndarray
         Intial guess for the homogeneous transformation matrix
@@ -321,30 +333,63 @@ def parametric_ilk(
         moving_image,
         weights,
         solver,
-        downscale,
-        nlevel,
-        min_size,
+        pyramid_downscale,
+        pyramid_minimum_size,
         matrix,
         dtype,
     )
 
 
 def _cost_nmi(x, reference_image, moving_image):
-    matrix = np.eye(3, dtype=np.float64)
-    matrix[:2, :] = x.reshape(2, 3)
+    """Negative normalized mutual information
+
+    Parameters
+    ----------
+    x: ndarray
+        Parameters of the transform
+    reference_image: ndarray
+        Reference image
+    moving_image: ndarray
+        Moving image
+    """
+    ndim = reference_image.ndim
+    matrix = np.eye(ndim + 1, dtype=np.float64)
+    matrix[:ndim, :] = x.reshape(ndim, ndim + 1)
     moving_image_warp = ndimage.affine_transform(moving_image, matrix)
     return -normalized_mutual_information(reference_image, moving_image_warp)
 
 
-def _parametric_nmi_solver(reference_image, moving_image, weights, matrix):
-    """from PR #3544"""
+def _parametric_nmi_solver(reference_image, moving_image, weights, tol, matrix):
+    """Solver maximizing mutual information
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights: ndarray
+        Weights
+    tol: float
+        Solver tolerance
+    matrix: ndarray
+        Initial value of the transform
+
+    Note:
+    from PR #3544
+    """
+
+    ndim = reference_image.ndim
+
     cost = partial(
         _cost_nmi, reference_image=reference_image, moving_image=moving_image
     )
-    x0 = matrix[:2, :].ravel()
-    result = minimize(cost, x0=x0, method="Powell")
-    matrix = np.eye(3, dtype=np.float64)
-    matrix[:2, :] = result.x.reshape(2, 3)
+
+    x0 = matrix[:ndim, :].ravel()
+
+    result = minimize(cost, x0=x0, method="Powell", tol=tol)
+    matrix = np.eye(ndim + 1, dtype=np.float64)
+    matrix[:ndim, :] = result.x.reshape(ndim, ndim + 1)
     return matrix
 
 
@@ -353,9 +398,9 @@ def parametric_nmi(
     moving_image,
     *,
     weights=None,
-    downscale=2,
-    nlevel=20,
-    min_size=16,
+    tol=None,
+    pyramid_scale=2,
+    pyramid_minimum_size=32,
     matrix=None,
     dtype=np.float32,
 ):
@@ -370,6 +415,8 @@ def parametric_nmi(
         The second gray scale image of the sequence.
     weights : ndarray or None
         The weights array with same shape as reference_image
+    tol : float
+        Tolearance for the solver (see scipy.mininize).
     downscale : float
         The pyramid downscale factor.
     nlevel : int
@@ -416,7 +463,7 @@ def parametric_nmi(
     if matrix is None:
         matrix = np.eye(ndim + 1, dtype=np.float64)
 
-    solver = partial(_parametric_nmi_solver)
+    solver = partial(_parametric_nmi_solver, tol=tol)
 
     if weights is None:
         weights = np.ones(reference_image.shape, dtype=dtype)
@@ -426,9 +473,8 @@ def parametric_nmi(
         moving_image,
         weights,
         solver,
-        downscale,
-        nlevel,
-        min_size,
+        pyramid_scale,
+        pyramid_minimum_size,
         matrix,
         dtype,
     )
