@@ -4,10 +4,8 @@ import numpy as np
 from scipy import ndimage
 from skimage.registration._optical_flow_utils import _get_pyramid
 
-"""Parametric registration"""
+"""Parametric image registration
 
-"""
-TODO: have a single object for the transform
 TODO: handle other parametric motion: translation, rotation, etc
 TODO: handle color images? channel_axis?
 TODO: add other solvers
@@ -17,7 +15,15 @@ TODO: add more test
 
 
 def _coarse_to_fine_parametric(
-    I0, I1, weights, solver, downscale=2, nlevel=10, min_size=16, dtype=np.float32
+    I0,
+    I1,
+    weights,
+    solver,
+    downscale=2,
+    nlevel=10,
+    min_size=16,
+    matrix=None,
+    dtype=np.float32,
 ):
     """Coarse to fine solver for affine motion.
 
@@ -37,15 +43,15 @@ def _coarse_to_fine_parametric(
         The maximum number of pyramid levels.
     min_size : int
         The minimum size for any dimension of the pyramid levels.
+    matrix: np.ndarray
+        The initial transformation matrix
     dtype : dtype
         Output data type.
 
     Returns
     -------
-    A : ndarray
-        The estimated affine matrix
-    v : ndarray
-        The estimated offset
+    matrix : ndarray
+        The estimated transformation matrix
 
     Note
     ----
@@ -66,17 +72,22 @@ def _coarse_to_fine_parametric(
         )
     )
 
-    A = np.eye(ndim)
-    v = np.zeros((ndim, 1))
+    if matrix is None:
+        matrix = np.eye(ndim + 1)
 
-    A, v = solver(pyramid[0][0], pyramid[0][1], pyramid[0][2], A=A, v=v)
+    matrix = solver(pyramid[0][0], pyramid[0][1], pyramid[0][2], matrix=matrix)
+
     for J0, J1, W in pyramid[1:]:
-        A, v = solver(J0, J1, W, A=A, v=downscale * v)
+        scaled_matrix = matrix
+        scaled_matrix[:ndim, -1] = downscale * scaled_matrix[:ndim, -1]
+        matrix = solver(J0, J1, W, matrix=scaled_matrix)
 
-    return A, v
+    return matrix
 
 
-def _parametric_ilk_solver(reference_image, moving_image, weights, num_warp, A, v):
+def _parametric_ilk_solver(
+    reference_image, moving_image, weights, num_warp, tol, matrix
+):
     """Estimate global affine motion between two images
 
     Parameters
@@ -90,17 +101,16 @@ def _parametric_ilk_solver(reference_image, moving_image, weights, num_warp, A, 
         Weights as an array with the same shape as reference_image
     num_warp : int
         Number of inner iteration
-    A : ndarray
-        Affine matrix shape (ndim, ndim)
-    v : ndarray
-        Offset (ndim,)
+    tol : float
+        Tolerance
+    matrix : ndarray
+        Initial homogeneous transformation matrix
+        see https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html)
 
     Returns
     -------
-    A : ndarray
-        The estimated affine matrix
-    v : ndarray
-        The estimated offset
+    matrix : ndarray
+        The estimated transformation matrix
 
     Note
     ----
@@ -112,28 +122,31 @@ def _parametric_ilk_solver(reference_image, moving_image, weights, num_warp, A, 
 
     grid = np.meshgrid(*[np.arange(n) for n in reference_image.shape], indexing="ij")
 
-    grad = [ndimage.prewitt(reference_image, axis=k) for k in range(ndim)]
+    grad = [ndimage.sobel(reference_image, axis=k) for k in range(ndim)]
 
     elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
 
     G = np.zeros([len(elems)] * 2)
+
     for i, j in combinations_with_replacement(range(len(elems)), 2):
         G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
 
+    Id = np.eye(ndim, dtype=matrix.dtype)
+
     for _ in range(num_warp):
-        moving_image_warp = ndimage.affine_transform(moving_image, A, v.flatten())
+        moving_image_warp = ndimage.affine_transform(moving_image, matrix)
         error_image = reference_image - moving_image_warp
         b = np.array([[(e * error_image * weights).sum()] for e in elems])
         try:
             r = np.linalg.solve(G, b)
-            v = v + A @ r[:ndim]
-            A = A @ (r[ndim:].reshape(ndim, ndim) + np.eye(ndim))
-            if np.linalg.norm(r) < 1e-9:
+            matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()
+            matrix[:ndim, :ndim] @= r[ndim:].reshape(ndim, ndim) + Id
+            if np.linalg.norm(r) < tol:
                 break
         except np.linalg.LinAlgError:
             break
 
-    return A, v
+    return matrix
 
 
 def _huber_weights(x, k):
@@ -157,8 +170,10 @@ def _huber_weights(x, k):
     return w
 
 
-def _parametric_rilk_solver(reference_image, moving_image, weights, num_warp, A, v):
-    """Estimate global affine motion between two images
+def _parametric_rilk_solver(
+    reference_image, moving_image, weights, num_warp, tol, matrix
+):
+    """Estimate affine motion between two images using iterative Lucas Kanade approach
 
     Parameters
     ----------
@@ -171,21 +186,15 @@ def _parametric_rilk_solver(reference_image, moving_image, weights, num_warp, A,
         Weights as an array with the same shape as reference_image
     num_warp : int
         Number of inner iteration
-    A : ndarray
-        Affine matrix shape (ndim, ndim)
-    v : ndarray
-        Offset (ndim,)
+    tol : float
+        Tolerance
+    matrix: np.ndarray
+        Transformation matrix
 
     Returns
     -------
-    A : ndarray
-        The estimated affine matrix
-    v : ndarray
-        The estimated offset
-
-    Note
-    ----
-    This is an inner function for  parametric_ilk
+    matrix : ndarray
+        Transformation matrix
 
     """
 
@@ -199,8 +208,10 @@ def _parametric_rilk_solver(reference_image, moving_image, weights, num_warp, A,
 
     G = np.zeros([len(elems)] * 2)
 
+    Id = np.eye(ndim, dtype=matrix.dtype)
+
     for _ in range(num_warp):
-        moving_image_warp = ndimage.affine_transform(moving_image, A, v.flatten())
+        moving_image_warp = ndimage.affine_transform(moving_image, matrix)
 
         error_image = reference_image - moving_image_warp
 
@@ -213,14 +224,14 @@ def _parametric_rilk_solver(reference_image, moving_image, weights, num_warp, A,
 
         try:
             r = np.linalg.solve(G, b)
-            v = v + A @ r[:ndim]
-            A = A @ (r[ndim:].reshape(ndim, ndim) + np.eye(ndim))
-            if np.linalg.norm(r) < 1e-5:
+            matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()
+            matrix[:ndim, :ndim] @= r[ndim:].reshape(ndim, ndim) + Id
+            if np.linalg.norm(r) < tol:
                 break
         except np.linalg.LinAlgError:
             break
 
-    return A, v
+    return matrix
 
 
 def parametric_ilk(
@@ -228,13 +239,12 @@ def parametric_ilk(
     moving_image,
     *,
     weights=None,
-    robust=False,
     num_warp=100,
+    tol=1e-3,
     downscale=2,
     nlevel=20,
     min_size=16,
-    A=None,
-    v=None,
+    matrix=None,
     dtype=np.float32,
 ):
     """Estimate affine motion between two images using an
@@ -248,23 +258,27 @@ def parametric_ilk(
         The second gray scale image of the sequence.
     weights : ndarray or None
         The weights array with same shape as reference_image
+    method: str
+        Method ilk,rilk or mi
     num_warp : int
         Number of inner iteration
+    tol : float
+        Tolerance for inner iterations
     downscale : float
         The pyramid downscale factor.
     nlevel : int
         The maximum number of pyramid levels.
     min_size : int
         The minimum size for any dimension of the pyramid levels.
+    matrix : ndarray
+        Intial guess for the homogeneous transformation matrix
     dtype : dtype
         Output data type.
 
     Returns
     -------
-    A : ndarray
-        The estimated affine matrix
-    v : ndarray
-        The estimated offset
+    matrix: ndarray
+        Transformation matrix
 
     Reference
     ---------
@@ -289,18 +303,13 @@ def parametric_ilk(
     plt.imshow(registered_moving)
 
     """
+
     ndim = reference_image.ndim
 
-    if A is None:
-        A = np.eye(ndim)
+    if matrix is None:
+        matrix = np.eye(ndim + 1, dtype=np.float64)
 
-    if v is None:
-        v = np.zeros((ndim,))
-
-    if robust:
-        solver = partial(_parametric_rilk_solver, num_warp=num_warp, A=A, v=v)
-    else:
-        solver = partial(_parametric_ilk_solver, num_warp=num_warp, A=A, v=v)
+    solver = partial(_parametric_ilk_solver, num_warp=num_warp, tol=tol)
 
     if weights is None:
         weights = np.ones(reference_image.shape, dtype=dtype)
@@ -313,5 +322,6 @@ def parametric_ilk(
         downscale,
         nlevel,
         min_size,
+        matrix,
         dtype,
     )
