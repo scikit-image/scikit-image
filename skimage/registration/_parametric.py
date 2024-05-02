@@ -3,6 +3,8 @@ from functools import partial
 import numpy as np
 from scipy import ndimage
 from skimage.registration._optical_flow_utils import _get_pyramid
+from scipy.optimize import minimize
+from skimage.metrics import normalized_mutual_information
 
 """Parametric image registration
 
@@ -64,11 +66,13 @@ def _coarse_to_fine_parametric(
 
     ndim = I0.ndim
 
+    # uses _get_pyramid as pyramid_gaussian is not in the right order
     pyramid = list(
         zip(
-            _get_pyramid(I0.astype(dtype), downscale, nlevel, min_size),
-            _get_pyramid(I1.astype(dtype), downscale, nlevel, min_size),
-            _get_pyramid(weights.astype(dtype), downscale, nlevel, min_size),
+            *[
+                _get_pyramid(x.astype(dtype), downscale, nlevel, min_size)
+                for x in [I0, I1, weights]
+            ]
         )
     )
 
@@ -122,7 +126,7 @@ def _parametric_ilk_solver(
 
     grid = np.meshgrid(*[np.arange(n) for n in reference_image.shape], indexing="ij")
 
-    grad = [ndimage.sobel(reference_image, axis=k) for k in range(ndim)]
+    grad = np.gradient(reference_image)
 
     elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
 
@@ -154,9 +158,9 @@ def _huber_weights(x, k):
 
     Parameters
     ----------
-    x : array
+    x : ndarray
         input
-    k : scalar
+    k : float
         scale parameter
 
     Result
@@ -258,8 +262,6 @@ def parametric_ilk(
         The second gray scale image of the sequence.
     weights : ndarray or None
         The weights array with same shape as reference_image
-    method: str
-        Method ilk,rilk or mi
     num_warp : int
         Number of inner iteration
     tol : float
@@ -287,20 +289,20 @@ def parametric_ilk(
     Example
     -------
 
-    from skimage import data
-    import numpy as np
-    from scipy import ndimage as ndi
-    from skimage.registration import parametric_ilk
-    import matplotlib.pyplot as plt
-    reference_image = data.astronaut()[...,0]
-    r = -0.12  # radians
-    c, s = np.cos(r), np.sin(r)
-    A0 =  np.array([[c, -s], [s, c]])
-    v0 = np.random.randn(2).flatten()
-    moving_image = ndi.affine_transform(reference_image, A0, v0)
-    A1,v1 = parametric_ilk(reference_image, moving_image)
-    registered_moving = ndi.affine_transform(moving_image, A1, v1.ravel())
-    plt.imshow(registered_moving)
+    >>> from skimage import data
+    >>> import numpy as np
+    >>> from scipy import ndimage as ndi
+    >>> from skimage.registration import parametric_ilk
+    >>> import matplotlib.pyplot as plt
+    >>> reference_image = data.astronaut()[...,0]
+    >>> r = -0.12  # radians
+    >>> c, s = np.cos(r), np.sin(r)
+    >>> A0 =  np.array([[c, -s], [s, c]])
+    >>> v0 = np.random.randn(2).flatten()
+    >>> moving_image = ndi.affine_transform(reference_image, A0, v0)
+    >>> A1,v1 = parametric_ilk(reference_image, moving_image)
+    >>> registered_moving = ndi.affine_transform(moving_image, A1, v1.ravel())
+    >>> plt.imshow(registered_moving)
 
     """
 
@@ -310,6 +312,111 @@ def parametric_ilk(
         matrix = np.eye(ndim + 1, dtype=np.float64)
 
     solver = partial(_parametric_ilk_solver, num_warp=num_warp, tol=tol)
+
+    if weights is None:
+        weights = np.ones(reference_image.shape, dtype=dtype)
+
+    return _coarse_to_fine_parametric(
+        reference_image,
+        moving_image,
+        weights,
+        solver,
+        downscale,
+        nlevel,
+        min_size,
+        matrix,
+        dtype,
+    )
+
+
+def _cost_nmi(x, reference_image, moving_image):
+    matrix = np.eye(3, dtype=np.float64)
+    matrix[:2, :] = x.reshape(2, 3)
+    moving_image_warp = ndimage.affine_transform(moving_image, matrix)
+    return -normalized_mutual_information(reference_image, moving_image_warp)
+
+
+def _parametric_nmi_solver(reference_image, moving_image, weights, matrix):
+    """from PR #3544"""
+    cost = partial(
+        _cost_nmi, reference_image=reference_image, moving_image=moving_image
+    )
+    x0 = matrix[:2, :].ravel()
+    result = minimize(cost, x0=x0, method="Powell")
+    matrix = np.eye(3, dtype=np.float64)
+    matrix[:2, :] = result.x.reshape(2, 3)
+    return matrix
+
+
+def parametric_nmi(
+    reference_image,
+    moving_image,
+    *,
+    weights=None,
+    downscale=2,
+    nlevel=20,
+    min_size=16,
+    matrix=None,
+    dtype=np.float32,
+):
+    """Estimate affine motion between two images by maximizing mutual
+    information
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights : ndarray or None
+        The weights array with same shape as reference_image
+    downscale : float
+        The pyramid downscale factor.
+    nlevel : int
+        The maximum number of pyramid levels.
+    min_size : int
+        The minimum size for any dimension of the pyramid levels.
+    matrix : ndarray
+        Intial guess for the homogeneous transformation matrix
+    dtype : dtype
+        Output data type.
+
+    Returns
+    -------
+    matrix: ndarray
+        Transformation matrix
+
+    Reference
+    ---------
+    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
+        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
+
+    Example
+    -------
+
+    >>> from skimage import data
+    >>> import numpy as np
+    >>> from scipy import ndimage as ndi
+    >>> from skimage.registration import parametric_ilk
+    >>> import matplotlib.pyplot as plt
+    >>> reference_image = data.astronaut()[...,0]
+    >>> r = -0.12  # radians
+    >>> c, s = np.cos(r), np.sin(r)
+    >>> A0 =  np.array([[c, -s], [s, c]])
+    >>> v0 = np.random.randn(2).flatten()
+    >>> moving_image = ndi.affine_transform(reference_image, A0, v0)
+    >>> A1,v1 = parametric_ilk(reference_image, moving_image)
+    >>> registered_moving = ndi.affine_transform(moving_image, A1, v1.ravel())
+    >>> plt.imshow(registered_moving)
+
+    """
+
+    ndim = reference_image.ndim
+
+    if matrix is None:
+        matrix = np.eye(ndim + 1, dtype=np.float64)
+
+    solver = partial(_parametric_nmi_solver)
 
     if weights is None:
         weights = np.ones(reference_image.shape, dtype=dtype)

@@ -5,7 +5,8 @@ python_sources = [
   '_optical_flow.py',
   '_optical_flow_utils.py',
   '_phase_cross_correlation.py',
-  '_parametric.py'
+  '_parametric.py',
+  '_affine.py'
 ]
 
 py3.install_sources(
