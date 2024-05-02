@@ -5,10 +5,10 @@ from ..util.dtype import dtype_range
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
 __all__ = [
-    'mean_squared_error',
-    'normalized_root_mse',
-    'peak_signal_noise_ratio',
-    'normalized_mutual_information',
+    "mean_squared_error",
+    "normalized_root_mse",
+    "peak_signal_noise_ratio",
+    "normalized_mutual_information",
 ]
 
 
@@ -48,7 +48,7 @@ def mean_squared_error(image0, image1):
     return np.mean((image0 - image1) ** 2, dtype=np.float64)
 
 
-def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
+def normalized_root_mse(image_true, image_test, *, normalization="euclidean"):
     """
     Compute the normalized root mean-squared error (NRMSE) between two
     images.
@@ -98,11 +98,11 @@ def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
 
     # Ensure that both 'Euclidean' and 'euclidean' match
     normalization = normalization.lower()
-    if normalization == 'euclidean':
+    if normalization == "euclidean":
         denom = np.sqrt(np.mean((image_true * image_true), dtype=np.float64))
-    elif normalization == 'min-max':
+    elif normalization == "min-max":
         denom = image_true.max() - image_true.min()
-    elif normalization == 'mean':
+    elif normalization == "mean":
         denom = image_true.mean()
     else:
         raise ValueError("Unsupported norm_type")
@@ -189,11 +189,11 @@ def _pad_to(arr, shape):
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
         raise ValueError(
-            f'Target shape {shape} cannot be smaller than input'
-            f'shape {arr.shape} along any axis.'
+            f"Target shape {shape} cannot be smaller than input"
+            f"shape {arr.shape} along any axis."
         )
     padding = [(0, s - i) for s, i in zip(shape, arr.shape)]
-    return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
+    return np.pad(arr, pad_width=padding, mode="constant", constant_values=0)
 
 
 def normalized_mutual_information(image0, image1, *, bins=100):
@@ -211,43 +211,45 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
     to 2 (perfectly correlated image values, whether positively or negatively).
 
-    Parameters
-    ----------
-    image0, image1 : ndarray
-        Images to be compared. The two input images must have the same number
-        of dimensions.
-    bins : int or sequence of int, optional
-        The number of bins along each axis of the joint histogram.
+    =======
+    >>>>>>> affine/image-registration
+        Parameters
+        ----------
+        image0, image1 : ndarray
+            Images to be compared. The two input images must have the same number
+            of dimensions.
+        bins : int or sequence of int, optional
+            The number of bins along each axis of the joint histogram.
 
-    Returns
-    -------
-    nmi : float
-        The normalized mutual information between the two arrays, computed at
-        the granularity given by ``bins``. Higher NMI implies more similar
-        input images.
+        Returns
+        -------
+        nmi : float
+            The normalized mutual information between the two arrays, computed at
+            the granularity given by ``bins``. Higher NMI implies more similar
+            input images.
 
-    Raises
-    ------
-    ValueError
-        If the images don't have the same number of dimensions.
+        Raises
+        ------
+        ValueError
+            If the images don't have the same number of dimensions.
 
     Notes
     -----
     If the two input images are not the same shape, the smaller image is padded
     with zeros.
 
-    References
-    ----------
-    .. [1] C. Studholme, D.L.G. Hill, & D.J. Hawkes (1999). An overlap
-           invariant entropy measure of 3D medical image alignment.
-           Pattern Recognition 32(1):71-86
-           :DOI:`10.1016/S0031-3203(98)00091-0`
+        References
+        ----------
+        .. [1] C. Studholme, D.L.G. Hill, & D.J. Hawkes (1999). An overlap
+               invariant entropy measure of 3D medical image alignment.
+               Pattern Recognition 32(1):71-86
+               :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     if image0.ndim != image1.ndim:
         raise ValueError(
-            f'NMI requires images of same number of dimensions. '
-            f'Got {image0.ndim}D for `image0` and '
-            f'{image1.ndim}D for `image1`.'
+            f"NMI requires images of same number of dimensions. "
+            f"Got {image0.ndim}D for `image0` and "
+            f"{image1.ndim}D for `image1`."
         )
     if image0.shape != image1.shape:
         max_shape = np.maximum(image0.shape, image1.shape)

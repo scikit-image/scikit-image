@@ -51,10 +51,10 @@ DST = np.array(
 
 
 def test_estimate_transform():
-    for tform in ('euclidean', 'similarity', 'affine', 'projective', 'polynomial'):
+    for tform in ("euclidean", "similarity", "affine", "projective", "polynomial"):
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
     with pytest.raises(ValueError):
-        estimate_transform('foobar', SRC[:2, :], DST[:2, :])
+        estimate_transform("foobar", SRC[:2, :], DST[:2, :])
 
 
 def test_matrix_transform():
@@ -64,13 +64,13 @@ def test_matrix_transform():
 
 def test_euclidean_estimation():
     # exact solution
-    tform = estimate_transform('euclidean', SRC[:2, :], SRC[:2, :] + 10)
+    tform = estimate_transform("euclidean", SRC[:2, :], SRC[:2, :] + 10)
     assert_almost_equal(tform(SRC[:2, :]), SRC[:2, :] + 10)
     assert_almost_equal(tform.params[0, 0], tform.params[1, 1])
     assert_almost_equal(tform.params[0, 1], -tform.params[1, 0])
 
     # over-determined
-    tform2 = estimate_transform('euclidean', SRC, DST)
+    tform2 = estimate_transform("euclidean", SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], -tform2.params[1, 0])
@@ -135,13 +135,13 @@ def test_euclidean_init():
 
 def test_similarity_estimation():
     # exact solution
-    tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
+    tform = estimate_transform("similarity", SRC[:2, :], DST[:2, :])
     assert_almost_equal(tform(SRC[:2, :]), DST[:2, :])
     assert_almost_equal(tform.params[0, 0], tform.params[1, 1])
     assert_almost_equal(tform.params[0, 1], -tform.params[1, 0])
 
     # over-determined
-    tform2 = estimate_transform('similarity', SRC, DST)
+    tform2 = estimate_transform("similarity", SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], -tform2.params[1, 0])
@@ -229,11 +229,11 @@ def test_similarity_init():
 
 def test_affine_estimation():
     # exact solution
-    tform = estimate_transform('affine', SRC[:3, :], DST[:3, :])
+    tform = estimate_transform("affine", SRC[:3, :], DST[:3, :])
     assert_almost_equal(tform(SRC[:3, :]), DST[:3, :])
 
     # over-determined
-    tform2 = estimate_transform('affine', SRC, DST)
+    tform2 = estimate_transform("affine", SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
@@ -338,7 +338,7 @@ def test_fundamental_matrix_estimation():
         ]
     ).reshape(-1, 2)
 
-    tform = estimate_transform('fundamental', src, dst)
+    tform = estimate_transform("fundamental", src, dst)
 
     # Reference values obtained using COLMAP SfM library.
     tform_ref = np.array(
@@ -362,7 +362,7 @@ def test_fundamental_matrix_residuals():
     assert_almost_equal(tform.residuals(src, dst) ** 2, [0, 0.5, 2])
 
 
-@pytest.mark.parametrize('array_like_input', [False, True])
+@pytest.mark.parametrize("array_like_input", [False, True])
 def test_fundamental_matrix_forward(array_like_input):
     if array_like_input:
         rotation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
@@ -437,8 +437,8 @@ def test_fundamental_matrix_inverse_estimation():
 
     # Inverse of (src -> dst) transform should be equivalent to
     # (dst -> src) transformation
-    tform = estimate_transform('fundamental', src, dst)
-    tform_inv = estimate_transform('fundamental', dst, src)
+    tform = estimate_transform("fundamental", src, dst)
+    tform_inv = estimate_transform("fundamental", dst, src)
 
     np.testing.assert_array_almost_equal(tform.inverse.params, tform_inv.params)
 
@@ -486,7 +486,7 @@ def test_fundamental_matrix_epipolar_projection():
         ]
     ).reshape(-1, 2)
 
-    tform = estimate_transform('fundamental', src, dst)
+    tform = estimate_transform("fundamental", src, dst)
 
     # calculate x' F x for each coordinate; should be close to zero
     p = np.abs(np.sum(np.column_stack((dst, np.ones(len(dst)))) * tform(src), axis=1))
@@ -542,7 +542,7 @@ def test_essential_matrix_estimation():
         ]
     ).reshape(-1, 2)
 
-    tform = estimate_transform('essential', src, dst)
+    tform = estimate_transform("essential", src, dst)
 
     # Reference values obtained using COLMAP SfM library.
     tform_ref = np.array(
@@ -582,11 +582,11 @@ def test_essential_matrix_residuals():
 
 def test_projective_estimation():
     # exact solution
-    tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
+    tform = estimate_transform("projective", SRC[:4, :], DST[:4, :])
     assert_almost_equal(tform(SRC[:4, :]), DST[:4, :])
 
     # over-determined
-    tform2 = estimate_transform('projective', SRC, DST)
+    tform2 = estimate_transform("projective", SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
     # via estimate method
@@ -597,22 +597,22 @@ def test_projective_estimation():
 
 def test_projective_weighted_estimation():
     # Exact solution with same points, and unity weights
-    tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
-    tform_w = estimate_transform('projective', SRC[:4, :], DST[:4, :], np.ones(4))
+    tform = estimate_transform("projective", SRC[:4, :], DST[:4, :])
+    tform_w = estimate_transform("projective", SRC[:4, :], DST[:4, :], np.ones(4))
     assert_almost_equal(tform.params, tform_w.params)
 
     # Over-determined solution with same points, and unity weights
-    tform = estimate_transform('projective', SRC, DST)
-    tform_w = estimate_transform('projective', SRC, DST, np.ones(SRC.shape[0]))
+    tform = estimate_transform("projective", SRC, DST)
+    tform_w = estimate_transform("projective", SRC, DST, np.ones(SRC.shape[0]))
     assert_almost_equal(tform.params, tform_w.params)
 
     # Repeating a point, but setting its weight small, should give nearly
     # the same result.
     point_weights = np.ones(SRC.shape[0] + 1)
     point_weights[0] = 1.0e-15
-    tform1 = estimate_transform('projective', SRC, DST)
+    tform1 = estimate_transform("projective", SRC, DST)
     tform2 = estimate_transform(
-        'projective',
+        "projective",
         SRC[np.arange(-1, SRC.shape[0]), :],
         DST[np.arange(-1, SRC.shape[0]), :],
         point_weights,
@@ -620,9 +620,9 @@ def test_projective_weighted_estimation():
     assert_almost_equal(tform1.params, tform2.params, decimal=3)
 
 
-@pytest.mark.parametrize('array_like_input', [False, True])
+@pytest.mark.parametrize("array_like_input", [False, True])
 def test_projective_init(array_like_input):
-    tform = estimate_transform('projective', SRC, DST)
+    tform = estimate_transform("projective", SRC, DST)
     # init with transformation matrix
     if array_like_input:
         params = [list(p) for p in tform.params]
@@ -634,7 +634,7 @@ def test_projective_init(array_like_input):
 
 def test_polynomial_estimation():
     # over-determined
-    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    tform = estimate_transform("polynomial", SRC, DST, order=10)
     assert_almost_equal(tform(SRC), DST, 6)
 
     # via estimate method
@@ -645,9 +645,9 @@ def test_polynomial_estimation():
 
 def test_polynomial_weighted_estimation():
     # Over-determined solution with same points, and unity weights
-    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    tform = estimate_transform("polynomial", SRC, DST, order=10)
     tform_w = estimate_transform(
-        'polynomial', SRC, DST, order=10, weights=np.ones(SRC.shape[0])
+        "polynomial", SRC, DST, order=10, weights=np.ones(SRC.shape[0])
     )
     assert_almost_equal(tform.params, tform_w.params)
 
@@ -655,9 +655,9 @@ def test_polynomial_weighted_estimation():
     # the same result.
     point_weights = np.ones(SRC.shape[0] + 1)
     point_weights[0] = 1.0e-15
-    tform1 = estimate_transform('polynomial', SRC, DST, order=10)
+    tform1 = estimate_transform("polynomial", SRC, DST, order=10)
     tform2 = estimate_transform(
-        'polynomial',
+        "polynomial",
         SRC[np.arange(-1, SRC.shape[0]), :],
         DST[np.arange(-1, SRC.shape[0]), :],
         order=10,
@@ -666,9 +666,9 @@ def test_polynomial_weighted_estimation():
     assert_almost_equal(tform1.params, tform2.params, decimal=4)
 
 
-@pytest.mark.parametrize('array_like_input', [False, True])
+@pytest.mark.parametrize("array_like_input", [False, True])
 def test_polynomial_init(array_like_input):
-    tform = estimate_transform('polynomial', SRC, DST, order=10)
+    tform = estimate_transform("polynomial", SRC, DST, order=10)
     # init with transformation parameters
     if array_like_input:
         params = [list(p) for p in tform.params]
@@ -679,8 +679,8 @@ def test_polynomial_init(array_like_input):
 
 
 def test_polynomial_default_order():
-    tform = estimate_transform('polynomial', SRC, DST)
-    tform2 = estimate_transform('polynomial', SRC, DST, order=2)
+    tform = estimate_transform("polynomial", SRC, DST)
+    tform2 = estimate_transform("polynomial", SRC, DST, order=2)
     assert_almost_equal(tform2.params, tform.params)
 
 
@@ -912,21 +912,21 @@ def test_projective_repr():
     want = (
         re.escape(
             textwrap.dedent(
-                '''
+                """
         <ProjectiveTransform(matrix=
             [[1., 0., 0.],
              [0., 1., 0.],
              [0., 0., 1.]]) at
-        '''
+        """
             ).strip()
         )
-        + ' 0x[a-f0-9]+'
-        + re.escape('>')
+        + " 0x[a-f0-9]+"
+        + re.escape(">")
     )
     # Hack the escaped regex to allow whitespace before each number for
     # compatibility with different numpy versions.
-    want = want.replace('0\\.', ' *0\\.')
-    want = want.replace('1\\.', ' *1\\.')
+    want = want.replace("0\\.", " *0\\.")
+    want = want.replace("1\\.", " *1\\.")
     assert re.match(want, repr(tform))
 
 
@@ -934,18 +934,18 @@ def test_projective_str():
     tform = ProjectiveTransform()
     want = re.escape(
         textwrap.dedent(
-            '''
+            """
         <ProjectiveTransform(matrix=
             [[1., 0., 0.],
              [0., 1., 0.],
              [0., 0., 1.]])>
-        '''
+        """
         ).strip()
     )
     # Hack the escaped regex to allow whitespace before each number for
     # compatibility with different numpy versions.
-    want = want.replace('0\\.', ' *0\\.')
-    want = want.replace('1\\.', ' *1\\.')
+    want = want.replace("0\\.", " *0\\.")
+    want = want.replace("1\\.", " *1\\.")
     assert re.match(want, str(tform))
 
 
@@ -960,7 +960,7 @@ def _assert_least_squares(tf, src, dst):
             assert new_ssq > baseline
 
 
-@pytest.mark.parametrize('array_like_input', [False, True])
+@pytest.mark.parametrize("array_like_input", [False, True])
 def test_estimate_affine_3d(array_like_input):
     ndim = 3
     src = np.random.random((25, ndim)) * 2 ** np.arange(7, 7 + ndim)
