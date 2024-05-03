@@ -15,7 +15,7 @@ class TestTpsTransform:
 
         # Test that _estimated is initialized to False
         assert tform._estimated is False
-        assert tform.spline_mappings is None
+        assert tform._spline_mappings is None
         assert tform.src is None
 
     def test_tps_transform_inverse(self):
@@ -40,17 +40,17 @@ class TestTpsTransform:
         )
 
         # Ensure that the initial state is as expected
-        assert tform.spline_mappings is None
+        assert tform._spline_mappings is None
         assert tform.src is None
 
         # Perform estimation
         assert tform.estimate(src, dst) is True
         np.testing.assert_array_equal(tform.src, src)
 
-        assert tform.spline_mappings.shape == (src.shape[0] + 3, 2)
+        assert tform._spline_mappings.shape == (src.shape[0] + 3, 2)
 
         np.testing.assert_allclose(
-            tform.spline_mappings,
+            tform._spline_mappings,
             desired_spline_mappings,
             rtol=0.1,
             atol=1e-16,
@@ -64,7 +64,7 @@ class TestTpsTransform:
 
         # Ensure that the initial state is as expected
         assert tform._estimated is False
-        assert tform.spline_mappings is None
+        assert tform._spline_mappings is None
         assert tform.src is None
 
         # Perform the estimation, which should fail due to the mismatched number of points
@@ -93,7 +93,7 @@ class TestTpsTransform:
 
         # Check that, when the estimation fails, the instance attributes remain unchanged
         assert tform._estimated is False
-        assert tform.spline_mappings is None
+        assert tform._spline_mappings is None
         assert tform.src is None
 
 

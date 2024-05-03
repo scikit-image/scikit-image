@@ -10,14 +10,11 @@ class TpsTransform:
     Given a set of control points (source and destination points), this class
     can be used to estimate the thin-plate spline (TPS) transformation which
     transforms the source points into the destination points.
-    It interpolates a surface that passes through each control point.
-    Control points are seen as position constraints on a bending surface. The ideal
-    surface is the one that bends least.
 
     Attributes
     ----------
-    spline_mappings : (N, D) array_like
-        Spline mappings for every control point.
+    _spline_mappings : (N, D) array_like
+        Coefficients corresponding to destination points coordinates.
     src : (N, 2) array_like
         Coordinates of control points in source image.
 
@@ -34,8 +31,8 @@ class TpsTransform:
 
     Define source and destination control points:
 
-    >>> src = np.array([[0, 0], [0, 5], [5, 5],[5, 0]])
-    >>> dst = np.roll(src, 1, axis=0)
+    >>> src = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
+    >>> dst = np.array([[5, 0], [0, 0], [0, 5], [5, 5]])
 
     Generate meshgrid:
 
@@ -70,7 +67,7 @@ class TpsTransform:
 
     def __init__(self):
         self._estimated = False
-        self.spline_mappings = None
+        self._spline_mappings = None
         self.src = None
 
     def __call__(self, coords):
@@ -86,9 +83,9 @@ class TpsTransform:
         transformed_coords: (N, D) array
             Destination coordinates
         """
-        if self.spline_mappings is None:
-            raise ValueError(f"{self.spline_mappings}. Compute the `estimate`")
-        coeffs = self.spline_mappings
+        if self._spline_mappings is None:
+            raise ValueError(f"{self._spline_mappings}. Compute the `estimate`")
+        coeffs = self._spline_mappings
         coords = np.array(coords)
 
         if not coords.ndim == 2 or coords.shape[1] != 2:
@@ -149,12 +146,13 @@ class TpsTransform:
         dist = sp.spatial.distance.cdist(self.src, self.src)
         K = _radial_basis_kernel(dist)
         P = np.hstack([np.ones((n, 1)), src])
-        L = np.zeros((n + 3, n + 3), dtype=np.float32)
+        n_plus_3 = n + 3
+        L = np.zeros((n_plus_3, n_plus_3), dtype=np.float32)
         L[:n, :n] = K
         L[:n, -3:] = P
         L[-3:, :n] = P.T
         V = np.concatenate([dst, np.zeros((d + 1, d))])
-        self.spline_mappings = np.dot(np.linalg.inv(L), V)
+        self._spline_mappings = np.dot(np.linalg.inv(L), V)
         return True
 
     def _radial_distance(self, x, y):
@@ -182,9 +180,8 @@ def _radial_basis_kernel(r):
     Parameters
     ----------
     r : (4, N) ndarray
-        Input array representing the norm distance between interlandmark
-        distances for the source (control) points and based on the (x,y) coordinates
-        for each of these points.
+        Input array representing the euclidean distance between each pair of
+        two collections of control points.
 
     Returns
     -------
