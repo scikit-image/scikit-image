@@ -11,7 +11,7 @@ permissions (if not, you will need to ask an owner to grant you
 access), specifically to:
 
   - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/scikit-image-web
+  - https://github.com/scikit-image/skimage-web
 
 
 - Check ``TODO.txt`` for any outstanding tasks.
@@ -73,7 +73,8 @@ Example `version number`
 
 - If this is a release:
 
-  - update the file ``skimage/data/_fetchers.py`` to point the pooch
+  - (Only needed if you create a new branch)
+    update the file ``skimage/data/_fetchers.py`` to point the pooch
     repository to the new branch instead of main during testing.
     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
     change it to the newly created branch name.
@@ -125,29 +126,40 @@ Example `version number`
       git commit -m 'Bump version'
       git push origin main
 
-----
+- Update documentation on the web:
+  The documentation is kept in a separate repo: scikit-image/docs
 
-- Once the release is completed you should update the release docs:
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - On the release branch, build a clean version of the docs. In the
-    root directory, run ``pip install .``.
-  - In the ``doc/`` directory:
-    - Build using
-      ``make clean; make html; make gh-pages``.
-    - Check (since this a new feature) that binder links in gallery examples
-      point to the release branch, e.g. `0.16.x`.
-    - In the ``gh-pages/`` directory:
-      - Update the symlink to ``stable`` and commit.
-      - Upload the docs: ``git push origin gh-pages`` in ``doc/gh-pages``.
+  - Wait for the CI service to deploy to GitHub Pages
+  - Sync your branch with the remote repo: ``git pull``.
+  - Update the docs
+
+      git switch gh-pages
+      git branch -C gh-pages gh-pages-backup
+      cp -a dev ../.
+      git reset --hard <commit from last release>
+      git rm -rf dev
+      cp -a ../dev .
+      git add dev
+      cp -a ../dev <release name, e.g., 0.23.x>
+      git add <release name, e.g., 0.23.x>
+      rm stable
+      ln -s <release name, e.g., 0.23.x> stable
+      git add stable
+      git commit -m "Add <release name, e.g., 0.23.x>"
+      git push -f origin gh-pages # force push---be careful!
 
 - Update the web frontpage:
+  The webpage is kept in a separate repo: scikit-image/skimage-web
 
-  The webpage source is kept in a separate repo: `scikit-image-web`.
+  - Highlight new release in the news section
 
-  - Add release date to ``index.rst`` under "News".
-  - Add previous stable version documentation path to disallowed paths
-    in `robots.txt`
-  - Commit and push (this will also build and update the website).
+      git pull
+      # Edit the ``News`` section of ``index.rst``
+      git add index.rst
+      git commit -m "Highlight ${VERSION} release"
+      git push
+
+----
 
 - Post release notes on user & dev forums, blog, Twitter, etc.
 
