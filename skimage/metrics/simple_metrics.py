@@ -196,7 +196,7 @@ def _pad_to(arr, shape):
     return np.pad(arr, pad_width=padding, mode="constant", constant_values=0)
 
 
-def normalized_mutual_information(image0, image1, *, bins=100):
+def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
     r"""Compute the normalized mutual information (NMI).
 
     The normalized mutual information of :math:`A` and :math:`B` is given by::
@@ -220,6 +220,8 @@ def normalized_mutual_information(image0, image1, *, bins=100):
             of dimensions.
         bins : int or sequence of int, optional
             The number of bins along each axis of the joint histogram.
+        weights: ndarray | None
+            Weights used in the computation of the histogram
 
         Returns
         -------
@@ -257,12 +259,17 @@ def normalized_mutual_information(image0, image1, *, bins=100):
         padded1 = _pad_to(image1, max_shape)
     else:
         padded0, padded1 = image0, image1
+    if weights.shape != padded0.shape:
+        padded_weights = _pad_to(weights, max_shape)
+    else:
+        padded_weights = weights
 
-    hist, bin_edges = np.histogramdd(
+    hist = np.histogramdd(
         [np.reshape(padded0, -1), np.reshape(padded1, -1)],
         bins=bins,
         density=True,
-    )
+        weights=np.reshape(padded_weights, -1),
+    )[0]
 
     H0 = entropy(np.sum(hist, axis=0))
     H1 = entropy(np.sum(hist, axis=1))

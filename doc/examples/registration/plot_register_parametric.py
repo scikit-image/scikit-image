@@ -2,42 +2,12 @@ import numpy as np
 from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 
-from skimage.data import astronaut
+from skimage.data import astronaut, cells3d
 from skimage import registration
 
+import tifffile
+
 import time
-
-
-# reference_image = astronaut()[..., 0]
-# r = -0.12  # radians
-# c, s = np.cos(r), np.sin(r)
-# matrix_transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
-
-# # matrix_transform = np.eye(2,3) + np.random.normal(0,0.1,(2,3))
-# moving_image = ndi.affine_transform(reference_image, matrix_transform)
-
-# matrix1 = registration.parametric_ilk(
-#     reference_image,
-#     moving_image,
-#     num_warp=50,
-#     tol=0.001,
-#     pyramid_downscale=2,
-#     pyramid_minimum_size=32,
-# )
-# registered1 = ndi.affine_transform(moving_image, matrix1)
-# mse1 = np.sum((registered1 > 0) * (registered1 - reference_image) ** 2) / np.sum(
-#     (registered1 > 0)
-# )
-# print(mse1)
-
-
-# plt.subplot(121)
-# plt.imshow(reference_image)
-# plt.subplot(122)
-# plt.imshow(moving_image)
-# plt.subplot(123)
-# plt.imshow(registered1)
-
 
 ###############################################################################
 # First, we make a toy example with an image and a shifted and rotated version
@@ -46,11 +16,14 @@ import time
 #
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
-r = -0.12
-c, s = np.cos(r), np.sin(r)
-matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
+image = astronaut()[..., 0]  # Just green channel
 
-image = astronaut()[..., 1]  # Just green channel
+r = np.random.uniform(-0.2, 0.2)  # radians
+c, s = np.cos(r), np.sin(r)
+T = np.array([[1, 0, -image.shape[0] / 2], [0, 1, -image.shape[1] / 2], [0, 0, 1]])
+R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+matrix_transform = np.linalg.inv(T) @ R @ T
+
 target = ndi.affine_transform(image, matrix_transform)
 
 ###############################################################################
@@ -58,7 +31,7 @@ target = ndi.affine_transform(image, matrix_transform)
 # transformation starting from only the two images.
 
 t0 = time.time()
-register_matrix = registration.affine(image, target, method="lucas kanade")
+register_matrix = registration.affine(image, target)
 t1 = time.time()
 
 ###############################################################################
@@ -119,7 +92,10 @@ plt.show()
 # transformation starting from only the two images.
 
 t0 = time.time()
-register_matrix = registration.affine(image, target, method="studholme")
+
+register_matrix = registration.affine(
+    image, target, solver=registration.studholme_affine_solver
+)
 t1 = time.time()
 
 ###############################################################################
@@ -147,4 +123,51 @@ print("Studholme's method")
 print(f"Elapsed time: {t1-t0:.2f} seconds.")
 print(f"MSE: {mse(image, registered):.2f}.")
 
+plt.show()
+
+###############################################################################
+# Registration of a 3D volume
+#
+
+try:
+    import pooch
+
+    reference = tifffile.imread(
+        sorted(
+            pooch.retrieve(
+                "https://graphics.stanford.edu/data/voldata/mrbrain-8bit.tar.gz",
+                known_hash=None,
+                processor=pooch.Untar(),
+            )
+        )
+    )[::2, ::4, ::4].astype(np.float32)
+except ModuleNotFoundError:
+    print("Need pooch to download the 3D brain example dataset. Using 3D cells instead")
+    reference = cells3d()[:, 0, ::4, ::4]
+
+T = np.concatenate(
+    [
+        np.concatenate(
+            [np.eye(3), -np.array(reference.shape).reshape(3, 1) / 2], axis=1
+        ),
+        [[0, 0, 0, 1]],
+    ]
+)
+r1 = np.random.uniform(-0.2, 0.2)  # radians
+c1, s1 = np.cos(r1), np.sin(r1)
+R1 = np.array([[c1, -s1, 0, 0], [s1, c1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+r2 = np.random.uniform(-0.2, 0.2)  # radians
+c2, s2 = np.cos(r2), np.sin(r2)
+R2 = np.array([[c2, -s2, 0, 0], [s2, c2, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+matrix_transform = np.linalg.inv(T) @ R2 @ R1 @ T
+moving = ndi.affine_transform(reference, matrix_transform)
+matrix = registration.affine(reference, moving)
+registered = ndi.affine_transform(moving, matrix)
+p = reference.shape[0] // 2
+plt.subplot(131)
+plt.imshow(reference[p])
+plt.subplot(132)
+plt.imshow(moving[p])
+plt.subplot(133)
+plt.imshow(registered[p])
 plt.show()

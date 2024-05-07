@@ -12,108 +12,21 @@ from math import log, floor
 TODO: handle other parametric motion: translation, rotation, etc
 TODO: handle color images? channel_axis?
 TODO: merge with PR #3544 https://github.com/seanbudd/scikit-image and #7050 https://github.com/Coilm/scikit-image
-TODO: add more test
-TODO: remove dtype
-TODO: optimize when there is no weights
+TODO: add more test (weights, color)
 """
 
 
-def _coarse_to_fine_affine(
-    I0,
-    I1,
+def lucas_kanade_affine_solver(
+    reference_image,
+    moving_image,
     weights,
-    solver,
-    channel_axis=None,
-    pyramid_downscale=2,
-    pyramid_minimum_size=16,
-    matrix=None,
+    channel_axis,
+    matrix,
+    *,
+    max_iter=40,
+    tol=1e-6,
 ):
-    """Coarse to fine solver for affine motion.
-
-    Parameters
-    ----------
-    I0 : ndarray
-        The first gray scale image of the sequence.
-    I1 : ndarray
-        The second gray scale image of the sequence.
-    weights : ndarray
-        Weight array the same shape as I0
-    solver : callable
-        The solver applied at each pyramid level I0,I1,A,v.
-    pyramid_downscale : float
-        The pyramid downscale factor.
-    nlevel : int
-        The maximum number of pyramid levels.
-    min_size : int
-        The minimum size for any dimension of the pyramid levels.
-    matrix: np.ndarray
-        The initial transformation matrix
-
-    Returns
-    -------
-    matrix : ndarray
-        The estimated transformation matrix
-
-    Note
-    ----
-    This function follows skimage.registration._optical_flow_utils.coarse_to_fine
-
-    Generate image pyramids and apply the solver at each level passing the
-    previous affine parameters from the previous estimate.
-
-    """
-
-    ndim = I0.ndim if channel_axis is None else I0.ndim - 1
-
-    max_layer = int(
-        floor(
-            log(min(I0.shape), pyramid_downscale)
-            - log(pyramid_minimum_size, pyramid_downscale)
-        )
-    )
-
-    pyramid = list(
-        zip(
-            *[
-                reversed(
-                    list(
-                        pyramid_gaussian(
-                            x,
-                            max_layer=max_layer,
-                            downscale=pyramid_downscale,
-                            preserve_range=True,
-                            channel_axis=channel_axis,
-                        )
-                    )
-                )
-                for x in [I0, I1, weights]
-            ]
-        )
-    )
-
-    if matrix is None:
-        matrix = np.eye(ndim + 1)
-
-    matrix = solver(
-        pyramid[0][0],
-        pyramid[0][1],
-        pyramid[0][2],
-        channel_axis=channel_axis,
-        matrix=matrix,
-    )
-
-    for J0, J1, W in pyramid[1:]:
-        scaled_matrix = matrix
-        scaled_matrix[:ndim, -1] = pyramid_downscale * scaled_matrix[:ndim, -1]
-        matrix = solver(J0, J1, W, channel_axis=channel_axis, matrix=scaled_matrix)
-
-    return matrix
-
-
-def _lucas_kanade_solver(
-    reference_image, moving_image, weights, channel_axis, num_warp, tol, matrix
-):
-    """Estimate global affine motion between two images
+    """Estimate affine motion between two images using a least square approach
 
     Parameters
     ----------
@@ -124,24 +37,28 @@ def _lucas_kanade_solver(
         The second gray scale image of the sequence.
     weights : ndarray
         Weights as an array with the same shape as reference_image
-    num_warp : int
+    channel_axis: int
+        Index of the channel axis
+    matrix : ndarray
+        Initial homogeneous transformation matrix
+    max_iter : int
         Number of inner iteration
     tol : float
         Tolerance
-    matrix : ndarray
-        Initial homogeneous transformation matrix
-        see https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html)
 
     Returns
     -------
     matrix : ndarray
         The estimated transformation matrix
 
-    Note
-    ----
-    This is an inner function for _affine_lucas_kanade
+    Reference
+    ---------
+    .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
 
     """
+
+    if weights is None:
+        weights = 1.0
 
     ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
 
@@ -158,7 +75,7 @@ def _lucas_kanade_solver(
 
     Id = np.eye(ndim, dtype=matrix.dtype)
 
-    for _ in range(num_warp):
+    for _ in range(max_iter):
         moving_image_warp = ndimage.affine_transform(moving_image, matrix)
         error_image = reference_image - moving_image_warp
         b = np.array([[(e * error_image * weights).sum()] for e in elems])
@@ -174,20 +91,40 @@ def _lucas_kanade_solver(
     return matrix
 
 
-def _affine_lucas_kanade(
+def _cost_nmi(x, reference_image, moving_image, weights):
+    """Negative normalized mutual information
+
+    Parameters
+    ----------
+    x: ndarray
+        Parameters of the transform
+    reference_image: ndarray
+        Reference image
+    moving_image: ndarray
+        Moving image
+    weights: ndarray | None
+        Weights
+    """
+
+    ndim = reference_image.ndim
+    matrix = np.eye(ndim + 1, dtype=np.float64)
+    matrix[:ndim, :] = x.reshape(ndim, ndim + 1)
+    moving_image_warp = ndimage.affine_transform(moving_image, matrix)
+    return -normalized_mutual_information(
+        reference_image, moving_image_warp, weights=weights
+    )
+
+
+def studholme_affine_solver(
     reference_image,
     moving_image,
+    weights,
+    channel_axis,
+    matrix,
     *,
-    channel_axis=None,
-    matrix=None,
-    weights=None,
-    num_warp=50,
-    tol=1e-3,
-    pyramid_downscale=2,
-    pyramid_minimum_size=32,
+    options={"maxiter": 10},
 ):
-    """Estimate affine motion between two images using an
-    iterative Lucas and Kanade approach
+    """Solver maximizing mutual information using Powell's method
 
     Parameters
     ----------
@@ -195,31 +132,97 @@ def _affine_lucas_kanade(
         The first gray scale image of the sequence.
     moving_image : ndarray
         The second gray scale image of the sequence.
-    weights : ndarray or None
+    weights: ndarray
+        Weights or mask
+    channel_axis: int | None
+        Index of the channel axis
+    matrix: ndarray
+        Initial value of the transform
+    options: dict
+        options for scipy.optimization.minimize("Powell")
+
+    Returns
+    -------
+    matrix:
+        Homogeneous transform matrix
+
+    Reference
+    ---------
+    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
+        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
+    .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
+        The Art of Scientific Python. O’Reilly Media, Inc., 2017.
+
+    Note:
+    from PR #3544
+    """
+
+    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
+
+    cost = partial(
+        _cost_nmi,
+        reference_image=reference_image,
+        moving_image=moving_image,
+        weights=weights,
+    )
+
+    x0 = matrix[:ndim, :].ravel()
+
+    result = minimize(cost, x0=x0, method="Powell", options=options)
+
+    matrix = np.eye(ndim + 1, dtype=np.float64)
+    matrix[:ndim, :] = result.x.reshape(ndim, ndim + 1)
+    return matrix
+
+
+def affine(
+    reference_image,
+    moving_image,
+    *,
+    weights=None,
+    channel_axis=None,
+    matrix=None,
+    solver=lucas_kanade_affine_solver,
+    pyramid_downscale=2,
+    pyramid_minimum_size=32,
+):
+    """Coarse-to-fine affine motion estimation between two images
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights : ndarray | None
         The weights array with same shape as reference_image
-    num_warp : int
-        Maximumnumber of inner iteration
-    tol : float
-        Tolerance for inner iterations
+    channel_axis: int | None
+        Index of the channel axis
+    matrix : ndarray
+        Intial guess for the homogeneous transformation matrix
+    solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
+        Affine motion solver can be lucas_kanade_affine_solver or studholme_affine_solver
     pyramid_scale : float
         The pyramid downscale factor.
     pyramid_minimum_size : int
         The minimum size for any dimension of the pyramid levels.
-    matrix : ndarray
-        Intial guess for the homogeneous transformation matrix
 
     Returns
     -------
     matrix: ndarray
         Transformation matrix
 
-    Reference
-    ---------
-    .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
+    Note
+    ----
+    Generate image pyramids and apply the solver at each level passing the
+    previous affine parameters from the previous estimate.
+
+    The estimated matrix can be used with scikit.ndimage.affine to register the moving image
+    to the reference image.
+
 
     Example
     -------
-
     >>> from skimage import data
     >>> import numpy as np
     >>> from scipy import ndimage as ndi
@@ -241,198 +244,48 @@ def _affine_lucas_kanade(
     if matrix is None:
         matrix = np.eye(ndim + 1, dtype=np.float64)
 
-    solver = partial(_lucas_kanade_solver, num_warp=num_warp, tol=tol)
-
     if weights is None:
         weights = np.ones(reference_image.shape, dtype=np.float32)
 
-    return _coarse_to_fine_affine(
-        reference_image,
-        moving_image,
-        weights,
-        solver,
-        channel_axis,
-        pyramid_downscale,
-        pyramid_minimum_size,
-        matrix,
+    max_layer = int(
+        floor(
+            log(min(reference_image.shape), pyramid_downscale)
+            - log(pyramid_minimum_size, pyramid_downscale)
+        )
     )
 
-
-def _cost_nmi(x, reference_image, moving_image):
-    """Negative normalized mutual information
-
-    Parameters
-    ----------
-    x: ndarray
-        Parameters of the transform
-    reference_image: ndarray
-        Reference image
-    moving_image: ndarray
-        Moving image
-    """
-
-    ndim = reference_image.ndim
-    matrix = np.eye(ndim + 1, dtype=np.float64)
-    matrix[:ndim, :] = x.reshape(ndim, ndim + 1)
-    moving_image_warp = ndimage.affine_transform(moving_image, matrix)
-    return -normalized_mutual_information(reference_image, moving_image_warp)
-
-
-def _studholme_solver(
-    reference_image, moving_image, weights, channel_axis, tol, matrix
-):
-    """Solver maximizing mutual information
-
-    Parameters
-    ----------
-    reference_image : ndarray
-        The first gray scale image of the sequence.
-    moving_image : ndarray
-        The second gray scale image of the sequence.
-    weights: ndarray
-        Weights
-    tol: float
-        Solver tolerance
-    matrix: ndarray
-        Initial value of the transform
-
-    Returns
-    -------
-    matrix:
-        Homogeneous transform matrix
-
-    Reference
-    ---------
-    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
-        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
-    Note:
-    from PR #3544
-    """
-
-    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
-
-    cost = partial(
-        _cost_nmi, reference_image=reference_image, moving_image=moving_image
+    pyramid = list(
+        zip(
+            *[
+                reversed(
+                    list(
+                        pyramid_gaussian(
+                            x,
+                            max_layer=max_layer,
+                            downscale=pyramid_downscale,
+                            preserve_range=True,
+                            channel_axis=channel_axis,
+                        )
+                        if x is not None
+                        else None
+                    )
+                )
+                for x in [reference_image, moving_image, weights]
+            ]
+        )
     )
 
-    x0 = matrix[:ndim, :].ravel()
-    result = minimize(cost, x0=x0, method="Powell", tol=tol)
+    matrix = solver(
+        pyramid[0][0],
+        pyramid[0][1],
+        pyramid[0][2],
+        channel_axis=channel_axis,
+        matrix=matrix,
+    )
 
-    matrix = np.eye(ndim + 1, dtype=np.float64)
-    matrix[:ndim, :] = result.x.reshape(ndim, ndim + 1)
+    for J0, J1, W in pyramid[1:]:
+        scaled_matrix = matrix
+        scaled_matrix[:ndim, -1] = pyramid_downscale * scaled_matrix[:ndim, -1]
+        matrix = solver(J0, J1, W, channel_axis=channel_axis, matrix=scaled_matrix)
+
     return matrix
-
-
-def _affine_studholme(
-    reference_image,
-    moving_image,
-    *,
-    channel_axis=None,
-    matrix=None,
-    weights=None,
-    tol=None,
-    pyramid_scale=2,
-    pyramid_minimum_size=32,
-):
-    """Estimate affine motion between two images by maximizing mutual
-    information using the Powell optimization method
-
-    Parameters
-    ----------
-    reference_image : ndarray
-        The first gray scale image of the sequence.
-    moving_image : ndarray
-        The second gray scale image of the sequence.
-    channel_axis = None | int
-        Channel axis
-    matrix : ndarray
-        Intial guess for the homogeneous transformation matrix
-    weights : ndarray or None
-        The weights array with same shape as reference_image
-    tol : float
-        Tolearance for the solver (see scipy.mininize).
-    pyramid_scale : float
-        The pyramid downscale factor.
-    pyramid_minimum_size : int
-        The minimum size for any dimension of the pyramid levels.
-
-    Returns
-    -------
-    matrix: ndarray
-        Transformation matrix
-
-    Reference
-    ---------
-    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
-        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
-
-    Example
-    -------
-
-    >>> from skimage import data
-    >>> import numpy as np
-    >>> from scipy import ndimage as ndi
-    >>> from skimage.registration import parametric_ilk
-    >>> import matplotlib.pyplot as plt
-    >>> reference_image = data.astronaut()[...,0]
-    >>> r = -0.12  # radians
-    >>> c, s = np.cos(r), np.sin(r)
-    >>> A0 =  np.array([[c, -s], [s, c]])
-    >>> v0 = np.random.randn(2).flatten()
-    >>> moving_image = ndi.affine_transform(reference_image, A0, v0)
-    >>> A1,v1 = affine(reference_image, moving_image)
-    >>> registered_moving = ndi.affine_transform(moving_image, A1, v1.ravel())
-    >>> plt.imshow(registered_moving)
-
-    """
-
-    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
-
-    if matrix is None:
-        matrix = np.eye(ndim + 1, dtype=np.float64)
-
-    solver = partial(_studholme_solver, tol=tol)
-
-    if weights is None:
-        weights = np.ones(reference_image.shape, dtype=np.float32)
-
-    return _coarse_to_fine_affine(
-        reference_image,
-        moving_image,
-        weights,
-        solver,
-        channel_axis,
-        pyramid_scale,
-        pyramid_minimum_size,
-        matrix,
-    )
-
-
-def affine(
-    reference_image,
-    moving_image,
-    *,
-    method="lucas kanade",
-    channel_axis=None,
-    matrix=None,
-    **kwargs,
-):
-    """Estimate affine motion between two images"""
-    if method == "lucas kanade":
-        return _affine_lucas_kanade(
-            reference_image,
-            moving_image,
-            channel_axis=channel_axis,
-            matrix=matrix,
-            **kwargs,
-        )
-    elif method == "studholme":
-        return _affine_studholme(
-            reference_image,
-            moving_image,
-            channel_axis=channel_axis,
-            matrix=matrix,
-            **kwargs,
-        )
-    else:
-        raise NotImplementedError(f"Method {method} not implement.")
