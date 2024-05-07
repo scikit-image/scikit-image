@@ -164,7 +164,8 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     image_true, image_test = _as_floats(image_true, image_test)
 
     err = mean_squared_error(image_true, image_test)
-    return 20 * np.log10(data_range / err)
+    data_range = float(data_range)  # prevent overflow for small integer types
+    return 10 * np.log10((data_range**2) / err)
 
 
 def _pad_to(arr, shape):
