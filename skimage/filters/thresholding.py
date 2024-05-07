@@ -313,7 +313,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
         raise Exception("Either image or hist must be provided.")
 
     if hist is not None:
-        if isinstance(hist, tuple | list):
+        if isinstance(hist, (tuple, list)):
             counts, bin_centers = hist
         else:
             counts = hist

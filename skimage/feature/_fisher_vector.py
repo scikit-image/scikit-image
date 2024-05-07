@@ -99,7 +99,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
             'order to use the Fisher vector functionality.'
         )
 
-    if not isinstance(descriptors, list | np.ndarray):
+    if not isinstance(descriptors, (list, np.ndarray)):
         raise DescriptorException(
             'Please ensure descriptors are either a NumPY array, '
             'or a list of NumPy arrays.'
