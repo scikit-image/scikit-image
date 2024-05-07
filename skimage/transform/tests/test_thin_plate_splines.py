@@ -2,16 +2,16 @@ import numpy as np
 import pytest
 
 import skimage as ski
-from skimage.transform._thin_plate_splines import TpsTransform, tps_warp
+from skimage.transform._thin_plate_splines import ThinPlateSplineTransform, tps_warp
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 
 DST = np.array([[5, 0], [0, 0], [0, 5], [5, 5]])
 
 
-class TestTpsTransform:
+class TestThinPlateSplineTransform:
     def test_tps_transform_init(self):
-        tform = TpsTransform()
+        tform = ThinPlateSplineTransform()
 
         # Test that _estimated is initialized to False
         assert tform._estimated is False
@@ -19,14 +19,14 @@ class TestTpsTransform:
         assert tform.src is None
 
     def test_tps_transform_inverse(self):
-        tps = TpsTransform()
+        tps = ThinPlateSplineTransform()
         with pytest.raises(NotImplementedError):
             tps.inverse()
 
     def test_tps_transform_estimation(self):
         src = np.array([[0, 1], [-1, 0], [0, -1], [1, 0]])
         dst = np.array([[0, 0.75], [-1, 0.25], [0, -1.25], [1, 0.25]], dtype=np.float32)
-        tform = TpsTransform()
+        tform = ThinPlateSplineTransform()
         desired_spline_mappings = np.array(
             [
                 [0.0, -0.0902],
@@ -58,7 +58,7 @@ class TestTpsTransform:
 
     def test_tps_transform_estimation_failure(self):
         # Test the estimate method when the estimation fails
-        tform = TpsTransform()
+        tform = ThinPlateSplineTransform()
         src = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
         dst = np.array([[5, 0], [0, 0], [0, 5]])
 
@@ -162,12 +162,12 @@ class TestTpsWarp:
 
     def test_tps_transform_call(self):
         # Test __call__ method without esitmate
-        tform = TpsTransform()
+        tform = ThinPlateSplineTransform()
         # Define coordinates to transform using meshgrid
         coords = np.array(np.mgrid[0:5, 0:5])
         coords = coords.T.reshape(-1, 2)
 
-        # Call a TpsTransform without estimate
+        # Call a ThinPlateSplineTransform without estimate
         with pytest.raises(ValueError, match="None. Compute the `estimate`"):
             tform(coords)
 

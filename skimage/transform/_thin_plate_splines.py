@@ -4,7 +4,7 @@ import scipy as sp
 from .._shared.utils import check_nD
 
 
-class TpsTransform:
+class ThinPlateSplineTransform:
     """Thin-plate spline transformation.
 
     Given a set of control points (source and destination points), this class
@@ -41,7 +41,7 @@ class TpsTransform:
 
     Estimate transformation:
 
-    >>> tps = ski.transform.TpsTransform()
+    >>> tps = ski.transform.ThinPlateSplineTransform()
     >>> tps.estimate(src, dst)
     True
 
@@ -283,7 +283,7 @@ def tps_warp(
     xx, yy = np.mgrid[x_min : x_max : x_steps * 1j, y_min : y_max : y_steps * 1j]
     coords = np.vstack([xx.ravel(), yy.ravel()]).T
 
-    tform = TpsTransform()
+    tform = ThinPlateSplineTransform()
     tform.estimate(dst, src)
     transform = tform(coords)
 
