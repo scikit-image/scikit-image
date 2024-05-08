@@ -79,3 +79,57 @@ def test_3d(solver):
     assert psnr > 10, f"PSNR({psnr}) < 10 "
     assert error1 < 0.1, f"Error norm({error1}) > 0.1 "
     assert error2 < 1, f"Error norm({error2}) > 1"
+
+
+@pytest.mark.parametrize("solver", solvers)
+def test_color(solver):
+    reference = np.moveaxis(astronaut(), 2, 0)
+    u = np.random.uniform(-10, 10)
+    v = np.random.uniform(-10, 10)
+    r = np.random.uniform(-0.2, 0.2)  # radians
+    c, s = np.cos(r), np.sin(r)
+    T = np.array([[1, 0, -256], [0, 1, -256], [0, 0, 1]])
+    R = np.array([[c, -s, u], [s, c, v], [0, 0, 1]])
+    matrix_transform = np.linalg.inv(T) @ R @ T
+
+    moving = np.stack(
+        [ndi.affine_transform(plane, matrix_transform) for plane in reference]
+    )
+
+    matrix = affine(reference, moving, channel_axis=0, solver=solver)
+
+    registered = np.stack([ndi.affine_transform(plane, matrix) for plane in moving])
+
+    reference = np.moveaxis(reference, 0, 2)
+    moving = np.moveaxis(moving, 0, 2)
+    registered = np.moveaxis(registered, 0, 2)
+    psnr, error1, error2 = metrics(reference, registered, matrix_transform, matrix)
+    assert psnr > 10, f"PSNR({psnr}) < 10 "
+    assert error1 < 0.1, f"Error norm({error1}) > 0.1 "
+    assert error2 < 1, f"Error norm({error2}) > 1"
+
+
+@pytest.mark.parametrize("solver", solvers)
+def test_weights(solver):
+    d = 64  # border
+    reference = astronaut()[..., 0]
+    u = np.random.uniform(-3, 3)
+    v = np.random.uniform(-3, 3)
+    r = np.random.uniform(-0.2, 0.2)  # radians
+    c, s = np.cos(r), np.sin(r)
+    T = np.array([[1, 0, -512 / 2 + d], [0, 1, -512 / 2 + d], [0, 0, 1]])
+    R = np.array([[c, -s, u], [s, c, v], [0, 0, 1]])
+    matrix_transform = np.linalg.inv(T) @ R @ T
+    weights = np.zeros(reference.shape)
+    cc = (slice(0, 512 - d), slice(0, 512 - d))
+    weights[cc] = 1
+    weights = weights / weights.sum()
+    moving = reference.copy()
+    moving[cc] = ndi.affine_transform(reference[cc], matrix_transform)
+    matrix = affine(reference, moving, weights=weights)
+    registered = moving.copy()
+    registered[cc] = ndi.affine_transform(moving[cc], matrix)
+    psnr, error1, error2 = metrics(reference, moving, matrix_transform, matrix)
+    assert psnr > 20, f"PSNR({psnr}) < 20 "
+    assert error1 < 0.1, f"Error norm({error1}) > 0.1 "
+    assert error2 < 1, f"Error norm({error2}) > 1"

@@ -10,9 +10,7 @@ from math import log, floor
 """Affine image registration
 
 TODO: handle other parametric motion: translation, rotation, etc
-TODO: handle color images? channel_axis?
 TODO: merge with PR #3544 https://github.com/seanbudd/scikit-image and #7050 https://github.com/Coilm/scikit-image
-TODO: add more test (weights, color)
 TODO: name of the functions
 """
 
@@ -83,7 +81,7 @@ def lucas_kanade_affine_solver(
     G = np.zeros([len(elems)] * 2)
 
     for i, j in combinations_with_replacement(range(len(elems)), 2):
-        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).mean()
+        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
 
     Id = np.eye(ndim, dtype=matrix.dtype)
 
@@ -92,7 +90,7 @@ def lucas_kanade_affine_solver(
             [ndi.affine_transform(plane, matrix) for plane in moving_image]
         )
         error_image = reference_image - moving_image_warp
-        b = np.array([[(e * error_image * weights).mean()] for e in elems])
+        b = np.array([[(e * error_image * weights).sum()] for e in elems])
         try:
             r = np.linalg.solve(G, b)
             matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()

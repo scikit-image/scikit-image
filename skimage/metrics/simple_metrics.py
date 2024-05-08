@@ -259,7 +259,9 @@ def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
         padded1 = _pad_to(image1, max_shape)
     else:
         padded0, padded1 = image0, image1
-    if weights.shape != padded0.shape:
+
+    if weights is not None and weights.shape != padded0.shape:
+        max_shape = np.maximum(image0.shape, image1.shape)
         padded_weights = _pad_to(weights, max_shape)
     else:
         padded_weights = weights
@@ -268,7 +270,7 @@ def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
         [np.reshape(padded0, -1), np.reshape(padded1, -1)],
         bins=bins,
         density=True,
-        weights=np.reshape(padded_weights, -1),
+        weights=None if weights is None else np.reshape(padded_weights, -1),
     )[0]
 
     H0 = entropy(np.sum(hist, axis=0))
