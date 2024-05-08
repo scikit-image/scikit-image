@@ -1,7 +1,7 @@
 from itertools import product, combinations_with_replacement
 from functools import partial
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage as ndi
 from scipy.optimize import minimize
 from skimage.metrics import normalized_mutual_information
 from skimage.transform import pyramid_gaussian
@@ -13,6 +13,7 @@ TODO: handle other parametric motion: translation, rotation, etc
 TODO: handle color images? channel_axis?
 TODO: merge with PR #3544 https://github.com/seanbudd/scikit-image and #7050 https://github.com/Coilm/scikit-image
 TODO: add more test (weights, color)
+TODO: name of the functions
 """
 
 
@@ -60,25 +61,38 @@ def lucas_kanade_affine_solver(
     if weights is None:
         weights = 1.0
 
-    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
+    if channel_axis is not None:
+        reference_image = np.moveaxis(reference_image, channel_axis, 0)
+        moving_image = np.moveaxis(moving_image, channel_axis, 0)
+    else:
+        reference_image = np.expand_dims(reference_image, 0)
+        moving_image = np.expand_dims(moving_image, 0)
 
-    grid = np.meshgrid(*[np.arange(n) for n in reference_image.shape], indexing="ij")
+    ndim = reference_image.ndim - 1
 
-    grad = np.gradient(reference_image)
+    grid = np.meshgrid(
+        *[np.arange(n) for n in reference_image.shape[1:]], indexing="ij"
+    )
+
+    grad = [
+        np.gradient(reference_image, axis=k)[0] for k in range(1, reference_image.ndim)
+    ]
 
     elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
 
     G = np.zeros([len(elems)] * 2)
 
     for i, j in combinations_with_replacement(range(len(elems)), 2):
-        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
+        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).mean()
 
     Id = np.eye(ndim, dtype=matrix.dtype)
 
     for _ in range(max_iter):
-        moving_image_warp = ndimage.affine_transform(moving_image, matrix)
+        moving_image_warp = np.stack(
+            [ndi.affine_transform(plane, matrix) for plane in moving_image]
+        )
         error_image = reference_image - moving_image_warp
-        b = np.array([[(e * error_image * weights).sum()] for e in elems])
+        b = np.array([[(e * error_image * weights).mean()] for e in elems])
         try:
             r = np.linalg.solve(G, b)
             matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()
@@ -106,10 +120,15 @@ def _cost_nmi(x, reference_image, moving_image, weights):
         Weights
     """
 
-    ndim = reference_image.ndim
+    ndim = reference_image.ndim - 1
+
     matrix = np.eye(ndim + 1, dtype=np.float64)
     matrix[:ndim, :] = x.reshape(ndim, ndim + 1)
-    moving_image_warp = ndimage.affine_transform(moving_image, matrix)
+
+    moving_image_warp = np.stack(
+        [ndi.affine_transform(plane, matrix) for plane in moving_image]
+    )
+
     return -normalized_mutual_information(
         reference_image, moving_image_warp, weights=weights
     )
@@ -157,7 +176,14 @@ def studholme_affine_solver(
     from PR #3544
     """
 
-    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
+    if channel_axis is not None:
+        reference_image = np.moveaxis(reference_image, channel_axis, 0)
+        moving_image = np.moveaxis(moving_image, channel_axis, 0)
+    else:
+        reference_image = np.expand_dims(reference_image, 0)
+        moving_image = np.expand_dims(moving_image, 0)
+
+    ndim = reference_image.ndim - 1
 
     cost = partial(
         _cost_nmi,
@@ -220,20 +246,19 @@ def affine(
     The estimated matrix can be used with scikit.ndimage.affine to register the moving image
     to the reference image.
 
-
     Example
     -------
     >>> from skimage import data
     >>> import numpy as np
     >>> from scipy import ndimage as ndi
-    >>> from skimage.registration import _affine_lucas_kanade
+    >>> from skimage.registration import affine
     >>> import matplotlib.pyplot as plt
-    >>> reference_image = data.astronaut()[...,0]
+    >>> reference = data.astronaut()[...,0]
     >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> matrix_transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
     >>> moving_image = ndi.affine_transform(reference_image, matrix_transform)
-    >>> matrix = _affine_lucas_kanade(reference_image, moving_image)
+    >>> matrix = affine(reference_image, moving_image)
     >>> registered_moving = ndi.affine_transform(moving_image, matrix)
     >>> plt.imshow(registered_moving)
 
@@ -244,12 +269,14 @@ def affine(
     if matrix is None:
         matrix = np.eye(ndim + 1, dtype=np.float64)
 
-    if weights is None:
-        weights = np.ones(reference_image.shape, dtype=np.float32)
+    if channel_axis is not None:
+        shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
+    else:
+        shape = reference_image.shape
 
     max_layer = int(
         floor(
-            log(min(reference_image.shape), pyramid_downscale)
+            log(min(shape), pyramid_downscale)
             - log(pyramid_minimum_size, pyramid_downscale)
         )
     )
@@ -267,7 +294,7 @@ def affine(
                             channel_axis=channel_axis,
                         )
                         if x is not None
-                        else None
+                        else [None] * (max_layer + 1)
                     )
                 )
                 for x in [reference_image, moving_image, weights]
