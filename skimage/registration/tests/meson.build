@@ -4,7 +4,6 @@ python_sources = [
   'test_masked_phase_cross_correlation.py',
   'test_phase_cross_correlation.py',
   'test_tvl1.py',
-  'test_parametric.py',
   'test_affine.py'
 ]
 

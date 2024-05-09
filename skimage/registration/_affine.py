@@ -1,4 +1,6 @@
-import functools
+from functools import partial
+from itertools import product, combinations_with_replacement
+
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
@@ -6,35 +8,108 @@ from scipy.optimize import minimize
 from skimage.transform.pyramids import pyramid_gaussian
 from skimage.metrics import normalized_mutual_information
 
-__all__ = ["affine"]
+from math import log, floor
 
 
-def _parameter_vector_to_matrix(parameter_vector):
-    """Convert m optimization parameters to a (n+1, n+1) transformation matrix.
-
-    By default (the case of this function), the parameter vector is taken to
-    be the first n rows of the affine transformation matrix in homogeneous
-    coordinate space.
+def lucas_kanade_affine_solver(
+    reference_image,
+    moving_image,
+    weights,
+    channel_axis,
+    matrix,
+    *,
+    max_iter=40,
+    tol=1e-6,
+    warp=ndi.affine_transform,
+):
+    """Estimate affine motion between two images using a least square approach
 
     Parameters
     ----------
-    parameter_vector : (ndim*(ndim+1)) array
-        A vector of M = N * (N+1) parameters.
+
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights : ndarray
+        Weights as an array with the same shape as reference_image
+    channel_axis: int
+        Index of the channel axis
+    matrix : ndarray
+        Initial homogeneous transformation matrix
+    max_iter : int
+        Number of inner iteration
+    tol : float
+        Tolerance of the norm of the update vector
+    warp:
+        Affine transform funciton ndi.affine_transform with ij conventions
 
     Returns
     -------
-    matrix : (ndim+1, ndim+1) array
-        A transformation matrix used to affine-map coordinates in an
-        ``ndim``-dimensional space.
+    matrix : ndarray
+        The estimated transformation matrix
+
+    Reference
+    ---------
+    .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
+
     """
-    m = parameter_vector.shape[0]
-    ndim = int((np.sqrt(4 * m + 1) - 1) / 2)
-    top_matrix = np.reshape(parameter_vector, (ndim, ndim + 1))
-    bottom_row = np.array([[0] * ndim + [1]])
-    return np.concatenate((top_matrix, bottom_row), axis=0)
+
+    if weights is None:
+        weights = 1.0
+
+    if channel_axis is not None:
+        reference_image = np.moveaxis(reference_image, channel_axis, 0)
+        moving_image = np.moveaxis(moving_image, channel_axis, 0)
+    else:
+        reference_image = np.expand_dims(reference_image, 0)
+        moving_image = np.expand_dims(moving_image, 0)
+
+    ndim = reference_image.ndim - 1
+
+    if matrix is None:
+        matrix = np.eye(ndim + 1, dtype=np.float64)
+
+    grid = np.meshgrid(
+        *[np.arange(n) for n in reference_image.shape[1:]], indexing="ij"
+    )
+
+    grad = [
+        np.gradient(reference_image, axis=k)[0] for k in range(1, reference_image.ndim)
+    ]
+
+    elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
+
+    G = np.zeros([len(elems)] * 2)
+
+    for i, j in combinations_with_replacement(range(len(elems)), 2):
+        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
+
+    Id = np.eye(ndim, dtype=matrix.dtype)
+
+    for _ in range(max_iter):
+        moving_image_warp = np.stack([warp(plane, matrix) for plane in moving_image])
+        error_image = reference_image - moving_image_warp
+        b = np.array([[(e * error_image * weights).sum()] for e in elems])
+        try:
+            r = np.linalg.solve(G, b)
+            matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()
+            matrix[:ndim, :ndim] @= r[ndim:].reshape(ndim, ndim) + Id
+            if np.linalg.norm(r) < tol:
+                break
+        except np.linalg.LinAlgError:
+            break
+
+    return matrix
 
 
-def cost_nmi(image0, image1, *, bins=100):
+def _parameter_vector_to_matrix(parameters, ndim):
+    matrix = np.eye(ndim + 1, dtype=np.float64)
+    matrix[:ndim, :] = parameters.reshape(ndim, ndim + 1)
+    return matrix
+
+
+def cost_nmi(image0, image1, *, bins=100, weights=None):
     """Negative of the normalized mutual information.
 
     See :func:`skimage.metrics.normalized_mutual_information` for more info.
@@ -53,186 +128,248 @@ def cost_nmi(image0, image1, *, bins=100):
         The negative of the normalized mutual information between ``image0``
         and ``image1``.
     """
-    return -normalized_mutual_information(image0, image1, bins=bins)
+
+    return -normalized_mutual_information(image0, image1, bins=bins, weights=weights)
 
 
 def _param_cost(
+    parameters,
     reference_image,
     moving_image,
-    parameter_vector,
+    weights,
     *,
-    vector_to_matrix,
-    cost,
-    multichannel,
+    cost=cost_nmi,
+    vector_to_matrix=_parameter_vector_to_matrix,
+    warp=ndi.affine_transform,
 ):
-    transformation = vector_to_matrix(parameter_vector)
-    if not multichannel:
-        transformed = ndi.affine_transform(moving_image, transformation, order=1)
+    """Compute the registration cost for the current parameters
+
+    Parameters
+    ----------
+    parameters: ndarray
+        Parameters of the transform
+    reference_image: ndarray
+        Reference image
+    moving_image: ndarray
+        Moving image
+    weights: ndarray | None
+        Weights
+    cost: function
+        Cost between registered image and reference
+    vector_to_matrix:
+        Convert the vector parameter to the homogeneous matrix
+
+    Returns
+    -------
+    Evaluated cost
+    """
+
+    ndim = reference_image.ndim - 1
+
+    matrix = vector_to_matrix(parameters, ndim)
+
+    moving_image_warp = np.stack([warp(plane, matrix) for plane in moving_image])
+
+    return cost(reference_image, moving_image_warp, weights=weights)
+
+
+def studholme_affine_solver(
+    reference_image,
+    moving_image,
+    weights,
+    channel_axis,
+    matrix,
+    *,
+    method="Powell",
+    options={"maxiter": 10, "disp": False},
+    cost=cost_nmi,
+    vector_to_matrix=_parameter_vector_to_matrix,
+    warp=ndi.affine_transform,
+):
+    """Solver maximizing mutual information using Powell's method
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights: ndarray
+        Weights or mask
+    channel_axis: int | None
+        Index of the channel axis
+    matrix: ndarray
+        Initial value of the transform
+    options: dict
+        options for scipy.optimization.minimize("Powell")
+    cost: function
+        Cost function minimize
+    vector_to_matrix: function(param, ndim) -> ndarray
+        Convert a vector of parameters to a matrix
+
+    Returns
+    -------
+    matrix:
+        Homogeneous transform matrix
+
+    Reference
+    ---------
+    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
+        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
+    .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
+        The Art of Scientific Python. O’Reilly Media, Inc., 2017.
+
+    Note:
+    from PR #3544
+    """
+
+    if channel_axis is not None:
+        reference_image = np.moveaxis(reference_image, channel_axis, 0)
+        moving_image = np.moveaxis(moving_image, channel_axis, 0)
     else:
-        transformed = np.zeros_like(moving_image)
-        for ch in range(moving_image.shape[-1]):
-            ndi.affine_transform(
-                moving_image[..., ch],
-                transformation,
-                order=1,
-                output=transformed[..., ch],
-            )
-    return cost(reference_image, transformed)
+        reference_image = np.expand_dims(reference_image, 0)
+        moving_image = np.expand_dims(moving_image, 0)
+
+    ndim = reference_image.ndim - 1
+
+    if matrix is None:
+        matrix = np.eye(ndim, ndim + 1, dtype=np.float64).flatten()
+
+    cost = partial(
+        _param_cost,
+        reference_image=reference_image,
+        moving_image=moving_image,
+        weights=weights,
+        cost=cost,
+        vector_to_matrix=vector_to_matrix,
+        warp=warp,
+    )
+
+    result = minimize(cost, x0=matrix, method=method, options=options)
+
+    return result.x
 
 
 def affine(
     reference_image,
     moving_image,
     *,
-    cost=cost_nmi,
-    method="Powell",
-    initial_parameters=None,
-    pyramid_scale=2,
-    pyramid_minimum_size=8,
-    level_callback=None,
-    inverse=True,
-    multichannel=False,
-    vector_to_matrix=None,
+    weights=None,
+    channel_axis=None,
+    matrix=None,
+    solver=lucas_kanade_affine_solver,
+    pyramid_downscale=2,
+    pyramid_minimum_size=32,
     translation_indices=None,
-    **kwargs,
 ):
-    """Find a transformation matrix to register a moving image to a reference.
+    """Coarse-to-fine affine motion estimation between two images
 
     Parameters
     ----------
     reference_image : ndarray
-        A reference image to compare against the target.
+        The first gray scale image of the sequence.
     moving_image : ndarray
-        Our target for registration. Transforming this image using the
-        returned matrix aligns it with the reference.
-    cost : function, optional
-        A cost function which takes two images and returns a score which is
-        at a minimum when images are aligned. Uses the normalized mutual
-        information by default.
-    initial_parameters : array of float, optional
-        The initial vector to optimize. This vector should have the same
-        dimensionality as the transform being optimized. For example, a 2D
-        affine transform has 6 parameters. A 2D rigid transform, on the other
-        hand, only has 3 parameters.
-    vector_to_matrix : callable, array (M,) -> array-like (N+1, N+1), optional
-        A function to convert a linear vector of parameters, as used by
-        `scipy.optimize.minimize`, to an affine transformation matrix in
-        homogeneous coordinates.
-    translation_indices : array of int, optional
-        The location of the translation parameters in the parameter vector. If
-        None, the positions of the translation parameters in the raveled
-        affine transformation matrix, in homogeneous coordinates, are used. For
-        example, in a 2D transform, the translation parameters are in the
-        top two positions of the third column of the 3 x 3 matrix, which
-        corresponds to the linear indices [2, 5].
-        The translation parameters are special in this class of transforms
-        because they are the only ones not scale-invariant. This means that
-        they need to be adjusted for each level of the image pyramid.
-    inverse : bool, optional
-        Whether to return the inverse transform, which converts coordinates
-        in the reference space to coordinates in the target space. For
-        technical reasons, this is the transform expected by
-        ``scipy.ndimage.affine_transform`` to map the target image to the
-        reference space. Defaults to True.
-    pyramid_scale : float, optional
-        Scaling factor to generate the image pyramid. The affine transformation
-        is estimated first for a downscaled version of the image, then
-        progressively refined with higher resolutions. This parameter controls
-        the increase in resolution at each level.
-    pyramid_minimum_size : integer, optional
-        The smallest size for an image along any dimension. This value
-        determines the size of the image pyramid used. Choosing a smaller value
-        here can cause registration errors, but a larger value could speed up
-        registration when the alignment is easy.
-    multichannel : bool, optional
-        Whether the last axis of the image is to be interpreted as multiple
-        channels or another spatial dimension. By default, this is False.
-    level_callback : callable, optional
-        If given, this function is called once per pyramid level with a tuple
-        containing the current downsampled image, transformation matrix, and
-        cost as the argument. This is useful for debugging or for plotting
-        intermediate results during the iterative process.
-    method : string or callable
-        Method of minimization.  See ``scipy.optimize.minimize`` for available
-        options.
-    **kwargs : keyword arguments
-        Keyword arguments passed through to ``scipy.optimize.minimize``
-
+        The second gray scale image of the sequence.
+    weights : ndarray | None
+        The weights array with same shape as reference_image
+    channel_axis: int | None
+        Index of the channel axis
+    matrix : ndarray
+        Intial guess for the homogeneous transformation matrix
+    solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
+        Affine motion solver can be lucas_kanade_affine_solver or studholme_affine_solver
+    pyramid_scale : float
+        The pyramid downscale factor.
+    pyramid_minimum_size : int
+        The minimum size for any dimension of the pyramid levels.
+    translation_indices:
+        Indices of the translation parameters that are not scale invariant
     Returns
     -------
-    matrix : array, or object coercible to array
-        A transformation matrix used to obtain a new image.
-        ``ndi.affine_transform(moving, matrix)`` will align the moving image to
-        the reference.
+    matrix: ndarray
+        Transformation matrix
+
+    Note
+    ----
+    Generate image pyramids and apply the solver at each level passing the
+    previous affine parameters from the previous estimate.
+
+    The estimated matrix can be used with scikit.ndimage.affine to register the moving image
+    to the reference image.
+
+    Reference
+    ---------
+    .. [1] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
+    The Art of Scientific Python. O’Reilly Media, Inc., 2017.
 
     Example
     -------
-    >>> from skimage.data import astronaut
-    >>> reference_image = astronaut()[..., 1]
+    >>> from skimage import data
+    >>> import numpy as np
+    >>> from scipy import ndimage as ndi
+    >>> from skimage.registration import affine
+    >>> import matplotlib.pyplot as plt
+    >>> reference = data.astronaut()[...,0]
     >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
-    >>> matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
+    >>> matrix_transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
     >>> moving_image = ndi.affine_transform(reference_image, matrix_transform)
     >>> matrix = affine(reference_image, moving_image)
     >>> registered_moving = ndi.affine_transform(moving_image, matrix)
+    >>> plt.imshow(registered_moving)
+
     """
 
-    # ignore the channels if present
-    ndim = reference_image.ndim if not multichannel else reference_image.ndim - 1
-    if ndim == 0:
-        raise ValueError("Input images must have at least 1 spatial dimension.")
+    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
 
-    channel_axis = -1 if multichannel else None
-
-    min_dim = min(reference_image.shape[:ndim])
-    nlevels = int(np.floor(np.log2(min_dim) - np.log2(pyramid_minimum_size)))
-
-    pyramid_ref = pyramid_gaussian(
-        reference_image,
-        downscale=pyramid_scale,
-        max_layer=nlevels,
-        channel_axis=channel_axis,
-        preserve_range=True,
-    )
-    pyramid_mvg = pyramid_gaussian(
-        moving_image,
-        downscale=pyramid_scale,
-        max_layer=nlevels,
-        channel_axis=channel_axis,
-        preserve_range=True,
-    )
-    image_pairs = reversed(list(zip(pyramid_ref, pyramid_mvg)))
-
-    if initial_parameters is None:
-        initial_parameters = np.eye(ndim, ndim + 1).ravel()
-    parameter_vector = initial_parameters
-    parameter_vector[translation_indices] /= pyramid_scale ** (nlevels + 1)
-
-    if vector_to_matrix is None:
-        vector_to_matrix = _parameter_vector_to_matrix
+    if channel_axis is not None:
+        shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
+    else:
+        shape = reference_image.shape
 
     if translation_indices is None:
-        translation_indices = slice(ndim, ndim**2 - 1, ndim)
+        translation_indices = np.arange((ndim + 1) * (ndim + 1)).reshape(
+            ndim + 1, ndim + 1
+        )[:ndim, -1]
 
-    for ref, mvg in image_pairs:
-        parameter_vector[translation_indices] *= pyramid_scale
-        _cost = functools.partial(
-            _param_cost,
-            ref,
-            mvg,
-            vector_to_matrix=vector_to_matrix,
-            cost=cost,
-            multichannel=multichannel,
+    max_layer = int(
+        floor(
+            log(min(shape), pyramid_downscale)
+            - log(pyramid_minimum_size, pyramid_downscale)
         )
-        result = minimize(_cost, x0=parameter_vector, method=method, **kwargs)
-        parameter_vector = result.x
-        if level_callback is not None:
-            level_callback((mvg, vector_to_matrix(parameter_vector), result.fun))
+    )
 
-    matrix = vector_to_matrix(parameter_vector)
+    pyramid = list(
+        zip(
+            *[
+                reversed(
+                    list(
+                        pyramid_gaussian(
+                            x,
+                            max_layer=max_layer,
+                            downscale=pyramid_downscale,
+                            preserve_range=True,
+                            channel_axis=channel_axis,
+                        )
+                        if x is not None
+                        else [None] * (max_layer + 1)
+                    )
+                )
+                for x in [reference_image, moving_image, weights]
+            ]
+        )
+    )
 
-    if not inverse:
-        # estimated is already inverse, so we invert for forward transform
-        matrix = np.linalg.inv(matrix)
+    matrix = solver(
+        pyramid[0][0],
+        pyramid[0][1],
+        pyramid[0][2],
+        channel_axis=channel_axis,
+        matrix=matrix,
+    )
+
+    for J0, J1, W in pyramid[1:]:
+        matrix.ravel()[translation_indices] *= pyramid_downscale
+        matrix = solver(J0, J1, W, channel_axis=channel_axis, matrix=matrix)
 
     return matrix

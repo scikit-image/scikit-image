@@ -25,9 +25,7 @@ from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 
 from skimage.data import astronaut
-from skimage.transform import pyramid_gaussian
 from skimage import registration
-from skimage import metrics
 
 
 ###############################################################################
@@ -37,40 +35,60 @@ from skimage import metrics
 #
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
-r = -0.12
-c, s = np.cos(r), np.sin(r)
-matrix_transform = np.array([[c, -s, 0],
-                             [s, c, 50],
-                             [0, 0,  1]])
 
-image = astronaut()[..., 1]  # Just green channel
-target = ndi.affine_transform(image, matrix_transform)
+reference = astronaut()[..., 1]  # Just green channel
+
+r = -0.12  # radians
+c, s = np.cos(r), np.sin(r)
+T = np.array(
+    [[1, 0, -reference.shape[0] / 2], [0, 1, -reference.shape[1] / 2], [0, 0, 1]]
+)
+R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+matrix_transform = np.linalg.inv(T) @ R @ T
+# matrix_transform = np.array([[c, -s, 0], [s, c, 50], [0, 0, 1]])
+
+moving = ndi.affine_transform(reference, matrix_transform)
 
 ###############################################################################
 # Next, we are going to see how ``registration.affine`` can recover that
-# transformation starting from only the two images. The registration works by
-# nudging the input image slightly and checking whether it is closer or further
-# away from the reference image. It does this initially on a much blurrier and
-# smaller version of the two images, then progressively refines the alignment
-# with sharper, full-resolution versions. This is called a Gaussian pyramid.
-# ``registration.affine`` also allows a *callback* function to be passed, which
-# is executed at every level of the Gaussian pyramid. We can use the callback
-# to observe the process of alignment.
-
-level_alignments = []
+# transformation starting from only the two images. It does this initially on a
+# much blurrier and smaller version of the two images, then progressively
+# refines the alignment with sharper, full-resolution versions. This is called
+# a Gaussian pyramid. This function can take two different solvers for estimating
+# the transformation at each pyramid level.
+# ``registration.affine``
 
 
 import time
-t0 = time.time()
-register_matrix = registration.affine(image, target,
-                                      level_callback=level_alignments.append)
-t1 = time.time()
+
+solvers = [
+    registration.lucas_kanade_affine_solver,
+    registration.studholme_affine_solver,
+]
+
+results = []
+for solver in solvers:
+    start_time = time.time()
+    matrix = registration.affine(reference, moving, solver=solver)
+    stop_time = time.time()
+    # TODO: this is not nice
+    if solver is registration.studholme_affine_solver:
+        matrix = registration._affine._parameter_vector_to_matrix(matrix, 2)
+    results.append(
+        {
+            "test": solver.__name__,
+            "elapsed time": stop_time - start_time,
+            "matrix": matrix,
+        }
+    )
+
 
 ###############################################################################
 # Once we have the matrix, it's easy to transform the target image to match
 # the reference using :func:`scipy.ndimage.affine_transform`:
 
-registered = ndi.affine_transform(target, register_matrix)
+for item in results:
+    item["registered"] = ndi.affine_transform(moving, item["matrix"])
 
 ###############################################################################
 # Let's look at the results. First, we make a helper function to overlay two
@@ -89,63 +107,51 @@ def overlay(image0, image1):
     return image_overlay
 
 
+def target_registration_error(shape, matrix):
+    """Compute the displacement norm for the transformation"""
+    # Create a regular set of points on the grid
+    points = np.concatenate(
+        [
+            np.stack(
+                [
+                    x.flatten()
+                    for x in np.meshgrid(*[np.arange(n) for n in shape], indexing="ij")
+                ],
+                axis=1,
+            ).T,
+            np.array([1] * np.prod(shape)).reshape(1, -1),
+        ]
+    )
+    delta = matrix @ matrix_transform @ points - points
+    return np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
+
+
 ###############################################################################
 # Now we can look at the alignment. The reference image is in yellow, while the
 # target image is in cyan. Regions of perfect overlap become gray or black:
 
-_, ax = plt.subplots(1, 2)
+_, ax = plt.subplots(2, len(results) + 1)
 
-ax[0].set_title('initial alignment')
-ax[0].imshow(overlay(image, target))
+ax[0, 0].set_title("initial alignment")
+ax[0, 0].imshow(overlay(reference, moving))
 
-ax[1].set_title('registered')
-ax[1].imshow(overlay(image, registered))
+for k, item in enumerate(results):
+    ax[0, k + 1].set_title(item["test"])
+    ax[0, k + 1].imshow(overlay(reference, item["registered"]))
+    ax[1, k + 1].set_title("TRE")
+    ax[1, k + 1].imshow(
+        target_registration_error(reference.shape, item["matrix"] @ matrix_transform)
+    )
 
-for a in ax:
+for a in ax.ravel():
     a.set_axis_off()
 
 plt.show()
 
-###############################################################################
-# Let's observe the Gaussian pyramid at work, as described above, using the
-# per-level alignments that we saved to a list using ``level_callback``. We
-# show the intermediate alignments with blurred images to demonstrate how
-# registration with Gaussian pyramids works. For illustrative purposes only, we
-# have to recreate the Gaussian pyramid outside of the registration function.
-
-_, ax = plt.subplots(1, 6)
-
-initial_nmi = metrics.normalized_mutual_information(image, target)
-ax[0].set_title('starting NMI {:.3}'.format(initial_nmi))
-ax[0].imshow(overlay(image, target))
-
-final_nmi = metrics.normalized_mutual_information(image, registered)
-ax[5].set_title('final correction, NMI {:.3}'.format(final_nmi))
-ax[5].imshow(overlay(image, registered))
-
-num_levels = len(level_alignments)
-
-reference_pyramid = list(pyramid_gaussian(image, max_layer=num_levels-1))[::-1]
-for axis_num, level_num in enumerate([0, 2, 4, 5], start=1):
-    level = num_levels - level_num - 1  # 0 is original image
-    iter_target, matrix, nnmi = level_alignments[level_num]
-    transformed_full = ndi.affine_transform(target, matrix)
-    transformed = ndi.affine_transform(iter_target, matrix)
-    level_image = reference_pyramid[level_num]
-    # NMI is sensitive to image resolution, so we must compare at top level
-    level_nmi = metrics.normalized_mutual_information(image, transformed_full)
-    ax[axis_num].set_title('level {}, NMI {:.4}'.format(level, level_nmi))
-    ax[axis_num].imshow(overlay(level_image, transformed),
-                           interpolation='bilinear')
-    ax[axis_num].set_axis_off()
-
-plt.show()
 
 ###############################################################################
 # If we know that our transform is a *rigid* transform, also known as a
-# Euclidean transform, we can use scikit-image's transformation classes to use
-# a smaller parameter set over which to optimize. This can make the
-# registration faster and more robust.
+# Euclidean transform.
 #
 # It is important to note that out of the components of an affine
 # transformation, scale, rotation, and skew are scale-invariant, but
@@ -158,25 +164,64 @@ plt.show()
 # Finally, in this case, a too-small pyramid image causes the registration to
 # fail to converge to the correct result, so we set the smallest size to 64.
 
-from skimage.transform import EuclideanTransform
+from functools import partial
 
 
-def rigid_transform(params):
-    return EuclideanTransform(rotation=params[0], translation=params[1:])
+def p2m_rigid(params, ndim):
+    """Rigid transform homogenous matrix
+
+    Note this respect the ij convention of ndi.affine_transform
+    """
+    c = np.cos(params[0])
+    s = np.sin(params[0])
+    return np.array([[c, s, params[1]], [-s, c, params[2]], [0, 0, 1]])
 
 
-t2 = time.time()
-rigid_matrix = registration.affine(image, target,
-                                   initial_parameters=np.zeros(3),
-                                   vector_to_matrix=rigid_transform,
-                                   pyramid_minimum_size=64,
-                                   translation_indices=slice(1, None))
-t3 = time.time()
+solver = partial(registration.studholme_affine_solver, vector_to_matrix=p2m_rigid)
 
+start_time = time.time()
+params = registration.affine(
+    reference, moving, solver=solver, translation_indices=[1, 2], matrix=[0, 0, 0]
+)
+end_time = time.time()
+results.append(
+    {
+        "test": "rigid motion",
+        "elapsed time": end_time - start_time,
+        "matrix": p2m_rigid(params, 2),
+        "registered": ndi.affine_transform(moving, p2m_rigid(params, 2)),
+    }
+)
 
-print('original matrix:')
-print(matrix_transform)
-print(f'full registration result in {t1 - t0:.1f} seconds:')
-print(register_matrix)
-print(f'rigid registration result in {t3 - t2:.1f} seconds:')
-print(rigid_matrix)
+print("original matrix:")
+print(np.linalg.inv(matrix_transform))
+for item in results:
+    item["tre"] = target_registration_error(
+        reference.shape, item["matrix"] @ matrix_transform
+    )
+    print(
+        f"""registration result with {item["test"]}
+         in {item["elapsed time"]:.2f} seconds, TRE {item["tre"].mean():.2f}
+         """
+    )
+    print(item["matrix"])
+
+###############################################################################
+# Now we can look at the alignment. The reference image is in yellow, while the
+# target image is in cyan. Regions of perfect overlap become gray or black:
+
+_, ax = plt.subplots(2, len(results) + 1)
+
+ax[0, 0].set_title("initial alignment")
+ax[0, 0].imshow(overlay(reference, moving))
+
+for k, item in enumerate(results):
+    ax[0, k + 1].set_title(item["test"])
+    ax[0, k + 1].imshow(overlay(reference, item["registered"]))
+    ax[1, k + 1].set_title("TRE")
+    ax[1, k + 1].imshow(item["tre"])
+
+for a in ax.ravel():
+    a.set_axis_off()
+
+plt.show()
