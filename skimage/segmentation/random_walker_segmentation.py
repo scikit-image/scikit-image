@@ -43,6 +43,17 @@ try:
     amg_loaded = True
 except ImportError:
     amg_loaded = False
+except AttributeError as error:
+    if "`np.deprecate` was removed" in error.args[0]:
+        warn(
+            "found optional dependency pyamg, which cannot (yet) be imported with "
+            "NumPy >=2 and will be treated as if not available",
+            RuntimeWarning,
+        )
+        amg_loaded = False
+    else:
+        raise error
+
 
 from ..util import img_as_float
 
