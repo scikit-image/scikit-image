@@ -4,7 +4,7 @@ python_sources = [
   'test_masked_phase_cross_correlation.py',
   'test_phase_cross_correlation.py',
   'test_tvl1.py',
-  'test_affine.py'
+  'test_affine.py',
 ]
 
 py3.install_sources(

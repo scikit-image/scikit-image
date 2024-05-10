@@ -122,7 +122,7 @@ def target_registration_error(shape, matrix):
             np.array([1] * np.prod(shape)).reshape(1, -1),
         ]
     )
-    delta = matrix @ matrix_transform @ points - points
+    delta = matrix @ points - points
     return np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
 
 

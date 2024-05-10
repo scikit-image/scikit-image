@@ -1,3 +1,4 @@
+import warnings
 from functools import partial
 from itertools import product, combinations_with_replacement
 
@@ -21,6 +22,7 @@ def lucas_kanade_affine_solver(
     max_iter=40,
     tol=1e-6,
     warp=ndi.affine_transform,
+    vector_to_matrix=None,
 ):
     """Estimate affine motion between two images using a least square approach
 
@@ -65,38 +67,54 @@ def lucas_kanade_affine_solver(
         reference_image = np.expand_dims(reference_image, 0)
         moving_image = np.expand_dims(moving_image, 0)
 
+    # We assume that there is always a channel axis in the 1st dimension
     ndim = reference_image.ndim - 1
 
+    # Initialize with the identity
     if matrix is None:
         matrix = np.eye(ndim + 1, dtype=np.float64)
 
+    # Compute the ij grids along each non channel axis
     grid = np.meshgrid(
         *[np.arange(n) for n in reference_image.shape[1:]], indexing="ij"
     )
 
+    # Compute the 1st derivative of the image in each non channel axis
     grad = [
         np.gradient(reference_image, axis=k)[0] for k in range(1, reference_image.ndim)
     ]
 
+    # Vector of gradients eg: [Iy Ix yIy xIy yIy yIx] (see eq. (27))
     elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
 
+    # G matrix of eq. (32)
     G = np.zeros([len(elems)] * 2)
-
     for i, j in combinations_with_replacement(range(len(elems)), 2):
         G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
 
     Id = np.eye(ndim, dtype=matrix.dtype)
 
     for _ in range(max_iter):
+        # Warp each channel
         moving_image_warp = np.stack([warp(plane, matrix) for plane in moving_image])
+
+        # Compute the error (eq. (26))
         error_image = reference_image - moving_image_warp
+
+        # Compute b from eq. (33)
         b = np.array([[(e * error_image * weights).sum()] for e in elems])
+
         try:
+            # Solve the system
             r = np.linalg.solve(G, b)
+
+            # update the current matrix (eq. (36-37))
             matrix[:ndim, -1] += (matrix[:ndim, :ndim] @ r[:ndim]).ravel()
             matrix[:ndim, :ndim] @= r[ndim:].reshape(ndim, ndim) + Id
+
             if np.linalg.norm(r) < tol:
                 break
+
         except np.linalg.LinAlgError:
             break
 
@@ -261,6 +279,7 @@ def affine(
     pyramid_downscale=2,
     pyramid_minimum_size=32,
     translation_indices=None,
+    vector_to_matrix=None,
 ):
     """Coarse-to-fine affine motion estimation between two images
 
@@ -326,11 +345,22 @@ def affine(
         shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
     else:
         shape = reference_image.shape
+        if min(shape) <= 6:
+            warnings.warn(f"No channel axis specified for shape {shape}")
 
     if translation_indices is None:
         translation_indices = np.arange((ndim + 1) * (ndim + 1)).reshape(
             ndim + 1, ndim + 1
         )[:ndim, -1]
+
+    if vector_to_matrix is None:
+        if solver is lucas_kanade_affine_solver:
+
+            def vector_to_matrix(x, ndim):
+                return x
+
+        elif solver is studholme_affine_solver:
+            vector_to_matrix = _parameter_vector_to_matrix
 
     max_layer = int(
         floor(
@@ -366,10 +396,18 @@ def affine(
         pyramid[0][2],
         channel_axis=channel_axis,
         matrix=matrix,
+        vector_to_matrix=vector_to_matrix,
     )
 
     for J0, J1, W in pyramid[1:]:
         matrix.ravel()[translation_indices] *= pyramid_downscale
-        matrix = solver(J0, J1, W, channel_axis=channel_axis, matrix=matrix)
+        matrix = solver(
+            J0,
+            J1,
+            W,
+            channel_axis=channel_axis,
+            matrix=matrix,
+            vector_to_matrix=vector_to_matrix,
+        )
 
-    return matrix
+    return vector_to_matrix(matrix, ndim)
