@@ -32,7 +32,7 @@ dependencies = [
     'imageio>=2.33',
     'tifffile>=2022.8.12',
     'packaging>=21',
-    'lazy_loader>=0.3',
+    'lazy-loader>=0.4',
 ]
 
 [[project.maintainers]]
@@ -52,7 +52,7 @@ build = [
     'ninja',
     'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.25',
+    'numpy>=2.0.0rc1',
     # Developer UI
     'spin==0.8',
     'build',
@@ -64,9 +64,9 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.2',
+    'sphinx>=7.3',
     'sphinx-gallery>=0.14',
-    'numpydoc>=1.6',
+    'numpydoc>=1.7',
     'sphinx-copybutton',
     'pytest-runner',
     'matplotlib>=3.6',
@@ -99,7 +99,7 @@ optional = [
 ]
 test = [
     'asv',
-    'numpydoc>=1.5',
+    'numpydoc>=1.7',
     'pooch>=1.6.0',
     'pytest>=7.0',
     'pytest-cov>=2.11.0',
@@ -125,7 +125,7 @@ requires = [
     'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
-    'numpy>=1.25',
+    'numpy>=2.0.0rc1',
 ]
 
 [tool.spin]
@@ -151,30 +151,21 @@ Metrics = [
 target-version = ['py310', 'py311', 'py312']
 skip-string-normalization = 1
 
-[tool.ruff]
-line-length = 88
-target-version = 'py310'
+[tool.ruff.lint]
 select = [
     'F',
     'E',
     'W',
     'UP',
+    'NPY201',
 ]
 ignore = [
     'E501',
     'E741',
     'E712',
 ]
-exclude = [
-    '.git',
-    '.ruff_cache',
-    'build',
-    'build-install',
-    'dist',
-    'doc/source/auto_examples',
-]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = [
     'E402',
     'F401',
@@ -190,7 +181,7 @@ exclude = [
 "skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = 'numpy'
 
 [tool.pytest.ini_options]
@@ -202,7 +193,10 @@ xfail_strict = true
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
-filterwarnings = []
+filterwarnings = [
+    "error",
+    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning'
+]
 
 [tool.coverage.run]
 omit = ['*/tests/*']

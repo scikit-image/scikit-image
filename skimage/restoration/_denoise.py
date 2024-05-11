@@ -788,7 +788,9 @@ def _wavelet_threshold(
             for thresh, level in zip(threshold, dcoeffs)
         ]
     denoised_coeffs = [coeffs[0]] + denoised_detail
-    return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
+    out = pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
+    out = out.astype(image.dtype)
+    return out
 
 
 def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigma):

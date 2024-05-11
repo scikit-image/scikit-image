@@ -1,6 +1,7 @@
 """
 Methods to characterize image textures.
 """
+
 import warnings
 
 import numpy as np

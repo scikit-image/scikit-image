@@ -5,6 +5,7 @@ can then be copied to luts.py.
 The luts are tuples of shape and base64 encoded bytes.
 
 """
+
 import base64
 
 
