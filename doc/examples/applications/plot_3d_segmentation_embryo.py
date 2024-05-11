@@ -119,7 +119,9 @@ cells = ski.morphology.opening(cells_noisy, footprint=np.ones((3, 5, 5)))
 
 distance = ndi.distance_transform_edt(cells)
 
-local_max_coords = ski.feature.peak_local_max(distance, min_distance=12)
+local_max_coords = ski.feature.peak_local_max(
+    distance, min_distance=12, exclude_border=False
+)
 local_max_mask = np.zeros(distance.shape, dtype=bool)
 local_max_mask[tuple(local_max_coords.T)] = True
 markers = ski.measure.label(local_max_mask)
@@ -179,8 +181,6 @@ assert gt.dtype in [np.uint16, np.uint32, np.uint64]
 assert gt.min() == 0
 assert gt.max() == np.unique(gt).shape[0] - 1
 
-print(f'TGMM finds {gt.max()} nuclei.')
-
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(ski.color.label2rgb(gt[25, :, :], bg_label=0))
 ax[0].set_title('TGMM output')
@@ -192,6 +192,9 @@ ax[1].axis('off')
 #####################################################################
 # Although the TGMM segmentation looks cleaner than ours, it seems to be missing
 # quite a few nuclei in the upper half of the `xy` section.
+
+print(f'TGMM finds {gt.max()} nuclei.')
+print(f'We find {segmented_cells.max()} nuclei.')
 
 #####################################################################
 # Our *local* thresholding seems to be making the difference here.
