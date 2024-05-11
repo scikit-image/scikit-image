@@ -17,6 +17,8 @@ draw
     Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
 exposure
     Image intensity adjustment, e.g., histogram equalization, etc.
+face
+    For facial recognition related tasks, e.g., Recognise faces in images and videos etc.
 feature
     Feature detection and extraction, e.g., texture analysis corners, etc.
 filters
@@ -66,6 +68,12 @@ dtype_limits
 """
 
 __version__ = '0.23.3rc0.dev0'
+
+from face.all import generate_face_embeddings, identify_faces_in_image, identify_faces_in_video, simple_identify_faces_in_video
+from face.embeddings import generate_face_embeddings
+from face.images import identify_faces_in_image
+from face.simple_video import simple_identify_faces_in_video
+from face.video import identify_faces_in_video
 
 import lazy_loader as lazy
 
