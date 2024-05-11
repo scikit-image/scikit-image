@@ -37,9 +37,10 @@ import skimage as ski
 #     sample = data[400:450, 1000:1750, 400:900]
 #     np.save('sample_3D_frame_184', sample)
 
-sample_url = 'https://github.com/mkcor/draft-notebooks/raw/main/embryo/data/sample_3D_frame_184.npy'
+sample_url = 'https://gitlab.com/scikit-image/data/-/raw/30a6bf082e5a91a2ee97e003465537224ffad216/Embryo2/sample_3D_frame_184.npz'
 response = requests.get(sample_url)
-im3d = np.load(io.BytesIO(response.content))
+im3d_dict = np.load(io.BytesIO(response.content))
+im3d = im3d_dict['arr_0']
 
 print(f'The shape of the image is: {im3d.shape}')
 
@@ -151,9 +152,10 @@ ax[1].axis('off')
 # minSuperVoxelSzPx=14 (yiels 541 nuclei).
 # The output (segmentation result) is a KLB file; we save it into a Numpy array.
 
-res_url = 'https://github.com/mkcor/draft-notebooks/blob/main/embryo/data/tgmm_conn74_tau14.npy'
+res_url = 'https://gitlab.com/scikit-image/data/-/raw/30a6bf082e5a91a2ee97e003465537224ffad216/Embryo2/tgmm_conn74_tau14.npz'
 resp = requests.get(res_url)
-gt = np.load(io.BytesIO(resp.content))
+gt_dict = np.load(io.BytesIO(resp.content))
+gt = gt_dict['arr_0']
 
 # Ensure TGMM result is an image of type "labeled"
 assert gt.dtype in [np.uint16, np.uint32, np.uint64]
