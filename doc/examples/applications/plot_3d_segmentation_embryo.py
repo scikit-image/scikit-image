@@ -26,7 +26,8 @@ import skimage as ski
 
 
 #####################################################################
-# We downloaded the original data in KLB format and saved a selection thereof:
+# We downloaded the original data in KLB format and sliced a particular
+# subvolume, which we saved into a compressed Numpy format:
 #
 # .. code-block:: python
 #
@@ -35,7 +36,11 @@ import skimage as ski
 #
 #     data = klb.readfull('Mmu_E1_CAGTAG1.TM000184_timeFused_blending/SPM00_TM000184_CM00_CM01_CHN00.fusedStack.corrected.shifted.klb')
 #     sample = data[400:450, 1000:1750, 400:900]
-#     np.save('sample_3D_frame_184', sample)
+#     np.savez_compressed('sample_3D_frame_184.npz', sample)
+
+#####################################################################
+# View 3D image data
+# ==================
 
 sample_url = 'https://gitlab.com/scikit-image/data/-/raw/30a6bf082e5a91a2ee97e003465537224ffad216/Embryo2/sample_3D_frame_184.npz'
 response = requests.get(sample_url)
@@ -45,13 +50,17 @@ im3d = im3d_dict['arr_0']
 print(f'The shape of the image is: {im3d.shape}')
 
 #####################################################################
-# The dataset is a 3D image with 50 `xy` sections stacked along `z`. Let us
+# The sample dataset is a 3D image with 50 `xy` sections stacked along `z`. Let us
 # visualize it by picking one such section in five.
 
 data_montage = ski.util.montage(im3d[::5], grid_shape=(2, 5), padding_width=5)
 fig, ax = plt.subplots(figsize=(10, 5))
 ax.imshow(data_montage)
 ax.set_axis_off()
+
+#####################################################################
+# Apply thresholding techniques
+# =============================
 
 # global thresholding vs local thresholding
 global_thresh = ski.filters.threshold_otsu(im3d)
@@ -103,6 +112,8 @@ cells_noisy = smooth > thresholds[1]
 cells = ski.morphology.opening(cells_noisy, footprint=np.ones((3, 5, 5)))
 
 #####################################################################
+# Use watershed algorithm
+# =======================
 # We use the watershed algorithm to separate nuclei when they are touching
 # or overlapping.
 
@@ -128,8 +139,11 @@ ax[1].axis('off')
 # segmentation compare with that obtained in [1]_?
 
 #####################################################################
-# We used the software developed for the research project at:
-# (https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/user-guide/quickstart.md)
+# Compare segmentation results
+# ============================
+#####################################################################
+# We used the software developed for the original research, "TGMM paper," and made available
+# [online](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/user-guide/quickstart.md).
 # We edited the TGMM config file to apply the hierarchical segmentation on
 # the sample data, which we saved 'back' in KLB format:
 #
@@ -137,7 +151,7 @@ ax[1].axis('off')
 #
 #     klb.writefull(np.ascontiguousarray(sample), 'sample_3D_frame_184.klb')
 #
-# We installed the software (https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/dev-guide/building.md)
+# We installed the software following the [instructions](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/dev-guide/building.md)
 # and ran it:
 #
 # .. code-block:: bash
@@ -145,17 +159,20 @@ ax[1].axis('off')
 #     ProcessStack config.md 184
 #     ProcessStack sample_3D_frame_184_seg_conn74_rad2.bin 14 50
 #
-# Chose tau=14 because persistanceSegmentationTau=14 in config file.
+# We chose tau=14 because persistanceSegmentationTau=14 in the TGMM config file.
 # A value of tau=2 clearly yields over-segmentation (yields 1597 nuclei).
-# Chose minSuperVoxelSzPx=50 because minNucleiSize=50 in config file.
-# Not much difference between minSuperVoxelSzPx=50 (yiels 517 nuclei) and
-# minSuperVoxelSzPx=14 (yiels 541 nuclei).
-# The output (segmentation result) is a KLB file; we save it into a Numpy array.
+# We chose minSuperVoxelSzPx=50 because minNucleiSize=50 in the TGMM config file.
+# There is not much difference between minSuperVoxelSzPx=50 (yields 517 nuclei) and
+# minSuperVoxelSzPx=14 (yields 541 nuclei).
+# The output (segmentation result) is a KLB file; we save it into a Numpy archive,
+# which we can easily load here:
 
 res_url = 'https://gitlab.com/scikit-image/data/-/raw/30a6bf082e5a91a2ee97e003465537224ffad216/Embryo2/tgmm_conn74_tau14.npz'
 resp = requests.get(res_url)
 gt_dict = np.load(io.BytesIO(resp.content))
 gt = gt_dict['arr_0']
+
+assert gt.shape == im3d.shape
 
 # Ensure TGMM result is an image of type "labeled"
 assert gt.dtype in [np.uint16, np.uint32, np.uint64]
@@ -173,8 +190,10 @@ ax[1].set_title('Our output')
 ax[1].axis('off')
 
 #####################################################################
-# The TGMM segmentation looks cleaner than ours, but it seems to be missing
+# Although the TGMM segmentation looks cleaner than ours, it seems to be missing
 # quite a few nuclei in the upper half of the `xy` section.
+
+#####################################################################
 # Our *local* thresholding seems to be making the difference here.
 # When enhancing the contrast of the original image, the nuclei in this darker
 # area can be clearly seen:
