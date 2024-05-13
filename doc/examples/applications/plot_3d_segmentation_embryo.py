@@ -51,7 +51,7 @@ print(f'The shape of the image is: {im3d.shape}')
 
 #####################################################################
 # The sample dataset is a 3D image with 50 `xy` sections stacked along `z`. Let us
-# visualize it by picking one such section in five.
+# visualize it by picking every fifth section.
 
 data_montage = ski.util.montage(im3d[::5], grid_shape=(2, 5), padding_width=5)
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -79,10 +79,10 @@ ax = axes.ravel()
 ax[0].imshow(im3d[25, :, :])
 ax[0].set_title('Original')
 
-ax[1].imshow(binary_global[25, :, :])
+ax[1].imshow(binary_global[25, :, :], interpolation="nearest")
 ax[1].set_title('Global thresholding (Otsu)')
 
-ax[2].imshow(binary_local[25, :, :])
+ax[2].imshow(binary_local[25, :, :], interpolation="nearest")
 ax[2].set_title('Local thresholding')
 
 for a in ax:
