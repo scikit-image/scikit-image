@@ -187,6 +187,7 @@ def _pad_to(arr, shape):
     --------
     >>> _pad_to(np.ones((1, 1), dtype=int), (1, 3))
     array([[1, 0, 0]])
+
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
         raise ValueError(
@@ -212,41 +213,39 @@ def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
     to 2 (perfectly correlated image values, whether positively or negatively).
 
-    =======
-    >>>>>>> affine/image-registration
-        Parameters
-        ----------
-        image0, image1 : ndarray
-            Images to be compared. The two input images must have the same number
-            of dimensions.
-        bins : int or sequence of int, optional
-            The number of bins along each axis of the joint histogram.
-        weights: ndarray | None
-            Weights used in the computation of the histogram
+    Parameters
+    ----------
+    image0, image1 : ndarray
+        Images to be compared. The two input images must have the same number
+        of dimensions.
+    bins : int or sequence of int, optional
+        The number of bins along each axis of the joint histogram.
+    weights: ndarray | None
+        Weights used in the computation of the histogram
 
-        Returns
-        -------
-        nmi : float
-            The normalized mutual information between the two arrays, computed at
-            the granularity given by ``bins``. Higher NMI implies more similar
-            input images.
+    Returns
+    -------
+    nmi : float
+        The normalized mutual information between the two arrays, computed at
+        the granularity given by ``bins``. Higher NMI implies more similar
+        input images.
 
-        Raises
-        ------
-        ValueError
-            If the images don't have the same number of dimensions.
+    Raises
+    ------
+    ValueError
+        If the images don't have the same number of dimensions.
 
     Notes
     -----
     If the two input images are not the same shape, the smaller image is padded
     with zeros.
 
-        References
-        ----------
-        .. [1] C. Studholme, D.L.G. Hill, & D.J. Hawkes (1999). An overlap
-               invariant entropy measure of 3D medical image alignment.
-               Pattern Recognition 32(1):71-86
-               :DOI:`10.1016/S0031-3203(98)00091-0`
+    References
+    ----------
+    .. [1] C. Studholme, D.L.G. Hill, & D.J. Hawkes (1999). An overlap
+            invariant entropy measure of 3D medical image alignment.
+            Pattern Recognition 32(1):71-86
+            :DOI:`10.1016/S0031-3203(98)00091-0`
     """
     if image0.ndim != image1.ndim:
         raise ValueError(
