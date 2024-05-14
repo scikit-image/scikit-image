@@ -16,7 +16,22 @@ from math import log, floor, cos, sin
 
 
 def target_registration_error(shape, matrix):
-    """Compute the displacement norm of the transform at at each pixel"""
+    """
+    Compute the displacement norm of the transform at at each pixel
+
+    Parameters
+    ----------
+    shape : shape like
+        Shape of the array
+    matrix: ndarray
+        Homogeneous matrix
+
+    Returns
+    -------
+    tre : ndarray
+        Error map
+
+    """
     # Create a regular set of points on the grid
     points = np.concatenate(
         [
@@ -31,11 +46,13 @@ def target_registration_error(shape, matrix):
         ]
     )
     delta = matrix @ points - points
-    return np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
+    tre = np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
+    return tre
 
 
 def _parameter_vector_to_matrix(parameter, model, ndim):
-    """Transform a vector of parameter to an affine matrix
+    """
+    Transform a vector of parameter to an affine matrix
 
     Parameters
     ----------
@@ -56,6 +73,7 @@ def _parameter_vector_to_matrix(parameter, model, ndim):
     - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D
     - euclidean : [dy,dx,theta] in 2D or [dz,dy,dx,alpha,beta,gamma] in 3D
     - affine: the top of the homogeneous matrix minus identity
+
     """
 
     # Test if the parameter is actually a homogeneous matrix already
@@ -91,7 +109,8 @@ def _parameter_vector_to_matrix(parameter, model, ndim):
 
 
 def _scale_parameters(parameter, model, ndim, scale):
-    """Scale the parameter vector or homogeneous matrix
+    """
+    Scale the parameter vector or homogeneous matrix
 
     Parameters
     ----------
@@ -111,6 +130,7 @@ def _scale_parameters(parameter, model, ndim, scale):
     Note
     ----
     See _parameter_vector_to_matrix for the indices
+
     """
     scaled_parameters = parameter.copy()
     # Homogeneous matrix case
@@ -145,7 +165,8 @@ def lucas_kanade_affine_solver(
     max_iter=40,
     tol=1e-6,
 ):
-    """Estimate affine motion between two images using a least square approach
+    """
+    Estimate affine motion between two images using a least square approach
 
     Parameters
     ----------
@@ -262,7 +283,8 @@ def lucas_kanade_affine_solver(
 
 
 def cost_nmi(image0, image1, *, bins=100, weights=None):
-    """Negative of the normalized mutual information.
+    """
+    Negative of the normalized mutual information.
 
     See :func:`skimage.metrics.normalized_mutual_information` for more info.
 
@@ -279,6 +301,7 @@ def cost_nmi(image0, image1, *, bins=100, weights=None):
     cnmi : float
         The negative of the normalized mutual information between ``image0``
         and ``image1``.
+
     """
 
     return -normalized_mutual_information(
@@ -295,7 +318,8 @@ def _param_cost(
     cost=cost_nmi,
     model="affine",
 ):
-    """Compute the registration cost for the current parameters
+    """
+    Compute the registration cost for the current parameters
 
     Parameters
     ----------
@@ -314,7 +338,9 @@ def _param_cost(
 
     Returns
     -------
-    Evaluated cost
+    cost: float
+        Evaluated cost
+
     """
 
     ndim = reference_image.ndim - 1
@@ -340,7 +366,8 @@ def studholme_affine_solver(
     options={"maxiter": 10, "disp": False},
     cost=cost_nmi,
 ):
-    """Solver maximizing mutual information using Powell's method
+    """
+    Solver maximizing mutual information using Powell's method
 
     Parameters
     ----------
@@ -377,8 +404,6 @@ def studholme_affine_solver(
     .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
         The Art of Scientific Python. O’Reilly Media, Inc., 2017.
 
-    Note:
-    from PR #3544
     """
 
     if channel_axis is not None:
@@ -427,7 +452,8 @@ def affine(
     pyramid_downscale=2,
     pyramid_minimum_size=32,
 ):
-    """Coarse-to-fine affine motion estimation between two images
+    """
+    Coarse-to-fine affine motion estimation between two images
 
     Parameters
     ----------
