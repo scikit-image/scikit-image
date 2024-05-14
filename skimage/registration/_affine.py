@@ -1,3 +1,5 @@
+"""Affine registration"""
+
 import warnings
 
 from functools import partial

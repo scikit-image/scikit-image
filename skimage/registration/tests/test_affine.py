@@ -49,6 +49,15 @@ def create_matrix(shape, model, ndim):
     return np.linalg.inv(T) @ matrix @ T
 
 
+def test_tre():
+    tre = target_registration_error([10, 10], np.eye(3))
+    assert_array_equal(np.zeros((10, 10)), tre)
+    tre = target_registration_error(
+        [10, 10], np.array([[1, 0, 1], [0, 1, 0], [0, 0, 1]])
+    )
+    assert_array_equal(np.ones((10, 10)), tre)
+
+
 @pytest.mark.parametrize("solver", solvers)
 @pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32])
 def test_register_affine_dtype(solver, dtype):
