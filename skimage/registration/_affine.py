@@ -520,8 +520,8 @@ def affine(
     >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
     >>> transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
-    >>> moving = ndi.affine_transform(reference_image, transform)
-    >>> matrix = affine(reference_image, moving)
+    >>> moving = ndi.affine_transform(reference, transform)
+    >>> matrix = affine(reference, moving)
     >>> registered = ndi.affine_transform(moving, matrix)
 
     """
