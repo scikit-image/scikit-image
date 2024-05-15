@@ -8,7 +8,7 @@ class ThinPlateSplineTransform:
     """Thin-plate spline transformation.
 
     Given a set of control points (source and destination points), this class
-    can be used to estimate the thin-plate spline (TPS) transformation which
+    can be used to estimate the thin-plate spline (TPS) transformation, which
     transforms the source points into the destination points.
 
     Attributes
@@ -22,7 +22,8 @@ class ThinPlateSplineTransform:
     ----------
     .. [1] Bookstein, Fred L. "Principal warps: Thin-plate splines and the
            decomposition of deformations," IEEE Transactions on pattern analysis
-           and machine intelligence 11.6 (1989): 567–585. DOI:`10.1109/34.24792`
+           and machine intelligence 11.6 (1989): 567–585.
+           DOI:`10.1109/34.24792`
            https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
     Examples
@@ -41,7 +42,7 @@ class ThinPlateSplineTransform:
 
     Estimate transformation:
 
-    >>> tps = ski.transform.ThinPlateSplineTransform()
+    >>> tps = ski.future.ThinPlateSplineTransform()
     >>> tps.estimate(src, dst)
     True
 
@@ -106,9 +107,7 @@ class ThinPlateSplineTransform:
         raise NotImplementedError("This is yet to be implemented.")
 
     def estimate(self, src, dst):
-        """Estimate optimal spline mappings that describe the deformation of source
-        points into destination points.
-
+        """Estimate optimal spline mappings between source and destination points.
 
         Parameters
         ----------
@@ -124,7 +123,7 @@ class ThinPlateSplineTransform:
 
         Notes
         -----
-        The number of source and destination points must match (N).
+        The number N of source and destination points must match.
         """
 
         check_nD(src, 2)
@@ -197,11 +196,10 @@ def _radial_basis_kernel(r):
 def tps_warp(
     image, src, dst, *, output_region=None, interpolation_order=1, grid_scaling=1
 ):
-    """Return an array of warped images.
+    """Warp an image using thin-plate splines.
 
-    Define a thin-plate-spline warping transform that warps from the
-    `src` to the `dst` points, and then warp the given image by
-    that transform.
+    Define an image deformation using thin-plate splines defined by `src` and
+    `dst` points. Then, warp the given image accordingly.
 
     Parameters
     ----------
@@ -216,14 +214,17 @@ def tps_warp(
         image that should be produced. (Note: The region is inclusive, i.e.,
         ``xmin <= x <= xmax``.)
     interpolation_order : int, optional
-        If 1, use linear interpolation, otherwise use
-        nearest-neighbor interpolation.
+        While this function uses thin-plate splines to define a transformation
+        between image coordinates, :func:`scipy.ndimage.map_coordinates` is
+        used to interpolate the given `image` onto the new deformed coordinate
+        grid. This parameter defines the order of that interpolation.
     grid_scaling : int, optional
         If `grid_scaling` is greater than 1, say x, then the transform is
         defined on a grid x times smaller than the output image region.
         Then the transform is bilinearly interpolated to the larger region.
         This is fairly accurate for values up to 10 or so. Must be equal to or
-        greater than 1.
+        greater than 1. Use this parameter, to increase performance at the cost
+        of accuracy.
 
     Returns
     -------
@@ -247,7 +248,7 @@ def tps_warp(
     >>> src = np.array([[0, 0], [0, 512], [512, 512],[512, 0]])
     >>> dst = np.array([[512, 0], [0, 0], [0, 512],[512, 512]])
     >>> output_region = (0, 0, image.shape[0], image.shape[1])
-    >>> warped_image = ski.transform.tps_warp(
+    >>> warped_image = ski.future.tps_warp(
     ...     image, src, dst, output_region=output_region
     ... )
 

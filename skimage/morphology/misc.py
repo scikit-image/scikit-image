@@ -1,4 +1,5 @@
 """Miscellaneous morphology functions."""
+
 import numpy as np
 import functools
 from scipy import ndimage as ndi

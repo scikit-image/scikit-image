@@ -19,6 +19,7 @@ enables projective 3D reconstruction of the captured scene. If the calibration
 is known, estimating the essential matrix enables metric 3D reconstruction of
 the captured scene.
 """
+
 import numpy as np
 from skimage import data
 from skimage.color import rgb2gray

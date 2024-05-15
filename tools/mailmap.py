@@ -40,7 +40,7 @@ for name, email in (author.split('::') for author in authors if author.strip()):
         emails.append(email)
 
 N = len(names)
-D = np.zeros((N, N)) + np.infty
+D = np.zeros((N, N)) + np.inf
 
 for i in range(1, N):
     for j in range(i):

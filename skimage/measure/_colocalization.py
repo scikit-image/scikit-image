@@ -94,7 +94,7 @@ def pearson_corr_coeff(image0, image1, mask=None):
         image0 = image0.reshape(-1)
         image1 = image1.reshape(-1)
 
-    return pearsonr(image0, image1)
+    return tuple(float(v) for v in pearsonr(image0, image1))
 
 
 def manders_coloc_coeff(image0, image1_mask, mask=None):

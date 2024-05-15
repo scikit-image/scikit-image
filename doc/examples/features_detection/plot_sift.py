@@ -27,6 +27,7 @@ References
        "ORB: An efficient alternative to SIFT and SURF"
        http://www.gwylab.com/download/ORB_2012.pdf
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data

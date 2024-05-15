@@ -14,6 +14,7 @@ provided in ``(z, c, y, x)`` order. Channel 0 contains cell membranes, while cha
 The example below shows how to explore this dataset. This 3D image can be used
 to test the various functions of scikit-image.
 """
+
 from skimage import data
 import plotly
 import plotly.express as px

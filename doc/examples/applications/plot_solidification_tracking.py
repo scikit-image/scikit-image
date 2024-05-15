@@ -5,7 +5,7 @@ Track solidification of a metallic alloy
 
 In this example, we identify and track the solid-liquid (S-L) interface in a
 nickel-based alloy undergoing solidification. Tracking the solidification over
-time enables the calculatation of the solidification velocity. This is
+time enables the calculation of the solidification velocity. This is
 important to characterize the solidified structure of the sample and will be
 used to inform research into additive manufacturing of metals. The image
 sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys

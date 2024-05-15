@@ -40,9 +40,7 @@ def test_overrange_tolerance_float():
     image *= max_value
 
     expected = np.ones_like(image)
-    with np.errstate(over="ignore"):
-        tolerance = max_value * 10
-    output = flood_fill(image, (0, 1), 1.0, tolerance=tolerance)
+    output = flood_fill(image, (0, 1), 1.0, tolerance=max_value.item() * 10)
 
     np.testing.assert_equal(output, expected)
 

@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  'test_thin_plate_splines.py',
   'test_trainable_segmentation.py'
 ]
 

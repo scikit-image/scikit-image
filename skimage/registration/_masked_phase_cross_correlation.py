@@ -8,6 +8,7 @@ IEEE Transactions on Image Processing (2012)
 and the author's original MATLAB implementation, available on this website:
 http://www.dirkpadfield.com/
 """
+
 from functools import partial
 
 import numpy as np

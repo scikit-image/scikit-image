@@ -14,6 +14,7 @@ with a spline interpolation of order 3 rescaling of the original `astronaut`
 image.
 
 """
+
 import numpy as np
 from scipy import ndimage as ndi
 from matplotlib import pyplot as plt

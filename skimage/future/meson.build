@@ -1,6 +1,7 @@
 python_sources = [
   '__init__.py',
   '__init__.pyi',
+  '_thin_plate_splines.py',
   'manual_segmentation.py',
   'trainable_segmentation.py'
 ]

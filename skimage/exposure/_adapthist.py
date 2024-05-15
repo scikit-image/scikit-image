@@ -6,6 +6,7 @@ http://tog.acm.org/resources/GraphicsGems/
 
 Relicensed with permission of the author under the Modified BSD license.
 """
+
 import math
 import numbers
 

@@ -107,13 +107,14 @@ def watershed(
         :func:`skimage.measure.label` onto the result (with the same given
         `connectivity`). Generally speaking, users are encouraged to pass
         markers explicitly.
-    connectivity : ndarray, optional
-        An array with the same number of dimensions as `image` whose
-        non-zero elements indicate neighbors for connection.
-        Following the scipy convention, default is a one-connected array of
-        the dimension of the image.
+    connectivity : int or ndarray, optional
+        The neighborhood connectivity. An integer is interpreted as in
+        ``scipy.ndimage.generate_binary_structure``, as the maximum number
+        of orthogonal steps to reach a neighbor. An array is directly
+        interpreted as a footprint (structuring element). Default value is 1.
+        In 2D, 1 gives a 4-neighborhood while 2 gives an 8-neighborhood.
     offset : array_like of shape image.ndim, optional
-        offset of the connectivity (one offset per dimension)
+        The coordinates of the center of the footprint.
     mask : (M, N[, ...]) ndarray of bools or 0's and 1's, optional
         Array of same shape as `image`. Only points at which mask == True
         will be labeled.
@@ -206,7 +207,7 @@ def watershed(
 
     >>> labels = watershed(-distance, markers, mask=image)
 
-    The algorithm works also for 3-D images, and can be used for example to
+    The algorithm works also for 3D images, and can be used for example to
     separate overlapping spheres.
     """
     image, markers, mask = _validate_inputs(image, markers, mask, connectivity)

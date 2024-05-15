@@ -2,14 +2,18 @@ Version 0.25
 ------------
 * In `skimage/feature/util.py`, remove deprecated function `plot_matches` as
   well as `test_plot_matches` in `skimage/feature/tests/test_util.py`.
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
+  tests related to that deprecation.
+* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
+  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
+  Make arguments after the deprecated `output` parameter, keyword only:
+  `gaussian(image, sigma, *, ...)`.
 
 Version 0.26
 ------------
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
-* Remove deprecated `skimage.lookfor`, `skimage/_vendored/numpy_lookfor.py`,
-  the associated note in `LICENSE.txt` and everything else associated with it.
 
 Other
 -----
@@ -36,3 +40,4 @@ Post numpy 2
   dependencies. Also remove temporary assert for NumPy 2.0 in
   `nightly_wheel_build.yml`.
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
+- scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.

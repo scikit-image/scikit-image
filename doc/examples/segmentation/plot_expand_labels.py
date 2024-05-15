@@ -10,6 +10,7 @@ In contrast to :py:func:`skimage.morphology.dilation` this method will
 not let connected components expand into neighboring connected components
 with lower label number.
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import data
