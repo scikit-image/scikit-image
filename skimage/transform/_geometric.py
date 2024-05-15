@@ -58,6 +58,8 @@ def _center_and_normalize_points(points):
            (1997): 580-593.
 
     """
+    # deal with array_like points
+    points = np.array(points)
     n, d = points.shape
     centroid = np.mean(points, axis=0)
 
@@ -779,7 +781,7 @@ class ProjectiveTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        n, d = src.shape
+        n, d = np.array(src).shape
 
         src_matrix, src = _center_and_normalize_points(src)
         dst_matrix, dst = _center_and_normalize_points(dst)
