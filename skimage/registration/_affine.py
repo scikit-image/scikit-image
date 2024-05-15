@@ -28,8 +28,8 @@ def target_registration_error(shape, matrix):
 
     Returns
     -------
-    tre : ndarray
-        Error map
+    TRE : ndarray
+        Norm of the displacement given by the transform
 
     """
     # Create a regular set of points on the grid
@@ -46,8 +46,8 @@ def target_registration_error(shape, matrix):
         ]
     )
     delta = matrix @ points - points
-    tre = np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
-    return tre
+    TRE = np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
+    return TRE
 
 
 def _parameter_vector_to_matrix(parameter, model, ndim):
@@ -66,6 +66,10 @@ def _parameter_vector_to_matrix(parameter, model, ndim):
     Returns
     -------
     Homogeneous matrix
+
+    Raises
+    ------
+    NotImplementedError for unsupported motion models.
 
     Note
     ----
@@ -126,6 +130,10 @@ def _scale_parameters(parameter, model, ndim, scale):
     Returns
     -------
     Scaled parameters as a ndarray
+
+    Raises
+    ------
+    NotImplementedError for unsupported motion models.
 
     Note
     ----
@@ -191,6 +199,10 @@ def lucas_kanade_affine_solver(
     -------
     matrix : ndarray
         The estimated homogenous transformation matrix
+
+    Raises
+    ------
+    NotImplementedError for unsupported motion models.
 
     Reference
     ---------
@@ -396,6 +408,10 @@ def studholme_affine_solver(
     -------
     matrix:
         Homogeneous transform matrix
+
+    Raises
+    ------
+    NotImplementedError for unsupported motion models.
 
     Reference
     ---------

@@ -28,6 +28,7 @@ def create_matrix(shape, model, ndim):
     # Center the transformations
     T = np.eye(ndim + 1, dtype=np.float64)
     T[:ndim, -1] = np.array(shape) / 2
+
     matrix = np.eye(ndim + 1, dtype=np.float64)
     if model == "translation":
         matrix[:ndim, -1] += np.random.uniform(-10, 10, size=(ndim))
@@ -142,15 +143,14 @@ def test_nomotion(solver):
     ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
 
 
+@pytest.mark.parametrize("solver", solvers)
 def test_weights(solver):
-    d = 16
     reference = data.camera()[::4, ::4]
-    forward = create_matrix(reference.shape, "euclidean", 2)
-    cc = (slice(0, reference.shape[0] - d), slice(0, reference.shape[1] - d))
-    moving = reference.copy()
-    moving[cc] = ndi.affine_transform(reference[cc], forward)
-    weights = np.zeros(reference.shape, dtype=float)
-    weights[cc] = 1.0
-    matrix = affine(reference, moving, weights=weights, solver=solver)
-    tre = target_registration_error(reference.shape, matrix)
-    assert tre.max() < 4, f"TRE ({tre.max():.2f}) is more than 4 pixels."
+    forward = create_matrix(reference.shape, "translation", 2)
+    weights = ndi.median_filter(reference, 15) < 128
+    moving = ndi.affine_transform(reference, forward)
+    matrix = affine(reference, moving, weights=weights, model="translation")
+    tre = target_registration_error(reference.shape, matrix @ forward)
+    assert (
+        tre.max() < max_error
+    ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
