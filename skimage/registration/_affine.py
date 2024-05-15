@@ -516,7 +516,6 @@ def affine(
     >>> import numpy as np
     >>> from scipy import ndimage as ndi
     >>> from skimage.registration import affine
-    >>> import matplotlib.pyplot as plt
     >>> reference = data.camera()
     >>> r = -0.12  # radians
     >>> c, s = np.cos(r), np.sin(r)
@@ -524,7 +523,6 @@ def affine(
     >>> moving = ndi.affine_transform(reference_image, transform)
     >>> matrix = affine(reference_image, moving)
     >>> registered = ndi.affine_transform(moving, matrix)
-    >>> plt.imshow(registered)
 
     """
 
