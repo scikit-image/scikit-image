@@ -1,12 +1,12 @@
 r"""
 ==========================================
-Interpolate images with thin-plate splines
+Use thin-plate splines for image warping
 ==========================================
 
 A conventional technique for interpolating surfaces over a set of data points
 are thin-plate splines (TPS) [1]_ [2]_.
 In an image context, given pairs of source and target control points, TPS can
-be used to transform a space, which, in our case, is a 2D image.
+be used to transform a space, which, in our case, a 2D image.
 
 
 .. [1] Wikipedia, Thin plate spline
@@ -112,7 +112,7 @@ target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
 
 # Compute the coefficient
-trans = ski.future.TpsTransform()
+trans = ski.future.ThinPlateSplineTransform()
 trans.estimate(source_xy, target_xy)
 
 
