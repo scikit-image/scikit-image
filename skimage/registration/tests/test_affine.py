@@ -42,7 +42,7 @@ def create_matrix(shape, model, ndim):
             R[a[0], a[1]] = -s
             R[a[1], a[1]] = c
             R[a[1], a[0]] = s
-            matrix @= R
+            matrix = matrix @ R
         matrix[:ndim, -1] += np.random.uniform(-1, 1, size=(ndim))
     else:
         matrix[:ndim, :] += np.random.uniform(-0.01, 0.01, size=(ndim, ndim + 1))

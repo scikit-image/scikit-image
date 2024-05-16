@@ -97,11 +97,11 @@ def _parameter_vector_to_matrix(parameter, model, ndim):
             R[a[0], a[1]] = -s
             R[a[1], a[1]] = c
             R[a[1], a[0]] = s
-            matrix @= R
+            matrix = matrix @ R
         # Translation along each axis
         T = np.eye(ndim + 1)
         T[:ndim, -1] = parameter[:ndim].ravel()
-        matrix @= T
+        matrix = matrix @ T
         T = np.array([[1, 1, parameter[0]], [0, 1, parameter[1]], [0, 0, 1]])
     elif model.lower() == "affine":
         matrix = np.eye(ndim + 1, dtype=parameter.dtype)
@@ -283,7 +283,7 @@ def lucas_kanade_affine_solver(
             # Solve the system
             r = np.linalg.solve(H.T @ G @ H, H.T @ b)
             # update the matrix
-            matrix @= _parameter_vector_to_matrix(r.ravel(), model, ndim)
+            matrix = matrix @ _parameter_vector_to_matrix(r.ravel(), model, ndim)
 
             if np.linalg.norm(r) < tol:
                 break
