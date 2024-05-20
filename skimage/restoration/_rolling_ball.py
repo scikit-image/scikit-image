@@ -56,7 +56,7 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     This algorithm is polynomial in the radius, with exponent = image.ndim,
     meaning it can take a long time as the radius grows beyond 30 or so [2]_ [3]_.
     It is an exact N-dimensional calculation; if all you need is an
-    approximation, faster options to consider are top-hat filtering [4] or
+    approximation, faster options to consider are top-hat filtering [4]_ or
     downscaling-then-upscaling to reduce the size of the input processed.
 
     References
