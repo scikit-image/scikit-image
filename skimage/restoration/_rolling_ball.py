@@ -53,8 +53,9 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     noise). If this is a problem in your image, you can apply mild
     gaussian smoothing before passing the image to this function.
 
-    This algorithm is polynomial in the radius, with exponent = image.ndim,
-    meaning it can take a long time as the radius grows beyond 30 or so [2]_ [3]_.
+    This algorithm's complexity is polynomial in the radius, with degree equal
+    to the image dimensionality (a 2D image is N^2, 3D image is N^3 etc.),
+    so it can take a long time as the radius grows beyond 30 or so [2]_ [3]_.
     It is an exact N-dimensional calculation; if all you need is an
     approximation, faster options to consider are top-hat filtering [4]_ or
     downscaling-then-upscaling to reduce the size of the input processed.
