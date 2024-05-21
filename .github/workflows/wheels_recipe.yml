@@ -110,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [macos-12]
         cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
         # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]

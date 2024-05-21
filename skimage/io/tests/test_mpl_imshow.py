@@ -10,7 +10,8 @@ if plt:
     plt.switch_backend("Agg")
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _reset_plugins():
     io.reset_plugins()
 
 
