@@ -42,21 +42,18 @@ astronaut = ski.data.astronaut()
 src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 100]])
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
-# Fit the thin-plate spline from source (src) to target (dst) points
+# Calculate TPS transformation
+tps = ski.future.ThinPlateSplineTransform()
+tps.estimate(dst, src)
 
-warped_img = ski.future.tps_warp(astronaut, src[:, ::-1], dst[:, ::-1], grid_scaling=1)
+# Fit the thin-plate spline from source (src) to target (dst) points
+warped_img = ski.transform.warp(astronaut, tps)
 
 
 fig, axs = plt.subplots(1, 2)
 
-labels = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-]  # Adjust the number of labels to match the number of points
+# fmt: off
+labels = ["1", "2", "3", "4", "5", "9"] # Adjust the number of labels to match the number of points
 
 axs[0].imshow(astronaut, cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1], marker='x', color='cyan')
