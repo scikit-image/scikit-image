@@ -12,7 +12,7 @@ def find_contours(
 ):
     """Find iso-valued contours in a 2D array for a given level value.
 
-    Uses the "marching squares" method to compute a the iso-valued contours of
+    Uses the "marching squares" method to compute the iso-valued contours of
     the input 2D array for a particular level value. Array values are linearly
     interpolated to provide better precision for the output contours.
 
@@ -33,7 +33,7 @@ def find_contours(
     positive_orientation : str, {'low', 'high'}
          Indicates whether the output contours will produce positively-oriented
          polygons around islands of low- or high-valued elements. If 'low' then
-         contours will wind counter- clockwise around elements below the
+         contours will wind counter-clockwise around elements below the
          iso-value. Alternately, this means that low-valued elements are always
          on the left of the contour. (See below for details.)
     mask : (M, N) ndarray of bool or None
@@ -55,7 +55,7 @@ def find_contours(
     The marching squares algorithm is a special case of the marching cubes
     algorithm [1]_.  A simple explanation is available here:
 
-    http://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
+    https://users.polytech.unice.fr/~lingrand/MarchingCubes/algo.html
 
     There is a single ambiguous case in the marching squares algorithm: when
     a given ``2 x 2``-element square has two high-valued and two low-valued
@@ -85,7 +85,7 @@ def find_contours(
 
     The order of the contours in the output list is determined by the position
     of the smallest ``x,y`` (in lexicographical order) coordinate in the
-    contour.  This is a side-effect of how the input array is traversed, but
+    contour.  This is a side effect of how the input array is traversed, but
     can be relied upon.
 
     .. warning::
@@ -100,7 +100,7 @@ def find_contours(
     midway between the expected "light" and "dark" values. In particular,
     given a binarized array, *do not* choose to find contours at the low or
     high value of the array. This will often yield degenerate contours,
-    especially around structures that are a single array element wide. Instead
+    especially around structures that are a single array element wide. Instead,
     choose a middle value, as above.
 
     References

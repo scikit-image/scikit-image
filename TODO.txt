@@ -8,6 +8,9 @@ Version 0.25
   and remove `test_gaussian.py::test_deprecated_gaussian_output`.
   Make arguments after the deprecated `output` parameter, keyword only:
   `gaussian(image, sigma, *, ...)`.
+* In `skimage/util/compare.py`, remove deprecated parameter `image2` as
+  well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
+  (and all `pytest.warns(FutureWarning)` context managers there).
 
 Version 0.26
 ------------
@@ -27,6 +30,10 @@ Other
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
+* Remove ``except AttributeError`` block in
+  ``skimage/segmentation/random_walker_segmentation.py`` as well as the warning filter
+  in ``pyproject.toml``, once pyamg supports NumPy 2
+  (see https://github.com/pyamg/pyamg/issues/406).
 
 Post numpy 2
 ------------
