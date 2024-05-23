@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: write # for softprops/action-gh-release to create GitHub release
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+      attestations: write # for GitHub attestations
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,10 +31,6 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
-
-      - name: Install Twine
-        run: |
-          pip install twine
 
       - uses: actions/download-artifact@v3
         id: download
@@ -47,6 +44,14 @@ jobs:
           source tools/github/before_install.sh
           python -m build --no-isolation --skip-dependency-check --sdist .
           ls -la ${{ github.workspace }}/dist
+
+      - name: Verify the distribution
+        run: pipx run twine check --strict dist/*
+
+      - name: Generate artifact attestation for sdist and wheels
+        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        with:
+          subject-path: "dist/scikit_image-*"
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
