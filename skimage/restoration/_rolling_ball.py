@@ -54,7 +54,7 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     gaussian smoothing before passing the image to this function.
 
     This algorithm's complexity is polynomial in the radius, with degree equal
-    to the image dimensionality (a 2D image is N^2, 3D image is N^3 etc.),
+    to the image dimensionality (a 2D image is N^2, a 3D image is N^3, etc.),
     so it can take a long time as the radius grows beyond 30 or so [2]_ [3]_.
     It is an exact N-dimensional calculation; if all you need is an
     approximation, faster options to consider are top-hat filtering [4]_ or
