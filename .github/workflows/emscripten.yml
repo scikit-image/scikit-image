@@ -33,14 +33,14 @@ jobs:
     # To enable this workflow on a fork, comment out:
     # if: github.repository == 'scikit-image/scikit-image'
     env:
-      PYODIDE_VERSION: 0.25.1
+      PYODIDE_VERSION: 0.26.0
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
       # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-      PYTHON_VERSION: 3.11.3
-      EMSCRIPTEN_VERSION: 3.1.46
-      NODE_VERSION: 18
+      PYTHON_VERSION: 3.12.1
+      EMSCRIPTEN_VERSION: 3.1.58
+      NODE_VERSION: 20
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -57,16 +57,8 @@ jobs:
           version: ${{ env.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
 
-      # We need to apply a patch to the Emscripten SDK to work around a bug in
-      # the file system API. This patch is already applied in the Emscripten SDK
-      # upstream, but we need to apply it here because we are using an older
-      # version of the Emscripten SDK with Pyodide.
-      - name: Apply necessary patch(es)
-        run: |
-          patch -d $EMSDK/upstream/emscripten/ -p1 < tools/emscripten/patches/0001-fix-npy-file-access.patch
-
       - name: Install pyodide-build
-        run: pip install "pydantic<2" pyodide-build==${{ env.PYODIDE_VERSION }}
+        run: pip install pyodide-build==${{ env.PYODIDE_VERSION }}
 
       - name: Build scikit-image for Pyodide
         run: |
