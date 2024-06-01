@@ -2,7 +2,6 @@
 
 <!--
 - Reference relevant issues or related pull requests with their URL / #<number>.
-- Do not use AI to help write your contribution.
 - Use `pre-commit` to check and format code.
 -->
 
