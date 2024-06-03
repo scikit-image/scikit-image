@@ -101,7 +101,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     if not isinstance(descriptors, (list, np.ndarray)):
         raise DescriptorException(
-            'Please ensure descriptors are either a NumPY array, '
+            'Please ensure descriptors are either a NumPy array, '
             'or a list of NumPy arrays.'
         )
 
