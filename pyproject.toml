@@ -163,6 +163,7 @@ ignore = [
     'E501',
     'E741',
     'E712',
+    'UP038',  # https://github.com/astral-sh/ruff/issues/7871
 ]
 
 [tool.ruff.lint.per-file-ignores]
