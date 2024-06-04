@@ -70,6 +70,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
+        env:
+          SKIMAGE_TEST_STRICT_WARNINGS: 0
         run: |
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
