@@ -9,11 +9,10 @@ on:
     branches:
       - main
       - maintenance/**
-  # TODO: refine after this is ready to merge
   push:
-    # branches:
-    #   - main
-    #   - maintenance/**
+    branches:
+      - main
+      - maintenance/**
   workflow_dispatch:
 
 env:
