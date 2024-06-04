@@ -4,16 +4,7 @@
 
 name: Test Emscripten/Pyodide build
 
-on:
-  pull_request:
-    branches:
-      - main
-      - maintenance/**
-  push:
-    branches:
-      - main
-      - maintenance/**
-  workflow_dispatch:
+on: [push, pull_request, merge_group]
 
 env:
   FORCE_COLOR: 3
