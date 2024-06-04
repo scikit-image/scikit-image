@@ -748,9 +748,11 @@ def test_inverse_all_transforms(tform):
     # Test addition with inverse, not implemented for all
     if not isinstance(
         tform,
-        EssentialMatrixTransform
-        | FundamentalMatrixTransform
-        | PiecewiseAffineTransform,
+        (
+            EssentialMatrixTransform,
+            FundamentalMatrixTransform,
+            PiecewiseAffineTransform,
+        ),
     ):
         assert_almost_equal((tform + tform.inverse)(SRC), SRC)
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
