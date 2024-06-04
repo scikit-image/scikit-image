@@ -20,8 +20,6 @@ jobs:
   build-wasm-emscripten:
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-22.04
-    # To enable this workflow on a fork, comment out:
-    if: github.repository == 'scikit-image/scikit-image'
     env:
       PYODIDE_VERSION: 0.26.0
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
