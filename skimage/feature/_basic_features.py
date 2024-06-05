@@ -12,6 +12,8 @@ else:
 
     # Threading isn't supported on WASM, mock ThreadPoolExecutor as a fallback
     class PoolExecutor(AbstractContextManager):
+        def __init__(self, *_, **__):
+            pass
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
