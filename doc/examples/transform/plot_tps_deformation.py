@@ -6,7 +6,7 @@ Use thin-plate splines for image warping
 A conventional technique for interpolating surfaces over a set of data points
 are thin-plate splines (TPS) [1]_ [2]_.
 In an image context, given pairs of source and target control points, TPS can
-be used to transform a space, which, in our case, a 2D image.
+be used to transform a space, in our case, a 2D image.
 
 
 .. [1] Wikipedia, Thin plate spline
@@ -52,8 +52,8 @@ warped_img = ski.transform.warp(astronaut, tps)
 
 fig, axs = plt.subplots(1, 2)
 
-# fmt: off
-labels = ["1", "2", "3", "4", "5", "9"] # Adjust the number of labels to match the number of points
+# Adjust the number of labels to match the number of points
+labels = ["1", "2", "3", "4", "5", "9"]
 
 axs[0].imshow(astronaut, cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1], marker='x', color='cyan')
@@ -87,11 +87,12 @@ plt.show()
 #
 # Derive an interpolation function
 # ================================
-# In this second example, we start with a set of source and target coordinates.
-# TPS is applied to each source and target coordinate to derive an interpolation
-# function and coefficients.
-# These coefficients are then used to transform an arbitrary point associated
-# with the reference to an interpolated location on the target.
+# In this second example, we start with a set of source and target points.
+# TPS are used to derive an interpolation function and coefficients from each
+# of those points.
+# These coefficients can then be used to translate another set of points, in
+# the example below called "Original", to a new location matching the original
+# deformation between source and target.
 
 import matplotlib.pyplot as plt
 
@@ -107,11 +108,9 @@ source_xy = np.column_stack((xx.ravel(), yy.ravel()))
 yy[:, [0, 3]] *= 2
 target_xy = np.column_stack((xx.ravel(), yy.ravel()))
 
-
 # Compute the coefficient
 trans = ski.future.ThinPlateSplineTransform()
 trans.estimate(source_xy, target_xy)
-
 
 # Create another arbitrary point
 samp2 = np.linspace(-1.8, 1.8, 10)
@@ -122,18 +121,18 @@ transformed_xy = trans(test_xy)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(8, 3))
 
-ax0.scatter(source_xy[:, 0], source_xy[:, 1], label='Source Points')
-ax0.scatter(test_xy[:, 0], test_xy[:, 1], c='orange', label='Test Points')
+ax0.scatter(source_xy[:, 0], source_xy[:, 1], label='Source')
+ax0.scatter(test_xy[:, 0], test_xy[:, 1], c='orange', label='Original')
 ax0.legend(loc='upper center')
-ax0.set_title('Source and Test Coordinates')
+ax0.set_title('Source and original points')
 
-ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target Points')
+ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target')
 ax1.scatter(
     transformed_xy[:, 0],
     transformed_xy[:, 1],
     c='orange',
-    label='Transformed Test Points',
+    label='Transformed',
 )
 ax1.legend(loc="upper center")
-ax1.set_title("Target and Transformed Coordinates")
+ax1.set_title("Target and transformed points")
 plt.show()
