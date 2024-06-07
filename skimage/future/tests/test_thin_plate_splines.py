@@ -21,7 +21,7 @@ class TestThinPlateSplineTransform:
     def test_call_before_estimation(self):
         tps = ThinPlateSplineTransform()
         coords = np.array([[0, 0], [0, 5]])
-        with pytest.raises(ValueError, match="None. Compute the `estimate`"):
+        with pytest.raises(ValueError, match="Transformation is undefined"):
             tps(coords)
 
     def test_call_invalid_coords_shape(self):
@@ -103,13 +103,11 @@ class TestThinPlateSplineTransform:
         assert tps.src is None
 
         # Perform the estimation, which should fail due to the mismatched number of points
-        with pytest.raises(ValueError, match=".*coordinates must match"):
+        with pytest.raises(ValueError, match="Shape of `src` and `dst` didn't match"):
             tps.estimate(src, dst)
 
         # # Check if src and dst have fewer than 3 points
-        with pytest.raises(
-            ValueError, match="There should be at least 3 points in both sets*."
-        ):
+        with pytest.raises(ValueError, match="Need at least 3 points"):
             src_less_than_3pts = np.array([[0, 0], [0, 5]])
             tps.estimate(src_less_than_3pts, dst)
 

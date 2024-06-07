@@ -85,7 +85,10 @@ class ThinPlateSplineTransform:
             Destination coordinates
         """
         if self._spline_mappings is None:
-            msg = "Transformation is undefined, use `estimate` before applying it"
+            msg = (
+                "Transformation is undefined, define it by calling `estimate` "
+                "before applying it"
+            )
             raise ValueError(msg)
         coords = np.array(coords)
 
@@ -128,7 +131,7 @@ class ThinPlateSplineTransform:
             msg = "Need at least 3 points in in `src` and `dst`"
             raise ValueError(msg)
         if src.shape != dst.shape:
-            msg = f"Shape of `src` and `dst` didn't macht, {src.shape} != {dst.shape}"
+            msg = f"Shape of `src` and `dst` didn't match, {src.shape} != {dst.shape}"
             raise ValueError(msg)
 
         self.src = src
