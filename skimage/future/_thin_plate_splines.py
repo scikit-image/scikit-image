@@ -7,14 +7,12 @@ from .._shared.utils import check_nD
 class ThinPlateSplineTransform:
     """Thin-plate spline transformation.
 
-    Given a set of control points (source and destination points), this class
-    can be used to estimate the thin-plate spline (TPS) transformation, which
-    transforms the source points into the destination points.
+    Given two matching sets of points, source and destination, this class
+    estimates the thin-plate spline (TPS) transformation which transforms
+    each point in source into its destination counterpart.
 
     Attributes
     ----------
-    _spline_mappings : (N, D) array_like
-        Coefficients corresponding to destination points coordinates.
     src : (N, 2) array_like
         Coordinates of control points in source image.
 
@@ -30,40 +28,43 @@ class ThinPlateSplineTransform:
     --------
     >>> import skimage as ski
 
-    Define source and destination control points:
+    Define source and destination control points such that they simulate
+    rotating by 90 degrees and generate a meshgrid from them:
 
     >>> src = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
     >>> dst = np.array([[5, 0], [0, 0], [0, 5], [5, 5]])
 
-    Generate meshgrid:
-
-    >>> coords = np.meshgrid(np.arange(5), np.arange(5))
-    >>> t_coords = np.vstack([coords[0].ravel(), coords[1].ravel()]).T
-
-    Estimate transformation:
+    Estimate the transformation:
 
     >>> tps = ski.future.ThinPlateSplineTransform()
     >>> tps.estimate(src, dst)
     True
 
-    Apply the transformation:
+    Appyling the transformation to `src` approximates `dst`
+    >>> np.round(tps(src))
+    array([[5., 0.],
+           [0., 0.],
+           [0., 5.],
+           [5., 5.]])
 
-    >>> trans_coord = tps(t_coords)
-    >>> xx_trans = trans_coord[:, 0]
-    >>> yy_trans = trans_coord[:, 1]
-    >>> coords[1]
+    Create a meshgrid to apply the transformation to
+
+    >>> grid = np.meshgrid(np.arange(5), np.arange(5))
+    >>> grid[1]
     array([[0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1],
            [2, 2, 2, 2, 2],
            [3, 3, 3, 3, 3],
            [4, 4, 4, 4, 4]])
-    >>> expected_yy = np.array([0, 1, 2, 3, 4,
-    ...                         0, 1, 2, 3, 4,
-    ...                         0, 1, 2, 3, 4,
-    ...                         0, 1, 2, 3, 4,
-    ...                         0, 1, 2, 3, 4])
-    >>> np.allclose(yy_trans, expected_yy)
-    True
+
+    >>> coords = np.vstack([grid[0].ravel(), grid[1].ravel()]).T
+    >>> transformed = tps(coords)
+    >>> np.round(transformed[:, 1]).reshape(5, 5).astype(int)
+    array([[0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4],
+           [0, 1, 2, 3, 4]])
     """
 
     def __init__(self):
