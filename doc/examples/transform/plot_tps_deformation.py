@@ -39,15 +39,16 @@ import skimage as ski
 
 astronaut = ski.data.astronaut()
 
+# Define a matching destination for each source point
 src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 100]])
 dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
 
-# Calculate TPS transformation
+# Estimate the TPS transformation from these points and then warp the image.
+# We switch `src` and `dst` here because `skimage.transform.warp` expects the
+# inverse transformation!
 tps = ski.future.ThinPlateSplineTransform()
 tps.estimate(dst, src)
-
-# Fit the thin-plate spline from source (src) to target (dst) points
-warped_img = ski.transform.warp(astronaut, tps)
+warped = ski.transform.warp(astronaut, tps)
 
 
 fig, axs = plt.subplots(1, 2)
@@ -68,7 +69,7 @@ for i, label in enumerate(labels):
         color='red',
     )
 
-axs[1].imshow(warped_img, cmap='gray')
+axs[1].imshow(warped, cmap='gray')
 axs[1].scatter(dst[:, 0], dst[:, 1], marker='x', color='cyan')
 
 for i, label in enumerate(labels):
