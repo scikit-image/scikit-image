@@ -85,11 +85,13 @@ class ThinPlateSplineTransform:
             Destination coordinates
         """
         if self._spline_mappings is None:
-            raise ValueError(f"{self._spline_mappings}. Compute the `estimate`")
+            msg = "Transformation is undefined, use `estimate` before applying it"
+            raise ValueError(msg)
         coords = np.array(coords)
 
         if coords.ndim != 2 or coords.shape[1] != 2:
-            raise ValueError("Input `coords` must have shape (N, 2)")
+            msg = "Input `coords` must have shape (N, 2)"
+            raise ValueError(msg)
 
         radial_dist = self._radial_distance(coords)
         transformed_coords = self._spline_function(coords, radial_dist)
@@ -98,7 +100,7 @@ class ThinPlateSplineTransform:
 
     @property
     def inverse(self):
-        raise NotImplementedError("This is yet to be implemented.")
+        raise NotImplementedError("Not supported")
 
     def estimate(self, src, dst):
         """Estimate optimal spline mappings between source and destination points.
@@ -119,19 +121,16 @@ class ThinPlateSplineTransform:
         -----
         The number N of source and destination points must match.
         """
-
         check_nD(src, 2)
         check_nD(dst, 2)
 
-        if len(src) < 3 or len(dst) < 3:
-            raise ValueError(
-                "There should be at least 3 points in both sets (source and destination)."
-            )
-
+        if src.shape[0] < 3 or dst.shape[0] < 3:
+            msg = "Need at least 3 points in in `src` and `dst`"
+            raise ValueError(msg)
         if src.shape != dst.shape:
-            raise ValueError(
-                "The shape of source and destination coordinates must match."
-            )
+            msg = f"Shape of `src` and `dst` didn't macht, {src.shape} != {dst.shape}"
+            raise ValueError(msg)
+
         self.src = src
         n, d = src.shape
 
