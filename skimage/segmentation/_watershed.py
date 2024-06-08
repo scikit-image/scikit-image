@@ -67,7 +67,7 @@ def _validate_inputs(image, markers, mask, connectivity):
         markers_bool = local_minima(image, connectivity=connectivity) * mask
         footprint = ndi.generate_binary_structure(markers_bool.ndim, connectivity)
         markers = ndi.label(markers_bool, structure=footprint)[0]
-    elif not isinstance(markers, np.ndarray | list | tuple):
+    elif not isinstance(markers, (np.ndarray, list, tuple)):
         # not array-like, assume int
         # given int, assume that number of markers *within mask*.
         markers = regular_seeds(image.shape, int(markers / (n_pixels / image.size)))

@@ -218,7 +218,7 @@ class ApiDocWriter:
                 continue
 
             # figure out if obj is a function or class
-            if isinstance(obj, FunctionType | BuiltinFunctionType):
+            if isinstance(obj, (FunctionType, BuiltinFunctionType)):
                 functions.append(obj_str)
             elif isinstance(obj, ModuleType) and 'skimage' in mod.__name__:
                 submodules.append(obj_str)
