@@ -99,3 +99,18 @@ def ipython(ctx, ipython_args):
     ) + ipython_args
 
     ctx.forward(meson.ipython)
+
+
+@click.command()
+def sdist():
+    """📦 Build a source distribution in `dist/`"""
+    p = util.run(["pyproject-build", ".", "--sdist"], output=False)
+    built_line = next(
+        line
+        for line in p.stdout.decode('utf-8').split('\n')
+        if line.startswith('Successfully built')
+    )
+    print(built_line)
+    sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
+    print(f"Validating {sdist}...")
+    util.run(["tools/check_sdist.py", sdist])
