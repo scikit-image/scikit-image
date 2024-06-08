@@ -143,7 +143,6 @@ ax[1].axis('off')
 #####################################################################
 # Compare segmentation results
 # ============================
-#####################################################################
 # We used the software developed for the original research, "TGMM paper," and made available
 # [online](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/user-guide/quickstart.md).
 # We edited the TGMM config file to apply the hierarchical segmentation on
