@@ -5,14 +5,6 @@ Segment 3D image sample of developing mouse embryo
 
 In this example, we look at a microscopy image of a developing mouse embryo.
 We use sample data from [1]_, more precisely from embryo B at time point 184.
-
-.. [1] McDole K, Guignard L, Amat F, Berger A, Malandain G, Royer LA,
-       Turaga SC, Branson K, Keller PJ (2018) "In Toto Imaging and
-       Reconstruction of Post-Implantation Mouse Development at the
-       Single-Cell Level" Cell, 175(3):859-876.e33.
-       ISSN: 0092-8674
-       :DOI:`10.1016/j.cell.2018.09.031`
-
 """
 
 import io
@@ -203,3 +195,11 @@ print(f'We find {segmented_cells.max()} nuclei.')
 enhanced_image = ski.exposure.equalize_hist(im3d[25, :, :])
 fig, ax = plt.subplots()
 ax.imshow(enhanced_image)
+
+#####################################################################
+# .. [1] McDole K, Guignard L, Amat F, Berger A, Malandain G, Royer LA,
+#        Turaga SC, Branson K, Keller PJ (2018) "In Toto Imaging and
+#        Reconstruction of Post-Implantation Mouse Development at the
+#        Single-Cell Level" Cell, 175(3):859-876.e33.
+#        ISSN: 0092-8674
+#        :DOI:`10.1016/j.cell.2018.09.031`
