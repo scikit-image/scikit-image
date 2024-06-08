@@ -47,7 +47,7 @@ print(f'The shape of the image is: {im3d.shape}')
 
 data_montage = ski.util.montage(im3d[::5], grid_shape=(2, 5), padding_width=5)
 fig, ax = plt.subplots(figsize=(10, 5))
-ax.imshow(data_montage)
+ax.imshow(data_montage, interpolation="none")
 ax.set_axis_off()
 
 #####################################################################
@@ -68,13 +68,13 @@ binary_local = im3d > local_thresh
 fig, axes = plt.subplots(ncols=3, figsize=(12, 4))
 ax = axes.ravel()
 
-ax[0].imshow(im3d[25, :, :])
+ax[0].imshow(im3d[25, :, :], interpolation="none")
 ax[0].set_title('Original')
 
-ax[1].imshow(binary_global[25, :, :], interpolation="nearest")
+ax[1].imshow(binary_global[25, :, :], interpolation="none")
 ax[1].set_title('Global thresholding (Otsu)')
 
-ax[2].imshow(binary_local[25, :, :], interpolation="nearest")
+ax[2].imshow(binary_local[25, :, :], interpolation="none")
 ax[2].set_title('Local thresholding')
 
 for a in ax:
@@ -89,10 +89,10 @@ thresholds = ski.filters.threshold_multiotsu(smooth, classes=3)
 regions = np.digitize(smooth, bins=thresholds)
 
 fig, ax = plt.subplots(ncols=2, figsize=(8, 4))
-ax[0].imshow(smooth[25, :, :])
+ax[0].imshow(smooth[25, :, :], interpolation="none")
 ax[0].set_title('Smoothing out')
 ax[0].axis('off')
-ax[1].imshow(regions[25, :, :])
+ax[1].imshow(regions[25, :, :], interpolation="none")
 ax[1].set_title('Multi-Otsu thresholding')
 ax[1].axis('off')
 
@@ -194,7 +194,7 @@ print(f'We find {segmented_cells.max()} nuclei.')
 
 enhanced_image = ski.exposure.equalize_hist(im3d[25, :, :])
 fig, ax = plt.subplots()
-ax.imshow(enhanced_image)
+ax.imshow(enhanced_image, interpolation="none")
 
 #####################################################################
 # .. [1] McDole K, Guignard L, Amat F, Berger A, Malandain G, Royer LA,
