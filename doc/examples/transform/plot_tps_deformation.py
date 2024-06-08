@@ -1,13 +1,32 @@
-r"""
+"""
 ==========================================
 Use thin-plate splines for image warping
 ==========================================
 
-A conventional technique for interpolating surfaces over a set of data points
-are thin-plate splines (TPS) [1]_ [2]_.
-In an image context, given pairs of source and target control points, TPS can
-be used to transform a space, in our case, a 2D image.
+To warp an image, we start with a set of source and target coordinates.
+The goal is to deform the image such that the source points move to the target
+locations. Typically, we only know the target positions for a few, select
+source points. To calculate the target positions for all other pixel positions,
+we need a model. Various such models exist, such as `affine or projective
+transformations <https://scikit-image.org/docs/stable/auto_examples/transform/plot_transform_types.html>`_.
 
+Most transformations are linear (i.e., they preserve straight lines), but
+sometimes we need more flexibility. One model that represents a non-linear
+transformation, i.e. one where lines can bend, is thin-plate splines [1]_ [2]_.
+
+Thin-plate splines draw on the analogy of a metal sheet, which has inherent
+rigidity. Consider our source points: each has to move a certain distance, in
+both the x and y directions, to land in their corresponding target positions.
+First, examine only the x coordinates. Imagine placing a thin metal plate on
+top of the image. Now bend it, such that at each source point, the plate's
+z offset is the distance, positive or negative, that that source point has to
+travel in the x direction in order to land in its target position. The plate
+resists bending, and therefore remains smooth. We can read offsets for
+coordinates other than source points from the position of the plate. The same
+procedure can be repeated for the y coordinates.
+
+This gives us our thin-plate spline model that maps any (x, y) coordinate to a
+target position.
 
 .. [1] Wikipedia, Thin plate spline
        https://en.wikipedia.org/wiki/Thin_plate_spline
