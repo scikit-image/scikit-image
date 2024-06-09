@@ -18,7 +18,7 @@ SKIP 1 — scikit-image governance and decision-making
 :Resolved: 2019-09-25
 :Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
-:Revised: 2023-09-15
+:Revised: 2024-06-09
 
 Abstract
 ========
