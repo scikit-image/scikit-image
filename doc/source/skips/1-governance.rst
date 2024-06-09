@@ -12,6 +12,7 @@ SKIP 1 — scikit-image governance and decision-making
 :Author: Mark Harfouche
 :Author: Lars Grüter
 :Author: Egor Panfilov
+:Author: Marianne Corvellec
 :Status: Final
 :Type: Process
 :Created: 2019-07-02
