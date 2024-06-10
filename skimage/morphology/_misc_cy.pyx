@@ -19,7 +19,7 @@ def _remove_near_objects(
     cnp.float64_t min_distance,
     tuple shape,
 ):
-    """Remove objects until a minimal distance is ensured.
+    """Remove objects, in specified order, until remaining are a minimum distance apart.
 
     Iterates over all objects (pixels that aren't zero) inside an image and
     removes "nearby" objects until all remaining ones are spaced more than a

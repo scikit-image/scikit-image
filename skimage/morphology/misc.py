@@ -306,12 +306,12 @@ def remove_near_objects(
     1. If `priority` is not given, use :func:`numpy.bincount` as a fallback.
     2. Find the indices for of all given objects and separate them depending on
        if they point to an object's border or not.
-    3. Sort indices by their object ID, ensuring all indices pointing to the
+    3. Sort indices by their object ID, ensuring that indices which point to the
        same object are next to each other. This optimization allows finding
        all parts of an object, simply by stepping to the neighboring indices.
     4. Sort boundary indices by priority. Use a stable-sort to preserve the
-       contiguousness from the previous sorting step.
-    5. Construct a kd-tree with :func:`scipy.spatial.cKDTree` from the
+       ordering from the previous sorting step.
+    5. Construct a :class:`scipy.spatial.cKDTree` from the
        boundary indices.
     6. Iterate all boundary indices in the sorted order, and query the kd-tree
        for objects that are too close. Remove ones that are and skip them on
