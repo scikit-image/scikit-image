@@ -286,7 +286,7 @@ before you get started.
   # Test your installation
   spin test
   # Build docs
-  spin docs
+  spin docs --install-deps
   # Try the new version in IPython
   spin ipython
 
