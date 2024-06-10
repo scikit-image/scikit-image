@@ -41,14 +41,15 @@ target position.
 Deform an image
 ===============
 
-Image deformation implies displacing the pixels of an image relative to one another.
-In this example, we deform the (2D) image of an astronaut by using thin-plate splines.
-In our image, we define 6 source and target points labeled "1-6": "1-4" are found near
-the image corners, "5" near the left smile corner, and "6" in the right eye.
-At the "1-4" points, there is no displacement.
-Point "5" is displaced upward and point "6" downward.
+In this example, we demonstrate how to correct a barrel distortion [3]_ with a
+transform based on thin-plate splines. A barrel distortion create a "fisheye"
+like effect, where the image magnification decreases with the distance from the
+image center (optical axis).
 
-We use TPS as a very handy interpolator for image deformation.
+Let's demonstrate the non-linear effect and its correction with the image of
+a checkerboard, which we first warp accordingly.
+
+.. [3] https://en.wikipedia.org/wiki/Distortion_(optics)#Radial_distortion
 """
 
 import matplotlib.pyplot as plt
@@ -56,29 +57,48 @@ import numpy as np
 
 import skimage as ski
 
-astronaut = ski.data.astronaut()
 
-# Define a matching destination for each source point
-src = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [240, 150], [200, 100]])
-dst = np.array([[50, 50], [400, 50], [50, 400], [400, 400], [276, 100], [230, 100]])
+def radial_distortion(xy, k1=0.9, k2=0.5):
+    """Distort coordinates `xz` symmetrically around their own center."""
+    xy_c = xy.max(axis=0) / 2
+    xy = (xy - xy_c) / xy_c
+    radius = np.linalg.norm(xy, axis=1)
+    distortion_model = (1 + k1 * radius + k2 * radius**2) * k2
+    xy *= distortion_model.reshape(-1, 1)
+    xy = xy * xy_c + xy_c
+    return xy
+
+
+image = ski.data.checkerboard()
+image = ski.transform.warp(image, radial_distortion, cval=0.5)
+
+
+# Pick points in `src` by hand and move their corresponding points in `dst` closer
+# to their expected position.
+# fmt: off
+src = np.array([[22,  22], [100,  10], [177, 22], [190, 100], [177, 177], [100, 188],
+                [22, 177], [ 10, 100], [ 66, 66], [133,  66], [ 66, 133], [133, 133]])
+dst = np.array([[ 0,   0], [100,   0], [200,  0], [200, 100], [200, 200], [100, 200],
+                [ 0, 200], [  0, 100], [ 73, 73], [128,  73], [ 73, 128], [128, 128]])
+# fmt: on
 
 # Estimate the TPS transformation from these points and then warp the image.
 # We switch `src` and `dst` here because `skimage.transform.warp` expects the
 # inverse transformation!
 tps = ski.future.ThinPlateSplineTransform()
 tps.estimate(dst, src)
-warped = ski.transform.warp(astronaut, tps)
+warped = ski.transform.warp(image, tps)
 
 
+# Plot the results
 fig, axs = plt.subplots(1, 2)
-
-# Adjust the number of labels to match the number of points
-labels = ["1", "2", "3", "4", "5", "9"]
-
-axs[0].imshow(astronaut, cmap='gray')
+axs[0].imshow(image, cmap='gray')
 axs[0].scatter(src[:, 0], src[:, 1], marker='x', color='cyan')
+axs[1].imshow(warped, cmap='gray', extent=(0, 200, 200, 0))
+axs[1].scatter(dst[:, 0], dst[:, 1], marker='x', color='cyan')
 
-for i, label in enumerate(labels):
+point_labels = [str(i) for i in range(len(src))]
+for i, label in enumerate(point_labels):
     axs[0].annotate(
         label,
         (src[:, 0][i], src[:, 1][i]),
@@ -87,11 +107,6 @@ for i, label in enumerate(labels):
         ha='center',
         color='red',
     )
-
-axs[1].imshow(warped, cmap='gray')
-axs[1].scatter(dst[:, 0], dst[:, 1], marker='x', color='cyan')
-
-for i, label in enumerate(labels):
     axs[1].annotate(
         label,
         (dst[:, 0][i], dst[:, 1][i]),
@@ -101,58 +116,4 @@ for i, label in enumerate(labels):
         color='red',
     )
 
-plt.show()
-
-######################################################################
-#
-# Derive an interpolation function
-# ================================
-# In this second example, we start with a set of source and target points.
-# TPS are used to derive an interpolation function and coefficients from each
-# of those points.
-# These coefficients can then be used to translate another set of points, in
-# the example below called "Original", to a new location matching the original
-# deformation between source and target.
-
-import matplotlib.pyplot as plt
-
-import skimage as ski
-
-samp = np.linspace(-2, 2, 4)
-xx, yy = np.meshgrid(samp, samp)
-
-# Create source points
-source_xy = np.column_stack((xx.ravel(), yy.ravel()))
-
-# Create target points
-yy[:, [0, 3]] *= 2
-target_xy = np.column_stack((xx.ravel(), yy.ravel()))
-
-# Compute the coefficient
-trans = ski.future.ThinPlateSplineTransform()
-trans.estimate(source_xy, target_xy)
-
-# Create another arbitrary point
-samp2 = np.linspace(-1.8, 1.8, 10)
-test_xy = np.tile(samp2, [2, 1]).T
-
-# Estimate transformed points from given sets of source and target points
-transformed_xy = trans(test_xy)
-
-fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(8, 3))
-
-ax0.scatter(source_xy[:, 0], source_xy[:, 1], label='Source')
-ax0.scatter(test_xy[:, 0], test_xy[:, 1], c='orange', label='Original')
-ax0.legend(loc='upper center')
-ax0.set_title('Source and original points')
-
-ax1.scatter(target_xy[:, 0], target_xy[:, 1], label='Target')
-ax1.scatter(
-    transformed_xy[:, 0],
-    transformed_xy[:, 1],
-    c='orange',
-    label='Transformed',
-)
-ax1.legend(loc="upper center")
-ax1.set_title("Target and transformed points")
 plt.show()
