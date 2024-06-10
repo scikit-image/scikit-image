@@ -12,12 +12,14 @@ SKIP 1 — scikit-image governance and decision-making
 :Author: Mark Harfouche
 :Author: Lars Grüter
 :Author: Egor Panfilov
+:Author: Marianne Corvellec
 :Status: Final
 :Type: Process
 :Created: 2019-07-02
 :Resolved: 2019-09-25
 :Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
+:Revised: 2024-06-09
 
 Abstract
 ========
@@ -145,16 +147,18 @@ are made according to the following rules:
   sentence (but no change of the scikit-image.org landing page or the “about”
   page), require approval by a core developer *and* no disagreement or requested
   changes by a core developer on the issue or pull request page (lazy
-  consensus). Core developers are expected to give “reasonable time” to others
-  to give their opinion on the pull request if they’re not confident others
-  would agree.
+  consensus). Core developers are expected to wait one or two days for others to give
+  their opinion if they’re not confident that others would agree.
 
-- **Code changes and major documentation changes** require agreement by *two*
-  core developers *and* no disagreement or requested changes by a core developer
-  on the issue or pull-request page (lazy consensus).
+- **Code and major documentation changes, and changes to the API** require agreement by
+  *two* core developers *and* no disagreement or requested changes by a core developer
+  on the issue or pull request page (lazy consensus). In the case of disagreement or
+  requested changes, core developers are expected to wait at least 5 days for others to
+  give their opinion if they’re not confident that others would agree.
 
 - **Changes to the API principles** require a :ref:`SKIP <skip>` and follow the
-  decision-making process outlined above.
+  decision-making process outlined above. But, in this case, the objection period
+  should be one month.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`SKIP <skip>` and follow the decision-making process outlined above,
