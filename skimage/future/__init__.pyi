@@ -8,9 +8,7 @@ __all__ = [
     "fit_segmenter",
     "predict_segmenter",
     "TrainableSegmenter",
-    "ThinPlateSplineTransform",
 ]
 
-from ._thin_plate_splines import ThinPlateSplineTransform
 from .manual_segmentation import manual_lasso_segmentation, manual_polygon_segmentation
 from .trainable_segmentation import TrainableSegmenter, fit_segmenter, predict_segmenter

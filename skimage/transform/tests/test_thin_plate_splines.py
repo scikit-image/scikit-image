@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import skimage as ski
-from skimage.future import ThinPlateSplineTransform
+from skimage.transform import ThinPlateSplineTransform
 
 SRC = np.array([[0, 0], [0, 5], [5, 5], [5, 0]])
 
