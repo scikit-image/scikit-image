@@ -36,7 +36,7 @@ class ThinPlateSplineTransform:
 
     Estimate the transformation:
 
-    >>> tps = ski.future.ThinPlateSplineTransform()
+    >>> tps = ski.transform.ThinPlateSplineTransform()
     >>> tps.estimate(src, dst)
     True
 

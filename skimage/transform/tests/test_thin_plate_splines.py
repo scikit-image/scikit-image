@@ -70,7 +70,7 @@ class TestThinPlateSplineTransform:
 
         src = np.array([[0, 0], [0, 511], [511, 511], [511, 0]])
         dst = np.array([[511, 0], [0, 0], [0, 511], [511, 511]])
-        tps = ski.future.ThinPlateSplineTransform()
+        tps = ThinPlateSplineTransform()
         tps.estimate(src, dst)
         result = ski.transform.warp(image, tps)
 
