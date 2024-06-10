@@ -158,7 +158,7 @@ are made according to the following rules:
 
 - **Changes to the API principles** require a :ref:`SKIP <skip>` and follow the
   decision-making process outlined above. But, in this case, the objection period
-  should be one-month-long.
+  should be one month.
 
 - **Changes to this governance model or our mission, vision, and values**
   require a :ref:`SKIP <skip>` and follow the decision-making process outlined above,
