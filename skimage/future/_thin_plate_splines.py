@@ -125,8 +125,8 @@ class ThinPlateSplineTransform:
         -----
         The number N of source and destination points must match.
         """
-        check_nD(src, 2)
-        check_nD(dst, 2)
+        check_nD(src, 2, arg_name="src")
+        check_nD(dst, 2, arg_name="dst")
 
         if src.shape[0] < 3 or dst.shape[0] < 3:
             msg = "Need at least 3 points in in `src` and `dst`"
@@ -170,7 +170,7 @@ class ThinPlateSplineTransform:
         Parameters
         ----------
         r : (4, N) ndarray
-            Input array representing the euclidean distance between each pair of
+            Input array representing the Euclidean distance between each pair of
             two collections of control points.
 
         Returns

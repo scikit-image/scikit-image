@@ -114,7 +114,11 @@ class TestThinPlateSplineTransform:
             dst_less_than_3pts = np.array([[0, 0], [0, 5]])
             tps.estimate(src, dst_less_than_3pts)
 
-            tps.estimate(src_less_than_3pts, dst_less_than_3pts)
+        not_2d = np.array([0, 1, 2, 3])
+        with pytest.raises(ValueError, match=".*`src` must be a 2-dimensional array"):
+            tps.estimate(not_2d, dst)
+        with pytest.raises(ValueError, match=".*`dst` must be a 2-dimensional array"):
+            tps.estimate(src, not_2d)
 
         # Check that src or dst not being (N, 2) does error
         with pytest.raises(ValueError):
