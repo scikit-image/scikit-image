@@ -102,14 +102,26 @@ def ipython(ctx, ipython_args):
 
 
 @click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`"""
-    p = util.run(["pyproject-build", ".", "--sdist"], output=False)
-    built_line = next(
-        line
-        for line in p.stdout.decode('utf-8').split('\n')
-        if line.startswith('Successfully built')
+@click.argument("pyproject-build-args", metavar='', nargs=-1)
+def sdist(pyproject_build_args):
+    """📦 Build a source distribution in `dist/`
+
+    Extra arguments are passed to `pyproject-build`, e.g.
+
+      spin sdist -- -x -n
+    """
+    p = util.run(
+        ["pyproject-build", ".", "--sdist"] + list(pyproject_build_args), output=False
     )
+    try:
+        built_line = next(
+            line
+            for line in p.stdout.decode('utf-8').split('\n')
+            if line.startswith('Successfully built')
+        )
+    except StopIteration:
+        print("Error: could not identify built wheel")
+        sys.exit(1)
     print(built_line)
     sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
     print(f"Validating {sdist}...")
