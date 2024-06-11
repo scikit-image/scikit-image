@@ -48,7 +48,7 @@ effect, where image magnification decreases with distance from the image center.
 We first generate an example dataset, by applying a fisheye warp to a checkboard
 image, and thereafter apply the inverse corrective transform.
 
-.. [3] https://en.wikipedia.org/wiki/Distortion_(optics)#Radial_distortion
+.. [3] https://en.wikipedia.org/wiki/Distortion_(optics)_#Radial_distortion
 """
 
 import matplotlib.pyplot as plt
