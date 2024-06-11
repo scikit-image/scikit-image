@@ -147,7 +147,10 @@ class ThinPlateSplineTransform:
         L[:n, -3:] = P
         L[-3:, :n] = P.T
         V = np.vstack([dst, np.zeros((d + 1, d))])
-        self._spline_mappings = np.linalg.solve(L, V)
+        try:
+            self._spline_mappings = np.linalg.solve(L, V)
+        except np.linalg.LinAlgError:
+            return False
         return True
 
     def _radial_distance(self, coords):
