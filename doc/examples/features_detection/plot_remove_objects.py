@@ -3,12 +3,11 @@
 Removing objects
 ================
 
-scikit-image has several ways of removing objects from N-dimensional
-images. Here, "objects" (and "holes") are defined as groups of
-connected samples that are distinct from the background. A binary image can
-contain several objects that are not connected to each other.
+scikit-image has several ways of removing objects from N-dimensional images.
+Here, "objects" (and "holes") are defined as groups of samples with the same
+label value which distinct from the background and other objects.
 
-This example shows how to remove objects based on their size, or their 
+This example shows how to remove objects based on their size, or their
 distances from other objects.
 """
 

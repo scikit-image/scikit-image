@@ -21,9 +21,9 @@ def _remove_near_objects(
 ):
     """Remove objects, in specified order, until remaining are a minimum distance apart.
 
-    Iterates over all objects (pixels that aren't zero) inside an image and
-    removes "nearby" objects until all remaining ones are spaced more than a
-    given minimal distance from each other.
+    Remove labeled objects from an image until the remaining ones are spaced
+    more than a given distance from one another. By default, smaller objects
+    are removed first.
 
     Parameters
     ----------

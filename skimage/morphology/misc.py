@@ -254,11 +254,11 @@ def remove_near_objects(
     spacing=None,
     out=None,
 ):
-    """Remove objects until a minimal distance is ensured.
+    """Remove objects, in specified order, until remaining are a minimum distance apart.
 
-    Iterates over all objects (pixels that aren't zero) inside an image and
-    removes "nearby" objects until all remaining ones are spaced more than a
-    given minimal distance from each other.
+    Remove labeled objects from an image until the remaining ones are spaced
+    more than a given distance from one another. By default, smaller objects
+    are removed first.
 
     Parameters
     ----------
@@ -267,20 +267,21 @@ def remove_near_objects(
         :func:`~.label`. A value of zero is considered background, all other
         object IDs must be positive integers.
     min_distance : int or float
-        Remove objects with lower priority whose distance is not greater than
-        this positive value.
+        Remove objects whose distance to other objects is not greater than this
+        positive value. Objects with a lower `priority` are removed first.
     priority : ndarray, optional
-        Defines the priority with which objects that are too close to each other
-        are removed. Expects a 1-dimensional array of length
+        Defines the priority with which objects are removed. Expects a
+        1-dimensional array of length
         :func:`np.amax(label_image) + 1 <numpy.amax>` that contains the priority
-        for each object ID at the respective index. Objects with a lower value
+        for each object's label at the respective index. Objects with a lower value
         are removed first until all remaining objects fulfill the distance
         requirement. If not given, priority is given to objects with a higher
-        number of samples and their ID second.
+        number of samples and their label value second.
     p_norm : int or float, optional
-        The Minkowski p-norm, used to calculate the distance between objects.
-        The default ``2`` corresponds to the Euclidean distance, ``1`` to the
-        "Manhattan" distance, and ``np.inf`` to the Chebyshev distance.
+        The Minkowski distance of order p, used to calculate the distance
+        between objects. The default ``2`` corresponds to the Euclidean
+        distance, ``1`` to the "Manhattan" distance, and ``np.inf`` to the
+        Chebyshev distance.
     spacing : sequence of float, optional
         The pixel spacing along each axis of `label_image`. If not specified,
         a grid spacing of unity (1) is implied.
@@ -303,22 +304,21 @@ def remove_near_objects(
     -----
     The basic steps of this algorithm work as follows:
 
-    1. If `priority` is not given, use :func:`numpy.bincount` as a fallback.
-    2. Find the indices for of all given objects and separate them depending on
+    1. Find the indices for of all given objects and separate them depending on
        if they point to an object's border or not.
-    3. Sort indices by their object ID, ensuring that indices which point to the
-       same object are next to each other. This optimization allows finding
+    2. Sort indices by their label value, ensuring that indices which point to
+       the same object are next to each other. This optimization allows finding
        all parts of an object, simply by stepping to the neighboring indices.
-    4. Sort boundary indices by priority. Use a stable-sort to preserve the
-       ordering from the previous sorting step.
-    5. Construct a :class:`scipy.spatial.cKDTree` from the
-       boundary indices.
-    6. Iterate all boundary indices in the sorted order, and query the kd-tree
-       for objects that are too close. Remove ones that are and skip them on
-       during the iteration.
+    3. Sort boundary indices by `priority`. Use a stable-sort to preserve the
+       ordering from the previous sorting step. If `priority` is not given,
+       use :func:`numpy.bincount` as a fallback.
+    4. Construct a :class:`scipy.spatial.cKDTree` from the boundary indices.
+    5. Iterate across boundary indices in priority-sorted order, and query the
+       kd-tree for objects that are too close. Remove ones that are and don't
+       take them into account when evaluating other objects later on.
 
-    The performance of this algorithm benefits significantly from reducing the
-    number of samples in `label_image` that belong to an object's border.
+    The performance of this algorithm depends on the number of samples in
+    `label_image` that belong to an object's border.
 
     Examples
     --------
