@@ -46,7 +46,7 @@ a thin-plate spline transform. Barrel distortion creates the characteristic fish
 effect, where image magnification decreases with distance from the image center.
 
 We first generate an example dataset, by applying a fisheye warp to a checkboard
-image, and thereafter apply the inverse corrective transform. 
+image, and thereafter apply the inverse corrective transform.
 
 .. [3] https://en.wikipedia.org/wiki/Distortion_(optics)#Radial_distortion
 """
@@ -84,7 +84,7 @@ dst = np.array([[ 0,   0], [100,   0], [200,  0], [200, 100], [200, 200], [100, 
 # Estimate the TPS transformation from these points and then warp the image.
 # We switch `src` and `dst` here because `skimage.transform.warp` requires the
 # inverse transformation!
-tps = ski.future.ThinPlateSplineTransform()
+tps = ski.transform.ThinPlateSplineTransform()
 tps.estimate(dst, src)
 warped = ski.transform.warp(image, tps)
 
