@@ -267,5 +267,5 @@ jobs:
           CIBW_ENVIRONMENT_PYODIDE: ""
           CIBW_TEST_REQUIRES_PYODIDE: "" # The Node.js runner installs the test requirements
           CIBW_TEST_COMMAND_PYODIDE: |
-            npm install pyodide --global
+            npm install pyodide@0.26.1
             node {project}/tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
