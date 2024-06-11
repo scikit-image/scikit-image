@@ -58,7 +58,7 @@ import skimage as ski
 
 
 def radial_distortion(xy, k1=0.9, k2=0.5):
-    """Distort coordinates `xz` symmetrically around their own center."""
+    """Distort coordinates `xy` symmetrically around their own center."""
     xy_c = xy.max(axis=0) / 2
     xy = (xy - xy_c) / xy_c
     radius = np.linalg.norm(xy, axis=1)
