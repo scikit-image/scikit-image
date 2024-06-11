@@ -40,14 +40,15 @@ class ThinPlateSplineTransform:
     >>> tps.estimate(src, dst)
     True
 
-    Appyling the transformation to `src` approximates `dst`
+    Appyling the transformation to `src` approximates `dst`:
+
     >>> np.round(tps(src))
     array([[5., 0.],
            [0., 0.],
            [0., 5.],
            [5., 5.]])
 
-    Create a meshgrid to apply the transformation to
+    Create a meshgrid to apply the transformation to:
 
     >>> grid = np.meshgrid(np.arange(5), np.arange(5))
     >>> grid[1]
