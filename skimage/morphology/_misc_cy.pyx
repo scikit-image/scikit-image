@@ -3,14 +3,14 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 
-"""Cython code used in `remove_near_objects` function."""
+"""Cython code used in `remove_objects_by_distance` function."""
 
 cimport numpy as cnp
 
 from .._shared.fused_numerics cimport np_anyint
 
 
-def _remove_near_objects(
+def _remove_objects_by_distance(
     np_anyint[::1] out not None,
     Py_ssize_t[::1] border_indices not None,
     Py_ssize_t[::1] inner_indices not None,

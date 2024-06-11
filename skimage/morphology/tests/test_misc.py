@@ -5,7 +5,7 @@ import scipy as sp
 from skimage.morphology import (
     remove_small_objects,
     remove_small_holes,
-    remove_near_objects,
+    remove_objects_by_distance,
     local_maxima,
     label,
 )
@@ -17,7 +17,7 @@ from skimage._shared._warnings import expected_warnings
 
 test_image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 1]], bool)
 
-# Dtypes supported by the `label_image` parameter in `remove_near_objects`
+# Dtypes supported by the `label_image` parameter in `remove_objects_by_distance`
 supported_dtypes = [
     np.uint8,
     np.uint16,
@@ -285,7 +285,7 @@ class Test_remove_near_objects:
         desired = labels.copy()
         desired[d] = 0
 
-        result = remove_near_objects(labels, min_distance)
+        result = remove_objects_by_distance(labels, min_distance)
         assert result.dtype == desired.dtype
         assert_array_equal(result, desired)
 
@@ -320,7 +320,7 @@ class Test_remove_near_objects:
             ],
             dtype=dtype,
         )
-        result = remove_near_objects(label, 3, priority=priority)
+        result = remove_objects_by_distance(label, 3, priority=priority)
         assert result.flags["C_CONTIGUOUS"]
         assert_array_equal(result, desired)
 
@@ -333,7 +333,7 @@ class Test_remove_near_objects:
         desired = labels.copy()
         desired[-2:, ...] = 0
 
-        result = remove_near_objects(labels, 2)
+        result = remove_objects_by_distance(labels, 2)
         assert_array_equal(result, desired)
 
     @pytest.mark.parametrize("distance", [5, 50, 100])
@@ -344,7 +344,7 @@ class Test_remove_near_objects:
         maxima = local_maxima(image)
         objects = label(maxima)
 
-        spaced_objects = remove_near_objects(objects, distance, p_norm=p_norm)
+        spaced_objects = remove_objects_by_distance(objects, distance, p_norm=p_norm)
         kdtree = sp.spatial.cKDTree(
             np.array(np.nonzero(spaced_objects), dtype=np.float64).transpose(),
         )
@@ -368,31 +368,31 @@ class Test_remove_near_objects:
         labels = np.empty((10, 10), dtype=dtype)
         labels.fill(value)
 
-        result = remove_near_objects(labels, 3)
+        result = remove_objects_by_distance(labels, 3)
         assert_array_equal(labels, result)
 
     def test_empty(self):
         labels = np.empty((3, 3, 0), dtype=int)
-        result = remove_near_objects(labels, 3)
+        result = remove_objects_by_distance(labels, 3)
         assert_equal(labels, result)
 
     def test_priority(self):
         labels = np.array([0, 1, 4, 1])
 
         # Object with more samples takes precedence
-        result = remove_near_objects(labels, 3)
+        result = remove_objects_by_distance(labels, 3)
         desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
         # Assigning priority with equal values, sorts by higher label ID second
         priority = np.array([0, 1, 1, 1, 1])
-        result = remove_near_objects(labels, 3, priority=priority)
+        result = remove_objects_by_distance(labels, 3, priority=priority)
         desired = np.array([0, 0, 4, 0])
         assert_array_equal(result, desired)
 
         # But given a different priority that order can be overruled
         priority = np.array([0, 1, 1, 1, -1])
-        result = remove_near_objects(labels, 3, priority=priority)
+        result = remove_objects_by_distance(labels, 3, priority=priority)
         desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
@@ -403,11 +403,11 @@ class Test_remove_near_objects:
 
         # By default, input image is not modified
         labels = labels_original.copy(order=order)
-        remove_near_objects(labels, 2)
+        remove_objects_by_distance(labels, 2)
         assert_array_equal(labels, labels_original)
 
         # But modified if passed to `out`
-        remove_near_objects(labels, 2, out=labels)
+        remove_objects_by_distance(labels, 2, out=labels)
         assert labels.flags[f"{order}_CONTIGUOUS"]
         assert_array_equal(labels, desired)
 
@@ -415,32 +415,32 @@ class Test_remove_near_objects:
     def test_negative_min_distance(self, min_distance):
         labels = np.array([1, 0, 2])
         with pytest.raises(ValueError, match="must be >= 0"):
-            remove_near_objects(labels, min_distance)
+            remove_objects_by_distance(labels, min_distance)
 
     def test_p_norm(self):
         labels = np.array([[2, 0], [0, 1]])
         removed = np.array([[2, 0], [0, 0]])
 
         # p_norm=2, default (Euclidean distance)
-        result = remove_near_objects(labels, 1.4)
+        result = remove_objects_by_distance(labels, 1.4)
         assert_array_equal(result, labels)
-        result = remove_near_objects(labels, np.sqrt(2))
+        result = remove_objects_by_distance(labels, np.sqrt(2))
         assert_array_equal(result, removed)
 
         # p_norm=1 (Manhatten distance)
-        result = remove_near_objects(
+        result = remove_objects_by_distance(
             labels,
             min_distance=1.9,
             p_norm=1,
         )
         assert_array_equal(result, labels)
-        result = remove_near_objects(labels, 2, p_norm=1)
+        result = remove_objects_by_distance(labels, 2, p_norm=1)
         assert_array_equal(result, removed)
 
         # p_norm=np.inf (Chebyshev distance)
-        result = remove_near_objects(labels, 0.9, p_norm=np.inf)
+        result = remove_objects_by_distance(labels, 0.9, p_norm=np.inf)
         assert_array_equal(result, labels)
-        result = remove_near_objects(labels, 1, p_norm=np.inf)
+        result = remove_objects_by_distance(labels, 1, p_norm=np.inf)
         assert_array_equal(result, removed)
 
     @pytest.mark.parametrize(
@@ -450,16 +450,16 @@ class Test_remove_near_objects:
         ],
     )
     def test_priority_shape(self, shape):
-        remove_near_objects(np.array([0, 0, 0]), 3, priority=np.ones((0,)))
-        remove_near_objects(np.array([0, 0, 0]), 3, priority=np.ones((1,)))
+        remove_objects_by_distance(np.array([0, 0, 0]), 3, priority=np.ones((0,)))
+        remove_objects_by_distance(np.array([0, 0, 0]), 3, priority=np.ones((1,)))
 
         error_msg = r"shape of `priority` must be \(np\.amax\(label_image\) \+ 1,\)"
         with pytest.raises(ValueError, match=error_msg):
-            remove_near_objects(np.array([1, 0, 0]), 3, priority=np.ones((0,)))
+            remove_objects_by_distance(np.array([1, 0, 0]), 3, priority=np.ones((0,)))
         with pytest.raises(ValueError, match=error_msg):
-            remove_near_objects(np.array([1, 0, 0]), 3, priority=np.ones((1,)))
+            remove_objects_by_distance(np.array([1, 0, 0]), 3, priority=np.ones((1,)))
         with pytest.raises(ValueError, match=error_msg):
-            remove_near_objects(np.array([1, 0, 0]), 3, priority=np.ones((1,)))
+            remove_objects_by_distance(np.array([1, 0, 0]), 3, priority=np.ones((1,)))
 
     def test_negative_label_ids(self):
         labels = np.array(
@@ -471,7 +471,7 @@ class Test_remove_near_objects:
             ]
         )
         with pytest.raises(ValueError, match=".*object with negative ID"):
-            remove_near_objects(labels, 1, priority=np.ones(4))
+            remove_objects_by_distance(labels, 1, priority=np.ones(4))
 
     def test_objects_with_inside(self):
         labels = np.array(
@@ -490,7 +490,7 @@ class Test_remove_near_objects:
                 [3, 3, 3, 3, 3, 3],
             ]
         )
-        result = remove_near_objects(labels, 1, priority=np.arange(4))
+        result = remove_objects_by_distance(labels, 1, priority=np.arange(4))
         assert_array_equal(result, desired)
 
     def test_spacing(self):
@@ -499,14 +499,14 @@ class Test_remove_near_objects:
         )
 
         # Stretch second dimension
-        result = remove_near_objects(labels, 3, spacing=(1, 3))
+        result = remove_objects_by_distance(labels, 3, spacing=(1, 3))
         expected = np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [3, 0, 0, 4]], dtype=int
         )
         np.testing.assert_array_equal(result, expected)
 
         # Compress second dimension
-        result = remove_near_objects(labels, 1, spacing=(1, 1 / 3))
+        result = remove_objects_by_distance(labels, 1, spacing=(1, 1 / 3))
         expected = np.array(
             [[0, 0, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 4]], dtype=int
         )
@@ -519,4 +519,4 @@ class Test_remove_near_objects:
         )
         regex = ".*must contain exactly one positive factor for each dimension"
         with pytest.raises(ValueError, match=regex):
-            remove_near_objects(labels, 3, spacing=spacing)
+            remove_objects_by_distance(labels, 3, spacing=spacing)

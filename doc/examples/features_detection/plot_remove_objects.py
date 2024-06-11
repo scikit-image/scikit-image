@@ -25,7 +25,7 @@ small_objects = objects ^ large_objects
 
 # Remove objects until remaining ones are at least 100 pixels apart.
 # By default, larger ones take precedence.
-spaced_objects = ski.morphology.remove_near_objects(objects, min_distance=100)
+spaced_objects = ski.morphology.remove_objects_by_distance(objects, min_distance=100)
 
 # Plot the results
 fig, ax = plt.subplots(2, 2, figsize=(10, 10), sharex=True, sharey=True)

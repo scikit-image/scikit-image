@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
 from .._shared.utils import warn
-from ._misc_cy import _remove_near_objects
+from ._misc_cy import _remove_objects_by_distance
 
 
 # Our function names don't exactly correspond to ndimages.
@@ -96,7 +96,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
 
     See Also
     --------
-    skimage.morphology.remove_near_objects
+    skimage.morphology.remove_objects_by_distance
 
     Examples
     --------
@@ -245,7 +245,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     return out
 
 
-def remove_near_objects(
+def remove_objects_by_distance(
     label_image,
     min_distance,
     *,
@@ -323,9 +323,9 @@ def remove_near_objects(
     Examples
     --------
     >>> import skimage as ski
-    >>> ski.morphology.remove_near_objects(np.array([2, 0, 1, 1]), 2)
+    >>> ski.morphology.remove_objects_by_distance(np.array([2, 0, 1, 1]), 2)
     array([0, 0, 1, 1])
-    >>> ski.morphology.remove_near_objects(
+    >>> ski.morphology.remove_objects_by_distance(
     ...     np.array([2, 0, 1, 1]), 2, priority=np.array([0, 1, 9])
     ... )
     array([2, 0, 0, 0])
@@ -339,7 +339,7 @@ def remove_near_objects(
     ...      [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7]]
     ... )
-    >>> ski.morphology.remove_near_objects(
+    >>> ski.morphology.remove_objects_by_distance(
     ...     label_image, min_distance=3
     ... )
     array([[8, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
@@ -434,7 +434,7 @@ def remove_near_objects(
         )
     kdtree = cKDTree(data=np.asarray(unraveled_indices, dtype=np.float64).T)
 
-    _remove_near_objects(
+    _remove_objects_by_distance(
         out=out_raveled,
         border_indices=border_indices,
         inner_indices=inner_indices,
