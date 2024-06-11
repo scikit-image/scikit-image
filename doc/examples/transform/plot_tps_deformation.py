@@ -16,7 +16,7 @@ transformation, i.e. one where lines can bend, is thin-plate splines [1]_ [2]_.
 
 Thin-plate splines draw on the analogy of a metal sheet, which has inherent
 rigidity. Consider our source points: each has to move a certain distance, in
-both the x and y directions, to land in their corresponding target positions.
+both the x and y directions, to land in its corresponding target position.
 First, examine only the x coordinates. Imagine placing a thin metal plate on
 top of the image. Now bend it, such that at each source point, the plate's
 z offset is the distance, positive or negative, that that source point has to
@@ -38,16 +38,15 @@ target position.
        https://user.engineering.uiowa.edu/~aip/papers/bookstein-89.pdf
 
 
-Deform an image
-===============
+Correct barrel distortion
+=========================
 
-In this example, we demonstrate how to correct a barrel distortion [3]_ with a
-transform based on thin-plate splines. A barrel distortion create a "fisheye"
-like effect, where the image magnification decreases with the distance from the
-image center (optical axis).
+In this example, we demonstrate how to correct barrel distortion [3]_ using
+a thin-plate spline transform. Barrel distortion creates the characteristic fisheye
+effect, where image magnification decreases with distance from the image center.
 
-Let's demonstrate the non-linear effect and its correction with the image of
-a checkerboard, which we first warp accordingly.
+We first generate an example dataset, by applying a fisheye warp to a checkboard
+image, and thereafter apply the inverse corrective transform. 
 
 .. [3] https://en.wikipedia.org/wiki/Distortion_(optics)#Radial_distortion
 """
@@ -73,8 +72,8 @@ image = ski.data.checkerboard()
 image = ski.transform.warp(image, radial_distortion, cval=0.5)
 
 
-# Pick points in `src` by hand and move their corresponding points in `dst` closer
-# to their expected position.
+# Pick a few `src` points by hand, and move the corresponding `dst` points to their
+# expected positions.
 # fmt: off
 src = np.array([[22,  22], [100,  10], [177, 22], [190, 100], [177, 177], [100, 188],
                 [22, 177], [ 10, 100], [ 66, 66], [133,  66], [ 66, 133], [133, 133]])
@@ -83,7 +82,7 @@ dst = np.array([[ 0,   0], [100,   0], [200,  0], [200, 100], [200, 200], [100, 
 # fmt: on
 
 # Estimate the TPS transformation from these points and then warp the image.
-# We switch `src` and `dst` here because `skimage.transform.warp` expects the
+# We switch `src` and `dst` here because `skimage.transform.warp` requires the
 # inverse transformation!
 tps = ski.future.ThinPlateSplineTransform()
 tps.estimate(dst, src)
