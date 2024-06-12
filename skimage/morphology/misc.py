@@ -6,6 +6,7 @@ from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
 from .._shared.utils import warn
+from .._shared._dependency_checks import is_wasm
 from ._misc_cy import _remove_objects_by_distance
 
 
@@ -401,8 +402,8 @@ def remove_objects_by_distance(
     inner_indices = inner_indices[np.argsort(out_raveled[inner_indices])]
 
     if priority is None:
-        if out_raveled.dtype.itemsize > np.intp().itemsize:
-            # bincount expects intp (e.g. 32-bit on WASM), so down-cast to that
+        if is_wasm:
+            # bincount expects intp (32-bit) on WASM, so down-cast to that
             priority = np.bincount(out_raveled.astype(np.intp, copy=False))
         else:
             priority = np.bincount(out_raveled)
