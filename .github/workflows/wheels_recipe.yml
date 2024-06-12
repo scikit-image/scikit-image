@@ -267,13 +267,6 @@ jobs:
           CIBW_ENVIRONMENT_PYODIDE: ""
           CIBW_TEST_REQUIRES_PYODIDE: "" # The Node.js runner installs the test requirements
           CIBW_TEST_COMMAND_PYODIDE: |
-            # Sanity check
-            echo "Checking the dist directory"
-            ls -lA {project}/dist/
-            echo "Checking the root directory"
-            ls -lA {project}
-            echo "Installing Pyodide and running tests"
             npm install pyodide@0.26.1 --verbose --prefix {project}
             cd {project}
-            # Next commit: Try to move file to the root directory and then run
             node {project}/tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
