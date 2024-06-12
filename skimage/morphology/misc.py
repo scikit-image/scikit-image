@@ -373,7 +373,7 @@ def remove_objects_by_distance(
                 "for each dimension of `label_image`"
             )
 
-    indices = np.nonzero(out_raveled)[0]
+    indices = np.flatnonzero(out_raveled)
     # Optimization: Split indices into those on the object boundaries and inner
     # ones. The KDTree is built only from the boundary indices, which reduces
     # the size of the critical loop significantly! Remaining indices are only
