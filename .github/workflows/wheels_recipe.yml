@@ -267,4 +267,7 @@ jobs:
           CIBW_ENVIRONMENT_PYODIDE: ""
           CIBW_TEST_REQUIRES_PYODIDE: "pytest matplotlib"
           CIBW_TEST_COMMAND_PYODIDE: |
-            pytest --pyargs skimage
+            pyodide venv .venv-pyodide
+            source .venv-pyodide/bin/activate
+            npm install pyodide@0.26.1
+            node {project}/tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
