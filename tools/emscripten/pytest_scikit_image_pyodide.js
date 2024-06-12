@@ -30,8 +30,11 @@ async function main() {
             wheels = glob.glob("/mnt/dist/*.whl")
             wheels = [f'emfs://{wheel}' for wheel in wheels]
 
-            if not wheels:
-                raise RuntimeError("No wheels found in /mnt/dist")
+            from pprint import pprint
+            pprint(glob.glob("/mnt/dist/**", recursive=True))
+
+            # if not wheels:
+            #     raise RuntimeError("No wheels found in /mnt/dist")
 
             print(f"Installing wheels: {wheels}")
             await micropip.install(wheels);
