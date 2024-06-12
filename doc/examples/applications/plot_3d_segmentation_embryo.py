@@ -138,8 +138,8 @@ ax[1].axis('off')
 #####################################################################
 # Compare segmentation results
 # ============================
-# We used the software developed for the original research, "TGMM paper," and made available
-# [online](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/user-guide/quickstart.md).
+# We used the software developed for the original research, referred to as
+# "TGMM paper" [2]_.
 # We edited the TGMM config file to apply the hierarchical segmentation on
 # the sample data, which we saved 'back' in KLB format:
 #
@@ -148,8 +148,8 @@ ax[1].axis('off')
 #
 #       klb.writefull(np.ascontiguousarray(sample), 'sample_3D_frame_184.klb')
 #
-# We installed the software following the [instructions](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/dev-guide/building.md)
-# and ran it:
+# We installed the software following the instructions in the documentation
+# [3]_ and ran it:
 #
 #   .. code-block:: bash
 #      :caption: We ran this program in the shell.
@@ -208,3 +208,5 @@ ax.imshow(enhanced_image, interpolation="none")
 #        Single-Cell Level" Cell, 175(3):859-876.e33.
 #        ISSN: 0092-8674
 #        :DOI:`10.1016/j.cell.2018.09.031`
+# .. [2] `ProcessStack workflow <https://bitbucket.org/fernandoamat/tgmm-paper/src/fd13c85920b5ff9a67020cc66e87d55aa69557ef/doc/new/docs/user-guide/quickstart.md>`_
+# .. [3] `ProcessStack build <https://bitbucket.org/fernandoamat/tgmm-paper/src/fd13c85920b5ff9a67020cc66e87d55aa69557ef/doc/new/docs/dev-guide/building.md>`_
