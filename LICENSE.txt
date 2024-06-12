@@ -82,6 +82,10 @@ File: tools/emscripten/pytest_scikit_image_pyodide.js
 Copyright: 2007-2024 The scikit-learn developers
 License: BSD-3-Clause
 
+File: skimage/transform/_thin_plate_splines.py
+Copyright: 2007 Zachary Pincus
+License: BSD-3-Clause
+
 License: BSD-2-Clause
 
 Redistribution and use in source and binary forms, with or without
