@@ -12,7 +12,7 @@ import requests
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage as ndi
+import scipy as sp
 
 import skimage as ski
 
@@ -112,7 +112,7 @@ cells = ski.morphology.opening(cells_noisy, footprint=np.ones((3, 5, 5)))
 # We use the watershed algorithm to separate nuclei when they are touching
 # or overlapping.
 
-distance = ndi.distance_transform_edt(cells)
+distance = sp.ndimage.distance_transform_edt(cells)
 
 local_max_coords = ski.feature.peak_local_max(
     distance, min_distance=12, exclude_border=False
