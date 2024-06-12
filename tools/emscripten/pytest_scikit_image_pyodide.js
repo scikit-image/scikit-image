@@ -18,7 +18,7 @@ async function main() {
         const FS = pyodide.FS;
         const NODEFS = FS.filesystems.NODEFS;
 
-        let mountDir = ".";
+        let mountDir = "/mnt";
         pyodide.FS.mkdir(mountDir);
         pyodide.FS.mount(pyodide.FS.filesystems.NODEFS, { root: "." }, mountDir);
 
@@ -27,14 +27,14 @@ async function main() {
             import glob
             import micropip
 
-            wheels = glob.glob("./dist/*.whl")
+            wheels = glob.glob("/mnt/dist/*.whl")
             wheels = [f'emfs://{wheel}' for wheel in wheels]
 
             from pprint import pprint
-            pprint(glob.glob("./dist/**", recursive=True))
+            pprint(glob.glob("/mnt/dist/**", recursive=True))
 
             # if not wheels:
-            #     raise RuntimeError("No wheels found in ./dist")
+            #     raise RuntimeError("No wheels found in /mnt/dist")
 
             print(f"Installing wheels: {wheels}")
             await micropip.install(wheels);
