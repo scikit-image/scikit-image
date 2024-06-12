@@ -401,7 +401,11 @@ def remove_objects_by_distance(
     inner_indices = inner_indices[np.argsort(out_raveled[inner_indices])]
 
     if priority is None:
-        priority = np.bincount(out_raveled)
+        if out_raveled.dtype.itemsize > np.intp().itemsize:
+            # bincount expects intp (e.g. 32-bit on WASM), so down-cast to that
+            priority = np.bincount(out_raveled.astype(np.intp, copy=False))
+        else:
+            priority = np.bincount(out_raveled)
     # `priority` can only be indexed by positive object IDs,
     # `border_indices` contains all unique sorted IDs so check the lowest / first
     smallest_id = out_raveled[border_indices[0]]
