@@ -21,14 +21,16 @@ import skimage as ski
 # We downloaded the original data in KLB format and sliced a particular
 # subvolume, which we saved into a compressed Numpy format:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: We ran this code after installing `pyklb`, a Python \
+#                wrapper for the KLB file format.
 #
-#     import numpy as np
-#     import pyklb as klb
+#       import numpy as np
+#       import pyklb as klb
 #
-#     data = klb.readfull('Mmu_E1_CAGTAG1.TM000184_timeFused_blending/SPM00_TM000184_CM00_CM01_CHN00.fusedStack.corrected.shifted.klb')
-#     sample = data[400:450, 1000:1750, 400:900]
-#     np.savez_compressed('sample_3D_frame_184.npz', sample)
+#       data = klb.readfull('Mmu_E1_CAGTAG1.TM000184_timeFused_blending/SPM00_TM000184_CM00_CM01_CHN00.fusedStack.corrected.shifted.klb')
+#       sample = data[400:450, 1000:1750, 400:900]
+#       np.savez_compressed('sample_3D_frame_184.npz', sample)
 
 #####################################################################
 # View 3D image data
@@ -141,17 +143,19 @@ ax[1].axis('off')
 # We edited the TGMM config file to apply the hierarchical segmentation on
 # the sample data, which we saved 'back' in KLB format:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: Here again, we ran this code after installing `pyklb`.
 #
-#     klb.writefull(np.ascontiguousarray(sample), 'sample_3D_frame_184.klb')
+#       klb.writefull(np.ascontiguousarray(sample), 'sample_3D_frame_184.klb')
 #
 # We installed the software following the [instructions](https://bitbucket.org/fernandoamat/tgmm-paper/src/master/doc/new/docs/dev-guide/building.md)
 # and ran it:
 #
-# .. code-block:: bash
+#   .. code-block:: bash
+#      :caption: We ran this program in the shell.
 #
-#     ProcessStack config.md 184
-#     ProcessStack sample_3D_frame_184_seg_conn74_rad2.bin 14 50
+#       ProcessStack config.md 184
+#       ProcessStack sample_3D_frame_184_seg_conn74_rad2.bin 14 50
 #
 # We chose tau=14 because persistanceSegmentationTau=14 in the TGMM config file.
 # A value of tau=2 clearly yields over-segmentation (yields 1597 nuclei).
