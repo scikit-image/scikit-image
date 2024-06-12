@@ -79,6 +79,7 @@ ax[2].set_title('Local thresholding')
 
 for a in ax:
     a.axis('off')
+# sphinx_gallery_thumbnail_number = 2
 
 #####################################################################
 # We smooth out the locally thresholded image (which is binary), so we can
