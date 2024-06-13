@@ -104,6 +104,13 @@ def convex_hull_image(
     .. [1] https://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
+    image_shape = np.array(image.shape)
+    # Look for 1D axes
+    axes_1D = np.where(image_shape == 1)[0]
+    label_is_2D = (axes_1D.size != 0) and (len(image_shape) == 3)
+    if label_is_2D:
+        # If there is at least one axis 1D and image is 3D, treat it as 2D
+        image = np.squeeze(image, axis=axes_1D[0])
     ndim = image.ndim
     if np.count_nonzero(image) == 0:
         warn(
@@ -166,6 +173,10 @@ def convex_hull_image(
 
         coords_in_hull = _check_coords_in_hull(gridcoords, hull.equations, tolerance)
         mask = np.reshape(coords_in_hull, image.shape)
+
+    if label_is_2D:
+        # If image was 3D with 1D axis, restore mask to original 3D shape
+        mask = mask.reshape(image_shape)
 
     return mask
 
