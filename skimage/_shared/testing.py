@@ -58,6 +58,7 @@ _dtypes_complexes = [np.complex64, np.complex128]
 _dtypes_real_numeric = _dtypes_anyint + _dtypes_floats
 _dtypes_numeric = _dtypes_real_numeric + _dtypes_complexes
 
+
 def assert_less(a, b, msg=None):
     message = f"{a!r} is not lower than {b!r}"
     if msg is not None:
