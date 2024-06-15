@@ -50,13 +50,13 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 arch32 = struct.calcsize("P") * 8 == 32
 
 # Corresponding lists for fused types (with respect to fused_numerics.pxd)
-_dtypes_int = [np.int8, np.int16, np.int32, np.int64]
-_dtypes_uint = [np.uint8, np.uint16, np.uint32, np.uint64]
-_dtypes_anyint = _dtypes_int + _dtypes_uint
-_dtypes_floats = [np.float32, np.float64]
-_dtypes_complexes = [np.complex64, np.complex128]
-_dtypes_real_numeric = _dtypes_anyint + _dtypes_floats
-_dtypes_numeric = _dtypes_real_numeric + _dtypes_complexes
+dtypes_int = (np.int8, np.int16, np.int32, np.int64)
+dtypes_uint = (np.uint8, np.uint16, np.uint32, np.uint64)
+dtypes_anyint = dtypes_int + dtypes_uint
+dtypes_floats = (np.float32, np.float64)
+dtypes_complexes = (np.complex64, np.complex128)
+dtypes_real_numeric = dtypes_anyint + dtypes_floats
+dtypes_numeric = dtypes_real_numeric + dtypes_complexes
 
 
 def assert_less(a, b, msg=None):
