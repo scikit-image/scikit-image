@@ -65,10 +65,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh attestation verify dist/scikit_image-*.tar.gz --repo ${{ github.repository }}
 
-      - name: Verify wheel artifact attestation
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh attestation verify dist/scikit_image-*.whl --repo ${{ github.repository }}
+      # This needs to be fixed, see
+      # https://github.com/scikit-image/scikit-image/issues/7443
+      # - name: Verify wheel artifact attestation
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: gh attestation verify dist/scikit_image-*.whl --repo ${{ github.repository }}
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
