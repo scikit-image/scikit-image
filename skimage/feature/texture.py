@@ -180,9 +180,9 @@ def graycoprops(P, prop='contrast'):
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
-    - 'mean': :math:`\\sum_{i,j=0}^{levels-1} i*P_{i,j}`
-    - 'variance': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}*(i-mean)^2`
-    - 'std': :math:`\\sqrt{mean}`
+    - 'mean': :math:`\\sum_{i=0}^{levels-1} i*P_{i}`
+    - 'variance': :math:`\\sum_{i=0}^{levels-1} P_{i}*(i-mean)^2`
+    - 'std': :math:`\\sqrt{variance}`
     - 'entropy': :math:`\\sum_{i,j=0}^{levels-1} -P_{i,j}*log(P_{i,j})`
 
     Each GLCM is normalized to have a sum of 1 before the computation of
