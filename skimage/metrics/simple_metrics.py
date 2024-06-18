@@ -14,7 +14,7 @@ __all__ = [
 
 def _as_floats(image0, image1):
     """
-    Promote im1, im2 to nearest appropriate floating point precision.
+    Promote image0, image1 to nearest appropriate floating-point precision.
 
     """
     float_type = _supported_float_type((image0.dtype, image1.dtype))
@@ -222,7 +222,7 @@ def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
     bins : int or sequence of int, optional
         The number of bins along each axis of the joint histogram.
     weights: ndarray | None
-        Weights used in the computation of the histogram
+        Weights used in the computation of the histogram.
 
     Returns
     -------

@@ -135,7 +135,7 @@ plt.show()
 
 ###############################################################################
 # If we know that our transform is a *rigid* transform, also known as a
-# Euclidean transform we can reduce the number of free parameters in the model.
+# Euclidean transform, we can reduce the number of free parameters in the model.
 #
 
 for solver in solvers:
