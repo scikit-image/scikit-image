@@ -15,8 +15,8 @@ reference space. This approach is explained in detail in Chapter 7 of Elegant
 SciPy [1]_.
 
 .. [1] Juan Nunez-Iglesias, Stefan van der Walt, and Harriet Dashnow. Elegant
-        SciPy: The Art of Scientific Python. 1st. O'Reilly Media, Inc.,
-        2017. isbn: 1491922877, 9781491922873.
+       SciPy: The Art of Scientific Python. 1st. O'Reilly Media, Inc.,
+       2017. isbn: 1491922877, 9781491922873.
 
 """
 

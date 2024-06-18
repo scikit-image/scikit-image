@@ -189,7 +189,7 @@ def lucas_kanade_affine_solver(
     matrix : ndarray
         Initial homogeneous transformation matrix
     model : str
-        Motion model 'affine', 'translation' or (2D) 'euclidean'
+        Motion model 'affine', 'translation' or (2D only) 'euclidean'
     max_iter : int
         Maximum number of inner iteration
     tol : float
@@ -302,11 +302,13 @@ def cost_nmi(image0, image1, *, bins=100, weights=None):
 
     Parameters
     ----------
-    image0, image1 : array
+    image0, image1 : ndarray
         The images to be compared. They should have the same shape.
     bins : int or sequence of int, optional
         The granularity of the histogram with which to compare the images.
         If it's a sequence, each number is the number of bins for that image.
+    weights: ndarray or None
+        The weight or mask where the motion is estimated
 
     Returns
     -------
@@ -344,7 +346,8 @@ def _param_cost(
     weights: ndarray | None
         Weights
     cost: function
-        Cost between registered image and reference
+        Cost between registered image and reference with 3 inputs:
+        reference image, moving image and weights.
     vector_to_matrix:
         Convert the vector parameter to the homogeneous matrix
 
@@ -481,7 +484,7 @@ def affine(
         The weights array with same shape as reference_image
     channel_axis: int | None
         Index of the channel axis
-    matrix : ndarray
+    matrix : ndarray | None
         Intial guess for the homogeneous transformation matrix
     model: str
         Motion model
