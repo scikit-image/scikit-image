@@ -1,7 +1,7 @@
-scikit-image 0.24.0rc0
-======================
+scikit-image 0.24.0 (2024-06-18)
+================================
 
-We're happy to announce the release of scikit-image 0.24.0rc0!
+We're happy to announce the release of scikit-image 0.24.0!
 
 Highlights
 ----------
@@ -51,6 +51,7 @@ Maintenance
 - In ``skimage.util.compare_images``, deprecate the parameter ``image2``. Instead use ``image0``, ``image1`` to pass the compared images. Furthermore, all other parameters will be turned into keyword-only parameters once the deprecation is complete (`#7322 <https://github.com/scikit-image/scikit-image/pull/7322>`_).
 - Add support back for Python 3.9 to enhance compatibility with Numpy 2 (`#7412 <https://github.com/scikit-image/scikit-image/pull/7412>`_).
 - Disable ruff/pyupgrade rule UP038 (`#7430 <https://github.com/scikit-image/scikit-image/pull/7430>`_).
+- Stop verifying wheel attestations temporarily (`#7444 <https://github.com/scikit-image/scikit-image/pull/7444>`_).
 
 Contributors
 ------------
