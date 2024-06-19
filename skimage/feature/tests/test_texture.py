@@ -176,6 +176,42 @@ class TestGLCM:
         np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
         np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
 
+    def test_mean(self):
+        result = graycomatrix(
+            self.image, [1], [0, np.pi / 2], 4, normed=True, symmetric=True
+        )
+        mean = graycoprops(result, 'mean')[0, 0]
+
+        # Reference value was calculated by hand and is close to original source if precision 3 is used.
+        np.testing.assert_almost_equal(mean, 1.29166667)
+
+    def test_variance(self):
+        result = graycomatrix(
+            self.image, [1], [0, np.pi / 2], 4, normed=True, symmetric=True
+        )
+        variance = graycoprops(result, 'variance')[0, 0]
+
+        # Reference value was calculated by hand and is close to original source if precision 3 is used.
+        np.testing.assert_almost_equal(variance, 1.03993055)
+
+    def test_std(self):
+        result = graycomatrix(
+            self.image, [1], [0, np.pi / 2], 4, normed=True, symmetric=True
+        )
+        std = graycoprops(result, 'std')[0, 0]
+
+        # Reference value was calculated by hand and is close to original source if precision 3 is used.
+        np.testing.assert_almost_equal(std, 1.01976985)
+
+    def test_entropy(self):
+        result = graycomatrix(
+            self.image, [1], [0, np.pi / 2], 4, normed=True, symmetric=True
+        )
+        entropy = graycoprops(result, 'entropy')[0, 0]
+
+        # Reference value was calculated by hand and is close to original source if precision 3 is used.
+        np.testing.assert_almost_equal(entropy, 2.09472904)
+
     def test_uniform_properties(self):
         im = np.ones((4, 4), dtype=np.uint8)
         result = graycomatrix(
@@ -188,6 +224,10 @@ class TestGLCM:
             'energy',
             'correlation',
             'ASM',
+            'mean',
+            'variance',
+            'std',
+            'entropy',
         ]:
             graycoprops(result, prop)
 
