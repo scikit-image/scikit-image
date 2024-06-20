@@ -309,7 +309,7 @@ source:
 
 .. code-block:: sh
 
-   git checkout main
+   git switch main
    git pull upstream main
 
 And you likely want to create a feature branch from there.
