@@ -9,6 +9,7 @@ import pytest
 from scipy import ndimage as ndi
 
 from skimage._shared.filters import gaussian
+from skimage.feature import peak_local_max
 from skimage.measure import label
 
 from .._watershed import watershed
@@ -770,11 +771,17 @@ class TestWatershed(unittest.TestCase):
 
 
 def test_compact_watershed():
+    # in this test, when compactness is greater than zero the watershed line
+    # is labeled with the closest marker (label=2)
+    # when compactness is zero the watershed line is labeled with
+    # the marker that reaches it first (label=1)
+    # because it has a zero cost path to the line.
     image = np.zeros((5, 6))
-    image[:, 3:] = 1
+    image[:, 3] = 2  # watershed line
+    image[:, 4:] = 1
     seeds = np.zeros((5, 6), dtype=int)
     seeds[2, 0] = 1
-    seeds[2, 3] = 2
+    seeds[2, 5] = 2
     compact = watershed(image, seeds, compactness=0.01)
     expected = np.array(
         [
@@ -788,9 +795,73 @@ def test_compact_watershed():
     )
     np.testing.assert_equal(compact, expected)
     normal = watershed(image, seeds)
-    expected = np.ones(image.shape, dtype=int)
-    expected[2, 3:] = 2
+    expected = np.array(
+        [
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+        ],
+        dtype=int,
+    )
     np.testing.assert_equal(normal, expected)
+
+    # checks that compact watershed labels with watershed lines are
+    # a subset of the labels from normal watershed
+    compact_wsl = watershed(image, seeds, compactness=0.01, watershed_line=True)
+    difference = compact_wsl != compact
+    difference[compact_wsl == 0] = False
+
+    assert not np.any(difference)
+
+
+def test_watershed_with_markers_offset():
+    """
+    Regression test from https://github.com/scikit-image/scikit-image/issues/6632
+    Generate an initial image with two overlapping circles.
+    """
+    x, y = np.indices((80, 80))
+    x1, y1, x2, y2 = 28, 28, 44, 52
+    r1, r2 = 16, 20
+    mask_circle1 = (x - x1) ** 2 + (y - y1) ** 2 < r1**2
+    mask_circle2 = (x - x2) ** 2 + (y - y2) ** 2 < r2**2
+    image = np.logical_or(mask_circle1, mask_circle2)
+
+    # Now we want to separate the two objects in image
+    # Generate the markers as local maxima of the distance to the background
+    distance = ndi.distance_transform_edt(image)
+    # shift the markers y coordinates by 0 or 4 pixels to demonstrate what happens
+    # when the markers don't perfectly align with the distance map minima
+    solutions = []
+    solutions_wsl = []
+    for i, dy in enumerate((0, 4)):
+        coords = peak_local_max(distance, footprint=np.ones((3, 3)), labels=image)
+        coords[:, 0] += dy
+        mask = np.zeros(distance.shape, dtype=bool)
+        mask[tuple(coords.T)] = True
+        markers, _ = ndi.label(mask)
+        solutions.append(watershed(-distance, markers, mask=image))
+        solutions_wsl.append(
+            watershed(-distance, markers, mask=image, watershed_line=True)
+        )
+
+    np.testing.assert_array_equal(solutions[0], solutions[1])
+    np.testing.assert_array_equal(solutions_wsl[0], solutions_wsl[1])
+
+
+def test_watershed_simple_basin_overspill():
+    """
+    Test behavior when markers spill over into another basin / compete.
+
+    Regression test for
+    https://github.com/scikit-image/scikit-image/issues/6632.
+    """
+    image = -np.array([1, 2, 2, 2, 2, 2, 3])
+    markers = np.array([1, 0, 0, 0, 0, 0, 2])
+    expected = np.array([1, 1, 1, 1, 2, 2, 2])
+    result = watershed(image, markers=markers, mask=image != 0)
+    np.testing.assert_array_equal(result, expected)
 
 
 def test_numeric_seed_watershed():
@@ -889,8 +960,8 @@ def test_connectivity():
     assert np.unique(labels_c2).shape[0] == 5
 
     # checking via area of each individual segment.
-    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1301, 11278]):
+    for lab, area in zip(range(6), [61824, 3653, 20467, 11097, 1300, 11279]):
         assert np.sum(labels_c1 == lab) == area
 
-    for lab, area in zip(range(5), [61824, 3653, 20466, 12386, 11291]):
+    for lab, area in zip(range(5), [61824, 3653, 20466, 12385, 11292]):
         assert np.sum(labels_c2 == lab) == area
