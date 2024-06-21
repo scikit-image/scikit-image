@@ -59,7 +59,7 @@ def _center_and_normalize_points(points):
 
     """
     # deal with array_like points
-    points = np.array(points)
+    points = np.asarray(points)
     n, d = points.shape
     centroid = np.mean(points, axis=0)
 

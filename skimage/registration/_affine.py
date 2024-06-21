@@ -17,51 +17,42 @@ from math import log, floor, cos, sin
 
 def target_registration_error(shape, matrix):
     """
-    Compute the displacement norm of the transform at at each pixel
+    Compute the displacement norm of the transform at at each pixel.
 
     Parameters
     ----------
     shape : shape like
-        Shape of the array
+        Shape of the array.
     matrix: ndarray
-        Homogeneous matrix
+        Homogeneous matrix.
 
     Returns
     -------
-    TRE : ndarray
-        Norm of the displacement given by the transform
-
+    error : ndarray
+        Norm of the displacement given by the transform.
     """
     # Create a regular set of points on the grid
-    points = np.concatenate(
-        [
-            np.stack(
-                [
-                    x.flatten()
-                    for x in np.meshgrid(*[np.arange(n) for n in shape], indexing="ij")
-                ],
-                axis=1,
-            ).T,
-            np.array([1] * np.prod(shape)).reshape(1, -1),
-        ]
-    )
+    slc = [slice(0, n) for n in shape]
+    N = np.prod(shape)
+    points = np.stack([*[x.ravel() for x in np.mgrid[slc]], np.ones(N)])
+    # compute the displacement
     delta = matrix @ points - points
-    TRE = np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
-    return TRE
+    error = np.linalg.norm(delta[: len(shape)], axis=0).reshape(shape)
+    return error
 
 
-def _parameter_vector_to_matrix(parameter, model, ndim):
+def _parameter_vector_to_matrix(parameters, model, ndim):
     """
-    Transform a vector of parameter to an affine matrix
+    Transform a vector of parameter to an affine matrix.
 
     Parameters
     ----------
-    parameter: ndarray
-        Vector of parameters
+    parameters: ndarray
+        Vector of parameters (see note).
     model: str
-        Motion model 'affine', 'euclidean' or 'translation'
+        Motion model 'affine', 'euclidean' or 'translation'.
     ndim: int
-        Image dimension (any dimensions)
+        Image dimension (any dimensions).
 
     Returns
     -------
@@ -73,63 +64,61 @@ def _parameter_vector_to_matrix(parameter, model, ndim):
 
     Note
     ----
-    The parameters are
-    - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D
-    - euclidean : [dy,dx,theta] in 2D or [dz,dy,dx,alpha,beta,gamma] in 3D
-    - affine: the top of the homogeneous matrix minus identity
-
+    The parameters are:
+    - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D,
+    - euclidean : [dy,dx,theta] in 2D or [dz,dy,dx,alpha,beta,gamma] in 3D,
+    - affine: the top of the homogeneous matrix minus identity.
     """
 
     # Test if the parameter is actually a homogeneous matrix already
-    if parameter.shape == (ndim + 1, ndim + 1):
-        return parameter
+    if parameters.shape == (ndim + 1, ndim + 1):
+        return parameters
 
     if model.lower() == "translation":
         matrix = np.eye(ndim + 1)
-        matrix[:ndim, -1] = parameter.ravel()
+        matrix[:ndim, -1] = parameters.ravel()
     elif model.lower() == "euclidean":
         matrix = np.eye(ndim + 1)
         # Rotations for each planes
         for k, a in enumerate(combinations(range(ndim), 2)):
-            c, s = cos(parameter[ndim + k]), sin(parameter[ndim + k])
-            R = np.eye(ndim + 1)
-            R[a[0], a[0]] = c
-            R[a[0], a[1]] = -s
-            R[a[1], a[1]] = c
-            R[a[1], a[0]] = s
-            matrix = matrix @ R
+            c, s = cos(parameters[ndim + k]), sin(parameters[ndim + k])
+            rot = np.eye(ndim + 1)
+            rot[a[0], a[0]] = c
+            rot[a[0], a[1]] = -s
+            rot[a[1], a[1]] = c
+            rot[a[1], a[0]] = s
+            matrix = matrix @ rot
         # Translation along each axis
-        T = np.eye(ndim + 1)
-        T[:ndim, -1] = parameter[:ndim].ravel()
-        matrix = matrix @ T
-        T = np.array([[1, 1, parameter[0]], [0, 1, parameter[1]], [0, 0, 1]])
+        trans = np.eye(ndim + 1)
+        trans[:ndim, -1] = parameters[:ndim].ravel()
+        matrix = matrix @ trans
     elif model.lower() == "affine":
-        matrix = np.eye(ndim + 1, dtype=parameter.dtype)
-        matrix[:ndim, -1] = parameter[:ndim].ravel()
-        matrix[:ndim, :ndim] = parameter[ndim:].reshape(ndim, ndim) + np.eye(ndim)
+        matrix = np.eye(ndim + 1, dtype=parameters.dtype)
+        matrix[:ndim, -1] = parameters[:ndim].ravel()
+        matrix[:ndim, :ndim] = parameters[ndim:].reshape(ndim, ndim) + np.eye(ndim)
     else:
         raise NotImplementedError(f"Model {model} is not supported")
     return matrix
 
 
-def _scale_parameters(parameter, model, ndim, scale):
+def _scale_parameters(parameters, model, ndim, scale):
     """
-    Scale the parameter vector or homogeneous matrix
+    Scale the parameter vector or homogeneous matrix.
 
     Parameters
     ----------
-    parameter: ndarray
-        Parameter vector or homogeneous matrix
+    parameters: ndarray
+        Vector of parameters or homogeneous matrix.
     model: str
-        Motion model 'affine', 'euclidean' or 'translation'
+        Motion model 'affine', 'euclidean' or 'translation'.
     ndim: int
-        Dimensionality of the image
+        Dimensionality of the image.
     scale: float
-        Scaling factor
+        Scaling factor.
 
     Returns
     -------
-    Scaled parameters as a ndarray
+    Vector of scaled parameters as a ndarray.
 
     Raises
     ------
@@ -137,12 +126,11 @@ def _scale_parameters(parameter, model, ndim, scale):
 
     Note
     ----
-    See _parameter_vector_to_matrix for the indices
-
+    See _parameter_vector_to_matrix for the indices.
     """
-    scaled_parameters = parameter.copy()
+    scaled_parameters = parameters.copy()
     # Homogeneous matrix case
-    if parameter.shape == (ndim + 1, ndim + 1):
+    if parameters.shape == (ndim + 1, ndim + 1):
         scaled_parameters[:ndim, -1] *= scale
     else:
         # Vector parameter
@@ -174,7 +162,7 @@ def lucas_kanade_affine_solver(
     tol=1e-6,
 ):
     """
-    Estimate affine motion between two images using a least square approach
+    Estimate affine motion between two images using a least square approach.
 
     Parameters
     ----------
@@ -183,22 +171,22 @@ def lucas_kanade_affine_solver(
     moving_image : ndarray
         The second image of the sequence.
     weights : ndarray
-        Weights as an array with the same shape as reference_image
+        Weights as an array with the same shape as reference_image.
     channel_axis: int
-        Index of the channel axis
+        Index of the channel axis.
     matrix : ndarray
-        Initial homogeneous transformation matrix
+        Initial homogeneous transformation matrix.
     model : str
-        Motion model 'affine', 'translation' or (2D only) 'euclidean'
+        Motion model 'affine', 'translation' or (2D only) 'euclidean'.
     max_iter : int
-        Maximum number of inner iteration
+        Maximum number of inner iteration.
     tol : float
-        Tolerance of the norm of the update vector
+        Tolerance of the norm of the update vector.
 
     Returns
     -------
     matrix : ndarray
-        The estimated homogenous transformation matrix
+        The estimated homogenous transformation matrix.
 
     Raises
     ------
@@ -207,7 +195,6 @@ def lucas_kanade_affine_solver(
     Reference
     ---------
     .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
-
     """
 
     if weights is None:
@@ -241,16 +228,16 @@ def lucas_kanade_affine_solver(
     elems = [*grad, *[x * dx for dx, x in product(grad, grid)]]
 
     # G matrix of eq. (32)
-    G = np.zeros([len(elems)] * 2)
+    g_mat = np.zeros([len(elems)] * 2)
     for i, j in combinations_with_replacement(range(len(elems)), 2):
-        G[i, j] = G[j, i] = (elems[i] * elems[j] * weights).sum()
+        g_mat[i, j] = g_mat[j, i] = (elems[i] * elems[j] * weights).sum()
 
     # Model reduction
     if model.lower() == "translation":
-        H = np.eye(G.shape[0], ndim, dtype=np.float64)
+        h_mat = np.eye(g_mat.shape[0], ndim, dtype=np.float64)
     elif model.lower() == "euclidean":
         if ndim == 2:
-            H = np.array(
+            h_mat = np.array(
                 [
                     [1.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0],
@@ -263,7 +250,7 @@ def lucas_kanade_affine_solver(
         else:
             raise NotImplementedError("Eulidean motion model implemented only in 2D")
     elif model.lower() == "affine":
-        H = np.eye(ndim * (ndim + 1), dtype=matrix.dtype)
+        h_mat = np.eye(ndim * (ndim + 1), dtype=matrix.dtype)
     else:
         raise NotImplementedError(f"Unsupported motion model {model}")
 
@@ -281,7 +268,7 @@ def lucas_kanade_affine_solver(
 
         try:
             # Solve the system
-            r = np.linalg.solve(H.T @ G @ H, H.T @ b)
+            r = np.linalg.solve(h_mat.T @ g_mat @ h_mat, h_mat.T @ b)
             # update the matrix
             matrix = matrix @ _parameter_vector_to_matrix(r.ravel(), model, ndim)
 
@@ -289,38 +276,10 @@ def lucas_kanade_affine_solver(
                 break
 
         except np.linalg.LinAlgError:
+            warnings.warn("Failed to invert linear system (np.linalg.solve).")
             break
 
     return matrix
-
-
-def cost_nmi(image0, image1, *, bins=100, weights=None):
-    """
-    Negative of the normalized mutual information.
-
-    See :func:`skimage.metrics.normalized_mutual_information` for more info.
-
-    Parameters
-    ----------
-    image0, image1 : ndarray
-        The images to be compared. They should have the same shape.
-    bins : int or sequence of int, optional
-        The granularity of the histogram with which to compare the images.
-        If it's a sequence, each number is the number of bins for that image.
-    weights: ndarray or None
-        The weight or mask where the motion is estimated
-
-    Returns
-    -------
-    cnmi : float
-        The negative of the normalized mutual information between ``image0``
-        and ``image1``.
-
-    """
-
-    return -normalized_mutual_information(
-        image0.squeeze(), image1.squeeze(), bins=bins, weights=weights
-    )
 
 
 def _param_cost(
@@ -328,8 +287,8 @@ def _param_cost(
     reference_image,
     moving_image,
     weights,
+    cost,
     *,
-    cost=cost_nmi,
     model="affine",
 ):
     """
@@ -338,24 +297,22 @@ def _param_cost(
     Parameters
     ----------
     parameters: ndarray
-        Parameters of the transform
+        Parameters of the transform.
     reference_image: ndarray
-        Reference image
+        Reference image.
     moving_image: ndarray
-        Moving image
+        Moving image.
     weights: ndarray | None
-        Weights
-    cost: function
-        Cost between registered image and reference with 3 inputs:
-        reference image, moving image and weights.
-    vector_to_matrix:
-        Convert the vector parameter to the homogeneous matrix
+        Weights.
+    cost: function lambda(reference_image, moving_image, weights) -> float
+        Cost between registered image and reference image.
+    model : str
+        Motion model: "affine", "translation" or "euclidean".
 
     Returns
     -------
     cost: float
         Evaluated cost
-
     """
 
     ndim = reference_image.ndim - 1
@@ -366,7 +323,7 @@ def _param_cost(
         [ndi.affine_transform(plane, matrix) for plane in moving_image]
     )
 
-    return cost(reference_image, moving_image_warp, weights=weights)
+    return cost(reference_image, moving_image_warp, weights)
 
 
 def studholme_affine_solver(
@@ -379,7 +336,9 @@ def studholme_affine_solver(
     *,
     method="Powell",
     options={"maxiter": 10, "disp": False},
-    cost=cost_nmi,
+    cost=lambda im0, im1, w: -normalized_mutual_information(
+        im0.squeeze(), im1.squeeze(), bins=100, weights=w
+    ),
 ):
     """
     Solver maximizing mutual information using Powell's method
@@ -391,26 +350,25 @@ def studholme_affine_solver(
     moving_image : ndarray
         The second image of the sequence.
     weights: ndarray
-        Weights or mask
+        Weights or mask.
     channel_axis: int | None
-        Index of the channel axis
+        Index of the channel axis.
     matrix: ndarray
-        Initial value of the transform, here matrix are parameters
+        Initial value of the transform, here matrix are parameters.
     model: str
-        Motion model: "affine", "translation" or "euclidean"
+        Motion model: "affine", "translation" or "euclidean".
     method: str
-        Minimization method for scipy.optimization.minimize
+        Minimization method for scipy.optimization.minimize.
     options: dict
-        options for scipy.optimization.minimize
-    cost: function
-        Cost function minimize
-    vector_to_matrix: function(param, ndim) -> ndarray
-        Convert a vector of parameters to a matrix
+        options for scipy.optimization.minimize.
+    cost: function lambda (reference,moving,weights) -> float
+        Cost function to be minimized taking as input the two images and
+        the weights.
 
     Returns
     -------
     matrix:
-        Homogeneous transform matrix
+        Homogeneous transform matrix.
 
     Raises
     ------
@@ -419,10 +377,9 @@ def studholme_affine_solver(
     Reference
     ---------
     .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
-        and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
+           and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
     .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
-        The Art of Scientific Python. O’Reilly Media, Inc., 2017.
-
+           The Art of Scientific Python. O’Reilly Media, Inc., 2017.
     """
 
     if channel_axis is not None:
@@ -472,7 +429,7 @@ def affine(
     pyramid_minimum_size=32,
 ):
     """
-    Coarse-to-fine affine motion estimation between two images
+    Coarse-to-fine affine motion estimation between two images.
 
     Parameters
     ----------
@@ -481,15 +438,17 @@ def affine(
     moving_image : ndarray
         The second gray scale image of the sequence.
     weights : ndarray | None
-        The weights array with same shape as reference_image
+        The weights array with same shape as reference_image.
     channel_axis: int | None
-        Index of the channel axis
+        Index of the channel axis.
     matrix : ndarray | None
-        Intial guess for the homogeneous transformation matrix
+        Intial guess for the homogeneous transformation matrix.
     model: str
-        Motion model
+        Motion model: "translation", "euclidean" or "affine" where euclidean motion
+        corresponds to rigid motion (rotation and translation) and affine motion can
+        represent change in scale, shear, rotation and translations.
     solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
-        Affine motion solver can be lucas_kanade_affine_solver or studholme_affine_solver
+        Affine motion solver can be lucas_kanade_affine_solver or studholme_affine_solver.
     pyramid_scale : float
         The pyramid downscale factor.
     pyramid_minimum_size : int
@@ -511,7 +470,7 @@ def affine(
     Reference
     ---------
     .. [1] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
-    The Art of Scientific Python. O’Reilly Media, Inc., 2017.
+           The Art of Scientific Python. O’Reilly Media, Inc., 2017.
 
     Example
     -------
@@ -526,7 +485,6 @@ def affine(
     >>> moving = ndi.affine_transform(reference, transform)
     >>> matrix = affine(reference, moving)
     >>> registered = ndi.affine_transform(moving, matrix)
-
     """
 
     ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
@@ -575,10 +533,10 @@ def affine(
         model=model,
     )
 
-    for J0, J1, W in pyramid[1:]:
+    for image_0, image_1, w in pyramid[1:]:
         matrix = _scale_parameters(matrix, model, ndim, pyramid_downscale)
         matrix = solver(
-            J0, J1, W, channel_axis=channel_axis, matrix=matrix, model=model
+            image_0, image_1, w, channel_axis=channel_axis, matrix=matrix, model=model
         )
 
     return _parameter_vector_to_matrix(matrix, model, ndim)
