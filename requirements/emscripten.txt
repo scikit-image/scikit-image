@@ -4,3 +4,4 @@
 # requirements/test.txt.
 pytest
 matplotlib
+lazy_loader
