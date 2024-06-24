@@ -58,7 +58,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Apply patch(es)
-        run: patch -d $EMSDK/upstream/emscripten/src/ -p1 < tools/emscripten/patches/0001-load-dependent-libs-globally.patch
+        run: patch -d $EMSDK/upstream/emscripten/ -p1 < tools/emscripten/patches/0001-load-dependent-libs-globally.patch
 
       - name: Set up Pyodide virtual environment
         run: |
