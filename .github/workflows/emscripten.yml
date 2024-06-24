@@ -66,10 +66,12 @@ jobs:
           source .venv-pyodide/bin/activate
           # npm install pyodide@${{ env.PYODIDE_VERSION }}
           # node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
-          pip install pytest matplotlib
+          pip install requirements/test.txt
           pytest --pyargs skimage
 
       - name: Test scikit-image for Pyodide in activated virtual environment
         run: |
           source .venv-pyodide/bin/activate
-          node tools/emscripten/test_scikit_image_pyodide.js
+          # node tools/emscripten/test_scikit_image_pyodide.js
+          pip install dist/*.whl
+          pytest --pyargs skimage
