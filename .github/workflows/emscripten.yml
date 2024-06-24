@@ -66,7 +66,7 @@ jobs:
           source .venv-pyodide/bin/activate
           # npm install pyodide@${{ env.PYODIDE_VERSION }}
           # node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
-          pip install requirements/test.txt
+          pip install -r requirements/emscripten.txt
           pytest --pyargs skimage
 
       - name: Test scikit-image for Pyodide in activated virtual environment
