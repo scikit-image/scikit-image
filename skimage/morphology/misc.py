@@ -401,7 +401,7 @@ def remove_objects_by_distance(
     inner_indices = inner_indices[np.argsort(out_raveled[inner_indices])]
 
     if priority is None:
-        if np.intp().itemsize < out.dtype.itemsize:
+        if not np.can_cast(out.dtype, np.intp, casting="safe"):
             # bincount expects intp (32-bit) on WASM or i386, so down-cast to that
             priority = np.bincount(out_raveled.astype(np.intp, copy=False))
         else:
