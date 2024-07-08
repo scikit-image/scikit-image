@@ -78,6 +78,13 @@ File: skimage/_vendored/numpy_lookfor.py
 Copyright: 2005-2023, NumPy Developers
 License: BSD-3-Clause
 
+File: tools/emscripten/pytest_scikit_image_pyodide.js
+Copyright: 2007-2024 The scikit-learn developers
+License: BSD-3-Clause
+
+File: skimage/transform/_thin_plate_splines.py
+Copyright: 2007 Zachary Pincus
+License: BSD-3-Clause
 
 License: BSD-2-Clause
 

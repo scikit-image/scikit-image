@@ -15,6 +15,7 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+
 import os.path
 import warnings
 from configparser import ConfigParser

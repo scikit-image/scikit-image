@@ -217,7 +217,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -858,7 +857,7 @@ def ransac(
     rng = np.random.default_rng(rng)
 
     # in case data is not pair of input and output, male it like it
-    if not isinstance(data, tuple | list):
+    if not isinstance(data, (tuple, list)):
         data = (data,)
     num_samples = len(data[0])
 

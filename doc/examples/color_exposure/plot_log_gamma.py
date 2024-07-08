@@ -7,6 +7,7 @@ This example adjusts image contrast by performing a Gamma and a Logarithmic
 correction on the input image.
 
 """
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np

@@ -11,6 +11,7 @@ provide rotation-invariance. Scale-invariance can be achieved by detecting and
 extracting features at different scales.
 
 """
+
 from skimage import data
 from skimage import transform
 from skimage.feature import (
