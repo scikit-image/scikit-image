@@ -21,7 +21,7 @@ def skeletonize(image, *, method=None):
         in the image is reduced to a single-pixel wide skeleton. The image is binarized
         prior to thinning; thus, adjacent objects of different intensities are
         considered as one. Zero or ``False`` values represent the background, nonzero
-        values or ``True`` -- foreground.
+        or ``True`` values -- foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
