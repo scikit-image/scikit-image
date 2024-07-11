@@ -5,6 +5,11 @@ on:
     types: [labeled]
   workflow_dispatch:
 
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -67,6 +72,9 @@ jobs:
           OMP_NUM_THREADS: 1
           ASV_FACTOR: 1.5
           ASV_SKIP_SLOW: 1
+          # Escape user controlled variables
+          BASELINE_LABEL: "${{ github.event.pull_request.base.label }}"
+          CONTENDER_LABEL: "${{ github.event.pull_request.head.label }}"
         run: |
           set -x
 
@@ -75,8 +83,8 @@ jobs:
           # ID this runner
           asv machine --yes
 
-          echo "Baseline:  ${{ github.event.pull_request.base.sha }} (${{ github.event.pull_request.base.label }})"
-          echo "Contender: ${GITHUB_SHA} (${{ github.event.pull_request.head.label }})"
+          echo "Baseline:  ${{ github.event.pull_request.base.sha }} ($BASELINE_LABEL)"
+          echo "Contender: ${GITHUB_SHA} ($CONTENDER_LABEL)"
 
           # Run benchmarks for current commit against base
           ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
