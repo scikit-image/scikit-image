@@ -19,8 +19,8 @@ def skeletonize(image, *, method=None):
     image : (M, N[, P]) ndarray of bool or int
         The image containing the objects to be skeletonized. Each connected component
         in the image is reduced to a single-pixel wide skeleton. The image is binarized
-        prior to thinning; thus, several adjacent objects of different intensities are
-        considered as one. Zeros or ``False`` values represent the background, nonzero
+        prior to thinning; thus, adjacent objects of different intensities are
+        considered as one. Zero or ``False`` values represent the background, nonzero
         values or ``True`` -- foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
