@@ -2,8 +2,7 @@
 # Fail on non-zero exit and echo the commands
 set -evx
 
-python -m pip install $PIP_FLAGS -r requirements/test.txt
-
+python -m pip install $PIP_FLAGS -r requirements/default.txt -r requirements/test.txt
 
 
 TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
