@@ -112,6 +112,32 @@ jobs:
         run: |
           asv check -v -E existing
 
+  test_skimage_linux_free_threaded:
+    name: linux-cp313t-default
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      # TODO: replace with setup-python when there is support
+      - uses: deadsnakes/action@e704e592227156e253e24c7f7ccf2bfe62ef58d4 # v3.1.0
+        with:
+          python-version: "3.13.0b3"
+          nogil: true
+
+      - name: Install nightly dependencies
+        run: |
+          set -ex
+          source tools/github/before_install.sh
+          pip install -vv --no-build-isolation .
+
+      - name: Run tests
+        env:
+          PYTHON_GIL: 0
+        run: |
+          source tools/github/script.sh
+
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
     runs-on: macos-12
