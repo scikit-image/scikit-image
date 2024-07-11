@@ -123,7 +123,7 @@ jobs:
       # TODO: replace with setup-python when there is support
       - uses: deadsnakes/action@e704e592227156e253e24c7f7ccf2bfe62ef58d4 # v3.1.0
         with:
-          python-version: "3.13.0b3"
+          python-version: "3.13"
           nogil: true
 
       - name: Install nightly dependencies
