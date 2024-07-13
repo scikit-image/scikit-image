@@ -809,7 +809,7 @@ def test_compact_watershed():
     np.testing.assert_equal(normal, expected)
 
     # checks that compact watershed labels with watershed lines are
-    # a subset of the labels from normal watershed
+    # a subset of the labels from compact watershed for this specific example
     compact_wsl = watershed(image, seeds, compactness=0.01, watershed_line=True)
     difference = compact_wsl != compact
     difference[compact_wsl == 0] = False
