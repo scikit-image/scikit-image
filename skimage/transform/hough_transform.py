@@ -1,8 +1,11 @@
 import numpy as np
 from scipy.spatial import cKDTree
+from scipy.ndimage import rotate
+
 
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
+from ._hough_transform import _gray_scale_hough_line
 
 
 def hough_line_peaks(
@@ -471,3 +474,43 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
             n_pts += 1
     should_keep = ~is_neighbor
     return should_keep
+
+
+def gray_scale_hough_line(image, theta=None):
+    """Perform a straight line Hough transform using gray-scale images.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray of type uint8
+        Input image with intensity values in the range [0, 255] 
+    theta : ndarray of double, shape (K,), optional
+        Angles at which to compute the transform, in radians.
+        Defaults to a vector of 180 angles evenly spaced in the
+        range [-pi/2, pi/2).
+
+    Returns
+    -------
+    hspace : ndarray of uint64, shape (P, Q, G)
+        Gray-Scale Hough transform accumulator where G is the intensity in the range [0, 255].
+    angles : ndarray
+        Angles at which the transform is computed, in radians.
+    distances : ndarray
+        Distance values.
+
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    X and Y axis are horizontal and vertical edges respectively.
+    The distance is the minimal algebraic distance from the origin
+    to the detected line.
+    The angle accuracy can be improved by decreasing the step size in
+    the `theta` array.
+    """
+    if image.ndim != 2:
+        raise ValueError('The input image `image` must be 2D.')
+
+    if theta is None:
+        # These values are approximations of pi/2
+        theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
+
+    return _gray_scale_hough_line(image, theta=theta)

@@ -540,3 +540,75 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     PyMem_Free(line_end)
     return [((line[0, 0], line[0, 1]), (line[1, 0], line[1, 1]))
             for line in lines[:nlines]]
+
+
+def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
+                cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta):
+    """Perform a gray-scale straight line Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray of unit8
+        Input image with in intensity values in the range [0, 255]. 
+        Currently only 8-bit unsigned integer are supported.
+    theta : 1D ndarray of float64
+        Angles at which to compute the transform, in radians.
+
+    Returns
+    -------
+    H : (P, Q, G) ndarray of uint64
+        Gray-Scale Hough transform accumulator.
+    theta : ndarray
+        Angles at which the transform was computed, in radians.
+    distances : ndarray
+        Distance values.
+
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    X and Y axis are horizontal and vertical edges respectively.
+    The distance is the minimal algebraic distance from the origin
+    to the detected line.
+
+    References
+    ----------
+    .. [1] R. Lo, W. Tsa, "Gray-Scale Hough Transform For Thick Line Detection In Gray-Scale Images", in IEEE Computer Society
+           Pattern Recognition Vol. 28, No. 5, pp. 647-661, 1995.
+
+    """
+    # Compute the array of angles and their sine and cosine
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] ctheta
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] stheta
+
+    ctheta = np.cos(theta)
+    stheta = np.sin(theta)
+
+    # compute the bins and allocate the accumulator array
+    cdef cnp.ndarray[ndim=3, dtype=cnp.uint64_t] accum
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] bins
+    cdef Py_ssize_t max_distance, offset
+
+    offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
+                                   img.shape[1] * img.shape[1]))
+    max_distance = 2 * offset + 1
+    accum = np.zeros((max_distance, theta.shape[0], 256), dtype=np.uint64)  # 256 correspond to intensity values of 8bit unsignde integer
+    bins = np.linspace(-offset, offset, max_distance)
+
+    # compute the nonzero indexes
+    cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
+    y_idxs, x_idxs = np.nonzero(img)
+
+    # finally, run the transform
+    cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
+
+    nidxs = y_idxs.shape[0]  # x and y are the same shape
+    nthetas = theta.shape[0]
+    with nogil:
+        for i in range(nidxs):
+            x = x_idxs[i]
+            y = y_idxs[i]
+            for j in range(nthetas):
+                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
+                accum[accum_idx, j, img[x, y]] += 1
+
+    return accum, theta, bins
