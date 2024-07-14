@@ -542,17 +542,19 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             for line in lines[:nlines]]
 
 
-def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
-                cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta):
+def _gray_scale_hough_line(cnp.ndarray img,
+                cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
+                cnp.ndarray[ndim=1, dtype=cnp.float64_t] intensity):
     """Perform a gray-scale straight line Hough transform.
 
     Parameters
     ----------
     img : (M, N) ndarray of unit8
-        Input image with in intensity values in the range [0, 255]. 
-        Currently only 8-bit unsigned integer are supported.
+        Input image with gra-scale intensity values 
     theta : 1D ndarray of float64
         Angles at which to compute the transform, in radians.
+    intensity : 1D ndarray of float64
+        Intensities at which to compute the transform, in the range [0, 1]
 
     Returns
     -------
@@ -562,6 +564,8 @@ def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
         Angles at which the transform was computed, in radians.
     distances : ndarray
         Distance values.
+    intensity: ndarray 
+        intensities at which the transform was computed, in the range [0, 1].
 
     Notes
     -----
@@ -572,8 +576,8 @@ def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
 
     References
     ----------
-    .. [1] R. Lo, W. Tsa, "Gray-Scale Hough Transform For Thick Line Detection In Gray-Scale Images", in IEEE Computer Society
-           Pattern Recognition Vol. 28, No. 5, pp. 647-661, 1995.
+    .. [1] R. Lo, W. Tsa, "Gray-Scale Hough Transform For Thick Line Detection In Gray-Scale Images",
+           in Pattern Recognition Vol. 28, No. 5, pp. 647-661, 1995.
 
     """
     # Compute the array of angles and their sine and cosine
@@ -583,6 +587,10 @@ def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
 
+    # convert intensity and img to c objects
+    cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] cintensity = intensity
+    cdef cnp.ndarray[ndim=2, dtype=cnp.float64_t] cimg = img
+
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=3, dtype=cnp.uint64_t] accum
     cdef cnp.ndarray[ndim=1, dtype=cnp.float64_t] bins
@@ -591,7 +599,7 @@ def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
     offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
                                    img.shape[1] * img.shape[1]))
     max_distance = 2 * offset + 1
-    accum = np.zeros((max_distance, theta.shape[0], 256), dtype=np.uint64)  # 256 correspond to intensity values of 8bit unsignde integer
+    accum = np.zeros((max_distance, theta.shape[0], intensity.shape[0]), dtype=np.uint64)
     bins = np.linspace(-offset, offset, max_distance)
 
     # compute the nonzero indexes
@@ -599,16 +607,24 @@ def _gray_scale_hough_line(cnp.ndarray[ndim=2, dtype=cnp.uint8_t] img,
     y_idxs, x_idxs = np.nonzero(img)
 
     # finally, run the transform
-    cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
+    cdef Py_ssize_t nidxs, nthetas, i, j, x, y, acc_idx, intensity_idx
+    cdef cnp.float64_t pixel_intensity
 
     nidxs = y_idxs.shape[0]  # x and y are the same shape
     nthetas = theta.shape[0]
+    nintensities = intensity.shape[0]
+    intensity_idx = 0  # without this line a warning is raised saying that intensity_idx is not initialized 
     with nogil:
         for i in range(nidxs):
             x = x_idxs[i]
             y = y_idxs[i]
+            pixel_intensity = cimg[x, y]
+            for intensity_idx in range(nintensities):
+                if  pixel_intensity < cintensity[intensity_idx]:
+                    break 
             for j in range(nthetas):
-                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
-                accum[accum_idx, j, img[x, y]] += 1
+                acc_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
 
-    return accum, theta, bins
+                accum[acc_idx, j, intensity_idx] += 1
+
+    return accum, theta, bins, intensity
