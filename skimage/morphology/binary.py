@@ -7,6 +7,7 @@ from scipy import ndimage as ndi
 
 from .footprints import _footprint_is_sequence, pad_footprint
 from .misc import default_footprint
+from ..util.backends import _dispatchable
 
 
 def _iterate_binary_func(binary_func, image, footprint, out, border_value):
@@ -36,6 +37,7 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 # The default_footprint decorator provides a diamond footprint as
 # default with the same dimension as the input image and size 3 along each
 # axis.
+@_dispatchable
 @default_footprint
 def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
@@ -117,6 +119,7 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
+@_dispatchable
 @default_footprint
 def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
@@ -198,6 +201,7 @@ def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
+@_dispatchable
 @default_footprint
 def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological opening of an image.
@@ -259,6 +263,7 @@ def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     return out
 
 
+@_dispatchable
 @default_footprint
 def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological closing of an image.

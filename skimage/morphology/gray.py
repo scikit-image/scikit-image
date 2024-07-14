@@ -9,6 +9,7 @@ from scipy import ndimage as ndi
 from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
 from .misc import default_footprint
 from .._shared.utils import DEPRECATED
+from ..util.backends import _dispatchable
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
@@ -124,6 +125,7 @@ _SUPPORTED_MODES = {
 }
 
 
+@_dispatchable
 @default_footprint
 def erosion(
     image,
@@ -241,6 +243,7 @@ def erosion(
     return out
 
 
+@_dispatchable
 @default_footprint
 def dilation(
     image,
@@ -362,6 +365,7 @@ def dilation(
     return out
 
 
+@_dispatchable
 @default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
@@ -439,6 +443,7 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
+@_dispatchable
 @default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
@@ -516,6 +521,7 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
+@_dispatchable
 @default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return white top hat of an image.
@@ -609,6 +615,7 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
+@_dispatchable
 @default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return black top hat of an image.
