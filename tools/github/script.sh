@@ -9,7 +9,7 @@ TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
 # installing successively may update previously constraint dependencies
 REQUIREMENT_FILES="-r requirements/default.txt -r requirements/test.txt"
 if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-    REQUIREMENT_FILES="-${REQUIREMENT_FILES} -r requirements/optional.txt"
+    REQUIREMENT_FILES="${REQUIREMENT_FILES} -r requirements/optional.txt"
 fi
 
 python -m pip install $PIP_FLAGS $REQUIREMENT_FILES
