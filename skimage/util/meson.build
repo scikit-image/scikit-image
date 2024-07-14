@@ -22,6 +22,7 @@ python_sources = [
   '_slice_along_axes.py',
   'apply_parallel.py',
   'arraycrop.py',
+  'backends.py',
   'compare.py',
   'dtype.py',
   'lookfor.py',
