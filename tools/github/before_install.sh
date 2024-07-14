@@ -5,7 +5,7 @@ export PIP_DEFAULT_TIMEOUT=60
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     for filename in requirements/*.txt; do
-        sed -i 's/>=/==/g' $filename
+        sed -i 's/>=/==/g' "$filename"
     done
 fi
 
