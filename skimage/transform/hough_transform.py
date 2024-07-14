@@ -6,7 +6,7 @@ from scipy.ndimage import rotate
 from ._hough_transform import _hough_circle, _hough_ellipse, _hough_line
 from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
 from ._hough_transform import _gray_scale_hough_line
-
+from ..util import img_as_float
 
 def hough_line_peaks(
     hspace,
@@ -476,7 +476,7 @@ def label_distant_points(xs, ys, min_xdistance, min_ydistance, max_points):
     return should_keep
 
 
-def gray_scale_hough_line(image, theta=None):
+def gray_scale_hough_line(image, theta=None, intensity=None):
     """Perform a straight line Hough transform using gray-scale images.
 
     Parameters
@@ -496,6 +496,8 @@ def gray_scale_hough_line(image, theta=None):
         Angles at which the transform is computed, in radians.
     distances : ndarray
         Distance values.
+    intensities: ndarray
+        Intensities at which the transform is computed, in the range [0, 1].
 
     Notes
     -----
@@ -513,4 +515,7 @@ def gray_scale_hough_line(image, theta=None):
         # These values are approximations of pi/2
         theta = np.linspace(-np.pi / 2, np.pi / 2, 180, endpoint=False)
 
-    return _gray_scale_hough_line(image, theta=theta)
+    if intensity is None:
+        intensity = np.linspace(0, 1, 256)
+
+    return _gray_scale_hough_line(img_as_float(image), theta=theta, intensity=intensity)
