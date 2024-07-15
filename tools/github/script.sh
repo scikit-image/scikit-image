@@ -6,7 +6,7 @@ TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
 
 
 # Combine requirement files for a more robust pip solve
-# installing successively may update previously constraint dependencies
+# installing successively may update previously constrained dependencies
 REQUIREMENT_FILES="-r requirements/default.txt -r requirements/test.txt"
 if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
     REQUIREMENT_FILES="${REQUIREMENT_FILES} -r requirements/optional.txt"
