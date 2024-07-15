@@ -68,6 +68,9 @@ def test_mask_border_keypoints():
 )
 def test_plot_matches(shapes):
     from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
 
     fig, ax = plt.subplots(nrows=1, ncols=1)
 
@@ -112,6 +115,9 @@ def test_plot_matches(shapes):
 )
 def test_plot_matched_features(shapes):
     from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
 
     fig, ax = plt.subplots()
 

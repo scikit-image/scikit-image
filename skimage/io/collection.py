@@ -299,7 +299,7 @@ class ImageCollection:
         if hasattr(n, '__index__'):
             n = n.__index__()
 
-        if not isinstance(n, int | slice):
+        if not isinstance(n, (int, slice)):
             raise TypeError('slicing must be with an int or slice object')
 
         if isinstance(n, int):

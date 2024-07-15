@@ -53,10 +53,20 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     noise). If this is a problem in your image, you can apply mild
     gaussian smoothing before passing the image to this function.
 
+    This algorithm's complexity is polynomial in the radius, with degree equal
+    to the image dimensionality (a 2D image is N^2, a 3D image is N^3, etc.),
+    so it can take a long time as the radius grows beyond 30 or so ([2]_, [3]_).
+    It is an exact N-dimensional calculation; if all you need is an
+    approximation, faster options to consider are top-hat filtering [4]_ or
+    downscaling-then-upscaling to reduce the size of the input processed.
+
     References
     ----------
     .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1
            (1983): 22-34. :DOI:`10.1109/MC.1983.1654163`
+    .. [2] https://github.com/scikit-image/scikit-image/issues/5193
+    .. [3] https://github.com/scikit-image/scikit-image/issues/7423
+    .. [4] https://forum.image.sc/t/59267/7
 
     Examples
     --------
