@@ -687,7 +687,7 @@ class ProjectiveTransform(_GeometricTransform):
 
         return dst[:, :ndim]
 
-    def __array__(self, dtype=None, copy=False):
+    def __array__(self, dtype=None, copy=None):
         if dtype is None:
             return self.params
         else:
