@@ -3,11 +3,16 @@ import pytest
 
 from skimage import io
 from skimage._shared._warnings import expected_warnings
+from skimage._shared._dependency_checks import is_wasm
 
 plt = pytest.importorskip("matplotlib.pyplot")
 
+if plt:
+    plt.switch_backend("Agg")
 
-def setup():
+
+@pytest.fixture(autouse=True)
+def _reset_plugins():
     io.reset_plugins()
 
 
@@ -29,6 +34,13 @@ imshow_expected_warnings = [
     r"np.asscalar|\A\Z",
     r"The figure layout has changed to tight|\A\Z",
 ]
+
+# This warning comes from the Python 3.12.1 interpreter powered by Pyodide
+# and is not relevant to the tests where it is raised.
+if is_wasm:
+    imshow_expected_warnings.append(
+        r"Pickle, copy, and deepcopy support will be removed from itertools in Python 3.14|\A\Z"
+    )
 
 
 def n_subplots(ax_im):

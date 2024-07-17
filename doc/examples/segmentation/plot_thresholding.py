@@ -13,7 +13,6 @@ Thresholding is used to create a binary image from a grayscale image [1]_.
 
 """
 
-
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filters import threshold_otsu

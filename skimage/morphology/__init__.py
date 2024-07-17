@@ -33,7 +33,7 @@ from ..measure._label import label
 from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
-from .misc import remove_small_holes, remove_small_objects
+from .misc import remove_small_holes, remove_small_objects, remove_objects_by_distance
 from .extrema import h_maxima, h_minima, local_minima, local_maxima
 from ._flood_fill import flood, flood_fill
 from .max_tree import (
@@ -89,6 +89,7 @@ __all__ = [
     'rectangle',
     'remove_small_holes',
     'remove_small_objects',
+    'remove_objects_by_distance',
     'skeletonize',
     'square',
     'star',

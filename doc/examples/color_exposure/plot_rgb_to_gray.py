@@ -19,6 +19,7 @@ References
 .. [1] http://poynton.ca/PDFs/ColorFAQ.pdf
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data

@@ -34,6 +34,7 @@ original picture in order to detect centers outside the frame.
 Its size is extended by two times the larger radius.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

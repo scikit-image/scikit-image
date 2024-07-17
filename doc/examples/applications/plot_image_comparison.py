@@ -9,6 +9,7 @@ such as exposure manipulations, filtering, and restoration.
 This example shows how to easily compare two images with various approaches.
 
 """
+
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 

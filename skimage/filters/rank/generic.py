@@ -48,7 +48,6 @@ References
 
 """
 
-
 import numpy as np
 from scipy import ndimage as ndi
 

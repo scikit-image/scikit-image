@@ -653,9 +653,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 theta = np.arctan2(gradient_col, gradient_row) - ori
                 lam_sig = self.lambda_descr * float(sigma[k])
                 # Gaussian weighted kernel magnitude
-                kernel = np.exp(
-                    (r_norm * r_norm + c_norm * c_norm) / (-2 * lam_sig**2)
-                )
+                kernel = np.exp((r_norm * r_norm + c_norm * c_norm) / (-2 * lam_sig**2))
                 magnitude = (
                     np.sqrt(gradient_row * gradient_row + gradient_col * gradient_col)
                     * kernel
