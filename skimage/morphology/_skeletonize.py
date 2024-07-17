@@ -321,7 +321,7 @@ def thin(image, max_num_iter=None):
     check_nD(image, 2)
 
     # convert image to uint8 with values in {0, 1}
-    skel = np.asanyarray(image, dtype=bool).view(np.uint8)
+    skel = np.asanyarray(image, dtype=bool).copy().view(np.uint8)
 
     # neighborhood mask
     mask = np.array([[8, 4, 2], [16, 0, 1], [32, 64, 128]], dtype=np.uint8)
