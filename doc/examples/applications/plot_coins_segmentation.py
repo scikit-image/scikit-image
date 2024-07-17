@@ -19,7 +19,7 @@ hist, hist_centers = histogram(coins)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 axes[0].imshow(coins, cmap=plt.cm.gray)
-axes[0].axis('off')
+axes[0].set_axis_off()
 axes[1].plot(hist_centers, hist, lw=2)
 axes[1].set_title('histogram of gray values')
 
@@ -42,9 +42,9 @@ axes[1].imshow(coins > 150, cmap=plt.cm.gray)
 axes[1].set_title('coins > 150')
 
 for a in axes:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Edge-based segmentation
@@ -61,7 +61,7 @@ edges = canny(coins)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray)
 ax.set_title('Canny detector')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # These contours are then filled using mathematical morphology.
@@ -73,7 +73,7 @@ fill_coins = ndi.binary_fill_holes(edges)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(fill_coins, cmap=plt.cm.gray)
 ax.set_title('filling the holes')
-ax.axis('off')
+ax.set_axis_off()
 
 
 ######################################################################
@@ -87,7 +87,7 @@ coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray)
 ax.set_title('removing small objects')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # However, this method is not very robust, since contours that are not
@@ -107,7 +107,7 @@ elevation_map = sobel(coins)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.gray)
 ax.set_title('elevation map')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # Next we find markers of the background and the coins based on the extreme
@@ -120,7 +120,7 @@ markers[coins > 150] = 2
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(markers, cmap=plt.cm.nipy_spectral)
 ax.set_title('markers')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
@@ -132,7 +132,7 @@ segmentation_coins = segmentation.watershed(elevation_map, markers)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation_coins, cmap=plt.cm.gray)
 ax.set_title('segmentation')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # This last method works even better, and the coins can be segmented and
@@ -150,8 +150,8 @@ axes[0].contour(segmentation_coins, [0.5], linewidths=1.2, colors='y')
 axes[1].imshow(image_label_overlay)
 
 for a in axes:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()

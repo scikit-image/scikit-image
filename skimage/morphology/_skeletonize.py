@@ -1,26 +1,27 @@
 """
 Algorithms for computing the skeleton of a binary image
 """
+
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_kwarg
+from .._shared.utils import check_nD, deprecate_func
 from ..util import crop
 from ._skeletonize_3d_cy import _compute_thin_image
 from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup_index
 
 
 def skeletonize(image, *, method=None):
-    """Compute the skeleton of a binary image.
-
-    Thinning is used to reduce each connected component in a binary image
-    to a single-pixel wide skeleton.
+    """Compute the skeleton of the input image via thinning.
 
     Parameters
     ----------
-    image : ndarray, 2D or 3D
-        An image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+    image : (M, N[, P]) ndarray of bool or int
+        The image containing the objects to be skeletonized. Each connected component
+        in the image is reduced to a single-pixel wide skeleton. The image is binarized
+        prior to thinning; thus, adjacent objects of different intensities are
+        considered as one. Zero or ``False`` values represent the background, nonzero
+        or ``True`` values -- foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
@@ -28,7 +29,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : ndarray of bool
+    skeleton : (M, N[, P]) ndarray of bool
         The thinned image.
 
     See Also
@@ -72,18 +73,18 @@ def skeletonize(image, *, method=None):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    image = image.astype(bool, copy=False)
+    image = image.astype(bool, order="C", copy=False)
 
     if method not in {'zhang', 'lee', None}:
         raise ValueError(
             f'skeletonize method should be either "lee" or "zhang", ' f'got {method}.'
         )
     if image.ndim == 2 and (method is None or method == 'zhang'):
-        skeleton = skeletonize_2d(image)
+        skeleton = _skeletonize_2d(image)
     elif image.ndim == 3 and method == 'zhang':
         raise ValueError('skeletonize method "zhang" only works for 2D ' 'images.')
     elif image.ndim == 3 or (image.ndim == 2 and method == 'lee'):
-        skeleton = skeletonize_3d(image)
+        skeleton = _skeletonize_3d(image)
     else:
         raise ValueError(
             f'skeletonize requires a 2D or 3D image as input, ' f'got {image.ndim}D.'
@@ -91,7 +92,7 @@ def skeletonize(image, *, method=None):
     return skeleton
 
 
-def skeletonize_2d(image):
+def _skeletonize_2d(image):
     """Return the skeleton of a 2D binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -100,9 +101,8 @@ def skeletonize_2d(image):
     Parameters
     ----------
     image : numpy.ndarray
-        A binary image containing the objects to be skeletonized. '1'
-        represents foreground, and '0' represents background. It
-        also accepts arrays of boolean values where True is foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
@@ -111,7 +111,7 @@ def skeletonize_2d(image):
 
     See Also
     --------
-    medial_axis
+    medial_axis, skeletonize, skeletonize_3d, thin
 
     Notes
     -----
@@ -161,10 +161,8 @@ def skeletonize_2d(image):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-
     if image.ndim != 2:
         raise ValueError("Zhang's skeletonize method requires a 2D array")
-
     return _fast_skeletonize(image)
 
 
@@ -355,9 +353,6 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 
@@ -393,7 +388,7 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     See Also
     --------
-    skeletonize
+    skeletonize, thin
 
     Notes
     -----
@@ -589,7 +584,7 @@ def _table_lookup(image, table):
     return image
 
 
-def skeletonize_3d(image):
+def _skeletonize_3d(image):
     """Compute the skeleton of a binary image.
 
     Thinning is used to reduce each connected component in a binary image
@@ -598,8 +593,8 @@ def skeletonize_3d(image):
     Parameters
     ----------
     image : ndarray, 2D or 3D
-        A binary image containing the objects to be skeletonized. Zeros
-        represent background, nonzero values are foreground.
+        An image containing the objects to be skeletonized. Zeros or ``False``
+        represent background, nonzero values or ``True`` are foreground.
 
     Returns
     -------
@@ -637,13 +632,13 @@ def skeletonize_3d(image):
             f"got image.ndim = {image.ndim} instead."
         )
 
-    image_io = image.astype(bool, copy=False)
+    image_o = image.astype(bool, order="C", copy=False)
 
     # make a 2D input image 3D and pad it w/ zeros to simplify dealing w/ boundaries
     # NB: careful here to not clobber the original *and* minimize copying
     if image.ndim == 2:
-        image_io = image_io[np.newaxis, ...]
-    image_o = np.pad(image_io, pad_width=1, mode='constant')
+        image_o = image_o[np.newaxis, ...]
+    image_o = np.pad(image_o, pad_width=1, mode='constant')  # copies
 
     # do the computation
     image_o = _compute_thin_image(image_o)
@@ -654,3 +649,15 @@ def skeletonize_3d(image):
         image_o = image_o[0]
 
     return image_o
+
+
+def skeletonize_3d(image):
+    return _skeletonize_3d(image)
+
+
+skeletonize_3d.__doc__ = _skeletonize_3d.__doc__
+skeletonize_3d = deprecate_func(
+    deprecated_version="0.23",
+    removed_version="0.25",
+    hint="Use `skimage.morphology.skeletonize` instead.",
+)(skeletonize_3d)

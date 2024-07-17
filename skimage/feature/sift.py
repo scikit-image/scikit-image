@@ -300,7 +300,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         # smooth to sigma_min, assuming sigma_in
         image = gaussian(
             image,
-            self.upsampling * math.sqrt(self.sigma_min**2 - self.sigma_in**2),
+            sigma=self.upsampling * math.sqrt(self.sigma_min**2 - self.sigma_in**2),
             mode='reflect',
         )
 
@@ -333,9 +333,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 # blur new scale assuming sigma of the last one
                 gaussian(
                     octave[s - 1],
-                    gaussian_sigmas[o, s - 1],
+                    sigma=gaussian_sigmas[o, s - 1],
                     mode='reflect',
-                    output=octave[s],
+                    out=octave[s],
                 )
             # move scales to last axis as expected by other methods
             scalespace.append(np.moveaxis(octave, 0, -1))
@@ -624,8 +624,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             )
 
             for k in range(len(p_max)):
-                rad_k = radius[k]
-                ori = orientations[k]
+                rad_k = float(radius[k])
+                ori = float(orientations[k])
                 histograms = np.zeros(
                     (self.n_hist, self.n_hist, self.n_ori), dtype=self.float_dtype
                 )
@@ -651,11 +651,9 @@ class SIFT(FeatureDetector, DescriptorExtractor):
                 gradient_col = gradient[1][r, c, scales[k]]
                 # compute the (relative) gradient orientation
                 theta = np.arctan2(gradient_col, gradient_row) - ori
-                lam_sig = self.lambda_descr * sigma[k]
+                lam_sig = self.lambda_descr * float(sigma[k])
                 # Gaussian weighted kernel magnitude
-                kernel = np.exp(
-                    (r_norm * r_norm + c_norm * c_norm) / (-2 * lam_sig**2)
-                )
+                kernel = np.exp((r_norm * r_norm + c_norm * c_norm) / (-2 * lam_sig**2))
                 magnitude = (
                     np.sqrt(gradient_row * gradient_row + gradient_col * gradient_col)
                     * kernel

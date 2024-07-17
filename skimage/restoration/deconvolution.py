@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.signal import convolve
 
-from .._shared.utils import _supported_float_type, deprecate_kwarg
+from .._shared.utils import _supported_float_type
 from . import uft
 
 
@@ -139,9 +139,6 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     return deconv
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def unsupervised_wiener(
     image, psf, reg=None, user_params=None, is_real=True, clip=True, *, rng=None
 ):

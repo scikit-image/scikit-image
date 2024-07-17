@@ -5,7 +5,6 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import deprecate_kwarg
 
 _EPSILON = np.spacing(1)
 
@@ -218,7 +217,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -669,9 +667,6 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def ransac(
     data,
     model_class,
@@ -862,7 +857,7 @@ def ransac(
     rng = np.random.default_rng(rng)
 
     # in case data is not pair of input and output, male it like it
-    if not isinstance(data, tuple | list):
+    if not isinstance(data, (tuple, list)):
         data = (data,)
     num_samples = len(data[0])
 

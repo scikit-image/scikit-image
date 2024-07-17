@@ -19,6 +19,7 @@ enables projective 3D reconstruction of the captured scene. If the calibration
 is known, estimating the essential matrix enables metric 3D reconstruction of
 the captured scene.
 """
+
 import numpy as np
 from skimage import data
 from skimage.color import rgb2gray
@@ -56,7 +57,7 @@ model, inliers = ransac(
     min_samples=8,
     residual_threshold=1,
     max_trials=5000,
-    random_state=rng,
+    rng=rng,
 )
 
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]

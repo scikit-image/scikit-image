@@ -55,12 +55,20 @@ extensions = [
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
 ]
 
 autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = ".rst"
+
+show_warning_types = True
+suppress_warnings = [
+    # Ignore new warning in Sphinx 7.3.0 while pickling environment:
+    #   WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
+    "config.cache",
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -183,9 +191,6 @@ html_theme_options = {
         "plausible_analytics_domain": "scikit-image.org",
         "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
     },
-    # Silence warning in pydata-sphinx-theme v0.14.2
-    # can be removed after >=0.15 is released and pinned
-    "navigation_with_keys": False,
 }
 
 # Custom sidebar templates, maps document names to template names.

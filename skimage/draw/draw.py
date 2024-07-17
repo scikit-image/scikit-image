@@ -2,6 +2,7 @@ import numpy as np
 
 from .._shared._geometry import polygon_clip
 from .._shared.version_requirements import require
+from .._shared.compat import NP_COPY_IF_NEEDED
 from ._draw import (
     _coords_inside_image,
     _line,
@@ -242,6 +243,9 @@ def polygon_perimeter(r, c, shape=None, clip=False):
 
     Examples
     --------
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
+
     >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
@@ -333,7 +337,7 @@ def set_color(image, coords, color, alpha=1):
     if image.ndim == 2:
         image = image[..., np.newaxis]
 
-    color = np.array(color, ndmin=1, copy=False)
+    color = np.array(color, ndmin=1, copy=NP_COPY_IF_NEEDED)
 
     if image.shape[-1] != color.shape[-1]:
         raise ValueError(
@@ -902,6 +906,9 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
 
     Examples
     --------
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
+
     >>> import numpy as np
     >>> from skimage.draw import rectangle_perimeter
     >>> img = np.zeros((5, 6), dtype=np.uint8)

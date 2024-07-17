@@ -127,7 +127,7 @@ def denoise_bilateral(
     mode : {'constant', 'edge', 'symmetric', 'reflect', 'wrap'}
         How to handle values outside the image borders. See
         `numpy.pad` for detail.
-    cval : string
+    cval : int or float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
     channel_axis : int or None, optional
@@ -788,7 +788,9 @@ def _wavelet_threshold(
             for thresh, level in zip(threshold, dcoeffs)
         ]
     denoised_coeffs = [coeffs[0]] + denoised_detail
-    return pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
+    out = pywt.waverecn(denoised_coeffs, wavelet)[original_extent]
+    out = out.astype(image.dtype)
+    return out
 
 
 def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigma):
@@ -959,8 +961,9 @@ def denoise_wavelet(
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('pywt')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('pywt')
+
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
@@ -1084,8 +1087,9 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
 
     Examples
     --------
-    >>> import pytest
-    >>> _ = pytest.importorskip('pywt')
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('pywt')
+
     >>> import skimage.data
     >>> from skimage import img_as_float
     >>> img = img_as_float(skimage.data.camera())

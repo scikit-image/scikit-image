@@ -235,7 +235,10 @@ def _cached(f):
         cache = obj._cache
         prop = f.__name__
 
-        if not ((prop in cache) and obj._cache_active):
+        if not obj._cache_active:
+            return f(obj)
+
+        if prop not in cache:
             cache[prop] = f(obj)
 
         return cache[prop]
@@ -1185,7 +1188,7 @@ def regionprops(
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
     **coords_scaled** : (K, 2) ndarray
-        Coordinate list ``(row, col)``of the region scaled by ``spacing``.
+        Coordinate list ``(row, col)`` of the region scaled by ``spacing``.
     **coords** : (K, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float

@@ -61,7 +61,6 @@ from .._shared.utils import (
     identity,
     reshape_nd,
     slice_at_axis,
-    deprecate_func,
 )
 from ..util import dtype, dtype_limits
 
@@ -311,7 +310,7 @@ def rgb2hsv(rgb, *, channel_axis=-1):
     out_v = arr.max(-1)
 
     # -- S channel
-    delta = arr.ptp(-1)
+    delta = np.ptp(arr, axis=-1)
     # Ignore warning for zero divided by zero
     old_settings = np.seterr(invalid='ignore')
     out_s = delta / out_v
@@ -628,43 +627,6 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
             f'Unknown illuminant/observer combination '
             f'(`{illuminant}`, `{observer}`)'
         )
-
-
-@deprecate_func(
-    hint="Use `skimage.color.xyz_tristimulus_values` instead.",
-    deprecated_version="0.21",
-    removed_version="0.23",
-)
-def get_xyz_coords(illuminant, observer, dtype=float):
-    """Get the XYZ coordinates of the given illuminant and observer [1]_.
-
-    Parameters
-    ----------
-    illuminant : {"A", "B", "C", "D50", "D55", "D65", "D75", "E"}, optional
-        The name of the illuminant (the function is NOT case sensitive).
-    observer : {"2", "10", "R"}, optional
-        One of: 2-degree observer, 10-degree observer, or 'R' observer as in
-        R function grDevices::convertColor.
-    dtype: dtype, optional
-        Output data type.
-
-    Returns
-    -------
-    out : array
-        Array with 3 elements containing the XYZ coordinates of the given
-        illuminant.
-
-    Raises
-    ------
-    ValueError
-        If either the illuminant or the observer angle are not supported or
-        unknown.
-
-    References
-    ----------
-    .. [1] https://en.wikipedia.org/wiki/Standard_illuminant
-    """
-    return xyz_tristimulus_values(illuminant=illuminant, observer=observer, dtype=dtype)
 
 
 # Haematoxylin-Eosin-DAB colorspace
@@ -1046,23 +1008,20 @@ def gray2rgba(image, alpha=None, *, channel_axis=-1):
         RGBA image. A new dimension of length 4 is added to input
         image shape.
     """
-
     arr = np.asarray(image)
-
-    alpha_min, alpha_max = dtype_limits(arr, clip_negative=False)
-
     if alpha is None:
-        alpha = alpha_max
-
-    if not np.can_cast(alpha, arr.dtype):
+        _, alpha = dtype_limits(arr, clip_negative=False)
+    with np.errstate(over="ignore", under="ignore"):
+        alpha_arr = np.asarray(alpha).astype(arr.dtype)
+    if not np.array_equal(alpha_arr, alpha):
         warn(
             f'alpha cannot be safely cast to image dtype {arr.dtype.name}', stacklevel=2
         )
-    if np.isscalar(alpha):
-        alpha = np.full(arr.shape, alpha, dtype=arr.dtype)
-    elif alpha.shape != arr.shape:
-        raise ValueError("alpha.shape must match image.shape")
-    rgba = np.stack((arr,) * 3 + (alpha,), axis=channel_axis)
+    try:
+        alpha_arr = np.broadcast_to(alpha_arr, arr.shape)
+    except ValueError as e:
+        raise ValueError("alpha.shape must match image.shape") from e
+    rgba = np.stack((arr,) * 3 + (alpha_arr,), axis=channel_axis)
     return rgba
 
 
@@ -1442,19 +1401,20 @@ def xyz2luv(xyz, illuminant="D65", observer="2", *, channel_axis=-1):
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(float).eps
+    eps = np.finfo(arr.dtype).eps
 
     # compute y_r and L
-    xyz_ref_white = np.array(
-        xyz_tristimulus_values(illuminant=illuminant, observer=observer)
+    xyz_ref_white = xyz_tristimulus_values(
+        illuminant=illuminant, observer=observer, dtype=arr.dtype
     )
     L = y / xyz_ref_white[1]
     mask = L > 0.008856
     L[mask] = 116.0 * np.cbrt(L[mask]) - 16.0
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4 * xyz_ref_white[0] / ([1, 15, 3] @ xyz_ref_white)
-    v0 = 9 * xyz_ref_white[1] / ([1, 15, 3] @ xyz_ref_white)
+    uv_weights = np.array([1, 15, 3], dtype=arr.dtype)
+    u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
@@ -1523,18 +1483,20 @@ def luv2xyz(luv, illuminant="D65", observer="2", *, channel_axis=-1):
 
     L, u, v = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    eps = np.finfo(float).eps
+    eps = np.finfo(arr.dtype).eps
 
     # compute y
     y = L.copy()
     mask = y > 7.999625
     y[mask] = np.power((y[mask] + 16.0) / 116.0, 3.0)
     y[~mask] = y[~mask] / 903.3
-    xyz_ref_white = xyz_tristimulus_values(illuminant=illuminant, observer=observer)
+    xyz_ref_white = xyz_tristimulus_values(
+        illuminant=illuminant, observer=observer, dtype=arr.dtype
+    )
     y *= xyz_ref_white[1]
 
     # reference white x,z
-    uv_weights = np.array([1, 15, 3])
+    uv_weights = np.array([1, 15, 3], dtype=arr.dtype)
     u0 = 4 * xyz_ref_white[0] / (uv_weights @ xyz_ref_white)
     v0 = 9 * xyz_ref_white[1] / (uv_weights @ xyz_ref_white)
 

@@ -5,7 +5,6 @@ import numpy as np
 
 from ._haar import haar_like_feature_coord_wrapper
 from ._haar import haar_like_feature_wrapper
-from .._shared.utils import deprecate_kwarg
 from ..color import gray2rgb
 from ..draw import rectangle
 from ..util import img_as_float
@@ -233,9 +232,6 @@ def haar_like_feature(
         return haar_feature
 
 
-@deprecate_kwarg(
-    {'random_state': 'rng'}, deprecated_version='0.21', removed_version='0.23'
-)
 def draw_haar_like_feature(
     image,
     r,

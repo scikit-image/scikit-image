@@ -227,3 +227,15 @@ def test_int_to_float():
 
     assert_equal(floats.max(), 1)
     assert_equal(floats.min(), -1)
+
+
+def test_img_as_ubyte_supports_npulonglong():
+    # Pre NumPy <2.0.0, `data_scaled.dtype.type` is `np.ulonglong` instead of
+    # np.uint64 as one might expect. This caused issues with `img_as_ubyte` due
+    # to `np.ulonglong` missing from `skimage.util.dtype._integer_types`.
+    # This doesn't seem to be an issue for NumPy >=2.0.0.
+    # https://github.com/scikit-image/scikit-image/issues/7385
+    data = np.arange(50, dtype=np.uint64)
+    data_scaled = data * 256 ** (data.dtype.itemsize - 1)
+    result = img_as_ubyte(data_scaled)
+    assert result.dtype == np.uint8

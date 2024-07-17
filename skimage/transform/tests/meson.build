@@ -6,7 +6,8 @@ python_sources = [
   'test_integral.py',
   'test_pyramids.py',
   'test_radon_transform.py',
-  'test_warps.py'
+  'test_thin_plate_splines.py',
+  'test_warps.py',
 ]
 
 py3.install_sources(

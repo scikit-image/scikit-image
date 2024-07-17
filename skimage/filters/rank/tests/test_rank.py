@@ -1,3 +1,5 @@
+import inspect
+
 import numpy as np
 import pytest
 
@@ -12,6 +14,7 @@ from skimage._shared.testing import (
 )
 from skimage.filters import rank
 from skimage.filters.rank import __all__ as all_rank_filters
+from skimage.filters.rank import __3Dfilters as _3d_rank_filters
 from skimage.filters.rank import subtract_mean
 from skimage.morphology import ball, disk, gray
 from skimage.util import img_as_float, img_as_ubyte
@@ -154,29 +157,7 @@ class TestRank:
             getattr(rank, filter)(self.image.astype(np.uint8), footprint_sequence)
 
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
-    @pytest.mark.parametrize(
-        'filter',
-        [
-            'equalize',
-            'otsu',
-            'autolevel',
-            'gradient',
-            'majority',
-            'maximum',
-            'mean',
-            'geometric_mean',
-            'subtract_mean',
-            'median',
-            'minimum',
-            'modal',
-            'enhance_contrast',
-            'pop',
-            'sum',
-            'threshold',
-            'noise_filter',
-            'entropy',
-        ],
-    )
+    @pytest.mark.parametrize('filter', _3d_rank_filters)
     def test_rank_filters_3D(self, filter, outdt):
         @run_in_parallel(warnings_matching=['Possible precision loss'])
         def check():
@@ -1116,3 +1097,37 @@ class TestRank:
         elem = np.ones((3, 3), dtype=bool)
         with pytest.raises(ValueError):
             rank.maximum(image=image, footprint=elem)
+
+    @pytest.mark.parametrize("filter", all_rank_filters)
+    @pytest.mark.parametrize("shift_name", ["shift_x", "shift_y"])
+    @pytest.mark.parametrize("shift_value", [False, True])
+    def test_rank_filters_boolean_shift(self, filter, shift_name, shift_value):
+        """Test warning if shift is provided as a boolean."""
+        filter_func = getattr(rank, filter)
+        image = img_as_ubyte(self.image)
+        kwargs = {"footprint": self.footprint, shift_name: shift_value}
+
+        with pytest.warns() as record:
+            filter_func(image, **kwargs)
+            expected_lineno = inspect.currentframe().f_lineno - 1
+        assert len(record) == 1
+        assert "will be interpreted as int" in record[0].message.args[0]
+        assert record[0].filename == __file__
+        assert record[0].lineno == expected_lineno
+
+    @pytest.mark.parametrize("filter", _3d_rank_filters)
+    @pytest.mark.parametrize("shift_name", ["shift_x", "shift_y", "shift_z"])
+    @pytest.mark.parametrize("shift_value", [False, True])
+    def test_rank_filters_3D_boolean_shift(self, filter, shift_name, shift_value):
+        """Test warning if shift is provided as a boolean."""
+        filter_func = getattr(rank, filter)
+        image = img_as_ubyte(self.volume)
+        kwargs = {"footprint": self.footprint_3d, shift_name: shift_value}
+
+        with pytest.warns() as record:
+            filter_func(image, **kwargs)
+            expected_lineno = inspect.currentframe().f_lineno - 1
+        assert len(record) == 1
+        assert "will be interpreted as int" in record[0].message.args[0]
+        assert record[0].filename == __file__
+        assert record[0].lineno == expected_lineno

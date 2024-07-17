@@ -3,6 +3,7 @@ import pathlib
 import numpy as np
 
 from .._shared.utils import warn
+from .._shared.version_requirements import require
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin
@@ -194,6 +195,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
     return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
 
 
+@require("matplotlib", ">=3.3")
 def show():
     """Display pending images.
 
@@ -206,8 +208,10 @@ def show():
 
     Examples
     --------
-    >>> import skimage.io as io
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('matplotlib')
 
+    >>> import skimage.io as io
     >>> rng = np.random.default_rng()
     >>> for i in range(4):
     ...     ax_im = io.imshow(rng.random((50, 50)))

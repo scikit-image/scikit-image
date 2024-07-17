@@ -1,6 +1,7 @@
 python_sources = [
   '__init__.py',
   'test_coord.py',
+  'test_dtype.py',
   'test_fast_exp.py',
   'test_geometry.py',
   'test_interpolation.py',
