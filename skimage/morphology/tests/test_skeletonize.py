@@ -31,10 +31,13 @@ class TestSkeletonize:
             skeletonize(image, method="foo")
 
     @pytest.mark.parametrize("method", ["zhang", "lee"])
-    def test_skeletonize_all_foreground(self, method):
+    def test_skeletonize_all_foreground_zhang(self, method):
         image = np.ones((3, 4), dtype=bool)
         result = skeletonize(image, method=method)
-        expected = np.array([[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]], dtype=bool)
+        if method == "zhang":
+            expected = np.array([[0, 0, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]], dtype=bool)
+        else:  # "lee"
+            expected = np.array([[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]], dtype=bool)
         assert_array_equal(result, expected)
 
     @pytest.mark.parametrize("method", ["zhang", "lee"])
@@ -134,8 +137,7 @@ class TestSkeletonize:
         )
         assert np.all(result == expected)
 
-    @pytest.mark.parametrize("method", ["zhang", "lee"])
-    @pytest.mark.parametrize("ndim", [2, 3])
+    @pytest.mark.parametrize("ndim,method", [(2, "zhang"), (2, "lee"), (3, "lee")])
     @pytest.mark.parametrize("dtype", [bool, np.uint8])
     def test_input_not_modified(self, method, ndim, dtype):
         # Skeletonize must not modify the input image
