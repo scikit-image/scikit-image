@@ -8,12 +8,12 @@ from skimage._shared.testing import fetch
 from skimage.io import imread, imsave, reset_plugins, use_plugin
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _use_tifffile_plugin():
+    """Ensure that PIL plugin is used in tests here."""
     use_plugin('tifffile')
     np.random.seed(0)
-
-
-def teardown():
+    yield
     reset_plugins()
 
 
@@ -27,7 +27,7 @@ def test_imread_uint16():
 def test_imread_uint16_big_endian():
     expected = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     img = imread(fetch('data/chessboard_GRAY_U16B.tif'))
-    assert img.dtype == np.uint16
+    assert img.dtype.type == np.uint16
     assert_array_almost_equal(img, expected)
 
 

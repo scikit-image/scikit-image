@@ -3,10 +3,12 @@ Testing utilities.
 """
 
 import os
+import platform
 import re
 import struct
-import threading
+import sys
 import functools
+import inspect
 from tempfile import NamedTemporaryFile
 
 import numpy as np
@@ -25,12 +27,11 @@ from numpy.testing import (
     assert_array_less,
 )
 
-import warnings
-
 from .. import data, io
 from ..data._fetchers import _fetch
 from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
+from ._dependency_checks import is_wasm
 
 import pytest
 
@@ -43,23 +44,10 @@ fixture = pytest.fixture
 
 SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 
-
 # true if python is running in 32bit mode
 # Calculate the size of a void * pointer in bits
 # https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
-
-
-_error_on_warnings = os.environ.get('SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL', '0')
-if _error_on_warnings.lower() == 'true':
-    _error_on_warnings = True
-elif _error_on_warnings.lower() == 'false':
-    _error_on_warnings = False
-else:
-    try:
-        _error_on_warnings = bool(int(_error_on_warnings))
-    except ValueError:
-        _error_on_warnings = False
 
 
 def assert_less(a, b, msg=None):
@@ -205,114 +193,6 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(r5, img5)
 
 
-def setup_test():
-    """Default package level setup routine for skimage tests.
-
-    Import packages known to raise warnings, and then
-    force warnings to raise errors.
-
-    Also set the random seed to zero.
-    """
-    warnings.simplefilter('default')
-
-    if _error_on_warnings:
-        np.random.seed(0)
-
-        warnings.simplefilter('error')
-
-        warnings.filterwarnings(
-            'default', message='unclosed file', category=ResourceWarning
-        )
-
-        # Ignore other warnings only seen when using older versions of
-        # dependencies.
-        warnings.filterwarnings(
-            'default',
-            message='Conversion of the second argument of issubdtype',
-            category=FutureWarning,
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='the matrix subclass is not the recommended way',
-            category=PendingDeprecationWarning,
-            module='numpy',
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='Your installed pillow version',
-            category=UserWarning,
-            module='skimage.io',
-        )
-
-        # ignore warning from cycle_spin about Dask not being installed
-        warnings.filterwarnings(
-            'default',
-            message='The optional dask dependency is not installed.',
-            category=UserWarning,
-        )
-
-        warnings.filterwarnings(
-            'default', message='numpy.ufunc size changed', category=RuntimeWarning
-        )
-
-        warnings.filterwarnings(
-            'default',
-            message='\n\nThe scipy.sparse array containers',
-            category=DeprecationWarning,
-        )
-
-        # ignore dtype deprecation warning from NumPy arising from use of SciPy
-        # as a reference in test_watershed09. Should be fixed in scipy>=1.9.4
-        # https://github.com/scipy/scipy/commit/da3ff893b9ac161938e11f9bcd5380e09cf03150
-        warnings.filterwarnings(
-            'default',
-            message=('`np.int0` is a deprecated alias for `np.intp`'),
-            category=DeprecationWarning,
-        )
-
-        # Temporary warning raised by imageio about change in Pillow. May be removed
-        # once https://github.com/python-pillow/Pillow/pull/7125 is shipped in the
-        # minimal required version of pillow (probably the release after Pillow 9.5.0)
-        warnings.filterwarnings(
-            "default",
-            message=(
-                r"Loading 16-bit \(uint16\) PNG as int32 due to limitations in "
-                r"pillow's PNG decoder\. This will be fixed in a future version of "
-                r"pillow which will make this warning dissapear\."
-            ),
-            category=UserWarning,
-        )
-
-        # Temporary warning raised by scipy. May be removed when scipy 1.12 is
-        # minimum supported version and we replace tol with rtol
-        warnings.filterwarnings(
-            "default",
-            message=(
-                "'scipy.sparse.linalg.cg' keyword argument `tol` is deprecated in "
-                "favor of `rtol`"
-            ),
-            category=DeprecationWarning,
-        )
-
-        warnings.filterwarnings(
-            "default",
-            message=("The figure layout has changed to tight"),
-            category=UserWarning,
-        )
-
-
-def teardown_test():
-    """Default package level teardown routine for skimage tests.
-
-    Restore warnings to default behavior
-    """
-    if _error_on_warnings:
-        warnings.resetwarnings()
-        warnings.simplefilter('default')
-
-
 def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
@@ -321,11 +201,16 @@ def fetch(data_filename):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
+# Ref: about the lack of threading support in WASM, please see
+# https://github.com/pyodide/pyodide/issues/237
 def run_in_parallel(num_threads=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
     concurrently and correctly while releasing the GIL.
+
+    It is currently skipped when running on WASM-based platforms, as
+    the threading module is not supported.
 
     Parameters
     ----------
@@ -343,6 +228,12 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
     assert num_threads > 0
 
     def wrapper(func):
+        if is_wasm:
+            # Threading isn't supported on WASM, return early
+            return func
+
+        import threading
+
         @functools.wraps(func)
         def inner(*args, **kwargs):
             with expected_warnings(warnings_matching):
@@ -361,3 +252,52 @@ def run_in_parallel(num_threads=2, warnings_matching=None):
         return inner
 
     return wrapper
+
+
+def assert_stacklevel(warnings, *, offset=-1):
+    """Assert correct stacklevel of captured warnings.
+
+    When scikit-image raises warnings, the stacklevel should ideally be set
+    so that the origin of the warnings will point to the public function
+    that was called by the user and not necessarily the very place where the
+    warnings were emitted (which may be inside of some internal function).
+    This utility function helps with checking that
+    the stacklevel was set correctly on warnings captured by `pytest.warns`.
+
+    Parameters
+    ----------
+    warnings : collections.abc.Iterable[warning.WarningMessage]
+        Warnings that were captured by `pytest.warns`.
+    offset : int, optional
+        Offset from the line this function is called to the line were the
+        warning is supposed to originate from. For multiline calls, the
+        first line is relevant. Defaults to -1 which corresponds to the line
+        right above the one where this function is called.
+
+    Raises
+    ------
+    AssertionError
+        If a warning in `warnings` does not match the expected line number or
+        file name.
+
+    Examples
+    --------
+    >>> def test_something():
+    ...     with pytest.warns(UserWarning, match="some message") as record:
+    ...         something_raising_a_warning()
+    ...     assert_stacklevel(record)
+    ...
+    >>> def test_another_thing():
+    ...     with pytest.warns(UserWarning, match="some message") as record:
+    ...         iam_raising_many_warnings(
+    ...             "A long argument that forces the call to wrap."
+    ...         )
+    ...     assert_stacklevel(record, offset=-3)
+    """
+    frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
+    line_number = frame.f_lineno + offset
+    filename = frame.f_code.co_filename
+    expected = f"{filename}:{line_number}"
+    for warning in warnings:
+        actual = f"{warning.filename}:{warning.lineno}"
+        assert actual == expected, f"{actual} != {expected}"

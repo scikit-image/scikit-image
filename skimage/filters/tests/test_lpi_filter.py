@@ -15,15 +15,13 @@ from skimage.filters import (
 
 def test_filter_forward():
     def filt_func(r, c, sigma=2):
-        return (1 / (2 * np.pi * sigma**2)) * np.exp(
-            -(r**2 + c**2) / (2 * sigma**2)
-        )
+        return (1 / (2 * np.pi * sigma**2)) * np.exp(-(r**2 + c**2) / (2 * sigma**2))
 
     gaussian_args = {
         'sigma': 2,
         'preserve_range': True,
         'mode': 'constant',
-        'truncate': 20  # LPI filtering is more precise than the truncated
+        'truncate': 20,  # LPI filtering is more precise than the truncated
         # Gaussian, so don't truncate at the default of 4 sigma
     }
 

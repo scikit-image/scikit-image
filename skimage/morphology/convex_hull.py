@@ -1,4 +1,5 @@
 """Convex Hull."""
+
 from itertools import product
 import numpy as np
 from scipy.spatial import ConvexHull, QhullError

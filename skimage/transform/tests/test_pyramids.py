@@ -1,4 +1,5 @@
 import math
+import warnings
 
 import pytest
 import numpy as np
@@ -27,20 +28,20 @@ def test_pyramid_reduce_gray():
     rows, cols = image_gray.shape
     out1 = pyramids.pyramid_reduce(image_gray, downscale=2, channel_axis=None)
     assert_array_equal(out1.shape, (rows / 2, cols / 2))
-    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
     out2 = pyramids.pyramid_reduce(
         image_gray, downscale=2, channel_axis=None, preserve_range=True
     )
-    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_gray_defaults():
     rows, cols = image_gray.shape
     out1 = pyramids.pyramid_reduce(image_gray)
     assert_array_equal(out1.shape, (rows / 2, cols / 2))
-    assert_almost_equal(out1.ptp(), 1.0, decimal=2)
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
     out2 = pyramids.pyramid_reduce(image_gray, preserve_range=True)
-    assert_almost_equal(out2.ptp() / image_gray.ptp(), 1.0, decimal=2)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_nd():
@@ -194,8 +195,16 @@ def test_check_factor():
     'pyramid_func', [pyramids.pyramid_gaussian, pyramids.pyramid_laplacian]
 )
 def test_pyramid_dtype_support(pyramid_func, dtype):
-    img = np.random.randn(32, 8).astype(dtype)
-    pyramid = pyramid_func(img)
+    with warnings.catch_warnings():
+        # Ignore arch specific warning on arm64, armhf, ppc64el, riscv64, s390x
+        # https://github.com/scikit-image/scikit-image/issues/7391
+        warnings.filterwarnings(
+            action="ignore",
+            category=RuntimeWarning,
+            message="invalid value encountered in cast",
+        )
+        img = np.random.randn(32, 8).astype(dtype)
 
+    pyramid = pyramid_func(img)
     float_dtype = _supported_float_type(dtype)
     assert np.all([im.dtype == float_dtype for im in pyramid])

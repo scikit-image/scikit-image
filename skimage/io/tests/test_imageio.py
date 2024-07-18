@@ -4,7 +4,7 @@ import numpy as np
 from skimage.io import imread, imsave, plugin_order
 
 from skimage._shared import testing
-from skimage._shared.testing import fetch
+from skimage._shared.testing import fetch, assert_stacklevel
 
 import pytest
 
@@ -24,7 +24,7 @@ def test_imageio_as_gray():
     assert img.dtype == np.float64
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
 def test_imageio_palette():
@@ -74,10 +74,11 @@ class TestSave:
         with NamedTemporaryFile(suffix='.png') as f:
             fname = f.name
 
-        with pytest.warns(UserWarning, match=r'.* is a boolean image'):
+        with pytest.warns(UserWarning, match=r'.* is a boolean image') as record:
             a = np.zeros((5, 5), bool)
             a[2, 2] = True
             imsave(fname, a)
+        assert_stacklevel(record)
 
 
 def test_return_class():

@@ -76,7 +76,7 @@ img_list = [
 ref_img = img_list[0].copy()
 
 img_list = [
-    util.random_noise(filters.gaussian(im, 1.1), var=5e-4, rng=seed)
+    util.random_noise(filters.gaussian(im, sigma=1.1), var=5e-4, rng=seed)
     for seed, im in enumerate(img_list)
 ]
 

@@ -7,6 +7,7 @@ This example illustrates the different edge modes available during
 interpolation in routines such as :py:func:`skimage.transform.rescale`
 and :py:func:`skimage.transform.resize`.
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

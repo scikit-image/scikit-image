@@ -367,9 +367,9 @@ def blob_dog(
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
     dog_image_cube = np.empty(image.shape + (k,), dtype=float_dtype)
-    gaussian_previous = gaussian(image, sigma_list[0], mode='reflect')
+    gaussian_previous = gaussian(image, sigma=sigma_list[0], mode='reflect')
     for i, s in enumerate(sigma_list[1:]):
-        gaussian_current = gaussian(image, s, mode='reflect')
+        gaussian_current = gaussian(image, sigma=s, mode='reflect')
         dog_image_cube[..., i] = gaussian_previous - gaussian_current
         gaussian_previous = gaussian_current
 
