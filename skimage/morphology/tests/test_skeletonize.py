@@ -31,7 +31,7 @@ class TestSkeletonize:
             skeletonize(image, method="foo")
 
     @pytest.mark.parametrize("method", ["zhang", "lee"])
-    def test_skeletonize_all_foreground_zhang(self, method):
+    def test_skeletonize_all_foreground(self, method):
         image = np.ones((3, 4), dtype=bool)
         result = skeletonize(image, method=method)
         if method == "zhang":
