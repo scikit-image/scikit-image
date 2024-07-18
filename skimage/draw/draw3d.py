@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import ellipkinc as ellip_F, ellipeinc as ellip_E
+from scipy.special import elliprg
 
 
 def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
@@ -98,12 +98,6 @@ def ellipsoid_stats(a, b, c):
     vol = 4 / 3.0 * np.pi * a * b * c
 
     # Analytical ellipsoid surface area
-    phi = np.arcsin((1.0 - (c**2 / (a**2.0))) ** 0.5)
-    d = float((a**2 - c**2) ** 0.5)
-    m = a**2 * (b**2 - c**2) / float(b**2 * (a**2 - c**2))
-    F = ellip_F(phi, m)
-    E = ellip_E(phi, m)
-
-    surf = 2 * np.pi * (c**2 + b * c**2 / d * F + b * d * E)
+    surf = 3 * vol * elliprg(1 / a**2, 1 / b**2, 1 / c**2)
 
     return vol, surf
