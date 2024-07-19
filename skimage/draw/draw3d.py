@@ -5,8 +5,8 @@ from scipy.special import elliprg
 def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
     """Generate ellipsoid for given semi-axis lengths.
 
-    The respective semi-axes are aligned with grid dimensions
-    on grid with specified `spacing`.
+    The respective semi-axis lengths are given along three dimensions in
+    Cartesian coordinates. Each dimension may use a different grid spacing.
 
     Parameters
     ----------
@@ -17,7 +17,7 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
     c : float
         Length of semi-axis aligned with z-axis.
     spacing : 3-tuple of floats
-        Spacing in three spatial dimensions.
+        Grid spacing in three spatial dimensions.
     levelset : bool
         If True, returns the level set for this ellipsoid (signed level
         set about zero, with positive denoting interior) as np.float64.
