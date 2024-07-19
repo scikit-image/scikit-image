@@ -3,18 +3,17 @@ from scipy.special import elliprg
 
 
 def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
-    """
-    Generates ellipsoid with semimajor axes aligned with grid dimensions
+    """Generate ellipsoid with given semi-axes aligned with grid dimensions
     on grid with specified `spacing`.
 
     Parameters
     ----------
     a : float
-        Length of semimajor axis aligned with x-axis.
+        Length of semi-axis aligned with x-axis.
     b : float
-        Length of semimajor axis aligned with y-axis.
+        Length of semi-axis aligned with y-axis.
     c : float
-        Length of semimajor axis aligned with z-axis.
+        Length of semi-axis aligned with z-axis.
     spacing : 3-tuple of floats
         Spacing in three spatial dimensions.
     levelset : bool
@@ -62,18 +61,17 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
 
 
 def ellipsoid_stats(a, b, c):
-    """
-    Calculates analytical surface area and volume for ellipsoid with
-    semimajor axes aligned with grid dimensions of specified `spacing`.
+    """Calculate analytical volume and surface area for ellipsoid with given
+    semi-axes.
 
     Parameters
     ----------
     a : float
-        Length of semimajor axis aligned with x-axis.
+        Length of semi-axis aligned with x-axis.
     b : float
-        Length of semimajor axis aligned with y-axis.
+        Length of semi-axis aligned with y-axis.
     c : float
-        Length of semimajor axis aligned with z-axis.
+        Length of semi-axis aligned with z-axis.
 
     Returns
     -------
@@ -86,18 +84,16 @@ def ellipsoid_stats(a, b, c):
     if (a <= 0) or (b <= 0) or (c <= 0):
         raise ValueError('Parameters a, b, and c must all be > 0')
 
-    # Calculate volume & surface area
-    # Surface calculation requires a >= b >= c and a != c.
+    # Volume
+    vol = 4 / 3.0 * np.pi * a * b * c
+
     abc = [a, b, c]
     abc.sort(reverse=True)
     a = abc[0]
     b = abc[1]
     c = abc[2]
 
-    # Volume
-    vol = 4 / 3.0 * np.pi * a * b * c
-
-    # Analytical ellipsoid surface area
+    # Surface area
     surf = 3 * vol * elliprg(1 / a**2, 1 / b**2, 1 / c**2)
 
     return vol, surf
