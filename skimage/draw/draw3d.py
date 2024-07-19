@@ -64,6 +64,9 @@ def ellipsoid_stats(a, b, c):
     """Calculate analytical volume and surface area for ellipsoid with given
     semi-axes.
 
+    This function makes use of :py:func:`scipy.special.elliprg` to calculate
+    the surface area.
+
     Parameters
     ----------
     a : float
