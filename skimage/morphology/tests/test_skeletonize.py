@@ -147,7 +147,7 @@ class TestThin:
 
     @pytest.mark.parametrize("dtype", [bool, float, int])
     def test_thin_copies_input(self, dtype):
-        """Thin mustn't modify the original input image."""
+        """Ensure thinning does not modify the input image."""
         image = self.input_image.astype(dtype)
         original = image.copy()
         thin(image)
