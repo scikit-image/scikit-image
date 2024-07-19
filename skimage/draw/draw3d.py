@@ -87,12 +87,6 @@ def ellipsoid_stats(a, b, c):
     # Volume
     vol = 4 / 3.0 * np.pi * a * b * c
 
-    abc = [a, b, c]
-    abc.sort(reverse=True)
-    a = abc[0]
-    b = abc[1]
-    c = abc[2]
-
     # Surface area
     surf = 3 * vol * elliprg(1 / a**2, 1 / b**2, 1 / c**2)
 
