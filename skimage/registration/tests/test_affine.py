@@ -121,6 +121,19 @@ def test_scale_parameters(ndim):
     assert_array_equal(matrix[:ndim, :ndim], scaled[:ndim, :ndim])
 
 
+def test_scale_inital_parameters():
+    target = data.camera()[::4, ::4].astype(float)
+    forward = np.array(
+        [[1.0, 0.0, 0], [0.0, -1.0, target.shape[1] - 1], [0.0, 0.0, 1.0]]
+    )
+    reference = ndi.affine_transform(target, forward)
+    matrix = affine(reference, target, model="translation", matrix=forward)
+    tre = target_registration_error(reference.shape, matrix @ forward)
+    assert (
+        tre.max() < max_error
+    ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels. {matrix.ravel()}"
+
+
 @pytest.mark.parametrize("solver", solvers)
 def test_3d(solver):
     reference = data.cells3d()[:, 1, ::4, ::4]

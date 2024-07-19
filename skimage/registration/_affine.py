@@ -12,7 +12,7 @@ from scipy.optimize import minimize
 from skimage.transform.pyramids import pyramid_gaussian
 from skimage.metrics import normalized_mutual_information
 
-from math import log, floor, cos, sin
+from math import log, floor, cos, sin, pow
 
 
 def target_registration_error(shape, matrix):
@@ -425,7 +425,7 @@ def affine(
     matrix=None,
     model="affine",
     solver=lucas_kanade_affine_solver,
-    pyramid_downscale=2,
+    pyramid_downscale=2.0,
     pyramid_minimum_size=32,
 ):
     """
@@ -523,6 +523,10 @@ def affine(
             ]
         )
     )
+
+    if matrix is not None:
+        first_scale = pow(pyramid_downscale, -max_layer)
+        matrix = _scale_parameters(matrix, model, ndim, first_scale)
 
     matrix = solver(
         pyramid[0][0],
