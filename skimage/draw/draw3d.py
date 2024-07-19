@@ -11,11 +11,11 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
     Parameters
     ----------
     a : float
-        Length of semi-axis aligned with x-axis.
+        Length of semi-axis along x-axis.
     b : float
-        Length of semi-axis aligned with y-axis.
+        Length of semi-axis along y-axis.
     c : float
-        Length of semi-axis aligned with z-axis.
+        Length of semi-axis along z-axis.
     spacing : 3-tuple of floats
         Grid spacing in three spatial dimensions.
     levelset : bool
@@ -71,11 +71,11 @@ def ellipsoid_stats(a, b, c):
     Parameters
     ----------
     a : float
-        Length of semi-axis aligned with x-axis.
+        Length of semi-axis along x-axis.
     b : float
-        Length of semi-axis aligned with y-axis.
+        Length of semi-axis along y-axis.
     c : float
-        Length of semi-axis aligned with z-axis.
+        Length of semi-axis along z-axis.
 
     Returns
     -------
