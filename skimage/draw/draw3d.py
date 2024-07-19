@@ -3,7 +3,7 @@ from scipy.special import elliprg
 
 
 def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
-    """Generate ellipsoid for given lengths of semi-axes.
+    """Generate ellipsoid for given semi-axis lengths.
 
     The respective semi-axes are aligned with grid dimensions
     on grid with specified `spacing`.
