@@ -3,7 +3,9 @@ from scipy.special import elliprg
 
 
 def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
-    """Generate ellipsoid with given semi-axes aligned with grid dimensions
+    """Generate ellipsoid for given lengths of semi-axes.
+
+    The respective semi-axes are aligned with grid dimensions
     on grid with specified `spacing`.
 
     Parameters
@@ -61,8 +63,7 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
 
 
 def ellipsoid_stats(a, b, c):
-    """Calculate analytical volume and surface area for ellipsoid with given
-    semi-axes.
+    """Calculate analytical volume and surface area of an ellipsoid.
 
     This function makes use of :py:func:`scipy.special.elliprg` to calculate
     the surface area.
