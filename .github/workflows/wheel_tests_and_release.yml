@@ -47,7 +47,7 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           source tools/github/before_install.sh
-          python -m build --no-isolation --skip-dependency-check --sdist .
+          spin sdist -- --no-isolation --skip-dependency-check
           ls -la ${{ github.workspace }}/dist
 
       - name: Generate artifact attestation for sdist and wheels

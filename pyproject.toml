@@ -136,7 +136,7 @@ package = 'skimage'
 Build = [
     'spin.cmds.meson.build',
     'spin.cmds.meson.test',
-    'spin.cmds.build.sdist',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
     'spin.cmds.meson.run',

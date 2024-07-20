@@ -15,8 +15,9 @@ sdist_name = args.sdist_name[0]
 with tarfile.open(sdist_name) as tar:
     members = tar.getmembers()
 
+
 # The very first item contains the name of the archive
-top_parent = Path(members[0].name)
+top_parent = Path(members[0].name).parts[0]
 
 filenames = ['./' + str(Path(m.name).relative_to(top_parent)) for m in members[1:]]
 
@@ -29,13 +30,17 @@ ignore_dirs = [
     './downloads',
     './scikit_image.egg-info',
     './benchmarks',
+    './emsdk',
 ]
 ignore_files = [
     './TODO.md',
     './README.md',
     './MANIFEST',
     './CODE_OF_CONDUCT.md',
+    './SECURITY.md',
     './.gitignore',
+    './.gitattributes',
+    './.git-blame-ignore-revs',
     './.travis.yml',
     './.gitmodules',
     './.mailmap',
@@ -45,6 +50,7 @@ ignore_files = [
     './.pep8speaks.yml',
     './asv.conf.json',
     './.codecov.yml',
+    './.pre-commit-config.yaml',
 ]
 
 # These docstring artifacts are hard to avoid without adding noise to the
@@ -78,7 +84,7 @@ if missing:
     for m in missing:
         print('  ', m)
 
-    print('\nPlease update MANIFEST.in')
+    print('\nPlease update .gitattributes')
 
     sys.exit(1)
 else:
