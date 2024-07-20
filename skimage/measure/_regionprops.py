@@ -1296,6 +1296,7 @@ def regionprops(
         A slice to extract the object from the source image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
+    *END OF LIST* (this line is here for regex parsing reasons)
 
     Each region also supports iteration, so that you can do::
 
@@ -1407,7 +1408,12 @@ def _parse_docs():
 
     doc = regionprops.__doc__ or ''
     matches = re.finditer(
-        r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL
+        # the fudging of the count of leading spaces on the description
+        # lines is because Python 3.13+ deindents docstrings:
+        # https://docs.python.org/3.13/whatsnew/3.13.html#other-language-changes
+        r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n {0,4}\*+)',
+        doc,
+        flags=re.DOTALL,
     )
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
