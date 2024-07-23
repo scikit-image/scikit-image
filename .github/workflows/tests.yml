@@ -121,7 +121,7 @@ jobs:
         uses: actions/checkout@v4
 
       # TODO: replace with setup-python when there is support
-      - uses: deadsnakes/action@e704e592227156e253e24c7f7ccf2bfe62ef58d4 # v3.1.0
+      - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
         with:
           python-version: "3.13"
           nogil: true
