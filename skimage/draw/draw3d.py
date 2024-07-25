@@ -91,7 +91,7 @@ def ellipsoid_stats(a, b, c):
 
     References
     ----------
-    .. [1] Paul Masson. Surface Area of an Ellipsoid.
+    .. [1] Paul Masson (2020). Surface Area of an Ellipsoid.
            https://analyticphysics.com/Mathematical%20Methods/Surface%20Area%20of%20an%20Ellipsoid.htm
 
     """
