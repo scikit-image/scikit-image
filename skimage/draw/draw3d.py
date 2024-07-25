@@ -65,8 +65,13 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), levelset=False):
 def ellipsoid_stats(a, b, c):
     """Calculate analytical volume and surface area of an ellipsoid.
 
-    This function makes use of :py:func:`scipy.special.elliprg` to calculate
-    the surface area.
+    The surface area of an ellipsoid is given by
+
+    .. math:: S=4\\pi b c R_G\\!\\left(1, \\frac{a^2}{b^2}, \\frac{a^2}{c^2}\\right)
+
+    where :math:`R_G` is Carlson's completely symmetric elliptic integral of
+    the second kind [1]_. The latter is implemented as
+    :py:func:`scipy.special.elliprg`.
 
     Parameters
     ----------
@@ -83,6 +88,11 @@ def ellipsoid_stats(a, b, c):
         Calculated volume of ellipsoid.
     surf : float
         Calculated surface area of ellipsoid.
+
+    References
+    ----------
+    .. [1] Paul Masson. Surface Area of an Ellipsoid.
+           https://analyticphysics.com/Mathematical%20Methods/Surface%20Area%20of%20an%20Ellipsoid.htm
 
     """
     if (a <= 0) or (b <= 0) or (c <= 0):
