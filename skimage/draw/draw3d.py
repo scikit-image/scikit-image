@@ -98,7 +98,7 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levels
         low[1] : high[1] : spacing[1],
         low[2] : high[2] : spacing[2],
     ]
-    prc_grid = np.vtack((plane_grid.flatten(), row_grid.flatten(), col_grid.flatten()))
+    prc_grid = np.vstack((plane_grid.flatten(), row_grid.flatten(), col_grid.flatten()))
     # Rotate the grid i.e. passive rotation
     prc_grid_rot = rotation_matrix.T @ prc_grid
 
