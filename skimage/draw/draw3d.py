@@ -2,8 +2,9 @@ import numpy as np
 from scipy.special import elliprg
 
 
-# works! using the explicit formula from https://mathworld.wolfram.com/Ellipsoid.html
-def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levelset=False):
+def ellipsoid(
+    a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levelset=False
+):
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
     on grid with specified `spacing`.
@@ -108,9 +109,17 @@ def ellipsoid(a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levels
     col_grid_rot = prc_grid_rot[2, :].reshape(col_grid.shape)
 
     if not levelset:
-        arr = ((plane_grid_rot / float(a)) ** 2 + (row_grid_rot / float(b)) ** 2 + (col_grid_rot / float(c)) ** 2) <= 1
+        arr = (
+            (plane_grid_rot / float(a)) ** 2
+            + (row_grid_rot / float(b)) ** 2
+            + (col_grid_rot / float(c)) ** 2
+        ) <= 1
     else:
-        arr = ((plane_grid_rot / float(a)) ** 2 + (row_grid_rot / float(b)) ** 2 + (col_grid_rot / float(c)) ** 2) - 1
+        arr = (
+            (plane_grid_rot / float(a)) ** 2
+            + (row_grid_rot / float(b)) ** 2
+            + (col_grid_rot / float(c)) ** 2
+        ) - 1
 
     return arr
 
