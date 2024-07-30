@@ -12,16 +12,16 @@ from ._skeletonize_cy import _fast_skeletonize, _skeletonize_loop, _table_lookup
 
 
 def skeletonize(image, *, method=None):
-    """Compute the skeleton of a binary image.
-
-    Thinning is used to reduce each connected component in a binary image
-    to a single-pixel wide skeleton.
+    """Compute the skeleton of the input image via thinning.
 
     Parameters
     ----------
-    image : ndarray, 2D or 3D
-        An image containing the objects to be skeletonized. Zeros or ``False``
-        represent background, nonzero values or ``True`` are foreground.
+    image : (M, N[, P]) ndarray of bool or int
+        The image containing the objects to be skeletonized. Each connected component
+        in the image is reduced to a single-pixel wide skeleton. The image is binarized
+        prior to thinning; thus, adjacent objects of different intensities are
+        considered as one. Zero or ``False`` values represent the background, nonzero
+        or ``True`` values -- foreground.
     method : {'zhang', 'lee'}, optional
         Which algorithm to use. Zhang's algorithm [Zha84]_ only works for
         2D images, and is the default for 2D. Lee's algorithm [Lee94]_
@@ -29,7 +29,7 @@ def skeletonize(image, *, method=None):
 
     Returns
     -------
-    skeleton : ndarray of bool
+    skeleton : (M, N[, P]) ndarray of bool
         The thinned image.
 
     See Also
@@ -321,7 +321,7 @@ def thin(image, max_num_iter=None):
     check_nD(image, 2)
 
     # convert image to uint8 with values in {0, 1}
-    skel = np.asanyarray(image, dtype=bool).view(np.uint8)
+    skel = np.asanyarray(image, dtype=bool).copy().view(np.uint8)
 
     # neighborhood mask
     mask = np.array([[8, 4, 2], [16, 0, 1], [32, 64, 128]], dtype=np.uint8)
