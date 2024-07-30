@@ -146,6 +146,14 @@ class TestThin:
         assert np.all(thin(image) == False)
 
     @pytest.mark.parametrize("dtype", [bool, float, int])
+    def test_thin_copies_input(self, dtype):
+        """Ensure thinning does not modify the input image."""
+        image = self.input_image.astype(dtype)
+        original = image.copy()
+        thin(image)
+        np.testing.assert_array_equal(image, original)
+
+    @pytest.mark.parametrize("dtype", [bool, float, int])
     def test_iter_1(self, dtype):
         image = self.input_image.astype(dtype)
         result = thin(image, 1).astype(bool)
