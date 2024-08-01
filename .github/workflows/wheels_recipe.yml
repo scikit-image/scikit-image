@@ -98,7 +98,7 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-          CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
+          # CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
           CIBW_BEFORE_BUILD: "pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython numpy scipy pywavelets"
           CIBW_BEFORE_TEST: "pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython numpy scipy pywavelets"
           CIBW_TEST_COMMAND: "PYTHON_GIL=0 $CIBW_TEST_COMMAND"
