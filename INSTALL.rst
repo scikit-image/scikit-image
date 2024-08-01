@@ -175,14 +175,12 @@ To suggest a change in these instructions,
 Installing scikit-image for contributors
 ========================================
 
-We are assuming that you have a default Python environment already configured on
-your computer and that you intend to install ``scikit-image`` inside of it.
-
+We are assuming that you have already `installed Python <https://www.python.org/downloads/>`_
+on your computer and that you intend to use it for ``scikit-image``.
 We also make a few more assumptions about your system:
 
-- You have a C compiler set up.
-- You have a C++ compiler set up.
-- You are running a version of Python compatible with our system as listed
+- You have a C and C++ compiler set up.
+- You are running a version of Python compatible with ``scikit-image`` as listed
   in our `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_.
 - You've cloned the git repository into a directory called ``scikit-image``.
   You have set up the `upstream` remote to point to our repository and `origin`
@@ -227,12 +225,7 @@ Build environment setup
 
 Once you've cloned your fork of the scikit-image repository,
 you should set up a Python development environment tailored for scikit-image.
-You may choose the environment manager of your choice.
-Here we provide instructions for two popular environment managers:
-``venv`` (pip based) and ``conda`` (Anaconda or Miniconda).
-
-venv
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Here we provide instructions for the pip-based environment manager ``venv``.
 
 .. code-block:: sh
 
@@ -244,42 +237,9 @@ venv
   # (On Windows, please use ``skimage-dev\Scripts\activate``)
   source ~/envs/skimage-dev/bin/activate
   # Install main development and runtime dependencies
-  pip install -r requirements.txt
+  python -m pip install -r requirements.txt
   # Install build dependencies of scikit-image
-  pip install -r requirements/build.txt
-  # Build scikit-image from source
-  spin build
-  # The new version lives under `${PWD}/build-install/.../site-packages`.
-  # Test your installation
-  spin test
-  # Build docs
-  spin docs
-  # Try the new version in IPython
-  spin ipython
-
-conda
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When using conda for development, we
-recommend adding the conda-forge channel for the most up-to-date version
-of many dependencies.
-Some dependencies we use (for testing and documentation) are not available
-from the default Anaconda channel. Please follow the official
-`conda-forge installation instructions <https://conda-forge.org/#about>`_
-before you get started.
-
-.. code-block:: sh
-
-  # Create a conda environment named ``skimage-dev``
-  conda create --name skimage-dev
-  # Activate it
-  conda activate skimage-dev
-  # Install main development and runtime dependencies
-  conda install -c conda-forge --file requirements/default.txt
-  conda install -c conda-forge --file requirements/test.txt
-  conda install -c conda-forge pre-commit
-  # Install build dependencies of scikit-image
-  pip install -r requirements/build.txt
+  python -m pip install -r requirements/build.txt
   # Build scikit-image from source
   spin build
   # The new version lives under `${PWD}/build-install/.../site-packages`.
@@ -299,7 +259,7 @@ Test your installation for correct behavior using:
 
 .. code-block:: sh
 
-   pytest skimage
+   spin test
 
 Updating the installation
 ------------------------------------------------------------------------------
@@ -343,6 +303,14 @@ Install suitable compilers:
 .. code-block:: sh
 
   sudo apt-get install build-essential
+
+**Arch Linux**
+
+Install suitable compilers:
+
+.. code-block:: sh
+
+  sudo pacman -S base-devel
 
 
 Full requirements list

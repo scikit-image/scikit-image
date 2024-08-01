@@ -529,11 +529,6 @@ development environment, then if using ``venv`` you may install the requirement 
   source skimage-dev/bin/activate
   pip install asv
 
-If you are using conda, then the command::
-
-  conda activate skimage-dev
-  conda install asv
-
 is more appropriate. Once installed, it is useful to run the command::
 
   spin asv -- machine
