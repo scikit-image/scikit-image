@@ -101,7 +101,7 @@ jobs:
           # CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
           CIBW_BEFORE_BUILD: "pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython numpy scipy pywavelets"
           CIBW_BEFORE_TEST: "pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython numpy scipy pywavelets"
-          CIBW_TEST_COMMAND: "PYTHON_GIL=0 $CIBW_TEST_COMMAND"
+          CIBW_TEST_COMMAND: "PYTHON_GIL=0 pytest --pyargs skimage"
       - uses: actions/upload-artifact@v3
         with:
           name: wheels
