@@ -15,8 +15,10 @@ def _hog_normalize_block(block, method, eps=1e-5):
         out = block / np.sqrt(np.sum(block**2) + eps**2)
         out = np.minimum(out, 0.2)
         out = out / np.sqrt(np.sum(out**2) + eps**2)
+    elif method is None:
+        out = block
     else:
-        raise ValueError('Selected block normalization method is invalid.')
+        raise ValueError(f'Selected block normalization method \'{method}\' is invalid')
 
     return out
 
