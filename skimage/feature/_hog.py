@@ -80,7 +80,7 @@ def hog(
         Size (in pixels) of a cell.
     cells_per_block : 2-tuple (int, int), optional
         Number of cells in each block.
-    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, optional
+    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, None. optional
         Block normalization method:
 
         ``L1``
@@ -94,6 +94,8 @@ def hog(
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
            renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
+        None:
+            No normalization step is performed. 
 
     visualize : bool, optional
         Also return an image of the HOG.  For each cell and orientation bin,
