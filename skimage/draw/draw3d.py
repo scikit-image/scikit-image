@@ -3,8 +3,13 @@ from scipy.special import elliprg
 
 
 def ellipsoid(
-    a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levelset=False
-):
+    a: float,
+    b: float,
+    c: float,
+    spacing: Tuple[float, float, float] = (1.0, 1.0, 1.0),
+    rotation: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+    levelset: bool = False,
+) -> np.ndarray:
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
     on grid with specified `spacing`.
@@ -124,7 +129,7 @@ def ellipsoid(
     return arr
 
 
-def ellipsoid_stats(a, b, c):
+def ellipsoid_stats(a: float, b: float, c: float) -> Tuple[float, float]:
     """Calculate analytical volume and surface area of an ellipsoid.
 
     The surface area of an ellipsoid is given by
