@@ -6,8 +6,8 @@ def ellipsoid(
     a: float,
     b: float,
     c: float,
-    spacing: Tuple[float, float, float] = (1.0, 1.0, 1.0),
-    rotation: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+    spacing: tuple[float, float, float] = (1.0, 1.0, 1.0),
+    rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
     levelset: bool = False,
 ) -> np.ndarray:
     """
@@ -129,7 +129,7 @@ def ellipsoid(
     return arr
 
 
-def ellipsoid_stats(a: float, b: float, c: float) -> Tuple[float, float]:
+def ellipsoid_stats(a: float, b: float, c: float) -> tuple[float, float]:
     """Calculate analytical volume and surface area of an ellipsoid.
 
     The surface area of an ellipsoid is given by
