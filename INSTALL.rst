@@ -247,9 +247,9 @@ venv
   pip install -r requirements.txt
   # Install build dependencies of scikit-image
   pip install -r requirements/build.txt
-  # Build scikit-image from source
-  spin build
-  # The new version lives under `${PWD}/build-install/.../site-packages`.
+  # Install scikit-image in editable mode, which will make sure that
+  # scikit-image is recompiled if necessary on import
+  spin install -v
   # Test your installation
   spin test
   # Build docs
@@ -286,7 +286,7 @@ before you get started.
   # Test your installation
   spin test
   # Build docs
-  spin docs
+  spin docs --install-deps
   # Try the new version in IPython
   spin ipython
 
