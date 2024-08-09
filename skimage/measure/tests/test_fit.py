@@ -599,6 +599,11 @@ def test_ransac_dynamic_max_trials():
     assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
     assert_equal(_dynamic_max_trials(1, 100, 5, 1), 360436504051)
 
+    # Due to rounding errors, we can not properly compute the exact maximum number of trials for large number
+    # of minimum samples. It will be smaller than the actual value. From a practical point of view it does not
+    # matter because the number of trials are huge nevertheless.
+    assert_equal(_dynamic_max_trials(1, 100, 20, 1), 162326183972299296)
+
 
 def test_ransac_invalid_input():
     # `residual_threshold` must be greater than zero
