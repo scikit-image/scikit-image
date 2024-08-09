@@ -26,7 +26,12 @@ from matplotlib import pyplot as plt
 
 from skimage import data
 from skimage.util import img_as_float
-from skimage.feature import corner_harris, corner_subpix, corner_peaks, plot_matches
+from skimage.feature import (
+    corner_harris,
+    corner_subpix,
+    corner_peaks,
+    plot_matched_features,
+)
 from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
 from skimage.color import rgb2gray
@@ -147,26 +152,26 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 plt.gray()
 
 inlier_idxs = np.nonzero(inliers)[0]
-plot_matches(
-    ax[0],
+plot_matched_features(
     img_orig_gray,
     img_warped_gray,
-    src,
-    dst,
-    np.column_stack((inlier_idxs, inlier_idxs)),
+    keypoints0=src,
+    keypoints1=dst,
+    matches=np.column_stack((inlier_idxs, inlier_idxs)),
+    ax=ax[0],
     matches_color='b',
 )
 ax[0].axis('off')
 ax[0].set_title('Correct correspondences')
 
 outlier_idxs = np.nonzero(outliers)[0]
-plot_matches(
-    ax[1],
+plot_matched_features(
     img_orig_gray,
     img_warped_gray,
-    src,
-    dst,
-    np.column_stack((outlier_idxs, outlier_idxs)),
+    keypoints0=src,
+    keypoints1=dst,
+    matches=np.column_stack((outlier_idxs, outlier_idxs)),
+    ax=ax[1],
     matches_color='r',
 )
 ax[1].axis('off')

@@ -34,7 +34,7 @@ __all__ = [
     'ORB',
     'SIFT',
     'match_descriptors',
-    'plot_matches',
+    'plot_matched_features',
     'blob_dog',
     'blob_doh',
     'blob_log',
@@ -81,7 +81,7 @@ from .censure import CENSURE
 from .orb import ORB
 from .sift import SIFT
 from .match import match_descriptors
-from .util import plot_matches
+from .util import plot_matched_features
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import haar_like_feature, haar_like_feature_coord, draw_haar_like_feature
 from ._basic_features import multiscale_basic_features
