@@ -147,7 +147,7 @@ def test_clear_border_non_binary_out():
     image = np.array(
         [[1, 2, 3, 1, 2], [3, 3, 5, 4, 2], [3, 4, 5, 4, 2], [3, 3, 2, 1, 2]]
     )
-    out = np.empty_like(image)
+    out = image.copy()
     result = clear_border(image, out=out)
     expected = np.array(
         [[0, 0, 0, 0, 0], [0, 0, 5, 4, 0], [0, 4, 5, 4, 0], [0, 0, 0, 0, 0]]
@@ -165,7 +165,7 @@ def test_clear_border_non_binary_out_3d():
             [[1, 2, 3, 1, 2], [3, 3, 3, 4, 2], [3, 4, 3, 4, 2], [3, 3, 2, 1, 2]],
         ]
     )
-    out = np.empty_like(image3d)
+    out = image3d.copy()
 
     result = clear_border(image3d, out=out)
     expected = np.array(
