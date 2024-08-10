@@ -74,7 +74,7 @@ suppress_warnings = [
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 exclude_trees = []
-default_role = "autolink"
+default_role = "py:obj"
 pygments_style = "sphinx"
 
 # -- Sphinx-gallery configuration --------------------------------------------

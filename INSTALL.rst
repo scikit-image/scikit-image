@@ -279,7 +279,7 @@ before you get started.
   conda install -c conda-forge --file requirements/test.txt
   conda install -c conda-forge pre-commit
   # Install build dependencies of scikit-image
-  pip install -r requirements/build.txt
+  conda install -c conda-forge --file requirements/build.txt
   # Build scikit-image from source
   spin build
   # The new version lives under `${PWD}/build-install/.../site-packages`.
