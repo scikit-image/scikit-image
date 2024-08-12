@@ -4,7 +4,7 @@ from numpy.testing import assert_array_equal
 import scipy.ndimage as ndi
 
 from skimage import io, draw
-from skimage._shared.testing import fetch, assert_
+from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.data import binary_blobs
 from skimage.morphology import medial_axis, skeletonize, skeletonize_3d, thin
 from skimage.morphology._skeletonize import G123_LUT, G123P_LUT, _generate_thin_luts
@@ -66,7 +66,7 @@ class TestSkeletonize:
             ],
             dtype=bool,
         )
-        result = skeletonize(image)
+        result = skeletonize(image, method=method)
         assert_array_equal(result, image)
 
     def test_output(self):
@@ -109,7 +109,7 @@ class TestSkeletonize:
         # there should never be a 2x2 block of foreground pixels in a skeleton
         mask = np.array([[1, 1], [1, 1]], np.uint8)
         blocks = ndi.correlate(result, mask, mode="constant")
-        assert_(not np.any(blocks == 4))
+        assert not np.any(blocks == 4)
 
     def test_lut_fix(self):
         image = np.array(
@@ -217,8 +217,7 @@ class TestSkeletonize:
         regex = "Use `skimage\\.morphology\\.skeletonize"
         with pytest.warns(FutureWarning, match=regex) as record:
             skeletonize_3d(image)
-        assert len(record) == 1
-        assert record[0].filename == __file__, "warning points at wrong file"
+        assert_stacklevel(record, offset=-1)
 
 
 class TestThin:
