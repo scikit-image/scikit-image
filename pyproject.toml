@@ -91,7 +91,7 @@ optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
+    'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
