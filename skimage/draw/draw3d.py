@@ -2,6 +2,55 @@ import numpy as np
 from scipy.special import elliprg
 
 
+def _create_rotation_matrix(rotation: tuple[float, float, float]) -> np.ndarray:
+    """
+    An auxiallry function to create a standard rotation matrix for the given Euler angles in the Right handed (x, y, z) coordinate system.
+
+    Parameters
+    ----------
+    rotation : tuple of float
+        A tuple containing the Euler angles (phi, theta, psi) in radians.
+
+    Returns
+    -------
+    np.ndarray
+        A 3x3 rotation matrix.
+
+    References
+    ----------
+    .. [1] Eq.2 and 6-14 in Weisstein, Eric W. "Euler Angles." From MathWorld--A Wolfram Web Resource.
+            https://mathworld.wolfram.com/EulerAngles.html
+
+    """
+    phi, theta, psi = rotation
+
+    cos_phi, sin_phi = np.cos(phi), np.sin(phi)
+    cos_theta, sin_theta = np.cos(theta), np.sin(theta)
+    cos_psi, sin_psi = np.cos(psi), np.sin(psi)
+
+    rotation_matrix = np.array(
+        [
+            [
+                cos_psi * cos_phi - cos_theta * sin_phi * sin_psi,
+                cos_psi * sin_phi + cos_theta * cos_phi * sin_psi,
+                sin_psi * sin_theta,
+            ],
+            [
+                -sin_psi * cos_phi - cos_theta * sin_phi * cos_psi,
+                -sin_psi * sin_phi + cos_theta * cos_phi * cos_psi,
+                cos_psi * sin_theta,
+            ],
+            [
+                sin_theta * sin_phi,
+                -sin_theta * cos_phi,
+                cos_theta,
+            ],
+        ]
+    )
+
+    return rotation_matrix
+
+
 def ellipsoid(
     a: float,
     b: float,
@@ -63,23 +112,9 @@ def ellipsoid(
         raise ValueError('Parameters a, b, and c must all be > 0')
 
     offset = np.r_[1, 1, 1] * np.r_[spacing]
-    phi, theta, psi = rotation
-    # Define the standard rotation matrix for the given Euler angles defined for the coordinate system (x,y,z)
-    standard_rotation_matrix = np.array(
-        [
-            [
-                np.cos(psi) * np.cos(phi) - np.cos(theta) * np.sin(phi) * np.sin(psi),
-                np.cos(psi) * np.sin(phi) + np.cos(theta) * np.cos(phi) * np.sin(psi),
-                np.sin(psi) * np.sin(theta),
-            ],
-            [
-                -np.sin(psi) * np.cos(phi) - np.cos(theta) * np.sin(phi) * np.cos(psi),
-                -np.sin(psi) * np.sin(phi) + np.cos(theta) * np.cos(phi) * np.cos(psi),
-                np.cos(psi) * np.sin(theta),
-            ],
-            [np.sin(theta) * np.sin(phi), -np.sin(theta) * np.cos(phi), np.cos(theta)],
-        ]
-    )
+
+    # Get the standard rotation matrix for given Euler angles defined for the coordinate system (x,y,z)
+    standard_rotation_matrix = _create_rotation_matrix(rotation)
     # Switch the elemets of the rotation matrix to match our convention of (plane, row, col)-axis <-> (z, x, y)-axis
     permutation = [2, 0, 1]
     rotation_matrix = standard_rotation_matrix[permutation, :][:, permutation]
