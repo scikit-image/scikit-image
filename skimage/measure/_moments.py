@@ -14,7 +14,7 @@ def moments_coords(coords, order=3):
      * Area as: ``M[0, 0]``.
      * Centroid as: {``M[1, 0] / M[0, 0]``, ``M[0, 1] / M[0, 0]``}.
 
-    Note that raw moments are neither translation, scale nor rotation
+    Note that raw moments are neither translation, scale, nor rotation
     invariant.
 
     Parameters
@@ -128,7 +128,7 @@ def moments_coords_central(coords, center=None, order=3):
 
     # generate all possible exponents for each axis in the given set of points
     # produces a matrix of shape (N, D, order + 1)
-    coords = np.stack([coords ** c for c in range(order + 1)], axis=-1)
+    coords = np.stack([coords**c for c in range(order + 1)], axis=-1)
 
     # add extra dimensions for proper broadcasting
     coords = coords.reshape(coords.shape + (1,) * (ndim - 1))
@@ -163,11 +163,11 @@ def moments(image, order=3, *, spacing=None):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     order : int, optional
         Maximum order of moments. Default is 3.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -209,14 +209,14 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
 
     Parameters
     ----------
-    image : nD double or uint8 array
+    image : (N[, ...]) double or uint8 array
         Rasterized shape as image.
     center : tuple of float, optional
         Coordinates of the image centroid. This will be computed if it
         is not provided.
     order : int, optional
         The maximum order of moments computed.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -252,16 +252,14 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
         #       The centroid will be obtained from the raw moments.
         moments_raw = moments(image, order=order, spacing=spacing)
         return moments_raw_to_central(moments_raw)
-    if spacing is None:
-        spacing = np.ones(image.ndim)
     float_dtype = _supported_float_type(image.dtype)
+    if spacing is None:
+        spacing = np.ones(image.ndim, dtype=float_dtype)
     calc = image.astype(float_dtype, copy=False)
     for dim, dim_length in enumerate(image.shape):
-        delta = (
-                np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
-        )
-        powers_of_delta = (
-            delta[:, np.newaxis] ** np.arange(order + 1, dtype=float_dtype)
+        delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
+        powers_of_delta = delta[:, np.newaxis] ** np.arange(
+            order + 1, dtype=float_dtype
         )
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
@@ -277,15 +275,17 @@ def moments_normalized(mu, order=3, spacing=None):
 
     Parameters
     ----------
-    mu : (M,[ ...,] M) array
+    mu : (M[, ...], M) array
         Central image moments, where M must be greater than or equal
         to ``order``.
     order : int, optional
         Maximum order of moments. Default is 3.
+    spacing: tuple of float, shape (ndim,)
+        The pixel spacing along each axis of the image.
 
     Returns
     -------
-    nu : (``order + 1``,[ ...,] ``order + 1``) array
+    nu : (``order + 1``[, ...], ``order + 1``) array
         Normalized central image moments.
 
     References
@@ -323,7 +323,9 @@ def moments_normalized(mu, order=3, spacing=None):
         if sum(powers) < 2:
             nu[powers] = np.nan
         else:
-            nu[powers] = (mu[powers] / scale ** sum(powers)) / (mu0 ** (sum(powers) / nu.ndim + 1))
+            nu[powers] = (mu[powers] / scale ** sum(powers)) / (
+                mu0 ** (sum(powers) / nu.ndim + 1)
+            )
     return nu
 
 
@@ -378,7 +380,7 @@ def centroid(image, *, spacing=None):
     ----------
     image : array
         The input image.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -395,9 +397,11 @@ def centroid(image, *, spacing=None):
     array([13.16666667, 13.16666667])
     """
     M = moments_central(image, center=(0,) * image.ndim, order=1, spacing=spacing)
-    center = (M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
-                                                       # for each axis
-              / M[(0,) * image.ndim])  # weighted sum of all points
+    center = (
+        M[tuple(np.eye(image.ndim, dtype=int))]  # array of weighted sums
+        # for each axis
+        / M[(0,) * image.ndim]
+    )  # weighted sum of all points
     return center
 
 
@@ -415,7 +419,7 @@ def inertia_tensor(image, mu=None, *, spacing=None):
         (for example, `skimage.measure.regionprops`), then it is more
         efficient to pre-compute them and pass them to the inertia tensor
         call.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -431,7 +435,9 @@ def inertia_tensor(image, mu=None, *, spacing=None):
            Scientific Applications. (Chapter 8: Tensor Methods) Springer, 1993.
     """
     if mu is None:
-        mu = moments_central(image, order=2, spacing=spacing)  # don't need higher-order moments
+        mu = moments_central(
+            image, order=2, spacing=spacing
+        )  # don't need higher-order moments
     mu0 = mu[(0,) * image.ndim]
     result = np.zeros((image.ndim, image.ndim), dtype=mu.dtype)
 
@@ -472,7 +478,7 @@ def inertia_tensor_eigvals(image, mu=None, T=None, *, spacing=None):
     T : array, shape ``(image.ndim, image.ndim)``
         The pre-computed inertia tensor. If ``T`` is given, ``mu`` and
         ``image`` are ignored.
-    spacing: tuple of float, shape (ndim, )
+    spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns

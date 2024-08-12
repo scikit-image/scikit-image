@@ -3,12 +3,18 @@ import pytest
 
 from skimage import io
 from skimage._shared._warnings import expected_warnings
+from skimage._shared._dependency_checks import is_wasm
 
 plt = pytest.importorskip("matplotlib.pyplot")
 
+if plt:
+    plt.switch_backend("Agg")
 
-def setup():
+
+@pytest.fixture(autouse=True)
+def _reset_plugins():
     io.reset_plugins()
+
 
 # test images. Note that they don't have their full range for their dtype,
 # but we still expect the display range to equal the full dtype range.
@@ -26,8 +32,15 @@ imshow_expected_warnings = [
     # with numpy 1.16
     # Matplotlib 2.2.3 is the last supported version for python 2.7
     r"np.asscalar|\A\Z",
-    r"The figure layout has changed to tight|\A\Z"
+    r"The figure layout has changed to tight|\A\Z",
 ]
+
+# This warning comes from the Python 3.12.1 interpreter powered by Pyodide
+# and is not relevant to the tests where it is raised.
+if is_wasm:
+    imshow_expected_warnings.append(
+        r"Pickle, copy, and deepcopy support will be removed from itertools in Python 3.14|\A\Z"
+    )
 
 
 def n_subplots(ax_im):
@@ -54,8 +67,7 @@ def n_subplots(ax_im):
 
 def test_uint8():
     plt.figure()
-    with expected_warnings(imshow_expected_warnings +
-                           [r"CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
         ax_im = io.imshow(im8)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 255)
@@ -65,8 +77,7 @@ def test_uint8():
 
 def test_uint16():
     plt.figure()
-    with expected_warnings(imshow_expected_warnings +
-                           [r"CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
         ax_im = io.imshow(im16)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 65535)
@@ -76,8 +87,7 @@ def test_uint16():
 
 def test_float():
     plt.figure()
-    with expected_warnings(imshow_expected_warnings +
-                           [r"CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
         ax_im = io.imshow(imf)
     assert ax_im.cmap.name == 'gray'
     assert ax_im.get_clim() == (0, 1)
@@ -86,8 +96,9 @@ def test_float():
 
 
 def test_low_data_range():
-    with expected_warnings(imshow_expected_warnings +
-                           ["Low image data range|CObject type is marked"]):
+    with expected_warnings(
+        imshow_expected_warnings + ["Low image data range|CObject type is marked"]
+    ):
         ax_im = io.imshow(im_lo)
     assert ax_im.get_clim() == (im_lo.min(), im_lo.max())
     # check that a colorbar was created
@@ -100,8 +111,9 @@ def test_outside_standard_range():
     # "The CObject type is marked Pending Deprecation in Python 2.7.
     #  Please use capsule objects instead."
     # Ref: https://docs.python.org/2/c-api/cobject.html
-    with expected_warnings(imshow_expected_warnings +
-                           ["out of standard range|CObject type is marked"]):
+    with expected_warnings(
+        imshow_expected_warnings + ["out of standard range|CObject type is marked"]
+    ):
         ax_im = io.imshow(im_hi)
     assert ax_im.get_clim() == (im_hi.min(), im_hi.max())
     assert n_subplots(ax_im) == 2
@@ -114,8 +126,9 @@ def test_nonstandard_type():
     # "The CObject type is marked Pending Deprecation in Python 2.7.
     #  Please use capsule objects instead."
     # Ref: https://docs.python.org/2/c-api/cobject.html
-    with expected_warnings(imshow_expected_warnings +
-                           ["Low image data range|CObject type is marked"]):
+    with expected_warnings(
+        imshow_expected_warnings + ["Low image data range|CObject type is marked"]
+    ):
         ax_im = io.imshow(im64)
     assert ax_im.get_clim() == (im64.min(), im64.max())
     assert n_subplots(ax_im) == 2
@@ -126,8 +139,7 @@ def test_signed_image():
     plt.figure()
     im_signed = np.array([[-0.5, -0.2], [0.1, 0.4]])
 
-    with expected_warnings(imshow_expected_warnings +
-                           [r"CObject type is marked|\A\Z"]):
+    with expected_warnings(imshow_expected_warnings + [r"CObject type is marked|\A\Z"]):
         ax_im = io.imshow(im_signed)
     assert ax_im.get_clim() == (-0.5, 0.5)
     assert n_subplots(ax_im) == 2

@@ -38,15 +38,13 @@ ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 
 def plot_comparison(original, filtered, filter_name):
-
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True,
-                                   sharey=True)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
-    ax1.axis('off')
+    ax1.set_axis_off()
     ax2.imshow(filtered, cmap=plt.cm.gray)
     ax2.set_title(filter_name)
-    ax2.axis('off')
+    ax2.set_axis_off()
 
 
 ######################################################################
@@ -59,8 +57,7 @@ def plot_comparison(original, filtered, filter_name):
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
-from skimage.morphology import (erosion, dilation, opening, closing,  # noqa
-                                white_tophat)
+from skimage.morphology import erosion, dilation, opening, closing, white_tophat  # noqa
 from skimage.morphology import black_tophat, skeletonize, convex_hull_image  # noqa
 from skimage.morphology import disk  # noqa
 
@@ -105,10 +102,10 @@ plot_comparison(orig_phantom, opened, 'opening')
 # that are *smaller* than the structuring element are removed. The dilation
 # operation that follows ensures that light regions that are *larger* than
 # the structuring element retain their original size. Notice how the light
-# and dark shapes in the center their original thickness but the 3 lighter
+# and dark shapes in the center retain their original thickness but the 3 lighter
 # patches in the bottom get completely eroded. The size dependence is
 # highlighted by the outer white ring: The parts of the ring thinner than the
-# structuring element were completely erased, while the thicker region at the
+# structuring element are completely erased, while the thicker region at the
 # top retains its original thickness.
 #
 # Closing
@@ -128,12 +125,12 @@ closed = closing(phantom, footprint)
 plot_comparison(phantom, closed, 'closing')
 
 ######################################################################
-# Since ``closing`` an image starts with an dilation operation, dark regions
+# Since ``closing`` an image starts with a dilation operation, dark regions
 # that are *smaller* than the structuring element are removed. The dilation
 # operation that follows ensures that dark regions that are *larger* than the
 # structuring element retain their original size. Notice how the white
 # ellipses at the bottom get connected because of dilation, but other dark
-# region retain their original sizes. Also notice how the crack we added is
+# regions retain their original sizes. Also notice how the crack we added is
 # mostly removed.
 #
 # White tophat

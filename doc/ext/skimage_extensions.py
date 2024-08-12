@@ -114,7 +114,7 @@ def write_random_js(app, exception):
     if tutorial_urls == 0:
         logger.error(
             "[skimage_extensions] did not find any gallery examples while creating %s",
-            random_js_path
+            random_js_path,
         )
         return
 
@@ -135,6 +135,4 @@ def write_random_js(app, exception):
 def setup(app):
     app.add_directive('naturalsortedtoctree', NaturalSortedTocTree)
     app.connect('build-finished', write_random_js)
-    return {
-        'parallel_read_safe': True
-    }
+    return {'parallel_read_safe': True}

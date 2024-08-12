@@ -19,6 +19,7 @@ enables projective 3D reconstruction of the captured scene. If the calibration
 is known, estimating the essential matrix enables metric 3D reconstruction of
 the captured scene.
 """
+
 import numpy as np
 from skimage import data
 from skimage.color import rgb2gray
@@ -42,8 +43,7 @@ descriptor_extractor.detect_and_extract(img_right)
 keypoints_right = descriptor_extractor.keypoints
 descriptors_right = descriptor_extractor.descriptors
 
-matches = match_descriptors(descriptors_left, descriptors_right,
-                            cross_check=True)
+matches = match_descriptors(descriptors_left, descriptors_right, cross_check=True)
 
 print(f'Number of matches: {matches.shape[0]}')
 
@@ -51,11 +51,14 @@ print(f'Number of matches: {matches.shape[0]}')
 random_seed = 9
 rng = np.random.default_rng(random_seed)
 
-model, inliers = ransac((keypoints_left[matches[:, 0]],
-                         keypoints_right[matches[:, 1]]),
-                        FundamentalMatrixTransform, min_samples=8,
-                        residual_threshold=1, max_trials=5000,
-                        random_state=rng)
+model, inliers = ransac(
+    (keypoints_left[matches[:, 0]], keypoints_right[matches[:, 1]]),
+    FundamentalMatrixTransform,
+    min_samples=8,
+    residual_threshold=1,
+    max_trials=5000,
+    rng=rng,
+)
 
 inlier_keypoints_left = keypoints_left[matches[inliers, 0]]
 inlier_keypoints_right = keypoints_right[matches[inliers, 1]]
@@ -76,8 +79,15 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-plot_matches(ax[0], img_left, img_right, keypoints_left, keypoints_right,
-             matches[inliers], only_matches=True)
+plot_matches(
+    ax[0],
+    img_left,
+    img_right,
+    keypoints_left,
+    keypoints_right,
+    matches[inliers],
+    only_matches=True,
+)
 ax[0].axis("off")
 ax[0].set_title("Inlier correspondences")
 

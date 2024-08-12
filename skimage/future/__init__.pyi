@@ -11,4 +11,4 @@ __all__ = [
 ]
 
 from .manual_segmentation import manual_lasso_segmentation, manual_polygon_segmentation
-from .trainable_segmentation import fit_segmenter, predict_segmenter, TrainableSegmenter
+from .trainable_segmentation import TrainableSegmenter, fit_segmenter, predict_segmenter

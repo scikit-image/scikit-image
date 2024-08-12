@@ -26,14 +26,16 @@ from spin import util
     default=True,
     help="Sphinx gallery: enable/disable plots",
 )
-@click.option("--jobs", "-j", default="auto", help="Number of parallel build jobs")
+@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
 @click.option(
     "--install-deps/--no-install-deps",
     default=False,
-    help="Install dependencies before building"
+    help="Install dependencies before building",
 )
 @click.pass_context
-def docs(ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, install_deps):
+def docs(
+    ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, install_deps
+):
     """📖 Build documentation
 
     By default, SPHINXOPTS="-W", raising errors on warnings.
@@ -75,16 +77,7 @@ def asv(asv_args):
     util.run(['asv'] + list(asv_args))
 
 
-@click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`.
-    """
-    util.run(['python', '-m', 'build', '.', '--sdist'])
-
-
-@click.command(context_settings={
-    'ignore_unknown_options': True
-})
+@click.command(context_settings={'ignore_unknown_options': True})
 @click.argument("ipython_args", metavar='', nargs=-1)
 @click.pass_context
 def ipython(ctx, ipython_args):
@@ -101,6 +94,8 @@ def ipython(ctx, ipython_args):
         r"import skimage as ski; "
         r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
     )
-    ctx.params['ipython_args'] = (f"--TerminalIPythonApp.exec_lines={preimport}",) + ipython_args
+    ctx.params['ipython_args'] = (
+        f"--TerminalIPythonApp.exec_lines={preimport}",
+    ) + ipython_args
 
     ctx.forward(meson.ipython)

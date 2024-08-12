@@ -20,6 +20,7 @@ values, and use the random walker for the segmentation.
        Anal. Mach. Intell. 2006 Nov; 28(11):1768-83 :DOI:`10.1109/TPAMI.2006.233`
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -34,8 +35,7 @@ rng = np.random.default_rng()
 data = skimage.img_as_float(binary_blobs(length=128, rng=1))
 sigma = 0.35
 data += rng.normal(loc=0, scale=sigma, size=data.shape)
-data = rescale_intensity(data, in_range=(-sigma, 1 + sigma),
-                         out_range=(-1, 1))
+data = rescale_intensity(data, in_range=(-sigma, 1 + sigma), out_range=(-1, 1))
 
 # The range of the binary image spans over (-1, 1).
 # We choose the hottest and the coldest pixels as markers.
@@ -47,8 +47,7 @@ markers[data > 0.95] = 2
 labels = random_walker(data, markers, beta=10, mode='bf')
 
 # Plot results
-fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2),
-                                    sharex=True, sharey=True)
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 3.2), sharex=True, sharey=True)
 ax1.imshow(data, cmap='gray')
 ax1.axis('off')
 ax1.set_title('Noisy data')

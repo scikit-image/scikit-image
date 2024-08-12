@@ -5,18 +5,23 @@ from skimage import io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 from skimage._shared import testing
-from skimage._shared.testing import (TestCase, assert_array_equal,
-                                     assert_array_almost_equal, fetch)
+from skimage._shared.testing import (
+    TestCase,
+    assert_array_equal,
+    assert_array_almost_equal,
+    fetch,
+)
 
-from pytest import importorskip
+import pytest
 
-importorskip('imread')
+pytest.importorskip('imread')
 
-def setup():
+
+@pytest.fixture(autouse=True)
+def _use_imread_plugin():
+    """Ensure that PIL plugin is used in tests here."""
     use_plugin('imread')
-
-
-def teardown():
+    yield
     reset_plugins()
 
 
@@ -26,7 +31,7 @@ def test_imread_as_gray():
     assert img.dtype == np.float64
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
-    assert np.core.numerictypes.sctype2char(img.dtype) in np.typecodes['AllInteger']
+    assert np.dtype(img.dtype).char in np.typecodes['AllInteger']
 
 
 def test_imread_palette():

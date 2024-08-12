@@ -76,6 +76,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     B = []
 
     from ..filters import sobel
+
     slices = tuple([slice(2, s - 1) for s in shape])
     for ax in range(n_axes):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)

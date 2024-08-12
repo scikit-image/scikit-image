@@ -23,7 +23,6 @@ env:
   OPTIONS_NAME: "default"
   INSTALL_FROM_SDIST: 0
   WITHOUT_POOCH: 0
-  SKIMAGE_TEST_STRICT_WARNINGS_GLOBAL: 0
   EAGER_IMPORT: 0
 
 jobs:
@@ -34,9 +33,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Build package
         run: |

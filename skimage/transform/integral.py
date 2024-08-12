@@ -66,6 +66,9 @@ def integrate(ii, start, end):
     S : scalar or ndarray
         Integral (sum) over the given window(s).
 
+    See Also
+    --------
+    integral_image : Create an integral image / summed area table.
 
     Examples
     --------
@@ -89,10 +92,8 @@ def integrate(ii, start, end):
     # convert negative indices into equivalent positive indices
     start_negatives = start < 0
     end_negatives = end < 0
-    start = (start + total_shape) * start_negatives + \
-             start * ~(start_negatives)
-    end = (end + total_shape) * end_negatives + \
-           end * ~(end_negatives)
+    start = (start + total_shape) * start_negatives + start * ~(start_negatives)
+    end = (end + total_shape) * end_negatives + end * ~(end_negatives)
 
     if np.any((end - start) < 0):
         raise IndexError('end coordinates must be greater or equal to start')
@@ -106,7 +107,7 @@ def integrate(ii, start, end):
     # The total terms = 4 = 2 ** 2(dims)
 
     S = np.zeros(rows)
-    bit_perm = 2 ** ii.ndim
+    bit_perm = 2**ii.ndim
     width = len(bin(bit_perm - 1)[2:])
 
     # Sum of a (hyper)cube, from an integral image is computed using
@@ -127,14 +128,18 @@ def integrate(ii, start, end):
         binary = bin(i)[2:].zfill(width)
         bool_mask = [bit == '1' for bit in binary]
 
-        sign = (-1)**sum(bool_mask)  # determine sign of permutation
+        sign = (-1) ** sum(bool_mask)  # determine sign of permutation
 
-        bad = [np.any(((start[r] - 1) * bool_mask) < 0)
-               for r in range(rows)]  # find out bad start rows
+        bad = [
+            np.any(((start[r] - 1) * bool_mask) < 0) for r in range(rows)
+        ]  # find out bad start rows
 
-        corner_points = (end * (np.invert(bool_mask))) + \
-                         ((start - 1) * bool_mask)  # find corner for each row
+        corner_points = (end * (np.invert(bool_mask))) + (
+            (start - 1) * bool_mask
+        )  # find corner for each row
 
-        S += [sign * ii[tuple(corner_points[r])] if(not bad[r]) else 0
-              for r in range(rows)]  # add only good rows
+        S += [
+            sign * float(ii[tuple(corner_points[r])]) if (not bad[r]) else 0
+            for r in range(rows)
+        ]  # add only good rows
     return S

@@ -21,12 +21,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage import (
-    color, feature, filters, measure, morphology, segmentation, util
-)
-from skimage.data import human_mitosis
+import skimage as ski
 
-image = human_mitosis()
+image = ski.data.human_mitosis()
 
 fig, ax = plt.subplots()
 ax.imshow(image, cmap='gray')
@@ -72,16 +69,16 @@ qcs.levels
 # To separate these three different classes of pixels, we
 # resort to :ref:`sphx_glr_auto_examples_segmentation_plot_multiotsu.py`.
 
-thresholds = filters.threshold_multiotsu(image, classes=3)
+thresholds = ski.filters.threshold_multiotsu(image, classes=3)
 regions = np.digitize(image, bins=thresholds)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0].set_axis_off()
 ax[1].imshow(regions)
 ax[1].set_title('Multi-Otsu thresholding')
-ax[1].axis('off')
+ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
@@ -92,8 +89,8 @@ plt.show()
 
 cells = image > thresholds[0]
 dividing = image > thresholds[1]
-labeled_cells = measure.label(cells)
-labeled_dividing = measure.label(dividing)
+labeled_cells = ski.measure.label(cells)
+labeled_dividing = ski.measure.label(dividing)
 naive_mi = labeled_dividing.max() / labeled_cells.max()
 print(naive_mi)
 
@@ -113,13 +110,13 @@ print(labeled_cells.max())
 fig, ax = plt.subplots(ncols=3, figsize=(15, 5))
 ax[0].imshow(image)
 ax[0].set_title('Original')
-ax[0].axis('off')
-ax[2].imshow(cells)
-ax[2].set_title('All nuclei?')
-ax[2].axis('off')
+ax[0].set_axis_off()
 ax[1].imshow(dividing)
 ax[1].set_title('Dividing nuclei?')
-ax[1].axis('off')
+ax[1].set_axis_off()
+ax[2].imshow(cells)
+ax[2].set_title('All nuclei?')
+ax[2].set_axis_off()
 plt.show()
 
 #####################################################################
@@ -142,20 +139,21 @@ plt.show()
 higher_threshold = 125
 dividing = image > higher_threshold
 
-smoother_dividing = filters.rank.mean(util.img_as_ubyte(dividing),
-                                      morphology.disk(4))
+smoother_dividing = ski.filters.rank.mean(
+    ski.util.img_as_ubyte(dividing), ski.morphology.disk(4)
+)
 
 binary_smoother_dividing = smoother_dividing > 20
 
 fig, ax = plt.subplots(figsize=(5, 5))
 ax.imshow(binary_smoother_dividing)
 ax.set_title('Dividing nuclei')
-ax.axis('off')
+ax.set_axis_off()
 plt.show()
 
 #####################################################################
 # We are left with
-cleaned_dividing = measure.label(binary_smoother_dividing)
+cleaned_dividing = ski.measure.label(binary_smoother_dividing)
 print(cleaned_dividing.max())
 
 #####################################################################
@@ -166,38 +164,43 @@ print(cleaned_dividing.max())
 # ==============
 # To separate overlapping nuclei, we resort to
 # :ref:`sphx_glr_auto_examples_segmentation_plot_watershed.py`.
+# The idea of the algorithm is to find watershed basins as if flooded from
+# a set of `markers`. We generate these markers as the local maxima of the
+# distance function to the background. Given the typical size of the nuclei,
+# we pass ``min_distance=7`` so that local maxima and, hence, markers will lie
+# at least 7 pixels away from one another.
+# We also use ``exclude_border=False`` so that all nuclei touching the image
+# border will be included.
+
+distance = ndi.distance_transform_edt(cells)
+
+local_max_coords = ski.feature.peak_local_max(
+    distance, min_distance=7, exclude_border=False
+)
+local_max_mask = np.zeros(distance.shape, dtype=bool)
+local_max_mask[tuple(local_max_coords.T)] = True
+markers = ski.measure.label(local_max_mask)
+
+segmented_cells = ski.segmentation.watershed(-distance, markers, mask=cells)
+
+#####################################################################
 # To visualize the segmentation conveniently, we colour-code the labelled
 # regions using the `color.label2rgb` function, specifying the background
 # label with argument `bg_label=0`.
 
-distance = ndi.distance_transform_edt(cells)
-
-local_max_coords = feature.peak_local_max(distance, min_distance=7)
-local_max_mask = np.zeros(distance.shape, dtype=bool)
-local_max_mask[tuple(local_max_coords.T)] = True
-markers = measure.label(local_max_mask)
-
-segmented_cells = segmentation.watershed(-distance, markers, mask=cells)
-
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 ax[0].imshow(cells, cmap='gray')
 ax[0].set_title('Overlapping nuclei')
-ax[0].axis('off')
-ax[1].imshow(color.label2rgb(segmented_cells, bg_label=0))
+ax[0].set_axis_off()
+ax[1].imshow(ski.color.label2rgb(segmented_cells, bg_label=0))
 ax[1].set_title('Segmented nuclei')
-ax[1].axis('off')
+ax[1].set_axis_off()
 plt.show()
 
 #####################################################################
-# Additionally, we may use function `color.label2rgb` to overlay the original
-# image with the segmentation result, using transparency (alpha parameter).
+# Make sure that the watershed algorithm has led to identifying more nuclei:
 
-color_labels = color.label2rgb(segmented_cells, image, alpha=0.4, bg_label=0)
-
-fig, ax = plt.subplots(figsize=(5, 5))
-ax.imshow(color_labels)
-ax.set_title('Segmentation result over raw image')
-plt.show()
+assert segmented_cells.max() > labeled_cells.max()
 
 #####################################################################
 # Finally, we find a total number of

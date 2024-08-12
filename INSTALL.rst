@@ -77,7 +77,7 @@ the package versions your application needs. They help avoid a common
 challenge known as
 `dependency hell <https://en.wikipedia.org/wiki/Dependency_hell>`_.
 
-To install the current ``scikit-image`` you'll need at least Python 3.6. If
+To install the current ``scikit-image`` you'll need at least Python 3.10. If
 your Python is older, pip will find the most recent compatible version.
 
 .. code-block:: sh
@@ -279,7 +279,7 @@ before you get started.
   conda install -c conda-forge --file requirements/test.txt
   conda install -c conda-forge pre-commit
   # Install build dependencies of scikit-image
-  pip install -r requirements/build.txt
+  conda install -c conda-forge --file requirements/build.txt
   # Build scikit-image from source
   spin build
   # The new version lives under `${PWD}/build-install/.../site-packages`.
@@ -399,6 +399,8 @@ functionality is only available with the following installed:
 * `Dask <https://dask.org/>`__
     The ``dask`` module is used to speed up certain functions.
 
+* `Matplotlib <https://matplotlib.org>`__
+    Used in various functions, e.g., for drawing, segmenting, reading images.
 
 .. include:: ../../../requirements/optional.txt
   :literal:

@@ -47,10 +47,9 @@ proteinA = np.zeros_like(nucleus, dtype="float64")
 proteinA_seg = np.zeros_like(nucleus, dtype="float64")
 
 for blob_seed in range(10):
-    blobs = data.binary_blobs(180,
-                              blob_size_fraction=0.5,
-                              volume_fraction=(50/(180**2)),
-                              rng=blob_seed)
+    blobs = data.binary_blobs(
+        180, blob_size_fraction=0.5, volume_fraction=(50 / (180**2)), rng=blob_seed
+    )
     blobs_image = filters.gaussian(blobs, sigma=1.5) * rng.integers(50, 256)
     proteinA += blobs_image
     proteinA_seg += blobs
@@ -146,11 +145,11 @@ for a in ax.ravel():
     a.set_axis_off()
 
 # plot pixel intensity scatter
-plt.figure()
-plt.scatter(proteinA, proteinB)
-plt.title('Pixel intensity')
-plt.xlabel('Protein A intensity')
-plt.ylabel('Protein B intensity')
+fig, ax = plt.subplots()
+ax.scatter(proteinA, proteinB)
+ax.set_title('Pixel intensity')
+ax.set_xlabel('Protein A intensity')
+ax.set_ylabel('Protein B intensity')
 
 #####################################################################
 # The intensities look linearly correlated so Pearson's Correlation Coefficient

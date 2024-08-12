@@ -44,15 +44,19 @@ def test_keypoints_censure_moon_image_dob():
     the expected values for DoB filter."""
     detector = CENSURE()
     detector.detect(img)
-    expected_keypoints = np.array([[ 21, 497],
-                                   [ 36,  46],
-                                   [119, 350],
-                                   [185, 177],
-                                   [287, 250],
-                                   [357, 239],
-                                   [463, 116],
-                                   [464, 132],
-                                   [467, 260]])
+    expected_keypoints = np.array(
+        [
+            [21, 497],
+            [36, 46],
+            [119, 350],
+            [185, 177],
+            [287, 250],
+            [357, 239],
+            [463, 116],
+            [464, 132],
+            [467, 260],
+        ]
+    )
     expected_scales = np.array([3, 4, 4, 2, 2, 3, 2, 2, 2])
 
     assert_array_equal(expected_keypoints, detector.keypoints)
@@ -66,14 +70,8 @@ def test_keypoints_censure_moon_image_octagon():
 
     detector = CENSURE(mode='octagon')
     # quarter scale image for speed
-    detector.detect(rescale(img, 0.25,
-                            anti_aliasing=False,
-                            mode='constant'))
-    expected_keypoints = np.array([[ 23,  27],
-                                   [ 29,  89],
-                                   [ 31,  87],
-                                   [106,  59],
-                                   [111,  67]])
+    detector.detect(rescale(img, 0.25, anti_aliasing=False, mode='constant'))
+    expected_keypoints = np.array([[23, 27], [29, 89], [31, 87], [106, 59], [111, 67]])
 
     expected_scales = np.array([3, 2, 5, 2, 4])
 
@@ -86,16 +84,10 @@ def test_keypoints_censure_moon_image_star():
     the expected values for STAR filter."""
     detector = CENSURE(mode='star')
     # quarter scale image for speed
-    detector.detect(rescale(img, 0.25,
-                            anti_aliasing=False,
-                            mode='constant'))
-    expected_keypoints = np.array([[ 23,  27],
-                                   [ 29,  89],
-                                   [ 30,  86],
-                                   [107,  59],
-                                   [109,  64],
-                                   [111,  67],
-                                   [113,  70]])
+    detector.detect(rescale(img, 0.25, anti_aliasing=False, mode='constant'))
+    expected_keypoints = np.array(
+        [[23, 27], [29, 89], [30, 86], [107, 59], [109, 64], [111, 67], [113, 70]]
+    )
 
     expected_scales = np.array([3, 2, 4, 2, 5, 3, 2])
 

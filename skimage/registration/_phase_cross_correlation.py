@@ -10,12 +10,10 @@ import numpy as np
 from scipy.fft import fftn, ifftn, fftfreq
 from scipy import ndimage as ndi
 
-from skimage._shared.utils import remove_arg
 from ._masked_phase_cross_correlation import _masked_phase_cross_correlation
 
 
-def _upsampled_dft(data, upsampled_region_size,
-                   upsample_factor=1, axis_offsets=None):
+def _upsampled_dft(data, upsampled_region_size, upsample_factor=1, axis_offsets=None):
     """
     Upsampled DFT by matrix multiplication.
 
@@ -53,26 +51,35 @@ def _upsampled_dft(data, upsampled_region_size,
     """
     # if people pass in an integer, expand it to a list of equal-sized sections
     if not hasattr(upsampled_region_size, "__iter__"):
-        upsampled_region_size = [upsampled_region_size, ] * data.ndim
+        upsampled_region_size = [
+            upsampled_region_size,
+        ] * data.ndim
     else:
         if len(upsampled_region_size) != data.ndim:
-            raise ValueError("shape of upsampled region sizes must be equal "
-                             "to input data's number of dimensions.")
+            raise ValueError(
+                "shape of upsampled region sizes must be equal "
+                "to input data's number of dimensions."
+            )
 
     if axis_offsets is None:
-        axis_offsets = [0, ] * data.ndim
+        axis_offsets = [
+            0,
+        ] * data.ndim
     else:
         if len(axis_offsets) != data.ndim:
-            raise ValueError("number of axis offsets must be equal to input "
-                             "data's number of dimensions.")
+            raise ValueError(
+                "number of axis offsets must be equal to input "
+                "data's number of dimensions."
+            )
 
     im2pi = 1j * 2 * np.pi
 
     dim_properties = list(zip(data.shape, upsampled_region_size, axis_offsets))
 
-    for (n_items, ups_size, ax_offset) in dim_properties[::-1]:
-        kernel = ((np.arange(ups_size) - ax_offset)[:, None]
-                  * fftfreq(n_items, upsample_factor))
+    for n_items, ups_size, ax_offset in dim_properties[::-1]:
+        kernel = (np.arange(ups_size) - ax_offset)[:, None] * fftfreq(
+            n_items, upsample_factor
+        )
         kernel = np.exp(-im2pi * kernel)
         # use kernel with same precision as the data
         kernel = kernel.astype(data.dtype, copy=False)
@@ -109,8 +116,17 @@ def _compute_error(cross_correlation_max, src_amp, target_amp):
     target_amp : float
         The normalized average image intensity of the target image
     """
-    error = 1.0 - cross_correlation_max * cross_correlation_max.conj() /\
-        (src_amp * target_amp)
+    amp = src_amp * target_amp
+    if amp == 0:
+        warnings.warn(
+            "Could not determine RMS error between images with the normalized "
+            f"average intensities {src_amp!r} and {target_amp!r}. Either the "
+            "reference or moving image may be empty.",
+            UserWarning,
+            stacklevel=3,
+        )
+    with np.errstate(invalid="ignore"):
+        error = 1.0 - cross_correlation_max * cross_correlation_max.conj() / amp
     return np.sqrt(np.abs(error))
 
 
@@ -148,13 +164,10 @@ def _disambiguate_shift(reference_image, moving_image, shift):
     """
     shape = reference_image.shape
     positive_shift = [shift_i % s for shift_i, s in zip(shift, shape)]
-    negative_shift = [shift_i - s
-                      for shift_i, s in zip(positive_shift, shape)]
+    negative_shift = [shift_i - s for shift_i, s in zip(positive_shift, shape)]
     subpixel = np.any(np.array(shift) % 1 != 0)
     interp_order = 3 if subpixel else 0
-    shifted = ndi.shift(
-            moving_image, shift, mode='grid-wrap', order=interp_order
-            )
+    shifted = ndi.shift(moving_image, shift, mode='grid-wrap', order=interp_order)
     indices = np.round(positive_shift).astype(int)
     splits_per_dim = [(slice(0, i), slice(i, None)) for i in indices]
     max_corr = -1.0
@@ -172,23 +185,32 @@ def _disambiguate_shift(reference_image, moving_image, shift):
         if corr > max_corr:
             max_corr = corr
             max_slice = test_slice
+    if max_slice is None:
+        warnings.warn(
+            f"Could not determine real-space shift for periodic shift {shift!r} "
+            f"as requested by `disambiguate=True` (disambiguation is degenerate).",
+            stacklevel=3,
+        )
+        return shift
     real_shift_acc = []
-    for sl, pos_shift, neg_shift in zip(
-            max_slice, positive_shift, negative_shift
-            ):
+    for sl, pos_shift, neg_shift in zip(max_slice, positive_shift, negative_shift):
         real_shift_acc.append(pos_shift if sl.stop is None else neg_shift)
 
     return np.array(real_shift_acc)
 
 
-@remove_arg('return_error', changed_version='0.23')
-def phase_cross_correlation(reference_image, moving_image, *,
-                            upsample_factor=1, space="real",
-                            disambiguate=False,
-                            return_error=True,
-                            reference_mask=None,
-                            moving_mask=None, overlap_ratio=0.3,
-                            normalization="phase"):
+def phase_cross_correlation(
+    reference_image,
+    moving_image,
+    *,
+    upsample_factor=1,
+    space="real",
+    disambiguate=False,
+    reference_mask=None,
+    moving_mask=None,
+    overlap_ratio=0.3,
+    normalization="phase",
+):
     """Efficient subpixel image translation registration by cross-correlation.
 
     This code gives the same precision as the FFT upsampled cross-correlation
@@ -296,9 +318,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
     """
     if (reference_mask is not None) or (moving_mask is not None):
         shift = _masked_phase_cross_correlation(
-            reference_image, moving_image,
-            reference_mask, moving_mask,
-            overlap_ratio
+            reference_image, moving_image, reference_mask, moving_mask, overlap_ratio
         )
         return shift, np.nan, np.nan
 
@@ -328,8 +348,9 @@ def phase_cross_correlation(reference_image, moving_image, *,
     cross_correlation = ifftn(image_product)
 
     # Locate maximum
-    maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
-                              cross_correlation.shape)
+    maxima = np.unravel_index(
+        np.argmax(np.abs(cross_correlation)), cross_correlation.shape
+    )
     midpoint = np.array([np.fix(axis_size / 2) for axis_size in shape])
 
     float_dtype = image_product.real.dtype
@@ -352,14 +373,17 @@ def phase_cross_correlation(reference_image, moving_image, *,
         # Center of output array at dftshift + 1
         dftshift = np.fix(upsampled_region_size / 2.0)
         # Matrix multiply DFT around the current shift estimate
-        sample_region_offset = dftshift - shift*upsample_factor
-        cross_correlation = _upsampled_dft(image_product.conj(),
-                                           upsampled_region_size,
-                                           upsample_factor,
-                                           sample_region_offset).conj()
+        sample_region_offset = dftshift - shift * upsample_factor
+        cross_correlation = _upsampled_dft(
+            image_product.conj(),
+            upsampled_region_size,
+            upsample_factor,
+            sample_region_offset,
+        ).conj()
         # Locate maximum and map back to original pixel grid
-        maxima = np.unravel_index(np.argmax(np.abs(cross_correlation)),
-                                  cross_correlation.shape)
+        maxima = np.unravel_index(
+            np.argmax(np.abs(cross_correlation)), cross_correlation.shape
+        )
         CCmax = cross_correlation[maxima]
 
         maxima = np.stack(maxima).astype(float_dtype, copy=False)
@@ -390,7 +414,7 @@ def phase_cross_correlation(reference_image, moving_image, *,
             "keywords, eg: "
             "phase_cross_correlation(reference_image, moving_image, "
             "reference_mask=~np.isnan(reference_image), "
-            "moving_mask=~np.isnan(moving_image))")
+            "moving_mask=~np.isnan(moving_image))"
+        )
 
-    return shift, _compute_error(CCmax, src_amp, target_amp),\
-        _compute_phasediff(CCmax)
+    return shift, _compute_error(CCmax, src_amp, target_amp), _compute_phasediff(CCmax)

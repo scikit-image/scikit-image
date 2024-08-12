@@ -123,9 +123,17 @@ py3.install_sources(
 )
 
 cython_cli = find_program('_build_utils/cythoner.py')
+cy = meson.get_compiler('cython')
+
+cython_args = ['@INPUT@', '@OUTPUT@']
+if cy.version().version_compare('>=3.1.0')
+  cython_args += ['-Xfreethreading_compatible=True']
+endif
+
+cython_cpp_args = cython_args + ['--cplus']
 
 cython_gen = generator(cython_cli,
-  arguments : ['@INPUT@', '@OUTPUT@'],
+  arguments : cython_args,
   output : '@BASENAME@.c')
 
 cython_gen_cpp = generator(cython_cli,
@@ -142,6 +150,7 @@ cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
 
 subdir('_shared')
+subdir('_vendored')
 subdir('color')
 subdir('data')
 subdir('draw')

@@ -9,7 +9,7 @@ from ..transform import pyramid_reduce
 from ..util.dtype import _convert
 
 
-def get_warp_points(grid, flow):
+def _get_warp_points(grid, flow):
     """Compute warp point coordinates.
 
     Parameters
@@ -32,7 +32,7 @@ def get_warp_points(grid, flow):
     return out
 
 
-def resize_flow(flow, shape):
+def _resize_flow(flow, shape):
     """Rescale the values of the vector field (u, v) to the desired shape.
 
     The values of the output vector field are scaled to the new
@@ -58,19 +58,20 @@ def resize_flow(flow, shape):
     for _ in shape:
         scale_factor = scale_factor[..., np.newaxis]
 
-    rflow = scale_factor*ndi.zoom(flow, [1] + scale, order=0,
-                                  mode='nearest', prefilter=False)
+    rflow = scale_factor * ndi.zoom(
+        flow, [1] + scale, order=0, mode='nearest', prefilter=False
+    )
 
     return rflow
 
 
-def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
+def _get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     """Construct image pyramid.
 
     Parameters
     ----------
     I : ndarray
-        The image to be preprocessed (Gray scale or RGB).
+        The image to be preprocessed (Grayscale or RGB).
     downscale : float
         The pyramid downscale factor.
     nlevel : int
@@ -98,16 +99,17 @@ def get_pyramid(I, downscale=2.0, nlevel=10, min_size=16):
     return pyramid[::-1]
 
 
-def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
-                   dtype=np.float32):
+def _coarse_to_fine(
+    I0, I1, solver, downscale=2, nlevel=10, min_size=16, dtype=np.float32
+):
     """Generic coarse to fine solver.
 
     Parameters
     ----------
     I0 : ndarray
-        The first gray scale image of the sequence.
+        The first grayscale image of the sequence.
     I1 : ndarray
-        The second gray scale image of the sequence.
+        The second grayscale image of the sequence.
     solver : callable
         The solver applied at each pyramid level.
     downscale : float
@@ -130,21 +132,21 @@ def coarse_to_fine(I0, I1, solver, downscale=2, nlevel=10, min_size=16,
         raise ValueError("Input images should have the same shape")
 
     if np.dtype(dtype).char not in 'efdg':
-        raise ValueError("Only floating point data type are valid"
-                         " for optical flow")
+        raise ValueError("Only floating point data type are valid" " for optical flow")
 
-    pyramid = list(zip(get_pyramid(_convert(I0, dtype),
-                                   downscale, nlevel, min_size),
-                       get_pyramid(_convert(I1, dtype),
-                                   downscale, nlevel, min_size)))
+    pyramid = list(
+        zip(
+            _get_pyramid(_convert(I0, dtype), downscale, nlevel, min_size),
+            _get_pyramid(_convert(I1, dtype), downscale, nlevel, min_size),
+        )
+    )
 
     # Initialization to 0 at coarsest level.
-    flow = np.zeros((pyramid[0][0].ndim, ) + pyramid[0][0].shape,
-                    dtype=dtype)
+    flow = np.zeros((pyramid[0][0].ndim,) + pyramid[0][0].shape, dtype=dtype)
 
     flow = solver(pyramid[0][0], pyramid[0][1], flow)
 
     for J0, J1 in pyramid[1:]:
-        flow = solver(J0, J1, resize_flow(flow, J0.shape))
+        flow = solver(J0, J1, _resize_flow(flow, J0.shape))
 
     return flow

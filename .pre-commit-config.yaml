@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0 # v4.4.0
+    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -16,23 +16,29 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.3 # v2.7.1
+    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # frozen:  v3.1.0
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.292 # v0.0.261
+    rev: 0ccbb5b7942d83fbcf7cb5e0fd99633efd2351d7 # frozen: v0.3.5
+
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --show-fixes, --exit-non-zero-on-fix]
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: v0.15.0 # v0.15.0
+    rev: 582556b052c898dc484a981bea48de3284a4b8ee # frozen: v0.16.0
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 1aca2956f585f85e2f3935c3afdc5341f3c40a73 # frozen: 24.3.0
+    hooks:
+      - id: black
 
   - repo: local
     hooks:
@@ -43,10 +49,7 @@ repos:
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
 
 ci:
-  # This ensures that PR's aren't autofixed by the bot, rather you call
-  # the bot to make the fix
   autofix_prs: false
   autofix_commit_msg: |
     '[pre-commit.ci 🤖] Apply code format tools to PR'
-  # Update hook versions every month (so we don't get hit with weekly update PR's)
-  autoupdate_schedule: monthly
+  autoupdate_schedule: quarterly

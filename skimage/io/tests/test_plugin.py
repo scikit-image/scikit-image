@@ -10,11 +10,10 @@ from skimage.io import manage_plugins
 priority_plugin = 'pil'
 
 
-def setup():
+@pytest.fixture(autouse=True)
+def _use_pil_plugin():
     io.use_plugin('pil')
-
-
-def teardown_module():
+    yield
     io.reset_plugins()
 
 
@@ -49,8 +48,7 @@ def test_load_preferred_plugins_all():
     from skimage.io._plugins import pil_plugin, matplotlib_plugin
 
     with protect_preferred_plugins():
-        manage_plugins.preferred_plugins = {'all': ['pil'],
-                                            'imshow': ['matplotlib']}
+        manage_plugins.preferred_plugins = {'all': ['pil'], 'imshow': ['matplotlib']}
         manage_plugins.reset_plugins()
 
         for plugin_type in ('imread', 'imsave'):

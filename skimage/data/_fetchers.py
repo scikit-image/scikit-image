@@ -5,6 +5,7 @@ For more images, see
  - http://sipi.usc.edu/database/database.php
 
 """
+
 import numpy as np
 import shutil
 
@@ -49,6 +50,7 @@ except ModuleNotFoundError:
         >>> os.remove(fname)
         """
         import hashlib
+
         if alg not in hashlib.algorithms_available:
             raise ValueError(f'Algorithm \'{alg}\' not available in hashlib')
         # Calculate the hash in chunks to avoid overloading the memory
@@ -72,6 +74,7 @@ def _has_hash(path, expected_hash):
 def _create_image_fetcher():
     try:
         import pooch
+
         # older versions of Pooch don't have a __version__ attribute
         if not hasattr(pooch, '__version__'):
             retry = {}
@@ -93,11 +96,9 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = ("https://github.com/scikit-image/scikit-image/raw/"
-               "{version}/skimage/")
+        url = "https://github.com/scikit-image/scikit-image/raw/" "{version}/skimage/"
     else:
-        url = ("https://github.com/scikit-image/scikit-image/raw/"
-               "v{version}/skimage/")
+        url = "https://github.com/scikit-image/scikit-image/raw/" "v{version}/skimage/"
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -141,10 +142,10 @@ def _skip_pytest_case_requiring_pooch(data_filename):
     if 'PYTEST_CURRENT_TEST' in os.environ:
         # https://docs.pytest.org/en/latest/example/simple.html#pytest-current-test-environment-variable  # noqa
         import pytest
+
         # Pytest skip raises an exception that allows the
         # tests to be skipped
-        pytest.skip(f'Unable to download {data_filename}',
-                    allow_module_level=True)
+        pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
 def _ensure_cache_dir(*, target_dir):
@@ -268,7 +269,7 @@ def download_all(directory=None):
     scikit-image will only search for images stored in the default directory.
     Only specify the directory if you wish to download the images to your own
     folder for a particular reason. You can access the location of the default
-    data directory by inspecting the variable `skimage.data.data_dir`.
+    data directory by inspecting the variable ``skimage.data.data_dir``.
     """
 
     if _image_fetcher is None:
@@ -331,6 +332,7 @@ def _load(f, as_gray=False):
     # importing io is quite slow since it scans all the backends
     # we lazy import it here
     from ..io import imread
+
     return imread(_fetch(f), as_gray=as_gray)
 
 
@@ -1106,9 +1108,7 @@ def stereo_motorcycle():
     """
     filename = _fetch("data/motorcycle_disp.npz")
     disp = np.load(filename)['arr_0']
-    return (_load("data/motorcycle_left.png"),
-            _load("data/motorcycle_right.png"),
-            disp)
+    return (_load("data/motorcycle_left.png"), _load("data/motorcycle_right.png"), disp)
 
 
 def lfw_subset():
@@ -1242,5 +1242,7 @@ def vortex():
            http://pivchallenge.org
     .. [2] 1st PIV challenge Case B: http://pivchallenge.org/pub/index.html#b
     """
-    return (_load('data/pivchallenge-B-B001_1.tif'),
-            _load('data/pivchallenge-B-B001_2.tif'))
+    return (
+        _load('data/pivchallenge-B-B001_1.tif'),
+        _load('data/pivchallenge-B-B001_2.tif'),
+    )
