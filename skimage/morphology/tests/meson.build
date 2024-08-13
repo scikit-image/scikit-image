@@ -10,7 +10,6 @@ python_sources = [
   'test_max_tree.py',
   'test_misc.py',
   'test_reconstruction.py',
-  'test_skeletonize_3d.py',
   'test_skeletonize.py',
   'test_util.py'
 ]
