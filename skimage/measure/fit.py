@@ -662,9 +662,12 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     if n_inliers == 0:
         return np.inf
     inlier_ratio = n_inliers / n_samples
-    nom = max(_EPSILON, 1 - probability)
+    nom = 1 - probability
     denom = 1 - inlier_ratio**min_samples
-    # Avoid log(1) below turning into -inf
+    # Keep (de-)nominator in the range of [_EPSILON, 1 - _EPSILON] so that
+    # it is always guaranteed that the logarithm is negative and we return
+    # a positive number of trials.
+    nom = np.clip(nom, a_min=_EPSILON, a_max=1 - _EPSILON)
     denom = np.clip(denom, a_min=_EPSILON, a_max=1 - _EPSILON)
     return np.ceil(np.log(nom) / np.log(denom))
 
