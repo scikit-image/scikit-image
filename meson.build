@@ -1,6 +1,6 @@
 project(
   'scikit-image',
-  'c', 'cpp',
+  'c', 'cpp', 'cython',
   # Note that the git commit hash cannot be added dynamically here
   # That only happens when importing from a git repository.
   # See `skimage/__init__.py`

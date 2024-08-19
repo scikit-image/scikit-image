@@ -69,7 +69,6 @@ docs = [
     'sphinx-gallery>=0.14',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
     'matplotlib>=3.6',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
@@ -91,7 +90,7 @@ optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
+    'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
