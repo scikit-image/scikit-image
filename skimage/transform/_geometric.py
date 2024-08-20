@@ -1195,7 +1195,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
         return tform
 
 
-def _euler_rotation_matrix(angles):
+def _euler_rotation_matrix(angles, degrees=False):
     """Produce an Euler rotation matrix from the given intrinsic rotation angles
     for the axes x, y and z.
 
@@ -1203,6 +1203,8 @@ def _euler_rotation_matrix(angles):
     ----------
     angles : array of float, shape (3,)
         The transformation angles in radians.
+    degrees : bool, optional
+        If True, then the given angles are assumed to be in degrees. Default is False.
 
     Returns
     -------
@@ -1210,7 +1212,7 @@ def _euler_rotation_matrix(angles):
         The Euler rotation matrix.
     """
     return spatial.transform.Rotation.from_euler(
-        'XYZ', angles=angles, degrees=False
+        'XYZ', angles=angles, degrees=degrees
     ).as_matrix()
 
 
