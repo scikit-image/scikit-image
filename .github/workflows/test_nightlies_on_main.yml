@@ -24,6 +24,7 @@ env:
   INSTALL_FROM_SDIST: 0
   WITHOUT_POOCH: 0
   EAGER_IMPORT: 0
+  SPHINXOPTS: "-j auto -W"
 
 jobs:
   wheels:
