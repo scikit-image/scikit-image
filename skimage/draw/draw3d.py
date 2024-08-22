@@ -167,7 +167,6 @@ def ellipsoid(
 
     # Generate (anisotropic) spatial grid
     plane_grid, row_grid, col_grid = np.mgrid[
-    plane_grid, row_grid, col_grid = np.mgrid[
         low[0] : high[0] : spacing[0],
         low[1] : high[1] : spacing[1],
         low[2] : high[2] : spacing[2],
