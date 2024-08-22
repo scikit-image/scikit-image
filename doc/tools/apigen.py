@@ -282,7 +282,7 @@ class ApiDocWriter:
         ad += title + '\n' + self.rst_section_levels[1] * len(title) + '\n\n'
 
         ad += '.. automodule:: ' + uri + '\n\n'
-        # ad += '.. currentmodule:: ' + uri + '\n\n'
+        ad += '.. currentmodule:: ' + uri + '\n\n'
         ad += '.. autosummary::\n   :nosignatures:\n\n'
         for f in functions:
             ad += '   ' + f + '\n'
