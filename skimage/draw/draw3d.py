@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import elliprg
 
 
-def _create_rotation_matrix(rotation: tuple[float, float, float]) -> np.ndarray:
+def _create_rotation_matrix(rotation):
     """
     An auxiallry function to create a standard rotation matrix for the given Euler angles in the Right handed (x, y, z) coordinate system.
 
@@ -52,13 +52,8 @@ def _create_rotation_matrix(rotation: tuple[float, float, float]) -> np.ndarray:
 
 
 def ellipsoid(
-    a: float,
-    b: float,
-    c: float,
-    spacing: tuple[float, float, float] = (1.0, 1.0, 1.0),
-    rotation: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    levelset: bool = False,
-) -> np.ndarray:
+    a, b, c, spacing=(1.0, 1.0, 1.0), rotation=(0.0, 0.0, 0.0), levelset=False
+):
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
     on grid with specified `spacing`.
@@ -164,7 +159,7 @@ def ellipsoid(
     return arr
 
 
-def ellipsoid_stats(a: float, b: float, c: float) -> tuple[float, float]:
+def ellipsoid_stats(a, b, c):
     """Calculate analytical volume and surface area of an ellipsoid.
 
     The surface area of an ellipsoid is given by
