@@ -8,5 +8,5 @@ ninja
 Cython>=3.0.4
 pythran
 numpy>=2.0.0
-spin==0.10
+spin==0.11
 build
