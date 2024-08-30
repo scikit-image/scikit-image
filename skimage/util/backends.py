@@ -1,12 +1,60 @@
 import functools
 import logging
 from collections.abc import Callable
-from types import ModuleType
-
+import warnings
+from importlib.metadata import entry_points
 
 __all__ = ["_dispatchable"]
 
 _logger = logging.getLogger(__name__)
+
+
+def _get_backends(group):
+    items = entry_points(group=group)
+    rv = {}
+    for ep in items:
+        if ep.name in rv:
+            warnings.warn(
+                f"skimage backend defined more than once: {ep.name}",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        else:
+            rv[ep.name] = ep
+    return rv
+
+
+backends = _get_backends("skimage.backends")
+
+
+def _dispatchable(
+    func: Callable,
+) -> Callable:  # this might not be a function in future but a class instead.
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        for arg in args:
+            if hasattr(arg, "__skimage_backend__"):
+                backend_name = arg.__skimage_backend__  # will be changed?
+                if backend_name in backends:
+                    backend_entry_point = backends[backend_name]
+                    backend_module = backend_entry_point.load()
+                    backend_func = getattr(
+                        backend_module, func.__name__, None
+                    )  # not sure if it is possible to have a "flat" namspace in skimage, like it is done in networkx.
+                    if backend_func:
+                        _logger.info(
+                            f"Running {func.__name__} with {backend_name} backend with args:{args} and kwargs:{kwargs}"
+                        )
+                        result = backend_func(*args, **kwargs)
+                        return result
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+'''
+# @JoOkuma's code
+
 
 cp = None
 
@@ -157,3 +205,5 @@ def _dispatchable(func: Callable) -> Callable:
         wrapper.__name__ = func.__class__.__name__
 
     return wrapper
+
+'''
