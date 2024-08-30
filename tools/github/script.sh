@@ -2,28 +2,36 @@
 # Fail on non-zero exit and echo the commands
 set -evx
 
-python -m pip install $PIP_FLAGS -r requirements/test.txt
-
-
-
 TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
+
+
+# Combine requirement files for a more robust pip solve
+# installing successively may update previously constrained dependencies
+REQUIREMENT_FILES="-r requirements/default.txt -r requirements/test.txt"
+if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
+    REQUIREMENT_FILES="${REQUIREMENT_FILES} -r requirements/optional.txt"
+fi
+
+python -m pip install $PIP_FLAGS $REQUIREMENT_FILES
 
 if [[ ${WITHOUT_POOCH} == "1" ]]; then
   # remove pooch (previously installed via requirements/test.txt)
   python -m pip uninstall pooch -y
 fi
-if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
-    python -m pip install $PIP_FLAGS -r ./requirements/optional.txt
-fi
 
 python -m pip list
 
+
+# Run the tests
 (cd .. && pytest $TEST_ARGS --pyargs skimage)
 
 
+# Optionally, prepare building the docs (and test examples)
 if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
-  echo Build or run examples
-  python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
+  echo "Build or run examples"
+  # Use previous installed requirements as well, otherwise installing
+  # successively may update previously constraint dependencies
+  python -m pip install $PIP_FLAGS $REQUIREMENT_FILES -r ./requirements/docs.txt
   python -m pip list
 
   export MPL_DIR
@@ -35,6 +43,7 @@ if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
   fi
 fi
 
+# Optionally, build the docs or test examples
 if [[ "${BUILD_DOCS}" == "1" ]]; then
   echo Build docs
   export SPHINXCACHE=${HOME}/.cache/sphinx; make -C doc html

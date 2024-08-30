@@ -4,7 +4,6 @@ sphinx>=7.3
 sphinx-gallery>=0.14
 numpydoc>=1.7
 sphinx-copybutton
-pytest-runner
 matplotlib>=3.6
 dask[array]>=2022.9.2
 pandas>=1.5
@@ -18,6 +17,6 @@ plotly>=5.10
 kaleido
 scikit-learn>=1.1
 sphinx_design>=0.5
-pydata-sphinx-theme>=0.15.2
+pydata-sphinx-theme>=0.15.4
 PyWavelets>=1.1.1
 pytest-doctestplus

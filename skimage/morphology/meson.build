@@ -1,6 +1,6 @@
-_skeletonize_3d_cy = custom_target('_skeletonize_3d_cy',
-  output: '_skeletonize_3d_cy.pyx',
-  input: '_skeletonize_3d_cy.pyx.in',
+_skeletonize_lee_cy = custom_target('_skeletonize_lee_cy',
+  output: '_skeletonize_lee_cy.pyx',
+  input: '_skeletonize_lee_cy.pyx.in',
   command: [
     py3, tempita, '@INPUT@', '-o', '@OUTDIR@'
   ]
@@ -12,7 +12,8 @@ extensions = [
   '_flood_fill_cy',
   '_grayreconstruct',
   '_max_tree',
-  '_skeletonize_cy'
+  '_misc_cy',
+  '_skeletonize_various_cy'
 ]
 
 foreach ext: extensions
@@ -25,8 +26,8 @@ foreach ext: extensions
   )
 endforeach
 
-py3.extension_module('_skeletonize_3d_cy',
-  cython_gen_cpp.process(_skeletonize_3d_cy),
+py3.extension_module('_skeletonize_lee_cy',
+  cython_gen_cpp.process(_skeletonize_lee_cy),
   cpp_args: cython_cpp_args,
   include_directories: [incdir_numpy, '../_shared'],
   install: true,
