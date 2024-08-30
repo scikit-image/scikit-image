@@ -1109,6 +1109,10 @@ def regionprops(
 ):
     r"""Measure properties of labeled image regions.
 
+    Region properties are evaluated lazily. If you have a pre-determined list
+    of region properties (which you would like to print or feed),
+    consider using :func:`skimage.measure.regionprops_table` instead.
+
     Parameters
     ----------
     label_image : (M, N[, P]) ndarray
