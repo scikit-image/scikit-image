@@ -3,7 +3,23 @@ import itertools
 import numpy as np
 from skimage import filters, feature
 from skimage.util.dtype import img_as_float32
-from concurrent.futures import ThreadPoolExecutor
+from .._shared._dependency_checks import is_wasm
+
+if not is_wasm:
+    from concurrent.futures import ThreadPoolExecutor as PoolExecutor
+else:
+    from contextlib import AbstractContextManager
+
+    # Threading isn't supported on WASM, mock ThreadPoolExecutor as a fallback
+    class PoolExecutor(AbstractContextManager):
+        def __init__(self, *_, **__):
+            pass
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
+
+        def map(self, fn, iterables):
+            return map(fn, iterables)
 
 
 def _texture_filter(gaussian_filtered):
@@ -83,7 +99,7 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    with ThreadPoolExecutor(max_workers=num_workers) as ex:
+    with PoolExecutor(max_workers=num_workers) as ex:
         out_sigmas = list(
             ex.map(
                 lambda s: _singlescale_basic_features_singlechannel(

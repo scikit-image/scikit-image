@@ -6,6 +6,11 @@ on:
     branches:
       - maintenance/**
 
+concurrency:
+  # Cancel previous workflows on the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -42,7 +47,7 @@ jobs:
         run: |
           SK_VERSION=$(git describe --tags)
           source tools/github/before_install.sh
-          python -m build --no-isolation --skip-dependency-check --sdist .
+          spin sdist -- --no-isolation --skip-dependency-check
           ls -la ${{ github.workspace }}/dist
 
       - name: Generate artifact attestation for sdist and wheels
@@ -54,21 +59,20 @@ jobs:
         run: pipx run twine check --strict dist/*
 
       # Ensure that a compromised twine couldn't have altered the distributions
-      # Required to resolve sdist and wheels separately
-      - name: Verify sdist artifact attestation
+      - name: Verify artifact attestation
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh attestation verify dist/scikit_image-*.tar.gz --repo ${{ github.repository }}
-
-      - name: Verify wheel artifact attestation
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh attestation verify dist/scikit_image-*.whl --repo ${{ github.repository }}
+        shell: bash
+        run: |
+          for artifact in dist/*; do
+              echo "# ${artifact}"
+              gh attestation verify "${artifact}" --repo ${{ github.repository }}
+          done
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
       - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 # v1.8.14
 
       - name: Github release
         uses: softprops/action-gh-release@v1
