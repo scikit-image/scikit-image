@@ -55,7 +55,6 @@ def _dispatchable(
 '''
 # @JoOkuma's code
 
-
 cp = None
 
 
