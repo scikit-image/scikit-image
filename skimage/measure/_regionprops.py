@@ -162,7 +162,7 @@ _require_intensity_image = (
 
 
 def _infer_number_of_required_args(func):
-    """Infer the number of required arguments for a function
+    """Infer the number of required arguments for a given function.
 
     Parameters
     ----------
@@ -172,7 +172,7 @@ def _infer_number_of_required_args(func):
     Returns
     -------
     n_args : int
-        The number of required arguments of func.
+        The number of required arguments for `func`.
     """
     argspec = inspect.getfullargspec(func)
     n_args = len(argspec.args)
@@ -182,7 +182,7 @@ def _infer_number_of_required_args(func):
 
 
 def _infer_regionprop_dtype(func, *, intensity, ndim):
-    """Infer the dtype of a region property calculated by func.
+    """Infer the dtype of a region property calculated by `func`.
 
     If a region property function always returns the same shape and type of
     output regardless of input size, then the dtype is the dtype of the
@@ -192,11 +192,11 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
     ----------
     func : callable
         Function to be tested. The signature should be array[bool] -> Any if
-        intensity is False, or *(array[bool], array[float]) -> Any otherwise.
+        `intensity` is False, or *(array[bool], array[float]) -> Any otherwise.
     intensity : bool
-        Whether the regionprop is calculated on an intensity image.
+        Whether the regionprop is calculated using an intensity image.
     ndim : int
-        The number of dimensions for which to check func.
+        The number of dimensions for which to check `func`.
 
     Returns
     -------
@@ -432,7 +432,7 @@ class RegionProperties:
         Returns
         -------
         A tuple of the bounding box's start coordinates for each dimension,
-        followed by the end coordinates for each dimension
+        followed by the end coordinates for each dimension.
         """
         return tuple(
             [self.slice[i].start for i in range(self._ndim)]
@@ -487,7 +487,7 @@ class RegionProperties:
     def euler_number(self):
         if self._ndim not in [2, 3]:
             raise NotImplementedError(
-                'Euler number is implemented for ' '2D or 3D images only'
+                'Euler number is implemented for 2D and 3D images only'
             )
         return euler_number(self.image, self._ndim)
 
