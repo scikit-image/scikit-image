@@ -136,6 +136,7 @@ Build = [
     'spin.cmds.meson.build',
     'spin.cmds.meson.test',
     'spin.cmds.build.sdist',
+    'spin.cmds.pip.install'
 ]
 Environments = [
     'spin.cmds.meson.run',
