@@ -2,13 +2,12 @@ import pathlib
 
 import numpy as np
 
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_func
 from .._shared.version_requirements import require
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin
 from .util import file_or_url_context
-
 
 __all__ = [
     'imread',
@@ -153,6 +152,11 @@ def imsave(fname, arr, plugin=None, check_contrast=True, **plugin_args):
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
+)
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
 
@@ -175,6 +179,11 @@ def imshow(arr, plugin=None, **plugin_args):
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
+)
 def imshow_collection(ic, plugin=None, **plugin_args):
     """Display a collection of images.
 
@@ -196,6 +205,11 @@ def imshow_collection(ic, plugin=None, **plugin_args):
 
 
 @require("matplotlib", ">=3.3")
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
+)
 def show():
     """Display pending images.
 
