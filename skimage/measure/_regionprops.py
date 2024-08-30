@@ -1112,7 +1112,7 @@ def regionprops(
     Parameters
     ----------
     label_image : (M, N[, P]) ndarray
-        Labeled input image. Labels with value 0 are ignored.
+        Label image. Labels with value 0 are ignored.
 
         .. versionchanged:: 0.14.1
             Previously, ``label_image`` was processed by ``numpy.squeeze`` and
@@ -1121,7 +1121,7 @@ def regionprops(
             recover the old behaviour, use
             ``regionprops(np.squeeze(label_image), ...)``.
     intensity_image : (M, N[, P][, C]) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image, plus
+        Intensity (input) image of same shape as label image, plus
         optionally an extra dimension for multichannel data. Currently,
         this extra channel dimension, if present, must be the last axis.
         Default is None.
@@ -1132,15 +1132,15 @@ def regionprops(
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
         increases.
-    extra_properties : Iterable of callables
+    extra_properties : iterable of callables
         Add extra property computation functions that are not included with
-        skimage. The name of the property is derived from the function name,
-        the dtype is inferred by calling the function on a small sample.
+        skimage. The name of the property is derived from the function name
+        and its dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
-        property the extra property will not be visible and a UserWarning is
-        issued. A property computation function must take a region mask as its
+        property, the extra property will not be visible and a UserWarning will be
+        issued. A property computation function must take a label image as its
         first argument. If the property requires an intensity image, it must
-        accept the intensity image as the second argument.
+        accept `intensity_image` as the second argument.
     spacing: tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
     offset : array-like of int, shape `(label_image.ndim,)`, optional
@@ -1151,17 +1151,17 @@ def regionprops(
     Returns
     -------
     properties : list of RegionProperties
-        Each item describes one labeled region, and can be accessed using the
-        attributes listed below.
+        Each item of the list corresponds to one labeled image region,
+        and can be accessed using the attributes listed below.
 
     Notes
     -----
     The following properties can be accessed as attributes or keys:
 
     **area** : float
-        Area of the region i.e. number of pixels of the region scaled by pixel-area.
+        Area of the region, i.e., number of pixels of the region scaled by pixel-area.
     **area_bbox** : float
-        Area of the bounding box i.e. number of pixels of bounding box scaled by pixel-area.
+        Area of the bounding box, i.e., number of pixels of the region's bounding box scaled by pixel-area.
     **area_convex** : float
         Area of the convex hull image, which is the smallest convex
         polygon that encloses the region.
@@ -1189,11 +1189,11 @@ def regionprops(
         Centroid coordinate tuple ``(row, col)``, relative to region bounding
         box, weighted with intensity image.
     **coords_scaled** : (K, 2) ndarray
-        Coordinate list ``(row, col)`` of the region scaled by ``spacing``.
+        Coordinate list ``(row, col)`` of the region scaled by `spacing`.
     **coords** : (K, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
-        Eccentricity of the ellipse that has the same second-moments as the
+        Eccentricity of the ellipse that has the same second moments as the
         region. The eccentricity is the ratio of the focal distance
         (distance between focal points) over the major axis length.
         The value is in the interval [0, 1).
@@ -1207,101 +1207,100 @@ def regionprops(
         components plus number of holes subtracted by number of tunnels.
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
-        Computed as ``area / (rows * cols)``
+        Computed as ``area / (rows * cols)``.
     **feret_diameter_max** : float
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
-        ``find_contours``. [5]_
-    **image** : (H, J) ndarray
-        Sliced binary region image which has the same size as bounding box.
-    **image_convex** : (H, J) ndarray
-        Binary convex hull image which has the same size as bounding box.
-    **image_filled** : (H, J) ndarray
-        Binary region image with filled holes which has the same size as
-        bounding box.
-    **image_intensity** : ndarray
-        Image inside region bounding box.
-    **inertia_tensor** : ndarray
+        ``find_contours`` [5]_.
+    **image** : (H, J) array
+        Binary region image sliced by bounding box.
+    **image_convex** : (H, J) array
+        Binary convex hull image sliced by bounding box.
+    **image_filled** : (H, J) array
+        Binary region image with filled holes sliced by bounding box.
+    **image_intensity** : (H, J) array
+        Intensity image sliced by bounding box.
+    **inertia_tensor** : array
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The eigenvalues of the inertia tensor in decreasing order.
     **intensity_max** : float
-        Value with the greatest intensity in the region.
+        Value of greatest intensity in the region.
     **intensity_mean** : float
-        Value with the mean intensity in the region.
+        Average of intensity values in the region.
     **intensity_min** : float
-        Value with the least intensity in the region.
+        Value of lowest intensity in the region.
     **intensity_std** : float
-        Standard deviation of the intensity in the region.
+        Standard deviation of intensity values in the region.
     **label** : int
-        The label in the labeled input image.
-    **moments** : (3, 3) ndarray
+        The region's label in the input label image.
+    **moments** : (3, 3) array
         Spatial moments up to 3rd order::
 
-            m_ij = sum{ array(row, col) * row^i * col^j }
+           m_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `row`, `col` coordinates of the region.
-    **moments_central** : (3, 3) ndarray
+        where the sum is over the ``row, col`` coordinates of the region.
+    **moments_central** : (3, 3) array
         Central moments (translation invariant) up to 3rd order::
 
-            mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
+           mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `row`, `col` coordinates of the region,
-        and `row_c` and `col_c` are the coordinates of the region's centroid.
+        where the sum is over the ``row, col`` coordinates of the region,
+        and ``row_c`` and ``col_c`` are the coordinates of the region's centroid.
     **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
-    **moments_normalized** : (3, 3) ndarray
+    **moments_normalized** : (3, 3) array
         Normalized moments (translation and scale invariant) up to 3rd order::
 
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
-        where `m_00` is the zeroth spatial moment.
-    **moments_weighted** : (3, 3) ndarray
+        where ``m_00`` is the zero-th spatial moment.
+    **moments_weighted** : (3, 3) array
         Spatial moments of intensity image up to 3rd order::
 
             wm_ij = sum{ array(row, col) * row^i * col^j }
 
-        where the sum is over the `row`, `col` coordinates of the region.
-    **moments_weighted_central** : (3, 3) ndarray
+        where the sum is over the ``row, col`` coordinates of the region.
+    **moments_weighted_central** : (3, 3) array
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
             wmu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
 
-        where the sum is over the `row`, `col` coordinates of the region,
-        and `row_c` and `col_c` are the coordinates of the region's weighted
+        where the sum is over the ``row, col`` coordinates of the region,
+        and ``row_c`` and ``col_c`` are the coordinates of the region's weighted
         centroid.
     **moments_weighted_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
-    **moments_weighted_normalized** : (3, 3) ndarray
+    **moments_weighted_normalized** : (3, 3) array
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
             wnu_ij = wmu_ij / wm_00^[(i+j)/2 + 1]
 
-        where ``wm_00`` is the zeroth spatial moment (intensity-weighted area).
+        where ``wm_00`` is the zero-th spatial moment (intensity-weighted area).
     **num_pixels** : int
         Number of foreground pixels.
     **orientation** : float
         Angle between the 0th axis (rows) and the major
         axis of the ellipse that has the same second moments as the region,
-        ranging from `-pi/2` to `pi/2` counter-clockwise.
+        ranging from :math:`-\pi/2` to :math:`\pi/2` counter-clockwise.
     **perimeter** : float
-        Perimeter of object which approximates the contour as a line
+        Perimeter of the region which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
     **perimeter_crofton** : float
-        Perimeter of object approximated by the Crofton formula in 4
+        Perimeter of the region approximated by the Crofton formula in 4
         directions.
     **slice** : tuple of slices
-        A slice to extract the object from the source image.
+        A slice to extract the region from the input image.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
 
-    Each region also supports iteration, so that you can do::
+    `properties` also supports iteration, so that you can do::
 
-      for prop in region:
-          print(prop, region[prop])
+      for region in properties:
+          print(region, properties[region])
 
     See Also
     --------
