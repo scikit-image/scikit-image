@@ -8,7 +8,7 @@
 - **Documentation:** [https://scikit-image.org/docs/stable/](https://scikit-image.org/docs/stable/)
 - **User forum:** [https://forum.image.sc/tag/scikit-image](https://forum.image.sc/tag/scikit-image)
 - **Developer forum:** [https://discuss.scientific-python.org/c/contributor/skimage](https://discuss.scientific-python.org/c/contributor/skimage)
-- **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image).
+- **Source:** [https://github.com/scikit-image/scikit-image](https://github.com/scikit-image/scikit-image)
 
 ## Installation
 

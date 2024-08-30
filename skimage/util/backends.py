@@ -40,7 +40,7 @@ def _dispatchable(
                     backend_module = backend_entry_point.load()
                     backend_func = getattr(
                         backend_module, func.__name__, None
-                    )  # not sure if it is possible to have a "flat" namspace in skimage, like it is done in networkx.
+                    )  # not sure if it is possible to have a "flat" namespace in skimage, like it is done in networkx.
                     if backend_func:
                         _logger.info(
                             f"Running {func.__name__} with {backend_name} backend with args:{args} and kwargs:{kwargs}"
