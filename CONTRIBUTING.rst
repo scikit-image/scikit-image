@@ -296,9 +296,9 @@ i.e., statement coverage should be at 100%.
 
 To measure test coverage run::
 
-  $ spin coverage
+  $ spin test --coverage
 
-This will print a report with one line for each file in `skimage`,
+This will run tests and print a report with one line for each file in `skimage`,
 detailing the test coverage::
 
   Name                                             Stmts   Exec  Cover   Missing
