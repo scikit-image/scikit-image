@@ -1229,15 +1229,15 @@ def regionprops(
         Maximum Feret's diameter computed as the longest distance between
         points around a region's convex hull contour as determined by
         ``find_contours`` [5]_.
-    **image** : (H, J) array
+    **image** : (H, J) ndarray
         Binary region image sliced by bounding box.
-    **image_convex** : (H, J) array
+    **image_convex** : (H, J) ndarray
         Binary convex hull image sliced by bounding box.
-    **image_filled** : (H, J) array
+    **image_filled** : (H, J) ndarray
         Binary region image with filled holes sliced by bounding box.
-    **image_intensity** : (H, J) array
+    **image_intensity** : (H, J) ndarray
         Intensity image sliced by bounding box.
-    **inertia_tensor** : array
+    **inertia_tensor** : ndarray
         Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The eigenvalues of the inertia tensor in decreasing order.
@@ -1251,13 +1251,13 @@ def regionprops(
         Standard deviation of intensity values in the region.
     **label** : int
         The region's label in the input label image.
-    **moments** : (3, 3) array
+    **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
            m_ij = sum{ array(row, col) * row^i * col^j }
 
         where the sum is over the ``row, col`` coordinates of the region.
-    **moments_central** : (3, 3) array
+    **moments_central** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
            mu_ij = sum{ array(row, col) * (row - row_c)^i * (col - col_c)^j }
@@ -1266,7 +1266,7 @@ def regionprops(
         and ``row_c`` and ``col_c`` are the coordinates of the region's centroid.
     **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
-    **moments_normalized** : (3, 3) array
+    **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
@@ -1278,7 +1278,7 @@ def regionprops(
             wm_ij = sum{ array(row, col) * row^i * col^j }
 
         where the sum is over the ``row, col`` coordinates of the region.
-    **moments_weighted_central** : (3, 3) array
+    **moments_weighted_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
@@ -1290,7 +1290,7 @@ def regionprops(
     **moments_weighted_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
-    **moments_weighted_normalized** : (3, 3) array
+    **moments_weighted_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
