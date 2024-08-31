@@ -933,19 +933,19 @@ def regionprops_table(
     extra_properties=None,
     spacing=None,
 ):
-    """Compute image properties and return them as a pandas-compatible table.
+    """Compute region properties and return them as a pandas-compatible table.
 
-    The table is a dictionary mapping column names to value arrays. See Notes
-    section below for details.
+    The table is "tidy" [1]_; it is a dictionary mapping property names to
+    value arrays. See Notes section below for details.
 
     .. versionadded:: 0.16
 
     Parameters
     ----------
     label_image : (M, N[, P]) ndarray
-        Labeled input image. Labels with value 0 are ignored.
+        Label image. Labels with value 0 are ignored.
     intensity_image : (M, N[, P][, C]) ndarray, optional
-        Intensity (i.e., input) image with same size as labeled image, plus
+        Intensity (input) image of same shape as label image, plus
         optionally an extra dimension for multichannel data. The channel dimension,
         if present, must be the last axis. Default is None.
 
@@ -971,7 +971,7 @@ def regionprops_table(
         Object columns are those that cannot be split in this way because the
         number of columns would change depending on the object. For example,
         ``image`` and ``coords``.
-    extra_properties : Iterable of callables
+    extra_properties : iterable of callables
         Add extra property computation functions that are not included with
         skimage. The name of the property is derived from the function name,
         the dtype is inferred by calling the function on a small sample.
@@ -1011,6 +1011,12 @@ def regionprops_table(
     "image" (the image of a region varies in size depending on the region
     size), an object array will be used, with the corresponding property name
     as the key.
+
+    References
+    ----------
+    .. [1] Wickham, H (2014) "Tidy Data" Journal of Statistical Software,
+           59(10), 1–23. https://doi.org/10.18637/jss.v059.i10
+           https://vita.had.co.nz/papers/tidy-data.pdf
 
     Examples
     --------
