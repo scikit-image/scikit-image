@@ -938,6 +938,11 @@ def regionprops_table(
     The table is "tidy" [1]_; it is a dictionary mapping property names to
     value arrays. See Notes section below for details.
 
+    This function is typically useful when you have a pre-determined list of
+    region properties you want to compute (and possibly print or feed). If you
+    can afford to compute given region properties only when they are needed,
+    consider using :func:`skimage.measure.regionprops` instead.
+
     .. versionadded:: 0.16
 
     Parameters
