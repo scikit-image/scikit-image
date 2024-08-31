@@ -1,3 +1,8 @@
+Version 0.27
+------------
+* Remove deprecated `skimage.io.imshow`,
+  `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
+
 Version 0.25
 ------------
 * Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and

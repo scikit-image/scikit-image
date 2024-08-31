@@ -17,6 +17,6 @@ plotly>=5.10
 kaleido
 scikit-learn>=1.1
 sphinx_design>=0.5
-pydata-sphinx-theme>=0.15.2
+pydata-sphinx-theme>=0.15.4
 PyWavelets>=1.1.1
 pytest-doctestplus
