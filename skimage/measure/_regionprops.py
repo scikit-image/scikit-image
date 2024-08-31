@@ -1174,9 +1174,11 @@ def regionprops(
     The following properties can be accessed as attributes or keys:
 
     **area** : float
-        Area of the region, i.e., number of pixels of the region scaled by pixel-area.
+        Area of the region, i.e., number of pixels of the region scaled by
+        pixel area (as determined by `spacing`).
     **area_bbox** : float
-        Area of the bounding box, i.e., number of pixels of the region's bounding box scaled by pixel-area.
+        Area of the bounding box, i.e., number of pixels of the region's
+        bounding box scaled by pixel area (as determined by `spacing`).
     **area_convex** : float
         Area of the convex hull image, which is the smallest convex
         polygon that encloses the region.
