@@ -935,8 +935,9 @@ def regionprops_table(
 ):
     """Compute region properties and return them as a pandas-compatible table.
 
-    The table is "tidy" [1]_; it is a dictionary mapping property names to
-    value arrays. See Notes section below for details.
+    The return value is a dictionary mapping property names to value arrays.
+    This dictionary can be used as input to ``pandas.DataFrame`` to result in
+    a "tidy" [1]_ table with one region per row and one property per column.
 
     This function is typically useful when you have a pre-determined list of
     region properties you want to compute (and possibly print or feed). If you
