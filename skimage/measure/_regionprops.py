@@ -939,10 +939,13 @@ def regionprops_table(
     This dictionary can be used as input to ``pandas.DataFrame`` to result in
     a "tidy" [1]_ table with one region per row and one property per column.
 
-    This function is typically useful when you have a pre-determined list of
-    region properties you want to compute (and possibly print or feed). If you
-    can afford to compute given region properties only when they are needed,
-    consider using :func:`skimage.measure.regionprops` instead.
+    Use this function typically when you want to do downstream data analysis,
+    or save region data to disk in a structured way. One downside of this
+    function is that it breaks multi-dimensional properties into independent
+    columns; for example, the region centroids of a 3D image end up in three
+    different columns, one per dimension. If you need to do complex
+    computations with the region properties, using
+    :func:`skimage.measure.regionprops` might be more fitting.
 
     .. versionadded:: 0.16
 
