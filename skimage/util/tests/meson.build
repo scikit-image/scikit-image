@@ -2,6 +2,7 @@ python_sources = [
   '__init__.py',
   'test_apply_parallel.py',
   'test_arraycrop.py',
+  'test_backends.py',
   'test_compare.py',
   'test_dtype.py',
   'test_invert.py',

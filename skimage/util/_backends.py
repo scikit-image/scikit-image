@@ -1,5 +1,4 @@
 import functools
-import importlib
 from importlib.metadata import entry_points
 from functools import lru_cache
 import os
@@ -16,7 +15,7 @@ def all_backends():
     backend_infos = entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
-        backends[backend.name] = {"module": backend}
+        backends[backend.name] = {"implementation": backend}
         try:
             info = backend_infos[backend.name]
             # Double () to load and then call the backend information function
@@ -43,6 +42,7 @@ def dispatchable(func):
     # return the original function. This way people who don't care about
     # don't see anything related to dispatching
     # XXX how do we test this given it happens at import time?
+    # XXX do we need to make this be False if SKIMAGE_NO_DISPATCHING=0?
     disable_dispatching = bool(os.environ.get("SKIMAGE_NO_DISPATCHING", False))
     if disable_dispatching or not all_backends():
         return func
@@ -59,30 +59,20 @@ def dispatchable(func):
                 ):
                     continue
 
-            backend_module = backend["module"].load()
-
-            # Import the module that contains the backend implementation,
-            # continuing to the next backend in case this fails
-            try:
-                mod = importlib.import_module(
-                    backend_module.__name__ + "." + func_module
-                )
-            except ImportError:
-                continue
+            backend_impl = backend["implementation"].load()
+            can_has_func, func_impl = backend_impl(f"{func_module}.{func_name}")
 
             # Allow the backend to accept/reject a call based on the values
             # of the arguments
-            backend_can_has_func = getattr(mod, f"can_has_{func_name}", None)
-            if backend_can_has_func is not None:
-                wants_it = backend_can_has_func(*args, **kwargs)
+            if can_has_func is not None:
+                wants_it = can_has_func(*args, **kwargs)
             else:
                 wants_it = True
 
             if not wants_it:
                 continue
 
-            backend_func = getattr(mod, func_name, None)
-            if backend_func is not None:
+            if func is not None:
                 warnings.warn(
                     f"Call to '{func.__module__}.{func_name}' was dispatched to"
                     f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
@@ -94,7 +84,7 @@ def dispatchable(func):
                     # XXX a function that was dispatched?
                     stacklevel=2,
                 )
-                return backend_func(*args, **kwargs)
+                return func_impl(*args, **kwargs)
 
         else:
             return func(*args, **kwargs)
