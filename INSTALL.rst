@@ -107,14 +107,9 @@ can install the package ``scikit-image[optional]``:
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Miniconda is a bare-essentials version of the Anaconda package; you'll need to
-install packages like ``scikit-image`` yourself. Like Anaconda, it installs
-Python and provides virtual environments.
-
-- `conda documentation <https://docs.conda.io>`_
-- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_
-- `conda-forge <https://conda-forge.org>`_, a conda channel maintained
-  with the latest ``scikit-image`` package
+We recommend `miniforge <https://github.com/conda-forge/miniforge>`_, a minimal
+distribution that makes use of `conda-forge <https://conda-forge.org>`_.
+It installs Python and provides virtual environments.
 
 Once you have your conda environment set up, you can install ``scikit-image``
 with the command:
@@ -122,6 +117,7 @@ with the command:
 .. code-block:: sh
 
     conda install scikit-image
+
 
 System package managers
 ------------------------------------------------------------------------------
@@ -229,7 +225,7 @@ Once you've cloned your fork of the scikit-image repository,
 you should set up a Python development environment tailored for scikit-image.
 You may choose the environment manager of your choice.
 Here we provide instructions for two popular environment managers:
-``venv`` (pip based) and ``conda`` (Anaconda or Miniconda).
+``venv`` (pip based) and ``conda`` (Miniforge).
 
 venv
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -254,13 +250,9 @@ venv
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When using conda for development, we
-recommend adding the conda-forge channel for the most up-to-date version
-of many dependencies.
-Some dependencies we use (for testing and documentation) are not available
-from the default Anaconda channel. Please follow the official
-`conda-forge installation instructions <https://conda-forge.org/#about>`_
-before you get started.
+When using conda for development, we recommend using
+`miniforge <https://github.com/conda-forge/miniforge>`_.
+After installing miniforge:
 
 .. code-block:: sh
 
