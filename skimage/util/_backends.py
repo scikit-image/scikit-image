@@ -2,6 +2,9 @@ import functools
 import importlib
 from importlib.metadata import entry_points
 from functools import lru_cache
+import warnings
+
+from .._shared._warnings import DispatchWarning
 
 
 @lru_cache
@@ -34,6 +37,10 @@ def dispatchable(func):
     # The submodule inside skimage, used to know which (sub)module to import
     # from the backend
     func_module = func.__module__.removeprefix("skimage.")
+
+    # If no backends are installed at all, return the original function
+    if not all_backends():
+        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -68,6 +75,17 @@ def dispatchable(func):
 
             backend_func = getattr(mod, func_name, None)
             if backend_func is not None:
+                warnings.warn(
+                    f"Call to '{func.__module__}.{func_name}' was dispatched to"
+                    f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
+                    " disable this.",
+                    DispatchWarning,
+                    # XXX from where should this warning originate?
+                    # XXX from where the function that was dispatched was called?
+                    # XXX or from where the user called a function that called
+                    # XXX a function that was dispatched?
+                    stacklevel=2,
+                )
                 return backend_func(*args, **kwargs)
 
         else:

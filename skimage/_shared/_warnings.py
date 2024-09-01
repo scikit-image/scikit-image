@@ -147,3 +147,9 @@ def expected_warnings(matching):
             newline = "\n"
             msg = f"No warning raised matching:{newline}{newline.join(remaining)}"
             raise ValueError(msg)
+
+
+class DispatchWarning(RuntimeWarning):
+    """Warning raised when a function is dispatched to a backend."""
+
+    pass
