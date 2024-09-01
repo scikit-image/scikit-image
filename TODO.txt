@@ -1,3 +1,14 @@
+Version 0.27
+------------
+* Remove deprecated `skimage.io.imshow`,
+  `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
+
+Version 0.26
+------------
+* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
+  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
+  function ``_shift_footprint``.
+
 Version 0.25
 ------------
 * Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
@@ -11,12 +22,6 @@ Version 0.25
   (and all `pytest.warns(FutureWarning)` context managers there).
 * Resolve temporary exclusion of Dask 2024.8.0 in optional dependencies, see
   https://github.com/scikit-image/scikit-image/issues/7491 for details.
-
-Version 0.26
-------------
-* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
-  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
-  function ``_shift_footprint``.
 
 Other
 -----
