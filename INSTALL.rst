@@ -62,7 +62,7 @@ your command line to install packages.
 We strongly recommend the use of a
 `virtual environment
 <https://towardsdatascience.com/virtual-environments-104c62d48c54?gi=2532aa12906#ee81>`_.
-They create a clean Python environment that does not interfere
+A virtual environment creates a clean Python environment that does not interfere
 with the existing system installation, can be easily removed, and contain only
 the package versions your application needs.
 
