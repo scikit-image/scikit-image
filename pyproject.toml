@@ -134,6 +134,7 @@ package = 'skimage'
 [tool.spin.commands]
 Build = [
     'spin.cmds.meson.build',
+    'spin.cmds.pip.install',
     'spin.cmds.meson.test',
     '.spin/cmds.py:sdist',
 ]
@@ -190,7 +191,7 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
+testpaths = ["skimage", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
