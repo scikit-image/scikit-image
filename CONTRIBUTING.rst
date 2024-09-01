@@ -3,17 +3,22 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun! Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
+Developing open source software as part of a community is fun, and
+often quite educational!
+
+If you want to contribute to this library, please join us on the `scikit-image
+developer forum
+<https://discuss.scientific-python.org/c/contributor/skimage>`_.
+
+If you prefer a more informal setting, you may find us on `Zulip chat <https://skimage.zulipchat.com/>`_.
 
 If you're looking for something to implement or to fix, you can browse the
 `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
 
-.. warning::
-
-   Given the uncertainty around licensing of AI-generated code, we
-   require that you **not** make use of these tools during the development
-   of any contributions to scikit-image.
+We love helping new contributors get started! All we ask is that you
+not contact developers privately, but post in our public forums where
+everyone can benefit from answers to your questions, and where
+developers can collectively answer according to their availability.
 
 .. contents::
    :local:
