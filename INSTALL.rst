@@ -250,12 +250,6 @@ venv
   # Install scikit-image in editable mode, which will make sure that
   # scikit-image is recompiled if necessary on import
   spin install -v
-  # Test your installation
-  spin test
-  # Build docs
-  spin docs
-  # Try the new version in IPython
-  spin ipython
 
 conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -280,26 +274,28 @@ before you get started.
   conda install -c conda-forge pre-commit
   # Install build dependencies of scikit-image
   conda install -c conda-forge --file requirements/build.txt
-  # Build scikit-image from source
-  spin build
-  # The new version lives under `${PWD}/build-install/.../site-packages`.
-  # Test your installation
-  spin test
-  # Build docs
-  spin docs --install-deps
-  # Try the new version in IPython
-  spin ipython
-
-For more information about building and using the ``spin`` package, see ``meson.md``.
+  # Install scikit-image in editable mode, which will make sure that
+  # scikit-image is recompiled if necessary on import
+  spin install -v
 
 Testing
 -------
 
-Test your installation for correct behavior using:
+You can run the complete test suite with
 
 .. code-block:: sh
 
-   pytest skimage
+   spin test
+
+You can also select a subset of specific tests with
+
+.. code-block:: sh
+
+   # Run tests in the given directory
+   spin test -- skimage/morphology/
+   # Run tests matching the given expression
+   spin test -- -k local_maxima
+
 
 Updating the installation
 ------------------------------------------------------------------------------
