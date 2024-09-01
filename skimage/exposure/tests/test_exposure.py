@@ -402,7 +402,7 @@ def test_rescale_float_output():
     image = np.array([-128, 0, 127], dtype=np.int8)
     output_image = exposure.rescale_intensity(image, out_range=(0, 255))
     assert_array_equal(output_image, [0, 128, 255])
-    assert output_image.dtype == float
+    assert output_image.dtype == _supported_float_type(image.dtype)
 
 
 def test_rescale_raises_on_incorrect_out_range():

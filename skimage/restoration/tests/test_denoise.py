@@ -114,7 +114,7 @@ def test_denoise_tv_chambolle_float_result_range():
     assert np.max(int_astro) > 1
     denoised_int_astro = restoration.denoise_tv_chambolle(int_astro, weight=0.1)
     # test if the value range of output float data is within [0.0:1.0]
-    assert denoised_int_astro.dtype == float
+    assert denoised_int_astro.dtype == _supported_float_type(int_astro.dtype)
     assert np.max(denoised_int_astro) <= 1.0
     assert np.min(denoised_int_astro) >= 0.0
 
@@ -129,7 +129,7 @@ def test_denoise_tv_chambolle_3d():
     mask[mask < 0] = 0
     mask[mask > 255] = 255
     res = restoration.denoise_tv_chambolle(mask.astype(np.uint8), weight=0.1)
-    assert res.dtype == float
+    assert res.dtype == np.float32
     assert res.std() * 255 < mask.std()
 
 
@@ -139,15 +139,16 @@ def test_denoise_tv_chambolle_1d():
     x += 20 * np.random.rand(x.size)
     x = np.clip(x, 0, 255)
     res = restoration.denoise_tv_chambolle(x.astype(np.uint8), weight=0.1)
-    assert res.dtype == float
+    assert res.dtype == np.float32
     assert res.std() * 255 < x.std()
 
 
 def test_denoise_tv_chambolle_4d():
     """TV denoising for a 4D input."""
     im = 255 * np.random.rand(8, 8, 8, 8)
-    res = restoration.denoise_tv_chambolle(im.astype(np.uint8), weight=0.1)
-    assert res.dtype == float
+    im = im.astype(np.uint8)
+    res = restoration.denoise_tv_chambolle(im, weight=0.1)
+    assert res.dtype == _supported_float_type(im.dtype)
     assert res.std() * 255 < im.std()
 
 
@@ -196,7 +197,7 @@ def test_denoise_tv_bregman_float_result_range():
     assert np.max(int_astro) > 1
     denoised_int_astro = restoration.denoise_tv_bregman(int_astro, weight=60.0)
     # test if the value range of output float data is within [0.0:1.0]
-    assert denoised_int_astro.dtype == float
+    assert denoised_int_astro.dtype == _supported_float_type(int_astro.dtype)
     assert np.max(denoised_int_astro) <= 1.0
     assert np.min(denoised_int_astro) >= 0.0
 

@@ -304,14 +304,14 @@ def test_area_bbox_spacing():
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
-    assert_almost_equal(mu[2, 0], 436.00000000000045)
+    assert_almost_equal(mu[2, 0], 436.00000000000045, decimal=4)
     # different from OpenCV results, bug in OpenCV
-    assert_almost_equal(mu[3, 0], -737.333333333333)
-    assert_almost_equal(mu[1, 1], -87.33333333333303)
-    assert_almost_equal(mu[2, 1], -127.5555555555593)
-    assert_almost_equal(mu[0, 2], 1259.7777777777774)
-    assert_almost_equal(mu[1, 2], 2000.296296296291)
-    assert_almost_equal(mu[0, 3], -760.0246913580195)
+    assert_almost_equal(mu[3, 0], -737.333333333333, decimal=4)
+    assert_almost_equal(mu[1, 1], -87.33333333333303, decimal=4)
+    assert_almost_equal(mu[2, 1], -127.5555555555593, decimal=4)
+    assert_almost_equal(mu[0, 2], 1259.7777777777774, decimal=4)
+    assert_almost_equal(mu[1, 2], 2000.296296296291, decimal=4)
+    assert_almost_equal(mu[0, 3], -760.0246913580195, decimal=4)
 
     # Verify central moment test functions
     centralMpq = get_central_moment_function(SAMPLE, spacing=(1, 1))
@@ -675,10 +675,10 @@ def test_axis_major_length():
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     target_length = 16.7924234999
-    assert_almost_equal(length, target_length)
+    assert_almost_equal(length, target_length, decimal=5)
 
     length = regionprops(SAMPLE, spacing=(2, 2))[0].axis_major_length
-    assert_almost_equal(length, 2 * target_length)
+    assert_almost_equal(length, 2 * target_length, decimal=5)
 
     from skimage.draw import ellipse
 

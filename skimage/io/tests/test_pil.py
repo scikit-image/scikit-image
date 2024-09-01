@@ -54,7 +54,7 @@ def test_png_round_trip():
 def test_imread_as_gray():
     img = imread(fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
-    assert img.dtype == np.float64
+    assert img.dtype == np.float32
     img = imread(fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.dtype(img.dtype).char in np.typecodes['AllInteger']

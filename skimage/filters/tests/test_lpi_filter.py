@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_, assert_equal, assert_array_almost_equal
+from numpy.testing import assert_allclose
 
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, coins
@@ -29,13 +29,13 @@ def test_filter_forward():
     image = coins()[:303, :383]
     filtered = filter_forward(image, filt_func)
     filtered_gaussian = gaussian(image, **gaussian_args)
-    assert_array_almost_equal(filtered, filtered_gaussian)
+    assert_allclose(filtered, filtered_gaussian, rtol=1e-5)
 
     # Even image size
     image = coins()
     filtered = filter_forward(image, filt_func)
     filtered_gaussian = gaussian(image, **gaussian_args)
-    assert_array_almost_equal(filtered, filtered_gaussian)
+    assert_allclose(filtered, filtered_gaussian, rtol=1e-5)
 
 
 class TestLPIFilter2D:
@@ -50,7 +50,7 @@ class TestLPIFilter2D:
     @pytest.mark.parametrize('c_slice', [slice(None), slice(0, -5), slice(0, -20)])
     def test_ip_shape(self, c_slice):
         x = self.img[:, c_slice]
-        assert_equal(self.f(x).shape, x.shape)
+        assert self.f(x).shape == x.shape
 
     @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
     def test_filter_inverse(self, dtype):
@@ -62,17 +62,17 @@ class TestLPIFilter2D:
 
         g = filter_inverse(F, predefined_filter=self.f)
         assert g.dtype == expected_dtype
-        assert_equal(g.shape, self.img.shape)
+        assert g.shape == self.img.shape
 
         g1 = filter_inverse(F[::-1, ::-1], predefined_filter=self.f)
-        assert_((g - g1[::-1, ::-1]).sum() < 55)
+        assert (g - g1[::-1, ::-1]).sum() < 55
 
         # test cache
         g1 = filter_inverse(F[::-1, ::-1], predefined_filter=self.f)
-        assert_((g - g1[::-1, ::-1]).sum() < 55)
+        assert (g - g1[::-1, ::-1]).sum() < 55
 
         g1 = filter_inverse(F[::-1, ::-1], self.filt_func)
-        assert_((g - g1[::-1, ::-1]).sum() < 55)
+        assert (g - g1[::-1, ::-1]).sum() < 55
 
     @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
     def test_wiener(self, dtype):
@@ -84,13 +84,13 @@ class TestLPIFilter2D:
 
         g = wiener(F, predefined_filter=self.f)
         assert g.dtype == expected_dtype
-        assert_equal(g.shape, self.img.shape)
+        assert g.shape == self.img.shape
 
         g1 = wiener(F[::-1, ::-1], predefined_filter=self.f)
-        assert_((g - g1[::-1, ::-1]).sum() < 1)
+        assert (g - g1[::-1, ::-1]).sum() < 1
 
         g1 = wiener(F[::-1, ::-1], self.filt_func)
-        assert_((g - g1[::-1, ::-1]).sum() < 1)
+        assert (g - g1[::-1, ::-1]).sum() < 1
 
     def test_non_callable(self):
         with pytest.raises(ValueError):

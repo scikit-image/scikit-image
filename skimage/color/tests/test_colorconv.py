@@ -11,7 +11,13 @@ Authors
 import colorsys
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_equal
+from numpy.testing import (
+    assert_allclose,
+    assert_almost_equal,
+    assert_array_almost_equal,
+    assert_array_equal,
+    assert_equal,
+)
 
 from skimage import data
 from skimage._shared._warnings import expected_warnings
@@ -266,14 +272,13 @@ class TestColorconv:
         round_trip = xyz2rgb(
             rgb2xyz(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
         )
-
-        assert_array_almost_equal(round_trip, img_rgb)
+        assert_allclose(round_trip, img_rgb, rtol=1e-5, atol=1e-5)
 
     # HED<->RGB roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_in = img_as_ubyte(self.img_stains)
         img_out = rgb2hed(hed2rgb(img_in))
-        assert_equal(img_as_ubyte(img_out), img_in)
+        assert_array_equal(img_as_ubyte(img_out), img_in)
 
     # HED<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
@@ -292,7 +297,7 @@ class TestColorconv:
         img_in = img_as_ubyte(self.img_stains)
         img_out = combine_stains(img_in, rgb_from_bro)
         img_out = separate_stains(img_out, bro_from_rgb)
-        assert_equal(img_as_ubyte(img_out), img_in)
+        assert_array_equal(img_as_ubyte(img_out), img_in)
 
     # BRO<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
@@ -523,11 +528,14 @@ class TestColorconv:
     def test_lab_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
-        assert_array_almost_equal(
+        assert_allclose(
             lab2rgb(
-                rgb2lab(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2lab(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
 
     def test_rgb2lab_dtype(self):
@@ -657,11 +665,14 @@ class TestColorconv:
     def test_luv_rgb_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
-        assert_array_almost_equal(
+        assert_allclose(
             luv2rgb(
-                rgb2luv(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2luv(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-4,
+            atol=1e-4,
         )
 
     def test_lab_rgb_outlier(self):
@@ -701,7 +712,7 @@ class TestColorconv:
             lab2lch(lab, channel_axis=channel_axis),
             channel_axis=channel_axis,
         )
-        assert_array_almost_equal(lab2, lab)
+        assert_allclose(lab2, lab, rtol=1e-4, atol=1e-4)
 
     def test_rgb_lch_roundtrip(self):
         rgb = img_as_float(self.img_rgb)
@@ -709,7 +720,7 @@ class TestColorconv:
         lch = lab2lch(lab)
         lab2 = lch2lab(lch)
         rgb2 = lab2rgb(lab2)
-        assert_array_almost_equal(rgb, rgb2)
+        assert_allclose(rgb, rgb2, rtol=1e-4, atol=1e-4)
 
     def test_lab_lch_0d(self):
         lab0 = self._get_lab0()
@@ -759,35 +770,50 @@ class TestColorconv:
     def test_yuv_roundtrip(self, channel_axis):
         img_rgb = img_as_float(self.img_rgb)[::16, ::16]
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
-        assert_array_almost_equal(
+        assert_allclose(
             yuv2rgb(
-                rgb2yuv(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2yuv(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
-        assert_array_almost_equal(
+        assert_allclose(
             yiq2rgb(
-                rgb2yiq(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2yiq(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
-        assert_array_almost_equal(
+        assert_allclose(
             ypbpr2rgb(
-                rgb2ypbpr(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2ypbpr(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
-        assert_array_almost_equal(
+        assert_allclose(
             ycbcr2rgb(
-                rgb2ycbcr(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2ycbcr(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
-        assert_array_almost_equal(
+        assert_allclose(
             ydbdr2rgb(
-                rgb2ydbdr(img_rgb, channel_axis=channel_axis), channel_axis=channel_axis
+                rgb2ydbdr(img_rgb, channel_axis=channel_axis),
+                channel_axis=channel_axis,
             ),
             img_rgb,
+            rtol=1e-5,
+            atol=1e-5,
         )
 
     def test_rgb2yuv_dtype(self):
@@ -923,28 +949,28 @@ def test_gray2rgba_alpha():
     alpha = None
     rgba = gray2rgba(img, alpha)
 
-    assert_equal(rgba[..., :3], gray2rgb(img))
-    assert_equal(rgba[..., 3], 1.0)
+    assert_array_equal(rgba[..., :3], gray2rgb(img))
+    assert_array_equal(rgba[..., 3], 1.0)
 
     # Scalar
     alpha = 0.5
     rgba = gray2rgba(img, alpha)
 
-    assert_equal(rgba[..., :3], gray2rgb(img))
-    assert_equal(rgba[..., 3], alpha)
+    assert_array_equal(rgba[..., :3], gray2rgb(img))
+    assert_array_equal(rgba[..., 3], alpha)
 
     # Array
     alpha = np.random.random((5, 5))
     rgba = gray2rgba(img, alpha)
 
-    assert_equal(rgba[..., :3], gray2rgb(img))
-    assert_equal(rgba[..., 3], alpha)
+    assert_array_equal(rgba[..., :3], gray2rgb(img))
+    assert_array_equal(rgba[..., 3], alpha)
 
     # Warning about alpha cast
     alpha = 0.5
     with expected_warnings(["alpha cannot be safely cast to image dtype"]):
         rgba = gray2rgba(img_u8, alpha)
-        assert_equal(rgba[..., :3], gray2rgb(img_u8))
+        assert_array_equal(rgba[..., :3], gray2rgb(img_u8))
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))

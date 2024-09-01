@@ -11,7 +11,6 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from .._shared.utils import (
-    _supported_float_type,
     convert_to_float,
     deprecate_parameter,
     DEPRECATED,
@@ -133,8 +132,6 @@ def gaussian(
             sigma = list(sigma)
             sigma.insert(channel_axis % image.ndim, 0)
     image = convert_to_float(image, preserve_range)
-    float_dtype = _supported_float_type(image.dtype)
-    image = image.astype(float_dtype, copy=False)
     if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
         raise ValueError(f"dtype of `out` must be float; got {out.dtype!r}.")
     return ndi.gaussian_filter(

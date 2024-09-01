@@ -160,6 +160,7 @@ def butterworth(
     float_dtype = _supported_float_type(image.dtype, allow_complex=True)
     if cutoff_frequency_ratio < 0 or cutoff_frequency_ratio > 0.5:
         raise ValueError("cutoff_frequency_ratio should be in the range [0, 0.5]")
+    image = image.astype(float_dtype, copy=False)
     wfilt = _get_nd_butterworth_filter(
         fft_shape,
         cutoff_frequency_ratio,
