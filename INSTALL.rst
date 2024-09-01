@@ -63,7 +63,7 @@ We strongly recommend the use of a
 `virtual environment
 <https://towardsdatascience.com/virtual-environments-104c62d48c54?gi=2532aa12906#ee81>`_.
 A virtual environment creates a clean Python environment that does not interfere
-with the existing system installation, can be easily removed, and contain only
+with the existing system installation, can be easily removed, and contains only
 the package versions your application needs.
 
 To install the current ``scikit-image`` you'll need at least Python 3.10. If
@@ -77,7 +77,8 @@ your Python is older, pip will find the most recent compatible version.
   # Install scikit-image
   python -m pip install -U scikit-image
 
-To access the example datasets from ``skimage.data``, use:
+Some additional dependencies are required to access all example
+datasets in ``skimage.data``. Install them using:
 
 .. code-block:: sh
 
@@ -116,16 +117,16 @@ Once you have your conda environment set up, install ``scikit-image`` with:
 System package managers
 ------------------------------------------------------------------------------
 
-Using a package manager (``yum``, ``apt-get``, etc.) to install ``scikit-image``
+Using a package manager (``apt``, ``dnf``, etc.) to install ``scikit-image``
 or other Python packages is not your best option, since you're likely
-to get an older version. It also becomes harder to add other Python packages
+to get an older version. It also becomes harder to install other Python packages
 not provided by the package manager.
 
 
 Downloading all demo datasets
 ------------------------------------------------------------------------------
 
-Some of our example data (``skimage.data``) is hosted online and is
+Some of our example images (in ``skimage.data``) are hosted online and are
 not installed by default. These images are downloaded upon first
 access. If you prefer to download all demo datasets, so they can be
 accessed offline, ensure that ``pooch`` is installed, then run:
@@ -151,7 +152,7 @@ To suggest a change in these instructions,
 Installing scikit-image for contributors
 ========================================
 
-Your systems needs a:
+Your system needs a:
 
 - C compiler,
 - C++ compiler, and
@@ -159,7 +160,7 @@ Your systems needs a:
   `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_).
 
 First, `fork the scikit-image repository on GitHub <https://github.com/scikit-image/scikit-image/fork>`_.
-Then clone your fork locally and setup an ``upstream`` remote to point to the original scikit-image repository:
+Then clone your fork locally and set an ``upstream`` remote to point to the original scikit-image repository:
 
 .. note::
 
@@ -224,7 +225,7 @@ conda
 
 We recommend installing conda using
 `miniforge <https://github.com/conda-forge/miniforge>`_,
-an alternative to Anaconda but without licensing costs.
+an alternative to Anaconda without licensing costs.
 
 After installing miniforge:
 
@@ -274,13 +275,13 @@ Or run a subset of tests:
 
 .. code-block:: sh
 
-   # Run tests in a specific file
+   # Run tests in a given file
    spin test skimage/morphology/tests/test_gray.py
 
-   # Run tests in the given directory
+   # Run tests in a given directory
    spin test skimage/morphology
 
-   # Run tests matching the given expression
+   # Run tests matching a given expression
    spin test -- -k local_maxima
 
 
@@ -293,14 +294,14 @@ First, fetch the latest source:
 
 .. code-block:: sh
 
-   git checkout main
+   git switch main
    git pull upstream main
 
 Create your feature branch:
 
 .. code-block:: sh
 
-   git checkout -b my-feature-name
+   git switch --create my-feature-name
 
 Using an editable install, ``scikit-image`` will rebuild itself as
 necessary.
@@ -377,7 +378,7 @@ You can use ``scikit-image`` with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
 * `Matplotlib <https://matplotlib.org>`__
-    Used in various functions, e.g., for drawing, segmenting, reading images.
+  Used in various functions, e.g., for drawing, segmenting, reading images.
 
 * `Dask <https://dask.org/>`__
   The ``dask`` module is used to parallelize certain functions.
@@ -393,7 +394,7 @@ More rarely, you may also need:
 
 * `SimpleITK <http://www.simpleitk.org/>`__
   Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
-  including specialized formats using in medical imaging.
+  including specialized formats used in biomedical imaging.
 
 .. include:: ../../../requirements/optional.txt
   :literal:
