@@ -158,23 +158,21 @@ Your systems needs a:
 - a version of Python supported by ``scikit-image`` (see
   `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_).
 
-Clone the git repository and set `upstream` and `origin` branches to
-point to our and your repositories, respectively:
+First, `fork the scikit-image repository on GitHub <https://github.com/scikit-image/scikit-image/fork>`_.
+Then clone the fork locally and setup an ``upstream`` remote to point to the original scikit-image repository:
+
+.. note::
+
+    We use ``git@github.com`` below; if you don't have SSH keys setup, use
+    ``https://github.com`` instead.
 
 .. code-block:: sh
 
-   # We use git@github.com below; if you don't have SSH keys setup,
-   # use https://github.com instead
-
-   git clone git@github.com:scikit-image/scikit-image
-
+   git clone git@github.com:YOURUSERNAME/scikit-image
    cd scikit-image
-
-   git remote rm origin
    git remote add upstream git@github.com:scikit-image/scikit-image
-   git remote add origin git@github.com:YOURUSERNAME/scikit-image
 
-All commands below are run from within the ``scikit-image`` directory.
+All commands below are run from within the new ``scikit-image`` directory.
 
 .. _build-env-setup:
 
@@ -218,7 +216,7 @@ venv
         spin build
 
     In that case, the library is not installed, but is accessible via
-    `spin` commands, such as `spin test`, `spin ipython`, `spin run`,
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
     etc.
 
 conda
@@ -241,7 +239,7 @@ After installing miniforge:
   # Install development dependencies
   conda install -c conda-forge --file requirements/default.txt
   conda install -c conda-forge --file requirements/test.txt
-  conda install -c conda-forge pre-commit
+  conda install -c conda-forge --file requirements/developer.txt
   conda install -c conda-forge --file requirements/build.txt
 
   # Install scikit-image in editable mode. In editable mode,
@@ -259,7 +257,7 @@ After installing miniforge:
         spin build
 
     In that case, the library is not installed, but is accessible via
-    `spin` commands, such as `spin test`, `spin ipython`, `spin run`,
+    ``spin`` commands, such as ``spin test``, ``spin ipython``, ``spin run``,
     etc.
 
 
