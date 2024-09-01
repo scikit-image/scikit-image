@@ -159,7 +159,7 @@ Your systems needs a:
   `pyproject.toml <https://github.com/scikit-image/scikit-image/blob/main/pyproject.toml#L14>`_).
 
 First, `fork the scikit-image repository on GitHub <https://github.com/scikit-image/scikit-image/fork>`_.
-Then clone the fork locally and setup an ``upstream`` remote to point to the original scikit-image repository:
+Then clone your fork locally and setup an ``upstream`` remote to point to the original scikit-image repository:
 
 .. note::
 
