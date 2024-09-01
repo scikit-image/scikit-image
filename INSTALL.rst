@@ -172,7 +172,7 @@ Then clone the fork locally and setup an ``upstream`` remote to point to the ori
    cd scikit-image
    git remote add upstream git@github.com:scikit-image/scikit-image
 
-All commands below are run from within the new ``scikit-image`` directory.
+All commands below are run from within the cloned ``scikit-image`` directory.
 
 .. _build-env-setup:
 
