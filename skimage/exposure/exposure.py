@@ -567,7 +567,7 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
 
     >>> image = np.array([-10, 0, 10], dtype=np.int8)
     >>> rescale_intensity(image, out_range=(0, 127))
-    array([  0. ,  63.5, 127. ])
+    array([  0. ,  63.5, 127. ], dtype=float32)
 
     To get the desired range with a specific dtype, use ``.astype()``:
 
