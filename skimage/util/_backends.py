@@ -2,6 +2,7 @@ import functools
 import importlib
 from importlib.metadata import entry_points
 from functools import lru_cache
+import os
 import warnings
 
 from .._shared._warnings import DispatchWarning
@@ -11,6 +12,8 @@ from .._shared._warnings import DispatchWarning
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
+    # XXX Adjust this to support older versions of Python
+    # XXX https://github.com/scikit-learn/scikit-learn/pull/25535/files#diff-1d31de81e903bd6529fbe68f8009b7113e3b7de4f1465572ef88af4d03a7dc5bR37-R41
     backends_ = entry_points(group="skimage_backends")
     backend_infos = entry_points(group="skimage_backend_infos")
 
@@ -38,8 +41,12 @@ def dispatchable(func):
     # from the backend
     func_module = func.__module__.removeprefix("skimage.")
 
-    # If no backends are installed at all, return the original function
-    if not all_backends():
+    # If no backends are installed at all or dispatching is disabled,
+    # return the original function. This way people who don't care about
+    # don't see anything related to dispatching
+    # XXX how do we test this given it happens at import time?
+    disable_dispatching = bool(os.environ.get("SKIMAGE_NO_DISPATCHING", False))
+    if disable_dispatching or not all_backends():
         return func
 
     @functools.wraps(func)
