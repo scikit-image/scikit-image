@@ -24,6 +24,12 @@ def all_backends():
 
 
 def dispatchable(func):
+    """Mark a function as dispatchable.
+
+    When a decorated function is called the installed backends are
+    searched for an implementation. If no backend implements the function
+    then the scikit-image implementation is used.
+    """
     func_name = func.__name__
     # The submodule inside skimage, used to know which (sub)module to import
     # from the backend
