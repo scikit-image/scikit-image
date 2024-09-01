@@ -5,8 +5,6 @@ from functools import lru_cache
 import os
 import warnings
 
-from .._shared._warnings import DispatchWarning
-
 
 @lru_cache
 def all_backends():
@@ -89,7 +87,7 @@ def dispatchable(func):
                     f"Call to '{func.__module__}.{func_name}' was dispatched to"
                     f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
                     " disable this.",
-                    DispatchWarning,
+                    DispatchNotification,
                     # XXX from where should this warning originate?
                     # XXX from where the function that was dispatched was called?
                     # XXX or from where the user called a function that called
@@ -113,3 +111,9 @@ class BackendInformation:
 
     def __init__(self, supported_functions):
         self.supported_functions = supported_functions
+
+
+class DispatchNotification(RuntimeWarning):
+    """Notification issued when a function is dispatched to a backend."""
+
+    pass
