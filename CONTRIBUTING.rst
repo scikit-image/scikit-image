@@ -6,19 +6,21 @@ How to contribute to scikit-image
 Developing open source software as part of a community is fun, and
 often quite educational!
 
-If you want to contribute to this library, please join us on the `scikit-image
-developer forum
-<https://discuss.scientific-python.org/c/contributor/skimage>`_.
+We coordinate our work using GitHub, where you can find lists of `open
+issues
+<https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__
+and `new feature requests
+<https://github.com/scikit-image/scikit-image/labels/%3Apray%3A%20Feature%20request>`__.
 
-If you prefer a more informal setting, you may find us on `Zulip chat <https://skimage.zulipchat.com/>`_.
+To follow along with discussions, or to get in touch with the
+developer team, please join us on the `scikit-image developer forum
+<https://discuss.scientific-python.org/c/contributor/skimage>`_ and
+the `Zulip chat <https://skimage.zulipchat.com/>`_.
 
-If you're looking for something to implement or to fix, you can browse the
-`open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
-
-We love helping new contributors get started! All we ask is that you
-not contact developers privately, but post in our public forums where
-everyone can benefit from answers to your questions, and where
-developers can collectively answer according to their availability.
+Please post questions to these public forums (rather than contacting
+developers directly); that way, everyone can benefit from the answers,
+and developers can answer according to their availability. Don't feel
+shy, the team is very friendly!
 
 .. contents::
    :local:
