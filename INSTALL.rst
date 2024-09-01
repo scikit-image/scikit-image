@@ -278,6 +278,21 @@ before you get started.
   # scikit-image is recompiled if necessary on import
   spin install -v
 
+.. tip::
+
+    An editable install is recommended in the two sections above.
+    It exposes scikit-image directly in your environment, meaning you can use
+    it directly in your IDE, ipython or other tools.
+    An alternative is to not do the install and build with
+
+    .. code-block:: sh
+
+        spin build
+
+    In that case the build is only accessible through commands using `spin`,
+    such as `spin test`, `spin ipython` or `spin run`.
+
+
 Testing
 -------
 
