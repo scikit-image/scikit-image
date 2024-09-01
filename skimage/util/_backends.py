@@ -74,9 +74,9 @@ def dispatchable(func):
 
             # Allow the backend to accept/reject a call based on the values
             # of the arguments
-            backend_can_haz_func = getattr(mod, f"can_haz_{func_name}", None)
-            if backend_can_haz_func is not None:
-                wants_it = backend_can_haz_func(*args, **kwargs)
+            backend_can_has_func = getattr(mod, f"can_has_{func_name}", None)
+            if backend_can_has_func is not None:
+                wants_it = backend_can_has_func(*args, **kwargs)
             else:
                 wants_it = True
 
