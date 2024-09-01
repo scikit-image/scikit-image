@@ -327,7 +327,7 @@ Platform-specific notes
 Building ``scikit-image`` on Windows is done as part of our continuous
 integration testing; the steps are shown in this `Azure Pipeline`_.
 
-.. _setup of Azure Pipelines: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
+.. _Azure Pipeline: https://github.com/scikit-image/scikit-image/blob/main/azure-pipelines.yml
 
 **Debian and Ubuntu**
 
