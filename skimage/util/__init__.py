@@ -33,7 +33,6 @@ from .shape import view_as_blocks, view_as_windows
 from .unique import unique_rows
 from .lookfor import lookfor
 
-
 __all__ = [
     'img_as_float32',
     'img_as_float64',
