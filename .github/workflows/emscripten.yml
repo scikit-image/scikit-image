@@ -19,9 +19,8 @@ permissions:
 jobs:
   build-wasm-emscripten:
     name: Build scikit-image distribution for Pyodide
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
-      PYODIDE_VERSION: 0.26.1
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
@@ -46,7 +45,7 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build==${{ env.PYODIDE_VERSION }}
+        run: pip install pyodide-build
 
       - name: Build scikit-image for Pyodide
         run: |
@@ -61,5 +60,9 @@ jobs:
         run: |
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
-          npm install pyodide@${{ env.PYODIDE_VERSION }}
-          node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
+          pip install dist/*.whl
+          pushd doc
+          pip install pytest matplotlib
+          pytest --pyargs skimage
+          # npm install pyodide
+          # node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
