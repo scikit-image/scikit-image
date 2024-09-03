@@ -49,8 +49,7 @@ jobs:
         run: pip install pyodide-build
 
       - name: Build scikit-image for Pyodide
-        run: |
-          pyodide build
+        run: pyodide build
 
       - name: Set up Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
@@ -59,11 +58,16 @@ jobs:
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
+          # Set up Pyodide virtual environment
           pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
+
+          # Activate the virtual environment and install the built scikit-image wheel
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
-          pushd doc
+          # Change to a different directory to avoid importing the local scikit-image
+          # package instead of the installed one
+          cd doc
           pip install pytest matplotlib
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
