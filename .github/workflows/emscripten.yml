@@ -19,8 +19,9 @@ permissions:
 jobs:
   build-wasm-emscripten:
     name: Build scikit-image distribution for Pyodide
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
+      PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
@@ -58,6 +59,7 @@ jobs:
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
+          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
