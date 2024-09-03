@@ -19,7 +19,7 @@ permissions:
 jobs:
   build-wasm-emscripten:
     name: Build scikit-image distribution for Pyodide
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     env:
       PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
