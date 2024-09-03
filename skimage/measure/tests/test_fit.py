@@ -5,6 +5,7 @@ from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (
     arch32,
+    is_wasm,
     assert_almost_equal,
     assert_array_less,
     assert_equal,
@@ -448,7 +449,7 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 
 
 @xfail(
-    condition=arch32,
+    condition=arch32 or is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '

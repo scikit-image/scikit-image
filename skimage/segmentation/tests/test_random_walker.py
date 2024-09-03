@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import xfail, arch32
+from skimage._shared.testing import xfail, arch32, is_wasm
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
@@ -279,7 +279,7 @@ def test_spacing_0():
 
 
 @xfail(
-    condition=arch32,
+    condition=arch32 or is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '
