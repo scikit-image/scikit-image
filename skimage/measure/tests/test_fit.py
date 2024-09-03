@@ -448,8 +448,9 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     assert_almost_equal(params, model.params)
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32 or is_wasm,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '

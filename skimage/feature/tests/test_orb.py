@@ -110,8 +110,9 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints(dtype):
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32 or is_wasm,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '

@@ -278,8 +278,9 @@ def test_spacing_0():
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32 or is_wasm,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '
