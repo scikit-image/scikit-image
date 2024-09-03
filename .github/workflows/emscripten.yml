@@ -63,6 +63,4 @@ jobs:
           pip install dist/*.whl
           pushd doc
           pip install pytest matplotlib
-          pytest --pyargs skimage
-          # npm install pyodide
-          # node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
+          pytest -svra -p no:cacheprovider --pyargs skimage
