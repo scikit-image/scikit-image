@@ -17,6 +17,7 @@ on:
         required: false
         type: string
         default: "pytest --pyargs skimage"
+  workflow_dispatch: # temporarily added for debugging
 
 env:
   CIBW_BUILD_VERBOSITY: 2
@@ -250,3 +251,28 @@ jobs:
         with:
           name: wheels
           path: ./dist/*.whl
+
+  build_pyodide_wheel:
+    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build and test scikit-image for Pyodide
+        uses: pypa/cibuildwheel@v2.19.1
+        with:
+          output-dir: dist
+        env:
+          # Override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
+          # for Pyodide-related settings.
+          CIBW_PLATFORM: pyodide
+          CIBW_ENVIRONMENT_PYODIDE: ""
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest matplotlib"
+          CIBW_TEST_COMMAND_PYODIDE: |
+            mkdir -p {project}/mnt/dist/
+            cp {wheel} {project}/mnt/dist/
+            npm install pyodide@0.26.1 --verbose --prefix {project}
+            cp {project}/tools/emscripten/pytest_scikit_image_pyodide.js {project}/
+            node {project}/pytest_scikit_image_pyodide.js --pyargs skimage
