@@ -701,6 +701,16 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self._set_number_of_octaves(image.shape)
         return image
 
+    @property
+    def keypoints(self):
+        return self.keypoints
+
+    @keypoints.setter
+    def keypoints(self, value):
+        if not (isinstance(value, np.ndarray) and value.ndim == 2 and value.shape[1] == 2):
+            raise ValueError("Keypoints must be a numpy array of int64 type with shape Nx2.")
+        self.keypoints = value
+
     def detect(self, image):
         """Detect the keypoints.
 
