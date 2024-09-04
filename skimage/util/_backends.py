@@ -5,14 +5,25 @@ import os
 import warnings
 
 
+def _entry_points(group):
+    # Support Python versions before 3.10, which do not let you
+    # filter groups directly.
+    all_entry_points = entry_points()
+    if hasattr(all_entry_points, "select"):
+        selected_entry_points = all_entry_points.select(group=group)
+    else:
+        selected_entry_points = all_entry_points.get(group, ())
+    return selected_entry_points
+
+
 @lru_cache
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
     # XXX Adjust this to support older versions of Python
     # XXX https://github.com/scikit-learn/scikit-learn/pull/25535/files#diff-1d31de81e903bd6529fbe68f8009b7113e3b7de4f1465572ef88af4d03a7dc5bR37-R41
-    backends_ = entry_points(group="skimage_backends")
-    backend_infos = entry_points(group="skimage_backend_infos")
+    backends_ = _entry_points(group="skimage_backends")
+    backend_infos = _entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
         backends[backend.name] = {"implementation": backend}
