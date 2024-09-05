@@ -268,11 +268,8 @@ def structural_similarity(
     D = B1 * B2
     S = (A1 * A2) / D
 
-    # to avoid edge effects will ignore filter radius strip around edges
-    pad = (win_size - 1) // 2
-
     # compute (weighted) mean of ssim. Use float64 for accuracy.
-    mssim = crop(S, pad).mean(dtype=np.float64)
+    mssim = S.mean(dtype=np.float64)
 
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.
