@@ -111,7 +111,9 @@ def test_all_props():
             # (we intentionally do not provide properties for these)
             if prop.lower() == prop:
                 # access legacy name via attribute
-                assert_allclose(getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5)
+                assert_allclose(
+                    getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5
+                )
 
         except TypeError:  # the `slice` property causes this
             pass
@@ -126,7 +128,9 @@ def test_all_props_3d():
             # skip property access tests for old CamelCase names
             # (we intentionally do not provide properties for these)
             if prop.lower() == prop:
-                assert_allclose(getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5)
+                assert_allclose(
+                    getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5
+                )
 
         except (NotImplementedError, TypeError):
             pass
@@ -919,9 +923,7 @@ def test_multichannel_centroid_weighted_table():
     rp0 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0])[0]
     rp1 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0:1])[0]
     rpm = regionprops(SAMPLE, intensity_image=intensity_image)[0]
-    assert_allclose(
-        rp0.centroid_weighted, np.squeeze(rp1.centroid_weighted), rtol=1e-5
-    )
+    assert_allclose(rp0.centroid_weighted, np.squeeze(rp1.centroid_weighted), rtol=1e-5)
     assert_allclose(
         rp0.centroid_weighted, np.array(rpm.centroid_weighted)[:, 0], rtol=1e-5
     )
