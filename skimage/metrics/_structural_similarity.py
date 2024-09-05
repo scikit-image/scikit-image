@@ -26,6 +26,8 @@ def structural_similarity(
 ):
     """
     Compute the mean structural similarity index between two images.
+    Images are reflection-padded, with size dependent on the window size, such that
+    the resulting SSIM image is the same shape as the input images.
     Please pay attention to the `data_range` parameter with floating-point images.
 
     Parameters
@@ -72,7 +74,7 @@ def structural_similarity(
     Returns
     -------
     mssim : float
-        The mean structural similarity index over the image.
+        The mean structural similarity index over the SSIM image.
     grad : ndarray
         The gradient of the structural similarity between im1 and im2 [2]_.
         This is only returned if `gradient` is set to True.
