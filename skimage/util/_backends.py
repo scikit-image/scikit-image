@@ -62,28 +62,28 @@ def dispatchable(func):
     def wrapper(*args, **kwargs):
         for name, backend in all_backends().items():
             # If we have a BackendInformation object we check if the
-            # method we are looking for is implemented in the backend
+            # function we are looking for is implemented in the backend
             if "info" in backend:
                 if (
-                    f"{func.__module__}.{func_name}"
+                    f"{func_module}.{func_name}"
                     not in backend["info"].supported_functions
                 ):
                     continue
 
             backend_impl = backend["implementation"].load()
-            can_has_func, func_impl = backend_impl(f"{func_module}.{func_name}")
 
-            # Allow the backend to accept/reject a call based on the values
-            # of the arguments
-            if can_has_func is not None:
-                wants_it = can_has_func(*args, **kwargs)
-            else:
-                wants_it = True
-
+            # Allow the backend to accept/reject a call based on the function
+            # name and the values of the arguments
+            wants_it = backend_impl.can_has(
+                f"{func_module}.{func_name}", *args, **kwargs
+            )
             if not wants_it:
                 continue
 
-            if func is not None:
+            # can_has("foo", ...) might be True, but the function might not actually
+            # be implemented in the backend
+            func_impl = backend_impl.get_implementation(f"{func_module}.{func_name}")
+            if func_impl is not None:
                 warnings.warn(
                     f"Call to '{func.__module__}.{func_name}' was dispatched to"
                     f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"

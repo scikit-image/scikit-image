@@ -4,31 +4,53 @@ from skimage.util import _backends
 
 @pytest.fixture
 def mock_fake_backends(monkeypatch):
-    def get_impl(name):
-        def fake_foo(x):
-            return x * 3
+    """Mock backend setup
 
-        return None, fake_foo
+    One backend, with one function.
+    """
 
     class Backend:
+        def get_implementation(self, name):
+            def fake_foo(x):
+                return x * 3
+
+            if not name.endswith(".foo"):
+                raise ValueError(
+                    "Backend only implements the 'foo' function."
+                    f" Called with '{name}'"
+                )
+
+            return fake_foo
+
+        def can_has(self, name, *args, **kwargs):
+            if not name.endswith(".foo"):
+                raise ValueError(
+                    "Backend only implements the 'foo' function."
+                    f" Called with '{name}'"
+                )
+            return True
+
+    class BackendEntryPoint:
         def load(self):
-            return get_impl
+            return Backend()
 
     def mock_all_backends():
-        return {"fake": {"implementation": Backend()}}
+        return {"fake": {"implementation": BackendEntryPoint()}}
 
     monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
 
 
 @pytest.fixture
 def mock_no_backends(monkeypatch):
+    """Mock backend setup with no backends"""
+
     def mock_no_backends():
         return {}
 
     monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
 
 
-def test_no_notification_raised(mock_no_backends):
+def test_no_notification_without_backends(mock_no_backends):
     # Check that no DispatchNotification is raised when no backend
     # is installed.
     @_backends.dispatchable
