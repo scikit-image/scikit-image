@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_equal, assert_almost_equal
+from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 import pytest
 
 from skimage._shared.testing import run_in_parallel
@@ -631,7 +631,7 @@ def test_ellipse_rotated():
         # estimate orientation of ellipse
         angle_estim_raw = regionprops(img)[0].orientation
         angle_estim = np.round(angle_estim_raw, 3) % (np.pi / 2)
-        assert_almost_equal(angle_estim, angle % (np.pi / 2), 2)
+        assert_allclose(angle_estim, angle % (np.pi / 2), rtol=1e-3, atol=1e-2)
 
 
 def test_ellipse_perimeter_dot_zeroangle():

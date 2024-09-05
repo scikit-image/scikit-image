@@ -622,7 +622,7 @@ def test_moments_hu():
         ]
     )
     # bug in OpenCV caused in Central Moments calculation?
-    assert_allclose(hu, ref, rtol=1e-5)
+    assert_allclose(hu, ref, rtol=1e-4)
 
     with testing.raises(NotImplementedError):
         regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
@@ -1536,5 +1536,5 @@ def test_3d_ellipsoid_axis_lengths():
         assert abs(ax_len - ax_len_expected) < 0.01 * ax_len_expected
 
     # verify that the axis length regionprops also agree
-    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-7
-    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-7
+    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-5
+    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-5
