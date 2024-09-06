@@ -69,15 +69,15 @@ plt.show()
 #
 # In this example, a 3-D cube is generated, then holes and
 # tunnels are added. Euler number is evaluated with 6 and 26 neighborhood
-# configuration. This code is inpired by
+# configuration. This code is inspired by
 # https://matplotlib.org/devdocs/gallery/mplot3d/voxels_numpy_logo.html
 
 
 def make_ax(grid=False):
-    ax = plt.figure().add_subplot(projection='3d')
+    fig, ax = plt.subplots(subplot_kw = {'projection':'3d'})
     ax.grid(grid)
     ax.set_axis_off()
-    return ax
+    return fig, ax
 
 
 def explode(data):
@@ -130,13 +130,13 @@ def display_voxels(volume):
     x, y, z = expand_coordinates(np.indices(np.array(filled.shape) + 1))
 
     # Define 3D figure and place voxels
-    ax = make_ax()
+    _, ax = make_ax()
     ax.voxels(x, y, z, filled, facecolors=fcolors)
     # Compute Euler number in 6 and 26 neighborhood configuration, that
     # correspond to 1 and 3 connectivity, respectively
     e26 = euler_number(volume, connectivity=3)
     e6 = euler_number(volume, connectivity=1)
-    plt.title(f'Euler number for N26: {e26}, for N6: {e6}')
+    ax.set_title(f'Euler number for N26: {e26}, for N6: {e6}')
     plt.show()
 
 
