@@ -24,10 +24,12 @@ labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 edges = filters.sobel(gimg)
 edges_rgb = color.gray2rgb(edges)
 
+fig, ax = plt.subplots()
+
 g = graph.rag_boundary(labels, edges)
 lc = graph.show_rag(
-    labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis', edge_width=1.2
+    labels, g, edges_rgb, img_cmap=None, ax=ax, edge_cmap='viridis', edge_width=1.2
 )
 
-plt.colorbar(lc, fraction=0.03)
-io.show()
+fig.colorbar(lc, fraction=0.03)
+plt.show()
