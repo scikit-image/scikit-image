@@ -39,9 +39,9 @@ def test_structural_similarity_image():
     S2 = structural_similarity(X, Y, win_size=11, gaussian_weights=True)
     assert S2 < 0.3
 
-    mssim0, S3 = structural_similarity(X, Y, full=True)
+    mssim0, S3 = structural_similarity(X, Y, padding_mode='reflect', full=True)
     assert_equal(S3.shape, X.shape)
-    mssim = structural_similarity(X, Y)
+    mssim = structural_similarity(X, Y, padding_mode='reflect')
     assert_equal(mssim0, mssim)
 
     # structural_similarity of image with itself should be 1.0
@@ -121,16 +121,25 @@ def test_structural_similarity_multichannel(channel_axis):
     assert_almost_equal(S1, S2)
 
     # full case should return an image as well
-    m, S3 = structural_similarity(Xc, Yc, channel_axis=channel_axis, full=True)
+    m, S3 = structural_similarity(
+        Xc, Yc, padding_mode='reflect', channel_axis=channel_axis, full=True
+    )
     assert_equal(S3.shape, Xc.shape)
 
     # gradient case
-    m, grad = structural_similarity(Xc, Yc, channel_axis=channel_axis, gradient=True)
+    m, grad = structural_similarity(
+        Xc, Yc, padding_mode='reflect', channel_axis=channel_axis, gradient=True
+    )
     assert_equal(grad.shape, Xc.shape)
 
     # full and gradient case
     m, grad, S3 = structural_similarity(
-        Xc, Yc, channel_axis=channel_axis, full=True, gradient=True
+        Xc,
+        Yc,
+        padding_mode='reflect',
+        channel_axis=channel_axis,
+        full=True,
+        gradient=True,
     )
     assert_equal(grad.shape, Xc.shape)
     assert_equal(S3.shape, Xc.shape)
