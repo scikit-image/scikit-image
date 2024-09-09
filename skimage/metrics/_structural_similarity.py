@@ -17,7 +17,7 @@ def structural_similarity(
     im2,
     *,
     win_size=None,
-    padding_mode=None,
+    padding_mode='reflect',
     gradient=False,
     data_range=None,
     channel_axis=None,
@@ -39,8 +39,8 @@ def structural_similarity(
         window size will depend on `sigma`.
     padding_mode: 'reflect', 'constant', 'nearest', 'mirror', 'wrap' or None, optional
         The padding mode specifying how the images should be padded. If None, no
-        padding is applied. Padding size is always determined by the window size
-        to ensure the SSIM image is the same shape as the images.
+        padding is applied. Padding size is determined by the window size
+        to ensure the SSIM image is the same shape as the input images.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     data_range : float, optional
@@ -77,7 +77,8 @@ def structural_similarity(
     Returns
     -------
     mssim : float
-        The mean structural similarity index over the SSIM image.
+        The mean structural similarity index over the SSIM image. If present in the
+        image, edge artefacts from padding are ignored in the computation.
     grad : ndarray
         The gradient of the structural similarity between im1 and im2 [2]_.
         This is only returned if `gradient` is set to True.
@@ -296,15 +297,16 @@ def structural_similarity(
         grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
         grad *= 2 / im1.size
 
-    # remove padding artefacts if no padding is specified
-    if not padding_mode:
-        pad = (win_size - 1) // 2
+    pad = (win_size - 1) // 2
+    if padding_mode:
+        # remove filter edge effects from mean
+        mssim = crop(S, pad).mean(dtype=np.float64)
+    else:
+        # remove filter edge effects from all potentially returned values
         S = crop(S, pad)
+        mssim = S.mean(dtype=np.float64)
         if gradient:
             grad = crop(grad, pad)
-
-    # compute (weighted) mean of ssim. Use float64 for accuracy.
-    mssim = S.mean(dtype=np.float64)
 
     if gradient:
         if full:
