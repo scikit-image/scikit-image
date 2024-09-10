@@ -124,6 +124,17 @@ def test_plot_matched_features(shapes):
         keypoints0=keypoints0,
         keypoints1=keypoints1,
         matches=matches,
+        matches_color=[
+            np.random.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
+        ],
+    )
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
         alignment='vertical',
     )
     plt.close()
