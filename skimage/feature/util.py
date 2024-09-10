@@ -1,4 +1,5 @@
 import numpy as np
+from collections.abc import Sequence
 
 from ..util import img_as_float
 from .._shared.utils import (
@@ -76,9 +77,9 @@ def plot_matched_features(
         The Axes object where the images and their matched features are drawn.
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
-    matches_color : matplotlib color, optional
-        Color for lines which connect keypoint matches. By default the
-        color is chosen randomly.
+    matches_color : matplotlib color or sequence of matplotlib color, optional
+        Single color or a sequence of colors for all lines which connect keypoint matches.
+        By default the color is chosen randomly.
     only_matches : bool, optional
         Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
@@ -147,14 +148,27 @@ def plot_matched_features(
 
     rng = np.random.default_rng(seed=0)
 
-    for i in range(matches.shape[0]):
-        idx0 = matches[i, 0]
-        idx1 = matches[i, 1]
+    number_of_matches = matches.shape[0]
 
-        if matches_color is None:
-            color = rng.random(3)
-        else:
-            color = matches_color
+    from matplotlib.colors import is_color_like
+
+    if matches_color is None:
+        colors = [rng.random(3) for _ in range(number_of_matches)]
+    elif is_color_like(matches_color):
+        colors = [matches_color for _ in range(number_of_matches)]
+    elif isinstance(matches_color, Sequence):
+        if len(matches_color) != number_of_matches:
+            raise ValueError(
+                '``matches_color`` needs to be a single color or a sequence with a color for each match.'
+            )
+        colors = matches_color
+    else:
+        raise ValueError(
+            '``matches_color`` needs to be a single color or a sequence with a color for each match.'
+        )
+
+    for match, color in zip(matches, colors):
+        idx0, idx1 = match
 
         ax.plot(
             (keypoints0[idx0, 1], keypoints1[idx1, 1] + offset[1]),
