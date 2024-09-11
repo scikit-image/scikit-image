@@ -1,4 +1,5 @@
 import inspect
+import sys
 from functools import wraps
 from math import atan2
 from math import pi as PI
@@ -1406,9 +1407,11 @@ def _parse_docs():
     import textwrap
 
     doc = regionprops.__doc__ or ''
-    matches = re.finditer(
-        r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL
-    )
+    arg_regex = r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)'
+    if sys.version_info >= (3, 13):
+        arg_regex = r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n[\*\S]+)'
+
+    matches = re.finditer(arg_regex, doc, flags=re.DOTALL)
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
