@@ -4,6 +4,13 @@
 [![Stackoverflow](https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg)](https://stackoverflow.com/questions/tagged/scikit-image)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://skimage.zulipchat.com)
 
+[![SPEC 0 — Minimum Supported Dependencies](https://img.shields.io/badge/SPEC-0-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0000/)
+[![SPEC 1 — Lazy Loading of Submodules and Functions](https://img.shields.io/badge/SPEC-1-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0001/)
+[![SPEC 4 — Using and Creating Nightly Wheels](https://img.shields.io/badge/SPEC-4-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0004/)
+[![SPEC 6 — Keys to the Castle](https://img.shields.io/badge/SPEC-6-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0006/)
+[![SPEC 7 — Seeding pseudo-random number generation](https://img.shields.io/badge/SPEC-7-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0007/)
+[![SPEC 8 — Securing the Release Process](https://img.shields.io/badge/SPEC-8-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/spec-0008/)
+
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
 - **Documentation:** [https://scikit-image.org/docs/stable/](https://scikit-image.org/docs/stable/)
 - **User forum:** [https://forum.image.sc/tag/scikit-image](https://forum.image.sc/tag/scikit-image)
@@ -30,3 +37,5 @@ If you find this project useful, please cite:
 > Gouillart, Tony Yu, and the scikit-image contributors.
 > _scikit-image: Image processing in Python_. PeerJ 2:e453 (2014)
 > https://doi.org/10.7717/peerj.453
+
+(See "Cite this repository" in sidebar for BiBTeX.)
