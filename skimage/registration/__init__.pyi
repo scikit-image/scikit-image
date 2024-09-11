@@ -10,7 +10,6 @@ __all__ = [
     "solver_affine_studholme",
     "solver_affine_lucas_kanade",
     "target_registration_error",
-    "cost_nmi",
 ]
 
 from ._optical_flow import optical_flow_tvl1, optical_flow_ilk
@@ -19,6 +18,5 @@ from ._affine import (
     affine,
     solver_affine_studholme,
     solver_affine_lucas_kanade,
-    cost_nmi,
     target_registration_error,
 )
