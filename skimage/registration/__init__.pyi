@@ -7,8 +7,8 @@ __all__ = [
     "optical_flow_tvl1",
     "phase_cross_correlation",
     "affine",
-    "studholme_affine_solver",
-    "lucas_kanade_affine_solver",
+    "solver_affine_studholme",
+    "solver_affine_lucas_kanade",
     "target_registration_error",
     "cost_nmi",
 ]
@@ -17,8 +17,8 @@ from ._optical_flow import optical_flow_tvl1, optical_flow_ilk
 from ._phase_cross_correlation import phase_cross_correlation
 from ._affine import (
     affine,
-    studholme_affine_solver,
-    lucas_kanade_affine_solver,
+    solver_affine_studholme,
+    solver_affine_lucas_kanade,
     cost_nmi,
     target_registration_error,
 )

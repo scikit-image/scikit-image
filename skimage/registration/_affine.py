@@ -150,7 +150,7 @@ def _scale_parameters(parameters, model, ndim, scale):
     return scaled_parameters
 
 
-def lucas_kanade_affine_solver(
+def solver_affine_lucas_kanade(
     reference_image,
     moving_image,
     weights,
@@ -326,7 +326,7 @@ def _param_cost(
     return cost(reference_image, moving_image_warp, weights)
 
 
-def studholme_affine_solver(
+def solver_affine_studholme(
     reference_image,
     moving_image,
     weights,
@@ -424,7 +424,7 @@ def affine(
     channel_axis=None,
     matrix=None,
     model="affine",
-    solver=lucas_kanade_affine_solver,
+    solver=solver_affine_lucas_kanade,
     pyramid_downscale=2.0,
     pyramid_minimum_size=32,
 ):
@@ -448,7 +448,7 @@ def affine(
         corresponds to rigid motion (rotation and translation) and affine motion can
         represent change in scale, shear, rotation and translations.
     solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
-        Affine motion solver can be lucas_kanade_affine_solver or studholme_affine_solver.
+        Affine motion solver can be solver_affine_lucas_kanade or solver_affine_studholme.
     pyramid_scale : float
         The pyramid downscale factor.
     pyramid_minimum_size : int

@@ -61,8 +61,8 @@ moving = ndi.affine_transform(reference, transform)
 import time
 
 solvers = [
-    registration.lucas_kanade_affine_solver,
-    registration.studholme_affine_solver,
+    registration.solver_affine_lucas_kanade,
+    registration.solver_affine_studholme,
 ]
 
 results = []

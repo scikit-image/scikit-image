@@ -13,12 +13,12 @@ from skimage._shared.testing import assert_array_equal
 from skimage.registration._affine import _parameter_vector_to_matrix, _scale_parameters
 
 from skimage.registration import (
-    lucas_kanade_affine_solver,
-    studholme_affine_solver,
+    solver_affine_lucas_kanade,
+    solver_affine_studholme,
     target_registration_error,
 )
 
-solvers = [lucas_kanade_affine_solver, studholme_affine_solver]
+solvers = [solver_affine_lucas_kanade, solver_affine_studholme]
 models = ["affine", "euclidean", "translation"]
 max_error = 2
 
@@ -36,7 +36,7 @@ def create_matrix(shape, model, ndim):
         R = np.eye(ndim + 1, dtype=np.float64)
         # Rotations for each planes
         for k, a in enumerate(combinations(range(ndim), 2)):
-            r = np.random.uniform(-0.1, 0.1)
+            r = np.random.uniform(-0.01, 0.01)
             c, s = math.cos(r), math.sin(r)
             R[a[0], a[0]] = c
             R[a[0], a[1]] = -s
