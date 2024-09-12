@@ -84,7 +84,7 @@ pd.DataFrame(props)
 # This example uses plotly in order to display properties when
 # hovering over the objects.
 
-import plotly
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from skimage import data, filters, measure, morphology
@@ -97,32 +97,44 @@ mask = morphology.remove_small_objects(mask, 50)
 mask = morphology.remove_small_holes(mask, 50)
 labels = measure.label(mask)
 
-fig = px.imshow(img, binary_string=True)
-fig.update_traces(hoverinfo='skip')  # hover is only for label info
+property_names = ["label", "area", "eccentricity", "perimeter", "intensity_mean"]
 
-props = measure.regionprops(labels, img)
-properties = ['area', 'eccentricity', 'perimeter', 'intensity_mean']
+props = pd.DataFrame(measure.regionprops_table(labels, img, properties=property_names))
+
+# Filter out big regions
+props = props[props["area"] < 5000]
+
+fig = px.imshow(img, binary_string=True)
+fig.update_traces(hoverinfo="skip")  # hover is only for label info
+
+# Prepare data for scatter plot
+scatter_data = []
+for label_i in props["label"]:
+    contour = measure.find_contours(labels == label_i, 0.5)[0]
+    y, x = contour.T
+    hoverinfo = "<br>".join(
+        [
+            f'<b>{prop_name}: {props.loc[props["label"] == label_i, prop_name].values[0]:.2f}</b>'
+            for prop_name in property_names
+        ]
+    )
+    scatter_data.append({"x": x, "y": y, "label": label_i, "hoverinfo": hoverinfo})
 
 # For each label, add a filled scatter trace for its contour,
 # and display the properties of the label in the hover of this trace.
-for index in range(1, labels.max()):
-    label_i = props[index].label
-    contour = measure.find_contours(labels == label_i, 0.5)[0]
-    y, x = contour.T
-    hoverinfo = ''
-    for prop_name in properties:
-        hoverinfo += f'<b>{prop_name}: {getattr(props[index], prop_name):.2f}</b><br>'
+for data_i in scatter_data:
     fig.add_trace(
         go.Scatter(
-            x=x,
-            y=y,
-            name=label_i,
-            mode='lines',
-            fill='toself',
+            x=data_i["x"],
+            y=data_i["y"],
+            name=str(data_i["label"]),
+            mode="lines",
+            fill="toself",
             showlegend=False,
-            hovertemplate=hoverinfo,
-            hoveron='points+fills',
+            hovertemplate=data_i["hoverinfo"],
+            hoveron="points+fills",
         )
     )
 
-plotly.io.show(fig)
+fig.update_layout(autosize=True)
+fig.show()
