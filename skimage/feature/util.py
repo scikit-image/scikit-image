@@ -152,20 +152,18 @@ def plot_matched_features(
 
     from matplotlib.colors import is_color_like
 
+    error_message = '`matches_color` needs to be a single color or a sequence with a color for each match.'
+
     if matches_color is None:
         colors = [rng.random(3) for _ in range(number_of_matches)]
     elif is_color_like(matches_color):
         colors = [matches_color for _ in range(number_of_matches)]
     elif isinstance(matches_color, Sequence):
         if len(matches_color) != number_of_matches:
-            raise ValueError(
-                '``matches_color`` needs to be a single color or a sequence with a color for each match.'
-            )
+            raise ValueError(error_message)
         colors = matches_color
     else:
-        raise ValueError(
-            '``matches_color`` needs to be a single color or a sequence with a color for each match.'
-        )
+        raise ValueError(error_message)
 
     for match, color in zip(matches, colors):
         idx0, idx1 = match
