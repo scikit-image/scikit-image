@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage import data
-from skimage._shared.testing import run_in_parallel, xfail, arch32
+from skimage._shared.testing import run_in_parallel, xfail, arch32, is_wasm
 from skimage.feature import ORB
 from skimage.util.dtype import _convert
 
@@ -110,8 +110,9 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints(dtype):
     assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '

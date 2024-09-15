@@ -109,6 +109,7 @@ def test_run_in_parallel():
     assert len(state) == 6
 
 
+@pytest.mark.skipif(is_wasm, reason="Cannot run parallel code in WASM")
 def test_parallel_warning():
     @run_in_parallel()
     def change_state_warns_fails():
