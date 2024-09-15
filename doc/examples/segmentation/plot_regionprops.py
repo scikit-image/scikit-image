@@ -9,6 +9,7 @@ interactively the properties of labelled objects.
 """
 
 import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,7 +17,6 @@ import pandas as pd
 from skimage.draw import ellipse
 from skimage.measure import label, regionprops, regionprops_table
 from skimage.transform import rotate
-
 
 image = np.zeros((600, 600))
 
@@ -84,9 +84,9 @@ pd.DataFrame(props)
 # This example uses plotly in order to display properties when
 # hovering over the objects.
 
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+
 from skimage import data, filters, measure, morphology
 
 img = data.coins()
@@ -99,22 +99,24 @@ labels = measure.label(mask)
 
 property_names = ["label", "area", "eccentricity", "perimeter", "intensity_mean"]
 
-props = pd.DataFrame(measure.regionprops_table(labels, img, properties=property_names))
+# Get region properties
+props = measure.regionprops(labels, img)
 
 # Filter out big regions
-props = props[props["area"] < 5000]
+filtered_props = [prop for prop in props if prop.area < 5000]
 
 fig = px.imshow(img, binary_string=True)
 fig.update_traces(hoverinfo="skip")  # hover is only for label info
 
 # Prepare data for scatter plot
 scatter_data = []
-for label_i in props["label"]:
+for prop in filtered_props:
+    label_i = prop.label
     contour = measure.find_contours(labels == label_i, 0.5)[0]
     y, x = contour.T
     hoverinfo = "<br>".join(
         [
-            f'<b>{prop_name}: {props.loc[props["label"] == label_i, prop_name].values[0]:.2f}</b>'
+            f'<b>{prop_name}: {getattr(prop, prop_name):.2f}</b>'
             for prop_name in property_names
         ]
     )
