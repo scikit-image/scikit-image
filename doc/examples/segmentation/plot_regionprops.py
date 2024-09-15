@@ -139,4 +139,4 @@ for data_i in scatter_data:
     )
 
 fig.update_layout(autosize=True)
-fig.show()
+plt.show()
