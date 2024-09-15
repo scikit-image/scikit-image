@@ -83,9 +83,9 @@ pd.DataFrame(props)
 # objects by visualizing them in the hover information of the labels.
 # This example uses plotly in order to display properties when
 # hovering over the objects.
-
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 
 from skimage import data, filters, measure, morphology
 
@@ -139,4 +139,4 @@ for data_i in scatter_data:
     )
 
 fig.update_layout(autosize=True)
-plt.show()
+pio.show(fig)
