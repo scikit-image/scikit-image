@@ -149,3 +149,70 @@ def test_plot_matched_features(shapes):
         alignment='vertical',
     )
     plt.close()
+
+
+@pytest.mark.parametrize("matches_color", (["C0"], ["C0", "C1"], np.arange(30)))
+def test_plot_matched_features_color_error(matches_color):
+    from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
+
+    fig, ax = plt.subplots()
+
+    keypoints0 = 10 * np.random.rand(10, 2)
+    keypoints1 = 10 * np.random.rand(10, 2)
+    idxs0 = np.random.randint(10, size=10)
+    idxs1 = np.random.randint(10, size=10)
+    matches = np.column_stack((idxs0, idxs1))
+    assert len(matches_color) != len(matches)
+
+    img0 = np.zeros((10, 10))
+    img1 = np.zeros_like(img0)
+
+    regex = (
+        '`matches_color` needs to be a single color '
+        'or a sequence with a color for each match'
+    )
+    with pytest.raises(ValueError, match=regex):
+        plot_matched_features(
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            matches_color=matches_color,
+        )
+
+
+def test_plot_matched_features_matplotlib_color_error():
+    # Error is raised from matplotlib itself if we pass a sequence of correct length
+    # but with values that aren't colors
+
+    from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
+
+    fig, ax = plt.subplots()
+
+    keypoints0 = 10 * np.random.rand(10, 2)
+    keypoints1 = 10 * np.random.rand(10, 2)
+    idxs0 = np.random.randint(10, size=10)
+    idxs1 = np.random.randint(10, size=10)
+    matches = np.column_stack((idxs0, idxs1))
+
+    img0 = np.zeros((10, 10))
+    img1 = np.zeros_like(img0)
+
+    with pytest.raises(ValueError, match=".* not a valid value for color"):
+        plot_matched_features(
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            matches_color=np.arange(len(matches)),
+        )
