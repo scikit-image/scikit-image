@@ -165,14 +165,13 @@ def plot_matched_features(
         )
         raise ValueError(error_message)
 
-    for match, color in zip(matches, colors):
+    for i, match in enumerate(matches):
         idx0, idx1 = match
-
         ax.plot(
             (keypoints0[idx0, 1], keypoints1[idx1, 1] + offset[1]),
             (keypoints0[idx0, 0], keypoints1[idx1, 0] + offset[0]),
             '-',
-            color=color,
+            color=colors[i],
         )
 
 
