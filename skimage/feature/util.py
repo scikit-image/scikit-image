@@ -145,13 +145,12 @@ def plot_matched_features(
     ax.imshow(image, cmap='gray')
     ax.axis((0, image0.shape[1] + offset[1], image0.shape[0] + offset[0], 0))
 
-    rng = np.random.default_rng(seed=0)
-
     number_of_matches = matches.shape[0]
 
     from matplotlib.colors import is_color_like
 
     if matches_color is None:
+        rng = np.random.default_rng(seed=0)
         colors = [rng.random(3) for _ in range(number_of_matches)]
     elif is_color_like(matches_color):
         colors = [matches_color for _ in range(number_of_matches)]
