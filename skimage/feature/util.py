@@ -1,5 +1,4 @@
 import numpy as np
-from collections.abc import Sequence
 
 from ..util import img_as_float
 from .._shared.utils import (
@@ -152,17 +151,18 @@ def plot_matched_features(
 
     from matplotlib.colors import is_color_like
 
-    error_message = '`matches_color` needs to be a single color or a sequence with a color for each match.'
-
     if matches_color is None:
         colors = [rng.random(3) for _ in range(number_of_matches)]
     elif is_color_like(matches_color):
         colors = [matches_color for _ in range(number_of_matches)]
-    elif isinstance(matches_color, Sequence):
-        if len(matches_color) != number_of_matches:
-            raise ValueError(error_message)
+    elif hasattr(matches_color, "__len__") and len(matches_color) == number_of_matches:
+        # No need to check, each color, matplotlib does so for us
         colors = matches_color
     else:
+        error_message = (
+            '`matches_color` needs to be a single color '
+            'or a sequence with a color for each match.'
+        )
         raise ValueError(error_message)
 
     for match, color in zip(matches, colors):
