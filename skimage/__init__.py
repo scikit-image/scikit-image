@@ -71,8 +71,6 @@ import lazy_loader as _lazy
 
 __getattr__, __lazy_dir__, _ = _lazy.attach_stub(__name__, __file__)
 
-del _lazy
-
 
 def __dir__():
     return __lazy_dir__() + ['__version__']
