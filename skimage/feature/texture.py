@@ -12,7 +12,9 @@ from ..util import img_as_float
 from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
-def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=False):
+def graycomatrix(
+    image, distances, angles, levels=None, symmetric=False, normed=False, mask=None
+):
     """Calculate the gray-level co-occurrence matrix.
 
     A gray level co-occurrence matrix is a histogram of co-occurring
@@ -48,6 +50,8 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
+    mask : array_like, optional
+        Integer typed binary mask. Pixels with value zero are ignored.
 
     Returns
     -------
@@ -136,12 +140,21 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     if levels is None:
         levels = 256
 
+    if mask is not None:
+        if np.issubdtype(mask.dtype, np.signedinteger) and np.any(mask < 0):
+            raise ValueError("Negative-valued masks are not supported.")
+        if mask.shape != image.shape:
+            raise ValueError("The mask must have the same shape as the image.")
+    else:
+        mask = np.ones_like(image, dtype=np.int8)
+
     if image_max >= levels:
         raise ValueError(
             "The maximum grayscale value in the image should be "
             "smaller than the number of levels."
         )
 
+    mask = np.ascontiguousarray(mask)
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
@@ -150,7 +163,7 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     )
 
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
+    _glcm_loop(image, mask, distances, angles, levels, P)
 
     # make each GLMC symmetric
     if symmetric:
@@ -550,13 +563,13 @@ def draw_multiblock_lbp(
         # Mix-in the visualization colors.
         if has_greater_value:
             new_value = (1 - alpha) * output[
-                curr_r : curr_r + height, curr_c : curr_c + width
+                curr_r: curr_r + height, curr_c: curr_c + width
             ] + alpha * color_greater_block
-            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
+            output[curr_r: curr_r + height, curr_c: curr_c + width] = new_value
         else:
             new_value = (1 - alpha) * output[
-                curr_r : curr_r + height, curr_c : curr_c + width
+                curr_r: curr_r + height, curr_c: curr_c + width
             ] + alpha * color_less_block
-            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
+            output[curr_r: curr_r + height, curr_c: curr_c + width] = new_value
 
     return output

@@ -129,7 +129,8 @@ class TestGLCM:
                 )
 
     def test_contrast(self):
-        result = graycomatrix(self.image, [1, 2], [0], 4, normed=True, symmetric=True)
+        result = graycomatrix(self.image, [1, 2], [
+                              0], 4, normed=True, symmetric=True)
         result = np.round(result, 3)
         contrast = graycoprops(result, 'contrast')
         np.testing.assert_almost_equal(contrast[0, 0], 0.585, decimal=3)
@@ -161,17 +162,20 @@ class TestGLCM:
             graycoprops(result, 'ABC')
 
     def test_homogeneity(self):
-        result = graycomatrix(self.image, [1], [0, 6], 4, normed=True, symmetric=True)
+        result = graycomatrix(
+            self.image, [1], [0, 6], 4, normed=True, symmetric=True)
         homogeneity = graycoprops(result, 'homogeneity')[0, 0]
         np.testing.assert_almost_equal(homogeneity, 0.80833333)
 
     def test_energy(self):
-        result = graycomatrix(self.image, [1], [0, 4], 4, normed=True, symmetric=True)
+        result = graycomatrix(
+            self.image, [1], [0, 4], 4, normed=True, symmetric=True)
         energy = graycoprops(result, 'energy')[0, 0]
         np.testing.assert_almost_equal(energy, 0.38188131)
 
     def test_correlation(self):
-        result = graycomatrix(self.image, [1, 2], [0], 4, normed=True, symmetric=True)
+        result = graycomatrix(self.image, [1, 2], [
+                              0], 4, normed=True, symmetric=True)
         energy = graycoprops(result, 'correlation')
         np.testing.assert_almost_equal(energy[0, 0], 0.71953255)
         np.testing.assert_almost_equal(energy[1, 0], 0.41176470)
@@ -230,6 +234,46 @@ class TestGLCM:
             'entropy',
         ]:
             graycoprops(result, prop)
+
+    def test_zero_mask(self):
+        mask = np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], dtype=np.uint8
+        )
+
+        result = graycomatrix(
+            self.image,
+            [1],
+            [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+            levels=4,
+            mask=mask,
+        )
+        expected = np.zeros((4, *self.image.shape))
+        np.testing.assert_array_equal(result, expected)
+
+    def test_mask(self):
+        mask = np.where(self.image != 0, 1, 0).astype(np.uint8)
+        result = graycomatrix(
+            self.image,
+            [1],
+            [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+            levels=4,
+            mask=mask,
+        )
+        assert result.shape == (4, 4, 1, 4)
+        expected1 = np.zeros_like(self.image).astype(np.uint32)
+        np.testing.assert_array_equal(result[0, :, 0, :], expected1)
+        expected2 = np.array(
+            [[0, 0, 0, 1], [2, 1, 2, 1], [0, 1, 2, 2], [0, 0, 0, 0]], dtype=np.uint32
+        )
+        np.testing.assert_array_equal(result[1, :, 0, :], expected2)
+        expected3 = np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [3, 0, 1, 2], [1, 2, 2, 1]], dtype=np.uint32
+        )
+        np.testing.assert_array_equal(result[2, :, 0, :], expected3)
+        expected4 = np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]], dtype=np.uint32
+        )
+        np.testing.assert_array_equal(result[3, :, 0, :], expected4)
 
 
 class TestLBP:
