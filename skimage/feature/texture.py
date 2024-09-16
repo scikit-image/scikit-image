@@ -146,7 +146,7 @@ def graycomatrix(
         if mask.shape != image.shape:
             raise ValueError("The mask must have the same shape as the image.")
     else:
-        mask = np.ones_like(image, dtype=np.int8)
+        mask = np.ones_like(image, dtype=np.uint8)
 
     if image_max >= levels:
         raise ValueError(

@@ -247,7 +247,7 @@ class TestGLCM:
             levels=4,
             mask=mask,
         )
-        expected = np.zeros((4, *self.image.shape))
+        expected = np.zeros((4, 4, 1, 4))
         np.testing.assert_array_equal(result, expected)
 
     def test_mask(self):
