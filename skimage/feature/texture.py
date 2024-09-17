@@ -51,7 +51,7 @@ def graycomatrix(
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
     mask : array_like, optional
-        Integer typed binary mask. Pixels with value zero are ignored.
+        Boolean mask. Pixels with value zero (False) are ignored.
 
     Returns
     -------
@@ -141,12 +141,12 @@ def graycomatrix(
         levels = 256
 
     if mask is not None:
-        if np.issubdtype(mask.dtype, np.signedinteger) and np.any(mask < 0):
-            raise ValueError("Negative-valued masks are not supported.")
+        if mask.dtype != np.bool_:
+            raise ValueError("The mask must be of boolean type.")
         if mask.shape != image.shape:
             raise ValueError("The mask must have the same shape as the image.")
     else:
-        mask = np.ones_like(image, dtype=np.uint8)
+        mask = np.ones_like(image, dtype=np.bool_)
 
     if image_max >= levels:
         raise ValueError(
@@ -563,13 +563,13 @@ def draw_multiblock_lbp(
         # Mix-in the visualization colors.
         if has_greater_value:
             new_value = (1 - alpha) * output[
-                curr_r: curr_r + height, curr_c: curr_c + width
+                curr_r : curr_r + height, curr_c : curr_c + width
             ] + alpha * color_greater_block
-            output[curr_r: curr_r + height, curr_c: curr_c + width] = new_value
+            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
         else:
             new_value = (1 - alpha) * output[
-                curr_r: curr_r + height, curr_c: curr_c + width
+                curr_r : curr_r + height, curr_c : curr_c + width
             ] + alpha * color_less_block
-            output[curr_r: curr_r + height, curr_c: curr_c + width] = new_value
+            output[curr_r : curr_r + height, curr_c : curr_c + width] = new_value
 
     return output

@@ -27,7 +27,7 @@ def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
         Integer typed input image. Only positive valued images are supported.
         If type is other than uint8, the argument `levels` needs to be set.
     mask : ndarray
-        Integer typed binary mask. Pixels with value zero are ignored.
+        Boolean mask. Pixels with value zero are ignored.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
@@ -46,7 +46,7 @@ def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col, start_row,\
                    end_row, start_col, end_col, offset_row, offset_col
         any_int i, j
-        cnp.float64_t angle, distance
+        cnp.float64_t angle, distance, sin_angle, cos_angle
 
     with nogil:
         rows = image.shape[0]
@@ -54,24 +54,28 @@ def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
 
         for a_idx in range(angles.shape[0]):
             angle = angles[a_idx]
+            sin_angle = sin(angle)
+            cos_angle = cos(angle)
+
             for d_idx in range(distances.shape[0]):
                 distance = distances[d_idx]
-                offset_row = round(sin(angle) * distance)
-                offset_col = round(cos(angle) * distance)
+                offset_row = round(sin_angle * distance)
+                offset_col = round(cos_angle * distance)
                 start_row = max(0, -offset_row)
                 end_row = min(rows, rows - offset_row)
                 start_col = max(0, -offset_col)
                 end_col = min(cols, cols - offset_col)
                 for r in range(start_row, end_row):
                     for c in range(start_col, end_col):
-                        if mask[r, c] != 0:
-                            i = image[r, c]
-                            # compute the location of the offset pixel
+                        if mask[r, c]:
                             row = r + offset_row
                             col = c + offset_col
-                            j = image[row, col]
-                            if 0 <= i < levels and 0 <= j < levels:
-                                out[i, j, d_idx, a_idx] += 1
+                            if mask[row, col]:
+                                i = image[r, c]
+                                j = image[row, col]
+
+                                if 0 <= i < levels and 0 <= j < levels:
+                                    out[i, j, d_idx, a_idx] += 1
 
 
 cdef inline int _bit_rotate_right(int value, int length) noexcept nogil:
