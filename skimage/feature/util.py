@@ -160,7 +160,7 @@ def plot_matched_features(
     else:
         error_message = (
             '`matches_color` needs to be a single color '
-            'or a sequence with a color for each match.'
+            'or a sequence of length equal to the number of matches.'
         )
         raise ValueError(error_message)
 
