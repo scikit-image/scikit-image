@@ -13,7 +13,7 @@ from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
 def graycomatrix(
-    image, distances, angles, levels=None, symmetric=False, normed=False, mask=None
+    image, distances, angles, levels=None, symmetric=False, normed=False, *, mask=None
 ):
     """Calculate the gray-level co-occurrence matrix.
 
