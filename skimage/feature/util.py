@@ -76,7 +76,7 @@ def plot_matched_features(
         The Axes object where the images and their matched features are drawn.
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
-    matches_color : matplotlib color or sequence of matplotlib color, optional
+    matches_color : matplotlib color or sequence thereof, optional
         Single color or a sequence of colors for all lines which connect keypoint matches.
         By default the color is chosen randomly.
     only_matches : bool, optional
