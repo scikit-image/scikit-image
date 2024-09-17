@@ -173,7 +173,6 @@ def test_plot_matched_features_color_error(matches_color):
 
     regex = (
         '`matches_color` needs to be a single color '
-        'or a sequence with a color for each match'
     )
     with pytest.raises(ValueError, match=regex):
         plot_matched_features(

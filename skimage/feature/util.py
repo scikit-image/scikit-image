@@ -77,8 +77,8 @@ def plot_matched_features(
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
     matches_color : matplotlib color or sequence thereof, optional
-        Single color or a sequence of colors for all lines which connect keypoint matches.
-        By default the color is chosen randomly.
+        Single color or sequence of colors for all lines which connect keypoint matches.
+        By default, colors are picked randomly.
     only_matches : bool, optional
         Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
@@ -155,7 +155,7 @@ def plot_matched_features(
     elif is_color_like(matches_color):
         colors = [matches_color for _ in range(number_of_matches)]
     elif hasattr(matches_color, "__len__") and len(matches_color) == number_of_matches:
-        # No need to check, each color, matplotlib does so for us
+        # No need to check each color, matplotlib does so for us
         colors = matches_color
     else:
         error_message = (
