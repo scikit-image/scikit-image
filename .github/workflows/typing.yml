@@ -1,0 +1,40 @@
+# Workflow to generate and test type annotations
+name: Typing
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docstub_mypy:
+    name: Generate and test type annotations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          pip install 'docstub [optional] @ git+https://github.com/scientific-python/docstub'
+          docstub --version
+
+      - name: Generate stubs
+        run: |
+          docstub -v skimage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skimage-stubs
+          path: ./skimage-stubs/
