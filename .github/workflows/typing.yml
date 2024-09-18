@@ -26,8 +26,10 @@ jobs:
           python-version: 3.12
 
       - name: Install dependencies
+        env:
+          DOCSTUB_REF: bb2a1f8cd212b3b844e7863538b259345c2ab9b4
         run: |
-          pip install 'docstub [optional] @ git+https://github.com/scientific-python/docstub'
+          pip install "docstub [optional] @ git+https://github.com/scientific-python/docstub@${DOCSTUB_REF}"
           docstub --version
 
       - name: Generate stubs
