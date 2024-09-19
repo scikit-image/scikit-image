@@ -169,12 +169,6 @@ jobs:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
 
-      - name: OSX configuration
-        run: |
-          # OpenMP is not present on macOS by default
-          set -ex
-          brew install libomp
-
       - name: Build package
         run: |
           set -ex
