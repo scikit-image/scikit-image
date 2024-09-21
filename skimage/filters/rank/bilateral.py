@@ -80,7 +80,7 @@ def mean_bilateral(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -94,7 +94,7 @@ def mean_bilateral(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     See also
@@ -142,7 +142,7 @@ def pop_bilateral(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -156,7 +156,7 @@ def pop_bilateral(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     Examples
@@ -217,7 +217,7 @@ def sum_bilateral(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -231,7 +231,7 @@ def sum_bilateral(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     See also
