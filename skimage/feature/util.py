@@ -78,12 +78,17 @@ def plot_matched_features(
         Color for keypoint locations.
     matches_color : matplotlib color or sequence thereof, optional
         Single color or sequence of colors for all lines which connect keypoint matches.
+        See [1]_ for an overview of supported color formats.
         By default, colors are picked randomly.
     only_matches : bool, optional
         Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
         Whether to show the two images side by side (`'horizontal'`), or one above
         the other (`'vertical'`).
+
+    References
+    ----------
+    .. [1] https://matplotlib.org/stable/users/explain/colors/colors.html#specifying-colors
 
     """
     image0 = img_as_float(image0)
