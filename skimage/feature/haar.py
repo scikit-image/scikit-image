@@ -278,7 +278,7 @@ def draw_haar_like_feature(
     max_n_features : int, default=None
         The maximum number of features to be returned.
         By default, all features are returned.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
