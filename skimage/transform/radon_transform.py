@@ -420,7 +420,7 @@ def iradon_sart(
         Relaxation parameter for the update step. A higher value can
         improve the convergence rate, but one runs the risk of instabilities.
         Values close to or higher than 1 are not recommended.
-    dtype : dtype, optional
+    dtype : `numpy.typing.DTypeLike`, optional
         Output data type, must be floating point. By default, if input
         data type is not float, input is cast to double, otherwise
         dtype is set to input data type.

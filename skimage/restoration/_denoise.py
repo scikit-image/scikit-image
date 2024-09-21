@@ -23,7 +23,7 @@ def _gaussian_weight(array, sigma_squared, *, dtype=float):
         Input array.
     sigma_squared : float
         The squared standard deviation used in the filter.
-    dtype : data type object, optional (default : float)
+    dtype : `numpy.typing.DTypeLike`, optional
         The type and size of the data to be returned.
 
     Returns
@@ -52,7 +52,7 @@ def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
         deviation of the ``image`` will be used.
     max_value : float
         Maximum value of the input image.
-    dtype : data type object, optional (default : float)
+    dtype : `numpy.typing.DTypeLike`, optional
         The type and size of the data to be returned.
 
     Returns
@@ -77,7 +77,7 @@ def _compute_spatial_lut(win_size, sigma, *, dtype=float):
     sigma : float
         Standard deviation for range distance. A larger value results in
         averaging of pixels with larger spatial differences.
-    dtype : data type object
+    dtype : `numpy.typing.DTypeLike`
         The type and size of the data to be returned.
 
     Returns

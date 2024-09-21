@@ -749,7 +749,7 @@ def _validate_interpolation_order(image_dtype, order):
 
     Parameters
     ----------
-    image_dtype : dtype
+    image_dtype : `numpy.typing.DTypeLike`
         Image dtype.
     order : int, optional
         The order of the spline interpolation. The order has to be in
@@ -848,7 +848,7 @@ def _supported_float_type(input_dtype, allow_complex=False):
 
     Returns
     -------
-    float_type : dtype
+    float_type : `numpy.dtype`
         Floating-point dtype for the image.
     """
     if isinstance(input_dtype, tuple):

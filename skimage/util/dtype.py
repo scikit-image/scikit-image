@@ -99,7 +99,7 @@ def _dtype_itemsize(itemsize, *dtypes):
 
     Returns
     -------
-    dtype: data type object
+    dtype: `numpy.dtype`
         First of `dtypes` with itemsize greater than `itemsize`.
 
     """
@@ -119,7 +119,7 @@ def _dtype_bits(kind, bits, itemsize=1):
 
     Returns
     -------
-    dtype: data type object
+    dtype: `numpy.dtype`
         Data type of `kind` that can store a `bits` wide unsigned int
 
     """
@@ -225,7 +225,7 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     ----------
     image : ndarray
         Input image.
-    dtype : dtype
+    dtype : `numpy.typing.DTypeLike`
         Target data-type.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
