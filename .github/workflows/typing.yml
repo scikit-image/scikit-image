@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          DOCSTUB_REF: bb2a1f8cd212b3b844e7863538b259345c2ab9b4
+          DOCSTUB_REF: f0147836b0c3bab98a6c3ff23ff86965665b70c2 # v0.2.2.dev24+gaf69621
         run: |
           pip install "docstub [optional] @ git+https://github.com/scientific-python/docstub@${DOCSTUB_REF}"
           docstub --version
