@@ -99,9 +99,6 @@ def ensure_spacing(
         A subset of coord where a minimum spacing is guaranteed.
 
     """
-    if spacing == 1:
-        return coords if max_out is None else coords[:max_out]
-
     output = coords
     if len(coords):
         coords = np.atleast_2d(coords)
