@@ -100,7 +100,7 @@ def ensure_spacing(
 
     """
     if spacing == 1:
-        return coords
+        return coords if max_out is None else coords[:max_out]
 
     output = coords
     if len(coords):
