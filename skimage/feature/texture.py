@@ -141,12 +141,10 @@ def graycomatrix(
         levels = 256
 
     if mask is not None:
-        if mask.dtype != np.bool_:
-            raise ValueError("The mask must be of boolean type.")
         if mask.shape != image.shape:
             raise ValueError("The mask must have the same shape as the image.")
     else:
-        mask = np.ones_like(image, dtype=np.bool_)
+        mask = np.ones_like(image)
 
     if image_max >= levels:
         raise ValueError(
@@ -154,7 +152,7 @@ def graycomatrix(
             "smaller than the number of levels."
         )
 
-    mask = np.ascontiguousarray(mask)
+    mask = np.ascontiguousarray(mask, dtype=image.dtype)
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
 
