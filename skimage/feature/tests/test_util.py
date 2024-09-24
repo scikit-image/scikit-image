@@ -152,14 +152,14 @@ def test_plot_matched_features(shapes):
 
 
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
-@pytest.mark.parametrize("matches_color", (["C0"], ["C0", "C1"], np.arange(30)))
+@pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
     from matplotlib import pyplot as plt
     from matplotlib import use
 
     use('Agg')
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
@@ -197,7 +197,7 @@ def test_plot_matched_features_matplotlib_color_error():
 
     use('Agg')
 
-    fig, ax = plt.subplots()
+    _, ax = plt.subplots()
 
     keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
