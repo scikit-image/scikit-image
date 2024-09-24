@@ -3,6 +3,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 
+# Workaround because lazy_loader only supports within-module imports
 from skimage.measure._label import label  # noqa: F401
 
 

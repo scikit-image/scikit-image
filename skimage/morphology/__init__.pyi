@@ -77,7 +77,6 @@ from .footprints import (
     square,
     star,
 )
-from ..measure._label import label
 from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
@@ -92,3 +91,6 @@ from ._max_tree import (
     max_tree,
     max_tree_local_maxima,
 )
+
+# Workaround because lazy_loader only supports within-module imports
+from ._util import label
