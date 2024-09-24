@@ -28,6 +28,7 @@ mechanisms.
    Presentation on
    :ref:`sphx_glr_auto_examples_applications_plot_rank_filters.py`.
 """
+
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -36,7 +37,9 @@ from skimage.filters import try_all_threshold
 img = data.page()
 
 fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
+
 plt.show()
+
 
 ######################################################################
 # How to apply a threshold?
@@ -64,7 +67,7 @@ ax[1].imshow(binary, cmap=plt.cm.gray)
 ax[1].set_title('Result')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.show()
 
@@ -99,7 +102,8 @@ ax[1, 1].hist(image.ravel(), bins=256)
 ax[1, 1].axvline(thresh_min, color='r')
 
 for a in ax[:, 0]:
-    a.axis('off')
+    a.set_axis_off()
+
 plt.show()
 
 ######################################################################
@@ -129,7 +133,7 @@ ax[1].axvline(thresh, color='r')
 
 ax[2].imshow(binary, cmap=plt.cm.gray)
 ax[2].set_title('Thresholded')
-ax[2].axis('off')
+ax[2].set_axis_off()
 
 plt.show()
 
@@ -175,7 +179,7 @@ ax[2].imshow(binary_local)
 ax[2].set_title('Local thresholding')
 
 for a in ax:
-    a.axis('off')
+    a.set_axis_off()
 
 plt.show()
 
@@ -204,24 +208,24 @@ global_otsu = img >= threshold_global_otsu
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True)
 ax = axes.ravel()
-plt.tight_layout()
+fig.tight_layout()
 
-fig.colorbar(ax[0].imshow(img, cmap=plt.cm.gray),
-             ax=ax[0], orientation='horizontal')
+fig.colorbar(ax[0].imshow(img, cmap=plt.cm.gray), ax=ax[0], orientation='horizontal')
 ax[0].set_title('Original')
-ax[0].axis('off')
+ax[0].set_axis_off()
 
-fig.colorbar(ax[1].imshow(local_otsu, cmap=plt.cm.gray),
-             ax=ax[1], orientation='horizontal')
+fig.colorbar(
+    ax[1].imshow(local_otsu, cmap=plt.cm.gray), ax=ax[1], orientation='horizontal'
+)
 ax[1].set_title(f'Local Otsu (radius={radius})')
-ax[1].axis('off')
+ax[1].set_axis_off()
 
 ax[2].imshow(img >= local_otsu, cmap=plt.cm.gray)
 ax[2].set_title('Original >= Local Otsu')
-ax[2].axis('off')
+ax[2].set_axis_off()
 
 ax[3].imshow(global_otsu, cmap=plt.cm.gray)
 ax[3].set_title('Global Otsu (threshold = {threshold_global_otsu})')
-ax[3].axis('off')
+ax[3].set_axis_off()
 
 plt.show()

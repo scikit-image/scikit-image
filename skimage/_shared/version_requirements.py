@@ -3,35 +3,6 @@ import sys
 from packaging import version as _version
 
 
-def ensure_python_version(min_version):
-    if not isinstance(min_version, tuple):
-        min_version = (min_version, )
-    if sys.version_info < min_version:
-        # since ensure_python_version is in the critical import path,
-        # we lazy import it.
-        from platform import python_version
-
-        raise ImportError("""
-
-You are running scikit-image on an unsupported version of Python.
-
-Unfortunately, scikit-image 0.15 and above no longer work with your installed
-version of Python ({}).  You therefore have two options: either upgrade to
-Python {}, or install an older version of scikit-image.
-
-For Python 2.7 or Python 3.4, use
-
- $ pip install 'scikit-image<0.15'
-
-Please also consider updating `pip` and `setuptools`:
-
- $ pip install pip setuptools --upgrade
-
-Newer versions of these tools avoid installing packages incompatible
-with your version of Python.
-""".format(python_version(), '.'.join([str(v) for v in min_version])))
-
-
 def _check_version(actver, version, cmp_op):
     """
     Check version string of an active module against a required version.
@@ -58,8 +29,7 @@ def _check_version(actver, version, cmp_op):
 
 def get_module_version(module_name):
     """Return module version or None if version can't be retrieved."""
-    mod = __import__(module_name,
-                     fromlist=[module_name.rpartition('.')[-1]])
+    mod = __import__(module_name, fromlist=[module_name.rpartition('.')[-1]])
     return getattr(mod, '__version__', getattr(mod, 'VERSION', None))
 
 
@@ -97,12 +67,11 @@ def is_installed(name, version=None):
 
         match = re.search('[0-9]', version)
         assert match is not None, "Invalid version number"
-        symb = version[:match.start()]
+        symb = version[: match.start()]
         if not symb:
             symb = '='
-        assert symb in ('>=', '>', '=', '<'),\
-            f"Invalid version condition '{symb}'"
-        version = version[match.start():]
+        assert symb in ('>=', '>', '=', '<'), f"Invalid version condition '{symb}'"
+        version = version[match.start() :]
         return _check_version(actver, version, symb)
 
 
@@ -139,7 +108,9 @@ def require(name, version=None):
                 if version is not None:
                     msg += f" {version}"
                 raise ImportError(msg + '"')
+
         return func_wrapped
+
     return decorator
 
 
@@ -164,5 +135,4 @@ def get_module(module_name, version=None):
     """
     if not is_installed(module_name, version):
         return None
-    return __import__(module_name,
-                      fromlist=[module_name.rpartition('.')[-1]])
+    return __import__(module_name, fromlist=[module_name.rpartition('.')[-1]])

@@ -3,8 +3,8 @@
 SimpleITK
 astropy>=5.0
 cloudpickle>=0.2.1
-dask[array]>=2021.1.0
-matplotlib>=3.5
+dask[array]>=2021.1.0,!=2024.8.0
+matplotlib>=3.6
 pooch>=1.6.0
 pyamg
 PyWavelets>=1.1.1

@@ -1,3 +1,6 @@
+scikit-image 0.13.1 (2017-09-27)
+================================
+
 scikit-image 0.13.1 is a bug-fix and compatibility update. See below for
 the many new features in 0.13.0.
 
@@ -13,8 +16,8 @@ include:
   Varoquaux (#2722), and Stéfan van der Walt (#2723, #2810)
 
 
-scikit-image 0.13.0 release notes
-=================================
+scikit-image 0.13.0 (2017-03-29)
+================================
 
 We're happy to (finally) announce the release of scikit-image v0.13.0!
 

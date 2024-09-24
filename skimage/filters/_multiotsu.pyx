@@ -129,7 +129,7 @@ cdef void _set_var_btwcls_lut(cnp.float32_t [::1] prob,
 
 cdef cnp.float32_t _get_var_btwclas_lut(cnp.float32_t [::1] var_btwcls,
                                         Py_ssize_t i, Py_ssize_t j,
-                                        Py_ssize_t nbins) nogil:
+                                        Py_ssize_t nbins) noexcept nogil:
     """Returns the variance between classes stored in compressed upper
     triangular matrix form at the desired 2D indices.
 
@@ -156,7 +156,7 @@ cdef cnp.float32_t _set_thresh_indices_lut(
         cnp.float32_t[::1] var_btwcls, Py_ssize_t hist_idx,
         Py_ssize_t thresh_idx, Py_ssize_t nbins, Py_ssize_t thresh_count,
         cnp.float32_t sigma_max, Py_ssize_t[::1] current_indices,
-        Py_ssize_t[::1] thresh_indices) nogil:
+        Py_ssize_t[::1] thresh_indices) noexcept nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 
@@ -317,7 +317,7 @@ cdef void _set_moments_lut_first_row(cnp.float32_t [::1] prob,
 
 cdef cnp.float32_t _get_var_btwclas(cnp.float32_t [::1] zeroth_moment,
                                     cnp.float32_t [::1] first_moment,
-                                    Py_ssize_t i, Py_ssize_t j) nogil:
+                                    Py_ssize_t i, Py_ssize_t j) noexcept nogil:
     """Computes the variance between two classes.
 
     Parameters
@@ -357,7 +357,7 @@ cdef cnp.float32_t _set_thresh_indices(cnp.float32_t[::1] zeroth_moment,
                                        Py_ssize_t thresh_count,
                                        cnp.float32_t sigma_max,
                                        Py_ssize_t[::1] current_indices,
-                                       Py_ssize_t[::1] thresh_indices) nogil:
+                                       Py_ssize_t[::1] thresh_indices) noexcept nogil:
     """Recursive function for finding the indices of the thresholds
     maximizing the  variance between classes sigma.
 

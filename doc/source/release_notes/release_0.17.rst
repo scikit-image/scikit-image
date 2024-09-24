@@ -1,5 +1,5 @@
-scikit-image 0.17.2 release notes
-=================================
+scikit-image 0.17.2 (2020-05-13)
+================================
 
 We're happy to announce the release of scikit-image v0.17.2, which is a bug-fix
 release.
@@ -34,8 +34,8 @@ Bug fixes
 
 
 
-scikit-image 0.17.1 release notes
-=================================
+scikit-image 0.17.1 (2020-05-08)
+================================
 
 We're happy to announce the release of scikit-image v0.17.1!
 
@@ -76,7 +76,7 @@ New Features
   (#3850)
 - Pooch -- on the fly download of datasets from github: we introduced the
   possibility to include larger datasets in the `data` submodule, thanks to the
-  `pooch` library. `data.download_all` fetches all datasets. (#3945)
+  ``pooch`` library. `data.download_all` fetches all datasets. (#3945)
 - Starting with this version, our gallery examples now have links to run the
   example notebook on a binder instance. (#4543)
 

@@ -1,9 +1,19 @@
 """ Testing decorators module
 """
 
+import inspect
+import re
+import warnings
+
+import pytest
 from numpy.testing import assert_equal
-from skimage._shared.testing import doctest_skip_parser, run_in_parallel
+from skimage._shared.testing import (
+    doctest_skip_parser,
+    run_in_parallel,
+    assert_stacklevel,
+)
 from skimage._shared import testing
+from skimage._shared._dependency_checks import is_wasm
 
 from skimage._shared._warnings import expected_warnings
 from warnings import warn
@@ -13,13 +23,11 @@ def test_skipper():
     def f():
         pass
 
-    class c():
-
+    class c:
         def __init__(self):
             self.me = "I think, therefore..."
 
-    docstring = \
-        """ Header
+    docstring = """ Header
 
             >>> something # skip if not HAVE_AMODULE
             >>> something + else
@@ -38,8 +46,7 @@ def test_skipper():
     assert f is f2
     assert c is c2
 
-    expected = \
-        """ Header
+    expected = """ Header
 
             >>> something # doctest: +SKIP
             >>> something + else
@@ -57,8 +64,7 @@ def test_skipper():
     c2 = doctest_skip_parser(c)
 
     assert f is f2
-    expected = \
-        """ Header
+    expected = """ Header
 
             >>> something
             >>> something + else
@@ -77,28 +83,33 @@ def test_skipper():
         doctest_skip_parser(c)
 
 
+@pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
 def test_run_in_parallel():
     state = []
 
     @run_in_parallel()
     def change_state1():
         state.append(None)
+
     change_state1()
     assert len(state) == 2
 
     @run_in_parallel(num_threads=1)
     def change_state2():
         state.append(None)
+
     change_state2()
     assert len(state) == 3
 
     @run_in_parallel(num_threads=3)
     def change_state3():
         state.append(None)
+
     change_state3()
     assert len(state) == 6
 
 
+@pytest.mark.skipif(is_wasm, reason="Cannot run parallel code in WASM")
 def test_parallel_warning():
     @run_in_parallel()
     def change_state_warns_fails():
@@ -117,7 +128,28 @@ def test_parallel_warning():
 def test_expected_warnings_noop():
     # This will ensure the line beolow it behaves like a no-op
     with expected_warnings(['Expected warnings test']):
-
         # This should behave as a no-op
         with expected_warnings(None):
             warn('Expected warnings test')
+
+
+class Test_assert_stacklevel:
+    def raise_warning(self, *args, **kwargs):
+        warnings.warn(*args, **kwargs)
+
+    def test_correct_stacklevel(self):
+        # Should pass if stacklevel is set correctly
+        with pytest.warns(UserWarning, match="passes") as record:
+            self.raise_warning("passes", UserWarning, stacklevel=2)
+        assert_stacklevel(record)
+
+    @pytest.mark.parametrize("level", [1, 3])
+    def test_wrong_stacklevel(self, level):
+        # AssertionError should be raised for wrong stacklevel
+        with pytest.warns(UserWarning, match="wrong") as record:
+            self.raise_warning("wrong", UserWarning, stacklevel=level)
+        # Check that message contains expected line on right side
+        line_number = inspect.currentframe().f_lineno - 2
+        regex = ".*" + re.escape(f"!= {__file__}:{line_number}")
+        with pytest.raises(AssertionError, match=regex):
+            assert_stacklevel(record, offset=-5)

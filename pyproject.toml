@@ -15,6 +15,7 @@ classifiers = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -25,14 +26,14 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.22',
-    'scipy>=1.8',
+    'numpy>=1.23',
+    'scipy>=1.9',
     'networkx>=2.8',
-    'pillow>=9.0.1',
-    'imageio>=2.27',
+    'pillow>=9.1',
+    'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
     'packaging>=21',
-    'lazy_loader>=0.3',
+    'lazy-loader>=0.4',
 ]
 
 [[project.maintainers]]
@@ -45,30 +46,30 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=0.29.32',
+    'Cython>=3.0.4',
     'pythran',
-    'numpy>=1.22',
+    'numpy>=2.0.0',
     # Developer UI
-    'spin==0.6',
+    'spin==0.12',
     'build',
 ]
 data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
+    'ipython',
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.2',
+    'sphinx>=7.3',
     'sphinx-gallery>=0.14',
-    'numpydoc>=1.6',
+    'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
-    'matplotlib>=3.5',
+    'matplotlib>=3.6',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
     'seaborn>=0.11',
@@ -81,15 +82,16 @@ docs = [
     'kaleido',
     'scikit-learn>=1.1',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.14.1',
+    'pydata-sphinx-theme>=0.15.4',
     'PyWavelets>=1.1.1',
+    'pytest-doctestplus',
 ]
 optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
-    'matplotlib>=3.5',
+    'dask[array]>=2021.1.0,!=2024.8.0',
+    'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
     'PyWavelets>=1.1.1',
@@ -97,13 +99,13 @@ optional = [
 ]
 test = [
     'asv',
-    'matplotlib>=3.5',
-    'numpydoc>=1.5',
+    'numpydoc>=1.7',
     'pooch>=1.6.0',
     'pytest>=7.0',
     'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
+    'pytest-doctestplus',
 ]
 
 [project.urls]
@@ -116,19 +118,14 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.14',
+    'meson-python>=0.15',
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=0.29.32',
+    'Cython>=3.0.4',
     'pythran',
     'lazy_loader>=0.3',
-    "numpy==1.22.4; python_version=='3.9' and platform_python_implementation != 'PyPy'",
-    "numpy==1.22.4; python_version=='3.10' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.22.4; python_version=='3.10' and platform_system != 'Windows' and platform_python_implementation != 'PyPy'",
-    "numpy==1.23.3; python_version=='3.11' and platform_python_implementation != 'PyPy'",
-    "numpy; python_version>='3.12'",
-    "numpy; python_version>='3.9' and platform_python_implementation=='PyPy'",
+    'numpy>=2.0.0rc1',
 ]
 
 [tool.spin]
@@ -136,45 +133,41 @@ package = 'skimage'
 
 [tool.spin.commands]
 Build = [
-    'spin.build',
-    'spin.test',
+    'spin.cmds.meson.build',
+    'spin.cmds.pip.install',
+    'spin.cmds.meson.test',
     '.spin/cmds.py:sdist',
 ]
 Environments = [
-    'spin.shell',
-    'spin.ipython',
-    'spin.python',
+    'spin.cmds.meson.run',
+    '.spin/cmds.py:ipython',
+    'spin.cmds.meson.python',
 ]
 Documentation = ['.spin/cmds.py:docs']
 Metrics = [
-    '.spin/cmds.py:asv',
-    '.spin/cmds.py:coverage',
+    '.spin/cmds.py:asv'
 ]
 
-[tool.ruff]
-line-length = 88
-target-version = 'py39'
+[tool.black]
+target-version = ['py310', 'py311', 'py312']
+skip-string-normalization = 1
+
+[tool.ruff.lint]
 select = [
     'F',
     'E',
     'W',
     'UP',
+    'NPY201',
 ]
 ignore = [
     'E501',
     'E741',
     'E712',
-]
-exclude = [
-    '.git',
-    '.ruff_cache',
-    'build',
-    'build-install',
-    'dist',
-    'doc/source/auto_examples',
+    'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = [
     'E402',
     'F401',
@@ -190,7 +183,7 @@ exclude = [
 "skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = 'numpy'
 
 [tool.pytest.ini_options]
@@ -198,11 +191,20 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
+testpaths = ["skimage", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
-filterwarnings = []
+filterwarnings = [
+    "error",
+    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning'
+]
 
 [tool.coverage.run]
 omit = ['*/tests/*']
+
+[tool.changelist]
+ignored_user_logins = [
+    "web-flow",
+    "pre-commit-ci[bot]"
+]

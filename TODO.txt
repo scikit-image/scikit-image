@@ -1,25 +1,30 @@
-Remember to list any API changes below in `doc/release/release_dev.rst`.
-
-Version 0.17
+Version 0.27
 ------------
+* Remove deprecated `skimage.io.imshow`,
+  `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
 
-* Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.22
+Version 0.26
 ------------
-* Deprecate ``return_error`` argument in
-  ``skimage.registration.phase_cross_correlation``. The function should always
-  return a tuple of (shift, error, phasediff).
-  Update ``test_phase_cross_correlation_deprecation``, too.
+* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
+  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
+  function ``_shift_footprint``.
 
-Version 0.23
+Version 0.25
 ------------
-* Remove deprecated `random_seed`, `random_state`, and `sample_seed`
-  arguments in favor of `rng`.
-* Remove deprecated function ``skimage.color.colorconv.get_xyz_coords()``.
+* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
+  tests related to that deprecation.
+* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
+  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
+  Make arguments after the deprecated `output` parameter, keyword only:
+  `gaussian(image, sigma, *, ...)`.
+* In `skimage/util/compare.py`, remove deprecated parameter `image2` as
+  well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
+  (and all `pytest.warns(FutureWarning)` context managers there).
+* Resolve temporary exclusion of Dask 2024.8.0 in optional dependencies, see
+  https://github.com/scikit-image/scikit-image/issues/7491 for details.
 
-Other (2022)
-------------
+Other
+-----
 * Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
   to (sparse) matricies (instead of arrays).
 * Remove warningsfilter for imageio and Pillow once
@@ -28,12 +33,25 @@ Other (2022)
 * NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+* Finalize ``skimage.future.manual_segmentation`` API,
+  see https://github.com/scikit-image/scikit-image/issues/2624
+* Remove ``except AttributeError`` block in
+  ``skimage/segmentation/random_walker_segmentation.py`` as well as the warning filter
+  in ``pyproject.toml``, once pyamg supports NumPy 2
+  (see https://github.com/pyamg/pyamg/issues/406).
+* Delete FREE_THREADED_BUILD block in tools/github/before_install.sh once free-threaded
+  wheels for scipy, numpy, cython and pywavelets, ... are available on PyPi
 
 Post numpy 2
 ------------
-
 - Remove try except blocks following comment starting
   `# TODO: when minimum numpy`
   in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
   `skimage/measure/_blur_effect.py`, and `skimage/util/tests/test_montage.py`
 - Remove `handle_np2` from `skimage/conftest.py`
+- Once matplotlib doesn't constrain to numpy<2.0 via contourpy (or 2.0 is
+  minimal required version): consider re-adding matplotlib to the test
+  dependencies. Also remove temporary assert for NumPy 2.0 in
+  `nightly_wheel_build.yml`.
+- Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
+- scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.

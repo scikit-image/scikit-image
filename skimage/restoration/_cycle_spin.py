@@ -5,6 +5,7 @@ from .._shared.utils import warn
 
 try:
     import dask
+
     dask_available = True
 except ImportError:
     dask_available = False
@@ -22,16 +23,16 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     """
     mc = int(multichannel)
     if np.isscalar(max_shifts):
-        max_shifts = (max_shifts, ) * (ndim - mc) + (0, ) * mc
+        max_shifts = (max_shifts,) * (ndim - mc) + (0,) * mc
     elif multichannel and len(max_shifts) == ndim - 1:
-        max_shifts = tuple(max_shifts) + (0, )
+        max_shifts = tuple(max_shifts) + (0,)
     elif len(max_shifts) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
     if np.isscalar(shift_steps):
-        shift_steps = (shift_steps, ) * (ndim - mc) + (1, ) * mc
+        shift_steps = (shift_steps,) * (ndim - mc) + (1,) * mc
     elif multichannel and len(shift_steps) == ndim - 1:
-        shift_steps = tuple(shift_steps) + (1, )
+        shift_steps = tuple(shift_steps) + (1,)
     elif len(shift_steps) != ndim:
         raise ValueError("max_shifts should have length ndim")
 
@@ -40,16 +41,23 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
     if multichannel and max_shifts[-1] != 0:
         raise ValueError(
-            "Multichannel cycle spinning should not have shifts along the "
-            "last axis.")
+            "Multichannel cycle spinning should not have shifts along the " "last axis."
+        )
 
-    return product(*[range(0, s + 1, t) for
-                     s, t in zip(max_shifts, shift_steps)])
+    return product(*[range(0, s + 1, t) for s, t in zip(max_shifts, shift_steps)])
 
 
 @utils.channel_as_last_axis()
-def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
-               func_kw=None, *, channel_axis=None):
+def cycle_spin(
+    x,
+    func,
+    max_shifts,
+    shift_steps=1,
+    num_workers=None,
+    func_kw=None,
+    *,
+    channel_axis=None,
+):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
 
     Parameters
@@ -123,8 +131,7 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
 
     x = np.asanyarray(x)
     multichannel = channel_axis is not None
-    all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts,
-                                  shift_steps)
+    all_shifts = _generate_shifts(x.ndim, multichannel, max_shifts, shift_steps)
     all_shifts = list(all_shifts)
     roll_axes = tuple(range(x.ndim))
 
@@ -136,10 +143,12 @@ def cycle_spin(x, func, max_shifts, shift_steps=1, num_workers=None,
 
     if not dask_available and (num_workers is None or num_workers > 1):
         num_workers = 1
-        warn('The optional dask dependency is not installed. '
-             'The number of workers is set to 1. To silence '
-             'this warning, install dask or explicitly set `num_workers=1` '
-             'when calling the `cycle_spin` function')
+        warn(
+            'The optional dask dependency is not installed. '
+            'The number of workers is set to 1. To silence '
+            'this warning, install dask or explicitly set `num_workers=1` '
+            'when calling the `cycle_spin` function'
+        )
     # compute a running average across the cycle shifts
     if num_workers == 1:
         # serial processing

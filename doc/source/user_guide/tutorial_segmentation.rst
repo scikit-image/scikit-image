@@ -70,7 +70,7 @@ function to remove objects smaller than a small threshold.
 
 ::
 
-    >>> label_objects, nb_labels = sp.ndimage..label(fill_coins)
+    >>> label_objects, nb_labels = sp.ndimage.label(fill_coins)
     >>> sizes = np.bincount(label_objects.ravel())
     >>> mask_sizes = sizes > 20
     >>> mask_sizes[0] = 0

@@ -3,11 +3,11 @@
 To improve performance, plugins are only loaded as needed. As a result, there
 can be multiple states for a given plugin:
 
-    available: Defined in an *ini file located in `skimage.io._plugins`.
-        See also `skimage.io.available_plugins`.
+    available: Defined in an *ini file located in ``skimage.io._plugins``.
+        See also :func:`skimage.io.available_plugins`.
     partial definition: Specified in an *ini file, but not defined in the
         corresponding plugin module. This will raise an error when loaded.
-    available but not on this system: Defined in `skimage.io._plugins`, but
+    available but not on this system: Defined in ``skimage.io._plugins``, but
         a dependent library (e.g. Qt, PIL) is not available on your system.
         This will raise an error when loaded.
     loaded: The real availability is determined when it's explicitly loaded,
@@ -15,6 +15,7 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+
 import os.path
 import warnings
 from configparser import ConfigParser
@@ -22,8 +23,15 @@ from glob import glob
 
 from .collection import imread_collection_wrapper
 
-__all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
-           'reset_plugins', 'find_available_plugins', 'available_plugins']
+__all__ = [
+    'use_plugin',
+    'call_plugin',
+    'plugin_info',
+    'plugin_order',
+    'reset_plugins',
+    'find_available_plugins',
+    'available_plugins',
+]
 
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
@@ -40,20 +48,21 @@ preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
     'all': ['imageio', 'pil', 'matplotlib'],
     'imshow': ['matplotlib'],
-    'imshow_collection': ['matplotlib']
+    'imshow_collection': ['matplotlib'],
 }
 
 
 def _clear_plugins():
-    """Clear the plugin state to the default, i.e., where no plugins are loaded
-    """
+    """Clear the plugin state to the default, i.e., where no plugins are loaded"""
     global plugin_store
-    plugin_store = {'imread': [],
-                    'imsave': [],
-                    'imshow': [],
-                    'imread_collection': [],
-                    'imshow_collection': [],
-                    '_app_show': []}
+    plugin_store = {
+        'imread': [],
+        'imsave': [],
+        'imshow': [],
+        'imread_collection': [],
+        'imshow_collection': [],
+        '_app_show': [],
+    }
 
 
 _clear_plugins()
@@ -61,8 +70,7 @@ _clear_plugins()
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection',
-                'imread']
+    io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection', 'imread']
     for p_type in io_types:
         _set_plugin(p_type, preferred_plugins['all'])
 
@@ -110,7 +118,9 @@ def _scan_plugins():
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
         if 'provides' not in meta_data:
-            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
+            warnings.warn(
+                f'file {filename} not recognized as a scikit-image io plugin, skipping.'
+            )
             continue
         plugin_meta_data[name] = meta_data
         provides = [s.strip() for s in meta_data['provides'].split(',')]
@@ -121,8 +131,9 @@ def _scan_plugins():
                 print(f"Plugin `{name}` wants to provide non-existent `{p}`. Ignoring.")
 
         # Add plugins that provide 'imread' as provider of 'imread_collection'.
-        need_to_add_collection = ('imread_collection' not in valid_provides and
-                                  'imread' in valid_provides)
+        need_to_add_collection = (
+            'imread_collection' not in valid_provides and 'imread' in valid_provides
+        )
         if need_to_add_collection:
             valid_provides.append('imread_collection')
 
@@ -158,8 +169,7 @@ def find_available_plugins(loaded=False):
     d = {}
     for plugin in plugin_provides:
         if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin]
-                         if not f.startswith('_')]
+            d[plugin] = [f for f in plugin_provides[plugin] if not f.startswith('_')]
 
     return d
 
@@ -186,10 +196,12 @@ def call_plugin(kind, *args, **kwargs):
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        msg = (f"No suitable plugin registered for {kind}.\n\n"
-               "You may load I/O plugins with the `skimage.io.use_plugin` "
-               "command.  A list of all available plugins are shown in the "
-               "`skimage.io` docstring.")
+        msg = (
+            f"No suitable plugin registered for {kind}.\n\n"
+            "You may load I/O plugins with the `skimage.io.use_plugin` "
+            "command.  A list of all available plugins are shown in the "
+            "`skimage.io` docstring."
+        )
         raise RuntimeError(msg)
 
     plugin = kwargs.pop('plugin', None)
@@ -212,14 +224,11 @@ def use_plugin(name, kind=None):
     Parameters
     ----------
     name : str
-        Name of plugin.
+        Name of plugin. See ``skimage.io.available_plugins`` for a list of available
+        plugins.
     kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
-
-    See Also
-    --------
-    available_plugins : List of available plugins
 
     Examples
     --------
@@ -228,8 +237,8 @@ def use_plugin(name, kind=None):
     >>> from skimage import io
     >>> io.use_plugin('matplotlib', 'imread')
 
-    To see a list of available plugins run ``io.available_plugins``. Note that
-    this lists plugins that are defined, but the full list may not be usable
+    To see a list of available plugins run ``skimage.io.available_plugins``. Note
+    that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 
     """
@@ -254,8 +263,9 @@ def use_plugin(name, kind=None):
 
         # Shuffle the plugins so that the requested plugin stands first
         # in line
-        funcs = [(n, f) for (n, f) in funcs if n == name] + \
-                [(n, f) for (n, f) in funcs if n != name]
+        funcs = [(n, f) for (n, f) in funcs if n == name] + [
+            (n, f) for (n, f) in funcs if n != name
+        ]
 
         plugin_store[k] = funcs
 
@@ -287,8 +297,7 @@ def _load(plugin):
         raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
-        plugin_module = __import__('skimage.io._plugins.' + modname,
-                                   fromlist=[modname])
+        plugin_module = __import__('skimage.io._plugins.' + modname, fromlist=[modname])
 
     provides = plugin_provides[plugin]
     for p in provides:

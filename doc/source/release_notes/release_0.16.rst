@@ -1,5 +1,5 @@
-scikit-image 0.16.2 release notes
-=================================
+scikit-image 0.16.2 (2019-10-22)
+================================
 
 We're happy to announce the release of scikit-image v0.16.2!
 
@@ -33,8 +33,8 @@ Bug fixes
 - Nelle Varoquaux
 
 
-scikit-image 0.16.1 release notes
-=================================
+scikit-image 0.16.1 (2019-10-11)
+================================
 
 We're happy to announce the release of scikit-image v0.16.1!
 
@@ -119,14 +119,14 @@ API Changes
   `skimage.morphology.remove_small_holes`. Use ``area_threshold`` instead.
 - Deprecated ``correct_mesh_orientation`` in `skimage.measure` has been
   removed.
-- `skimage.measure._regionprops` has been completely switched to using
+- ``skimage.measure._regionprops`` has been completely switched to using
   row-column coordinates. Old x-y interface is not longer available.
 - Default value of ``behavior`` parameter has been set to ``ndimage`` in
   `skimage.filters.median`.
 - Parameter ``flatten`` in `skimage.io.imread` has been removed in
   favor of ``as_gray``.
 - Parameters ``Hxx, Hxy, Hyy`` have been removed from
-  `skimage.feature.corner.hessian_matrix_eigvals` in favor of ``H_elems``.
+  ``skimage.feature.corner.hessian_matrix_eigvals`` in favor of ``H_elems``.
 - Default value of ``order`` parameter has been set to ``rc`` in
   `skimage.feature.hessian_matrix`.
 - ``skimage.util.img_as_*`` functions no longer raise precision and/or loss warnings.
