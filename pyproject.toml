@@ -30,7 +30,7 @@ dependencies = [
     'scipy>=1.9',
     'networkx>=2.8',
     'pillow>=9.1',
-    'imageio>=2.33',
+    'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
     'packaging>=21',
     'lazy-loader>=0.4',
@@ -55,7 +55,7 @@ build = [
     'pythran',
     'numpy>=2.0.0',
     # Developer UI
-    'spin==0.8',
+    'spin==0.12',
     'build',
 ]
 data = ['pooch>=1.6.0']
@@ -69,7 +69,6 @@ docs = [
     'sphinx-gallery>=0.14',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
     'matplotlib>=3.6',
     'dask[array]>=2022.9.2',
     'pandas>=1.5',
@@ -83,7 +82,7 @@ docs = [
     'kaleido',
     'scikit-learn>=1.1',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.15.2',
+    'pydata-sphinx-theme>=0.15.4',
     'PyWavelets>=1.1.1',
     'pytest-doctestplus',
 ]
@@ -91,7 +90,7 @@ optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
+    'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.6',
     'pooch>=1.6.0',
     'pyamg',
@@ -135,8 +134,9 @@ package = 'skimage'
 [tool.spin.commands]
 Build = [
     'spin.cmds.meson.build',
+    'spin.cmds.pip.install',
     'spin.cmds.meson.test',
-    'spin.cmds.build.sdist',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
     'spin.cmds.meson.run',
@@ -191,7 +191,7 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
+testpaths = ["skimage", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]

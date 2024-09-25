@@ -3,17 +3,24 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun! Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
+Developing open source software as part of a community is fun, and
+often quite educational!
 
-If you're looking for something to implement or to fix, you can browse the
-`open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
+We coordinate our work using GitHub, where you can find lists of `open
+issues
+<https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__
+and `new feature requests
+<https://github.com/scikit-image/scikit-image/labels/%3Apray%3A%20Feature%20request>`__.
 
-.. warning::
+To follow along with discussions, or to get in touch with the
+developer team, please join us on the `scikit-image developer forum
+<https://discuss.scientific-python.org/c/contributor/skimage>`_ and
+the `Zulip chat <https://skimage.zulipchat.com/>`_.
 
-   Given the uncertainty around licensing of AI-generated code, we
-   require that you **not** make use of these tools during the development
-   of any contributions to scikit-image.
+Please post questions to these public forums (rather than contacting
+developers directly); that way, everyone can benefit from the answers,
+and developers can answer according to their availability. Don't feel
+shy, the team is very friendly!
 
 .. contents::
    :local:
@@ -296,9 +303,9 @@ i.e., statement coverage should be at 100%.
 
 To measure test coverage run::
 
-  $ spin coverage
+  $ spin test --coverage
 
-This will print a report with one line for each file in `skimage`,
+This will run tests and print a report with one line for each file in `skimage`,
 detailing the test coverage::
 
   Name                                             Stmts   Exec  Cover   Missing
