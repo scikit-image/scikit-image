@@ -1,4 +1,4 @@
-"""Implementations restoration functions"""
+"""Implementation of various restoration functions."""
 
 import numpy as np
 from scipy.signal import convolve
@@ -8,62 +8,63 @@ from . import uft
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
-    r"""Wiener-Hunt deconvolution
+    r"""Restore image using Wiener-Hunt deconvolution.
 
-    Return the deconvolution with a Wiener-Hunt approach (i.e. with
-    Fourier diagonalisation).
+    Wiener-Hunt deconvolution is a restoration method which follows a Bayesian
+    approach [1]_.
 
     Parameters
     ----------
-    image : ndarray
-       Input degraded image (can be n-dimensional).
+    image : ([P, ]M, N) ndarray
+       Degraded image.
     psf : ndarray
-       Point Spread Function. This is assumed to be the impulse
-       response (input image space) if the data-type is real, or the
-       transfer function (Fourier space) if the data-type is
-       complex. There is no constraints on the shape of the impulse
+       Point spread function (PSF). Assumed to be the impulse
+       response (input image space) if the data type is real, or the
+       transfer function (Fourier or frequency space) if the data type is
+       complex. There is no constraint on the shape of the impulse
        response. The transfer function must be of shape
-       `(N1, N2, ..., ND)` if `is_real is True`,
-       `(N1, N2, ..., ND // 2 + 1)` otherwise (see `np.fft.rfftn`).
+       ``(N1, N2, ..., ND)`` if `is_real is True`,
+       ``(N1, N2, ..., ND // 2 + 1)`` otherwise (see :func:`numpy.fft.rfftn`).
     balance : float
-       The regularisation parameter value that tunes the balance
-       between the data adequacy that improve frequency restoration
-       and the prior adequacy that reduce frequency restoration (to
-       avoid noise artifacts).
+       Regularization parameter. Denoted by :math:`\lambda`: in the Notes
+       section below, its value lets you balance data adequacy (improving
+       frequency restoration) with respect to prior adequacy (reducing
+       frequency restoration and avoiding noise artifacts).
     reg : ndarray, optional
-       The regularisation operator. The Laplacian by default. It can
-       be an impulse response or a transfer function, as for the
-       psf. Shape constraint is the same as for the `psf` parameter.
+       Regularization operator. Laplacian by default. It can
+       be an impulse response or a transfer function, as for the PSF.
+       Shape constraints are the same as for `psf`.
     is_real : boolean, optional
-       True by default. Specify if ``psf`` and ``reg`` are provided
-       with hermitian hypothesis, that is only half of the frequency
-       plane is provided (due to the redundancy of Fourier transform
-       of real signal). It's apply only if ``psf`` and/or ``reg`` are
-       provided as transfer function.  For the hermitian property see
-       ``uft`` module or ``np.fft.rfftn``.
+       True by default. Specify if `psf` and `reg` are provided over just half
+       the frequency space (thanks to the redundancy of the Fourier transform
+       for real signals). Applies only if `psf` and/or `reg` are
+       provided as transfer functions.
+       See ``uft`` module and :func:`np.fft.rfftn`.
     clip : boolean, optional
-       True by default. If True, pixel values of the result above 1 or
-       under -1 are thresholded for skimage pipeline compatibility.
+       True by default. If True, pixel values of the deconvolved image (which
+       is the return value) above 1 (resp. below -1) are clipped to 1 (resp.
+       to -1). Be careful to set `clip=False` if you do not want this clipping
+       and/or if your data range is not [0, 1] or [-1,1].
 
     Returns
     -------
-    im_deconv : (M, N) ndarray
+    im_deconv : ([P, ]M, N) ndarray
        The deconvolved image.
 
     Examples
     --------
-    >>> from skimage import color, data, restoration
-    >>> img = color.rgb2gray(data.astronaut())
-    >>> from scipy.signal import convolve2d
+    >>> import skimage as ski
+    >>> import scipy as sp
+    >>> img = ski.color.rgb2gray(ski.data.astronaut())
     >>> psf = np.ones((5, 5)) / 25
-    >>> img = convolve2d(img, psf, 'same')
+    >>> img = sp.signal.convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
     >>> img += 0.1 * img.std() * rng.standard_normal(img.shape)
-    >>> deconvolved_img = restoration.wiener(img, psf, 0.1)
+    >>> deconvolved_img = ski.restoration.wiener(img, psf, 0.1)
 
     Notes
     -----
-    This function applies the Wiener filter to a noisy and degraded
+    This function applies the Wiener filter to a noisy (degraded)
     image by an impulse response (or PSF). If the data model is
 
     .. math:: y = Hx + n
@@ -101,9 +102,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
            Rodet, "Bayesian estimation of regularization and point
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
-
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
-
            https://hal.archives-ouvertes.fr/hal-00674508
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
