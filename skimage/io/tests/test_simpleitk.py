@@ -26,7 +26,7 @@ def test_prefered_plugin():
 def test_imread_as_gray():
     img = imread(testing.fetch('data/color.png'), as_gray=True)
     assert img.ndim == 2
-    assert img.dtype == np.float64
+    assert img.dtype == np.float32
     img = imread(testing.fetch('data/camera.png'), as_gray=True)
     # check that conversion does not happen for a gray image
     assert np.dtype(img.dtype).char in np.typecodes['AllInteger']

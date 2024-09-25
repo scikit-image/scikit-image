@@ -5,7 +5,7 @@ import numbers
 import scipy.stats
 import numpy as np
 
-from ..util.dtype import img_as_float
+from ..util.dtype import img_as_float, img_as_float32, img_as_float64
 from .._shared import utils
 from .._shared.utils import _supported_float_type, warn
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
@@ -360,7 +360,11 @@ def denoise_tv_bregman(
     .. [4] https://en.wikipedia.org/wiki/Total_variation_denoising
 
     """
-    image = np.atleast_3d(img_as_float(image))
+    float_dtype = _supported_float_type(image.dtype)
+    if not image.dtype.kind == 'f':
+        _as_float = img_as_float64 if float_dtype == np.float64 else img_as_float32
+        image = _as_float(image)
+    image = np.atleast_3d(image)
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -585,11 +589,12 @@ def denoise_tv_chambolle(
     """
 
     im_type = image.dtype
+    float_dtype = _supported_float_type(image.dtype)
     if not im_type.kind == 'f':
-        image = img_as_float(image)
+        _as_float = img_as_float64 if float_dtype == np.float64 else img_as_float32
+        image = _as_float(image)
 
     # enforce float16->float32 and float128->float64
-    float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
     if channel_axis is not None:
@@ -810,7 +815,9 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigm
     if image.dtype.kind != 'f':
         if rescale_sigma:
             range_pre = image.max() - image.min()
-        image = img_as_float(image)
+        float_dtype = _supported_float_type(image.dtype)
+        _as_float = img_as_float64 if float_dtype == np.float64 else img_as_float32
+        image = _as_float(image)
         if rescale_sigma:
             range_post = image.max() - image.min()
             # apply the same magnitude scaling to sigma

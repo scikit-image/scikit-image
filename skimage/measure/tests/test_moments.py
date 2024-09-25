@@ -238,12 +238,15 @@ def test_analytical_moments_calculation(dtype, order, ndim):
     else:
         x = rng.standard_normal(shape, dtype=dtype)
     # setting center=None will use the analytical expressions
+    float_dtype = _supported_float_type(x.dtype)
     m1 = moments_central(x, center=None, order=order)
+    assert m1.dtype == float_dtype
     # providing explicit centroid will bypass the analytical code path
     m2 = moments_central(x, center=centroid(x), order=order)
+    assert m2.dtype == float_dtype
     # ensure numeric and analytical central moments are close
     # TODO: np 2 failed w/ thresh = 1e-4
-    thresh = 1.5e-4 if x.dtype == np.float32 else 1e-9
+    thresh = 5e-4 if float_dtype == np.float32 else 1e-9
     compare_moments(m1, m2, thresh=thresh)
 
 

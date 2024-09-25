@@ -6,6 +6,7 @@ from skimage import color, data, draw, feature, img_as_float
 from skimage._shared import filters
 from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
+from skimage.util import img_as_float64
 
 
 def test_hog_output_size():
@@ -24,7 +25,9 @@ def test_hog_output_size():
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l1_norm(dtype):
-    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    # cast type after rgb2gray for consistency with previously saved result
+    img = img_as_float64(data.astronaut())
+    img = color.rgb2gray(img).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L1.npy'))
 
     output = feature.hog(
@@ -45,7 +48,9 @@ def test_hog_output_correctness_l1_norm(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_hog_output_correctness_l2hys_norm(dtype):
-    img = color.rgb2gray(data.astronaut()).astype(dtype=dtype, copy=False)
+    # cast type after rgb2gray for consistency with previously saved result
+    img = img_as_float64(data.astronaut())
+    img = color.rgb2gray(img).astype(dtype=dtype, copy=False)
     correct_output = np.load(fetch('data/astronaut_GRAY_hog_L2-Hys.npy'))
 
     output = feature.hog(

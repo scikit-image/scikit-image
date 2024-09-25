@@ -430,10 +430,11 @@ def test_resize_dtype():
     x_u8 = x.astype(np.uint8)
     x_b = x.astype(bool)
 
+    float_dtype = _supported_float_type(x_u8.dtype)
     assert resize(x, (10, 10), preserve_range=False).dtype == x.dtype
     assert resize(x, (10, 10), preserve_range=True).dtype == x.dtype
-    assert resize(x_u8, (10, 10), preserve_range=False).dtype == np.float64
-    assert resize(x_u8, (10, 10), preserve_range=True).dtype == np.float64
+    assert resize(x_u8, (10, 10), preserve_range=False).dtype == float_dtype
+    assert resize(x_u8, (10, 10), preserve_range=True).dtype == float_dtype
     assert resize(x_b, (10, 10), preserve_range=False).dtype == bool
     assert resize(x_b, (10, 10), preserve_range=True).dtype == bool
     assert resize(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
@@ -1032,12 +1033,18 @@ def test_resize_local_mean_dtype():
     x_u8 = x.astype(np.uint8)
     x_b = x.astype(bool)
 
+    float_dtype_u8 = _supported_float_type(x_u8.dtype)
+    float_dtype_b = _supported_float_type(x_b.dtype)
     assert resize_local_mean(x, (10, 10), preserve_range=False).dtype == x.dtype
     assert resize_local_mean(x, (10, 10), preserve_range=True).dtype == x.dtype
-    assert resize_local_mean(x_u8, (10, 10), preserve_range=False).dtype == np.float64
-    assert resize_local_mean(x_u8, (10, 10), preserve_range=True).dtype == np.float64
-    assert resize_local_mean(x_b, (10, 10), preserve_range=False).dtype == np.float64
-    assert resize_local_mean(x_b, (10, 10), preserve_range=True).dtype == np.float64
+    assert (
+        resize_local_mean(x_u8, (10, 10), preserve_range=False).dtype == float_dtype_u8
+    )
+    assert (
+        resize_local_mean(x_u8, (10, 10), preserve_range=True).dtype == float_dtype_u8
+    )
+    assert resize_local_mean(x_b, (10, 10), preserve_range=False).dtype == float_dtype_b
+    assert resize_local_mean(x_b, (10, 10), preserve_range=True).dtype == float_dtype_b
     assert resize_local_mean(x_f32, (10, 10), preserve_range=False).dtype == x_f32.dtype
     assert resize_local_mean(x_f32, (10, 10), preserve_range=True).dtype == x_f32.dtype
 

@@ -1,3 +1,4 @@
+import functools
 import math
 
 import re
@@ -6,8 +7,6 @@ import pytest
 import scipy.ndimage as ndi
 from numpy.testing import (
     assert_allclose,
-    assert_almost_equal,
-    assert_array_almost_equal,
     assert_array_equal,
     assert_equal,
 )
@@ -62,6 +61,8 @@ SAMPLE_3D[1:3, 1:3, 1:3] = 1
 SAMPLE_3D[3, 2, 2] = 1
 INTENSITY_SAMPLE_3D = SAMPLE_3D.copy()
 
+approx_eq = functools.partial(assert_allclose, rtol=1e-5, atol=1e-9)
+
 
 def get_moment_function(img, spacing=(1, 1)):
     rows, cols = img.shape
@@ -104,13 +105,15 @@ def test_all_props():
     for prop in PROPS:
         try:
             # access legacy name via dict
-            assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+            assert_allclose(region[prop], getattr(region, PROPS[prop]), rtol=1e-5)
 
             # skip property access tests for old CamelCase names
             # (we intentionally do not provide properties for these)
             if prop.lower() == prop:
                 # access legacy name via attribute
-                assert_almost_equal(getattr(region, prop), getattr(region, PROPS[prop]))
+                assert_allclose(
+                    getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5
+                )
 
         except TypeError:  # the `slice` property causes this
             pass
@@ -120,12 +123,14 @@ def test_all_props_3d():
     region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
     for prop in PROPS:
         try:
-            assert_almost_equal(region[prop], getattr(region, PROPS[prop]))
+            assert_allclose(region[prop], getattr(region, PROPS[prop]), rtol=1e-5)
 
             # skip property access tests for old CamelCase names
             # (we intentionally do not provide properties for these)
             if prop.lower() == prop:
-                assert_almost_equal(getattr(region, prop), getattr(region, PROPS[prop]))
+                assert_allclose(
+                    getattr(region, prop), getattr(region, PROPS[prop]), rtol=1e-5
+                )
 
         except (NotImplementedError, TypeError):
             pass
@@ -270,58 +275,58 @@ def test_area(sample, spacing):
 
 def test_bbox():
     bbox = regionprops(SAMPLE)[0].bbox
-    assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]))
+    assert_array_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]))
 
     bbox = regionprops(SAMPLE, spacing=(1, 2))[0].bbox
-    assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]))
+    assert_array_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]))
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[:, -1] = 0
     bbox = regionprops(SAMPLE_mod)[0].bbox
-    assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1] - 1))
+    assert_array_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1] - 1))
     bbox = regionprops(SAMPLE_mod, spacing=(3, 2))[0].bbox
-    assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1] - 1))
+    assert_array_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1] - 1))
 
     bbox = regionprops(SAMPLE_3D)[0].bbox
-    assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
+    assert_array_equal(bbox, (1, 1, 1, 4, 3, 3))
     bbox = regionprops(SAMPLE_3D, spacing=(0.5, 2, 7))[0].bbox
-    assert_array_almost_equal(bbox, (1, 1, 1, 4, 3, 3))
+    assert_array_equal(bbox, (1, 1, 1, 4, 3, 3))
 
 
 def test_area_bbox():
     padded = np.pad(SAMPLE, 5, mode='constant')
     bbox_area = regionprops(padded)[0].area_bbox
-    assert_array_almost_equal(bbox_area, SAMPLE.size)
+    assert_array_equal(bbox_area, SAMPLE.size)
 
 
 def test_area_bbox_spacing():
     spacing = (0.5, 3)
     padded = np.pad(SAMPLE, 5, mode='constant')
     bbox_area = regionprops(padded, spacing=spacing)[0].area_bbox
-    assert_array_almost_equal(bbox_area, SAMPLE.size * np.prod(spacing))
+    assert_allclose(bbox_area, SAMPLE.size * np.prod(spacing), rtol=1e-5)
 
 
 def test_moments_central():
     mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
-    assert_almost_equal(mu[2, 0], 436.00000000000045)
+    approx_eq(mu[2, 0], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
-    assert_almost_equal(mu[3, 0], -737.333333333333)
-    assert_almost_equal(mu[1, 1], -87.33333333333303)
-    assert_almost_equal(mu[2, 1], -127.5555555555593)
-    assert_almost_equal(mu[0, 2], 1259.7777777777774)
-    assert_almost_equal(mu[1, 2], 2000.296296296291)
-    assert_almost_equal(mu[0, 3], -760.0246913580195)
+    approx_eq(mu[3, 0], -737.333333333333)
+    approx_eq(mu[1, 1], -87.33333333333303)
+    approx_eq(mu[2, 1], -127.5555555555593)
+    approx_eq(mu[0, 2], 1259.7777777777774)
+    approx_eq(mu[1, 2], 2000.296296296291)
+    approx_eq(mu[0, 3], -760.0246913580195)
 
     # Verify central moment test functions
     centralMpq = get_central_moment_function(SAMPLE, spacing=(1, 1))
-    assert_almost_equal(centralMpq(2, 0), mu[2, 0])
-    assert_almost_equal(centralMpq(3, 0), mu[3, 0])
-    assert_almost_equal(centralMpq(1, 1), mu[1, 1])
-    assert_almost_equal(centralMpq(2, 1), mu[2, 1])
-    assert_almost_equal(centralMpq(0, 2), mu[0, 2])
-    assert_almost_equal(centralMpq(1, 2), mu[1, 2])
-    assert_almost_equal(centralMpq(0, 3), mu[0, 3])
+    approx_eq(centralMpq(2, 0), mu[2, 0])
+    approx_eq(centralMpq(3, 0), mu[3, 0])
+    approx_eq(centralMpq(1, 1), mu[1, 1])
+    approx_eq(centralMpq(2, 1), mu[2, 1])
+    approx_eq(centralMpq(0, 2), mu[0, 2])
+    approx_eq(centralMpq(1, 2), mu[1, 2])
+    approx_eq(centralMpq(0, 3), mu[0, 3])
 
 
 def test_moments_central_spacing():
@@ -330,26 +335,26 @@ def test_moments_central_spacing():
     centralMpq = get_central_moment_function(SAMPLE, spacing=spacing)
 
     mu = regionprops(SAMPLE, spacing=spacing)[0].moments_central
-    assert_almost_equal(mu[2, 0], centralMpq(2, 0))
-    assert_almost_equal(mu[3, 0], centralMpq(3, 0))
-    assert_almost_equal(mu[1, 1], centralMpq(1, 1))
-    assert_almost_equal(mu[2, 1], centralMpq(2, 1))
-    assert_almost_equal(mu[0, 2], centralMpq(0, 2))
-    assert_almost_equal(mu[1, 2], centralMpq(1, 2))
-    assert_almost_equal(mu[0, 3], centralMpq(0, 3))
+    approx_eq(mu[2, 0], centralMpq(2, 0))
+    approx_eq(mu[3, 0], centralMpq(3, 0))
+    approx_eq(mu[1, 1], centralMpq(1, 1))
+    approx_eq(mu[2, 1], centralMpq(2, 1))
+    approx_eq(mu[0, 2], centralMpq(0, 2))
+    approx_eq(mu[1, 2], centralMpq(1, 2))
+    approx_eq(mu[0, 3], centralMpq(0, 3))
 
 
 def test_centroid():
     centroid = regionprops(SAMPLE)[0].centroid
     # determined with MATLAB
-    assert_array_almost_equal(centroid, (5.66666666666666, 9.444444444444444))
+    assert_allclose(centroid, (5.66666666666666, 9.444444444444444), rtol=1e-5)
 
     # Verify test moment function with spacing=(1, 1)
     Mpq = get_moment_function(SAMPLE, spacing=(1, 1))
     cY = Mpq(1, 0) / Mpq(0, 0)
     cX = Mpq(0, 1) / Mpq(0, 0)
 
-    assert_array_almost_equal((cY, cX), centroid)
+    assert_allclose((cY, cX), centroid, rtol=1e-5)
 
 
 def test_centroid_spacing():
@@ -360,13 +365,13 @@ def test_centroid_spacing():
     cX = Mpq(0, 1) / Mpq(0, 0)
 
     centroid = regionprops(SAMPLE, spacing=spacing)[0].centroid
-    assert_array_almost_equal(centroid, (cY, cX))
+    assert_allclose(centroid, (cY, cX), rtol=1e-5)
 
 
 def test_centroid_3d():
     centroid = regionprops(SAMPLE_3D)[0].centroid
     # determined by mean along axis 1 of SAMPLE_3D.nonzero()
-    assert_array_almost_equal(centroid, (1.66666667, 1.55555556, 1.55555556))
+    assert_allclose(centroid, (1.66666667, 1.55555556, 1.55555556), rtol=1e-5)
 
     # Verify moment 3D test function
     Mpqr = get_moment3D_function(SAMPLE_3D, spacing=(1, 1, 1))
@@ -374,7 +379,7 @@ def test_centroid_3d():
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
     cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
 
-    assert_array_almost_equal((cZ, cY, cX), centroid)
+    assert_allclose((cZ, cY, cX), centroid, rtol=1e-5)
 
 
 @pytest.mark.parametrize(
@@ -390,7 +395,7 @@ def test_spacing_parameter_3d(spacing):
     cY = Mpqr(0, 1, 0) / Mpqr(0, 0, 0)
     cX = Mpqr(0, 0, 1) / Mpqr(0, 0, 0)
     centroid = regionprops(SAMPLE_3D, spacing=spacing)[0].centroid
-    assert_array_almost_equal(centroid, (cZ, cY, cX))
+    assert_allclose(centroid, (cZ, cY, cX), rtol=1e-5)
 
 
 @pytest.mark.parametrize(
@@ -431,7 +436,7 @@ def test_spacing_parameter_2d(spacing):
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[
         0
     ].centroid_weighted
-    assert_almost_equal(centroid, (cX, cY))
+    approx_eq(centroid, (cX, cY))
 
 
 @pytest.mark.parametrize(
@@ -538,29 +543,29 @@ def test_slice_spacing():
 
 def test_eccentricity():
     eps = regionprops(SAMPLE)[0].eccentricity
-    assert_almost_equal(eps, 0.814629313427)
+    approx_eq(eps, 0.814629313427)
 
     eps = regionprops(SAMPLE, spacing=(1.5, 1.5))[0].eccentricity
-    assert_almost_equal(eps, 0.814629313427)
+    approx_eq(eps, 0.814629313427)
 
     img = np.zeros((5, 5), dtype=int)
     img[2, 2] = 1
     eps = regionprops(img)[0].eccentricity
-    assert_almost_equal(eps, 0)
+    approx_eq(eps, 0)
 
     eps = regionprops(img, spacing=(3, 3))[0].eccentricity
-    assert_almost_equal(eps, 0)
+    approx_eq(eps, 0)
 
 
 def test_equivalent_diameter_area():
     diameter = regionprops(SAMPLE)[0].equivalent_diameter_area
     # determined with MATLAB
-    assert_almost_equal(diameter, 9.57461472963)
+    approx_eq(diameter, 9.57461472963)
 
     spacing = (1, 3)
     diameter = regionprops(SAMPLE, spacing=spacing)[0].equivalent_diameter_area
     equivalent_area = np.pi * (diameter / 2.0) ** 2
-    assert_almost_equal(equivalent_area, SAMPLE.sum() * np.prod(spacing))
+    approx_eq(equivalent_area, SAMPLE.sum() * np.prod(spacing))
 
 
 def test_euler_number():
@@ -598,9 +603,9 @@ def test_euler_number():
 
 def test_extent():
     extent = regionprops(SAMPLE)[0].extent
-    assert_almost_equal(extent, 0.4)
+    approx_eq(extent, 0.4)
     extent = regionprops(SAMPLE, spacing=(5, 0.2))[0].extent
-    assert_almost_equal(extent, 0.4)
+    approx_eq(extent, 0.4)
 
 
 def test_moments_hu():
@@ -617,7 +622,7 @@ def test_moments_hu():
         ]
     )
     # bug in OpenCV caused in Central Moments calculation?
-    assert_array_almost_equal(hu, ref)
+    assert_allclose(hu, ref, rtol=1e-4)
 
     with testing.raises(NotImplementedError):
         regionprops(SAMPLE, spacing=(2, 1))[0].moments_hu
@@ -675,10 +680,10 @@ def test_axis_major_length():
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     target_length = 16.7924234999
-    assert_almost_equal(length, target_length)
+    approx_eq(length, target_length)
 
     length = regionprops(SAMPLE, spacing=(2, 2))[0].axis_major_length
-    assert_almost_equal(length, 2 * target_length)
+    approx_eq(length, 2 * target_length)
 
     from skimage.draw import ellipse
 
@@ -690,27 +695,27 @@ def test_axis_major_length():
     length_wo_spacing = regionprops(img[::2], spacing=(1, 1))[0].axis_minor_length
     assert abs(length_wo_spacing - target_length) > 0.1
     length = regionprops(img[:, ::2], spacing=(1, 2))[0].axis_major_length
-    assert_almost_equal(length, target_length, decimal=0)
+    approx_eq(length, target_length, rtol=2e-2)
 
 
 def test_intensity_max():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_max
-    assert_almost_equal(intensity, 2)
+    approx_eq(intensity, 2)
 
 
 def test_intensity_mean():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_mean
-    assert_almost_equal(intensity, 1.02777777777777)
+    approx_eq(intensity, 1.02777777777777)
 
 
 def test_intensity_min():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_min
-    assert_almost_equal(intensity, 1)
+    approx_eq(intensity, 1)
 
 
 def test_intensity_std():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_std
-    assert_almost_equal(intensity, 0.16433554953054486)
+    approx_eq(intensity, 0.16433554953054486)
 
 
 def test_axis_minor_length():
@@ -718,10 +723,10 @@ def test_axis_minor_length():
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     target_length = 9.739302807263
-    assert_almost_equal(length, target_length)
+    approx_eq(length, target_length)
 
     length = regionprops(SAMPLE, spacing=(1.5, 1.5))[0].axis_minor_length
-    assert_almost_equal(length, 1.5 * target_length)
+    approx_eq(length, 1.5 * target_length)
 
     from skimage.draw import ellipse
 
@@ -733,35 +738,36 @@ def test_axis_minor_length():
     length_wo_spacing = regionprops(img[::2], spacing=(1, 1))[0].axis_minor_length
     assert abs(length_wo_spacing - target_length) > 0.1
     length = regionprops(img[::2], spacing=(2, 1))[0].axis_minor_length
-    assert_almost_equal(length, target_length, decimal=1)
+    approx_eq(length, target_length, rtol=2e-2)
 
 
 def test_moments():
     m = regionprops(SAMPLE)[0].moments
+
     # determined with OpenCV
-    assert_almost_equal(m[0, 0], 72.0)
-    assert_almost_equal(m[0, 1], 680.0)
-    assert_almost_equal(m[0, 2], 7682.0)
-    assert_almost_equal(m[0, 3], 95588.0)
-    assert_almost_equal(m[1, 0], 408.0)
-    assert_almost_equal(m[1, 1], 3766.0)
-    assert_almost_equal(m[1, 2], 43882.0)
-    assert_almost_equal(m[2, 0], 2748.0)
-    assert_almost_equal(m[2, 1], 24836.0)
-    assert_almost_equal(m[3, 0], 19776.0)
+    approx_eq(m[0, 0], 72.0)
+    approx_eq(m[0, 1], 680.0)
+    approx_eq(m[0, 2], 7682.0)
+    approx_eq(m[0, 3], 95588.0)
+    approx_eq(m[1, 0], 408.0)
+    approx_eq(m[1, 1], 3766.0)
+    approx_eq(m[1, 2], 43882.0)
+    approx_eq(m[2, 0], 2748.0)
+    approx_eq(m[2, 1], 24836.0)
+    approx_eq(m[3, 0], 19776.0)
 
     # Verify moment test function
     Mpq = get_moment_function(SAMPLE, spacing=(1, 1))
-    assert_almost_equal(Mpq(0, 0), m[0, 0])
-    assert_almost_equal(Mpq(0, 1), m[0, 1])
-    assert_almost_equal(Mpq(0, 2), m[0, 2])
-    assert_almost_equal(Mpq(0, 3), m[0, 3])
-    assert_almost_equal(Mpq(1, 0), m[1, 0])
-    assert_almost_equal(Mpq(1, 1), m[1, 1])
-    assert_almost_equal(Mpq(1, 2), m[1, 2])
-    assert_almost_equal(Mpq(2, 0), m[2, 0])
-    assert_almost_equal(Mpq(2, 1), m[2, 1])
-    assert_almost_equal(Mpq(3, 0), m[3, 0])
+    approx_eq(Mpq(0, 0), m[0, 0])
+    approx_eq(Mpq(0, 1), m[0, 1])
+    approx_eq(Mpq(0, 2), m[0, 2])
+    approx_eq(Mpq(0, 3), m[0, 3])
+    approx_eq(Mpq(1, 0), m[1, 0])
+    approx_eq(Mpq(1, 1), m[1, 1])
+    approx_eq(Mpq(1, 2), m[1, 2])
+    approx_eq(Mpq(2, 0), m[2, 0])
+    approx_eq(Mpq(2, 1), m[2, 1])
+    approx_eq(Mpq(3, 0), m[3, 0])
 
 
 def test_moments_spacing():
@@ -769,28 +775,28 @@ def test_moments_spacing():
     spacing = (2, 0.3)
     m = regionprops(SAMPLE, spacing=spacing)[0].moments
     Mpq = get_moment_function(SAMPLE, spacing=spacing)
-    assert_almost_equal(m[0, 0], Mpq(0, 0))
-    assert_almost_equal(m[0, 1], Mpq(0, 1))
-    assert_almost_equal(m[0, 2], Mpq(0, 2))
-    assert_almost_equal(m[0, 3], Mpq(0, 3))
-    assert_almost_equal(m[1, 0], Mpq(1, 0))
-    assert_almost_equal(m[1, 1], Mpq(1, 1))
-    assert_almost_equal(m[1, 2], Mpq(1, 2))
-    assert_almost_equal(m[2, 0], Mpq(2, 0))
-    assert_almost_equal(m[2, 1], Mpq(2, 1))
-    assert_almost_equal(m[3, 0], Mpq(3, 0))
+    approx_eq(m[0, 0], Mpq(0, 0))
+    approx_eq(m[0, 1], Mpq(0, 1))
+    approx_eq(m[0, 2], Mpq(0, 2))
+    approx_eq(m[0, 3], Mpq(0, 3))
+    approx_eq(m[1, 0], Mpq(1, 0))
+    approx_eq(m[1, 1], Mpq(1, 1))
+    approx_eq(m[1, 2], Mpq(1, 2))
+    approx_eq(m[2, 0], Mpq(2, 0))
+    approx_eq(m[2, 1], Mpq(2, 1))
+    approx_eq(m[3, 0], Mpq(3, 0))
 
 
 def test_moments_normalized():
     nu = regionprops(SAMPLE)[0].moments_normalized
 
     # determined with OpenCV
-    assert_almost_equal(nu[0, 2], 0.24301268861454037)
-    assert_almost_equal(nu[0, 3], -0.017278118992041805)
-    assert_almost_equal(nu[1, 1], -0.016846707818929982)
-    assert_almost_equal(nu[1, 2], 0.045473992910668816)
-    assert_almost_equal(nu[2, 0], 0.08410493827160502)
-    assert_almost_equal(nu[2, 1], -0.002899800614433943)
+    approx_eq(nu[0, 2], 0.24301268861454037)
+    approx_eq(nu[0, 3], -0.017278118992041805)
+    approx_eq(nu[1, 1], -0.016846707818929982)
+    approx_eq(nu[1, 2], 0.045473992910668816)
+    approx_eq(nu[2, 0], 0.08410493827160502)
+    approx_eq(nu[2, 1], -0.002899800614433943)
 
 
 def test_moments_normalized_spacing():
@@ -798,41 +804,41 @@ def test_moments_normalized_spacing():
     nu = regionprops(SAMPLE, spacing=spacing)[0].moments_normalized
 
     # Normalized moments are scale invariant.
-    assert_almost_equal(nu[0, 2], 0.24301268861454037)
-    assert_almost_equal(nu[0, 3], -0.017278118992041805)
-    assert_almost_equal(nu[1, 1], -0.016846707818929982)
-    assert_almost_equal(nu[1, 2], 0.045473992910668816)
-    assert_almost_equal(nu[2, 0], 0.08410493827160502)
-    assert_almost_equal(nu[2, 1], -0.002899800614433943)
+    approx_eq(nu[0, 2], 0.24301268861454037)
+    approx_eq(nu[0, 3], -0.017278118992041805)
+    approx_eq(nu[1, 1], -0.016846707818929982)
+    approx_eq(nu[1, 2], 0.045473992910668816)
+    approx_eq(nu[2, 0], 0.08410493827160502)
+    approx_eq(nu[2, 1], -0.002899800614433943)
 
 
 def test_orientation():
     orient = regionprops(SAMPLE)[0].orientation
     # determined with MATLAB
     target_orient = -1.4663278802756865
-    assert_almost_equal(orient, target_orient)
+    approx_eq(orient, target_orient)
 
     orient = regionprops(SAMPLE, spacing=(2, 2))[0].orientation
-    assert_almost_equal(orient, target_orient)
+    approx_eq(orient, target_orient)
 
     # test diagonal regions
     diag = np.eye(10, dtype=int)
     orient_diag = regionprops(diag)[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    approx_eq(orient_diag, math.pi / 4)
     orient_diag = regionprops(diag, spacing=(1, 2))[0].orientation
-    assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
+    approx_eq(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
     orient_diag = regionprops(np.flipud(diag))[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    approx_eq(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.flipud(diag), spacing=(1, 2))[0].orientation
-    assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
+    approx_eq(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
     orient_diag = regionprops(np.fliplr(diag))[0].orientation
-    assert_almost_equal(orient_diag, -math.pi / 4)
+    approx_eq(orient_diag, -math.pi / 4)
     orient_diag = regionprops(np.fliplr(diag), spacing=(1, 2))[0].orientation
-    assert_almost_equal(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
+    approx_eq(orient_diag, -np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
     orient_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
-    assert_almost_equal(orient_diag, math.pi / 4)
+    approx_eq(orient_diag, math.pi / 4)
     orient_diag = regionprops(np.fliplr(np.flipud(diag)), spacing=(1, 2))[0].orientation
-    assert_almost_equal(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
+    approx_eq(orient_diag, np.arccos(0.5 / np.sqrt(1 + 0.5**2)))
 
 
 def test_orientation_continuity():
@@ -846,9 +852,9 @@ def test_orientation_continuity():
     props = regionprops(image)
     orientations = [prop.orientation for prop in props]
     np.testing.assert_allclose(orientations, orientations[1], rtol=0, atol=0.08)
-    assert_almost_equal(orientations[0], -0.7144496360953664)
-    assert_almost_equal(orientations[1], -0.7853981633974483)
-    assert_almost_equal(orientations[2], -0.8563466906995303)
+    approx_eq(orientations[0], -0.7144496360953664)
+    approx_eq(orientations[1], -0.7853981633974483)
+    approx_eq(orientations[2], -0.8563466906995303)
 
     # Test spacing
     spacing = (3.2, 1.2)
@@ -856,33 +862,33 @@ def test_orientation_continuity():
         0
     ].moments_weighted_central
     centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    assert_almost_equal(wmu[0, 0], centralMpq(0, 0))
-    assert_almost_equal(wmu[0, 1], centralMpq(0, 1))
-    assert_almost_equal(wmu[0, 2], centralMpq(0, 2))
-    assert_almost_equal(wmu[0, 3], centralMpq(0, 3))
-    assert_almost_equal(wmu[1, 0], centralMpq(1, 0))
-    assert_almost_equal(wmu[1, 1], centralMpq(1, 1))
-    assert_almost_equal(wmu[1, 2], centralMpq(1, 2))
-    assert_almost_equal(wmu[1, 3], centralMpq(1, 3))
-    assert_almost_equal(wmu[2, 0], centralMpq(2, 0))
-    assert_almost_equal(wmu[2, 1], centralMpq(2, 1))
-    assert_almost_equal(wmu[2, 2], centralMpq(2, 2))
-    assert_almost_equal(wmu[2, 3], centralMpq(2, 3))
-    assert_almost_equal(wmu[3, 0], centralMpq(3, 0))
-    assert_almost_equal(wmu[3, 1], centralMpq(3, 1))
-    assert_almost_equal(wmu[3, 2], centralMpq(3, 2))
-    assert_almost_equal(wmu[3, 3], centralMpq(3, 3))
+    approx_eq(wmu[0, 0], centralMpq(0, 0))
+    approx_eq(wmu[0, 1], centralMpq(0, 1))
+    approx_eq(wmu[0, 2], centralMpq(0, 2))
+    approx_eq(wmu[0, 3], centralMpq(0, 3))
+    approx_eq(wmu[1, 0], centralMpq(1, 0))
+    approx_eq(wmu[1, 1], centralMpq(1, 1))
+    approx_eq(wmu[1, 2], centralMpq(1, 2))
+    approx_eq(wmu[1, 3], centralMpq(1, 3))
+    approx_eq(wmu[2, 0], centralMpq(2, 0))
+    approx_eq(wmu[2, 1], centralMpq(2, 1))
+    approx_eq(wmu[2, 2], centralMpq(2, 2))
+    approx_eq(wmu[2, 3], centralMpq(2, 3))
+    approx_eq(wmu[3, 0], centralMpq(3, 0))
+    approx_eq(wmu[3, 1], centralMpq(3, 1))
+    approx_eq(wmu[3, 2], centralMpq(3, 2))
+    approx_eq(wmu[3, 3], centralMpq(3, 3))
 
 
 def test_perimeter():
     per = regionprops(SAMPLE)[0].perimeter
     target_per = 55.2487373415
-    assert_almost_equal(per, target_per)
+    approx_eq(per, target_per)
     per = regionprops(SAMPLE, spacing=(2, 2))[0].perimeter
-    assert_almost_equal(per, 2 * target_per)
+    approx_eq(per, 2 * target_per)
 
     per = perimeter(SAMPLE.astype('double'), neighborhood=8)
-    assert_almost_equal(per, 46.8284271247)
+    approx_eq(per, 46.8284271247)
 
     with testing.raises(NotImplementedError):
         per = regionprops(SAMPLE, spacing=(2, 1))[0].perimeter
@@ -891,12 +897,12 @@ def test_perimeter():
 def test_perimeter_crofton():
     per = regionprops(SAMPLE)[0].perimeter_crofton
     target_per_crof = 61.0800637973
-    assert_almost_equal(per, target_per_crof)
+    approx_eq(per, target_per_crof)
     per = regionprops(SAMPLE, spacing=(2, 2))[0].perimeter_crofton
-    assert_almost_equal(per, 2 * target_per_crof)
+    approx_eq(per, 2 * target_per_crof)
 
     per = perimeter_crofton(SAMPLE.astype('double'), directions=2)
-    assert_almost_equal(per, 64.4026493985)
+    approx_eq(per, 64.4026493985)
 
     with testing.raises(NotImplementedError):
         per = regionprops(SAMPLE, spacing=(2, 1))[0].perimeter_crofton
@@ -905,10 +911,10 @@ def test_perimeter_crofton():
 def test_solidity():
     solidity = regionprops(SAMPLE)[0].solidity
     target_solidity = 0.576
-    assert_almost_equal(solidity, target_solidity)
+    approx_eq(solidity, target_solidity)
 
     solidity = regionprops(SAMPLE, spacing=(3, 9))[0].solidity
-    assert_almost_equal(solidity, target_solidity)
+    approx_eq(solidity, target_solidity)
 
 
 def test_multichannel_centroid_weighted_table():
@@ -917,11 +923,9 @@ def test_multichannel_centroid_weighted_table():
     rp0 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0])[0]
     rp1 = regionprops(SAMPLE, intensity_image=intensity_image[..., 0:1])[0]
     rpm = regionprops(SAMPLE, intensity_image=intensity_image)[0]
-    np.testing.assert_almost_equal(
-        rp0.centroid_weighted, np.squeeze(rp1.centroid_weighted)
-    )
-    np.testing.assert_almost_equal(
-        rp0.centroid_weighted, np.array(rpm.centroid_weighted)[:, 0]
+    assert_allclose(rp0.centroid_weighted, np.squeeze(rp1.centroid_weighted), rtol=1e-5)
+    assert_allclose(
+        rp0.centroid_weighted, np.array(rpm.centroid_weighted)[:, 0], rtol=1e-5
     )
     assert np.shape(rp0.centroid_weighted) == (SAMPLE.ndim,)
     assert np.shape(rp1.centroid_weighted) == (SAMPLE.ndim, 1)
@@ -947,26 +951,26 @@ def test_moments_weighted_central():
         ]
     )
 
-    assert_array_almost_equal(wmu, ref)
+    assert_allclose(wmu, ref, rtol=1e-5, atol=1e-9)
 
     # Verify test function
     centralMpq = get_central_moment_function(INTENSITY_SAMPLE, spacing=(1, 1))
-    assert_almost_equal(centralMpq(0, 0), ref[0, 0])
-    assert_almost_equal(centralMpq(0, 1), ref[0, 1])
-    assert_almost_equal(centralMpq(0, 2), ref[0, 2])
-    assert_almost_equal(centralMpq(0, 3), ref[0, 3])
-    assert_almost_equal(centralMpq(1, 0), ref[1, 0])
-    assert_almost_equal(centralMpq(1, 1), ref[1, 1])
-    assert_almost_equal(centralMpq(1, 2), ref[1, 2])
-    assert_almost_equal(centralMpq(1, 3), ref[1, 3])
-    assert_almost_equal(centralMpq(2, 0), ref[2, 0])
-    assert_almost_equal(centralMpq(2, 1), ref[2, 1])
-    assert_almost_equal(centralMpq(2, 2), ref[2, 2])
-    assert_almost_equal(centralMpq(2, 3), ref[2, 3])
-    assert_almost_equal(centralMpq(3, 0), ref[3, 0])
-    assert_almost_equal(centralMpq(3, 1), ref[3, 1])
-    assert_almost_equal(centralMpq(3, 2), ref[3, 2])
-    assert_almost_equal(centralMpq(3, 3), ref[3, 3])
+    approx_eq(centralMpq(0, 0), ref[0, 0])
+    approx_eq(centralMpq(0, 1), ref[0, 1])
+    approx_eq(centralMpq(0, 2), ref[0, 2])
+    approx_eq(centralMpq(0, 3), ref[0, 3])
+    approx_eq(centralMpq(1, 0), ref[1, 0])
+    approx_eq(centralMpq(1, 1), ref[1, 1])
+    approx_eq(centralMpq(1, 2), ref[1, 2])
+    approx_eq(centralMpq(1, 3), ref[1, 3])
+    approx_eq(centralMpq(2, 0), ref[2, 0])
+    approx_eq(centralMpq(2, 1), ref[2, 1])
+    approx_eq(centralMpq(2, 2), ref[2, 2])
+    approx_eq(centralMpq(2, 3), ref[2, 3])
+    approx_eq(centralMpq(3, 0), ref[3, 0])
+    approx_eq(centralMpq(3, 1), ref[3, 1])
+    approx_eq(centralMpq(3, 2), ref[3, 2])
+    approx_eq(centralMpq(3, 3), ref[3, 3])
 
 
 def test_centroid_weighted():
@@ -985,13 +989,13 @@ def test_centroid_weighted():
         0
     ].centroid_weighted
     target_centroid = (5.540540540540, 9.445945945945)
-    assert_array_almost_equal(centroid, target_centroid)
+    assert_allclose(centroid, target_centroid, rtol=1e-5)
 
     # Verify test function
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=(1, 1))
     cY = Mpq(0, 1) / Mpq(0, 0)
     cX = Mpq(1, 0) / Mpq(0, 0)
-    assert_almost_equal((cX, cY), centroid)
+    assert_allclose((cX, cY), centroid, rtol=1e-5)
 
     # Test spacing
     spacing = (2, 2)
@@ -1001,12 +1005,12 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[
         0
     ].centroid_weighted
-    assert_almost_equal(centroid, (cX, cY))
-    assert_almost_equal(centroid, 2 * np.array(target_centroid))
+    assert_allclose(centroid, (cX, cY), rtol=1e-5)
+    assert_allclose(centroid, 2 * np.array(target_centroid), rtol=1e-5)
     centroid = regionprops(
         sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing
     )[0].centroid_weighted
-    assert_almost_equal(centroid, 2 * np.array(target_centroid_wspacing))
+    assert_allclose(centroid, 2 * np.array(target_centroid_wspacing), rtol=1e-5)
 
     spacing = (1.3, 0.7)
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
@@ -1015,11 +1019,11 @@ def test_centroid_weighted():
     centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE, spacing=spacing)[
         0
     ].centroid_weighted
-    assert_almost_equal(centroid, (cX, cY))
+    assert_allclose(centroid, (cX, cY), rtol=1e-5)
     centroid = regionprops(
         sample_for_spacing, intensity_image=sample_for_spacing, spacing=spacing
     )[0].centroid_weighted
-    assert_almost_equal(centroid, spacing * np.array(target_centroid_wspacing))
+    assert_allclose(centroid, spacing * np.array(target_centroid_wspacing), rtol=1e-5)
 
 
 def test_moments_weighted_hu():
@@ -1035,7 +1039,7 @@ def test_moments_weighted_hu():
             -6.7936409056e-06,
         ]
     )
-    assert_array_almost_equal(whu, ref)
+    assert_allclose(whu, ref, rtol=1e-5)
 
     with testing.raises(NotImplementedError):
         regionprops(SAMPLE, spacing=(2, 1))[0].moments_weighted_hu
@@ -1051,26 +1055,26 @@ def test_moments_weighted():
             [1.9778000e04, 1.7500100e05, 2.0810510e06, 2.8078871e07],
         ]
     )
-    assert_array_almost_equal(wm, ref)
+    assert_allclose(wm, ref, rtol=1e-5)
 
     # Verify test function
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=(1, 1))
-    assert_almost_equal(Mpq(0, 0), ref[0, 0])
-    assert_almost_equal(Mpq(0, 1), ref[0, 1])
-    assert_almost_equal(Mpq(0, 2), ref[0, 2])
-    assert_almost_equal(Mpq(0, 3), ref[0, 3])
-    assert_almost_equal(Mpq(1, 0), ref[1, 0])
-    assert_almost_equal(Mpq(1, 1), ref[1, 1])
-    assert_almost_equal(Mpq(1, 2), ref[1, 2])
-    assert_almost_equal(Mpq(1, 3), ref[1, 3])
-    assert_almost_equal(Mpq(2, 0), ref[2, 0])
-    assert_almost_equal(Mpq(2, 1), ref[2, 1])
-    assert_almost_equal(Mpq(2, 2), ref[2, 2])
-    assert_almost_equal(Mpq(2, 3), ref[2, 3])
-    assert_almost_equal(Mpq(3, 0), ref[3, 0])
-    assert_almost_equal(Mpq(3, 1), ref[3, 1])
-    assert_almost_equal(Mpq(3, 2), ref[3, 2])
-    assert_almost_equal(Mpq(3, 3), ref[3, 3])
+    approx_eq(Mpq(0, 0), ref[0, 0])
+    approx_eq(Mpq(0, 1), ref[0, 1])
+    approx_eq(Mpq(0, 2), ref[0, 2])
+    approx_eq(Mpq(0, 3), ref[0, 3])
+    approx_eq(Mpq(1, 0), ref[1, 0])
+    approx_eq(Mpq(1, 1), ref[1, 1])
+    approx_eq(Mpq(1, 2), ref[1, 2])
+    approx_eq(Mpq(1, 3), ref[1, 3])
+    approx_eq(Mpq(2, 0), ref[2, 0])
+    approx_eq(Mpq(2, 1), ref[2, 1])
+    approx_eq(Mpq(2, 2), ref[2, 2])
+    approx_eq(Mpq(2, 3), ref[2, 3])
+    approx_eq(Mpq(3, 0), ref[3, 0])
+    approx_eq(Mpq(3, 1), ref[3, 1])
+    approx_eq(Mpq(3, 2), ref[3, 2])
+    approx_eq(Mpq(3, 3), ref[3, 3])
 
 
 def test_moments_weighted_spacing():
@@ -1083,7 +1087,7 @@ def test_moments_weighted_spacing():
             [1.9778000e04, 1.7500100e05, 2.0810510e06, 2.8078871e07],
         ]
     )
-    assert_array_almost_equal(wm, ref)
+    assert_allclose(wm, ref, rtol=1e-5)
 
     # Test spacing
     spacing = (3.2, 1.2)
@@ -1091,22 +1095,22 @@ def test_moments_weighted_spacing():
         0
     ].moments_weighted
     Mpq = get_moment_function(INTENSITY_SAMPLE, spacing=spacing)
-    assert_almost_equal(wmu[0, 0], Mpq(0, 0))
-    assert_almost_equal(wmu[0, 1], Mpq(0, 1))
-    assert_almost_equal(wmu[0, 2], Mpq(0, 2))
-    assert_almost_equal(wmu[0, 3], Mpq(0, 3))
-    assert_almost_equal(wmu[1, 0], Mpq(1, 0))
-    assert_almost_equal(wmu[1, 1], Mpq(1, 1))
-    assert_almost_equal(wmu[1, 2], Mpq(1, 2))
-    assert_almost_equal(wmu[1, 3], Mpq(1, 3))
-    assert_almost_equal(wmu[2, 0], Mpq(2, 0))
-    assert_almost_equal(wmu[2, 1], Mpq(2, 1))
-    assert_almost_equal(wmu[2, 2], Mpq(2, 2))
-    assert_almost_equal(wmu[2, 3], Mpq(2, 3))
-    assert_almost_equal(wmu[3, 0], Mpq(3, 0))
-    assert_almost_equal(wmu[3, 1], Mpq(3, 1))
-    assert_almost_equal(wmu[3, 2], Mpq(3, 2))
-    assert_almost_equal(wmu[3, 3], Mpq(3, 3), decimal=6)
+    approx_eq(wmu[0, 0], Mpq(0, 0))
+    approx_eq(wmu[0, 1], Mpq(0, 1))
+    approx_eq(wmu[0, 2], Mpq(0, 2))
+    approx_eq(wmu[0, 3], Mpq(0, 3))
+    approx_eq(wmu[1, 0], Mpq(1, 0))
+    approx_eq(wmu[1, 1], Mpq(1, 1))
+    approx_eq(wmu[1, 2], Mpq(1, 2))
+    approx_eq(wmu[1, 3], Mpq(1, 3))
+    approx_eq(wmu[2, 0], Mpq(2, 0))
+    approx_eq(wmu[2, 1], Mpq(2, 1))
+    approx_eq(wmu[2, 2], Mpq(2, 2))
+    approx_eq(wmu[2, 3], Mpq(2, 3))
+    approx_eq(wmu[3, 0], Mpq(3, 0))
+    approx_eq(wmu[3, 1], Mpq(3, 1))
+    approx_eq(wmu[3, 2], Mpq(3, 2))
+    approx_eq(wmu[3, 3], Mpq(3, 3))
 
 
 def test_moments_weighted_normalized():
@@ -1121,7 +1125,7 @@ def test_moments_weighted_normalized():
             [-0.0161217406, -0.0031376984, 0.0043903193, -0.0011057191],
         ]
     )
-    assert_array_almost_equal(wnu, ref)
+    assert_allclose(wnu, ref, rtol=1e-5)
 
 
 def test_moments_weighted_normalized_spacing():
@@ -1140,19 +1144,19 @@ def test_moments_weighted_normalized_spacing():
     )
 
     # Normalized moments are scale invariant
-    assert_almost_equal(wnu[0, 2], 0.2301467830)
-    assert_almost_equal(wnu[0, 3], -0.0162529732)
-    assert_almost_equal(wnu[1, 1], -0.0160405109)
-    assert_almost_equal(wnu[1, 2], 0.0457932622)
-    assert_almost_equal(wnu[1, 3], -0.0104598869)
-    assert_almost_equal(wnu[2, 0], 0.0873590903)
-    assert_almost_equal(wnu[2, 1], -0.0031421072)
-    assert_almost_equal(wnu[2, 2], 0.0165315478)
-    assert_almost_equal(wnu[2, 3], -0.0028544152)
-    assert_almost_equal(wnu[3, 0], -0.0161217406)
-    assert_almost_equal(wnu[3, 1], -0.0031376984)
-    assert_almost_equal(wnu[3, 2], 0.0043903193)
-    assert_almost_equal(wnu[3, 3], -0.0011057191)
+    approx_eq(wnu[0, 2], 0.2301467830)
+    approx_eq(wnu[0, 3], -0.0162529732)
+    approx_eq(wnu[1, 1], -0.0160405109)
+    approx_eq(wnu[1, 2], 0.0457932622)
+    approx_eq(wnu[1, 3], -0.0104598869)
+    approx_eq(wnu[2, 0], 0.0873590903)
+    approx_eq(wnu[2, 1], -0.0031421072)
+    approx_eq(wnu[2, 2], 0.0165315478)
+    approx_eq(wnu[2, 3], -0.0028544152)
+    approx_eq(wnu[3, 0], -0.0161217406)
+    approx_eq(wnu[3, 1], -0.0031376984)
+    approx_eq(wnu[3, 2], 0.0043903193)
+    approx_eq(wnu[3, 3], -0.0011057191)
 
 
 def test_offset_features():
@@ -1160,7 +1164,7 @@ def test_offset_features():
     offset = np.array([1024, 2048])
     props_offset = regionprops(SAMPLE, offset=offset)[0]
 
-    assert_allclose(props.centroid, props_offset.centroid - offset)
+    assert_allclose(props.centroid, props_offset.centroid - offset, rtol=1e-5)
 
 
 def test_label_sequence():
@@ -1469,7 +1473,7 @@ def test_extra_properties_table():
         properties=('label',),
         extra_properties=(intensity_median, pixelcount, bbox_list),
     )
-    assert_array_almost_equal(out['intensity_median'], np.array([2.0, 4.0]))
+    assert_allclose(out['intensity_median'], np.array([2.0, 4.0]), rtol=1e-5)
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
 
     assert out['bbox_list'].dtype == np.object_
@@ -1532,5 +1536,5 @@ def test_3d_ellipsoid_axis_lengths():
         assert abs(ax_len - ax_len_expected) < 0.01 * ax_len_expected
 
     # verify that the axis length regionprops also agree
-    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-7
-    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-7
+    assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-5
+    assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-5

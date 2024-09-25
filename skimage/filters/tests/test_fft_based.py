@@ -165,7 +165,7 @@ def test_butterworth_4D_channel(chan, dtype):
 
 
 def test_butterworth_correctness_bw():
-    small = coins()[180:190, 260:270]
+    small = coins()[180:190, 260:270].astype(float)
     filtered = butterworth(small, cutoff_frequency_ratio=0.2)
     # fmt: off
     correct = np.array(
@@ -187,7 +187,7 @@ def test_butterworth_correctness_bw():
 
 
 def test_butterworth_correctness_rgb():
-    small = astronaut()[135:145, 205:215]
+    small = astronaut()[135:145, 205:215].astype(float)
     filtered = butterworth(
         small, cutoff_frequency_ratio=0.3, high_pass=True, channel_axis=-1
     )

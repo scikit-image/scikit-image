@@ -15,12 +15,12 @@ repos:
       - id: check-json
       - id: check-added-large-files
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # frozen:  v3.1.0
-    hooks:
-      - id: prettier
-        files: \.(md|rst|yml|yaml)
-        args: [--prose-wrap=preserve]
+  # - repo: https://github.com/pre-commit/mirrors-prettier
+  #   rev: "ffb6a759a979008c0e6dff86e39f4745a2d9eac4" # frozen:  v3.1.0
+  #   hooks:
+  #     - id: prettier
+  #       files: \.(md|rst|yml|yaml)
+  #       args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 0ccbb5b7942d83fbcf7cb5e0fd99633efd2351d7 # frozen: v0.3.5

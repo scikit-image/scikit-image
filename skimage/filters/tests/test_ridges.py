@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_less, assert_equal
 
-from skimage import img_as_float
+from skimage import img_as_float, img_as_float64
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import camera, retina
@@ -204,31 +204,54 @@ def test_3d_linearity():
     )
 
 
-def test_2d_cropped_camera_image():
+@pytest.mark.parametrize('dtype', ['float64', 'uint8'])
+def test_2d_cropped_camera_image(dtype):
     a_black = crop(camera(), ((200, 212), (100, 312)))
+    assert a_black.dtype == np.uint8
+    if dtype == 'float64':
+        a_black = img_as_float64(a_black)
+        rtol = 1e-7
+        atol = 0
+    else:
+        rtol = 1e-4
+        atol = 1e-4
     a_white = invert(a_black)
 
     np.zeros((100, 100))
     ones = np.ones((100, 100))
 
     assert_allclose(
-        meijering(a_black, black_ridges=True), meijering(a_white, black_ridges=False)
+        meijering(a_black, black_ridges=True),
+        meijering(a_white, black_ridges=False),
+        atol=atol,
+        rtol=rtol,
     )
 
     assert_allclose(
         sato(a_black, black_ridges=True, mode='reflect'),
         sato(a_white, black_ridges=False, mode='reflect'),
+        atol=atol,
+        rtol=rtol,
     )
 
     assert_allclose(
-        frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
+        frangi(a_black, black_ridges=True),
+        frangi(a_white, black_ridges=False),
+        atol=atol,
+        rtol=rtol,
     )
 
     assert_allclose(
-        hessian(a_black, black_ridges=True, mode='reflect'), ones, atol=1 - 1e-7
+        hessian(a_black, black_ridges=True, mode='reflect'),
+        ones,
+        rtol=rtol,
+        atol=1 - 1e-7,
     )
     assert_allclose(
-        hessian(a_white, black_ridges=False, mode='reflect'), ones, atol=1 - 1e-7
+        hessian(a_white, black_ridges=False, mode='reflect'),
+        ones,
+        rtol=rtol,
+        atol=1 - 1e-7,
     )
 
 
@@ -239,8 +262,17 @@ def test_ridge_output_dtype(func, dtype):
     assert func(img).dtype == _supported_float_type(img.dtype)
 
 
-def test_3d_cropped_camera_image():
+@pytest.mark.parametrize('dtype', ['float64', 'uint8'])
+def test_3d_cropped_camera_image(dtype):
     a_black = crop(camera(), ((200, 212), (100, 312)))
+    assert a_black.dtype == np.uint8
+    if dtype == 'float64':
+        a_black = img_as_float64(a_black)
+        rtol = 1e-7
+        atol = 0
+    else:
+        rtol = 1e-4
+        atol = 1e-4
     a_black = np.stack([a_black] * 5, axis=-1)
     a_white = invert(a_black)
 
@@ -248,23 +280,38 @@ def test_3d_cropped_camera_image():
     ones = np.ones(a_black.shape)
 
     assert_allclose(
-        meijering(a_black, black_ridges=True), meijering(a_white, black_ridges=False)
+        meijering(a_black, black_ridges=True),
+        meijering(a_white, black_ridges=False),
+        rtol=rtol,
+        atol=atol,
     )
 
     assert_allclose(
         sato(a_black, black_ridges=True, mode='reflect'),
         sato(a_white, black_ridges=False, mode='reflect'),
+        rtol=rtol,
+        atol=atol,
     )
 
     assert_allclose(
-        frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
+        frangi(a_black, black_ridges=True),
+        frangi(a_white, black_ridges=False),
+        rtol=rtol,
+        atol=atol,
     )
 
+    # TODO: seems like a bug to have atol so large on these?
     assert_allclose(
-        hessian(a_black, black_ridges=True, mode='reflect'), ones, atol=1 - 1e-7
+        hessian(a_black, black_ridges=True, mode='reflect'),
+        ones,
+        rtol=rtol,
+        atol=1 - 1e-7,
     )
     assert_allclose(
-        hessian(a_white, black_ridges=False, mode='reflect'), ones, atol=1 - 1e-7
+        hessian(a_white, black_ridges=False, mode='reflect'),
+        ones,
+        rtol=rtol,
+        atol=1 - 1e-7,
     )
 
 

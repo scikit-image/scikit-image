@@ -252,7 +252,9 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
         #       The centroid will be obtained from the raw moments.
         moments_raw = moments(image, order=order, spacing=spacing)
         return moments_raw_to_central(moments_raw)
-    float_dtype = _supported_float_type(image.dtype)
+    final_float_dtype = _supported_float_type(image.dtype)
+    # use double precision internally to preserve accuracy
+    float_dtype = np.float64
     if spacing is None:
         spacing = np.ones(image.ndim, dtype=float_dtype)
     calc = image.astype(float_dtype, copy=False)
@@ -264,7 +266,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
         calc = np.rollaxis(calc, dim, image.ndim)
         calc = np.dot(calc, powers_of_delta)
         calc = np.rollaxis(calc, -1, dim)
-    return calc
+    return np.asarray(calc, dtype=final_float_dtype)
 
 
 def moments_normalized(mu, order=3, spacing=None):

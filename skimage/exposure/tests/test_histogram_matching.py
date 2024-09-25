@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
+from numpy.testing import assert_allclose, assert_almost_equal
 
 from skimage import data
 from skimage import exposure
@@ -20,7 +20,7 @@ def test_match_array_values(array, template, expected_array):
     matched = histogram_matching._match_cumulative_cdf(array, template)
 
     # then
-    assert_array_almost_equal(matched, expected_array)
+    assert_allclose(matched, expected_array)
 
 
 class TestMatchHistogram:
@@ -120,4 +120,4 @@ class TestMatchHistogram:
         reference_f64 = self.template_rgb.astype(np.float64, copy=False)
         matched_u8 = exposure.match_histograms(image_u8, reference_u8)
         matched_f64 = exposure.match_histograms(image_f64, reference_f64)
-        assert_array_almost_equal(matched_u8.astype(np.float64), matched_f64)
+        assert_allclose(matched_u8.astype(np.float64), matched_f64, rtol=1e-5)

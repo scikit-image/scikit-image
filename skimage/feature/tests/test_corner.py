@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
+from numpy.testing import assert_allclose, assert_array_almost_equal, assert_array_equal
 
 from skimage import data, draw, img_as_float
 from skimage._shared._warnings import expected_warnings
@@ -88,7 +88,7 @@ def test_structure_tensor_3d(dtype):
     cube[2, 2, 2] = 1
     A_elems = structure_tensor(cube, sigma=0.1)
     assert all(a.dtype == _supported_float_type(dtype) for a in A_elems)
-    assert_equal(len(A_elems), 6)
+    assert len(A_elems) == 6
     assert_array_equal(
         A_elems[0][:, 1, :],
         np.array(
@@ -171,7 +171,7 @@ def test_hessian_matrix(dtype):
 
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (Hrr, Hrc, Hcc))
-    assert_almost_equal(
+    assert_array_almost_equal(
         Hrr,
         np.array(
             [
@@ -184,7 +184,7 @@ def test_hessian_matrix(dtype):
         ),
     )
 
-    assert_almost_equal(
+    assert_array_almost_equal(
         Hrc,
         np.array(
             [
@@ -197,7 +197,7 @@ def test_hessian_matrix(dtype):
         ),
     )
 
-    assert_almost_equal(
+    assert_array_almost_equal(
         Hcc,
         np.array(
             [
@@ -241,7 +241,7 @@ def test_hessian_matrix_3d():
     Hs = hessian_matrix(cube, sigma=0.1, order='rc', use_gaussian_derivatives=False)
     assert len(Hs) == 6, f"incorrect number of Hessian images ({len(Hs)}) for 3D"
     # This test didn't catch the fix in gh-6624 (passes with and without) ...
-    assert_almost_equal(
+    assert_array_almost_equal(
         Hs[2][:, 2, :],
         np.array(
             [
@@ -254,7 +254,7 @@ def test_hessian_matrix_3d():
         ),
     )
     # ... so we add another test that fails for the not-fixed hessian_matrix
-    assert_almost_equal(
+    assert_array_almost_equal(
         Hs[0][:, 2, :],
         np.array(
             [
@@ -343,7 +343,7 @@ def test_hessian_matrix_eigvals(dtype):
     l1, l2 = hessian_matrix_eigvals(H)
     out_dtype = _supported_float_type(dtype)
     assert all(a.dtype == out_dtype for a in (l1, l2))
-    assert_almost_equal(
+    assert_array_almost_equal(
         l1,
         np.array(
             [
@@ -355,7 +355,7 @@ def test_hessian_matrix_eigvals(dtype):
             ]
         ),
     )
-    assert_almost_equal(
+    assert_array_almost_equal(
         l2,
         np.array(
             [
@@ -400,7 +400,7 @@ def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    assert_almost_equal(det, 0, decimal=3)
+    assert_array_almost_equal(det, 0, decimal=3)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
@@ -432,7 +432,7 @@ def test_shape_index():
     square[2, 2] = 4
     with expected_warnings([r'divide by zero|\A\Z', r'invalid value|\A\Z']):
         s = shape_index(square, sigma=0.1)
-    assert_almost_equal(
+    assert_array_almost_equal(
         s,
         np.array(
             [
@@ -626,7 +626,7 @@ def test_subpix_border():
         ]
     )
 
-    assert_almost_equal(subpix, ref)
+    assert_array_almost_equal(subpix, ref)
 
 
 def test_num_peaks():
@@ -803,7 +803,7 @@ def test_corner_orientations_astronaut():
     )
 
     actual = corner_orientations(img, corners, octagon(3, 2))
-    assert_almost_equal(actual, expected)
+    assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
