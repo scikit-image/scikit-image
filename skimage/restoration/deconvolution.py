@@ -363,7 +363,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
 
     Parameters
     ----------
-    image : ndarray
+    image : ([P, ]M, N) ndarray
        Input degraded image (can be n-dimensional). Input image
        should be normalized to the range [0, 1] to allow for proper
        floating point conversion prior to deconvolution.
