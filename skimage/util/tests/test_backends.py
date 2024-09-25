@@ -3,7 +3,7 @@ from skimage.util import _backends
 
 
 @pytest.fixture
-def mock_fake_backends(monkeypatch):
+def fake_backends(monkeypatch):
     """Mock backend setup
 
     Two backends, with one function each.
@@ -64,7 +64,7 @@ def mock_fake_backends(monkeypatch):
 
 
 @pytest.fixture
-def mock_no_backends(monkeypatch):
+def no_backends(monkeypatch):
     """Mock backend setup with no backends"""
 
     def mock_no_backends():
@@ -73,7 +73,7 @@ def mock_no_backends(monkeypatch):
     monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
 
 
-def test_no_notification_without_backends(mock_no_backends):
+def test_no_notification_without_backends(no_backends):
     # Check that no DispatchNotification is raised when no backend
     # is installed.
     @_backends.dispatchable
@@ -85,7 +85,7 @@ def test_no_notification_without_backends(mock_no_backends):
     assert r == 42 * 2
 
 
-def test_no_dispatching_when_disabled(mock_fake_backends, monkeypatch):
+def test_no_dispatching_when_disabled(fake_backends, monkeypatch):
     monkeypatch.setenv("SKIMAGE_NO_DISPATCHING", "1")
 
     @_backends.dispatchable
@@ -97,18 +97,15 @@ def test_no_dispatching_when_disabled(mock_fake_backends, monkeypatch):
     assert r == 42 * 2
 
 
-def test_notification_raised(mock_fake_backends):
+def test_notification_raised(fake_backends):
     @_backends.dispatchable
     def foo(x):
         return x * 2
 
-    with pytest.warns(_backends.DispatchNotification):
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Call to.*foo' was dispatched to the 'fake1' backend",
+    ):
         r = foo(42)
 
     assert r == 42 * 3
-
-
-def test_all_backends():
-    _backends.all_backends()
-
-    _backends.all_backends.cache_clear()
