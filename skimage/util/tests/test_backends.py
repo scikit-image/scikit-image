@@ -6,10 +6,10 @@ from skimage.util import _backends
 def mock_fake_backends(monkeypatch):
     """Mock backend setup
 
-    One backend, with one function.
+    Two backends, with one function each.
     """
 
-    class Backend:
+    class Backend1:
         def get_implementation(self, name):
             def fake_foo(x):
                 return x * 3
@@ -30,12 +30,35 @@ def mock_fake_backends(monkeypatch):
                 )
             return True
 
-    class BackendEntryPoint:
+    class Backend2:
+        def get_implementation(self, name):
+            def fake_foo(x):
+                return x * 4
+
+            if not name.endswith(".foo"):
+                return None
+
+            return fake_foo
+
+        def can_has(self, name, *args, **kwargs):
+            if name.endswith(".foo"):
+                return True
+            else:
+                return False
+
+    class BackendEntryPoint1:
         def load(self):
-            return Backend()
+            return Backend1()
+
+    class BackendEntryPoint2:
+        def load(self):
+            return Backend2()
 
     def mock_all_backends():
-        return {"fake": {"implementation": BackendEntryPoint()}}
+        return {
+            "fake1": {"implementation": BackendEntryPoint1()},
+            "fake2": {"implementation": BackendEntryPoint2()},
+        }
 
     monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
 

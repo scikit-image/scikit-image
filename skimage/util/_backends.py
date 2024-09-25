@@ -60,7 +60,12 @@ def dispatchable(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        for name, backend in all_backends().items():
+        # Backends are tried in alphabetical order, this makes things
+        # predictable and stable across runs. Might need a better solution
+        # when it becomes common that users have more than one backend
+        # that would accept a call.
+        for name, backend in sorted(all_backends()):
+            backend = all_backends[name]
             # If we have a BackendInformation object we check if the
             # function we are looking for is implemented in the backend
             if "info" in backend:
