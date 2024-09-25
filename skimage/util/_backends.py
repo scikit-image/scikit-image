@@ -20,8 +20,6 @@ def _entry_points(group):
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
-    # XXX Adjust this to support older versions of Python
-    # XXX https://github.com/scikit-learn/scikit-learn/pull/25535/files#diff-1d31de81e903bd6529fbe68f8009b7113e3b7de4f1465572ef88af4d03a7dc5bR37-R41
     backends_ = _entry_points(group="skimage_backends")
     backend_infos = _entry_points(group="skimage_backend_infos")
 
