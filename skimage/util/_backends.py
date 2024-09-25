@@ -16,6 +16,15 @@ def _entry_points(group):
     return selected_entry_points
 
 
+def disable_dispatching():
+    """Determine if dispatching has been disabled by the user"""
+    no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
+    if no_dispatching == "1":
+        return True
+    else:
+        return False
+
+
 @lru_cache
 def all_backends():
     """List all installed backends and information about them"""
@@ -48,12 +57,9 @@ def dispatchable(func):
     func_module = func.__module__.removeprefix("skimage.")
 
     # If no backends are installed at all or dispatching is disabled,
-    # return the original function. This way people who don't care about
+    # return the original function. This way people who don't care about it
     # don't see anything related to dispatching
-    # XXX how do we test this given it happens at import time?
-    # XXX do we need to make this be False if SKIMAGE_NO_DISPATCHING=0?
-    disable_dispatching = bool(os.environ.get("SKIMAGE_NO_DISPATCHING", False))
-    if disable_dispatching or not all_backends():
+    if disable_dispatching() or not all_backends():
         return func
 
     @functools.wraps(func)
@@ -62,8 +68,8 @@ def dispatchable(func):
         # predictable and stable across runs. Might need a better solution
         # when it becomes common that users have more than one backend
         # that would accept a call.
-        for name, backend in sorted(all_backends()):
-            backend = all_backends[name]
+        for name in sorted(all_backends()):
+            backend = all_backends()[name]
             # If we have a BackendInformation object we check if the
             # function we are looking for is implemented in the backend
             if "info" in backend:
