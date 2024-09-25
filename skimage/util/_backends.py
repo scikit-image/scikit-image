@@ -52,9 +52,7 @@ def dispatchable(func):
     then the scikit-image implementation is used.
     """
     func_name = func.__name__
-    # The submodule inside skimage, used to know which (sub)module to import
-    # from the backend
-    func_module = func.__module__.removeprefix("skimage.")
+    func_module = func.__module__
 
     # If no backends are installed at all or dispatching is disabled,
     # return the original function. This way people who don't care about it
