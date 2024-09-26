@@ -364,7 +364,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     Parameters
     ----------
     image : ([P, ]M, N) ndarray
-       Input degraded image (can be n-dimensional). If keeping the 
+       Input degraded image (can be n-dimensional). If you keep the
        default `clip=True` parameter, you may want to normalize
        the image so that its values fall in the [-1, 1] interval to avoid
        information loss.
