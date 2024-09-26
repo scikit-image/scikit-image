@@ -16,24 +16,15 @@ with _hide_plugin_deprecation_warnings():
 
 
 __all__ = [
-    "call_plugin",
     "concatenate_images",
-    "find_available_plugins",
     "imread",
     "imread_collection",
     "imread_collection_wrapper",
     "imsave",
-    "imshow",
-    "imshow_collection",
     "load_sift",
     "load_surf",
-    "plugin_info",
-    "plugin_order",
     "pop",
     "push",
-    "reset_plugins",
-    "show",
-    "use_plugin",
     "ImageCollection",
     "MultiImage",
 ]
