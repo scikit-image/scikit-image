@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
+# Test pytest and build docs in CI workflows on GitHub
+#
+# This script is not really intended to run locally outside of GitHub's CI
+# environment.
+
 # Fail on non-zero exit and echo the commands
 set -evx
 
-TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
+# Ensure that pytest picks up its configuration in pyproject.toml even if
+# we shift directory
+if [ -z "${GITHUB_WORKSPACE}" ]; then
+  PYTEST_CONFIG_FILE_OPTION="--config-file ${GITHUB_WORKSPACE}/pyproject.toml"
+fi
+
+TEST_ARGS="--doctest-plus --cov=skimage --showlocals ${PYTEST_CONFIG_FILE_OPTION}"
 
 
 # Combine requirement files for a more robust pip solve
@@ -22,7 +33,7 @@ fi
 python -m pip list
 
 
-# Run the tests
+# Run the tests, step out of project dir to make sure that installed version is tested
 (cd .. && pytest $TEST_ARGS --pyargs skimage)
 
 
