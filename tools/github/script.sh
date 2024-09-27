@@ -9,7 +9,7 @@ set -evx
 
 # Ensure that pytest picks up its configuration in pyproject.toml even if
 # we shift directory
-if [ -z "${GITHUB_WORKSPACE}" ]; then
+if [ -n "${GITHUB_WORKSPACE}" ]; then
   PYTEST_CONFIG_FILE_OPTION="--config-file ${GITHUB_WORKSPACE}/pyproject.toml"
 fi
 
