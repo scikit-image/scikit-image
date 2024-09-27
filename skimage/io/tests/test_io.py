@@ -139,7 +139,7 @@ def test_plugin_deprecation_on_imread(kwarg):
 @pytest.mark.parametrize(
     # Test `**plugin_args` with `mode`
     "kwarg",
-    [{"plugin": None}, {"plugin": "imageio"}, {"mode": "w"}],
+    [{"plugin": None}, {"plugin": "imageio"}, {"append": False}],
 )
 def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
     path = tmp_path / "test.tif"
