@@ -118,6 +118,10 @@ def test_plot_matched_features(shapes):
         matches_color='r',
     )
     # Pass colors as random list of color strings
+    rng = np.random.default_rng(202409281822)
+    random_matches_color = [
+        rng.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
+    ]
     plot_matched_features(
         img0,
         img1,
@@ -125,9 +129,7 @@ def test_plot_matched_features(shapes):
         keypoints0=keypoints0,
         keypoints1=keypoints1,
         matches=matches,
-        matches_color=[
-            np.random.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
-        ],
+        matches_color=random_matches_color,
     )
     # Pass colors as single array of shape (len(matches), 3)
     plot_matched_features(
