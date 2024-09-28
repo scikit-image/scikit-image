@@ -129,7 +129,7 @@ def test_failed_temporary_file(monkeypatch, error_class):
 )
 def test_plugin_deprecation_on_imread(kwarg):
     path = fetch("data/multipage.tif")
-    regex = ".*Use imageio or a similar package instead.*"
+    regex = ".*use `imageio` or other I/O packages directly.*"
     with pytest.warns(FutureWarning, match=regex) as record:
         io.imread(path, **kwarg)
     assert len(record) == 1
@@ -144,7 +144,7 @@ def test_plugin_deprecation_on_imread(kwarg):
 def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
     path = tmp_path / "test.tif"
     array = np.array([0, 1], dtype=float)
-    regex = ".*Use imageio or a similar package instead.*"
+    regex = ".*use `imageio` or other I/O packages directly.*"
     with pytest.warns(FutureWarning, match=regex) as record:
         io.imsave(path, array, **kwarg)
     assert len(record) == 1
@@ -154,7 +154,7 @@ def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
 @pytest.mark.parametrize("kwarg", [{"plugin": None}, {"plugin": "imageio"}])
 def test_plugin_deprecation_on_imread_collection(kwarg):
     pattern = data_dir + "*.png"
-    regex = ".*Use imageio or a similar package instead.*"
+    regex = ".*use `imageio` or other I/O packages directly.*"
     with pytest.warns(FutureWarning, match=regex) as record:
         io.imread_collection(pattern, **kwarg)
     assert len(record) == 1

@@ -24,8 +24,8 @@ _remove_plugin_param_template = (
     "The plugin infrastructure in `skimage.io` and the parameter "
     "`{deprecated_name}` are deprecated since version {deprecated_version} and "
     "will be removed in {changed_version} (or later). To avoid this warning, "
-    "please do not use the parameter `{deprecated_name}`. Use imageio or a "
-    "similar package instead. See also `{func_name}`."
+    "please do not use the parameter `{deprecated_name}`. Instead, use `imageio` "
+    "or other I/O packages directly. See also `{func_name}`."
 )
 
 
@@ -66,8 +66,8 @@ def imread(fname, as_gray=False, plugin=DEPRECATED, **plugin_args):
             "The plugin infrastructure in `skimage.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Use imageio or a similar package "
-            "instead. See also `skimage.io.imread`."
+            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
+            "I/O packages directly. See also `skimage.io.imread`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 
@@ -137,8 +137,8 @@ def imread_collection(
             "The plugin infrastructure in `skimage.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Use imageio or a similar package "
-            "instead. See also `skimage.io.imread_collection`."
+            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
+            "I/O packages directly. See also `skimage.io.imread_collection`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
     with _hide_plugin_deprecation_warnings():
@@ -181,8 +181,8 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
             "The plugin infrastructure in `skimage.io` is deprecated since "
             "version 0.25 and will be removed in 0.27 (or later). To avoid "
             "this warning, please do not pass additional keyword arguments "
-            "for plugins (`**plugin_args`). Use imageio or a similar package "
-            "instead. See also `skimage.io.imsave`."
+            "for plugins (`**plugin_args`). Instead, use `imageio` or other "
+            "I/O packages directly. See also `skimage.io.imsave`."
         )
         warnings.warn(msg, category=FutureWarning, stacklevel=3)
 

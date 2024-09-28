@@ -25,7 +25,7 @@ from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
 from .._plugins.pil_plugin import _palette_is_grayscale, ndarray_to_pil, pil_to_ndarray
 
 
-plugin_deprecation_warning = r"Use imageio or a similar package instead|\A\Z"
+plugin_deprecation_warning = r"use `imageio` or other I/O packages directly|\A\Z"
 
 
 @pytest.fixture(autouse=True)

@@ -60,7 +60,7 @@ def _hide_plugin_deprecation_warnings():
     with warnings.catch_warnings():
         warnings.filterwarnings(
             action="ignore",
-            message=".*Use imageio or a similar package instead.*",
+            message=".*use `imageio` or other I/O packages directly.*",
             category=FutureWarning,
             module="skimage",
         )
@@ -109,8 +109,8 @@ def _set_plugin(plugin_type, plugin_list):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def reset_plugins():
     with _hide_plugin_deprecation_warnings():
@@ -172,8 +172,8 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def find_available_plugins(loaded=False):
     """List available plugins.
@@ -211,8 +211,8 @@ with _hide_plugin_deprecation_warnings():
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
@@ -257,8 +257,8 @@ def call_plugin(kind, *args, **kwargs):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
@@ -360,8 +360,8 @@ def _load(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_info(plugin):
     """Return plugin meta-data.
@@ -386,8 +386,8 @@ def plugin_info(plugin):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="The plugin infrastructure of imageio is deprecated. "
-    "Use imageio or a similar package instead.",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
 )
 def plugin_order():
     """Return the currently preferred plugin order.

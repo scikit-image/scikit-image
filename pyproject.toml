@@ -198,7 +198,7 @@ python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
     'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning',
-    "ignore:.*Use imageio or a similar package instead.*:FutureWarning:skimage",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
 ]
 
 [tool.coverage.run]

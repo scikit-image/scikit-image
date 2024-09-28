@@ -86,7 +86,7 @@ def test_load_preferred_plugins_imread():
     ],
 )
 def test_deprecation_warnings_on_plugin_funcs(func, args):
-    regex = ".*Use imageio or a similar package instead.*"
+    regex = ".*use `imageio` or other I/O packages directly.*"
     with pytest.warns(FutureWarning, match=regex) as record:
         func(*args)
     assert len(record) == 1

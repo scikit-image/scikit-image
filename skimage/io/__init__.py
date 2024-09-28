@@ -34,8 +34,8 @@ def __getattr__(name):
     if name == "available_plugins":
         warnings.warn(
             "`available_plugins` is deprecated since version 0.25 and will "
-            "be removed in version 0.27. Use imageio or a similar package "
-            "instead.",
+            "be removed in version 0.27. Instead, use `imageio` or other "
+            "I/O packages directly.",
             category=FutureWarning,
             stacklevel=2,
         )
