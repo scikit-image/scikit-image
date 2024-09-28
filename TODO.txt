@@ -2,11 +2,13 @@ Version 0.27
 ------------
 * Remove deprecated `skimage.io.imshow`,
   `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
-* Complete deprecation of plugin infrastructure by removing the following:
-  - skimage/io/_plugins
-  - skimage/io/manage_plugins.py
-  - skimage/io/__init__.py::__getattr__
-  as well as related tests, imports, etc...
+* Complete deprecation of plugin infrastructure by doing the following:
+  - Replace calls to `call_plugin` with functions from the imageio plugin
+  - Remove `skimage/io/_plugins`
+  - Remove `skimage/io/manage_plugins.py`
+  - Remove `skimage/io/__init__.py::__getattr__`
+  - Remove related tests, imports, etc...
+
 
 Version 0.26
 ------------
