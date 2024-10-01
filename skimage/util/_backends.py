@@ -25,6 +25,28 @@ def disable_dispatching():
         return False
 
 
+def get_module_name(func):
+    """Get the public module name of a scikit-image function.
+
+    This computes the name of the public submodule in which the function can
+    be found.
+    """
+    full_name = func.__module__
+    # This relies on the fact that scikit-image does not use
+    # sub-sub-modules in its public API. This means that public
+    # name can be atmost `skimage.foobar`.
+    public_name = ".".join(full_name.split(".")[:2])
+
+    # It would be nice to sanity check things by doing something like the
+    # following. However we can't because this code is executed while the
+    # module is being imported, which means this would create a circular
+    # import
+    # mod = importlib.import_module(public_name)
+    # assert getattr(mod, func.__name__) is func
+
+    return public_name
+
+
 @lru_cache
 def all_backends():
     """List all installed backends and information about them"""
@@ -52,7 +74,7 @@ def dispatchable(func):
     then the scikit-image implementation is used.
     """
     func_name = func.__name__
-    func_module = func.__module__
+    func_module = get_module_name(func)
 
     # If no backends are installed at all or dispatching is disabled,
     # return the original function. This way people who don't care about it

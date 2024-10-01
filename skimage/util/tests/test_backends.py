@@ -1,5 +1,17 @@
+import importlib
+
 import pytest
+
+import skimage.metrics
 from skimage.util import _backends
+
+
+def mock_get_module_name(func):
+    # Unlike the real `get_module_name` this returns the actual
+    # full module name and does not perform a sanity check
+    # because that test would fail for the functions we define
+    # inside our tests.
+    return func.__module__
 
 
 @pytest.fixture
@@ -61,6 +73,7 @@ def fake_backends(monkeypatch):
         }
 
     monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
+    monkeypatch.setattr(_backends, "get_module_name", mock_get_module_name)
 
 
 @pytest.fixture
@@ -71,6 +84,7 @@ def no_backends(monkeypatch):
         return {}
 
     monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
+    monkeypatch.setattr(_backends, "get_module_name", mock_get_module_name)
 
 
 def test_no_notification_without_backends(no_backends):
@@ -109,3 +123,19 @@ def test_notification_raised(fake_backends):
         r = foo(42)
 
     assert r == 42 * 3
+
+
+@pytest.mark.parametrize(
+    "func, expected",
+    [
+        (skimage.metrics.mean_squared_error, "skimage.metrics"),
+        (skimage.io.concatenate_images, "skimage.io"),
+    ],
+)
+def test_module_name_determination(func, expected):
+    module_name = _backends.get_module_name(func)
+
+    assert module_name == expected
+
+    mod = importlib.import_module(module_name)
+    assert getattr(mod, func.__name__) is func
