@@ -130,6 +130,7 @@ def test_notification_raised(fake_backends):
     [
         (skimage.metrics.mean_squared_error, "skimage.metrics"),
         (skimage.io.concatenate_images, "skimage.io"),
+        (skimage.filters.rank.entropy, "skimage.filters.rank"),
     ],
 )
 def test_module_name_determination(func, expected):

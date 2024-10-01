@@ -33,9 +33,13 @@ def get_module_name(func):
     """
     full_name = func.__module__
     # This relies on the fact that scikit-image does not use
-    # sub-sub-modules in its public API. This means that public
-    # name can be atmost `skimage.foobar`.
-    public_name = ".".join(full_name.split(".")[:2])
+    # sub-submodules in its public API, except in one case.
+    # This means that public name can be atmost `skimage.foobar`
+    # for everything else
+    if full_name.startswith("skimage.filters.rank"):
+        public_name = "skimage.filters.rank"
+    else:
+        public_name = ".".join(full_name.split(".")[:2])
 
     # It would be nice to sanity check things by doing something like the
     # following. However we can't because this code is executed while the
