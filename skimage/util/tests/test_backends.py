@@ -26,7 +26,7 @@ def fake_backends(monkeypatch):
             def fake_foo(x):
                 return x * 3
 
-            if not name.endswith(".foo"):
+            if not name.endswith(":foo"):
                 raise ValueError(
                     "Backend only implements the 'foo' function."
                     f" Called with '{name}'"
@@ -35,7 +35,7 @@ def fake_backends(monkeypatch):
             return fake_foo
 
         def can_has(self, name, *args, **kwargs):
-            if not name.endswith(".foo"):
+            if not name.endswith(":foo"):
                 raise ValueError(
                     "Backend only implements the 'foo' function."
                     f" Called with '{name}'"
@@ -47,13 +47,13 @@ def fake_backends(monkeypatch):
             def fake_foo(x):
                 return x * 4
 
-            if not name.endswith(".foo"):
+            if not name.endswith(":foo"):
                 return None
 
             return fake_foo
 
         def can_has(self, name, *args, **kwargs):
-            if name.endswith(".foo"):
+            if name.endswith(":foo"):
                 return True
             else:
                 return False
@@ -118,7 +118,7 @@ def test_notification_raised(fake_backends):
 
     with pytest.warns(
         _backends.DispatchNotification,
-        match="Call to.*foo' was dispatched to the 'fake1' backend",
+        match="Call to.*:foo' was dispatched to the 'fake1' backend",
     ):
         r = foo(42)
 

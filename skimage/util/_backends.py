@@ -94,7 +94,7 @@ def dispatchable(func):
             # function we are looking for is implemented in the backend
             if "info" in backend:
                 if (
-                    f"{func_module}.{func_name}"
+                    f"{func_module}:{func_name}"
                     not in backend["info"].supported_functions
                 ):
                     continue
@@ -104,17 +104,17 @@ def dispatchable(func):
             # Allow the backend to accept/reject a call based on the function
             # name and the values of the arguments
             wants_it = backend_impl.can_has(
-                f"{func_module}.{func_name}", *args, **kwargs
+                f"{func_module}:{func_name}", *args, **kwargs
             )
             if not wants_it:
                 continue
 
             # can_has("foo", ...) might be True, but the function might not actually
             # be implemented in the backend
-            func_impl = backend_impl.get_implementation(f"{func_module}.{func_name}")
+            func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
             if func_impl is not None:
                 warnings.warn(
-                    f"Call to '{func.__module__}.{func_name}' was dispatched to"
+                    f"Call to '{func_module}:{func_name}' was dispatched to"
                     f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
                     " disable this.",
                     DispatchNotification,
