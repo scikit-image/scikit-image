@@ -1,6 +1,6 @@
 import functools
 from importlib.metadata import entry_points
-from functools import lru_cache
+from functools import cache
 import os
 import warnings
 
@@ -47,7 +47,7 @@ def get_module_name(func):
     return public_name
 
 
-@lru_cache
+@cache
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
