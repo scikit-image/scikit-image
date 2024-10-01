@@ -164,6 +164,7 @@ ignore = [
     'E501',
     'E741',
     'E712',
+    'E721',
     'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
