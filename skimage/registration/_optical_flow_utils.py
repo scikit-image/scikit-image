@@ -118,7 +118,7 @@ def _coarse_to_fine(
         The maximum number of pyramid levels.
     min_size : int
         The minimum size for any dimension of the pyramid levels.
-    dtype : dtype
+    dtype : `numpy.typing.DTypeLike`
         Output data type.
 
     Returns

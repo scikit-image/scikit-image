@@ -208,7 +208,7 @@ def optical_flow_tvl1(
         image warp. When True, a median filter with window size 3
         along each axis is applied. This helps to remove potential
         outliers.
-    dtype : dtype, optional
+    dtype : `numpy.typing.DTypeLike`, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
         time compared to double precision.
@@ -381,7 +381,7 @@ def optical_flow_ilk(
         image warp. When True, a median filter with window size 3
         along each axis is applied. This helps to remove potential
         outliers.
-    dtype : dtype, optional
+    dtype : `numpy.typing.DTypeLike`, optional
         Output data type: must be floating point. Single precision
         provides good results and saves memory usage and computation
         time compared to double precision.
