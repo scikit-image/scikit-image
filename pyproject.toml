@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,7 +12,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
@@ -26,9 +25,9 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.23',
-    'scipy>=1.9',
-    'networkx>=2.8',
+    'numpy>=1.24',
+    'scipy>=1.10',
+    'networkx>=3.0',
     'pillow>=9.1',
     'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
@@ -69,9 +68,9 @@ docs = [
     'sphinx-gallery>=0.14',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'matplotlib>=3.6',
+    'matplotlib>=3.7',
     'dask[array]>=2022.9.2',
-    'pandas>=1.5',
+    'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
     'tifffile>=2022.8.12',
@@ -80,7 +79,7 @@ docs = [
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
     'plotly>=5.10',
     'kaleido',
-    'scikit-learn>=1.1',
+    'scikit-learn>=1.2',
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.15.4',
     'PyWavelets>=1.1.1',
@@ -91,11 +90,11 @@ optional = [
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0,!=2024.8.0',
-    'matplotlib>=3.6',
+    'matplotlib>=3.7',
     'pooch>=1.6.0',
     'pyamg',
     'PyWavelets>=1.1.1',
-    'scikit-learn>=1.1',
+    'scikit-learn>=1.2',
 ]
 test = [
     'asv',
@@ -164,6 +163,7 @@ ignore = [
     'E501',
     'E741',
     'E712',
+    'E721',
     'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
