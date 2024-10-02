@@ -264,7 +264,7 @@ def lookfor(what, module=None, import_modules=True, regenerate=False, output=Non
     found.sort(key=relevance_value)
 
     # Pretty-print
-    s = "Search results for '%s'" % (' '.join(whats))
+    s = "Search results for '{}'".format(' '.join(whats))
     help_text = [s, "-" * len(s)]
     for name in found[::-1]:
         doc, kind, ix = cache[name]
