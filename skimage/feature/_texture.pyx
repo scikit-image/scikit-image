@@ -15,7 +15,7 @@ from .._shared.fused_numerics cimport np_anyint as any_int
 
 cnp.import_array()
 
-def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
+def _glcm_loop(any_int[:, ::1] image,
                cnp.float64_t[:] distances,
                cnp.float64_t[:] angles, Py_ssize_t levels,
                cnp.uint32_t[:, :, :, ::1] out):
@@ -26,8 +26,6 @@ def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
     image : ndarray
         Integer typed input image. Only positive valued images are supported.
         If type is other than uint8, the argument `levels` needs to be set.
-    mask : ndarray
-        Boolean mask. Pixels with value zero are ignored.
     distances : ndarray
         List of pixel pair distance offsets.
     angles : ndarray
@@ -67,15 +65,12 @@ def _glcm_loop(any_int[:, ::1] image, any_int[:, ::1] mask,
                 end_col = min(cols, cols - offset_col)
                 for r in range(start_row, end_row):
                     for c in range(start_col, end_col):
-                        if mask[r, c]:
-                            row = r + offset_row
-                            col = c + offset_col
-                            if mask[row, col]:
-                                i = image[r, c]
-                                j = image[row, col]
-
-                                if 0 <= i < levels and 0 <= j < levels:
-                                    out[i, j, d_idx, a_idx] += 1
+                        row = r + offset_row
+                        col = c + offset_col
+                        i = image[r, c]
+                        j = image[row, col]
+                        if 0 <= i < levels and 0 <= j < levels:
+                            out[i, j, d_idx, a_idx] += 1
 
 
 cdef inline int _bit_rotate_right(int value, int length) noexcept nogil:
