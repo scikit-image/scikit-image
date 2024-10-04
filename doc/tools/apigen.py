@@ -298,7 +298,7 @@ class ApiDocWriter:
             ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
             ad += '\n.. autofunction:: ' + f + '\n\n'
-            ad += f'    .. minigallery:: {f}\n\n'
+            ad += f'    .. minigallery:: {uri}.{f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -310,7 +310,7 @@ class ApiDocWriter:
                 '\n'
                 '  .. automethod:: __init__\n\n'
             )
-            ad += f'    .. minigallery:: {c}\n\n'
+            ad += f'    .. minigallery:: {uri}.{c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
