@@ -1,4 +1,3 @@
-import operator
 import os
 import warnings
 from collections.abc import Sequence
@@ -99,55 +98,6 @@ def footprint_from_sequence(footprints):
     return morphology.binary_dilation(imag, footprints)
 
 
-class FootprintComponent(tuple):
-    """Part of a decomposed footprint.
-
-    Parameters
-    ----------
-    component : array
-        The footprint component that makes up part of the decomposition.
-    repetitions : int
-        The number of times the `component` should be applied (at least once).
-
-    Notes
-    -----
-    This is a subclass of a tuple and behaves in almost the same way.
-    """
-
-    # Dev notes:
-
-    __slots__ = ()
-
-    def __new__(cls, component, *, repetitions):
-        if not isinstance(component, np.ndarray):
-            msg = (
-                "Expected first item in FootprintComponent to be a numpy.ndarray, "
-                f"got {component!r}"
-            )
-            raise TypeError(msg)
-        if not operator.index(repetitions):
-            msg = (
-                "Expected second item in FootprintComponent to be a positive integer, "
-                f"got {repetitions!r}"
-            )
-            raise TypeError(msg)
-        if repetitions < 1:
-            msg = "`repetitions` must be at least 1"
-            raise ValueError(msg)
-
-        new = super().__new__(cls, (component, repetitions))
-        return new
-
-    @property
-    def component(self):
-        """The footprint component that makes up part of the decomposition."""
-        return self[0]
-
-    def repetitions(self):
-        """The number of times the `component` should be applied."""
-        return self[1]
-
-
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition="sequence"):
     """
 
@@ -186,7 +136,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition="sequence"):
 
     def partial_footprint(dim, width):
         shape_ = (1,) * dim + (width,) + (1,) * (len(shape) - dim - 1)
-        fp = FootprintComponent(np.ones(shape_, dtype=dtype), repetitions=1)
+        fp = (np.ones(shape_, dtype=dtype), 1)
         return fp
 
     if decomposition is None:
@@ -201,9 +151,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition="sequence"):
         min_width = min(shape)
         sq_reps = _decompose_size(min_width, 3)
         footprint = [
-            FootprintComponent(
-                np.ones((3,) * len(shape), dtype=dtype), repetitions=sq_reps
-            )
+            (np.ones((3,) * len(shape), dtype=dtype), sq_reps)
         ]
         for dim, width in enumerate(shape):
             if width > min_width:
@@ -269,20 +217,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    if decomposition is None:
-        return np.ones((width, width), dtype=dtype)
-
-    if decomposition == 'separable' or width % 2 == 0:
-        sequence = [
-            (np.ones((width, 1), dtype=dtype), 1),
-            (np.ones((1, width), dtype=dtype), 1),
-        ]
-    elif decomposition == 'sequence':
-        # only handles odd widths
-        sequence = [(np.ones((3, 3), dtype=dtype), _decompose_size(width, 3))]
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(width, width), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def _decompose_size(size, kernel_size=3):
@@ -354,30 +292,10 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
-    if decomposition is None:  # TODO: check optimal width setting here
-        return np.ones((nrows, ncols), dtype=dtype)
-
-    even_rows = nrows % 2 == 0
-    even_cols = ncols % 2 == 0
-    if decomposition == 'separable' or even_rows or even_cols:
-        sequence = [
-            (np.ones((nrows, 1), dtype=dtype), 1),
-            (np.ones((1, ncols), dtype=dtype), 1),
-        ]
-    elif decomposition == 'sequence':
-        # this branch only support odd nrows, ncols
-        sq_size = 3
-        sq_reps = _decompose_size(min(nrows, ncols), sq_size)
-        sequence = [(np.ones((3, 3), dtype=dtype), sq_reps)]
-        if nrows > ncols:
-            nextra = nrows - ncols
-            sequence.append((np.ones((nextra + 1, 1), dtype=dtype), 1))
-        elif ncols > nrows:
-            nextra = ncols - nrows
-            sequence.append((np.ones((1, nextra + 1), dtype=dtype), 1))
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(nrows, ncols), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def diamond(radius, dtype=np.uint8, *, decomposition=None):
@@ -808,21 +726,10 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    if decomposition is None:
-        return np.ones((width, width, width), dtype=dtype)
-
-    if decomposition == 'separable' or width % 2 == 0:
-        sequence = [
-            (np.ones((width, 1, 1), dtype=dtype), 1),
-            (np.ones((1, width, 1), dtype=dtype), 1),
-            (np.ones((1, 1, width), dtype=dtype), 1),
-        ]
-    elif decomposition == 'sequence':
-        # only handles odd widths
-        sequence = [(np.ones((3, 3, 3), dtype=dtype), _decompose_size(width, 3))]
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(width, width, width), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def octahedron(radius, dtype=np.uint8, *, decomposition=None):
