@@ -28,7 +28,7 @@ dynamic = ['version']
 dependencies = [
     'numpy>=1.24',
     'scipy>=1.10',
-    'networkx>=3.0',
+    'networkx==3.4rc0',
     'pillow>=9.1',
     'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
