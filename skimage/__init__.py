@@ -65,7 +65,7 @@ dtype_limits
 
 """
 
-__version__ = '0.25.0rc0'
+__version__ = '0.25.0rc1.dev0'
 
 import lazy_loader as _lazy
 
