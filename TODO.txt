@@ -8,6 +8,9 @@ Version 0.26
 * In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
   and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
   function ``_shift_footprint``.
+* In `skimage/util/compare.py`, remove deprecated parameter `image2` as
+  well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
+  (and all `pytest.warns(FutureWarning)` context managers there).
 
 Version 0.25
 ------------
@@ -15,9 +18,6 @@ Version 0.25
   and remove `test_gaussian.py::test_deprecated_gaussian_output`.
   Make arguments after the deprecated `output` parameter, keyword only:
   `gaussian(image, sigma, *, ...)`.
-* In `skimage/util/compare.py`, remove deprecated parameter `image2` as
-  well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
-  (and all `pytest.warns(FutureWarning)` context managers there).
 * Resolve temporary exclusion of Dask 2024.8.0 in optional dependencies, see
   https://github.com/scikit-image/scikit-image/issues/7491 for details.
 
