@@ -14,10 +14,6 @@ Version 0.26
 
 Version 0.25
 ------------
-* Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
-  and remove `test_gaussian.py::test_deprecated_gaussian_output`.
-  Make arguments after the deprecated `output` parameter, keyword only:
-  `gaussian(image, sigma, *, ...)`.
 * Resolve temporary exclusion of Dask 2024.8.0 in optional dependencies, see
   https://github.com/scikit-image/scikit-image/issues/7491 for details.
 
