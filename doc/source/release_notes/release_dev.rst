@@ -1,7 +1,7 @@
-scikit-image 0.25.0rc0
+scikit-image 0.25.0rc1
 ======================
 
-We're happy to announce the release of scikit-image 0.25.0rc0!
+We're happy to announce the release of scikit-image 0.25.0rc1!
 
 New Features
 ------------
@@ -84,6 +84,10 @@ Maintenance
 - Support Python 3.13 (`#7565 <https://github.com/scikit-image/scikit-image/pull/7565>`_).
 - During deprecation cycles, preserve the value of deprecated parameters that don't have a new parameter as a replacement (`#7552 <https://github.com/scikit-image/scikit-image/pull/7552>`_).
 - Fix missing minigalleries by using full names in directives (`#7567 <https://github.com/scikit-image/scikit-image/pull/7567>`_).
+- Build Python 3.13 wheels (`#7571 <https://github.com/scikit-image/scikit-image/pull/7571>`_).
+- Update TODO (`#7573 <https://github.com/scikit-image/scikit-image/pull/7573>`_).
+- Remove deprecated skeletonize_3d (`#7572 <https://github.com/scikit-image/scikit-image/pull/7572>`_).
+- Remove deprecated gaussian output parameter (`#7574 <https://github.com/scikit-image/scikit-image/pull/7574>`_).
 
 Contributors
 ------------
@@ -137,3 +141,4 @@ Contributors
 
 _These lists are automatically generated, and may not be complete or may contain
 duplicates._
+
