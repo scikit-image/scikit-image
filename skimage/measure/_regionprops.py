@@ -366,6 +366,14 @@ class RegionProperties:
             self._extra_properties = {func.__name__: func for func in extra_properties}
 
     def __getattr__(self, attr):
+        if attr == "__setstate__":
+            # When deserializing this object with pickle, `__setstate__`
+            # is accessed before any other attributes like `self._intensity_image`
+            # are available which leads to a RecursionError when trying to
+            # access them later on in this function. So guard against this by
+            # provoking the default AttributeError (gh-6465).
+            return self.__getattribute__(attr)
+
         if self._intensity_image is None and attr in _require_intensity_image:
             raise AttributeError(
                 f"Attribute '{attr}' unavailable when `intensity_image` "
