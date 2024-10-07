@@ -22,7 +22,7 @@ def contingency_table(im_true, im_test, *, ignore_labels=None, normalize=False):
 
     Returns
     -------
-    cont : scipy.sparse.csr_matrix
+    cont : scipy.sparse.csr_array
         A contingency table. `cont[i, j]` will equal the number of voxels
         labeled `i` in `im_true` and `j` in `im_test`.
     """
@@ -34,5 +34,5 @@ def contingency_table(im_true, im_test, *, ignore_labels=None, normalize=False):
     data = np.isin(im_true_r, ignore_labels, invert=True).astype(float)
     if normalize:
         data /= np.count_nonzero(data)
-    cont = sparse.coo_matrix((data, (im_true_r, im_test_r))).tocsr()
+    cont = sparse.coo_array((data, (im_true_r, im_test_r))).tocsr()
     return cont

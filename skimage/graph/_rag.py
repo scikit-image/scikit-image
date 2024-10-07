@@ -8,7 +8,7 @@ from .. import measure, segmentation, util, color
 from .._shared.version_requirements import require
 
 
-def _edge_generator_from_csr(csr_matrix):
+def _edge_generator_from_csr(csr_array):
     """Yield weighted edge triples for use by NetworkX from a CSR matrix.
 
     This function is a straight rewrite of
@@ -17,7 +17,7 @@ def _edge_generator_from_csr(csr_matrix):
 
     Parameters
     ----------
-    csr_matrix : scipy.sparse.csr_matrix
+    csr_array : scipy.sparse.csr_array
         The input matrix. An edge (i, j, w) will be yielded if there is a
         data value for coordinates (i, j) in the matrix, even if that value
         is 0.
@@ -31,15 +31,15 @@ def _edge_generator_from_csr(csr_matrix):
     --------
 
     >>> dense = np.eye(2, dtype=float)
-    >>> csr = sparse.csr_matrix(dense)
+    >>> csr = sparse.csr_array(dense)
     >>> edges = _edge_generator_from_csr(csr)
     >>> list(edges)
     [(0, 0, 1.0), (1, 1, 1.0)]
     """
-    nrows = csr_matrix.shape[0]
-    values = csr_matrix.data
-    indptr = csr_matrix.indptr
-    col_indices = csr_matrix.indices
+    nrows = csr_array.shape[0]
+    values = csr_array.data
+    indptr = csr_array.indptr
+    col_indices = csr_array.indices
     for i in range(nrows):
         for j in range(indptr[i], indptr[i + 1]):
             yield i, col_indices[j], values[j]
@@ -437,12 +437,12 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
     # use a dummy broadcast array as data for RAG
     ones = np.broadcast_to(1.0, labels_small.shape)
-    count_matrix = sparse.coo_matrix(
+    count_matrix = sparse.coo_array(
         (ones, (labels_small, labels_large)), dtype=int, shape=(n, n)
     ).tocsr()
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
-    data_coo = sparse.coo_matrix((data, (labels_small, labels_large)))
+    data_coo = sparse.coo_array((data, (labels_small, labels_large)))
     graph_matrix = data_coo.tocsr()
     graph_matrix.data /= count_matrix.data
 

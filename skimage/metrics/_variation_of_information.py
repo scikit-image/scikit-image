@@ -51,7 +51,7 @@ def _xlogx(x):
 
     Parameters
     ----------
-    x : ndarray or scipy.sparse.csc_matrix or csr_matrix
+    x : ndarray or scipy.sparse.csc_array or csr_array
         The input array.
 
     Returns
@@ -60,7 +60,8 @@ def _xlogx(x):
         Result of x * log_2(x).
     """
     y = x.copy()
-    if isinstance(y, sparse.csc_matrix) or isinstance(y, sparse.csr_matrix):
+    print(y)
+    if isinstance(y, sparse.csc_array) or isinstance(y, sparse.csr_array):
         z = y.data
     else:
         z = np.asarray(y)  # ensure np.matrix converted to np.array
@@ -76,7 +77,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
-    table : csr matrix, optional
+    table : csr_array, optional
         Pre-computed contingency table.
     ignore_labels : sequence of int, optional
         Labels to ignore when computing scores.
@@ -104,8 +105,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
 
     # use sparse matrix linear algebra to compute VI
     # first, compute the inverse diagonal matrices
-    px_inv = sparse.diags(_invert_nonzero(px))
-    py_inv = sparse.diags(_invert_nonzero(py))
+    px_inv = sparse.diags_array(_invert_nonzero(px))
+    py_inv = sparse.diags_array(_invert_nonzero(py))
 
     # then, compute the entropies
     hygx = -px @ _xlogx(px_inv @ pxy).sum(axis=1)

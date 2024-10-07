@@ -81,8 +81,8 @@ def adapted_rand_error(
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).A.ravel()
-    b_i = p_ij.sum(axis=0).A.ravel()
+    a_i = p_ij.sum(axis=1).ravel()
+    b_i = p_ij.sum(axis=0).ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
