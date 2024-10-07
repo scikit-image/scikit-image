@@ -63,7 +63,7 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
 
     Returns
     -------
-    graph : scipy.sparse.csr_matrix
+    graph : scipy.sparse.csr_array
         A sparse adjacency matrix in which entry (i, j) is 1 if nodes i and j
         are neighbors, 0 otherwise.
     nodes : array of int
@@ -134,7 +134,7 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
     )
 
     m = nodes_sequential.size
-    mat = sparse.coo_matrix(
+    mat = sparse.coo_array(
         (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
     )
     graph = mat.tocsr()
@@ -149,7 +149,7 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
 
     Parameters
     ----------
-    graph : scipy.sparse.csr_matrix
+    graph : scipy.sparse.csr_array
         The sparse matrix representation of the graph.
     nodes : array of int
         The raveled index of each node in graph in the image. If not provided,
@@ -184,7 +184,7 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     idxs = np.arange(graph.shape[0])
     total_shortest_path_len_list = []
     for partition in np.array_split(idxs, num_splits):
-        shortest_paths = csgraph.shortest_path(graph, directed=False, indices=partition)
+        shortest_paths = csgraph.shortest_path(graph.toarray(), directed=False, indices=partition)
         shortest_paths_no_inf = np.nan_to_num(shortest_paths)
         total_shortest_path_len_list.append(np.sum(shortest_paths_no_inf, axis=1))
     total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
