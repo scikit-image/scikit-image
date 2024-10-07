@@ -30,7 +30,7 @@ from .footprints import (
     star,
 )
 from ..measure._label import label
-from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
+from ._skeletonize import medial_axis, skeletonize, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
 from .misc import remove_small_holes, remove_small_objects, remove_objects_by_distance
