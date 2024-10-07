@@ -61,7 +61,7 @@ extensions = [
 
 autosummary_generate = True
 templates_path = ["_templates"]
-source_suffix = ".rst"
+source_suffix = {".rst": "restructuredtext"}
 
 show_warning_types = True
 suppress_warnings = [
@@ -74,7 +74,7 @@ suppress_warnings = [
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 exclude_trees = []
-default_role = "autolink"
+default_role = "py:obj"
 pygments_style = "sphinx"
 
 # -- Sphinx-gallery configuration --------------------------------------------
@@ -185,8 +185,8 @@ html_theme_options = {
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
     # Other
-    "pygment_light_style": "default",
-    "pygment_dark_style": "github-dark",
+    "pygments_light_style": "default",
+    "pygments_dark_style": "github-dark",
     "analytics": {
         "plausible_analytics_domain": "scikit-image.org",
         "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),

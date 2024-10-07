@@ -30,9 +30,6 @@ jobs:
         Python310-x64:
           PYTHON_VERSION: "3.10"
           ARCH: "x64"
-        Python39-x64:
-          PYTHON_VERSION: "3.9"
-          ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
 

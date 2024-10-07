@@ -56,7 +56,7 @@ File: skimage/exposure/_adapthist.py
 Copyright: 1994 Karel Zuiderveld
 License: BSD-3-Clause
 
-Function: skimage/morphology/_skeletonize_cy.pyx:_skeletonize_loop
+Function: skimage/morphology/_skeletonize_various_cy.pyx:_skeletonize_loop
 Copyright: 2003-2009 Massachusetts Institute of Technology
            2009-2011 Broad Institute
            2003 Lee Kamentsky
@@ -76,10 +76,6 @@ License: MIT
 
 File: skimage/_vendored/numpy_lookfor.py
 Copyright: 2005-2023, NumPy Developers
-License: BSD-3-Clause
-
-File: tools/emscripten/pytest_scikit_image_pyodide.js
-Copyright: 2007-2024 The scikit-learn developers
 License: BSD-3-Clause
 
 File: skimage/transform/_thin_plate_splines.py
