@@ -23,7 +23,10 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     else:
         max_out = None
 
-    coord = ensure_spacing(coord, spacing=min_distance, p_norm=p_norm, max_out=max_out)
+    if min_distance > 1:
+        coord = ensure_spacing(
+            coord, spacing=min_distance, p_norm=p_norm, max_out=max_out
+        )
 
     if len(coord) > num_peaks:
         coord = coord[:num_peaks]
