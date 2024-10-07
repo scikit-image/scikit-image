@@ -14,8 +14,6 @@ Version 0.26
 
 Version 0.25
 ------------
-* Remove deprecated `skimage.morphology._skeletonize.skeletonize_3d` and
-  tests related to that deprecation.
 * Remove traces of deprecated `output` parameter in `skimage.filters.gaussian`
   and remove `test_gaussian.py::test_deprecated_gaussian_output`.
   Make arguments after the deprecated `output` parameter, keyword only:
