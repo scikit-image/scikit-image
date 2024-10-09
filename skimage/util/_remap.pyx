@@ -7,8 +7,8 @@ from .._shared.fused_numerics cimport np_numeric, np_anyint
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing
-def _map_array(np_anyint[:] inarr, np_numeric[:] outarr,
-               np_anyint[:] inval, np_numeric[:] outval):
+def _map_array(const np_anyint[:] inarr, np_numeric[:] outarr,
+               const np_anyint[:] inval, const np_numeric[:] outval):
     # build the map from the input and output vectors
     cdef size_t i, n_map, n_array
     cdef unordered_map[np_anyint, np_numeric] lut
