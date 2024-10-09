@@ -33,6 +33,7 @@ imshow_expected_warnings = [
     # Matplotlib 2.2.3 is the last supported version for python 2.7
     r"np.asscalar|\A\Z",
     r"The figure layout has changed to tight|\A\Z",
+    "is deprecated since version 0.25.* Please use .* to visualize images",
 ]
 
 # This warning comes from the Python 3.12.1 interpreter powered by Pyodide

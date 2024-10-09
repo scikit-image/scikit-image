@@ -21,7 +21,7 @@ jobs:
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-22.04
     env:
-      PYODIDE_VERSION: 0.26.1
+      PYODIDE_VERSION: 0.27.0a2
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
@@ -46,11 +46,10 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build==${{ env.PYODIDE_VERSION }}
+        run: pip install pyodide-build
 
       - name: Build scikit-image for Pyodide
-        run: |
-          pyodide build
+        run: pyodide build
 
       - name: Set up Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
@@ -59,7 +58,17 @@ jobs:
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
+          # Set up Pyodide virtual environment
+          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
+
+          # Activate the virtual environment and install the built scikit-image wheel
           source .venv-pyodide/bin/activate
-          npm install pyodide@${{ env.PYODIDE_VERSION }}
-          node tools/emscripten/pytest_scikit_image_pyodide.js --pyargs skimage
+          pip install dist/*.whl
+          # Change to a different directory to avoid importing the local scikit-image
+          # package instead of the installed one
+          cd doc
+          pip install pytest matplotlib
+          # Don't use the cache provider plugin, as it doesn't work with Pyodide
+          # right now: https://github.com/pypa/cibuildwheel/issues/1966
+          pytest -svra -p no:cacheprovider --pyargs skimage

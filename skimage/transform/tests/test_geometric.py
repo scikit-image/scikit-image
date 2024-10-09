@@ -1029,11 +1029,12 @@ def test_affine_params_nD_error():
 
 
 def test_euler_rotation():
-    v = [0, 10, 0]
-    angles = np.radians([90, 45, 45])
-    expected = [-5, -5, 7.1]
-    R = _euler_rotation_matrix(angles)
-    assert_almost_equal(R @ v, expected, decimal=1)
+    for v, angles, expected in (
+        ([0, 10, 0], np.radians([90, 45, 45]), [-5, -5, 7.1]),
+        ([-1, 7, -2], np.radians([-10, 23, -25]), [1.1, 6.2, -3.8]),
+    ):
+        R = _euler_rotation_matrix(angles)
+        assert_almost_equal(R @ v, expected, decimal=1)
 
 
 def test_euclidean_param_defaults():
