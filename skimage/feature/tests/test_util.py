@@ -73,10 +73,11 @@ def test_plot_matched_features(shapes):
 
     fig, ax = plt.subplots()
 
-    keypoints0 = 10 * np.random.rand(10, 2)
-    keypoints1 = 10 * np.random.rand(10, 2)
-    idxs0 = np.random.randint(10, size=10)
-    idxs1 = np.random.randint(10, size=10)
+    rng = np.random.default_rng(202410101501)
+    keypoints0 = 10 * rng.random((10, 2))
+    keypoints1 = 10 * rng.random((10, 2))
+    idxs0 = rng.integers(10, size=10)
+    idxs1 = rng.integers(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
 
     shape0, shape1 = shapes
