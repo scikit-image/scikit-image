@@ -77,9 +77,9 @@ def plot_matched_features(
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
     matches_color : matplotlib color or sequence thereof, optional
-        Single color or sequence of colors for all lines which connect keypoint matches.
-        See [1]_ for an overview of supported color formats.
-        By default, colors are picked randomly.
+        Single color or sequence of colors for each line defined by `matches`,
+        which connect keypoint matches. See [1]_ for an overview of supported
+        color formats. By default, colors are picked randomly.
     only_matches : bool, optional
         Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
@@ -90,6 +90,10 @@ def plot_matched_features(
     ----------
     .. [1] https://matplotlib.org/stable/users/explain/colors/colors.html#specifying-colors
 
+    Notes
+    -----
+    To make a color palette work for any number of `matches`, you can wrap the palette
+    in :func:`itertools.cycle`.
     """
     image0 = img_as_float(image0)
     image1 = img_as_float(image1)
