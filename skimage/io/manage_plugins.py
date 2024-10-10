@@ -20,7 +20,9 @@ import os.path
 import warnings
 from configparser import ConfigParser
 from glob import glob
+from contextlib import contextmanager
 
+from .._shared.utils import deprecate_func
 from .collection import imread_collection_wrapper
 
 __all__ = [
@@ -30,7 +32,7 @@ __all__ = [
     'plugin_order',
     'reset_plugins',
     'find_available_plugins',
-    'available_plugins',
+    '_available_plugins',
 ]
 
 # The plugin store will save a list of *loaded* io functions for each io type
@@ -52,6 +54,19 @@ preferred_plugins = {
 }
 
 
+@contextmanager
+def _hide_plugin_deprecation_warnings():
+    """Ignore warnings related to plugin infrastructure deprecation."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message=".*use `imageio` or other I/O packages directly.*",
+            category=FutureWarning,
+            module="skimage",
+        )
+        yield
+
+
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded"""
     global plugin_store
@@ -65,7 +80,8 @@ def _clear_plugins():
     }
 
 
-_clear_plugins()
+with _hide_plugin_deprecation_warnings():
+    _clear_plugins()
 
 
 def _load_preferred_plugins():
@@ -81,7 +97,7 @@ def _load_preferred_plugins():
 
 def _set_plugin(plugin_type, plugin_list):
     for plugin in plugin_list:
-        if plugin not in available_plugins:
+        if plugin not in _available_plugins:
             continue
         try:
             use_plugin(plugin, kind=plugin_type)
@@ -90,9 +106,16 @@ def _set_plugin(plugin_type, plugin_list):
             pass
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def reset_plugins():
-    _clear_plugins()
-    _load_preferred_plugins()
+    with _hide_plugin_deprecation_warnings():
+        _clear_plugins()
+        _load_preferred_plugins()
 
 
 def _parse_config_file(filename):
@@ -142,9 +165,16 @@ def _scan_plugins():
         plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 
-_scan_plugins()
+with _hide_plugin_deprecation_warnings():
+    _scan_plugins()
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def find_available_plugins(loaded=False):
     """List available plugins.
 
@@ -174,9 +204,16 @@ def find_available_plugins(loaded=False):
     return d
 
 
-available_plugins = find_available_plugins()
+with _hide_plugin_deprecation_warnings():
+    _available_plugins = find_available_plugins()
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
@@ -217,6 +254,12 @@ def call_plugin(kind, *args, **kwargs):
     return func(*args, **kwargs)
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
     will be loaded if it hasn't been already.
@@ -278,6 +321,7 @@ def _inject_imread_collection_if_needed(module):
         setattr(module, 'imread_collection', func)
 
 
+@_hide_plugin_deprecation_warnings()
 def _load(plugin):
     """Load the given plugin.
 
@@ -313,6 +357,12 @@ def _load(plugin):
             store.append((plugin, func))
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def plugin_info(plugin):
     """Return plugin meta-data.
 
@@ -333,6 +383,12 @@ def plugin_info(plugin):
         raise ValueError(f'No information on plugin "{plugin}"')
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def plugin_order():
     """Return the currently preferred plugin order.
 

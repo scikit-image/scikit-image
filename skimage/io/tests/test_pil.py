@@ -25,6 +25,9 @@ from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
 from .._plugins.pil_plugin import _palette_is_grayscale, ndarray_to_pil, pil_to_ndarray
 
 
+plugin_deprecation_warning = r"use `imageio` or other I/O packages directly|\A\Z"
+
+
 @pytest.fixture(autouse=True)
 def use_pil_plugin():
     """Ensure that PIL plugin is used in tests here."""
@@ -260,14 +263,14 @@ def test_imexport_imimport():
 
 
 def test_all_color():
-    with expected_warnings(['.* is a boolean image']):
+    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
         color_check('pil')
-    with expected_warnings(['.* is a boolean image']):
+    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
         color_check('pil', 'bmp')
 
 
 def test_all_mono():
-    with expected_warnings(['.* is a boolean image']):
+    with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
         mono_check('pil')
 
 
