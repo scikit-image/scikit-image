@@ -74,4 +74,4 @@ def test_no_mask_with_edge_func():
 
     g, n = pixel_graph(image, edge_function=func)
     np.testing.assert_array_equal(n, np.arange(image.size))
-    np.testing.assert_array_equal(g.todense(), expected_g)
+    np.testing.assert_array_equal(g.toarray(), expected_g)
