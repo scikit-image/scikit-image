@@ -98,7 +98,7 @@ def footprint_from_sequence(footprints):
     return morphology.binary_dilation(imag, footprints)
 
 
-def footprint_rectangle(shape, *, dtype=np.uint8, decomposition="sequence"):
+def footprint_rectangular(shape, *, dtype=np.uint8, decomposition="sequence"):
     """
 
     Parameters
@@ -166,7 +166,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition="sequence"):
     return footprint
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangle` instead.")
+@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
@@ -217,7 +217,7 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    footprint = footprint_rectangle(
+    footprint = footprint_rectangular(
         shape=(width, width), dtype=dtype, decomposition=decomposition
     )
     return footprint
@@ -236,7 +236,7 @@ def _decompose_size(size, kernel_size=3):
     return 1 + (size - kernel_size) // (kernel_size - 1)
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangle` instead.")
+@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -292,7 +292,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
-    footprint = footprint_rectangle(
+    footprint = footprint_rectangular(
         shape=(nrows, ncols), dtype=dtype, decomposition=decomposition
     )
     return footprint
@@ -678,7 +678,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangle` instead.")
+@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
 def cube(width, dtype=np.uint8, *, decomposition=None):
     """Generates a cube-shaped footprint.
 
@@ -726,7 +726,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    footprint = footprint_rectangle(
+    footprint = footprint_rectangular(
         shape=(width, width, width), dtype=dtype, decomposition=decomposition
     )
     return footprint
