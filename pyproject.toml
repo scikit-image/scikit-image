@@ -198,7 +198,7 @@ python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
-    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning'
+    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning',
 ]
 
 [tool.coverage.run]
