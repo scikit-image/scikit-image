@@ -70,8 +70,8 @@ def pearson_corr_coeff(image0, image1, mask=None):
 
     References
     ----------
-    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html  # noqa
-    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html  # noqa
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html
+    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html
     .. [3] Dunn, K. W., Kamocka, M. M., & McDonald, J. H. (2011). A practical
            guide to evaluating colocalization in biological microscopy.
            American journal of physiology. Cell physiology, 300(4), C723–C742.

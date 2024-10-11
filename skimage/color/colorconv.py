@@ -1728,7 +1728,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     >>> from skimage.color import separate_stains, hdx_from_rgb
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
-    """  # noqa: E501
+    """
     rgb = _prepare_colorarray(rgb, force_copy=True, channel_axis=-1)
     np.maximum(rgb, 1e-6, out=rgb)  # avoiding log artifacts
     log_adjust = np.log(1e-6)  # used to compensate the sum above

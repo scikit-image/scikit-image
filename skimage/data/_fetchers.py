@@ -140,7 +140,7 @@ def _skip_pytest_case_requiring_pooch(data_filename):
     # want to run it online with pooch as a dependency.
     # As such, we will avoid failing the test, and silently skipping it.
     if 'PYTEST_CURRENT_TEST' in os.environ:
-        # https://docs.pytest.org/en/latest/example/simple.html#pytest-current-test-environment-variable  # noqa
+        # https://docs.pytest.org/en/latest/example/simple.html#pytest-current-test-environment-variable
         import pytest
 
         # Pytest skip raises an exception that allows the

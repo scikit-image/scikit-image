@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-""" Platform independent file copier script
-"""
+"""Platform independent file copier script"""
 
 import shutil
 import argparse

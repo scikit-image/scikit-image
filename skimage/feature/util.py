@@ -123,7 +123,7 @@ def plot_matched_features(
         mesg = (
             f"`plot_matched_features` accepts either 'horizontal' or 'vertical' for "
             f"alignment, but '{alignment}' was given. See "
-            f"https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matched_features "  # noqa
+            f"https://scikit-image.org/docs/dev/api/skimage.feature.html#skimage.feature.plot_matched_features "
             f"for details."
         )
         raise ValueError(mesg)

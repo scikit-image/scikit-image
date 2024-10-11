@@ -1,6 +1,4 @@
-"""Tests for the version requirement functions.
-
-"""
+"""Tests for the version requirement functions."""
 
 import numpy as np
 from numpy.testing import assert_equal

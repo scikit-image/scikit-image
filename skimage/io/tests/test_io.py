@@ -95,7 +95,7 @@ def _named_tempfile_func(error_class):
     from the Python standard library could raise. As of this writing, these
     are ``FileNotFoundError``, ``FileExistsError``, ``PermissionError``, and
     ``BaseException``. See
-    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__  # noqa
+    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__
     for more information.
     """
 

@@ -22,11 +22,6 @@ class RegionpropsTableIndividual:
     params = sorted(list(PROP_VALS))
 
     def setup(self, prop):
-        try:
-            from skimage.measure import regionprops_table  # noqa
-        except ImportError:
-            # regionprops_table was introduced in scikit-image v0.16.0
-            raise NotImplementedError("regionprops_table unavailable")
         self.label_image, self.intensity_image = init_regionprops_data()
 
     def time_single_region_property(self, prop):
@@ -42,11 +37,6 @@ class RegionpropsTableAll:
     params = (False, True)
 
     def setup(self, cache):
-        try:
-            from skimage.measure import regionprops_table  # noqa
-        except ImportError:
-            # regionprops_table was introduced in scikit-image v0.16.0
-            raise NotImplementedError("regionprops_table unavailable")
         self.label_image, self.intensity_image = init_regionprops_data()
 
     def time_regionprops_table_all(self, cache):

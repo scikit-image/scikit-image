@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 2c9f875913ee60ca25ce70243dc24d5b6415598c # frozen: v4.6.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -23,11 +23,11 @@ repos:
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: cc915bbf189077041f55bc59c4c0cf7f30cc921f # frozen: v0.6.8
-
+    rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79 # frozen: v0.6.9
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
     rev: 9247866fce7128f2c0eaf4a09f437880397d4689 # frozen: v0.16.2

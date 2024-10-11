@@ -1,6 +1,4 @@
-"""TV-L1 optical flow algorithm implementation.
-
-"""
+"""TV-L1 optical flow algorithm implementation."""
 
 from functools import partial
 from itertools import combinations_with_replacement

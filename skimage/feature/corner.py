@@ -200,7 +200,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order=
 
     # Apply two successive first order Gaussian derivative operations, as
     # detailed in:
-    # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct  # noqa
+    # https://dsp.stackexchange.com/questions/78280/are-scipy-second-order-gaussian-derivatives-correct
 
     # 1.) First order along one axis while smoothing (order=0) along the other
     ndim = image.ndim

@@ -148,9 +148,8 @@ Metrics = [
     '.spin/cmds.py:asv'
 ]
 
-[tool.black]
-target-version = ['py310', 'py311', 'py312']
-skip-string-normalization = 1
+[tool.ruff.format]
+quote-style = "preserve"
 
 [tool.ruff.lint]
 select = [

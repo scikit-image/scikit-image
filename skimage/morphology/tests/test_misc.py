@@ -273,7 +273,6 @@ def test_float_input_holes():
 
 
 class Test_remove_near_objects:
-
     @pytest.mark.parametrize("min_distance", [2.1, 5, 30.99, 49])
     @pytest.mark.parametrize("dtype", supported_dtypes)
     def test_min_distance_1d(self, min_distance, dtype):

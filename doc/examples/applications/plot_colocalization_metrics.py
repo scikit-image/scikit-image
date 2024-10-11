@@ -26,7 +26,6 @@ area?
 # and assume that whatever is not in the nucleus is in the cytoplasm.
 # The protein, "protein A", will be simulated as blobs and segmented.
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap

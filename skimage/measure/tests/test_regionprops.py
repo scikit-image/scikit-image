@@ -1,4 +1,5 @@
 import math
+import pickle
 
 import re
 import numpy as np
@@ -1534,3 +1535,18 @@ def test_3d_ellipsoid_axis_lengths():
     # verify that the axis length regionprops also agree
     assert abs(rp.axis_major_length - axis_lengths[0]) < 1e-7
     assert abs(rp.axis_minor_length - axis_lengths[-1]) < 1e-7
+
+
+def test_pickling_region_properties():
+    # Check that RegionProperties can be pickled & unpickled (gh-6465)
+
+    # Prepare RegionProperties object
+    label_image = np.zeros((10, 10), dtype=int)
+    label_image[:, 0:5] = 1
+    regions = regionprops(label_image)
+    assert len(regions) == 1
+
+    # pickle and unpickle
+    pickled = pickle.dumps(regions[0])
+    unpickled = pickle.loads(pickled)  # RecursionError here
+    assert regions[0] == unpickled

@@ -1,6 +1,4 @@
-"""Image restoration module.
-
-"""
+"""Image restoration module."""
 
 import lazy_loader as _lazy
 
