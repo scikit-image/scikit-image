@@ -24,10 +24,10 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79 # frozen: v0.6.9
-
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
     rev: 9247866fce7128f2c0eaf4a09f437880397d4689 # frozen: v0.16.2
