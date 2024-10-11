@@ -1546,7 +1546,7 @@ def test_pickling_region_properties():
     regions = regionprops(label_image)
     assert len(regions) == 1
 
-    #pickle and unpickle
+    # pickle and unpickle
     pickled = pickle.dumps(regions[0])
-    unpickled = pickle.loads(pickled) #RecursionError here
+    unpickled = pickle.loads(pickled)  # RecursionError here
     assert regions[0] == unpickled

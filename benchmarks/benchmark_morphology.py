@@ -254,7 +254,6 @@ class LocalMaxima:
 
 
 class RemoveObjectsByDistance:
-
     param_names = ["min_distance"]
     params = [5, 100]
 
