@@ -292,7 +292,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
     References
     ----------
-    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
+    .. [1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
     """
     axis_lengths = []
     for ax in range(2, -1, -1):
