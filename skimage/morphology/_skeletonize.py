@@ -5,7 +5,7 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import check_nD, deprecate_func
+from .._shared.utils import check_nD
 from ..util import crop
 from ._skeletonize_lee_cy import _compute_thin_image
 from ._skeletonize_various_cy import (
@@ -115,7 +115,7 @@ def _skeletonize_zhang(image):
 
     See Also
     --------
-    medial_axis, skeletonize, skeletonize_3d, thin
+    medial_axis, skeletonize, thin
 
     Notes
     -----
@@ -632,7 +632,7 @@ def _skeletonize_lee(image):
     # make sure the image is 3D or 2D
     if image.ndim < 2 or image.ndim > 3:
         raise ValueError(
-            "skeletonize_3d can only handle 2D or 3D images; "
+            "skeletonize can only handle 2D or 3D images; "
             f"got image.ndim = {image.ndim} instead."
         )
 
@@ -653,15 +653,3 @@ def _skeletonize_lee(image):
         image_o = image_o[0]
 
     return image_o
-
-
-def skeletonize_3d(image):
-    return _skeletonize_lee(image)
-
-
-skeletonize_3d.__doc__ = _skeletonize_lee.__doc__
-skeletonize_3d = deprecate_func(
-    deprecated_version="0.23",
-    removed_version="0.25",
-    hint="Use `skimage.morphology.skeletonize` instead.",
-)(skeletonize_3d)
