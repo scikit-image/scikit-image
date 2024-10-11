@@ -132,7 +132,9 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
             for n, v in _getmembers(item):
                 try:
                     item_name = getattr(
-                        v, '__name__', "%s.%s" % (name, n)  # noqa: UP031
+                        v,
+                        '__name__',
+                        "%s.%s" % (name, n),  # noqa: UP031
                     )  # noqa: UP031
                     mod_name = getattr(v, '__module__', None)
                 except NameError:

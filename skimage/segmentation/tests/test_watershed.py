@@ -1,5 +1,4 @@
-"""test_watershed.py - tests the watershed function
-"""
+"""test_watershed.py - tests the watershed function"""
 
 import math
 import unittest
