@@ -126,6 +126,7 @@ sphinx_gallery_conf = {
     },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
+    "parallel": True,  # Same number of jobs as Sphinx flag `-j`
 }
 
 

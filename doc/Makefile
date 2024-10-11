@@ -3,7 +3,7 @@
 
 # You can set these variables from the command line.
 PYTHON        ?= python
-SPHINXOPTS    ?= -j1
+SPHINXOPTS    ?= -j auto
 SPHINXBUILD   ?= $(PYTHON) -m sphinx
 SPHINXCACHE   ?= build/doctrees
 PAPER         ?=
