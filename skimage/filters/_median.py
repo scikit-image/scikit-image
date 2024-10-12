@@ -48,7 +48,7 @@ def median(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     See also

@@ -45,7 +45,7 @@ def quickshift(
     convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
