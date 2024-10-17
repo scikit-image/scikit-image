@@ -12,7 +12,9 @@ from ..util import img_as_float
 from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
-def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=False):
+def graycomatrix(
+    image, distances, angles, levels=None, symmetric=False, normed=False, *, mask=None
+):
     """Calculate the gray-level co-occurrence matrix.
 
     A gray level co-occurrence matrix is a histogram of co-occurring
@@ -48,6 +50,8 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
+    mask : array_like, optional
+        Boolean mask. Pixels with value zero (False) are ignored.
 
     Returns
     -------
@@ -135,6 +139,13 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
 
     if levels is None:
         levels = 256
+
+    if mask is not None:
+        if mask.shape != image.shape or mask.dtype != np.bool_:
+            raise ValueError(
+                "The mask must have the same shape as the image and be of boolean type."
+            )
+        image[~mask] = np.iinfo(image.dtype).max
 
     if image_max >= levels:
         raise ValueError(
