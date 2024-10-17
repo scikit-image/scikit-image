@@ -105,8 +105,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
 
     # use sparse matrix linear algebra to compute VI
     # first, compute the inverse diagonal matrices
-    px_inv = sparse.diags_array(_invert_nonzero(px))
-    py_inv = sparse.diags_array(_invert_nonzero(py))
+    px_inv = sparse.dia_array((_invert_nonzero(px), 0), shape=(n := len(px), n))
+    py_inv = sparse.dia_array((_invert_nonzero(py), 0), shape=(n := len(py), n))
 
     # then, compute the entropies
     hygx = -px @ _xlogx(px_inv @ pxy).sum(axis=1)

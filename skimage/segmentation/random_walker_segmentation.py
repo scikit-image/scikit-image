@@ -208,7 +208,8 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
                 )
             M = None
         elif mode == 'cg_j':
-            M = sparse.diags_array(1.0 / lap_sparse.diagonal())
+            n = lap_sparse.shape[-1]
+            M = sparse.dia_array((1.0 / lap_sparse.diagonal(), 0), shape=(n, n))
         else:
             # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
