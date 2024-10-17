@@ -145,9 +145,9 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
-    lap = sparse.coo_array((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
+    lap = sparse.csr_array((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
     lap.setdiag(-np.ravel(lap.sum(axis=0)))
-    return lap.tocsr()
+    return lap
 
 
 def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichannel):
@@ -212,6 +212,8 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         else:
             # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
+            lap_sparse.indptr = lap_sparse.indptr.astype('int32')
+            lap_sparse.indices = lap_sparse.indices.astype('int32')
             ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30

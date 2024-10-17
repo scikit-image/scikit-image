@@ -34,5 +34,5 @@ def contingency_table(im_true, im_test, *, ignore_labels=None, normalize=False):
     data = np.isin(im_true_r, ignore_labels, invert=True).astype(float)
     if normalize:
         data /= np.count_nonzero(data)
-    cont = sparse.coo_array((data, (im_true_r, im_test_r))).tocsr()
+    cont = sparse.csr_array((data, (im_true_r, im_test_r)))
     return cont

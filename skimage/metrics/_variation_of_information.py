@@ -61,7 +61,7 @@ def _xlogx(x):
     """
     y = x.copy()
     print(y)
-    if isinstance(y, sparse.csc_array) or isinstance(y, sparse.csr_array):
+    if sparse.issparse(y) and y.format in ('csc', 'csr'):
         z = y.data
     else:
         z = np.asarray(y)  # ensure np.matrix converted to np.array

@@ -113,7 +113,8 @@ def test_2d_cg_mg(dtype):
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
     anticipated_warnings = [
-        f'scipy.sparse.sparsetools|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg'
+        f'conversion of A to CSR|scipy.sparse.sparsetools|'
+        f'{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg'
     ]
     with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
@@ -147,7 +148,10 @@ def test_types():
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    with expected_warnings([f"{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"]):
+    anticipated_warnings = [
+        f"conversion of A to CSR|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"
+    ]
+    with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
