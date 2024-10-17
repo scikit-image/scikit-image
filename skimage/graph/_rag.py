@@ -437,13 +437,12 @@ def rag_boundary(labels, edge_map, connectivity=2):
 
     # use a dummy broadcast array as data for RAG
     ones = np.broadcast_to(1.0, labels_small.shape)
-    count_matrix = sparse.coo_array(
+    count_matrix = sparse.csr_array(
         (ones, (labels_small, labels_large)), dtype=int, shape=(n, n)
-    ).tocsr()
+    )
     data = np.concatenate((edge_map[boundaries0], edge_map[boundaries1]))
 
-    data_coo = sparse.coo_array((data, (labels_small, labels_large)))
-    graph_matrix = data_coo.tocsr()
+    graph_matrix = sparse.csr_array((data, (labels_small, labels_large)))
     graph_matrix.data /= count_matrix.data
 
     rag = RAG()
