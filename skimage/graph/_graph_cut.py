@@ -165,7 +165,7 @@ def partition_by_cut(cut, rag):
     """
     # `cut` is derived from `D` and `W` matrices, which also follow the
     # ordering returned by `rag.nodes()` because we use
-    # nx.to_scipy_sparse_matrix.
+    # nx.to_scipy_sparse_array.
 
     # Example
     # rag.nodes() = [3, 7, 9, 13]
