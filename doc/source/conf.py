@@ -216,9 +216,7 @@ latex_documents = [
     ),
 ]
 latex_elements = {}
-latex_elements[
-    "preamble"
-] = r"""
+latex_elements["preamble"] = r"""
 \usepackage{enumitem}
 \setlistdepth{100}
 

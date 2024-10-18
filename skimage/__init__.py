@@ -178,7 +178,7 @@ if 'dev' in __version__:
             )
             __version__ += f'+git{git_date}.{git_hash}'
 
-from skimage._shared.tester import PytestTester  # noqa
+from skimage._shared.tester import PytestTester
 
 test = PytestTester(__name__)
 del PytestTester
