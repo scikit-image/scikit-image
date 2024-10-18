@@ -18,7 +18,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
     elif method is None:
         out = block
     else:
-        raise ValueError(f'Selected block normalization method \'{method}\' is invalid')
+        raise ValueError(f'Unexpected block normalization method: {method}')
 
     return out
 
@@ -95,7 +95,7 @@ def hog(
            renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
         None:
-            No normalization step is performed. 
+            No normalization step is performed.
 
     visualize : bool, optional
         Also return an image of the HOG.  For each cell and orientation bin,
