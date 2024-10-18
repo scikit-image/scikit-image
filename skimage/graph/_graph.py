@@ -184,7 +184,7 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     total_shortest_path_len_list = []
     for partition in np.array_split(idxs, num_splits):
         shortest_paths = csgraph.shortest_path(
-            graph.toarray(), directed=False, indices=partition
+            sparse.coo_matrix(graph), directed=False, indices=partition
         )
         shortest_paths_no_inf = np.nan_to_num(shortest_paths)
         total_shortest_path_len_list.append(np.sum(shortest_paths_no_inf, axis=1))
