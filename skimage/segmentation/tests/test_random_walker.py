@@ -94,11 +94,15 @@ def test_2d_cg(dtype):
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         full_prob = random_walker(
             data, labels, beta=90, mode='cg', return_full_prob=True
         )
@@ -113,7 +117,7 @@ def test_2d_cg_mg(dtype):
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
     anticipated_warnings = [
-        f'conversion of A to CSR|scipy.sparse.sparsetools|'
+        f'Changing the sparsity structure|conversion of A to CSR|scipy.sparse.sparsetools|'
         f'{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg'
     ]
     with expected_warnings(anticipated_warnings):
@@ -149,7 +153,7 @@ def test_types():
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
     anticipated_warnings = [
-        f"conversion of A to CSR|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"
+        f"Changing the sparsity structure|conversion of A to CSR|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"
     ]
     with expected_warnings(anticipated_warnings):
         labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
@@ -197,7 +201,9 @@ def test_3d(dtype):
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data.astype(dtype, copy=False)
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -208,7 +214,11 @@ def test_3d_inactive():
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     labels[5:25, 26:29, 26:29] = -1
-    with expected_warnings(['"cg" mode|CObject type|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|"cg" mode|CObject type|scipy.sparse.linalg.cg'
+        ]
+    ):
         labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     assert data.shape == labels.shape
@@ -224,13 +234,18 @@ def test_multispectral_2d(dtype, channel_axis):
 
     data = np.moveaxis(data, -1, channel_axis)
     with expected_warnings(
-        ['"cg" mode|scipy.sparse.linalg.cg', 'The probability range is outside']
+        [
+            'Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg',
+            'The probability range is outside',
+        ]
     ):
         multi_labels = random_walker(data, labels, mode='cg', channel_axis=channel_axis)
     data = np.moveaxis(data, channel_axis, -1)
 
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
     assert data[..., 0].shape == labels.shape
@@ -243,10 +258,14 @@ def test_multispectral_3d(dtype):
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     data = data.astype(dtype, copy=False)
     data = data[..., np.newaxis].repeat(2, axis=-1)  # Expect identical output
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         multi_labels = random_walker(data, labels, mode='cg', channel_axis=-1)
     assert data[..., 0].shape == labels.shape
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
@@ -274,7 +293,9 @@ def test_spacing_0():
     ] = 2
 
     # Test with `spacing` kwarg
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         labels_aniso = random_walker(
             data_aniso, labels_aniso, mode='cg', spacing=(1.0, 1.0, 0.5)
         )
@@ -313,7 +334,9 @@ def test_spacing_1():
 
     # Test with `spacing` kwarg
     # First, anisotropic along Y
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         labels_aniso = random_walker(
             data_aniso, labels_aniso, mode='cg', spacing=(1.0, 2.0, 1.0)
         )
@@ -334,7 +357,9 @@ def test_spacing_1():
     labels_aniso2[lx - small_l // 2, ly // 2 + small_l // 4, lz // 2 - small_l // 4] = 2
 
     # Anisotropic along X
-    with expected_warnings(['"cg" mode|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
+    ):
         labels_aniso2 = random_walker(
             data_aniso, labels_aniso2, mode='cg', spacing=(2.0, 1.0, 1.0)
         )
@@ -437,10 +462,18 @@ def test_isolated_seeds():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    with expected_warnings(['The probability range is outside|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|The probability range is outside|scipy.sparse.linalg.cg'
+        ]
+    ):
         res = random_walker(a, mask)
     assert res[1, 1] == 1
-    with expected_warnings(['The probability range is outside|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|The probability range is outside|scipy.sparse.linalg.cg'
+        ]
+    ):
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 1
     assert res[1, 1, 1] == 0
@@ -459,10 +492,18 @@ def test_isolated_area():
     mask[6, 6] = 1
 
     # Test that no error is raised, and that labels of isolated seeds are OK
-    with expected_warnings(['The probability range is outside|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|The probability range is outside|scipy.sparse.linalg.cg'
+        ]
+    ):
         res = random_walker(a, mask)
     assert res[1, 1] == 0
-    with expected_warnings(['The probability range is outside|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|The probability range is outside|scipy.sparse.linalg.cg'
+        ]
+    ):
         res = random_walker(a, mask, return_full_prob=True)
     assert res[0, 1, 1] == 0
     assert res[1, 1, 1] == 0
@@ -480,7 +521,11 @@ def test_prob_tol():
     mask[4, 4] = 2
     mask[6, 6] = 1
 
-    with expected_warnings(['The probability range is outside|scipy.sparse.linalg.cg']):
+    with expected_warnings(
+        [
+            'Changing the sparsity structure|The probability range is outside|scipy.sparse.linalg.cg'
+        ]
+    ):
         res = random_walker(a, mask, return_full_prob=True)
 
     # Lower beta, no warning is expected.
