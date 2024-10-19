@@ -117,7 +117,7 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
                             try:
                                 sys.stdout = StringIO()
                                 sys.stderr = StringIO()
-                                __import__("%s.%s" % (name, to_import))  # noqa: UP031
+                                __import__(f"{name}.{to_import}")
                             finally:
                                 sys.stdout = old_stdout
                                 sys.stderr = old_stderr
@@ -132,16 +132,18 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
             for n, v in _getmembers(item):
                 try:
                     item_name = getattr(
-                        v, '__name__', "%s.%s" % (name, n)  # noqa: UP031
-                    )  # noqa: UP031
+                        v,
+                        '__name__',
+                        f"{name}.{n}",
+                    )
                     mod_name = getattr(v, '__module__', None)
                 except NameError:
                     # ref. SWIG's global cvars
                     #    NameError: Unknown C global variable
-                    item_name = "%s.%s" % (name, n)  # noqa: UP031
+                    item_name = f"{name}.{n}"
                     mod_name = None
                 if '.' not in item_name and mod_name:
-                    item_name = "%s.%s" % (mod_name, item_name)  # noqa: UP031
+                    item_name = f"{mod_name}.{item_name}"
 
                 if not item_name.startswith(name + '.'):
                     # don't crawl "foreign" objects
@@ -152,11 +154,11 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
                         continue
                 elif not (inspect.ismodule(v) or _all is None or n in _all):
                     continue
-                stack.append(("%s.%s" % (name, n), v))  # noqa: UP031
+                stack.append((f"{name}.{n}", v))
         elif inspect.isclass(item):
             kind = "class"
             for n, v in _getmembers(item):
-                stack.append(("%s.%s" % (name, n), v))  # noqa: UP031
+                stack.append((f"{name}.{n}", v))
         elif hasattr(item, "__call__"):
             kind = "func"
 
@@ -264,7 +266,7 @@ def lookfor(what, module=None, import_modules=True, regenerate=False, output=Non
     found.sort(key=relevance_value)
 
     # Pretty-print
-    s = "Search results for '{}'".format(' '.join(whats))
+    s = f"Search results for '{' '.join(whats)}'"
     help_text = [s, "-" * len(s)]
     for name in found[::-1]:
         doc, kind, ix = cache[name]
@@ -278,7 +280,7 @@ def lookfor(what, module=None, import_modules=True, regenerate=False, output=Non
                 first_doc = doclines[1].strip()
         except IndexError:
             first_doc = ""
-        help_text.append("%s\n    %s" % (name, first_doc))  # noqa: UP031
+        help_text.append(f"{name}\n    {first_doc}")
 
     if not found:
         help_text.append("Nothing found.")
