@@ -134,7 +134,7 @@ def test_notification_raised(fake_backends):
     ],
 )
 def test_module_name_determination(func, expected):
-    module_name = _backends.get_module_name(func)
+    module_name = _backends.public_api_name(func)
 
     assert module_name == expected
 

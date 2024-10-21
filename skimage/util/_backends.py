@@ -25,8 +25,8 @@ def dispatching_disabled():
         return False
 
 
-def get_module_name(func):
-    """Get the public module name of a scikit-image function.
+def public_api_name(func):
+    """Get the name of the public module for a scikit-image function.
 
     This computes the name of the public submodule in which the function can
     be found.
@@ -78,7 +78,7 @@ def dispatchable(func):
     then the scikit-image implementation is used.
     """
     func_name = func.__name__
-    func_module = get_module_name(func)
+    func_module = public_api_name(func)
 
     # If no backends are installed at all or dispatching is disabled,
     # return the original function. This way people who don't care about it
