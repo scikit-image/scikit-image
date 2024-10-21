@@ -16,7 +16,7 @@ def _entry_points(group):
     return selected_entry_points
 
 
-def disable_dispatching():
+def dispatching_disabled():
     """Determine if dispatching has been disabled by the user"""
     no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
     if no_dispatching == "1":
@@ -83,7 +83,7 @@ def dispatchable(func):
     # If no backends are installed at all or dispatching is disabled,
     # return the original function. This way people who don't care about it
     # don't see anything related to dispatching
-    if disable_dispatching() or not all_backends():
+    if dispatching_disabled() or not all_backends():
         return func
 
     @functools.wraps(func)
