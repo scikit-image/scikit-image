@@ -92,8 +92,8 @@ def plot_matched_features(
 
     Notes
     -----
-    To make a color palette work for any number of `matches`, you can wrap the palette
-    in :func:`itertools.cycle`.
+    To make a sequence of colors passed to `matches_color` work for any number of
+    `matches`, you can wrap that sequence in :func:`itertools.cycle`.
     """
     image0 = img_as_float(image0)
     image1 = img_as_float(image1)
