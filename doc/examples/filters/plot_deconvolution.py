@@ -2,8 +2,8 @@
 =====================
 Image Deconvolution
 =====================
-In this example, we deconvolve an image using Richardson-Lucy
-deconvolution algorithm ([1]_, [2]_).
+In this example, we deconvolve an image using Lucy-Richardson or
+Richardson-Lucy deconvolution algorithm ([1]_, [2]_).
 
 The algorithm is based on a PSF (Point Spread Function),
 where PSF is described as the impulse response of the
@@ -26,15 +26,23 @@ from skimage import color, data, restoration
 
 rng = np.random.default_rng()
 
+# Convert astronaut's image to grayscale
 astro = color.rgb2gray(data.astronaut())
 
+# Define the Point Spread Function (PSF)
 psf = np.ones((5, 5)) / 25
-astro = conv2(astro, psf, 'same')
-# Add Noise to Image
-astro_noisy = astro.copy()
-astro_noisy += (rng.poisson(lam=25, size=astro.shape) - 10) / 255.0
 
-# Restore Image using Richardson-Lucy algorithm
+# Convolve image with the PSF to simulate a blurred image
+astro_blurred = conv2(astro, psf, 'same')
+
+# Introduce poisson noise to the blurred image
+max_photon_count = 100
+astro_noisy = rng.poisson(astro_blurred * max_photon_count) / max_photon_count
+
+# Normalize the noisy image for skimage
+astro_noisy /= np.max(astro_noisy)
+
+# Restore image using `richardson_lucy` algorithm
 deconvolved_RL = restoration.richardson_lucy(astro_noisy, psf, num_iter=30)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
