@@ -65,8 +65,8 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.3',
-    'sphinx-gallery[parallel]>=0.17',
+    'sphinx>=8.0',
+    'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'matplotlib>=3.7',
@@ -78,11 +78,11 @@ docs = [
     'myst-parser',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=5.10',
+    'plotly>=5.20',
     'kaleido',
     'scikit-learn>=1.2',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.15.4',
+    'pydata-sphinx-theme>=0.16',
     'PyWavelets>=1.1.1',
     'pytest-doctestplus',
 ]
