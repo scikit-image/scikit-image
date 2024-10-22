@@ -37,7 +37,7 @@ class BRIEF(DescriptorExtractor):
     mode : {'normal', 'uniform'}, optional
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator (RNG).
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.

@@ -208,3 +208,12 @@ ignored_user_logins = [
     "web-flow",
     "pre-commit-ci[bot]"
 ]
+
+
+[tool.docstub.known_imports]
+skimage = {import = "skimage"}
+numpy = {import = "numpy"}
+scipy = {import = "scipy"}
+matplotlib = {import = "matplotlib"}
+sklearn = {import = "sklearn"}
+pathlib = {import = "pathlib"}
