@@ -169,13 +169,11 @@ def structural_similarity(
         raise ValueError("sigma must be positive")
     use_sample_covariance = kwargs.pop('use_sample_covariance', True)
 
-    if gaussian_weights:
-        # Set to give an 11-tap filter with the default sigma of 1.5 to match
-        # Wang et. al. 2004.
-        truncate = 3.5
-
     if win_size is None:
         if gaussian_weights:
+            # Set to give an 11-tap filter with the default sigma of 1.5 to match
+            # Wang et. al. 2004.
+            truncate = 3.5
             # set win_size used by crop to match the filter size
             r = int(truncate * sigma + 0.5)  # radius as in ndimage
             win_size = 2 * r + 1
