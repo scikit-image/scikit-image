@@ -9,7 +9,7 @@ __all__ = ["_dispatchable"]
 _logger = logging.getLogger(__name__)
 
 
-def _get_backends(group):
+def _get_backends(group, load_and_call=False):
     items = entry_points(group=group)
     rv = {}
     for ep in items:
@@ -19,12 +19,22 @@ def _get_backends(group):
                 RuntimeWarning,
                 stacklevel=2,
             )
+        elif load_and_call:
+            try:
+                rv[ep.name] = ep.load()()
+            except Exception as exc:
+                warnings.warn(
+                    f"Error encountered when loading info for backend {ep.name}: {exc}",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
         else:
             rv[ep.name] = ep
     return rv
 
 
 backends = _get_backends("skimage.backends")
+backend_info = _get_backends("skimage.backends.info", load_and_call=True)
 
 
 def _dispatchable(
@@ -34,13 +44,13 @@ def _dispatchable(
     def wrapper(*args, **kwargs):
         for arg in args:
             if hasattr(arg, "__skimage_backend__"):
-                backend_name = arg.__skimage_backend__  # will be changed?
+                backend_name = (
+                    arg.__skimage_backend__
+                )  # array type (__class__.__module__: __class__.__qualname__)
                 if backend_name in backends:
                     backend_entry_point = backends[backend_name]
                     backend_module = backend_entry_point.load()
-                    backend_func = getattr(
-                        backend_module, func.__name__, None
-                    )  # not sure if it is possible to have a "flat" namespace in skimage, like it is done in networkx.
+                    backend_func = getattr(backend_module, func.__name__, None)
                     if backend_func:
                         _logger.info(
                             f"Running {func.__name__} with {backend_name} backend with args:{args} and kwargs:{kwargs}"
