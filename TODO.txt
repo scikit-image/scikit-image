@@ -36,10 +36,6 @@ Other
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
-* Remove ``except AttributeError`` block in
-  ``skimage/segmentation/random_walker_segmentation.py`` as well as the warning filter
-  in ``pyproject.toml``, once pyamg supports NumPy 2
-  (see https://github.com/pyamg/pyamg/issues/406).
 * Delete FREE_THREADED_BUILD block in tools/github/before_install.sh once free-threaded
   wheels for scipy, numpy, cython and pywavelets, ... are available on PyPi
 
