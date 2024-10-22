@@ -34,8 +34,8 @@ def structural_similarity(
         Images. Any dimensionality with same shape.
     win_size : int or None, optional
         The side-length of the sliding window used in comparison. Must be an
-        odd value. If `gaussian_weights` is True, this is ignored and the
-        window size will depend on `sigma`.
+        odd value. If `gaussian_weights` is True and `win_size` is None, the
+        window size will depend on `sigma`. Default is 7.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     data_range : float, optional
