@@ -113,22 +113,19 @@ def dispatchable(func):
             if not wants_it:
                 continue
 
-            # can_has("foo", ...) might be True, but the function might not actually
-            # be implemented in the backend
             func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
-            if func_impl is not None:
-                warnings.warn(
-                    f"Call to '{func_module}:{func_name}' was dispatched to"
-                    f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
-                    " disable this.",
-                    DispatchNotification,
-                    # XXX from where should this warning originate?
-                    # XXX from where the function that was dispatched was called?
-                    # XXX or from where the user called a function that called
-                    # XXX a function that was dispatched?
-                    stacklevel=2,
-                )
-                return func_impl(*args, **kwargs)
+            warnings.warn(
+                f"Call to '{func_module}:{func_name}' was dispatched to"
+                f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
+                " disable this.",
+                DispatchNotification,
+                # XXX from where should this warning originate?
+                # XXX from where the function that was dispatched was called?
+                # XXX or from where the user called a function that called
+                # XXX a function that was dispatched?
+                stacklevel=2,
+            )
+            return func_impl(*args, **kwargs)
 
         else:
             return func(*args, **kwargs)
