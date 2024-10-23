@@ -39,7 +39,7 @@ astro_blurred = conv2(astro, psf, 'same')
 max_photon_count = 100
 astro_noisy = rng.poisson(astro_blurred * max_photon_count) / max_photon_count
 
-# Normalize the noisy image for skimage
+# Normalize the noisy image to match what skimage expects
 astro_noisy /= np.max(astro_noisy)
 
 # Restore image using `richardson_lucy` algorithm
