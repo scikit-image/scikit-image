@@ -26,7 +26,7 @@ from skimage import color, data, restoration
 
 rng = np.random.default_rng()
 
-# Convert astronaut's image to grayscale
+# Convert astronaut image to grayscale
 astro = color.rgb2gray(data.astronaut())
 
 # Define the Point Spread Function (PSF)
