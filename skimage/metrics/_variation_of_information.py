@@ -60,7 +60,6 @@ def _xlogx(x):
         Result of x * log_2(x).
     """
     y = x.copy()
-    print(y)
     if sparse.issparse(y) and y.format in ('csc', 'csr'):
         z = y.data
     else:
