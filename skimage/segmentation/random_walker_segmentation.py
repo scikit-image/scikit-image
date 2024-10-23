@@ -145,9 +145,9 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
-    lap = sparse.coo_matrix((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
+    lap = sparse.csr_array((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
     lap.setdiag(-np.ravel(lap.sum(axis=0)))
-    return lap.tocsr()
+    return lap
 
 
 def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichannel):
@@ -174,10 +174,10 @@ def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichanne
     B = -rows[:, seeds_indices]
 
     seeds = labels[seeds_mask]
-    seeds_mask = sparse.csc_matrix(
+    seeds_mask = sparse.csc_array(
         np.hstack([np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)])
     )
-    rhs = B.dot(seeds_mask)
+    rhs = B @ seeds_mask
 
     return lap_sparse, rhs
 
@@ -208,16 +208,19 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
                 )
             M = None
         elif mode == 'cg_j':
-            M = sparse.diags(1.0 / lap_sparse.diagonal())
+            n = lap_sparse.shape[-1]
+            M = sparse.dia_array((1.0 / lap_sparse.diagonal(), 0), shape=(n, n))
         else:
             # mode == 'cg_mg'
             lap_sparse = lap_sparse.tocsr()
+            lap_sparse.indptr = lap_sparse.indptr.astype('int32')
+            lap_sparse.indices = lap_sparse.indices.astype('int32')
             ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         rtol = {SCIPY_CG_TOL_PARAM_NAME: tol}
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), **rtol, atol=0, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, [i]].toarray(), **rtol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])
         ]
         if np.any([info > 0 for _, info in cg_out]):

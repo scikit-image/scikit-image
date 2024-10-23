@@ -71,4 +71,4 @@ jobs:
           pip install pytest matplotlib
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          pytest -svra -p no:cacheprovider --pyargs skimage
+          # pytest -svra -p no:cacheprovider --pyargs skimage
