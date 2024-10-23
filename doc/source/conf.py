@@ -126,6 +126,8 @@ sphinx_gallery_conf = {
     },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
+    # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
+    "parallel": True,
 }
 
 
@@ -216,9 +218,7 @@ latex_documents = [
     ),
 ]
 latex_elements = {}
-latex_elements[
-    "preamble"
-] = r"""
+latex_elements["preamble"] = r"""
 \usepackage{enumitem}
 \setlistdepth{100}
 
