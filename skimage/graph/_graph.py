@@ -183,6 +183,8 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
     idxs = np.arange(graph.shape[0])
     total_shortest_path_len_list = []
     for partition in np.array_split(idxs, num_splits):
+        # FIXME: Once csgraph.shortest_path supports the array interface,
+        # we should pass graph directly.
         shortest_paths = csgraph.shortest_path(
             sparse.coo_matrix(graph), directed=False, indices=partition
         )

@@ -26,8 +26,6 @@ Version 0.25
 
 Other
 -----
-* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
-  to (sparse) matricies (instead of arrays).
 * Remove warningsfilter for imageio and Pillow once
   https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
   version of pillow (probably the release after Pillow 9.5.0).
@@ -38,6 +36,7 @@ Other
   see https://github.com/scikit-image/scikit-image/issues/2624
 * Delete FREE_THREADED_BUILD block in tools/github/before_install.sh once free-threaded
   wheels for scipy, numpy, cython and pywavelets, ... are available on PyPi
+* Update `central_pixel` once `sp.sparse.csgraph` supports the array interface
 
 Post numpy 2
 ------------
