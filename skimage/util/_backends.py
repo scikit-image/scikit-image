@@ -102,7 +102,7 @@ def dispatchable(func):
             backend_impl = backend["implementation"].load()
 
             # Allow the backend to accept/reject a call based on the function
-            # name and the values of the arguments
+            # name and the arguments
             wants_it = backend_impl.can_has(
                 f"{func_module}:{func_name}", *args, **kwargs
             )
