@@ -94,14 +94,10 @@ def dispatchable(func):
         # that would accept a call.
         for name in sorted(all_backends()):
             backend = all_backends()[name]
-            # If we have a BackendInformation object we check if the
-            # function we are looking for is implemented in the backend
-            if "info" in backend:
-                if (
-                    f"{func_module}:{func_name}"
-                    not in backend["info"].supported_functions
-                ):
-                    continue
+            # Check if the function we are looking for is implemented in
+            # the backend
+            if f"{func_module}:{func_name}" not in backend["info"].supported_functions:
+                continue
 
             backend_impl = backend["implementation"].load()
 

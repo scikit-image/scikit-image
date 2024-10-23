@@ -6,8 +6,8 @@ import skimage.metrics
 from skimage.util import _backends
 
 
-def mock_get_module_name(func):
-    # Unlike the real `get_module_name` this returns the actual
+def mock_public_api_name(func):
+    # Unlike the real `public_api_name` this returns the actual
     # full module name and does not perform a sanity check
     # because that test would fail for the functions we define
     # inside our tests.
@@ -68,12 +68,22 @@ def fake_backends(monkeypatch):
 
     def mock_all_backends():
         return {
-            "fake1": {"implementation": BackendEntryPoint1()},
-            "fake2": {"implementation": BackendEntryPoint2()},
+            "fake2": {
+                "implementation": BackendEntryPoint2(),
+                "info": _backends.BackendInformation(
+                    ["skimage.util.tests.test_backends:foo"]
+                ),
+            },
+            "fake1": {
+                "implementation": BackendEntryPoint1(),
+                "info": _backends.BackendInformation(
+                    ["skimage.util.tests.test_backends:foo"]
+                ),
+            },
         }
 
     monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
-    monkeypatch.setattr(_backends, "get_module_name", mock_get_module_name)
+    monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
 
 
 @pytest.fixture
@@ -84,7 +94,7 @@ def no_backends(monkeypatch):
         return {}
 
     monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
-    monkeypatch.setattr(_backends, "get_module_name", mock_get_module_name)
+    monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
 
 
 def test_no_notification_without_backends(no_backends):
@@ -118,6 +128,8 @@ def test_notification_raised(fake_backends):
 
     with pytest.warns(
         _backends.DispatchNotification,
+        # Checking for fake1 means we also check that the backends are
+        # used in the correct priority/order
         match="Call to.*:foo' was dispatched to the 'fake1' backend",
     ):
         r = foo(42)
