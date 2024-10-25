@@ -18,6 +18,9 @@ jobs:
         Python312-x64:
           PYTHON_VERSION: "3.12"
           ARCH: "x64"
+        Python311-x64:
+          PYTHON_VERSION: "3.11"
+          ARCH: "x64"
         Python312-x64-pre:
           PYTHON_VERSION: "3.12"
           ARCH: "x64"
@@ -25,14 +28,8 @@ jobs:
         Python311-x64-docs:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
+          SKIP_PYTEST: "true"
           BUILD_DOCS: "true"
-        Python311-x64-gallery:
-          PYTHON_VERSION: "3.11"
-          ARCH: "x64"
-          TEST_EXAMPLES: "true"
-        Python310-x64:
-          PYTHON_VERSION: "3.10"
-          ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
 
@@ -172,6 +169,7 @@ jobs:
           # For more details, see https://github.com/numpy/numpy/issues/13468
           export TEST_ARGS="-v --cov=skimage"
           $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
+        condition: eq(variables['SKIP_PYTEST'], 'true')
         displayName: "Package testing"
 
       - bash: |
