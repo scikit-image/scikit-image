@@ -169,7 +169,7 @@ jobs:
           # For more details, see https://github.com/numpy/numpy/issues/13468
           export TEST_ARGS="-v --cov=skimage"
           $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
-        condition: eq(variables['SKIP_PYTEST'], 'true')
+        condition: ne(variables['SKIP_PYTEST'], 'true')
         displayName: "Package testing"
 
       - bash: |
