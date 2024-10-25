@@ -12,6 +12,9 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
+        Python313-x64:
+          PYTHON_VERSION: "3.13"
+          ARCH: "x64"
         Python312-x64:
           PYTHON_VERSION: "3.12"
           ARCH: "x64"
@@ -188,7 +191,7 @@ jobs:
           # Build the documentation
           choco install optipng
           export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS=-W
+          export SPHINXOPTS="-W -j auto"
           make -C doc html
         condition: eq(variables['BUILD_DOCS'], 'true')
         displayName: "Documentation testing"
