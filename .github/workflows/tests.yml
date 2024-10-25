@@ -140,7 +140,7 @@ jobs:
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
-    runs-on: macos-12
+    runs-on: macos-13
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails

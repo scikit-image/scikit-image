@@ -1,5 +1,4 @@
-""" Testing decorators module
-"""
+"""Testing decorators module"""
 
 import inspect
 import re
