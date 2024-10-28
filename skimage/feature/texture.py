@@ -50,7 +50,7 @@ def graycomatrix(
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
-    mask : array_like, optional
+    mask : bool_array, optional
         Boolean mask. Pixels with value zero (False) are ignored.
 
     Returns
@@ -140,6 +140,8 @@ def graycomatrix(
     if levels is None:
         levels = 256
 
+    # Apply mask if provided. Masked pixels are set to maximum grayscale to
+    # place them outside of the valid computation range of `_glcm_loop`.
     if mask is not None:
         if mask.shape != image.shape or mask.dtype != np.bool_:
             raise ValueError(
