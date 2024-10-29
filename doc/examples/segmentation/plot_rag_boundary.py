@@ -13,7 +13,7 @@ between two regions is the average value of the corresponding pixels in
 """
 
 from skimage import graph
-from skimage import data, segmentation, color, filters, io
+from skimage import data, segmentation, color, filters
 from matplotlib import pyplot as plt
 
 
@@ -31,5 +31,6 @@ lc = graph.show_rag(
     labels, g, edges_rgb, img_cmap=None, ax=ax, edge_cmap='viridis', edge_width=1.2
 )
 
-fig.colorbar(lc, fraction=0.03)
+
+plt.colorbar(lc, fraction=0.03)
 plt.show()

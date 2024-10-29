@@ -8,7 +8,8 @@ foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
     c_args: cython_c_args,
-    include_directories: [incdir_numpy, '../_shared'],
+    include_directories: ['../_shared'],
+    dependencies: [np_dep],
     install: true,
     subdir: 'skimage/transform'
   )
