@@ -29,7 +29,7 @@ rng = np.random.default_rng()
 # Convert astronaut image to grayscale
 astro = color.rgb2gray(data.astronaut())
 
-# Define the Point Spread Function (PSF)
+# Define PSF
 psf = np.ones((5, 5)) / 25
 
 # Convolve image with the PSF to simulate a blurred image
