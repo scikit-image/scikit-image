@@ -19,15 +19,15 @@ iterations, which needs to be hand-tuned.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import skimage as ski
 
 from scipy.signal import convolve2d as conv2
 
-from skimage import color, data, restoration
 
 rng = np.random.default_rng()
 
 # Convert astronaut image to grayscale
-astro = color.rgb2gray(data.astronaut())
+astro = ski.color.rgb2gray(ski.data.astronaut())
 
 # Define PSF
 psf = np.ones((5, 5)) / 25
@@ -43,7 +43,7 @@ astro_noisy = rng.poisson(astro_blurred * max_photon_count) / max_photon_count
 astro_noisy /= np.max(astro_noisy)
 
 # Restore image by means of deconvolution
-deconvolved_RL = restoration.richardson_lucy(astro_noisy, psf, num_iter=30)
+deconvolved_RL = ski.restoration.richardson_lucy(astro_noisy, psf, num_iter=30)
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
 plt.gray()
