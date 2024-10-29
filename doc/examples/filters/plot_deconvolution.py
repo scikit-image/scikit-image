@@ -15,6 +15,8 @@ iterations, which needs to be hand-tuned.
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), :DOI:`10.1364/JOSA.62.000055`
 
 .. [2] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+
+.. [3] https://en.wikipedia.org/wiki/Image_noise
 """
 
 import numpy as np
@@ -35,7 +37,7 @@ psf = np.ones((5, 5)) / 25
 # Convolve image with the PSF to simulate a blurred image
 astro_blurred = conv2(astro, psf, 'same')
 
-# Introduce poisson noise to the blurred image
+# Introduce poisson noise to the blurred image ([3]_)
 max_photon_count = 100
 astro_noisy = rng.poisson(astro_blurred * max_photon_count) / max_photon_count
 
