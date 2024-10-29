@@ -140,7 +140,7 @@ def graycomatrix(
     if levels is None:
         levels = 256
 
-    # Apply mask if provided. Masked pixels are set to maximum grayscale to
+    # apply mask if provided; masked pixels are set to maximum grayscale to
     # place them outside of the computation range of `_glcm_loop`.
     if mask is not None:
         if mask.shape != image.shape or mask.dtype != np.bool_:
