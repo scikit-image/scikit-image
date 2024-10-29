@@ -2,8 +2,8 @@
 =====================
 Image Deconvolution
 =====================
-In this example, we deconvolve an image using the Lucy-Richardson /
-Richardson-Lucy algorithm ([1]_, [2]_).
+In this example, we deconvolve an image using the
+Richardson–Lucy algorithm ([1]_, [2]_).
 
 The algorithm is based on a point spread function (PSF),
 described as the impulse response of the
