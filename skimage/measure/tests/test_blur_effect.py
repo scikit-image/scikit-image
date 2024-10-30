@@ -1,5 +1,5 @@
-from numpy.testing import assert_array_equal, assert_almost_equal, assert_equal
 import numpy as np
+from numpy.testing import assert_array_equal, assert_almost_equal, assert_equal
 
 from skimage.color import rgb2gray
 from skimage.data import astronaut, cells3d
@@ -66,3 +66,10 @@ def test_blur_single_axis_constant_image():
     image = np.array([row for _ in range(1000)])
     B0 = blur_effect(image)
     assert_almost_equal(B0, 1.0, decimal=5)
+
+
+def test_blur_effect_zerodivision():
+    """Test that the blur effect function errors upon division by zero."""
+    image = np.zeros((100, 100, 3))
+    with np.testing.assert_raises(ZeroDivisionError):
+        blur_effect(image)
