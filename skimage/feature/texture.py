@@ -9,7 +9,12 @@ import numpy as np
 from .._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
-from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
+from ._texture import (
+    _glcm_loop,
+    _glcm_loop_mask,
+    _local_binary_pattern,
+    _multiblock_lbp,
+)
 
 
 def graycomatrix(
@@ -51,7 +56,7 @@ def graycomatrix(
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
     mask : bool array, optional
-        Boolean mask. Pixels with value zero (False) are ignored.
+        Boolean mask. If value is True, the pixel is ignored.
 
     Returns
     -------
@@ -140,14 +145,10 @@ def graycomatrix(
     if levels is None:
         levels = 256
 
-    # apply mask if provided; masked pixels are set to maximum grayscale to
-    # place them outside of the computation range of `_glcm_loop`.
-    if mask is not None:
-        if mask.shape != image.shape or mask.dtype != np.bool_:
-            raise ValueError(
-                "The mask must have the same shape as the image and be of boolean type."
-            )
-        image[~mask] = np.iinfo(image.dtype).max
+    if mask is not None and (mask.shape != image.shape or mask.dtype != np.bool_):
+        raise ValueError(
+            "The mask must have the same shape as the image and be of boolean type."
+        )
 
     if image_max >= levels:
         raise ValueError(
@@ -163,9 +164,13 @@ def graycomatrix(
     )
 
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
+    if mask is None:
+        _glcm_loop(image, distances, angles, levels, P)
+    else:
+        mask = np.ascontiguousarray(mask, dtype=np.bool_)
+        _glcm_loop_mask(image, mask, distances, angles, levels, P)
 
-    # make each GLMC symmetric
+    # make each GLCM symmetric
     if symmetric:
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt

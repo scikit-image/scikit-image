@@ -235,7 +235,7 @@ class TestGLCM:
 
     def test_zero_mask(self):
         mask = np.array(
-            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+            [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]],
             dtype=np.bool_,
         )
 
@@ -250,7 +250,7 @@ class TestGLCM:
         np.testing.assert_array_equal(result, expected)
 
     def test_mask(self):
-        mask = np.where(self.image != 0, 1, 0).astype(np.bool_)
+        mask = np.where(self.image == 0, 1, 0).astype(np.bool_)
         result = graycomatrix(
             self.image,
             [1],
