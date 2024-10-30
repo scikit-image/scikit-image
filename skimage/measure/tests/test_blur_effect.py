@@ -1,3 +1,4 @@
+import numpy as np
 from numpy.testing import assert_array_equal
 
 from skimage.color import rgb2gray
@@ -50,3 +51,10 @@ def test_blur_effect_3d():
     B2 = blur_effect(gaussian(image_3d, sigma=4))
     assert 0 <= B0 < 1
     assert B0 < B1 < B2
+
+
+def test_blur_effect_zerodivision():
+    """Test that the blur effect function errors upon division by zero."""
+    image = np.zeros((100, 100, 3))
+    with np.testing.raises(ZeroDivisionError):
+        blur_effect(image)
