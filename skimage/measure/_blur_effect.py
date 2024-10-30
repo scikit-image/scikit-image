@@ -86,7 +86,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         M1 = np.sum(im_sharp[slices])
         M2 = np.sum(T[slices])
         if M1 == 0:
-            raise ValueError('Division by zero will cause NaN')
+            raise ZeroDivisionError
         B.append(np.abs(M1 - M2) / M1)
 
     return B if reduce_func is None else reduce_func(B)
