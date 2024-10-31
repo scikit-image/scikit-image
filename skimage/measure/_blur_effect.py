@@ -84,9 +84,9 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         im_blur = np.abs(sobel(filt_im, axis=ax))
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
-        M2 = np.sum(T[slices])
         if M1 == 0:
             raise ZeroDivisionError
+        M2 = np.sum(T[slices])
         B.append(np.abs(M1 - M2) / M1)
 
     return B if reduce_func is None else reduce_func(B)
