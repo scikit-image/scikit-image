@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import skimage as ski
 
@@ -53,11 +54,11 @@ def test_blur_effect_3d():
     assert B0 < B1 < B2
 
 
-def test_blur_constant_image():
-    """Test that the blur metric works for a constant image."""
-    image = np.zeros((1080, 1920, 3), dtype=int)
-    B0 = ski.measure.blur_effect(image)
-    np.testing.assert_equal(B0, 1.0)
+@pytest.mark.parametrize('image', [np.zeros((100, 100, 3)), np.ones((100, 100, 3))])
+def test_blur_effect_uniform_input(image):
+    """Test that the blur metric is 1 for completely uniform images."""
+    B = ski.measure.blur_effect(image)
+    assert B == 1
 
 
 def test_blur_single_axis_constant_image():
@@ -66,10 +67,3 @@ def test_blur_single_axis_constant_image():
     image = np.array([row for _ in range(1000)])
     B0 = ski.measure.blur_effect(image)
     np.testing.assert_almost_equal(B0, 1.0, decimal=5)
-
-
-def test_blur_effect_zerodivision():
-    """Test that the blur effect function errors upon division by zero."""
-    image = np.zeros((100, 100, 3))
-    with np.testing.assert_raises(ZeroDivisionError):
-        ski.measure.blur_effect(image)
