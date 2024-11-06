@@ -212,9 +212,9 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
             M = sparse.dia_array((1.0 / lap_sparse.diagonal(), 0), shape=(n, n))
         else:
             # mode == 'cg_mg'
-            lap_sparse = lap_sparse.tocsr()
-            lap_sparse.indptr = lap_sparse.indptr.astype('int32')
-            lap_sparse.indices = lap_sparse.indices.astype('int32')
+            lap_sparse.indices, lap_sparse.indptr = _safe_downcast_indices(
+                lap_sparse, np.int32, "index values too large for int32 mode 'cg_mg'"
+            )
             ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
@@ -232,6 +232,22 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         X = np.asarray([x for x, _ in cg_out])
 
     return X
+
+
+def _safe_downcast_indices(A, itype, msg):
+    # check for safe downcasting
+    max_value = np.iinfo(itype).max
+
+    if A.indptr[-1] > max_value:  # indptr[-1] is max b/c indptr always sorted
+        raise ValueError(msg)
+
+    if max(*A.shape) > max_value:  # only check large enough arrays
+        if np.any(A.indices > max_value):
+            raise ValueError(msg)
+
+    indices = A.indices.astype(itype, copy=False)
+    indptr = A.indptr.astype(itype, copy=False)
+    return indices, indptr
 
 
 def _preprocess(labels):
