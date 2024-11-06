@@ -3,6 +3,7 @@ from scipy import sparse
 from scipy.sparse import csgraph
 from ..morphology._util import _raveled_offsets_and_distances
 from ..util._map_array import map_array
+from ..segmentation.random_walker_segmentation import _safe_downcast_indices
 
 
 def _weighted_abs_diff(values0, values1, distances):
@@ -180,14 +181,13 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
         num_splits = 1
     else:
         num_splits = max(2, graph.shape[0] // partition_size)
+    graph.indices, graph.indptr = _safe_downcast_indices(
+        graph, np.int32, 'index values too large for csgraph'
+    )
     idxs = np.arange(graph.shape[0])
     total_shortest_path_len_list = []
     for partition in np.array_split(idxs, num_splits):
-        # FIXME: Once csgraph.shortest_path supports the array interface,
-        # we should pass graph directly.
-        shortest_paths = csgraph.shortest_path(
-            sparse.coo_matrix(graph), directed=False, indices=partition
-        )
+        shortest_paths = csgraph.shortest_path(graph, directed=False, indices=partition)
         shortest_paths_no_inf = np.nan_to_num(shortest_paths)
         total_shortest_path_len_list.append(np.sum(shortest_paths_no_inf, axis=1))
     total_shortest_path_len = np.concatenate(total_shortest_path_len_list)
