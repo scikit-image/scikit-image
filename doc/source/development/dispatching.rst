@@ -50,12 +50,13 @@ This entrypoint should point to a namespace that contains two functions:
 `can_has(name, *args, **kwargs)` and `get_implementation(name)`. They will be used to
 determine if the backend will be called and to get the actual implementation.
 
-When a user calls a function that the backend listed as one that it implements the
+When a user calls a function that the backend listed as one that it implements (via
+the information endpoint) the
 `can_has` function will be called with the name of the function that is being dispatched
-and the arguments the user provided when calling the function. The function should use
-this information to determine if the backend wants to be called or if a different backend
-should be tried. A backend might implement a particular function but only want to handle
-calls where the input arrays are of a particuler type or size.
+and the arguments the user provided when calling the function. The `can_has` function
+should use this information to determine if the backend wants to be called or if a
+different backend should be tried. A backend might implement a particular function but
+only want to handle calls where the input arrays are of a particuler type or size.
 
 If your backend can not handle a particular call the `can_has` function should return as
 quickly as possible. This means you should perform fast checks first and more expensive
@@ -64,6 +65,9 @@ checks later in your `can_has` function.
 If the `can_has` function indicates that the backend wants to handle the call the
 `get_implementation(name)` function is called to get the implementation. This should
 return the function that implements the behaviour of the function `name` in scikit-image.
+The `name` parameter will contain the "full name" of the function. That is the public
+module name and the function name separated by a colon. The name for the `canny` function
+from the `feature` module would be `skimage.feature:canny`.
 
 Once the implementation has been retrieved from the backend it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
@@ -71,3 +75,12 @@ arguments the user provided and it is expected to return the result of the compu
 When returning an array it has to be of the same type as the array(s) passed in to the
 function by the user. This means your implementation can convert the input to a different
 array type, but it has to convert the result back to the original array type.
+
+
+An example backend
+~~~~~~~~~~~~~~~~~~
+
+To make the ideas describe above more concrete take a look at `an example backend that implements
+a single function <https://github.com/betatim/scikit-image-backend-phony>`_.
+This example gives you an idea of how everything fits together and to see the dispatching
+in action. It is designed to make it easy to understand and experiment with.
