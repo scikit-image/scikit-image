@@ -26,6 +26,9 @@ def test_pixel_graph_return_type():
     g, n = pixel_graph(mask, connectivity=2, sparse_type="array")
     assert isinstance(g, sp.sparse.csr_array)
 
+    with pytest.raises(ValueError, match="`sparse_type` must be 'array' or 'matrix'"):
+        pixel_graph(mask, connectivity=2, sparse_type="unknown")
+
 
 @pytest.mark.parametrize("sparse_type", ["matrix", "array"])
 def test_central_pixel(sparse_type):

@@ -154,7 +154,7 @@ def pixel_graph(
     if sparse_type == "matrix":
         graph = sparse.csr_matrix(graph)
     elif sparse_type != "array":
-        msg = f"`return_type` must be 'array' or 'matrix', got {sparse_type}"
+        msg = f"`sparse_type` must be 'array' or 'matrix', got {sparse_type}"
         raise ValueError(msg)
 
     return graph, nodes
