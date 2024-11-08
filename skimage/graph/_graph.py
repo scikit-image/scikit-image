@@ -31,7 +31,15 @@ def _weighted_abs_diff(values0, values1, distances):
     return np.abs(values0 - values1) * distances
 
 
-def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing=None):
+def pixel_graph(
+    image,
+    *,
+    mask=None,
+    edge_function=None,
+    connectivity=1,
+    spacing=None,
+    sparse_type="matrix",
+):
     """Create an adjacency graph of pixels in an image.
 
     Pixels where the mask is True are nodes in the returned graph, and they are
@@ -61,12 +69,16 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
         `scipy.ndimage.generate_binary_structure` for details.
     spacing : tuple of float
         The spacing between pixels along each axis.
+    sparse_type : {"matrix", "array"}, optional
+        The return type of `graph`, either `scipy.sparse.csr_array` or
+        `scipy.sparse.csr_matrix` (default).
 
     Returns
     -------
-    graph : scipy.sparse.csr_array
+    graph : scipy.sparse.csr_matrix or scipy.sparse.csr_array
         A sparse adjacency matrix in which entry (i, j) is 1 if nodes i and j
-        are neighbors, 0 otherwise.
+        are neighbors, 0 otherwise. Depending on `sparse_type`, this can be
+        returned as a `scipy.sparse.csr_array`.
     nodes : array of int
         The nodes of the graph. These correspond to the raveled indices of the
         nonzero pixels in the mask.
@@ -138,6 +150,13 @@ def pixel_graph(image, *, mask=None, edge_function=None, connectivity=1, spacing
     graph = sparse.csr_array(
         (data, (indices_sequential, neighbor_indices_sequential)), shape=(m, m)
     )
+
+    if sparse_type == "matrix":
+        graph = sparse.csr_matrix(graph)
+    elif sparse_type != "array":
+        msg = f"`return_type` must be 'array' or 'matrix', got {sparse_type}"
+        raise ValueError(msg)
+
     return graph, nodes
 
 
@@ -149,8 +168,8 @@ def central_pixel(graph, nodes=None, shape=None, partition_size=100):
 
     Parameters
     ----------
-    graph : scipy.sparse.csr_array
-        The sparse matrix representation of the graph.
+    graph : scipy.sparse.csr_array or scipy.sparse.csr_matrix
+        The sparse representation of the graph.
     nodes : array of int
         The raveled index of each node in graph in the image. If not provided,
         the returned value will be the index in the input graph.
