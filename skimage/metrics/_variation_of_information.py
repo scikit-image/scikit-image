@@ -51,7 +51,7 @@ def _xlogx(x):
 
     Parameters
     ----------
-    x : ndarray or scipy.sparse.csc_array
+    x : ndarray or scipy.sparse.csc_array or scipy.sparse.csr_array
         The input array.
 
     Returns
