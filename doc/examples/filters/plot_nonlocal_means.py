@@ -51,7 +51,9 @@ sigma_est = np.mean(estimate_sigma(noisy, channel_axis=-1))
 print(f'estimated noise standard deviation = {sigma_est}')
 
 patch_kw = dict(
-    patch_size=5, patch_distance=6, channel_axis=-1  # 5x5 patches  # 13x13 search area
+    patch_size=5,  # 5x5 patches
+    patch_distance=6,  # 13x13 search area
+    channel_axis=-1,
 )
 
 # slow algorithm

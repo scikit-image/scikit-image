@@ -219,7 +219,7 @@ class GrayReconstruction:
 
         References
         ----------
-        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory  # noqa
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
         """
         pass
 
@@ -254,7 +254,6 @@ class LocalMaxima:
 
 
 class RemoveObjectsByDistance:
-
     param_names = ["min_distance"]
     params = [5, 100]
 

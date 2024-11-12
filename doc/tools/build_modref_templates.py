@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""Script to auto-generate our API docs.
-"""
+"""Script to auto-generate our API docs."""
 
 import sys
 
