@@ -15,7 +15,7 @@ is preferred for real-time applications.
 
 from skimage import data
 from skimage import transform
-from skimage.feature import match_descriptors, ORB, plot_matches
+from skimage.feature import match_descriptors, ORB, plot_matched_features
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
@@ -46,11 +46,25 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
+plot_matched_features(
+    img1,
+    img2,
+    keypoints0=keypoints1,
+    keypoints1=keypoints2,
+    matches=matches12,
+    ax=ax[0],
+)
 ax[0].axis('off')
 ax[0].set_title("Original Image vs. Transformed Image")
 
-plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
+plot_matched_features(
+    img1,
+    img3,
+    keypoints0=keypoints1,
+    keypoints1=keypoints3,
+    matches=matches13,
+    ax=ax[1],
+)
 ax[1].axis('off')
 ax[1].set_title("Original Image vs. Transformed Image")
 

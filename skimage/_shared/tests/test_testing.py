@@ -1,5 +1,4 @@
-""" Testing decorators module
-"""
+"""Testing decorators module"""
 
 import inspect
 import re
@@ -13,6 +12,7 @@ from skimage._shared.testing import (
     assert_stacklevel,
 )
 from skimage._shared import testing
+from skimage._shared._dependency_checks import is_wasm
 
 from skimage._shared._warnings import expected_warnings
 from warnings import warn
@@ -82,6 +82,7 @@ def test_skipper():
         doctest_skip_parser(c)
 
 
+@pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
 def test_run_in_parallel():
     state = []
 
@@ -107,6 +108,7 @@ def test_run_in_parallel():
     assert len(state) == 6
 
 
+@pytest.mark.skipif(is_wasm, reason="Cannot run parallel code in WASM")
 def test_parallel_warning():
     @run_in_parallel()
     def change_state_warns_fails():
@@ -147,6 +149,6 @@ class Test_assert_stacklevel:
             self.raise_warning("wrong", UserWarning, stacklevel=level)
         # Check that message contains expected line on right side
         line_number = inspect.currentframe().f_lineno - 2
-        regex = ".*" + re.escape(f"!= {__file__}:{line_number}")
+        regex = ".*" + re.escape(f"Expected: {__file__}:{line_number}")
         with pytest.raises(AssertionError, match=regex):
             assert_stacklevel(record, offset=-5)

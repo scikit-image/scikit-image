@@ -64,7 +64,20 @@ if incdir_numpy == 'not-given'
   ).stdout().strip()
 endif
 
-inc_np = include_directories(incdir_numpy)
+# Don't use the deprecated NumPy C API. Define this to a fixed version instead of
+# NPY_API_VERSION in order not to break compilation for released SciPy versions
+# when NumPy introduces a new deprecation. Use in a meson.build file::
+#
+#   py3.extension_module('_name',
+#     'source_fname',
+#     numpy_nodepr_api)
+#
+numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_23_API_VERSION'
+
+np_dep = declare_dependency(
+  include_directories: incdir_numpy,
+  compile_args: numpy_nodepr_api
+)
 
 cc = meson.get_compiler('c')
 
@@ -99,16 +112,6 @@ else
   use_math_defines = []
 endif
 
-# Don't use the deprecated NumPy C API. Define this to a fixed version instead of
-# NPY_API_VERSION in order not to break compilation for released SciPy versions
-# when NumPy introduces a new deprecation. Use in a meson.build file::
-#
-#   py3.extension_module('_name',
-#     'source_fname',
-#     numpy_nodepr_api)
-#
-numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
-
 python_sources = [
   '__init__.py',
   '__init__.pyi',
@@ -123,9 +126,17 @@ py3.install_sources(
 )
 
 cython_cli = find_program('_build_utils/cythoner.py')
+cy = meson.get_compiler('cython')
+
+cython_args = ['@INPUT@', '@OUTPUT@']
+if cy.version().version_compare('>=3.1.0')
+  cython_args += ['-Xfreethreading_compatible=True']
+endif
+
+cython_cpp_args = cython_args + ['--cplus']
 
 cython_gen = generator(cython_cli,
-  arguments : ['@INPUT@', '@OUTPUT@'],
+  arguments : cython_args,
   output : '@BASENAME@.c')
 
 cython_gen_cpp = generator(cython_cli,

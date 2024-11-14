@@ -65,11 +65,11 @@ dtype_limits
 
 """
 
-__version__ = '0.23.3rc0.dev0'
+__version__ = '0.25.0rc2.dev0'
 
-import lazy_loader as lazy
+import lazy_loader as _lazy
 
-__getattr__, __lazy_dir__, _ = lazy.attach_stub(__name__, __file__)
+__getattr__, __lazy_dir__, _ = _lazy.attach_stub(__name__, __file__)
 
 
 def __dir__():
@@ -159,6 +159,8 @@ if 'dev' in __version__:
         )
     except FileNotFoundError:
         pass
+    except OSError:
+        pass  # If skimage is built with emscripten which does not support processes
     else:
         out, err = p.communicate()
         if p.returncode == 0:
@@ -176,7 +178,7 @@ if 'dev' in __version__:
             )
             __version__ += f'+git{git_date}.{git_hash}'
 
-from skimage._shared.tester import PytestTester  # noqa
+from skimage._shared.tester import PytestTester
 
 test = PytestTester(__name__)
 del PytestTester

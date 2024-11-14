@@ -30,6 +30,7 @@ __all__ = [
     'FundamentalMatrixTransform',
     'PolynomialTransform',
     'PiecewiseAffineTransform',
+    'ThinPlateSplineTransform',
     'swirl',
     'resize',
     'resize_local_mean',
@@ -65,6 +66,7 @@ from ._geometric import (
     PolynomialTransform,
     PiecewiseAffineTransform,
 )
+from ._thin_plate_splines import ThinPlateSplineTransform
 from ._warps import (
     swirl,
     resize,

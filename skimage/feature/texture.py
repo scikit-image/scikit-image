@@ -75,8 +75,10 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
 
     Examples
     --------
-    Compute 2 GLCMs: One for a 1-pixel offset to the right, and one
-    for a 1-pixel offset upwards.
+    Compute 4 GLCMs using 1-pixel distance and 4 different angles. For example,
+    an angle of 0 radians refers to the neighboring pixel to the right;
+    pi/4 radians to the top-right diagonal neighbor; pi/2 radians to the pixel
+    above, and so forth.
 
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],
@@ -180,6 +182,10 @@ def graycoprops(P, prop='contrast'):
     - 'correlation':
         .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
+    - 'mean': :math:`\\sum_{i=0}^{levels-1} i*P_{i}`
+    - 'variance': :math:`\\sum_{i=0}^{levels-1} P_{i}*(i-mean)^2`
+    - 'std': :math:`\\sqrt{variance}`
+    - 'entropy': :math:`\\sum_{i,j=0}^{levels-1} -P_{i,j}*log(P_{i,j})`
 
     Each GLCM is normalized to have a sum of 1 before the computation of
     texture properties.
@@ -196,7 +202,7 @@ def graycoprops(P, prop='contrast'):
         occurs at a distance d and at an angle theta from
         gray-level i.
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
-            'correlation', 'ASM'}, optional
+            'correlation', 'ASM', 'mean', 'variance', 'std', 'entropy'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
 
     Returns
@@ -229,6 +235,12 @@ def graycoprops(P, prop='contrast'):
            [1.25      , 2.75      ]])
 
     """
+
+    def glcm_mean():
+        I = np.arange(num_level).reshape((num_level, 1, 1, 1))
+        mean = np.sum(I * P, axis=(0, 1))
+        return I, mean
+
     check_nD(P, 4, 'P')
 
     (num_level, num_level2, num_dist, num_angle) = P.shape
@@ -253,7 +265,7 @@ def graycoprops(P, prop='contrast'):
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
         weights = 1.0 / (1.0 + (I - J) ** 2)
-    elif prop in ['ASM', 'energy', 'correlation']:
+    elif prop in ['ASM', 'energy', 'correlation', 'entropy', 'variance', 'mean', 'std']:
         pass
     else:
         raise ValueError(f'{prop} is an invalid property')
@@ -264,6 +276,19 @@ def graycoprops(P, prop='contrast'):
         results = np.sqrt(asm)
     elif prop == 'ASM':
         results = np.sum(P**2, axis=(0, 1))
+    elif prop == 'mean':
+        _, results = glcm_mean()
+    elif prop == 'variance':
+        I, mean = glcm_mean()
+        results = np.sum(P * ((I - mean) ** 2), axis=(0, 1))
+    elif prop == 'std':
+        I, mean = glcm_mean()
+        var = np.sum(P * ((I - mean) ** 2), axis=(0, 1))
+        results = np.sqrt(var)
+    elif prop == 'entropy':
+        ln = -np.log(P, where=(P != 0), out=np.zeros_like(P))
+        results = np.sum(P * ln, axis=(0, 1))
+
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))

@@ -15,6 +15,7 @@ classifiers = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -25,11 +26,11 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.23',
-    'scipy>=1.9',
-    'networkx>=2.8',
+    'numpy>=1.24',
+    'scipy>=1.11',
+    'networkx>=3.0',
     'pillow>=9.1',
-    'imageio>=2.33',
+    'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
     'packaging>=21',
     'lazy-loader>=0.4',
@@ -50,11 +51,11 @@ build = [
     'setuptools>=67',
     'packaging>=21',
     'ninja',
-    'Cython>=3.0.4',
+    'Cython>=3.0.8',
     'pythran',
-    'numpy>=2.0.0rc1',
+    'numpy>=2.0.0',
     # Developer UI
-    'spin==0.8',
+    'spin==0.12',
     'build',
 ]
 data = ['pooch>=1.6.0']
@@ -64,25 +65,24 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.3',
-    'sphinx-gallery>=0.14',
+    'sphinx>=8.0',
+    'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
-    'matplotlib>=3.6',
+    'matplotlib>=3.7',
     'dask[array]>=2022.9.2',
-    'pandas>=1.5',
+    'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
     'tifffile>=2022.8.12',
     'myst-parser',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=5.10',
+    'plotly>=5.20',
     'kaleido',
-    'scikit-learn>=1.1',
+    'scikit-learn>=1.2',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.15.2',
+    'pydata-sphinx-theme>=0.16',
     'PyWavelets>=1.1.1',
     'pytest-doctestplus',
 ]
@@ -90,12 +90,12 @@ optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
-    'matplotlib>=3.6',
+    'dask[array]>=2021.1.0,!=2024.8.0',
+    'matplotlib>=3.7',
     'pooch>=1.6.0',
-    'pyamg',
+    'pyamg>=5.2',
     'PyWavelets>=1.1.1',
-    'scikit-learn>=1.1',
+    'scikit-learn>=1.2',
 ]
 test = [
     'asv',
@@ -122,10 +122,10 @@ requires = [
     'wheel',
     'setuptools>=67',
     'packaging>=21',
-    'Cython>=3.0.4',
+    'Cython>=3.0.8',
     'pythran',
-    'lazy_loader>=0.3',
-    'numpy>=2.0.0rc1',
+    'lazy_loader>=0.4',
+    'numpy>=2.0.0',
 ]
 
 [tool.spin]
@@ -134,8 +134,9 @@ package = 'skimage'
 [tool.spin.commands]
 Build = [
     'spin.cmds.meson.build',
+    'spin.cmds.pip.install',
     'spin.cmds.meson.test',
-    'spin.cmds.build.sdist',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
     'spin.cmds.meson.run',
@@ -147,9 +148,8 @@ Metrics = [
     '.spin/cmds.py:asv'
 ]
 
-[tool.black]
-target-version = ['py310', 'py311', 'py312']
-skip-string-normalization = 1
+[tool.ruff.format]
+quote-style = "preserve"
 
 [tool.ruff.lint]
 select = [
@@ -163,6 +163,8 @@ ignore = [
     'E501',
     'E741',
     'E712',
+    'E721',
+    'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -189,13 +191,13 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
+testpaths = ["skimage", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
-    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning'
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
 ]
 
 [tool.coverage.run]

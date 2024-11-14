@@ -129,7 +129,7 @@ class ArrayMap:
         """Return one more than the maximum label value being remapped."""
         return np.max(self.in_values) + 1
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         """Return an array that behaves like the arraymap when indexed.
 
         This array can be very large: it is the size of the largest value
