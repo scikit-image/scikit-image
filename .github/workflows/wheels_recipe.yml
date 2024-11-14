@@ -141,6 +141,16 @@ jobs:
         run: |
           python -m pip install cibuildwheel
 
+      # Needed to install a specific libomp version later
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
+        with:
+          python-version: "3.12"
+          channels: conda-forge
+          channel-priority: true
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
+
       - name: Build wheels for CPython Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
