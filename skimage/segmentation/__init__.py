@@ -5,7 +5,7 @@ from .random_walker_segmentation import random_walker
 from .active_contour_model import active_contour
 from ._felzenszwalb import felzenszwalb
 from .slic_superpixels import slic
-from ._quickshift import quickshift
+from ._quickshift import quickshift, set_segment_mask_numbers
 from .boundaries import find_boundaries, mark_boundaries
 from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_sequential
@@ -28,6 +28,7 @@ __all__ = [
     'felzenszwalb',
     'slic',
     'quickshift',
+    'set_segment_mask_numbers',
     'find_boundaries',
     'mark_boundaries',
     'clear_border',

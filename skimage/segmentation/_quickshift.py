@@ -7,6 +7,134 @@ from ..util import img_as_float
 from ._quickshift_cy import _quickshift_cython
 
 
+# ==================== Segment numbering =======================
+def set_segment_mask_numbers(ax, imgSegmentMask, **kwargs):
+    """
+    Automatically add the segment numbers created by
+    'skimage.segmentation.quickshift(...)' to the centre of each segment.
+
+    Parameters
+    ----------
+    imgSegmentMask : array of integers created by
+                     'skimage.segmentation.quickshift(...)'
+
+    Other Parameters
+    ----------------
+    **kwargs : `segment_values`
+        A list of manually added segment numbers without an even shape
+        (hence awkward to automatically get the centre of the segment) eg:
+
+        {'segment_values': [
+          {'num': 10, 'x': 0.25, 'y': 0.88},
+          {'num': 5, 'x': 0.68, 'y': 0.84}
+        ]}
+    """
+    import matplotlib.pyplot as plt
+
+    oldplugin_imshow(ax, imgSegmentMask)
+
+    sortedSegmentNums = np.unique(np.sort(imgSegmentMask))
+
+    endX = imgSegmentMask.shape[0]
+    endY = imgSegmentMask.shape[1]
+
+    # Add awkward shaped segments manually
+    manual_segments = []
+    if 'segment_values' in kwargs:
+        for item in kwargs['segment_values']:
+            print(f"Manually adding segment number: {item['num']}")
+            plt.figtext(item['x'], item['y'], item['num'])
+            manual_segments.append(item['num'])
+
+    xLeft = 0.14
+    xRight = 0.8
+    yTop = 0.95
+    yBottom = 0.06
+
+    for num in sortedSegmentNums:
+        (midX, midY) = get_segment_midpoint(imgSegmentMask, num)
+
+        xFigText = ((xRight - xLeft) * (midX / endX)) + xLeft
+        yFigText = (-(yTop - yBottom) * (midY / endY)) + yTop
+
+        if num not in manual_segments:
+            plt.figtext(xFigText, yFigText, num)
+
+
+def oldplugin_imshow(ax, img):
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    import matplotlib.pyplot as plt
+
+    ax_im = ax.imshow(img)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(ax_im, cax=cax)
+    ax.get_figure().tight_layout()
+
+
+def get_segment_midpoint(imgSegmentMask, segNum):
+    (startX, startY) = get_segment_starts(imgSegmentMask, segNum)
+
+    endX = startX
+    endY = startY
+
+    rowNum = 0
+    for row in imgSegmentMask:
+        colNum = 0
+        for col in row:
+            try:
+                if imgSegmentMask[rowNum][colNum] == segNum:
+                    if colNum > endX:
+                        endX = colNum
+                    if rowNum > endY:
+                        endY = rowNum
+
+            except IndexError:
+                pass
+
+            colNum += 1
+
+        rowNum += 1
+
+    # Now return the mid-point
+    midDeltaX = round((endX - startX) / 2)
+    midDeltaY = round((endY - startY) / 2)
+
+    midX = startX + midDeltaX
+    midY = startY + midDeltaY
+
+    return (midX, midY)
+
+
+def get_segment_starts(imgSegmentMask, segNum):
+    searchStartX = imgSegmentMask.shape[0]
+    searchStartY = imgSegmentMask.shape[1]
+
+    rowNum = 0
+    for row in imgSegmentMask:
+        colNum = 0
+        for col in row:
+            try:
+                if imgSegmentMask[rowNum][colNum] == segNum:
+                    if colNum < searchStartX:
+                        searchStartX = colNum
+                    if rowNum < searchStartY:
+                        searchStartY = rowNum
+
+            except IndexError:
+                pass
+
+            colNum += 1
+
+        rowNum += 1
+
+    return (searchStartX, searchStartY)
+
+
+# ==================== END: Segment numbering ==================
+
+
 def quickshift(
     image,
     ratio=1.0,
