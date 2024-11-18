@@ -19,5 +19,5 @@ kaleido==0.2.1
 scikit-learn>=1.2
 sphinx_design>=0.5
 pydata-sphinx-theme>=0.16
-PyWavelets>=1.1.1
+PyWavelets>=1.6
 pytest-doctestplus
