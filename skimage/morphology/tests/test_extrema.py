@@ -602,7 +602,7 @@ class TestLocalMaxima(unittest.TestCase):
 
     def test_extrema_float(self):
         """Specific tests for float type."""
-        # Copied from old unit test for local_maxma
+        # Copied from old unit test for local_maxima
         image = np.array(
             [
                 [0.10, 0.11, 0.13, 0.14, 0.14, 0.15, 0.14, 0.14, 0.13, 0.11],
@@ -643,6 +643,29 @@ class TestLocalMaxima(unittest.TestCase):
         # Test for local minima with automatic step calculation
         result = extrema.local_minima(inverted_image)
         assert result.dtype == bool
+        assert_equal(result, expected_result)
+
+    def test_extrema_small_float(self):
+        image = np.array(
+            [
+                [9.89232736e-20, 8.78543302e-20, 8.78543302e-20, 9.89232736e-20],
+                [8.78543302e-20, 6.38842355e-20, 6.38842355e-20, 8.78543302e-20],
+                [8.78543302e-20, 6.38842355e-20, 6.38842355e-20, 8.78543302e-20],
+                [9.89232736e-20, 8.78543302e-20, 8.78543302e-20, 9.89232736e-20],
+            ]
+        )
+
+        result = extrema.local_minima(image)
+
+        expected_result = np.array(
+            [
+                [False, False, False, False],
+                [False, True, True, False],
+                [False, True, True, False],
+                [False, False, False, False],
+            ]
+        )
+
         assert_equal(result, expected_result)
 
     def test_exceptions(self):

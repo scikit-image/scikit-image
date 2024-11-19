@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from skimage import io
-from skimage._shared.testing import assert_array_equal, fetch
+from skimage._shared.testing import assert_array_equal, fetch, assert_stacklevel
 from skimage._shared._dependency_checks import is_wasm
 from skimage.data import data_dir
 
@@ -95,7 +95,7 @@ def _named_tempfile_func(error_class):
     from the Python standard library could raise. As of this writing, these
     are ``FileNotFoundError``, ``FileExistsError``, ``PermissionError``, and
     ``BaseException``. See
-    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__  # noqa
+    `this comment <https://github.com/scikit-image/scikit-image/issues/3785#issuecomment-486598307>`__
     for more information.
     """
 
@@ -120,3 +120,42 @@ def test_failed_temporary_file(monkeypatch, error_class):
         )
         with pytest.raises(error_class):
             io.imread(image_url)
+
+
+@pytest.mark.parametrize(
+    # Test `**plugin_args` with `mode`
+    "kwarg",
+    [{"plugin": None}, {"plugin": "imageio"}, {"mode": "r"}],
+)
+def test_plugin_deprecation_on_imread(kwarg):
+    path = fetch("data/multipage.tif")
+    regex = ".*use `imageio` or other I/O packages directly.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        io.imread(path, **kwarg)
+    assert len(record) == 1
+    assert_stacklevel(record, offset=-2)
+
+
+@pytest.mark.parametrize(
+    # Test `**plugin_args` with `mode`
+    "kwarg",
+    [{"plugin": None}, {"plugin": "imageio"}, {"append": False}],
+)
+def test_plugin_deprecation_on_imsave(kwarg, tmp_path):
+    path = tmp_path / "test.tif"
+    array = np.array([0, 1], dtype=float)
+    regex = ".*use `imageio` or other I/O packages directly.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        io.imsave(path, array, **kwarg)
+    assert len(record) == 1
+    assert_stacklevel(record, offset=-2)
+
+
+@pytest.mark.parametrize("kwarg", [{"plugin": None}, {"plugin": "imageio"}])
+def test_plugin_deprecation_on_imread_collection(kwarg):
+    pattern = data_dir + "*.png"
+    regex = ".*use `imageio` or other I/O packages directly.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        io.imread_collection(pattern, **kwarg)
+    assert len(record) == 1
+    assert_stacklevel(record, offset=-2)

@@ -25,7 +25,7 @@ class Skeletonize3d:
         # we stack the horse data 5 times to get an example volume
         self.image = np.stack(5 * [util.invert(data.horse())])
 
-    def time_skeletonize_3d(self):
+    def time_skeletonize(self):
         self.skeletonize(self.image)
 
     def peakmem_reference(self, *args):
@@ -44,7 +44,7 @@ class Skeletonize3d:
         """
         pass
 
-    def peakmem_skeletonize_3d(self):
+    def peakmem_skeletonize(self):
         self.skeletonize(self.image)
 
 
@@ -219,7 +219,7 @@ class GrayReconstruction:
 
         References
         ----------
-        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory  # noqa
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
         """
         pass
 
@@ -254,7 +254,6 @@ class LocalMaxima:
 
 
 class RemoveObjectsByDistance:
-
     param_names = ["min_distance"]
     params = [5, 100]
 

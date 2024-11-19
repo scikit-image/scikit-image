@@ -285,21 +285,20 @@ class ApiDocWriter:
         ad += '.. currentmodule:: ' + uri + '\n\n'
         ad += '.. autosummary::\n   :nosignatures:\n\n'
         for f in functions:
-            ad += '   ' + uri + '.' + f + '\n'
+            ad += '   ' + f + '\n'
         ad += '\n'
         for c in classes:
-            ad += '   ' + uri + '.' + c + '\n'
+            ad += '   ' + c + '\n'
         ad += '\n'
         for m in submodules:
-            ad += '   ' + uri + '.' + m + '\n'
+            ad += '   ' + m + '\n'
         ad += '\n'
 
         for f in functions:
             ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
-            full_f = uri + '.' + f
-            ad += '\n.. autofunction:: ' + full_f + '\n\n'
-            ad += f'    .. minigallery:: {full_f}\n\n'
+            ad += '\n.. autofunction:: ' + f + '\n\n'
+            ad += f'    .. minigallery:: {uri}.{f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -311,8 +310,7 @@ class ApiDocWriter:
                 '\n'
                 '  .. automethod:: __init__\n\n'
             )
-            full_c = uri + '.' + c
-            ad += f'    .. minigallery:: {full_c}\n\n'
+            ad += f'    .. minigallery:: {uri}.{c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):

@@ -12,6 +12,9 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
+        Python313-x64:
+          PYTHON_VERSION: "3.13"
+          ARCH: "x64"
         Python312-x64:
           PYTHON_VERSION: "3.12"
           ARCH: "x64"
@@ -29,9 +32,6 @@ jobs:
           TEST_EXAMPLES: "true"
         Python310-x64:
           PYTHON_VERSION: "3.10"
-          ARCH: "x64"
-        Python39-x64:
-          PYTHON_VERSION: "3.9"
           ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
@@ -170,7 +170,7 @@ jobs:
           # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
-          export TEST_ARGS="-v --cov=skimage"
+          export TEST_ARGS="-v"
           $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
         displayName: "Package testing"
 
@@ -191,7 +191,7 @@ jobs:
           # Build the documentation
           choco install optipng
           export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS=-W
+          export SPHINXOPTS="-W -j auto"
           make -C doc html
         condition: eq(variables['BUILD_DOCS'], 'true')
         displayName: "Documentation testing"

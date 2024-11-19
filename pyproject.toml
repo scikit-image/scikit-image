@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.9'
+requires-python = '>=3.10'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,10 +12,10 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -26,11 +26,11 @@ classifiers = [
 ]
 dynamic = ['version']
 dependencies = [
-    'numpy>=1.23',
-    'scipy>=1.9',
-    'networkx>=2.8',
-    'pillow>=9.1',
-    'imageio>=2.33',
+    'numpy>=1.24',
+    'scipy>=1.11.2',
+    'networkx>=3.0',
+    'pillow>=10.1',
+    'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
     'packaging>=21',
     'lazy-loader>=0.4',
@@ -46,17 +46,15 @@ file = 'LICENSE.txt'
 [project.optional-dependencies]
 build = [
     # Also update [build-system] -> requires
-    'meson-python>=0.15',
-    'wheel',
-    'setuptools>=67',
-    'packaging>=21',
-    'ninja',
-    'Cython>=3.0.4',
-    'pythran',
-    'numpy>=2.0.0',
+    'meson-python>=0.16',
+    'setuptools>=68',
+    'ninja>=1.11.1.1',
+    'Cython>=3.0.8',
+    'pythran>=0.16',
+    'numpy>=2.0',
     # Developer UI
-    'spin==0.8',
-    'build',
+    'spin==0.12',
+    'build>=1.2.1',
 ]
 data = ['pooch>=1.6.0']
 developer = [
@@ -65,38 +63,38 @@ developer = [
     "tomli; python_version < '3.11'",
 ]
 docs = [
-    'sphinx>=7.3',
-    'sphinx-gallery>=0.14',
+    'sphinx>=8.0',
+    'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',
     'sphinx-copybutton',
-    'pytest-runner',
-    'matplotlib>=3.6',
+    'matplotlib>=3.7',
     'dask[array]>=2022.9.2',
-    'pandas>=1.5',
+    'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
     'tifffile>=2022.8.12',
     'myst-parser',
+    'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=5.10',
-    'kaleido',
-    'scikit-learn>=1.1',
+    'plotly>=5.20',
+    'kaleido==0.2.1',
+    'scikit-learn>=1.2',
     'sphinx_design>=0.5',
-    'pydata-sphinx-theme>=0.15.2',
-    'PyWavelets>=1.1.1',
+    'pydata-sphinx-theme>=0.16',
+    'PyWavelets>=1.6',
     'pytest-doctestplus',
 ]
 optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0',
-    'matplotlib>=3.6',
+    'dask[array]>=2021.1.0,!=2024.8.0',
+    'matplotlib>=3.7',
     'pooch>=1.6.0',
-    'pyamg',
-    'PyWavelets>=1.1.1',
-    'scikit-learn>=1.1',
+    'pyamg>=5.2',
+    'PyWavelets>=1.6',
+    'scikit-learn>=1.2',
 ]
 test = [
     'asv',
@@ -119,14 +117,12 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 [build-system]
 build-backend = 'mesonpy'
 requires = [
-    'meson-python>=0.15',
-    'wheel',
-    'setuptools>=67',
-    'packaging>=21',
-    'Cython>=3.0.4',
-    'pythran',
-    'lazy_loader>=0.3',
-    'numpy>=2.0.0rc1',
+    'meson-python>=0.16',
+    'setuptools>=68',
+    'Cython>=3.0.8',
+    'pythran>=0.16',
+    'lazy_loader>=0.4',
+    'numpy>=2.0',
 ]
 
 [tool.spin]
@@ -135,8 +131,9 @@ package = 'skimage'
 [tool.spin.commands]
 Build = [
     'spin.cmds.meson.build',
+    'spin.cmds.pip.install',
     'spin.cmds.meson.test',
-    'spin.cmds.build.sdist',
+    '.spin/cmds.py:sdist',
 ]
 Environments = [
     'spin.cmds.meson.run',
@@ -148,9 +145,8 @@ Metrics = [
     '.spin/cmds.py:asv'
 ]
 
-[tool.black]
-target-version = ['py310', 'py311', 'py312']
-skip-string-normalization = 1
+[tool.ruff.format]
+quote-style = "preserve"
 
 [tool.ruff.lint]
 select = [
@@ -164,6 +160,7 @@ ignore = [
     'E501',
     'E741',
     'E712',
+    'E721',
     'UP038',  # non-pep604-isinstance -- https://github.com/astral-sh/ruff/issues/7871
 ]
 
@@ -191,13 +188,13 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-#testpaths = ["skimage", "../../../../../benchmarks"]
+testpaths = ["skimage", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
-    'default:.*pyamg, which cannot \(yet\) be imported with NumPy >=2:RuntimeWarning'
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
 ]
 
 [tool.coverage.run]
