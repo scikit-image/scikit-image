@@ -126,7 +126,7 @@ plot_comparison(phantom, closed, 'closing')
 
 ######################################################################
 # Since ``closing`` an image starts with a dilation operation, dark regions
-# that are *smaller* than the structuring element are removed. The dilation
+# that are *smaller* than the structuring element are removed. The erosion
 # operation that follows ensures that dark regions that are *larger* than the
 # structuring element retain their original size. Notice how the white
 # ellipses at the bottom get connected because of dilation, but other dark
