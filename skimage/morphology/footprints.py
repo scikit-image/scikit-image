@@ -150,9 +150,7 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition="sequence"):
     elif decomposition == "sequence":
         min_width = min(shape)
         sq_reps = _decompose_size(min_width, 3)
-        footprint = [
-            (np.ones((3,) * len(shape), dtype=dtype), sq_reps)
-        ]
+        footprint = [(np.ones((3,) * len(shape), dtype=dtype), sq_reps)]
         for dim, width in enumerate(shape):
             if width > min_width:
                 nextra = width - min_width + 1
@@ -166,7 +164,11 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition="sequence"):
     return footprint
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+)
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
@@ -236,7 +238,11 @@ def _decompose_size(size, kernel_size=3):
     return 1 + (size - kernel_size) // (kernel_size - 1)
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+)
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -678,7 +684,11 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
-@deprecate_func(deprecated_version="0.25", removed_version="0.27", hint="Use `skimage.morphology.footprint_rectangular` instead.")
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+)
 def cube(width, dtype=np.uint8, *, decomposition=None):
     """Generates a cube-shaped footprint.
 
