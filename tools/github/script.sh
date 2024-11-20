@@ -2,7 +2,7 @@
 # Fail on non-zero exit and echo the commands
 set -evx
 
-TEST_ARGS="--doctest-plus --cov=skimage --showlocals"
+TEST_ARGS="--doctest-plus --showlocals"
 
 
 # Combine requirement files for a more robust pip solve
