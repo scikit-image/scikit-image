@@ -19,12 +19,10 @@ References
 
 """
 
-
 import numpy as np
 import scipy.fft as fft
 
 from .._shared.utils import _supported_float_type
-
 
 
 def ufftn(inarray, dim=None):
@@ -71,8 +69,9 @@ def uifftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : ndarray (same shape than inarray)
-        The unitary inverse N-D Fourier transform of ``inarray``.
+    outarray : ndarray
+        The unitary inverse nD Fourier transform of ``inarray``. Has the same shape as
+        ``inarray``.
 
     Examples
     --------
@@ -97,7 +96,7 @@ def urfftn(inarray, dim=None):
 
     Parameters
     ----------
-    inarray : ndarray, shape (M, N, ..., P)
+    inarray : ndarray, shape (M[, ...], P)
         The array to transform.
     dim : int, optional
         The last axis along which to compute the transform. All
@@ -105,7 +104,7 @@ def urfftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : ndarray, shape (M, N, ..., P / 2 + 1)
+    outarray : ndarray, shape (M[, ...], P / 2 + 1)
         The unitary N-D real Fourier transform of ``inarray``.
 
     Notes
@@ -246,12 +245,12 @@ def urfft2(inarray):
 
     Parameters
     ----------
-    inarray : ndarray, shape (M, N, ..., P)
+    inarray : ndarray, shape (M[, ...], P)
         The array to transform.
 
     Returns
     -------
-    outarray : ndarray, shape (M, N, ..., 2 * (P - 1))
+    outarray : ndarray, shape (M[, ...], 2 * (P - 1))
         The unitary 2-D real Fourier transform of ``inarray``.
 
     See Also
@@ -280,7 +279,7 @@ def uirfft2(inarray, shape=None):
 
     Parameters
     ----------
-    inarray : ndarray, shape (M, N, ..., P)
+    inarray : ndarray, shape (M[, ...], P)
         The array to transform.
     shape : tuple of int, optional
         The shape of the output. The shape of ``rfft`` is ambiguous in
@@ -289,7 +288,7 @@ def uirfft2(inarray, shape=None):
 
     Returns
     -------
-    outarray : ndarray, shape (M, N, ..., 2 * (P - 1))
+    outarray : ndarray, shape (M[, ...], 2 * (P - 1))
         The unitary 2-D inverse real Fourier transform of ``inarray``.
 
     See Also
@@ -335,8 +334,9 @@ def image_quad_norm(inarray):
     """
     # If there is a Hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
-        return (2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) -
-                np.sum(np.abs(inarray[..., 0]) ** 2, axis=-1))
+        return 2 * np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1) - np.sum(
+            np.abs(inarray[..., 0]) ** 2, axis=-1
+        )
     else:
         return np.sum(np.sum(np.abs(inarray) ** 2, axis=-1), axis=-1)
 
@@ -398,9 +398,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     # problem. Work with odd and even size.
     for axis, axis_size in enumerate(imp_resp.shape):
         if axis >= imp_resp.ndim - dim:
-            irpadded = np.roll(irpadded,
-                               shift=-int(np.floor(axis_size / 2)),
-                               axis=axis)
+            irpadded = np.roll(irpadded, shift=-int(np.floor(axis_size / 2)), axis=axis)
 
     func = fft.rfftn if is_real else fft.fftn
     out = func(irpadded, axes=(range(-dim, 0)))
@@ -443,12 +441,11 @@ def laplacian(ndim, shape, is_real=True):
     """
     impr = np.zeros([3] * ndim)
     for dim in range(ndim):
-        idx = tuple([slice(1, 2)] * dim +
-                    [slice(None)] +
-                    [slice(1, 2)] * (ndim - dim - 1))
-        impr[idx] = np.array([-1.0,
-                              0.0,
-                              -1.0]).reshape([-1 if i == dim else 1
-                                              for i in range(ndim)])
-    impr[(slice(1, 2), ) * ndim] = 2.0 * ndim
+        idx = tuple(
+            [slice(1, 2)] * dim + [slice(None)] + [slice(1, 2)] * (ndim - dim - 1)
+        )
+        impr[idx] = np.array([-1.0, 0.0, -1.0]).reshape(
+            [-1 if i == dim else 1 for i in range(ndim)]
+        )
+    impr[(slice(1, 2),) * ndim] = 2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr

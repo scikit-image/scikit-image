@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9 # v4.4.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -15,29 +15,36 @@ repos:
       - id: check-json
       - id: check-added-large-files
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: 50c5478ed9e10bf360335449280cf2a67f4edb7a # v2.7.1
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: 1463d990e0801964764a375260dca598513f3be5 # frozen: v3.3.3
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: f6346ef27faac608d493bf3926528b308d175d9e # v0.0.261
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79 # frozen: v0.6.9
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --show-fixes, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: ee720d6332a996d755b8919de55fc75d408be768 # v0.15.0
+    rev: 9247866fce7128f2c0eaf4a09f437880397d4689 # frozen: v0.16.2
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
 
   - repo: local
     hooks:
-      - id: pyproject.toml
-        name: pyproject.toml
+      - id: generate_requirements.py
+        name: generate_requirements.py
         language: system
-        entry: python tools/generate_pyproject.toml.py
-        files: "pyproject.toml|requirements/.*\\.txt|tools/.*pyproject.*"
+        entry: python tools/generate_requirements.py
+        files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+
+ci:
+  autofix_prs: false
+  autofix_commit_msg: |
+    '[pre-commit.ci 🤖] Apply code format tools to PR'
+  autoupdate_schedule: quarterly

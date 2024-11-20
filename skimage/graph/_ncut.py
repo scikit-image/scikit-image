@@ -14,17 +14,17 @@ def DW_matrices(graph):
 
     Returns
     -------
-    D : csc_matrix
+    D : csc_array
         The diagonal matrix of the graph. ``D[i, i]`` is the sum of weights of
         all edges incident on `i`. All other entries are `0`.
-    W : csc_matrix
+    W : csc_array
         The weight matrix of the graph. ``W[i, j]`` is the weight of the edge
         joining `i` to `j`.
     """
     # sparse.eighsh is most efficient with CSC-formatted input
     W = nx.to_scipy_sparse_array(graph, format='csc')
     entries = W.sum(axis=0)
-    D = sparse.dia_matrix((entries, 0), shape=W.shape).tocsc()
+    D = sparse.dia_array((entries, 0), shape=W.shape).tocsc()
 
     return D, W
 
@@ -37,9 +37,9 @@ def ncut_cost(cut, D, W):
     cut : ndarray
         The mask for the nodes in the graph. Nodes corresponding to a `True`
         value are in one set.
-    D : csc_matrix
+    D : csc_array
         The diagonal matrix of the graph.
-    W : csc_matrix
+    W : csc_array
         The weight matrix of the graph.
 
     Returns
@@ -54,7 +54,7 @@ def ncut_cost(cut, D, W):
            Intelligence, Page 889, Equation 2.
     """
     cut = np.array(cut)
-    cut_cost = _ncut_cy.cut_cost(cut, W)
+    cut_cost = _ncut_cy.cut_cost(cut, W.data, W.indices, W.indptr, num_cols=W.shape[0])
 
     # D has elements only along the diagonal, one per node, so we can directly
     # index the data attribute with cut.

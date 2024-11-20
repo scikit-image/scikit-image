@@ -1,5 +1,4 @@
 import os
-import shutil
 import sys
 
 import click
@@ -8,28 +7,54 @@ from spin import util
 
 
 @click.command()
+@click.argument("sphinx_target", default="html")
 @click.option(
-    "--clean", is_flag=True, help="Clean previously built docs before building"
+    "--clean",
+    is_flag=True,
+    default=False,
+    help="Clean previously built docs before building",
 )
-def docs(clean=False):
+@click.option(
+    "--build/--no-build",
+    "first_build",
+    default=True,
+    help="Build project before generating docs",
+)
+@click.option(
+    "--plot/--no-plot",
+    "sphinx_gallery_plot",
+    default=True,
+    help="Sphinx gallery: enable/disable plots",
+)
+@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
+@click.option(
+    "--install-deps/--no-install-deps",
+    default=False,
+    help="Install dependencies before building",
+)
+@click.pass_context
+def docs(
+    ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, install_deps
+):
     """📖 Build documentation
+
+    By default, SPHINXOPTS="-W", raising errors on warnings.
+    To build without raising on warnings:
+
+      SPHINXOPTS="" spin docs
+
+    The command is roughly equivalent to `cd doc && make SPHINX_TARGET`.
+    To get a list of viable `SPHINX_TARGET`:
+
+      spin docs help
+
     """
-    if clean:
-        doc_dir = "./doc/build"
-        if os.path.isdir(doc_dir):
-            print(f"Removing `{doc_dir}`")
-            shutil.rmtree(doc_dir)
+    if install_deps:
+        util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
-    site_path = meson._get_site_packages()
-    if site_path is None:
-        print("No built scikit-image found; run `spin build` first.")
-        sys.exit(1)
-
-    util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
-
-    os.environ['SPHINXOPTS'] = '-W'
-    os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
-    util.run(['make', '-C', 'doc', 'html'], replace=True)
+    for extra_param in ('install_deps',):
+        del ctx.params[extra_param]
+    ctx.forward(meson.docs)
 
 
 @click.command()
@@ -52,15 +77,52 @@ def asv(asv_args):
     util.run(['asv'] + list(asv_args))
 
 
-@click.command()
-def coverage():
-    """📊 Generate coverage report
+@click.command(context_settings={'ignore_unknown_options': True})
+@click.argument("ipython_args", metavar='', nargs=-1)
+@click.pass_context
+def ipython(ctx, ipython_args):
+    """💻 Launch IPython shell with PYTHONPATH set
+
+    OPTIONS are passed through directly to IPython, e.g.:
+
+    spin ipython -i myscript.py
     """
-    util.run(['python', '-m', 'spin', 'test', '--', '-o', 'python_functions=test_*', 'skimage', '--cov=skimage'], replace=True)
+    env = os.environ
+    env['PYTHONWARNINGS'] = env.get('PYTHONWARNINGS', 'all')
+
+    preimport = (
+        r"import skimage as ski; "
+        r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
+    )
+    ctx.params['ipython_args'] = (
+        f"--TerminalIPythonApp.exec_lines={preimport}",
+    ) + ipython_args
+
+    ctx.forward(meson.ipython)
 
 
 @click.command()
-def sdist():
-    """📦 Build a source distribution in `dist/`.
+@click.argument("pyproject-build-args", metavar='', nargs=-1)
+def sdist(pyproject_build_args):
+    """📦 Build a source distribution in `dist/`
+
+    Extra arguments are passed to `pyproject-build`, e.g.
+
+      spin sdist -- -x -n
     """
-    util.run(['python', '-m', 'build', '.', '--sdist'])
+    p = util.run(
+        ["pyproject-build", ".", "--sdist"] + list(pyproject_build_args), output=False
+    )
+    try:
+        built_line = next(
+            line
+            for line in p.stdout.decode('utf-8').split('\n')
+            if line.startswith('Successfully built')
+        )
+    except StopIteration:
+        print("Error: could not identify built wheel")
+        sys.exit(1)
+    print(built_line)
+    sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
+    print(f"Validating {sdist}...")
+    util.run(["tools/check_sdist.py", sdist])

@@ -1,5 +1,5 @@
-scikit-image 0.18.3 release notes
-=================================
+scikit-image 0.18.3 (2021-08-24)
+================================
 
 We're happy to announce the release of scikit-image v0.18.3!
 
@@ -29,8 +29,8 @@ Juan Nunez-Iglesias
 Mark Harfouche
 
 
-scikit-image 0.18.2 release notes
-=================================
+scikit-image 0.18.2 (2021-06-10)
+================================
 
 We're happy to announce the release of scikit-image v0.18.2!
 
@@ -85,8 +85,8 @@ Development process
 - Stéfan van der Walt
 
 
-scikit-image 0.18.1 release notes
-=================================
+scikit-image 0.18.1 (2020-12-23)
+================================
 
 This is a bug fix release and contains the following two bug fixes:
 
@@ -95,8 +95,8 @@ This is a bug fix release and contains the following two bug fixes:
 
 See below for the new features and API changes in 0.18.0.
 
-scikit-image 0.18.0 release notes
-=================================
+scikit-image 0.18.0 (2020-12-15)
+================================
 
 We're happy to announce the release of scikit-image v0.18.0!
 
@@ -171,11 +171,11 @@ Documentation
   <https://scikit-image.org/docs/dev/auto_examples/segmentation/plot_regionprops.html>`_
   (#5010).
 - Documentation has been added to explain
-  `how to download example datasets <https://scikit-image.org/docs/dev/install.html#downloading-all-demo-datasets>`_
+  `how to download example datasets <https://scikit-image.org/docs/dev/user_guide/install.html#downloading-all-demo-datasets>`_
   which are not installed with scikit-image (#4984). Similarly, the contributor
   guide has been updated to mention how to host new datasets in a gitlab
   repository (#4892).
-- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/contribute.html#benchmarks>`_
+- The `benchmarking section of the developer documentation <https://scikit-image.org/docs/dev/development/contribute.html#benchmarks>`_
   has been expanded (#4905).
 - Added links to the image.sc forum in example pages (#5094, #5096)
 - Added missing datasets to gallery examples (#5116, #5118)

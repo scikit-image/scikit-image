@@ -37,12 +37,10 @@ def _ensure_spacing(coord, spacing, p_norm, max_out):
         if idx not in rejected_peaks_indices:
             # keep current point and the points at exactly spacing from it
             candidates.remove(idx)
-            dist = distance.cdist([coord[idx]],
-                                  coord[candidates],
-                                  distance.minkowski,
-                                  p=p_norm).reshape(-1)
-            candidates = [c for c, d in zip(candidates, dist)
-                          if d < spacing]
+            dist = distance.cdist(
+                [coord[idx]], coord[candidates], distance.minkowski, p=p_norm
+            ).reshape(-1)
+            candidates = [c for c, d in zip(candidates, dist) if d < spacing]
 
             # candidates.remove(keep)
             rejected_peaks_indices.update(candidates)
@@ -58,8 +56,15 @@ def _ensure_spacing(coord, spacing, p_norm, max_out):
     return output
 
 
-def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
-                   max_out=None, *, max_split_size=2000):
+def ensure_spacing(
+    coords,
+    spacing=1,
+    p_norm=np.inf,
+    min_split_size=50,
+    max_out=None,
+    *,
+    max_split_size=2000,
+):
     """Returns a subset of coord where a minimum spacing is guaranteed.
 
     Parameters
@@ -97,7 +102,6 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
 
     output = coords
     if len(coords):
-
         coords = np.atleast_2d(coords)
         if min_split_size is None:
             batch_list = [coords]
@@ -107,14 +111,14 @@ def ensure_spacing(coords, spacing=1, p_norm=np.inf, min_split_size=50,
             split_size = min_split_size
             while coord_count - split_idx[-1] > max_split_size:
                 split_size *= 2
-                split_idx.append(split_idx[-1] + min(split_size,
-                                                     max_split_size))
+                split_idx.append(split_idx[-1] + min(split_size, max_split_size))
             batch_list = np.array_split(coords, split_idx)
 
         output = np.zeros((0, coords.shape[1]), dtype=coords.dtype)
         for batch in batch_list:
-            output = _ensure_spacing(np.vstack([output, batch]),
-                                     spacing, p_norm, max_out)
+            output = _ensure_spacing(
+                np.vstack([output, batch]), spacing, p_norm, max_out
+            )
             if max_out is not None and len(output) >= max_out:
                 break
 

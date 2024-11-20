@@ -79,6 +79,7 @@ References
        pp. 91-110.
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.feature import hog
@@ -87,8 +88,14 @@ from skimage import data, exposure
 
 image = data.astronaut()
 
-fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
-                    cells_per_block=(1, 1), visualize=True, channel_axis=-1)
+fd, hog_image = hog(
+    image,
+    orientations=8,
+    pixels_per_cell=(16, 16),
+    cells_per_block=(1, 1),
+    visualize=True,
+    channel_axis=-1,
+)
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharex=True, sharey=True)
 

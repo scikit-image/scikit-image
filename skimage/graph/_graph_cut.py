@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
-from .._shared.utils import deprecate_kwarg
 from . import _ncut, _ncut_cy
 
 
@@ -51,8 +50,7 @@ def cut_threshold(labels, rag, thresh, in_place=True):
         rag = rag.copy()
 
     # Because deleting edges while iterating through them produces an error.
-    to_remove = [(x, y) for x, y, d in rag.edges(data=True)
-                 if d['weight'] >= thresh]
+    to_remove = [(x, y) for x, y, d in rag.edges(data=True) if d['weight'] >= thresh]
     rag.remove_edges_from(to_remove)
 
     comps = nx.connected_components(rag)
@@ -69,13 +67,16 @@ def cut_threshold(labels, rag, thresh, in_place=True):
     return map_array[labels]
 
 
-@deprecate_kwarg({'random_state': 'seed'}, deprecated_version='0.21',
-                 removed_version='0.23')
-def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
-                   max_edge=1.0,
-                   *,
-                   seed=None,
-                   ):
+def cut_normalized(
+    labels,
+    rag,
+    thresh=0.001,
+    num_cuts=10,
+    in_place=True,
+    max_edge=1.0,
+    *,
+    rng=None,
+):
     """Perform Normalized Graph cut on the Region Adjacency Graph.
 
     Given an image's labels and its similarity RAG, recursively perform
@@ -101,14 +102,12 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
         The maximum possible value of an edge in the RAG. This corresponds to
         an edge between identical regions. This is used to put self
         edges in the RAG.
-    seed : {None, int, `numpy.random.Generator`}, optional
-        If `seed` is None, the `numpy.random.Generator` singleton is used.
-        If `seed` is an int, a new ``Generator`` instance is used,
-        seeded with `seed`.
-        If `seed` is already a ``Generator`` instance, then that
-        instance is used.
+    rng : {`numpy.random.Generator`, int}, optional
+        Pseudo-random number generator.
+        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
+        If `rng` is an int, it is used to seed the generator.
 
-        The `seed` is used for the starting point
+        The `rng` is used to determine the starting point
         of `scipy.sparse.linalg.eigsh`.
 
     Returns
@@ -131,7 +130,7 @@ def cut_normalized(labels, rag, thresh=0.001, num_cuts=10, in_place=True,
            IEEE Transactions on, vol. 22, no. 8, pp. 888-905, August 2000.
 
     """
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(rng)
     if not in_place:
         rag = rag.copy()
 
@@ -166,7 +165,7 @@ def partition_by_cut(cut, rag):
     """
     # `cut` is derived from `D` and `W` matrices, which also follow the
     # ordering returned by `rag.nodes()` because we use
-    # nx.to_scipy_sparse_matrix.
+    # nx.to_scipy_sparse_array.
 
     # Example
     # rag.nodes() = [3, 7, 9, 13]
@@ -275,11 +274,10 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2001, Equation 7, Page 891
-        A = d2 * (d - w) * d2
+        A = d2 @ (d - w) @ d2
         # Initialize the vector to ensure reproducibility.
         v0 = random_generator.random(A.shape[0])
-        vals, vectors = linalg.eigsh(A, which='SM', v0=v0,
-                                     k=min(100, m - 2))
+        vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
@@ -288,7 +286,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         ev = vectors[:, index2]
 
         cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-        if (mcut < thresh):
+        if mcut < thresh:
             # Sub divide and perform N-cut again
             # Refer Shi & Malik 2001, Section 3.2.5, Page 893
             sub1, sub2 = partition_by_cut(cut_mask, rag)

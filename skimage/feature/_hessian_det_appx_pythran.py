@@ -63,10 +63,10 @@ def _integ(img, r, c, rl, cl):
     c2 = _clip(c + cl, 0, img.shape[1] - 1)
 
     ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
-    return max(0., ans)
+    return max(0.0, ans)
 
 
-#pythran export _hessian_matrix_det(float64[:,:], float or int)
+# pythran export _hessian_matrix_det(float64[:,:], float or int)
 def _hessian_matrix_det(img, sigma):
     """Compute the approximate Hessian Determinant over a 2D image.
 
@@ -134,6 +134,6 @@ def _hessian_matrix_det(img, sigma):
             dyy = mid - 3 * side
             dyy = -dyy * w_i
 
-            out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
+            out[r, c] = dxx * dyy - 0.81 * (dxy * dxy)
 
     return out

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""Script to auto-generate our API docs.
-"""
+"""Script to auto-generate our API docs."""
 
 import sys
 
@@ -10,11 +9,13 @@ from packaging import version as _version
 from apigen import ApiDocWriter
 
 
-#*****************************************************************************
+# *****************************************************************************
+
 
 def abort(error):
     print(f'*WARNING* API documentation not generated: {error}')
     exit()
+
 
 if __name__ == '__main__':
     package = 'skimage'
@@ -54,7 +55,6 @@ if __name__ == '__main__':
         r'\.fixes$',
         r'\.externals$',
         r'filter$',
-        r'\.future.graph$',  # Remove after v0.20 release
     ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')

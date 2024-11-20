@@ -4,8 +4,9 @@ from ._contingency_table import contingency_table
 __all__ = ['adapted_rand_error']
 
 
-def adapted_rand_error(image_true=None, image_test=None, *, table=None,
-                       ignore_labels=(0,), alpha=0.5):
+def adapted_rand_error(
+    image_true=None, image_test=None, *, table=None, ignore_labels=(0,), alpha=0.5
+):
     r"""Compute Adapted Rand error as defined by the SNEMI3D contest. [1]_
 
     Parameters
@@ -68,8 +69,13 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
         check_shape_equality(image_true, image_test)
 
     if table is None:
-        p_ij = contingency_table(image_true, image_test,
-                                 ignore_labels=ignore_labels, normalize=False)
+        p_ij = contingency_table(
+            image_true,
+            image_test,
+            ignore_labels=ignore_labels,
+            normalize=False,
+            sparse_type="array",
+        )
     else:
         p_ij = table
 
@@ -79,8 +85,8 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).A.ravel()
-    b_i = p_ij.sum(axis=0).A.ravel()
+    a_i = p_ij.sum(axis=1).ravel()
+    b_i = p_ij.sum(axis=0).ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)
@@ -92,6 +98,6 @@ def adapted_rand_error(image_true=None, image_test=None, *, table=None,
     recall = sum_p_ij2 / sum_b2
 
     fscore = sum_p_ij2 / (alpha * sum_a2 + (1 - alpha) * sum_b2)
-    are = 1. - fscore
+    are = 1.0 - fscore
 
     return are, precision, recall

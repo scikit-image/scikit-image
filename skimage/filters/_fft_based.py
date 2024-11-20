@@ -6,8 +6,9 @@ import scipy.fft as fft
 from .._shared.utils import _supported_float_type
 
 
-def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
-                               dtype=np.float64, squared_butterworth=True):
+def _get_nd_butterworth_filter(
+    shape, factor, order, high_pass, real, dtype=np.float64, squared_butterworth=True
+):
     """Create a N-dimensional Butterworth mask for an FFT
 
     Parameters
@@ -36,15 +37,13 @@ def _get_nd_butterworth_filter(shape, factor, order, high_pass, real,
     for i, d in enumerate(shape):
         # start and stop ensures center of mask aligns with center of FFT
         axis = np.arange(-(d - 1) // 2, (d - 1) // 2 + 1) / (d * factor)
-        ranges.append(fft.ifftshift(axis ** 2))
+        ranges.append(fft.ifftshift(axis**2))
     # for real image FFT, halve the last axis
     if real:
         limit = d // 2 + 1
         ranges[-1] = ranges[-1][:limit]
     # q2 = squared Euclidean distance grid
-    q2 = functools.reduce(
-            np.add, np.meshgrid(*ranges, indexing="ij", sparse=True)
-            )
+    q2 = functools.reduce(np.add, np.meshgrid(*ranges, indexing="ij", sparse=True))
     q2 = q2.astype(dtype)
     q2 = np.power(q2, order)
     wfilt = 1 / (1 + q2)
@@ -154,32 +153,37 @@ def butterworth(
     elif npad > 0:
         center_slice = tuple(slice(npad, s + npad) for s in image.shape)
         image = np.pad(image, npad, mode='edge')
-    fft_shape = (image.shape if channel_axis is None
-                 else np.delete(image.shape, channel_axis))
+    fft_shape = (
+        image.shape if channel_axis is None else np.delete(image.shape, channel_axis)
+    )
     is_real = np.isrealobj(image)
     float_dtype = _supported_float_type(image.dtype, allow_complex=True)
     if cutoff_frequency_ratio < 0 or cutoff_frequency_ratio > 0.5:
-        raise ValueError(
-            "cutoff_frequency_ratio should be in the range [0, 0.5]"
-        )
+        raise ValueError("cutoff_frequency_ratio should be in the range [0, 0.5]")
     wfilt = _get_nd_butterworth_filter(
-        fft_shape, cutoff_frequency_ratio, order, high_pass, is_real,
-        float_dtype, squared_butterworth
+        fft_shape,
+        cutoff_frequency_ratio,
+        order,
+        high_pass,
+        is_real,
+        float_dtype,
+        squared_butterworth,
     )
     axes = np.arange(image.ndim)
     if channel_axis is not None:
         axes = np.delete(axes, channel_axis)
         abs_channel = channel_axis % image.ndim
         post = image.ndim - abs_channel - 1
-        sl = ((slice(None),) * abs_channel + (np.newaxis,) +
-              (slice(None),) * post)
+        sl = (slice(None),) * abs_channel + (np.newaxis,) + (slice(None),) * post
         wfilt = wfilt[sl]
     if is_real:
-        butterfilt = fft.irfftn(wfilt * fft.rfftn(image, axes=axes),
-                                s=fft_shape, axes=axes)
+        butterfilt = fft.irfftn(
+            wfilt * fft.rfftn(image, axes=axes), s=fft_shape, axes=axes
+        )
     else:
-        butterfilt = fft.ifftn(wfilt * fft.fftn(image, axes=axes),
-                               s=fft_shape, axes=axes)
+        butterfilt = fft.ifftn(
+            wfilt * fft.fftn(image, axes=axes), s=fft_shape, axes=axes
+        )
     if npad > 0:
         butterfilt = butterfilt[center_slice]
     return butterfilt

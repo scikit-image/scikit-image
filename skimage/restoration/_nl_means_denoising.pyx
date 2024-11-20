@@ -16,7 +16,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
                                         np_floats [:, :, :] p2,
                                         np_floats [:, ::] w,
                                         Py_ssize_t s, np_floats var,
-                                        Py_ssize_t n_channels) nogil:
+                                        Py_ssize_t n_channels) noexcept nogil:
     """
     Compute a Gaussian distance between two image patches.
 
@@ -65,7 +65,7 @@ cdef inline np_floats patch_distance_2d(np_floats [:, :, :] p1,
 cdef inline np_floats patch_distance_3d(np_floats [:, :, :] p1,
                                         np_floats [:, :, :] p2,
                                         np_floats [:, :, ::] w,
-                                        Py_ssize_t s, np_floats var) nogil:
+                                        Py_ssize_t s, np_floats var) noexcept nogil:
     """
     Compute a Gaussian distance between two image patches.
 
@@ -316,7 +316,7 @@ cdef inline cnp.float64_t _integral_to_distance_2d(cnp.float64_t [:, ::] integra
                                                    Py_ssize_t row,
                                                    Py_ssize_t col,
                                                    Py_ssize_t offset,
-                                                   cnp.float64_t h2s2) nogil:
+                                                   cnp.float64_t h2s2) noexcept nogil:
     """
     Parameters
     ----------
@@ -361,7 +361,7 @@ cdef inline cnp.float64_t _integral_to_distance_3d(cnp.float64_t[:, :, ::] integ
                                                    Py_ssize_t row,
                                                    Py_ssize_t col,
                                                    Py_ssize_t offset,
-                                                   cnp.float64_t s_cube_h_square) nogil:
+                                                   cnp.float64_t s_cube_h_square) noexcept nogil:
     """
     Parameters
     ----------
@@ -412,7 +412,7 @@ cdef inline cnp.float64_t _integral_to_distance_4d(cnp.float64_t [:, :, :, ::] i
                                                    Py_ssize_t row,
                                                    Py_ssize_t col,
                                                    Py_ssize_t offset,
-                                                   cnp.float64_t s4_h_square) nogil:
+                                                   cnp.float64_t s4_h_square) noexcept nogil:
     """
     Parameters
     ----------
@@ -475,7 +475,7 @@ cdef inline void _integral_image_2d(cnp.float64_t [:, :, ::] padded,
                                     Py_ssize_t t_row, Py_ssize_t t_col,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
-                                    cnp.float64_t var_diff) nogil:
+                                    cnp.float64_t var_diff) noexcept nogil:
     """ Compute the integral of the squared difference between an image
     ``padded`` and the same image shifted by ``(t_row, t_col)``.
 
@@ -530,7 +530,7 @@ cdef inline void _integral_image_3d(cnp.float64_t [:, :, :, ::] padded,
                                     Py_ssize_t t_col, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col,
                                     Py_ssize_t n_channels,
-                                    cnp.float64_t var_diff) nogil:
+                                    cnp.float64_t var_diff) noexcept nogil:
     """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 
@@ -596,7 +596,7 @@ cdef inline void _integral_image_4d(cnp.float64_t [:, :, :, :, ::] padded,
                                     Py_ssize_t t_time, Py_ssize_t t_pln, Py_ssize_t t_row,
                                     Py_ssize_t t_col, Py_ssize_t n_time, Py_ssize_t n_pln,
                                     Py_ssize_t n_row, Py_ssize_t n_col, Py_ssize_t n_channels,
-                                    cnp.float64_t var_diff) nogil:
+                                    cnp.float64_t var_diff) noexcept nogil:
     """Compute the integral of the squared difference between an image ``padded``
     and the same image shifted by ``(t_pln, t_row, t_col)``.
 

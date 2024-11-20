@@ -6,8 +6,7 @@ from .._shared.utils import check_shape_equality
 __all__ = ['variation_of_information']
 
 
-def variation_of_information(image0=None, image1=None, *, table=None,
-                             ignore_labels=()):
+def variation_of_information(image0=None, image1=None, *, table=None, ignore_labels=()):
     """Return symmetric conditional entropies associated with the VI. [1]_
 
     The variation of information is defined as VI(X,Y) = H(X|Y) + H(Y|X).
@@ -40,8 +39,7 @@ def variation_of_information(image0=None, image1=None, *, table=None,
         distance, Journal of Multivariate Analysis, Volume 98, Issue 5,
         Pages 873-895, ISSN 0047-259X, :DOI:`10.1016/j.jmva.2006.11.013`.
     """
-    h0g1, h1g0 = _vi_tables(image0, image1, table=table,
-                            ignore_labels=ignore_labels)
+    h0g1, h1g0 = _vi_tables(image0, image1, table=table, ignore_labels=ignore_labels)
     # false splits, false merges
     return np.array([h1g0.sum(), h0g1.sum()])
 
@@ -53,7 +51,7 @@ def _xlogx(x):
 
     Parameters
     ----------
-    x : ndarray or scipy.sparse.csc_matrix or csr_matrix
+    x : ndarray or scipy.sparse.csc_array or scipy.sparse.csr_array
         The input array.
 
     Returns
@@ -62,7 +60,7 @@ def _xlogx(x):
         Result of x * log_2(x).
     """
     y = x.copy()
-    if isinstance(y, sparse.csc_matrix) or isinstance(y, sparse.csr_matrix):
+    if sparse.issparse(y) and y.format in ('csc', 'csr'):
         z = y.data
     else:
         z = np.asarray(y)  # ensure np.matrix converted to np.array
@@ -78,7 +76,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     ----------
     im_true, im_test : ndarray of int
         Input label images, any dimensionality.
-    table : csr matrix, optional
+    table : csr_array, optional
         Pre-computed contingency table.
     ignore_labels : sequence of int, optional
         Labels to ignore when computing scores.
@@ -94,8 +92,7 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
     if table is None:
         # normalize, since it is an identity op if already done
         pxy = contingency_table(
-            im_true, im_test,
-            ignore_labels=ignore_labels, normalize=True
+            im_true, im_test, ignore_labels=ignore_labels, normalize=True
         )
 
     else:
@@ -107,8 +104,8 @@ def _vi_tables(im_true, im_test, table=None, ignore_labels=()):
 
     # use sparse matrix linear algebra to compute VI
     # first, compute the inverse diagonal matrices
-    px_inv = sparse.diags(_invert_nonzero(px))
-    py_inv = sparse.diags(_invert_nonzero(py))
+    px_inv = sparse.dia_array((_invert_nonzero(px), 0), shape=(px.size, px.size))
+    py_inv = sparse.dia_array((_invert_nonzero(py), 0), shape=(py.size, py.size))
 
     # then, compute the entropies
     hygx = -px @ _xlogx(px_inv @ pxy).sum(axis=1)

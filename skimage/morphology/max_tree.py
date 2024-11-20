@@ -21,20 +21,20 @@ References:
     .. [1] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           :DOI:10.1109/83.663500
+           :DOI:`10.1109/83.663500`
     .. [2] Berger, C., Geraud, T., Levillain, R., Widynski, N., Baillard, A.,
            Bertin, E. (2007). Effective Component Tree Computation with
            Application to Pattern Recognition in Astronomical Imaging.
            In International Conference on Image Processing (ICIP) (pp. 41-44).
-           :DOI:10.1109/ICIP.2007.4379949
+           :DOI:`10.1109/ICIP.2007.4379949`
     .. [3] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           :DOI:10.1109/TIP.2006.877518
+           :DOI:`10.1109/TIP.2006.877518`
     .. [4] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           :DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 """
 
 import numpy as np
@@ -119,31 +119,37 @@ def max_tree(image, connectivity=1):
         np.moveaxis(mask, k, 0)[0] = 0
         np.moveaxis(mask, k, 0)[-1] = 0
 
-    neighbors, offset = _validate_connectivity(image.ndim, connectivity,
-                                               offset=None)
+    neighbors, offset = _validate_connectivity(image.ndim, connectivity, offset=None)
 
     # initialization of the parent image
     parent = np.zeros(image.shape, dtype=np.int64)
 
     # flat_neighborhood contains a list of offsets allowing one to find the
     # neighbors in the ravelled image.
-    flat_neighborhood = _offsets_to_raveled_neighbors(image.shape, neighbors,
-                                                      offset).astype(np.int32)
+    flat_neighborhood = _offsets_to_raveled_neighbors(
+        image.shape, neighbors, offset
+    ).astype(np.int32)
 
     # pixels need to be sorted according to their gray level.
-    tree_traverser = np.argsort(image.ravel()).astype(np.int64)
+    tree_traverser = np.argsort(image.ravel(), kind="stable").astype(np.int64)
 
     # call of cython function.
-    _max_tree._max_tree(image.ravel(), mask.ravel().astype(np.uint8),
-                        flat_neighborhood, offset.astype(np.int32),
-                        np.array(image.shape, dtype=np.int32),
-                        parent.ravel(), tree_traverser)
+    _max_tree._max_tree(
+        image.ravel(),
+        mask.ravel().astype(np.uint8),
+        flat_neighborhood,
+        offset.astype(np.int32),
+        np.array(image.shape, dtype=np.int32),
+        parent.ravel(),
+        tree_traverser,
+    )
 
     return parent, tree_traverser
 
 
-def area_opening(image, area_threshold=64, connectivity=1,
-                 parent=None, tree_traverser=None):
+def area_opening(
+    image, area_threshold=64, connectivity=1, parent=None, tree_traverser=None
+):
     """Perform an area opening of the image.
 
     Area opening removes all bright structures of an image with
@@ -206,19 +212,19 @@ def area_opening(image, area_threshold=64, connectivity=1,
            May 1993.
     .. [2] Soille, P., "Morphological Image Analysis: Principles and
            Applications" (Chapter 6), 2nd edition (2003), ISBN 3540429883.
-           :DOI:10.1007/978-3-662-05088-0
+           :DOI:`10.1007/978-3-662-05088-0`
     .. [3] Salembier, P., Oliveras, A., & Garrido, L. (1998). Antiextensive
            Connected Operators for Image and Sequence Processing.
            IEEE Transactions on Image Processing, 7(4), 555-570.
-           :DOI:10.1109/83.663500
+           :DOI:`10.1109/83.663500`
     .. [4] Najman, L., & Couprie, M. (2006). Building the component tree in
            quasi-linear time. IEEE Transactions on Image Processing, 15(11),
            3531-3539.
-           :DOI:10.1109/TIP.2006.877518
+           :DOI:`10.1109/TIP.2006.877518`
     .. [5] Carlinet, E., & Geraud, T. (2014). A Comparative Review of
            Component Tree Computation Algorithms. IEEE Transactions on Image
            Processing, 23(9), 3885-3895.
-           :DOI:10.1109/TIP.2014.2336551
+           :DOI:`10.1109/TIP.2014.2336551`
 
     Examples
     --------
@@ -243,16 +249,22 @@ def area_opening(image, area_threshold=64, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    area = _max_tree._compute_area(image.ravel(),
-                                   parent.ravel(), tree_traverser)
+    area = _max_tree._compute_area(image.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
-                             tree_traverser, area, area_threshold)
+    _max_tree._direct_filter(
+        image.ravel(),
+        output.ravel(),
+        parent.ravel(),
+        tree_traverser,
+        area,
+        area_threshold,
+    )
     return output
 
 
-def diameter_opening(image, diameter_threshold=8, connectivity=1,
-                     parent=None, tree_traverser=None):
+def diameter_opening(
+    image, diameter_threshold=8, connectivity=1, parent=None, tree_traverser=None
+):
     """Perform a diameter opening of the image.
 
     Diameter opening removes all bright structures of an image with
@@ -334,17 +346,27 @@ def diameter_opening(image, diameter_threshold=8, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    diam = _max_tree._compute_extension(image.ravel(),
-                                        np.array(image.shape, dtype=np.int32),
-                                        parent.ravel(), tree_traverser)
+    diam = _max_tree._compute_extension(
+        image.ravel(),
+        np.array(image.shape, dtype=np.int32),
+        parent.ravel(),
+        tree_traverser,
+    )
 
-    _max_tree._direct_filter(image.ravel(), output.ravel(), parent.ravel(),
-                             tree_traverser, diam, diameter_threshold)
+    _max_tree._direct_filter(
+        image.ravel(),
+        output.ravel(),
+        parent.ravel(),
+        tree_traverser,
+        diam,
+        diameter_threshold,
+    )
     return output
 
 
-def area_closing(image, area_threshold=64, connectivity=1,
-                 parent=None, tree_traverser=None):
+def area_closing(
+    image, area_threshold=64, connectivity=1, parent=None, tree_traverser=None
+):
     """Perform an area closing of the image.
 
     Area closing removes all dark structures of an image with
@@ -455,11 +477,16 @@ def area_closing(image, area_threshold=64, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    area = _max_tree._compute_area(image_inv.ravel(),
-                                   parent.ravel(), tree_traverser)
+    area = _max_tree._compute_area(image_inv.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
-                             tree_traverser, area, area_threshold)
+    _max_tree._direct_filter(
+        image_inv.ravel(),
+        output.ravel(),
+        parent.ravel(),
+        tree_traverser,
+        area,
+        area_threshold,
+    )
 
     # inversion of the output image
     output = invert(output)
@@ -467,8 +494,9 @@ def area_closing(image, area_threshold=64, connectivity=1,
     return output
 
 
-def diameter_closing(image, diameter_threshold=8, connectivity=1,
-                     parent=None, tree_traverser=None):
+def diameter_closing(
+    image, diameter_threshold=8, connectivity=1, parent=None, tree_traverser=None
+):
     """Perform a diameter closing of the image.
 
     Diameter closing removes all dark structures of an image with
@@ -562,19 +590,26 @@ def diameter_closing(image, diameter_threshold=8, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    diam = _max_tree._compute_extension(image_inv.ravel(),
-                                        np.array(image_inv.shape,
-                                                 dtype=np.int32),
-                                        parent.ravel(), tree_traverser)
+    diam = _max_tree._compute_extension(
+        image_inv.ravel(),
+        np.array(image_inv.shape, dtype=np.int32),
+        parent.ravel(),
+        tree_traverser,
+    )
 
-    _max_tree._direct_filter(image_inv.ravel(), output.ravel(), parent.ravel(),
-                             tree_traverser, diam, diameter_threshold)
+    _max_tree._direct_filter(
+        image_inv.ravel(),
+        output.ravel(),
+        parent.ravel(),
+        tree_traverser,
+        diam,
+        diameter_threshold,
+    )
     output = invert(output)
     return output
 
 
-def max_tree_local_maxima(image, connectivity=1,
-                          parent=None, tree_traverser=None):
+def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 
     The local maxima are defined as connected sets of pixels with equal
@@ -658,7 +693,8 @@ def max_tree_local_maxima(image, connectivity=1,
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    _max_tree._max_tree_local_maxima(image.ravel(), output.ravel(),
-                                     parent.ravel(), tree_traverser)
+    _max_tree._max_tree_local_maxima(
+        image.ravel(), output.ravel(), parent.ravel(), tree_traverser
+    )
 
     return output

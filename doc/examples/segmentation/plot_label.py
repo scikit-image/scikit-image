@@ -46,8 +46,14 @@ for region in regionprops(label_image):
     if region.area >= 100:
         # draw rectangle around segmented coins
         minr, minc, maxr, maxc = region.bbox
-        rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-                                  fill=False, edgecolor='red', linewidth=2)
+        rect = mpatches.Rectangle(
+            (minc, minr),
+            maxc - minc,
+            maxr - minr,
+            fill=False,
+            edgecolor='red',
+            linewidth=2,
+        )
         ax.add_patch(rect)
 
 ax.set_axis_off()

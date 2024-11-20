@@ -9,7 +9,8 @@ foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
     c_args: cython_c_args,
-    include_directories: [incdir_numpy, '../_shared'],
+    include_directories: ['../_shared'],
+    dependencies: [np_dep],
     install: true,
     subdir: 'skimage/restoration'
   )
@@ -25,7 +26,8 @@ foreach ext: wrap_extensions
   py3.extension_module(ext,
     [cython_gen.process(ext[0][0] + '.pyx')] + ext[1],
     c_args: cython_c_args,
-    include_directories: [incdir_numpy, '../_shared'],
+    include_directories: ['../_shared'],
+    dependencies: [np_dep],
     install: true,
     subdir: 'skimage/restoration'
   )
@@ -33,13 +35,14 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_cycle_spin.py',
   '_denoise.py',
   'deconvolution.py',
   'inpaint.py',
   'j_invariant.py',
   'non_local_means.py',
-  'rolling_ball.py',
+  '_rolling_ball.py',
   'uft.py',
   'unwrap.py'
 ]

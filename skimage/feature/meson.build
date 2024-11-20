@@ -15,7 +15,8 @@ foreach pyx_file: pyx_files
     pyx_file[1].process(pyx_file[0] + '.pyx'),
     c_args: cython_c_args,
     cpp_args: cython_cpp_args,
-    include_directories: [incdir_numpy, '../_shared'],
+    include_directories: ['../_shared'],
+    dependencies: [np_dep],
     install: true,
     subdir: 'skimage/feature'
   )
@@ -30,8 +31,8 @@ _brief_pythran = custom_target('_brief_pythran',
 py3.extension_module('brief_cy',
   [_brief_pythran],
   cpp_args: cpp_args_pythran,
-  include_directories: [incdir_pythran, incdir_numpy],
-  dependencies: [py3_dep],
+  include_directories: [incdir_pythran],
+  dependencies: [py3_dep, np_dep],
   install: true,
   subdir: 'skimage/feature'
 )
@@ -45,14 +46,15 @@ _hessian_det_appx_pythran = custom_target('_hessian_det_appx_pythran',
 py3.extension_module('_hessian_det_appx',
   [_hessian_det_appx_pythran],
   cpp_args: cpp_args_pythran,
-  include_directories: [incdir_pythran, incdir_numpy],
-  dependencies: [py3_dep],
+  include_directories: [incdir_pythran],
+  dependencies: [py3_dep, np_dep],
   install: true,
   subdir: 'skimage/feature'
 )
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_basic_features.py',
   '_canny.py',
   '_daisy.py',
@@ -62,7 +64,7 @@ python_sources = [
   'brief.py',
   'censure.py',
   'corner.py',
-  'fisher_vector.py',
+  '_fisher_vector.py',
   'haar.py',
   'match.py',
   'orb.py',

@@ -21,12 +21,12 @@ window that contains the surrounding pixels.
        pp. 225-236, 2000.
        :DOI:`10.1016/S0031-3203(99)00055-2`
 """
+
 import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage.data import page
-from skimage.filters import (threshold_otsu, threshold_niblack,
-                             threshold_sauvola)
+from skimage.filters import threshold_otsu, threshold_niblack, threshold_sauvola
 
 
 matplotlib.rcParams['font.size'] = 9

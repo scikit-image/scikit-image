@@ -1,5 +1,6 @@
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_adapthist.py',
   'exposure.py',
   'histogram_matching.py'

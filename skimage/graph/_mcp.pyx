@@ -376,7 +376,7 @@ cdef class MCP:
 
 
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index,
-                                FLOAT_T offset_length):
+                                FLOAT_T offset_length) noexcept:
         """ _examine_neighbor(int index, int new_index, float offset_length)
         This method is called once for every pair of neighboring nodes,
         as soon as both nodes become frozen.
@@ -385,7 +385,7 @@ cdef class MCP:
 
 
     cdef void _update_node(self, INDEX_T index, INDEX_T new_index,
-                           FLOAT_T offset_length):
+                           FLOAT_T offset_length) noexcept:
         """ _update_node(int index, int new_index, float offset_length)
         This method is called when a node is updated.
         """
@@ -775,7 +775,7 @@ cdef class MCP_Connect(MCP):
 
 
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index,
-                                FLOAT_T offset_length):
+                                FLOAT_T offset_length) noexcept:
         """ Check whether two fronts are meeting. If so, the flat_traceback
         is obtained and a connection is created.
         """
@@ -832,7 +832,7 @@ cdef class MCP_Connect(MCP):
 
 
     cdef void _update_node(self, INDEX_T index, INDEX_T new_index,
-                           FLOAT_T offset_length):
+                           FLOAT_T offset_length) noexcept:
         """ Keep track of the id map so that we know which seed point
         a certain front originates from.
         """
@@ -900,10 +900,10 @@ cdef class MCP_Flexible(MCP):
 
 
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index,
-                                FLOAT_T offset_length):
+                                FLOAT_T offset_length) noexcept:
         self.examine_neighbor(index, new_index, offset_length)
 
 
     cdef void _update_node(self, INDEX_T index, INDEX_T new_index,
-                           FLOAT_T offset_length):
+                           FLOAT_T offset_length) noexcept:
         self.update_node(index, new_index, offset_length)

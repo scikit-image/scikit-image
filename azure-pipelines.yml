@@ -12,29 +12,27 @@ jobs:
     strategy:
       maxParallel: 10
       matrix:
-        Python38-x64:
-          PYTHON_VERSION: "3.8"
+        Python313-x64:
+          PYTHON_VERSION: "3.13"
           ARCH: "x64"
-          PIP_FLAGS: ""
-          BUILD_DOCS: "true"
-        # build pre release packages on Python 3.8 since it has been out long
-        # enough for wheels to be built for packages that need to be compiled.
-        Python38-x64-pre:
-          PYTHON_VERSION: "3.8"
+        Python312-x64:
+          PYTHON_VERSION: "3.12"
+          ARCH: "x64"
+        Python312-x64-pre:
+          PYTHON_VERSION: "3.12"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
-        Python39:
-          PYTHON_VERSION: "3.9"
+        Python311-x64-docs:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
-          PIP_FLAGS: ""
-        Python39-x64:
-          PYTHON_VERSION: "3.9"
+          BUILD_DOCS: "true"
+        Python311-x64-gallery:
+          PYTHON_VERSION: "3.11"
           ARCH: "x64"
-          PIP_FLAGS: ""
           TEST_EXAMPLES: "true"
-          # NOTE(honles): winpty is required by one of the doc dependencies,
-          #               but does not provide a wheel for Python 3.9
-          # TEST_EXAMPLES: 'true'
+        Python310-x64:
+          PYTHON_VERSION: "3.10"
+          ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
 
@@ -104,7 +102,7 @@ jobs:
           fi
 
           ## To list all installed packages:
-          # choco list --localonly
+          choco list
 
           # Remove other gcc compilers
 
@@ -112,9 +110,9 @@ jobs:
           # choco uninstall llvm mingw rtools strawberryperl -x
 
           # Remove mingw gcc
-          rm /c/ProgramData/Chocolatey/bin/gcc
-          rm /c/ProgramData/Chocolatey/bin/g++
-          rm /c/ProgramData/Chocolatey/bin/c++
+          #rm /c/ProgramData/Chocolatey/bin/gcc
+          #rm /c/ProgramData/Chocolatey/bin/g++
+          #rm /c/ProgramData/Chocolatey/bin/c++
           # Remove perl gcc
           rm -rf /c/Strawberry
 
@@ -169,10 +167,10 @@ jobs:
           export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
 
           # Run unit tests with pytest
-          # We don't test docstring examples (--doctest-modules) on
+          # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
-          export TEST_ARGS="-v --cov=skimage"
+          export TEST_ARGS="-v"
           $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
         displayName: "Package testing"
 
@@ -193,7 +191,7 @@ jobs:
           # Build the documentation
           choco install optipng
           export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS=-W
+          export SPHINXOPTS="-W -j auto"
           make -C doc html
         condition: eq(variables['BUILD_DOCS'], 'true')
         displayName: "Documentation testing"
