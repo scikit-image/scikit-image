@@ -18,7 +18,7 @@ _submodules = [
     'util',
 ]
 
-__all__ = _submodules + ['__version__'] # noqa: F822
+__all__ = _submodules + ['__version__']  # noqa: F822
 
 from . import (
     color,
@@ -49,7 +49,7 @@ from .util.dtype import (
     img_as_int,
     img_as_uint,
     img_as_ubyte,
-    img_as_bool
+    img_as_bool,
 )
 from .util.lookfor import lookfor
 from .data import data_dir
