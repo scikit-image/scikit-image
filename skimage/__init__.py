@@ -70,11 +70,28 @@ __version__ = '0.25.0rc2.dev0'
 
 import lazy_loader as _lazy
 
-__getattr__, __lazy_dir__, __all__ = _lazy.attach_stub(__name__, __file__)
+__getattr__, *_ = _lazy.attach_stub(__name__, __file__)
 
-
-def __dir__():
-    return __lazy_dir__() + ['__version__']
+__all__ = [
+    'color',
+    'data',
+    'draw',
+    'exposure',
+    'feature',
+    'filters',
+    'future',
+    'graph',
+    'io',
+    'measure',
+    'metrics',
+    'morphology',
+    'registration',
+    'restoration',
+    'segmentation',
+    'transform',
+    'util',
+    '__version__',
+]
 
 
 # Logic for checking for improper install and importing while in the source
