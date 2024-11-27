@@ -1,4 +1,4 @@
-"""Utilities to read and write images in various formats."""
+"""Reading and saving of images and video."""
 
 import warnings
 
