@@ -72,6 +72,8 @@ import lazy_loader as _lazy
 
 __getattr__, *_ = _lazy.attach_stub(__name__, __file__)
 
+# `attach_stub` currently ignores __all__ inside the stub file and simply
+# returns every lazy-imported object, so we need to define `__all__` again.
 __all__ = [
     'color',
     'data',
