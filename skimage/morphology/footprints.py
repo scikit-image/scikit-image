@@ -98,7 +98,7 @@ def footprint_from_sequence(footprints):
     return morphology.binary_dilation(imag, footprints)
 
 
-def footprint_rectangular(shape, *, dtype=np.uint8, decomposition="sequence"):
+def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
     """
 
     Parameters
