@@ -980,7 +980,9 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
             n -= 1
         sequence = []
         if m > 1:
-            sequence += list(square(m, dtype=dtype, decomposition='sequence'))
+            sequence += list(
+                footprint_rectangular((m, m), dtype=dtype, decomposition='sequence')
+            )
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
         footprint = tuple(sequence)
