@@ -99,7 +99,11 @@ def footprint_from_sequence(footprints):
 
 
 def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
-    """
+    """Generate a rectangular or hyper-rectangular footprint.
+
+    Generates, depending on the length and dimensions requested with `shape`,
+    a square, rectangle, cube, cuboid, or even higher-dimensional versions
+    of these shapes.
 
     Parameters
     ----------
@@ -124,6 +128,32 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
         neighborhood. When `decomposition` is None, this is just an array.
         Otherwise, this will be a tuple whose length is equal to the number of
         unique structuring elements to apply (see Examples for more detail).
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> ski.morphology.footprint_rectangular((3, 5))
+    array([[1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1]], dtype=uint8)
+
+    Decomposition will return multiple footprints that combine into a simple
+    footprint of the requested shape.
+
+    >>> ski.morphology.footprint_rectangular((9, 9), decomposition="sequence")
+    ((array([[1, 1, 1],
+             [1, 1, 1],
+             [1, 1, 1]], dtype=uint8),
+      4),)
+
+    `"sequence"` makes sure that the decomposition only returns 1D footprints.
+
+    >>> ski.morphology.footprint_rectangular((3, 5), decomposition="separable")
+    ((array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1),
+     (array([[1, 1, 1, 1, 1]], dtype=uint8), 1))
     """
     has_even_width = any(width % 2 == 0 for width in shape)
     if decomposition == "sequence" and has_even_width:
