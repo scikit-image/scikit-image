@@ -299,7 +299,7 @@ each and every contributor, regardless of their role.
   Maintenance of the build and test infrastructure.
 
 - Taylor D. Scott
-  Simplified \_upsampled_dft and extended register_translation to nD images.
+  Simplified `_upsampled_dft` and extended `register_translation` to nD images.
 
 - David J. Mellert
   Polar and log-polar warping, nD windows
