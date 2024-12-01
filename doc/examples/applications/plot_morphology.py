@@ -57,9 +57,9 @@ def plot_comparison(original, filtered, filter_name):
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
-from skimage.morphology import erosion, dilation, opening, closing, white_tophat  # noqa
-from skimage.morphology import black_tophat, skeletonize, convex_hull_image  # noqa
-from skimage.morphology import disk  # noqa
+from skimage.morphology import erosion, dilation, opening, closing, white_tophat
+from skimage.morphology import black_tophat, skeletonize, convex_hull_image
+from skimage.morphology import disk
 
 footprint = disk(6)
 eroded = erosion(orig_phantom, footprint)
@@ -126,7 +126,7 @@ plot_comparison(phantom, closed, 'closing')
 
 ######################################################################
 # Since ``closing`` an image starts with a dilation operation, dark regions
-# that are *smaller* than the structuring element are removed. The dilation
+# that are *smaller* than the structuring element are removed. The erosion
 # operation that follows ensures that dark regions that are *larger* than the
 # structuring element retain their original size. Notice how the white
 # ellipses at the bottom get connected because of dilation, but other dark

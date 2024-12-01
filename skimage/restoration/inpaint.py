@@ -174,9 +174,9 @@ def _inpaint_biharmonic_single_region(
 
     # Form sparse matrix of unknown values
     sp_shape = (n_mask, out.size)
-    matrix_unknown = sparse.coo_matrix(
+    matrix_unknown = sparse.csr_array(
         (data_unknown, (row_idx_unknown, col_idx_unknown)), shape=sp_shape
-    ).tocsr()
+    )
 
     # Solve linear system for masked points
     matrix_unknown = matrix_unknown[:, mask_i]

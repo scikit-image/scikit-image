@@ -13,7 +13,7 @@ if [ -n "${GITHUB_WORKSPACE}" ]; then
   PYTEST_CONFIG_FILE_OPTION="--config-file ${GITHUB_WORKSPACE}/pyproject.toml"
 fi
 
-TEST_ARGS="--doctest-plus --cov=skimage --showlocals ${PYTEST_CONFIG_FILE_OPTION}"
+TEST_ARGS="--doctest-plus --showlocals ${PYTEST_CONFIG_FILE_OPTION}"
 
 
 # Combine requirement files for a more robust pip solve
