@@ -9,6 +9,13 @@ libraries other than Numpy or optimised implementations for particular hardware.
 This section of the documentation describes how to create an alternative implementation (a "backend")
 and how the dispatching mechanism in scikit-image works.
 
+.. important::
+    Dispatching support and infrastructure is experimental and is not ready for production.
+    It's made available as an early draft so that developers can gain experience
+    with the system.
+
+    Expect the dispatching API to change without notice.
+
 
 Implementing a new backend
 --------------------------
@@ -18,7 +25,7 @@ for particular hardware, support array libraries other than Numpy or explore nov
 are not (yet) a good fit for the core scikit-image library.
 
 To create a backend you have to create a new Python package that registers two particular
-entrypoints. The first entrypoint called `skimage_backends` should resolve to a namespace
+`entrypoints <https://packaging.python.org/en/latest/specifications/pyproject-toml/#entry-points>`_. The first entrypoint called `skimage_backends` should resolve to a namespace
 that contains two functions: `can_has(name, *args, **kwargs)` and `get_implementation(name)`.
 The second entrypoint called `skimage_backend_infos` should resolve to a function with no
 arguments that returns an instance of the `skimage.util._backends.BackendInformation` class
@@ -58,7 +65,7 @@ should use this information to determine if the backend wants to be called or if
 different backend should be tried. A backend might implement a particular function but
 only want to handle calls where the input arrays are of a particuler type or size.
 
-If your backend can not handle a particular call the `can_has` function should return as
+If your backend can not handle a particular call the `can_has` function should return `False` as
 quickly as possible. This means you should perform fast checks first and more expensive
 checks later in your `can_has` function.
 
