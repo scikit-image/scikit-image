@@ -90,39 +90,37 @@ if __SKIMAGE_SETUP__:
     # process, as it may not be compiled yet
 
 
-if 'dev' in __version__:
-    # Append last commit date and hash to dev version information, if available
-
+def _try_append_commit_info(version):
+    """Append last commit date and hash to `version`, if available."""
     import subprocess
-    import os.path
+    from pathlib import Path
 
     try:
-        p = subprocess.Popen(
+        output = subprocess.check_output(
             ['git', 'log', '-1', '--format="%h %aI"'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=os.path.dirname(__file__),
+            cwd=Path(__file__).parent,
+            text=True,
         )
-    except FileNotFoundError:
+        if output:
+            git_hash, git_date = (
+                output.strip().replace('"', '').split('T')[0].replace('-', '').split()
+            )
+            version = '+'.join(
+                [tag for tag in version.split('+') if not tag.startswith('git')]
+            )
+            version += f'+git{git_date}.{git_hash}'
+
+    except (FileNotFoundError, subprocess.CalledProcessError):
         pass
     except OSError:
         pass  # If skimage is built with emscripten which does not support processes
-    else:
-        out, err = p.communicate()
-        if p.returncode == 0:
-            git_hash, git_date = (
-                out.decode('utf-8')
-                .strip()
-                .replace('"', '')
-                .split('T')[0]
-                .replace('-', '')
-                .split()
-            )
 
-            __version__ = '+'.join(
-                [tag for tag in __version__.split('+') if not tag.startswith('git')]
-            )
-            __version__ += f'+git{git_date}.{git_hash}'
+    return version
+
+
+if 'dev' in __version__:
+    __version__ = _try_append_commit_info(__version__)
+
 
 from skimage._shared.tester import PytestTester
 
