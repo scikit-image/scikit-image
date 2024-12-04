@@ -122,7 +122,6 @@ if 'dev' in __version__:
     __version__ = _try_append_commit_info(__version__)
 
 
-from skimage._shared.tester import PytestTester
+from skimage._shared.tester import PytestTester as _PytestTester
 
-test = PytestTester(__name__)
-del PytestTester
+test = _PytestTester(__name__)
