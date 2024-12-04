@@ -1,4 +1,4 @@
-"""Measurement of image properties, e.g., region properties and contours."""
+"""Measurement of image properties, e.g., region properties, contours."""
 
 import lazy_loader as _lazy
 

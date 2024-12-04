@@ -79,7 +79,7 @@ if __SKIMAGE_SETUP__:
     import sys
 
     sys.stderr.write('Partial import of skimage during the build process.\n')
-    # We are not importing the rest of the scikit during the build
+    # We are not importing the rest of the package during the build
     # process, as it may not be compiled yet
 
 

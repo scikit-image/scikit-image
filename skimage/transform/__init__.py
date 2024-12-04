@@ -1,4 +1,4 @@
-"""Geometric and other transforms, e.g., rotation or the Radon transform.
+"""Geometric and other transformations, e.g., rotations, Radon transform.
 
 - Geometric transformation:
   These transforms change the shape or position of an image.

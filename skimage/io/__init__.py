@@ -1,4 +1,4 @@
-"""Reading and saving of images and video."""
+"""Reading and saving of images and videos."""
 
 import warnings
 

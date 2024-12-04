@@ -1,4 +1,4 @@
-"""Metrics corresponding to images, e.g. distance metrics, similarity, etc."""
+"""Metrics corresponding to images, e.g., distance metrics, similarity, etc."""
 
 import lazy_loader as _lazy
 
