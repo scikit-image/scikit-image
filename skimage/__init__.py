@@ -12,7 +12,14 @@ __version__ = '0.25.0rc2.dev0'
 
 import lazy_loader as _lazy
 
-__getattr__, *_ = _lazy.attach_stub(__name__, __file__)
+__getattr__, __lazy_dir__, _ = _lazy.attach_stub(__name__, __file__)
+
+
+def __dir__():
+    """Add lazy-loaded attributes to keep consistent with `__getattr__`."""
+    patched_dir = {*globals().keys(), *__lazy_dir__()}
+    return sorted(patched_dir)
+
 
 # `attach_stub` currently ignores __all__ inside the stub file and simply
 # returns every lazy-imported object, so we need to define `__all__` again.
