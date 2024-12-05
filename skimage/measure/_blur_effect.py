@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -40,6 +42,13 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     -------
     blur : float (0 to 1) or list of floats
         Blur metric: by default, the maximum of blur metrics along all axes.
+
+    Warns
+    -----
+    RuntimeWarning
+        When the blur couldn't be estimated because no edges where detected
+        in `image`, e.g., if `image` is uniform. In this case, NaN is returned
+        instead of an estimate.
 
     Notes
     -----
@@ -85,8 +94,15 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
         if M1 == 0:
-            raise ZeroDivisionError
-        M2 = np.sum(T[slices])
-        B.append(np.abs(M1 - M2) / M1)
+            warnings.warn(
+                "Couldn't estimate blur for `image` without edges, "
+                "`image` may be uniform, using NaN as a blur metric",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            B.append(np.nan)
+        else:
+            M2 = np.sum(T[slices])
+            B.append(np.abs(M1 - M2) / M1)
 
     return B if reduce_func is None else reduce_func(B)
