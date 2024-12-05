@@ -158,7 +158,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     Generate a 5-dimensional hypercube with 3 samples in each dimension
 
     >>> ski.morphology.footprint_rectangle((3,) * 5).shape
-    (3, 3, 3, 3, 3, 3)
+    (3, 3, 3, 3, 3)
     """
     has_even_width = any(width % 2 == 0 for width in shape)
     if decomposition == "sequence" and has_even_width:
