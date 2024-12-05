@@ -19,8 +19,7 @@ __all__ = ['blur_effect']
 
 
 def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
-    """Compute a metric that indicates the strength of blur in an image
-    (0 for no blur, 1 for maximal blur).
+    """Estimate the strength of a blur in an image as a metric.
 
     Parameters
     ----------
@@ -41,7 +40,10 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     Returns
     -------
     blur : float (0 to 1) or list of floats
-        Blur metric: by default, the maximum of blur metrics along all axes.
+        An estimate for the images blurriness in the range [0, 1]. Lower values
+        indicate a lower blurriness. `reduce_func` may be used to combine the
+        estimates for each dimension into a single value, by default the highest
+        estimate is returned.
 
     Warns
     -----
