@@ -11,7 +11,7 @@ from numpy.testing import assert_equal
 
 from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
-from skimage.morphology import footprint_rectangular, footprint_from_sequence
+from skimage.morphology import footprint_rectangle, footprint_from_sequence
 
 
 class TestFootprints:
@@ -139,7 +139,7 @@ class TestFootprints:
         (footprints.ball, (3,), True),
         (footprints.diamond, (3,), True),
         (footprints.octahedron, (3,), True),
-        (footprint_rectangular, ((3, 5),), True),
+        (footprint_rectangle, ((3, 5),), True),
         (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
@@ -246,12 +246,12 @@ def test_pad_footprint(as_sequence, pad_end):
     assert_equal(expected_res, actual_res)
 
 
-class Test_footprint_rectangular:
+class Test_footprint_rectangule:
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
     @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
     def test_rectangle(self, i, j):
         desired = np.ones((i, j), dtype='uint8')
-        actual = footprint_rectangular((i, j))
+        actual = footprint_rectangle((i, j))
         assert_equal(actual, desired)
 
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
@@ -259,23 +259,23 @@ class Test_footprint_rectangular:
     @pytest.mark.parametrize("k", [0, 1, 2, 3, 4])
     def test_cuboid(self, i, j, k):
         desired = np.ones((i, j, k), dtype='uint8')
-        actual = footprint_rectangular((i, j, k))
+        actual = footprint_rectangle((i, j, k))
         assert_equal(actual, desired)
 
     @pytest.mark.parametrize("shape", [(3,), (5, 5), (5, 5, 7)])
     @pytest.mark.parametrize("decomposition", ["separable", "sequence"])
     def test_decomposition(self, shape, decomposition):
-        regular = footprint_rectangular(shape)
-        decomposed = footprint_rectangular(shape, decomposition=decomposition)
+        regular = footprint_rectangle(shape)
+        decomposed = footprint_rectangle(shape, decomposition=decomposition)
         recomposed = footprint_from_sequence(decomposed)
         assert_equal(recomposed, regular)
 
     @pytest.mark.parametrize("shape", [(2,), (3, 4)])
     def test_uneven_sequence_decomposition_warning(self, shape):
         """Should fall back to decomposition="separable" for uneven footprint size."""
-        desired = footprint_rectangular(shape, decomposition="separable")
+        desired = footprint_rectangle(shape, decomposition="separable")
         regex = "decomposition='sequence' is only supported for uneven footprints"
         with pytest.warns(UserWarning, match=regex) as record:
-            actual = footprint_rectangular(shape, decomposition="sequence")
+            actual = footprint_rectangle(shape, decomposition="sequence")
         assert_stacklevel(record)
         assert_equal(actual, desired)

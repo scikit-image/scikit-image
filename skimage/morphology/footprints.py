@@ -98,7 +98,7 @@ def footprint_from_sequence(footprints):
     return morphology.binary_dilation(imag, footprints)
 
 
-def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
+def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     """Generate a rectangular or hyper-rectangular footprint.
 
     Generates, depending on the length and dimensions requested with `shape`,
@@ -132,7 +132,7 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
     Examples
     --------
     >>> import skimage as ski
-    >>> ski.morphology.footprint_rectangular((3, 5))
+    >>> ski.morphology.footprint_rectangle((3, 5))
     array([[1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1]], dtype=uint8)
@@ -140,7 +140,7 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
     Decomposition will return multiple footprints that combine into a simple
     footprint of the requested shape.
 
-    >>> ski.morphology.footprint_rectangular((9, 9), decomposition="sequence")
+    >>> ski.morphology.footprint_rectangle((9, 9), decomposition="sequence")
     ((array([[1, 1, 1],
              [1, 1, 1],
              [1, 1, 1]], dtype=uint8),
@@ -148,7 +148,7 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
 
     `"sequence"` makes sure that the decomposition only returns 1D footprints.
 
-    >>> ski.morphology.footprint_rectangular((3, 5), decomposition="separable")
+    >>> ski.morphology.footprint_rectangle((3, 5), decomposition="separable")
     ((array([[1],
              [1],
              [1]], dtype=uint8),
@@ -197,7 +197,7 @@ def footprint_rectangular(shape, *, dtype=np.uint8, decomposition=None):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
 )
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
@@ -249,7 +249,7 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    footprint = footprint_rectangular(
+    footprint = footprint_rectangle(
         shape=(width, width), dtype=dtype, decomposition=decomposition
     )
     return footprint
@@ -271,7 +271,7 @@ def _decompose_size(size, kernel_size=3):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
 )
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
@@ -328,7 +328,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
-    footprint = footprint_rectangular(
+    footprint = footprint_rectangle(
         shape=(nrows, ncols), dtype=dtype, decomposition=decomposition
     )
     return footprint
@@ -717,7 +717,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangular` instead.",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
 )
 def cube(width, dtype=np.uint8, *, decomposition=None):
     """Generates a cube-shaped footprint.
@@ -766,7 +766,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    footprint = footprint_rectangular(
+    footprint = footprint_rectangle(
         shape=(width, width, width), dtype=dtype, decomposition=decomposition
     )
     return footprint
@@ -981,7 +981,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
         sequence = []
         if m > 1:
             sequence += list(
-                footprint_rectangular((m, m), dtype=dtype, decomposition='sequence')
+                footprint_rectangle((m, m), dtype=dtype, decomposition='sequence')
             )
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]

@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch, assert_stacklevel
-from skimage.morphology import gray, footprints, footprint_rectangular
+from skimage.morphology import gray, footprints, footprint_rectangle
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -45,7 +45,7 @@ class TestMorphology:
 
     def _build_expected_output(self):
         def square(n):
-            return footprint_rectangular((n, n))
+            return footprint_rectangle((n, n))
 
         footprints_2D = (
             square,
@@ -114,9 +114,9 @@ class TestEccentricStructuringElements:
         self.black_pixel[2, 2] = 0
         self.white_pixel = 255 - self.black_pixel
         self.footprints = [
-            footprint_rectangular((2, 2)),
-            footprint_rectangular((2, 1)),
-            footprint_rectangular((2, 1)),
+            footprint_rectangle((2, 2)),
+            footprint_rectangle((2, 1)),
+            footprint_rectangle((2, 1)),
         ]
 
     def test_dilate_erode_symmetry(self):
@@ -395,8 +395,8 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols, decompositio
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangular((nrows, ncols), decomposition=None)
-    footprint = footprint_rectangular((nrows, ncols), decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
+    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
     func = getattr(gray, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
@@ -460,8 +460,8 @@ def test_cube_decomposition(cell3d_image, function, shape, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangular(shape, decomposition=None)
-    footprint = footprint_rectangular(shape, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
+    footprint = footprint_rectangle(shape, decomposition=decomposition)
     func = getattr(gray, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
