@@ -586,8 +586,9 @@ cdef class MCP:
                 cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
 
-                # If the cost at this point is negative or infinite, ignore it
-                if new_cost < 0 or new_cost == inf:
+                # If the cost at this point is negative, infinite or above max_cost, ignore it
+                above_max_cost = False if max_cost is None else new_cost > max_cost
+                if new_cost < 0 or new_cost == inf or above_max_cost:
                     continue
 
                 # Calculate new cumulative cost
