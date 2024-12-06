@@ -6,6 +6,48 @@ processing and computer vision.
 The main package of ``skimage`` only provides a few utilities for converting
 between image data types; for most features, you need to import one of its
 subpackages.
+
+Attributes
+----------
+__version__ : str
+    The scikit-image version string.
+
+Subpackages
+-----------
+color
+    Color space conversion.
+data
+    Example images and datasets.
+draw
+    Drawing primitives, such as lines, circles, text, etc.
+exposure
+    Image intensity adjustment, e.g., histogram equalization, etc.
+feature
+    Feature detection and extraction, e.g., texture analysis, corners, etc.
+filters
+    Sharpening, edge finding, rank filters, thresholding, etc.
+future
+    Functionality with an experimental API.
+graph
+    Graph-based operations, e.g., shortest paths.
+io
+    Reading and saving of images and videos.
+measure
+    Measurement of image properties, e.g., region properties, contours.
+metrics
+    Metrics corresponding to images, e.g., distance metrics, similarity, etc.
+morphology
+    Morphological algorithms, e.g., closing, opening, skeletonization.
+registration
+    Image registration algorithms, e.g., optical flow or phase cross correlation.
+restoration
+    Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
+segmentation
+    Algorithms to partition images into meaningful regions or boundaries.
+transform
+    Geometric and other transformations, e.g., rotations, Radon transform.
+util
+    Generic utilities.
 """
 
 __version__ = '0.25.0rc2.dev0'
