@@ -40,7 +40,7 @@ from . import (
     util,
 )
 
-# Legacy import, not advertised in __all__
+# Legacy imports, not advertised in __all__
 from .util.dtype import (
     dtype_limits,
     img_as_float32,

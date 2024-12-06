@@ -1,4 +1,4 @@
-"""Drawing primitives that operate on NumPy arrays, e.g., lines, text, etc."""
+"""Drawing primitives, such as lines, circles, text, etc."""
 
 import lazy_loader as _lazy
 
