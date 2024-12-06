@@ -53,7 +53,7 @@ build = [
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
-    'spin==0.12',
+    'spin==0.13',
     'build>=1.2.1',
 ]
 data = ['pooch>=1.6.0']
