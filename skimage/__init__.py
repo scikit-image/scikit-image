@@ -74,22 +74,6 @@ def _raise_build_error(e):
     )
 
 
-try:
-    # This variable is injected in the __builtins__ by the build
-    # process. It used to enable importing subpackages of skimage when
-    # the binaries are not built
-    __SKIMAGE_SETUP__
-except NameError:
-    __SKIMAGE_SETUP__ = False
-
-if __SKIMAGE_SETUP__:
-    import sys
-
-    sys.stderr.write('Partial import of skimage during the build process.\n')
-    # We are not importing the rest of the package during the build
-    # process, as it may not be compiled yet
-
-
 def _try_append_commit_info(version):
     """Append last commit date and hash to `version`, if available."""
     import subprocess
