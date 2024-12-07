@@ -186,3 +186,28 @@ def _test_random(shape):
     for end in ends:
         m.traceback(end)
     return a, costs, offsets
+
+
+def test_max_costs():
+    image = np.array([[1, 2, 2, 2], [2, 3, 2, 1], [1, 3, 2, 1], [2, 3, 2, 1]])
+    with expected_warnings(['Upgrading NumPy' + warning_optional]):
+        m = mcp.MCP(image, fully_connected=True)
+
+    destinations = [[3, 3]]
+
+    costs, traceback = m.find_costs(destinations)
+
+    assert_array_equal(costs, [[7, 6, 5, 5], [8, 6, 4, 3], [7, 6, 3, 2], [8, 6, 3, 1]])
+    assert_array_equal(
+        traceback, [[0, 0, 0, 1], [3, 0, 0, 1], [0, 3, 0, 1], [3, 5, 3, -1]]
+    )
+
+    costs_limited, traceback_limited = m.find_costs(destinations, max_cost=2)
+
+    assert_array_equal(
+        costs_limited,
+        [[7, 6, 5, 5], [8, np.inf, 4, 3], [9, np.inf, 3, 2], [11, np.inf, 3, 1]],
+    )
+    assert_array_equal(
+        traceback_limited, [[3, 0, 0, 1], [5, -2, 0, 1], [6, -2, 0, 1], [6, -2, 3, -1]]
+    )
