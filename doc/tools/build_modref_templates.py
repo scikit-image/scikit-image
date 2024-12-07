@@ -42,7 +42,7 @@ if __name__ == '__main__':
     source_lines = open('../skimage/__init__.py').readlines()
     version = 'vUndefined'
     for l in source_lines:
-        if l.startswith('__version__'):
+        if l.startswith('__version__ = '):
             source_version = _version.parse(l.split("'")[1])
             break
 

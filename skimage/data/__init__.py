@@ -1,5 +1,4 @@
-"""
-Test images and datasets.
+"""Example images and datasets.
 
 A curated set of general purpose and scientific images used in tests, examples,
 and documentation.
