@@ -3,10 +3,6 @@
 scikit-image (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
-The main package of ``skimage`` only provides a few utilities for converting
-between image data types; for most features, you need to import one of its
-subpackages.
-
 Attributes
 ----------
 __version__ : str
