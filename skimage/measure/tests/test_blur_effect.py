@@ -1,5 +1,8 @@
+import pytest
+import numpy as np
 from numpy.testing import assert_array_equal
 
+from skimage._shared.testing import assert_stacklevel
 from skimage.color import rgb2gray
 from skimage.data import astronaut, cells3d
 from skimage.filters import gaussian
@@ -50,3 +53,17 @@ def test_blur_effect_3d():
     B2 = blur_effect(gaussian(image_3d, sigma=4))
     assert 0 <= B0 < 1
     assert B0 < B1 < B2
+
+
+def test_blur_effect_uniform():
+    image = np.ones((10, 10))
+    regex = "Couldn't estimate blur.*may be uniform.*using NaN as a blur metric"
+    with pytest.warns(RuntimeWarning, match=regex) as record:
+        result = blur_effect(image)
+    assert_stacklevel(record)
+    assert np.isnan(result)
+
+    with pytest.warns(RuntimeWarning, match=regex) as record:
+        result = blur_effect(image, reduce_func=None)
+    assert_stacklevel(record)
+    assert result == [np.nan, np.nan]
