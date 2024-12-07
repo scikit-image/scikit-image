@@ -7,7 +7,7 @@ for use with data on a n-dimensional lattice.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 cimport numpy as cnp
 from . cimport heap
@@ -391,9 +391,13 @@ cdef class MCP:
         """
         pass
 
-
+    @deprecate_parameter(
+        "max_cumulative_cost",
+        start_version="0.25",
+        stop_version="0.27",
+    )
     def find_costs(self, starts, ends=None, find_all_ends=True,
-                   max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
