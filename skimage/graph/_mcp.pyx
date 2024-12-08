@@ -7,7 +7,7 @@ for use with data on a n-dimensional lattice.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 cimport numpy as cnp
 from . cimport heap
@@ -391,9 +391,13 @@ cdef class MCP:
         """
         pass
 
-
+    @deprecate_parameter(
+        "max_cumulative_cost",
+        start_version="0.25",
+        stop_version="0.27",
+    )
     def find_costs(self, starts, ends=None, find_all_ends=True,
-                   max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_step_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
@@ -415,6 +419,9 @@ cdef class MCP:
             end-position will be found; otherwise the algorithm will stop when
             a a path is found to any end-position. (If no `ends` were
             specified, then this parameter has no effect.)
+        max_step_cost : float, optional
+            Cost limit for each step between points. Points whose costs is
+            higher than this will form a barrier.
 
         Returns
         -------
@@ -586,8 +593,9 @@ cdef class MCP:
                 cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
 
-                # If the cost at this point is negative or infinite, ignore it
-                if new_cost < 0 or new_cost == inf:
+                # If the cost at this point is negative, infinite or above max_step_cost, ignore it
+                above_max_step_cost = False if max_step_cost is None else new_cost > max_step_cost
+                if new_cost < 0 or new_cost == inf or above_max_step_cost:
                     continue
 
                 # Calculate new cumulative cost
