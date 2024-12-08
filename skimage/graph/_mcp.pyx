@@ -397,7 +397,7 @@ cdef class MCP:
         stop_version="0.27",
     )
     def find_costs(self, starts, ends=None, find_all_ends=True,
-                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_step_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
@@ -419,7 +419,7 @@ cdef class MCP:
             end-position will be found; otherwise the algorithm will stop when
             a a path is found to any end-position. (If no `ends` were
             specified, then this parameter has no effect.)
-        max_cost : float, optional
+        max_step_cost : float, optional
             Cost limit for each step between points. Points whose costs is
             higher than this will form a barrier.
 
@@ -593,9 +593,9 @@ cdef class MCP:
                 cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
 
-                # If the cost at this point is negative, infinite or above max_cost, ignore it
-                above_max_cost = False if max_cost is None else new_cost > max_cost
-                if new_cost < 0 or new_cost == inf or above_max_cost:
+                # If the cost at this point is negative, infinite or above max_step_cost, ignore it
+                above_max_step_cost = False if max_step_cost is None else new_cost > max_step_cost
+                if new_cost < 0 or new_cost == inf or above_max_step_cost:
                     continue
 
                 # Calculate new cumulative cost
