@@ -6,25 +6,13 @@
 """Cython code used in _flood_fill.py."""
 
 cimport numpy as cnp
+from .._shared.fused_numerics cimport *
 cnp.import_array()
 
 # Must be defined to use QueueWithHistory
 ctypedef Py_ssize_t QueueItem
 
 include "../morphology/_queue_with_history.pxi"
-
-
-ctypedef fused dtype_t:
-    cnp.uint8_t
-    cnp.uint16_t
-    cnp.uint32_t
-    cnp.uint64_t
-    cnp.int8_t
-    cnp.int16_t
-    cnp.int32_t
-    cnp.int64_t
-    cnp.float32_t
-    cnp.float64_t
 
 
 # Definition of flag values used for `flags` in _flood_fill & _fill_plateau
@@ -37,11 +25,11 @@ cdef:
     unsigned char UNKNOWN = 0
 
 
-cpdef inline void _flood_fill_equal(dtype_t[::1] image,
+cpdef inline void _flood_fill_equal(np_real_numeric[::1] image,
                                     unsigned char[::1] flags,
                                     Py_ssize_t[::1] neighbor_offsets,
                                     Py_ssize_t start_index,
-                                    dtype_t seed_value):
+                                    np_real_numeric seed_value):
     """Find connected areas to fill, requiring strict equality.
 
     Parameters
@@ -86,13 +74,13 @@ cpdef inline void _flood_fill_equal(dtype_t[::1] image,
             queue_exit(&queue)
 
 
-cpdef inline void _flood_fill_tolerance(dtype_t[::1] image,
+cpdef inline void _flood_fill_tolerance(np_real_numeric[::1] image,
                                         unsigned char[::1] flags,
                                         Py_ssize_t[::1] neighbor_offsets,
                                         Py_ssize_t start_index,
-                                        dtype_t seed_value,
-                                        dtype_t low_tol,
-                                        dtype_t high_tol):
+                                        np_real_numeric seed_value,
+                                        np_real_numeric low_tol,
+                                        np_real_numeric high_tol):
     """Find connected areas to fill, within a tolerance.
 
     Parameters
