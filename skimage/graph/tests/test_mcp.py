@@ -202,7 +202,7 @@ def test_max_costs():
         traceback, [[0, 0, 0, 1], [3, 0, 0, 1], [0, 3, 0, 1], [3, 5, 3, -1]]
     )
 
-    costs_limited, traceback_limited = m.find_costs(destinations, max_cost=2)
+    costs_limited, traceback_limited = m.find_costs(destinations, max_step_cost=2)
 
     assert_array_equal(
         costs_limited,
