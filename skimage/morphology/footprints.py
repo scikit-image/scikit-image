@@ -129,6 +129,12 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
         Otherwise, this will be a tuple whose length is equal to the number of
         unique structuring elements to apply (see Examples for more detail).
 
+    Notes
+    -----
+    When `decomposition` is not None, each element of the `footprint`
+    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
+    footprint array and the number of iterations it is to be applied.
+
     Examples
     --------
     >>> import skimage as ski
@@ -991,6 +997,83 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
         footprint = tuple(sequence)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return footprint
+
+
+def footprint_octagon(shape, *, cutout_length=None, dtype=np.uint8, decomposition=None):
+    """TODO
+
+    Parameters
+    ----------
+    shape : tuple[int, int]
+        The length of the footprint in each dimension. Only 2 dimensions are
+        supported.
+    cutout_length : tuple[float, float], optional
+        If None, a regular octagon is approximated where all sides have the
+        same length. Otherwise, an octagon is formed by cutting of the edges
+        of a rectangle. `cutout_length` will define the side length of these
+        cutouts.
+
+    Returns
+    -------
+    footprint : array or tuple[tuple[ndarray, int], ...]
+        TODO
+    """
+    if len(shape) != 2:
+        msg = f"only 2 dimensions are supported, requested {len(shape)}"
+        raise ValueError(msg)
+
+    if cutout_length is None:
+        n0 = (shape[0] - shape[0] / (1 + 2 / np.sqrt(2))) / 2
+        n1 = (shape[1] - shape[1] / (1 + 2 / np.sqrt(2))) / 2
+        n0 = int(np.floor(n0))
+        n1 = int(np.floor(n1))
+        m0 = shape[0] - 2 * n0
+        m1 = shape[0] - 2 * n1
+    else:
+        if len(cutout_length) != len(shape):
+            msg = (
+                "dimensions in `cutout_length` must match `shape`, "
+                f"{len(cutout_length)} != {len(shape)}"
+            )
+            raise ValueError(msg)
+
+        n0, n1 = cutout_length
+        m0 = shape[0] - 2 * n0
+        m1 = shape[1] - 2 * n1
+
+    assert shape == (m0 + 2 * n0, m1 + 2 * n1), (shape, (m0 + 2 * n0, m1 + 2 * n1))
+
+    if decomposition is None:
+        from . import convex_hull_image
+
+        footprint = np.zeros(shape)
+        footprint[0, n1] = 1
+        footprint[n0, 0] = 1
+        footprint[0, m1 + n1 - 1] = 1
+        footprint[m0 + n0 - 1, 0] = 1
+        footprint[-1, n1] = 1
+        footprint[n0, -1] = 1
+        footprint[-1, m1 + n1 - 1] = 1
+        footprint[m0 + n0 - 1, -1] = 1
+        footprint = convex_hull_image(footprint).astype(dtype)
+
+    elif decomposition == 'sequence':
+        # general approach for larger m and/or n
+        if m == 0:
+            m = 2
+            n -= 1
+        sequence = []
+        if m > 1:
+            sequence += list(
+                footprint_rectangle((m0, m1), dtype=dtype, decomposition='sequence')
+            )
+        if n > 0:
+            sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
+        footprint = tuple(sequence)
+
     else:
         raise ValueError(f"Unrecognized decomposition: {decomposition}")
     return footprint
