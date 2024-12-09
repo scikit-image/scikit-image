@@ -396,8 +396,14 @@ cdef class MCP:
         start_version="0.25",
         stop_version="0.27",
     )
+    @deprecate_parameter(
+        "max_cost",
+        start_version="0.25",
+        stop_version="0.27",
+    )
     def find_costs(self, starts, ends=None, *, find_all_ends=True,
-                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_step_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=DEPRECATED, max_cost=DEPRECATED,
+                   max_step_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 

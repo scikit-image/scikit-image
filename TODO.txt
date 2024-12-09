@@ -8,7 +8,7 @@ Version 0.27
   - Remove `skimage/io/manage_plugins.py`
   - Remove `skimage/io/__init__.py::__getattr__`
   - Remove related tests, imports, etc...
-  - Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost`
+  - Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
 
 
 Version 0.26
