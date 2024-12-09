@@ -847,7 +847,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Parameters
     ----------
-    radius : int
+    radius : float
         The radius of the ball-shaped footprint.
 
     Other Parameters
