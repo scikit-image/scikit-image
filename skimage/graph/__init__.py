@@ -1,5 +1,5 @@
 """
-This moddule provides utilities for graph-based image processing.
+Graph-based operations, e.g., shortest paths.
 
 This includes creating adjacency graphs of pixels in an image, finding the
 central pixel in an image, finding (minimum-cost) paths across pixels, merging
