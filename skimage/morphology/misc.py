@@ -70,7 +70,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
 
     Parameters
     ----------
-    ar : ndarray (arbitrary shape, int or bool type)
+    ar : ndarray, arbitrary shape, int or bool type
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
     min_size : int, optional (default: 64)
@@ -164,7 +164,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
 
     Parameters
     ----------
-    ar : ndarray (arbitrary shape, int or bool type)
+    ar : ndarray, arbitrary shape, int or bool type
         The array containing the connected components of interest.
     area_threshold : int, optional (default: 64)
         The maximum area, in pixels, of a contiguous hole that will be filled.

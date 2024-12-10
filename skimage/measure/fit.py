@@ -758,7 +758,7 @@ def ransac(
         where the probability (confidence) is typically set to a high value
         such as 0.99, e is the current fraction of inliers w.r.t. the
         total number of samples, and m is the min_samples value.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
