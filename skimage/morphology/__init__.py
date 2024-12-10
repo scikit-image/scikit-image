@@ -16,6 +16,7 @@ from .footprints import (
     ellipse,
     footprint_from_sequence,
     footprint_rectangle,
+    footprint_ellipse,
     mirror_footprint,
     octagon,
     octahedron,
