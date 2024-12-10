@@ -50,37 +50,36 @@ __version__ = '0.25.0rc2.dev0'
 
 import lazy_loader as _lazy
 
-__getattr__, __lazy_dir__, _ = _lazy.attach_stub(__name__, __file__)
+__getattr__, *_ = _lazy.attach_stub(__name__, __file__)
+
+
+# Don't use the `__all__` and `__dir__` returned by `attach_stubs` since that
+# one would expose utility functions we don't want to advertise in our
+# top-level module anymore.
+__all__ = [
+    "__version__",
+    "color",
+    "data",
+    "draw",
+    "exposure",
+    "feature",
+    "filters",
+    "future",
+    "graph",
+    "io",
+    "measure",
+    "metrics",
+    "morphology",
+    "registration",
+    "restoration",
+    "segmentation",
+    "transform",
+    "util",
+]
 
 
 def __dir__():
-    """Add lazy-loaded attributes to keep consistent with `__getattr__`."""
-    patched_dir = {*globals().keys(), *__lazy_dir__()}
-    return sorted(patched_dir)
-
-
-# `attach_stub` currently ignores __all__ inside the stub file and simply
-# returns every lazy-imported object, so we need to define `__all__` again.
-__all__ = [
-    'color',
-    'data',
-    'draw',
-    'exposure',
-    'feature',
-    'filters',
-    'future',
-    'graph',
-    'io',
-    'measure',
-    'metrics',
-    'morphology',
-    'registration',
-    'restoration',
-    'segmentation',
-    'transform',
-    'util',
-    '__version__',
-]
+    return __all__
 
 
 # Logic for checking for improper install and importing while in the source
