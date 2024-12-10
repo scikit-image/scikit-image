@@ -79,7 +79,7 @@ __all__ = [
 
 
 def __dir__():
-    return __all__
+    return __all__.copy()
 
 
 # Logic for checking for improper install and importing while in the source
