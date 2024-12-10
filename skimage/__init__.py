@@ -1,79 +1,85 @@
 """Image Processing for Python
 
-``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
+scikit-image (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
-The main package of ``skimage`` only provides a few utilities for converting
-between image data types; for most features, you need to import one of the
-following subpackages:
+Attributes
+----------
+__version__ : str
+    The scikit-image version string.
 
 Subpackages
 -----------
 color
     Color space conversion.
 data
-    Test images and example data.
+    Example images and datasets.
 draw
-    Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
+    Drawing primitives, such as lines, circles, text, etc.
 exposure
     Image intensity adjustment, e.g., histogram equalization, etc.
 feature
-    Feature detection and extraction, e.g., texture analysis corners, etc.
+    Feature detection and extraction, e.g., texture analysis, corners, etc.
 filters
     Sharpening, edge finding, rank filters, thresholding, etc.
+future
+    Functionality with an experimental API.
 graph
-    Graph-theoretic operations, e.g., shortest paths.
+    Graph-based operations, e.g., shortest paths.
 io
-    Reading, saving, and displaying images and video.
+    Reading and saving of images and videos.
 measure
-    Measurement of image properties, e.g., region properties and contours.
+    Measurement of image properties, e.g., region properties, contours.
 metrics
-    Metrics corresponding to images, e.g. distance metrics, similarity, etc.
+    Metrics corresponding to images, e.g., distance metrics, similarity, etc.
 morphology
-    Morphological operations, e.g., opening or skeletonization.
+    Morphological algorithms, e.g., closing, opening, skeletonization.
+registration
+    Image registration algorithms, e.g., optical flow or phase cross correlation.
 restoration
     Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
-    Partitioning an image into multiple regions.
+    Algorithms to partition images into meaningful regions or boundaries.
 transform
-    Geometric and other transforms, e.g., rotation or the Radon transform.
+    Geometric and other transformations, e.g., rotations, Radon transform.
 util
     Generic utilities.
-
-Utility Functions
------------------
-img_as_float
-    Convert an image to floating point format, with values in [0, 1].
-    Is similar to `img_as_float64`, but will not convert lower-precision
-    floating point arrays to `float64`.
-img_as_float32
-    Convert an image to single-precision (32-bit) floating point format,
-    with values in [0, 1].
-img_as_float64
-    Convert an image to double-precision (64-bit) floating point format,
-    with values in [0, 1].
-img_as_uint
-    Convert an image to unsigned integer format, with values in [0, 65535].
-img_as_int
-    Convert an image to signed integer format, with values in [-32768, 32767].
-img_as_ubyte
-    Convert an image to unsigned byte format, with values in [0, 255].
-img_as_bool
-    Convert an image to boolean format, with values either True or False.
-dtype_limits
-    Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
-
 """
 
 __version__ = '0.25.0rc2.dev0'
 
 import lazy_loader as _lazy
 
-__getattr__, __lazy_dir__, _ = _lazy.attach_stub(__name__, __file__)
+__getattr__, *_ = _lazy.attach_stub(__name__, __file__)
+
+
+# Don't use the `__all__` and `__dir__` returned by `attach_stubs` since that
+# one would expose utility functions we don't want to advertise in our
+# top-level module anymore.
+__all__ = [
+    "__version__",
+    "color",
+    "data",
+    "draw",
+    "exposure",
+    "feature",
+    "filters",
+    "future",
+    "graph",
+    "io",
+    "measure",
+    "metrics",
+    "morphology",
+    "registration",
+    "restoration",
+    "segmentation",
+    "transform",
+    "util",
+]
 
 
 def __dir__():
-    return __lazy_dir__() + ['__version__']
+    return __all__.copy()
 
 
 # Logic for checking for improper install and importing while in the source
@@ -105,80 +111,38 @@ def _raise_build_error(e):
     )
 
 
-try:
-    # This variable is injected in the __builtins__ by the build
-    # process. It used to enable importing subpackages of skimage when
-    # the binaries are not built
-    __SKIMAGE_SETUP__
-except NameError:
-    __SKIMAGE_SETUP__ = False
-
-if __SKIMAGE_SETUP__:
-    import sys
-
-    sys.stderr.write('Partial import of skimage during the build process.\n')
-    # We are not importing the rest of the scikit during the build
-    # process, as it may not be compiled yet
-else:
-    try:
-        from ._shared import geometry
-
-        del geometry
-    except ImportError as e:
-        _raise_build_error(e)
-
-    # Legacy imports into the root namespace; not advertised in __all__
-    from .util.dtype import (
-        dtype_limits,
-        img_as_float32,
-        img_as_float64,
-        img_as_float,
-        img_as_int,
-        img_as_uint,
-        img_as_ubyte,
-        img_as_bool,
-    )
-
-    from .util.lookfor import lookfor
-
-    from .data import data_dir
-
-
-if 'dev' in __version__:
-    # Append last commit date and hash to dev version information, if available
-
+def _try_append_commit_info(version):
+    """Append last commit date and hash to `version`, if available."""
     import subprocess
-    import os.path
+    from pathlib import Path
 
     try:
-        p = subprocess.Popen(
+        output = subprocess.check_output(
             ['git', 'log', '-1', '--format="%h %aI"'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=os.path.dirname(__file__),
+            cwd=Path(__file__).parent,
+            text=True,
         )
-    except FileNotFoundError:
+        if output:
+            git_hash, git_date = (
+                output.strip().replace('"', '').split('T')[0].replace('-', '').split()
+            )
+            version = '+'.join(
+                [tag for tag in version.split('+') if not tag.startswith('git')]
+            )
+            version += f'+git{git_date}.{git_hash}'
+
+    except (FileNotFoundError, subprocess.CalledProcessError):
         pass
     except OSError:
         pass  # If skimage is built with emscripten which does not support processes
-    else:
-        out, err = p.communicate()
-        if p.returncode == 0:
-            git_hash, git_date = (
-                out.decode('utf-8')
-                .strip()
-                .replace('"', '')
-                .split('T')[0]
-                .replace('-', '')
-                .split()
-            )
 
-            __version__ = '+'.join(
-                [tag for tag in __version__.split('+') if not tag.startswith('git')]
-            )
-            __version__ += f'+git{git_date}.{git_hash}'
+    return version
 
-from skimage._shared.tester import PytestTester
 
-test = PytestTester(__name__)
-del PytestTester
+if 'dev' in __version__:
+    __version__ = _try_append_commit_info(__version__)
+
+
+from skimage._shared.tester import PytestTester as _PytestTester
+
+test = _PytestTester(__name__)
