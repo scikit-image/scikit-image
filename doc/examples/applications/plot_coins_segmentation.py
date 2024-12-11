@@ -53,9 +53,9 @@ fig.tight_layout()
 # segmentation. To do this, we first get the edges of features using the
 # Canny edge-detector.
 
-from skimage.feature import canny
+import skimage as ski
 
-edges = canny(coins)
+edges = ski.feature.canny(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray)
@@ -79,9 +79,9 @@ ax.set_axis_off()
 # Small spurious objects are easily removed by setting a minimum size for
 # valid objects.
 
-from skimage import morphology
+import skimage as ski
 
-coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
+coins_cleaned = ski.morphology.remove_small_objects(fill_coins, 21)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray)
@@ -99,9 +99,9 @@ ax.set_axis_off()
 # We therefore try a region-based method using the watershed transform.
 # First, we find an elevation map using the Sobel gradient of the image.
 
-from skimage.filters import sobel
+import skimage as ski
 
-elevation_map = sobel(coins)
+elevation_map = ski.filters.sobel(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.gray)
@@ -124,9 +124,8 @@ ax.set_axis_off()
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
-from skimage import segmentation
 
-segmentation_coins = segmentation.watershed(elevation_map, markers)
+segmentation_coins = ski.segmentation.watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation_coins, cmap=plt.cm.gray)
@@ -137,11 +136,9 @@ ax.set_axis_off()
 # This last method works even better, and the coins can be segmented and
 # labeled individually.
 
-from skimage.color import label2rgb
-
 segmentation_coins = ndi.binary_fill_holes(segmentation_coins - 1)
 labeled_coins, _ = ndi.label(segmentation_coins)
-image_label_overlay = label2rgb(labeled_coins, image=coins, bg_label=0)
+image_label_overlay = ski.color.label2rgb(labeled_coins, image=coins, bg_label=0)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
 axes[0].imshow(coins, cmap=plt.cm.gray)

@@ -494,18 +494,19 @@ fig.tight_layout()
 # Here is an example of the classical morphological gray-level filters:
 # opening, closing and morphological gradient.
 
-from skimage.filters.rank import minimum, gradient
+import skimage as ski
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
 opening = ski.filters.rank.maximum(
-    minimum(noisy_image, ski.morphology.disk(5)), ski.morphology.disk(5)
+    ski.filters.rank.minimum(noisy_image, ski.morphology.disk(5)),
+    ski.morphology.disk(5),
 )
-closing = minimum(
+closing = ski.filters.rank.minimum(
     ski.filters.rank.maximum(noisy_image, ski.morphology.disk(5)),
     ski.morphology.disk(5),
 )
-grad = gradient(noisy_image, ski.morphology.disk(5))
+grad = ski.filters.rank.gradient(noisy_image, ski.morphology.disk(5))
 
 # display results
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
