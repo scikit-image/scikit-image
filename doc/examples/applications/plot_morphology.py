@@ -26,10 +26,9 @@ functions only work on gray-scale or binary images, so we set ``as_gray=True``.
 """
 
 import matplotlib.pyplot as plt
-from skimage import data
-from skimage.util import img_as_ubyte
+import skimage as ski
 
-orig_phantom = img_as_ubyte(data.shepp_logan_phantom())
+orig_phantom = ski.util.img_as_ubyte(ski.data.shepp_logan_phantom())
 fig, ax = plt.subplots()
 ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
@@ -187,7 +186,7 @@ plot_comparison(phantom, b_tophat, 'black tophat')
 # *single-pixel wide skeleton*. It is important to note that this is
 # performed on binary images only.
 
-horse = data.horse()
+horse = ski.data.horse()
 
 sk = skeletonize(horse == 0)
 plot_comparison(horse, sk, 'skeletonize')

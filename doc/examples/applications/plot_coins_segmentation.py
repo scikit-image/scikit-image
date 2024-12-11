@@ -11,11 +11,10 @@ against a darker background.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data
-from skimage.exposure import histogram
+import skimage as ski
 
-coins = data.coins()
-hist, hist_centers = histogram(coins)
+coins = ski.data.coins()
+hist, hist_centers = ski.exposure.histogram(coins)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 axes[0].imshow(coins, cmap=plt.cm.gray)
