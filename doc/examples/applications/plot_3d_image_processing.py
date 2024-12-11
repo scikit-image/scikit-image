@@ -55,7 +55,7 @@ import skimage as ski
 # Load and display 3D images
 # ==========================
 
-data = ski.util.img_as_float(ski.cells3d()[:, 1, :, :])  # grab just the nuclei
+data = ski.util.img_as_float(ski.data.cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')
