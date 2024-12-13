@@ -35,7 +35,7 @@ psf = np.ones((5, 5)) / 25
 # Convolve image with the PSF to simulate a blurred image
 astro_blurred = conv2(astro, psf, 'same')
 
-# Introduce poisson noise to the blurred image (https://en.wikipedia.org/wiki/Image_noise)
+# Add Poisson noise to the blurred image (https://en.wikipedia.org/wiki/Shot_noise)
 max_photon_count = 1000
 astro_noisy = rng.poisson(astro_blurred * max_photon_count) / max_photon_count
 
