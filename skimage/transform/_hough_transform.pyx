@@ -618,7 +618,7 @@ def _gray_scale_hough_line(cnp.ndarray img,
         for i in range(nidxs):
             x = x_idxs[i]
             y = y_idxs[i]
-            pixel_intensity = cimg[x, y]
+            pixel_intensity = cimg[y, x]
             for intensity_idx in range(nintensities):
                 if  pixel_intensity < cintensity[intensity_idx]:
                     break 

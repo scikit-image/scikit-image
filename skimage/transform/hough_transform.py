@@ -8,6 +8,7 @@ from ._hough_transform import _probabilistic_hough_line as _prob_hough_line
 from ._hough_transform import _gray_scale_hough_line
 from ..util import img_as_float
 
+
 def hough_line_peaks(
     hspace,
     angles,
@@ -482,16 +483,16 @@ def gray_scale_hough_line(image, theta=None, intensity=None):
     Parameters
     ----------
     image : (M, N) ndarray of type uint8
-        Input image with intensity values in the range [0, 255] 
+        Input image with intensity values in the range [0, 255]
     theta : ndarray of double, shape (K,), optional
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
     intensity : ndarray of double, shape (K,) and value range [0, 1], optional
         intensity values for a float image at which the transform is computed.
-        Defaults to a vector of 256 intensity values equally spaced in the 
+        Defaults to a vector of 256 intensity values equally spaced in the
         range [0, 1].
- 
+
     Returns
     -------
     hspace : ndarray of uint64, shape (P, Q, G)
@@ -523,3 +524,4 @@ def gray_scale_hough_line(image, theta=None, intensity=None):
         intensity = np.linspace(0, 1, 256)
 
     return _gray_scale_hough_line(img_as_float(image), theta=theta, intensity=intensity)
+
