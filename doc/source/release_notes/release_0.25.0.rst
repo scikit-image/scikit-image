@@ -1,7 +1,7 @@
-scikit-image 0.25.0rc2
-======================
+scikit-image 0.25.0 (2024-12-13)
+================================
 
-We're happy to announce the release of scikit-image 0.25.0rc2!
+We're happy to announce the release of scikit-image 0.25.0!
 
 New Features
 ------------
@@ -17,16 +17,16 @@ API Changes
 - Remove deprecated ``skimage.morphology.skeletonize_3d``;  use ``skimage.morphology.skeletonize`` instead (`#7572 <https://github.com/scikit-image/scikit-image/pull/7572>`_).
 - Deprecate ``skimage.io`` plugin infrastructure (`#7353 <https://github.com/scikit-image/scikit-image/pull/7353>`_).
 - Switched to using the ``scipy.sparse`` array interface. For more details, see the note about the new ``scipy.sparse`` array interface [here](https://docs.scipy.org/doc/scipy/reference/sparse.html) (`#7576 <https://github.com/scikit-image/scikit-image/pull/7576>`_).
-- Deprecate ``skimage.morphology.cube`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
 - Deprecate ``skimage.morphology.rectangle`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
+- Deprecate ``skimage.morphology.cube`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
 - Deprecate ``skimage.morphology.square`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
 
 Enhancements
 ------------
 
 - Improve numerical stability of ``skimage.morphology.local_minima`` for extremely small floats (`#7534 <https://github.com/scikit-image/scikit-image/pull/7534>`_).
-- Make sure that ``skimage.feature.plot_matched_features`` uses the same random colors, if ``matches_color`` isn't provided  explicitly (`#7541 <https://github.com/scikit-image/scikit-image/pull/7541>`_).
 - Allow passing a sequence of colors to the parameter ``matches_color`` in ``skimage.feature.plot_matched_features`` (`#7541 <https://github.com/scikit-image/scikit-image/pull/7541>`_).
+- Make sure that ``skimage.feature.plot_matched_features`` uses the same random colors, if ``matches_color`` isn't provided  explicitly (`#7541 <https://github.com/scikit-image/scikit-image/pull/7541>`_).
 
 Performance
 -----------
@@ -130,6 +130,7 @@ Maintenance
 - Add forgotten TODO about deprecated ``square``, ``cube`` & ``rectangle`` (`#7624 <https://github.com/scikit-image/scikit-image/pull/7624>`_).
 - Upgrade to spin 0.13 (`#7622 <https://github.com/scikit-image/scikit-image/pull/7622>`_).
 - Lazy load legacy imports in ``skimage`` top module (`#6892 <https://github.com/scikit-image/scikit-image/pull/6892>`_).
+- CI pre-commit fix (`#7631 <https://github.com/scikit-image/scikit-image/pull/7631>`_).
 
 Contributors
 ------------
