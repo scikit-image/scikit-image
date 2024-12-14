@@ -26,12 +26,12 @@ References
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as ndi
-from skimage import color, data, filters, graph, measure, morphology
+import skimage as ski
 
 ###############################################################################
 # We start by loading the data: an image of a human retina.
 
-retina_source = data.retina()
+retina_source = ski.data.retina()
 
 _, ax = plt.subplots()
 ax.imshow(retina_source)
@@ -43,10 +43,10 @@ _ = ax.set_title('Human retina')
 # `Sato vesselness filter <skimage.filters.sato>` to better distinguish the
 # main vessels in the image.
 
-retina = color.rgb2gray(retina_source)
-t0, t1 = filters.threshold_multiotsu(retina, classes=3)
+retina = ski.color.rgb2gray(retina_source)
+t0, t1 = ski.filters.threshold_multiotsu(retina, classes=3)
 mask = retina > t0
-vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
+vessels = ski.filters.sato(retina, sigmas=range(1, 10)) * mask
 
 _, axes = plt.subplots(nrows=1, ncols=2)
 axes[0].imshow(retina, cmap='gray')
@@ -61,11 +61,11 @@ _ = axes[1].set_title('Sato vesselness')
 # `hysteresis thresholding <skimage.filters.apply_hysteresis_threshold>` to
 # define the main vessels.
 
-thresholded = filters.apply_hysteresis_threshold(vessels, 0.01, 0.03)
+thresholded = ski.filters.apply_hysteresis_threshold(vessels, 0.01, 0.03)
 labeled = ndi.label(thresholded)[0]
 
 _, ax = plt.subplots()
-ax.imshow(color.label2rgb(labeled, retina))
+ax.imshow(ski.color.label2rgb(labeled, retina))
 ax.set_axis_off()
 _ = ax.set_title('Thresholded vesselness')
 
@@ -77,16 +77,16 @@ _ = ax.set_title('Thresholded vesselness')
 
 largest_nonzero_label = np.argmax(np.bincount(labeled[labeled > 0]))
 binary = labeled == largest_nonzero_label
-skeleton = morphology.skeletonize(binary)
-g, nodes = graph.pixel_graph(skeleton, connectivity=2)
-px, distances = graph.central_pixel(
+skeleton = ski.morphology.skeletonize(binary)
+g, nodes = ski.graph.pixel_graph(skeleton, connectivity=2)
+px, distances = ski.graph.central_pixel(
     g, nodes=nodes, shape=skeleton.shape, partition_size=100
 )
 
-centroid = measure.centroid(labeled > 0)
+centroid = ski.measure.centroid(labeled > 0)
 
 _, ax = plt.subplots()
-ax.imshow(color.label2rgb(skeleton, retina))
+ax.imshow(ski.color.label2rgb(skeleton, retina))
 ax.scatter(px[1], px[0], label='graph center')
 ax.scatter(centroid[1], centroid[0], label='centroid')
 ax.legend()

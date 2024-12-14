@@ -13,18 +13,17 @@ This example shows how to easily compare two images with various approaches.
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from skimage import data, transform, exposure
-from skimage.util import compare_images
+import skimage as ski
 
 
-img1 = data.coins()
-img1_equalized = exposure.equalize_hist(img1)
-img2 = transform.rotate(img1, 2)
+img1 = ski.data.coins()
+img1_equalized = ski.exposure.equalize_hist(img1)
+img2 = ski.transform.rotate(img1, 2)
 
 
-comp_equalized = compare_images(img1, img1_equalized, method='checkerboard')
-diff_rotated = compare_images(img1, img2, method='diff')
-blend_rotated = compare_images(img1, img2, method='blend')
+comp_equalized = ski.util.compare_images(img1, img1_equalized, method='checkerboard')
+diff_rotated = ski.util.compare_images(img1, img2, method='diff')
+blend_rotated = ski.util.compare_images(img1, img2, method='blend')
 
 
 ######################################################################

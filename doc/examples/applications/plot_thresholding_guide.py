@@ -31,12 +31,11 @@ mechanisms.
 
 import matplotlib.pyplot as plt
 
-from skimage import data
-from skimage.filters import try_all_threshold
+import skimage as ski
 
-img = data.page()
+img = ski.data.page()
 
-fig, ax = try_all_threshold(img, figsize=(10, 8), verbose=False)
+fig, ax = ski.filters.try_all_threshold(img, figsize=(10, 8), verbose=False)
 
 plt.show()
 
@@ -50,11 +49,9 @@ plt.show()
 # and naive threshold value, which is sometimes used as a guess value.
 #
 
-from skimage.filters import threshold_mean
 
-
-image = data.camera()
-thresh = threshold_mean(image)
+image = ski.data.camera()
+thresh = ski.filters.threshold_mean(image)
 binary = image > thresh
 
 fig, axes = plt.subplots(ncols=2, figsize=(8, 3))
@@ -79,12 +76,10 @@ plt.show()
 # For instance, the minimum algorithm takes a histogram of the image and smooths it
 # repeatedly until there are only two peaks in the histogram.
 
-from skimage.filters import threshold_minimum
 
+image = ski.data.camera()
 
-image = data.camera()
-
-thresh_min = threshold_minimum(image)
+thresh_min = ski.filters.threshold_minimum(image)
 binary_min = image > thresh_min
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 10))
@@ -115,10 +110,9 @@ plt.show()
 # .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
 
-from skimage.filters import threshold_otsu
 
-image = data.camera()
-thresh = threshold_otsu(image)
+image = ski.data.camera()
+thresh = ski.filters.threshold_otsu(image)
 binary = image > thresh
 
 fig, ax = plt.subplots(ncols=3, figsize=(8, 2.5))
@@ -153,16 +147,14 @@ plt.show()
 # of the local neighborhood minus an offset value.
 #
 
-from skimage.filters import threshold_otsu, threshold_local
 
+image = ski.data.page()
 
-image = data.page()
-
-global_thresh = threshold_otsu(image)
+global_thresh = ski.filters.threshold_otsu(image)
 binary_global = image > global_thresh
 
 block_size = 35
-local_thresh = threshold_local(image, block_size, offset=10)
+local_thresh = ski.filters.threshold_local(image, block_size, offset=10)
 binary_local = image > local_thresh
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
@@ -192,18 +184,14 @@ plt.show()
 # The example compares the local threshold with the global threshold.
 #
 
-from skimage.morphology import disk
-from skimage.filters import threshold_otsu, rank
-from skimage.util import img_as_ubyte
 
-
-img = img_as_ubyte(data.page())
+img = ski.util.img_as_ubyte(ski.data.page())
 
 radius = 15
-footprint = disk(radius)
+footprint = ski.morphology.disk(radius)
 
-local_otsu = rank.otsu(img, footprint)
-threshold_global_otsu = threshold_otsu(img)
+local_otsu = ski.filters.rank.otsu(img, footprint)
+threshold_global_otsu = ski.filters.threshold_otsu(img)
 global_otsu = img >= threshold_global_otsu
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True)

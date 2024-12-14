@@ -48,15 +48,14 @@ import numpy as np
 
 import plotly
 import plotly.express as px
-from skimage import exposure, util
-from skimage.data import cells3d
+import skimage as ski
 
 
 #####################################################################
 # Load and display 3D images
 # ==========================
 
-data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
+data = ski.util.img_as_float(ski.data.cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')
@@ -114,7 +113,7 @@ show_plane(c, data[:, :, n_col // 2], title=f'Column = {n_col // 2}')
 
 
 def display(im3d, cmap='gray', step=2):
-    data_montage = util.montage(im3d[::step], padding_width=4, fill=np.nan)
+    data_montage = ski.util.montage(im3d[::step], padding_width=4, fill=np.nan)
     _, ax = plt.subplots(figsize=(16, 14))
     ax.imshow(data_montage, cmap=cmap)
     ax.set_axis_off()
@@ -241,10 +240,10 @@ def plot_hist(ax, data, title=None):
 
 
 gamma_low_val = 0.5
-gamma_low = exposure.adjust_gamma(data, gamma=gamma_low_val)
+gamma_low = ski.exposure.adjust_gamma(data, gamma=gamma_low_val)
 
 gamma_high_val = 1.5
-gamma_high = exposure.adjust_gamma(data, gamma=gamma_high_val)
+gamma_high = ski.exposure.adjust_gamma(data, gamma=gamma_high_val)
 
 _, ((a, b, c), (d, e, f)) = plt.subplots(nrows=2, ncols=3, figsize=(12, 8))
 
@@ -265,7 +264,7 @@ plot_hist(f, gamma_high)
 # areas. One downside of this approach is that it may enhance background
 # noise.
 
-equalized_data = exposure.equalize_hist(data)
+equalized_data = ski.exposure.equalize_hist(data)
 
 display(equalized_data)
 
@@ -284,11 +283,11 @@ _, ((a, b), (c, d)) = plt.subplots(nrows=2, ncols=2, figsize=(16, 8))
 plot_hist(a, data, title="Original histogram")
 plot_hist(b, equalized_data, title="Equalized histogram")
 
-cdf, bins = exposure.cumulative_distribution(data.ravel())
+cdf, bins = ski.exposure.cumulative_distribution(data.ravel())
 c.plot(bins, cdf, "r")
 c.set_title("Original CDF")
 
-cdf, bins = exposure.cumulative_distribution(equalized_data.ravel())
+cdf, bins = ski.exposure.cumulative_distribution(equalized_data.ravel())
 d.plot(bins, cdf, "r")
 d.set_title("Histogram equalization CDF")
 
@@ -301,7 +300,7 @@ d.set_title("Histogram equalization CDF")
 
 vmin, vmax = np.percentile(data, q=(0.5, 99.5))
 
-clipped_data = exposure.rescale_intensity(
+clipped_data = ski.exposure.rescale_intensity(
     data, in_range=(vmin, vmax), out_range=np.float32
 )
 
