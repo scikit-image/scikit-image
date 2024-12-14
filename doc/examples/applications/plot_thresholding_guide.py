@@ -49,8 +49,6 @@ plt.show()
 # and naive threshold value, which is sometimes used as a guess value.
 #
 
-import skimage as ski
-
 
 image = ski.data.camera()
 thresh = ski.filters.threshold_mean(image)
@@ -77,8 +75,6 @@ plt.show()
 # For pictures with a bimodal histogram, more specific algorithms can be used.
 # For instance, the minimum algorithm takes a histogram of the image and smooths it
 # repeatedly until there are only two peaks in the histogram.
-
-import skimage as ski
 
 
 image = ski.data.camera()
@@ -114,7 +110,6 @@ plt.show()
 # .. [2] https://en.wikipedia.org/wiki/Otsu's_method
 #
 
-import skimage as ski
 
 image = ski.data.camera()
 thresh = ski.filters.threshold_otsu(image)
@@ -152,8 +147,6 @@ plt.show()
 # of the local neighborhood minus an offset value.
 #
 
-import skimage as ski
-
 
 image = ski.data.page()
 
@@ -190,8 +183,6 @@ plt.show()
 #
 # The example compares the local threshold with the global threshold.
 #
-
-import skimage as ski
 
 
 img = ski.util.img_as_ubyte(ski.data.page())

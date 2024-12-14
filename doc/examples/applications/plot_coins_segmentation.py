@@ -53,7 +53,6 @@ fig.tight_layout()
 # segmentation. To do this, we first get the edges of features using the
 # Canny edge-detector.
 
-import skimage as ski
 
 edges = ski.feature.canny(coins)
 
@@ -79,7 +78,6 @@ ax.set_axis_off()
 # Small spurious objects are easily removed by setting a minimum size for
 # valid objects.
 
-import skimage as ski
 
 coins_cleaned = ski.morphology.remove_small_objects(fill_coins, 21)
 
@@ -99,7 +97,6 @@ ax.set_axis_off()
 # We therefore try a region-based method using the watershed transform.
 # First, we find an elevation map using the Sobel gradient of the image.
 
-import skimage as ski
 
 elevation_map = ski.filters.sobel(coins)
 

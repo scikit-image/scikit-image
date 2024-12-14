@@ -61,7 +61,6 @@ fig.tight_layout()
 # are randomly set to 0. The **median** filter is applied to remove the
 # noise.
 
-import skimage as ski
 
 rng = np.random.default_rng()
 noise = rng.random(noisy_image.shape)
@@ -124,7 +123,6 @@ fig.tight_layout()
 # The example hereunder shows how a local **mean** filter smooths the camera
 # man image.
 
-import skimage as ski
 
 loc_mean = ski.filters.rank.mean(noisy_image, ski.morphology.disk(10))
 
@@ -153,7 +151,6 @@ fig.tight_layout()
 #     A different implementation is available for color images in
 #     :func:`skimage.restoration.denoise_bilateral`.
 
-import skimage as ski
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
@@ -195,7 +192,6 @@ fig.tight_layout()
 # .. [3] https://en.wikipedia.org/wiki/Histogram_equalization
 # .. [4] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
-import skimage as ski
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
@@ -239,7 +235,6 @@ fig.tight_layout()
 # The following example shows how local auto-level enhances the camara man
 # picture.
 
-import skimage as ski
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
@@ -267,7 +262,6 @@ fig.tight_layout()
 # of local minimum and maximum. The example below illustrates how the
 # percentile parameters influence the local auto-level result.
 
-import skimage as ski
 
 image = ski.data.camera()
 
@@ -386,7 +380,6 @@ fig.tight_layout()
 #
 # .. [5] https://en.wikipedia.org/wiki/Otsu's_method
 
-import skimage as ski
 
 p8 = ski.data.page()
 
@@ -494,7 +487,6 @@ fig.tight_layout()
 # Here is an example of the classical morphological gray-level filters:
 # opening, closing and morphological gradient.
 
-import skimage as ski
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
@@ -587,7 +579,6 @@ fig.tight_layout()
 from time import time
 
 from scipy.ndimage import percentile_filter
-import skimage as ski
 
 
 def exec_and_timeit(func):

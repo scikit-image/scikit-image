@@ -56,7 +56,6 @@ def plot_comparison(original, filtered, filter_name):
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
-import skimage as ski
 
 footprint = ski.morphology.disk(6)
 eroded = ski.morphology.erosion(orig_phantom, footprint)
