@@ -599,10 +599,10 @@ cdef class MCP:
                 cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
 
-                # If the cost at this point is negative, infinite or above max_step_cost, ignore it
-                above_max_step_cost = False if max_step_cost is None else new_cost > max_step_cost
-                if new_cost < 0 or new_cost == inf or above_max_step_cost:
-                    continue
+                if new_cost < 0 or new_cost == inf:
+                    continue  # Ignore negative and inf cost
+                if max_step_cost is not None and new_cost > max_step_cost:
+                    continue  # Ignore, if it exceeds `max_step_cost`
 
                 # Calculate new cumulative cost
                 new_cumcost = cumcost + self._travel_cost(cost, new_cost,
