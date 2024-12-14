@@ -1,7 +1,14 @@
+import pytest
+
 import numpy as np
 import skimage.graph.mcp as mcp
 
-from skimage._shared.testing import assert_array_equal, assert_almost_equal, parametrize
+from skimage._shared.testing import (
+    assert_array_equal,
+    assert_almost_equal,
+    parametrize,
+    assert_stacklevel,
+)
 from skimage._shared._warnings import expected_warnings
 
 
@@ -211,3 +218,22 @@ def test_max_costs():
     assert_array_equal(
         traceback_limited, [[3, 0, 0, 1], [5, -2, 0, 1], [6, -2, 0, 1], [6, -2, 3, -1]]
     )
+
+
+def test_MCP_find_costs_deprecated_params():
+    image = np.ones((2, 2))
+    destinations = [[0, 0]]
+    m = mcp.MCP(image, fully_connected=True)
+
+    regex = "`max_cost` is deprecated.*use the parameter `max_step_cost`"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        m.find_costs(destinations, max_cost=2)
+    assert_stacklevel(record)
+
+    regex = (
+        "`max_cumulative_cost` is deprecated.*"
+        "do not use the parameter `max_cumulative_cost`"
+    )
+    with pytest.warns(FutureWarning, match=regex) as record:
+        m.find_costs(destinations, max_cumulative_cost=2)
+    assert_stacklevel(record)

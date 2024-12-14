@@ -395,12 +395,14 @@ cdef class MCP:
         "max_cumulative_cost",
         start_version="0.26",
         stop_version="0.28",
+        stacklevel=2
     )
     @deprecate_parameter(
         "max_cost",
         new_name="max_step_cost",
         start_version="0.26",
         stop_version="0.28",
+        stacklevel=3,
     )
     def find_costs(self, starts, ends=None, *, find_all_ends=True,
                    max_coverage=1.0, max_cumulative_cost=DEPRECATED,
