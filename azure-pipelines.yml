@@ -30,6 +30,10 @@ jobs:
           ARCH: "x64"
           SKIP_PYTEST: "true"
           BUILD_DOCS: "true"
+        Python311-x64-gallery:
+          PYTHON_VERSION: "3.11"
+          ARCH: "x64"
+          TEST_EXAMPLES: "true"
     continueOnError: false
     timeoutInMinutes: 60
 
