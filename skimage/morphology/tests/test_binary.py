@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
-from skimage.morphology import binary, footprints, gray
+from skimage.morphology import binary, footprints, gray, footprint_rectangle
 
 
 img = color.rgb2gray(data.astronaut())
@@ -13,28 +13,28 @@ bw_img = img > 100 / 255.0
 
 
 def test_non_square_image():
-    footprint = morphology.square(3)
+    footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_erosion(bw_img[:100, :200], footprint)
     gray_res = img_as_bool(gray.erosion(bw_img[:100, :200], footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_erosion():
-    footprint = morphology.square(3)
+    footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_erosion(bw_img, footprint)
     gray_res = img_as_bool(gray.erosion(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_dilation():
-    footprint = morphology.square(3)
+    footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_dilation(bw_img, footprint)
     gray_res = img_as_bool(gray.dilation(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
 
 
 def test_binary_closing():
-    footprint = morphology.square(3)
+    footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_closing(bw_img, footprint)
     gray_res = img_as_bool(gray.closing(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
@@ -52,7 +52,7 @@ def test_binary_closing_extensive():
 
 
 def test_binary_opening():
-    footprint = morphology.square(3)
+    footprint = footprint_rectangle((3, 3))
     binary_res = binary.binary_opening(bw_img, footprint)
     gray_res = img_as_bool(gray.opening(bw_img, footprint))
     assert_array_equal(binary_res, gray_res)
@@ -85,36 +85,16 @@ def _get_decomp_test_data(function, ndim=2):
     "function",
     ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
 )
-@pytest.mark.parametrize("size", (3, 4, 11))
-@pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_square_decomposition(function, size, decomposition):
-    """Validate footprint decomposition for various shapes.
-
-    comparison is made to the case without decomposition.
-    """
-    footprint_ndarray = footprints.square(size, decomposition=None)
-    footprint = footprints.square(size, decomposition=decomposition)
-    img = _get_decomp_test_data(function)
-    func = getattr(binary, function)
-    expected = func(img, footprint=footprint_ndarray)
-    out = func(img, footprint=footprint)
-    assert_array_equal(expected, out)
-
-
-@pytest.mark.parametrize(
-    "function",
-    ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
-)
-@pytest.mark.parametrize("nrows", (3, 4, 11))
-@pytest.mark.parametrize("ncols", (3, 4, 11))
+@pytest.mark.parametrize("nrows", (3, 7, 11))
+@pytest.mark.parametrize("ncols", (3, 7, 11))
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
 def test_rectangle_decomposition(function, nrows, ncols, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.rectangle(nrows, ncols, decomposition=None)
-    footprint = footprints.rectangle(nrows, ncols, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
+    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
     img = _get_decomp_test_data(function)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)
@@ -129,6 +109,9 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 @pytest.mark.parametrize("m", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3, 4, 5))
 @pytest.mark.parametrize("decomposition", ['sequence'])
+@pytest.mark.filterwarnings(
+    "ignore:.*falling back to decomposition='separable':UserWarning:skimage"
+)
 def test_octagon_decomposition(function, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
 
@@ -171,15 +154,18 @@ def test_diamond_decomposition(function, radius, decomposition):
     "function",
     ["binary_erosion", "binary_dilation", "binary_closing", "binary_opening"],
 )
-@pytest.mark.parametrize("size", (3, 4, 5))
+@pytest.mark.parametrize("shape", [(3, 3, 3), (3, 4, 5)])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_cube_decomposition(function, size, decomposition):
+@pytest.mark.filterwarnings(
+    "ignore:.*falling back to decomposition='separable':UserWarning:skimage"
+)
+def test_cube_decomposition(function, shape, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.cube(size, decomposition=None)
-    footprint = footprints.cube(size, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
+    footprint = footprint_rectangle(shape, decomposition=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)

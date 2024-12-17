@@ -321,13 +321,13 @@ class Test_deprecate_parameter:
             r"in 0\.12.* see the documentation of .*_func_deprecated_params`."
         )
         with pytest.warns(FutureWarning, match=match):
-            assert _func_deprecated_params(1, 2) == (1, DEPRECATED, DEPRECATED, None)
+            assert _func_deprecated_params(1, 2) == (1, 2, DEPRECATED, None)
         with pytest.warns(FutureWarning, match=match):
-            assert _func_deprecated_params(1, 2, 3) == (1, DEPRECATED, DEPRECATED, None)
+            assert _func_deprecated_params(1, 2, 3) == (1, 2, 3, None)
         with pytest.warns(FutureWarning, match=match):
             assert _func_deprecated_params(1, old0=2) == (
                 1,
-                DEPRECATED,
+                2,
                 DEPRECATED,
                 None,
             )
@@ -335,7 +335,7 @@ class Test_deprecate_parameter:
             assert _func_deprecated_params(1, old1=2) == (
                 1,
                 DEPRECATED,
-                DEPRECATED,
+                2,
                 None,
             )
 

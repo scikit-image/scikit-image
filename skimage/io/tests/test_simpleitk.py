@@ -64,7 +64,7 @@ def test_imread_uint16_big_endian():
 # Neither NumPy's linspace nor called functions in our color module can
 # really deal with the max and min value supported by float64. As we might
 # deprecate this plugin system soon, just ignore it.
-@pytest.mark.filterwarnings("default")
+@pytest.mark.filterwarnings("ignore::RuntimeWarning")
 def test_imsave_roundtrip(shape, dtype, tmp_path):
     if np.issubdtype(dtype, np.floating):
         info_func = np.finfo

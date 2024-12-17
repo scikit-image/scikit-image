@@ -11,6 +11,7 @@ from warnings import filterwarnings
 
 import plotly.io as pio
 import skimage
+from intersphinx_registry import get_intersphinx_mapping
 from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
@@ -30,7 +31,7 @@ with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
 version = "vUndefined"
 for l in setup_lines:
-    if l.startswith("__version__"):
+    if l.startswith("__version__ ="):
         version = l.split("'")[1]
         break
 
@@ -126,6 +127,8 @@ sphinx_gallery_conf = {
     },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
+    # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
+    "parallel": True,
 }
 
 
@@ -216,9 +219,7 @@ latex_documents = [
     ),
 ]
 latex_elements = {}
-latex_elements[
-    "preamble"
-] = r"""
+latex_elements["preamble"] = r"""
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -245,17 +246,20 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 # -- intersphinx --------------------------------------------------------------
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "neps": ("https://numpy.org/neps/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-    "matplotlib": ("https://matplotlib.org/stable/", None),
-    "networkx": ("https://networkx.org/documentation/stable/", None),
-    "plotly": ("https://plotly.com/python-api-reference/", None),
-    "seaborn": ("https://seaborn.pydata.org/", None),
-}
+# ...
+intersphinx_mapping = get_intersphinx_mapping(
+    packages={
+        "python",
+        "numpy",
+        "neps",
+        "scipy",
+        "sklearn",
+        "matplotlib",
+        "networkx",
+        "plotly",
+        "seaborn",
+    }
+)
 
 # Do not (yet) use nitpicky mode for checking cross-references
 nitpicky = False
