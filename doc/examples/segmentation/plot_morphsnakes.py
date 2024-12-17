@@ -49,13 +49,8 @@ References
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data, img_as_float
-from skimage.segmentation import (
-    morphological_chan_vese,
-    morphological_geodesic_active_contour,
-    inverse_gaussian_gradient,
-    checkerboard_level_set,
-)
+import matplotlib.lines as mlines
+import skimage as ski
 
 
 def store_evolution_in(lst):
@@ -70,14 +65,14 @@ def store_evolution_in(lst):
 
 
 # Morphological ACWE
-image = img_as_float(data.camera())
+image = ski.util.img_as_float(ski.data.camera())
 
 # Initial level set
-init_ls = checkerboard_level_set(image.shape, 6)
+init_ls = ski.segmentation.checkerboard_level_set(image.shape, 6)
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_chan_vese(
+ls = ski.segmentation.morphological_chan_vese(
     image, num_iter=35, init_level_set=init_ls, smoothing=3, iter_callback=callback
 )
 
@@ -91,20 +86,27 @@ ax[0].set_title("Morphological ACWE segmentation", fontsize=12)
 
 ax[1].imshow(ls, cmap="gray")
 ax[1].set_axis_off()
-contour = ax[1].contour(evolution[2], [0.5], colors='g')
-contour.collections[0].set_label("Iteration 2")
-contour = ax[1].contour(evolution[7], [0.5], colors='y')
-contour.collections[0].set_label("Iteration 7")
-contour = ax[1].contour(evolution[-1], [0.5], colors='r')
-contour.collections[0].set_label("Iteration 35")
-ax[1].legend(loc="upper right")
+
+ax[1].contour(evolution[2], [0.5], colors='g')
+ax[1].contour(evolution[7], [0.5], colors='y')
+ax[1].contour(evolution[-1], [0.5], colors='r')
+
+# `Axes.legend` does not support handles for `QuadContourSet`, define proxy
+# artists instead
+contour_labels = [
+    mlines.Line2D([], [], color="g", label="Iteration 2"),
+    mlines.Line2D([], [], color="y", label="Iteration 7"),
+    mlines.Line2D([], [], color="r", label="Iteration 35"),
+]
+ax[1].legend(handles=contour_labels, loc="upper right")
+
 title = "Morphological ACWE evolution"
 ax[1].set_title(title, fontsize=12)
 
 
 # Morphological GAC
-image = img_as_float(data.coins())
-gimage = inverse_gaussian_gradient(image)
+image = ski.util.img_as_float(ski.data.coins())
+gimage = ski.segmentation.inverse_gaussian_gradient(image)
 
 # Initial level set
 init_ls = np.zeros(image.shape, dtype=np.int8)
@@ -112,7 +114,7 @@ init_ls[10:-10, 10:-10] = 1
 # List with intermediate results for plotting the evolution
 evolution = []
 callback = store_evolution_in(evolution)
-ls = morphological_geodesic_active_contour(
+ls = ski.segmentation.morphological_geodesic_active_contour(
     gimage,
     num_iter=230,
     init_level_set=init_ls,
@@ -129,13 +131,20 @@ ax[2].set_title("Morphological GAC segmentation", fontsize=12)
 
 ax[3].imshow(ls, cmap="gray")
 ax[3].set_axis_off()
-contour = ax[3].contour(evolution[0], [0.5], colors='g')
-contour.collections[0].set_label("Iteration 0")
-contour = ax[3].contour(evolution[100], [0.5], colors='y')
-contour.collections[0].set_label("Iteration 100")
-contour = ax[3].contour(evolution[-1], [0.5], colors='r')
-contour.collections[0].set_label("Iteration 230")
-ax[3].legend(loc="upper right")
+
+ax[3].contour(evolution[0], [0.5], colors='g')
+ax[3].contour(evolution[100], [0.5], colors='y')
+ax[3].contour(evolution[-1], [0.5], colors='r')
+
+# `Axes.legend` does not support handles for `QuadContourSet`, define proxy
+# artists instead
+contour_labels = [
+    mlines.Line2D([], [], color="g", label="Iteration 0"),
+    mlines.Line2D([], [], color="y", label="Iteration 100"),
+    mlines.Line2D([], [], color="r", label="Iteration 230"),
+]
+ax[3].legend(handles=contour_labels, loc="upper right")
+
 title = "Morphological GAC evolution"
 ax[3].set_title(title, fontsize=12)
 
