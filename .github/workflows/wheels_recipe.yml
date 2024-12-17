@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["aarch64"]
     steps:
@@ -123,7 +123,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-13]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
@@ -140,6 +140,16 @@ jobs:
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
+
+      # Needed to install a specific libomp version later
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
+        with:
+          python-version: "3.12"
+          channels: conda-forge
+          channel-priority: true
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
 
       - name: Build wheels for CPython Mac OS
         run: |
@@ -172,8 +182,8 @@ jobs:
           # use conda to install llvm-openmp
           # Note that we do NOT activate the conda environment, we just add the
           # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
-          sudo conda create -n build $OPENMP_URL
-          PREFIX="/usr/local/miniconda/envs/build"
+          conda create -n build $OPENMP_URL
+          PREFIX="/Users/runner/miniconda3/envs/build"
           export CC=/usr/bin/clang
           export CXX=/usr/bin/clang++
           export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
@@ -202,7 +212,7 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
 
     steps:
       - uses: actions/checkout@v4
