@@ -86,23 +86,17 @@ ax[0].set_title("Morphological ACWE segmentation", fontsize=12)
 
 ax[1].imshow(ls, cmap="gray")
 ax[1].set_axis_off()
+ax[1].set_title("Morphological ACWE evolution", fontsize=12)
 
-ax[1].contour(evolution[2], [0.5], colors='g')
-ax[1].contour(evolution[7], [0.5], colors='y')
-ax[1].contour(evolution[-1], [0.5], colors='r')
+contour_labels = []
+for n, color in ((2, 'g'), (7, 'y'), (35, 'r')):
+    ax[1].contour(evolution[n], [0.5], colors=color)
 
-# `Axes.legend` does not support handles for `QuadContourSet`, define proxy
-# artists instead
-contour_labels = [
-    mlines.Line2D([], [], color="g", label="Iteration 2"),
-    mlines.Line2D([], [], color="y", label="Iteration 7"),
-    mlines.Line2D([], [], color="r", label="Iteration 35"),
-]
+    # Use empty line to represent this contour in the legend
+    legend_line = mlines.Line2D([], [], color=color, label=f"Iteration {n}")
+    contour_labels.append(legend_line)
+
 ax[1].legend(handles=contour_labels, loc="upper right")
-
-title = "Morphological ACWE evolution"
-ax[1].set_title(title, fontsize=12)
-
 
 # Morphological GAC
 image = ski.util.img_as_float(ski.data.coins())
@@ -131,22 +125,17 @@ ax[2].set_title("Morphological GAC segmentation", fontsize=12)
 
 ax[3].imshow(ls, cmap="gray")
 ax[3].set_axis_off()
+ax[3].set_title("Morphological GAC evolution", fontsize=12)
 
-ax[3].contour(evolution[0], [0.5], colors='g')
-ax[3].contour(evolution[100], [0.5], colors='y')
-ax[3].contour(evolution[-1], [0.5], colors='r')
+contour_labels = []
+for n, color in ((0, 'g'), (100, 'y'), (230, 'r')):
+    ax[3].contour(evolution[n], [0.5], colors=color)
 
-# `Axes.legend` does not support handles for `QuadContourSet`, define proxy
-# artists instead
-contour_labels = [
-    mlines.Line2D([], [], color="g", label="Iteration 0"),
-    mlines.Line2D([], [], color="y", label="Iteration 100"),
-    mlines.Line2D([], [], color="r", label="Iteration 230"),
-]
+    # Use empty line to represent this contour in the legend
+    legend_line = mlines.Line2D([], [], color=color, label=f"Iteration {n}")
+    contour_labels.append(legend_line)
+
 ax[3].legend(handles=contour_labels, loc="upper right")
-
-title = "Morphological GAC evolution"
-ax[3].set_title(title, fontsize=12)
 
 fig.tight_layout()
 plt.show()
