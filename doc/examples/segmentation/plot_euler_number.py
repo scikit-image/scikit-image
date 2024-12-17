@@ -74,7 +74,7 @@ plt.show()
 
 
 def make_ax(grid=False):
-    fig, ax = plt.subplots(subplot_kw = {'projection':'3d'})
+    fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
     ax.grid(grid)
     ax.set_axis_off()
     return fig, ax
