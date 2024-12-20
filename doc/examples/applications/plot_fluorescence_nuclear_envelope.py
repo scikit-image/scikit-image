@@ -35,14 +35,13 @@ import plotly.io
 import plotly.express as px
 from scipy import ndimage as ndi
 
-from skimage import filters, measure, morphology, segmentation
-from skimage.data import protein_transport
+import skimage as ski
 
 
 #####################################################################
 # We start with a single cell/nucleus to construct the workflow.
 
-image_sequence = protein_transport()
+image_sequence = ski.data.protein_transport()
 
 print(f'shape: {image_sequence.shape}')
 
@@ -77,9 +76,9 @@ image_t_0_channel_0 = image_sequence[0, 0, :, :]
 # and foreground with Otsu's method: We get a binary image (step ``c)``). We
 # then fill the holes in the objects (step ``c-1)``).
 
-smooth = filters.gaussian(image_t_0_channel_0, sigma=1.5)
+smooth = ski.filters.gaussian(image_t_0_channel_0, sigma=1.5)
 
-thresh_value = filters.threshold_otsu(smooth)
+thresh_value = ski.filters.threshold_otsu(smooth)
 thresh = smooth > thresh_value
 
 fill = ndi.binary_fill_holes(thresh)
@@ -89,16 +88,16 @@ fill = ndi.binary_fill_holes(thresh)
 # border (step ``c-2)``). Here, we can see that part of another nucleus was
 # touching the bottom right-hand corner.
 
-clear = segmentation.clear_border(fill)
+clear = ski.segmentation.clear_border(fill)
 clear.dtype
 
 #####################################################################
 # We compute both the morphological dilation of this binary image
 # (step ``d)``) and its morphological erosion (step ``e)``).
 
-dilate = morphology.binary_dilation(clear)
+dilate = ski.morphology.binary_dilation(clear)
 
-erode = morphology.binary_erosion(clear)
+erode = ski.morphology.binary_erosion(clear)
 
 #####################################################################
 # Finally, we subtract the eroded from the dilated to get the nucleus rim
@@ -168,7 +167,7 @@ fig.tight_layout()
 # The mean intensity is readily available as a region property in a labeled
 # image.
 
-props = measure.regionprops_table(
+props = ski.measure.regionprops_table(
     mask.astype(np.uint8),
     intensity_image=image_t_0_channel_1,
     properties=('label', 'area', 'intensity_mean'),
@@ -193,8 +192,8 @@ props['area'] * props['intensity_mean']
 
 n_z = image_sequence.shape[0]  # number of frames
 
-smooth_seq = filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
-thresh_values = [filters.threshold_otsu(s) for s in smooth_seq[:]]
+smooth_seq = ski.filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
+thresh_values = [ski.filters.threshold_otsu(s) for s in smooth_seq[:]]
 thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 
 #####################################################################
@@ -250,10 +249,10 @@ fill_seq = ndi.binary_fill_holes(thresh_seq, structure=footprint)
 
 border_mask = np.ones_like(fill_seq)
 border_mask[n_z // 2, -1, -1] = False
-clear_seq = segmentation.clear_border(fill_seq, mask=border_mask)
+clear_seq = ski.segmentation.clear_border(fill_seq, mask=border_mask)
 
-dilate_seq = morphology.binary_dilation(clear_seq, footprint=footprint)
-erode_seq = morphology.binary_erosion(clear_seq, footprint=footprint)
+dilate_seq = ski.morphology.binary_dilation(clear_seq, footprint=footprint)
+erode_seq = ski.morphology.binary_erosion(clear_seq, footprint=footprint)
 mask_sequence = np.logical_and(dilate_seq, ~erode_seq)
 
 #####################################################################
@@ -270,7 +269,7 @@ mask_sequence *= labels[:, np.newaxis, np.newaxis]
 # Let us compute the region properties of interest for all these labeled
 # regions.
 
-props = measure.regionprops_table(
+props = ski.measure.regionprops_table(
     mask_sequence,
     intensity_image=image_sequence[:, 1, :, :],
     properties=('label', 'area', 'intensity_mean'),

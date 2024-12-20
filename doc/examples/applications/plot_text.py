@@ -12,9 +12,9 @@ using scikit-image's optional dependency `matplotlib
 
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage import data
+import skimage as ski
 
-img = data.cat()
+img = ski.data.cat()
 
 fig = plt.figure()
 fig.figimage(img, resize=True)
