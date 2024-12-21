@@ -16,6 +16,9 @@ except ImportError:
 __all__ = ['blur_effect']
 
 
+_EPSILON = 1e-10
+
+
 def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     """Compute a metric that indicates the strength of blur in an image
     (0 for no blur, 1 for maximal blur).
@@ -85,6 +88,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
         M2 = np.sum(T[slices])
+        M1 = np.clip(M1, a_min=_EPSILON, a_max=None)
         B.append(np.abs(M1 - M2) / M1)
 
     return B if reduce_func is None else reduce_func(B)
