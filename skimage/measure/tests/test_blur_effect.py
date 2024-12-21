@@ -62,14 +62,7 @@ def test_blur_constant_image():
 
 def test_blur_single_axis_constant_image():
     """Test that the blur metric work for an image that is constant in one axis."""
-    image = np.array(
-        [
-            [0, 0.025, 0.05, 0.075, 0.1],
-            [0, 0.025, 0.05, 0.075, 0.1],
-            [0, 0.025, 0.05, 0.075, 0.1],
-            [0, 0.025, 0.05, 0.075, 0.1],
-            [0, 0.025, 0.05, 0.075, 0.1],
-        ]
-    )
+    row = np.linspace(0, 1, 1000)
+    image = np.array([row for _ in range(1000)])
     B0 = blur_effect(image)
     assert_almost_equal(B0, 1.0, decimal=5)
