@@ -27,6 +27,7 @@ class ThinPlateSplineTransform:
     Examples
     --------
     >>> import skimage as ski
+    >>> import numpy as np
 
     Define source and destination control points such that they simulate
     rotating by 90 degrees and generate a meshgrid from them:

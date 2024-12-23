@@ -42,6 +42,8 @@ class LineModelND(BaseModel):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.measure import LineModelND
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND()
@@ -249,6 +251,8 @@ class CircleModel(BaseModel):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.measure import CircleModel
     >>> t = np.linspace(0, 2 * np.pi, 25)
     >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
     >>> model = CircleModel()
@@ -402,6 +406,8 @@ class EllipseModel(BaseModel):
     Examples
     --------
 
+    >>> import numpy as np
+    >>> from skimage.measure import EllipseModel
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
     ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
     >>> ellipse = EllipseModel()
@@ -790,6 +796,7 @@ def ransac(
 
     Generate ellipse data without tilt and add noise:
 
+    >>> import numpy as np
     >>> t = np.linspace(0, 2 * np.pi, 50)
     >>> xc, yc = 20, 30
     >>> a, b = 5, 10
@@ -808,6 +815,7 @@ def ransac(
 
     Estimate ellipse model using all available data:
 
+    >>> from skimage.measure import EllipseModel
     >>> model = EllipseModel()
     >>> model.estimate(data)
     True

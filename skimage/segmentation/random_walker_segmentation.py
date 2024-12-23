@@ -465,6 +465,8 @@ def random_walker(
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.segmentation import random_walker
     >>> rng = np.random.default_rng()
     >>> a = np.zeros((10, 10)) + 0.2 * rng.random((10, 10))
     >>> a[5:8, 5:8] += 1

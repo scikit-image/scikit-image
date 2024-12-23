@@ -107,6 +107,8 @@ def max_tree(image, connectivity=1):
     --------
     We create a small sample image (Figure 1 from [4]) and build the max-tree.
 
+    >>> import numpy as np
+    >>> from skimage.morphology import max_tree
     >>> image = np.array([[15, 13, 16], [12, 12, 10], [16, 12, 14]])
     >>> P, S = max_tree(image, connectivity=2)
     """
@@ -231,6 +233,8 @@ def area_opening(
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
 
+    >>> import numpy as np
+    >>> from skimage.morphology import area_opening
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -327,6 +331,7 @@ def diameter_opening(
     We create an image (quadratic function with a maximum in the center and
     4 additional local maxima.
 
+    >>> import numpy as np
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -336,6 +341,7 @@ def diameter_opening(
 
     We can calculate the diameter opening:
 
+    >>> from skimage.morphology import diameter_opening
     >>> open = diameter_opening(f, 3, connectivity=1)
 
     The peaks with a maximal extension of 2 or less are removed.
@@ -448,6 +454,7 @@ def area_closing(
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
 
+    >>> import numpy as np
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -457,6 +464,7 @@ def area_closing(
 
     We can calculate the area closing:
 
+    >>> from skimage.morphology import area_closing
     >>> closed = area_closing(f, 8, connectivity=1)
 
     All small minima are removed, and the remaining minima have at least
@@ -561,6 +569,7 @@ def diameter_closing(
     We create an image (quadratic function with a minimum in the center and
     4 additional local minima.
 
+    >>> import numpy as np
     >>> w = 12
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 180 + 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -570,6 +579,7 @@ def diameter_closing(
 
     We can calculate the diameter closing:
 
+    >>> from skimage.morphology import diameter_closing
     >>> closed = diameter_closing(f, 3, connectivity=1)
 
     All small minima with a maximal extension of 2 or less are removed.
@@ -675,6 +685,7 @@ def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=Non
     We create an image (quadratic function with a maximum in the center and
     4 additional constant maxima.
 
+    >>> import numpy as np
     >>> w = 10
     >>> x, y = np.mgrid[0:w,0:w]
     >>> f = 20 - 0.2*((x - w/2)**2 + (y-w/2)**2)
@@ -683,6 +694,7 @@ def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=Non
 
     We can calculate all local maxima:
 
+    >>> from skimage.morphology import max_tree_local_maxima
     >>> maxima = max_tree_local_maxima(f)
 
     The resulting image contains the labeled local maxima.

@@ -37,6 +37,8 @@ def frt2(a):
     Generate a test image:
     Use a prime number for the array dimensions
 
+    >>> import numpy as np
+    >>> from skimage.transform.finite_radon_transform import frt2
     >>> SIZE = 59
     >>> img = np.tri(SIZE, dtype=np.int32)
 
@@ -93,6 +95,8 @@ def ifrt2(a):
     Examples
     --------
 
+    >>> import numpy as np
+    >>> from skimage.transform.finite_radon_transform import frt2, ifrt2
     >>> SIZE = 59
     >>> img = np.tri(SIZE, dtype=np.int32)
 

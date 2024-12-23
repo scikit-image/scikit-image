@@ -615,6 +615,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
     Get the CIE XYZ tristimulus values for a "D65" illuminant for a 10 degree field of
     view
 
+    >>> from skimage.color import xyz_tristimulus_values
     >>> xyz_tristimulus_values(illuminant="D65", observer="10")
     array([0.94809668, 1.        , 1.07305136])
     """
@@ -845,6 +846,7 @@ def rgb2xyz(rgb, *, channel_axis=-1):
     Examples
     --------
     >>> from skimage import data
+    >>> from skimage.color import rgb2xyz
     >>> img = data.astronaut()
     >>> img_xyz = rgb2xyz(img)
     """

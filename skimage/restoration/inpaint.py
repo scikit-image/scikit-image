@@ -236,6 +236,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
 
     Examples
     --------
+    >>> import numpy as np
     >>> img = np.tile(np.square(np.linspace(0, 1, 5)), (5, 1))
     >>> mask = np.zeros_like(img)
     >>> mask[2, 2:] = 1

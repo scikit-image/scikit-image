@@ -43,6 +43,8 @@ def ufftn(inarray, dim=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import ufftn
     >>> input = np.ones((3, 3, 3))
     >>> output = ufftn(input)
     >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
@@ -75,6 +77,8 @@ def uifftn(inarray, dim=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import uifftn
     >>> input = np.ones((3, 3, 3))
     >>> output = uifftn(input)
     >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
@@ -115,6 +119,8 @@ def urfftn(inarray, dim=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import urfftn
     >>> input = np.ones((5, 5, 5))
     >>> output = urfftn(input)
     >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
@@ -159,6 +165,8 @@ def uirfftn(inarray, dim=None, shape=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import urfftn, uirfftn
     >>> input = np.ones((5, 5, 5))
     >>> output = uirfftn(urfftn(input), shape=input.shape)
     >>> np.allclose(input, output)
@@ -193,6 +201,8 @@ def ufft2(inarray):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import ufft2
     >>> input = np.ones((10, 128, 128))
     >>> output = ufft2(input)
     >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size),
@@ -225,6 +235,8 @@ def uifft2(inarray):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import uifft2
     >>> input = np.ones((10, 128, 128))
     >>> output = uifft2(input)
     >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size),
@@ -259,6 +271,8 @@ def urfft2(inarray):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import urfft2
     >>> input = np.ones((10, 128, 128))
     >>> output = urfft2(input)
     >>> np.allclose(np.sum(input[1,...]) / np.sqrt(input[1,...].size),
@@ -297,6 +311,8 @@ def uirfft2(inarray, shape=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import uirfftn, urfftn
     >>> input = np.ones((10, 128, 128))
     >>> output = uirfftn(urfftn(input), shape=input.shape)
     >>> np.allclose(input, output)
@@ -326,6 +342,7 @@ def image_quad_norm(inarray):
 
     Examples
     --------
+    >>> import numpy as np
     >>> input = np.ones((5, 5))
     >>> image_quad_norm(ufft2(input)) == np.sum(np.abs(input)**2)
     True
@@ -374,6 +391,8 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import ir2tf
     >>> np.all(np.array([[4, 0], [0, 0]]) == ir2tf(np.ones((2, 2)), (2, 2)))
     True
     >>> ir2tf(np.ones((2, 2)), (512, 512)).shape == (512, 257)
@@ -433,6 +452,8 @@ def laplacian(ndim, shape, is_real=True):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.uft import laplacian
     >>> tf, ir = laplacian(2, (32, 32))
     >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
     True

@@ -52,6 +52,8 @@ def skeletonize(image, *, method=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import skeletonize
     >>> X, Y = np.ogrid[0:9, 0:9]
     >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
     >>> ellipse.view(np.uint8)
@@ -140,6 +142,8 @@ def _skeletonize_zhang(image):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import skeletonize
     >>> X, Y = np.ogrid[0:9, 0:9]
     >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(bool)
     >>> ellipse.view(np.uint8)
@@ -300,6 +304,8 @@ def thin(image, max_num_iter=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import thin
     >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
     >>> square[0, 1] =  1
@@ -419,6 +425,8 @@ def medial_axis(image, mask=None, return_distance=False, *, rng=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import medial_axis
     >>> square = np.zeros((7, 7), dtype=bool)
     >>> square[1:-1, 2:-2] = 1
     >>> square.view(np.uint8)

@@ -77,6 +77,9 @@ def _kernel_shape(ndim, dim):
 
     Examples
     --------
+    ..! disable_try_examples
+
+    >>> from skimage.filters.edges import _kernel_shape
     >>> _kernel_shape(2, 0)
     [-1, 1]
     >>> _kernel_shape(3, 1)
@@ -110,6 +113,9 @@ def _reshape_nd(arr, ndim, dim):
 
     Examples
     --------
+    ..! disable_try_examples
+
+    >>> import numpy as np
     >>> rng = np.random.default_rng()
     >>> arr = rng.random(7)
     >>> _reshape_nd(arr, 2, 0).shape

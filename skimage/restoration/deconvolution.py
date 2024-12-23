@@ -53,8 +53,9 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
+    >>> import numpy as np
+    >>> img = color.rgb2gray(data.astronaut())
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
@@ -207,8 +208,9 @@ def unsupervised_wiener(
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
+    >>> import numpy as np
+    >>> img = color.rgb2gray(data.astronaut())
     >>> psf = np.ones((5, 5)) / 25
     >>> img = convolve2d(img, psf, 'same')
     >>> rng = np.random.default_rng()
@@ -388,8 +390,10 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     Examples
     --------
     >>> from skimage import img_as_float, data, restoration
-    >>> camera = img_as_float(data.camera())
     >>> from scipy.signal import convolve2d
+    >>> import numpy as np
+    >>> camera = img_as_float(data.camera())
+
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
     >>> rng = np.random.default_rng()

@@ -64,7 +64,9 @@ class LPIFilter2D:
         --------
         Gaussian filter without normalization of coefficients:
 
+        >>> from skimage.filters import LPIFilter2D
         >>> def filt_func(r, c, sigma=1):
+        ...     import numpy as np
         ...     return np.exp(-(r**2 + c**2)/(2 * sigma**2))
         >>> filter = LPIFilter2D(filt_func)
 
@@ -155,7 +157,9 @@ def filter_forward(
 
     Gaussian filter without normalization:
 
+    >>> from skimage.filters import filter_forward
     >>> def filt_func(r, c, sigma=1):
+    ...     import numpy as np
     ...     return np.exp(-(r**2 + c**2)/(2 * sigma**2))
     >>>
     >>> from skimage import data

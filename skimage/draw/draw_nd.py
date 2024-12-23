@@ -33,6 +33,10 @@ def _round_safe(coords):
 
     Examples
     --------
+    ..! disable_try_examples
+
+    >>> import numpy as np
+    >>> from skimage.draw.draw_nd import _round_safe
     >>> coords0 = np.array([0.5, 1.25, 2., 2.75, 3.5])
     >>> _round_safe(coords0)
     array([0, 1, 2, 3, 4])
@@ -77,6 +81,8 @@ def line_nd(start, stop, *, endpoint=False, integer=True):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.draw import line_nd
     >>> lin = line_nd((1, 1), (5, 2.5), endpoint=False)
     >>> lin
     (array([1, 2, 3, 4]), array([1, 1, 2, 2]))

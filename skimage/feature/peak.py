@@ -200,6 +200,7 @@ def peak_local_max(
 
     Examples
     --------
+    >>> import numpy as np
     >>> img1 = np.zeros((7, 7))
     >>> img1[3, 4] = 1
     >>> img1[3, 2] = 1.5

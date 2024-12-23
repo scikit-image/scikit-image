@@ -1059,6 +1059,8 @@ def mirror_footprint(footprint):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import mirror_footprint
     >>> footprint = np.array([[0, 0, 0],
     ...                       [0, 1, 1],
     ...                       [0, 1, 1]], np.uint8)
@@ -1092,6 +1094,8 @@ def pad_footprint(footprint, *, pad_end=True):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.morphology import pad_footprint
     >>> footprint = np.array([[0, 0],
     ...                       [1, 1],
     ...                       [1, 1]], np.uint8)

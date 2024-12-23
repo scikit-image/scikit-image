@@ -279,6 +279,7 @@ def show():
         >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> import skimage.io as io
+    >>> import numpy as np
     >>> rng = np.random.default_rng()
     >>> for i in range(4):
     ...     ax_im = io.imshow(rng.random((50, 50)))  # doctest: +SKIP
