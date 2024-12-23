@@ -132,6 +132,11 @@ sphinx_gallery_conf = {
     #   Temporarily disabled because plotly scraper isn't parallel-safe
     #   (see https://github.com/plotly/plotly.py/issues/4959)!
     # "parallel": True,
+    # Interactive documentation via jupyterlite-sphinx utilities
+    "jupyterlite": {
+        "use_jupyter_lab": False,  # use the Notebook interface instead of JupyterLab
+        'notebook_modification_function': None,  # TODO: fully qualified name of a function that implements JupyterLite-specific modifications of notebooks
+    },
 }
 
 
@@ -376,5 +381,5 @@ try_examples_global_warning_text = (
     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
 )
 
-jupyterlite_silence = False # temporary, for debugging
+jupyterlite_silence = False  # temporary, for debugging
 jupyterlite_overrides = "overrides.json"
