@@ -134,7 +134,10 @@ sphinx_gallery_conf = {
     # "parallel": True,
     # Interactive documentation via jupyterlite-sphinx utilities
     "jupyterlite": {
-        "use_jupyter_lab": False,  # use the Notebook interface instead of JupyterLab
+        # Use the Notebook interface instead of the Lab interface, until
+        # https://github.com/sphinx-gallery/sphinx-gallery/pull/1417 makes
+        # it to a release
+        "use_jupyter_lab": True,
         'notebook_modification_function': None,  # TODO: fully qualified name of a function that implements JupyterLite-specific modifications of notebooks
     },
 }
@@ -374,7 +377,6 @@ myst_enable_extensions = [
 
 global_enable_try_examples = True
 try_examples_global_button_text = "Try it!"
-try_examples_global_height = "600px"
 try_examples_global_warning_text = (
     "Interactive examples for scikit-image are experimental and may not always work "
     "as expected. If you encounter any issues, please report them on the [scikit-image "
