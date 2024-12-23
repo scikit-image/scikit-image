@@ -377,3 +377,4 @@ try_examples_global_warning_text = (
 )
 
 jupyterlite_silence = False # temporary, for debugging
+jupyterlite_overrides = "overrides.json"
