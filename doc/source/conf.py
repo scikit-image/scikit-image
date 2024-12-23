@@ -51,6 +51,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "jupyterlite_sphinx",
     "doi_role",
     "numpydoc",
     "sphinx_design",
@@ -363,3 +364,16 @@ myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
 ]
+
+# -- Interactive documentation via jupyterlite-sphinx ------------------------
+
+global_enable_try_examples = True
+try_examples_global_button_text = "Try it!"
+try_examples_global_height = "600px"
+try_examples_global_warning_text = (
+    "Interactive examples for scikit-image are experimental and may not always work "
+    "as expected. If you encounter any issues, please report them on the [scikit-image "
+    "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
+)
+
+jupyterlite_silence = False # temporary, for debugging
