@@ -27,11 +27,15 @@ value are independent channels, or the `CMYK model
 to and from different color spaces. Integer-type arrays can be
 transformed to floating-point type by the conversion operation::
 
+.. try_examples::
+
     >>> # bright saturated red
+    >>> import numpy as np
+    >>> import skimage.color as color
     >>> red_pixel_rgb = np.array([[[255, 0, 0]]], dtype=np.uint8)
     >>> color.rgb2hsv(red_pixel_rgb)
     array([[[ 0.,  1.,  1.]]])
-    >>> # darker saturated blue
+    >>> # darker saturated blue
     >>> dark_blue_pixel_rgb = np.array([[[0, 0, 100]]], dtype=np.uint8)
     >>> color.rgb2hsv(dark_blue_pixel_rgb)
     array([[[ 0.66666667,  1.        ,  0.39215686]]])
@@ -48,6 +52,8 @@ Conversion from RGBA to RGB - Removing alpha channel through alpha blending
 Converting an RGBA image to an RGB image by alpha blending it with a
 background is realized with :func:`rgba2rgb` ::
 
+.. try_examples::
+
     >>> import skimage as ski
     >>> img_rgba = ski.data.logo()
     >>> img_rgb = ski.color.rgba2rgb(img_rgba)
@@ -58,6 +64,9 @@ Conversion between color and gray values
 Converting an RGB image to a grayscale image is realized with
 :func:`rgb2gray` ::
 
+.. try_examples::
+
+    >>> import skimage as ski
     >>> img = ski.data.astronaut()
     >>> img_gray = ski.color.rgb2gray(img)
 
@@ -67,6 +76,10 @@ such a weighting ensures `luminance preservation
 <https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale>`_
 from RGB to grayscale::
 
+.. try_examples::
+
+    >>> import numpy as np
+    >>> import skimage as ski
     >>> red_pixel = np.array([[[255, 0, 0]]], dtype=np.uint8)
     >>> ski.color.rgb2gray(red_pixel)
     array([[ 0.2125]])
@@ -86,6 +99,8 @@ become False and conversely. For grayscale images, pixel values are replaced by 
 difference of the maximum value of the data type and the actual value. For RGB
 images, the same operation is done for each channel. This operation can be achieved
 with :py:func:`skimage.util.invert`::
+
+.. try_examples::
 
     >>> import skimage as ski
     >>> img = ski.data.camera()
@@ -139,6 +154,8 @@ Other methods re-distribute pixel values according to the *histogram* of
 the image. The histogram of pixel values is computed with
 :func:`skimage.exposure.histogram`::
 
+.. try_examples::
+
     >>> import numpy as np
     >>> import skimage as ski
     >>> image = np.array([[1, 3], [1, 1]])
@@ -154,6 +171,8 @@ The simplest contrast enhancement :func:`rescale_intensity` consists in
 stretching pixel values to the whole allowed range, using a linear
 transformation::
 
+.. try_examples::
+
     >>> import skimage as ski
     >>> text = ski.data.text()
     >>> text.min(), text.max()
@@ -162,11 +181,11 @@ transformation::
     >>> better_contrast.min(), better_contrast.max()
     (0, 255)
 
-Even if an image uses the whole value range, sometimes there is very
-little weight at the ends of the value range. In such a case, clipping
-pixel values using percentiles of the image improves the contrast (at the
-expense of some loss of information, because some pixels are saturated by
-this operation)::
+    Even if an image uses the whole value range, sometimes there is very
+    little weight at the ends of the value range. In such a case, clipping
+    pixel values using percentiles of the image improves the contrast (at the
+    expense of some loss of information, because some pixels are saturated by
+    this operation)::
 
     >>> moon = ski.data.moon()
     >>> v_min, v_max = np.percentile(moon, (0.2, 99.8))
