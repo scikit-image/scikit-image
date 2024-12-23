@@ -74,6 +74,8 @@ docs = [
     'pooch>=1.6',
     'tifffile>=2022.8.12',
     'myst-parser',
+    'jupyterlite-sphinx',
+    'jupyterlite-pyodide-kernel',
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
