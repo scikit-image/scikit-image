@@ -583,18 +583,16 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
     """
-    if decomposition is None:
-        L = np.arange(-radius, radius + 1)
-        X, Y = np.meshgrid(L, L)
-        if not strict_radius:
-            radius += 0.5
-        return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
-    elif decomposition == 'sequence':
-        sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
-    elif decomposition == 'crosses':
-        fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = _cross_decomposition(fp)
-    return sequence
+    diameter = radius * 2
+    if diameter % 2 == 0:
+        diameter += 1
+    footprint = footprint_ellipse(
+        shape=(diameter,) * 2,
+        grow=0 if strict_radius else 0.5,
+        dtype=dtype,
+        decomposition=decomposition,
+    )
+    return footprint
 
 
 def _cross(r0, r1, dtype=np.uint8):
@@ -717,6 +715,53 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         fp = ellipse(width, height, dtype, decomposition=None)
         sequence = _cross_decomposition(fp)
     return sequence
+
+
+def footprint_ellipse(shape, *, grow=0, dtype=np.uint8, decomposition=None):
+    """
+
+    Parameters
+    ----------
+    shape
+    grow : float, optional
+        Adjust ellipse size within the footprint.
+    dtype
+    decomposition
+
+    Returns
+    -------
+
+    """
+    if decomposition == 'sequence':
+        if not all(shape[0] == diameter for diameter in shape):
+            msg = (
+                "sequence decomposition is only supported for spherical "
+                f"shapes, got elliptical shape: {shape!r}"
+            )
+            raise ValueError(msg)
+        footprint = _nsphere_series_decomposition(
+            shape[0] // 2, ndim=len(shape), dtype=dtype
+        )
+
+    else:
+        footprint = np.zeros(shape, dtype=float)
+        for dim, length in enumerate(shape):
+            radius = length / 2
+            coords = np.linspace(-radius, radius, num=length, endpoint=True)
+            coords = coords.reshape(
+                (1,) * dim + (length,) + (1,) * (len(shape) - dim - 1)
+            )
+            adjusted_radius = radius + grow  # TODO limit to >0
+            footprint += (coords / adjusted_radius) ** 2
+        footprint = footprint <= 1
+        footprint = footprint.astype(dtype)
+
+        if decomposition == "crosses":
+            footprint = _cross_decomposition(footprint)
+        elif decomposition is not None:
+            raise ValueError(f"Unrecognized decomposition: {decomposition}")
+
+    return footprint
 
 
 @deprecate_func(
@@ -893,22 +938,16 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
     .. [2] https://en.wikipedia.org/wiki/Rhombicuboctahedron
     """
-    if decomposition is None:
-        n = 2 * radius + 1
-        Z, Y, X = np.mgrid[
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-            -radius : radius : n * 1j,
-        ]
-        s = X**2 + Y**2 + Z**2
-        if not strict_radius:
-            radius += 0.5
-        return np.array(s <= radius * radius, dtype=dtype)
-    elif decomposition == 'sequence':
-        sequence = _nsphere_series_decomposition(radius, ndim=3, dtype=dtype)
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return sequence
+    diameter = radius * 2
+    if diameter % 2 == 0:
+        diameter += 1
+    footprint = footprint_ellipse(
+        shape=(diameter,) * 3,
+        grow=0 if strict_radius else 0.5,
+        dtype=dtype,
+        decomposition=decomposition,
+    )
+    return footprint
 
 
 def octagon(m, n, dtype=np.uint8, *, decomposition=None):
