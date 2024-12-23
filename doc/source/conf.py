@@ -130,6 +130,11 @@ sphinx_gallery_conf = {
     "remove_config_comments": True,
     # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
     "parallel": True,
+    # Interactive documentation via jupyterlite-sphinx utilities
+    "jupyterlite": {
+        "use_jupyter_lab": False,  # use the Notebook interface instead of JupyterLab
+        'notebook_modification_function': None,  # TODO: fully qualified name of a function that implements JupyterLite-specific modifications of notebooks
+    },
 }
 
 
@@ -374,5 +379,5 @@ try_examples_global_warning_text = (
     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
 )
 
-jupyterlite_silence = False # temporary, for debugging
+jupyterlite_silence = False  # temporary, for debugging
 jupyterlite_overrides = "overrides.json"
