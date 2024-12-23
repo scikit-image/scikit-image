@@ -184,6 +184,8 @@ def watershed(
 
     We first generate an initial image with two overlapping circles:
 
+    >>> import numpy as np
+    >>> from skimage.segmentation import watershed
     >>> x, y = np.indices((80, 80))
     >>> x1, y1, x2, y2 = 28, 28, 44, 52
     >>> r1, r2 = 16, 20

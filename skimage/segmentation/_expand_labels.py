@@ -58,6 +58,8 @@ def expand_labels(label_image, distance=1, spacing=1):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.segmentation import expand_labels
     >>> labels = np.array([0, 1, 0, 0, 0, 0, 2])
     >>> expand_labels(labels, distance=1)
     array([1, 1, 1, 0, 0, 2, 2])

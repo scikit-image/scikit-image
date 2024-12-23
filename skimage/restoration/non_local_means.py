@@ -143,6 +143,8 @@ def denoise_nl_means(
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration.non_local_means import denoise_nl_means
     >>> a = np.zeros((40, 40))
     >>> a[10:-10, 10:-10] = 1.
     >>> rng = np.random.default_rng()

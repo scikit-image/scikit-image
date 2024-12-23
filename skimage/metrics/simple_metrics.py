@@ -185,6 +185,8 @@ def _pad_to(arr, shape):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> _pad_to(np.ones((1, 1), dtype=int), (1, 3))
     array([[1, 0, 0]])
     """

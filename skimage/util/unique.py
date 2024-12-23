@@ -29,6 +29,8 @@ def unique_rows(ar):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.util import unique_rows
     >>> ar = np.array([[1, 0, 1],
     ...                [0, 1, 0],
     ...                [1, 0, 1]], np.uint8)

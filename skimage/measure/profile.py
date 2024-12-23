@@ -52,6 +52,7 @@ def profile_line(
 
     Examples
     --------
+    >>> import numpy as np
     >>> x = np.array([[1, 1, 1, 2, 2, 2]])
     >>> img = np.vstack([np.zeros_like(x), x, x, x, np.zeros_like(x)])
     >>> img

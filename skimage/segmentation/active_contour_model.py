@@ -79,6 +79,7 @@ def active_contour(
     --------
     >>> from skimage.draw import circle_perimeter
     >>> from skimage.filters import gaussian
+    >>> import numpy as np
 
     Create and smooth image:
 

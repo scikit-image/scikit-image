@@ -79,6 +79,7 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
     Examples
     --------
     >>> from skimage.draw import ellipse
+    >>> import numpy as np
     >>> img = np.zeros((10, 12), dtype=np.uint8)
     >>> rr, cc = ellipse(5, 6, 3, 5, rotation=np.deg2rad(30))
     >>> img[rr, cc] = 1
@@ -107,16 +108,20 @@ def ellipse(r, c, r_radius, c_radius, shape=None, rotation=0.0):
     using these ellipse positions for an image afterwards may lead to appearing
     on the other side of image, because ``image[-1, -1] = image[end-1, end-1]``
 
-    >>> rr, cc = ellipse(1, 2, 3, 6)
-    >>> img = np.zeros((6, 12), dtype=np.uint8)
-    >>> img[rr, cc] = 1
-    >>> img
-    array([[1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
-           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
-           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-           [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
+    .. try_examples::
+
+        >>> from skimage.draw import ellipse
+        >>> import numpy as np
+        >>> rr, cc = ellipse(1, 2, 3, 6)
+        >>> img = np.zeros((6, 12), dtype=np.uint8)
+        >>> img[rr, cc] = 1
+        >>> img
+        array([[1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]], dtype=uint8)
     """
 
     center = np.array([r, c])
@@ -247,6 +252,7 @@ def polygon_perimeter(r, c, shape=None, clip=False):
         >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> from skimage.draw import polygon_perimeter
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
     ...                            [-1, 5, 11, 5],
@@ -316,6 +322,7 @@ def set_color(image, coords, color, alpha=1):
     Examples
     --------
     >>> from skimage.draw import line, set_color
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 20, 20)
     >>> set_color(img, (rr, cc), 1)
@@ -384,6 +391,7 @@ def line(r0, c0, r1, c1):
     Examples
     --------
     >>> from skimage.draw import line
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = line(1, 1, 8, 8)
     >>> img[rr, cc] = 1
@@ -426,6 +434,7 @@ def line_aa(r0, c0, r1, c1):
     Examples
     --------
     >>> from skimage.draw import line_aa
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = line_aa(1, 1, 8, 8)
     >>> img[rr, cc] = val * 255
@@ -480,6 +489,7 @@ def polygon(r, c, shape=None):
     Examples
     --------
     >>> import skimage as ski
+    >>> import numpy as np
     >>> r = np.array([1, 2, 8])
     >>> c = np.array([1, 7, 4])
     >>> rr, cc = ski.draw.polygon(r, c)
@@ -567,6 +577,7 @@ def circle_perimeter(r, c, radius, method='bresenham', shape=None):
     Examples
     --------
     >>> from skimage.draw import circle_perimeter
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = circle_perimeter(4, 4, 3)
     >>> img[rr, cc] = 1
@@ -623,6 +634,7 @@ def circle_perimeter_aa(r, c, radius, shape=None):
     Examples
     --------
     >>> from skimage.draw import circle_perimeter_aa
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc, val = circle_perimeter_aa(4, 4, 3)
     >>> img[rr, cc] = val * 255
@@ -679,6 +691,7 @@ def ellipse_perimeter(r, c, r_radius, c_radius, orientation=0, shape=None):
     Examples
     --------
     >>> from skimage.draw import ellipse_perimeter
+    >>> import numpy as np
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(5, 5, 3, 4)
     >>> img[rr, cc] = 1
@@ -825,6 +838,8 @@ def rectangle(start, end=None, extent=None, shape=None):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
 
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle
     >>> img = np.zeros((5, 5), dtype=np.uint8)
     >>> start = (0, 1)
     >>> end = (3, 3)
@@ -923,6 +938,8 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
            [0, 0, 1, 0, 0, 1],
            [0, 0, 1, 1, 1, 1]], dtype=uint8)
 
+    >>> import numpy as np
+    >>> from skimage.draw import rectangle_perimeter
     >>> img = np.zeros((5, 5), dtype=np.uint8)
     >>> r, c = rectangle_perimeter(start, (10, 10), shape=img.shape, clip=True)
     >>> img[r, c] = 1

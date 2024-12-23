@@ -18,6 +18,8 @@ def lookfor(what):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> import skimage as ski
     >>> ski.util.lookfor('regular_grid')
     Search results for 'regular_grid'

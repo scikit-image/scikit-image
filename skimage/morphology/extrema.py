@@ -341,6 +341,7 @@ def local_maxima(
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.morphology import local_maxima
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = 1
@@ -501,6 +502,7 @@ def local_minima(
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.morphology import local_minima
     >>> image = np.zeros((4, 7), dtype=int)
     >>> image[1:3, 1:3] = -1

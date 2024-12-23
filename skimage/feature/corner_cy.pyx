@@ -38,6 +38,7 @@ def _corner_moravec(np_floats[:, ::1] cimage, Py_ssize_t window_size=1):
     Examples
     --------
     >>> from skimage.feature import corner_moravec
+    >>> import numpy as np
     >>> square = np.zeros([7, 7])
     >>> square[3, 3] = 1
     >>> square.astype(int)
@@ -224,6 +225,7 @@ def _corner_orientations(np_floats[:, ::1] image, Py_ssize_t[:, :] corners,
     >>> from skimage.morphology import octagon
     >>> from skimage.feature import (corner_fast, corner_peaks,
     ...                              corner_orientations)
+    >>> import numpy as np
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
     >>> square.astype(int)

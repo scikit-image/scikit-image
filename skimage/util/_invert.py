@@ -40,6 +40,8 @@ def invert(image, signed_float=False):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.util import invert
     >>> img = np.array([[100,  0, 200],
     ...                 [  0, 50,   0],
     ...                 [ 30,  0, 255]], np.uint8)

@@ -42,6 +42,8 @@ def hausdorff_distance(image0, image1, method="standard"):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.metrics.set_metrics import hausdorff_distance
     >>> points_a = (3, 0)
     >>> points_b = (6, 0)
     >>> shape = (7, 1)
@@ -103,6 +105,8 @@ def hausdorff_pair(image0, image1):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.metrics.set_metrics import hausdorff_pair
     >>> points_a = (3, 0)
     >>> points_b = (6, 0)
     >>> shape = (7, 1)

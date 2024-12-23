@@ -35,6 +35,7 @@ def block_reduce(image, block_size=2, func=np.sum, cval=0, func_kwargs=None):
     Examples
     --------
     >>> from skimage.measure import block_reduce
+    >>> import numpy as np
     >>> image = np.arange(3*3*4).reshape(3, 3, 4)
     >>> image # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1,  2,  3],

@@ -1213,6 +1213,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     --------
     >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank
+    >>> import numpy as np
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
@@ -1280,6 +1281,7 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Examples
     --------
+    >>> import numpy as np
     >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank         # Cube seems to fail but
     >>> img = np.array([[0, 0, 0, 0, 0],            # Ball can pass
@@ -1351,6 +1353,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
     --------
     >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> from skimage.filters.rank import threshold
+    >>> import numpy as np
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],

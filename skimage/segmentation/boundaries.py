@@ -87,6 +87,8 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.segmentation import find_boundaries
     >>> labels = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ...                    [0, 0, 0, 0, 0, 5, 5, 5, 0, 0],
