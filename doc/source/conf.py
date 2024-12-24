@@ -162,6 +162,9 @@ html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
 html_logo = "_static/logo.png"
 
+# Note: we don't include sphinx_gallery_hide_links.css here because we
+# add it dynamically for the gallery pages via hide_sg_links() below.
+# Debugging
 html_css_files = ['theme_overrides.css']
 
 html_theme_options = {
@@ -195,6 +198,8 @@ html_theme_options = {
         "version_match": "dev" if "dev" in version else version,
     },
     "show_version_warning_banner": True,
+    # Secondary sidebar
+    "secondary_sidebar_items": ["page-toc", "sg_download_links", "sg_launcher_links"],
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
@@ -385,3 +390,11 @@ try_examples_global_warning_text = (
 
 jupyterlite_silence = False  # temporary, for debugging
 jupyterlite_overrides = "overrides.json"
+
+
+def hide_sg_links(app, pagename, templatename, context, doctree):
+    if pagename.startswith("auto_examples/"):
+        app.add_css_file("sphinx_gallery_hide_links.css")
+
+def setup(app):
+    app.connect("html-page-context", hide_sg_links)
