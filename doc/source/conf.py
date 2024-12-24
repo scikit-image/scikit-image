@@ -396,5 +396,6 @@ def hide_sg_links(app, pagename, templatename, context, doctree):
     if pagename.startswith("auto_examples/"):
         app.add_css_file("sphinx_gallery_hide_links.css")
 
+
 def setup(app):
     app.connect("html-page-context", hide_sg_links)
