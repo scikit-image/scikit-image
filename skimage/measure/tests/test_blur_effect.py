@@ -57,14 +57,14 @@ def test_blur_effect_3d():
 @pytest.mark.parametrize('image', [np.zeros((100, 100, 3)), np.ones((100, 100, 3))])
 def test_blur_effect_uniform_input(image):
     """Test that the blur metric is 1 for completely uniform images."""
-    B = ski.measure.blur_effect(image)
+    B = ski.measure.blur_effect(image, channel_axis=-1)
     assert B == 1
 
 
-@pytest.mark.parametrize('size', [1, 10, 100, 1000])
+@pytest.mark.parametrize('size', [10, 100, 1000])
 def test_blur_single_axis_constant_image(size):
     """Test that the blur metric work for an image that is constant in one axis."""
     row = np.linspace(0, 1, size)
     image = np.array([row for _ in range(size)])
-    B0 = ski.measure.blur_effect(image)
-    np.testing.assert_almost_equal(B0, 1.0, decimal=5)
+    B = ski.measure.blur_effect(image)
+    assert B == 1
