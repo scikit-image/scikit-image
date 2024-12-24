@@ -236,6 +236,7 @@ def histogram(
     Examples
     --------
     >>> from skimage import data, exposure, img_as_float
+    >>> import numpy as np
     >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
     (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
@@ -339,6 +340,7 @@ def cumulative_distribution(image, nbins=256):
     Examples
     --------
     >>> from skimage import data, exposure, img_as_float
+    >>> import numpy as np
     >>> image = img_as_float(data.camera())
     >>> hi = exposure.histogram(image)
     >>> cdf = exposure.cumulative_distribution(image)
@@ -535,6 +537,8 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     the limits allowed by the image's dtype, since `in_range` defaults to
     'image' and `out_range` defaults to 'dtype':
 
+    >>> import numpy as np
+    >>> from skimage.exposure import rescale_intensity
     >>> image = np.array([51, 102, 153], dtype=np.uint8)
     >>> rescale_intensity(image)
     array([  0, 127, 255], dtype=uint8)
@@ -820,6 +824,8 @@ def is_low_contrast(
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.exposure import is_low_contrast
     >>> image = np.linspace(0, 0.04, 100)
     >>> is_low_contrast(image)
     True

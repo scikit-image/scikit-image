@@ -32,6 +32,7 @@ def polygon2mask(image_shape, polygon):
     Examples
     --------
     >>> import skimage as ski
+    >>> import numpy as np
     >>> image_shape = (10, 10)
     >>> polygon = np.array([[1, 1], [2, 7], [8, 4]])
     >>> mask = ski.draw.polygon2mask(image_shape, polygon)

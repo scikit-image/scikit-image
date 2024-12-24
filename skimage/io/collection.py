@@ -69,6 +69,7 @@ def alphanumeric_key(s):
 
     Examples
     --------
+    >>> from skimage.io.collection import alphanumeric_key
     >>> alphanumeric_key('z23a')
     ['z', 23, 'a']
     >>> filenames = ['f9.10.png', 'e10.png', 'f9.9.png', 'f10.10.png',
@@ -177,6 +178,8 @@ class ImageCollection:
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> import imageio.v3 as iio3
     >>> import skimage.io as io
 
@@ -461,6 +464,8 @@ class MultiImage(ImageCollection):
 
     Examples
     --------
+    ..! disable_try_examples
+
     # Where your images are located
     >>> data_dir = os.path.join(os.path.dirname(__file__), '../data')
 

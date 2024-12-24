@@ -11,6 +11,8 @@ seaborn>=0.11
 pooch>=1.6
 tifffile>=2022.8.12
 myst-parser
+jupyterlite-sphinx
+jupyterlite-pyodide-kernel
 intersphinx-registry>=0.2411.14
 ipywidgets
 ipykernel

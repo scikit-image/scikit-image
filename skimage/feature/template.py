@@ -82,6 +82,7 @@ def match_template(
 
     Examples
     --------
+    >>> import numpy as np
     >>> template = np.zeros((3, 3))
     >>> template[1, 1] = 1
     >>> template

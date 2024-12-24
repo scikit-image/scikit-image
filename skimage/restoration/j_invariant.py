@@ -60,6 +60,7 @@ def _generate_grid_slice(shape, *, offset, stride=3):
 
     Examples
     --------
+    >>> import numpy as np
     >>> shape = (4, 4)
     >>> array = np.zeros(shape, dtype=int)
     >>> grid_slice = _generate_grid_slice(shape, offset=0, stride=2)

@@ -51,6 +51,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "jupyterlite_sphinx",
     "doi_role",
     "numpydoc",
     "sphinx_design",
@@ -129,6 +130,14 @@ sphinx_gallery_conf = {
     "remove_config_comments": True,
     # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
     "parallel": True,
+    # Interactive documentation via jupyterlite-sphinx utilities
+    "jupyterlite": {
+        # Use the Notebook interface instead of the Lab interface, until
+        # https://github.com/sphinx-gallery/sphinx-gallery/pull/1417 makes
+        # it to a release
+        "use_jupyter_lab": True,
+        'notebook_modification_function': None,  # TODO: fully qualified name of a function that implements JupyterLite-specific modifications of notebooks
+    },
 }
 
 
@@ -151,6 +160,9 @@ html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
 html_logo = "_static/logo.png"
 
+# Note: we don't include sphinx_gallery_hide_links.css here because we
+# add it dynamically for the gallery pages via hide_sg_links() below.
+# Debugging
 html_css_files = ['theme_overrides.css']
 
 html_theme_options = {
@@ -184,6 +196,8 @@ html_theme_options = {
         "version_match": "dev" if "dev" in version else version,
     },
     "show_version_warning_banner": True,
+    # Secondary sidebar
+    "secondary_sidebar_items": ["page-toc", "sg_download_links", "sg_launcher_links"],
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
@@ -361,3 +375,25 @@ myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
 ]
+
+# -- Interactive documentation via jupyterlite-sphinx ------------------------
+
+global_enable_try_examples = True
+try_examples_global_button_text = "Try it!"
+try_examples_global_warning_text = (
+    "Interactive examples for scikit-image are experimental and may not always work "
+    "as expected. If you encounter any issues, please report them on the [scikit-image "
+    "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
+)
+
+jupyterlite_silence = False  # temporary, for debugging
+jupyterlite_overrides = "overrides.json"
+
+
+def hide_sg_links(app, pagename, templatename, context, doctree):
+    if pagename.startswith("auto_examples/"):
+        app.add_css_file("sphinx_gallery_hide_links.css")
+
+
+def setup(app):
+    app.connect("html-page-context", hide_sg_links)

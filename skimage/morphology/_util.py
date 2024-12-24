@@ -103,6 +103,8 @@ def _raveled_offsets_and_distances(
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> off, d = _raveled_offsets_and_distances(
     ...         (4, 5), footprint=np.ones((4, 3)), center=(1, 1)
     ...         )
@@ -193,6 +195,8 @@ def _offsets_to_raveled_neighbors(image_shape, footprint, center, order='C'):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> _offsets_to_raveled_neighbors((4, 5), np.ones((4, 3)), (1, 1))
     array([-5, -1,  1,  5, -6, -4,  4,  6, 10,  9, 11])
     >>> _offsets_to_raveled_neighbors((2, 3, 2), np.ones((3, 3, 3)), (1, 1, 1))
@@ -239,6 +243,8 @@ def _resolve_neighborhood(footprint, connectivity, ndim, enforce_adjacency=True)
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> _resolve_neighborhood(None, 1, 2)
     array([[False,  True, False],
            [ True,  True,  True],
@@ -284,6 +290,10 @@ def _set_border_values(image, value, border_width=1):
 
     Examples
     --------
+    ..! disable_try_examples
+
+    >>> import numpy as np
+    >>> from skimage.morphology._util import _set_border_values
     >>> image = np.zeros((4, 5), dtype=int)
     >>> _set_border_values(image, 1)
     >>> image

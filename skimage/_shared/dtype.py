@@ -47,6 +47,7 @@ def numeric_dtype_min_max(dtype):
     Examples
     --------
     >>> import numpy as np
+    >>> from skimage._shared.dtype import numeric_dtype_min_max
     >>> numeric_dtype_min_max(np.uint8)
     (0, 255)
     >>> numeric_dtype_min_max(bool)

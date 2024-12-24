@@ -29,6 +29,7 @@ def rank_order(image):
 
     Examples
     --------
+    >>> import numpy as np
     >>> a = np.array([[1, 4, 5], [4, 4, 1], [5, 1, 1]])
     >>> a
     array([[1, 4, 5],

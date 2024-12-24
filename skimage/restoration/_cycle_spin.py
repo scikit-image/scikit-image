@@ -17,6 +17,8 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> s = list(_generate_shifts(2, False, max_shifts=(1, 2), shift_steps=1))
     >>> print(s)
     [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
@@ -119,6 +121,7 @@ def cycle_spin(
     >>> import skimage.data
     >>> from skimage import img_as_float
     >>> from skimage.restoration import denoise_tv_chambolle, cycle_spin
+    >>> import numpy as np
     >>> img = img_as_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)

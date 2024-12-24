@@ -11,6 +11,8 @@ def _get_chunks(shape, ncpu):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> _get_chunks((4, 4), 4)
     ((2, 2), (2, 2))
     >>> _get_chunks((4, 4), 2)

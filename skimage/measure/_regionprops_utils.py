@@ -340,6 +340,7 @@ def euler_number(image, connectivity=None):
     Examples
     --------
     >>> import numpy as np
+    >>> from skimage.measure import euler_number
     >>> SAMPLE = np.zeros((100,100,100));
     >>> SAMPLE[40:60, 40:60, 40:60]=1
     >>> euler_number(SAMPLE) # doctest: +ELLIPSIS
