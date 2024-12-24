@@ -185,7 +185,7 @@ transformation::
     little weight at the ends of the value range. In such a case, clipping
     pixel values using percentiles of the image improves the contrast (at the
     expense of some loss of information, because some pixels are saturated by
-    this operation)::
+    this operation):
 
     >>> moon = ski.data.moon()
     >>> v_min, v_max = np.percentile(moon, (0.2, 99.8))

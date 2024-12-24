@@ -74,7 +74,7 @@ values*::
     array([  0, 128, 255], dtype=uint8)
 
     Be careful! These conversions can result in a loss of precision, since 8 bits
-    cannot hold the same amount of information as 64 bits::
+    cannot hold the same amount of information as 64 bits:
 
     >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
     >>> ski.util.img_as_ubyte(image)

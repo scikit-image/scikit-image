@@ -57,7 +57,7 @@ system::
    'pil': ['imread', 'imsave', 'imread_collection'],
    'test': ['imsave', 'imshow', 'imread', 'imread_collection'],}
 
-  or only those already loaded::
+  or only those already loaded:
 
   >>> ski.io.find_available_plugins(loaded=True)
   {'matplotlib': ['imshow', 'imread', 'imread_collection'],
@@ -76,7 +76,7 @@ system::
   Note that, if more than one plugin provides certain functionality, the
   last plugin loaded is used.
 
-  To query a plugin's capabilities, use ``plugin_info``::
+  To query a plugin's capabilities, use ``plugin_info``:
 
   >>> ski.io.plugin_info('pil')
   {'description': 'Image reading via the Python Imaging Library',
