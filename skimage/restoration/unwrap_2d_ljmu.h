@@ -1,4 +1,4 @@
-void unwrap2D(
+short unwrap2D(
         double *wrapped_image,
         double *UnwrappedImage,
         unsigned char *input_mask,
