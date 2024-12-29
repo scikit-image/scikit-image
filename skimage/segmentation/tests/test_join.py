@@ -6,9 +6,10 @@ from skimage._shared.testing import assert_array_equal
 import pytest
 
 
-def test_join_segmentations():
-    s1 = np.array([[0, 0, 1, 1], [0, 2, 1, 1], [2, 2, 2, 1]])
-    s2 = np.array([[0, 1, 1, 0], [0, 1, 1, 0], [0, 1, 1, 1]])
+@pytest.mark.parametrize("dtype", [int, np.uint16, np.uint])
+def test_join_segmentations(dtype):
+    s1 = np.array([[0, 0, 1, 1], [0, 2, 1, 1], [2, 2, 2, 1]], dtype=dtype)
+    s2 = np.array([[0, 1, 1, 0], [0, 1, 1, 0], [0, 1, 1, 1]], dtype=dtype)
 
     # test correct join
     # NOTE: technically, equality to j_ref is not required, only that there

@@ -11,16 +11,15 @@ git shortlog --summary --numbered
 ```
 
 Previously, we asked authors to add their names to this file whenever
-they made a contribution.  Because these additions were not made
+they made a contribution. Because these additions were not made
 consistently, we now refer to the git commit log as the ultimate
 record of code contribution.
 
-Please note that, on a project as large as this, there are *many*
-different ways to contribute, of which code is only one.  Other
+Please note that, on a project as large as this, there are _many_
+different ways to contribute, of which code is only one. Other
 contributions include community & project management, code review,
-answering questions on forums, and web design.  We are grateful for
+answering questions on forums, and web design. We are grateful for
 each and every contributor, regardless of their role.
-
 
 ## Historical credits list
 
@@ -29,8 +28,8 @@ each and every contributor, regardless of their role.
 
 - Nicolas Pinto
   Colour spaces and filters, and image resizing.
-  Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
-  Montage helpers: ``util.montage``.
+  Shape views: `util.shape.view_as_windows` and `util.shape.view_as_blocks`
+  Montage helpers: `util.montage`.
 
 - Damian Eads
   Morphological operators
@@ -119,7 +118,7 @@ each and every contributor, regardless of their role.
   Skeletonization and grey level co-occurrence matrices.
 
 - Nelle Varoquaux
-  Renaming of the package to ``skimage``.
+  Renaming of the package to `skimage`.
   Harris corner detector
 
 - W. Randolph Franklin
@@ -129,7 +128,7 @@ each and every contributor, regardless of their role.
   Harris corner detector
 
 - Nicolas Poilvert
-  Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
+  Shape views: `util.shape.view_as_windows` and `util.shape.view_as_blocks`
   Image resizing.
 
 - Johannes Schönberger
@@ -300,7 +299,7 @@ each and every contributor, regardless of their role.
   Maintenance of the build and test infrastructure.
 
 - Taylor D. Scott
-  Simplified _upsampled_dft and extended register_translation to nD images.
+  Simplified `_upsampled_dft` and extended `register_translation` to nD images.
 
 - David J. Mellert
   Polar and log-polar warping, nD windows

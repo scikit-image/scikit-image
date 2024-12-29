@@ -25,7 +25,7 @@ from skimage.feature import (
     structure_tensor,
     structure_tensor_eigenvalues,
 )
-from skimage.morphology import cube, octagon
+from skimage.morphology import footprint_rectangle, octagon
 
 
 @pytest.fixture
@@ -325,9 +325,11 @@ def test_structure_tensor_eigenvalues(dtype):
 
 
 def test_structure_tensor_eigenvalues_3d():
-    image = np.pad(cube(9, dtype=np.int64), 5, mode='constant') * 1000
+    image = footprint_rectangle((9, 9, 9), dtype=np.int64)
+    image = np.pad(image, 5, mode='constant') * 1000
     boundary = (
-        np.pad(cube(9), 5, mode='constant') - np.pad(cube(7), 6, mode='constant')
+        np.pad(footprint_rectangle((9, 9, 9)), 5, mode='constant')
+        - np.pad(footprint_rectangle((7, 7, 7)), 6, mode='constant')
     ).astype(bool)
     A_elems = structure_tensor(image, sigma=0.1)
     e0, e1, e2 = structure_tensor_eigenvalues(A_elems)

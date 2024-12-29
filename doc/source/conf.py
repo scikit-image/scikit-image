@@ -31,7 +31,7 @@ with open("../../skimage/__init__.py") as f:
     setup_lines = f.readlines()
 version = "vUndefined"
 for l in setup_lines:
-    if l.startswith("__version__"):
+    if l.startswith("__version__ ="):
         version = l.split("'")[1]
         break
 
