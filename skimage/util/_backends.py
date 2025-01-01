@@ -15,14 +15,23 @@ def _entry_points(group):
         selected_entry_points = all_entry_points.get(group, ())
     return selected_entry_points
 
+def get_backend_priority():
+    """Returns the backend priority list, or `False` if the dispatching is disabled.
 
-def dispatching_disabled():
-    """Determine if dispatching has been disabled by the user"""
-    no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
-    if no_dispatching == "1":
-        return True
-    else:
+    The function interprets the value of the environment variable 
+    `SKIMAGE_BACKEND_PRIORITY` as follows:
+    - If unset or explicitly `False`, return `False`.
+    - If a comma-separated string, return it as a list of backend names.
+    - If a single string, return it as a list with that single backend name.
+    """
+    backend_priority = os.environ.get("SKIMAGE_BACKEND_PRIORITY", False)
+
+    if not backend_priority or backend_priority == "False":
         return False
+    elif "," in backend_priority:
+        return [item.strip() for item in backend_priority.split(",")]
+    else:
+        return [backend_priority,]
 
 
 def public_api_name(func):
@@ -79,21 +88,20 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_name(func)
+    backend_priority = get_backend_priority()
+    all_backends = all_backends()
 
-    # If no backends are installed at all or dispatching is disabled,
-    # return the original function. This way people who don't care about it
-    # don't see anything related to dispatching
-    if dispatching_disabled() or not all_backends():
+    # If no backends are installed or dispatching is disabled,
+    # return the original function.
+    if not (backend_priority and all_backends):
         return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Backends are tried in alphabetical order, this makes things
-        # predictable and stable across runs. Might need a better solution
-        # when it becomes common that users have more than one backend
-        # that would accept a call.
-        for name in sorted(all_backends()):
-            backend = all_backends()[name]
+        for backend_name in backend_priority:
+            if backend_name not in all_backends:
+                continue
+            backend = all_backends[backend_name]
             # Check if the function we are looking for is implemented in
             # the backend
             if f"{func_module}:{func_name}" not in backend["info"].supported_functions:
@@ -112,8 +120,8 @@ def dispatchable(func):
             func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was dispatched to"
-                f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
-                " disable this.",
+                f" the '{backend_name}' backend. Set SKIMAGE_BACKEND_PRIORITY='False' to"
+                " disable dispatching.",
                 DispatchNotification,
                 # XXX from where should this warning originate?
                 # XXX from where the function that was dispatched was called?
@@ -124,6 +132,13 @@ def dispatchable(func):
             return func_impl(*args, **kwargs)
 
         else:
+            if backend_priority:
+                warnings.warn(
+                    f"Call to '{func_module}:{func_name}' was not dispatched."
+                    " All backends rejected the call. Falling back to scikit-image",
+                    DispatchNotification,
+                    stacklevel=2,
+                )
             return func(*args, **kwargs)
 
     return wrapper
