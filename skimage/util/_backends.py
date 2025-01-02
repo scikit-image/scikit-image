@@ -15,6 +15,8 @@ def _entry_points(group):
         selected_entry_points = all_entry_points.get(group, ())
     return selected_entry_points
 
+
+@cache
 def get_backend_priority():
     """Returns the backend priority list, or `False` if the dispatching is disabled.
 
@@ -88,16 +90,16 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_name(func)
-    backend_priority = get_backend_priority()
-    all_backends = all_backends()
 
     # If no backends are installed or dispatching is disabled,
     # return the original function.
-    if not (backend_priority and all_backends):
+    if not (get_backend_priority() and all_backends()):
         return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        backend_priority = get_backend_priority()
+        all_backends = all_backends()
         for backend_name in backend_priority:
             if backend_name not in all_backends:
                 continue
