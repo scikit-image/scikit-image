@@ -123,6 +123,8 @@ def test_backend_priority_when_disabled(fake_backends, monkeypatch):
 
 
 def test_notification_raised(fake_backends):
+    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake1, fake2")
+
     @_backends.dispatchable
     def foo(x):
         return x * 2
@@ -164,6 +166,7 @@ def test_module_name_determination(func, expected):
     ],
 )
 def test_get_backend_priority(monkeypatch, env_value, output):
-    """Test the behavior of get_backend_priority with different environment variable values."""    
+    """Test the behavior of get_backend_priority with different environment variable values."""
+    _backends.get_backend_priority.cache_clear()
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", env_value)
     assert _backends.get_backend_priority() == output
