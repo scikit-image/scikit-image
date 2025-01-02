@@ -109,8 +109,8 @@ def test_no_notification_without_backends(no_backends):
     assert r == 42 * 2
 
 
-def test_no_dispatching_when_disabled(fake_backends, monkeypatch):
-    monkeypatch.setenv("SKIMAGE_NO_DISPATCHING", "1")
+def test_backend_priority_when_disabled(fake_backends, monkeypatch):
+    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "False")
 
     @_backends.dispatchable
     def foo(x):
