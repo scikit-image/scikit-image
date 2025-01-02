@@ -84,6 +84,7 @@ def fake_backends(monkeypatch):
 
     monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
     monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
+    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake1, fake2")
 
 
 @pytest.fixture
@@ -152,3 +153,17 @@ def test_module_name_determination(func, expected):
 
     mod = importlib.import_module(module_name)
     assert getattr(mod, func.__name__) is func
+
+@pytest.mark.parametrize(
+    "env_value, output",
+    [
+        (None, False),
+        ("False", False),
+        ("backend1", ["backend1",]),
+        ("backend1,backend2, backend3", ["backend1", "backend2", "backend3"]),
+    ],
+)
+def test_get_backend_priority(monkeypatch, env_value, output):
+    """Test the behavior of get_backend_priority with different environment variable values."""    
+    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", env_value)
+    assert _backends.get_backend_priority() == output
