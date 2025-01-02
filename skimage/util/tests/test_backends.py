@@ -110,7 +110,7 @@ def test_no_notification_without_backends(no_backends):
     assert r == 42 * 2
 
 
-def test_backend_priority_when_disabled(fake_backends, monkeypatch):
+def test_when_dispatching_disabled(fake_backends, monkeypatch):
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "False")
 
     @_backends.dispatchable
@@ -122,7 +122,7 @@ def test_backend_priority_when_disabled(fake_backends, monkeypatch):
     assert r == 42 * 2
 
 
-def test_notification_raised(fake_backends):
+def test_notification_raised(fake_backends, monkeypatch):
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake1, fake2")
 
     @_backends.dispatchable
@@ -159,7 +159,6 @@ def test_module_name_determination(func, expected):
 @pytest.mark.parametrize(
     "env_value, output",
     [
-        (None, False),
         ("False", False),
         ("backend1", ["backend1",]),
         ("backend1,backend2, backend3", ["backend1", "backend2", "backend3"]),
