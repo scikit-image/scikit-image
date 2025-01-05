@@ -490,15 +490,14 @@ fig.tight_layout()
 
 noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
+disk_5 = ski.morphology.disk(5)
 opening = ski.filters.rank.maximum(
-    ski.filters.rank.minimum(noisy_image, ski.morphology.disk(5)),
-    ski.morphology.disk(5),
+    ski.filters.rank.minimum(noisy_image, disk_5), disk_5,
 )
 closing = ski.filters.rank.minimum(
-    ski.filters.rank.maximum(noisy_image, ski.morphology.disk(5)),
-    ski.morphology.disk(5),
+    ski.filters.rank.maximum(noisy_image, disk_5), disk_5,
 )
-grad = ski.filters.rank.gradient(noisy_image, ski.morphology.disk(5))
+grad = ski.filters.rank.gradient(noisy_image, disk_5)
 
 # display results
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
