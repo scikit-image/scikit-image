@@ -492,10 +492,10 @@ noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
 disk_5 = ski.morphology.disk(5)
 opening = ski.filters.rank.maximum(
-    ski.filters.rank.minimum(noisy_image, disk_5), disk_5,
+    ski.filters.rank.minimum(noisy_image, disk_5), disk_5
 )
 closing = ski.filters.rank.minimum(
-    ski.filters.rank.maximum(noisy_image, disk_5), disk_5,
+    ski.filters.rank.maximum(noisy_image, disk_5), disk_5
 )
 grad = ski.filters.rank.gradient(noisy_image, disk_5)
 
