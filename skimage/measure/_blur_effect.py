@@ -16,7 +16,7 @@ except ImportError:
 __all__ = ['blur_effect']
 
 
-_EPSILON = np.spacing(1)
+_EPSILON = np.spacing(np.float64(1))
 
 
 def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
