@@ -16,21 +16,21 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: bc7af46104f0f5368b95878decf720f9f00c2559  # frozen: v3.4.2
+    rev: bc7af46104f0f5368b95878decf720f9f00c2559 # frozen: v3.4.2
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 89c421dff2e1026ba12cdb9ebd731f4a83aa8021  # frozen: v0.8.6
+    rev: 89c421dff2e1026ba12cdb9ebd731f4a83aa8021 # frozen: v0.8.6
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
       - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: 1ac5158c1b0f405350517c218f03d3a21bbb381c  # frozen: v0.16.6
+    rev: 1ac5158c1b0f405350517c218f03d3a21bbb381c # frozen: v0.16.6
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
