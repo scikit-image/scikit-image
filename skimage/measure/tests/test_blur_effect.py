@@ -62,10 +62,10 @@ def test_blur_effect_uniform_input(factor):
     assert B == 1
 
 
-@pytest.mark.parametrize('size', [10, 100, 1000])
-def test_blur_single_axis_constant_image(size):
+@pytest.mark.parametrize('shape', [(10, 11), (4, 5, 6)])
+def test_blur_single_axis_constant_image(shape):
     """Test that the blur metric is 1 for an image that is uniform along one axis."""
-    row = np.linspace(0, 1, size)
-    image = np.array([row for _ in range(size)])
+    row = np.linspace(0, 1, shape[-1])
+    image = np.broadcast_to(row, shape)
     B = ski.measure.blur_effect(image)
     assert B == 1
