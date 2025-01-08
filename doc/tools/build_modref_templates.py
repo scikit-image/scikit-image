@@ -58,4 +58,12 @@ if __name__ == '__main__':
     ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
-    print(f'{len(docwriter.written_modules)} files written')
+
+    if len(docwriter.written_modules) <= 1:
+        msg = (
+            f"expected more modules, only wrote files for: "
+            f"{docwriter.written_modules!r}"
+        )
+        raise RuntimeWarning(msg)
+    else:
+        print(f'{len(docwriter.written_modules)} files written')
