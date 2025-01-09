@@ -8,6 +8,8 @@ Installing pyamg and using the 'cg_mg' mode of random_walker improves
 significantly the performance.
 """
 
+import warnings
+
 import numpy as np
 from scipy import sparse, ndimage as ndi
 
@@ -504,6 +506,15 @@ def random_walker(
             'Input argument `spacing` incorrect, should be an '
             'iterable with one number per spatial dimension.'
         )
+
+    if data.dtype == np.float16:
+        # SciPy sparse, which is used later on, doesn't officially support float16
+        # This led to failures when testing with NumPy 1.26 (see gh-7635).
+        warnings.warn(
+            message="upcasting `data` with dtype float16 to float32",
+            stacklevel=3,
+        )
+        data = data.astype(np.float32)
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
