@@ -1,0 +1,14 @@
+version: 2
+
+jobs:
+  doc:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+
+workflows:
+  version: 2
+  build-doc:
+    jobs:
+      - doc
