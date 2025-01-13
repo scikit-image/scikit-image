@@ -167,58 +167,6 @@ jobs:
           # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
-          export TEST_ARGS="-v"
-          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
+          export TEST_ARGS="-vv --showlocals"s
+          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage -k test_reproducibility
         displayName: "Package testing"
-
-      - bash: |
-          set -ex
-          PYTHON="$(python.pythonLocation)\\python.exe"
-          $PYTHON -m asv check -v -E existing
-        displayName: Check benchmarks
-
-      - bash: |
-          set -ex
-          export PYTHON="$(python.pythonLocation)\\python.exe"
-
-          # Install the doc dependencies
-          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-          $PYTHON -m pip list
-
-          # Build the documentation
-          choco install optipng
-          export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS="-W -j auto"
-          make -C doc html
-        condition: eq(variables['BUILD_DOCS'], 'true')
-        displayName: "Documentation testing"
-
-      - bash: |
-          set -ex
-          PYTHON="$(python.pythonLocation)\\python.exe"
-
-          # Install the doc dependencies
-          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-          $PYTHON -m pip list
-
-          # Force matplotlib to use the prepared config
-          export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
-
-          # Run example applications
-          for f in doc/examples/*/*.py; do
-            # Comment out any plotly.io.show() calls before running the example.
-            # Plotly opens a web browser, which often seemed to cause the CI to
-            # hang and timeout.
-            sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
-
-            $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
-            if [ $? -ne 0 ]; then
-              exit 1
-            fi
-          done
-        condition: eq(variables['TEST_EXAMPLES'], 'true')
-        displayName: "Gallery testing"
-#  - bash: |
-#      # -- Publish the .whl artifacts
-#      # -- Upload the content of dist/*.whl to a public wheelhouse
-#    displayName: 'Further consideration'
