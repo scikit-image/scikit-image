@@ -16,7 +16,6 @@ def _entry_points(group):
     return selected_entry_points
 
 
-@cache
 def get_backend_priority():
     """Returns the backend priority list, or `False` if the dispatching is disabled.
 

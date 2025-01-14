@@ -166,6 +166,5 @@ def test_module_name_determination(func, expected):
 )
 def test_get_backend_priority(monkeypatch, env_value, output):
     """Test the behavior of get_backend_priority with different environment variable values."""
-    _backends.get_backend_priority.cache_clear()
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", env_value)
     assert _backends.get_backend_priority() == output
