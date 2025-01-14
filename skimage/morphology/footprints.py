@@ -745,14 +745,19 @@ def footprint_ellipse(shape, *, grow=0, dtype=np.uint8, decomposition=None):
 
     else:
         footprint = np.zeros(shape, dtype=float)
+
         for dim, length in enumerate(shape):
-            radius = length / 2
+            if length == 1:
+                continue
+
+            radius = length // 2
             coords = np.linspace(-radius, radius, num=length, endpoint=True)
             coords = coords.reshape(
                 (1,) * dim + (length,) + (1,) * (len(shape) - dim - 1)
             )
-            adjusted_radius = radius + grow  # TODO limit to >0
+            adjusted_radius = radius + grow
             footprint += (coords / adjusted_radius) ** 2
+
         footprint = footprint <= 1
         footprint = footprint.astype(dtype)
 
