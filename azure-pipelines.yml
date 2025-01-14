@@ -168,5 +168,5 @@ jobs:
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
           export TEST_ARGS="-vv --showlocals"
-          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage -k 'test_default_random'
+          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage -k 'test_reproducibility'
         displayName: "Package testing"

@@ -3,7 +3,6 @@ import numpy as np
 from scipy.sparse import linalg
 
 from . import _ncut, _ncut_cy
-from skimage._shared.testing import hash_np_array
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
@@ -278,10 +277,6 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         A = d2 @ (d - w) @ d2
         # Initialize the vector to ensure reproducibility.
         v0 = random_generator.random(A.shape[0])
-        hash_np_array(
-            v0,
-            expected="ab031ca49700e662a12a0b82f65698c8a126f824e5aecd1a412442efa328c68e",
-        )
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
 
         # Pick second smallest eigenvector.
