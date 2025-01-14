@@ -224,6 +224,16 @@ def test_reproducibility():
         assert_array_equal(results[i], results[i + 1])
 
 
+def test_default_random():
+    results = []
+    for _ in range(4):
+        rng = np.random.default_rng(1234)
+        v0 = rng.random(417)
+        results.append(v0)
+    for i in range(len(results) - 1):
+        assert_array_equal(results[i], results[i + 1])
+
+
 def test_generic_rag_2d():
     labels = np.array([[1, 2], [3, 4]], dtype=np.uint8)
     g = graph.RAG(labels)

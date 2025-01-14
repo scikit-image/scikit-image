@@ -1,19 +1,9 @@
-import hashlib
-import warnings
-
 import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
 from . import _ncut, _ncut_cy
-
-
-def hash_np_array(array, *, expected=None):
-    digest = hashlib.sha256(array.tobytes()).hexdigest()
-    if expected is not None and digest != expected:
-        msg = f"{digest=} not equal to {expected=}"
-        warnings.warn(msg, stacklevel=2)
-    return digest
+from skimage._shared.testing import hash_np_array
 
 
 def cut_threshold(labels, rag, thresh, in_place=True):
