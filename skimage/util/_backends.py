@@ -5,17 +5,6 @@ import os
 import warnings
 
 
-def _entry_points(group):
-    # Support Python versions before 3.10, which do not let you
-    # filter groups directly.
-    all_entry_points = entry_points()
-    if hasattr(all_entry_points, "select"):
-        selected_entry_points = all_entry_points.select(group=group)
-    else:
-        selected_entry_points = all_entry_points.get(group, ())
-    return selected_entry_points
-
-
 def dispatching_disabled():
     """Determine if dispatching has been disabled by the user"""
     no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
@@ -55,8 +44,8 @@ def public_api_name(func):
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
-    backends_ = _entry_points(group="skimage_backends")
-    backend_infos = _entry_points(group="skimage_backend_infos")
+    backends_ = entry_points(group="skimage_backends")
+    backend_infos = entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
         backends[backend.name] = {"implementation": backend}
