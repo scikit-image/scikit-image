@@ -25,8 +25,10 @@ def public_api_name(func):
     # sub-submodules in its public API, except in one case.
     # This means that public name can be atmost `skimage.foobar`
     # for everything else
-    if full_name.startswith("skimage.filters.rank"):
-        public_name = "skimage.filters.rank"
+    sub_submodules = ["skimage.filters.rank",]
+    for sub_submodule in sub_submodules:
+        if full_name.startswith(sub_submodule):
+            public_name = sub_submodule
     else:
         public_name = ".".join(full_name.split(".")[:2])
 
