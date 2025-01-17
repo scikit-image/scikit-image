@@ -25,12 +25,21 @@ def public_api_name(func):
     # sub-submodules in its public API, except in one case.
     # This means that public name can be atmost `skimage.foobar`
     # for everything else
-    sub_submodules = ["skimage.filters.rank",]
-    for sub_submodule in sub_submodules:
-        if full_name.startswith(sub_submodule):
-            public_name = sub_submodule
+
+    sub_submodules = ["skimage.filters.rank"]
+    candidates = [name for name in sub_submodules if full_name.startswith(name)]
+    if len(candidates) == 0:
+        # Assume first two parts of the name are where the function is in our public API
+        parts = full_name.split(".")
+        if len(parts) <= 2:
+            msg = f"expected {func.__module__=} with more than 2 dot-delimited parts"
+            raise ValueError(msg)
+        public_name = ".".join(parts[:2])
+    elif len(candidates) == 1:
+        public_name = candidates[0]
     else:
-        public_name = ".".join(full_name.split(".")[:2])
+        msg = f"{func!r} matches more than one sub-submodule: {candidates!r}"
+        raise ValueError(msg)
 
     # It would be nice to sanity check things by doing something like the
     # following. However we can't because this code is executed while the
