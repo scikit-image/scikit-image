@@ -20,12 +20,12 @@ def get_backend_priority():
     """Returns the backend priority list, or `False` if the dispatching is disabled.
 
     The function interprets the value of the environment variable 
-    `SKIMAGE_BACKEND_PRIORITY` as follows:
+    `SKIMAGE_BACKENDS` as follows:
     - If unset or explicitly `False`, return `False`.
     - If a comma-separated string, return it as a list of backend names.
     - If a single string, return it as a list with that single backend name.
     """
-    backend_priority = os.environ.get("SKIMAGE_BACKEND_PRIORITY", False)
+    backend_priority = os.environ.get("SKIMAGE_BACKENDS", False)
 
     if not backend_priority or backend_priority == "False":
         return False
@@ -121,7 +121,7 @@ def dispatchable(func):
             func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was dispatched to"
-                f" the '{backend_name}' backend. Set SKIMAGE_BACKEND_PRIORITY='False' to"
+                f" the '{backend_name}' backend. Set SKIMAGE_BACKENDS='False' to"
                 " disable dispatching.",
                 DispatchNotification,
                 # XXX from where should this warning originate?

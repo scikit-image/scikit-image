@@ -20,20 +20,20 @@ Using backends
 Firstly, you need to install the scikit-image backend package you need to use.
 
 By default, the backend dispatching is **disabled**. To enable and customize backend dispatching, you
-can use the `SKIMAGE_BACKEND_PRIORITY` environment variable.
+can use the `SKIMAGE_BACKENDS` environment variable.
 
-The `SKIMAGE_BACKEND_PRIORITY` environment variable can be configured in the following ways:
+The `SKIMAGE_BACKENDS` environment variable can be configured in the following ways:
 
 - Using a single backend:
 
     ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name"
+    os.environ["SKIMAGE_BACKENDS"] = "backend_name"
     ```
 
 - Using multiple backends:
 
     ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name_1, backend_name_2, backend_name_3"
+    os.environ["SKIMAGE_BACKENDS"] = "backend_name_1, backend_name_2, backend_name_3"
     ```
 
     Here, the first backend (`backend_name_1`) will be queried for the implementation of an algorithm.
@@ -45,10 +45,10 @@ The `SKIMAGE_BACKEND_PRIORITY` environment variable can be configured in the fol
 - Disabling backend dispatching:
 
     ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "False"
+    os.environ["SKIMAGE_BACKENDS"] = "False"
     ```
 
-Note that if no backend(s) in the `SKIMAGE_BACKEND_PRIORITY`,
+Note that if no backend(s) in the `SKIMAGE_BACKENDS`,
 
 - are installed on your local machine, or
 - provide an alternate implementation for an algorithm,  
