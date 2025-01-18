@@ -16,6 +16,7 @@ and how the dispatching mechanism in scikit-image works.
 
     Expect the dispatching API to change without notice.
 
+
 Creating a scikit-image backend
 -------------------------------
 

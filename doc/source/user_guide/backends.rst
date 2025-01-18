@@ -22,7 +22,7 @@ Firstly, you need to install the scikit-image backend package you need to use.
 By default, the backend dispatching is **disabled**. To enable and customize backend dispatching, you
 can use the `SKIMAGE_BACKENDS` environment variable.
 
-The `SKIMAGE_BACKENDS` environment variable can be configured in the following ways:
+The `SKIMAGE_BACKENDS` environment variable can be configured at runtime in the following ways:
 
 - Using a single backend:
 
@@ -46,6 +46,12 @@ The `SKIMAGE_BACKENDS` environment variable can be configured in the following w
 
     ```python
     os.environ["SKIMAGE_BACKENDS"] = "False"
+    ```
+
+You can also set the backend(s) without modifying your exsisting scikit-image code file, like this:
+
+    ```sh
+    $ export SKIMAGE_BACKENDS="backend_name1, backend_name_2" && python scikit_image_code.py
     ```
 
 Note that if no backend(s) in the `SKIMAGE_BACKENDS`,
