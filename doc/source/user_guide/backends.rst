@@ -48,7 +48,7 @@ The `SKIMAGE_BACKENDS` environment variable can be configured at runtime in the 
     os.environ["SKIMAGE_BACKENDS"] = "False"
     ```
 
-You can also set the backend(s) without modifying your exsisting scikit-image code file, like this:
+You can also set the backend(s) without modifying your existing scikit-image code file, like this:
 
     ```sh
     $ export SKIMAGE_BACKENDS="backend_name1, backend_name_2" && python scikit_image_code.py
