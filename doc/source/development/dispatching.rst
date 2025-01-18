@@ -16,49 +16,6 @@ and how the dispatching mechanism in scikit-image works.
 
     Expect the dispatching API to change without notice.
 
-Using backends
---------------
-
-Scikit-image provides an API that allows the dispatching of algorithms to specific backend(s).
-By default, this dispatching is **disabled**. To enable and customize backend dispatching, you
-can use the `SKIMAGE_BACKEND_PRIORITY` environment variable.
-
-The `SKIMAGE_BACKEND_PRIORITY` environment variable can be configured in the following ways:
-
-- Using a single backend:
-
-    ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name"
-    ```
-
-- Using multiple backends:
-
-    ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name_1, backend_name_2, backend_name_3"
-    ```
-
-    Here, the first backend (`backend_name_1`) will be queried for the implementation of an algorithm.
-    If it does not implement that algorithm, then the next backend in the list (`backend_name_2`) will be
-    checked, and so on, until the we encounter a backend that does have the implementation for the algorithm.
-    If none of the backends in the list implement the algorithm, then the scikit-image's original
-    implementations is executed.
-
-- Disabling backend dispatching:
-
-    ```python
-    os.environ["SKIMAGE_BACKEND_PRIORITY"] = "False"
-    ```
-
-Note that if no backend(s) in the `SKIMAGE_BACKEND_PRIORITY`,
-
-- are installed on your local machine, or
-- provide an alternate implementation for an algorithm,  
-
-then scikit-image will fallback to its native implementation of the algorithm.  
-
-Additionally, if an error is raised during the execution of a backend implementation,
-this fallback will **not** occur, and the error will be propagated.
-
 Creating a scikit-image backend
 -------------------------------
 
@@ -137,3 +94,5 @@ To make the ideas describe above more concrete take a look at `an example backen
 a single function <https://github.com/betatim/scikit-image-backend-phony>`_.
 This example gives you an idea of how everything fits together and to see the dispatching
 in action. It is designed to make it easy to understand and experiment with.
+
+To learn how to use backends refer the :doc:`User guide on backends <../user_guide/backends>`.
