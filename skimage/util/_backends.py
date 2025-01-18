@@ -5,17 +5,6 @@ import os
 import warnings
 
 
-def _entry_points(group):
-    # Support Python versions before 3.10, which do not let you
-    # filter groups directly.
-    all_entry_points = entry_points()
-    if hasattr(all_entry_points, "select"):
-        selected_entry_points = all_entry_points.select(group=group)
-    else:
-        selected_entry_points = all_entry_points.get(group, ())
-    return selected_entry_points
-
-
 def get_backend_priority():
     """Returns the backend priority list, or `False` if the dispatching is disabled.
 
@@ -46,10 +35,21 @@ def public_api_name(func):
     # sub-submodules in its public API, except in one case.
     # This means that public name can be atmost `skimage.foobar`
     # for everything else
-    if full_name.startswith("skimage.filters.rank"):
-        public_name = "skimage.filters.rank"
+
+    sub_submodules = ["skimage.filters.rank"]
+    candidates = [name for name in sub_submodules if full_name.startswith(name)]
+    if len(candidates) == 0:
+        # Assume first two parts of the name are where the function is in our public API
+        parts = full_name.split(".")
+        if len(parts) <= 2:
+            msg = f"expected {func.__module__=} with more than 2 dot-delimited parts"
+            raise ValueError(msg)
+        public_name = ".".join(parts[:2])
+    elif len(candidates) == 1:
+        public_name = candidates[0]
     else:
-        public_name = ".".join(full_name.split(".")[:2])
+        msg = f"{func!r} matches more than one sub-submodule: {candidates!r}"
+        raise ValueError(msg)
 
     # It would be nice to sanity check things by doing something like the
     # following. However we can't because this code is executed while the
@@ -65,8 +65,8 @@ def public_api_name(func):
 def all_backends():
     """List all installed backends and information about them"""
     backends = {}
-    backends_ = _entry_points(group="skimage_backends")
-    backend_infos = _entry_points(group="skimage_backend_infos")
+    backends_ = entry_points(group="skimage_backends")
+    backend_infos = entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
         backends[backend.name] = {"implementation": backend}
