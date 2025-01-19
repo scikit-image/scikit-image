@@ -92,7 +92,16 @@ def dispatchable(func):
 
     # If no backends are installed or dispatching is disabled,
     # return the original function.
-    if not (get_backend_priority() and all_backends()):
+    if not all_backends():
+        if get_backend_priority():
+            # no installed backends but `SKIMAGE_BACKENDS` is not False
+            warnings.warn(
+                f"Call to '{func_module}:{func_name}' was not dispatched."
+                " No backends installed and SKIMAGE_BACKENDS is not 'False'."
+                " Falling back to scikit-image.",
+                DispatchNotification,
+                stacklevel=2,
+            )
         return func
 
     @functools.wraps(func)
