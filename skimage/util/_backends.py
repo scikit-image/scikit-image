@@ -103,6 +103,9 @@ def dispatchable(func):
                 stacklevel=2,
             )
         return func
+    elif not get_backend_priority():
+        # backends installed but `SKIMAGE_BACKENDS` is False
+        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
