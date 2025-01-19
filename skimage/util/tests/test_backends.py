@@ -122,9 +122,7 @@ def test_when_dispatching_disabled(fake_backends, monkeypatch):
     assert r == 42 * 2
 
 
-def test_notification_raised(fake_backends, monkeypatch):
-    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1, fake2")
-
+def test_notification_raised(fake_backends):
     @_backends.dispatchable
     def foo(x):
         return x * 2
