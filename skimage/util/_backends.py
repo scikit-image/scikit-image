@@ -98,11 +98,11 @@ def dispatchable(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         backend_priority = get_backend_priority()
-        all_backends = all_backends()
+        installed_backends = all_backends()
         for backend_name in backend_priority:
-            if backend_name not in all_backends:
+            if backend_name not in installed_backends:
                 continue
-            backend = all_backends[backend_name]
+            backend = installed_backends[backend_name]
             # Check if the function we are looking for is implemented in
             # the backend
             if f"{func_module}:{func_name}" not in backend["info"].supported_functions:
