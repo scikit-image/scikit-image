@@ -16,7 +16,7 @@ def get_backend_priority():
     """
     backend_priority = os.environ.get("SKIMAGE_BACKENDS", False)
 
-    if not backend_priority or backend_priority == "False":
+    if backend_priority in ["False", False]:
         return False
     elif "," in backend_priority:
         return [item.strip() for item in backend_priority.split(",")]
