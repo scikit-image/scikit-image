@@ -2,11 +2,14 @@
 Binary morphological operations
 """
 
+import warnings
+
 import numpy as np
 from scipy import ndimage as ndi
 
 from .footprints import _footprint_is_sequence, pad_footprint
 from .misc import default_footprint
+from .._shared.utils import deprecate_func
 
 
 def _iterate_binary_func(binary_func, image, footprint, out, border_value):
@@ -37,6 +40,11 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 # default with the same dimension as the input image and size 3 along each
 # axis.
 @default_footprint
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28",
+    hint="Use `skimage.morphology.erosion` instead.",
+)
 def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
 
@@ -118,6 +126,11 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
 
 
 @default_footprint
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28",
+    hint="Use `skimage.morphology.dilation` instead.",
+)
 def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
 
@@ -199,6 +212,11 @@ def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
 
 
 @default_footprint
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28",
+    hint="Use `skimage.morphology.opening` instead.",
+)
 def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological opening of an image.
 
@@ -254,12 +272,24 @@ def binary_opening(image, footprint=None, out=None, *, mode='ignore'):
     skimage.morphology.isotropic_opening
 
     """
-    tmp = binary_erosion(image, footprint, mode=mode)
-    out = binary_dilation(tmp, footprint, out=out, mode=mode)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message="`binary_(dilation|erosion)` is deprecated",
+            category=FutureWarning,
+            module="skimage",
+        )
+        tmp = binary_erosion(image, footprint, mode=mode)
+        out = binary_dilation(tmp, footprint, out=out, mode=mode)
     return out
 
 
 @default_footprint
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28",
+    hint="Use `skimage.morphology.closing` instead.",
+)
 def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological closing of an image.
 
@@ -315,6 +345,13 @@ def binary_closing(image, footprint=None, out=None, *, mode='ignore'):
     skimage.morphology.isotropic_closing
 
     """
-    tmp = binary_dilation(image, footprint, mode=mode)
-    out = binary_erosion(tmp, footprint, out=out, mode=mode)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message="`binary_(dilation|erosion)` is deprecated",
+            category=FutureWarning,
+            module="skimage",
+        )
+        tmp = binary_dilation(image, footprint, mode=mode)
+        out = binary_erosion(tmp, footprint, out=out, mode=mode)
     return out

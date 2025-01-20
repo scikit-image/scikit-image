@@ -1,3 +1,8 @@
+Version 0.28
+------------
+* Complete deprecation of `skimage.morphology.binary_*` functions.
+
+
 Version 0.27
 ------------
 * Remove deprecated `skimage.io.imshow`,
