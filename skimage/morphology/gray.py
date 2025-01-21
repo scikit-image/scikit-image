@@ -197,7 +197,8 @@ def erosion(
 
     For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
     this function produce an output that differs: one is shifted by one pixel
-    compared to the other.
+    compared to the other. :func:`skimage.morphology.pad_footprint´ is available
+    to account for this.
 
     Examples
     --------
@@ -316,6 +317,7 @@ def dilation(
     For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
     and :func:`skimage.morphology.dilation` produce an output that differs:
     `binary_dilation` mirrors the footprint, whereas `dilation` does not.
+    :func:`skimage.morphology.mirror_footprint` is available to correct for this.
 
     Examples
     --------

@@ -43,7 +43,8 @@ def _iterate_binary_func(binary_func, image, footprint, out, border_value):
 @deprecate_func(
     deprecated_version="0.26",
     removed_version="0.28",
-    hint="Use `skimage.morphology.erosion` instead.",
+    hint="Use `skimage.morphology.erosion` instead. "
+    "Note the pixel shift by 1 for even-sized footprints (see docstring notes).",
 )
 def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological erosion of an image.
@@ -97,7 +98,8 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
 
     For even-sized footprints, :func:`skimage.morphology.erosion` and
     this function produce an output that differs: one is shifted by one pixel
-    compared to the other.
+    compared to the other. :func:`skimage.morphology.pad_footprint´ is available
+    to account for this.
 
     See also
     --------
@@ -129,7 +131,8 @@ def binary_erosion(image, footprint=None, out=None, *, mode='ignore'):
 @deprecate_func(
     deprecated_version="0.26",
     removed_version="0.28",
-    hint="Use `skimage.morphology.dilation` instead.",
+    hint="Use `skimage.morphology.dilation` instead. "
+    "Note the lack of mirroring for non-symmetric footprints (see docstring notes).",
 )
 def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     """Return fast binary morphological dilation of an image.
@@ -184,6 +187,7 @@ def binary_dilation(image, footprint=None, out=None, *, mode='ignore'):
     For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
     and :func:`skimage.morphology.dilation` produce an output that differs:
     `binary_dilation` mirrors the footprint, whereas `dilation` does not.
+    :func:`skimage.morphology.mirror_footprint` is available to correct for this.
 
     See also
     --------
