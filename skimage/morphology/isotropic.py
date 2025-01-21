@@ -9,7 +9,7 @@ from scipy import ndimage as ndi
 def isotropic_erosion(image, radius, out=None, spacing=None):
     """Return binary morphological erosion of an image.
 
-    This function returns the same result as :func:`skimage.morphology.binary_erosion`
+    This function returns the same result as :func:`skimage.morphology.erosion`
     but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
     of the image [1]_, [2]_.
@@ -57,7 +57,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
 def isotropic_dilation(image, radius, out=None, spacing=None):
     """Return binary morphological dilation of an image.
 
-    This function returns the same result as :func:`skimage.morphology.binary_dilation`
+    This function returns the same result as :func:`skimage.morphology.dilation`
     but performs faster for large circular structuring elements.
     This works by applying a threshold to the exact Euclidean distance map
     of the inverted image [1]_, [2]_.
@@ -105,7 +105,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
 def isotropic_opening(image, radius, out=None, spacing=None):
     """Return binary morphological opening of an image.
 
-    This function returns the same result as :func:`skimage.morphology.binary_opening`
+    This function returns the same result as :func:`skimage.morphology.opening`
     but performs faster for large circular structuring elements.
     This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
@@ -151,7 +151,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
 def isotropic_closing(image, radius, out=None, spacing=None):
     """Return binary morphological closing of an image.
 
-    This function returns the same result as binary :func:`skimage.morphology.binary_closing`
+    This function returns the same result as binary :func:`skimage.morphology.closing`
     but performs faster for large circular structuring elements.
     This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
