@@ -1,23 +1,38 @@
-scikit-image 0.25.0rc1
-======================
+scikit-image 0.25.0 (2024-12-13)
+================================
 
-We're happy to announce the release of scikit-image 0.25.0rc1!
+We're happy to announce the release of scikit-image 0.25.0!
 
 New Features
 ------------
 
-- Add the new Grey-Level Co-occurrence Matrix (GLCM) properties  "mean", "variance", "standard deviation" and "entropy" to  ``skimage.feature.texture.graycoprops`` (`#7375 <https://github.com/scikit-image/scikit-image/pull/7375>`_).
+- Add the new Gray-Level Co-occurrence Matrix (GLCM) properties  "mean", "variance", "standard deviation" and "entropy" to  ``skimage.feature.texture.graycoprops`` (`#7375 <https://github.com/scikit-image/scikit-image/pull/7375>`_).
+- Add the new ``skimage.morphology.footprint_rectangle`` supporting generation of rectangular or hyper-rectangular footprints in one function (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
 
 API Changes
 -----------
 
 - Complete the deprecation of and remove ``skimage.feature.plot_matches``. Use ``skimage.feature.plot_matched_features`` going forward (`#7487 <https://github.com/scikit-image/scikit-image/pull/7487>`_).
 - Deprecate ``skimage.io.imshow``, ``skimage.io.imshow_collection`` and ``skimage.io.show``. Please use ``matplotlib``, ``napari``, etc. to visualize images (`#7508 <https://github.com/scikit-image/scikit-image/pull/7508>`_).
+- Remove deprecated ``skimage.morphology.skeletonize_3d``;  use ``skimage.morphology.skeletonize`` instead (`#7572 <https://github.com/scikit-image/scikit-image/pull/7572>`_).
+- Deprecate ``skimage.io`` plugin infrastructure (`#7353 <https://github.com/scikit-image/scikit-image/pull/7353>`_).
+- Switched to using the ``scipy.sparse`` array interface. For more details, see the note about the new ``scipy.sparse`` array interface [here](https://docs.scipy.org/doc/scipy/reference/sparse.html) (`#7576 <https://github.com/scikit-image/scikit-image/pull/7576>`_).
+- Deprecate ``skimage.morphology.rectangle`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
+- Deprecate ``skimage.morphology.cube`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
+- Deprecate ``skimage.morphology.square`` in favor of the new function ``skimage.morphology.footprint_rectangle`` (`#7566 <https://github.com/scikit-image/scikit-image/pull/7566>`_).
 
 Enhancements
 ------------
 
 - Improve numerical stability of ``skimage.morphology.local_minima`` for extremely small floats (`#7534 <https://github.com/scikit-image/scikit-image/pull/7534>`_).
+- Allow passing a sequence of colors to the parameter ``matches_color`` in ``skimage.feature.plot_matched_features`` (`#7541 <https://github.com/scikit-image/scikit-image/pull/7541>`_).
+- Make sure that ``skimage.feature.plot_matched_features`` uses the same random colors, if ``matches_color`` isn't provided  explicitly (`#7541 <https://github.com/scikit-image/scikit-image/pull/7541>`_).
+
+Performance
+-----------
+
+- ``skimage.feature.peak_local_max`` will now skip unnecessary distance computations in the case of ``min_distance=1``. This results in performance improvements to functions like ``skimage.feature.blob_dog``, ``skimage.feature.blob_log``,  ``skimage.feature.blob_doh`` and ``skimage.feature.corner_peaks`` that call  ``peak_local_max`` internally (`#7548 <https://github.com/scikit-image/scikit-image/pull/7548>`_).
+- In ``skimage.featurepeak_local_max``, skip unnecessary check for cases where  ``min_distance > 1`` is passed (`#7548 <https://github.com/scikit-image/scikit-image/pull/7548>`_).
 
 Bug Fixes
 ---------
@@ -27,6 +42,10 @@ Bug Fixes
 - Prevent ``skimage.morphology.thin`` from accidentally  modifying the input image in case it is of dtype uint8 (`#7469 <https://github.com/scikit-image/scikit-image/pull/7469>`_).
 - Fix numerical precision error in ``skimage.measure.ransac``. In some cases, ``ransac`` was stopping at the first iteration (`#7065 <https://github.com/scikit-image/scikit-image/pull/7065>`_).
 - Fix numerical precision error in ``skimage.measure.ransac``;  very small probabilities lead to -0 number of max trials (`#7496 <https://github.com/scikit-image/scikit-image/pull/7496>`_).
+- Ensure that ``RegionProperties`` objects returned by ``skimage.measure.regionprops`` can be deserialized with pickle (`#7569 <https://github.com/scikit-image/scikit-image/pull/7569>`_).
+- Fix edge case where setting ``watershed_lines=True`` in ``skimage.segmentation.watershed`` resulted in an incorrect solution (`#7071 <https://github.com/scikit-image/scikit-image/pull/7071>`_).
+- Fix the behavior of ``skimage.segmentation.watershed`` when the markers don't align with local minima by making sure every marker is evaluated before successive pixels (`#7071 <https://github.com/scikit-image/scikit-image/pull/7071>`_).
+- Fix dtype promotion in ``skimage.segmentation.join_segmentations`` if ``numpy.uint`` is used with NumPy<2 (`#7292 <https://github.com/scikit-image/scikit-image/pull/7292>`_).
 
 Documentation
 -------------
@@ -40,6 +59,8 @@ Documentation
 - Rework installation instructions (`#7434 <https://github.com/scikit-image/scikit-image/pull/7434>`_).
 - Improve the description of the ``image`` parameter in ``skimage.restoration.richardson_lucy`` (`#7477 <https://github.com/scikit-image/scikit-image/pull/7477>`_).
 - Account for empty arrays when counting segments per contour level in gallery example "Segment human cells (in mitosis)" (`#7551 <https://github.com/scikit-image/scikit-image/pull/7551>`_).
+- Fix typo in morphology doc (`#7606 <https://github.com/scikit-image/scikit-image/pull/7606>`_).
+- Change type description of parameter ``radius`` in  ``skimage.morphology.ball`` from ``int`` to ``float`` (`#7627 <https://github.com/scikit-image/scikit-image/pull/7627>`_).
 
 Infrastructure
 --------------
@@ -55,6 +76,10 @@ Infrastructure
 - Ensure only a single ``type:`` label is present in PRs (`#7512 <https://github.com/scikit-image/scikit-image/pull/7512>`_).
 - Update pydata-sphinx-theme (`#7511 <https://github.com/scikit-image/scikit-image/pull/7511>`_).
 - Fix OpenBLAS ``s_cmp`` unresolved symbol error, update Emscripten CI testing (`#7525 <https://github.com/scikit-image/scikit-image/pull/7525>`_).
+- Render paragraphs in dormant message (`#7549 <https://github.com/scikit-image/scikit-image/pull/7549>`_).
+- Build sphinx documentation with parallel jobs (`#7579 <https://github.com/scikit-image/scikit-image/pull/7579>`_).
+- Don't check test coverage in CI (`#7594 <https://github.com/scikit-image/scikit-image/pull/7594>`_).
+- Explicitly setup conda on macos for wheel building (`#7608 <https://github.com/scikit-image/scikit-image/pull/7608>`_).
 
 Maintenance
 -----------
@@ -86,49 +111,81 @@ Maintenance
 - Fix missing minigalleries by using full names in directives (`#7567 <https://github.com/scikit-image/scikit-image/pull/7567>`_).
 - Build Python 3.13 wheels (`#7571 <https://github.com/scikit-image/scikit-image/pull/7571>`_).
 - Update TODO (`#7573 <https://github.com/scikit-image/scikit-image/pull/7573>`_).
-- Remove deprecated skeletonize_3d (`#7572 <https://github.com/scikit-image/scikit-image/pull/7572>`_).
 - Remove deprecated gaussian output parameter (`#7574 <https://github.com/scikit-image/scikit-image/pull/7574>`_).
+- Test Py3.13 on windows (`#7578 <https://github.com/scikit-image/scikit-image/pull/7578>`_).
+- Update ruff linter / formatter (`#7580 <https://github.com/scikit-image/scikit-image/pull/7580>`_).
+- Fix formatting issues (`#7581 <https://github.com/scikit-image/scikit-image/pull/7581>`_).
+- CI: bump macos image pin from 12 to 13 (`#7582 <https://github.com/scikit-image/scikit-image/pull/7582>`_).
+- Update build dependencies (`#7587 <https://github.com/scikit-image/scikit-image/pull/7587>`_).
+- Update minimum supported pyamg (`#7586 <https://github.com/scikit-image/scikit-image/pull/7586>`_).
+- Update documentation dependencies (`#7590 <https://github.com/scikit-image/scikit-image/pull/7590>`_).
+- Bump ``changelist`` to v0.5 (`#7601 <https://github.com/scikit-image/scikit-image/pull/7601>`_).
+- Pin kaleido to 0.2.1 (`#7612 <https://github.com/scikit-image/scikit-image/pull/7612>`_).
+- Update upload-nightly-action (`#7609 <https://github.com/scikit-image/scikit-image/pull/7609>`_).
+- Update pillow (`#7615 <https://github.com/scikit-image/scikit-image/pull/7615>`_).
+- Remove Python 2.7 cruft (`#7616 <https://github.com/scikit-image/scikit-image/pull/7616>`_).
+- Use ``intersphinx_registry`` package in ``conf.py`` to keep intersphinx urls up to date. This means that building docs now requires the ``intersphinx-registry`` package (`#7611 <https://github.com/scikit-image/scikit-image/pull/7611>`_).
+- Update build dependencies (`#7614 <https://github.com/scikit-image/scikit-image/pull/7614>`_).
+- Update file extension and reformat Markdown file (`#7617 <https://github.com/scikit-image/scikit-image/pull/7617>`_).
+- Add forgotten TODO about deprecated ``square``, ``cube`` & ``rectangle`` (`#7624 <https://github.com/scikit-image/scikit-image/pull/7624>`_).
+- Upgrade to spin 0.13 (`#7622 <https://github.com/scikit-image/scikit-image/pull/7622>`_).
+- Lazy load legacy imports in ``skimage`` top module (`#6892 <https://github.com/scikit-image/scikit-image/pull/6892>`_).
+- CI pre-commit fix (`#7631 <https://github.com/scikit-image/scikit-image/pull/7631>`_).
 
 Contributors
 ------------
 
-21 authors added to this release (alphabetically):
+30 authors added to this release (alphabetically):
 
+- `@aeisenbarth <https://github.com/aeisenbarth>`_
 - `@FedericoWZhaw <https://github.com/FedericoWZhaw>`_
 - `@jakirkham <https://github.com/jakirkham>`_
 - `@michaelbratsch <https://github.com/michaelbratsch>`_
 - Adeyemi Biola  (`@decorouz <https://github.com/decorouz>`_)
+- Aditi Juneja (`@Schefflera-Arboricola <https://github.com/Schefflera-Arboricola>`_)
 - Agriya Khetarpal (`@agriyakhetarpal <https://github.com/agriyakhetarpal>`_)
 - Brigitta Sipőcz (`@bsipocz <https://github.com/bsipocz>`_)
+- Dan Schult (`@dschult <https://github.com/dschult>`_)
 - Edgar Andrés Margffoy Tuay (`@andfoy <https://github.com/andfoy>`_)
 - Egor Panfilov (`@soupault <https://github.com/soupault>`_)
 - Erik Welch (`@eriknw <https://github.com/eriknw>`_)
 - Gianluca (`@geeanlooca <https://github.com/geeanlooca>`_)
+- Gregory Lee (`@grlee77 <https://github.com/grlee77>`_)
 - Hayato Ikoma (`@hayatoikoma <https://github.com/hayatoikoma>`_)
+- Henrik Finsberg (`@finsberg <https://github.com/finsberg>`_)
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Jordão Bragantini (`@JoOkuma <https://github.com/JoOkuma>`_)
 - João Seródio (`@SerodioJ <https://github.com/SerodioJ>`_)
 - Kushaan Gupta (`@kushaangupta <https://github.com/kushaangupta>`_)
 - Lars Grüter (`@lagru <https://github.com/lagru>`_)
 - Loïc Estève (`@lesteve <https://github.com/lesteve>`_)
+- M Bussonnier (`@Carreau <https://github.com/Carreau>`_)
 - Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
 - Mark Harfouche (`@hmaarrfk <https://github.com/hmaarrfk>`_)
 - Matthew Feickert (`@matthewfeickert <https://github.com/matthewfeickert>`_)
+- Paritosh Dahiya (`@hnhparitosh <https://github.com/hnhparitosh>`_)
 - Piyush Amitabh (`@pamitabh <https://github.com/pamitabh>`_)
+- Ricky Walsh (`@rickymwalsh <https://github.com/rickymwalsh>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-20 reviewers added to this release (alphabetically):
+25 reviewers added to this release (alphabetically):
 
+- `@aeisenbarth <https://github.com/aeisenbarth>`_
 - `@FedericoWZhaw <https://github.com/FedericoWZhaw>`_
 - `@jakirkham <https://github.com/jakirkham>`_
 - `@michaelbratsch <https://github.com/michaelbratsch>`_
 - Agriya Khetarpal (`@agriyakhetarpal <https://github.com/agriyakhetarpal>`_)
 - Brigitta Sipőcz (`@bsipocz <https://github.com/bsipocz>`_)
+- Dan Schult (`@dschult <https://github.com/dschult>`_)
 - Edgar Andrés Margffoy Tuay (`@andfoy <https://github.com/andfoy>`_)
 - Egor Panfilov (`@soupault <https://github.com/soupault>`_)
 - Gianluca (`@geeanlooca <https://github.com/geeanlooca>`_)
+- Gregory Lee (`@grlee77 <https://github.com/grlee77>`_)
 - Hayato Ikoma (`@hayatoikoma <https://github.com/hayatoikoma>`_)
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Jordão Bragantini (`@JoOkuma <https://github.com/JoOkuma>`_)
 - João Seródio (`@SerodioJ <https://github.com/SerodioJ>`_)
+- Juan Nunez-Iglesias (`@jni <https://github.com/jni>`_)
 - Kushaan Gupta (`@kushaangupta <https://github.com/kushaangupta>`_)
 - Lars Grüter (`@lagru <https://github.com/lagru>`_)
 - Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)

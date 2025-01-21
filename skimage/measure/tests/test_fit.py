@@ -461,6 +461,7 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
+
     warning_message = (
         "Standard deviation of data is too small to estimate "
         "ellipse with meaningful precision."
@@ -470,7 +471,11 @@ def test_ellipse_model_estimate_failers():
     assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
-    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    warning_message = "Need at least 5 data points to estimate an ellipse."
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    assert_stacklevel(_warnings)
+    assert len(_warnings) == 1
 
 
 def test_ellipse_model_residuals():

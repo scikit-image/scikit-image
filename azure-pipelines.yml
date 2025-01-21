@@ -30,9 +30,6 @@ jobs:
           PYTHON_VERSION: "3.11"
           ARCH: "x64"
           TEST_EXAMPLES: "true"
-        Python310-x64:
-          PYTHON_VERSION: "3.10"
-          ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
 
@@ -170,7 +167,7 @@ jobs:
           # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
-          export TEST_ARGS="-v --cov=skimage"
+          export TEST_ARGS="-v"
           $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
         displayName: "Package testing"
 
@@ -191,7 +188,7 @@ jobs:
           # Build the documentation
           choco install optipng
           export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS=-W
+          export SPHINXOPTS="-W -j auto"
           make -C doc html
         condition: eq(variables['BUILD_DOCS'], 'true')
         displayName: "Documentation testing"
