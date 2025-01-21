@@ -2,7 +2,7 @@ Version 0.28
 ------------
 * Complete deprecation of `skimage.morphology.binary_*` functions.
   - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
-  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`. 
+  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
 
 
 Version 0.27
