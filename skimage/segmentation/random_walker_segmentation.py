@@ -505,9 +505,9 @@ def random_walker(
     # Spacing kwarg checks
     if spacing is None:
         spacing = np.ones(3, dtype=data.dtype)
-    elif not isinstance(spacing, np.ndarray):
-        spacing = np.asarray(spacing, dtype=data.dtype)
-    if len(spacing) == labels.ndim:
+    elif len(spacing) == labels.ndim:
+        if not isinstance(spacing, np.ndarray):
+            spacing = np.asarray(spacing, dtype=data.dtype)
         if len(spacing) == 2:
             # Need a dummy spacing for singleton 3rd dim
             spacing = np.r_[spacing, 1.0]
