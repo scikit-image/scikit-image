@@ -579,7 +579,7 @@ def test_empty_labels():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy"
+    "ignore:Changing the sparsity structure of a csr_matrix is expensive::scipy"
 )
 def test_float16_upcasting_warning():
     data, labels = make_2d_syntheticdata(lx=70, ly=100)
