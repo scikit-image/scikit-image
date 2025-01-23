@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04-arm]
         cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["aarch64"]
@@ -93,10 +93,6 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel

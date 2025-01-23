@@ -11,7 +11,7 @@ def active_contour(
     snake,
     alpha=0.01,
     beta=0.1,
-    w_line=0,
+    w_line=0.0,
     w_edge=1,
     gamma=0.01,
     max_px_move=1.0,

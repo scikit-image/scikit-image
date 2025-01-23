@@ -36,6 +36,7 @@ __all__ = [
     'manders_coloc_coeff',
     'manders_overlap_coeff',
     'intersection_coeff',
+    'centroid',
 ]
 
 from ._find_contours import find_contours

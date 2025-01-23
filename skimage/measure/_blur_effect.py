@@ -16,6 +16,9 @@ except ImportError:
 __all__ = ['blur_effect']
 
 
+_EPSILON = np.spacing(np.float64(1))
+
+
 def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     """Compute a metric that indicates the strength of blur in an image
     (0 for no blur, 1 for maximal blur).
@@ -82,6 +85,11 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)
         im_sharp = np.abs(sobel(image, axis=ax))
         im_blur = np.abs(sobel(filt_im, axis=ax))
+
+        # avoid numerical instabilities
+        im_sharp = np.maximum(_EPSILON, im_sharp)
+        im_blur = np.maximum(_EPSILON, im_blur)
+
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
         M2 = np.sum(T[slices])
