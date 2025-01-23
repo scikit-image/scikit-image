@@ -1,6 +1,126 @@
 import numpy as np
 from scipy import ndimage as ndi
+
 from ..transform._warps import warp
+
+
+def find_transform_ecc(
+    ir,
+    iw,
+    warp_matrix=None,
+    motion_type="affine",
+    number_of_iterations=200,
+    termination_eps=-1.0,
+    gauss_filt_size=5.0,
+    order=1,
+):
+    """find_transform_ecc _summary_
+
+    Parameters
+    ----------
+    ir : ndarray
+        reference image
+    iw : ndarray
+        warped image to be corrected
+    warp_matrix : ndarray, optional
+        initial guess for the transformation matrix, should be a 3x3 ndarray by default None
+    motion_type : str, optional
+        determine the type of transformation the algorithm will try to find. Can be either "translation", "affine", "euclidean" or "homography", by default "affine"
+    number_of_iterations : int, optional
+        number of iterations before the algorithm stops (will stop earlier if it reaches termination_eps), by default 200
+    termination_eps : float, optional
+        If the absolute difference between the normalized correlation from two successive run is less than this, the algorithm will stop, by default -1.0 (Which means it will stop only when it reaches number_of_iterations)
+    gauss_filt_size : float, optional
+        Standard deviation of the gaussian kernel used for bluring ir and iw, by default 5
+    order : int, optional
+        Order of the interpolation, see 'warp' for more details, by default 1
+
+    Returns
+    -------
+    warp_matrix: ndarray
+        The matrix that will warp iw to ir.
+
+    Raises
+    ------
+    ValueError
+        if rho is a NaN the algorithm will stop
+    ValueError
+        _description_
+    """
+    if warp_matrix is None:
+        warp_matrix = np.eye(3)
+
+    x_grid, y_grid = np.meshgrid(np.arange(ir.shape[0]), np.arange(iw.shape[1]))
+    x_grid = x_grid.astype(np.float32)
+    y_grid = y_grid.astype(np.float32)
+    ir = ndi.gaussian_filter(ir, gauss_filt_size)
+    iw = ndi.gaussian_filter(iw, gauss_filt_size)
+
+    [grad_iw_y, grad_iw_x] = np.gradient(iw)
+
+    rho = -1
+    last_rho = -termination_eps
+
+    ir_mean = np.mean(ir)
+    ir_std = np.std(ir)
+    ir_meancorr = ir - ir_mean
+
+    ir_norm = np.sqrt(np.sum(np.prod(ir.shape)) * ir_std**2)
+
+    for _ in range(number_of_iterations):
+        if np.abs(rho - last_rho) < termination_eps:
+            break
+
+        iw_warped = warp(iw, warp_matrix, order=order)
+
+        # TODO: This need to be corrected to not take into account the out-of-bound value (set to 0)
+        iw_mean = np.mean(iw_warped[iw_warped != 0])
+        iw_std = np.std(iw_warped[iw_warped != 0])
+        iw_norm = np.sqrt(np.sum(iw_warped != 0) * iw_std**2)
+        # iw_norm = np.sqrt(np.sum(np.prod(iw.shape)) * iw_std**2)
+
+        iw_warped_meancorr = iw_warped - iw_mean
+
+        grad_iw_x_warped = warp(grad_iw_x, warp_matrix, order=order)
+        grad_iw_y_warped = warp(grad_iw_y, warp_matrix, order=order)
+
+        jacobian = compute_jacobian(
+            [grad_iw_x_warped, grad_iw_y_warped],
+            [x_grid, y_grid],
+            warp_matrix,
+            motion_type,
+        )
+        hessian = compute_hessian(jacobian)
+        hessian_inv = np.linalg.inv(hessian)
+
+        correlation = np.vdot(ir_meancorr, iw_warped_meancorr)
+        last_rho = rho
+        rho = correlation / (ir_norm * iw_norm)
+
+        if np.isnan(rho):
+            raise ValueError("NaN encoutered.")
+
+        iw_projection = project_onto_jacobian(jacobian, iw_warped_meancorr)
+        ir_projection = project_onto_jacobian(jacobian, ir_meancorr)
+
+        iw_hessian_projection = np.matmul(hessian_inv, iw_projection)
+
+        num = (iw_norm**2) - np.dot(iw_projection, iw_hessian_projection)
+        den = correlation - np.dot(ir_projection, iw_hessian_projection)
+
+        if den <= 0:
+            raise ValueError(
+                "The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped."
+            )
+
+        _lambda = num / den
+
+        error = _lambda * ir_meancorr - iw_warped_meancorr
+        error_projection = project_onto_jacobian(jacobian, error)
+        delta_p = np.matvec(hessian_inv, error_projection)
+        warp_matrix = update_warping_matrix(warp_matrix, delta_p, motion_type)
+
+    return warp_matrix
 
 
 def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
@@ -13,7 +133,14 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         x_grid, y_grid = xy_grid
 
         return np.stack(
-            [grad_iw_x * x_grid, grad_iw_y * x_grid, grad_iw_x * y_grid, grad_iw_y * y_grid, grad_iw_x, grad_iw_y]
+            [
+                grad_iw_x * x_grid,
+                grad_iw_y * x_grid,
+                grad_iw_x * y_grid,
+                grad_iw_y * y_grid,
+                grad_iw_x,
+                grad_iw_y,
+            ]
         )
 
     def compute_jacobian_euclidean(grad, xy_grid, warp_matrix):
@@ -150,85 +277,3 @@ def compute_hessian(jac):
     """
     hessian = np.tensordot(jac, jac, axes=([1, 2], [1, 2]))
     return hessian
-
-
-def find_transform_ecc(
-    ir,
-    iw,
-    warp_matrix=None,
-    motion_type="affine",
-    number_of_iterations=200,
-    termination_eps=-1.0,
-    gauss_filt_size=5,
-    order=1,
-):
-
-    if warp_matrix is None:
-        warp_matrix = np.eye(3)
-
-    x_grid, y_grid = np.meshgrid(np.arange(ir.shape[0]), np.arange(iw.shape[1]))
-    x_grid = x_grid.astype(np.float32)
-    y_grid = y_grid.astype(np.float32)
-    ir = ndi.gaussian_filter(ir, gauss_filt_size)
-    iw = ndi.gaussian_filter(iw, gauss_filt_size)
-
-    [grad_iw_y, grad_iw_x] = np.gradient(iw)
-
-    rho = -1
-    last_rho = -termination_eps
-
-    ir_mean = np.mean(ir)
-    ir_std = np.std(ir)
-    ir_meancorr = ir - ir_mean
-
-    ir_norm = np.sqrt(np.sum(np.prod(ir.shape)) * ir_std**2)
-
-    for _ in range(number_of_iterations):
-        if np.abs(rho - last_rho) < termination_eps:
-            break
-
-        iw_warped = warp(iw, warp_matrix, order=order)
-
-        # TODO: This need to be corrected to not take into account the out-of-bound value (set to 0)
-        iw_mean = np.mean(iw_warped[iw_warped != 0])
-        iw_std = np.std(iw_warped[iw_warped != 0])
-        iw_norm = np.sqrt(np.sum(iw_warped != 0) * iw_std**2)
-        # iw_norm = np.sqrt(np.sum(np.prod(iw.shape)) * iw_std**2)
-
-        iw_warped_meancorr = iw_warped - iw_mean
-
-        grad_iw_x_warped = warp(grad_iw_x, warp_matrix, order=order)
-        grad_iw_y_warped = warp(grad_iw_y, warp_matrix, order=order)
-
-        jacobian = compute_jacobian([grad_iw_x_warped, grad_iw_y_warped], [x_grid, y_grid], warp_matrix, motion_type)
-        hessian = compute_hessian(jacobian)
-        hessian_inv = np.linalg.inv(hessian)
-
-        correlation = np.vdot(ir_meancorr, iw_warped_meancorr)
-        last_rho = rho
-        rho = correlation / (ir_norm * iw_norm)
-
-        if np.isnan(rho):
-            raise ValueError("NaN encoutered.")
-
-        iw_projection = project_onto_jacobian(jacobian, iw_warped_meancorr)
-        ir_projection = project_onto_jacobian(jacobian, ir_meancorr)
-
-        iw_hessian_projection = np.matmul(hessian_inv, iw_projection)
-
-        num = (iw_norm**2) - np.dot(iw_projection, iw_hessian_projection)
-        den = correlation - np.dot(ir_projection, iw_hessian_projection)
-
-        if den <= 0:
-            raise ValueError(
-                "The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped."
-            )
-
-        _lambda = num / den
-
-        error = _lambda * ir_meancorr - iw_warped_meancorr
-        error_projection = project_onto_jacobian(jacobian, error)
-        delta_p = np.matvec(hessian_inv, error_projection)
-        warp_matrix = update_warping_matrix(warp_matrix, delta_p, motion_type)
-
-    return warp_matrix
