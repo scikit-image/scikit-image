@@ -590,3 +590,21 @@ def test_float16_upcasting_warning():
         random_walker(data, labels, beta=90, mode='cg_j')
     testing.assert_stacklevel(record)
     assert len(record) == 1
+
+
+def test_spacing_dtype_behavior():
+    data, labels = make_2d_syntheticdata(lx=70, ly=100)
+    data = data.astype(np.float32, copy=False)
+
+    # Iterable should implicitly be converted to the correct dtype and not raise
+    random_walker(data, labels, spacing=(1, 2), beta=90, mode='cg_j')
+
+    # `spacing` that can be safely casted is fine too
+    spacing_safe = np.ones(2, dtype=np.float16)
+    random_walker(data, labels, spacing=spacing_safe, beta=90, mode='cg_j')
+
+    # But explicit array for `spacing` with unsafe dtype should raise
+    spacing_unsafe = np.ones(2, dtype=np.float64)
+    regex = "Cannot safely cast `spacing` to the same dtype as `data`"
+    with pytest.raises(TypeError, match=regex):
+        random_walker(data, labels, spacing=spacing_unsafe, beta=90, mode='cg_j')

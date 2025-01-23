@@ -493,20 +493,6 @@ def random_walker(
             f"'cg', 'cg_j', 'bf', and None"
         )
 
-    # Spacing kwarg checks
-    if spacing is None:
-        spacing = np.ones(3)
-    elif len(spacing) == labels.ndim:
-        if len(spacing) == 2:
-            # Need a dummy spacing for singleton 3rd dim
-            spacing = np.r_[spacing, 1.0]
-        spacing = np.asarray(spacing)
-    else:
-        raise ValueError(
-            'Input argument `spacing` incorrect, should be an '
-            'iterable with one number per spatial dimension.'
-        )
-
     if data.dtype == np.float16:
         # SciPy sparse, which is used later on, doesn't officially support float16
         # This led to failures when testing with NumPy 1.26 (see gh-7635).
@@ -514,7 +500,30 @@ def random_walker(
             message="upcasting `data` with dtype float16 to float32",
             stacklevel=3,
         )
-        data = data.astype(np.float32)
+        data = data.astype(np.float32, casting="safe")
+
+    # Spacing kwarg checks
+    if spacing is None:
+        spacing = np.ones(3, dtype=data.dtype)
+    elif not isinstance(spacing, np.ndarray):
+        spacing = np.asarray(spacing, dtype=data.dtype)
+    if len(spacing) == labels.ndim:
+        if len(spacing) == 2:
+            # Need a dummy spacing for singleton 3rd dim
+            spacing = np.r_[spacing, 1.0]
+    else:
+        raise ValueError(
+            'Input argument `spacing` incorrect, should be an '
+            'iterable with one number per spatial dimension.'
+        )
+    try:
+        spacing = spacing.astype(data.dtype, casting="safe", copy=False)
+    except TypeError as error:
+        msg = (
+            f"Cannot safely cast `spacing` to the same dtype as `data`, got: "
+            f"{data.dtype=}, {spacing.dtype=}"
+        )
+        raise TypeError(msg) from error
 
     # This algorithm expects 4-D arrays of floats, where the first three
     # dimensions are spatial and the final denotes channels. 2-D images have
