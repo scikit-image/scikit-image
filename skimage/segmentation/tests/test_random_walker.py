@@ -89,9 +89,6 @@ def test_2d_bf(dtype):
     assert data.shape == labels.shape
 
 
-@pytest.mark.filterwarnings(
-    "ignore:upcasting `data` with dtype float16 to float32:UserWarning:skimage"
-)
 @pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning:skimage')
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
