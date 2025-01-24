@@ -77,15 +77,18 @@ jobs:
 
       - name: Build package
         env:
-          # Set variables here that are used by the build script below
-          # (including those used within tools/github/before_install.sh)
+          # Settings for setup_test_env.sh
           MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
+          TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+
           INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
-          set -ex
-          source tools/github/before_install.sh
-          set -ex
+          source tools/github/setup_test_env.sh
+
           if [[ $INSTALL_FROM_SDIST == "1" ]]; then
               python -m build --no-isolation --skip-dependency-check --sdist .
               pip install dist/scikit_image-*.tar.gz
@@ -95,18 +98,14 @@ jobs:
 
       - name: Run tests
         env:
-          # Set variables here that are used by the run script below
-          # (including those used within tools/github/script.sh)
-          # Also includes the EAGER_IMPORT that skimage checks.
-          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+          # Settings for run_tests_and_docs.sh
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
           TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
-          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+
+          # A lazy loader parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
-          source tools/github/script.sh
+          source tools/github/run_tests_and_docs.sh
 
       - name: Check benchmarks
         run: |
@@ -129,14 +128,14 @@ jobs:
       - name: Install nightly dependencies
         run: |
           set -ex
-          source tools/github/before_install.sh
+          source tools/github/setup_test_env.sh
           pip install -vv --no-build-isolation .
 
       - name: Run tests
         env:
           PYTHON_GIL: 0
         run: |
-          source tools/github/script.sh
+          source tools/github/run_tests_and_docs.sh
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -178,7 +177,7 @@ jobs:
       - name: Build package
         run: |
           set -ex
-          source tools/github/before_install.sh
+          source tools/github/setup_test_env.sh
           python -m build --no-isolation --sdist
           pip install -vv --no-build-isolation .;
 
@@ -189,7 +188,7 @@ jobs:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
         run: |
-          source tools/github/script.sh
+          source tools/github/run_tests_and_docs.sh
 
       - name: Check benchmarks
         run: |
