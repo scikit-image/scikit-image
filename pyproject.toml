@@ -86,13 +86,13 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK; sys_platform != "emscripten"',
+    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.7',
-    'pooch>=1.6.0; sys_platform != "emscripten"',
-    'pyamg>=5.2; sys_platform != "emscripten"',
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
     'scikit-learn>=1.2',
 ]
