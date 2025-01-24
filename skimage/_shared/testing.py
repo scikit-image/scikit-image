@@ -7,6 +7,8 @@ import platform
 import re
 import struct
 import sys
+import hashlib
+import warnings
 import functools
 import inspect
 from tempfile import NamedTemporaryFile
@@ -48,6 +50,16 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 # Calculate the size of a void * pointer in bits
 # https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
+
+
+def hash_np_array(array, *, expected=None):
+    digest = hashlib.sha256(array.tobytes()).hexdigest()
+    if expected is not None and digest != expected:
+        msg = f"not equal: {digest=}, {expected=}"
+    else:
+        msg = f"is equal: {digest=}, {expected=}"
+    warnings.warn(msg, stacklevel=2)
+    return digest
 
 
 def assert_less(a, b, msg=None):
