@@ -588,7 +588,10 @@ def test_float16_upcasting_warning():
     regex = "upcasting `data` with dtype float16 to float32"
     with pytest.warns(UserWarning, match=regex) as record:
         random_walker(data, labels, beta=90, mode='cg_j')
-    testing.assert_stacklevel(record)
+    # For SciPy 1.11.2, an additionional SparseEfficiencyWarning (ignored above)
+    # is raised, we need to drop it so that assert_stacklevel doesn't check it
+    record = [r for r in record if "upcasting" in r.message.args[0]]
+    testing.assert_stacklevel(record, offset=-2)
     assert len(record) == 1
 
 
