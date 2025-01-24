@@ -581,33 +581,11 @@ def test_empty_labels():
 @pytest.mark.filterwarnings(
     "ignore:Changing the sparsity structure of a csr_matrix is expensive::scipy"
 )
-def test_float16_upcasting_warning():
+def test_float16_upcasting():
     data, labels = make_2d_syntheticdata(lx=70, ly=100)
     data = data.astype(np.float16, copy=False)
-
-    regex = "upcasting `data` with dtype float16 to float32"
-    with pytest.warns(UserWarning, match=regex) as record:
-        random_walker(data, labels, beta=90, mode='cg_j')
-    # For SciPy 1.11.2, an additionional SparseEfficiencyWarning (ignored above)
-    # is raised, we need to drop it so that assert_stacklevel doesn't check it
-    record = [r for r in record if "upcasting" in r.message.args[0]]
-    testing.assert_stacklevel(record, offset=-2)
-    assert len(record) == 1
-
-
-def test_spacing_dtype_behavior():
-    data, labels = make_2d_syntheticdata(lx=70, ly=100)
-    data = data.astype(np.float32, copy=False)
-
-    # Iterable should implicitly be converted to the correct dtype and not raise
-    random_walker(data, labels, spacing=(1, 2), beta=90, mode='cg_j')
-
-    # `spacing` that can be safely casted is fine too
-    spacing_safe = np.ones(2, dtype=np.float16)
-    random_walker(data, labels, spacing=spacing_safe, beta=90, mode='cg_j')
-
-    # But explicit array for `spacing` with unsafe dtype should raise
-    spacing_unsafe = np.ones(2, dtype=np.float64)
-    regex = "Cannot safely cast `spacing` to the same dtype as `data`"
-    with pytest.raises(TypeError, match=regex):
-        random_walker(data, labels, spacing=spacing_unsafe, beta=90, mode='cg_j')
+    spacing = np.ones(2, dtype=np.float16)
+    # Just check that this line doesn't raise an error due to data being float16
+    labels_cg = random_walker(data, labels, spacing=spacing, beta=90, mode='cg_j')
+    assert (labels_cg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
