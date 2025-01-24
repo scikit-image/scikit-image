@@ -148,6 +148,7 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
     lap = sparse.csr_array((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
+    lap = sparse.lil_array(lap)  # Avoid SparseEfficiencyWarning
     lap.setdiag(-np.ravel(lap.sum(axis=0)))
     return lap
 
