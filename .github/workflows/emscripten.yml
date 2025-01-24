@@ -64,7 +64,7 @@ jobs:
 
           # Activate the virtual environment and install the built scikit-image wheel
           source .venv-pyodide/bin/activate
-          pip install dist/*.whl"[optional]"
+          pip install "$(find dist -name 'scikit_image*.whl')[optional]"
           # Change to a different directory to avoid importing the local scikit-image
           # package instead of the installed one
           cd doc
