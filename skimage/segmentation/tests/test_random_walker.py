@@ -61,9 +61,6 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
     return data, seeds
 
 
-@pytest.mark.filterwarnings(
-    "ignore:upcasting `data` with dtype float16 to float32::skimage"
-)
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_bf(dtype):
     lx = 70
@@ -112,9 +109,6 @@ def test_2d_cg(dtype):
     assert data.shape == labels.shape
 
 
-@pytest.mark.filterwarnings(
-    "ignore:upcasting `data` with dtype float16 to float32::skimage"
-)
 @pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):
@@ -134,9 +128,6 @@ def test_2d_cg_mg(dtype):
     assert data.shape == labels.shape
 
 
-@pytest.mark.filterwarnings(
-    "ignore:upcasting `data` with dtype float16 to float32::skimage"
-)
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_j(dtype):
     lx = 70
