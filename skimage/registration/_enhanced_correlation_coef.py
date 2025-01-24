@@ -14,38 +14,39 @@ def find_transform_ecc(
     gauss_filt_size=5.0,
     order=1,
 ):
-    """find_transform_ecc _summary_
+    """
+    Find the transformation matrix that aligns the warped image (iw) to the reference image (ir) using the Enhanced Correlation Coefficient (ECC) maximization.
 
     Parameters
     ----------
     ir : ndarray
-        reference image
+        Reference image.
     iw : ndarray
-        warped image to be corrected
+        Warped image to be corrected.
     warp_matrix : ndarray, optional
-        initial guess for the transformation matrix, should be a 3x3 ndarray by default None
+        Initial guess for the transformation matrix, should be a 3x3 ndarray. Default is None.
     motion_type : str, optional
-        determine the type of transformation the algorithm will try to find. Can be either "translation", "affine", "euclidean" or "homography", by default "affine"
+        Type of transformation to find. Can be "translation", "affine", "euclidean", or "homography". Default is "affine".
     number_of_iterations : int, optional
-        number of iterations before the algorithm stops (will stop earlier if it reaches termination_eps), by default 200
+        Maximum number of iterations before the algorithm stops. Default is 200.
     termination_eps : float, optional
-        If the absolute difference between the normalized correlation from two successive run is less than this, the algorithm will stop, by default -1.0 (Which means it will stop only when it reaches number_of_iterations)
+        Threshold for the absolute difference between the normalized correlation of successive iterations. If the difference is less than this value, the algorithm stops. Default is -1.0 (algorithm stops only after reaching the maximum number of iterations).
     gauss_filt_size : float, optional
-        Standard deviation of the gaussian kernel used for bluring ir and iw, by default 5
+        Standard deviation of the Gaussian kernel used for blurring ir and iw. Default is 5.0.
     order : int, optional
-        Order of the interpolation, see 'warp' for more details, by default 1
+        Order of the interpolation used in the warp function. Default is 1.
 
     Returns
     -------
-    warp_matrix: ndarray
-        The matrix that will warp iw to ir.
+    warp_matrix : ndarray
+        The transformation matrix that best aligns iw to ir.
 
     Raises
     ------
     ValueError
-        if rho is a NaN the algorithm will stop
+        If rho is NaN, indicating a failure in the algorithm.
     ValueError
-        _description_
+        If the algorithm stops before convergence, indicating that the images may be uncorrelated or non-overlapping.
     """
     if warp_matrix is None:
         warp_matrix = np.eye(3)
@@ -73,11 +74,9 @@ def find_transform_ecc(
 
         iw_warped = warp(iw, warp_matrix, order=order)
 
-        # TODO: This need to be corrected to not take into account the out-of-bound value (set to 0)
         iw_mean = np.mean(iw_warped[iw_warped != 0])
         iw_std = np.std(iw_warped[iw_warped != 0])
         iw_norm = np.sqrt(np.sum(iw_warped != 0) * iw_std**2)
-        # iw_norm = np.sqrt(np.sum(np.prod(iw.shape)) * iw_std**2)
 
         iw_warped_meancorr = iw_warped - iw_mean
 
