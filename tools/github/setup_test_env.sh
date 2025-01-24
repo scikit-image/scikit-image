@@ -5,12 +5,6 @@
 # MINIMUM_REQUIREMENTS:
 #   Install the minimum versions of all requirements, instead of the latest.
 #
-# FREE_THREADED_BUILD:
-#   Indicates that we are running on the free-threaded build.
-#   This option disables the GIL and installs free-threaded builds of
-#   dependencies. (TODO: remove nightly-wheels install once those builds are
-#   available on pypi.)
-#
 # PIP_FLAGS:
 #   These options are passed to pip.
 #
@@ -22,6 +16,8 @@
 #
 # WITHOUT_POOCH:
 #   Remove pooch from environment.
+
+# TODO: Remove special handling of free-threaded dependencies below.
 
 set -ex
 

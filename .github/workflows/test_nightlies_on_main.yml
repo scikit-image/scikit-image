@@ -40,9 +40,9 @@ jobs:
       - name: Build package
         run: |
           set -ex
-          source tools/github/before_install.sh
+          source tools/github/setup_test_env.sh
           set -ex
           pip install -vv --no-build-isolation .;
 
       - name: Run tests
-        run: source tools/github/script.sh
+        run: source tools/github/run_tests_and_docs.sh
