@@ -86,13 +86,13 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK',
+    'SimpleITK; sys_platform != "emscripten"',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.7',
-    'pooch>=1.6.0',
-    'pyamg>=5.2',
+    'pooch>=1.6.0; sys_platform != "emscripten"',
+    'pyamg>=5.2; sys_platform != "emscripten"',
     'PyWavelets>=1.6',
     'scikit-learn>=1.2',
 ]
