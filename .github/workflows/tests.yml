@@ -175,6 +175,10 @@ jobs:
           brew install libomp
 
       - name: Build package
+        env:
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
+          # TEST_EXAMPLES is inherited from the job-level env.
         run: |
           set -ex
           source tools/github/setup_test_env.sh
@@ -183,8 +187,7 @@ jobs:
 
       - name: Run tests
         env:
-          # Note: TEST_EXAMPLES is not in the matrix.
-          #       It gets inherited from the job-level env.
+          # TEST_EXAMPLES isinherited from the job-level env.
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
         run: |
