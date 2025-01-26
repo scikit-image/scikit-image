@@ -48,6 +48,25 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
         and thresholding of distance maps, Pattern Recognition Letters,
         Volume 13, Issue 3, 1992, Pages 161-166.
         :DOI:`10.1016/0167-8655(92)90055-5`
+
+    Examples
+    --------
+    Erosion shrinks bright regions
+
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = np.array([[0, 0, 1, 0, 0],
+    ...                   [0, 1, 1, 1, 0],
+    ...                   [0, 1, 1, 1, 0],
+    ...                   [0, 1, 1, 1, 0],
+    ...                   [0, 0, 0, 0, 0]], dtype=bool)
+    >>> result = ski.morphology.isotropic_erosion(image, radius=1)
+    >>> result.view(np.uint8)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
     """
 
     dist = ndi.distance_transform_edt(image, sampling=spacing)
@@ -96,6 +115,25 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
         and thresholding of distance maps, Pattern Recognition Letters,
         Volume 13, Issue 3, 1992, Pages 161-166.
         :DOI:`10.1016/0167-8655(92)90055-5`
+
+    Examples
+    --------
+    Dilation enlarges bright regions
+
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = np.array([[0, 0, 0, 0, 0],
+    ...                   [0, 0, 0, 0, 0],
+    ...                   [0, 0, 1, 0, 0],
+    ...                   [0, 0, 1, 1, 0],
+    ...                   [0, 0, 0, 0, 0]], dtype=bool)
+    >>> result = ski.morphology.isotropic_dilation(image, radius=1)
+    >>> result.view(np.uint8)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 1],
+           [0, 0, 1, 1, 0]], dtype=uint8)
     """
 
     dist = ndi.distance_transform_edt(np.logical_not(image), sampling=spacing)
@@ -142,6 +180,25 @@ def isotropic_opening(image, radius, out=None, spacing=None):
         and thresholding of distance maps, Pattern Recognition Letters,
         Volume 13, Issue 3, 1992, Pages 161-166.
         :DOI:`10.1016/0167-8655(92)90055-5`
+
+    Examples
+    --------
+    Remove undesired connection between two bright regions
+
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = np.array([[1, 0, 0, 0, 1],
+    ...                   [1, 1, 0, 1, 1],
+    ...                   [1, 1, 1, 1, 1],
+    ...                   [1, 1, 0, 1, 1],
+    ...                   [1, 0, 0, 0, 1]], dtype=bool)
+    >>> result = ski.morphology.isotropic_opening(image, radius=1)
+    >>> result.view(np.uint8)
+    array([[1, 0, 0, 0, 1],
+           [1, 1, 0, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 0, 1, 1],
+           [1, 0, 0, 0, 1]], dtype=uint8)
     """
 
     eroded = isotropic_erosion(image, radius, out=out, spacing=spacing)
@@ -188,6 +245,25 @@ def isotropic_closing(image, radius, out=None, spacing=None):
         and thresholding of distance maps, Pattern Recognition Letters,
         Volume 13, Issue 3, 1992, Pages 161-166.
         :DOI:`10.1016/0167-8655(92)90055-5`
+
+    Examples
+    --------
+    Close gap between two bright lines
+
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = np.array([[0, 0, 0, 0, 0],
+    ...                   [0, 0, 0, 0, 0],
+    ...                   [1, 1, 0, 1, 1],
+    ...                   [0, 0, 0, 0, 0],
+    ...                   [0, 0, 0, 0, 0]], dtype=bool)
+    >>> result = ski.morphology.isotropic_closing(image, radius=1)
+    >>> result.view(np.uint8)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [1, 1, 0, 1, 1],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
     """
 
     dilated = isotropic_dilation(image, radius, out=out, spacing=spacing)
