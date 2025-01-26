@@ -16,10 +16,6 @@ skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
 funcs = (
-    'binary_erosion',
-    'binary_dilation',
-    'binary_opening',
-    'binary_closing',
     'black_tophat',
     'white_tophat',
 )

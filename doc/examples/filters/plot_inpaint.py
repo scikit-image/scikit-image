@@ -31,7 +31,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.morphology import disk, binary_dilation
+from skimage.morphology import disk, dilation
 from skimage.restoration import inpaint
 
 image_orig = data.astronaut()
@@ -57,7 +57,7 @@ for radius in [0, 2, 4]:
     thresh = 3 + 0.25 * radius  # make larger defects less common
     tmp_mask = rstate.standard_normal(image_orig.shape[:-1]) > thresh
     if radius > 0:
-        tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+        tmp_mask = dilation(tmp_mask, disk(radius, dtype=bool))
     mask[tmp_mask] = 1
 
 # Apply defect mask to the image over the same region in each color channel

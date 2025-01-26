@@ -5,7 +5,7 @@ import scipy.ndimage as ndi
 
 from skimage.data import camera
 from skimage import restoration, data, color
-from skimage.morphology import binary_dilation
+from skimage.morphology import dilation
 
 try:
     from skimage.morphology import disk
@@ -255,7 +255,7 @@ class Inpaint:
             thresh = 2.75 + 0.25 * radius  # larger defects are less common
             tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
             if radius > 0:
-                tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+                tmp_mask = dilation(tmp_mask, disk(radius, dtype=bool))
             mask[tmp_mask] = 1
 
         for layer in range(image.shape[-1]):
