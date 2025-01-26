@@ -9,10 +9,17 @@ import numpy as np
 from .._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
-from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
+from ._texture import (
+    _glcm_loop,
+    _glcm_loop_mask,
+    _local_binary_pattern,
+    _multiblock_lbp,
+)
 
 
-def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=False):
+def graycomatrix(
+    image, distances, angles, levels=None, symmetric=False, normed=False, *, mask=None
+):
     """Calculate the gray-level co-occurrence matrix.
 
     A gray level co-occurrence matrix is a histogram of co-occurring
@@ -48,6 +55,8 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
         by the total number of accumulated co-occurrences for the given
         offset. The elements of the resulting matrix sum to 1. The
         default is False.
+    mask : bool array, optional
+        Boolean mask. If value is True, the pixel is ignored.
 
     Returns
     -------
@@ -136,6 +145,11 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     if levels is None:
         levels = 256
 
+    if mask is not None and (mask.shape != image.shape or mask.dtype != np.bool_):
+        raise ValueError(
+            "The mask must have the same shape as the image and be of boolean type."
+        )
+
     if image_max >= levels:
         raise ValueError(
             "The maximum grayscale value in the image should be "
@@ -150,9 +164,13 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     )
 
     # count co-occurences
-    _glcm_loop(image, distances, angles, levels, P)
+    if mask is None:
+        _glcm_loop(image, distances, angles, levels, P)
+    else:
+        mask = np.ascontiguousarray(mask, dtype=np.bool_)
+        _glcm_loop_mask(image, mask, distances, angles, levels, P)
 
-    # make each GLMC symmetric
+    # make each GLCM symmetric
     if symmetric:
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
