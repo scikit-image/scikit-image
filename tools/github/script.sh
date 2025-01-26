@@ -23,7 +23,7 @@ python -m pip list
 
 
 # Run the tests
-(cd .. && pytest $TEST_ARGS --pyargs skimage)
+pytest $TEST_ARGS --pyargs skimage
 
 
 # Optionally, prepare building the docs (and test examples)
