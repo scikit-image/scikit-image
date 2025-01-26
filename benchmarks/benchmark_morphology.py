@@ -58,7 +58,7 @@ class IsotropicMorphology2D:
 
     def setup(self, shape, radius):
         rng = np.random.default_rng(123)
-        # Make an image that is mostly True, with random isolated False areas
+        # Create an image that is mostly True, with random isolated False areas
         # (so it will not become fully False for any of the footprints).
         self.image = rng.standard_normal(shape) < 3.5
 
