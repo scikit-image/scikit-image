@@ -7,7 +7,11 @@ from skimage._shared.testing import xfail, arch32, is_wasm
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
-PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
+
+pytestmark = pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. '
+    'The "cg_j" mode will be used instead.:UserWarning'
+)
 
 
 def make_2d_syntheticdata(lx, ly=None):
@@ -145,11 +149,7 @@ def test_types():
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    anticipated_warnings = [
-        f"Changing the sparsity structure|conversion of A to CSR|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"
-    ]
-    with expected_warnings(anticipated_warnings):
-        labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
+    labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
 
