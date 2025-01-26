@@ -37,6 +37,7 @@ py3.install_sources([
   'microaneurysms.png',
   'moon.png',
   'multipage.tif',
+  'multipage_rgb.tif',
   'no_time_for_that_tiny.gif',
   'page.png',
   'text.png',

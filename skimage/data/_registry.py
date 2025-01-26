@@ -25,6 +25,8 @@ legacy_datasets = [
     'logo.png',
     'microaneurysms.png',
     'moon.png',
+    'multipage_rgb.tif',
+    'no_time_for_that_tiny.gif',
     'page.png',
     'text.png',
     'retina.jpg',
