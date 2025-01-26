@@ -66,7 +66,7 @@ A virtual environment creates a clean Python environment that does not interfere
 with the existing system installation, can be easily removed, and contains only
 the package versions your application needs.
 
-To install the current ``scikit-image`` you'll need at least Python 3.10. If
+To install the current ``scikit-image`` you'll need at least Python 3.11. If
 your Python is older, pip will find the most recent compatible version.
 
 .. code-block:: sh
