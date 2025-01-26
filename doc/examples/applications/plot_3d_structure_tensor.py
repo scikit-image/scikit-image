@@ -19,7 +19,7 @@ import numpy as np
 import plotly.express as px
 import plotly.io
 
-from skimage import data, feature
+import skimage as ski
 
 
 #####################################################################
@@ -27,7 +27,7 @@ from skimage import data, feature
 # ==========
 # This biomedical image is available through `scikit-image`'s data registry.
 
-data = data.kidney()
+data = ski.data.kidney()
 
 #####################################################################
 # What exactly are the shape and size of our 3D multichannel image?
@@ -123,12 +123,12 @@ plotly.io.show(fig2)
 # the X-Z or Y-Z planes confirms it is reasonable.
 
 sigma = (1, 1.5, 2.5)
-A_elems = feature.structure_tensor(sample, sigma=sigma)
+A_elems = ski.feature.structure_tensor(sample, sigma=sigma)
 
 #####################################################################
 # We can then compute the eigenvalues of the structure tensor.
 
-eigen = feature.structure_tensor_eigenvalues(A_elems)
+eigen = ski.feature.structure_tensor_eigenvalues(A_elems)
 eigen.shape
 
 #####################################################################
