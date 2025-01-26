@@ -9,8 +9,9 @@ from scipy import ndimage as ndi
 def isotropic_erosion(image, radius, out=None, spacing=None):
     """Return binary morphological erosion of an image.
 
-    This function returns the same result as :func:`skimage.morphology.erosion`
-    but performs faster for large circular structuring elements.
+    Compared to the more general :func:`skimage.morphology.erosion`, this
+    function only supports binary input and circular neighborhoods.
+    However, it may perform faster for large neighborhoods.
     This works by applying a threshold to the exact Euclidean distance map
     of the image [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
@@ -20,7 +21,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     image : ndarray
         Binary input image.
     radius : float
-        The radius by which regions should be eroded.
+        The radius defining the neighborhood of the operation.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         a new array will be allocated.
@@ -76,8 +77,9 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
 def isotropic_dilation(image, radius, out=None, spacing=None):
     """Return binary morphological dilation of an image.
 
-    This function returns the same result as :func:`skimage.morphology.dilation`
-    but performs faster for large circular structuring elements.
+    Compared to the more general :func:`skimage.morphology.dilation`, this
+    function only supports binary input and circular neighborhoods.
+    However, it may perform faster for large neighborhoods.
     This works by applying a threshold to the exact Euclidean distance map
     of the inverted image [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
@@ -87,7 +89,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
     image : ndarray
         Binary input image.
     radius : float
-        The radius by which regions should be dilated.
+        The radius defining the neighborhood of the operation.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
@@ -143,8 +145,9 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
 def isotropic_opening(image, radius, out=None, spacing=None):
     """Return binary morphological opening of an image.
 
-    This function returns the same result as :func:`skimage.morphology.opening`
-    but performs faster for large circular structuring elements.
+    Compared to the more general :func:`skimage.morphology.opening`, this
+    function only supports binary input and circular neighborhoods.
+    However, it may perform faster for large neighborhoods.
     This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
@@ -153,7 +156,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
     image : ndarray
         Binary input image.
     radius : float
-        The radius with which the regions should be opened.
+        The radius defining the neighborhood of the operation.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
@@ -208,8 +211,9 @@ def isotropic_opening(image, radius, out=None, spacing=None):
 def isotropic_closing(image, radius, out=None, spacing=None):
     """Return binary morphological closing of an image.
 
-    This function returns the same result as binary :func:`skimage.morphology.closing`
-    but performs faster for large circular structuring elements.
+    Compared to the more general :func:`skimage.morphology.closing`, this
+    function only supports binary input and circular neighborhoods.
+    However, it may perform faster for large neighborhoods.
     This works by thresholding the exact Euclidean distance map [1]_, [2]_.
     The implementation is based on: func:`scipy.ndimage.distance_transform_edt`.
 
@@ -218,7 +222,7 @@ def isotropic_closing(image, radius, out=None, spacing=None):
     image : ndarray
         Binary input image.
     radius : float
-        The radius with which the regions should be closed.
+        The radius defining the neighborhood of the operation.
     out : ndarray of bool, optional
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
