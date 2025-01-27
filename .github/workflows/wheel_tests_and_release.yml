@@ -44,10 +44,13 @@ jobs:
           merge-multiple: true
           path: ./dist
 
+      - name: Install dependencies
+        run: |
+          source tools/github/setup_env.sh
+
       - name: Build the source distribution
         run: |
           SK_VERSION=$(git describe --tags)
-          source tools/github/setup_test_env.sh
           spin sdist -- --no-isolation --skip-dependency-check
           ls -la ${{ github.workspace }}/dist
 

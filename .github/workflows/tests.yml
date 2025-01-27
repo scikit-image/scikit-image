@@ -21,16 +21,28 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        PIP_FLAGS: [""]
+
+        # Dependency options for setup_env.sh
         MINIMUM_REQUIREMENTS: [0]
-        BUILD_DOCS: [1]
-        PYTHONOPTIMIZE: [0]
-        TEST_EXAMPLES: [0]
         OPTIONAL_DEPS: [0]
-        OPTIONS_NAME: ["default"]
-        INSTALL_FROM_SDIST: [0]
         WITHOUT_POOCH: [0]
+        PIP_FLAGS: [""]
+
+        # Flag that chooses between source and sdist build
+        INSTALL_FROM_SDIST: [0]
+
+        # Flags that control what we are testing
+        BUILD_DOCS: [1]
+
+        # Flags that control lazy-loader behavior
         EAGER_IMPORT: [0]
+
+        # Python flags
+        PYTHONOPTIMIZE: [0]
+
+        # Flag to control naming of workflow job
+        OPTIONS_NAME: ["default"]
+
         include:
           - platform_id: manylinux_x86_64
             python-version: "3.10"
@@ -75,37 +87,41 @@ jobs:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
 
-      - name: Build package
+      - name: Install dependencies
         env:
-          # Settings for setup_test_env.sh
+          # Settings for setup_env.sh
           MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-          TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
-
-          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
-          source tools/github/setup_test_env.sh
+          source tools/github/setup_env.sh
 
-          if [[ $INSTALL_FROM_SDIST == "1" ]]; then
-              python -m build --no-isolation --skip-dependency-check --sdist .
-              pip install dist/scikit_image-*.tar.gz
-          else
-              pip install -vv --no-build-isolation .;
-          fi
+      - name: Build and install from source
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        run: |
+          pip install -vv --no-build-isolation .
+
+      - name: Build and install from sdist
+        if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
+        run: |
+          python -m build --no-isolation --skip-dependency-check --sdist .
+          pip install dist/scikit_image-*.tar.gz
 
       - name: Run tests
         env:
-          # Settings for run_tests_and_docs.sh
-          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-          TEST_EXAMPLES: ${{ matrix.TEST_EXAMPLES }}
-
-          # A lazy loader parameter
+          # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          source tools/github/run_tests_and_docs.sh
+          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+
+      - name: Build docs / run examples
+        if: ${{ matrix.BUILD_DOCS == 1 }}
+        env:
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+        run: |
+          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
 
       - name: Check benchmarks
         run: |
@@ -125,17 +141,31 @@ jobs:
           python-version: "3.13"
           nogil: true
 
-      - name: Install nightly dependencies
+      - name: Install dependencies
+        # See special clause inside setup_env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
         run: |
-          set -ex
-          source tools/github/setup_test_env.sh
+          source tools/github/setup_env.sh
+
+      - name: Build and install
+        run: |
           pip install -vv --no-build-isolation .
 
       - name: Run tests
         env:
           PYTHON_GIL: 0
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          source tools/github/run_tests_and_docs.sh
+          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+
+      - name: Build docs / run examples
+        if: ${{ matrix.BUILD_DOCS == 1 }}
+        env:
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+        run: |
+          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -150,7 +180,6 @@ jobs:
         BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
     env:
-      TEST_EXAMPLES: 0
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
       CPPFLAGS: "-Xpreprocessor -fopenmp"
@@ -174,24 +203,26 @@ jobs:
           set -ex
           brew install libomp
 
-      - name: Build package
+      - name: Install dependencies
         env:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-          # TEST_EXAMPLES is inherited from the job-level env.
         run: |
-          set -ex
-          source tools/github/setup_test_env.sh
-          python -m build --no-isolation --sdist
-          pip install -vv --no-build-isolation .;
+          source tools/github/setup_env.sh
+
+      - name: Build and install
+        run: |
+          pip install -vv --no-build-isolation .
 
       - name: Run tests
         env:
-          # TEST_EXAMPLES isinherited from the job-level env.
-          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
         run: |
-          source tools/github/run_tests_and_docs.sh
+          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+
+      - name: Build docs / run examples
+        if: ${{ matrix.BUILD_DOCS == 1 }}
+        run: |
+          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
 
       - name: Check benchmarks
         run: |
