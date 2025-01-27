@@ -5,10 +5,7 @@
 # MINIMUM_REQUIREMENTS:
 #   Install the minimum versions of all requirements, instead of the latest.
 #
-# PIP_FLAGS:
-#   These options are passed to pip.
-#
-# BUILD_DOCS / TEST_EXAMPLES:
+# BUILD_DOCS:
 #   Install documentation dependencies, and set up headless Matplotlib backend.
 #
 # OPTIONAL_DEPS:
@@ -16,6 +13,9 @@
 #
 # WITHOUT_POOCH:
 #   Remove pooch from environment.
+#
+# PIP_FLAGS:
+#   These options are passed to pip.
 
 # TODO: Remove special handling of free-threaded dependencies below.
 
@@ -51,8 +51,8 @@ fi
 python -m pip install $PIP_FLAGS -r requirements/build.txt
 
 # Prepare for building the docs (and test examples)
-if [[ "${BUILD_DOCS}" == "1" ]] || [[ "${TEST_EXAMPLES}" == "1" ]]; then
-  echo "Build or run examples"
+if [[ "${BUILD_DOCS}" == "1" ]]; then
+  echo "Installing docs / examples dependencies..."
   # Use previous installed requirements as well, otherwise installing
   # successively may update previously constraint dependencies
   python -m pip install $PIP_FLAGS $REQUIREMENT_FILES -r ./requirements/docs.txt
