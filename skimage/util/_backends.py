@@ -76,17 +76,16 @@ def all_backends_with_eps_combined():
         - `info` : object
           `BackendInformation` object stored in the `skimage_backend_infos` entry-point.
 
-    Examples
-    --------
-    >>> import skimage
-    >>> skimage.util._backends.all_backends_with_eps_combined()
-    {
-        'backend1': {
-            'skimage_backends_ep_obj': EntryPoint(...),
-            'info': <BackendInformation object at ...>
-        },
-        ...
-    }
+    For example::
+
+        {
+            'backend1': {
+                'skimage_backends_ep_obj': EntryPoint(...),
+                'info': <BackendInformation object at ...>
+            },
+            ...
+        }
+
     """
     backends = {}
     backends_ = entry_points(group="skimage_backends")
