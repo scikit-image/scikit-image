@@ -17,14 +17,21 @@ jobs:
             ./emsdk install 3.1.58
             ./emsdk activate 3.1.58
             source emsdk_env.sh
+
+            echo '#!/bin/bash' > ~/setup_env.sh
+            echo "source $(pwd)/emsdk_env.sh" >> ~/setup_env.sh
+            chmod +x ~/setup_env.sh
             cd ..
       - run:
-          name: Install Pyodide
+          name: Install pyodide-build
           command: |
             pip install "pyodide-build>=0.29.2"
       - run:
           name: Build WASM wheel
           command: |
+            source ~/setup_env.sh
+            emcc --version
+
             pyodide build
             mkdir -p dist/wasm
             mv dist/*.whl dist/wasm/
