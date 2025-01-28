@@ -52,6 +52,7 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
+    "jupyterlite_sphinx",
     "sphinx_gallery.gen_gallery",
     "doi_role",
     "numpydoc",
@@ -61,21 +62,6 @@ extensions = [
     "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
 ]
-
-# Add jupyterlite-sphinx for CircleCI and skip for GitHub Actions
-# and Azure Pipelines, as CircleCI produces WASM + docs HTML artifacts.
-#
-# Also add it for local builds, as it's useful for testing.
-
-IS_CIRCLECI = os.environ.get("CIRCLECI", "0") == "1"
-IS_GHA = os.environ.get("GITHUB_ACTIONS", "0") == "1"
-IS_AZP = os.environ.get("TF_BUILD", "0") == "1"  # https://stackoverflow.com/a/68771148
-IS_CI = os.environ.get("CI", "0") == "1"
-
-USE_JUPYTERLITE = (IS_CIRCLECI and not (IS_GHA or IS_AZP)) or (not IS_CI)
-
-if USE_JUPYTERLITE:
-    extensions.append("jupyterlite_sphinx")
 
 
 autosummary_generate = True
@@ -190,18 +176,15 @@ sphinx_gallery_conf = {
     #   Temporarily disabled because plotly scraper isn't parallel-safe
     #   (see https://github.com/plotly/plotly.py/issues/4959)!
     # "parallel": True,
-}
-
-# Interactive documentation via jupyterlite-sphinx utilities
-if USE_JUPYTERLITE:
-    sphinx_gallery_conf["jupyterlite"] = {
+    # Interactive documentation via jupyterlite-sphinx utilities
+    "jupyterlite": {
         # Use the Lab interface instead of the Notebook interface, until
         # https://github.com/sphinx-gallery/sphinx-gallery/pull/1417 makes
         # it to a release
         "use_jupyter_lab": True,
         "notebook_modification_function": notebook_modification_function,
-    }
-
+    },
+}
 
 if _has_optipng():
     # This option requires optipng to compress images
@@ -440,21 +423,18 @@ myst_enable_extensions = [
 
 # -- Interactive documentation via jupyterlite-sphinx ------------------------
 
-if USE_JUPYTERLITE:
-    ## Disable the global "Try it!" button for now, because there's no reliable
-    ## way to keep scikit-image updated within it. However, it is enabled for the
-    ## Sphinx-Gallery examples. This can be re-enabled at a later stage.
-    # global_enable_try_examples = True
-    # try_examples_global_button_text = "Try it!"
-    # try_examples_global_warning_text = (
-    #     "Interactive examples for scikit-image are experimental and may not always work "
-    #     "as expected. If you encounter any issues, please report them on the [scikit-image "
-    #     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
-    # )
-    jupyterlite_silence = False  # temporary, for debugging
-    jupyterlite_overrides = "overrides.json"
-else:
-    pass
+## Disable the global "Try it!" button for now, because there's no reliable
+## way to keep scikit-image updated within it. However, it is enabled for the
+## Sphinx-Gallery examples. This can be re-enabled at a later stage.
+# global_enable_try_examples = True
+# try_examples_global_button_text = "Try it!"
+# try_examples_global_warning_text = (
+#     "Interactive examples for scikit-image are experimental and may not always work "
+#     "as expected. If you encounter any issues, please report them on the [scikit-image "
+#     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
+# )
+jupyterlite_silence = False  # temporary, for debugging
+jupyterlite_overrides = "overrides.json"
 
 
 def hide_sg_links(app, pagename, templatename, context, doctree):
