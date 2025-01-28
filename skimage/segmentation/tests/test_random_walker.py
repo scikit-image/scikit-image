@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
@@ -88,46 +89,38 @@ def test_2d_bf(dtype):
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning:skimage')
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    with expected_warnings(
-        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
-    ):
-        labels_cg = random_walker(data, labels, beta=90, mode='cg')
+
+    labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(
-        ['Changing the sparsity structure|"cg" mode|scipy.sparse.linalg.cg']
-    ):
-        full_prob = random_walker(
-            data, labels, beta=90, mode='cg', return_full_prob=True
-        )
+
+    full_prob = random_walker(data, labels, beta=90, mode='cg', return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >= full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = data.astype(dtype, copy=False)
-    anticipated_warnings = [
-        f'Changing the sparsity structure|conversion of A to CSR|scipy.sparse.sparsetools|'
-        f'{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg'
-    ]
-    with expected_warnings(anticipated_warnings):
-        labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
+
+    labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
-    with expected_warnings(anticipated_warnings):
-        full_prob = random_walker(
-            data, labels, beta=90, mode='cg_mg', return_full_prob=True
-        )
+
+    full_prob = random_walker(
+        data, labels, beta=90, mode='cg_mg', return_full_prob=True
+    )
     assert (full_prob[1, 25:45, 40:60] >= full_prob[0, 25:45, 40:60]).all()
     assert data.shape == labels.shape
 
@@ -571,3 +564,16 @@ def test_empty_labels():
     # Once seeds are provided, it should run without error
     labels[3, 3] = 1
     random_walker(image, labels)
+
+
+@pytest.mark.filterwarnings(
+    "ignore:Changing the sparsity structure of a csr_matrix is expensive::scipy"
+)
+def test_float16_upcasting():
+    data, labels = make_2d_syntheticdata(lx=70, ly=100)
+    data = data.astype(np.float16, copy=False)
+    spacing = np.ones(2, dtype=np.float16)
+    # Just check that this line doesn't raise an error due to data being float16
+    labels_cg = random_walker(data, labels, spacing=spacing, beta=90, mode='cg_j')
+    assert (labels_cg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
