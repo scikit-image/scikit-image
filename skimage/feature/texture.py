@@ -80,6 +80,7 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     pi/4 radians to the top-right diagonal neighbor; pi/2 radians to the pixel
     above, and so forth.
 
+    >>> import numpy as np
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
@@ -223,6 +224,7 @@ def graycoprops(P, prop='contrast'):
     Compute the contrast for GLCMs with distances [1, 2] and angles
     [0 degrees, 90 degrees]
 
+    >>> import numpy as np
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],

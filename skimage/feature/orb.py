@@ -83,6 +83,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
     Examples
     --------
     >>> from skimage.feature import ORB, match_descriptors
+    >>> import numpy as np
     >>> img1 = np.zeros((100, 100))
     >>> img2 = np.zeros_like(img1)
     >>> rng = np.random.default_rng(19481137)  # do not copy this value

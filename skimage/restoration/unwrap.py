@@ -49,6 +49,8 @@ def unwrap_phase(image, wrap_around=False, rng=None):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.restoration import unwrap_phase
     >>> c0, c1 = np.ogrid[-1:1:128j, -1:1:128j]
     >>> image = 12 * np.pi * np.exp(-(c0**2 + c1**2))
     >>> image_wrapped = np.angle(np.exp(1j * image))

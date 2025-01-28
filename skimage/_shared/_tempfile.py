@@ -14,6 +14,8 @@ def temporary_file(suffix=''):
 
     Examples
     --------
+    ..! disable_try_examples
+
     >>> import numpy as np
     >>> from skimage import io
     >>> with temporary_file('.tif') as tempfile:

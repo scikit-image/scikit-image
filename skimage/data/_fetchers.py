@@ -29,18 +29,23 @@ except ModuleNotFoundError:
         """
         Calculate the hash of a given file.
         Useful for checking if a file has changed or been corrupted.
+
         Parameters
         ----------
         fname : str
             The name of the file.
         alg : str
             The type of the hashing algorithm
+
         Returns
         -------
         hash : str
             The hash of the file.
+
         Examples
         --------
+        ..! disable_try_examples
+
         >>> fname = "test-file-for-hash.txt"
         >>> with open(fname, "w") as f:
         ...     __ = f.write("content of the file")

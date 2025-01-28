@@ -275,6 +275,8 @@ def use_plugin(name, kind=None):
 
     Examples
     --------
+    ..! disable_try_examples
+
     To use Matplotlib as the default image reader, you would write:
 
     >>> from skimage import io

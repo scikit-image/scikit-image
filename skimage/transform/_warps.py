@@ -487,6 +487,8 @@ def downscale_local_mean(image, factors, cval=0, clip=True):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.transform import downscale_local_mean
     >>> a = np.arange(15).reshape(3, 5)
     >>> a
     array([[ 0,  1,  2,  3,  4],
@@ -663,6 +665,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     Produce a coordinate map that shifts an image up and to the right:
 
     >>> from skimage import data
+    >>> import numpy as np
     >>> from scipy.ndimage import map_coordinates
     >>>
     >>> def shift_up10_left20(xy):
@@ -859,6 +862,7 @@ def warp(
     --------
     >>> from skimage.transform import warp
     >>> from skimage import data
+    >>> import numpy as np
     >>> image = data.camera()
 
     The following image warps are all equal but differ substantially in

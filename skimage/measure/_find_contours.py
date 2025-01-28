@@ -112,6 +112,8 @@ def find_contours(
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.measure import find_contours
     >>> a = np.zeros((3, 3))
     >>> a[0, 0] = 1
     >>> a

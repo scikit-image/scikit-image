@@ -13,6 +13,8 @@ square corresponding to the top-left corner of the astronaut image. Note that
 this operation is done for all color channels (the color dimension is the last,
 third dimension)::
 
+.. try_examples::
+
    >>> import skimage as ski
    >>> img = ski.data.astronaut()
    >>> top_left = img[:100, :100]

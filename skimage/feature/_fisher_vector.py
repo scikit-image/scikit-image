@@ -84,6 +84,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         >>> import pytest; _ = pytest.importorskip('sklearn')
 
     >>> from skimage.feature import fisher_vector
+    >>> import numpy as np
     >>> rng = np.random.Generator(np.random.PCG64())
     >>> sift_for_images = [rng.standard_normal((10, 128)) for _ in range(10)]
     >>> num_modes = 16
@@ -197,6 +198,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
         >>> import pytest; _ = pytest.importorskip('sklearn')
 
     >>> from skimage.feature import fisher_vector, learn_gmm
+    >>> import numpy as np
     >>> sift_for_images = [np.random.random((10, 128)) for _ in range(10)]
     >>> num_modes = 16
     >>> # Estimate 16-mode GMM with these synthetic SIFT vectors

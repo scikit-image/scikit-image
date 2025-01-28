@@ -129,6 +129,8 @@ def _hough_ellipse(cnp.ndarray img, Py_ssize_t threshold=4,
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.draw import ellipse_perimeter
     >>> img = np.zeros((25, 25), dtype=np.uint8)
     >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
@@ -275,6 +277,8 @@ def _hough_line(cnp.ndarray img,
     --------
     Generate a test image:
 
+    >>> import numpy as np
+    >>> from skimage.transform import hough_line
     >>> img = np.zeros((100, 150), dtype=bool)
     >>> img[30, :] = 1
     >>> img[:, 65] = 1

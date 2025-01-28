@@ -36,6 +36,8 @@ def regular_grid(ar_shape, n_points):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> from skimage.util import regular_grid
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
@@ -99,6 +101,8 @@ def regular_seeds(ar_shape, n_points, dtype=int):
 
     Examples
     --------
+    >>> from skimage.util import regular_seeds
+    >>> import numpy as np
     >>> regular_seeds((5, 5), 4)
     array([[0, 0, 0, 0, 0],
            [0, 1, 0, 2, 0],
