@@ -64,7 +64,8 @@ def public_api_name(func):
 @cache
 def all_backends_with_eps_combined():
     """
-    Returns a dictionary with all the installed scikit-image backends and their infos.
+    Returns a dictionary with all the installed scikit-image backends and the infos
+    stored in their two entry-points.
 
     Returns
     -------
@@ -77,7 +78,7 @@ def all_backends_with_eps_combined():
 
     Examples
     --------
-    >>> all_backends_with_eps_combined()
+    >>> skimage.util._backends.all_backends_with_eps_combined()
     {
         'backend1': {
             'skimage_backends_ep_obj': EntryPoint(...),
