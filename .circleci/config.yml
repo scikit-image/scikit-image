@@ -51,8 +51,8 @@ jobs:
       - run:
           name: Copy WASM wheel to docs directory
           command: |
-            mkdir -p doc/skimage_docs_wasm_wheels
-            cp dist/wasm/*.whl doc/skimage_docs_wasm_wheels/
+            mkdir -p doc/source/skimage_docs_wasm_wheels
+            cp dist/wasm/*.whl doc/source/skimage_docs_wasm_wheels/
       - run:
           name: Install apt packages
           command: |
