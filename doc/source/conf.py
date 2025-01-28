@@ -68,9 +68,11 @@ extensions = [
 # Also add it for local builds, as it's useful for testing.
 
 IS_CIRCLECI = os.environ.get("CIRCLECI", "0") == "1"
+IS_GHA = os.environ.get("GITHUB_ACTIONS", "0") == "1"
+IS_AZP = os.environ.get("TF_BUILD", "0") == "1"  # https://stackoverflow.com/a/68771148
 IS_CI = os.environ.get("CI", "0") == "1"
 
-USE_JUPYTERLITE = IS_CIRCLECI or not IS_CI
+USE_JUPYTERLITE = (IS_CIRCLECI and not (IS_GHA or IS_AZP)) or (not IS_CI)
 
 if USE_JUPYTERLITE:
     extensions.append("jupyterlite_sphinx")
