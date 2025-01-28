@@ -1,11 +1,50 @@
 version: 2.1
 
 jobs:
+  wasm: # this job only builds the WASM wheel and does not test it, that is done in the emscripten.yml job via GHA.
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run:
+          # Current version is 3.1.58 for Pyodide 0.27.2, see
+          # https://github.com/pyodide/pyodide/blob/266a08f3b09deb66d192735ff91abf2fd8f4f102/Makefile.envs#L2-L4
+          # for information and for future upgrades
+          name: Install Emscripten
+          command: |
+            git clone https://github.com/emscripten-core/emsdk.git
+            cd emsdk
+            ./emsdk install 3.1.58
+            ./emsdk activate 3.1.58
+            source emsdk_env.sh
+            cd ..
+      - run:
+          name: Install Pyodide
+          command: |
+            pip install "pyodide-build>=0.29.2"
+      - run:
+          name: Build WASM wheel
+          command: |
+            pyodide build
+            mkdir -p dist/wasm
+            mv dist/*.whl dist/wasm/
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - wasm
+
   doc:
     machine:
       image: ubuntu-2204:current
     steps:
       - checkout
+      - attach_workspace:
+          at: dist
+      - run:
+          name: Copy WASM wheel to docs directory
+          command: |
+            mkdir -p doc/skimage_docs_wasm_wheels
+            cp dist/wasm/*.whl doc/skimage_docs_wasm_wheels/
       - run:
           name: Install apt packages
           command: |
@@ -67,4 +106,7 @@ jobs:
 workflows:
   build-doc:
     jobs:
-      - doc
+      - wasm
+      - doc:
+          requires:
+            - wasm
