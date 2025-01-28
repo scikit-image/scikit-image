@@ -439,13 +439,16 @@ myst_enable_extensions = [
 # -- Interactive documentation via jupyterlite-sphinx ------------------------
 
 if USE_JUPYTERLITE:
-    global_enable_try_examples = True
-    try_examples_global_button_text = "Try it!"
-    try_examples_global_warning_text = (
-        "Interactive examples for scikit-image are experimental and may not always work "
-        "as expected. If you encounter any issues, please report them on the [scikit-image "
-        "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
-    )
+    ## Disable the global "Try it!" button for now, because there's no reliable
+    ## way to keep scikit-image updated within it. However, it is enabled for the
+    ## Sphinx-Gallery examples. This can be re-enabled at a later stage.
+    # global_enable_try_examples = True
+    # try_examples_global_button_text = "Try it!"
+    # try_examples_global_warning_text = (
+    #     "Interactive examples for scikit-image are experimental and may not always work "
+    #     "as expected. If you encounter any issues, please report them on the [scikit-image "
+    #     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
+    # )
     jupyterlite_silence = False  # temporary, for debugging
     jupyterlite_overrides = "overrides.json"
 else:
