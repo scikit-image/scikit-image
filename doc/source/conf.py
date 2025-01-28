@@ -100,7 +100,7 @@ pio.renderers.default = "sphinx_gallery_png"
 # add a scikit-image installation step when running in JupyterLite
 
 
-def notebook_modification_function(notebook_content):
+def notebook_modification_function(notebook_content, notebook_filename):
     warning_template = "\n".join(
         [
             "<div class='alert alert-{message_class}'>",
@@ -181,7 +181,7 @@ sphinx_gallery_conf = {
         # https://github.com/sphinx-gallery/sphinx-gallery/pull/1417 makes
         # it to a release
         "use_jupyter_lab": True,
-        'notebook_modification_function': notebook_modification_function,
+        "notebook_modification_function": notebook_modification_function,
     },
 }
 
