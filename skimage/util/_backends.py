@@ -73,8 +73,8 @@ def all_backends_with_eps_combined():
         A dictionary where keys are backend names, and values are dictionaries with:
         - `skimage_backends_ep_obj` : EntryPoint
           The backend's entry point object from the `skimage_backends` group.
-        - `info` : object, optional
-          Additional backend details from the `skimage_backend_infos` group, if available.
+        - `info` : object
+          `BackendInformation` object stored in the `skimage_backend_infos` entry-point.
 
     Examples
     --------
@@ -93,13 +93,10 @@ def all_backends_with_eps_combined():
 
     for backend in backends_:
         backends[backend.name] = {"skimage_backends_ep_obj": backend}
-        try:
-            info = backend_infos[backend.name]
-            # Only loading and calling the infos ep bcoz it is 
-            # assumed to be cheap operation --> saves time
-            backends[backend.name]["info"] = info.load()()
-        except KeyError:
-            pass
+        info = backend_infos[backend.name]
+        # Only loading and calling the infos ep bcoz it is 
+        # assumed to be cheap operation --> saves time
+        backends[backend.name]["info"] = info.load()()
 
     return backends
 
