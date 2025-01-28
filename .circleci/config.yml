@@ -49,9 +49,8 @@ jobs:
       - attach_workspace:
           at: dist
       - run:
-          name: Copy WASM wheel to docs directory
+          name: Copy WASM wheel to custom WASM docs index directory
           command: |
-            mkdir -p doc/source/skimage_docs_wasm_wheels
             cp dist/wasm/*.whl doc/source/skimage_docs_wasm_wheels/
       - run:
           name: Install apt packages
