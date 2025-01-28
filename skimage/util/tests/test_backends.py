@@ -66,23 +66,23 @@ def fake_backends(monkeypatch):
         def load(self):
             return Backend2()
 
-    def mock_all_backends():
+    def mock_all_backends_with_eps_combined():
         return {
             "fake2": {
-                "implementation": BackendEntryPoint2(),
+                "skimage_backends_ep_obj": BackendEntryPoint2(),
                 "info": _backends.BackendInformation(
                     ["skimage.util.tests.test_backends:foo"]
                 ),
             },
             "fake1": {
-                "implementation": BackendEntryPoint1(),
+                "skimage_backends_ep_obj": BackendEntryPoint1(),
                 "info": _backends.BackendInformation(
                     ["skimage.util.tests.test_backends:foo"]
                 ),
             },
         }
 
-    monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
+    monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_all_backends_with_eps_combined)
     monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
     monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1, fake2")
 
@@ -94,7 +94,7 @@ def no_backends(monkeypatch):
     def mock_no_backends():
         return {}
 
-    monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
+    monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_no_backends)
     monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
 
 
@@ -162,7 +162,7 @@ def test_module_name_determination(func, expected):
         ("backend1,backend2, backend3", ["backend1", "backend2", "backend3"]),
     ],
 )
-def test_get_backend_priority(monkeypatch, env_value, output):
-    """Test the behavior of get_backend_priority with different environment variable values."""
+def test_get_skimage_backends(monkeypatch, env_value, output):
+    """Test the behavior of get_skimage_backends with different environment variable values."""
     monkeypatch.setenv("SKIMAGE_BACKENDS", env_value)
-    assert _backends.get_backend_priority() == output
+    assert _backends.get_skimage_backends() == output

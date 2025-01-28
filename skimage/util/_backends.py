@@ -5,7 +5,7 @@ import os
 import warnings
 
 
-def get_backend_priority():
+def get_skimage_backends():
     """Returns the backend priority list, or `False` if the dispatching is disabled.
 
     The function interprets the value of the environment variable 
@@ -62,17 +62,40 @@ def public_api_name(func):
 
 
 @cache
-def all_backends():
-    """List all installed backends and information about them"""
+def all_backends_with_eps_combined():
+    """
+    Returns a dictionary with all the installed scikit-image backends and their infos.
+
+    Returns
+    -------
+    dict
+        A dictionary where keys are backend names, and values are dictionaries with:
+        - `skimage_backends_ep_obj` : EntryPoint
+          The backend's entry point object from the `skimage_backends` group.
+        - `info` : object, optional
+          Additional backend details from the `skimage_backend_infos` group, if available.
+
+    Examples
+    --------
+    >>> all_backends_with_eps_combined()
+    {
+        'backend1': {
+            'skimage_backends_ep_obj': EntryPoint(...),
+            'info': <BackendInformation object at ...>
+        },
+        ...
+    }
+    """
     backends = {}
     backends_ = entry_points(group="skimage_backends")
     backend_infos = entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
-        backends[backend.name] = {"implementation": backend}
+        backends[backend.name] = {"skimage_backends_ep_obj": backend}
         try:
             info = backend_infos[backend.name]
-            # Double () to load and then call the backend information function
+            # Only loading and calling the infos ep bcoz it is 
+            # assumed to be cheap operation --> saves time
             backends[backend.name]["info"] = info.load()()
         except KeyError:
             pass
@@ -92,8 +115,8 @@ def dispatchable(func):
 
     # If no backends are installed or dispatching is disabled,
     # return the original function.
-    if not all_backends():
-        if get_backend_priority():
+    if not all_backends_with_eps_combined():
+        if get_skimage_backends():
             # no installed backends but `SKIMAGE_BACKENDS` is not False
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was not dispatched."
@@ -103,14 +126,14 @@ def dispatchable(func):
                 stacklevel=2,
             )
         return func
-    elif not get_backend_priority():
+    elif not get_skimage_backends():
         # backends installed but `SKIMAGE_BACKENDS` is False
         return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        backend_priority = get_backend_priority()
-        installed_backends = all_backends()
+        backend_priority = get_skimage_backends()
+        installed_backends = all_backends_with_eps_combined()
         for backend_name in backend_priority:
             if backend_name not in installed_backends:
                 continue
@@ -120,7 +143,7 @@ def dispatchable(func):
             if f"{func_module}:{func_name}" not in backend["info"].supported_functions:
                 continue
 
-            backend_impl = backend["implementation"].load()
+            backend_impl = backend["skimage_backends_ep_obj"].load()
 
             # Allow the backend to accept/reject a call based on the function
             # name and the arguments
