@@ -52,8 +52,10 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
-    "jupyterlite_sphinx",
     "sphinx_gallery.gen_gallery",
+    # Important: keep jupyterlite_sphinx after sphinx_gallery
+    # to avoid missing notebook files in the gallery
+    "jupyterlite_sphinx",
     "doi_role",
     "numpydoc",
     "sphinx_design",
