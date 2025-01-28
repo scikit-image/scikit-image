@@ -199,9 +199,6 @@ if USE_JUPYTERLITE:
         "use_jupyter_lab": True,
         "notebook_modification_function": notebook_modification_function,
     }
-else:
-    # Sphinx-Gallery requires disabling it explicitly
-    sphinx_gallery_conf["jupyterlite"] = None
 
 
 if _has_optipng():
