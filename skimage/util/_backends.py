@@ -78,6 +78,7 @@ def all_backends_with_eps_combined():
 
     Examples
     --------
+    >>> import skimage
     >>> skimage.util._backends.all_backends_with_eps_combined()
     {
         'backend1': {
