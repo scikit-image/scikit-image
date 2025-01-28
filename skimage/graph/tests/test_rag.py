@@ -209,6 +209,7 @@ def test_ncut_stable_subgraph():
 
 # FIXME: https://github.com/scikit-image/scikit-image/issues/7651
 @pytest.mark.skipif(sys.platform == "win32", reason="test is flaky on azure")
+@pytest.mark.thread_unsafe
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed

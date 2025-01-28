@@ -7,7 +7,10 @@ from skimage.io.collection import MultiImage
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, assert_allclose
 
+import pytest
 from pytest import fixture
+
+pytestmark = pytest.mark.thread_unsafe
 
 
 @fixture
@@ -30,6 +33,7 @@ def imgs():
     reset_plugins()
 
 
+@pytest.mark.thread_unsafe
 def test_shapes(imgs):
     imgs = imgs[-1]
     assert imgs[0][0].shape == imgs[0][1].shape
@@ -54,6 +58,7 @@ def test_slicing(imgs):
     assert_allclose(img[0], img[::-1][-1])
 
 
+@pytest.mark.thread_unsafe
 def test_getitem(imgs):
     for img in imgs[0]:
         num = len(img)

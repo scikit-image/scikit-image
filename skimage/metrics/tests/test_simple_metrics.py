@@ -42,6 +42,7 @@ def test_PSNR_vs_IPOL():
     assert_almost_equal(p, p_IPOL, decimal=4)
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_PSNR_float(dtype):
     p_uint8 = peak_signal_noise_ratio(cam, cam_noisy)

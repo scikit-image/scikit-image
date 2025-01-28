@@ -116,21 +116,34 @@ jobs:
     name: linux-cp313t-default
     runs-on: ubuntu-latest
 
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        run_parallel: [0, 1]
+    env:
+      RUN_PARALLEL: ${{ matrix.run_parallel }}
+
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
 
       # TODO: replace with setup-python when there is support
-      - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
+      # TODO: replace with setup-python when there is support
+      - uses: Quansight-Labs/setup-python@b9ab292c751a42bcd2bb465b7fa202ea2c3f5796 # v5.3.1
         with:
-          python-version: "3.13"
-          nogil: true
+          python-version: "3.13t"
 
       - name: Install nightly dependencies
         run: |
           set -ex
           source tools/github/before_install.sh
           pip install -vv --no-build-isolation .
+
+      - name: Install pytest-run-parallel
+        if: ${{ matrix.run_parallel == '1' }}
+        run: |
+          pip install pytest-run-parallel
 
       - name: Run tests
         env:
