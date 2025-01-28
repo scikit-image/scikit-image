@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
@@ -35,6 +36,7 @@ def test_basic():
     assert_array_equal(convex_hull_image(image), expected)
 
 
+@pytest.mark.thread_unsafe
 def test_empty_image():
     image = np.zeros((6, 6), dtype=bool)
     with expected_warnings(['entirely zero']):
@@ -331,6 +333,7 @@ def test_consistent_2d_3d_hulls(images2d3d):
     assert_array_equal(chimage3d[1], chimage)
 
 
+@pytest.mark.thread_unsafe
 def test_few_points():
     image = np.array(
         [

@@ -106,6 +106,7 @@ class TestRank:
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
+    @pytest.mark.thread_unsafe
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter, outdt):
@@ -156,6 +157,7 @@ class TestRank:
         with pytest.raises(ValueError):
             getattr(rank, filter)(self.image.astype(np.uint8), footprint_sequence)
 
+    @pytest.mark.thread_unsafe
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize('filter', _3d_rank_filters)
     def test_rank_filters_3D(self, filter, outdt):
@@ -307,6 +309,7 @@ class TestRank:
             cm = gray.erosion(image, elem)
             assert_equal(out, cm)
 
+    @pytest.mark.thread_unsafe
     def test_bitdepth(self):
         # test the different bit depth for rank16
 
@@ -389,6 +392,7 @@ class TestRank:
         )
         assert_equal(r, out)
 
+    @pytest.mark.thread_unsafe
     def test_pass_on_bitdepth(self):
         # should pass because data bitdepth is not too high for the function
 
@@ -436,6 +440,7 @@ class TestRank:
 
         assert_equal(loc_autolevel, loc_perc_autolevel)
 
+    @pytest.mark.thread_unsafe
     def test_compare_ubyte_vs_float(self):
         # Create signed int8 image that and convert it to uint8
         image_uint = img_as_ubyte(data.camera()[:50, :50])
@@ -458,6 +463,7 @@ class TestRank:
                 out_f = func(image_float, disk(3))
             assert_equal(out_u, out_f)
 
+    @pytest.mark.thread_unsafe
     def test_compare_ubyte_vs_float_3d(self):
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
@@ -492,6 +498,7 @@ class TestRank:
                 out_f = func(volume_float, ball(3))
             assert_equal(out_u, out_f)
 
+    @pytest.mark.thread_unsafe
     def test_compare_8bit_unsigned_vs_signed(self):
         # filters applied on 8-bit image or 16-bit image (having only real 8-bit
         # of dynamic) should be identical
@@ -526,6 +533,7 @@ class TestRank:
                 out_s = func(image_s, disk(3))
             assert_equal(out_u, out_s)
 
+    @pytest.mark.thread_unsafe
     def test_compare_8bit_unsigned_vs_signed_3d(self):
         # filters applied on 8-bit volume or 16-bit volume (having only real 8-bit
         # of dynamic) should be identical
@@ -787,6 +795,7 @@ class TestRank:
         th = 1 * (test >= rank.otsu(test, footprint))
         assert_equal(th, res)
 
+    @pytest.mark.thread_unsafe
     def test_entropy(self):
         #  verify that entropy is coherent with bitdepth of the input data
 
@@ -860,6 +869,7 @@ class TestRank:
             )
             assert_equal(image, out)
 
+    @pytest.mark.thread_unsafe
     def test_16bit(self):
         image = np.zeros((21, 21), dtype=np.uint16)
         footprint = np.ones((3, 3), dtype=np.uint8)

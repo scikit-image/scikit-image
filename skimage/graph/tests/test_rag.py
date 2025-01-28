@@ -206,6 +206,7 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
+@pytest.mark.thread_unsafe
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed

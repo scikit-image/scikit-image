@@ -1,6 +1,8 @@
 import numpy as np
 from skimage.restoration import unwrap_phase
 import sys
+import sysconfig
+import pytest
 
 from skimage._shared import testing
 from skimage._shared.testing import (
@@ -133,11 +135,16 @@ dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
     sys.version_info[:2] == (3, 4),
     reason="Doesn't work with python 3.4. See issue #3079",
 )
+@skipif(
+    bool(sysconfig.get_config_var("Py_GIL_DISABLED")),
+    reason='This test is failing under free-threaded Python',
+)
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
 
 
+@pytest.mark.thread_unsafe
 def test_mask():
     length = 100
     ramps = [

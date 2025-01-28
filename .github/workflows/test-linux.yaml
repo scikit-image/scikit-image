@@ -135,6 +135,15 @@ jobs:
     name: linux-cp313t-default
     runs-on: ubuntu-latest
 
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        run_parallel: [0, 1]
+        version: ['3.13t']
+    env:
+      RUN_PARALLEL: ${{ matrix.run_parallel }}
+
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
@@ -142,10 +151,13 @@ jobs:
           persist-credentials: false
 
       # TODO: replace with setup-python when there is support
-      - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
+      # TODO: replace with setup-python when there is support
+      - uses: astral-sh/setup-uv@b5f58b2abc5763ade55e4e9d0fe52cd1ff7979ca
         with:
-          python-version: "3.13"
-          nogil: true
+          python-version: ${{ matrix.version }}
+          enable-cache: false
+      - run:
+          uv pip install --python=${{ matrix.version }} pip
 
       - name: Install build dependencies
         # See special clause inside setup-build-env.sh that detects when
@@ -169,10 +181,16 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Install pytest-run-parallel
+        if: ${{ matrix.run_parallel == '1' }}
+        run: |
+          pip install pytest-run-parallel
+
       - name: Run tests
         env:
           PYTHON_GIL: 0
+          NUM_PARALLEL_THREADS: ${{ matrix.run_parallel == '0' && 1 || 4 }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --num-parallel-threads=$NUM_PARALLEL_THREADS --doctest-plus --showlocals --pyargs skimage)

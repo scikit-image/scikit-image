@@ -88,6 +88,7 @@ def test_haar_like_feature_precomputed(feature_type):
     img = np.ones((5, 5), dtype=np.int8)
     img_ii = integral_image(img)
     if isinstance(feature_type, list):
+        feature_type = list(feature_type)
         # shuffle the index of the feature to be sure that we are output
         # the features in the same order
         shuffle(feature_type)
