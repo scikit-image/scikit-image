@@ -4,6 +4,7 @@ jobs:
   wasm: # this job only builds the WASM wheel and does not test it, that is done in the emscripten.yml job via GHA.
     docker:
       - image: cimg/python:3.12
+    resource_class: large
     steps:
       - checkout
       - run:
