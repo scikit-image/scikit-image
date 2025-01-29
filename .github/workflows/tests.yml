@@ -135,6 +135,8 @@ jobs:
         # See special clause inside setup_build_env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
         run: |
           source tools/github/setup_build_env.sh
 
@@ -146,6 +148,8 @@ jobs:
         # See special clause inside setup_test_env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
         run: |
           source tools/github/setup_test_env.sh
 
