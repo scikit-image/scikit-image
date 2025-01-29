@@ -5,7 +5,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
-    """Estimate background intensity by translating a kernel over an image.
+    """Estimate background intensity using the rolling ball algorithm.
 
     This function estimates the background intensity of an n-dimensional
     image. Typically, it is useful for background subtraction in case of
@@ -17,11 +17,11 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     image : ndarray
         The image to be filtered.
     radius : int, optional
-        Radius of the ball-shaped kernel to be translated over the
-        image. Used only if `kernel` is ``None``.
+        Radius of the ball-shaped kernel to be rolled under the
+        image landscape. Used only if `kernel` is ``None``.
     kernel : ndarray, optional
-        The kernel to be translated over the image. It must have the
-        same number of axes as `image`.
+        An alternative way to specify the rolling ball, as an arbitrary
+        kernel. It must have the same number of axes as `image`.
     nansafe: bool, optional
         If ``False`` (default), the function assumes that none of the values
         in `image` are ``np.nan``, and uses a faster implementation.
@@ -51,7 +51,7 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
 
     This implementation assumes that dark pixels correspond to the background. If
     you have a bright background, invert the image before passing it to this
-    function, e.g., using :func:`skimage.util.invert`. See the gallery example for details.
+    function, e.g., using :func:`skimage.util.invert`.
 
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
