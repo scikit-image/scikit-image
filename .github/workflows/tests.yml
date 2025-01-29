@@ -207,7 +207,7 @@ jobs:
         env:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
-          source tools/github/setup_build_env.sh
+          source tools/github/setup_test_env.sh
 
       - name: Run tests
         run: |
