@@ -214,7 +214,7 @@ jobs:
           asv check -v -E existing
 
   test_docs_aarch64:
-    name: macos-cp${{ matrix.python-version }}
+    name: macos-docs
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
@@ -223,7 +223,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version}}
+          python-version: "3.13"
           allow-prereleases: true
 
       - name: Install build dependencies
