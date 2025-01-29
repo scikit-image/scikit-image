@@ -201,7 +201,6 @@ jobs:
           source tools/github/setup_build_env.sh
 
       - name: Run tests
-        env:
         run: |
           (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
 
