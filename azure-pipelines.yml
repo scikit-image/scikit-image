@@ -126,6 +126,9 @@ jobs:
 
           which clang || true
 
+          export CC=clang
+          export CXX=clang++
+
           # Compile the package and build the wheel
           $PYTHON -m build --no-isolation --skip-dependency-check --wheel
 
