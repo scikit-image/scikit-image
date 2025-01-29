@@ -12,7 +12,7 @@ export PIP_DEFAULT_TIMEOUT=60
 echo "Installing docs / examples dependencies..."
 # Use previous installed requirements as well, otherwise installing
 # successively may update previously constraint dependencies
-python -m pip install $PIP_FLAGS $REQUIREMENT_FILES -r ./requirements/docs.txt
+python -m pip install $PIP_FLAGS -r ./requirements/docs.txt
 
 echo "Set matplotlib backend to Template..."
 export MPL_DIR
