@@ -151,6 +151,7 @@ def notebook_modification_function(notebook_content, notebook_filename):
     if (
         "from skimage import data" in notebook_content_str
         or "skimage.data" in notebook_content_str
+        or "ski.data" in notebook_content_str
         or re.search(
             r'from\s+skimage\s+import\s+(?:[^,\n]+,\s*)*data(?:\s*,|$)',
             notebook_content_str,
