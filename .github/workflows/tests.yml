@@ -81,6 +81,7 @@ jobs:
           allow-prereleases: true
 
       - name: Install build dependencies
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
