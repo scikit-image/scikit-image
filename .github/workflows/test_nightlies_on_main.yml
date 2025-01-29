@@ -16,6 +16,13 @@ env:
   # For lazy-loader
   EAGER_IMPORT: 0
 
+  # Make available packages from nightly wheels repo
+  PIP_FLAGS: >-
+    --upgrade
+    --pre
+    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --extra-index-url https://pypi.org/simple
+
 jobs:
   wheels:
     runs-on: ubuntu-latest
@@ -28,23 +35,23 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Setup dependencies
-        env:
-          MINIMUM_REQUIREMENTS: 0
-          OPTIONAL_DEPS: 0
-          WITHOUT_POOCH: 0
-          PIP_FLAGS: >-
-            --upgrade
-            --pre
-            --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
-            --extra-index-url https://pypi.org/simple
-
+      - name: Setup build dependencies
+        # PIP_FLAGS: exposed via global env
         run: |
-          source tools/github/setup_env.sh
+          source tools/github/setup_build_env.sh
 
       - name: Build and install
         run: |
           pip install -vv --no-build-isolation .
+
+      - name: Setup test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: 0
+          OPTIONAL_DEPS: 0
+          WITHOUT_POOCH: 0
+          # PIP_FLAGS: exposed via global env
+        run: |
+          source tools/github/setup_test_env.sh
 
       - name: Run tests
         run: |

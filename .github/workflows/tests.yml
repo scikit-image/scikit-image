@@ -22,7 +22,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-        # Dependency options for setup_env.sh
+        # Dependency options for setup_test_env.sh
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
@@ -30,9 +30,6 @@ jobs:
 
         # Flag that chooses between source and sdist build
         INSTALL_FROM_SDIST: [0]
-
-        # Flags that control what we are testing
-        BUILD_DOCS: [1]
 
         # Flags that control lazy-loader behavior
         EAGER_IMPORT: [0]
@@ -47,7 +44,6 @@ jobs:
           - platform_id: manylinux_x86_64
             python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
-            BUILD_DOCS: 0
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
             OPTIONS_NAME: "mini-req-eager-import"
@@ -55,7 +51,6 @@ jobs:
             python-version: "3.10"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
-            BUILD_DOCS: 0
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
@@ -63,14 +58,12 @@ jobs:
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
-            BUILD_DOCS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
             PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
-            BUILD_DOCS: 0
             OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
@@ -87,16 +80,11 @@ jobs:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
 
-      - name: Install dependencies
+      - name: Install build dependencies
         env:
-          # Settings for setup_env.sh
-          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
         run: |
-          source tools/github/setup_env.sh
+          source tools/github/setup_build_env.sh
 
       - name: Build and install from source
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
@@ -109,19 +97,21 @@ jobs:
           python -m build --no-isolation --skip-dependency-check --sdist .
           pip install dist/scikit_image-*.tar.gz
 
+      - name: Install test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        run: |
+          source tools/github/setup_test_env.sh
+
       - name: Run tests
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
-
-      - name: Build docs / run examples
-        if: ${{ matrix.BUILD_DOCS == 1 }}
-        env:
-          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-        run: |
-          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
 
       - name: Check benchmarks
         run: |
@@ -141,16 +131,23 @@ jobs:
           python-version: "3.13"
           nogil: true
 
-      - name: Install dependencies
-        # See special clause inside setup_env.sh that detects when
+      - name: Install build dependencies
+        # See special clause inside setup_build_env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
         run: |
-          source tools/github/setup_env.sh
+          source tools/github/setup_build_env.sh
 
       - name: Build and install
         run: |
           pip install -vv --no-build-isolation .
+
+      - name: Install test dependencies
+        # See special clause inside setup_test_env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
+        run: |
+          source tools/github/setup_test_env.sh
 
       - name: Run tests
         env:
@@ -159,13 +156,6 @@ jobs:
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
-
-      - name: Build docs / run examples
-        if: ${{ matrix.BUILD_DOCS == 1 }}
-        env:
-          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-        run: |
-          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -177,7 +167,6 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
         OPTIONAL_DEPS: [1]
-        BUILD_DOCS: [1]
         OPTIONS_NAME: ["default"]
     env:
       CC: /usr/bin/clang
@@ -197,33 +186,55 @@ jobs:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
 
-      - name: OSX configuration
+      - name: Install build dependencies
         run: |
-          # OpenMP is not present on macOS by default
-          set -ex
-          brew install libomp
-
-      - name: Install dependencies
-        env:
-          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-          BUILD_DOCS: ${{ matrix.BUILD_DOCS }}
-        run: |
-          source tools/github/setup_env.sh
+          source tools/github/setup_build_env.sh
 
       - name: Build and install
         run: |
           pip install -vv --no-build-isolation .
+
+      - name: Install test dependencies
+        env:
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+        run: |
+          source tools/github/setup_build_env.sh
 
       - name: Run tests
         env:
         run: |
           (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
 
-      - name: Build docs / run examples
-        if: ${{ matrix.BUILD_DOCS == 1 }}
-        run: |
-          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html
-
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+
+  test_docs_aarch64:
+    name: macos-cp${{ matrix.python-version }}
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+
+      - name: Install build dependencies
+        run: |
+          source tools/github/setup_build_env.sh
+
+      - name: Build and install from source
+        run: |
+          pip install -vv --no-build-isolation .
+
+      - name: Install test dependencies
+        run: |
+          source tools/github/setup_test_env.sh
+
+      - name: Build docs / run examples
+        run: |
+          source tools/github/setup_docs_env.sh
+          SPHINXCACHE=${HOME}/.cache/sphinx make -C doc html

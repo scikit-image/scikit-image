@@ -44,9 +44,9 @@ jobs:
           merge-multiple: true
           path: ./dist
 
-      - name: Install dependencies
+      - name: Install sdist build dependencies
         run: |
-          source tools/github/setup_env.sh
+          source tools/github/setup_build_env.sh
 
       - name: Build the source distribution
         run: |
