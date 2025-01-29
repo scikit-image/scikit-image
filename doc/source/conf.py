@@ -7,6 +7,7 @@ from datetime import date
 import inspect
 import os
 import sys
+import re
 from warnings import filterwarnings
 
 import plotly.io as pio
@@ -104,6 +105,7 @@ pio.renderers.default = "sphinx_gallery_png"
 
 
 def notebook_modification_function(notebook_content, notebook_filename):
+    notebook_content_str = str(notebook_content)
     warning_template = "\n".join(
         [
             "<div class='alert alert-{message_class}'>",
@@ -129,10 +131,41 @@ def notebook_modification_function(notebook_content, notebook_filename):
     dummy_notebook_content = {"cells": []}
     add_markdown_cell(dummy_notebook_content, markdown)
 
-    code_lines = [f"%pip install scikit-image=={version}"]
+    code_lines = [f"%pip install scikit-image=={version}\n"]
     code_lines.insert(0, "# JupyterLite-specific code")
 
-    code = "\n".join(code_lines)
+    # Extra code lines, dynamically added based on the notebooks' contents.
+    extra_code_lines = []
+    if "plotly" in notebook_content_str:
+        extra_code_lines.append("%pip install plotly")
+    if "matplotlib" in notebook_content_str:
+        extra_code_lines.append("%pip install matplotlib")
+    if "pandas" in notebook_content_str:
+        extra_code_lines.append("%pip install pandas")
+    if "sklearn" in notebook_content_str:
+        extra_code_lines.append("%pip install scikit-learn")
+    if "networkx" in notebook_content_str:
+        extra_code_lines.append("%pip install networkx")
+    if "pywt" in notebook_content_str:
+        extra_code_lines.append("%pip install PyWavelets")
+    if (
+        "from skimage import data" in notebook_content_str
+        or "skimage.data" in notebook_content_str
+        or re.search(
+            r'from\s+skimage\s+import\s+(?:[^,\n]+,\s*)*data(?:\s*,|$)',
+            notebook_content_str,
+        )
+    ):
+        extra_code_lines.extend(
+            [
+                "%pip install pyodide-http",
+                "import pyodide_http",
+                "pyodide_http.patch_all()",
+                "import pooch",
+            ]
+        )
+
+    code = "\n".join(code_lines) + "\n".join(extra_code_lines)
     add_code_cell(dummy_notebook_content, code)
 
     notebook_content["cells"] = (
