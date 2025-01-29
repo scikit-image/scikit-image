@@ -8,6 +8,7 @@ on:
       - "main"
 
 jobs:
+  if: github.event.pull_request.merged == true
   milestone_pr:
     name: attach to PR
     runs-on: ubuntu-latest
