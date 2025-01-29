@@ -8,9 +8,9 @@ on:
       - "main"
 
 jobs:
-  if: github.event.pull_request.merged == true
   milestone_pr:
     name: attach to PR
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: scientific-python/attach-next-milestone@bc07be829f693829263e57d5e8489f4e57d3d420
