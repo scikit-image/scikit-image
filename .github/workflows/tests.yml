@@ -95,6 +95,7 @@ jobs:
       - name: Build and install from sdist
         if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
         run: |
+          pip install build
           python -m build --no-isolation --skip-dependency-check --sdist .
           pip install dist/scikit_image-*.tar.gz
 
