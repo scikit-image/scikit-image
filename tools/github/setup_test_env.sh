@@ -19,7 +19,6 @@
 set -ex
 
 export PIP_DEFAULT_TIMEOUT=60
-python -m pip install --upgrade pip
 
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     for filename in requirements/*.txt; do
