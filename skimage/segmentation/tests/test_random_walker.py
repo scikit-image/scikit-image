@@ -106,6 +106,9 @@ def test_2d_cg(dtype):
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    "ignore:\"cg_mg\" not available, it requires pyamg to be installed"
+)
 @pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):

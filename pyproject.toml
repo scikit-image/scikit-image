@@ -74,6 +74,12 @@ docs = [
     'pooch>=1.6',
     'tifffile>=2022.8.12',
     'myst-parser',
+    # Pyodide kernel 0.5.2 comes with Pyodide 0.27.2; see
+    # https://pyodide.org/en/0.27.2/usage/packages-in-pyodide.html and
+    # https://jupyterlite-pyodide-kernel.readthedocs.io/en/stable/#with-pyodide
+    # for information on updating
+    'jupyterlite-sphinx>=0.18.0',
+    'jupyterlite-pyodide-kernel==0.5.2',
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
@@ -86,13 +92,13 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK',
+    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2021.1.0,!=2024.8.0',
     'matplotlib>=3.7',
-    'pooch>=1.6.0',
-    'pyamg>=5.2',
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
     'scikit-learn>=1.2',
 ]
