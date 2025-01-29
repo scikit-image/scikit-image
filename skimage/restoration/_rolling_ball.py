@@ -5,29 +5,30 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
-    """Estimate background intensity by rolling/translating a kernel.
+    """Estimate background intensity by translating a kernel over an image.
 
-    This rolling ball algorithm estimates background intensity for a
-    ndimage in case of uneven exposure. It is a generalization of the
-    frequently used rolling ball algorithm [1]_.
+    This function estimates the background intensity of an n-dimensional
+    image. Typically, it is useful for background subtraction in case of
+    uneven exposure. It is a generalization of the well-known rolling-ball
+    algorithm [1]_.
 
     Parameters
     ----------
     image : ndarray
         The image to be filtered.
     radius : int, optional
-        Radius of a ball-shaped kernel to be rolled/translated in the image.
-        Used if ``kernel = None``.
+        Radius of the ball-shaped kernel to be translated over the
+        image. Used only if `kernel` is ``None``.
     kernel : ndarray, optional
-        The kernel to be rolled/translated in the image. It must have the
-        same number of dimensions as ``image``. Kernel is filled with the
-        intensity of the kernel at that position.
+        The kernel to be translated over the image. It must have the
+        same number of axes as `image`.
     nansafe: bool, optional
-        If ``False`` (default) assumes that none of the values in ``image``
-        are ``np.nan``, and uses a faster implementation.
+        If ``False`` (default), the function assumes that none of the values
+        in `image` are ``np.nan``, and uses a faster implementation.
     num_threads: int, optional
-        The maximum number of threads to use. If ``None`` use the OpenMP
-        default value; typically equal to the maximum number of virtual cores.
+        The maximum number of threads to use. If ``None``, the function uses
+        the OpenMP default value; typically, it is equal to the maximum number
+        of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
 
@@ -38,20 +39,23 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
 
     Notes
     -----
-    For the pixel that has its background intensity estimated (without loss
-    of generality at ``center``) the rolling ball method centers ``kernel``
-    under it and raises the kernel until the surface touches the image umbra
-    at some ``pos=(y,x)``. The background intensity is then estimated
-    using the image intensity at that position (``image[pos]``) plus the
-    difference of ``kernel[center] - kernel[pos]``.
+    The algorithm is easy to grasp in 2D: Consider that each pixel value
+    defines a height, forming a 2D surface in 3D space. Then, a (3D) ball of
+    given radius (or a kernel, in the general case) is placed under this
+    surface and raised until it touches it. The background intensity is
+    estimated by the hull of the volume reachable by the ball.
 
-    This algorithm assumes that dark pixels correspond to the background. If
-    you have a bright background, invert the image before passing it to the
-    function, e.g., using `utils.invert`. See the gallery example for details.
+    Clearly, for this method to give meaningful results, the radius of the
+    ball (or typical size of the kernel, in the general case) should be (much)
+    larger than the typical size of the image features of interest.
+
+    This implementation assumes that dark pixels correspond to the background. If
+    you have a bright background, invert the image before passing it to this
+    function, e.g., using :func:`skimage.util.invert`. See the gallery example for details.
 
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
-    gaussian smoothing before passing the image to this function.
+    Gaussian smoothing before passing the image to this function.
 
     This algorithm's complexity is polynomial in the radius, with degree equal
     to the image dimensionality (a 2D image is N^2, a 3D image is N^3, etc.),
