@@ -23,6 +23,8 @@ env:
     --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
     --extra-index-url https://pypi.org/simple
 
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
 jobs:
   wheels:
     runs-on: ubuntu-latest
@@ -55,4 +57,4 @@ jobs:
 
       - name: Run tests
         run: |
-          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
