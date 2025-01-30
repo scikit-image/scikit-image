@@ -5,7 +5,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
-    """Estimate background intensity using the rolling ball algorithm.
+    """Estimate background intensity using the rolling-ball algorithm.
 
     This function estimates the background intensity of an n-dimensional
     image. Typically, it is useful for background subtraction in case of
