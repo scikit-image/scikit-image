@@ -120,7 +120,6 @@ jobs:
       matrix:
         os: [macos-13]
         cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
-        # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
