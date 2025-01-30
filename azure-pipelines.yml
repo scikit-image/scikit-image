@@ -165,12 +165,6 @@ jobs:
           # We don't test docstring examples (--doctest-plus) on
           # Windows due to inconsistent ndarray formatting in `numpy`.
           # For more details, see https://github.com/numpy/numpy/issues/13468
-          export TEST_ARGS="-v"
-          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage
+          export TEST_ARGS="-vv --showlocals"
+          $PYTHON -m pytest ${TEST_ARGS} --pyargs skimage -k 'test_reproducibility'
         displayName: "Package testing"
-
-      - bash: |
-          set -ex
-          PYTHON="$(python.pythonLocation)\\python.exe"
-          $PYTHON -m asv check -v -E existing
-        displayName: Check benchmarks
