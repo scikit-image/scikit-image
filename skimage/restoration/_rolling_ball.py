@@ -7,10 +7,12 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
     """Estimate background intensity using the rolling-ball algorithm.
 
-    This function estimates the background intensity of an n-dimensional
-    image. Typically, it is useful for background subtraction in case of
-    uneven exposure. It is a generalization of the well-known rolling-ball
-    algorithm [1]_.
+    This function is a generalization of the rolling-ball algorithm [1]_ to
+    estimate the background intensity of an n-dimensional image. This is
+    typically useful for background subtraction in case of uneven exposure.
+    Think of the image as a landscape (where altitude is determined by
+    intensity), under which a ball of given radius is rolled. At each
+    position, the ball's apex gives the resulting background intensity.
 
     Parameters
     ----------
@@ -39,19 +41,13 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
 
     Notes
     -----
-    The algorithm is easy to grasp in 2D: Consider that each pixel value
-    defines a height, forming a 2D surface in 3D space. Then, a (3D) ball of
-    given radius (or a kernel, in the general case) is placed under this
-    surface and raised until it touches it. The background intensity is
-    estimated by the hull of the volume reachable by the ball.
-
-    Clearly, for this method to give meaningful results, the radius of the
-    ball (or typical size of the kernel, in the general case) should be (much)
-    larger than the typical size of the image features of interest.
-
     This implementation assumes that dark pixels correspond to the background. If
     you have a bright background, invert the image before passing it to this
     function, e.g., using :func:`skimage.util.invert`.
+
+    For this method to give meaningful results, the radius of the ball (or
+    typical size of the kernel, in the general case) should be larger than the
+    typical size of the image features of interest.
 
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
