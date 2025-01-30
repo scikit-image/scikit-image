@@ -3,6 +3,9 @@
 set -evx
 
 TEST_ARGS="--doctest-plus --showlocals"
+if [[ $RUN_PARALLEL == "1" ]]; then
+  TEST_ARGS="$TEST_ARGS --parallel-threads=4"
+fi
 
 
 # Combine requirement files for a more robust pip solve

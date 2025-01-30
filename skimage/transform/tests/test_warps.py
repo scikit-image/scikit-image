@@ -146,6 +146,7 @@ def test_warp_clip_cval_is_nan(order):
     assert_array_almost_equal(np.nanmax(outx), 2)
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.parametrize('order', range(6))
 def test_warp_clip_cval_outside_input_range(order):
     # Test that clipping behavior considers cval part of the input range
@@ -166,6 +167,7 @@ def test_warp_clip_cval_outside_input_range(order):
         assert np.sum(np.less(1, outx) * np.less(outx, 2)) > 0
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.parametrize('order', range(6))
 def test_warp_clip_cval_not_used(order):
     # Test that clipping does not consider cval part of the input range if it
@@ -466,6 +468,7 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
     assert np.nanmax(resized) == expected_max
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
     image = img_as_float(checkerboard()).astype(dtype, copy=False)
@@ -600,6 +603,7 @@ def test_downsize_anti_aliasing():
         )
 
 
+@pytest.mark.thread_unsafe
 def test_downsize_anti_aliasing_invalid_stddev():
     x = np.zeros((10, 10), dtype=np.float64)
     with pytest.raises(ValueError):

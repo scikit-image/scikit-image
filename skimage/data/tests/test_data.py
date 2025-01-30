@@ -167,6 +167,7 @@ def test_brain_3d():
     assert image.shape == (10, 256, 256)
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.xfail(
     Version(np.__version__) >= Version('2.0.0.dev0'),
     reason='tifffile uses deprecated attribute `ndarray.newbyteorder`',

@@ -215,6 +215,7 @@ def test_mssim_vs_legacy(dtype):
     assert_almost_equal(mssim, mssim_skimage_0pt17)
 
 
+@pytest.mark.thread_unsafe
 def test_ssim_warns_about_data_range():
     mssim = structural_similarity(cam, cam_noisy)
     with expected_warnings(['Setting data_range based on im1.dtype']):
