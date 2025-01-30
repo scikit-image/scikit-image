@@ -193,6 +193,7 @@ python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:.*requires pyamg.*:UserWarning",
 ]
 
 [tool.coverage.run]
