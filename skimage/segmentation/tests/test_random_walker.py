@@ -60,6 +60,9 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_bf(dtype):
     lx = 70
     ly = 100
@@ -89,7 +92,7 @@ def test_2d_bf(dtype):
 
 @pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning:skimage')
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
@@ -141,7 +144,7 @@ def test_2d_cg_j(dtype):
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_types():
     lx = 70
@@ -155,7 +158,7 @@ def test_types():
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_reorder_labels():
     lx = 70
@@ -168,7 +171,7 @@ def test_reorder_labels():
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_2d_inactive():
     lx = 70
@@ -182,7 +185,7 @@ def test_2d_inactive():
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_2d_laplacian_size():
     # test case from: https://github.com/scikit-image/scikit-image/issues/5034
@@ -512,7 +515,7 @@ def test_isolated_area():
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_prob_tol():
     np.random.seed(0)
@@ -563,7 +566,7 @@ def test_umfpack_import():
 
 
 @pytest.mark.filterwarnings(
-    'ignore:Changing the sparsity structure of a csr_matrix is expensive:SparseEfficiencyWarning:scipy'
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
 def test_empty_labels():
     image = np.random.random((5, 5))
@@ -582,7 +585,7 @@ def test_empty_labels():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:Changing the sparsity structure of a csr_matrix is expensive::scipy"
+    "ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning"
 )
 def test_float16_upcasting():
     data, labels = make_2d_syntheticdata(lx=70, ly=100)
