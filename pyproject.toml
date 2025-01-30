@@ -67,7 +67,7 @@ docs = [
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'matplotlib>=3.7',
-    'dask[array]>=2022.9.2',
+    'dask[array]>=2023.2.0',
     'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
@@ -88,7 +88,7 @@ optional = [
     'SimpleITK',
     'astropy>=5.0',
     'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0,!=2024.8.0',
+    'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0',
     'pyamg>=5.2',
