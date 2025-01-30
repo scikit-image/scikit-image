@@ -87,7 +87,7 @@ docs = [
 optional = [
     'SimpleITK',
     'astropy>=5.0',
-    'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
+    'cloudpickle>=1.1.1',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0',
