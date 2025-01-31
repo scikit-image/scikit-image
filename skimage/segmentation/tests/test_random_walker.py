@@ -117,6 +117,9 @@ def test_2d_cg(dtype):
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):
     lx = 70
