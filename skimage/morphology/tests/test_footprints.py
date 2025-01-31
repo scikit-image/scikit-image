@@ -9,33 +9,12 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
-from skimage._shared.testing import fetch
+from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
+from skimage.morphology import footprint_rectangle, footprint_from_sequence
 
 
 class TestFootprints:
-    def test_square_footprint(self):
-        """Test square footprints"""
-        for k in range(0, 5):
-            actual_mask = footprints.square(k)
-            expected_mask = np.ones((k, k), dtype='uint8')
-            assert_equal(expected_mask, actual_mask)
-
-    def test_rectangle_footprint(self):
-        """Test rectangle footprints"""
-        for i in range(0, 5):
-            for j in range(0, 5):
-                actual_mask = footprints.rectangle(i, j)
-                expected_mask = np.ones((i, j), dtype='uint8')
-                assert_equal(expected_mask, actual_mask)
-
-    def test_cube_footprint(self):
-        """Test cube footprints"""
-        for k in range(0, 5):
-            actual_mask = footprints.cube(k)
-            expected_mask = np.ones((k, k, k), dtype='uint8')
-            assert_equal(expected_mask, actual_mask)
-
     def strel_worker(self, fn, func):
         matlab_masks = np.load(fetch(fn))
         k = 0
@@ -158,11 +137,9 @@ class TestFootprints:
     [
         (footprints.disk, (3,), True),
         (footprints.ball, (3,), True),
-        (footprints.square, (3,), True),
-        (footprints.cube, (3,), True),
         (footprints.diamond, (3,), True),
         (footprints.octahedron, (3,), True),
-        (footprints.rectangle, (3, 4), True),
+        (footprint_rectangle, ((3, 5),), True),
         (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
@@ -267,3 +244,38 @@ def test_pad_footprint(as_sequence, pad_end):
     actual_res = footprints.pad_footprint(footprint, pad_end=pad_end)
     assert type(expected_res) is type(actual_res)
     assert_equal(expected_res, actual_res)
+
+
+class Test_footprint_rectangule:
+    @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
+    def test_rectangle(self, i, j):
+        desired = np.ones((i, j), dtype='uint8')
+        actual = footprint_rectangle((i, j))
+        assert_equal(actual, desired)
+
+    @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
+    @pytest.mark.parametrize("k", [0, 1, 2, 3, 4])
+    def test_cuboid(self, i, j, k):
+        desired = np.ones((i, j, k), dtype='uint8')
+        actual = footprint_rectangle((i, j, k))
+        assert_equal(actual, desired)
+
+    @pytest.mark.parametrize("shape", [(3,), (5, 5), (5, 5, 7)])
+    @pytest.mark.parametrize("decomposition", ["separable", "sequence"])
+    def test_decomposition(self, shape, decomposition):
+        regular = footprint_rectangle(shape)
+        decomposed = footprint_rectangle(shape, decomposition=decomposition)
+        recomposed = footprint_from_sequence(decomposed)
+        assert_equal(recomposed, regular)
+
+    @pytest.mark.parametrize("shape", [(2,), (3, 4)])
+    def test_uneven_sequence_decomposition_warning(self, shape):
+        """Should fall back to decomposition="separable" for uneven footprint size."""
+        desired = footprint_rectangle(shape, decomposition="separable")
+        regex = "decomposition='sequence' is only supported for uneven footprints"
+        with pytest.warns(UserWarning, match=regex) as record:
+            actual = footprint_rectangle(shape, decomposition="sequence")
+        assert_stacklevel(record)
+        assert_equal(actual, desired)

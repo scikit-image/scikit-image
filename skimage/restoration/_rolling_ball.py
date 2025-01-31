@@ -5,29 +5,32 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
-    """Estimate background intensity by rolling/translating a kernel.
+    """Estimate background intensity using the rolling-ball algorithm.
 
-    This rolling ball algorithm estimates background intensity for a
-    ndimage in case of uneven exposure. It is a generalization of the
-    frequently used rolling ball algorithm [1]_.
+    This function is a generalization of the rolling-ball algorithm [1]_ to
+    estimate the background intensity of an n-dimensional image. This is
+    typically useful for background subtraction in case of uneven exposure.
+    Think of the image as a landscape (where altitude is determined by
+    intensity), under which a ball of given radius is rolled. At each
+    position, the ball's apex gives the resulting background intensity.
 
     Parameters
     ----------
     image : ndarray
         The image to be filtered.
     radius : int, optional
-        Radius of a ball-shaped kernel to be rolled/translated in the image.
-        Used if ``kernel = None``.
+        Radius of the ball-shaped kernel to be rolled under the
+        image landscape. Used only if `kernel` is ``None``.
     kernel : ndarray, optional
-        The kernel to be rolled/translated in the image. It must have the
-        same number of dimensions as ``image``. Kernel is filled with the
-        intensity of the kernel at that position.
+        An alternative way to specify the rolling ball, as an arbitrary
+        kernel. It must have the same number of axes as `image`.
     nansafe: bool, optional
-        If ``False`` (default) assumes that none of the values in ``image``
-        are ``np.nan``, and uses a faster implementation.
+        If ``False`` (default), the function assumes that none of the values
+        in `image` are ``np.nan``, and uses a faster implementation.
     num_threads: int, optional
-        The maximum number of threads to use. If ``None`` use the OpenMP
-        default value; typically equal to the maximum number of virtual cores.
+        The maximum number of threads to use. If ``None``, the function uses
+        the OpenMP default value; typically, it is equal to the maximum number
+        of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
 
@@ -38,20 +41,17 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
 
     Notes
     -----
-    For the pixel that has its background intensity estimated (without loss
-    of generality at ``center``) the rolling ball method centers ``kernel``
-    under it and raises the kernel until the surface touches the image umbra
-    at some ``pos=(y,x)``. The background intensity is then estimated
-    using the image intensity at that position (``image[pos]``) plus the
-    difference of ``kernel[center] - kernel[pos]``.
+    This implementation assumes that dark pixels correspond to the background. If
+    you have a bright background, invert the image before passing it to this
+    function, e.g., using :func:`skimage.util.invert`.
 
-    This algorithm assumes that dark pixels correspond to the background. If
-    you have a bright background, invert the image before passing it to the
-    function, e.g., using `utils.invert`. See the gallery example for details.
+    For this method to give meaningful results, the radius of the ball (or
+    typical size of the kernel, in the general case) should be larger than the
+    typical size of the image features of interest.
 
     This algorithm is sensitive to noise (in particular salt-and-pepper
     noise). If this is a problem in your image, you can apply mild
-    gaussian smoothing before passing the image to this function.
+    Gaussian smoothing before passing the image to this function.
 
     This algorithm's complexity is polynomial in the radius, with degree equal
     to the image dimensionality (a 2D image is N^2, a 3D image is N^3, etc.),
@@ -71,19 +71,16 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.restoration import rolling_ball
-    >>> image = data.coins()
-    >>> background = rolling_ball(data.coins())
+    >>> import skimage as ski
+    >>> image = ski.data.coins()
+    >>> background = ski.restoration.rolling_ball(image)
     >>> filtered_image = image - background
 
-
     >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.restoration import rolling_ball, ellipsoid_kernel
-    >>> image = data.coins()
-    >>> kernel = ellipsoid_kernel((101, 101), 75)
-    >>> background = rolling_ball(data.coins(), kernel=kernel)
+    >>> import skimage as ski
+    >>> image = ski.data.coins()
+    >>> kernel = ski.restoration.ellipsoid_kernel((101, 101), 75)
+    >>> background = ski.restoration.rolling_ball(image, kernel=kernel)
     >>> filtered_image = image - background
     """
 

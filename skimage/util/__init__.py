@@ -1,4 +1,4 @@
-"""General utility functions.
+"""Generic utilities.
 
 This module contains a number of utility functions to work with images in general.
 """

@@ -22,14 +22,6 @@ jobs:
           PYTHON_VERSION: "3.12"
           ARCH: "x64"
           PIP_FLAGS: "--pre"
-        Python311-x64-docs:
-          PYTHON_VERSION: "3.11"
-          ARCH: "x64"
-          BUILD_DOCS: "true"
-        Python311-x64-gallery:
-          PYTHON_VERSION: "3.11"
-          ARCH: "x64"
-          TEST_EXAMPLES: "true"
         Python310-x64:
           PYTHON_VERSION: "3.10"
           ARCH: "x64"
@@ -179,49 +171,3 @@ jobs:
           PYTHON="$(python.pythonLocation)\\python.exe"
           $PYTHON -m asv check -v -E existing
         displayName: Check benchmarks
-
-      - bash: |
-          set -ex
-          export PYTHON="$(python.pythonLocation)\\python.exe"
-
-          # Install the doc dependencies
-          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-          $PYTHON -m pip list
-
-          # Build the documentation
-          choco install optipng
-          export SPHINXCACHE=${AGENT_BUILDDIRECTORY}/.cache/sphinx
-          export SPHINXOPTS="-W -j auto"
-          make -C doc html
-        condition: eq(variables['BUILD_DOCS'], 'true')
-        displayName: "Documentation testing"
-
-      - bash: |
-          set -ex
-          PYTHON="$(python.pythonLocation)\\python.exe"
-
-          # Install the doc dependencies
-          $PYTHON -m pip install ${PIP_FLAGS} -r requirements/docs.txt
-          $PYTHON -m pip list
-
-          # Force matplotlib to use the prepared config
-          export MATPLOTLIBRC=${AGENT_BUILDDIRECTORY}
-
-          # Run example applications
-          for f in doc/examples/*/*.py; do
-            # Comment out any plotly.io.show() calls before running the example.
-            # Plotly opens a web browser, which often seemed to cause the CI to
-            # hang and timeout.
-            sed -i 's/plotly.io.show/# plotly.io.show/g' ${f}
-
-            $PYTHON -W ignore:Matplotlib:UserWarning "${f}"
-            if [ $? -ne 0 ]; then
-              exit 1
-            fi
-          done
-        condition: eq(variables['TEST_EXAMPLES'], 'true')
-        displayName: "Gallery testing"
-#  - bash: |
-#      # -- Publish the .whl artifacts
-#      # -- Upload the content of dist/*.whl to a public wheelhouse
-#    displayName: 'Further consideration'

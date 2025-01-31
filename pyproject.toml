@@ -47,13 +47,12 @@ file = 'LICENSE.txt'
 build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
-    'setuptools>=68',
     'ninja>=1.11.1.1',
     'Cython>=3.0.8',
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
-    'spin==0.12',
+    'spin==0.13',
     'build>=1.2.1',
 ]
 data = ['pooch>=1.6.0']
@@ -118,7 +117,6 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'setuptools>=68',
     'Cython>=3.0.8',
     'pythran>=0.16',
     'lazy_loader>=0.4',
