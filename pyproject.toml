@@ -27,7 +27,7 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'numpy>=1.24',
-    'scipy>=1.11.2',
+    'scipy>=1.11.4',
     'networkx>=3.0',
     'pillow>=10.1',
     'imageio>=2.33,!=2.35.0',
