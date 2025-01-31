@@ -13,6 +13,7 @@ permissions:
 env:
   CC: clang
   CXX: clang
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 jobs:
   test_skimage_linux:
@@ -75,4 +76,4 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
