@@ -93,7 +93,7 @@ jobs:
       - name: Build and install from source
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Build and install from sdist
         if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
@@ -147,7 +147,7 @@ jobs:
 
       - name: Build and install
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Install test dependencies
         # See special clause inside setup_test_env.sh that detects when
@@ -206,7 +206,7 @@ jobs:
 
       - name: Build and install
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Install test dependencies
         env:
@@ -241,7 +241,7 @@ jobs:
 
       - name: Build and install from source
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Install test dependencies
         run: |

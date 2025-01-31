@@ -44,7 +44,7 @@ jobs:
 
       - name: Build and install
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Setup test dependencies
         env:
