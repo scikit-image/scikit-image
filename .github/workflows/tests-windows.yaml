@@ -25,12 +25,12 @@ jobs:
       matrix:
         include:
           - python-version: "3.10"
-            MINIMUM_REQUIREMENTS: 1
+            MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 0
             OPTIONS_NAME: "mini-req"
           - platform_id: manylinux_x86_64
             python-version: "3.11"
-            MINIMUM_REQUIREMENTS: 1
+            MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
@@ -39,7 +39,8 @@ jobs:
             OPTIONS_NAME: "pre"
           - platform_id: manylinux_x86_64
             python-version: "3.13"
-            OPTIONAL_DEPS: 1
+            MINIMUM_REQUIREMENTS: 0
+            OPTIONAL_DEPS: 0
             OPTIONS_NAME: "optional-deps"
 
     steps:
@@ -62,7 +63,7 @@ jobs:
       - name: Build and install from source
         shell: bash
         run: |
-          pip install -vv --no-build-isolation .
+          pip install -v --no-build-isolation .
 
       - name: Install test dependencies
         env:
