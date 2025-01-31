@@ -71,7 +71,6 @@ jobs:
         shell: bash
         run: |
           source tools/github/setup_test_env.sh
-          mkdir "D:\\tmp"  # used by two doctests (test_PSNR_vs_IPOL, test_gaussian_structural_similarity_vs_IPOL)
 
       - name: Run tests
         shell: bash
