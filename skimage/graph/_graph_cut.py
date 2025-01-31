@@ -277,34 +277,35 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
             #
             # It may make sense to a warning here; on the other hand segmentations
             # are not a ground truth, so this level of "noise" should be acceptable.
-            return
+            pass
 
-        d2 = d.copy()
-        # Since d is diagonal, we can directly operate on its data
-        # the inverse of the square root
-        d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
+        else:
+            d2 = d.copy()
+            # Since d is diagonal, we can directly operate on its data
+            # the inverse of the square root
+            d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
-        # Refer Shi & Malik 2001, Equation 7, Page 891
-        A = d2 @ (d - w) @ d2
-        # Initialize the vector to ensure reproducibility.
-        v0 = random_generator.random(A.shape[0])
-        vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
+            # Refer Shi & Malik 2001, Equation 7, Page 891
+            A = d2 @ (d - w) @ d2
+            # Initialize the vector to ensure reproducibility.
+            v0 = random_generator.random(A.shape[0])
+            vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
 
-        # Pick second smallest eigenvector.
-        # Refer Shi & Malik 2001, Section 3.2.3, Page 893
-        vals, vectors = np.real(vals), np.real(vectors)
-        index2 = _ncut_cy.argmin2(vals)
-        ev = vectors[:, index2]
+            # Pick second smallest eigenvector.
+            # Refer Shi & Malik 2001, Section 3.2.3, Page 893
+            vals, vectors = np.real(vals), np.real(vectors)
+            index2 = _ncut_cy.argmin2(vals)
+            ev = vectors[:, index2]
 
-        cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
-        if mcut < thresh:
-            # Sub divide and perform N-cut again
-            # Refer Shi & Malik 2001, Section 3.2.5, Page 893
-            sub1, sub2 = partition_by_cut(cut_mask, rag)
+            cut_mask, mcut = get_min_ncut(ev, d, w, num_cuts)
+            if mcut < thresh:
+                # Sub divide and perform N-cut again
+                # Refer Shi & Malik 2001, Section 3.2.5, Page 893
+                sub1, sub2 = partition_by_cut(cut_mask, rag)
 
-            _ncut_relabel(sub1, thresh, num_cuts, random_generator)
-            _ncut_relabel(sub2, thresh, num_cuts, random_generator)
-            return
+                _ncut_relabel(sub1, thresh, num_cuts, random_generator)
+                _ncut_relabel(sub2, thresh, num_cuts, random_generator)
+                return
 
     # The N-cut wasn't small enough, or could not be computed.
     # The remaining graph is a region.
