@@ -110,6 +110,12 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
+      - name: Verify non-conflicting dependencies
+        if: ${{ matrix.OPTIONAL_DEPS == 1 && matrix.MINIMUM_REQUIREMENTS == 0}}
+        run: |
+          # Attempt to resolve all requirements simultaneously
+          pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
+
       - name: Run tests
         env:
           # A lazy loader configuration parameter
