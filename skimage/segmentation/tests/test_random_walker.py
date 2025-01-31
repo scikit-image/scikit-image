@@ -94,6 +94,9 @@ def test_2d_bf(dtype):
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
     lx = 70
@@ -111,6 +114,9 @@ def test_2d_cg(dtype):
 
 
 @pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):
     lx = 70
@@ -130,6 +136,9 @@ def test_2d_cg_mg(dtype):
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_cg_j(dtype):
     lx = 70
     ly = 100
@@ -146,6 +155,9 @@ def test_2d_cg_j(dtype):
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 def test_types():
     lx = 70
     ly = 100
@@ -410,6 +422,9 @@ def test_trivial_cases():
         test = random_walker(img, markers, return_full_prob=True)
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
     #   spacing code is working properly.
