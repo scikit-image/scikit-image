@@ -11,6 +11,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
 jobs:
   test_skimage_linux:
     name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
@@ -113,7 +116,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
 
       - name: Check benchmarks
         run: |
@@ -161,7 +164,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
 
   test_skimage_macos:
     name: macos-cp${{ matrix.python-version }}
@@ -213,7 +216,7 @@ jobs:
 
       - name: Run tests
         run: |
-          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
 
       - name: Check benchmarks
         run: |
