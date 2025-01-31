@@ -6,10 +6,19 @@ from scipy import ndimage as ndi
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
 from skimage.morphology import binary, footprints, gray, footprint_rectangle
+from skimage._shared.testing import assert_stacklevel
 
 
 img = color.rgb2gray(data.astronaut())
 bw_img = img > 100 / 255.0
+
+
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:"
+    "`binary_(dilation|erosion|opening|closing)` is deprecated.*"
+    "Use `skimage.morphology.(dilation|erosion|opening|closing)` instead"
+    ":FutureWarning:skimage"
+)
 
 
 def test_non_square_image():
@@ -347,3 +356,18 @@ def test_binary_output_3d():
 
     assert_equal(int_opened.dtype, np.uint8)
     assert_equal(int_closed.dtype, np.uint8)
+
+
+@pytest.mark.parametrize(
+    "func_name",
+    ["binary_erosion", "binary_dilation", "binary_opening", "binary_closing"],
+)
+def test_deprecation_warning(func_name):
+    func = getattr(binary, func_name)
+    footprint = footprint_rectangle((3, 3))
+
+    regex = f"`{func_name}` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(bw_img, footprint)
+    assert_stacklevel(record)
+    assert len(record) == 1

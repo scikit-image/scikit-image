@@ -95,7 +95,7 @@ def footprint_from_sequence(footprints):
     shape = _shape_from_sequence(footprints)
     imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
-    return morphology.binary_dilation(imag, footprints)
+    return morphology.dilation(imag, footprints)
 
 
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
