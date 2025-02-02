@@ -26,11 +26,7 @@ jobs:
 
       - name: Build and install from source
         run: |
-          pip install -v --no-build-isolation .
-
-      - name: Install test dependencies
-        run: |
-          source .github/scripts/setup-test-env.sh
+          pip install -v .
 
       - name: Build docs / run examples
         run: |
