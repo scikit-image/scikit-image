@@ -40,7 +40,7 @@ jobs:
       - name: Setup build dependencies
         # PIP_FLAGS: exposed via global env
         run: |
-          source tools/github/setup_build_env.sh
+          source .github/scripts/setup_build_env.sh
 
       - name: Build and install
         run: |
@@ -53,7 +53,7 @@ jobs:
           WITHOUT_POOCH: 0
           # PIP_FLAGS: exposed via global env
         run: |
-          source tools/github/setup_test_env.sh
+          source .github/scripts/setup_test_env.sh
 
       - name: Run tests
         run: |
