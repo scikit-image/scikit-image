@@ -56,7 +56,7 @@ jobs:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
-          source .github/scripts/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
         shell: bash
@@ -71,7 +71,7 @@ jobs:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
-          source .github/scripts/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         shell: bash

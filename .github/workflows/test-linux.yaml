@@ -24,7 +24,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-        # Dependency options for setup_test_env.sh
+        # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
@@ -87,7 +87,7 @@ jobs:
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
-          source .github/scripts/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
@@ -108,7 +108,7 @@ jobs:
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
-          source .github/scripts/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         env:
@@ -136,26 +136,26 @@ jobs:
           nogil: true
 
       - name: Install build dependencies
-        # See special clause inside setup_build_env.sh that detects when
+        # See special clause inside setup-build-env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source .github/scripts/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install
         run: |
           pip install -v --no-build-isolation .
 
       - name: Install test dependencies
-        # See special clause inside setup_test_env.sh that detects when
+        # See special clause inside setup-test-env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source .github/scripts/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         env:

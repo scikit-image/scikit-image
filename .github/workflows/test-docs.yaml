@@ -30,9 +30,9 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          source .github/scripts/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Build docs / run examples
         run: |
-          source .github/scripts/setup_docs_env.sh
+          source .github/scripts/setup-docs-env.sh
           SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html

@@ -50,7 +50,7 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          source .github/scripts/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install
         run: |
@@ -60,7 +60,7 @@ jobs:
         env:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
-          source .github/scripts/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         run: |
