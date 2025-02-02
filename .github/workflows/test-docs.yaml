@@ -24,10 +24,6 @@ jobs:
           python-version: "3.13"
           allow-prereleases: true
 
-      - name: Install build dependencies
-        run: |
-          source .github/scripts/setup_build_env.sh
-
       - name: Build and install from source
         run: |
           pip install -v --no-build-isolation .
