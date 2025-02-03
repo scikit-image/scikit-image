@@ -44,7 +44,7 @@ repos:
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: 4dcc98ccce605605fd6d5202bf803a8c8bc34e8d # v1.1.1
+    rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
     hooks:
       - id: zizmor
 
