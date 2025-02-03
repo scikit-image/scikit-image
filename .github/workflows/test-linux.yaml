@@ -1,0 +1,174 @@
+name: Test Linux
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
+jobs:
+  test_skimage_linux:
+    name: linux-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+        # Dependency options for setup-test-env.sh
+        MINIMUM_REQUIREMENTS: [0]
+        OPTIONAL_DEPS: [0]
+        WITHOUT_POOCH: [0]
+        PIP_FLAGS: [""]
+
+        # Flag that chooses between source and sdist build
+        INSTALL_FROM_SDIST: [0]
+
+        # Flags that control lazy-loader behavior
+        EAGER_IMPORT: [0]
+
+        # Python flags
+        PYTHONOPTIMIZE: [0]
+
+        # Flag to control naming of workflow job
+        OPTIONS_NAME: ["default"]
+
+        include:
+          - platform_id: manylinux_x86_64
+            python-version: "3.10"
+            MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 0
+            EAGER_IMPORT: 1
+            OPTIONS_NAME: "mini-req-eager-import"
+          - platform_id: manylinux_x86_64
+            python-version: "3.10"
+            MINIMUM_REQUIREMENTS: 1
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "mini-req-optional-deps"
+          - platform_id: manylinux_x86_64
+            python-version: "3.12"
+            PIP_FLAGS: "--pre"
+            OPTIONS_NAME: "pre"
+          - platform_id: manylinux_x86_64
+            python-version: "3.12"
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "optional-deps"
+          - platform_id: manylinux_x86_64
+            python-version: "3.12"
+            PYTHONOPTIMIZE: 2
+            WITHOUT_POOCH: 1
+            OPTIONS_NAME: "optimize and no pooch"
+          - platform_id: manylinux_x86_64
+            python-version: "3.12"
+            INSTALL_FROM_SDIST: 1
+            OPTIONS_NAME: "install-from-sdist"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Install build dependencies
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        env:
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install from source
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Build and install from sdist
+        if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
+        run: |
+          pip install build
+          python -m build --sdist .
+          pip install dist/scikit_image-*.tar.gz
+
+      - name: Install test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Verify non-conflicting dependencies
+        if: ${{ matrix.OPTIONAL_DEPS == 1 && matrix.MINIMUM_REQUIREMENTS == 0}}
+        run: |
+          # Attempt to resolve all requirements simultaneously
+          pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
+
+      - name: Run tests
+        env:
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+        run: |
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
+
+  test_skimage_linux_free_threaded:
+    name: linux-cp313t-default
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      # TODO: replace with setup-python when there is support
+      - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
+        with:
+          python-version: "3.13"
+          nogil: true
+
+      - name: Install build dependencies
+        # See special clause inside setup-build-env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install test dependencies
+        # See special clause inside setup-test-env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Run tests
+        env:
+          PYTHON_GIL: 0
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
+        run: |
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)

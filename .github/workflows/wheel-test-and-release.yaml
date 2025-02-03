@@ -36,6 +36,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - uses: actions/download-artifact@v4
         id: download
@@ -44,10 +46,13 @@ jobs:
           merge-multiple: true
           path: ./dist
 
+      - name: Install sdist build dependencies
+        run: |
+          source .github/scripts/setup-build-env.sh
+
       - name: Build the source distribution
         run: |
           SK_VERSION=$(git describe --tags)
-          source tools/github/before_install.sh
           spin sdist -- --no-isolation --skip-dependency-check
           ls -la ${{ github.workspace }}/dist
 
