@@ -81,6 +81,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install build dependencies
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
@@ -109,6 +111,12 @@ jobs:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
           source .github/scripts/setup-test-env.sh
+
+      - name: Verify non-conflicting dependencies
+        if: ${{ matrix.OPTIONAL_DEPS == 1 && matrix.MINIMUM_REQUIREMENTS == 0}}
+        run: |
+          # Attempt to resolve all requirements simultaneously
+          pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
       - name: Run tests
         env:

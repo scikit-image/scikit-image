@@ -50,6 +50,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
+          cache-dependency-path: "requirements/*.txt"
+          cache: "pip"
 
       - name: Install build dependencies
         env:

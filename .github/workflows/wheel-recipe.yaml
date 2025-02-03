@@ -47,6 +47,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Setup free-threaded environment
@@ -93,6 +95,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel
@@ -131,6 +135,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel
         run: |
@@ -218,6 +224,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |
