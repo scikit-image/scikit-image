@@ -47,6 +47,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Setup free-threaded environment
@@ -93,6 +95,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel
@@ -120,7 +124,6 @@ jobs:
       matrix:
         os: [macos-13]
         cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
-        # TODO: add "universal2" once a universal2 libomp is available
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
@@ -132,6 +135,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel
         run: |
@@ -219,6 +224,8 @@ jobs:
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |

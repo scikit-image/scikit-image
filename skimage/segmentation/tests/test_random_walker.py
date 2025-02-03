@@ -7,8 +7,6 @@ from skimage._shared.testing import xfail, arch32, is_wasm
 from skimage.segmentation import random_walker
 from skimage.transform import resize
 
-PYAMG_MISSING_WARNING = r'pyamg|\A\Z'
-
 
 def make_2d_syntheticdata(lx, ly=None):
     if ly is None:
@@ -62,6 +60,9 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_bf(dtype):
     lx = 70
     ly = 100
@@ -90,6 +91,12 @@ def test_2d_bf(dtype):
 
 
 @pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning:skimage')
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
     lx = 70
@@ -107,6 +114,12 @@ def test_2d_cg(dtype):
 
 
 @pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg_mg(dtype):
     lx = 70
@@ -126,6 +139,9 @@ def test_2d_cg_mg(dtype):
 
 
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_cg_j(dtype):
     lx = 70
     ly = 100
@@ -139,21 +155,26 @@ def test_2d_cg_j(dtype):
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
+@pytest.mark.filterwarnings(
+    'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
+)  # if pyamg is not available
 def test_types():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
     data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
-    anticipated_warnings = [
-        f"Changing the sparsity structure|conversion of A to CSR|{PYAMG_MISSING_WARNING}|scipy.sparse.linalg.cg"
-    ]
-    with expected_warnings(anticipated_warnings):
-        labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
+    labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_reorder_labels():
     lx = 70
     ly = 100
@@ -164,6 +185,9 @@ def test_reorder_labels():
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_inactive():
     lx = 70
     ly = 100
@@ -175,6 +199,9 @@ def test_2d_inactive():
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_2d_laplacian_size():
     # test case from: https://github.com/scikit-image/scikit-image/issues/5034
     # The markers here were modified from the ones in the original issue to
@@ -398,6 +425,9 @@ def test_trivial_cases():
         test = random_walker(img, markers, return_full_prob=True)
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_length2_spacing():
     # If this passes without raising an exception (warnings OK), the new
     #   spacing code is working properly.
@@ -502,6 +532,9 @@ def test_isolated_area():
     assert res[1, 1, 1] == 0
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_prob_tol():
     np.random.seed(0)
     a = np.random.random((7, 7))
@@ -550,6 +583,9 @@ def test_umfpack_import():
         assert UmfpackContext is None
 
 
+@pytest.mark.filterwarnings(
+    'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
+)
 def test_empty_labels():
     image = np.random.random((5, 5))
     labels = np.zeros((5, 5), dtype=int)
@@ -567,7 +603,7 @@ def test_empty_labels():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:Changing the sparsity structure of a csr_matrix is expensive::scipy"
+    "ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning"
 )
 def test_float16_upcasting():
     data, labels = make_2d_syntheticdata(lx=70, ly=100)

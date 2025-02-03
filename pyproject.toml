@@ -27,7 +27,7 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'numpy>=1.24',
-    'scipy>=1.11.2',
+    'scipy>=1.11.4',
     'networkx>=3.0',
     'pillow>=10.1',
     'imageio>=2.33,!=2.35.0',
@@ -47,7 +47,6 @@ file = 'LICENSE.txt'
 build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
-    'setuptools>=68',
     'ninja>=1.11.1.1',
     'Cython>=3.0.8',
     'pythran>=0.16',
@@ -68,7 +67,7 @@ docs = [
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'matplotlib>=3.7',
-    'dask[array]>=2022.9.2',
+    'dask[array]>=2023.2.0',
     'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
@@ -88,8 +87,8 @@ docs = [
 optional = [
     'SimpleITK',
     'astropy>=5.0',
-    'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0,!=2024.8.0',
+    'cloudpickle>=1.1.1',  # necessary to provide the 'processes' scheduler for dask
+    'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0',
     'pyamg>=5.2',
@@ -100,7 +99,7 @@ test = [
     'asv',
     'numpydoc>=1.7',
     'pooch>=1.6.0',
-    'pytest>=7.0',
+    'pytest>=8',
     'pytest-cov>=2.11.0',
     'pytest-localserver',
     'pytest-faulthandler',
@@ -118,7 +117,6 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'setuptools>=68',
     'Cython>=3.0.8',
     'pythran>=0.16',
     'lazy_loader>=0.4',
@@ -195,6 +193,7 @@ python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
 
 [tool.coverage.run]

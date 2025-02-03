@@ -1,0 +1,62 @@
+# Workflow to build and test against nightly wheels
+name: Test Nightly
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  PYTHONOPTIMIZE: 0
+  OPTIONS_NAME: "default"
+
+  # For lazy-loader
+  EAGER_IMPORT: 0
+
+  # Make available packages from nightly wheels repo
+  PIP_FLAGS: >-
+    --upgrade
+    --pre
+    --index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple
+    --extra-index-url https://pypi.org/simple
+
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
+jobs:
+  wheels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Setup build dependencies
+        # PIP_FLAGS: exposed via global env
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Setup test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: 0
+          OPTIONAL_DEPS: 0
+          WITHOUT_POOCH: 0
+          # PIP_FLAGS: exposed via global env
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Run tests
+        run: |
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
