@@ -34,9 +34,8 @@ Other
 * Once NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
-* Delete FREE_THREADED_BUILD block in tools/github/setup_*_env.sh once free-threaded
-  wheels of scipy, numpy, cython and pywavelets are available on PyPi.
-  Last time checked (2025-02-02) only Cython was outstanding.
+* Delete FREE_THREADED_BUILD block in `.github/scripts/setup-*-env.sh` once free-threaded
+  wheels of Cython are available on PyPi.
 * Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
