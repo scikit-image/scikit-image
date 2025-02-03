@@ -186,7 +186,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
 
     Examples
     --------
-    Remove undesired connection between two bright regions
+    Remove connection between two bright regions
 
     >>> import numpy as np
     >>> import skimage as ski
