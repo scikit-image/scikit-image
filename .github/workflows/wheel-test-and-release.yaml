@@ -46,7 +46,7 @@ jobs:
 
       - name: Install sdist build dependencies
         run: |
-          source tools/github/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build the source distribution
         run: |

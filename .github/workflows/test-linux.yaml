@@ -1,5 +1,4 @@
-# Workflow to build and test wheels
-name: Test
+name: Test Linux
 
 on: [push, pull_request, merge_group]
 
@@ -25,7 +24,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-        # Dependency options for setup_test_env.sh
+        # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
@@ -88,7 +87,7 @@ jobs:
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
-          source tools/github/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
@@ -109,7 +108,7 @@ jobs:
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
-          source tools/github/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         env:
@@ -137,26 +136,26 @@ jobs:
           nogil: true
 
       - name: Install build dependencies
-        # See special clause inside setup_build_env.sh that detects when
+        # See special clause inside setup-build-env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source tools/github/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install
         run: |
           pip install -v --no-build-isolation .
 
       - name: Install test dependencies
-        # See special clause inside setup_test_env.sh that detects when
+        # See special clause inside setup-test-env.sh that detects when
         # free threaded build is used, and then installs dependencies
         # from nightly wheels
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source tools/github/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         env:
@@ -165,89 +164,3 @@ jobs:
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
-
-  test_skimage_macos:
-    name: macos-cp${{ matrix.python-version }}
-    runs-on: macos-13
-
-    strategy:
-      # Ensure that a wheel builder finishes even if another fails
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        OPTIONAL_DEPS: [1]
-        OPTIONS_NAME: ["default"]
-    env:
-      CC: /usr/bin/clang
-      CXX: /usr/bin/clang++
-      CPPFLAGS: "-Xpreprocessor -fopenmp"
-      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-      CXXFLAGS: "-I/usr/local/opt/libomp/include"
-      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
-
-    steps:
-      - name: Checkout scikit-image
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version}}
-          allow-prereleases: true
-
-      - name: OSX configuration
-        run: |
-          # OpenMP is not present on macOS by default
-          brew install libomp
-
-      - name: Install build dependencies
-        run: |
-          source tools/github/setup_build_env.sh
-
-      - name: Build and install
-        run: |
-          pip install -v --no-build-isolation .
-
-      - name: Install test dependencies
-        env:
-          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
-        run: |
-          source tools/github/setup_test_env.sh
-
-      - name: Run tests
-        run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
-
-      - name: Check benchmarks
-        run: |
-          asv check -v -E existing
-
-  test_docs_aarch64:
-    name: macos-docs
-    runs-on: ubuntu-24.04-arm
-    steps:
-      - name: Checkout scikit-image
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          allow-prereleases: true
-
-      - name: Install build dependencies
-        run: |
-          source tools/github/setup_build_env.sh
-
-      - name: Build and install from source
-        run: |
-          pip install -v --no-build-isolation .
-
-      - name: Install test dependencies
-        run: |
-          source tools/github/setup_test_env.sh
-
-      - name: Build docs / run examples
-        run: |
-          source tools/github/setup_docs_env.sh
-          SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html

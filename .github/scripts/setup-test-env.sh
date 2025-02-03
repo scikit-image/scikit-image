@@ -35,10 +35,10 @@ fi
 
 python -m pip install $PIP_FLAGS $REQUIREMENT_FILES
 
-# TODO: delete when scipy, numpy, cython and pywavelets free-threaded wheels are available on PyPi
+# TODO: delete when cython free-threaded wheels are available on PyPi
 FREE_THREADED_BUILD="$(python -c"import sysconfig; print(bool(sysconfig.get_config_var('Py_GIL_DISABLED')))")"
 if [[ $FREE_THREADED_BUILD == "True" ]]; then
-    pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython numpy scipy pywavelets
+    pip install --pre -i https://pypi.anaconda.org/scientific-python-nightly-wheels/simple cython
 fi
 
 if [[ ${WITHOUT_POOCH} == "1" ]]; then

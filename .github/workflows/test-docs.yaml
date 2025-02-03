@@ -1,0 +1,37 @@
+name: Test docs
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test_docs_aarch64:
+    name: macos-docs
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          allow-prereleases: true
+
+      - name: Build and install from source
+        run: |
+          pip install -v .
+
+      - name: Install doc dependencies
+        run: |
+          source .github/scripts/setup-docs-env.sh
+
+      - name: Build docs / run examples
+        run: |
+          SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html
