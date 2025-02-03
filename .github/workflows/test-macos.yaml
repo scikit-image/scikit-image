@@ -42,6 +42,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: OSX configuration
         run: |

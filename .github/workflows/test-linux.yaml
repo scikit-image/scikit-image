@@ -81,6 +81,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install build dependencies
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}

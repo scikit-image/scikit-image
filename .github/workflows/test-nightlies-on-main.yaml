@@ -36,6 +36,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Setup build dependencies
         # PIP_FLAGS: exposed via global env

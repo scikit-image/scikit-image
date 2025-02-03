@@ -23,6 +23,8 @@ jobs:
         with:
           python-version: "3.13"
           allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Build and install from source
         run: |
