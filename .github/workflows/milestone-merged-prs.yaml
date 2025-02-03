@@ -7,6 +7,8 @@ on:
     branches:
       - "main"
 
+permissions: {}
+
 jobs:
   milestone_pr:
     name: attach to PR
