@@ -1,7 +1,18 @@
+import warnings
+
 import numpy as np
 from scipy import ndimage as ndi
 
 from ..transform._warps import warp
+
+
+def custom_warp(im, mat, motion_type="affine", order=1):
+    if motion_type == 'homography':
+        if len(im.shape) == 3:
+            raise ValueError("Homography motion type is only supported for 2D images.")
+        return warp(im.T, mat, order=order).T
+    else:
+        return ndi.affine_transform(im, mat, order=order)
 
 
 def find_transform_ecc(
@@ -48,17 +59,28 @@ def find_transform_ecc(
     ValueError
         If the algorithm stops before convergence, indicating that the images may be uncorrelated or non-overlapping.
     """
-    if warp_matrix is None:
-        warp_matrix = np.eye(3)
 
-    x_grid, y_grid = np.meshgrid(np.arange(ir.shape[0]), np.arange(iw.shape[1]))
-    x_grid = x_grid.astype(np.float32)
-    y_grid = y_grid.astype(np.float32)
+    if warp_matrix is None:
+        if len(ir.shape) == 2:
+            warp_matrix = np.eye(3)
+        else:
+            warp_matrix = np.eye(4)
+
+    # Necessary to transpose because ndi.affine_transform is not consistent with the rest of the skimage API ([x,y] vs [i,j])
+    if len(ir.shape) == 2:
+        ir = ir.T
+        iw = iw.T
+    elif len(ir.shape) == 3:  # TODO: Check if it is the correct transpose
+        ir = ir.transpose(0, 2, 1)
+        iw = iw.transpose(0, 2, 1)
+
+    mesh = np.meshgrid(*[np.arange(0, x) for x in ir.shape], indexing='ij')
+    mesh = [x.astype(np.float32) for x in mesh]
     ir = ndi.gaussian_filter(ir, gauss_filt_size)
+
     iw = ndi.gaussian_filter(iw, gauss_filt_size)
 
-    [grad_iw_y, grad_iw_x] = np.gradient(iw)
-
+    grad = np.gradient(iw)
     rho = -1
     last_rho = -termination_eps
 
@@ -72,23 +94,21 @@ def find_transform_ecc(
         if np.abs(rho - last_rho) < termination_eps:
             break
 
-        iw_warped = warp(iw, warp_matrix, order=order)
+        iw_warped = custom_warp(iw, warp_matrix, motion_type=motion_type, order=order)
 
         iw_mean = np.mean(iw_warped[iw_warped != 0])
         iw_std = np.std(iw_warped[iw_warped != 0])
         iw_norm = np.sqrt(np.sum(iw_warped != 0) * iw_std**2)
 
         iw_warped_meancorr = iw_warped - iw_mean
-
-        grad_iw_x_warped = warp(grad_iw_x, warp_matrix, order=order)
-        grad_iw_y_warped = warp(grad_iw_y, warp_matrix, order=order)
-
-        jacobian = compute_jacobian(
-            [grad_iw_x_warped, grad_iw_y_warped],
-            [x_grid, y_grid],
-            warp_matrix,
-            motion_type,
+        grad_iw_warped = np.array(
+            [
+                custom_warp(g, warp_matrix, motion_type=motion_type, order=order)
+                for g in grad
+            ]
         )
+
+        jacobian = compute_jacobian(grad_iw_warped, mesh, warp_matrix, motion_type)
         hessian = compute_hessian(jacobian)
         hessian_inv = np.linalg.inv(hessian)
 
@@ -106,11 +126,16 @@ def find_transform_ecc(
 
         num = (iw_norm**2) - np.dot(iw_projection, iw_hessian_projection)
         den = correlation - np.dot(ir_projection, iw_hessian_projection)
-
+        print(den)
         if den <= 0:
-            raise ValueError(
-                "The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped."
+            warnings.warn(
+                (
+                    "The algorithm stopped before its convergence. The correlation is going to be minimized."
+                    "Images may be uncorrelated or non-overlapped."
+                ),
+                RuntimeWarning,
             )
+            return warp_matrix
 
         _lambda = num / den
 
@@ -142,6 +167,27 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
             ]
         )
 
+    def compute_jacobian_affine_3D(grad, xy_grid):
+        grad_iw_z, grad_iw_y, grad_iw_x = grad
+        z_grid, y_grid, x_grid = xy_grid
+
+        return np.stack(
+            [
+                grad_iw_x * x_grid,
+                grad_iw_y * x_grid,
+                grad_iw_z * x_grid,
+                grad_iw_x * y_grid,
+                grad_iw_y * y_grid,
+                grad_iw_z * y_grid,
+                grad_iw_x * z_grid,
+                grad_iw_y * z_grid,
+                grad_iw_z * z_grid,
+                grad_iw_x,
+                grad_iw_y,
+                grad_iw_z,
+            ]
+        )
+
     def compute_jacobian_euclidean(grad, xy_grid, warp_matrix):
         grad_iw_x, grad_iw_y = grad
         x_grid, y_grid = xy_grid
@@ -165,7 +211,7 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         h6_ = warp_matrix[0, 2]
         h7_ = warp_matrix[1, 2]
 
-        grad_iw_x, grad_iw_y = grad
+        grad_iw_y, grad_iw_x = grad
         x_grid, y_grid = xy_grid
 
         den_ = x_grid * h2_ + y_grid * h5_ + 1.0
@@ -194,21 +240,24 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
             ]
         )
 
-    match motion_type:
-        case "translation":
-            return compute_jacobian_translation(grad)
-        case "affine":
-            return compute_jacobian_affine(grad, xy_grid)
-        case "euclidean":
-            return compute_jacobian_euclidean(grad, xy_grid, warp_matrix)
-        case "homography":
-            return compute_jacobian_homography(grad, xy_grid, warp_matrix)
+    if np.shape(grad)[0] == 2:
+        match motion_type:
+            case "translation":
+                return compute_jacobian_translation(grad)
+            case "affine":
+                return compute_jacobian_affine(grad, xy_grid)
+            case "euclidean":
+                return compute_jacobian_euclidean(grad, xy_grid, warp_matrix)
+            case "homography":
+                return compute_jacobian_homography(grad, xy_grid, warp_matrix)
+    else:
+        return compute_jacobian_affine_3D(grad, xy_grid)
 
 
 def update_warping_matrix(map_matrix, update, motion_type="affine"):
     def update_warping_matrix_translation(map_matrix, update):
-        map_matrix[0, 2] += update[0]
-        map_matrix[1, 2] += update[1]
+        map_matrix[0, 2] += update[1]
+        map_matrix[1, 2] += update[0]
         return map_matrix
 
     def update_warping_matrix_affine(map_matrix, update):
@@ -243,15 +292,30 @@ def update_warping_matrix(map_matrix, update, motion_type="affine"):
         map_matrix[1, 2] += update[7]
         return map_matrix
 
-    match motion_type:
-        case "translation":
-            return update_warping_matrix_translation(map_matrix, update)
-        case "affine":
-            return update_warping_matrix_affine(map_matrix, update)
-        case "euclidean":
-            return update_warping_matrix_euclidean(map_matrix, update)
-        case "homography":
-            return update_warping_matrix_homography(map_matrix, update)
+    def update_warping_matrix_affine_3D(map_matrix, update):
+        map_matrix[0, 0] += update[0]
+        map_matrix[1, 0] += update[1]
+        map_matrix[2, 0] += update[2]
+        map_matrix[0, 1] += update[3]
+        map_matrix[1, 1] += update[4]
+        map_matrix[2, 1] += update[5]
+        map_matrix[0, 2] += update[6]
+        map_matrix[1, 2] += update[7]
+        map_matrix[2, 2] += update[8]
+        return map_matrix
+
+    if np.shape(map_matrix)[0] == 3:
+        match motion_type:
+            case "translation":
+                return update_warping_matrix_translation(map_matrix, update)
+            case "affine":
+                return update_warping_matrix_affine(map_matrix, update)
+            case "euclidean":
+                return update_warping_matrix_euclidean(map_matrix, update)
+            case "homography":
+                return update_warping_matrix_homography(map_matrix, update)
+    else:
+        return update_warping_matrix_affine_3D(map_matrix, update)
 
 
 def project_onto_jacobian(jac, mat):
@@ -261,7 +325,10 @@ def project_onto_jacobian(jac, mat):
     This is equivalent to multiplying the two matrices together element-by-element, then summing the result.
     Here we have it stored as a 3d array [K,H,W] `jac`, so we take advantage of broadcasting to not need to loop through K.
     """
-    return np.sum(np.multiply(jac, mat), axis=(1, 2))
+    axis_summation = tuple(np.arange(1, len(np.shape(jac))))
+    return np.sum(
+        np.multiply(jac, mat), axis=axis_summation
+    )  # axis=(1, 2)) if 2D, axis=(1, 2, 3)) if 3D
 
 
 def compute_hessian(jac):
@@ -274,5 +341,9 @@ def compute_hessian(jac):
             hessian[i,j] = np.sum(np.multiply(jac[i,:,:], jac[j,:,:]))
             hessian[j,i] = hessian[i,j]
     """
-    hessian = np.tensordot(jac, jac, axes=([1, 2], [1, 2]))
+    axis_summation = tuple(np.arange(1, len(np.shape(jac))))
+    hessian = np.tensordot(
+        jac, jac, axes=((axis_summation, axis_summation))
+    )  # axes=([1, 2], [1, 2])) if 2D
+    # axes=([1, 2, 3], [1, 2, 3]) if 3D
     return hessian
