@@ -154,10 +154,12 @@ jobs:
       # TODO: replace with setup-python when there is support
       - uses: astral-sh/setup-uv@b5f58b2abc5763ade55e4e9d0fe52cd1ff7979ca
         with:
-          python-version: ${{ matrix.version }}
+          # python-version: ${{ matrix.version }}
           enable-cache: false
+
       - run: |
           pushd $HOME/work
+          uv python install ${{ matrix.version }}
           uv pip install --python=${{ matrix.version }} pip
           popd
 
