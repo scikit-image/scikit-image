@@ -163,7 +163,6 @@ jobs:
           uv python install ${{ matrix.version }}
           uv venv --python=${{ matrix.version }}
           uv pip install --python=${{ matrix.version }} pip
-          source .venv/bin/activate
           popd
 
       - name: Install build dependencies
@@ -195,7 +194,7 @@ jobs:
       - name: Install pytest-run-parallel
         if: ${{ matrix.run_parallel == '1' }}
         run: |
-          pip install pytest-run-parallel
+          uv pip install --python=${{ matrix.version }} pytest-run-parallel
 
       - name: Run tests
         env:
@@ -205,4 +204,5 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
+          source $HOME/work/.venv/bin/activate
           (cd .. && $PYTEST $NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
