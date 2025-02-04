@@ -15,16 +15,6 @@ jobs:
         Python313-x64:
           PYTHON_VERSION: "3.13"
           ARCH: "x64"
-        Python312-x64:
-          PYTHON_VERSION: "3.12"
-          ARCH: "x64"
-        Python312-x64-pre:
-          PYTHON_VERSION: "3.12"
-          ARCH: "x64"
-          PIP_FLAGS: "--pre"
-        Python310-x64:
-          PYTHON_VERSION: "3.10"
-          ARCH: "x64"
     continueOnError: false
     timeoutInMinutes: 60
 
@@ -141,6 +131,15 @@ jobs:
           cd ${AGENT_BUILDDIRECTORY}  # D:\a\1
           echo "backend : Agg" > matplotlibrc
         displayName: "Pre-testing"
+
+      - bash: |
+          set -ex
+          PYTHON="$(python.pythonLocation)\\python.exe"
+          export OPENBLAS_VERBOSE=2
+          echo "Numpy OpenBLAS"
+          $PYTHON -c "import numpy"
+          echo "Scipy OpenBLAS"
+          $PYTHON -c "import scipy"
 
       - bash: |
           set -ex
