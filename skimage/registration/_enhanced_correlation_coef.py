@@ -126,7 +126,6 @@ def find_transform_ecc(
 
         num = (iw_norm**2) - np.dot(iw_projection, iw_hessian_projection)
         den = correlation - np.dot(ir_projection, iw_hessian_projection)
-        print(den)
         if den <= 0:
             warnings.warn(
                 (
