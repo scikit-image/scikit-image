@@ -7,8 +7,7 @@ on:
     branches:
       - "main"
 
-permissions:
-  pull-requests: write
+permissions: {}
 
 jobs:
   milestone_pr:
