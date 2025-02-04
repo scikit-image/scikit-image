@@ -144,7 +144,7 @@ jobs:
       - bash: |
           set -ex
           export OPENBLAS_VERBOSE=2
-          export OPENBLAS_CORETYPE=Haswell
+          # export OPENBLAS_CORETYPE=Haswell
           PYTHON="$(python.pythonLocation)\\python.exe"
 
           # Change the working directory in order to run the tests
