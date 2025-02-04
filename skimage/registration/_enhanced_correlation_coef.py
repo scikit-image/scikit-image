@@ -247,8 +247,8 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
 
 def update_warping_matrix(map_matrix, update, motion_type="affine"):
     def update_warping_matrix_translation(map_matrix, update):
-        map_matrix[0, 2] += update[1]
-        map_matrix[1, 2] += update[0]
+        map_matrix[0, 2] += update[0]
+        map_matrix[1, 2] += update[1]
         return map_matrix
 
     def update_warping_matrix_affine(map_matrix, update):
