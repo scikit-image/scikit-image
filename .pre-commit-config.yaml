@@ -16,21 +16,21 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: 1463d990e0801964764a375260dca598513f3be5 # frozen: v3.3.3
+    rev: bc7af46104f0f5368b95878decf720f9f00c2559 # frozen: v3.4.2
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79 # frozen: v0.6.9
+    rev: 89c421dff2e1026ba12cdb9ebd731f4a83aa8021 # frozen: v0.8.6
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
       - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: 9247866fce7128f2c0eaf4a09f437880397d4689 # frozen: v0.16.2
+    rev: 1ac5158c1b0f405350517c218f03d3a21bbb381c # frozen: v0.16.6
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
@@ -42,6 +42,11 @@ repos:
         language: system
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
+    hooks:
+      - id: zizmor
 
 ci:
   autofix_prs: false

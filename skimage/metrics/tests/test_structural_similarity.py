@@ -180,10 +180,10 @@ def test_gaussian_structural_similarity_vs_IPOL():
 
     Notes
     -----
-    To generate mssim_IPOL, we need a local copy of cam_noisy:
+    To generate mssim_IPOL, we need a local copy of cam_noisy::
 
-    >>> from skimage import io
-    >>> io.imsave('/tmp/cam_noisy.png', cam_noisy)
+      from skimage import io
+      io.imsave('/tmp/cam_noisy.png', cam_noisy)
 
     Then, we use the following command:
     $ ./imdiff -m mssim <path to camera.png>/camera.png /tmp/cam_noisy.png
