@@ -491,6 +491,11 @@ def random_walker(
             f"'cg', 'cg_j', 'bf', and None"
         )
 
+    if data.dtype == np.float16:
+        # SciPy sparse, which is used later on, doesn't officially support float16
+        # This led to failures when testing with NumPy 1.26 (see gh-7635).
+        data = data.astype(np.float32, casting="safe")
+
     # Spacing kwarg checks
     if spacing is None:
         spacing = np.ones(3)
