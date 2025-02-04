@@ -1,5 +1,3 @@
-from packaging.version import Version
-
 import numpy as np
 import skimage.data as data
 from skimage.data._fetchers import _image_fetcher
@@ -167,10 +165,6 @@ def test_brain_3d():
     assert image.shape == (10, 256, 256)
 
 
-@pytest.mark.xfail(
-    Version(np.__version__) >= Version('2.0.0.dev0'),
-    reason='tifffile uses deprecated attribute `ndarray.newbyteorder`',
-)
 def test_kidney_3d_multichannel():
     """Test that 3D multichannel image of kidney tissue can be loaded.
 
@@ -181,10 +175,6 @@ def test_kidney_3d_multichannel():
     assert kidney.shape == (16, 512, 512, 3)
 
 
-@pytest.mark.xfail(
-    Version(np.__version__) >= Version('2.0.0.dev0'),
-    reason='tifffile uses deprecated attribute `ndarray.newbyteorder`',
-)
 def test_lily_multichannel():
     """Test that microscopy image of lily of the valley can be loaded.
 

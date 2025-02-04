@@ -26,10 +26,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.io
 
-from skimage import filters, measure, restoration
-from skimage.data import nickel_solidification
+import skimage as ski
 
-image_sequence = nickel_solidification()
+image_sequence = ski.data.nickel_solidification()
 
 y0, y1, x0, x1 = 0, 180, 100, 330
 
@@ -64,7 +63,7 @@ plotly.io.show(fig)
 # ending at the second-to-last frame from the image sequence starting
 # at the second frame.
 
-smoothed = filters.gaussian(image_sequence)
+smoothed = ski.filters.gaussian(image_sequence)
 image_deltas = smoothed[1:, :, :] - smoothed[:-1, :, :]
 
 fig = px.imshow(
@@ -106,7 +105,7 @@ plotly.io.show(fig)
 # noise beyond the interface.
 
 inverted = 1 - clipped
-denoised = restoration.denoise_tv_chambolle(inverted, weight=0.15)
+denoised = ski.restoration.denoise_tv_chambolle(inverted, weight=0.15)
 
 fig = px.imshow(
     denoised,
@@ -130,7 +129,7 @@ plotly.io.show(fig)
 # method from the ``filters`` submodule of scikit-image (there are other
 # methods that may work better for different applications).
 
-thresh_val = filters.threshold_minimum(denoised)
+thresh_val = ski.filters.threshold_minimum(denoised)
 binarized = denoised > thresh_val
 
 fig = px.imshow(
@@ -158,8 +157,8 @@ plotly.io.show(fig)
 # To begin with, let us consider the first image delta at this stage of the
 # workflow, ``binarized[0, :, :]``.
 
-labeled_0 = measure.label(binarized[0, :, :])
-props_0 = measure.regionprops_table(labeled_0, properties=('label', 'area', 'bbox'))
+labeled_0 = ski.measure.label(binarized[0, :, :])
+props_0 = ski.measure.regionprops_table(labeled_0, properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
 # Show top five rows
@@ -198,8 +197,8 @@ largest_region = np.empty_like(binarized)
 bboxes = []
 
 for i in range(binarized.shape[0]):
-    labeled = measure.label(binarized[i, :, :])
-    props = measure.regionprops_table(labeled, properties=('label', 'area', 'bbox'))
+    labeled = ski.measure.label(binarized[i, :, :])
+    props = ski.measure.regionprops_table(labeled, properties=('label', 'area', 'bbox'))
     props_df = pd.DataFrame(props)
     props_df = props_df.sort_values('area', ascending=False)
     largest_region[i, :, :] = labeled == props_df.iloc[0]['label']

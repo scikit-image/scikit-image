@@ -267,7 +267,19 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
 
-    if m > 2:
+    if (m > 2) and (d != w).nnz > 0:
+        # This avoids further segmenting a graph that is too small,
+        # and the degenerate case (d == w), which typically occurs
+        # when only three single pixels remain.
+        #
+        # We're not sure exactly why this latter case arises. For
+        # SciPy <= 0.14, SciPy continued to compute an eigenvector,
+        # but newer versions (correctly) won't.  We refuse to guess,
+        # and stop further segmentation.
+        #
+        # It may make sense to a warning here; on the other hand segmentations
+        # are not a ground truth, so this level of "noise" should be acceptable.
+
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
