@@ -31,6 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         name: Install Python
@@ -75,6 +76,7 @@ jobs:
           ASV_FACTOR: 1.5
           ASV_SKIP_SLOW: 1
           # Escape user controlled variables
+          BASELINE_SHA: "${{ github.event.pull_request.base.sha }}"
           BASELINE_LABEL: "${{ github.event.pull_request.base.label }}"
           CONTENDER_LABEL: "${{ github.event.pull_request.head.label }}"
         run: |
@@ -85,12 +87,12 @@ jobs:
           # ID this runner
           asv machine --yes
 
-          echo "Baseline:  ${{ github.event.pull_request.base.sha }} ($BASELINE_LABEL)"
-          echo "Contender: ${GITHUB_SHA} ($CONTENDER_LABEL)"
+          echo "Baseline: $BASELINE_SHA ($BASELINE_LABEL)"
+          echo "Contender: $GITHUB_SHA ($CONTENDER_LABEL)"
 
           # Run benchmarks for current commit against base
           ASV_OPTIONS="--split --show-stderr --factor $ASV_FACTOR"
-          asv continuous $ASV_OPTIONS ${{ github.event.pull_request.base.sha }} ${GITHUB_SHA} \
+          asv continuous $ASV_OPTIONS $BASELINE_SHA $GITHUB_SHA \
               | sed "/Traceback \|failed$\|PERFORMANCE DECREASED/ s/^/::error::/" \
               | tee benchmarks.log
 
