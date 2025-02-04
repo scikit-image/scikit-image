@@ -1,6 +1,7 @@
 from tempfile import NamedTemporaryFile
 
 import numpy as np
+import threading
 from skimage.io import imread, imsave, plugin_order
 
 from skimage._shared import testing
@@ -65,7 +66,9 @@ class TestSave:
             min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype
         )
         expected = expected.reshape(shape)
-        file_path = tmp_path / "roundtrip.png"
+        tmp_dir = tmp_path / str(threading.get_native_id())
+        tmp_dir.mkdir()
+        file_path = tmp_dir / "roundtrip.png"
         imsave(file_path, expected)
         actual = imread(file_path)
         np.testing.assert_array_almost_equal(actual, expected)

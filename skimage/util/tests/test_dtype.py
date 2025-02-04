@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import pytest
 from skimage import (
     img_as_float,
     img_as_float32,
@@ -87,6 +88,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     )
 
 
+@pytest.mark.thread_unsafe
 def test_downcast():
     x = np.arange(10).astype(np.uint64)
     with expected_warnings(['Downcasting']):
@@ -187,6 +189,7 @@ def test_float_conversion_dtype():
         assert y.dtype == np.dtype(dtype_out)
 
 
+@pytest.mark.thread_unsafe
 def test_float_conversion_dtype_warns():
     """Test that convert issues a warning when called"""
     from skimage.util.dtype import convert

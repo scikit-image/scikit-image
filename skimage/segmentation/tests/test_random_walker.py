@@ -97,6 +97,7 @@ def test_2d_bf(dtype):
 @pytest.mark.filterwarnings(
     'ignore:"cg_mg" not available, it requires pyamg to be installed. The "cg_j" mode will be used instead.:UserWarning'
 )  # if pyamg is not available
+@pytest.mark.thread_unsafe
 @testing.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_2d_cg(dtype):
     lx = 70
@@ -215,6 +216,7 @@ def test_2d_laplacian_size():
     np.testing.assert_array_equal(labels, expected_labels)
 
 
+@pytest.mark.thread_unsafe
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_3d(dtype):
     n = 30
@@ -229,6 +231,7 @@ def test_3d(dtype):
     assert data.shape == labels.shape
 
 
+@pytest.mark.thread_unsafe
 def test_3d_inactive():
     n = 30
     lx, ly, lz = n, n, n
@@ -244,6 +247,7 @@ def test_3d_inactive():
     assert data.shape == labels.shape
 
 
+@pytest.mark.thread_unsafe
 @testing.parametrize('channel_axis', [0, 1, -1])
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_multispectral_2d(dtype, channel_axis):
@@ -271,6 +275,7 @@ def test_multispectral_2d(dtype, channel_axis):
     assert data[..., 0].shape == labels.shape
 
 
+@pytest.mark.thread_unsafe
 @testing.parametrize('dtype', [np.float32, np.float64])
 def test_multispectral_3d(dtype):
     n = 30
@@ -292,6 +297,7 @@ def test_multispectral_3d(dtype):
     assert data[..., 0].shape == labels.shape
 
 
+@pytest.mark.thread_unsafe
 def test_spacing_0():
     n = 30
     lx, ly, lz = n, n, n
@@ -323,6 +329,7 @@ def test_spacing_0():
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
 
+@pytest.mark.thread_unsafe
 # Passing on WASM
 @xfail(
     condition=arch32 and not is_wasm,
@@ -386,6 +393,7 @@ def test_spacing_1():
     assert (labels_aniso2[26:34, 13:17, 13:17] == 2).all()
 
 
+@pytest.mark.thread_unsafe
 def test_trivial_cases():
     # When all voxels are labeled
     img = np.ones((10, 10))
@@ -472,6 +480,7 @@ def test_bad_inputs():
         random_walker(img, labels, mode='bad')
 
 
+@pytest.mark.thread_unsafe
 def test_isolated_seeds():
     np.random.seed(0)
     a = np.random.random((7, 7))
@@ -502,6 +511,7 @@ def test_isolated_seeds():
     assert res[1, 1, 1] == 0
 
 
+@pytest.mark.thread_unsafe
 def test_isolated_area():
     np.random.seed(0)
     a = np.random.random((7, 7))
@@ -535,6 +545,7 @@ def test_isolated_area():
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )
+@pytest.mark.thread_unsafe
 def test_prob_tol():
     np.random.seed(0)
     a = np.random.random((7, 7))

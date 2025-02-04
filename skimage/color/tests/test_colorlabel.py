@@ -203,6 +203,7 @@ def test_avg(channel_axis):
     assert_array_equal(out_bg, expected_out_bg)
 
 
+@pytest.mark.thread_unsafe
 def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
     image = np.full((10, 10), -1, dtype='float64')
@@ -309,6 +310,7 @@ def test_overlay_custom_saturation():
     assert_array_almost_equal(saturaded_img[:3, :3] * (1 - alpha), rgb[:3, :3])
 
 
+@pytest.mark.thread_unsafe
 def test_saturation_warning():
     rgb_img = np.random.uniform(size=(10, 10, 3))
     labels = np.ones((10, 10), dtype=np.int64)
