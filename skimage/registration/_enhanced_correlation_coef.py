@@ -66,14 +66,6 @@ def find_transform_ecc(
         else:
             warp_matrix = np.eye(4)
 
-    # Necessary to transpose because ndi.affine_transform is not consistent with the rest of the skimage API ([x,y] vs [i,j])
-    if len(ir.shape) == 2:
-        ir = ir.T
-        iw = iw.T
-    elif len(ir.shape) == 3:  # TODO: Check if it is the correct transpose
-        ir = ir.transpose(0, 2, 1)
-        iw = iw.transpose(0, 2, 1)
-
     mesh = np.meshgrid(*[np.arange(0, x) for x in ir.shape], indexing='ij')
     mesh = [x.astype(np.float32) for x in mesh]
     ir = ndi.gaussian_filter(ir, gauss_filt_size)
