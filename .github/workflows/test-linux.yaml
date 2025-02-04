@@ -140,7 +140,7 @@ jobs:
       fail-fast: false
       matrix:
         run_parallel: [0, 1]
-        version: ['3.13t']
+        version: ["3.13t"]
     env:
       RUN_PARALLEL: ${{ matrix.run_parallel }}
 
@@ -156,8 +156,7 @@ jobs:
         with:
           python-version: ${{ matrix.version }}
           enable-cache: false
-      - run:
-          uv pip install --python=${{ matrix.version }} pip
+      - run: uv pip install --python=${{ matrix.version }} pip
 
       - name: Install build dependencies
         # See special clause inside setup-build-env.sh that detects when
@@ -171,6 +170,10 @@ jobs:
       - name: Build and install
         run: |
           pip install -v --no-build-isolation .
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: Install test dependencies
         # See special clause inside setup-test-env.sh that detects when
