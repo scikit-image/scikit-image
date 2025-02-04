@@ -1,14 +1,15 @@
 import numpy as np
-import pytest
 import scipy.ndimage as ndi
 
 from skimage.color import rgb2gray
-from skimage.data import astronaut, cat
+from skimage.data import astronaut
 from skimage.registration import find_transform_ecc
-from skimage.transform import AffineTransform, warp
+from skimage.transform import AffineTransform
 
 # Taken from PR #7421, to be replace once it is merged.
 max_error = 4
+
+
 def target_registration_error(shape, matrix):
     """
     Compute the displacement norm of the transform at at each pixel.
