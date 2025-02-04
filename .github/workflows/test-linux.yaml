@@ -172,10 +172,12 @@ jobs:
         env:
           PIP_FLAGS: "--pre"
         run: |
+          source $HOME/work/.venv/bin/activate
           source .github/scripts/setup-build-env.sh
 
       - name: Build and install
         run: |
+          source $HOME/work/.venv/bin/activate
           pip install -v --no-build-isolation .
 
       - name: Setup tmate session
@@ -189,11 +191,13 @@ jobs:
         env:
           PIP_FLAGS: "--pre"
         run: |
+          source $HOME/work/.venv/bin/activate
           source .github/scripts/setup-test-env.sh
 
       - name: Install pytest-run-parallel
         if: ${{ matrix.run_parallel == '1' }}
         run: |
+          source $HOME/work/.venv/bin/activate
           uv pip install --python=${{ matrix.version }} pytest-run-parallel
 
       - name: Run tests
