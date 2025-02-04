@@ -33,7 +33,7 @@ def _quickshift_cython(np_floats[:, :, ::1] image, np_floats kernel_size,
         Higher means fewer clusters.
     return_tree : bool
         Whether to return the full segmentation hierarchy tree and distances.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.

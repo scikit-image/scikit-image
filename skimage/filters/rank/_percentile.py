@@ -81,7 +81,7 @@ def autolevel_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -95,7 +95,7 @@ def autolevel_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -126,7 +126,7 @@ def gradient_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -140,7 +140,7 @@ def gradient_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -171,7 +171,7 @@ def mean_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -185,7 +185,7 @@ def mean_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -216,7 +216,7 @@ def subtract_mean_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -230,7 +230,7 @@ def subtract_mean_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -265,7 +265,7 @@ def enhance_contrast_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -279,7 +279,7 @@ def enhance_contrast_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -311,7 +311,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -324,7 +324,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -358,7 +358,7 @@ def pop_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -372,7 +372,7 @@ def pop_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -406,7 +406,7 @@ def sum_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -420,7 +420,7 @@ def sum_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
@@ -454,7 +454,7 @@ def threshold_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -467,7 +467,7 @@ def threshold_percentile(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input image
         Output image.
 
     """
