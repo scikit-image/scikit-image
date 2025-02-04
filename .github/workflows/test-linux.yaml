@@ -157,10 +157,13 @@ jobs:
           # python-version: ${{ matrix.version }}
           enable-cache: false
 
-      - run: |
+      - name: Setup free-threaded Python via uv
+        run: |
           pushd $HOME/work
           uv python install ${{ matrix.version }}
+          uv venv --python=${{ matrix.version }}
           uv pip install --python=${{ matrix.version }} pip
+          source .venv/bin/activate
           popd
 
       - name: Install build dependencies
@@ -198,7 +201,8 @@ jobs:
         env:
           PYTHON_GIL: 0
           NUM_PARALLEL_THREADS: ${{ matrix.run_parallel == '0' && 1 || 4 }}
+          DOCTEST_FLAG: ${{ matrix.run_parallel == '0' && '--doctest-plus' || '' }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --num-parallel-threads=$NUM_PARALLEL_THREADS --doctest-plus --showlocals --pyargs skimage)
+          (cd .. && $PYTEST --parallel-threads=$NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
