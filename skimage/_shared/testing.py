@@ -9,6 +9,7 @@ import struct
 import sys
 import functools
 import inspect
+import threading
 from tempfile import NamedTemporaryFile
 
 import numpy as np
@@ -193,12 +194,16 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(r5, img5)
 
 
+FETCH_LOCK = threading.Lock()
+
+
 def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
-    try:
-        return _fetch(data_filename)
-    except (ConnectionError, ModuleNotFoundError):
-        pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
+    with FETCH_LOCK:
+        try:
+            return _fetch(data_filename)
+        except (ConnectionError, ModuleNotFoundError):
+            pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
 
 # Ref: about the lack of threading support in WASM, please see

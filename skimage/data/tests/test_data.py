@@ -7,6 +7,7 @@ import os
 import pytest
 
 
+@pytest.mark.thread_unsafe
 def test_download_all_with_pooch():
     # jni first wrote this test with the intention of
     # fully deleting the files in the data_dir,

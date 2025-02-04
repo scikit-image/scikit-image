@@ -210,3 +210,6 @@ jobs:
         run: |
           source $HOME/work/.venv/bin/activate
           (cd .. && $PYTEST $NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3

@@ -40,3 +40,10 @@ def handle_np2():
         np.set_printoptions(legacy="1.21")
     except ImportError:
         pass
+
+
+if not PARALLEL_RUN_AVAILABLE:
+
+    @pytest.fixture
+    def num_parallel_threads():
+        return 1
