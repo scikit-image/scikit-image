@@ -95,9 +95,9 @@ clear.dtype
 # We compute both the morphological dilation of this binary image
 # (step ``d)``) and its morphological erosion (step ``e)``).
 
-dilate = ski.morphology.binary_dilation(clear)
+dilate = ski.morphology.dilation(clear)
 
-erode = ski.morphology.binary_erosion(clear)
+erode = ski.morphology.erosion(clear)
 
 #####################################################################
 # Finally, we subtract the eroded from the dilated to get the nucleus rim
@@ -251,8 +251,8 @@ border_mask = np.ones_like(fill_seq)
 border_mask[n_z // 2, -1, -1] = False
 clear_seq = ski.segmentation.clear_border(fill_seq, mask=border_mask)
 
-dilate_seq = ski.morphology.binary_dilation(clear_seq, footprint=footprint)
-erode_seq = ski.morphology.binary_erosion(clear_seq, footprint=footprint)
+dilate_seq = ski.morphology.dilation(clear_seq, footprint=footprint)
+erode_seq = ski.morphology.erosion(clear_seq, footprint=footprint)
 mask_sequence = np.logical_and(dilate_seq, ~erode_seq)
 
 #####################################################################

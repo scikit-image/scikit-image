@@ -2,6 +2,13 @@ Please include necessary information to complete each entry. The
 release manager should be able to step through this file without
 external references.
 
+Version 0.28
+------------
+* Complete deprecation of `skimage.morphology.binary_*` functions.
+  - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
+  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
+
+
 Version 0.27
 ------------
 * Remove deprecated `skimage.io.imshow`,
