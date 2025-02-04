@@ -203,7 +203,7 @@ jobs:
       - name: Run tests
         env:
           PYTHON_GIL: 0
-          NUM_PARALLEL_THREADS: ${{ matrix.run_parallel == '0' && '' || '--parallel-threads=4' }}
+          NUM_PARALLEL_THREADS: ${{ matrix.run_parallel == '1' && '--parallel-threads=4' || '' }}
           DOCTEST_FLAG: ${{ matrix.run_parallel == '0' && '--doctest-plus' || '' }}
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
