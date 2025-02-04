@@ -156,7 +156,10 @@ jobs:
         with:
           python-version: ${{ matrix.version }}
           enable-cache: false
-      - run: uv pip install --python=${{ matrix.version }} pip
+      - run: |
+          pushd $HOME/work
+          uv pip install --python=${{ matrix.version }} pip
+          popd
 
       - name: Install build dependencies
         # See special clause inside setup-build-env.sh that detects when
