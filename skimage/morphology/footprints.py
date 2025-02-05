@@ -717,20 +717,33 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
-def footprint_ellipse(shape, *, grow=0, dtype=np.uint8, decomposition=None):
-    """
+def footprint_ellipse(
+    shape, *, grow=0, border=True, dtype=np.uint8, decomposition=None
+):
+    """TBD
 
     Parameters
     ----------
-    shape
+    shape : sequence of ints
+        Shape of the new footprint, e.g., ``(2, 3)``.
     grow : float, optional
         Adjust ellipse size within the footprint.
-    dtype
-    decomposition
+    border : bool, optional
+        If ``True``, include pixels that are on the border of the ellipse
+        equation in the footprint.
+    dtype : data-type, optional
+        The data type of the footprint.
+    decomposition : {None, 'sequence', 'crosses'}, optional
+        TBD
 
     Returns
     -------
+    footprint : ndarray
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
 
+    Notes
+    -----
+    TBD
     """
     if decomposition == 'sequence':
         if not all(shape[0] == diameter for diameter in shape):
@@ -758,7 +771,7 @@ def footprint_ellipse(shape, *, grow=0, dtype=np.uint8, decomposition=None):
             adjusted_radius = radius + grow
             footprint += (coords / adjusted_radius) ** 2
 
-        footprint = footprint <= 1
+        footprint = footprint <= 1 if border is True else footprint < 1
         footprint = footprint.astype(dtype)
 
         if decomposition == "crosses":
