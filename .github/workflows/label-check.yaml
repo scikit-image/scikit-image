@@ -9,8 +9,6 @@ on:
       - unlabeled
       - synchronize
 
-permissions: {}
-
 env:
   LABELS: ${{ toJSON(github.event.pull_request.labels) }}
 

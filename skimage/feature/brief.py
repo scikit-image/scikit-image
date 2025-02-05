@@ -1,7 +1,6 @@
 import copy
 
 import numpy as np
-from packaging.version import Version
 
 from .._shared.filters import gaussian
 from .._shared.utils import check_nD
@@ -11,9 +10,6 @@ from .util import (
     _mask_border_keypoints,
     _prepare_grayscale_input_2D,
 )
-
-
-np2 = Version(np.__version__) >= Version('2')
 
 
 class BRIEF(DescriptorExtractor):
@@ -203,10 +199,7 @@ class BRIEF(DescriptorExtractor):
         self.mask = _mask_border_keypoints(image.shape, keypoints, patch_size // 2)
 
         keypoints = np.array(
-            keypoints[self.mask, :],
-            dtype=np.int64,
-            order='C',
-            copy=None if np2 else False,
+            keypoints[self.mask, :], dtype=np.int64, order='C', copy=False
         )
 
         self.descriptors = np.zeros(

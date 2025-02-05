@@ -43,13 +43,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Setup free-threaded environment
@@ -92,13 +89,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel
@@ -132,14 +126,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel
         run: |
@@ -222,14 +213,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |
