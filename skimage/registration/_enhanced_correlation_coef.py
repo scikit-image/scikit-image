@@ -3,14 +3,17 @@ import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
-from ..transform._warps import warp
-
 
 def custom_warp(im, mat, motion_type="affine", order=1):
+    def coord_mapping(pt, mat):
+        pt += (1,)
+        points_unwarping = mat @ np.array(pt).T
+        return tuple(points_unwarping)
+
     if motion_type == 'homography':
-        if len(im.shape) == 3:
-            raise ValueError("Homography motion type is only supported for 2D images.")
-        return warp(im.T, mat, order=order).T
+        return ndi.geometric_transform(
+            im, coord_mapping, order=order, extra_arguments=(mat,)
+        )
     else:
         return ndi.affine_transform(im, mat, order=order)
 

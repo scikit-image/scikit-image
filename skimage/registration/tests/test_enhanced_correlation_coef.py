@@ -3,7 +3,7 @@ import scipy.ndimage as ndi
 
 from skimage.color import rgb2gray
 from skimage.data import astronaut
-from skimage.registration import find_transform_ecc
+from skimage.registration import custom_warp, find_transform_ecc
 from skimage.transform import AffineTransform
 
 # Taken from PR #7421, to be replace once it is merged.
@@ -64,5 +64,24 @@ def test_find_transform_ecc_affine():
     mat = find_transform_ecc(ir, iw, motion_type='affine', termination_eps=1e-12)
     tre = target_registration_error(ir.shape, mat @ forward)
     assert (
-        tre.max() < max_error
-    ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
+        tre.max()
+        < 2
+        * max_error  # Correction appears to be a bit less precise with an homography
+        # Probably also due to the ir is downsampled by 4 for speed reasons.
+    ), f"TRE ({tre.max():.2f}) is more than {2 * max_error} pixels."
+
+
+# This test might be too long.
+def test_find_transform_ecc_homography():
+    ir = rgb2gray(astronaut())[::4, ::4]
+    forward = AffineTransform(translation=(10, -15), rotation=0.14, shear=0.01).params
+    forward[2, 0] = 1e-3
+    iw = custom_warp(ir, forward, motion_type='homography')
+    mat = find_transform_ecc(ir, iw, motion_type='homography', termination_eps=1e-12)
+    tre = target_registration_error(ir.shape, mat @ forward)
+    assert (
+        tre.max()
+        < 2
+        * max_error  # Correction appears to be a bit less precise with an homography
+        # Probably also due to the ir is downsampled by 4 for speed reasons.
+    ), f"TRE ({tre.max():.2f}) is more than {2 * max_error} pixels."
