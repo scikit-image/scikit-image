@@ -583,16 +583,18 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
     """
-    diameter = radius * 2
-    if diameter % 2 == 0:
-        diameter += 1
-    footprint = footprint_ellipse(
-        shape=(diameter,) * 2,
-        grow=0 if strict_radius else 0.5,
-        dtype=dtype,
-        decomposition=decomposition,
-    )
-    return footprint
+    if decomposition is None:
+        L = np.arange(-radius, radius + 1)
+        X, Y = np.meshgrid(L, L)
+        if not strict_radius:
+            radius += 0.5
+        return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
+    elif decomposition == 'sequence':
+        sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
+    elif decomposition == 'crosses':
+        fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
+        sequence = _cross_decomposition(fp)
+    return sequence
 
 
 def _cross(r0, r1, dtype=np.uint8):
