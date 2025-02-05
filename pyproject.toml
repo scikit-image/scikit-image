@@ -193,7 +193,11 @@ python_functions = ["time_*", "test_*", "peakmem_*"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
-    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",  # warn by pyamg in ruge_stuben_solver
+    # TODO Temporary while working on gh-7628
+    "ignore:`ellipse` is deprecated:FutureWarning",
+    "ignore:`disk` is deprecated:FutureWarning",
+    "ignore:`ball` is deprecated:FutureWarning",
 ]
 
 [tool.coverage.run]
