@@ -202,7 +202,7 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         h6_ = warp_matrix[0, 2]
         h7_ = warp_matrix[1, 2]
 
-        grad_iw_y, grad_iw_x = grad
+        grad_iw_x, grad_iw_y = grad
         x_grid, y_grid = xy_grid
 
         den_ = x_grid * h2_ + y_grid * h5_ + 1.0
