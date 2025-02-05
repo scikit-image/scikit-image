@@ -429,11 +429,9 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
 
     if radius == 1:
         # for radius 1 just use the exact shape (3,) * ndim solution
-        kwargs = dict(dtype=dtype, strict_radius=False, decomposition=None)
-        if ndim == 2:
-            return ((disk(1, **kwargs), 1),)
-        elif ndim == 3:
-            return ((ball(1, **kwargs), 1),)
+        shape = (3,) * ndim
+        sequence = ((footprint_ellipse(shape, grow=0.5, dtype=dtype), 1),)
+        return sequence
 
     # load precomputed decompositions
     if ndim not in _nsphere_decompositions:
