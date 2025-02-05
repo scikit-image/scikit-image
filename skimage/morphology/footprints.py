@@ -430,7 +430,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     if radius == 1:
         # for radius 1 just use the exact shape (3,) * ndim solution
         shape = (3,) * ndim
-        sequence = ((footprint_ellipse(shape, grow=0.5, dtype=dtype), 1),)
+        sequence = ((footprint_ellipse(shape, adjust_radii=0.5, dtype=dtype), 1),)
         return sequence
 
     # load precomputed decompositions
@@ -734,23 +734,41 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
 
 def footprint_ellipse(
-    shape, *, grow=0, border=True, dtype=np.uint8, decomposition=None
+    shape, *, border=True, adjust_radii=0, dtype=np.uint8, decomposition=None
 ):
-    """TBD
+    """Generates an elliptical or spherical footprint.
+
+    This function generates ellipsoids with any number of desired dimensions,
+    including spherical footprints. Use this function to generate shapes such
+    as a disk, an ellipse (2D), or a ball (3D).
 
     Parameters
     ----------
     shape : sequence of ints
         Shape of the new footprint, e.g., ``(2, 3)``.
-    grow : float, optional
-        Adjust ellipse size within the footprint.
     border : bool, optional
         If ``True``, include pixels that are on the border of the ellipse
         equation in the footprint.
+    adjust_radii : float or sequence of floats, optional
+        Adjust ellipse size within the footprint. Positive values will increase
+        the axes of the ellipse. With 0, the border of the ellipsis will touch
+        the border of the generated footprint. Ignored, if `decomposition` is
+        not `None`.
     dtype : data-type, optional
         The data type of the footprint.
     decomposition : {None, 'sequence', 'crosses'}, optional
-        TBD
+        If None, a single array is returned, otherwise `footprint` consists
+        of series of smaller footprints. Applying these footprints successively
+        will give a similar (often identical) result to the single footprint.
+        But for large footprints, a decomposition will often yield a better
+        performance.
+
+        Passing 'sequence', will yield a series of smaller footprints with
+        an extent 3 along each axis. This method [1]_ only works for spherical
+        footprints with 2 or 3 dimensions.
+
+        Passing 'crosses', will yield a series of cross-shaped footprints.
+        This method [2]_ works for elliptical
 
     Returns
     -------
@@ -759,8 +777,49 @@ def footprint_ellipse(
 
     Notes
     -----
-    TBD
+    This function uses the ellipsis equation
+
+    .. math:: \\sum_{k=1}^{n} \\frac{x_k^2}{a_k^2} \\lt 1
+
+    to determine which pixels are assigned 1 in the `footprint`. `border`
+    controls the comparison with the right-hand side. ``border=False``
+    corresponds to :math:`< 1`.
+
+    To produce spherical footprints with sequence decomposition, we extend the
+    approach taken in [1]_ for disks to the 3D case, using 3-dimensional
+    extensions of the "square", "diamond" and "t-shaped" elements from that
+    publication. We numerically computed the number of repetitions of each
+    element that gives the closest match when using this function with
+    ``adjust_=False, decomposition=None``.
+
+    The method cross-decomposition method is based on an adaption of
+    algorithm 1 given in [2]_.
+
+    Empirically, the equivalent composite footprint to the sequence
+    decomposition approaches a rhombicuboctahedron (26-faces) [3]_.
+
+    References
+    ----------
+    .. [1] Park, H and Chin R.T. Decomposition of structuring elements for
+           optimal implementation of morphological operations. In Proceedings:
+           1997 IEEE Workshop on Nonlinear Signal and Image Processing, London,
+           UK.
+           https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
+    .. [2] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
+           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
+           Image Processing, (1 November 1990).
+           :DOI:`10.1117/12.23608`
+    .. [3] https://en.wikipedia.org/wiki/Rhombicuboctahedron
     """
+    if np.isscalar(adjust_radii):
+        adjust_radii = (adjust_radii,) * len(shape)
+    elif len(shape) != len(adjust_radii):
+        msg = (
+            "`adjust_radii` must be scalar or sequence matching `shape` in length, "
+            f"got shape={shape!r} and adjust_radii={adjust_radii!r}"
+        )
+        raise ValueError(msg)
+
     if decomposition == 'sequence':
         if not all(shape[0] == diameter for diameter in shape):
             msg = (
@@ -775,7 +834,7 @@ def footprint_ellipse(
     else:
         footprint = np.zeros(shape, dtype=float)
 
-        for dim, length in enumerate(shape):
+        for dim, (length, adjust_radius) in enumerate(zip(shape, adjust_radii)):
             if length == 1:
                 continue
 
@@ -784,7 +843,7 @@ def footprint_ellipse(
             coords = coords.reshape(
                 (1,) * dim + (length,) + (1,) * (len(shape) - dim - 1)
             )
-            adjusted_radius = radius + grow
+            adjusted_radius = radius + adjust_radius
             footprint += (coords / adjusted_radius) ** 2
 
         footprint = footprint <= 1 if border is True else footprint < 1

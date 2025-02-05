@@ -64,6 +64,7 @@ __all__ = [
     'flood_fill',
     'footprint_from_sequence',
     'footprint_rectangle',
+    'footprint_ellipse',
     'h_maxima',
     'h_minima',
     'isotropic_closing',
