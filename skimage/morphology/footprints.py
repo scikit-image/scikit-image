@@ -945,16 +945,22 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
            https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
     .. [2] https://en.wikipedia.org/wiki/Rhombicuboctahedron
     """
-    diameter = radius * 2
-    if diameter % 2 == 0:
-        diameter += 1
-    footprint = footprint_ellipse(
-        shape=(diameter,) * 3,
-        grow=0 if strict_radius else 0.5,
-        dtype=dtype,
-        decomposition=decomposition,
-    )
-    return footprint
+    if decomposition is None:
+        n = 2 * radius + 1
+        Z, Y, X = np.mgrid[
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+        ]
+        s = X**2 + Y**2 + Z**2
+        if not strict_radius:
+            radius += 0.5
+        return np.array(s <= radius * radius, dtype=dtype)
+    elif decomposition == 'sequence':
+        sequence = _nsphere_series_decomposition(radius, ndim=3, dtype=dtype)
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+    return sequence
 
 
 def octagon(m, n, dtype=np.uint8, *, decomposition=None):
