@@ -503,6 +503,13 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     return tuple(all_t)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the deprecated behavior approximately use:\n"
+    "    footprint_ellipse(shape=(radius * 2 + 1,) * 2)",
+)
 def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a flat, disk-shaped footprint.
 
@@ -647,6 +654,15 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the deprecated behavior approximately use:\n"
+    "    footprint_ellipse(\n"
+    "        shape=(height * 2 + 1, width * 2 + 1), grow=1, border=False\n"
+    "    )",
+)
 def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, ellipse-shaped footprint.
 
@@ -901,6 +917,13 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the behavior approximately use:\n"
+    "    footprint_ellipse(shape=(radius * 2 + 1,) * 3)",
+)
 def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a ball-shaped footprint.
 

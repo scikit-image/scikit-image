@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
+import skimage as ski
 from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
@@ -279,3 +280,65 @@ class Test_footprint_rectangule:
             actual = footprint_rectangle(shape, decomposition="sequence")
         assert_stacklevel(record)
         assert_equal(actual, desired)
+
+
+@pytest.mark.parametrize("width", [0, 1, 2, 3, 4, 5, 33, 103])
+@pytest.mark.parametrize("height", [0, 1, 2, 3, 4, 5, 33, 103])
+def test_footprint_ellipse_backwards_compatibility(width, height):
+    with pytest.warns(FutureWarning, match="`ellipse` is deprecated"):
+        old = ski.morphology.ellipse(width, height)
+    new = ski.morphology.footprint_ellipse(
+        shape=(height * 2 + 1, width * 2 + 1), grow=1, border=False
+    )
+    np.testing.assert_equal(old, new)
+
+
+@pytest.mark.parametrize("width", [0, 1, 2, 3, 4, 5, 33, 103])
+@pytest.mark.parametrize("height", [0, 1, 2, 3, 4, 5, 33, 103])
+def test_footprint_ellipse_backwards_compatibility_decompose(width, height):
+    with pytest.warns(FutureWarning, match="`ellipse` is deprecated"):
+        old = ski.morphology.ellipse(width, height, decomposition="crosses")
+    new = ski.morphology.footprint_ellipse(
+        shape=(height * 2 + 1, width * 2 + 1),
+        grow=1,
+        border=False,
+        decomposition="crosses",
+    )
+    np.testing.assert_equal(old, new)
+
+
+@pytest.mark.parametrize("radius", [0, 1, 2, 3, 4, 5, 33])
+def test_footprint_disk_backwards_compatibility(radius):
+    with pytest.warns(FutureWarning, match="`disk` is deprecated"):
+        old = ski.morphology.disk(radius)
+    new = ski.morphology.footprint_ellipse(shape=(radius * 2 + 1,) * 2, grow=0.0001)
+    np.testing.assert_equal(old, new)
+
+
+@pytest.mark.parametrize("radius", [0, 1, 2, 3, 4, 5, 33])
+@pytest.mark.parametrize("decomposition", ["sequence", "crosses"])
+def test_footprint_disk_backwards_compatibility_decompose(radius, decomposition):
+    with pytest.warns(FutureWarning, match="`disk` is deprecated"):
+        old = ski.morphology.disk(radius, decomposition=decomposition)
+    new = ski.morphology.footprint_ellipse(
+        shape=(radius * 2 + 1,) * 2, grow=0.0001, decomposition=decomposition
+    )
+    np.testing.assert_equal(old, new)
+
+
+@pytest.mark.parametrize("radius", [0, 1, 2, 3, 4, 5, 33])
+def test_footprint_ball_backwards_compatibility(radius):
+    with pytest.warns(FutureWarning, match="`ball` is deprecated"):
+        old = ski.morphology.ball(radius)
+    new = ski.morphology.footprint_ellipse(shape=(radius * 2 + 1,) * 3, grow=0.0001)
+    np.testing.assert_equal(old, new)
+
+
+@pytest.mark.parametrize("radius", [0, 1, 2, 3, 4, 5, 33])
+def test_footprint_ball_backwards_compatibility_decompose(radius):
+    with pytest.warns(FutureWarning, match="`ball` is deprecated"):
+        old = ski.morphology.ball(radius, decomposition="sequence")
+    new = ski.morphology.footprint_ellipse(
+        shape=(radius * 2 + 1,) * 3, grow=0.0001, decomposition="sequence"
+    )
+    np.testing.assert_equal(old, new)
