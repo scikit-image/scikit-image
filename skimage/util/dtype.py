@@ -3,6 +3,8 @@ from warnings import warn
 
 import numpy as np
 
+from .._shared.utils import deprecate_func
+
 
 __all__ = [
     'img_as_float32',
@@ -12,6 +14,13 @@ __all__ = [
     'img_as_uint',
     'img_as_ubyte',
     'img_as_bool',
+    'rescale_to_float32',
+    'rescale_to_float64',
+    'rescale_to_float',
+    'rescale_to_int16',
+    'rescale_to_uint16',
+    'rescale_to_ubyte',
+    'rescale_to_bool',
     'dtype_limits',
 ]
 
@@ -422,6 +431,11 @@ if _convert.__doc__ is not None:
     )
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float32` instead.",
+)
 def img_as_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
@@ -448,6 +462,11 @@ def img_as_float32(image, force_copy=False):
     return rescale_to_float32(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float64` instead.",
+)
 def img_as_float64(image, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
@@ -474,6 +493,11 @@ def img_as_float64(image, force_copy=False):
     return rescale_to_float64(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float` instead.",
+)
 def img_as_float(image, force_copy=False):
     """Convert an image to floating point format.
 
@@ -503,6 +527,11 @@ def img_as_float(image, force_copy=False):
     return rescale_to_float(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_uint16` instead.",
+)
 def img_as_uint(image, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
@@ -527,6 +556,11 @@ def img_as_uint(image, force_copy=False):
     return rescale_to_uint16(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_int16` instead.",
+)
 def img_as_int(image, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
@@ -552,6 +586,11 @@ def img_as_int(image, force_copy=False):
     return rescale_to_int16(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_ubyte` instead.",
+)
 def img_as_ubyte(image, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
@@ -576,6 +615,11 @@ def img_as_ubyte(image, force_copy=False):
     return rescale_to_ubyte(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_bool` instead.",
+)
 def img_as_bool(image, force_copy=False):
     """Convert an image to boolean format.
 

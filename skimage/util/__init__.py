@@ -42,13 +42,13 @@ from .lookfor import lookfor
 
 
 __all__ = [
-    "rescale_to_float32",
-    "rescale_to_float64",
-    "rescale_to_float",
-    "rescale_to_int16",
-    "rescale_to_uint16",
-    "rescale_to_ubyte",
-    "rescale_to_bool",
+    'rescale_to_float32',
+    'rescale_to_float64',
+    'rescale_to_float',
+    'rescale_to_int16',
+    'rescale_to_uint16',
+    'rescale_to_ubyte',
+    'rescale_to_bool',
     'dtype_limits',
     'view_as_blocks',
     'view_as_windows',
