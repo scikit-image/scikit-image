@@ -18,6 +18,13 @@ from .dtype import (
     img_as_int,
     img_as_ubyte,
     img_as_uint,
+    rescale_to_float,
+    rescale_to_float32,
+    rescale_to_float64,
+    rescale_to_bool,
+    rescale_to_int16,
+    rescale_to_ubyte,
+    rescale_to_uint16,
 )
 from ._slice_along_axes import slice_along_axes
 from ._invert import invert
@@ -35,13 +42,13 @@ from .lookfor import lookfor
 
 
 __all__ = [
-    'img_as_float32',
-    'img_as_float64',
-    'img_as_float',
-    'img_as_int',
-    'img_as_uint',
-    'img_as_ubyte',
-    'img_as_bool',
+    "rescale_to_float32",
+    "rescale_to_float64",
+    "rescale_to_float",
+    "rescale_to_int16",
+    "rescale_to_uint16",
+    "rescale_to_ubyte",
+    "rescale_to_bool",
     'dtype_limits',
     'view_as_blocks',
     'view_as_windows',
