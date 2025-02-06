@@ -964,8 +964,8 @@ def denoise_wavelet(
     .. testsetup::
         >>> import pytest; _ = pytest.importorskip('pywt')
 
-    >>> from skimage import color, data
-    >>> img = img_as_float(data.astronaut())
+    >>> from skimage import color, data, util
+    >>> img = util.rescale_to_float(data.astronaut())
     >>> img = color.rgb2gray(img)
     >>> rng = np.random.default_rng()
     >>> img += 0.1 * rng.standard_normal(img.shape)
