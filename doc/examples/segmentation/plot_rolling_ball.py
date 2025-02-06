@@ -151,7 +151,7 @@ plt.show()
 # be much larger than the image intensity, which can lead to
 # unexpected results.
 
-image = util.img_as_float(data.coins()[:200, :200])
+image = util.rescale_to_float(data.coins()[:200, :200])
 
 background = restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -173,7 +173,7 @@ plt.show()
 # multiplied by two.
 
 normalized_radius = 70.5 / 255
-image = util.img_as_float(data.coins())
+image = util.rescale_to_float(data.coins())
 kernel = restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), normalized_radius * 2)
 
 background = restoration.rolling_ball(image, kernel=kernel)

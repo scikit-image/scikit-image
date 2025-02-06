@@ -17,7 +17,7 @@ from skimage.filters.rank import __all__ as all_rank_filters
 from skimage.filters.rank import __3Dfilters as _3d_rank_filters
 from skimage.filters.rank import subtract_mean
 from skimage.morphology import ball, disk, gray
-from skimage.util import img_as_float, img_as_ubyte
+from skimage.util import rescale_to_float, rescale_to_ubyte
 
 
 def test_otsu_edge_case():
@@ -412,7 +412,7 @@ class TestRank:
         # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
         # should returns the same arrays
 
-        image = util.img_as_ubyte(data.camera())
+        image = util.rescale_to_ubyte(data.camera())
 
         footprint = disk(20)
         loc_autolevel = rank.autolevel(image, footprint=footprint)
@@ -438,8 +438,8 @@ class TestRank:
 
     def test_compare_ubyte_vs_float(self):
         # Create signed int8 image that and convert it to uint8
-        image_uint = img_as_ubyte(data.camera()[:50, :50])
-        image_float = img_as_float(image_uint)
+        image_uint = rescale_to_ubyte(data.camera()[:50, :50])
+        image_float = rescale_to_float(image_uint)
 
         methods = [
             'autolevel',
@@ -462,7 +462,7 @@ class TestRank:
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
         volume_uint = np.random.randint(0, high=256, size=(10, 20, 30), dtype=np.uint8)
-        volume_float = img_as_float(volume_uint)
+        volume_float = rescale_to_float(volume_uint)
 
         methods_3d = [
             'equalize',
@@ -497,11 +497,11 @@ class TestRank:
         # of dynamic) should be identical
 
         # Create signed int8 image that and convert it to uint8
-        image = img_as_ubyte(data.camera())[::2, ::2]
+        image = rescale_to_ubyte(data.camera())[::2, ::2]
         image[image > 127] = 0
         image_s = image.astype(np.int8)
-        image_u = img_as_ubyte(image_s)
-        assert_equal(image_u, img_as_ubyte(image_s))
+        image_u = rescale_to_ubyte(image_s)
+        assert_equal(image_u, rescale_to_ubyte(image_s))
 
         methods = [
             'autolevel',
@@ -533,8 +533,8 @@ class TestRank:
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
         volume_s = np.random.randint(0, high=127, size=(10, 20, 30), dtype=np.int8)
-        volume_u = img_as_ubyte(volume_s)
-        assert_equal(volume_u, img_as_ubyte(volume_s))
+        volume_u = rescale_to_ubyte(volume_s)
+        assert_equal(volume_u, rescale_to_ubyte(volume_s))
 
         methods_3d = [
             'equalize',
@@ -584,7 +584,7 @@ class TestRank:
     def test_compare_8bit_vs_16bit(self, method):
         # filters applied on 8-bit image or 16-bit image (having only real 8-bit
         # of dynamic) should be identical
-        image8 = util.img_as_ubyte(data.camera())[::2, ::2]
+        image8 = util.rescale_to_ubyte(data.camera())[::2, ::2]
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
@@ -1104,7 +1104,7 @@ class TestRank:
     def test_rank_filters_boolean_shift(self, filter, shift_name, shift_value):
         """Test warning if shift is provided as a boolean."""
         filter_func = getattr(rank, filter)
-        image = img_as_ubyte(self.image)
+        image = rescale_to_ubyte(self.image)
         kwargs = {"footprint": self.footprint, shift_name: shift_value}
 
         with pytest.warns() as record:
@@ -1121,7 +1121,7 @@ class TestRank:
     def test_rank_filters_3D_boolean_shift(self, filter, shift_name, shift_value):
         """Test warning if shift is provided as a boolean."""
         filter_func = getattr(rank, filter)
-        image = img_as_ubyte(self.volume)
+        image = rescale_to_ubyte(self.volume)
         kwargs = {"footprint": self.footprint_3d, shift_name: shift_value}
 
         with pytest.warns() as record:

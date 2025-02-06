@@ -4,7 +4,7 @@ import pytest
 from skimage._shared.testing import assert_equal
 from scipy.ndimage import binary_dilation, binary_erosion
 from skimage import data, feature
-from skimage.util import img_as_float
+from skimage.util import rescale_to_float
 
 
 class TestCanny(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = img_as_float(data.camera()[::100, ::100])
+        image = rescale_to_float(data.camera()[::100, ::100])
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -98,7 +98,7 @@ class TestCanny(unittest.TestCase):
         assert np.all(feature.canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
-        image = img_as_float(data.camera()[::50, ::50])
+        image = rescale_to_float(data.camera()[::50, ::50])
 
         self.assertRaises(
             ValueError,
@@ -150,7 +150,7 @@ class TestCanny(unittest.TestCase):
     def test_dtype(self):
         """Check that the same output is produced regardless of image dtype."""
         image_uint8 = data.camera()
-        image_float = img_as_float(image_uint8)
+        image_float = rescale_to_float(image_uint8)
 
         result_uint8 = feature.canny(image_uint8)
         result_float = feature.canny(image_float)

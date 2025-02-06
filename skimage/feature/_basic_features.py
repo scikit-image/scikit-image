@@ -2,7 +2,7 @@ from itertools import combinations_with_replacement
 import itertools
 import numpy as np
 from skimage import filters, feature
-from skimage.util.dtype import img_as_float32
+from skimage.util.dtype import rescale_to_float32
 from .._shared._dependency_checks import is_wasm
 
 if not is_wasm:
@@ -89,7 +89,7 @@ def _mutiscale_basic_features_singlechannel(
         List of features, each element of the list is an array of shape as img.
     """
     # computations are faster as float32
-    img = np.ascontiguousarray(img_as_float32(img))
+    img = np.ascontiguousarray(rescale_to_float32(img))
     if num_sigma is None:
         num_sigma = int(np.log2(sigma_max) - np.log2(sigma_min) + 1)
     sigmas = np.logspace(

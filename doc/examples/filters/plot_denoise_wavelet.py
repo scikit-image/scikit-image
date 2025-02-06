@@ -31,12 +31,12 @@ results in an improvement over what can be obtained with a single threshold.
 import matplotlib.pyplot as plt
 
 from skimage.restoration import denoise_wavelet, estimate_sigma
-from skimage import data, img_as_float
-from skimage.util import random_noise
+from skimage import data
+from skimage.util import random_noise, rescale_to_float
 from skimage.metrics import peak_signal_noise_ratio
 
 
-original = img_as_float(data.chelsea()[100:250, 50:300])
+original = rescale_to_float(data.chelsea()[100:250, 50:300])
 
 sigma = 0.12
 noisy = random_noise(original, var=sigma**2)

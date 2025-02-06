@@ -29,7 +29,12 @@ from numpy.testing import (
 
 from .. import data, io
 from ..data._fetchers import _fetch
-from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
+from ..util import (
+    rescale_to_uint16,
+    rescale_to_float,
+    rescale_to_int16,
+    rescale_to_ubyte,
+)
 from ._warnings import expected_warnings
 from ._dependency_checks import is_wasm
 
@@ -132,7 +137,7 @@ def color_check(plugin, fmt='png'):
     All major input types should be handled as ubytes and read
     back correctly.
     """
-    img = img_as_ubyte(data.chelsea())
+    img = rescale_to_ubyte(data.chelsea())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 
@@ -140,20 +145,20 @@ def color_check(plugin, fmt='png'):
     r2 = roundtrip(img2, plugin, fmt)
     testing.assert_allclose(img2, r2.astype(bool))
 
-    img3 = img_as_float(img)
+    img3 = rescale_to_float(img)
     r3 = roundtrip(img3, plugin, fmt)
     testing.assert_allclose(r3, img)
 
-    img4 = img_as_int(img)
+    img4 = rescale_to_int16(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
         r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
         r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_ubyte(img4))
+        testing.assert_allclose(r4, rescale_to_ubyte(img4))
 
-    img5 = img_as_uint(img)
+    img5 = rescale_to_uint16(img)
     r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img)
 
@@ -164,7 +169,7 @@ def mono_check(plugin, fmt='png'):
     All major input types should be handled.
     """
 
-    img = img_as_ubyte(data.moon())
+    img = rescale_to_ubyte(data.moon())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 
@@ -172,23 +177,23 @@ def mono_check(plugin, fmt='png'):
     r2 = roundtrip(img2, plugin, fmt)
     testing.assert_allclose(img2, r2.astype(bool))
 
-    img3 = img_as_float(img)
+    img3 = rescale_to_float(img)
     r3 = roundtrip(img3, plugin, fmt)
     if r3.dtype.kind == 'f':
         testing.assert_allclose(img3, r3)
     else:
-        testing.assert_allclose(r3, img_as_uint(img))
+        testing.assert_allclose(r3, rescale_to_uint16(img))
 
-    img4 = img_as_int(img)
+    img4 = rescale_to_int16(img)
     if fmt.lower() in (('tif', 'tiff')):
         img4 -= 100
         r4 = roundtrip(img4, plugin, fmt)
         testing.assert_allclose(r4, img4)
     else:
         r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, img_as_uint(img4))
+        testing.assert_allclose(r4, rescale_to_uint16(img4))
 
-    img5 = img_as_uint(img)
+    img5 = rescale_to_uint16(img)
     r5 = roundtrip(img5, plugin, fmt)
     testing.assert_allclose(r5, img5)
 

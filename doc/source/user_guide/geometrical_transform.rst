@@ -73,7 +73,7 @@ represented with finite coordinates.
 
 Transformations can be applied to images using :func:`skimage.transform.warp`::
 
-   img = ski.util.img_as_float(ski.data.chelsea())
+   img = ski.util.rescale_to_float(ski.data.chelsea())
    tf_img = ski.transform.warp(img, tform.inverse)
 
 .. image:: ../auto_examples/transform/images/sphx_glr_plot_transform_types_001.png

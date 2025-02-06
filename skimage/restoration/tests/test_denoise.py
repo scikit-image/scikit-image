@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_warns
 
-from skimage import color, data, img_as_float, restoration
+from skimage import color, data, restoration
+from skimage.util import rescale_to_float
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
@@ -36,12 +37,12 @@ else:
 np.random.seed(1234)
 
 
-astro = img_as_float(data.astronaut()[:128, :128])
+astro = rescale_to_float(data.astronaut()[:128, :128])
 astro_gray = color.rgb2gray(astro)
 # Make sure that all tests below that rely on 0-1 range are valid:
 assert np.max(astro_gray) <= 1.0
 
-checkerboard_gray = img_as_float(data.checkerboard())
+checkerboard_gray = rescale_to_float(data.checkerboard())
 checkerboard = color.gray2rgb(checkerboard_gray)
 assert np.max(checkerboard_gray) <= 1.0
 
@@ -288,7 +289,7 @@ def test_denoise_bilateral_2d():
 def test_denoise_bilateral_pad():
     """This test checks if the bilateral filter is returning an image
     correctly padded."""
-    img = img_as_float(data.chelsea())[100:200, 100:200]
+    img = rescale_to_float(data.chelsea())[100:200, 100:200]
     img_bil = restoration.denoise_bilateral(
         img, sigma_color=0.1, sigma_spatial=10, channel_axis=-1
     )
@@ -758,7 +759,7 @@ def test_wavelet_denoising_channel_axis(channel_axis, convert2ycbcr):
     "estimate_sigma", [pytest.param(True, marks=xfail_without_pywt), False]
 )
 def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
-    """Test cases for images without prescaling via img_as_float."""
+    """Test cases for images without prescaling via rescale_to_float."""
     rstate = np.random.default_rng(1234)
 
     if case == '1d':
@@ -815,7 +816,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
         assert denoised.max() > 0.9 * x.max()
     else:
         # have to compare to x_as_float in integer input cases
-        x_as_float = img_as_float(x)
+        x_as_float = rescale_to_float(x)
         f_data_range = x_as_float.max() - x_as_float.min()
         psnr_denoised = peak_signal_noise_ratio(
             x_as_float, denoised, data_range=f_data_range

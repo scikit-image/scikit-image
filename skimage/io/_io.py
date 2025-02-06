@@ -195,7 +195,7 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
         warn(
             f'{fname} is a boolean image: setting True to 255 and False to 0. '
             'To silence this warning, please convert the image using '
-            'img_as_ubyte.',
+            'rescale_to_ubyte.',
             stacklevel=3,
         )
         arr = arr.astype('uint8') * 255

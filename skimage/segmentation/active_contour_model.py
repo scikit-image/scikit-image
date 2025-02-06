@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import RectBivariateSpline
 
 from .._shared.utils import _supported_float_type
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ..filters import sobel
 
 
@@ -121,7 +121,7 @@ def active_contour(
             + '.'
         )
 
-    img = img_as_float(image)
+    img = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     img = img.astype(float_dtype, copy=False)
 

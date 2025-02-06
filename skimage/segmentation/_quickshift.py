@@ -3,7 +3,7 @@ import numpy as np
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type
 from ..color import rgb2lab
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ._quickshift_cy import _quickshift_cython
 
 
@@ -73,7 +73,7 @@ def quickshift(
            European Conference on Computer Vision, 2008
     """
 
-    image = img_as_float(np.atleast_3d(image))
+    image = rescale_to_float(np.atleast_3d(image))
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

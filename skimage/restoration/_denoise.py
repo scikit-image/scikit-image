@@ -5,7 +5,7 @@ import numbers
 import scipy.stats
 import numpy as np
 
-from ..util.dtype import img_as_float
+from ..util.dtype import rescale_to_float
 from .._shared import utils
 from .._shared.utils import _supported_float_type, warn
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
@@ -47,7 +47,7 @@ def _compute_color_lut(bins, sigma, max_value, *, dtype=float):
         Standard deviation for grayvalue/color distance (radiometric
         similarity). A larger value results in averaging of pixels with larger
         radiometric differences. Note, that the image will be converted using
-        the `img_as_float` function and thus the standard deviation is in
+        the ``rescale_to_float`` function and thus the standard deviation is in
         respect to the range ``[0, 1]``. If the value is ``None`` the standard
         deviation of the ``image`` will be used.
     max_value : float
@@ -157,7 +157,7 @@ def denoise_bilateral(
     deviation (`sigma_color`).
 
     Note that, if the image is of any `int` dtype, ``image`` will be
-    converted using the `img_as_float` function and thus the standard
+    converted using the ``rescale_to_float`` function and thus the standard
     deviation (`sigma_color`) will be in range ``[0, 1]``.
 
     For more information on scikit-image's data type conversions and how
@@ -172,8 +172,8 @@ def denoise_bilateral(
 
     Examples
     --------
-    >>> from skimage import data, img_as_float
-    >>> astro = img_as_float(data.astronaut())
+    >>> import skimage as ski
+    >>> astro = ski.util.rescale_to_float(ski.data.astronaut())
     >>> astro = astro[220:300, 220:320]
     >>> rng = np.random.default_rng()
     >>> noisy = astro + 0.6 * astro.std() * rng.random(astro.shape)
@@ -235,7 +235,7 @@ def denoise_bilateral(
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
 
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(rescale_to_float(image))
     image = np.ascontiguousarray(image)
 
     sigma_color = sigma_color or image.std()
@@ -307,7 +307,7 @@ def denoise_tv_bregman(
     Parameters
     ----------
     image : ndarray
-        Input image to be denoised (converted using :func:`~.img_as_float`).
+        Input image to be denoised (converted using :func:`~.rescale_to_float`).
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{\lambda}{2}`. Therefore,
         the smaller the `weight`, the more denoising (at
@@ -360,7 +360,7 @@ def denoise_tv_bregman(
     .. [4] https://en.wikipedia.org/wiki/Total_variation_denoising
 
     """
-    image = np.atleast_3d(img_as_float(image))
+    image = np.atleast_3d(rescale_to_float(image))
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -515,7 +515,7 @@ def denoise_tv_chambolle(
     ----------
     image : ndarray
         Input image to be denoised. If its dtype is not float, it gets
-        converted with :func:`~.img_as_float`.
+        converted with :func:`~.rescale_to_float`.
     weight : float, optional
         Denoising weight. It is equal to :math:`\frac{1}{\lambda}`. Therefore,
         the greater the `weight`, the more denoising (at the expense of
@@ -586,7 +586,7 @@ def denoise_tv_chambolle(
 
     im_type = image.dtype
     if not im_type.kind == 'f':
-        image = img_as_float(image)
+        image = rescale_to_float(image)
 
     # enforce float16->float32 and float128->float64
     float_dtype = _supported_float_type(image.dtype)
@@ -796,7 +796,7 @@ def _wavelet_threshold(
 def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigma):
     """If the ``image`` is rescaled, also rescale ``sigma`` consistently.
 
-    Images that are not floating point will be rescaled via ``img_as_float``.
+    Images that are not floating point will be rescaled via ``rescale_to_float``.
     Half-precision images will be promoted to single precision.
     """
     if multichannel:
@@ -810,7 +810,7 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigm
     if image.dtype.kind != 'f':
         if rescale_sigma:
             range_pre = image.max() - image.min()
-        image = img_as_float(image)
+        image = rescale_to_float(image)
         if rescale_sigma:
             range_post = image.max() - image.min()
             # apply the same magnitude scaling to sigma
@@ -1091,8 +1091,8 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
         >>> import pytest; _ = pytest.importorskip('pywt')
 
     >>> import skimage.data
-    >>> from skimage import img_as_float
-    >>> img = img_as_float(skimage.data.camera())
+    >>> from skimage.util import rescale_to_float
+    >>> img = rescale_to_float(skimage.data.camera())
     >>> sigma = 0.1
     >>> rng = np.random.default_rng()
     >>> img = img + sigma * rng.standard_normal(img.shape)

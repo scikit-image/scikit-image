@@ -7,7 +7,7 @@ from ._haar import haar_like_feature_coord_wrapper
 from ._haar import haar_like_feature_wrapper
 from ..color import gray2rgb
 from ..draw import rectangle
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 FEATURE_TYPE = ('type-2-x', 'type-2-y', 'type-3-x', 'type-3-y', 'type-4')
 
@@ -321,7 +321,7 @@ def draw_haar_like_feature(
     output = np.copy(image)
     if len(image.shape) < 3:
         output = gray2rgb(image)
-    output = img_as_float(output)
+    output = rescale_to_float(output)
 
     for coord in feature_coord_:
         for idx_rect, rect in enumerate(coord):

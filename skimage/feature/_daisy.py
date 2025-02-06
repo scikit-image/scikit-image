@@ -4,7 +4,7 @@ import numpy as np
 from numpy import arctan2, exp, pi, sqrt
 
 from .. import draw
-from ..util.dtype import img_as_float
+from ..util.dtype import rescale_to_float
 from .._shared.filters import gaussian
 from .._shared.utils import check_nD
 from ..color import gray2rgb
@@ -110,7 +110,7 @@ def daisy(
 
     check_nD(image, 2, 'img')
 
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = image.dtype
 
     # Validate parameters.

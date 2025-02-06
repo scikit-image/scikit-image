@@ -185,7 +185,7 @@ plt.show()
 #
 
 
-img = ski.util.img_as_ubyte(ski.data.page())
+img = ski.util.rescale_to_ubyte(ski.data.page())
 
 radius = 15
 footprint = ski.morphology.disk(radius)

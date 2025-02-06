@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..util.dtype import img_as_float
+from ..util.dtype import rescale_to_float
 from .._shared import utils
 from .._shared.filters import gaussian
 
@@ -40,7 +40,7 @@ def unsharp_mask(
         or negative. Typically, it is a small positive number, e.g. 1.0.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of ``img_as_float``.
+        image is converted according to the conventions of ``rescale_to_float``.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -124,7 +124,7 @@ def unsharp_mask(
     if preserve_range:
         fimg = image.astype(float_dtype, copy=False)
     else:
-        fimg = img_as_float(image).astype(float_dtype, copy=False)
+        fimg = rescale_to_float(image).astype(float_dtype, copy=False)
         negative = np.any(fimg < 0)
         if negative:
             vrange = [-1.0, 1.0]

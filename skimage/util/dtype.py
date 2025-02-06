@@ -501,7 +501,7 @@ def img_as_float64(image, force_copy=False):
 def img_as_float(image, force_copy=False):
     """Convert an image to floating point format.
 
-    This function is similar to `img_as_float64`, but will not convert
+    This function is similar to :func:`~.rescale_to_float64`, but will not convert
     lower-precision floating point arrays to `float64`.
 
     Parameters
@@ -699,7 +699,7 @@ def rescale_to_float64(image, *, force_copy=False):
 def rescale_to_float(image, *, force_copy=False):
     """Convert an image to floating point format.
 
-    This function is similar to `img_as_float64`, but will not convert
+    This function is similar to :func:`~.rescale_to_float64`, but will not convert
     lower-precision floating point arrays to `float64`.
 
     Parameters

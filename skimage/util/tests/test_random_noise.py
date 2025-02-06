@@ -3,7 +3,7 @@ from skimage._shared.testing import assert_array_equal, assert_allclose
 
 import numpy as np
 from skimage.data import camera
-from skimage.util import random_noise, img_as_float
+from skimage.util import random_noise, rescale_to_float
 
 
 def test_set_seed():
@@ -13,7 +13,7 @@ def test_set_seed():
 
 
 def test_salt():
-    cam = img_as_float(camera())
+    cam = rescale_to_float(camera())
     amount = 0.15
     cam_noisy = random_noise(cam, rng=42, mode='salt', amount=amount)
     saltmask = cam != cam_noisy
@@ -42,7 +42,7 @@ def test_singleton_dim():
 
 
 def test_pepper():
-    cam = img_as_float(camera())
+    cam = rescale_to_float(camera())
     data_signed = cam * 2.0 - 1.0  # Same image, on range [-1, 1]
 
     amount = 0.15
@@ -68,7 +68,7 @@ def test_pepper():
 
 
 def test_salt_and_pepper():
-    cam = img_as_float(camera())
+    cam = rescale_to_float(camera())
     amount = 0.15
     cam_noisy = random_noise(
         cam, rng=42, mode='s&p', amount=amount, salt_vs_pepper=0.25
@@ -146,14 +146,14 @@ def test_poisson():
     cam_noisy = random_noise(data, mode='poisson', rng=42)
     cam_noisy2 = random_noise(data, mode='poisson', rng=42, clip=False)
 
-    expected = rng.poisson(img_as_float(data) * 256) / 256.0
+    expected = rng.poisson(rescale_to_float(data) * 256) / 256.0
     assert_allclose(cam_noisy, np.clip(expected, 0.0, 1.0))
     assert_allclose(cam_noisy2, expected)
 
 
 def test_clip_poisson():
     data = camera()  # 512x512 grayscale uint8
-    data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
     cam_poisson = random_noise(data, mode='poisson', rng=42, clip=True)
@@ -170,7 +170,7 @@ def test_clip_poisson():
 
 def test_clip_gaussian():
     data = camera()  # 512x512 grayscale uint8
-    data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
     cam_gauss = random_noise(data, mode='gaussian', rng=42, clip=True)
@@ -187,7 +187,7 @@ def test_clip_gaussian():
 
 def test_clip_speckle():
     data = camera()  # 512x512 grayscale uint8
-    data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    data_signed = rescale_to_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
 
     # Signed and unsigned, clipped
     cam_speckle = random_noise(data, mode='speckle', rng=42, clip=True)
