@@ -1,5 +1,8 @@
 import numpy as np
 import itertools
+import pytest
+
+import skimage.util.dtype
 from skimage.util import (
     rescale_to_float,
     rescale_to_float32,
@@ -12,7 +15,7 @@ from skimage.util.dtype import _convert
 
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
-from skimage._shared.testing import assert_equal, parametrize
+from skimage._shared.testing import assert_equal, parametrize, assert_stacklevel
 
 
 dtype_range = {
@@ -245,3 +248,25 @@ def test_rescale_to_ubyte_supports_npulonglong():
     data_scaled = data * 256 ** (data.dtype.itemsize - 1)
     result = rescale_to_ubyte(data_scaled)
     assert result.dtype == np.uint8
+
+
+@pytest.mark.parametrize("module", [skimage, skimage.util, skimage.util.dtype])
+@pytest.mark.parametrize(
+    "name",
+    [
+        "img_as_float",
+        "img_as_float32",
+        "img_as_float64",
+        "img_as_int",
+        "img_as_uint",
+        "img_as_ubyte",
+    ],
+)
+def test_deprecation_of_img_as_funcs(module, name):
+    func = getattr(module, name)
+    img = np.linspace(-1, 1)
+    regex = "`img_as_.*` is deprecated.*Use `skimage.util.rescale_to_.*`"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(img)
+    assert len(record) == 1
+    assert_stacklevel(record, offset=-2)
