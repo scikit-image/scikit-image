@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   call-workflow-build-wheels:
-    uses: ./.github/workflows/wheels_recipe.yml
+    uses: ./.github/workflows/wheels-recipe.yaml
 
   deploy:
     name: Release
