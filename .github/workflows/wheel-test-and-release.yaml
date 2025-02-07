@@ -17,6 +17,8 @@ permissions:
 jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
+    with:
+      CIBW_SKIP: cp313t-* # until Cython 3.1 is released
 
   deploy:
     name: Release
