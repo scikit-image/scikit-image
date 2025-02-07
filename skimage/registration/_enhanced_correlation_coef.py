@@ -135,7 +135,7 @@ def find_transform_ecc(
 
         error = _lambda * ir_meancorr - iw_warped_meancorr
         error_projection = project_onto_jacobian(jacobian, error)
-        delta_p = np.matvec(hessian_inv, error_projection)
+        delta_p = np.matmul(hessian_inv, error_projection)
         warp_matrix = update_warping_matrix(warp_matrix, delta_p, motion_type)
 
     return warp_matrix
