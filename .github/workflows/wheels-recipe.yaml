@@ -19,7 +19,7 @@ on:
         default: "pytest --pyargs skimage"
 
 env:
-  CIBW_BUILD_VERBOSITY: 2
+  CIBW_BUILD_VERBOSITY: 1
   CIBW_TEST_REQUIRES: ${{ inputs.CIBW_TEST_REQUIRES }}
   CIBW_ENVIRONMENT: ${{ inputs.CIBW_ENVIRONMENT }}
   CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
