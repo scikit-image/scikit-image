@@ -2,7 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from skimage.color import rgb2gray
-from skimage.data import astronaut
+from skimage.data import astronaut, cells3d
 from skimage.registration import custom_warp, find_transform_ecc
 from skimage.transform import AffineTransform
 
@@ -85,3 +85,19 @@ def test_find_transform_ecc_homography():
         * max_error  # Correction appears to be a bit less precise with an homography
         # Probably also due to the ir is downsampled by 4 for speed reasons.
     ), f"TRE ({tre.max():.2f}) is more than {2 * max_error} pixels."
+
+
+def test_find_transform_ecc_translation_3D():
+    ir = cells3d()[:, 0, :, :]
+    forward = np.identity(4)
+    forward[0, 3] = 3
+    forward[1, 3] = 7
+    forward[2, 3] = -5
+    iw = ndi.affine_transform(ir, forward, order=1)
+    mat = find_transform_ecc(ir, iw, motion_type='translation', termination_eps=1e-6)
+    tre = target_registration_error(ir.shape, mat @ forward)
+    assert (
+        tre.max()
+        < max_error  # Correction appears to be a bit less precise with an homography
+        # Probably also due to the ir is downsampled by 4 for speed reasons.
+    ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."

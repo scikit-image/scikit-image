@@ -71,8 +71,8 @@ def find_transform_ecc(
 
     mesh = np.meshgrid(*[np.arange(0, x) for x in ir.shape], indexing='ij')
     mesh = [x.astype(np.float32) for x in mesh]
-    ir = ndi.gaussian_filter(ir, gauss_filt_size)
 
+    ir = ndi.gaussian_filter(ir, gauss_filt_size)
     iw = ndi.gaussian_filter(iw, gauss_filt_size)
 
     grad = np.gradient(iw)
@@ -146,6 +146,10 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         grad_iw_x, grad_iw_y = grad
         return np.stack([grad_iw_x, grad_iw_y])
 
+    def compute_jacobian_translation_3D(grad):
+        grad_iw_x, grad_iw_y, grad_iw_z = grad
+        return np.stack([grad_iw_x, grad_iw_y, grad_iw_z])
+
     def compute_jacobian_affine(grad, xy_grid):
         grad_iw_x, grad_iw_y = grad
         x_grid, y_grid = xy_grid
@@ -162,8 +166,8 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         )
 
     def compute_jacobian_affine_3D(grad, xy_grid):
-        grad_iw_z, grad_iw_y, grad_iw_x = grad
-        z_grid, y_grid, x_grid = xy_grid
+        grad_iw_x, grad_iw_y, grad_iw_z = grad
+        x_grid, y_grid, z_grid = xy_grid
 
         return np.stack(
             [
@@ -245,13 +249,23 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
             case "homography":
                 return compute_jacobian_homography(grad, xy_grid, warp_matrix)
     else:
-        return compute_jacobian_affine_3D(grad, xy_grid)
+        match motion_type:
+            case "translation":
+                return compute_jacobian_translation_3D(grad)
+            case "affine":
+                return compute_jacobian_affine_3D(grad, xy_grid)
 
 
 def update_warping_matrix(map_matrix, update, motion_type="affine"):
     def update_warping_matrix_translation(map_matrix, update):
         map_matrix[0, 2] += update[0]
         map_matrix[1, 2] += update[1]
+        return map_matrix
+
+    def update_warping_matrix_translation_3D(map_matrix, update):
+        map_matrix[0, 3] += update[0]
+        map_matrix[1, 3] += update[1]
+        map_matrix[2, 3] += update[2]
         return map_matrix
 
     def update_warping_matrix_affine(map_matrix, update):
@@ -296,6 +310,9 @@ def update_warping_matrix(map_matrix, update, motion_type="affine"):
         map_matrix[0, 2] += update[6]
         map_matrix[1, 2] += update[7]
         map_matrix[2, 2] += update[8]
+        map_matrix[0, 3] += update[9]
+        map_matrix[1, 3] += update[10]
+        map_matrix[2, 3] += update[11]
         return map_matrix
 
     if np.shape(map_matrix)[0] == 3:
@@ -309,7 +326,11 @@ def update_warping_matrix(map_matrix, update, motion_type="affine"):
             case "homography":
                 return update_warping_matrix_homography(map_matrix, update)
     else:
-        return update_warping_matrix_affine_3D(map_matrix, update)
+        match motion_type:
+            case "translation":
+                return update_warping_matrix_translation_3D(map_matrix, update)
+            case "affine":
+                return update_warping_matrix_affine_3D(map_matrix, update)
 
 
 def project_onto_jacobian(jac, mat):
