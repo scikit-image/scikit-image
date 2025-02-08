@@ -55,13 +55,12 @@ jobs:
       - name: Setup free-threaded environment
         if: endsWith(matrix.cibw_python, 't-*')
         run: |
-          ANACONDA_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
-          NIGHTLY_INSTALL="pip install --pre -i $ANACONDA_URL cython numpy scipy pywavelets"
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
           TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
           echo "CIBW_PRERELEASE_PYTHONS=1" >> "$GITHUB_ENV"
           echo "CIBW_FREE_THREADED_SUPPORT=1" >> "$GITHUB_ENV"
-          echo "CIBW_BEFORE_BUILD=$NIGHTLY_INSTALL" >> "$GITHUB_ENV"
-          echo "CIBW_BEFORE_TEST=$NIGHTLY_INSTALL" >> "$GITHUB_ENV"
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
           echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
       - name: Build the wheel
         run: python -m cibuildwheel --output-dir dist
