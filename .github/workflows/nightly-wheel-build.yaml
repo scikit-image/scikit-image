@@ -25,7 +25,7 @@ jobs:
       # assert NumPy 2.0 before running tests
       CIBW_TEST_COMMAND: >
         pip list --pre --format=freeze | grep -q 'numpy==2' &&
-        (cd .. && pytest --config-file ${{ github.workspace }}/pyproject.toml --pyargs skimage)
+        (cd .. && pytest --pyargs skimage)
 
   upload_anaconda:
     permissions:
