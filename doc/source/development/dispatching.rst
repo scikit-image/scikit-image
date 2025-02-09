@@ -31,6 +31,9 @@ arguments that returns an instance of the :py:class:`skimage.util._backends.Back
 or something that behaves like it.
 :ref:`backend-entry-point` should resolve to a namespace
 that contains two functions: `can_has(name, *args, **kwargs)` and `get_implementation(name)`.
+The `name` parameter contains the public module name and the function name separated by a
+colon. For example, the `name` for the `canny` function from the `feature` module would
+be `skimage.feature:canny`.
 
 .. _backend-infos-entry-point:
 
@@ -77,9 +80,6 @@ the backend or backend implementation, that should be done in the `get_implement
 If the `can_has` function indicates that the backend wants to handle the call then the
 `get_implementation(name)` function is called to get the implementation. This should
 return the backend function that implements the behaviour of the function `name` in scikit-image.
-The `name` parameter will contain the public module name and the function name separated by a
-colon. For example, the `name` for the `canny` function from the `feature` module would
-be `skimage.feature:canny`.
 
 Once the implementation has been retrieved from the backend it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
