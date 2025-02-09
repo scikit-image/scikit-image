@@ -6,11 +6,12 @@ import warnings
 
 
 def get_skimage_backends():
-    """Returns the backend priority list, or `False` if the dispatching is disabled.
+    """Returns the backend priority list stored in `SKIMAGE_BACKENDS`
+    environment variable, or `False` if the dispatching is disabled.
 
-    The function interprets the value of the environment variable 
+    This function interprets the value of the environment variable 
     `SKIMAGE_BACKENDS` as follows:
-    - If unset or explicitly `False`, return `False`.
+    - If unset or explicitly set to `"False"`, return `False`.
     - If a comma-separated string, return it as a list of backend names.
     - If a single string, return it as a list with that single backend name.
     """
@@ -25,10 +26,21 @@ def get_skimage_backends():
 
 
 def public_api_name(func):
-    """Get the name of the public module for a scikit-image function.
+    """Returns the public module in which the given skimage `func` is present.
 
-    This computes the name of the public submodule in which the function can
-    be found.
+    Since scikit-image does not use sub-submodules in its public API
+    (except `skimage.filters.rank`), the function infers the public module name
+    based on the function's module path.
+
+    Parameters
+    ----------
+    func : function
+        A function from the scikit-image library.
+
+    Returns
+    -------
+    public_name : str
+        The name of the public module in scikit-image where the `func` resides.
     """
     full_name = func.__module__
     # This relies on the fact that scikit-image does not use
@@ -63,13 +75,12 @@ def public_api_name(func):
 
 @cache
 def all_backends_with_eps_combined():
-    """
-    Returns a dictionary with all the installed scikit-image backends and the infos
+    """Returns a dictionary with all the installed scikit-image backends and the infos
     stored in their two entry-points.
 
     Returns
     -------
-    dict
+    backends : dict
         A dictionary where keys are backend names, and values are dictionaries with:
         - `skimage_backends_ep_obj` : EntryPoint
           The backend's entry point object from the `skimage_backends` group.
@@ -179,10 +190,20 @@ def dispatchable(func):
 
 
 class BackendInformation:
-    """Information about a backend
+    """To store the information about a backend.
 
-    A backend that wants to provide additional information about itself
-    should return an instance of this from its information entry-point.
+    An instance of this class is expected to be returned by the
+    `skimage_backend_infos` entry-point.
+
+    Parameters
+    ----------
+    supported_functions : list of strings
+        A list of all the functions supported by a backend. The functions are
+        present in the list as strings of the form `"public_module_name:func_name"`.
+        For example: `["skimage.metrics:mean_squared_error", ...]`.
+
+    In future, a backend would be able to provide more additional information
+    about itself.
     """
 
     def __init__(self, supported_functions):
@@ -190,6 +211,7 @@ class BackendInformation:
 
 
 class DispatchNotification(RuntimeWarning):
-    """Notification issued when a function is dispatched to a backend."""
+    """This type of runtime warning is issued when a function is dispatched to
+    a backend."""
 
     pass
