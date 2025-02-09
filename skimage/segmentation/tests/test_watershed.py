@@ -892,6 +892,27 @@ def test_watershed_simple_basin_overspill():
     np.testing.assert_array_equal(result, expected)
 
 
+def test_watershed_evenly_distributed_overspill():
+    """Basins should be distributed evenly between contesting markers.
+
+    Markers should be prevented from spilling over into another basin and
+    conquering it against other markers with the same claim, just because they
+    get to the basin one step earlier.
+    """
+    # Scenario 1: markers start with the same value
+    image =    np.array([0, 2, 1, 1, 1, 1, 1, 1, 2, 0])  # fmt: skip
+    markers =  np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 2])  # fmt: skip
+    expected = np.array([1, 1, 1, 1, 1, 2, 2, 2, 2, 2])  # fmt: skip
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
+
+    # Scenario 2: markers start with the different values
+    image =    np.array([2, 2, 1, 1, 1, 1, 1, 1, 2, 0])  # fmt: skip
+    expected = np.array([1, 1, 1, 1, 1, 2, 2, 2, 2, 2])  # fmt: skip
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
+
+
 def test_markers_on_maxima():
     """Check that markers placed at maxima don't conquer other pixels.
 

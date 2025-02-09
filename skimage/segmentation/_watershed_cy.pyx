@@ -180,8 +180,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 new_elem.index = neighbor_index
                 new_elem.source = elem.source
 
-                # watershed cost of moving to neighbor is at least the cost of
-                # its own neighboring pixel
+                # The cost adding a neighbor should be at least the cost of its
+                # originating pixel, effectively its marker. This leads to "fairer"
+                # outcomes in edge cases. It prevents one marker from conquering a basin
+                # against other markers with a similar claim, just because it spills
+                # into the basin one step earlier. Instead `age` will distribute the
+                # basin more evenly between contesting markers with the same cost.
                 if new_elem.value < elem.value:
                     new_elem.value = elem.value
 
