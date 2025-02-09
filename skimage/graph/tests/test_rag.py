@@ -4,7 +4,6 @@ import numpy as np
 from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
-import sys
 
 
 def max_edge(g, src, dst, n):
@@ -207,8 +206,6 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
-# FIXME: https://github.com/scikit-image/scikit-image/issues/7651
-@pytest.mark.skipif(sys.platform == "win32", reason="test is flaky on azure")
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed

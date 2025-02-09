@@ -44,19 +44,23 @@ jobs:
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
+          cache-dependency-path: "requirements/*.txt"
+          cache: "pip"
 
       - name: Install build dependencies
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
-          source tools/github/setup_build_env.sh
+          source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
         shell: bash
@@ -71,7 +75,7 @@ jobs:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         shell: bash
         run: |
-          source tools/github/setup_test_env.sh
+          source .github/scripts/setup-test-env.sh
 
       - name: Run tests
         shell: bash

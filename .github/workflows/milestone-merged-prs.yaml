@@ -1,11 +1,13 @@
 name: Milestone
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types:
       - closed
     branches:
       - "main"
+
+permissions: {}
 
 jobs:
   milestone_pr:

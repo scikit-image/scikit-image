@@ -43,6 +43,11 @@ repos:
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
 
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
+    hooks:
+      - id: zizmor
+
 ci:
   autofix_prs: false
   autofix_commit_msg: |
