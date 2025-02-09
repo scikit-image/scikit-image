@@ -817,7 +817,8 @@ def test_compact_watershed():
 
 
 def test_watershed_with_markers_offset():
-    """Check behavior reported in gh-6632.
+    """
+    Check edge case behavior reported in gh-6632
 
     While we initially viewed the behavior described in gh-6632 [1]_ as a bug,
     we have reverted that decision in gh-7661. See [2]_ for an explanation.
@@ -862,7 +863,7 @@ def test_watershed_with_markers_offset():
 
 def test_watershed_simple_basin_overspill():
     """
-    Test behavior when markers spill over into another basin / compete.
+    Test edge case behavior when markers spill over into another basin / compete.
 
     While we initially viewed the behavior described in gh-6632 [1]_ as a bug,
     we have reverted that decision in gh-7661. See [2]_ for an explanation.
@@ -893,7 +894,8 @@ def test_watershed_simple_basin_overspill():
 
 
 def test_watershed_evenly_distributed_overspill():
-    """Basins should be distributed evenly between contesting markers.
+    """
+    Edge case: Basins should be distributed evenly between contesting markers.
 
     Markers should be prevented from spilling over into another basin and
     conquering it against other markers with the same claim, just because they
