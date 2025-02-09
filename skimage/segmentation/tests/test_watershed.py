@@ -922,9 +922,12 @@ def test_markers_on_maxima():
 
     .. [1] https://github.com/scikit-image/scikit-image/issues/7661
     """
-    image = np.array([0, 1, 2, 3, 4, 5])
-    markers = np.array([1, 0, 0, 0, 0, 2])
-    expected = np.array([1, 1, 1, 1, 1, 2])
+    image =    np.array([[0, 1, 2, 3, 4, 5, 4],
+                         [0, 1, 2, 3, 4, 4, 4]])  # fmt: skip
+    markers =  np.array([[1, 0, 0, 0, 0, 2, 0],
+                         [0, 0, 0, 0, 0, 0, 0]])  # fmt: skip
+    expected = np.array([[1, 1, 1, 1, 1, 2, 1],
+                         [1, 1, 1, 1, 1, 1, 1]])  # fmt: skip
     result = watershed(image, markers=markers)
     np.testing.assert_equal(result, expected)
 
