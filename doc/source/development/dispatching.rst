@@ -71,7 +71,8 @@ only want to handle calls where the input arrays are of a particuler type or siz
 
 If your backend can not handle a particular call the `can_has` function should return `False` as
 quickly as possible. This means you should perform fast checks first and more expensive
-checks later in your `can_has` function.
+checks later in your `can_has` function. Note that the `can_has` function should not import
+the backend or backend implementation, that should be done in the `get_implementation`.
 
 If the `can_has` function indicates that the backend wants to handle the call then the
 `get_implementation(name)` function is called to get the implementation. This should
@@ -82,6 +83,10 @@ be `skimage.feature:canny`.
 
 Once the implementation has been retrieved from the backend it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
+
+Note that we don't check the passed in args and kwargs when calling the backend
+implementation. So, this allows you to take in additional backend-specific kwargs
+from users but make sure this doesn't harm your backend in anyway.
 
 When returning an array it has to be of the same type as the array(s) passed in to the
 function by the user. This means a backend implementation can convert the input to a different
