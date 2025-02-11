@@ -1,7 +1,5 @@
-"""Image restoration module.
+"""Restoration algorithms, e.g., deconvolution algorithms, denoising, etc."""
 
-"""
+import lazy_loader as _lazy
 
-import lazy_loader as lazy
-
-__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+__getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)

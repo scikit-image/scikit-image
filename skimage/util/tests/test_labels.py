@@ -42,9 +42,10 @@ def test_label_points_two_dimensional_output():
 
 
 def test_label_points_multi_dimensional_output():
-    coords, output_shape = np.array(
-        [[0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 0], [4, 4, 1]]
-    ), (5, 5, 3)
+    coords, output_shape = (
+        np.array([[0, 0, 0], [1, 1, 1], [2, 2, 2], [3, 3, 0], [4, 4, 1]]),
+        (5, 5, 3),
+    )
     mask = label_points(coords, output_shape)
     result = np.array(
         [

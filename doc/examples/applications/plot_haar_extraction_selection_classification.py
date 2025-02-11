@@ -34,11 +34,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
-from skimage.data import lfw_subset
-from skimage.transform import integral_image
-from skimage.feature import haar_like_feature
-from skimage.feature import haar_like_feature_coord
-from skimage.feature import draw_haar_like_feature
+import skimage as ski
 
 
 ###########################################################################
@@ -50,8 +46,8 @@ from skimage.feature import draw_haar_like_feature
 
 def extract_feature_image(img, feature_type, feature_coord=None):
     """Extract the haar feature for the current image"""
-    ii = integral_image(img)
-    return haar_like_feature(
+    ii = ski.transform.integral_image(img)
+    return ski.feature.haar_like_feature(
         ii,
         0,
         0,
@@ -69,7 +65,7 @@ def extract_feature_image(img, feature_type, feature_coord=None):
 # determine the most salient features. The remaining 25 images from each
 # class are used to assess the performance of the classifier.
 
-images = lfw_subset()
+images = ski.data.lfw_subset()
 # To speed up the example, extract the two types of features only
 feature_types = ['type-2-x', 'type-2-y']
 
@@ -87,7 +83,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # Extract all possible features
-feature_coord, feature_type = haar_like_feature_coord(
+feature_coord, feature_type = ski.feature.haar_like_feature_coord(
     width=images.shape[2], height=images.shape[1], feature_type=feature_types
 )
 
@@ -113,7 +109,7 @@ idx_sorted = np.argsort(clf.feature_importances_)[::-1]
 fig, axes = plt.subplots(3, 2)
 for idx, ax in enumerate(axes.ravel()):
     image = images[0]
-    image = draw_haar_like_feature(
+    image = ski.feature.draw_haar_like_feature(
         image, 0, 0, images.shape[2], images.shape[1], [feature_coord[idx_sorted[idx]]]
     )
     ax.imshow(image)
