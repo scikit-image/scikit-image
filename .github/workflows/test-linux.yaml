@@ -180,10 +180,6 @@ jobs:
           source $HOME/work/.venv/bin/activate
           pip install -v --no-build-isolation .
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-
       - name: Install test dependencies
         # See special clause inside setup-test-env.sh that detects when
         # free threaded build is used, and then installs dependencies
@@ -210,7 +206,3 @@ jobs:
         run: |
           source $HOME/work/.venv/bin/activate
           (cd .. && $PYTEST $NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
