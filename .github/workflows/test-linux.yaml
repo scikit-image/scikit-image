@@ -212,4 +212,5 @@ jobs:
           (cd .. && $PYTEST $NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
 
       - name: Setup tmate session
+        if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
