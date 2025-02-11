@@ -14,7 +14,8 @@ and how the dispatching mechanism in scikit-image works.
     It is made available as an early prototype so that developers can gain experience
     with the system.
 
-    Expect the dispatching API to change without notice.
+    Consider the dispatching API to be very unstable; we might change behavior
+    suddenly between releases without a deprecation period.
 
 
 Creating a scikit-image backend
@@ -30,10 +31,10 @@ To create a backend you have to create a new Python package that registers two p
 arguments that returns an instance of the :py:class:`skimage.util._backends.BackendInformation` class
 or something that behaves like it.
 :ref:`backend-entry-point` should resolve to a namespace
-that contains two functions: `can_has(name, *args, **kwargs)` and `get_implementation(name)`.
-The `name` parameter contains the public module name and the function name separated by a
-colon. For example, the `name` for the `canny` function from the `feature` module would
-be `skimage.feature:canny`.
+that contains two functions: ``can_has(name, *args, **kwargs)`` and ``get_implementation(name)``.
+The ``name`` parameter contains the public module name and the function name separated by a
+colon. For example, the ``name`` for the ``canny`` function from the ``feature`` module would
+be ``skimage.feature:canny``.
 
 .. _backend-infos-entry-point:
 
@@ -42,10 +43,10 @@ The `skimage_backend_infos` entry point
 
 The information your backend provides via this entry point is used to get things like its
 name, homepage and which functions it implements. The main requirement for this entry point
-is that it is fast to import and has no dependencies other than `scikit-image`.
+is that it is fast to import and has no dependencies other than scikit-image.
 
 The return value of the function should be an instance of the
-`skimage.util._backends.BackendInformation` class or something that behaves like it.
+``skimage.util._backends.BackendInformation`` class or something that behaves like it.
 
 The reason this entry point has to be fast is that the list of implemented functions
 it provides is used to make a decision on which backends to try for a particular scikit-image
@@ -60,26 +61,27 @@ The `skimage_backends` entry point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This entry point should point to a namespace that contains two functions:
-`can_has(name, *args, **kwargs)` and `get_implementation(name)`. They will be used to
+``can_has(name, *args, **kwargs)`` and ``get_implementation(name)``. They will be used to
 determine if the backend can be called with the provided arguments and to get the
 actual implementation.
 
 When a user calls a function that the backend listed as one that it implements (via
-the `skimage_backend_infos` entry point) the
-`can_has` function will be called with the function name and the arguments the user
-provided when calling the function. The `can_has` function
+the ``skimage_backend_infos`` entry point) the
+``can_has`` function will be called with the function name and the arguments the user
+provided when calling the function. The ``can_has`` function
 should use this information to determine if the backend wants to be called or if a
 different backend should be tried. A backend might implement a particular function but
 only want to handle calls where the input arrays are of a particuler type or size.
 
-If your backend can not handle a particular call the `can_has` function should return `False` as
-quickly as possible. This means you should perform fast checks first and more expensive
-checks later in your `can_has` function. Note that the `can_has` function should not import
-the backend or backend implementation, that should be done in the `get_implementation`.
+If your backend can not handle a particular call the ``can_has`` function should return
+``False`` as quickly as possible. This means you should perform fast checks first and
+more expensive checks later in your ``can_has`` function. Note that the ``can_has`` function
+should not import the backend or backend implementation, that should be done in the
+``get_implementation``.
 
-If the `can_has` function indicates that the backend wants to handle the call then the
-`get_implementation(name)` function is called to get the implementation. This should
-return the backend function that implements the behaviour of the function `name` in scikit-image.
+If the ``can_has`` function indicates that the backend wants to handle the call then the
+``get_implementation(name)`` function is called to get the implementation. This should
+return the backend function that implements the behaviour of the function ``name`` in scikit-image.
 
 Once the implementation has been retrieved from the backend it will be called with the
 arguments the user provided and it is expected to return the result of the computation.

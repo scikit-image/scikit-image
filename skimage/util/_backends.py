@@ -25,7 +25,7 @@ def get_skimage_backends():
         return [backend_priority,]
 
 
-def public_api_name(func):
+def public_api_module(func):
     """Returns the public module in which the given skimage `func` is present.
 
     Since scikit-image does not use sub-submodules in its public API
@@ -120,7 +120,7 @@ def dispatchable(func):
     then the scikit-image implementation is used.
     """
     func_name = func.__name__
-    func_module = public_api_name(func)
+    func_module = public_api_module(func)
 
     # If no backends are installed or dispatching is disabled,
     # return the original function.

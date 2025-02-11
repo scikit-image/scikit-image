@@ -15,6 +15,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  PYTEST: "--config-file ${{ github.workspace }}/pyproject.toml"
+
 jobs:
   call-workflow-build-wheels:
     uses: ./.github/workflows/wheels_recipe.yml
@@ -25,7 +28,7 @@ jobs:
       # assert NumPy 2.0 before running tests
       CIBW_TEST_COMMAND: >
         pip list --pre --format=freeze | grep -q 'numpy==2' &&
-        pytest --pyargs skimage
+        (cd .. && $PYTEST --pyargs skimage)
 
   upload_anaconda:
     permissions:
@@ -35,14 +38,15 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         id: download
         with:
-          name: wheels
+          pattern: wheels-*
+          merge-multiple: true
           path: ./dist
 
       - name: Upload wheel
-        uses: scientific-python/upload-nightly-action@b67d7fcc0396e1128a474d1ab2b48aa94680f9fc # 0.5.0
+        uses: scientific-python/upload-nightly-action@82396a2ed4269ba06c6b2988bb4fd568ef3c3d6b # 0.6.1
         with:
           artifacts_path: dist
           anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}

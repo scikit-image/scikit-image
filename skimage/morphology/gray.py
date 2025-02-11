@@ -203,13 +203,13 @@ def erosion(
     --------
     >>> # Erosion shrinks bright regions
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> bright_square = np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> erosion(bright_square, square(3))
+    >>> erosion(bright_square, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
@@ -321,13 +321,13 @@ def dilation(
     --------
     >>> # Dilation enlarges bright regions
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> bright_pixel = np.array([[0, 0, 0, 0, 0],
     ...                          [0, 0, 0, 0, 0],
     ...                          [0, 0, 1, 0, 0],
     ...                          [0, 0, 0, 0, 0],
     ...                          [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> dilation(bright_pixel, square(3))
+    >>> dilation(bright_pixel, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 1, 1, 0],
@@ -420,13 +420,13 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     --------
     >>> # Open up gap between two bright regions (but also shrink regions)
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> bad_connection = np.array([[1, 0, 0, 0, 1],
     ...                            [1, 1, 0, 1, 1],
     ...                            [1, 1, 1, 1, 1],
     ...                            [1, 1, 0, 1, 1],
     ...                            [1, 0, 0, 0, 1]], dtype=np.uint8)
-    >>> opening(bad_connection, square(3))
+    >>> opening(bad_connection, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [1, 1, 0, 1, 1],
            [1, 1, 0, 1, 1],
@@ -497,13 +497,13 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     --------
     >>> # Close a gap between two bright lines
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> broken_line = np.array([[0, 0, 0, 0, 0],
     ...                         [0, 0, 0, 0, 0],
     ...                         [1, 1, 0, 1, 1],
     ...                         [0, 0, 0, 0, 0],
     ...                         [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> closing(broken_line, square(3))
+    >>> closing(broken_line, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1],
@@ -578,13 +578,13 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     --------
     >>> # Subtract gray background from bright peak
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> bright_on_gray = np.array([[2, 3, 3, 3, 2],
     ...                            [3, 4, 5, 4, 3],
     ...                            [3, 5, 9, 5, 3],
     ...                            [3, 4, 5, 4, 3],
     ...                            [2, 3, 3, 3, 2]], dtype=np.uint8)
-    >>> white_tophat(bright_on_gray, square(3))
+    >>> white_tophat(bright_on_gray, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
@@ -672,13 +672,13 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     --------
     >>> # Change dark peak to bright peak and subtract background
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> dark_on_gray = np.array([[7, 6, 6, 6, 7],
     ...                          [6, 5, 4, 5, 6],
     ...                          [6, 4, 0, 4, 6],
     ...                          [6, 5, 4, 5, 6],
     ...                          [7, 6, 6, 6, 7]], dtype=np.uint8)
-    >>> black_tophat(dark_on_gray, square(3))
+    >>> black_tophat(dark_on_gray, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],

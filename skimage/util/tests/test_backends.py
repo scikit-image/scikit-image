@@ -6,8 +6,8 @@ import skimage.metrics
 from skimage.util import _backends
 
 
-def mock_public_api_name(func):
-    # Unlike the real `public_api_name` this returns the actual
+def mock_public_api_module(func):
+    # Unlike the real `public_api_module` this returns the actual
     # full module name and does not perform a sanity check
     # because that test would fail for the functions we define
     # inside our tests.
@@ -83,7 +83,7 @@ def fake_backends(monkeypatch):
         }
 
     monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_all_backends_with_eps_combined)
-    monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
+    monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
     monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1, fake2")
 
 
@@ -95,7 +95,7 @@ def no_backends(monkeypatch):
         return {}
 
     monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_no_backends)
-    monkeypatch.setattr(_backends, "public_api_name", mock_public_api_name)
+    monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
 
 
 def test_no_notification_without_backends(no_backends):
@@ -147,7 +147,7 @@ def test_notification_raised(fake_backends):
     ],
 )
 def test_module_name_determination(func, expected):
-    module_name = _backends.public_api_name(func)
+    module_name = _backends.public_api_module(func)
 
     assert module_name == expected
 

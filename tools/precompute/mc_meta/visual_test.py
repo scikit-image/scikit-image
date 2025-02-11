@@ -22,7 +22,7 @@ def main(select=3, **kwargs):
         4: Ellipsoid
 
     """
-    import visvis as vv  # noqa: delay import visvis and GUI libraries
+    import visvis as vv
 
     # Create test volume
     if select == 1:
