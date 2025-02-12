@@ -115,7 +115,7 @@ def all_backends_with_eps_combined():
 def dispatchable(func):
     """Mark a function as dispatchable.
 
-    When a decorated function is called the installed backends are
+    When a decorated function is called, the installed backends are
     searched for an implementation. If no backend implements the function
     then the scikit-image implementation is used.
     """

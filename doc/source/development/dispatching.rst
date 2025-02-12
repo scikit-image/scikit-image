@@ -4,7 +4,7 @@ Dispatching
 The dispatching mechanism allows users to use alternative implementations of the algorithms
 available in scikit-image. The alternative implementations are provided by separate
 Python packages maintained outside of scikit-image. Example use-cases are support for array
-libraries other than Numpy or optimised implementations for particular hardware.
+libraries other than NumPy or optimized implementations for particular hardware.
 
 This section of the documentation describes how to create an alternative implementation (a "backend")
 and how the dispatching mechanism in scikit-image works.
@@ -22,15 +22,15 @@ Creating a scikit-image backend
 -------------------------------
 
 An alternative implementation ("backend") is a good place to provide optimized implementations
-for particular hardware, support array libraries other than Numpy or explore novel ideas that
+for particular hardware, to support array libraries other than NumPy, or to explore novel ideas that
 are not (yet) a good fit for the core scikit-image library.
 
 To create a backend you have to create a new Python package that registers two particular
-`entry points <https://packaging.python.org/en/latest/specifications/pyproject-toml/#entry-points>`_.
-:ref:`backend-infos-entry-point` should resolve to a function with no
+`entry points <https://packaging.python.org/en/latest/specifications/pyproject-toml/#entry-points>`_:
+* :ref:`backend-infos-entry-point` should resolve to a function with no
 arguments that returns an instance of the :py:class:`skimage.util._backends.BackendInformation` class
-or something that behaves like it.
-:ref:`backend-entry-point` should resolve to a namespace
+or something that behaves like it;
+* :ref:`backend-entry-point` should resolve to a namespace
 that contains two functions: ``can_has(name, *args, **kwargs)`` and ``get_implementation(name)``.
 The ``name`` parameter contains the public module name and the function name separated by a
 colon. For example, the ``name`` for the ``canny`` function from the ``feature`` module would
@@ -42,17 +42,17 @@ The `skimage_backend_infos` entry point
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The information your backend provides via this entry point is used to get things like its
-name, homepage and which functions it implements. The main requirement for this entry point
+name, homepage, and which functions it implements. The main requirement for this entry point
 is that it is fast to import and has no dependencies other than scikit-image.
 
 The return value of the function should be an instance of the
 ``skimage.util._backends.BackendInformation`` class or something that behaves like it.
 
 The reason this entry point has to be fast is that the list of implemented functions
-it provides is used to make a decision on which backends to try for a particular scikit-image
+is used to make a decision on which backends to try for a particular scikit-image
 function. This means it is loaded unconditionally as soon as a backend is installed.
 
-To help make your implementation fast avoid computing the list of implemented functions
+To help make your implementation fast, avoid computing the list of implemented functions
 dynamically or performing other expensive operations.
 
 .. _backend-entry-point:
@@ -71,9 +71,9 @@ the ``skimage_backend_infos`` entry point) the
 provided when calling the function. The ``can_has`` function
 should use this information to determine if the backend wants to be called or if a
 different backend should be tried. A backend might implement a particular function but
-only want to handle calls where the input arrays are of a particuler type or size.
+only want to handle calls where the input arrays are of a particular type or size.
 
-If your backend can not handle a particular call the ``can_has`` function should return
+If your backend cannot handle a particular call, the ``can_has`` function should return
 ``False`` as quickly as possible. This means you should perform fast checks first and
 more expensive checks later in your ``can_has`` function. Note that the ``can_has`` function
 should not import the backend or backend implementation, that should be done in the
@@ -83,14 +83,14 @@ If the ``can_has`` function indicates that the backend wants to handle the call 
 ``get_implementation(name)`` function is called to get the implementation. This should
 return the backend function that implements the behaviour of the function ``name`` in scikit-image.
 
-Once the implementation has been retrieved from the backend it will be called with the
+Once the implementation has been retrieved from the backend, it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
 
 Note that we don't check the passed in args and kwargs when calling the backend
 implementation. So, this allows you to take in additional backend-specific kwargs
 from users but make sure this doesn't harm your backend in anyway.
 
-When returning an array it has to be of the same type as the array(s) passed in to the
+When returning an array, it has to be of the same type as the array(s) passed in to the
 function by the user. This means a backend implementation can convert the input to a different
 array type, but it has to convert the result back to the original array type.
 
@@ -98,9 +98,9 @@ array type, but it has to convert the result back to the original array type.
 An example backend
 ~~~~~~~~~~~~~~~~~~
 
-To make the ideas describe above more concrete take a look at `an example backend that implements
+To make the ideas described above more concrete, take a look at `an example backend that implements
 a single function <https://github.com/betatim/scikit-image-backend-phony>`_.
-This example gives you an idea of how everything fits together and to see the dispatching
+This example gives you an idea of how everything fits together and lets you see the dispatching
 in action. It is designed to make it easy to understand and experiment with.
 
 To learn how to use backends refer the :doc:`User guide on backends <../user_guide/backends>`.
