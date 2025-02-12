@@ -6,7 +6,7 @@ import warnings
 
 
 def dispatching_disabled():
-    """Determine if dispatching has been disabled by the user"""
+    """Determine if dispatching has been disabled by the user."""
     no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
     if no_dispatching == "1":
         return True
@@ -53,7 +53,7 @@ def public_api_module(func):
 
 @cache
 def all_backends():
-    """List all installed backends and information about them"""
+    """List all installed backends and information about them."""
     backends = {}
     backends_ = entry_points(group="skimage_backends")
     backend_infos = entry_points(group="skimage_backend_infos")
@@ -73,7 +73,7 @@ def all_backends():
 def dispatchable(func):
     """Mark a function as dispatchable.
 
-    When a decorated function is called the installed backends are
+    When a decorated function is called, the installed backends are
     searched for an implementation. If no backend implements the function
     then the scikit-image implementation is used.
     """
@@ -133,7 +133,7 @@ class BackendInformation:
     """Information about a backend
 
     A backend that wants to provide additional information about itself
-    should return an instance of this from its information entry-point.
+    should return an instance of this from its information entry point.
     """
 
     def __init__(self, supported_functions):
