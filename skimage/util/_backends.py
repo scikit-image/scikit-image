@@ -121,29 +121,29 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_module(func)
-    skimage_backends = get_skimage_backends()
-
-    # If no backends are installed or dispatching is disabled,
-    # return the original function.
-    if not all_backends_with_eps_combined():
-        if skimage_backends:
-            # no installed backends but `SKIMAGE_BACKENDS` is not False
-            warnings.warn(
-                f"Call to '{func_module}:{func_name}' was not dispatched."
-                " No backends installed and SKIMAGE_BACKENDS is not 'False',"
-                f"but '{skimage_backends}'. Falling back to scikit-image.",
-                DispatchNotification,
-                stacklevel=2,
-            )
-        return func
-    elif not skimage_backends:
-        # backends installed but `SKIMAGE_BACKENDS` is False
-        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         backend_priority = get_skimage_backends()
         installed_backends = all_backends_with_eps_combined()
+
+        # If no backends are installed or dispatching is disabled,
+        # return the original function.
+        if not all_backends_with_eps_combined():
+            if backend_priority:
+                # no installed backends but `SKIMAGE_BACKENDS` is not False
+                warnings.warn(
+                    f"Call to '{func_module}:{func_name}' was not dispatched."
+                    " No backends installed and SKIMAGE_BACKENDS is not 'False',"
+                    f"but '{backend_priority}'. Falling back to scikit-image.",
+                    DispatchNotification,
+                    stacklevel=2,
+                )
+            return func(*args, **kwargs)
+        elif not backend_priority:
+            # backends installed but `SKIMAGE_BACKENDS` is False
+            return func(*args, **kwargs)
+
         for backend_name in backend_priority:
             if backend_name not in installed_backends:
                 continue
