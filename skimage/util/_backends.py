@@ -121,21 +121,22 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_module(func)
+    skimage_backends = get_skimage_backends()
 
     # If no backends are installed or dispatching is disabled,
     # return the original function.
     if not all_backends_with_eps_combined():
-        if get_skimage_backends():
+        if skimage_backends:
             # no installed backends but `SKIMAGE_BACKENDS` is not False
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was not dispatched."
-                " No backends installed and SKIMAGE_BACKENDS is not 'False'."
-                " Falling back to scikit-image.",
+                " No backends installed and SKIMAGE_BACKENDS is not 'False',"
+                f"but '{skimage_backends}'. Falling back to scikit-image.",
                 DispatchNotification,
                 stacklevel=2,
             )
         return func
-    elif not get_skimage_backends():
+    elif not skimage_backends:
         # backends installed but `SKIMAGE_BACKENDS` is False
         return func
 
@@ -180,7 +181,8 @@ def dispatchable(func):
             if backend_priority:
                 warnings.warn(
                     f"Call to '{func_module}:{func_name}' was not dispatched."
-                    " All backends rejected the call. Falling back to scikit-image",
+                    " All backends rejected the call. Falling back to scikit-image."
+                    f"Installed backends : {installed_backends.keys()}",
                     DispatchNotification,
                     stacklevel=2,
                 )

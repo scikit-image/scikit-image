@@ -98,7 +98,7 @@ def no_backends(monkeypatch):
     monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
 
 
-def test_no_notification_without_backends(no_backends):
+def test_notification_without_backends(monkeypatch, no_backends):
     # Check that no DispatchNotification is raised when no backend
     # is installed.
     @_backends.dispatchable
@@ -106,6 +106,16 @@ def test_no_notification_without_backends(no_backends):
         return x * 2
 
     r = foo(42)
+
+    assert r == 42 * 2
+
+    # no backends installed but `SKIMAGE_BACKENDS` is not "False"
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1")
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Call to.*:foo' was not dispatched.",
+    ):
+        r = foo(42)
 
     assert r == 42 * 2
 
@@ -122,7 +132,7 @@ def test_when_dispatching_disabled(fake_backends, monkeypatch):
     assert r == 42 * 2
 
 
-def test_notification_raised(fake_backends):
+def test_notification_with_backends(monkeypatch, fake_backends):
     @_backends.dispatchable
     def foo(x):
         return x * 2
@@ -136,6 +146,15 @@ def test_notification_raised(fake_backends):
         r = foo(42)
 
     assert r == 42 * 3
+
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake3") # "fake3" is not a backend.
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Call to.*:foo' was not dispatched.",
+    ):
+        r = foo(42)
+
+    assert r == 42 * 2
 
 
 @pytest.mark.parametrize(
