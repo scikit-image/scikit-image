@@ -1,3 +1,5 @@
+from functools import partial
+
 import numpy as np
 import itertools
 import pytest
@@ -28,15 +30,15 @@ dtype_range = {
 }
 
 
-img_funcs = (
+rescale_funcs = (
     rescale_to_int16,
-    rescale_to_float64,
-    rescale_to_float32,
+    partial(rescale_to_float64, legacy_float_range=True),
+    partial(rescale_to_float32, legacy_float_range=True),
     rescale_to_uint16,
     rescale_to_ubyte,
 )
-dtypes_for_img_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
-img_funcs_and_types = zip(img_funcs, dtypes_for_img_funcs)
+dtypes_for_rescale_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
+rescale_funcs_and_types = zip(rescale_funcs, dtypes_for_rescale_funcs)
 
 
 def _verify_range(msg, x, vmin, vmax, dtype):
@@ -45,7 +47,7 @@ def _verify_range(msg, x, vmin, vmax, dtype):
     assert x.dtype == dtype
 
 
-@parametrize("dtype, f_and_dt", itertools.product(dtype_range, img_funcs_and_types))
+@parametrize("dtype, f_and_dt", itertools.product(dtype_range, rescale_funcs_and_types))
 def test_range(dtype, f_and_dt):
     imin, imax = dtype_range[dtype]
     x = np.linspace(imin, imax, 10).astype(dtype)
@@ -88,7 +90,7 @@ def test_range_extra_dtypes(dtype_in, dt):
     imin, imax = dtype_range_extra[dtype_in]
     x = np.linspace(imin, imax, 10).astype(dtype_in)
 
-    y = _convert(x, dt)
+    y = _convert(x, dt, legacy_float_range=True)
 
     omin, omax = dtype_range_extra[dt]
     _verify_range(
@@ -146,8 +148,8 @@ def test_bool():
 
 def test_clobber():
     # The `img_as_*` functions should never modify input arrays.
-    for func_input_type in img_funcs:
-        for func_output_type in img_funcs:
+    for func_input_type in rescale_funcs:
+        for func_output_type in rescale_funcs:
             img = np.random.rand(5, 5)
 
             img_in = func_input_type(img)
@@ -159,7 +161,7 @@ def test_clobber():
 
 def test_signed_scaling_float32():
     x = np.array([-128, 127], dtype=np.int8)
-    y = rescale_to_float32(x)
+    y = rescale_to_float32(x, legacy_float_range=True)
     assert_equal(y.max(), 1)
 
 
@@ -227,12 +229,12 @@ def test_subclass_conversion():
 def test_int_to_float():
     """Check Normalization when casting rescale_to_float from int types to float"""
     int_list = np.arange(9, dtype=np.int64)
-    converted = rescale_to_float(int_list)
+    converted = rescale_to_float(int_list, legacy_float_range=True)
     assert np.allclose(converted, int_list * 1e-19, atol=0.0, rtol=0.1)
 
     ii32 = np.iinfo(np.int32)
     ii_list = np.array([ii32.min, ii32.max], dtype=np.int32)
-    floats = rescale_to_float(ii_list)
+    floats = rescale_to_float(ii_list, legacy_float_range=True)
 
     assert_equal(floats.max(), 1)
     assert_equal(floats.min(), -1)
@@ -270,3 +272,25 @@ def test_deprecation_of_img_as_funcs(module, name):
         func(img)
     assert len(record) == 1
     assert_stacklevel(record, offset=-2)
+
+
+@pytest.mark.parametrize("dtype_in", [np.int8, np.int16, np.int32, np.int64])
+@pytest.mark.parametrize("dtype_out", [np.float16, np.float32, np.float64])
+def test_convert_signed_to_float(dtype_in, dtype_out):
+    image = np.array([np.iinfo(dtype_in).min, np.iinfo(dtype_in).max], dtype=dtype_in)
+    expected = np.array([0, 1], dtype=dtype_out)
+    result = _convert(image, dtype=dtype_out, legacy_float_range=False)
+    assert result.dtype == dtype_out
+    np.testing.assert_equal(expected, result)
+
+
+@pytest.mark.parametrize("dtype_in", [np.int8, np.int16, np.int32, np.int64])
+@pytest.mark.parametrize("dtype_out", [np.float16, np.float32, np.float64])
+def test_convert_signed_to_float_legacy(dtype_in, dtype_out):
+    image = np.array(
+        [np.iinfo(dtype_in).min, 0, np.iinfo(dtype_in).max], dtype=dtype_in
+    )
+    expected = np.array([-1, 0, 1], dtype=dtype_out)
+    result = _convert(image, dtype=dtype_out, legacy_float_range=True)
+    assert result.dtype == dtype_out
+    np.testing.assert_equal(expected, result)
