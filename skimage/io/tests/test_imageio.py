@@ -66,7 +66,10 @@ class TestSave:
             min_, max_, endpoint=True, num=np.prod(shape), dtype=dtype
         )
         expected = expected.reshape(shape)
-        tmp_dir = tmp_path / str(threading.get_native_id())
+        if hasattr(threading, 'get_native_id'):
+            tmp_dir = tmp_path / str(threading.get_native_id())
+        else:
+            tmp_dir = tmp_path / str(threading.get_ident())
         tmp_dir.mkdir()
         file_path = tmp_dir / "roundtrip.png"
         imsave(file_path, expected)
