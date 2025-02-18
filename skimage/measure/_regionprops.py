@@ -1132,9 +1132,9 @@ def regionprops(
 ):
     r"""Measure properties of labeled image regions.
 
-    Region properties are evaluated lazily. If you have a pre-determined list
-    of region properties (which you would like to print or feed),
-    consider using :func:`skimage.measure.regionprops_table` instead.
+    Region properties are evaluated on demand and come in diverse types. If
+    you want to do tabular data analysis of specific properties, consider
+    using :func:`skimage.measure.regionprops_table` instead.
 
     Parameters
     ----------
