@@ -1,38 +1,39 @@
 """
-================================================================
+==============================================================
 Use rolling-ball algorithm for estimating background intensity
-================================================================
+==============================================================
 
 The rolling-ball algorithm estimates the background intensity of a grayscale
-image in case of uneven exposure. It is frequently used in biomedical
+image. It comes in useful, for instance, in case of uneven exposure, when
+subtracting the background is desirable. It is frequently used in biomedical
 image processing and was first proposed by Stanley R. Sternberg in
 1983 [1]_.
 
-The algorithm works as a filter and is quite intuitive. We think of the image
+The algorithm works as a filter. To get a grasp it, think of the image
 as a surface that has unit-sized blocks stacked on top of each other in place
 of each pixel. The number of blocks, and hence surface height, is determined
 by the intensity of the pixel. To get the intensity of the background at a
 desired (pixel) position, we imagine submerging a ball under the surface at the
 desired position. Once it is completely covered by the blocks, the apex of
 the ball determines the intensity of the background at that position. We can
-then *roll* this ball around below the surface to get the background values for
-the entire image.
+then 'roll' this ball around below the surface to get the background values for
+the entire image. The larger the ball, the smoother the background.
 
-Scikit-image implements a general version of this rolling-ball algorithm, which
-allows you to not just use balls, but arbitrary shapes as kernel and works on
-n-dimensional ndimages. This allows you to directly filter RGB images or filter
-image stacks along any (or all) spacial dimensions.
+Scikit-image implements a generalized version of this rolling-ball algorithm,
+allowing you to work with n-dimensional images and to use not only balls, but
+arbitrary shapes as kernels. This way, you may directly filter RGB images or
+image stacks along any (or all) spatial dimensions.
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
     22-34. :DOI:`10.1109/MC.1983.1654163`
 
 
 Classic rolling ball
--------------------------------
+--------------------
 
-In scikit-image, the rolling ball algorithm assumes that your background has
-low intensity (black), whereas the features have high intensity (white). If
-this is the case for your image, you can directly use the filter like so:
+In scikit-image, the implementation assumes that your image background has
+low intensity (dark), whereas the features have high intensity (bright). If
+this is your case, you may readily call the rolling-ball filter:
 
 """
 
@@ -69,12 +70,12 @@ plot_result(image, background)
 plt.show()
 
 ######################################################################
-# White background
-# ----------------
+# Bright background
+# -----------------
 #
 # If you have dark features on a bright background, you need to invert
-# the image before you pass it into the algorithm, and then invert the
-# result. This can be accomplished via:
+# the image before passing it to the rolling-ball filter, and then invert the
+# result. This can be accomplished as follows:
 
 image = data.page()
 image_inverted = util.invert(image)
