@@ -39,9 +39,9 @@ this is your case, you may readily call the rolling-ball filter:
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pywt
 
-from skimage import data, restoration, util
+import pywt
+import skimage as ski
 
 
 def plot_result(image, background):
@@ -62,9 +62,9 @@ def plot_result(image, background):
     fig.tight_layout()
 
 
-image = data.coins()
+image = ski.data.coins()
 
-background = restoration.rolling_ball(image)
+background = ski.restoration.rolling_ball(image)
 
 plot_result(image, background)
 plt.show()
@@ -77,13 +77,13 @@ plt.show()
 # the image before passing it to the rolling-ball filter, and then invert the
 # result. This can be accomplished as follows:
 
-image = data.page()
-image_inverted = util.invert(image)
+image = ski.data.page()
+image_inverted = ski.util.invert(image)
 
-background_inverted = restoration.rolling_ball(image_inverted, radius=45)
+background_inverted = ski.restoration.rolling_ball(image_inverted, radius=45)
 filtered_image_inverted = image_inverted - background_inverted
-filtered_image = util.invert(filtered_image_inverted)
-background = util.invert(background_inverted)
+filtered_image = ski.util.invert(filtered_image_inverted)
+background = ski.util.invert(background_inverted)
 
 fig, ax = plt.subplots(nrows=1, ncols=3)
 
@@ -109,15 +109,15 @@ plt.show()
 # suffer from an underflow leading to unwanted artifacts. You can see
 # this in the top right corner of the visualization.
 
-image = data.page()
-image_inverted = util.invert(image)
+image = ski.data.page()
+image_inverted = ski.util.invert(image)
 
-background_inverted = restoration.rolling_ball(image_inverted, radius=45)
-background = util.invert(background_inverted)
+background_inverted = ski.restoration.rolling_ball(image_inverted, radius=45)
+background = ski.util.invert(background_inverted)
 underflow_image = image - background  # integer underflow occurs here
 
 # correct subtraction
-correct_image = util.invert(image_inverted - background_inverted)
+correct_image = ski.util.invert(image_inverted - background_inverted)
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
 
@@ -140,9 +140,9 @@ plt.show()
 # ``rolling_ball`` can handle datatypes other than `np.uint8`. You can
 # pass them into the function in the same way.
 
-image = data.coins()[:200, :200].astype(np.uint16)
+image = ski.data.coins()[:200, :200].astype(np.uint16)
 
-background = restoration.rolling_ball(image, radius=70.5)
+background = ski.restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
 plt.show()
 
@@ -152,9 +152,9 @@ plt.show()
 # be much larger than the image intensity, which can lead to
 # unexpected results.
 
-image = util.img_as_float(data.coins()[:200, :200])
+image = ski.util.img_as_float(ski.data.coins()[:200, :200])
 
-background = restoration.rolling_ball(image, radius=70.5)
+background = ski.restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
 plt.show()
 
@@ -174,10 +174,10 @@ plt.show()
 # multiplied by two.
 
 normalized_radius = 70.5 / 255
-image = util.img_as_float(data.coins())
-kernel = restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), normalized_radius * 2)
+image = ski.util.img_as_float(ski.data.coins())
+kernel = ski.restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), normalized_radius * 2)
 
-background = restoration.rolling_ball(image, kernel=kernel)
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -199,10 +199,10 @@ plt.show()
 # kernel and is used as the default kernel. ``ellipsoid_kernel``
 # specifies an ellipsoid shaped kernel.
 
-image = data.coins()
-kernel = restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), 70.5 * 2)
+image = ski.data.coins()
+kernel = ski.restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), 70.5 * 2)
 
-background = restoration.rolling_ball(image, kernel=kernel)
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -211,11 +211,11 @@ plt.show()
 # unexpected result and see that the effective (spatial) filter size
 # was reduced.
 
-image = data.coins()
+image = ski.data.coins()
 
-kernel = restoration.ellipsoid_kernel((10 * 2, 10 * 2), 255 * 2)
+kernel = ski.restoration.ellipsoid_kernel((10 * 2, 10 * 2), 255 * 2)
 
-background = restoration.rolling_ball(image, kernel=kernel)
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 plot_result(image, background)
 plt.show()
 
@@ -229,10 +229,10 @@ plt.show()
 # dimensions must match the image dimensions, hence the kernel shape
 # is now 3 dimensional.
 
-image = data.cells3d()[:, 1, ...]
-background = restoration.rolling_ball(
-    image, kernel=restoration.ellipsoid_kernel((1, 21, 21), 0.1)
-)
+image = ski.data.cells3d()[:, 1, ...]
+kernel = ski.restoration.ellipsoid_kernel((1, 21, 21), 0.1)
+
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 
 plot_result(image[30, ...], background[30, ...])
 plt.show()
@@ -244,10 +244,9 @@ plt.show()
 # However, you can also filter along all 3 dimensions at the same
 # time by specifying a value other than 1.
 
-image = data.cells3d()[:, 1, ...]
-background = restoration.rolling_ball(
-    image, kernel=restoration.ellipsoid_kernel((5, 21, 21), 0.1)
-)
+kernel = ski.restoration.ellipsoid_kernel((5, 21, 21), 0.1)
+
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 
 plot_result(image[30, ...], background[30, ...])
 plt.show()
@@ -256,10 +255,9 @@ plt.show()
 # Another possibility is to filter individual pixels along the
 # planar axis (z-stack axis).
 
-image = data.cells3d()[:, 1, ...]
-background = restoration.rolling_ball(
-    image, kernel=restoration.ellipsoid_kernel((100, 1, 1), 0.1)
-)
+kernel = ski.restoration.ellipsoid_kernel((100, 1, 1), 0.1)
+
+background = ski.restoration.rolling_ball(image, kernel=kernel)
 
 plot_result(image[30, ...], background[30, ...])
 plt.show()
@@ -275,8 +273,8 @@ plt.show()
 # Smoother peaks can be removed with smaller values of the radius.
 
 x = pywt.data.ecg()
-background = restoration.rolling_ball(x, radius=80)
-background2 = restoration.rolling_ball(x, radius=10)
+background = ski.restoration.rolling_ball(x, radius=80)
+background2 = ski.restoration.rolling_ball(x, radius=10)
 plt.figure()
 plt.plot(x, label='original')
 plt.plot(x - background, label='radius=80')
