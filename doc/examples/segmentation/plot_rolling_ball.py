@@ -183,21 +183,23 @@ plt.show()
 
 ######################################################################
 # Advanced Shapes
-# -----------------
+# ---------------
 #
-# By default, ``rolling_ball`` uses a ball shaped kernel (surprise).
-# Sometimes, this can be too limiting - as in the example above -,
+# By default, :func:`skimage.restoration.rolling_ball` uses a ball-shaped
+# kernel (surprise).
+# Sometimes, though, this can be too limiting---as in the example above,
 # because the intensity dimension has a different scale compared to
 # the spatial dimensions, or because the image dimensions may have
-# different meanings - one could be a stack counter in an image stack.
+# different meanings (e.g., one could be a stack counter in an image stack).
 #
-# To account for this, ``rolling_ball`` has a ``kernel`` argument
-# which allows you to specify the kernel to be used. A kernel must
-# have the same dimensionality as the image (Note: dimensionality,
-# not shape). To help with it's creation, two default kernels are
-# provided by ``skimage``. ``ball_kernel`` specifies a ball shaped
-# kernel and is used as the default kernel. ``ellipsoid_kernel``
-# specifies an ellipsoid shaped kernel.
+# To account for this, :func:`skimage.restoration.rolling_ball` has a `kernel`
+# argument which allows you to specify the kernel to be used. A kernel must
+# have the same dimensionality as the image (i.e., the same number of
+# dimensions/axes).
+# To help with its creation, two kernel implementations are provided:
+# :func:`skimage.restoration.ball_kernel` specifies a ball-shaped kernel and
+# is used as the default kernel; :func:`skimage.restoration.ellipsoid_kernel`
+# specifies an ellipsoid-shaped kernel.
 
 image = ski.data.coins()
 kernel = ski.restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), 70.5 * 2)
@@ -207,12 +209,11 @@ plot_result(image, background)
 plt.show()
 
 ######################################################################
-# You can also use ``ellipsoid_kernel`` to recreate the previous,
-# unexpected result and see that the effective (spatial) filter size
-# was reduced.
+# You can also use :func:`skimage.restoration.ellipsoid_kernel` to recreate
+# the previous, unexpected result and see that the effective (spatial) filter
+# size was reduced.
 
 image = ski.data.coins()
-
 kernel = ski.restoration.ellipsoid_kernel((10 * 2, 10 * 2), 255 * 2)
 
 background = ski.restoration.rolling_ball(image, kernel=kernel)
@@ -223,11 +224,11 @@ plt.show()
 # Higher Dimensions
 # -----------------
 #
-# Another feature of ``rolling_ball`` is that you can directly
-# apply it to higher dimensional images, e.g., a z-stack of images
-# obtained during confocal microscopy. The number of kernel
-# dimensions must match the image dimensions, hence the kernel shape
-# is now 3 dimensional.
+# Another interesting feature of :func:`skimage.restoration.rolling_ball` is
+# that you can directly apply it to higher-dimensional images, e.g., a z-stack
+# of images obtained in confocal microscopy. The number of kernel dimensions
+# must match that of image dimensions; in this case, the kernel is thus
+# 3-dimensional.
 
 image = ski.data.cells3d()[:, 1, ...]
 kernel = ski.restoration.ellipsoid_kernel((1, 21, 21), 0.1)
