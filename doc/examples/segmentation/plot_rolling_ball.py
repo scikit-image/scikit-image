@@ -45,7 +45,7 @@ import skimage as ski
 
 
 def plot_result(image, background):
-    fig, ax = plt.subplots(nrows=1, ncols=3)
+    fig, ax = plt.subplots(ncols=3)
 
     ax[0].imshow(image, cmap='gray')
     ax[0].set_title('Original image')
@@ -85,7 +85,7 @@ filtered_image_inverted = image_inverted - background_inverted
 filtered_image = ski.util.invert(filtered_image_inverted)
 background = ski.util.invert(background_inverted)
 
-fig, ax = plt.subplots(nrows=1, ncols=3)
+fig, ax = plt.subplots(ncols=3)
 
 ax[0].imshow(image, cmap='gray')
 ax[0].set_title('Original image')
@@ -119,7 +119,7 @@ underflow_image = image - background  # integer underflow occurs here
 # correct subtraction
 correct_image = ski.util.invert(image_inverted - background_inverted)
 
-fig, ax = plt.subplots(nrows=1, ncols=2)
+fig, ax = plt.subplots(ncols=2)
 
 ax[0].imshow(underflow_image, cmap='gray')
 ax[0].set_title('Background Removal with Underflow')
