@@ -70,7 +70,11 @@ def adapted_rand_error(
 
     if table is None:
         p_ij = contingency_table(
-            image_true, image_test, ignore_labels=ignore_labels, normalize=False
+            image_true,
+            image_test,
+            ignore_labels=ignore_labels,
+            normalize=False,
+            sparse_type="array",
         )
     else:
         p_ij = table
@@ -81,8 +85,8 @@ def adapted_rand_error(
     # Sum of the joint distribution squared
     sum_p_ij2 = p_ij.data @ p_ij.data - p_ij.sum()
 
-    a_i = p_ij.sum(axis=1).A.ravel()
-    b_i = p_ij.sum(axis=0).A.ravel()
+    a_i = p_ij.sum(axis=1).ravel()
+    b_i = p_ij.sum(axis=0).ravel()
 
     # Sum of squares of the test segment sizes (this is 2x the number of pairs
     # of pixels with the same label in im_test)

@@ -1,5 +1,4 @@
-"""test_watershed.py - tests the watershed function
-"""
+"""test_watershed.py - tests the watershed function"""
 
 import math
 import unittest
@@ -8,7 +7,9 @@ import numpy as np
 import pytest
 from scipy import ndimage as ndi
 
+import skimage.measure
 from skimage._shared.filters import gaussian
+from skimage.feature import peak_local_max
 from skimage.measure import label
 
 from .._watershed import watershed
@@ -770,11 +771,17 @@ class TestWatershed(unittest.TestCase):
 
 
 def test_compact_watershed():
+    # in this test, when compactness is greater than zero the watershed line
+    # is labeled with the closest marker (label=2)
+    # when compactness is zero the watershed line is labeled with
+    # the marker that reaches it first (label=1)
+    # because it has a zero cost path to the line.
     image = np.zeros((5, 6))
-    image[:, 3:] = 1
+    image[:, 3] = 2  # watershed line
+    image[:, 4:] = 1
     seeds = np.zeros((5, 6), dtype=int)
     seeds[2, 0] = 1
-    seeds[2, 3] = 2
+    seeds[2, 5] = 2
     compact = watershed(image, seeds, compactness=0.01)
     expected = np.array(
         [
@@ -788,9 +795,141 @@ def test_compact_watershed():
     )
     np.testing.assert_equal(compact, expected)
     normal = watershed(image, seeds)
-    expected = np.ones(image.shape, dtype=int)
-    expected[2, 3:] = 2
+    expected = np.array(
+        [
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+            [1, 1, 1, 1, 2, 2],
+        ],
+        dtype=int,
+    )
     np.testing.assert_equal(normal, expected)
+
+    # checks that compact watershed labels with watershed lines are
+    # a subset of the labels from compact watershed for this specific example
+    compact_wsl = watershed(image, seeds, compactness=0.01, watershed_line=True)
+    difference = compact_wsl != compact
+    difference[compact_wsl == 0] = False
+
+    assert not np.any(difference)
+
+
+def test_watershed_with_markers_offset():
+    """
+    Check edge case behavior reported in gh-6632
+
+    While we initially viewed the behavior described in gh-6632 [1]_ as a bug,
+    we have reverted that decision in gh-7661. See [2]_ for an explanation.
+    So this test now actually asserts the behavior reported in gh-6632 as
+    correct.
+
+    .. [1] https://github.com/scikit-image/scikit-image/issues/6632.
+    .. [2] https://github.com/scikit-image/scikit-image/issues/7661#issuecomment-2645810807
+    """
+    # Generate an initial image with two overlapping circles
+    x, y = np.indices((80, 80))
+    x1, y1, x2, y2 = 28, 28, 44, 52
+    r1, r2 = 16, 20
+    mask_circle1 = (x - x1) ** 2 + (y - y1) ** 2 < r1**2
+    mask_circle2 = (x - x2) ** 2 + (y - y2) ** 2 < r2**2
+    image = np.logical_or(mask_circle1, mask_circle2)
+
+    # Now we want to separate the two objects in image
+    # Generate the markers as local maxima of the distance to the background
+    # and then apply an y-offset
+    distance = ndi.distance_transform_edt(image)
+    coords = peak_local_max(distance, footprint=np.ones((3, 3)), labels=image)
+    coords[:, 0] += 6
+    mask = np.zeros(distance.shape, dtype=bool)
+    mask[tuple(coords.T)] = True
+    markers, _ = ndi.label(mask)
+
+    labels = watershed(-distance, markers, mask=image)
+
+    props = skimage.measure.regionprops(labels, intensity_image=-distance)
+
+    # Generally, assert that the smaller object could only conquer a thin line
+    # in the direction of the positive gradient
+    assert props[0].extent == 1
+    expected_region = np.arange(start=-10, stop=0, dtype=float).reshape(-1, 1)
+    np.testing.assert_equal(props[0].image_intensity, expected_region)
+
+    # Assert pixel count from reviewed reproducing example in bug report
+    assert props[0].num_pixels == 10
+    assert props[1].num_pixels == 1928
+
+
+def test_watershed_simple_basin_overspill():
+    """
+    Test edge case behavior when markers spill over into another basin / compete.
+
+    While we initially viewed the behavior described in gh-6632 [1]_ as a bug,
+    we have reverted that decision in gh-7661. See [2]_ for an explanation.
+    So this test now actually asserts the behavior reported in gh-6632 as
+    correct.
+
+    .. [1] https://github.com/scikit-image/scikit-image/issues/6632.
+    .. [2] https://github.com/scikit-image/scikit-image/issues/7661#issuecomment-2645810807
+    """
+    # Scenario 1
+    # fmt: off
+    image =    np.array([[6, 5, 4, 3, 0, 3, 0, 1, 2],
+                         [6, 5, 4, 3, 0, 3, 0, 1, 2]])
+    markers =  np.array([[0, 1, 0, 0, 0, 0, 0, 2, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    expected = np.array([[1, 1, 2, 2, 2, 2, 2, 2, 2],
+                         [2, 2, 2, 2, 2, 2, 2, 2, 2]])
+    # fmt: on
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
+
+    # Scenario 2
+    image = -np.array([1, 2, 2, 2, 2, 2, 3])
+    markers = np.array([1, 0, 0, 0, 0, 0, 2])
+    expected = np.array([1, 2, 2, 2, 2, 2, 2])
+    result = watershed(image, markers=markers, mask=image != 0)
+    np.testing.assert_array_equal(result, expected)
+
+
+def test_watershed_evenly_distributed_overspill():
+    """
+    Edge case: Basins should be distributed evenly between contesting markers.
+
+    Markers should be prevented from spilling over into another basin and
+    conquering it against other markers with the same claim, just because they
+    get to the basin one step earlier.
+    """
+    # Scenario 1: markers start with the same value
+    image =    np.array([0, 2, 1, 1, 1, 1, 1, 1, 2, 0])  # fmt: skip
+    markers =  np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 2])  # fmt: skip
+    expected = np.array([1, 1, 1, 1, 1, 2, 2, 2, 2, 2])  # fmt: skip
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
+
+    # Scenario 2: markers start with the different values
+    image =    np.array([2, 2, 1, 1, 1, 1, 1, 1, 2, 0])  # fmt: skip
+    expected = np.array([1, 1, 1, 1, 1, 2, 2, 2, 2, 2])  # fmt: skip
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
+
+
+def test_markers_on_maxima():
+    """Check that markers placed at maxima don't conquer other pixels.
+
+    Regression test for gh-7661 [1]_.
+
+    .. [1] https://github.com/scikit-image/scikit-image/issues/7661
+    """
+    image =    np.array([[0, 1, 2, 3, 4, 5, 4],
+                         [0, 1, 2, 3, 4, 4, 4]])  # fmt: skip
+    markers =  np.array([[1, 0, 0, 0, 0, 2, 0],
+                         [0, 0, 0, 0, 0, 0, 0]])  # fmt: skip
+    expected = np.array([[1, 1, 1, 1, 1, 2, 1],
+                         [1, 1, 1, 1, 1, 1, 1]])  # fmt: skip
+    result = watershed(image, markers=markers)
+    np.testing.assert_equal(result, expected)
 
 
 def test_numeric_seed_watershed():

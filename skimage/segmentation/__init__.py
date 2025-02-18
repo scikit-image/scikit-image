@@ -1,5 +1,4 @@
-"""Algorithms to partition images into meaningful regions or boundaries.
-"""
+"""Algorithms to partition images into meaningful regions or boundaries."""
 
 from ._expand_labels import expand_labels
 from .random_walker_segmentation import random_walker

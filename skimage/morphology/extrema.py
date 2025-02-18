@@ -541,7 +541,7 @@ def local_minima(
            [False, False, False, False, False, False, False]])
     """
     return local_maxima(
-        image=invert(image),
+        image=invert(image, signed_float=True),
         footprint=footprint,
         connectivity=connectivity,
         indices=indices,
