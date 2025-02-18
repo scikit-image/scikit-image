@@ -225,7 +225,7 @@ plt.show()
 # -----------------
 #
 # Another interesting feature of :func:`skimage.restoration.rolling_ball` is
-# that you can directly apply it to higher-dimensional images, e.g., a z-stack
+# that you can directly apply it to higher-dimensional images, e.g., a Z-stack
 # of images obtained in confocal microscopy. The number of kernel dimensions
 # must match that of image dimensions; in this case, the kernel is thus
 # 3-dimensional.
@@ -238,30 +238,26 @@ background = ski.restoration.rolling_ball(image, kernel=kernel)
 plot_result(image[30, ...], background[30, ...])
 plt.show()
 
-######################################################################
-# A kernel size of 1 does not filter along this axis. In other words,
-# above filter is applied to each image in the stack individually.
+#####################################################################
+# The above filter is actually applied to each image in the stack
+# *individually*, since the kernel has size 1 along the Z axis.
 #
-# However, you can also filter along all 3 dimensions at the same
-# time by specifying a value other than 1.
-
-kernel = ski.restoration.ellipsoid_kernel((5, 21, 21), 0.1)
-
-background = ski.restoration.rolling_ball(image, kernel=kernel)
-
-plot_result(image[30, ...], background[30, ...])
-plt.show()
+# To filter along all 3 dimensions at the same time, you must use sizes
+# greater than 1 along all 3 dimensions.
+#
+#   .. code-block:: python
+#      :caption: Change the first line in the above code block.
+#
+#       kernel = ski.restoration.ellipsoid_kernel((5, 21, 21), 0.1)
 
 ######################################################################
-# Another possibility is to filter individual pixels along the
-# planar axis (z-stack axis).
-
-kernel = ski.restoration.ellipsoid_kernel((100, 1, 1), 0.1)
-
-background = ski.restoration.rolling_ball(image, kernel=kernel)
-
-plot_result(image[30, ...], background[30, ...])
-plt.show()
+# Another possibility is to filter individual pixels *only* along the
+# planar (Z) axis.
+#
+#   .. code-block:: python
+#      :caption: This change here will show a lot more clearly in the result.
+#
+#       kernel = ski.restoration.ellipsoid_kernel((100, 1, 1), 0.1)
 
 ######################################################################
 # 1D Signal Filtering
