@@ -46,7 +46,7 @@ util
     Generic utilities.
 """
 
-__version__ = '0.25.2rc0.dev0'
+__version__ = '0.25.3rc0.dev0'
 
 import lazy_loader as _lazy
 
