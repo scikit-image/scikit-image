@@ -203,11 +203,13 @@ thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 # dimension now contains all pixel values), and applying the thresholding
 # function on the image sequence along its second axis:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: NumPy's `apply_along_axis` applies a function to 1D slices of
+#                `arr` along `axis`.
 #
-#     thresh_values = np.apply_along_axis(filters.threshold_otsu,
-#                                         axis=1,
-#                                         arr=smooth_seq.reshape(n_z, -1))
+#       thresh_values = np.apply_along_axis(filters.threshold_otsu,
+#                                           axis=1,
+#                                           arr=smooth_seq.reshape(n_z, -1))
 #
 # We use the following flat structuring element for morphological
 # computations (``np.newaxis`` is used to prepend an axis of size 1 for time):
