@@ -1,3 +1,5 @@
+name: CircleCI
+
 on: [status]
 permissions:
   contents: read
