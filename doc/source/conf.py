@@ -132,7 +132,7 @@ def notebook_modification_function(notebook_content, notebook_filename):
     skimage_install_lines = ["# JupyterLite-specific code"]
     skimage_pip_install_magic = (
         [f"%pip install scikit-image=={version}\n\n"]
-        if ("dev" in version and "CI" in os.environ)
+        if (("dev" or "rc") in version and "CI" in os.environ)
         else ["%pip install scikit-image\n\n"]
     )
     skimage_install_lines.extend(skimage_pip_install_magic)
