@@ -96,9 +96,9 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "{version}/skimage/"
+        url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
     else:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "v{version}/skimage/"
+        url = "https://github.com/scikit-image/scikit-image/raw/v{version}/skimage/"
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -297,6 +297,33 @@ def download_all(directory=None):
                 shutil.copy2(file_path, dest_path)
     finally:
         _image_fetcher.path = old_dir
+
+
+def patch_cors():
+    """Patch all registry URLs to use a CORS proxy for GitLab resources.
+
+    This function modifies the registry_urls dictionary to route all GitLab
+    resources through a CORS proxy (cdn.statically.io), making them accessible
+    in environments with CORS restrictions, such as JupyterLite.
+
+    Notes
+    -----
+    This modifies the global registry_urls dictionary in-place.
+    The modification only affects gitlab.com URLs.
+    """
+    import re
+    from . import _registry
+
+    new_registry_urls = {
+        k: re.sub(
+            r'https://gitlab.com/(.+)/-/raw(.+)',
+            r'https://cdn.statically.io/gl/\1\2',
+            url,
+        )
+        for k, url in _registry.registry_urls.items()
+    }
+    _registry.registry_urls.clear()
+    _registry.registry_urls.update(new_registry_urls)
 
 
 def lbp_frontal_face_cascade_filename():

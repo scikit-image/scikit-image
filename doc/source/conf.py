@@ -172,6 +172,11 @@ def notebook_modification_function(notebook_content, notebook_filename):
                 "%pip install pyodide-http",
                 "import pyodide_http",
                 "pyodide_http.patch_all()",
+                "\n",
+                # Enable a CORS proxy for GitLab resources, see:
+                # https://gitlab.com/gitlab-org/gitlab/-/issues/16732
+                "import skimage.data",
+                "skimage.data.patch_cors()",
             ]
         )
 
