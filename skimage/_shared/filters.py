@@ -13,23 +13,17 @@ from scipy import ndimage as ndi
 from .._shared.utils import (
     _supported_float_type,
     convert_to_float,
-    deprecate_parameter,
-    DEPRECATED,
 )
 
 
-@deprecate_parameter(
-    "output", new_name="out", start_version="0.23", stop_version="0.25"
-)
 def gaussian(
     image,
-    sigma=1,
-    output=DEPRECATED,
+    sigma=1.0,
+    *,
     mode='nearest',
     cval=0,
     preserve_range=False,
     truncate=4.0,
-    *,
     channel_axis=None,
     out=None,
 ):

@@ -13,11 +13,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from skimage.morphology import (
-    square,
-    rectangle,
+    footprint_rectangle,
     diamond,
     disk,
-    cube,
     octahedron,
     ball,
     octagon,
@@ -26,15 +24,19 @@ from skimage.morphology import (
 
 # Generate 2D and 3D structuring elements.
 struc_2d = {
-    "square(15)": square(15),
-    "rectangle(15, 10)": rectangle(15, 10),
+    "square 15x15": footprint_rectangle((15, 15)),
+    "rectangle 15x10": footprint_rectangle((15, 10)),
     "diamond(7)": diamond(7),
     "disk(7)": disk(7),
     "octagon(7, 4)": octagon(7, 4),
     "star(5)": star(5),
 }
 
-struc_3d = {"cube(11)": cube(11), "octahedron(5)": octahedron(5), "ball(5)": ball(5)}
+struc_3d = {
+    "cube 11x11x11": footprint_rectangle((11, 11, 11)),
+    "octahedron(5)": octahedron(5),
+    "ball(5)": ball(5),
+}
 
 # Visualize the elements.
 fig = plt.figure(figsize=(8, 8))

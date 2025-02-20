@@ -53,7 +53,8 @@ qcs.levels
 #####################################################################
 # Each level has, respectively, the following number of segments:
 
-[len(seg) for seg in qcs.allsegs]
+# Levels without segments still contain one empty array, account for that
+[len(seg) if seg[0].size else 0 for seg in qcs.allsegs]
 
 #####################################################################
 # Estimate the mitotic index
