@@ -325,6 +325,12 @@ def patch_cors():
     _registry.registry_urls.clear()
     _registry.registry_urls.update(new_registry_urls)
 
+    # Recreate the image fetcher to use the new URLs, so
+    # that we can download the images from the new URLs
+    # and intercept before the download happens
+    global _image_fetcher, data_dir
+    _image_fetcher, data_dir = _create_image_fetcher()
+
 
 def lbp_frontal_face_cascade_filename():
     """Return the path to the XML file containing the weak classifier cascade.
