@@ -159,10 +159,15 @@ def notebook_modification_function(notebook_content, notebook_filename):
     ):
         extra_code_lines.extend(
             [
+                # lzma needs to be imported so that %pip install pooch works
+                "import lzma",
+                # pooch depends on requests and need to be installed before
+                # pyodide_http.patch_all() is called
+                "%pip install pooch",
+                "import pooch",
                 "%pip install pyodide-http",
                 "import pyodide_http",
                 "pyodide_http.patch_all()",
-                "import pooch",
             ]
         )
 
