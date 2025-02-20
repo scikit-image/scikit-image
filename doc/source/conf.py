@@ -7,7 +7,6 @@ from datetime import date
 import inspect
 import os
 import sys
-import re
 from warnings import filterwarnings
 
 import plotly.io as pio
@@ -101,21 +100,8 @@ else:
 pio.renderers.default = "sphinx_gallery_png"
 
 
-# add a scikit-image installation step when running in JupyterLite
-
-
 def notebook_modification_function(notebook_content, notebook_filename):
     notebook_content_str = str(notebook_content)
-    warning_template = "\n".join(
-        [
-            "<div class='alert alert-{message_class}'>",
-            "",
-            "# JupyterLite warning",
-            "",
-            "{message}",
-            "</div>",
-        ]
-    )
 
     message_class = "warning"
     message = (
@@ -123,15 +109,31 @@ def notebook_modification_function(notebook_content, notebook_filename):
         " encounter some unexpected behaviour.\n\nThe main difference is that imports"
         " can take a lot longer than usual, for example the first `import skimage`"
         " statement can take roughly 10-20s.\n\nIf you notice problems, feel free to"
-        " open an [issue](https://github.com/scikit-image/scikit-image/issues/new/choose)."
+        " [open an issue](https://github.com/scikit-image/scikit-image/issues/new/choose)."
     )
 
-    markdown = warning_template.format(message_class=message_class, message=message)
+    jupyterlite_warning_header = "\n".join(
+        [
+            f"<div class='alert alert-{message_class}'>",
+            "",
+            "# JupyterLite warning",
+            "",
+            f"{message}",
+            "</div>",
+        ]
+    )
 
     dummy_notebook_content = {"cells": []}
-    add_markdown_cell(dummy_notebook_content, markdown)
+    add_markdown_cell(dummy_notebook_content, jupyterlite_warning_header)
 
-    code_lines = [f"%pip install scikit-image=={version}\n"]
+    # Add a code cell to install the correct version of scikit-image. We add
+    # this only for CI and the dev docs, as it includes a WASM build of
+    # scikit-image that might not be available when building the docs locally.
+    code_lines = (
+        [f"%pip install scikit-image=={version}\n\n"]
+        if ("dev" in version and "CI" in os.environ)
+        else ["%pip install scikit-image\n\n"]
+    )
     code_lines.insert(0, "# JupyterLite-specific code")
 
     # Extra code lines, dynamically added based on the notebooks' contents.
@@ -152,10 +154,12 @@ def notebook_modification_function(notebook_content, notebook_filename):
         "from skimage import data" in notebook_content_str
         or "skimage.data" in notebook_content_str
         or "ski.data" in notebook_content_str
-        or re.search(
-            r'from\s+skimage\s+import\s+(?:[^,\n]+,\s*)*data(?:\s*,|$)',
-            notebook_content_str,
-        )
+        # TODO: regex seems to make the notebook_modification_function hang
+        # up here, enable this later
+        # or re.search(
+        #     r'from\s+skimage\s+import\s+(?:[^,\n]+,\s*)*data(?:\s*,|$)',
+        #     notebook_content_str,
+        # )
     ):
         extra_code_lines.extend(
             [
