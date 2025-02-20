@@ -15,16 +15,16 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     Parameters
     ----------
-    image : ([P, ]M, N) ndarray
+    image : (N1, N2, ..., ND) ndarray
        Degraded image.
     psf : ndarray
        Point spread function (PSF). Assumed to be the impulse
        response (input image space) if the data type is real, or the
        transfer function (Fourier or frequency space) if the data type is
        complex. There is no constraint on the shape of the impulse
-       response. The transfer function must be of shape
-       ``(N1, N2, ..., ND)`` if `is_real is True`,
-       ``(N1, N2, ..., ND // 2 + 1)`` otherwise (see :func:`numpy.fft.rfftn`).
+       response. The transfer function though must be of shape
+       `(N1, N2, ..., ND)` if `is_real is True`,
+       `(N1, N2, ..., ND // 2 + 1)` otherwise (see :func:`numpy.fft.rfftn`).
     balance : float
        Regularization parameter. Denoted by :math:`\lambda`: in the Notes
        section below, its value lets you balance data adequacy (improving
@@ -48,7 +48,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     Returns
     -------
-    im_deconv : ([P, ]M, N) ndarray
+    im_deconv : (N1, N2, ..., ND) ndarray
        The deconvolved image.
 
     Examples
