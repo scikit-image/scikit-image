@@ -29,7 +29,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        Regularization parameter. Denoted by :math:`\lambda`: in the Notes
        section below, its value lets you balance data adequacy (improving
        frequency restoration) with respect to prior adequacy (reducing
-       frequency restoration and avoiding noise artifacts).
+       frequency restoration and avoiding noise artifacts). A larger value for
+       this parameter favors the regularization/prior.
     reg : ndarray, optional
        Regularization operator. Laplacian by default. It can
        be an impulse response or a transfer function, as for the PSF.
@@ -69,7 +70,7 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     .. math:: y = Hx + n
 
-    where :math:`n` is noise, :math:`H` the PSF and :math:`x` the
+    where :math:`n` is noise, :math:`H` the PSF, and :math:`x` the
     unknown original image, the Wiener filter is
 
     .. math::
@@ -78,18 +79,19 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     where :math:`F` and :math:`F^\dagger` are the Fourier and inverse
     Fourier transforms respectively, :math:`\Lambda_H` the transfer
-    function (or the Fourier transform of the PSF, see [Hunt] below)
-    and :math:`\Lambda_D` the filter to penalize the restored image
-    frequencies (Laplacian by default, that is penalization of high
-    frequency). The parameter :math:`\lambda` tunes the balance
-    between the data (that tends to increase high frequency, even
-    those coming from noise), and the regularization.
+    function (or the Fourier transform of the PSF, see [2]_),
+    and :math:`\Lambda_D` the regularization operator, which is a filter
+    penalizing the restored image frequencies (Laplacian by default, that is,
+    penalization of high frequencies). The parameter :math:`\lambda` tunes the
+    balance between data (which tends to increase high frequencies, even those
+    coming from noise) and regularization/prior (which tends to avoid noise
+    artifacts).
 
     These methods are then specific to a prior model. Consequently,
     the application or the true image nature must correspond to the
-    prior model. By default, the prior model (Laplacian) introduce
+    prior model. By default, the prior model (Laplacian) introduces
     image smoothness or pixel correlation. It can also be interpreted
-    as high-frequency penalization to compensate the instability of
+    as high-frequency penalization to compensate for the instability of
     the solution with respect to the data (sometimes called noise
     amplification or "explosive" solution).
 
