@@ -129,12 +129,14 @@ def notebook_modification_function(notebook_content, notebook_filename):
     # Add a code cell to install the correct version of scikit-image. We add
     # this only for CI and the dev docs, as it includes a WASM build of
     # scikit-image that might not be available when building the docs locally.
-    code_lines = (
+    skimage_install_lines = ["# JupyterLite-specific code"]
+    skimage_pip_install_magic = (
         [f"%pip install scikit-image=={version}\n\n"]
         if ("dev" in version and "CI" in os.environ)
         else ["%pip install scikit-image\n\n"]
     )
-    code_lines.insert(0, "# JupyterLite-specific code")
+    skimage_install_lines.extend(skimage_pip_install_magic)
+    add_code_cell(dummy_notebook_content, "\n".join(skimage_install_lines))
 
     # Extra code lines, dynamically added based on the notebooks' contents.
     extra_code_lines = []
@@ -172,7 +174,6 @@ def notebook_modification_function(notebook_content, notebook_filename):
                 "%pip install pyodide-http",
                 "import pyodide_http",
                 "pyodide_http.patch_all()",
-                "\n",
                 # Enable a CORS proxy for GitLab resources, see:
                 # https://gitlab.com/gitlab-org/gitlab/-/issues/16732
                 "import skimage.data",
@@ -180,8 +181,8 @@ def notebook_modification_function(notebook_content, notebook_filename):
             ]
         )
 
-    code = "\n".join(code_lines) + "\n".join(extra_code_lines)
-    add_code_cell(dummy_notebook_content, code)
+    if extra_code_lines:
+        add_code_cell(dummy_notebook_content, "\n".join(extra_code_lines))
 
     notebook_content["cells"] = (
         dummy_notebook_content["cells"] + notebook_content["cells"]
