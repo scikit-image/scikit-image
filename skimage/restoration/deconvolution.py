@@ -8,9 +8,9 @@ from . import uft
 
 
 def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
-    r"""Restore image using Wiener-Hunt deconvolution.
+    r"""Restore image using Wiener–Hunt deconvolution.
 
-    Wiener-Hunt deconvolution is a restoration method which follows a Bayesian
+    Wiener–Hunt deconvolution is a restoration method which follows a Bayesian
     approach [1]_.
 
     Parameters
@@ -100,14 +100,14 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     ----------
     .. [1] François Orieux, Jean-François Giovannelli, and Thomas
            Rodet, "Bayesian estimation of regularization and point
-           spread function parameters for Wiener-Hunt deconvolution",
-           J. Opt. Soc. Am. A 27, 1593-1607 (2010)
+           spread function parameters for Wiener–Hunt deconvolution",
+           J. Opt. Soc. Am. A 27, 1593–1607 (2010)
            https://www.osapublishing.org/josaa/abstract.cfm?URI=josaa-27-7-1593
            https://hal.archives-ouvertes.fr/hal-00674508
 
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
-           Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
+           Electroacoustics, vol. au-19, no. 4, pp. 285–288, dec. 1971
     """
     if reg is None:
         reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
