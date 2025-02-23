@@ -268,7 +268,7 @@ def probabilistic_hough_line(
         Angles at which to compute the transform, in radians.
         Defaults to a vector of 180 angles evenly spaced in the
         range [-pi/2, pi/2).
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
