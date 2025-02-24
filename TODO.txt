@@ -24,9 +24,6 @@ Version 0.26
   well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
   (and all `pytest.warns(FutureWarning)` context managers there).
 
-Version 0.25
-------------
-
 Other
 -----
 * Remove warningsfilter for imageio and Pillow once
