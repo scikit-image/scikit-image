@@ -11,7 +11,8 @@ Version 0.27
   - Remove `skimage/io/_plugins`
   - Remove `skimage/io/manage_plugins.py`
   - Remove `skimage/io/__init__.py::__getattr__`
-  - Remove related tests, imports, etc...
+  - Remove related tests, imports, etc.
+  - Remove `doc/source/user_guide/plugins.rst`
 * Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
 
 Version 0.26
