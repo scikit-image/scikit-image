@@ -1,3 +1,128 @@
+scikit-image 0.25.2  (2025-02-18)
+=================================
+
+We're happy to announce the release of scikit-image 0.25.2!
+
+Bug Fixes
+---------
+
+- Handle random degenerate case in ``skimage.graph.cut_normalized`` gracefully (`#7675 <https://github.com/scikit-image/scikit-image/pull/7675>`_).
+- In ``skimage.feature.BRIEF``, copy ``keypoints`` if necessary to preserve contiguity (`#7692 <https://github.com/scikit-image/scikit-image/pull/7692>`_).
+- Revert a previous fix to ``skimage.segmentation.watershed`` that unintentionally changed the algorithm's behavior for markers placed at maxima in the image. We decided that the behavior originally reported as a bug (gh-6632), is not actually one (`#7702 <https://github.com/scikit-image/scikit-image/pull/7702>`_).
+
+Documentation
+-------------
+
+- Improve docstring of ``skimage.restoration.rolling_ball`` (`#7682 <https://github.com/scikit-image/scikit-image/pull/7682>`_).
+
+Infrastructure
+--------------
+
+- Only run the job if the PR got merged (vs merely closed) (`#7679 <https://github.com/scikit-image/scikit-image/pull/7679>`_).
+- Fix typo in GH workflow (`#7681 <https://github.com/scikit-image/scikit-image/pull/7681>`_).
+- Refactor GitHub's CI config and helper scripts (`#7672 <https://github.com/scikit-image/scikit-image/pull/7672>`_).
+- Use pytest config in pyproject.toml in CI (`#7555 <https://github.com/scikit-image/scikit-image/pull/7555>`_).
+- Lower CI build verbosity (`#7688 <https://github.com/scikit-image/scikit-image/pull/7688>`_).
+- Port testing on Windows from Azure CI to GitHub's CI (`#7687 <https://github.com/scikit-image/scikit-image/pull/7687>`_).
+- CI cleanup (`#7693 <https://github.com/scikit-image/scikit-image/pull/7693>`_).
+- Simultaneously resolve all dependencies; add pip caching (`#7690 <https://github.com/scikit-image/scikit-image/pull/7690>`_).
+- Reenable graph reproducibility test (`#7694 <https://github.com/scikit-image/scikit-image/pull/7694>`_).
+- Give milestone labeler necessary permissions (`#7695 <https://github.com/scikit-image/scikit-image/pull/7695>`_).
+- Milestone labeler permission not needed (`#7696 <https://github.com/scikit-image/scikit-image/pull/7696>`_).
+- Fix 313t wheel build (`#7699 <https://github.com/scikit-image/scikit-image/pull/7699>`_).
+
+Maintenance
+-----------
+
+- Include a missing image in meson.build so they are included in the wheel (`#7660 <https://github.com/scikit-image/scikit-image/pull/7660>`_).
+- Add zizmor to pre-commit; address GH workflow issues raised (`#7662 <https://github.com/scikit-image/scikit-image/pull/7662>`_).
+
+Contributors
+------------
+
+6 authors added to this release (alphabetically):
+
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
+- Matthew Brett (`@matthew-brett <https://github.com/matthew-brett>`_)
+- Orion Poplawski (`@opoplawski <https://github.com/opoplawski>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+
+8 reviewers added to this release (alphabetically):
+
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Juan Nunez-Iglesias (`@jni <https://github.com/jni>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
+- Mark Harfouche (`@hmaarrfk <https://github.com/hmaarrfk>`_)
+- Matthew Brett (`@matthew-brett <https://github.com/matthew-brett>`_)
+- Ralf Gommers (`@rgommers <https://github.com/rgommers>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+
+_These lists are automatically generated, and may not be complete or may contain duplicates._
+
+scikit-image 0.25.1 (2025-01-26)
+================================
+
+We're happy to announce the release of scikit-image 0.25.1!
+
+Bug Fixes
+---------
+
+- Include ``centroid`` in ``__all__`` of the PYI file in ``skimage.measure`` (`#7652 <https://github.com/scikit-image/scikit-image/pull/7652>`_).
+- Improve numerical stability of ``blur_effect`` (`#7643 <https://github.com/scikit-image/scikit-image/pull/7643>`_).
+- Because under-determined fits are unreliable, ``skimage.measure.EllipseModel`` will now warn and return ``False`` (no fit) when fewer than 5 data points are provided (`#7648 <https://github.com/scikit-image/scikit-image/pull/7648>`_).
+- Explicitly upcast ``data`` with dtype ``float16`` to ``float32`` in  ``skimage.segmentation.random_walker``; this fixes passing ``float16`` on NumPy 1.26 (`#7655 <https://github.com/scikit-image/scikit-image/pull/7655>`_).
+
+Documentation
+-------------
+
+- Don't use removed ``QuadContourSet.collections`` in gallery example (`#7638 <https://github.com/scikit-image/scikit-image/pull/7638>`_).
+- Change old import convention in the gallery examples (`#7630 <https://github.com/scikit-image/scikit-image/pull/7630>`_).
+
+Infrastructure
+--------------
+
+- Make apigen.py work with editable hooks (`#7647 <https://github.com/scikit-image/scikit-image/pull/7647>`_).
+- Build Linux ARM wheels natively (`#7664 <https://github.com/scikit-image/scikit-image/pull/7664>`_).
+
+Maintenance
+-----------
+
+- Infer floating point type for sigma parameter (`#7637 <https://github.com/scikit-image/scikit-image/pull/7637>`_).
+- In ``skimage.segmentation.active_contour``, change the type of the default argument for ``w_line`` to indicate it is a float (`#7645 <https://github.com/scikit-image/scikit-image/pull/7645>`_).
+- Temporarily disable parallel building of gallery (`#7656 <https://github.com/scikit-image/scikit-image/pull/7656>`_).
+- [pre-commit.ci] pre-commit autoupdate (`#7649 <https://github.com/scikit-image/scikit-image/pull/7649>`_).
+- Skip flaky test on azure (`#7669 <https://github.com/scikit-image/scikit-image/pull/7669>`_).
+
+Contributors
+------------
+
+8 authors added to this release (alphabetically):
+
+- `@michaelbratsch <https://github.com/michaelbratsch>`_
+- `@scrimpys <https://github.com/scrimpys>`_
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Jigyasu (`@jgyasu <https://github.com/jgyasu>`_)
+- kwikwag (`@kwikwag <https://github.com/kwikwag>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+
+8 reviewers added to this release (alphabetically):
+
+- `@michaelbratsch <https://github.com/michaelbratsch>`_
+- Dan Schult (`@dschult <https://github.com/dschult>`_)
+- Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
+- Jigyasu (`@jgyasu <https://github.com/jgyasu>`_)
+- Lars Grüter (`@lagru <https://github.com/lagru>`_)
+- Marianne Corvellec (`@mkcor <https://github.com/mkcor>`_)
+- Ruth Comer (`@rcomer <https://github.com/rcomer>`_)
+- Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
+
+_These lists are automatically generated, and may not be complete or may contain duplicates._
+
 scikit-image 0.25.0 (2024-12-13)
 ================================
 
@@ -196,5 +321,4 @@ Contributors
 - Ralf Gommers (`@rgommers <https://github.com/rgommers>`_)
 - Stefan van der Walt (`@stefanv <https://github.com/stefanv>`_)
 
-_These lists are automatically generated, and may not be complete or may contain
-duplicates._
+_These lists are automatically generated, and may not be complete or may contain duplicates._
