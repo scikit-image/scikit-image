@@ -76,24 +76,26 @@ for it, (ax, image) in enumerate(zip(axes.flatten(), sample[::step])):
 #####################################################################
 # To view the sample data in 3D, run the following code:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: We import the `plotly.graph_objects` module, upon which
+#                `plotly.express` is built.
 #
-#     import plotly.graph_objects as go
+#       import plotly.graph_objects as go
 #
-#     (n_Z, n_Y, n_X) = sample.shape
-#     Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
+#       (n_Z, n_Y, n_X) = sample.shape
+#       Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
 #
-#     fig = go.Figure(
-#         data=go.Volume(
-#             x=X.flatten(),
-#             y=Y.flatten(),
-#             z=Z.flatten(),
-#             value=sample.flatten(),
-#             opacity=0.5,
-#             slices_z=dict(show=True, locations=[4])
-#         )
-#     )
-#     fig.show()
+#       fig = go.Figure(
+#           data=go.Volume(
+#               x=X.flatten(),
+#               y=Y.flatten(),
+#               z=Z.flatten(),
+#               value=sample.flatten(),
+#               opacity=0.5,
+#               slices_z=dict(show=True, locations=[4])
+#           )
+#       )
+#       fig.show()
 
 #####################################################################
 # Compute structure tensor
