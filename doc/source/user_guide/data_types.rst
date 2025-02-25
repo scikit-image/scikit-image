@@ -38,7 +38,7 @@ violates these assumptions about the dtype range::
    >>> image = np.arange(0, 50, 10, dtype=np.uint8)
    >>> print(image.astype(float)) # These float values are out of range.
    [  0.  10.  20.  30.  40.]
-   >>> print(ski.util.img_as_float(image))
+   >>> print(ski.util.rescale_to_float(image))
    [ 0.          0.03921569  0.07843137  0.11764706  0.15686275]
 
 
@@ -54,31 +54,34 @@ requirements should be noted in the docstrings.
 The following utility functions in the main package are available to developers
 and users:
 
-=============  =================================
-Function name  Description
-=============  =================================
-img_as_float   Convert to floating point (integer types become 64-bit floats)
-img_as_ubyte   Convert to 8-bit uint.
-img_as_uint    Convert to 16-bit uint.
-img_as_int     Convert to 16-bit int.
-=============  =================================
+==================  =================================
+Function name       Description
+==================  =================================
+rescale_to_float    Convert to floating point (integer types become 64-bit floats).
+rescale_to_float64  Convert to 64-bit float.
+rescale_to_float32  Convert to 32-bit float.
+rescale_to_ubyte    Convert to 8-bit uint.
+rescale_to_uint16   Convert to 16-bit uint.
+rescale_to_int16    Convert to 16-bit int.
+rescale_to_bool     Convert to bool.
+==================  =================================
 
 These functions convert images to the desired dtype and *properly rescale their
 values*::
 
    >>> import skimage as ski
    >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> ski.util.img_as_ubyte(image)
+   >>> ski.util.rescale_to_ubyte(image)
    array([  0, 128, 255], dtype=uint8)
 
 Be careful! These conversions can result in a loss of precision, since 8 bits
 cannot hold the same amount of information as 64 bits::
 
    >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
-   >>> ski.util.img_as_ubyte(image)
+   >>> ski.util.rescale_to_ubyte(image)
    array([  0, 128, 128, 255], dtype=uint8)
 
-Note that :func:`skimage.util.img_as_float` will preserve the precision of floating
+Note that :func:`skimage.util.rescale_to_float` will preserve the precision of floating
 point types and does not automatically rescale the range of floating point inputs.
 
 Additionally, some functions take a ``preserve_range`` argument where a range
@@ -119,7 +122,7 @@ unnecessary data copies take place.
 A user that requires a specific type of output (e.g., for display purposes),
 may write::
 
-   >>> out = ski.util.img_as_uint(sobel(image))
+   >>> out = ski.util.rescale_to_uint(sobel(image))
    >>> plt.imshow(out)
 
 
@@ -152,19 +155,19 @@ Using an image from OpenCV with ``skimage``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If cv_image is an array of unsigned bytes, ``skimage`` will understand it by
-default. If you prefer working with floating point images, :func:`~.img_as_float`
+default. If you prefer working with floating point images, :func:`~.rescale_to_float`
 can be used to convert the image::
 
     >>> import skimage as ski
-    >>> image = ski.util.img_as_float(any_opencv_image)
+    >>> image = ski.util.rescale_to_float(any_opencv_image)
 
 Using an image from ``skimage`` with OpenCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The reverse can be achieved with :func:`~.img_as_ubyte`::
+The reverse can be achieved with :func:`~.rescale_to_ubyte`::
 
     >>> import skimage as ski
-    >>> cv_image = ski.util.img_as_ubyte(any_skimage_image)
+    >>> cv_image = ski.util.rescale_to_ubyte(any_skimage_image)
 
 
 Image processing pipeline
@@ -177,14 +180,14 @@ dtype conversion functions (here, ``func1`` and ``func2`` are ``skimage``
 functions)::
 
    >>> import skimage as ski
-   >>> image = ski.util.img_as_float(func1(func2(image)))
+   >>> image = ski.util.rescale_to_float(func1(func2(image)))
    >>> processed_image = custom_func(image)
 
 Better yet, you can convert the image internally and use a simplified
 processing pipeline::
 
    >>> def custom_func(image):
-   ...     image = ski.util.img_as_float(image)
+   ...     image = ski.util.rescale_to_float(image)
    ...     # do something
    ...
    >>> processed_image = custom_func(func1(func2(image)))
@@ -232,7 +235,7 @@ dtypes. (Negative values are preserved when converting between signed dtypes.)
 To prevent this clipping behavior, you should rescale your image beforehand::
 
    >>> image = ski.exposure.rescale_intensity(img_int32, out_range=(0, 2**31 - 1))
-   >>> img_uint8 = ski.util.img_as_ubyte(image)
+   >>> img_uint8 = ski.util.rescale_to_ubyte(image)
 
 This behavior is symmetric: The values in an unsigned dtype are spread over
 just the positive range of a signed dtype.

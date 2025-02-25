@@ -54,7 +54,7 @@ from skimage.color import (
     rgba2rgb,
     gray2rgba,
 )
-from skimage.util import img_as_float, img_as_ubyte, img_as_float32
+from skimage.util import rescale_to_float, rescale_to_ubyte, rescale_to_float32
 
 # TODO: when minimum numpy dependency is 1.25 use:
 # np..exceptions.AxisError instead of AxisError
@@ -71,7 +71,7 @@ class TestColorconv:
     img_rgba = np.array([[[0, 0.5, 1, 0], [0, 0.5, 1, 1], [0, 0.5, 1, 0.5]]]).astype(
         float
     )
-    img_stains = img_as_float(img_rgb) * 0.3
+    img_stains = rescale_to_float(img_rgb) * 0.3
 
     colbars = np.array(
         [[1, 1, 0, 0, 1, 1, 0, 0], [1, 1, 1, 1, 0, 0, 0, 0], [1, 0, 1, 0, 1, 0, 1, 0]]
@@ -142,7 +142,7 @@ class TestColorconv:
 
     def test_rgba2rgb_dtype(self):
         rgba = self.img_rgba.astype('float64')
-        rgba32 = img_as_float32(rgba)
+        rgba32 = rescale_to_float32(rgba)
 
         assert rgba2rgb(rgba).dtype == rgba.dtype
         assert rgba2rgb(rgba32).dtype == rgba32.dtype
@@ -150,7 +150,7 @@ class TestColorconv:
     # RGB to HSV
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_rgb2hsv_conversion(self, channel_axis):
-        rgb = img_as_float(self.img_rgb)[::16, ::16]
+        rgb = rescale_to_float(self.img_rgb)[::16, ::16]
 
         _rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
         hsv = rgb2hsv(_rgb, channel_axis=channel_axis)
@@ -168,8 +168,8 @@ class TestColorconv:
             rgb2hsv(self.img_grayscale)
 
     def test_rgb2hsv_dtype(self):
-        rgb = img_as_float(self.img_rgb)
-        rgb32 = img_as_float32(self.img_rgb)
+        rgb = rescale_to_float(self.img_rgb)
+        rgb32 = rescale_to_float32(self.img_rgb)
 
         assert rgb2hsv(rgb).dtype == rgb.dtype
         assert rgb2hsv(rgb32).dtype == rgb32.dtype
@@ -260,7 +260,7 @@ class TestColorconv:
     # RGB<->XYZ roundtrip on another image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_xyz_rgb_roundtrip(self, channel_axis):
-        img_rgb = img_as_float(self.img_rgb)
+        img_rgb = rescale_to_float(self.img_rgb)
 
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
         round_trip = xyz2rgb(
@@ -271,9 +271,9 @@ class TestColorconv:
 
     # HED<->RGB roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
-        img_in = img_as_ubyte(self.img_stains)
+        img_in = rescale_to_ubyte(self.img_stains)
         img_out = rgb2hed(hed2rgb(img_in))
-        assert_equal(img_as_ubyte(img_out), img_in)
+        assert_equal(rescale_to_ubyte(img_out), img_in)
 
     # HED<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
@@ -289,10 +289,10 @@ class TestColorconv:
     def test_bro_rgb_roundtrip(self):
         from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
 
-        img_in = img_as_ubyte(self.img_stains)
+        img_in = rescale_to_ubyte(self.img_stains)
         img_out = combine_stains(img_in, rgb_from_bro)
         img_out = separate_stains(img_out, bro_from_rgb)
-        assert_equal(img_as_ubyte(img_out), img_in)
+        assert_equal(rescale_to_ubyte(img_out), img_in)
 
     # BRO<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
@@ -521,7 +521,7 @@ class TestColorconv:
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_rgb_roundtrip(self, channel_axis):
-        img_rgb = img_as_float(self.img_rgb)
+        img_rgb = rescale_to_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
         assert_array_almost_equal(
             lab2rgb(
@@ -655,7 +655,7 @@ class TestColorconv:
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1 - 2])
     def test_luv_rgb_roundtrip(self, channel_axis):
-        img_rgb = img_as_float(self.img_rgb)
+        img_rgb = rescale_to_float(self.img_rgb)
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
         assert_array_almost_equal(
             luv2rgb(
@@ -694,7 +694,7 @@ class TestColorconv:
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_lab_lch_roundtrip(self, channel_axis):
-        rgb = img_as_float(self.img_rgb)
+        rgb = rescale_to_float(self.img_rgb)
         rgb = np.moveaxis(rgb, source=-1, destination=channel_axis)
         lab = rgb2lab(rgb, channel_axis=channel_axis)
         lab2 = lch2lab(
@@ -704,7 +704,7 @@ class TestColorconv:
         assert_array_almost_equal(lab2, lab)
 
     def test_rgb_lch_roundtrip(self):
-        rgb = img_as_float(self.img_rgb)
+        rgb = rescale_to_float(self.img_rgb)
         lab = rgb2lab(rgb)
         lch = lab2lch(lab)
         lab2 = lch2lab(lch)
@@ -730,7 +730,7 @@ class TestColorconv:
         assert_array_almost_equal(lch0, lch3[0, 0, 0, :])
 
     def _get_lab0(self):
-        rgb = img_as_float(self.img_rgb[:1, :1, :])
+        rgb = rescale_to_float(self.img_rgb[:1, :1, :])
         return rgb2lab(rgb)[0, 0, :]
 
     def test_yuv(self):
@@ -757,7 +757,7 @@ class TestColorconv:
 
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
     def test_yuv_roundtrip(self, channel_axis):
-        img_rgb = img_as_float(self.img_rgb)[::16, ::16]
+        img_rgb = rescale_to_float(self.img_rgb)[::16, ::16]
         img_rgb = np.moveaxis(img_rgb, source=-1, destination=channel_axis)
         assert_array_almost_equal(
             yuv2rgb(
@@ -805,7 +805,7 @@ class TestColorconv:
         assert yuv2rgb(img32).dtype == img32.dtype
 
     def test_rgb2yiq_conversion(self):
-        rgb = img_as_float(self.img_rgb)[::16, ::16]
+        rgb = rescale_to_float(self.img_rgb)[::16, ::16]
         yiq = rgb2yiq(rgb).reshape(-1, 3)
         gt = np.array(
             [colorsys.rgb_to_yiq(pt[0], pt[1], pt[2]) for pt in rgb.reshape(-1, 3)]
@@ -908,7 +908,7 @@ def test_gray2rgb_channel_axis(shape, channel_axis):
 def test_gray2rgba_dtype():
     img_f64 = np.random.random((5, 5))
     img_f32 = img_f64.astype('float32')
-    img_u8 = img_as_ubyte(img_f64)
+    img_u8 = rescale_to_ubyte(img_f64)
     img_int = img_u8.astype(int)
 
     for img in [img_f64, img_f32, img_u8, img_int]:
@@ -917,7 +917,7 @@ def test_gray2rgba_dtype():
 
 def test_gray2rgba_alpha():
     img = np.random.random((5, 5))
-    img_u8 = img_as_ubyte(img)
+    img_u8 = rescale_to_ubyte(img)
 
     # Default
     alpha = None
@@ -1052,7 +1052,7 @@ def test_rgba2rgb_dtypes(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_lab_lch_roundtrip_dtypes(dtype):
-    rgb = img_as_float(data.colorwheel()).astype(dtype=dtype, copy=False)
+    rgb = rescale_to_float(data.colorwheel()).astype(dtype=dtype, copy=False)
     lab = rgb2lab(rgb)
     float_dtype = _supported_float_type(dtype)
     assert lab.dtype == float_dtype
@@ -1063,7 +1063,7 @@ def test_lab_lch_roundtrip_dtypes(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_rgb2hsv_dtypes(dtype):
-    rgb = img_as_float(data.colorwheel())[::16, ::16]
+    rgb = rescale_to_float(data.colorwheel())[::16, ::16]
     rgb = rgb.astype(dtype=dtype, copy=False)
     hsv = rgb2hsv(rgb).reshape(-1, 3)
     float_dtype = _supported_float_type(dtype)

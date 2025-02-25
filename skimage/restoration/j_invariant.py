@@ -6,7 +6,7 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type
 from ..metrics import mean_squared_error
-from ..util import img_as_float
+from ..util import rescale_to_float
 
 
 def _interpolate_image(image, *, multichannel=False):
@@ -96,8 +96,8 @@ def denoise_invariant(
     ----------
     image : ndarray (M[, N[, ...]][, C]) of ints, uints or floats
         Input data to be denoised. `image` can be of any numeric type,
-        but it is cast into a ndarray of floats (using `img_as_float`) for the
-        computation of the denoised image.
+        but it is cast into a ndarray of floats (using :func:`~.rescale_to_float`)
+        for the computation of the denoised image.
     denoise_function : function
         Original denoising function.
     stride : int, optional
@@ -143,11 +143,11 @@ def denoise_invariant(
     --------
     >>> import skimage
     >>> from skimage.restoration import denoise_invariant, denoise_tv_chambolle
-    >>> image = skimage.util.img_as_float(skimage.data.chelsea())
+    >>> image = skimage.util.rescale_to_float(skimage.data.chelsea())
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
     >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
 
     # promote float16->float32 if needed
     float_dtype = _supported_float_type(image.dtype)
@@ -214,7 +214,7 @@ def calibrate_denoiser(
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+        Input data to be denoised (converted using :func:`~.rescale_to_float`).
     denoise_function : function
         Denoising function to be calibrated.
     denoise_parameters : dict of list
@@ -308,7 +308,7 @@ def _calibrate_denoiser_search(
     Parameters
     ----------
     image : ndarray
-        Input data to be denoised (converted using `img_as_float`).
+        Input data to be denoised (converted using :func:`~.rescale_to_float`).
     denoise_function : function
         Denoising function to be calibrated.
     denoise_parameters : dict of list
@@ -329,7 +329,7 @@ def _calibrate_denoiser_search(
     losses : list of int
         Self-supervised loss for each set of parameters in `parameters_tested`.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     parameters_tested = list(_product_from_dict(denoise_parameters))
     losses = []
 

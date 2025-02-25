@@ -171,9 +171,9 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = dtype.rescale_to_float32
     else:
-        _func = dtype.img_as_float64
+        _func = dtype.rescale_to_float64
     return _func(arr, force_copy=force_copy)
 
 
@@ -236,9 +236,9 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
 
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        arr = dtype.img_as_float32(arr)
+        arr = dtype.rescale_to_float32(arr)
     else:
-        arr = dtype.img_as_float64(arr)
+        arr = dtype.rescale_to_float64(arr)
 
     background = np.ravel(background).astype(arr.dtype)
     if len(background) != 3:
@@ -1958,9 +1958,9 @@ def _prepare_lab_array(arr, force_copy=True):
         raise ValueError('Input image has less than 3 channels.')
     float_dtype = _supported_float_type(arr.dtype)
     if float_dtype == np.float32:
-        _func = dtype.img_as_float32
+        _func = dtype.rescale_to_float32
     else:
-        _func = dtype.img_as_float64
+        _func = dtype.rescale_to_float64
     return _func(arr, force_copy=force_copy)
 
 

@@ -18,8 +18,8 @@ from skimage._shared.testing import (
     mono_check,
 )
 from skimage.metrics import structural_similarity
+from skimage.util import rescale_to_float
 
-from ... import img_as_float
 from ...color import rgb2lab
 from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
 from .._plugins.pil_plugin import _palette_is_grayscale, ndarray_to_pil, pil_to_ndarray
@@ -49,7 +49,7 @@ def test_png_round_trip():
 
     I = np.eye(3)
     imsave(fname, I)
-    Ip = img_as_float(imread(fname))
+    Ip = rescale_to_float(imread(fname))
     os.remove(fname)
     assert np.sum(np.abs(Ip - I)) < 1e-3
 

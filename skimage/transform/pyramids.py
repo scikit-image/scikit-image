@@ -67,7 +67,7 @@ def pyramid_reduce(
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -144,7 +144,7 @@ def pyramid_expand(
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -232,7 +232,7 @@ def pyramid_gaussian(
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.
@@ -337,7 +337,7 @@ def pyramid_laplacian(
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     channel_axis : int or None, optional
         If None, the image is assumed to be a grayscale (single channel) image.

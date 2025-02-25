@@ -2,7 +2,7 @@ __all__ = ['random_noise']
 
 
 import numpy as np
-from .dtype import img_as_float
+from .dtype import rescale_to_float
 
 
 def _bernoulli(p, shape, *, rng):
@@ -130,7 +130,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
     else:
         low_clip = 0.0
 
-    image = img_as_float(image)
+    image = rescale_to_float(image)
 
     rng = np.random.default_rng(rng)
 

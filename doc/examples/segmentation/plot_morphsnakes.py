@@ -65,7 +65,7 @@ def store_evolution_in(lst):
 
 
 # Morphological ACWE
-image = ski.util.img_as_float(ski.data.camera())
+image = ski.util.rescale_to_float(ski.data.camera())
 
 # Initial level set
 init_ls = ski.segmentation.checkerboard_level_set(image.shape, 6)
@@ -99,7 +99,7 @@ for n, color in ((2, 'g'), (7, 'y'), (35, 'r')):
 ax[1].legend(handles=contour_labels, loc="upper right")
 
 # Morphological GAC
-image = ski.util.img_as_float(ski.data.coins())
+image = ski.util.rescale_to_float(ski.data.coins())
 gimage = ski.segmentation.inverse_gaussian_gradient(image)
 
 # Initial level set

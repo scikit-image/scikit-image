@@ -28,7 +28,7 @@ functions only work on gray-scale or binary images, so we set ``as_gray=True``.
 import matplotlib.pyplot as plt
 import skimage as ski
 
-orig_phantom = ski.util.img_as_ubyte(ski.data.shepp_logan_phantom())
+orig_phantom = ski.util.rescale_to_ubyte(ski.data.shepp_logan_phantom())
 fig, ax = plt.subplots()
 ax.imshow(orig_phantom, cmap=plt.cm.gray)
 

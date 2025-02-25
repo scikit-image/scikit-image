@@ -235,11 +235,11 @@ def histogram(
 
     Examples
     --------
-    >>> from skimage import data, exposure, img_as_float
-    >>> image = img_as_float(data.camera())
+    >>> import skimage as ski
+    >>> image = ski.util.rescale_to_float(ski.data.camera())
     >>> np.histogram(image, bins=2)
     (array([ 93585, 168559]), array([0. , 0.5, 1. ]))
-    >>> exposure.histogram(image, nbins=2)
+    >>> ski.exposure.histogram(image, nbins=2)
     (array([ 93585, 168559]), array([0.25, 0.75]))
     """
     sh = image.shape
@@ -338,10 +338,10 @@ def cumulative_distribution(image, nbins=256):
 
     Examples
     --------
-    >>> from skimage import data, exposure, img_as_float
-    >>> image = img_as_float(data.camera())
-    >>> hi = exposure.histogram(image)
-    >>> cdf = exposure.cumulative_distribution(image)
+    >>> import skimage as ski
+    >>> image = ski.util.rescale_to_float(ski.data.camera())
+    >>> hi = ski.exposure.histogram(image)
+    >>> cdf = ski.exposure.cumulative_distribution(image)
     >>> all(cdf[0] == np.cumsum(hi[0])/float(image.size))
     True
     """
@@ -662,9 +662,9 @@ def adjust_gamma(image, gamma=1, gain=1):
 
     Examples
     --------
-    >>> from skimage import data, exposure, img_as_float
-    >>> image = img_as_float(data.moon())
-    >>> gamma_corrected = exposure.adjust_gamma(image, 2)
+    >>> import skimage as ski
+    >>> image = ski.util.rescale_to_float(ski.data.moon())
+    >>> gamma_corrected = ski.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()
     True

@@ -3,6 +3,8 @@ from warnings import warn
 
 import numpy as np
 
+from .._shared.utils import deprecate_func
+
 
 __all__ = [
     'img_as_float32',
@@ -12,6 +14,13 @@ __all__ = [
     'img_as_uint',
     'img_as_ubyte',
     'img_as_bool',
+    'rescale_to_float32',
+    'rescale_to_float64',
+    'rescale_to_float',
+    'rescale_to_int16',
+    'rescale_to_uint16',
+    'rescale_to_ubyte',
+    'rescale_to_bool',
     'dtype_limits',
 ]
 
@@ -422,7 +431,220 @@ if _convert.__doc__ is not None:
     )
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float32` instead.",
+)
 def img_as_float32(image, force_copy=False):
+    """Convert an image to single-precision (32-bit) floating point format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float32
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return rescale_to_float32(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float64` instead.",
+)
+def img_as_float64(image, force_copy=False):
+    """Convert an image to double-precision (64-bit) floating point format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float64
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return rescale_to_float64(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float` instead.",
+)
+def img_as_float(image, force_copy=False):
+    """Convert an image to floating point format.
+
+    This function is similar to :func:`~.rescale_to_float64`, but will not convert
+    lower-precision floating point arrays to `float64`.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of float
+        Output image.
+
+    Notes
+    -----
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
+    If the input image has a float type, intensity values are not modified
+    and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
+
+    """
+    return rescale_to_float(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_uint16` instead.",
+)
+def img_as_uint(image, force_copy=False):
+    """Convert an image to 16-bit unsigned integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of uint16
+        Output image.
+
+    Notes
+    -----
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 65535.
+
+    """
+    return rescale_to_uint16(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_int16` instead.",
+)
+def img_as_int(image, force_copy=False):
+    """Convert an image to 16-bit signed integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of int16
+        Output image.
+
+    Notes
+    -----
+    The values are scaled between -32768 and 32767.
+    If the input data-type is positive-only (e.g., uint8), then
+    the output image will still only have positive values.
+
+    """
+    return rescale_to_int16(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_ubyte` instead.",
+)
+def img_as_ubyte(image, force_copy=False):
+    """Convert an image to 8-bit unsigned integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of ubyte (uint8)
+        Output image.
+
+    Notes
+    -----
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 255.
+
+    """
+    return rescale_to_ubyte(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_bool` instead.",
+)
+def img_as_bool(image, force_copy=False):
+    """Convert an image to boolean format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of bool (`bool_`)
+        Output image.
+
+    Notes
+    -----
+    The upper half of the input dtype's positive range is True, and the lower
+    half is False. All negative values (if present) are False.
+
+    """
+    return rescale_to_bool(image, force_copy=force_copy)
+
+
+def rescale_to_float32(image, *, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
     Parameters
@@ -448,7 +670,7 @@ def img_as_float32(image, force_copy=False):
     return _convert(image, np.float32, force_copy)
 
 
-def img_as_float64(image, force_copy=False):
+def rescale_to_float64(image, *, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -474,10 +696,10 @@ def img_as_float64(image, force_copy=False):
     return _convert(image, np.float64, force_copy)
 
 
-def img_as_float(image, force_copy=False):
+def rescale_to_float(image, *, force_copy=False):
     """Convert an image to floating point format.
 
-    This function is similar to `img_as_float64`, but will not convert
+    This function is similar to :func:`~.rescale_to_float64`, but will not convert
     lower-precision floating point arrays to `float64`.
 
     Parameters
@@ -503,7 +725,7 @@ def img_as_float(image, force_copy=False):
     return _convert(image, np.floating, force_copy)
 
 
-def img_as_uint(image, force_copy=False):
+def rescale_to_uint16(image, *, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -527,7 +749,7 @@ def img_as_uint(image, force_copy=False):
     return _convert(image, np.uint16, force_copy)
 
 
-def img_as_int(image, force_copy=False):
+def rescale_to_int16(image, *, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -552,7 +774,7 @@ def img_as_int(image, force_copy=False):
     return _convert(image, np.int16, force_copy)
 
 
-def img_as_ubyte(image, force_copy=False):
+def rescale_to_ubyte(image, *, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -576,7 +798,7 @@ def img_as_ubyte(image, force_copy=False):
     return _convert(image, np.uint8, force_copy)
 
 
-def img_as_bool(image, force_copy=False):
+def rescale_to_bool(image, *, force_copy=False):
     """Convert an image to boolean format.
 
     Parameters

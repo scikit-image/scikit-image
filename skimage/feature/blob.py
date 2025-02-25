@@ -7,7 +7,7 @@ from scipy import spatial
 from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
 from ..transform import integral_image
-from ..util import img_as_float
+from ..util import rescale_to_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
 
@@ -336,7 +336,7 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -518,7 +518,7 @@ def blob_log(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -681,7 +681,7 @@ def blob_doh(
     """
     check_nD(image, 2)
 
-    image = img_as_float(image)
+    image = rescale_to_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

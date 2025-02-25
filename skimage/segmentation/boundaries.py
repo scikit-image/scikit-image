@@ -3,7 +3,7 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import _supported_float_type
 from ..morphology import dilation, erosion, footprint_rectangle
-from ..util import img_as_float, view_as_windows
+from ..util import rescale_to_float, view_as_windows
 from ..color import gray2rgb
 
 
@@ -220,7 +220,7 @@ def mark_boundaries(
     find_boundaries
     """
     float_dtype = _supported_float_type(image.dtype)
-    marked = img_as_float(image, force_copy=True)
+    marked = rescale_to_float(image, force_copy=True)
     marked = marked.astype(float_dtype, copy=False)
     if marked.ndim == 2:
         marked = gray2rgb(marked)
