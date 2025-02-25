@@ -1,5 +1,11 @@
 I/O Plugin Infrastructure
 -------------------------
+
+.. note::
+    The plugin infrastructure of ``skimage.io`` is deprecated since version
+    0.25 and will be removed in version 0.27. Please use ``imageio`` or other
+    I/O packages directly.
+
 A plugin consists of two files, the source and the descriptor ``.ini``.  Let's
 say we'd like to provide a plugin for ``imshow`` using ``matplotlib``.  We'll
 call our plugin ``mpl``::
