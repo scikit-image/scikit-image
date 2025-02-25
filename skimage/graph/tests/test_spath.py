@@ -1,9 +1,11 @@
 import numpy as np
+import pytest
 import skimage.graph.spath as spath
 
 from skimage._shared.testing import assert_equal, assert_array_equal
 
 
+@pytest.mark.thread_unsafe
 def test_basic():
     x = np.array([[1, 1, 3], [0, 2, 0], [4, 3, 1]])
     path, cost = spath.shortest_path(x)

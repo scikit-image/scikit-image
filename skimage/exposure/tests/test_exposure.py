@@ -357,6 +357,7 @@ def test_rescale_same_values():
     assert_array_almost_equal(out, image)
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.skipif(
     Version(np.__version__) < Version('1.25'),
     reason="Older NumPy throws a few extra warnings here",

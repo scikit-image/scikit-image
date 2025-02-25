@@ -5,6 +5,9 @@ from skimage._shared.testing import assert_array_equal, assert_almost_equal, par
 from skimage._shared._warnings import expected_warnings
 
 
+import pytest
+
+
 np.random.seed(0)
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
@@ -50,6 +53,7 @@ def test_basic():
     )
 
 
+@pytest.mark.thread_unsafe
 def test_neg_inf():
     expected_costs = np.where(a == 1, np.inf, 0)
     expected_path = [

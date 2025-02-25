@@ -915,7 +915,7 @@ def test_gray2rgba_dtype():
         assert gray2rgba(img).dtype == img.dtype
 
 
-def test_gray2rgba_alpha():
+def test_gray2rgba_alpha(num_parallel_threads):
     img = np.random.random((5, 5))
     img_u8 = img_as_ubyte(img)
 
@@ -942,9 +942,10 @@ def test_gray2rgba_alpha():
 
     # Warning about alpha cast
     alpha = 0.5
-    with expected_warnings(["alpha cannot be safely cast to image dtype"]):
-        rgba = gray2rgba(img_u8, alpha)
-        assert_equal(rgba[..., :3], gray2rgb(img_u8))
+    if num_parallel_threads == 1:
+        with expected_warnings(["alpha cannot be safely cast to image dtype"]):
+            rgba = gray2rgba(img_u8, alpha)
+            assert_equal(rgba[..., :3], gray2rgb(img_u8))
 
     # Invalid shape
     alpha = np.random.random((5, 5, 1))

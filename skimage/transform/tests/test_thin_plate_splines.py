@@ -64,10 +64,10 @@ class TestThinPlateSplineTransform:
         # When the estimation fails, the instance attributes remain unchanged
         assert tps.src is None
 
+    @pytest.mark.thread_unsafe
     def test_rotate(self):
         image = ski.data.astronaut()
         desired = ski.transform.rotate(image, angle=90)
-
         src = np.array([[0, 0], [0, 511], [511, 511], [511, 0]])
         dst = np.array([[511, 0], [0, 0], [0, 511], [511, 511]])
         tps = ThinPlateSplineTransform()
