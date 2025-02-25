@@ -1,43 +1,3 @@
-# This minimal dataset was available as part of
-# scikit-image 0.15 and will be retained until
-# further notice.
-# Testing data and additional datasets should only
-# be made available by pooch
-legacy_datasets = [
-    'astronaut.png',
-    'brick.png',
-    'camera.png',
-    'chessboard_GRAY.png',
-    'chessboard_RGB.png',
-    'chelsea.png',
-    'clock_motion.png',
-    'coffee.png',
-    'coins.png',
-    'color.png',
-    'cell.png',
-    'grass.png',
-    'gravel.png',
-    'horse.png',
-    'hubble_deep_field.jpg',
-    'ihc.png',
-    'lbpcascade_frontalface_opencv.xml',
-    'lfw_subset.npy',
-    'logo.png',
-    'microaneurysms.png',
-    'moon.png',
-    'multipage.tif',
-    'multipage_rgb.tif',
-    'no_time_for_that_tiny.gif',
-    'page.png',
-    'text.png',
-    'retina.jpg',
-    'rocket.jpg',
-    'phantom.png',
-    'motorcycle_disp.npz',
-    'motorcycle_left.png',
-    'motorcycle_right.png',
-]
-
 # Registry of datafiles that can be downloaded along with their SHA256 hashes
 # To generate the SHA256 hash, use the command
 # openssl sha256 filename
@@ -180,8 +140,4 @@ registry_urls = {
     "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
     "restoration/tests/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
     "data/gray_morph_output.npz": "https://gitlab.com/scikit-image/data/-/raw/806548e112bcf2b708a9a32275d335cb592480fd/Tests_besides_Equalize_Otsu/gray_morph_output.npz",
-}
-
-legacy_registry = {
-    ('data/' + filename): registry['data/' + filename] for filename in legacy_datasets
 }
