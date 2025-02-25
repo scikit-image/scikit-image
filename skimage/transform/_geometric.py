@@ -17,7 +17,7 @@ def _affine_matrix_from_vector(v):
     dimensionality = int(np.round(d))  # round to prevent approx errors
     if d != dimensionality:
         raise ValueError(
-            'Invalid number of elements for ' f'linearized matrix: {nparam}'
+            "Invalid number of elements for " f"linearized matrix: {nparam}"
         )
     matrix = np.eye(dimensionality + 1)
     matrix[:-1, :] = np.reshape(v, (dimensionality, dimensionality + 1))
@@ -58,6 +58,8 @@ def _center_and_normalize_points(points):
            (1997): 580-593.
 
     """
+    # deal with array_like points
+    points = np.asarray(points)
     n, d = points.shape
     centroid = np.mean(points, axis=0)
 
@@ -319,8 +321,8 @@ class FundamentalMatrixTransform(_GeometricTransform):
         self.params = matrix
         if dimensionality != 2:
             raise NotImplementedError(
-                f'{self.__class__} is only implemented for 2D coordinates '
-                '(i.e. 3D transformation matrices).'
+                f"{self.__class__} is only implemented for 2D coordinates "
+                "(i.e. 3D transformation matrices)."
             )
 
     def __call__(self, coords):
@@ -378,9 +380,9 @@ class FundamentalMatrixTransform(_GeometricTransform):
         src = np.asarray(src)
         dst = np.asarray(dst)
         if src.shape != dst.shape:
-            raise ValueError('src and dst shapes must be identical.')
+            raise ValueError("src and dst shapes must be identical.")
         if src.shape[0] < 8:
-            raise ValueError('src.shape[0] must be equal or larger than 8.')
+            raise ValueError("src.shape[0] must be equal or larger than 8.")
 
         # Center and normalize image points for better numerical stability.
         try:
@@ -779,9 +781,7 @@ class ProjectiveTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        src = np.asarray(src)
-        dst = np.asarray(dst)
-        n, d = src.shape
+        n, d = np.array(src).shape
 
         src_matrix, src = _center_and_normalize_points(src)
         dst_matrix, dst = _center_and_normalize_points(dst)
@@ -853,8 +853,8 @@ class ProjectiveTransform(_GeometricTransform):
 
     def __nice__(self):
         """common 'paramstr' used by __str__ and __repr__"""
-        npstring = np.array2string(self.params, separator=', ')
-        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
+        npstring = np.array2string(self.params, separator=", ")
+        paramstr = "matrix=\n" + textwrap.indent(npstring, "    ")
         return paramstr
 
     def __repr__(self):
@@ -862,14 +862,14 @@ class ProjectiveTransform(_GeometricTransform):
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        return f'<{classstr}({paramstr}) at {hex(id(self))}>'
+        return f"<{classstr}({paramstr}) at {hex(id(self))}>"
 
     def __str__(self):
         """Add standard str formatting around a __nice__ string"""
         paramstr = self.__nice__()
         classname = self.__class__.__name__
         classstr = classname
-        return f'<{classstr}({paramstr})>'
+        return f"<{classstr}({paramstr})>"
 
     @property
     def dimensionality(self):
@@ -1007,7 +1007,7 @@ class AffineTransform(ProjectiveTransform):
                 " the implicit parameters at the same time."
             )
         if params and dimensionality > 2:
-            raise ValueError('Parameter input is only supported in 2D.')
+            raise ValueError("Parameter input is only supported in 2D.")
         elif matrix is not None:
             matrix = np.asarray(matrix)
             if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
@@ -1062,7 +1062,7 @@ class AffineTransform(ProjectiveTransform):
     def rotation(self):
         if self.dimensionality != 2:
             raise NotImplementedError(
-                'The rotation property is only implemented for 2D transforms.'
+                "The rotation property is only implemented for 2D transforms."
             )
         return math.atan2(self.params[1, 0], self.params[0, 0])
 
@@ -1070,7 +1070,7 @@ class AffineTransform(ProjectiveTransform):
     def shear(self):
         if self.dimensionality != 2:
             raise NotImplementedError(
-                'The shear property is only implemented for 2D transforms.'
+                "The shear property is only implemented for 2D transforms."
             )
         beta = math.atan2(-self.params[0, 1], self.params[1, 1])
         return beta - self.rotation
@@ -1293,14 +1293,14 @@ class EuclideanTransform(ProjectiveTransform):
                     rotation = np.zeros(3)
                 else:
                     raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
+                        "Parameters cannot be specified for dimension "
+                        f"{dimensionality} transforms"
                     )
             else:
                 if not np.isscalar(rotation) and len(rotation) != 3:
                     raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
+                        "Parameters cannot be specified for dimension "
+                        f"{dimensionality} transforms"
                     )
             if translation is None:
                 translation = (0,) * dimensionality
@@ -1358,7 +1358,7 @@ class EuclideanTransform(ProjectiveTransform):
             return self.params[:3, :3]
         else:
             raise NotImplementedError(
-                'Rotation only implemented for 2D and 3D transforms.'
+                "Rotation only implemented for 2D and 3D transforms."
             )
 
     @property
@@ -1433,7 +1433,7 @@ class SimilarityTransform(EuclideanTransform):
                 dimensionality = matrix.shape[0] - 1
         if params:
             if dimensionality not in (2, 3):
-                raise ValueError('Parameters only supported for 2D and 3D.')
+                raise ValueError("Parameters only supported for 2D and 3D.")
             matrix = np.eye(dimensionality + 1, dtype=float)
             if scale is None:
                 scale = 1
@@ -1491,7 +1491,7 @@ class SimilarityTransform(EuclideanTransform):
         elif self.dimensionality == 3:
             return np.cbrt(np.linalg.det(self.params))
         else:
-            raise NotImplementedError('Scale is only implemented for 2D and 3D.')
+            raise NotImplementedError("Scale is only implemented for 2D and 3D.")
 
 
 class PolynomialTransform(_GeometricTransform):
@@ -1519,7 +1519,7 @@ class PolynomialTransform(_GeometricTransform):
     def __init__(self, params=None, *, dimensionality=2):
         if dimensionality != 2:
             raise NotImplementedError(
-                'Polynomial transforms are only implemented for 2D.'
+                "Polynomial transforms are only implemented for 2D."
             )
         if params is None:
             # default to transformation which preserves original coordinates
@@ -1662,22 +1662,22 @@ class PolynomialTransform(_GeometricTransform):
     @property
     def inverse(self):
         raise NotImplementedError(
-            'There is no explicit way to do the inverse polynomial '
-            'transformation. Instead, estimate the inverse transformation '
-            'parameters by exchanging source and destination coordinates,'
-            'then apply the forward transformation.'
+            "There is no explicit way to do the inverse polynomial "
+            "transformation. Instead, estimate the inverse transformation "
+            "parameters by exchanging source and destination coordinates,"
+            "then apply the forward transformation."
         )
 
 
 TRANSFORMS = {
-    'euclidean': EuclideanTransform,
-    'similarity': SimilarityTransform,
-    'affine': AffineTransform,
-    'piecewise-affine': PiecewiseAffineTransform,
-    'projective': ProjectiveTransform,
-    'fundamental': FundamentalMatrixTransform,
-    'essential': EssentialMatrixTransform,
-    'polynomial': PolynomialTransform,
+    "euclidean": EuclideanTransform,
+    "similarity": SimilarityTransform,
+    "affine": AffineTransform,
+    "piecewise-affine": PiecewiseAffineTransform,
+    "projective": ProjectiveTransform,
+    "fundamental": FundamentalMatrixTransform,
+    "essential": EssentialMatrixTransform,
+    "polynomial": PolynomialTransform,
 }
 
 
@@ -1745,7 +1745,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     """
     ttype = ttype.lower()
     if ttype not in TRANSFORMS:
-        raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
+        raise ValueError(f"the transformation type '{ttype}' is not implemented")
 
     tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
     tform.estimate(src, dst, *args, **kwargs)
