@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import entropy
 
+from ..util._backends import dispatchable
 from ..util.dtype import dtype_range
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
@@ -22,6 +23,7 @@ def _as_floats(image0, image1):
     return image0, image1
 
 
+@dispatchable
 def mean_squared_error(image0, image1):
     """
     Compute the mean-squared error between two images.
@@ -48,6 +50,7 @@ def mean_squared_error(image0, image1):
     return np.mean((image0 - image1) ** 2, dtype=np.float64)
 
 
+@dispatchable
 def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
     """
     Compute the normalized root mean-squared error (NRMSE) between two

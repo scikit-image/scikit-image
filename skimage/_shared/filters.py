@@ -18,7 +18,7 @@ from .._shared.utils import (
 
 def gaussian(
     image,
-    sigma=1,
+    sigma=1.0,
     *,
     mode='nearest',
     cval=0,

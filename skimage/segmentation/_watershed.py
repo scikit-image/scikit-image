@@ -172,7 +172,7 @@ def watershed(
 
     .. [2] https://en.wikipedia.org/wiki/Watershed_%28image_processing%29
 
-    .. [3] http://cmm.ensmp.fr/~beucher/wtshed.html
+    .. [3] https://web.archive.org/web/20180702213110/http://cmm.ensmp.fr/~beucher/wtshed.html
 
     .. [4] P. J. Soille and M. M. Ansoult, "Automated basin delineation from
            digital elevation models using mathematical morphology," Signal

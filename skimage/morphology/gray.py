@@ -2,14 +2,11 @@
 Grayscale morphological operations
 """
 
-import warnings
-
 import numpy as np
 from scipy import ndimage as ndi
 
 from .footprints import _footprint_is_sequence, mirror_footprint, pad_footprint
 from .misc import default_footprint
-from .._shared.utils import DEPRECATED
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
@@ -30,66 +27,6 @@ def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
         for _ in range(num_iter):
             gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     return out
-
-
-def _shift_footprint(footprint, shift_x, shift_y):
-    """Shift the binary image `footprint` in the left and/or up.
-
-    This only affects 2D footprints with even number of rows
-    or columns.
-
-    Parameters
-    ----------
-    footprint : 2D array, shape (M, N)
-        The input footprint.
-    shift_x, shift_y : bool or None
-        Whether to move `footprint` along each axis. If ``None``, the
-        array is not modified along that dimension.
-
-    Returns
-    -------
-    out : 2D array, shape (M + int(shift_x), N + int(shift_y))
-        The shifted footprint.
-    """
-    footprint = np.asarray(footprint)
-    if footprint.ndim != 2:
-        # do nothing for 1D or 3D or higher footprints
-        return footprint
-    m, n = footprint.shape
-    if m % 2 == 0:
-        extra_row = np.zeros((1, n), footprint.dtype)
-        if shift_x:
-            footprint = np.vstack((footprint, extra_row))
-        else:
-            footprint = np.vstack((extra_row, footprint))
-        m += 1
-    if n % 2 == 0:
-        extra_col = np.zeros((m, 1), footprint.dtype)
-        if shift_y:
-            footprint = np.hstack((footprint, extra_col))
-        else:
-            footprint = np.hstack((extra_col, footprint))
-    return footprint
-
-
-def _shift_footprints(footprint, shift_x, shift_y):
-    """Shifts the footprints, whether it's a single array or a sequence.
-
-    See `_shift_footprint`, which is called for each array in the sequence.
-    """
-    if shift_x is DEPRECATED and shift_y is DEPRECATED:
-        return footprint
-
-    warning_msg = (
-        "The parameters `shift_x` and `shift_y` are deprecated since v0.23 and "
-        "will be removed in v0.26. Use `pad_footprint` or modify the footprint"
-        "manually instead."
-    )
-    warnings.warn(warning_msg, FutureWarning, stacklevel=4)
-
-    if _footprint_is_sequence(footprint):
-        return tuple((_shift_footprint(fp, shift_x, shift_y), n) for fp, n in footprint)
-    return _shift_footprint(footprint, shift_x, shift_y)
 
 
 def _min_max_to_constant_mode(dtype, mode, cval):
@@ -130,8 +67,6 @@ def erosion(
     image,
     footprint=None,
     out=None,
-    shift_x=DEPRECATED,
-    shift_y=DEPRECATED,
     *,
     mode="reflect",
     cval=0.0,
@@ -173,12 +108,6 @@ def erosion(
     eroded : array, same shape as `image`
         The result of the morphological erosion.
 
-    Other Parameters
-    ----------------
-    shift_x, shift_y : DEPRECATED
-
-        .. deprecated:: 0.23
-
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
@@ -197,7 +126,8 @@ def erosion(
 
     For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
     this function produce an output that differs: one is shifted by one pixel
-    compared to the other.
+    compared to the other. :func:`skimage.morphology.pad_footprint` is available
+    to account for this.
 
     Examples
     --------
@@ -226,7 +156,6 @@ def erosion(
         mode = "max"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
-    footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, pad_end=False)
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
@@ -247,8 +176,6 @@ def dilation(
     image,
     footprint=None,
     out=None,
-    shift_x=DEPRECATED,
-    shift_y=DEPRECATED,
     *,
     mode="reflect",
     cval=0.0,
@@ -291,12 +218,6 @@ def dilation(
     dilated : uint8 array, same shape and type as `image`
         The result of the morphological dilation.
 
-    Other Parameters
-    ----------------
-    shift_x, shift_y : DEPRECATED
-
-        .. deprecated:: 0.23
-
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the lower
@@ -316,6 +237,7 @@ def dilation(
     For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
     and :func:`skimage.morphology.dilation` produce an output that differs:
     `binary_dilation` mirrors the footprint, whereas `dilation` does not.
+    :func:`skimage.morphology.mirror_footprint` is available to correct for this.
 
     Examples
     --------
@@ -344,7 +266,6 @@ def dilation(
         mode = "min"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
-    footprint = _shift_footprints(footprint, shift_x, shift_y)
     footprint = pad_footprint(footprint, pad_end=False)
     # Note that `ndi.grey_dilation` mirrors the footprint and this
     # additional inversion should be removed in skimage2, see gh-6676.
