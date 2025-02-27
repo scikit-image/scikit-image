@@ -7,7 +7,7 @@ Version 0.28
 * Complete deprecation of `skimage.morphology.binary_*` functions.
   - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
   - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
-
+* Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
 
 Version 0.27
 ------------
