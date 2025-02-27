@@ -6,11 +6,11 @@ project(
   # See `skimage/__init__.py`
   version: run_command('skimage/_build_utils/version.py', check: true).stdout().strip(),
   license: 'BSD-3',
-  meson_version: '>= 1.1.0',
+  meson_version: '>= 1.5.0',
   default_options: [
     'buildtype=debugoptimized',
-    'c_std=c99',
-    'cpp_std=c++14',
+    'c_std=c17',
+    'cpp_std=c++17',
   ],
 )
 
@@ -19,8 +19,8 @@ cpp = meson.get_compiler('cpp')
 
 # Check compiler is recent enough (see "Toolchain Roadmap" for details)
 if cc.get_id() == 'gcc'
-  if not cc.version().version_compare('>=8.0')
-    error('scikit-image requires GCC >= 8.0')
+  if not cc.version().version_compare('>=9.1')
+    error('scikit-image requires GCC >= 9.1')
   endif
 elif cc.get_id() == 'msvc'
   if not cc.version().version_compare('>=19.20')
