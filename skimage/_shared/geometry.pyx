@@ -8,7 +8,7 @@ cnp.import_array()
 
 
 cdef unsigned char point_in_polygon(np_floats[::1] xp, np_floats[::1] yp,
-                                    np_floats x, np_floats y) nogil:
+                                    np_floats x, np_floats y) noexcept nogil:
     """Test relative point position to a polygon.
 
     Parameters

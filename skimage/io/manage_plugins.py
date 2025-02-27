@@ -3,11 +3,11 @@
 To improve performance, plugins are only loaded as needed. As a result, there
 can be multiple states for a given plugin:
 
-    available: Defined in an *ini file located in `skimage.io._plugins`.
-        See also `skimage.io.available_plugins`.
+    available: Defined in an *ini file located in ``skimage.io._plugins``.
+        See also :func:`skimage.io.available_plugins`.
     partial definition: Specified in an *ini file, but not defined in the
         corresponding plugin module. This will raise an error when loaded.
-    available but not on this system: Defined in `skimage.io._plugins`, but
+    available but not on this system: Defined in ``skimage.io._plugins``, but
         a dependent library (e.g. Qt, PIL) is not available on your system.
         This will raise an error when loaded.
     loaded: The real availability is determined when it's explicitly loaded,
@@ -15,15 +15,25 @@ can be multiple states for a given plugin:
         loaded explicitly by the user.
 
 """
+
 import os.path
 import warnings
 from configparser import ConfigParser
 from glob import glob
+from contextlib import contextmanager
 
+from .._shared.utils import deprecate_func
 from .collection import imread_collection_wrapper
 
-__all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
-           'reset_plugins', 'find_available_plugins', 'available_plugins']
+__all__ = [
+    'use_plugin',
+    'call_plugin',
+    'plugin_info',
+    'plugin_order',
+    'reset_plugins',
+    'find_available_plugins',
+    '_available_plugins',
+]
 
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
@@ -40,29 +50,43 @@ preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
     'all': ['imageio', 'pil', 'matplotlib'],
     'imshow': ['matplotlib'],
-    'imshow_collection': ['matplotlib']
+    'imshow_collection': ['matplotlib'],
 }
 
 
+@contextmanager
+def _hide_plugin_deprecation_warnings():
+    """Ignore warnings related to plugin infrastructure deprecation."""
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            message=".*use `imageio` or other I/O packages directly.*",
+            category=FutureWarning,
+            module="skimage",
+        )
+        yield
+
+
 def _clear_plugins():
-    """Clear the plugin state to the default, i.e., where no plugins are loaded
-    """
+    """Clear the plugin state to the default, i.e., where no plugins are loaded"""
     global plugin_store
-    plugin_store = {'imread': [],
-                    'imsave': [],
-                    'imshow': [],
-                    'imread_collection': [],
-                    'imshow_collection': [],
-                    '_app_show': []}
+    plugin_store = {
+        'imread': [],
+        'imsave': [],
+        'imshow': [],
+        'imread_collection': [],
+        'imshow_collection': [],
+        '_app_show': [],
+    }
 
 
-_clear_plugins()
+with _hide_plugin_deprecation_warnings():
+    _clear_plugins()
 
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection',
-                'imread']
+    io_types = ['imsave', 'imshow', 'imread_collection', 'imshow_collection', 'imread']
     for p_type in io_types:
         _set_plugin(p_type, preferred_plugins['all'])
 
@@ -73,7 +97,7 @@ def _load_preferred_plugins():
 
 def _set_plugin(plugin_type, plugin_list):
     for plugin in plugin_list:
-        if plugin not in available_plugins:
+        if plugin not in _available_plugins:
             continue
         try:
             use_plugin(plugin, kind=plugin_type)
@@ -82,9 +106,16 @@ def _set_plugin(plugin_type, plugin_list):
             pass
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def reset_plugins():
-    _clear_plugins()
-    _load_preferred_plugins()
+    with _hide_plugin_deprecation_warnings():
+        _clear_plugins()
+        _load_preferred_plugins()
 
 
 def _parse_config_file(filename):
@@ -110,7 +141,9 @@ def _scan_plugins():
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)
         if 'provides' not in meta_data:
-            warnings.warn(f'file {filename} not recognized as a scikit-image io plugin, skipping.')
+            warnings.warn(
+                f'file {filename} not recognized as a scikit-image io plugin, skipping.'
+            )
             continue
         plugin_meta_data[name] = meta_data
         provides = [s.strip() for s in meta_data['provides'].split(',')]
@@ -121,8 +154,9 @@ def _scan_plugins():
                 print(f"Plugin `{name}` wants to provide non-existent `{p}`. Ignoring.")
 
         # Add plugins that provide 'imread' as provider of 'imread_collection'.
-        need_to_add_collection = ('imread_collection' not in valid_provides and
-                                  'imread' in valid_provides)
+        need_to_add_collection = (
+            'imread_collection' not in valid_provides and 'imread' in valid_provides
+        )
         if need_to_add_collection:
             valid_provides.append('imread_collection')
 
@@ -131,9 +165,16 @@ def _scan_plugins():
         plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 
-_scan_plugins()
+with _hide_plugin_deprecation_warnings():
+    _scan_plugins()
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def find_available_plugins(loaded=False):
     """List available plugins.
 
@@ -158,15 +199,21 @@ def find_available_plugins(loaded=False):
     d = {}
     for plugin in plugin_provides:
         if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin]
-                         if not f.startswith('_')]
+            d[plugin] = [f for f in plugin_provides[plugin] if not f.startswith('_')]
 
     return d
 
 
-available_plugins = find_available_plugins()
+with _hide_plugin_deprecation_warnings():
+    _available_plugins = find_available_plugins()
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
@@ -186,10 +233,12 @@ def call_plugin(kind, *args, **kwargs):
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        msg = (f"No suitable plugin registered for {kind}.\n\n"
-               "You may load I/O plugins with the `skimage.io.use_plugin` "
-               "command.  A list of all available plugins are shown in the "
-               "`skimage.io` docstring.")
+        msg = (
+            f"No suitable plugin registered for {kind}.\n\n"
+            "You may load I/O plugins with the `skimage.io.use_plugin` "
+            "command.  A list of all available plugins are shown in the "
+            "`skimage.io` docstring."
+        )
         raise RuntimeError(msg)
 
     plugin = kwargs.pop('plugin', None)
@@ -205,6 +254,12 @@ def call_plugin(kind, *args, **kwargs):
     return func(*args, **kwargs)
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
     will be loaded if it hasn't been already.
@@ -212,14 +267,11 @@ def use_plugin(name, kind=None):
     Parameters
     ----------
     name : str
-        Name of plugin.
+        Name of plugin. See ``skimage.io.available_plugins`` for a list of available
+        plugins.
     kind : {'imsave', 'imread', 'imshow', 'imread_collection', 'imshow_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
-
-    See Also
-    --------
-    available_plugins : List of available plugins
 
     Examples
     --------
@@ -228,8 +280,8 @@ def use_plugin(name, kind=None):
     >>> from skimage import io
     >>> io.use_plugin('matplotlib', 'imread')
 
-    To see a list of available plugins run ``io.available_plugins``. Note that
-    this lists plugins that are defined, but the full list may not be usable
+    To see a list of available plugins run ``skimage.io.available_plugins``. Note
+    that this lists plugins that are defined, but the full list may not be usable
     if your system does not have the required libraries installed.
 
     """
@@ -254,8 +306,9 @@ def use_plugin(name, kind=None):
 
         # Shuffle the plugins so that the requested plugin stands first
         # in line
-        funcs = [(n, f) for (n, f) in funcs if n == name] + \
-                [(n, f) for (n, f) in funcs if n != name]
+        funcs = [(n, f) for (n, f) in funcs if n == name] + [
+            (n, f) for (n, f) in funcs if n != name
+        ]
 
         plugin_store[k] = funcs
 
@@ -268,6 +321,7 @@ def _inject_imread_collection_if_needed(module):
         setattr(module, 'imread_collection', func)
 
 
+@_hide_plugin_deprecation_warnings()
 def _load(plugin):
     """Load the given plugin.
 
@@ -287,8 +341,7 @@ def _load(plugin):
         raise ValueError(f"Plugin {plugin} not found.")
     else:
         modname = plugin_module_name[plugin]
-        plugin_module = __import__('skimage.io._plugins.' + modname,
-                                   fromlist=[modname])
+        plugin_module = __import__('skimage.io._plugins.' + modname, fromlist=[modname])
 
     provides = plugin_provides[plugin]
     for p in provides:
@@ -304,6 +357,12 @@ def _load(plugin):
             store.append((plugin, func))
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def plugin_info(plugin):
     """Return plugin meta-data.
 
@@ -324,6 +383,12 @@ def plugin_info(plugin):
         raise ValueError(f'No information on plugin "{plugin}"')
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="The plugin infrastructure of `skimage.io` is deprecated. "
+    "Instead, use `imageio` or other I/O packages directly.",
+)
 def plugin_order():
     """Return the currently preferred plugin order.
 

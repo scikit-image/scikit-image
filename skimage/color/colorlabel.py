@@ -11,12 +11,21 @@ from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
 
 
-DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
-                  'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
+DEFAULT_COLORS = (
+    'red',
+    'blue',
+    'yellow',
+    'magenta',
+    'green',
+    'indigo',
+    'darkorange',
+    'cyan',
+    'pink',
+    'yellowgreen',
+)
 
 
-color_dict = {k: v for k, v in rgb_colors.__dict__.items()
-              if isinstance(v, tuple)}
+color_dict = {k: v for k, v in rgb_colors.__dict__.items() if isinstance(v, tuple)}
 
 
 def _rgb_vector(color):
@@ -28,7 +37,7 @@ def _rgb_vector(color):
     Parameters
     ----------
     color : str or array
-        Color name in `color_dict` or RGB float values between [0, 1].
+        Color name in ``skimage.color.color_dict`` or RGB float values between [0, 1].
     """
     if isinstance(color, str):
         color = color_dict[color]
@@ -49,6 +58,8 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
 
     # map labels to their ranks among all labels from small to large
     unique_labels, mapped_labels = np.unique(label, return_inverse=True)
+    # unique_inverse is no longer flat in NumPy 2.0
+    mapped_labels = mapped_labels.reshape(-1)
 
     # get rank of bg_label
     bg_label_rank_list = mapped_labels[label.flat == bg_label]
@@ -71,9 +82,19 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     return mapped_labels, color_cycle
 
 
-def label2rgb(label, image=None, colors=None, alpha=0.3,
-              bg_label=0, bg_color=(0, 0, 0), image_alpha=1, kind='overlay',
-              *, saturation=0, channel_axis=-1):
+def label2rgb(
+    label,
+    image=None,
+    colors=None,
+    alpha=0.3,
+    bg_label=0,
+    bg_color=(0, 0, 0),
+    image_alpha=1,
+    kind='overlay',
+    *,
+    saturation=0,
+    channel_axis=-1,
+):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -94,8 +115,8 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         `bg_color` is `None`, and `kind` is `overlay`,
         background is not painted by any colors.
     bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+        Background color. Must be a name in ``skimage.color.color_dict`` or RGB float
+        values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
     kind : string, one of {'overlay', 'avg'}
@@ -114,7 +135,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         `image` that corresponds to channels.
 
         .. versionadded:: 0.19
-           ``channel_axis`` was added in 0.19.
+            ``channel_axis`` was added in 0.19.
 
     Returns
     -------
@@ -125,8 +146,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     if image is not None:
         image = np.moveaxis(image, source=channel_axis, destination=-1)
     if kind == 'overlay':
-        rgb = _label2rgb_overlay(label, image, colors, alpha, bg_label,
-                                 bg_color, image_alpha, saturation)
+        rgb = _label2rgb_overlay(
+            label, image, colors, alpha, bg_label, bg_color, image_alpha, saturation
+        )
     elif kind == 'avg':
         rgb = _label2rgb_avg(label, image, bg_label, bg_color)
     else:
@@ -134,9 +156,16 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     return np.moveaxis(rgb, source=-1, destination=channel_axis)
 
 
-def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
-                       bg_label=-1, bg_color=None, image_alpha=1,
-                       saturation=0):
+def _label2rgb_overlay(
+    label,
+    image=None,
+    colors=None,
+    alpha=0.3,
+    bg_label=-1,
+    bg_color=None,
+    image_alpha=1,
+    saturation=0,
+):
     """Return an RGB image where color-coded labels are painted over the image.
 
     Parameters
@@ -156,8 +185,8 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         Label that's treated as the background. If `bg_label` is specified and
         `bg_color` is `None`, background is not painted by any colors.
     bg_color : str or array, optional
-        Background color. Must be a name in `color_dict` or RGB float values
-        between [0, 1].
+        Background color. Must be a name in ``skimage.color.color_dict`` or RGB float
+        values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
     saturation : float [0, 1], optional
@@ -183,14 +212,11 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
-        if (image.shape[:label.ndim] != label.shape
-                or image.ndim > label.ndim + 1):
+        if image.shape[: label.ndim] != label.shape or image.ndim > label.ndim + 1:
             raise ValueError("`image` and `label` must be the same shape")
 
         if image.ndim == label.ndim + 1 and image.shape[-1] != 3:
-            raise ValueError(
-                "`image` must be RGB (image.shape[-1] must be 3)."
-            )
+            raise ValueError("`image` must be RGB (image.shape[-1] must be 3).")
 
         if image.min() < 0:
             warn("Negative intensities in `image` are not supported")
@@ -217,9 +243,9 @@ def _label2rgb_overlay(label, image=None, colors=None, alpha=0.3,
         new_type = np.uint8
     label = label.astype(new_type)
 
-    mapped_labels_flat, color_cycle = _match_label_with_color(label, colors,
-                                                              bg_label,
-                                                              bg_color)
+    mapped_labels_flat, color_cycle = _match_label_with_color(
+        label, colors, bg_label, bg_color
+    )
 
     if len(mapped_labels_flat) == 0:
         return image
@@ -261,7 +287,7 @@ def _label2rgb_avg(label_field, image, bg_label=0, bg_color=(0, 0, 0)):
     """
     out = np.zeros(label_field.shape + (3,), dtype=image.dtype)
     labels = np.unique(label_field)
-    bg = (labels == bg_label)
+    bg = labels == bg_label
     if bg.any():
         labels = labels[labels != bg_label]
         mask = (label_field == bg_label).nonzero()

@@ -2,7 +2,7 @@
 # numpy is present both in default.txt and build.txt
 # with pinning instructions which are slightly different,
 # therefore pip gives up and errors
-Cython>=0.29.13
+Cython>=3.0.4
 wheel
 scikit-learn
 dask[array]>=0.15.0

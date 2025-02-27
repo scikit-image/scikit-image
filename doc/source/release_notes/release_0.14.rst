@@ -1,5 +1,5 @@
-scikit-image 0.14.4 release notes
-=================================
+scikit-image 0.14.4 (2019-09-04)
+================================
 
 We're happy to announce the release of scikit-image v0.14.4!
 
@@ -25,8 +25,8 @@ Other Pull Requests
 - Mark Harfouche
 
 
-scikit-image 0.14.3 release notes
-=================================
+scikit-image 0.14.3 (2019-05-17)
+================================
 
 As a reminder, 0.14.x is the final version of scikit-image with support for
 Python 2.7, and will receive critical bug fixes until Jan 1, 2020. If you
@@ -548,7 +548,7 @@ It contains the following 186 merged pull requests by 67 committers:
 - Deprecate `visualise` in favor of `visualize` in `skimage.feature.hog` (#2705)
 - Remove alpha channel when saving to jpg format (#2706)
 - Tweak in-place installation instructions (#2712)
-- Add `skimage.lookfor` function (#2713)
+- Add ``skimage.lookfor`` function (#2713)
 - Speedup image dtype conversion by switching to `asarray` (#2715)
 - MAINT reorganizing CI-related scripts (#2718)
 - added rect function to draw module (#2719)

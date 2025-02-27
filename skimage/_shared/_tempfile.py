@@ -2,6 +2,7 @@ from tempfile import NamedTemporaryFile
 from contextlib import contextmanager
 import os
 
+
 @contextmanager
 def temporary_file(suffix=''):
     """Yield a writeable temporary filename that is deleted on context exit.

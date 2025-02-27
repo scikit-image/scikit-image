@@ -1,4 +1,5 @@
 import os
+import warnings
 from collections.abc import Sequence
 from numbers import Integral
 
@@ -6,6 +7,8 @@ import numpy as np
 
 from .. import draw
 from skimage import morphology
+from .._shared.utils import deprecate_func
+
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
 # radius of the desired decomposition is used to index into the first axis of
@@ -15,9 +18,11 @@ from skimage import morphology
 # See _nsphere_series_decomposition for full details.
 _nsphere_decompositions = {}
 _nsphere_decompositions[2] = np.load(
-    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npy'))
+    os.path.join(os.path.dirname(__file__), 'disk_decompositions.npy')
+)
 _nsphere_decompositions[3] = np.load(
-    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy'))
+    os.path.join(os.path.dirname(__file__), 'ball_decompositions.npy')
+)
 
 
 def _footprint_is_sequence(footprint):
@@ -57,9 +62,7 @@ def _shape_from_sequence(footprints, require_odd_size=False):
 
     def _odd_size(size, require_odd_size):
         if require_odd_size and size % 2 == 0:
-            raise ValueError(
-                "expected all footprint elements to have odd size"
-            )
+            raise ValueError("expected all footprint elements to have odd size")
 
     for d in range(ndim):
         fp, nreps = footprints[0]
@@ -79,22 +82,128 @@ def footprint_from_sequence(footprints):
     footprints : tuple of 2-tuples
         A sequence of footprint tuples where the first element of each tuple
         is an array corresponding to a footprint and the second element is the
-        number of times it is to be applied. Currently all footprints should
+        number of times it is to be applied. Currently, all footprints should
         have odd size.
 
     Returns
     -------
     footprint : ndarray
-        An single array equivalent to applying the sequence of `footprints`.
+        An single array equivalent to applying the sequence of ``footprints``.
     """
 
     # Create a single pixel image of sufficient size and apply binary dilation.
     shape = _shape_from_sequence(footprints)
     imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
-    return morphology.binary_dilation(imag, footprints)
+    return morphology.dilation(imag, footprints)
 
 
+def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
+    """Generate a rectangular or hyper-rectangular footprint.
+
+    Generates, depending on the length and dimensions requested with `shape`,
+    a square, rectangle, cube, cuboid, or even higher-dimensional versions
+    of these shapes.
+
+    Parameters
+    ----------
+    shape : tuple[int, ...]
+        The length of the footprint in each dimension. The length of the
+        sequence determines the number of dimensions of the footprint.
+    dtype : data-type, optional
+        The data type of the footprint.
+    decomposition : {None, 'separable', 'sequence'}, optional
+        If None, a single array is returned. For 'sequence', a tuple of smaller
+        footprints is returned. Applying this series of smaller footprints will
+        give an identical result to a single, larger footprint, but often with
+        better computational performance. See Notes for more details.
+        With 'separable', this function uses separable 1D footprints for each
+        axis. Whether 'sequence' or 'separable' is computationally faster may
+        be architecture-dependent.
+
+    Returns
+    -------
+    footprint : array or tuple[tuple[ndarray, int], ...]
+        A footprint consisting only of ones, i.e. every pixel belongs to the
+        neighborhood. When `decomposition` is None, this is just an array.
+        Otherwise, this will be a tuple whose length is equal to the number of
+        unique structuring elements to apply (see Examples for more detail).
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> ski.morphology.footprint_rectangle((3, 5))
+    array([[1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1]], dtype=uint8)
+
+    Decomposition will return multiple footprints that combine into a simple
+    footprint of the requested shape.
+
+    >>> ski.morphology.footprint_rectangle((9, 9), decomposition="sequence")
+    ((array([[1, 1, 1],
+             [1, 1, 1],
+             [1, 1, 1]], dtype=uint8),
+      4),)
+
+    `"sequence"` makes sure that the decomposition only returns 1D footprints.
+
+    >>> ski.morphology.footprint_rectangle((3, 5), decomposition="separable")
+    ((array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1),
+     (array([[1, 1, 1, 1, 1]], dtype=uint8), 1))
+
+    Generate a 5-dimensional hypercube with 3 samples in each dimension
+
+    >>> ski.morphology.footprint_rectangle((3,) * 5).shape
+    (3, 3, 3, 3, 3)
+    """
+    has_even_width = any(width % 2 == 0 for width in shape)
+    if decomposition == "sequence" and has_even_width:
+        warnings.warn(
+            "decomposition='sequence' is only supported for uneven footprints, "
+            "falling back to decomposition='separable'",
+            stacklevel=2,
+        )
+        decomposition = "sequence_fallback"
+
+    def partial_footprint(dim, width):
+        shape_ = (1,) * dim + (width,) + (1,) * (len(shape) - dim - 1)
+        fp = (np.ones(shape_, dtype=dtype), 1)
+        return fp
+
+    if decomposition is None:
+        footprint = np.ones(shape, dtype=dtype)
+
+    elif decomposition in ("separable", "sequence_fallback"):
+        footprint = tuple(
+            partial_footprint(dim, width) for dim, width in enumerate(shape)
+        )
+
+    elif decomposition == "sequence":
+        min_width = min(shape)
+        sq_reps = _decompose_size(min_width, 3)
+        footprint = [(np.ones((3,) * len(shape), dtype=dtype), sq_reps)]
+        for dim, width in enumerate(shape):
+            if width > min_width:
+                nextra = width - min_width + 1
+                component = partial_footprint(dim, nextra)
+                footprint.append(component)
+        footprint = tuple(footprint)
+
+    else:
+        raise ValueError(f"Unrecognized decomposition: {decomposition}")
+
+    return footprint
+
+
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
+)
 def square(width, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, square-shaped footprint.
 
@@ -113,10 +222,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
         footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but often with
+        give an identical result to a single, larger footprint, but often with
         better computational performance. See Notes for more details.
         With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'seqeunce' or 'separable' is computationally faster may
+        axis. Whether 'sequence' or 'separable' is computationally faster may
         be architecture-dependent.
 
     Returns
@@ -145,18 +254,10 @@ def square(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    if decomposition is None:
-        return np.ones((width, width), dtype=dtype)
-
-    if decomposition == 'separable' or width % 2 == 0:
-        sequence = [(np.ones((width, 1), dtype=dtype), 1),
-                    (np.ones((1, width), dtype=dtype), 1)]
-    elif decomposition == 'sequence':
-        # only handles odd widths
-        sequence = [(np.ones((3, 3), dtype=dtype), _decompose_size(width, 3))]
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(width, width), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def _decompose_size(size, kernel_size=3):
@@ -172,6 +273,11 @@ def _decompose_size(size, kernel_size=3):
     return 1 + (size - kernel_size) // (kernel_size - 1)
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
+)
 def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, rectangular-shaped footprint.
 
@@ -227,32 +333,10 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     - The use of ``width`` and ``height`` has been deprecated in
       version 0.18.0. Use ``nrows`` and ``ncols`` instead.
     """
-    if decomposition is None:  # TODO: check optimal width setting here
-        return np.ones((nrows, ncols), dtype=dtype)
-
-    even_rows = nrows % 2 == 0
-    even_cols = ncols % 2 == 0
-    if decomposition == 'separable' or even_rows or even_cols:
-        sequence = [(np.ones((nrows, 1), dtype=dtype), 1),
-                    (np.ones((1, ncols), dtype=dtype), 1)]
-    elif decomposition == 'sequence':
-        # this branch only support odd nrows, ncols
-        sq_size = 3
-        sq_reps = _decompose_size(min(nrows, ncols), sq_size)
-        sequence = [(np.ones((3, 3), dtype=dtype), sq_reps)]
-        if nrows > ncols:
-            nextra = nrows - ncols
-            sequence.append(
-                (np.ones((nextra + 1, 1), dtype=dtype), 1)
-            )
-        elif ncols > nrows:
-            nextra = ncols - nrows
-            sequence.append(
-                (np.ones((1, nextra + 1), dtype=dtype), 1)
-            )
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(nrows, ncols), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def diamond(radius, dtype=np.uint8, *, decomposition=None):
@@ -300,8 +384,9 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
     if decomposition is None:
         L = np.arange(0, radius * 2 + 1)
         I, J = np.meshgrid(L, L)
-        footprint = np.array(np.abs(I - radius) + np.abs(J - radius) <= radius,
-                             dtype=dtype)
+        footprint = np.array(
+            np.abs(I - radius) + np.abs(J - radius) <= radius, dtype=dtype
+        )
     elif decomposition == 'sequence':
         fp = diamond(1, dtype=dtype, decomposition=None)
         nreps = _decompose_size(2 * radius + 1, fp.shape[0])
@@ -367,7 +452,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
 
     sequence = []
     if num_t_series > 0:
-        # shape (3, ) * ndim "T-shaped" footprints
+        # shape (3,) * ndim "T-shaped" footprints
         all_t = _t_shaped_element_series(ndim=ndim, dtype=dtype)
         [sequence.append((t, num_t_series)) for t in all_t]
     if num_diamond > 0:
@@ -379,7 +464,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
             sl[ax] = slice(1, 2)
         sequence.append((d, num_diamond))
     if num_square > 0:
-        sq = np.ones((3, ) * ndim, dtype=dtype)
+        sq = np.ones((3,) * ndim, dtype=dtype)
         sequence.append((sq, num_square))
     return tuple(sequence)
 
@@ -399,9 +484,7 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     if ndim == 2:
         # The n-dimensional case produces the same set of footprints, but
         # the 2D example is retained here for clarity.
-        t0 = np.array([[1, 1, 1],
-                       [0, 1, 0],
-                       [0, 1, 0]], dtype=dtype)
+        t0 = np.array([[1, 1, 1], [0, 1, 0], [0, 1, 0]], dtype=dtype)
         t90 = np.rot90(t0, 1)
         t180 = np.rot90(t0, 2)
         t270 = np.rot90(t0, 3)
@@ -505,12 +588,11 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         X, Y = np.meshgrid(L, L)
         if not strict_radius:
             radius += 0.5
-        return np.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=dtype)
+        return np.array((X**2 + Y**2) <= radius**2, dtype=dtype)
     elif decomposition == 'sequence':
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
-        fp = disk(radius, dtype, strict_radius=strict_radius,
-                  decomposition=None)
+        fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
         sequence = _cross_decomposition(fp)
     return sequence
 
@@ -531,7 +613,7 @@ def _cross(r0, r1, dtype=np.uint8):
 
 
 def _cross_decomposition(footprint, dtype=np.uint8):
-    """ Decompose a symmetric convex footprint into cross-shaped elements.
+    """Decompose a symmetric convex footprint into cross-shaped elements.
 
     This is a decomposition of the footprint into a sequence of
     (possibly asymmetric) cross-shaped elements. This technique was proposed in
@@ -543,7 +625,7 @@ def _cross_decomposition(footprint, dtype=np.uint8):
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
     """
-    quadrant = footprint[footprint.shape[0] // 2:, footprint.shape[1] // 2:]
+    quadrant = footprint[footprint.shape[0] // 2 :, footprint.shape[1] // 2 :]
     col_sums = quadrant.sum(0, dtype=int)
     col_sums = np.concatenate((col_sums, np.asarray([0], dtype=int)))
     i_prev = 0
@@ -637,8 +719,13 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     return sequence
 
 
+@deprecate_func(
+    deprecated_version="0.25",
+    removed_version="0.27",
+    hint="Use `skimage.morphology.footprint_rectangle` instead.",
+)
 def cube(width, dtype=np.uint8, *, decomposition=None):
-    """ Generates a cube-shaped footprint.
+    """Generates a cube-shaped footprint.
 
     This is the 3D equivalent of a square.
     Every pixel along the perimeter has a chessboard distance
@@ -684,21 +771,10 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     `width` is even, the sequence used will be identical to the 'separable'
     mode.
     """
-    if decomposition is None:
-        return np.ones((width, width, width), dtype=dtype)
-
-    if decomposition == 'separable' or width % 2 == 0:
-        sequence = [(np.ones((width, 1, 1), dtype=dtype), 1),
-                    (np.ones((1, width, 1), dtype=dtype), 1),
-                    (np.ones((1, 1, width), dtype=dtype), 1)]
-    elif decomposition == 'sequence':
-        # only handles odd widths
-        sequence = [
-            (np.ones((3, 3, 3), dtype=dtype), _decompose_size(width, 3))
-        ]
-    else:
-        raise ValueError(f"Unrecognized decomposition: {decomposition}")
-    return tuple(sequence)
+    footprint = footprint_rectangle(
+        shape=(width, width, width), dtype=dtype, decomposition=decomposition
+    )
+    return footprint
 
 
 def octahedron(radius, dtype=np.uint8, *, decomposition=None):
@@ -746,9 +822,11 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     # note that in contrast to diamond(), this method allows non-integer radii
     if decomposition is None:
         n = 2 * radius + 1
-        Z, Y, X = np.mgrid[-radius:radius:n * 1j,
-                           -radius:radius:n * 1j,
-                           -radius:radius:n * 1j]
+        Z, Y, X = np.mgrid[
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+        ]
         s = np.abs(X) + np.abs(Y) + np.abs(Z)
         footprint = np.array(s <= radius, dtype=dtype)
     elif decomposition == 'sequence':
@@ -769,7 +847,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Parameters
     ----------
-    radius : int
+    radius : float
         The radius of the ball-shaped footprint.
 
     Other Parameters
@@ -817,10 +895,12 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """
     if decomposition is None:
         n = 2 * radius + 1
-        Z, Y, X = np.mgrid[-radius:radius:n * 1j,
-                           -radius:radius:n * 1j,
-                           -radius:radius:n * 1j]
-        s = X ** 2 + Y ** 2 + Z ** 2
+        Z, Y, X = np.mgrid[
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+            -radius : radius : n * 1j,
+        ]
+        s = X**2 + Y**2 + Z**2
         if not strict_radius:
             radius += 0.5
         return np.array(s <= radius * radius, dtype=dtype)
@@ -883,6 +963,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
 
     if decomposition is None:
         from . import convex_hull_image
+
         footprint = np.zeros((m + 2 * n, m + 2 * n))
         footprint[0, n] = 1
         footprint[n, 0] = 1
@@ -904,7 +985,9 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
             n -= 1
         sequence = []
         if m > 1:
-            sequence += list(square(m, dtype=dtype, decomposition='sequence'))
+            sequence += list(
+                footprint_rectangle((m, m), dtype=dtype, decomposition='sequence')
+            )
         if n > 0:
             sequence += [(diamond(1, dtype=dtype, decomposition=None), n)]
         footprint = tuple(sequence)
@@ -947,7 +1030,7 @@ def star(a, dtype=np.uint8):
     m = 2 * a + 1
     n = a // 2
     footprint_square = np.zeros((m + 2 * n, m + 2 * n))
-    footprint_square[n: m + n, n: m + n] = 1
+    footprint_square[n : m + n, n : m + n] = 1
 
     c = (m + 2 * n - 1) // 2
     footprint_rotated = np.zeros((m + 2 * n, m + 2 * n))
@@ -959,3 +1042,69 @@ def star(a, dtype=np.uint8):
     footprint[footprint > 0] = 1
 
     return footprint.astype(dtype)
+
+
+def mirror_footprint(footprint):
+    """Mirror each dimension in the footprint.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+
+    Returns
+    -------
+    inverted : ndarray or tuple
+        The footprint, mirrored along each dimension.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0, 0],
+    ...                       [0, 1, 1],
+    ...                       [0, 1, 1]], np.uint8)
+    >>> mirror_footprint(footprint)
+    array([[1, 1, 0],
+           [1, 1, 0],
+           [0, 0, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((mirror_footprint(fp), n) for fp, n in footprint)
+    footprint = np.asarray(footprint)
+    return footprint[(slice(None, None, -1),) * footprint.ndim]
+
+
+def pad_footprint(footprint, *, pad_end=True):
+    """Pad the footprint to an odd size along each dimension.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple
+        The input footprint or sequence of footprints
+    pad_end : bool, optional
+        If ``True``, pads at the end of each dimension (right side), otherwise
+        pads on the front (left side).
+
+    Returns
+    -------
+    padded : ndarray or tuple
+        The footprint, padded to an odd size along each dimension.
+
+    Examples
+    --------
+    >>> footprint = np.array([[0, 0],
+    ...                       [1, 1],
+    ...                       [1, 1]], np.uint8)
+    >>> pad_footprint(footprint)
+    array([[0, 0, 0],
+           [1, 1, 0],
+           [1, 1, 0]], dtype=uint8)
+
+    """
+    if _footprint_is_sequence(footprint):
+        return tuple((pad_footprint(fp, pad_end=pad_end), n) for fp, n in footprint)
+    footprint = np.asarray(footprint)
+    padding = []
+    for sz in footprint.shape:
+        padding.append(((0, 1) if pad_end else (1, 0)) if sz % 2 == 0 else (0, 0))
+    return np.pad(footprint, padding)

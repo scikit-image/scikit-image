@@ -26,10 +26,9 @@ functions only work on gray-scale or binary images, so we set ``as_gray=True``.
 """
 
 import matplotlib.pyplot as plt
-from skimage import data
-from skimage.util import img_as_ubyte
+import skimage as ski
 
-orig_phantom = img_as_ubyte(data.shepp_logan_phantom())
+orig_phantom = ski.util.img_as_ubyte(ski.data.shepp_logan_phantom())
 fig, ax = plt.subplots()
 ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
@@ -38,15 +37,13 @@ ax.imshow(orig_phantom, cmap=plt.cm.gray)
 
 
 def plot_comparison(original, filtered, filter_name):
-
-    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True,
-                                   sharey=True)
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4), sharex=True, sharey=True)
     ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
-    ax1.axis('off')
+    ax1.set_axis_off()
     ax2.imshow(filtered, cmap=plt.cm.gray)
     ax2.set_title(filter_name)
-    ax2.axis('off')
+    ax2.set_axis_off()
 
 
 ######################################################################
@@ -59,13 +56,9 @@ def plot_comparison(original, filtered, filter_name):
 # neighborhood. Below, we use ``disk`` to create a circular structuring
 # element, which we use for most of the following examples.
 
-from skimage.morphology import (erosion, dilation, opening, closing,  # noqa
-                                white_tophat)
-from skimage.morphology import black_tophat, skeletonize, convex_hull_image  # noqa
-from skimage.morphology import disk  # noqa
 
-footprint = disk(6)
-eroded = erosion(orig_phantom, footprint)
+footprint = ski.morphology.disk(6)
+eroded = ski.morphology.erosion(orig_phantom, footprint)
 plot_comparison(orig_phantom, eroded, 'erosion')
 
 ######################################################################
@@ -81,7 +74,7 @@ plot_comparison(orig_phantom, eroded, 'erosion')
 # pixels in the neighborhood centered at (i, j)*. Dilation enlarges bright
 # regions and shrinks dark regions.
 
-dilated = dilation(orig_phantom, footprint)
+dilated = ski.morphology.dilation(orig_phantom, footprint)
 plot_comparison(orig_phantom, dilated, 'dilation')
 
 ######################################################################
@@ -97,7 +90,7 @@ plot_comparison(orig_phantom, dilated, 'dilation')
 # a dilation*. Opening can remove small bright spots (i.e. "salt") and
 # connect small dark cracks.
 
-opened = opening(orig_phantom, footprint)
+opened = ski.morphology.opening(orig_phantom, footprint)
 plot_comparison(orig_phantom, opened, 'opening')
 
 ######################################################################
@@ -105,10 +98,10 @@ plot_comparison(orig_phantom, opened, 'opening')
 # that are *smaller* than the structuring element are removed. The dilation
 # operation that follows ensures that light regions that are *larger* than
 # the structuring element retain their original size. Notice how the light
-# and dark shapes in the center their original thickness but the 3 lighter
+# and dark shapes in the center retain their original thickness but the 3 lighter
 # patches in the bottom get completely eroded. The size dependence is
 # highlighted by the outer white ring: The parts of the ring thinner than the
-# structuring element were completely erased, while the thicker region at the
+# structuring element are completely erased, while the thicker region at the
 # top retains its original thickness.
 #
 # Closing
@@ -124,16 +117,16 @@ plot_comparison(orig_phantom, opened, 'opening')
 phantom = orig_phantom.copy()
 phantom[10:30, 200:210] = 0
 
-closed = closing(phantom, footprint)
+closed = ski.morphology.closing(phantom, footprint)
 plot_comparison(phantom, closed, 'closing')
 
 ######################################################################
-# Since ``closing`` an image starts with an dilation operation, dark regions
-# that are *smaller* than the structuring element are removed. The dilation
+# Since ``closing`` an image starts with a dilation operation, dark regions
+# that are *smaller* than the structuring element are removed. The erosion
 # operation that follows ensures that dark regions that are *larger* than the
 # structuring element retain their original size. Notice how the white
 # ellipses at the bottom get connected because of dilation, but other dark
-# region retain their original sizes. Also notice how the crack we added is
+# regions retain their original sizes. Also notice how the crack we added is
 # mostly removed.
 #
 # White tophat
@@ -149,7 +142,7 @@ phantom = orig_phantom.copy()
 phantom[340:350, 200:210] = 255
 phantom[100:110, 200:210] = 0
 
-w_tophat = white_tophat(phantom, footprint)
+w_tophat = ski.morphology.white_tophat(phantom, footprint)
 plot_comparison(phantom, w_tophat, 'white tophat')
 
 ######################################################################
@@ -165,7 +158,7 @@ plot_comparison(phantom, w_tophat, 'white tophat')
 # minus the original image**. This operation returns the *dark spots of the
 # image that are smaller than the structuring element*.
 
-b_tophat = black_tophat(phantom, footprint)
+b_tophat = ski.morphology.black_tophat(phantom, footprint)
 plot_comparison(phantom, b_tophat, 'black tophat')
 
 ######################################################################
@@ -190,9 +183,9 @@ plot_comparison(phantom, b_tophat, 'black tophat')
 # *single-pixel wide skeleton*. It is important to note that this is
 # performed on binary images only.
 
-horse = data.horse()
+horse = ski.data.horse()
 
-sk = skeletonize(horse == 0)
+sk = ski.morphology.skeletonize(horse == 0)
 plot_comparison(horse, sk, 'skeletonize')
 
 ######################################################################
@@ -206,7 +199,7 @@ plot_comparison(horse, sk, 'skeletonize')
 # convex polygon that surround all white pixels in the input image*. Again
 # note that this is also performed on binary images.
 
-hull1 = convex_hull_image(horse == 0)
+hull1 = ski.morphology.convex_hull_image(horse == 0)
 plot_comparison(horse, hull1, 'convex hull')
 
 ######################################################################
@@ -219,7 +212,7 @@ plot_comparison(horse, hull1, 'convex hull')
 horse_mask = horse == 0
 horse_mask[45:50, 75:80] = 1
 
-hull2 = convex_hull_image(horse_mask)
+hull2 = ski.morphology.convex_hull_image(horse_mask)
 plot_comparison(horse_mask, hull2, 'convex hull')
 
 ######################################################################

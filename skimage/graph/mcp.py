@@ -1,8 +1,7 @@
 from ._mcp import MCP, MCP_Geometric, MCP_Connect, MCP_Flexible  # noqa: F401
 
 
-def route_through_array(array, start, end, fully_connected=True,
-                        geometric=True):
+def route_through_array(array, start, end, fully_connected=True, geometric=True):
     """Simple example of how to use the MCP and MCP_Geometric classes.
 
     See the MCP and MCP_Geometric class documentation for explanation of the

@@ -11,12 +11,19 @@ __all__ = ['gabor_kernel', 'gabor']
 def _sigma_prefactor(bandwidth):
     b = bandwidth
     # See http://www.cs.rug.nl/~imaging/simplecell.html
-    return 1.0 / np.pi * math.sqrt(math.log(2) / 2.0) * \
-        (2.0 ** b + 1) / (2.0 ** b - 1)
+    return 1.0 / np.pi * math.sqrt(math.log(2) / 2.0) * (2.0**b + 1) / (2.0**b - 1)
 
 
-def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
-                 n_stds=3, offset=0, dtype=np.complex128):
+def gabor_kernel(
+    frequency,
+    theta=0,
+    bandwidth=1,
+    sigma_x=None,
+    sigma_y=None,
+    n_stds=3,
+    offset=0,
+    dtype=np.complex128,
+):
     """Return complex 2D Gabor filter kernel.
 
     Gabor kernel is a Gaussian kernel modulated by a complex harmonic function.
@@ -62,20 +69,19 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
     Examples
     --------
     >>> from skimage.filters import gabor_kernel
-    >>> from skimage import io
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> gk = gabor_kernel(frequency=0.2)
-    >>> plt.figure()        # doctest: +SKIP
-    >>> io.imshow(gk.real)  # doctest: +SKIP
-    >>> io.show()           # doctest: +SKIP
+    >>> fig, ax = plt.subplots()  # doctest: +SKIP
+    >>> ax.imshow(gk.real)        # doctest: +SKIP
+    >>> plt.show()                # doctest: +SKIP
 
     >>> # more ripples (equivalent to increasing the size of the
     >>> # Gaussian spread)
     >>> gk = gabor_kernel(frequency=0.2, bandwidth=0.1)
-    >>> plt.figure()        # doctest: +SKIP
-    >>> io.imshow(gk.real)  # doctest: +SKIP
-    >>> io.show()           # doctest: +SKIP
+    >>> fig, ax = plt.suplots()  # doctest: +SKIP
+    >>> ax.imshow(gk.real)       # doctest: +SKIP
+    >>> plt.show()               # doctest: +SKIP
     """
     if sigma_x is None:
         sigma_x = _sigma_prefactor(bandwidth) / frequency
@@ -87,30 +93,37 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
     ct = math.cos(theta)
     st = math.sin(theta)
-    x0 = math.ceil(
-        max(abs(n_stds * sigma_x * ct), abs(n_stds * sigma_y * st), 1)
+    x0 = math.ceil(max(abs(n_stds * sigma_x * ct), abs(n_stds * sigma_y * st), 1))
+    y0 = math.ceil(max(abs(n_stds * sigma_y * ct), abs(n_stds * sigma_x * st), 1))
+    y, x = np.meshgrid(
+        np.arange(-y0, y0 + 1), np.arange(-x0, x0 + 1), indexing='ij', sparse=True
     )
-    y0 = math.ceil(
-        max(abs(n_stds * sigma_y * ct), abs(n_stds * sigma_x * st), 1)
-    )
-    y, x = np.meshgrid(np.arange(-y0, y0 + 1),
-                       np.arange(-x0, x0 + 1),
-                       indexing='ij',
-                       sparse=True)
     rotx = x * ct + y * st
     roty = -x * st + y * ct
 
     g = np.empty(roty.shape, dtype=dtype)
-    np.exp(-0.5 * (rotx ** 2 / sigma_x ** 2 + roty ** 2 / sigma_y ** 2)
-           + 1j * (2 * np.pi * frequency * rotx + offset),
-           out=g)
+    np.exp(
+        -0.5 * (rotx**2 / sigma_x**2 + roty**2 / sigma_y**2)
+        + 1j * (2 * np.pi * frequency * rotx + offset),
+        out=g,
+    )
     g *= 1 / (2 * np.pi * sigma_x * sigma_y)
 
     return g
 
 
-def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
-          sigma_y=None, n_stds=3, offset=0, mode='reflect', cval=0):
+def gabor(
+    image,
+    frequency,
+    theta=0,
+    bandwidth=1,
+    sigma_x=None,
+    sigma_y=None,
+    n_stds=3,
+    offset=0,
+    mode='reflect',
+    cval=0,
+):
     """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -165,21 +178,21 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     Examples
     --------
     >>> from skimage.filters import gabor
-    >>> from skimage import data, io
+    >>> from skimage import data
     >>> from matplotlib import pyplot as plt  # doctest: +SKIP
 
     >>> image = data.coins()
     >>> # detecting edges in a coin image
     >>> filt_real, filt_imag = gabor(image, frequency=0.6)
-    >>> plt.figure()            # doctest: +SKIP
-    >>> io.imshow(filt_real)    # doctest: +SKIP
-    >>> io.show()               # doctest: +SKIP
+    >>> fix, ax = plt.subplots()  # doctest: +SKIP
+    >>> ax.imshow(filt_real)      # doctest: +SKIP
+    >>> plt.show()                # doctest: +SKIP
 
     >>> # less sensitivity to finer details with the lower frequency kernel
     >>> filt_real, filt_imag = gabor(image, frequency=0.1)
-    >>> plt.figure()            # doctest: +SKIP
-    >>> io.imshow(filt_real)    # doctest: +SKIP
-    >>> io.show()               # doctest: +SKIP
+    >>> fig, ax = plt.subplots()  # doctest: +SKIP
+    >>> ax.imshow(filt_real)      # doctest: +SKIP
+    >>> plt.show()                # doctest: +SKIP
     """
     check_nD(image, 2)
     # do not cast integer types to float!
@@ -190,8 +203,16 @@ def gabor(image, frequency, theta=0, bandwidth=1, sigma_x=None,
     else:
         kernel_dtype = np.complex128
 
-    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, n_stds,
-                     offset, dtype=kernel_dtype)
+    g = gabor_kernel(
+        frequency,
+        theta,
+        bandwidth,
+        sigma_x,
+        sigma_y,
+        n_stds,
+        offset,
+        dtype=kernel_dtype,
+    )
 
     filtered_real = ndi.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndi.convolve(image, np.imag(g), mode=mode, cval=cval)

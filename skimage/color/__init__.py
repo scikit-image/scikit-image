@@ -1,3 +1,5 @@
-import lazy_loader as lazy
+"""Color space conversion."""
 
-__getattr__, __dir__, __all__ = lazy.attach_stub(__name__, __file__)
+import lazy_loader as _lazy
+
+__getattr__, __dir__, __all__ = _lazy.attach_stub(__name__, __file__)

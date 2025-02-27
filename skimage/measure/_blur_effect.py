@@ -4,8 +4,19 @@ import scipy.ndimage as ndi
 from ..color import rgb2gray
 from ..util import img_as_float
 
+# TODO: when minimum numpy dependency is 1.25 use:
+# np..exceptions.AxisError instead of AxisError
+# and remove this try-except
+try:
+    from numpy import AxisError
+except ImportError:
+    from numpy.exceptions import AxisError
+
 
 __all__ = ['blur_effect']
+
+
+_EPSILON = np.spacing(np.float64(1))
 
 
 def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
@@ -55,7 +66,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
         try:
             # ensure color channels are in the final dimension
             image = np.moveaxis(image, channel_axis, -1)
-        except np.AxisError:
+        except AxisError:
             print('channel_axis must be one of the image array dimensions')
             raise
         except TypeError:
@@ -68,11 +79,17 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
     B = []
 
     from ..filters import sobel
+
     slices = tuple([slice(2, s - 1) for s in shape])
     for ax in range(n_axes):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)
         im_sharp = np.abs(sobel(image, axis=ax))
         im_blur = np.abs(sobel(filt_im, axis=ax))
+
+        # avoid numerical instabilities
+        im_sharp = np.maximum(_EPSILON, im_sharp)
+        im_blur = np.maximum(_EPSILON, im_blur)
+
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
         M2 = np.sum(T[slices])

@@ -1,3 +1,6 @@
+# Use ruff for formatting
+68633e8c682d47ade07a891f1511a5eefda8dc9a
+
 # Applied codespell to the codebase
 025757f8d5a1ece2687781000560aad79047b6c3
 
@@ -6,3 +9,6 @@ f4978b11499e499cc006c417b3bf0ccf245ca72c
 
 # Adopt ruff and cython-lint (gh-6729)
 b22ecff8d52eeb59e5d1d2e7fcc7962b4a0a84ce
+
+# Adopt black (gh-7197)
+659af605da92732b57b7862f78fe77f3fd161fd0
