@@ -72,7 +72,7 @@ endif
 #     'source_fname',
 #     numpy_nodepr_api)
 #
-numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_23_API_VERSION'
+numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_24_API_VERSION'
 
 np_dep = declare_dependency(
   include_directories: incdir_numpy,
