@@ -429,7 +429,7 @@ cdef class MCP:
             a a path is found to any end-position. (If no `ends` were
             specified, then this parameter has no effect.)
         max_step_cost : float, optional
-            Cost limit for each step between points. Points whose costs is
+            Cost limit for each step between points. Costs
             higher than this will form a barrier.
 
         Returns
