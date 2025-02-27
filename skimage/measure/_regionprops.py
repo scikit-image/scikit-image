@@ -484,7 +484,7 @@ class RegionProperties:
     @property
     @only2d
     def circularity(self):
-        return 4 * np.pi * self.area / self.perimeter ** 2
+        return 4 * np.pi * self.area / self.perimeter**2
 
     @property
     @only2d
