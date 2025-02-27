@@ -154,10 +154,15 @@ jobs:
 
       - name: Build wheels for CPython Mac OS
         run: |
-          # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into
-          # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/
+          # You need to use a libomp library built for the
+          # appropriate MACOSX_DEPLOYMENT_TARGET.
+          #
+          # Navigate to
+          # https://anaconda.org/conda-forge/llvm-openmp/files
+          # and, for the latest version, search for the `osx-arm64` and
+          # `osx-64` prefixes. Update the filenames below with those
+          # filenames.
+
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
               export MACOSX_DEPLOYMENT_TARGET=12.3
               OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
