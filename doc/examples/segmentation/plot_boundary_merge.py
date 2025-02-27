@@ -94,6 +94,6 @@ out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 axes[1, 0].imshow(out)
 axes[1, 0].set_title('Final segmentation')
 
-axes[1, 1].axis("off")
+axes[1, 1].axis('off')
 
 plt.show()
