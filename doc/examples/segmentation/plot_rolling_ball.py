@@ -19,9 +19,9 @@ the ball determines the intensity of the background at that position. We can
 then 'roll' this ball around below the surface to get the background values for
 the entire image. The larger the ball, the smoother the background.
 
-Scikit-image implements a generalized version of this rolling-ball algorithm,
+scikit-image implements a generalized version of this rolling-ball algorithm,
 allowing you to work with n-dimensional images and to use not only balls, but
-arbitrary shapes as kernels. This way, you may directly filter RGB images or
+other kernels as well. This way, you may directly filter RGB images or
 image stacks along any (or all) spatial dimensions.
 
 .. [1] Sternberg, Stanley R. "Biomedical image processing." Computer 1 (1983):
@@ -33,7 +33,8 @@ Classic rolling ball
 
 In scikit-image, the implementation assumes that your image background has
 low intensity (dark), whereas the features have high intensity (bright). If
-this is your case, you may readily call the rolling-ball filter:
+this is not your case, you first have to invert the image—we give an example
+of that further on.
 
 """
 
