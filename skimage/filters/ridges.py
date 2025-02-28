@@ -214,7 +214,10 @@ def frangi(
     gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
-        The default, None, uses half of the maximum Hessian norm.
+
+        .. versionchanged:: 0.20
+            The default, None, uses half of the maximum Hessian norm.
+
     black_ridges : boolean, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
@@ -228,6 +231,12 @@ def frangi(
     -------
     out : (M, N[, P]) ndarray
         Filtered image (maximum of pixels across all scales).
+
+    .. versionchanged:: 0.20
+        The implementation got rewritten and gives different output values wrt
+        the previous implementation (backwards incompatible change).
+        The filter is now set to zero whenever one of the Hessian eigenvalues
+        has a sign which is incompatible with a ridge of the desired polarity.
 
     Notes
     -----
