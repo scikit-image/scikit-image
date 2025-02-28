@@ -123,7 +123,7 @@ def cycle_spin(
     >>> sigma = 0.1
     >>> img = img + sigma * np.random.standard_normal(img.shape)
     >>> denoised = cycle_spin(img, func=denoise_tv_chambolle,
-    ...                       max_shifts=3)
+    ...                       max_shifts=3)  # doctest: +IGNORE_WARNINGS
 
     """
     if func_kw is None:

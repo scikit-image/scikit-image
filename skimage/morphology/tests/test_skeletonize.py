@@ -4,9 +4,9 @@ from numpy.testing import assert_array_equal
 import scipy.ndimage as ndi
 
 from skimage import io, draw
-from skimage._shared.testing import fetch, assert_stacklevel
+from skimage._shared.testing import fetch
 from skimage.data import binary_blobs
-from skimage.morphology import medial_axis, skeletonize, skeletonize_3d, thin
+from skimage.morphology import medial_axis, skeletonize, thin
 from skimage.morphology._skeletonize import G123_LUT, G123P_LUT, _generate_thin_luts
 
 
@@ -211,13 +211,6 @@ class TestSkeletonize:
         result = skeletonize(image)
         expected = io.imread(fetch("data/_blobs_3d_fiji_skeleton.tif")).astype(bool)
         assert_array_equal(result, expected)
-
-    def test_deprecated_skeletonize_3d(self):
-        image = np.ones((10, 10), dtype=bool)
-        regex = "Use `skimage\\.morphology\\.skeletonize"
-        with pytest.warns(FutureWarning, match=regex) as record:
-            skeletonize_3d(image)
-        assert_stacklevel(record, offset=-1)
 
 
 class TestThin:
