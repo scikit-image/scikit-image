@@ -429,11 +429,9 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
 
     if radius == 1:
         # for radius 1 just use the exact shape (3,) * ndim solution
-        kwargs = dict(dtype=dtype, strict_radius=False, decomposition=None)
-        if ndim == 2:
-            return ((disk(1, **kwargs), 1),)
-        elif ndim == 3:
-            return ((ball(1, **kwargs), 1),)
+        shape = (3,) * ndim
+        sequence = ((footprint_ellipse(shape, adjust_radii=0.5, dtype=dtype), 1),)
+        return sequence
 
     # load precomputed decompositions
     if ndim not in _nsphere_decompositions:
@@ -505,6 +503,13 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     return tuple(all_t)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the deprecated behavior approximately use:\n"
+    "    footprint_ellipse(shape=(radius * 2 + 1,) * 2)",
+)
 def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a flat, disk-shaped footprint.
 
@@ -649,6 +654,15 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the deprecated behavior approximately use:\n"
+    "    footprint_ellipse(\n"
+    "        shape=(height * 2 + 1, width * 2 + 1), grow=1, border=False\n"
+    "    )",
+)
 def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, ellipse-shaped footprint.
 
@@ -717,6 +731,130 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         fp = ellipse(width, height, dtype, decomposition=None)
         sequence = _cross_decomposition(fp)
     return sequence
+
+
+def footprint_ellipse(
+    shape, *, border=True, adjust_radii=0, dtype=np.uint8, decomposition=None
+):
+    """Generates an elliptical or spherical footprint.
+
+    This function generates ellipsoids with any number of desired dimensions,
+    including spherical footprints. Use this function to generate shapes such
+    as a disk, an ellipse (2D), or a ball (3D).
+
+    Parameters
+    ----------
+    shape : sequence of ints
+        Shape of the new footprint, e.g., ``(2, 3)``.
+    border : bool, optional
+        If ``True``, include pixels that are on the border of the ellipse
+        equation in the footprint.
+    adjust_radii : float or sequence of floats, optional
+        Adjust ellipse size within the footprint. Positive values will increase
+        the axes of the ellipse. With 0, the border of the ellipsis will touch
+        the border of the generated footprint. Ignored, if `decomposition` is
+        not `None`.
+    dtype : data-type, optional
+        The data type of the footprint.
+    decomposition : {None, 'sequence', 'crosses'}, optional
+        If None, a single array is returned, otherwise `footprint` consists
+        of series of smaller footprints. Applying these footprints successively
+        will give a similar (often identical) result to the single footprint.
+        But for large footprints, a decomposition will often yield a better
+        performance.
+
+        Passing 'sequence', will yield a series of smaller footprints with
+        an extent 3 along each axis. This method [1]_ only works for spherical
+        footprints with 2 or 3 dimensions.
+
+        Passing 'crosses', will yield a series of cross-shaped footprints.
+        This method [2]_ works for elliptical
+
+    Returns
+    -------
+    footprint : ndarray
+        The footprint where elements of the neighborhood are 1 and 0 otherwise.
+
+    Notes
+    -----
+    This function uses the ellipsis equation
+
+    .. math:: \\sum_{k=1}^{n} \\frac{x_k^2}{a_k^2} \\lt 1
+
+    to determine which pixels are assigned 1 in the `footprint`. `border`
+    controls the comparison with the right-hand side. ``border=False``
+    corresponds to :math:`< 1`.
+
+    To produce spherical footprints with sequence decomposition, we extend the
+    approach taken in [1]_ for disks to the 3D case, using 3-dimensional
+    extensions of the "square", "diamond" and "t-shaped" elements from that
+    publication. We numerically computed the number of repetitions of each
+    element that gives the closest match when using this function with
+    ``adjust_=False, decomposition=None``.
+
+    The method cross-decomposition method is based on an adaption of
+    algorithm 1 given in [2]_.
+
+    Empirically, the equivalent composite footprint to the sequence
+    decomposition approaches a rhombicuboctahedron (26-faces) [3]_.
+
+    References
+    ----------
+    .. [1] Park, H and Chin R.T. Decomposition of structuring elements for
+           optimal implementation of morphological operations. In Proceedings:
+           1997 IEEE Workshop on Nonlinear Signal and Image Processing, London,
+           UK.
+           https://www.iwaenc.org/proceedings/1997/nsip97/pdf/scan/ns970226.pdf
+    .. [2] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
+           Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
+           Image Processing, (1 November 1990).
+           :DOI:`10.1117/12.23608`
+    .. [3] https://en.wikipedia.org/wiki/Rhombicuboctahedron
+    """
+    if np.isscalar(adjust_radii):
+        adjust_radii = (adjust_radii,) * len(shape)
+    elif len(shape) != len(adjust_radii):
+        msg = (
+            "`adjust_radii` must be scalar or sequence matching `shape` in length, "
+            f"got shape={shape!r} and adjust_radii={adjust_radii!r}"
+        )
+        raise ValueError(msg)
+
+    if decomposition == 'sequence':
+        if not all(shape[0] == diameter for diameter in shape):
+            msg = (
+                "sequence decomposition is only supported for spherical "
+                f"shapes, got elliptical shape: {shape!r}"
+            )
+            raise ValueError(msg)
+        footprint = _nsphere_series_decomposition(
+            shape[0] // 2, ndim=len(shape), dtype=dtype
+        )
+
+    else:
+        footprint = np.zeros(shape, dtype=float)
+
+        for dim, (length, adjust_radius) in enumerate(zip(shape, adjust_radii)):
+            if length == 1:
+                continue
+
+            radius = length // 2
+            coords = np.linspace(-radius, radius, num=length, endpoint=True)
+            coords = coords.reshape(
+                (1,) * dim + (length,) + (1,) * (len(shape) - dim - 1)
+            )
+            adjusted_radius = radius + adjust_radius
+            footprint += (coords / adjusted_radius) ** 2
+
+        footprint = footprint <= 1 if border is True else footprint < 1
+        footprint = footprint.astype(dtype)
+
+        if decomposition == "crosses":
+            footprint = _cross_decomposition(footprint)
+        elif decomposition is not None:
+            raise ValueError(f"Unrecognized decomposition: {decomposition}")
+
+    return footprint
 
 
 @deprecate_func(
@@ -838,6 +976,13 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="0.28 (or later)",
+    hint="Use `skimage.morphology.footprint_ellipse` instead. "
+    "If you want to reproduce the behavior approximately use:\n"
+    "    footprint_ellipse(shape=(radius * 2 + 1,) * 3)",
+)
 def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a ball-shaped footprint.
 
