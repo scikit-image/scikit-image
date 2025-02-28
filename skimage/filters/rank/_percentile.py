@@ -25,6 +25,7 @@ References
 from ..._shared.utils import check_nD
 from . import percentile_cy
 from .generic import _preprocess_input
+from ...util._backends import dispatchable
 
 __all__ = [
     'autolevel_percentile',
@@ -65,6 +66,7 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, p0, p1, out_dtyp
     return out.reshape(out.shape[:2])
 
 
+@dispatchable
 def autolevel_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -113,6 +115,7 @@ def autolevel_percentile(
     )
 
 
+@dispatchable
 def gradient_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -158,6 +161,7 @@ def gradient_percentile(
     )
 
 
+@dispatchable
 def mean_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -203,6 +207,7 @@ def mean_percentile(
     )
 
 
+@dispatchable
 def subtract_mean_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -248,6 +253,7 @@ def subtract_mean_percentile(
     )
 
 
+@dispatchable
 def enhance_contrast_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -297,6 +303,7 @@ def enhance_contrast_percentile(
     )
 
 
+@dispatchable
 def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0):
     """Return local percentile of an image.
 
@@ -342,6 +349,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
     )
 
 
+@dispatchable
 def pop_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -390,6 +398,7 @@ def pop_percentile(
     )
 
 
+@dispatchable
 def sum_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
@@ -438,6 +447,7 @@ def sum_percentile(
     )
 
 
+@dispatchable
 def threshold_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 ):

@@ -8,6 +8,7 @@ from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, check_nD
 from ..transform import integral_image
 from ..util import img_as_float
+from ..util._backends import dispatchable
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
 
@@ -218,6 +219,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
+@dispatchable
 def blob_dog(
     image,
     min_sigma=1,
@@ -409,6 +411,7 @@ def blob_dog(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@dispatchable
 def blob_log(
     image,
     min_sigma=1,
@@ -581,6 +584,7 @@ def blob_log(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@dispatchable
 def blob_doh(
     image,
     min_sigma=1,

@@ -17,6 +17,7 @@ from ..filters._multiotsu import (
 )
 from ..transform import integral_image
 from ..util import dtype_limits
+from ..util._backends import dispatchable
 from ._sparse import _correlate_sparse, _validate_window_size
 
 __all__ = [
@@ -106,6 +107,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
 
 @require("matplotlib", ">=3.3")
+@dispatchable
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
@@ -174,6 +176,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     return _try_all(image, figsize=figsize, methods=methods, verbose=verbose)
 
 
+@dispatchable
 def threshold_local(
     image, block_size=3, method='gaussian', offset=0, mode='reflect', param=None, cval=0
 ):
@@ -333,6 +336,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     return counts.astype('float32', copy=False), bin_centers
 
 
+@dispatchable
 def threshold_otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
 
@@ -407,6 +411,7 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     return threshold
 
 
+@dispatchable
 def threshold_yen(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Yen's method.
     Either image or hist must be provided. In case hist is given, the actual
@@ -467,6 +472,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
     return bin_centers[crit.argmax()]
 
 
+@dispatchable
 def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     """Return threshold value(s) based on ISODATA method.
 
@@ -639,6 +645,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
+@dispatchable
 def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=None):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
@@ -792,6 +799,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     return threshold
 
 
+@dispatchable
 def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     """Return threshold value based on minimum method.
 
@@ -883,6 +891,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     return bin_centers[maximum_idxs[0] + threshold_idx]
 
 
+@dispatchable
 def threshold_mean(image):
     """Return threshold value based on the mean of grayscale values.
 
@@ -914,6 +923,7 @@ def threshold_mean(image):
     return np.mean(image)
 
 
+@dispatchable
 def threshold_triangle(image, nbins=256):
     """Return threshold value based on the triangle algorithm.
 
@@ -1060,6 +1070,7 @@ def _mean_std(image, w):
     return m, s
 
 
+@dispatchable
 def threshold_niblack(image, window_size=15, k=0.2):
     """Applies Niblack local threshold to an array.
 
@@ -1123,6 +1134,7 @@ def threshold_niblack(image, window_size=15, k=0.2):
     return m - k * s
 
 
+@dispatchable
 def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     """Applies Sauvola local threshold to an array. Sauvola is a
     modification of Niblack technique.
@@ -1183,6 +1195,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     return m * (1 + k * ((s / r) - 1))
 
 
+@dispatchable
 def apply_hysteresis_threshold(image, low, high):
     """Apply hysteresis thresholding to ``image``.
 
@@ -1230,6 +1243,7 @@ def apply_hysteresis_threshold(image, low, high):
     return thresholded
 
 
+@dispatchable
 def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     r"""Generate `classes`-1 threshold values to divide gray levels in `image`,
     following Otsu's method for multiple classes.

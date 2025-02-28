@@ -5,6 +5,7 @@ from scipy.ndimage import binary_erosion, convolve
 from .._shared.utils import _supported_float_type, check_nD
 from ..restoration.uft import laplacian
 from ..util.dtype import img_as_float
+from ..util._backends import dispatchable
 
 # n-dimensional filter weights
 SOBEL_EDGE = np.array([1, 0, -1])
@@ -197,6 +198,7 @@ def _generic_edge_filter(
     return output
 
 
+@dispatchable
 def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find edges in an image using the Sobel filter.
 
@@ -254,6 +256,7 @@ def sobel(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     return output
 
 
+@dispatchable
 def sobel_h(image, mask=None):
     """Find the horizontal edges of an image using the Sobel transform.
 
@@ -284,6 +287,7 @@ def sobel_h(image, mask=None):
     return sobel(image, mask=mask, axis=0)
 
 
+@dispatchable
 def sobel_v(image, mask=None):
     """Find the vertical edges of an image using the Sobel transform.
 
@@ -314,6 +318,7 @@ def sobel_v(image, mask=None):
     return sobel(image, mask=mask, axis=1)
 
 
+@dispatchable
 def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Scharr transform.
 
@@ -376,6 +381,7 @@ def scharr(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     return output
 
 
+@dispatchable
 def scharr_h(image, mask=None):
     """Find the horizontal edges of an image using the Scharr transform.
 
@@ -411,6 +417,7 @@ def scharr_h(image, mask=None):
     return scharr(image, mask=mask, axis=0)
 
 
+@dispatchable
 def scharr_v(image, mask=None):
     """Find the vertical edges of an image using the Scharr transform.
 
@@ -445,6 +452,7 @@ def scharr_v(image, mask=None):
     return scharr(image, mask=mask, axis=1)
 
 
+@dispatchable
 def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Prewitt transform.
 
@@ -504,6 +512,7 @@ def prewitt(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     return output
 
 
+@dispatchable
 def prewitt_h(image, mask=None):
     """Find the horizontal edges of an image using the Prewitt transform.
 
@@ -534,6 +543,7 @@ def prewitt_h(image, mask=None):
     return prewitt(image, mask=mask, axis=0)
 
 
+@dispatchable
 def prewitt_v(image, mask=None):
     """Find the vertical edges of an image using the Prewitt transform.
 
@@ -564,6 +574,7 @@ def prewitt_v(image, mask=None):
     return prewitt(image, mask=mask, axis=1)
 
 
+@dispatchable
 def roberts(image, mask=None):
     """Find the edge magnitude using Roberts' cross operator.
 
@@ -602,6 +613,7 @@ def roberts(image, mask=None):
     return out
 
 
+@dispatchable
 def roberts_pos_diag(image, mask=None):
     """Find the cross edges of an image using Roberts' cross operator.
 
@@ -640,6 +652,7 @@ def roberts_pos_diag(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
+@dispatchable
 def roberts_neg_diag(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
 
@@ -678,6 +691,7 @@ def roberts_neg_diag(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
+@dispatchable
 def laplace(image, ksize=3, mask=None):
     """Find the edges of an image using the Laplace operator.
 
@@ -716,6 +730,7 @@ def laplace(image, ksize=3, mask=None):
     return _mask_filter_result(result, mask)
 
 
+@dispatchable
 def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     """Find the edge magnitude using the Farid transform.
 
@@ -786,6 +801,7 @@ def farid(image, mask=None, *, axis=None, mode='reflect', cval=0.0):
     return output
 
 
+@dispatchable
 def farid_h(image, *, mask=None):
     """Find the horizontal edges of an image using the Farid transform.
 
@@ -826,6 +842,7 @@ def farid_h(image, *, mask=None):
     return _mask_filter_result(result, mask)
 
 
+@dispatchable
 def farid_v(image, *, mask=None):
     """Find the vertical edges of an image using the Farid transform.
 

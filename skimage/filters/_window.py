@@ -5,8 +5,10 @@ from scipy.signal import get_window
 
 from .._shared.utils import safe_as_int
 from ..transform import warp
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def window(window_type, shape, warp_kwargs=None):
     """Return an n-dimensional window of a given size and dimensionality.
 

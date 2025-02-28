@@ -7,6 +7,7 @@ from scipy.spatial import cKDTree
 
 from .._shared.utils import warn
 from ._misc_cy import _remove_objects_by_distance
+from ..util._backends import dispatchable
 
 
 # Our function names don't exactly correspond to ndimages.
@@ -56,6 +57,7 @@ def _check_dtype_supported(ar):
         )
 
 
+@dispatchable
 def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     """Remove objects smaller than the specified size.
 
@@ -155,6 +157,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     return out
 
 
+@dispatchable
 def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     """Remove contiguous holes smaller than the specified size.
 
@@ -241,6 +244,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     return out
 
 
+@dispatchable
 def remove_objects_by_distance(
     label_image,
     min_distance,

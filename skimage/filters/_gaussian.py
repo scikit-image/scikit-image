@@ -2,10 +2,12 @@ import numpy as np
 
 from .._shared.filters import gaussian
 from ..util import img_as_float
+from ..util._backends import dispatchable
 
 __all__ = ['gaussian', 'difference_of_gaussians']
 
 
+@dispatchable
 def difference_of_gaussians(
     image,
     low_sigma,

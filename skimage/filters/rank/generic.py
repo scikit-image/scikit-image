@@ -54,6 +54,7 @@ from scipy import ndimage as ndi
 from ..._shared.utils import check_nD, warn
 from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
+from ...util._backends import dispatchable
 from . import generic_cy
 
 
@@ -439,6 +440,7 @@ def _apply_vector_per_pixel(
     return out
 
 
+@dispatchable
 def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Auto-level image using local histogram.
 
@@ -504,6 +506,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Equalize image using local histogram.
 
@@ -566,6 +569,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
@@ -628,6 +632,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local maximum of an image.
 
@@ -699,6 +704,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mean of an image.
 
@@ -761,6 +767,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def geometric_mean(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
@@ -830,6 +837,7 @@ def geometric_mean(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def subtract_mean(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
@@ -902,6 +910,7 @@ def subtract_mean(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def median(
     image,
     footprint=None,
@@ -980,6 +989,7 @@ def median(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local minimum of an image.
 
@@ -1051,6 +1061,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mode of an image.
 
@@ -1115,6 +1126,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def enhance_contrast(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
@@ -1183,6 +1195,7 @@ def enhance_contrast(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local number (population) of pixels.
 
@@ -1252,6 +1265,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local sum of pixels.
 
@@ -1321,6 +1335,7 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local threshold of an image.
 
@@ -1390,6 +1405,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def noise_filter(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
@@ -1479,6 +1495,7 @@ def noise_filter(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local entropy.
 
@@ -1551,6 +1568,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local Otsu's threshold value for each pixel.
 
@@ -1619,6 +1637,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
+@dispatchable
 def windowed_histogram(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, n_bins=None
 ):
@@ -1681,6 +1700,7 @@ def windowed_histogram(
     )
 
 
+@dispatchable
 def majority(
     image,
     footprint,

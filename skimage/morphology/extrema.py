@@ -16,6 +16,7 @@ from .._shared.utils import warn
 from ..util import dtype_limits, invert, crop
 from . import grayreconstruct, _util
 from ._extrema_cy import _local_maxima
+from ..util._backends import dispatchable
 
 
 def _add_constant_clip(image, const_value):
@@ -46,6 +47,7 @@ def _subtract_constant_clip(image, const_value):
     return result
 
 
+@dispatchable
 def h_maxima(image, h, footprint=None):
     """Determine all maxima of the image with height >= h.
 
@@ -175,6 +177,7 @@ def h_maxima(image, h, footprint=None):
     return (residue_img >= h).astype(np.uint8)
 
 
+@dispatchable
 def h_minima(image, h, footprint=None):
     """Determine all minima of the image with depth >= h.
 
@@ -272,6 +275,7 @@ def h_minima(image, h, footprint=None):
     return (residue_img >= h).astype(np.uint8)
 
 
+@dispatchable
 def local_maxima(
     image, footprint=None, connectivity=None, indices=False, allow_borders=True
 ):
@@ -438,6 +442,7 @@ def local_maxima(
         return flags.view(bool)
 
 
+@dispatchable
 def local_minima(
     image, footprint=None, connectivity=None, indices=False, allow_borders=True
 ):

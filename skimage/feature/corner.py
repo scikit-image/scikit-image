@@ -10,6 +10,7 @@ from .._shared.filters import gaussian
 from .._shared.utils import _supported_float_type, safe_as_int, warn
 from ..transform import integral_image
 from ..util import img_as_float
+from ..util._backends import dispatchable
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .peak import peak_local_max
@@ -43,6 +44,7 @@ def _compute_derivatives(image, mode='constant', cval=0):
     return derivatives
 
 
+@dispatchable
 def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     """Compute structure tensor using sum of squared differences.
 
@@ -222,6 +224,7 @@ def _hessian_matrix_with_gaussian(image, sigma=1, mode='reflect', cval=0, order=
     return H_elems
 
 
+@dispatchable
 def hessian_matrix(
     image, sigma=1, mode='constant', cval=0, order='rc', use_gaussian_derivatives=None
 ):
@@ -338,6 +341,7 @@ def hessian_matrix(
     return H_elems
 
 
+@dispatchable
 def hessian_matrix_det(image, sigma=1, approximate=True):
     """Compute the approximate Hessian Determinant over an image.
 
@@ -449,6 +453,7 @@ def _symmetric_image(S_elems):
     return symmetric_image
 
 
+@dispatchable
 def structure_tensor_eigenvalues(A_elems):
     """Compute eigenvalues of structure tensor.
 
@@ -486,6 +491,7 @@ def structure_tensor_eigenvalues(A_elems):
     return _symmetric_compute_eigenvalues(A_elems)
 
 
+@dispatchable
 def hessian_matrix_eigvals(H_elems):
     """Compute eigenvalues of Hessian matrix.
 
@@ -519,6 +525,7 @@ def hessian_matrix_eigvals(H_elems):
     return _symmetric_compute_eigenvalues(H_elems)
 
 
+@dispatchable
 def shape_index(image, sigma=1, mode='constant', cval=0):
     """Compute the shape index.
 
@@ -600,6 +607,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
         return (2.0 / np.pi) * np.arctan((l2 + l1) / (l2 - l1))
 
 
+@dispatchable
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     """Compute Kitchen and Rosenfeld corner measure response image.
 
@@ -651,6 +659,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     return response
 
 
+@dispatchable
 def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     """Compute Harris corner measure response image.
 
@@ -731,6 +740,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     return response
 
 
+@dispatchable
 def corner_shi_tomasi(image, sigma=1):
     """Compute Shi-Tomasi (Kanade-Tomasi) corner measure response image.
 
@@ -793,6 +803,7 @@ def corner_shi_tomasi(image, sigma=1):
     return response
 
 
+@dispatchable
 def corner_foerstner(image, sigma=1):
     """Compute Foerstner corner measure response image.
 
@@ -877,6 +888,7 @@ def corner_foerstner(image, sigma=1):
     return w, q
 
 
+@dispatchable
 def corner_fast(image, n=12, threshold=0.15):
     """Extract FAST corners for a given image.
 
@@ -942,6 +954,7 @@ def corner_fast(image, n=12, threshold=0.15):
     return response
 
 
+@dispatchable
 def corner_subpix(image, corners, window_size=11, alpha=0.99):
     """Determine subpixel position of corners.
 
@@ -1123,6 +1136,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
+@dispatchable
 def corner_peaks(
     image,
     min_distance=1,
@@ -1238,6 +1252,7 @@ def corner_peaks(
     return peaks
 
 
+@dispatchable
 def corner_moravec(image, window_size=1):
     """Compute Moravec corner measure response image.
 
@@ -1288,6 +1303,7 @@ def corner_moravec(image, window_size=1):
     return _corner_moravec(np.ascontiguousarray(image), window_size)
 
 
+@dispatchable
 def corner_orientations(image, corners, mask):
     """Compute the orientation of corners.
 
