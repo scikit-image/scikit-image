@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from skimage import data
 from skimage.segmentation import felzenszwalb
 
@@ -46,6 +47,7 @@ def test_minsize():
         assert_greater(counts.min() + 1, min_size)
 
 
+@pytest.mark.thread_unsafe
 @testing.parametrize('channel_axis', [0, -1])
 def test_3D(channel_axis):
     grey_img = np.zeros((10, 10))

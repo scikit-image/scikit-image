@@ -1,6 +1,8 @@
 import skimage as ski
+import pytest
 
 
+@pytest.mark.thread_unsafe
 def test_lookfor_basic(capsys):
     assert ski.lookfor is ski.util.lookfor
 

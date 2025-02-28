@@ -7,6 +7,7 @@ import os
 import pytest
 
 
+@pytest.mark.thread_unsafe
 def test_download_all_with_pooch():
     # jni first wrote this test with the intention of
     # fully deleting the files in the data_dir,
@@ -165,6 +166,7 @@ def test_brain_3d():
     assert image.shape == (10, 256, 256)
 
 
+@pytest.mark.thread_unsafe
 def test_kidney_3d_multichannel():
     """Test that 3D multichannel image of kidney tissue can be loaded.
 
