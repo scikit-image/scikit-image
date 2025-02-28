@@ -8,6 +8,7 @@ from ._convex_hull import possible_hull
 from ..measure._label import label
 from ..util import unique_rows
 from .._shared.utils import warn
+from ..util._backends import dispatchable
 
 __all__ = ['convex_hull_image', 'convex_hull_object']
 
@@ -71,6 +72,7 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
     return coords_in_hull
 
 
+@dispatchable
 def convex_hull_image(
     image, offset_coordinates=True, tolerance=1e-10, include_borders=True
 ):
@@ -170,6 +172,7 @@ def convex_hull_image(
     return mask
 
 
+@dispatchable
 def convex_hull_object(image, *, connectivity=2):
     r"""Compute the convex hull image of individual objects in a binary image.
 

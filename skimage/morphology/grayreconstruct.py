@@ -3,8 +3,10 @@ import numpy as np
 from .._shared.utils import _supported_float_type
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def reconstruction(seed, mask, method='dilation', footprint=None, offset=None):
     """Perform a morphological reconstruction of an image.
 

@@ -13,8 +13,10 @@ from ._skeletonize_various_cy import (
     _skeletonize_loop,
     _table_lookup_index,
 )
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def skeletonize(image, *, method=None):
     """Compute the skeleton of the input image via thinning.
 
@@ -253,6 +255,7 @@ G123P_LUT = np.array([0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0,
 # fmt: on
 
 
+@dispatchable
 def thin(image, max_num_iter=None):
     """
     Perform morphological thinning of a binary image.
@@ -357,6 +360,7 @@ def thin(image, max_num_iter=None):
 _eight_connect = ndi.generate_binary_structure(2, 2)
 
 
+@dispatchable
 def medial_axis(image, mask=None, return_distance=False, *, rng=None):
     """Compute the medial axis transform of a binary image.
 

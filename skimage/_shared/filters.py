@@ -14,8 +14,10 @@ from .._shared.utils import (
     _supported_float_type,
     convert_to_float,
 )
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def gaussian(
     image,
     sigma=1.0,

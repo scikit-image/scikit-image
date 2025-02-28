@@ -4,6 +4,7 @@ from scipy import ndimage as ndi
 from ._geometric import SimilarityTransform, AffineTransform, ProjectiveTransform
 from ._warps_cy import _warp_fast
 from ..measure import block_reduce
+from ..util._backends import dispatchable
 
 from .._shared.utils import (
     get_bound_method_class,
@@ -68,6 +69,7 @@ def _preprocess_resize_output_shape(image, output_shape):
     return image, output_shape
 
 
+@dispatchable
 def resize(
     image,
     output_shape,
@@ -209,6 +211,7 @@ def resize(
     return out
 
 
+@dispatchable
 @channel_as_last_axis()
 def rescale(
     image,
@@ -327,6 +330,7 @@ def rescale(
     )
 
 
+@dispatchable
 def rotate(
     image,
     angle,
@@ -517,6 +521,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
     return xy
 
 
+@dispatchable
 def swirl(
     image,
     center=None,
@@ -761,6 +766,7 @@ def _clip_warp_output(input_image, output_image, mode, cval, clip):
         np.clip(output_image, min_val, max_val, out=output_image)
 
 
+@dispatchable
 def warp(
     image,
     inverse_map,
@@ -1104,6 +1110,7 @@ def _log_polar_mapping(output_coords, k_angle, k_radius, center):
     return coords
 
 
+@dispatchable
 @channel_as_last_axis()
 def warp_polar(
     image,

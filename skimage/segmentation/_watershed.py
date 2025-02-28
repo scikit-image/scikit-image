@@ -22,6 +22,7 @@ from . import _watershed_cy
 from ..morphology.extrema import local_minima
 from ..morphology._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import crop, regular_seeds
+from ..util._backends import dispatchable
 
 
 def _validate_inputs(image, markers, mask, connectivity):
@@ -83,6 +84,7 @@ def _validate_inputs(image, markers, mask, connectivity):
     return (image.astype(np.float64), markers, mask.astype(np.int8))
 
 
+@dispatchable
 def watershed(
     image,
     markers=None,

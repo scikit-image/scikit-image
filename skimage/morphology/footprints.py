@@ -8,6 +8,7 @@ import numpy as np
 from .. import draw
 from skimage import morphology
 from .._shared.utils import deprecate_func
+from ..util._backends import dispatchable
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -74,6 +75,7 @@ def _shape_from_sequence(footprints, require_odd_size=False):
     return tuple(shape)
 
 
+@dispatchable
 def footprint_from_sequence(footprints):
     """Convert a footprint sequence into an equivalent ndarray.
 
@@ -98,6 +100,7 @@ def footprint_from_sequence(footprints):
     return morphology.dilation(imag, footprints)
 
 
+@dispatchable
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     """Generate a rectangular or hyper-rectangular footprint.
 
@@ -339,6 +342,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@dispatchable
 def diamond(radius, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, diamond-shaped footprint.
 
@@ -505,6 +509,7 @@ def _t_shaped_element_series(ndim=2, dtype=np.uint8):
     return tuple(all_t)
 
 
+@dispatchable
 def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a flat, disk-shaped footprint.
 
@@ -649,6 +654,7 @@ def _cross_decomposition(footprint, dtype=np.uint8):
     return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
 
 
+@dispatchable
 def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
     """Generates a flat, ellipse-shaped footprint.
 
@@ -777,6 +783,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@dispatchable
 def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     """Generates a octahedron-shaped footprint.
 
@@ -838,6 +845,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@dispatchable
 def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     """Generates a ball-shaped footprint.
 
@@ -911,6 +919,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
     return sequence
 
 
+@dispatchable
 def octagon(m, n, dtype=np.uint8, *, decomposition=None):
     """Generates an octagon shaped footprint.
 
@@ -996,6 +1005,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
     return footprint
 
 
+@dispatchable
 def star(a, dtype=np.uint8):
     """Generates a star shaped footprint.
 
