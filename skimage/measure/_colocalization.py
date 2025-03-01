@@ -141,8 +141,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
     where
 
     - :math:`A_i` is the value of the :math:`i^{th}` pixel in `image0`,
-    - :math:`A_{i,coloc} = A_i` if :math:`Bmask_i > 0`, and
-    - :math:`Bmask_i` is the value of the :math:`i^{th}` pixel in `mask`.
+    - :math:`A_{i,coloc} = A_i` if :math:`Bmask_i > 0`, :math:`Bmask_i` being the value of the :math:`i^{th}` pixel in `mask`.
 
     MCC is sensitive to noise, with diffuse signal in the first channel
     inflating its value. Images should be processed to remove out of focus and
