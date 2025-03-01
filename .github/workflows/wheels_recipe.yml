@@ -248,6 +248,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
         uses: pypa/cibuildwheel@v2.19.1
