@@ -265,18 +265,13 @@ jobs:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@v2.19.1
+        uses: pypa/cibuildwheel@v2.23.0 # builds for Pyodide 0.27
         with:
           output-dir: dist
         env:
-          # Override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
-          # for Pyodide-related settings.
+          # We override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
+          # in favour of Pyodide-related settings.
           CIBW_PLATFORM: pyodide
-          CIBW_ENVIRONMENT_PYODIDE: ""
-          CIBW_TEST_REQUIRES_PYODIDE: "pytest matplotlib"
-          CIBW_TEST_COMMAND_PYODIDE: |
-            mkdir -p {project}/mnt/dist/
-            cp {wheel} {project}/mnt/dist/
-            npm install pyodide@0.26.1 --verbose --prefix {project}
-            cp {project}/tools/emscripten/pytest_scikit_image_pyodide.js {project}/
-            node {project}/pytest_scikit_image_pyodide.js --pyargs skimage
+          CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn"
+          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage"
