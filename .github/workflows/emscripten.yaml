@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Set up Pyodide virtual environment and install test dependencies
+      - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
           # Set up Pyodide virtual environment
           pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
