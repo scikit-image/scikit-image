@@ -1,6 +1,0 @@
-# Manually curated list of requirements for testing
-# inside a Pyodide virtual environment. This list
-# contains a subset of the dependencies mentioned in
-# requirements/test.txt.
-pytest
-matplotlib
