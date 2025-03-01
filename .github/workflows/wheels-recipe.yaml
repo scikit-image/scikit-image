@@ -17,7 +17,9 @@ on:
         required: false
         type: string
         default: "pytest --pyargs skimage"
-  workflow_dispatch: # temporarily added for debugging
+  # temporarily added for debugging
+  pull_request:
+  workflow_dispatch:
 
 env:
   CIBW_BUILD_VERBOSITY: 1
