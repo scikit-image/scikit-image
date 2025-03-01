@@ -5,6 +5,7 @@ from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (
     arch32,
+    is_wasm,
     assert_almost_equal,
     assert_array_less,
     assert_equal,
@@ -447,8 +448,9 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     assert_almost_equal(params, model.params)
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '
@@ -459,6 +461,7 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
+
     warning_message = (
         "Standard deviation of data is too small to estimate "
         "ellipse with meaningful precision."
@@ -468,7 +471,11 @@ def test_ellipse_model_estimate_failers():
     assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
-    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    warning_message = "Need at least 5 data points to estimate an ellipse."
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    assert_stacklevel(_warnings)
+    assert len(_warnings) == 1
 
 
 def test_ellipse_model_residuals():
@@ -598,6 +605,22 @@ def test_ransac_dynamic_max_trials():
     # e = 0%, min_samples = 5
     assert_equal(_dynamic_max_trials(1, 100, 5, 0), 0)
     assert_equal(_dynamic_max_trials(1, 100, 5, 1), 360436504051)
+
+
+def test_ransac_dynamic_max_trials_clipping():
+    """Test that the function behaves well when `nom` or `denom` become almost 1.0."""
+    # e = 0%, min_samples = 10
+    # Ensure that (1 - inlier_ratio ** min_samples) approx 1 does not fail.
+    assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
+
+    EPSILON = np.finfo(np.float64).eps
+    desired = np.ceil(np.log(EPSILON) / np.log(1 - EPSILON))
+    assert desired > 0
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1), desired)
+
+    # Ensure that (1 - probability) approx 1 does not fail.
+    assert_equal(_dynamic_max_trials(1, 100, 10, 1e-40), 1)
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1e-40), 1)
 
 
 def test_ransac_invalid_input():

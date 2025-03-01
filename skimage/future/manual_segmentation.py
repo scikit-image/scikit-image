@@ -60,11 +60,13 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
 
     Examples
     --------
-    >>> from skimage import data, future, io
+    >>> from skimage import data, future
+    >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> camera = data.camera()
     >>> mask = future.manual_polygon_segmentation(camera)  # doctest: +SKIP
-    >>> io.imshow(mask)  # doctest: +SKIP
-    >>> io.show()  # doctest: +SKIP
+    >>> fig, ax = plt.subplots()  # doctest: +SKIP
+    >>> ax.imshow(mask)           # doctest: +SKIP
+    >>> plt.show()                # doctest: +SKIP
     """
     import matplotlib
     import matplotlib.pyplot as plt
@@ -93,7 +95,7 @@ def manual_polygon_segmentation(image, alpha=0.4, return_all=False):
             fig.canvas.draw_idle()
 
     undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
-    undo_button = matplotlib.widgets.Button(undo_pos, '\u27F2')
+    undo_button = matplotlib.widgets.Button(undo_pos, '\u27f2')
     undo_button.on_clicked(_undo)
 
     def _extend_polygon(event):
@@ -176,11 +178,13 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
 
     Examples
     --------
-    >>> from skimage import data, future, io
+    >>> from skimage import data, future
+    >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> camera = data.camera()
     >>> mask = future.manual_lasso_segmentation(camera)  # doctest: +SKIP
-    >>> io.imshow(mask)  # doctest: +SKIP
-    >>> io.show()  # doctest: +SKIP
+    >>> fig, ax = plt.subplots()  # doctest: +SKIP
+    >>> ax.imshow(mask)           # doctest: +SKIP
+    >>> plt.show()                # doctest: +SKIP
     """
     import matplotlib
     import matplotlib.pyplot as plt
@@ -206,7 +210,7 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
             fig.canvas.draw_idle()
 
     undo_pos = fig.add_axes([0.85, 0.05, 0.075, 0.075])
-    undo_button = matplotlib.widgets.Button(undo_pos, '\u27F2')
+    undo_button = matplotlib.widgets.Button(undo_pos, '\u27f2')
     undo_button.on_clicked(_undo)
 
     def _on_lasso_selection(vertices):

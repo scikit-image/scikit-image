@@ -1,4 +1,5 @@
 import inspect
+import sys
 from functools import wraps
 from math import atan2
 from math import pi as PI
@@ -291,7 +292,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
     References
     ----------
-    ..[1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors  # noqa
+    .. [1] https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors
     """
     axis_lengths = []
     for ax in range(2, -1, -1):
@@ -365,6 +366,14 @@ class RegionProperties:
             self._extra_properties = {func.__name__: func for func in extra_properties}
 
     def __getattr__(self, attr):
+        if attr == "__setstate__":
+            # When deserializing this object with pickle, `__setstate__`
+            # is accessed before any other attributes like `self._intensity_image`
+            # are available which leads to a RecursionError when trying to
+            # access them later on in this function. So guard against this by
+            # provoking the default AttributeError (gh-6465).
+            return self.__getattribute__(attr)
+
         if self._intensity_image is None and attr in _require_intensity_image:
             raise AttributeError(
                 f"Attribute '{attr}' unavailable when `intensity_image` "
@@ -1406,9 +1415,11 @@ def _parse_docs():
     import textwrap
 
     doc = regionprops.__doc__ or ''
-    matches = re.finditer(
-        r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)', doc, flags=re.DOTALL
-    )
+    arg_regex = r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n    [\*\S]+)'
+    if sys.version_info >= (3, 13):
+        arg_regex = r'\*\*(\w+)\*\* \:.*?\n(.*?)(?=\n[\*\S]+)'
+
+    matches = re.finditer(arg_regex, doc, flags=re.DOTALL)
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc

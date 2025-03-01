@@ -92,6 +92,18 @@ class ApiDocWriter:
         self._package_name = package_name
         root_module = self._import(package_name)
         self.root_path = root_module.__path__[-1]
+
+        if not os.path.isdir(self.root_path):
+            # __path__ might point to editable loader, try falling back to __file__
+            self.root_path = os.path.dirname(root_module.__file__)
+
+        if not os.path.isdir(self.root_path):
+            msg = (
+                f"could not determine a valid directory for {root_module!r}, "
+                f"'{self.root_path}' is not a directory"
+            )
+            raise NotADirectoryError(msg)
+
         self.written_modules = None
 
     package_name = property(
@@ -285,21 +297,20 @@ class ApiDocWriter:
         ad += '.. currentmodule:: ' + uri + '\n\n'
         ad += '.. autosummary::\n   :nosignatures:\n\n'
         for f in functions:
-            ad += '   ' + uri + '.' + f + '\n'
+            ad += '   ' + f + '\n'
         ad += '\n'
         for c in classes:
-            ad += '   ' + uri + '.' + c + '\n'
+            ad += '   ' + c + '\n'
         ad += '\n'
         for m in submodules:
-            ad += '   ' + uri + '.' + m + '\n'
+            ad += '   ' + m + '\n'
         ad += '\n'
 
         for f in functions:
             ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
-            full_f = uri + '.' + f
-            ad += '\n.. autofunction:: ' + full_f + '\n\n'
-            ad += f'    .. minigallery:: {full_f}\n\n'
+            ad += '\n.. autofunction:: ' + f + '\n\n'
+            ad += f'    .. minigallery:: {uri}.{f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -311,8 +322,7 @@ class ApiDocWriter:
                 '\n'
                 '  .. automethod:: __init__\n\n'
             )
-            full_c = uri + '.' + c
-            ad += f'    .. minigallery:: {full_c}\n\n'
+            ad += f'    .. minigallery:: {uri}.{c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):

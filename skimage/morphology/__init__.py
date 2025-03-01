@@ -1,10 +1,4 @@
-"""Utilities that operate on shapes in images.
-
-These operations are particularly suited for binary images,
-although some may be useful for images of other types as well.
-
-Basic morphological operations include dilation and erosion.
-"""
+"""Morphological algorithms, e.g., closing, opening, skeletonization."""
 
 from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
 from .gray import black_tophat, closing, dilation, erosion, opening, white_tophat
@@ -21,6 +15,7 @@ from .footprints import (
     disk,
     ellipse,
     footprint_from_sequence,
+    footprint_rectangle,
     mirror_footprint,
     octagon,
     octahedron,
@@ -30,10 +25,10 @@ from .footprints import (
     star,
 )
 from ..measure._label import label
-from ._skeletonize import medial_axis, skeletonize, skeletonize_3d, thin
+from ._skeletonize import medial_axis, skeletonize, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
-from .misc import remove_small_holes, remove_small_objects
+from .misc import remove_small_holes, remove_small_objects, remove_objects_by_distance
 from .extrema import h_maxima, h_minima, local_minima, local_maxima
 from ._flood_fill import flood, flood_fill
 from .max_tree import (
@@ -49,15 +44,10 @@ __all__ = [
     'area_closing',
     'area_opening',
     'ball',
-    'binary_closing',
-    'binary_dilation',
-    'binary_erosion',
-    'binary_opening',
     'black_tophat',
     'closing',
     'convex_hull_image',
     'convex_hull_object',
-    'cube',
     'diameter_closing',
     'diameter_opening',
     'diamond',
@@ -68,6 +58,7 @@ __all__ = [
     'flood',
     'flood_fill',
     'footprint_from_sequence',
+    'footprint_rectangle',
     'h_maxima',
     'h_minima',
     'isotropic_closing',
@@ -86,11 +77,10 @@ __all__ = [
     'opening',
     'pad_footprint',
     'reconstruction',
-    'rectangle',
     'remove_small_holes',
     'remove_small_objects',
+    'remove_objects_by_distance',
     'skeletonize',
-    'square',
     'star',
     'thin',
     'white_tophat',

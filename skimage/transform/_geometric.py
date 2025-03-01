@@ -687,7 +687,7 @@ class ProjectiveTransform(_GeometricTransform):
 
         return dst[:, :ndim]
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         if dtype is None:
             return self.params
         else:
@@ -1195,60 +1195,25 @@ class PiecewiseAffineTransform(_GeometricTransform):
         return tform
 
 
-def _euler_rotation(axis, angle):
-    """Produce a single-axis Euler rotation matrix.
-
-    Parameters
-    ----------
-    axis : int in {0, 1, 2}
-        The axis of rotation.
-    angle : float
-        The angle of rotation in radians.
-
-    Returns
-    -------
-    Ri : array of float, shape (3, 3)
-        The rotation matrix along axis `axis`.
-    """
-    i = axis
-    s = (-1) ** i * np.sin(angle)
-    c = np.cos(angle)
-    R2 = np.array([[c, -s], [s, c]])
-    Ri = np.eye(3)
-    # We need the axes other than the rotation axis, in the right order:
-    # 0 -> (1, 2); 1 -> (0, 2); 2 -> (0, 1).
-    axes = sorted({0, 1, 2} - {axis})
-    # We then embed the 2-axis rotation matrix into the full matrix.
-    # (1, 2) -> R[1:3:1, 1:3:1] = R2, (0, 2) -> R[0:3:2, 0:3:2] = R2, etc.
-    sl = slice(axes[0], axes[1] + 1, axes[1] - axes[0])
-    Ri[sl, sl] = R2
-    return Ri
-
-
-def _euler_rotation_matrix(angles, axes=None):
-    """Produce an Euler rotation matrix from the given angles.
-
-    The matrix will have dimension equal to the number of angles given.
+def _euler_rotation_matrix(angles, degrees=False):
+    """Produce an Euler rotation matrix from the given intrinsic rotation angles
+    for the axes x, y and z.
 
     Parameters
     ----------
     angles : array of float, shape (3,)
         The transformation angles in radians.
-    axes : list of int
-        The axes about which to produce the rotation. Defaults to 0, 1, 2.
+    degrees : bool, optional
+        If True, then the given angles are assumed to be in degrees. Default is False.
 
     Returns
     -------
     R : array of float, shape (3, 3)
         The Euler rotation matrix.
     """
-    if axes is None:
-        axes = range(3)
-    dim = len(angles)
-    R = np.eye(dim)
-    for i, angle in zip(axes, angles):
-        R = R @ _euler_rotation(i, angle)
-    return R
+    return spatial.transform.Rotation.from_euler(
+        'XYZ', angles=angles, degrees=degrees
+    ).as_matrix()
 
 
 class EuclideanTransform(ProjectiveTransform):

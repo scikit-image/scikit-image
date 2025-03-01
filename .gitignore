@@ -36,7 +36,8 @@ sg_execution_times.rst
 doc/release/_release_notes_for_docs.rst
 doc/gh-pages
 wheels
-skimage/morphology/_skeletonize_3d_cy.pyx
+skimage/morphology/_skeletonize_lee_cy.pyx
 .asv
 .vscode/
 .mesonpy-native-file.ini
+/.pyodide-xbuildenv-*
