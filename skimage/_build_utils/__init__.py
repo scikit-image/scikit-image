@@ -5,7 +5,7 @@
 #   config.add_extension('_name', sources=['source_fname'], **numpy_nodepr_api)
 #
 numpy_nodepr_api = dict(
-    define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_9_API_VERSION")]
+    define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_24_API_VERSION")]
 )
 
 

@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.10'
+requires-python = '>=3.11'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,7 +12,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
@@ -59,7 +58,6 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    "tomli; python_version < '3.11'",
 ]
 docs = [
     'sphinx>=8.0',
@@ -85,13 +83,13 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK',
-    'astropy>=5.0',
-    'cloudpickle>=1.1.1',  # necessary to provide the 'processes' scheduler for dask
+    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
+    'astropy>=6.0',
+    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
-    'pooch>=1.6.0',
-    'pyamg>=5.2',
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
     'scikit-learn>=1.2',
 ]

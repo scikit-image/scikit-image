@@ -186,6 +186,7 @@ def dispatchable(func):
                     DispatchNotification,
                     stacklevel=2,
                 )
+
             return func(*args, **kwargs)
 
     return wrapper
