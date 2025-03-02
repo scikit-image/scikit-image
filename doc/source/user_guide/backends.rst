@@ -57,9 +57,9 @@ You can also set the backend(s) without modifying your existing scikit-image cod
 Note that if no backend(s) in the `SKIMAGE_BACKENDS`,
 
 - are installed on your local machine, or
-- provide an alternate implementation for an algorithm,  
+- provide an alternate implementation for an algorithm,
 
-then scikit-image will fallback to its native implementation of the algorithm.  
+then scikit-image will fallback to its native implementation of the algorithm.
 
 Additionally, if an error is raised during the execution of a backend implementation,
 this fallback will **not** occur, and the error will be propagated.

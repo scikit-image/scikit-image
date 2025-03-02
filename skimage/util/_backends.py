@@ -9,7 +9,7 @@ def get_skimage_backends():
     """Returns the backend priority list stored in `SKIMAGE_BACKENDS`
     environment variable, or `False` if the dispatching is disabled.
 
-    This function interprets the value of the environment variable 
+    This function interprets the value of the environment variable
     `SKIMAGE_BACKENDS` as follows:
     - If unset or explicitly set to `"False"`, return `False`.
     - If a comma-separated string, return it as a list of backend names.
@@ -22,7 +22,9 @@ def get_skimage_backends():
     elif "," in backend_priority:
         return [item.strip() for item in backend_priority.split(",")]
     else:
-        return [backend_priority,]
+        return [
+            backend_priority,
+        ]
 
 
 def public_api_module(func):
@@ -105,7 +107,7 @@ def all_backends_with_eps_combined():
     for backend in backends_:
         backends[backend.name] = {"skimage_backends_ep_obj": backend}
         info = backend_infos[backend.name]
-        # Only loading and calling the infos ep bcoz it is 
+        # Only loading and calling the infos ep bcoz it is
         # assumed to be cheap operation --> saves time
         backends[backend.name]["info"] = info.load()()
 
