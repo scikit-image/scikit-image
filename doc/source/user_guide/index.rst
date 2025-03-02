@@ -20,6 +20,7 @@ and more advanced topics.
    geometrical_transform
    tutorials
    getting_help
+   backends
 
 .. toctree::
    :maxdepth: 1
