@@ -28,8 +28,7 @@ def fake_backends(monkeypatch):
 
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
 
             return fake_foo
@@ -37,8 +36,7 @@ def fake_backends(monkeypatch):
         def can_has(self, name, *args, **kwargs):
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
             return True
 
@@ -82,7 +80,9 @@ def fake_backends(monkeypatch):
             },
         }
 
-    monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_all_backends_with_eps_combined)
+    monkeypatch.setattr(
+        _backends, "all_backends_with_eps_combined", mock_all_backends_with_eps_combined
+    )
     monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
     monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1, fake2")
 
@@ -147,7 +147,7 @@ def test_notification_with_backends(monkeypatch, fake_backends):
 
     assert r == 42 * 3
 
-    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake3") # "fake3" is not a backend.
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake3")  # "fake3" is not a backend.
     with pytest.warns(
         _backends.DispatchNotification,
         match="Call to.*:foo' was not dispatched.",
@@ -173,11 +173,17 @@ def test_module_name_determination(func, expected):
     mod = importlib.import_module(module_name)
     assert getattr(mod, func.__name__) is func
 
+
 @pytest.mark.parametrize(
     "env_value, output",
     [
         ("False", False),
-        ("backend1", ["backend1",]),
+        (
+            "backend1",
+            [
+                "backend1",
+            ],
+        ),
         ("backend1,backend2, backend3", ["backend1", "backend2", "backend3"]),
     ],
 )

@@ -26,15 +26,13 @@ The `SKIMAGE_BACKENDS` environment variable can be configured at runtime in the 
 
 - Using a single backend:
 
-    ```python
-    os.environ["SKIMAGE_BACKENDS"] = "backend_name"
-    ```
+    .. code-block:: python
+        os.environ["SKIMAGE_BACKENDS"] = "backend_name"
 
 - Using multiple backends:
 
-    ```python
-    os.environ["SKIMAGE_BACKENDS"] = "backend_name_1, backend_name_2, backend_name_3"
-    ```
+    .. code-block:: python
+        os.environ["SKIMAGE_BACKENDS"] = "backend_name_1, backend_name_2, backend_name_3"
 
     Here, the first backend (`backend_name_1`) will be queried for the implementation of an algorithm.
     If it does not implement that algorithm, then the next backend in the list (`backend_name_2`) will be
@@ -44,15 +42,13 @@ The `SKIMAGE_BACKENDS` environment variable can be configured at runtime in the 
 
 - Disabling backend dispatching:
 
-    ```python
-    os.environ["SKIMAGE_BACKENDS"] = "False"
-    ```
+    .. code-block:: python
+        os.environ["SKIMAGE_BACKENDS"] = "False"
 
 You can also set the backend(s) without modifying your existing scikit-image code file, like this:
 
-    ```sh
-    $ export SKIMAGE_BACKENDS="backend_name1, backend_name_2" && python scikit_image_code.py
-    ```
+    .. code-block:: bash
+        $ export SKIMAGE_BACKENDS="backend_name1, backend_name_2" && python scikit_image_code.py
 
 Note that if no backend(s) in the `SKIMAGE_BACKENDS`,
 
