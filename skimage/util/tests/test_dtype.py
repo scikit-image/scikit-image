@@ -115,15 +115,19 @@ def test_float_out_of_range():
         rescale_to_int16(too_low)
 
 
-def test_float_float_all_ranges():
+@pytest.mark.parametrize("legacy_float_range", [True, False])
+def test_float_float_all_ranges(legacy_float_range):
     arr_in = np.array([[-10.0, 10.0, 1e20]], dtype=np.float32)
-    np.testing.assert_array_equal(rescale_to_float(arr_in), arr_in)
+    np.testing.assert_array_equal(
+        rescale_to_float(arr_in, legacy_float_range=legacy_float_range), arr_in
+    )
 
 
-def test_copy():
+@pytest.mark.parametrize("legacy_float_range", [True, False])
+def test_copy(legacy_float_range):
     x = np.array([1], dtype=np.float64)
-    y = rescale_to_float(x)
-    z = rescale_to_float(x, force_copy=True)
+    y = rescale_to_float(x, legacy_float_range=legacy_float_range)
+    z = rescale_to_float(x, force_copy=True, legacy_float_range=legacy_float_range)
 
     assert y is x
     assert z is not x
@@ -159,15 +163,17 @@ def test_clobber():
             assert_equal(img_in, img_in_before)
 
 
-def test_signed_scaling_float32():
+@pytest.mark.parametrize("legacy_float_range", [True, False])
+def test_signed_scaling_float32(legacy_float_range):
     x = np.array([-128, 127], dtype=np.int8)
-    y = rescale_to_float32(x, legacy_float_range=True)
+    y = rescale_to_float32(x, legacy_float_range=legacy_float_range)
     assert_equal(y.max(), 1)
 
 
-def test_float32_passthrough():
+@pytest.mark.parametrize("legacy_float_range", [True, False])
+def test_float32_passthrough(legacy_float_range):
     x = np.array([-1, 1], dtype=np.float32)
-    y = rescale_to_float(x)
+    y = rescale_to_float(x, legacy_float_range=legacy_float_range)
     assert_equal(y.dtype, x.dtype)
 
 
