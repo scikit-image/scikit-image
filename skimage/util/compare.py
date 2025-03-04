@@ -1,5 +1,4 @@
 import functools
-import warnings
 from itertools import product
 
 import numpy as np
@@ -8,28 +7,12 @@ from .dtype import rescale_to_float
 
 
 def _rename_image_params(func):
-    wm_images = (
-        "Since version 0.24, the two input images are named `image0` and "
-        "`image1` (instead of `image1` and `image2`, respectively). Please use "
-        "`image0, image1` to avoid this warning for now, and avoid an error "
-        "from version 0.26 onwards."
-    )
-
-    wm_method = (
-        "Starting in version 0.24, all arguments following `image0, image1` "
-        "(including `method`) will be keyword-only. Please pass `method=` "
-        "in the function call to avoid this warning for now, and avoid an error "
-        "from version 0.26 onwards."
-    )
-
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # Turn all args into kwargs
         for i, (value, param) in enumerate(
             zip(args, ["image0", "image1", "method", "n_tiles"])
         ):
-            if i >= 2:
-                warnings.warn(wm_method, category=FutureWarning, stacklevel=2)
             if param in kwargs:
                 raise ValueError(
                     f"{param} passed both as positional and keyword argument."
@@ -37,21 +20,6 @@ def _rename_image_params(func):
             else:
                 kwargs[param] = value
         args = tuple()
-
-        # Account for `image2` if given
-        if "image2" in kwargs.keys():
-            warnings.warn(wm_images, category=FutureWarning, stacklevel=2)
-
-            # Safely move `image2` to `image1` if that's empty
-            if "image1" in kwargs.keys():
-                # Safely move `image1` to `image0`
-                if "image0" in kwargs.keys():
-                    raise ValueError(
-                        "Three input images given; please use only `image0` "
-                        "and `image1`."
-                    )
-                kwargs["image0"] = kwargs.pop("image1")
-            kwargs["image1"] = kwargs.pop("image2")
 
         return func(*args, **kwargs)
 

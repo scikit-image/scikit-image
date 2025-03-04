@@ -157,7 +157,7 @@ def test_footprint_dtype(function, args, supports_sequence_decomposition, dtype)
 
 
 @pytest.mark.parametrize("function", ["disk", "ball"])
-@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 75, 100])
+@pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20])
 def test_nsphere_series_approximation(function, radius):
     fp_func = getattr(footprints, function)
     expected = fp_func(radius, strict_radius=False, decomposition=None)

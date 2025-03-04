@@ -95,9 +95,9 @@ clear.dtype
 # We compute both the morphological dilation of this binary image
 # (step ``d)``) and its morphological erosion (step ``e)``).
 
-dilate = ski.morphology.binary_dilation(clear)
+dilate = ski.morphology.dilation(clear)
 
-erode = ski.morphology.binary_erosion(clear)
+erode = ski.morphology.erosion(clear)
 
 #####################################################################
 # Finally, we subtract the eroded from the dilated to get the nucleus rim
@@ -203,11 +203,13 @@ thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 # dimension now contains all pixel values), and applying the thresholding
 # function on the image sequence along its second axis:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: NumPy's `apply_along_axis` applies a function to 1D slices of
+#                `arr` along `axis`.
 #
-#     thresh_values = np.apply_along_axis(filters.threshold_otsu,
-#                                         axis=1,
-#                                         arr=smooth_seq.reshape(n_z, -1))
+#       thresh_values = np.apply_along_axis(filters.threshold_otsu,
+#                                           axis=1,
+#                                           arr=smooth_seq.reshape(n_z, -1))
 #
 # We use the following flat structuring element for morphological
 # computations (``np.newaxis`` is used to prepend an axis of size 1 for time):
@@ -227,32 +229,34 @@ fill_seq = ndi.binary_fill_holes(thresh_seq, structure=footprint)
 # In this case, the only relevant border is the edge at the greatest (x, y)
 # values. This can be seen in 3D by running the following code:
 #
-# .. code-block:: python
+#   .. code-block:: python
+#      :caption: We import the `plotly.graph_objects` module, upon which
+#                `plotly.express` is built.
 #
-#     import plotly.graph_objects as go
+#       import plotly.graph_objects as go
 #
-#     sample = fill_seq
-#     (n_Z, n_Y, n_X) = sample.shape
-#     Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
+#       sample = fill_seq
+#       (n_Z, n_Y, n_X) = sample.shape
+#       Z, Y, X = np.mgrid[:n_Z, :n_Y, :n_X]
 #
-#     fig = go.Figure(
-#         data=go.Volume(
-#             x=X.flatten(),
-#             y=Y.flatten(),
-#             z=Z.flatten(),
-#             value=sample.flatten(),
-#             opacity=0.5,
-#             slices_z=dict(show=True, locations=[n_z // 2])
-#         )
-#     )
-#     fig.show()
+#       fig = go.Figure(
+#           data=go.Volume(
+#               x=X.flatten(),
+#               y=Y.flatten(),
+#               z=Z.flatten(),
+#               value=sample.flatten(),
+#               opacity=0.5,
+#               slices_z=dict(show=True, locations=[n_z // 2])
+#           )
+#       )
+#       fig.show()
 
 border_mask = np.ones_like(fill_seq)
 border_mask[n_z // 2, -1, -1] = False
 clear_seq = ski.segmentation.clear_border(fill_seq, mask=border_mask)
 
-dilate_seq = ski.morphology.binary_dilation(clear_seq, footprint=footprint)
-erode_seq = ski.morphology.binary_erosion(clear_seq, footprint=footprint)
+dilate_seq = ski.morphology.dilation(clear_seq, footprint=footprint)
+erode_seq = ski.morphology.erosion(clear_seq, footprint=footprint)
 mask_sequence = np.logical_and(dilate_seq, ~erode_seq)
 
 #####################################################################
