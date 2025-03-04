@@ -139,7 +139,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
 
     where
 
-    - :math:`A_i` is the value of the :math:`i^{th}` pixel in `image0`,
+    - :math:`A_i` is the value of the :math:`i^{th}` pixel in `image0`, and
     - :math:`A_{i, coloc} = A_i B_i`, considering that :math:`B_i` is the
       (``True`` or ``False``) value of the :math:`i^{th}` pixel in
       `image1_mask` cast into int or float (``1`` or ``0``, respectively).
