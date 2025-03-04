@@ -380,7 +380,11 @@ def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_rang
                 image = np.multiply(image, 1.0 / ptp_in, dtype=computation_type)
                 image -= imin_in / ptp_in
             else:
-                raise ValueError("must set `legacy_float_range` to True or False")
+                msg = (
+                    "must set `legacy_float_range` to True or False "
+                    "when rescaling from integers to float"
+                )
+                raise ValueError(msg)
 
         else:
             image = np.add(image, 0.5, dtype=computation_type)
@@ -769,7 +773,7 @@ def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
     """Convert an image to floating point format.
 
     This function is similar to :func:`~.rescale_to_float64`, but will not convert
-    lower-precision floating point arrays to `float64`.
+    and scale (!) lower-precision floating point arrays to `float64`.
 
     Parameters
     ----------
