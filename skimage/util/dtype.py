@@ -701,18 +701,18 @@ def rescale_to_float32(image, *, force_copy=False, legacy_float_range=False):
     >>> import numpy as np
 
     >>> image_u8 = np.array([0, 255], dtype=np.uint8)
-    >>> out = ski.util.rescale_to_float32(image_u8, dtype=np.uint8))
+    >>> out = ski.util.rescale_to_float32(image_u8)
     >>> out
     array([0., 1.], dtype=float32)
     >>> out.dtype
-    np.float32
+    dtype('float32')
 
     >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
     >>> ski.util.rescale_to_float32(image_i8)
     array([0.       , 0.5019608, 1.       ], dtype=float32)
 
-    >>> ski.util.rescale_to_float32(image_i8 legacy_float_range=True)
-    array([-1., 0, 1.], dtype=float32)
+    >>> ski.util.rescale_to_float32(image_i8, legacy_float_range=True)
+    array([-1.,  0.,  1.], dtype=float32)
     """
     return _convert(
         image, np.float32, force_copy, legacy_float_range=legacy_float_range
@@ -755,14 +755,14 @@ def rescale_to_float64(image, *, force_copy=False, legacy_float_range=False):
     >>> out
     array([0., 1.])
     >>> out.dtype
-    np.float64
+    dtype('float64')
 
     >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
-    >>> ski.util.rescale_to_float64(image_i8, dtype=np.int8))
+    >>> ski.util.rescale_to_float64(image_i8)
     array([0.        , 0.50196078, 1.        ])
 
     >>> ski.util.rescale_to_float64(image_i8, legacy_float_range=True)
-    array([-1., 0, 1.])
+    array([-1.,  0.,  1.])
     """
     return _convert(
         image, np.float64, force_copy, legacy_float_range=legacy_float_range
@@ -808,14 +808,14 @@ def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
     >>> out
     array([0., 1.])
     >>> out.dtype
-    np.float64
+    dtype('float64')
 
     >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
-    >>> ski.util.rescale_to_float(image_i8, dtype=np.int8))
+    >>> ski.util.rescale_to_float(image_i8)
     array([0.        , 0.50196078, 1.        ])
 
     >>> ski.util.rescale_to_float(image_i8, legacy_float_range=True)
-    array([-1., 0, 1.])
+    array([-1.,  0.,  1.])
     """
     return _convert(
         image, np.floating, force_copy, legacy_float_range=legacy_float_range
