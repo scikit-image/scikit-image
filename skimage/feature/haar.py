@@ -321,7 +321,7 @@ def draw_haar_like_feature(
     output = np.copy(image)
     if len(image.shape) < 3:
         output = gray2rgb(image)
-    output = rescale_to_float(output)
+    output = rescale_to_float(output, legacy_float_range=True)
 
     for coord in feature_coord_:
         for idx_rect, rect in enumerate(coord):

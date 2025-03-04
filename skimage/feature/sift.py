@@ -694,7 +694,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     def _preprocess(self, image):
         check_nD(image, 2)
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
         self.float_dtype = _supported_float_type(image.dtype)
         image = image.astype(self.float_dtype, copy=False)
 

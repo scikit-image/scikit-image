@@ -124,7 +124,8 @@ def unsharp_mask(
     if preserve_range:
         fimg = image.astype(float_dtype, copy=False)
     else:
-        fimg = rescale_to_float(image).astype(float_dtype, copy=False)
+        fimg = rescale_to_float(image, legacy_float_range=True)
+        fimg = fimg.astype(float_dtype, copy=False)
         negative = np.any(fimg < 0)
         if negative:
             vrange = [-1.0, 1.0]

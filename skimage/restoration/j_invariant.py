@@ -147,7 +147,7 @@ def denoise_invariant(
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
     >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)
     """
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
 
     # promote float16->float32 if needed
     float_dtype = _supported_float_type(image.dtype)
@@ -329,7 +329,7 @@ def _calibrate_denoiser_search(
     losses : list of int
         Self-supervised loss for each set of parameters in `parameters_tested`.
     """
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     parameters_tested = list(_product_from_dict(denoise_parameters))
     losses = []
 

@@ -101,8 +101,8 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
     if image1.shape != image0.shape:
         raise ValueError('Images must have the same shape.')
 
-    img1 = rescale_to_float(image0)
-    img2 = rescale_to_float(image1)
+    img1 = rescale_to_float(image0, legacy_float_range=True)
+    img2 = rescale_to_float(image1, legacy_float_range=True)
 
     if method == 'diff':
         comparison = np.abs(img2 - img1)

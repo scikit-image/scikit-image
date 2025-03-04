@@ -50,7 +50,7 @@ def _felzenszwalb_cython(image, cnp.float64_t scale=1, sigma=0.8,
             "which may not be intended." % str(image.shape[2])),
             stacklevel=3)
 
-    image = rescale_to_float64(image)
+    image = rescale_to_float64(image, legacy_float_range=True)
 
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.

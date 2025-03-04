@@ -89,7 +89,7 @@ def _mutiscale_basic_features_singlechannel(
         List of features, each element of the list is an array of shape as img.
     """
     # computations are faster as float32
-    img = np.ascontiguousarray(rescale_to_float32(img))
+    img = np.ascontiguousarray(rescale_to_float32(img, legacy_float_range=True))
     if num_sigma is None:
         num_sigma = int(np.log2(sigma_max) - np.log2(sigma_min) + 1)
     sigmas = np.logspace(

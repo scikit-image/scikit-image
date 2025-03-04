@@ -10,7 +10,9 @@ from skimage._shared.utils import _supported_float_type
 
 
 def test_hog_output_size():
-    img = rescale_to_float(data.astronaut()[:256, :].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:256, :].mean(axis=2), legacy_float_range=True
+    )
 
     fd = feature.hog(
         img,

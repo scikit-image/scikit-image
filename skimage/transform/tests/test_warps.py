@@ -468,7 +468,8 @@ def test_resize_clip(order, preserve_range, anti_aliasing, dtype):
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_swirl(dtype):
-    image = rescale_to_float(checkerboard()).astype(dtype, copy=False)
+    image = rescale_to_float(checkerboard(), legacy_float_range=True)
+    image = image.astype(dtype, copy=False)
     float_dtype = _supported_float_type(dtype)
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -498,7 +499,7 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    img = rescale_to_float(rgb2gray(astronaut()))
+    img = rescale_to_float(rgb2gray(astronaut()), legacy_float_range=True)
     assert len(img.shape) == 2
     assert np.allclose(img, warp(img, AffineTransform(rotation=0)))
     assert not np.allclose(img, warp(img, AffineTransform(rotation=0.1)))

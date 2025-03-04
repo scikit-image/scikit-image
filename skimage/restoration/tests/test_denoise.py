@@ -37,12 +37,12 @@ else:
 np.random.seed(1234)
 
 
-astro = rescale_to_float(data.astronaut()[:128, :128])
+astro = rescale_to_float(data.astronaut()[:128, :128], legacy_float_range=True)
 astro_gray = color.rgb2gray(astro)
 # Make sure that all tests below that rely on 0-1 range are valid:
 assert np.max(astro_gray) <= 1.0
 
-checkerboard_gray = rescale_to_float(data.checkerboard())
+checkerboard_gray = rescale_to_float(data.checkerboard(), legacy_float_range=True)
 checkerboard = color.gray2rgb(checkerboard_gray)
 assert np.max(checkerboard_gray) <= 1.0
 
@@ -289,7 +289,7 @@ def test_denoise_bilateral_2d():
 def test_denoise_bilateral_pad():
     """This test checks if the bilateral filter is returning an image
     correctly padded."""
-    img = rescale_to_float(data.chelsea())[100:200, 100:200]
+    img = rescale_to_float(data.chelsea(), legacy_float_range=True)[100:200, 100:200]
     img_bil = restoration.denoise_bilateral(
         img, sigma_color=0.1, sigma_spatial=10, channel_axis=-1
     )
@@ -816,7 +816,7 @@ def test_wavelet_denoising_scaling(case, dtype, convert2ycbcr, estimate_sigma):
         assert denoised.max() > 0.9 * x.max()
     else:
         # have to compare to x_as_float in integer input cases
-        x_as_float = rescale_to_float(x)
+        x_as_float = rescale_to_float(x, legacy_float_range=True)
         f_data_range = x_as_float.max() - x_as_float.min()
         psnr_denoised = peak_signal_noise_ratio(
             x_as_float, denoised, data_range=f_data_range

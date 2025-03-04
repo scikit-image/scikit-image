@@ -515,7 +515,7 @@ def draw_multiblock_lbp(
         output = gray2rgb(image)
 
     # Colors are specified in floats.
-    output = rescale_to_float(output)
+    output = rescale_to_float(output, legacy_float_range=True)
 
     # Offsets of neighbor rectangles relative to central one.
     # It has order starting from top left and going clockwise.

@@ -181,7 +181,7 @@ def test_wrong_input():
 
 
 def test_bounding_values():
-    image = rescale_to_float(data.page())
+    image = rescale_to_float(data.page(), legacy_float_range=True)
     template = np.zeros((3, 3))
     template[1, 1] = 1
     result = match_template(image, template)

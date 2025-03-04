@@ -320,7 +320,7 @@ def test_otsu_coins_image():
 
 
 def test_otsu_coins_image_as_float():
-    coins = util.rescale_to_float(data.coins())
+    coins = util.rescale_to_float(data.coins(), legacy_float_range=True)
     assert 0.41 < threshold_otsu(coins) < 0.42
 
 
@@ -364,7 +364,7 @@ def test_li_coins_image():
 
 
 def test_li_coins_image_as_float():
-    coins = util.rescale_to_float(data.coins())
+    coins = util.rescale_to_float(data.coins(), legacy_float_range=True)
     assert 94 / 255 < threshold_li(coins) < 95 / 255
 
 
@@ -458,7 +458,7 @@ def test_yen_coins_image():
 
 
 def test_yen_coins_image_as_float():
-    coins = util.rescale_to_float(data.coins())
+    coins = util.rescale_to_float(data.coins(), legacy_float_range=True)
     assert 0.43 < threshold_yen(coins) < 0.44
 
 

@@ -15,7 +15,9 @@ def test_daisy_color_image_unsupported_error():
 
 
 def test_daisy_desc_dims():
-    img = rescale_to_float(data.astronaut()[:128, :128].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:128, :128].mean(axis=2), legacy_float_range=True
+    )
     rings = 2
     histograms = 4
     orientations = 3
@@ -30,7 +32,9 @@ def test_daisy_desc_dims():
 
 
 def test_descs_shape():
-    img = rescale_to_float(data.astronaut()[:256, :256].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:256, :256].mean(axis=2), legacy_float_range=True
+    )
     radius = 20
     step = 8
     descs = daisy(img, radius=radius, step=step)
@@ -55,7 +59,9 @@ def test_daisy_sigmas_and_radii(dtype):
 
 
 def test_daisy_incompatible_sigmas_and_radii():
-    img = rescale_to_float(data.astronaut()[:64, :64].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:64, :64].mean(axis=2), legacy_float_range=True
+    )
     sigmas = [1, 2]
     radii = [1, 2]
     with pytest.raises(ValueError):
@@ -63,7 +69,9 @@ def test_daisy_incompatible_sigmas_and_radii():
 
 
 def test_daisy_normalization():
-    img = rescale_to_float(data.astronaut()[:64, :64].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:64, :64].mean(axis=2), legacy_float_range=True
+    )
 
     descs = daisy(img, normalization='l1')
     for i in range(descs.shape[0]):
@@ -98,6 +106,8 @@ def test_daisy_normalization():
 
 
 def test_daisy_visualization():
-    img = rescale_to_float(data.astronaut()[:32, :32].mean(axis=2))
+    img = rescale_to_float(
+        data.astronaut()[:32, :32].mean(axis=2), legacy_float_range=True
+    )
     descs, descs_img = daisy(img, visualize=True)
     assert descs_img.shape == (32, 32, 3)

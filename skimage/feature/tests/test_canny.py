@@ -72,7 +72,7 @@ class TestCanny(unittest.TestCase):
         self.assertTrue(np.all(result1 == result2))
 
     def test_use_quantiles(self):
-        image = rescale_to_float(data.camera()[::100, ::100])
+        image = rescale_to_float(data.camera()[::100, ::100], legacy_float_range=True)
 
         # Correct output produced manually with quantiles
         # of 0.8 and 0.6 for high and low respectively
@@ -98,7 +98,7 @@ class TestCanny(unittest.TestCase):
         assert np.all(feature.canny(image) == 0)
 
     def test_invalid_use_quantiles(self):
-        image = rescale_to_float(data.camera()[::50, ::50])
+        image = rescale_to_float(data.camera()[::50, ::50], legacy_float_range=True)
 
         self.assertRaises(
             ValueError,
@@ -150,7 +150,7 @@ class TestCanny(unittest.TestCase):
     def test_dtype(self):
         """Check that the same output is produced regardless of image dtype."""
         image_uint8 = data.camera()
-        image_float = rescale_to_float(image_uint8)
+        image_float = rescale_to_float(image_uint8, legacy_float_range=True)
 
         result_uint8 = feature.canny(image_uint8)
         result_float = feature.canny(image_float)

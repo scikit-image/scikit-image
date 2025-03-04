@@ -74,7 +74,7 @@ def blur_effect(image, h_size=11, channel_axis=None, reduce_func=np.max):
             raise
         image = rgb2gray(image)
     n_axes = image.ndim
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     shape = image.shape
     B = []
 

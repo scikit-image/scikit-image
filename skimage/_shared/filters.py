@@ -47,7 +47,8 @@ def gaussian(
         is 0.0
     preserve_range : bool, optional
         If True, keep the original range of values. Otherwise, the input
-        ``image`` is converted according to the conventions of ``rescale_to_float``
+        ``image`` is converted according to the conventions of
+        :func:`rescale_to_float(..., legacy_float_range=True) <~.rescale_to_float>`
         (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
         dtype of input)
 

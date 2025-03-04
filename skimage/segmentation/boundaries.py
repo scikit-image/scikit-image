@@ -220,7 +220,7 @@ def mark_boundaries(
     find_boundaries
     """
     float_dtype = _supported_float_type(image.dtype)
-    marked = rescale_to_float(image, force_copy=True)
+    marked = rescale_to_float(image, force_copy=True, legacy_float_range=True)
     marked = marked.astype(float_dtype, copy=False)
     if marked.ndim == 2:
         marked = gray2rgb(marked)

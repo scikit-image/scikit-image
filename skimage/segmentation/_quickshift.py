@@ -73,7 +73,7 @@ def quickshift(
            European Conference on Computer Vision, 2008
     """
 
-    image = rescale_to_float(np.atleast_3d(image))
+    image = rescale_to_float(np.atleast_3d(image), legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

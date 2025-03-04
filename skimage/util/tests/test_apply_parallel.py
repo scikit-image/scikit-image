@@ -143,7 +143,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     2.) tuple of length ``image.ndim - 1`` corresponding to spatial axes
     3.) tuple of length ``image.ndim`` corresponding to all axes
     """
-    cat = rescale_to_float(data.chelsea())
+    cat = rescale_to_float(data.chelsea(), legacy_float_range=True)
 
     func = color.rgb2ycbcr
     cat_ycbcr_expected = func(cat, channel_axis=-1)

@@ -121,7 +121,7 @@ def active_contour(
             + '.'
         )
 
-    img = rescale_to_float(image)
+    img = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     img = img.astype(float_dtype, copy=False)
 

@@ -222,7 +222,8 @@ def _label2rgb_overlay(
             warn("Negative intensities in `image` are not supported")
 
         float_dtype = _supported_float_type(image.dtype)
-        image = rescale_to_float(image).astype(float_dtype, copy=False)
+        image = rescale_to_float(image, legacy_float_range=True)
+        image = image.astype(float_dtype, copy=False)
         if image.ndim > label.ndim:
             hsv = rgb2hsv(image)
             hsv[..., 1] *= saturation

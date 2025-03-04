@@ -524,7 +524,8 @@ def random_walker(
             )
         if data.shape != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
-        data = np.atleast_3d(rescale_to_float(data))[..., np.newaxis]
+        data = rescale_to_float(data, legacy_float_range=True)
+        data = np.atleast_3d(data)[..., np.newaxis]
     else:
         if data.ndim not in (3, 4):
             raise ValueError(
@@ -532,7 +533,7 @@ def random_walker(
             )
         if data.shape[:-1] != labels.shape:
             raise ValueError('Incompatible data and labels shapes.')
-        data = rescale_to_float(data)
+        data = rescale_to_float(data, legacy_float_range=True)
         if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
             data = data[:, :, np.newaxis, :]
 

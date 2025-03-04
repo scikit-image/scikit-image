@@ -336,7 +336,7 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -518,7 +518,7 @@ def blob_log(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -681,7 +681,7 @@ def blob_doh(
     """
     check_nD(image, 2)
 
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

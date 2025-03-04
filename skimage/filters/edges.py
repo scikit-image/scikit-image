@@ -179,7 +179,7 @@ def _generic_edge_filter(
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     output = np.zeros(image.shape, dtype=image.dtype)
 
     for edge_dim in axes:
@@ -635,7 +635,7 @@ def roberts_pos_diag(image, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     result = convolve(image, ROBERTS_PD_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -673,7 +673,7 @@ def roberts_neg_diag(image, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     result = convolve(image, ROBERTS_ND_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -708,7 +708,7 @@ def laplace(image, ksize=3, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     # Create the discrete Laplacian operator - We keep only the real part of
     # the filter
     _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
@@ -821,7 +821,7 @@ def farid_h(image, *, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     result = convolve(image, HFARID_WEIGHTS)
     return _mask_filter_result(result, mask)
 
@@ -858,6 +858,6 @@ def farid_v(image, *, mask=None):
         float_dtype = _supported_float_type(image.dtype)
         image = image.astype(float_dtype, copy=False)
     else:
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     result = convolve(image, VFARID_WEIGHTS)
     return _mask_filter_result(result, mask)

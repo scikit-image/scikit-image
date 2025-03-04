@@ -439,7 +439,7 @@ class TestRank:
     def test_compare_ubyte_vs_float(self):
         # Create signed int8 image that and convert it to uint8
         image_uint = rescale_to_ubyte(data.camera()[:50, :50])
-        image_float = rescale_to_float(image_uint)
+        image_float = rescale_to_float(image_uint, legacy_float_range=True)
 
         methods = [
             'autolevel',
@@ -462,7 +462,7 @@ class TestRank:
         # Create signed int8 volume that and convert it to uint8
         np.random.seed(0)
         volume_uint = np.random.randint(0, high=256, size=(10, 20, 30), dtype=np.uint8)
-        volume_float = rescale_to_float(volume_uint)
+        volume_float = rescale_to_float(volume_uint, legacy_float_range=True)
 
         methods_3d = [
             'equalize',

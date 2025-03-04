@@ -130,7 +130,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
     else:
         low_clip = 0.0
 
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
 
     rng = np.random.default_rng(rng)
 

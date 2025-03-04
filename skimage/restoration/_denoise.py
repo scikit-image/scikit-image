@@ -235,7 +235,7 @@ def denoise_bilateral(
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
 
-    image = np.atleast_3d(rescale_to_float(image))
+    image = np.atleast_3d(rescale_to_float(image, legacy_float_range=True))
     image = np.ascontiguousarray(image)
 
     sigma_color = sigma_color or image.std()
@@ -360,7 +360,7 @@ def denoise_tv_bregman(
     .. [4] https://en.wikipedia.org/wiki/Total_variation_denoising
 
     """
-    image = np.atleast_3d(rescale_to_float(image))
+    image = np.atleast_3d(rescale_to_float(image, legacy_float_range=True))
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -586,7 +586,7 @@ def denoise_tv_chambolle(
 
     im_type = image.dtype
     if not im_type.kind == 'f':
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
 
     # enforce float16->float32 and float128->float64
     float_dtype = _supported_float_type(image.dtype)
@@ -810,7 +810,7 @@ def _scale_sigma_and_image_consistently(image, sigma, multichannel, rescale_sigm
     if image.dtype.kind != 'f':
         if rescale_sigma:
             range_pre = image.max() - image.min()
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
         if rescale_sigma:
             range_post = image.max() - image.min()
             # apply the same magnitude scaling to sigma

@@ -255,7 +255,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
     if np.ma.isMaskedArray(image):
         raise TypeError('Masked arrays are not supported')
 
-    image = skimage.util.rescale_to_float(image)
+    image = skimage.util.rescale_to_float(image, legacy_float_range=True)
 
     # float16->float32 and float128->float64
     float_dtype = utils._supported_float_type(image.dtype)

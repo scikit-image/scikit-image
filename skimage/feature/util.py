@@ -95,8 +95,8 @@ def plot_matched_features(
     To make a sequence of colors passed to `matches_color` work for any number of
     `matches`, you can wrap that sequence in :func:`itertools.cycle`.
     """
-    image0 = rescale_to_float(image0)
-    image1 = rescale_to_float(image1)
+    image0 = rescale_to_float(image0, legacy_float_range=True)
+    image1 = rescale_to_float(image1, legacy_float_range=True)
 
     new_shape0 = list(image0.shape)
     new_shape1 = list(image1.shape)
@@ -186,7 +186,7 @@ def plot_matched_features(
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
     check_nD(image, 2)
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 
@@ -194,7 +194,7 @@ def _prepare_grayscale_input_2D(image):
 def _prepare_grayscale_input_nD(image):
     image = np.squeeze(image)
     check_nD(image, range(2, 6))
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = _supported_float_type(image.dtype)
     return image.astype(float_dtype, copy=False)
 

@@ -260,7 +260,8 @@ def slic(
             "the image is grayscale"
         )
 
-    image = rescale_to_float(image)
+    # Use new float scaling [0, 1], since image is normalized below anyway
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = utils._supported_float_type(image.dtype)
     # copy=True so subsequent in-place operations do not modify the
     # function input

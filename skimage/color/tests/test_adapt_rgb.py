@@ -56,7 +56,9 @@ def test_gray_scale_image():
 def test_each_channel():
     filtered = edges_each(COLOR_IMAGE)
     for i, channel in enumerate(np.rollaxis(filtered, axis=-1)):
-        expected = rescale_to_float(filters.sobel(COLOR_IMAGE[:, :, i]))
+        expected = rescale_to_float(
+            filters.sobel(COLOR_IMAGE[:, :, i]), legacy_float_range=True
+        )
         assert_allclose(channel, expected)
 
 

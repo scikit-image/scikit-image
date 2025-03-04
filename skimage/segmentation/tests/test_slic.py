@@ -97,7 +97,7 @@ def test_slic_consistency_across_image_magnitude():
     # give the same segmentation result
     img_uint8 = data.cat()[:256, :128]
     img_uint16 = 256 * img_uint8.astype(np.uint16)
-    img_float32 = rescale_to_float(img_uint8)
+    img_float32 = rescale_to_float(img_uint8, legacy_float_range=True)
     img_float32_norm = img_float32 / img_float32.max()
     img_float32_offset = img_float32 + 1000
 

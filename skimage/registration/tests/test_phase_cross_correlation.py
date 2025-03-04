@@ -90,7 +90,9 @@ def test_size_one_dimension_input():
 
 
 def test_3d_input():
-    phantom = rescale_to_float(binary_blobs(length=32, n_dim=3))
+    phantom = rescale_to_float(
+        binary_blobs(length=32, n_dim=3), legacy_float_range=True
+    )
     reference_image = fft.fftn(phantom)
     shift = (-2.0, 1.0, 5.0)
     shifted_image = fourier_shift(reference_image, shift)
@@ -146,7 +148,9 @@ def test_wrong_input():
 
 
 def test_4d_input_pixel():
-    phantom = rescale_to_float(binary_blobs(length=32, n_dim=4))
+    phantom = rescale_to_float(
+        binary_blobs(length=32, n_dim=4), legacy_float_range=True
+    )
     reference_image = fft.fftn(phantom)
     shift = (-2.0, 1.0, 5.0, -3)
     shifted_image = fourier_shift(reference_image, shift)
@@ -157,7 +161,9 @@ def test_4d_input_pixel():
 
 
 def test_4d_input_subpixel():
-    phantom = rescale_to_float(binary_blobs(length=32, n_dim=4))
+    phantom = rescale_to_float(
+        binary_blobs(length=32, n_dim=4), legacy_float_range=True
+    )
     reference_image = fft.fftn(phantom)
     subpixel_shift = (-2.3, 1.7, 5.4, -3.2)
     shifted_image = fourier_shift(reference_image, subpixel_shift)

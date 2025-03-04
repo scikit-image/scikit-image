@@ -234,7 +234,8 @@ def test_2d_cropped_camera_image():
 @pytest.mark.parametrize('func', [meijering, sato, frangi, hessian])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_ridge_output_dtype(func, dtype):
-    img = rescale_to_float(camera()).astype(dtype, copy=False)
+    img = rescale_to_float(camera(), legacy_float_range=True)
+    img = img.astype(dtype, copy=False)
     assert func(img).dtype == _supported_float_type(img.dtype)
 
 

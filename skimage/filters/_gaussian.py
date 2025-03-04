@@ -114,7 +114,7 @@ def difference_of_gaussians(
            https://doi.org/10.1098/rspb.1980.0020
 
     """
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     low_sigma = np.array(low_sigma, dtype='float', ndmin=1)
     if high_sigma is None:
         high_sigma = low_sigma * 1.6

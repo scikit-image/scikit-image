@@ -747,7 +747,7 @@ def convert_to_float(image, preserve_range):
     else:
         from ..util.dtype import rescale_to_float
 
-        image = rescale_to_float(image)
+        image = rescale_to_float(image, legacy_float_range=True)
     return image
 
 

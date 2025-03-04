@@ -110,7 +110,7 @@ def daisy(
 
     check_nD(image, 2, 'img')
 
-    image = rescale_to_float(image)
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = image.dtype
 
     # Validate parameters.

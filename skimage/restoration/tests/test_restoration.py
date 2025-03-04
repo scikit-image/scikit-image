@@ -12,7 +12,7 @@ from skimage.data import astronaut, camera
 from skimage.restoration import uft
 
 
-test_img = util.rescale_to_float(camera())
+test_img = util.rescale_to_float(camera(), legacy_float_range=True)
 
 
 def _get_rtol_atol(dtype):
@@ -41,7 +41,7 @@ def test_wiener(dtype, ndim):
     if ndim != 2:
         test_img = rng.randint(0, 100, [50] * ndim)
     else:
-        test_img = util.rescale_to_float(camera())
+        test_img = util.rescale_to_float(camera(), legacy_float_range=True)
 
     data = convolve(test_img, psf, 'same')
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
@@ -130,7 +130,9 @@ def test_image_shape():
     point[2, 2] = 1.0
     psf = filters.gaussian(point, sigma=1.0, mode='reflect')
     # image shape: (45, 45), as reported in #1172
-    image = util.rescale_to_float(camera()[65:165, 215:315])  # just the face
+    image = util.rescale_to_float(
+        camera()[65:165, 215:315], legacy_float_range=True
+    )  # just the face
     image_conv = ndi.convolve(image, psf)
     deconv_sup = restoration.wiener(image_conv, psf, 1)
     deconv_un = restoration.unsupervised_wiener(image_conv, psf)[0]
@@ -150,7 +152,7 @@ def test_richardson_lucy(ndim):
     if ndim != 2:
         test_img = np.random.randint(0, 100, [30] * ndim)
     else:
-        test_img = util.rescale_to_float(camera())
+        test_img = util.rescale_to_float(camera(), legacy_float_range=True)
     data = convolve(test_img, psf, 'same')
 
     rng = np.random.RandomState(0)

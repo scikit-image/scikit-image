@@ -49,7 +49,7 @@ def test_png_round_trip():
 
     I = np.eye(3)
     imsave(fname, I)
-    Ip = rescale_to_float(imread(fname))
+    Ip = rescale_to_float(imread(fname), legacy_float_range=True)
     os.remove(fname)
     assert np.sum(np.abs(Ip - I)) < 1e-3
 

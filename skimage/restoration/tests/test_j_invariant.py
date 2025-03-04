@@ -12,9 +12,9 @@ from skimage.restoration.j_invariant import denoise_invariant
 from skimage.util import rescale_to_float, random_noise
 from skimage.restoration.tests.test_denoise import xfail_without_pywt
 
-test_img = rescale_to_float(camera())
-test_img_color = rescale_to_float(chelsea())
-test_img_3d = rescale_to_float(binary_blobs(64, n_dim=3)) / 2
+test_img = rescale_to_float(camera(), legacy_float_range=True)
+test_img_color = rescale_to_float(chelsea(), legacy_float_range=True)
+test_img_3d = rescale_to_float(binary_blobs(64, n_dim=3), legacy_float_range=True) / 2
 noisy_img = random_noise(test_img, mode='gaussian', var=0.01)
 noisy_img_color = random_noise(test_img_color, mode='gaussian', var=0.01)
 noisy_img_3d = random_noise(test_img_3d, mode='gaussian', var=0.1)

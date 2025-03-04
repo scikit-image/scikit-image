@@ -535,7 +535,7 @@ def test_noisy_square_image():
 def test_squared_dot():
     im = np.zeros((50, 50))
     im[4:8, 4:8] = 1
-    im = rescale_to_float(im)
+    im = rescale_to_float(im, legacy_float_range=True)
 
     # Moravec fails
 
@@ -553,7 +553,7 @@ def test_rotated_img():
     The harris filter should yield the same results with an image and it's
     rotation.
     """
-    im = rescale_to_float(data.astronaut().mean(axis=2))
+    im = rescale_to_float(data.astronaut().mean(axis=2), legacy_float_range=True)
     im_rotated = im.T
 
     # Moravec
