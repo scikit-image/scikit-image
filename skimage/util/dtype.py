@@ -252,9 +252,9 @@ def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_rang
         https://github.com/scikit-image/scikit-image/pull/3575
 
     legacy_float_range : bool, optional
-        By default and if ``False``, the contents of integer images will be
+        By default (``False``), the contents of integer images are
         scaled to the range [0.0, 1.0] if the target `dtype` is floating point.
-        However, if legacy behavior is enabled, images with signed integers
+        However, if legacy float range is enabled, images with signed integers
         will be scaled to [-1.0, 1.0] instead. This parameter as no effect on
         non-integer images.
 
