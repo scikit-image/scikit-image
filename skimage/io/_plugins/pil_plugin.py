@@ -3,7 +3,7 @@ __all__ = ['imread', 'imsave']
 import numpy as np
 from PIL import Image
 
-from ...util import rescale_to_ubyte, rescale_to_uint16
+from ...util import rescale_to_uint8, rescale_to_uint16
 
 
 def imread(fname, dtype=None, img_num=None, **kwargs):
@@ -162,7 +162,7 @@ def ndarray_to_pil(arr, format_str=None):
 
     """
     if arr.ndim == 3:
-        arr = rescale_to_ubyte(arr)
+        arr = rescale_to_uint8(arr)
         mode = {3: 'RGB', 4: 'RGBA'}[arr.shape[2]]
 
     elif format_str in ['png', 'PNG']:
@@ -180,7 +180,7 @@ def ndarray_to_pil(arr, format_str=None):
             arr = rescale_to_uint16(arr)
 
     else:
-        arr = rescale_to_ubyte(arr)
+        arr = rescale_to_uint8(arr)
         mode = 'L'
         mode_base = 'L'
 
@@ -229,9 +229,9 @@ def imsave(fname, arr, format_str=None, **kwargs):
     -----
     Use the Python Imaging Library.
     See PIL docs [1]_ for a list of other supported formats.
-    All images besides single channel PNGs are converted using `rescale_to_ubyte`.
+    All images besides single channel PNGs are converted using `rescale_to_uint8`.
     Single Channel PNGs have the following behavior:
-    - Integer values in [0, 255] and Boolean types -> rescale_to_ubyte
+    - Integer values in [0, 255] and Boolean types -> rescale_to_uint8
     - Floating point and other integers -> rescale_to_uint16
 
     References

@@ -7,7 +7,7 @@ from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.morphology import gray, footprints, footprint_rectangle
-from skimage.util import rescale_to_uint16, rescale_to_ubyte
+from skimage.util import rescale_to_uint16, rescale_to_uint8
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ class TestMorphology:
             footprints.star,
         )
 
-        image = rescale_to_ubyte(
+        image = rescale_to_uint8(
             transform.downscale_local_mean(color.rgb2gray(data.coffee()), (20, 20))
         )
 

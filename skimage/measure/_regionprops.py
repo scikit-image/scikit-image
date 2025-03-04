@@ -1333,7 +1333,7 @@ def regionprops(
     --------
     >>> from skimage import data, util
     >>> from skimage.measure import label, regionprops
-    >>> img = util.rescale_to_ubyte(data.coins()) > 110
+    >>> img = util.rescale_to_uint8(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> props = regionprops(label_img)
     >>> # centroid of first labeled object
@@ -1348,7 +1348,7 @@ def regionprops(
     >>> from skimage import data, util
     >>> from skimage.measure import label, regionprops
     >>> import numpy as np
-    >>> img = util.rescale_to_ubyte(data.coins()) > 110
+    >>> img = util.rescale_to_uint8(data.coins()) > 110
     >>> label_img = label(img, connectivity=img.ndim)
     >>> def pixelcount(regionmask):
     ...     return np.sum(regionmask)

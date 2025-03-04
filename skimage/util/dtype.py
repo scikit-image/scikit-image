@@ -19,7 +19,7 @@ __all__ = [
     'rescale_to_float',
     'rescale_to_int16',
     'rescale_to_uint16',
-    'rescale_to_ubyte',
+    'rescale_to_uint8',
     'rescale_to_bool',
     'dtype_limits',
 ]
@@ -610,7 +610,7 @@ def img_as_int(image, force_copy=False):
 @deprecate_func(
     deprecated_version="0.26",
     removed_version="2.0",
-    hint="Use `skimage.util.rescale_to_ubyte` instead.",
+    hint="Use `skimage.util.rescale_to_uint8` instead.",
 )
 def img_as_ubyte(image, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
@@ -633,7 +633,7 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return rescale_to_ubyte(image, force_copy=force_copy)
+    return rescale_to_uint8(image, force_copy=force_copy)
 
 
 @deprecate_func(
@@ -871,7 +871,7 @@ def rescale_to_int16(image, *, force_copy=False):
     return _convert(image, np.int16, force_copy)
 
 
-def rescale_to_ubyte(image, *, force_copy=False):
+def rescale_to_uint8(image, *, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters

@@ -25,10 +25,10 @@ from skimage.morphology import disk
 from skimage.segmentation import watershed
 from skimage import data
 from skimage.filters import rank
-from skimage.util import rescale_to_ubyte
+from skimage.util import rescale_to_uint8
 
 
-image = rescale_to_ubyte(data.eagle())
+image = rescale_to_uint8(data.eagle())
 
 # denoise image
 denoised = rank.median(image, disk(2))

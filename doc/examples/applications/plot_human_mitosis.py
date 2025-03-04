@@ -141,7 +141,7 @@ higher_threshold = 125
 dividing = image > higher_threshold
 
 smoother_dividing = ski.filters.rank.mean(
-    ski.util.rescale_to_ubyte(dividing), ski.morphology.disk(4)
+    ski.util.rescale_to_uint8(dividing), ski.morphology.disk(4)
 )
 
 binary_smoother_dividing = smoother_dividing > 20

@@ -60,7 +60,7 @@ Function name       Description
 rescale_to_float    Convert to floating point (integer types become 64-bit floats).
 rescale_to_float64  Convert to 64-bit float.
 rescale_to_float32  Convert to 32-bit float.
-rescale_to_ubyte    Convert to 8-bit uint.
+rescale_to_uint8    Convert to 8-bit uint.
 rescale_to_uint16   Convert to 16-bit uint.
 rescale_to_int16    Convert to 16-bit int.
 rescale_to_bool     Convert to bool.
@@ -71,14 +71,14 @@ values*::
 
    >>> import skimage as ski
    >>> image = np.array([0, 0.5, 1], dtype=float)
-   >>> ski.util.rescale_to_ubyte(image)
+   >>> ski.util.rescale_to_uint8(image)
    array([  0, 128, 255], dtype=uint8)
 
 Be careful! These conversions can result in a loss of precision, since 8 bits
 cannot hold the same amount of information as 64 bits::
 
    >>> image = np.array([0, 0.5, 0.503, 1], dtype=float)
-   >>> ski.util.rescale_to_ubyte(image)
+   >>> ski.util.rescale_to_uint8(image)
    array([  0, 128, 128, 255], dtype=uint8)
 
 Note that :func:`skimage.util.rescale_to_float` will preserve the precision of floating
@@ -164,10 +164,10 @@ can be used to convert the image::
 Using an image from ``skimage`` with OpenCV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The reverse can be achieved with :func:`~.rescale_to_ubyte`::
+The reverse can be achieved with :func:`~.rescale_to_uint8`::
 
     >>> import skimage as ski
-    >>> cv_image = ski.util.rescale_to_ubyte(any_skimage_image)
+    >>> cv_image = ski.util.rescale_to_uint8(any_skimage_image)
 
 
 Image processing pipeline
@@ -235,7 +235,7 @@ dtypes. (Negative values are preserved when converting between signed dtypes.)
 To prevent this clipping behavior, you should rescale your image beforehand::
 
    >>> image = ski.exposure.rescale_intensity(img_int32, out_range=(0, 2**31 - 1))
-   >>> img_uint8 = ski.util.rescale_to_ubyte(image)
+   >>> img_uint8 = ski.util.rescale_to_uint8(image)
 
 This behavior is symmetric: The values in an unsigned dtype are spread over
 just the positive range of a signed dtype.

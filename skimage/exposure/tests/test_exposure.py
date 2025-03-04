@@ -188,7 +188,7 @@ def test_equalize_uint8_approx():
 
 
 def test_equalize_ubyte():
-    img = util.rescale_to_ubyte(test_img)
+    img = util.rescale_to_uint8(test_img)
     img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)

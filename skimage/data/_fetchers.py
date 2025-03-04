@@ -448,7 +448,7 @@ def brick():
     >>> from skimage.transform import rescale, warp, rotate
     >>> from skimage.color import rgb2gray
     >>> from imageio import imread, imwrite
-    >>> from skimage.util import rescale_to_ubyte
+    >>> from skimage.util import rescale_to_uint8
     >>> import numpy as np
 
 
@@ -462,7 +462,7 @@ def brick():
     >>> brick = warp(brick_orig, H)
     >>> brick = rescale(brick[:1024, :1024], (0.5, 0.5, 1))
     >>> brick = rotate(brick, -90)
-    >>> imwrite('brick.png', rescale_to_ubyte(rgb2gray(brick)))
+    >>> imwrite('brick.png', rescale_to_uint8(rgb2gray(brick)))
     """
     return _load("data/brick.png", as_gray=True)
 
@@ -509,7 +509,7 @@ def grass():
     >>> with open('grass_orig.jpg', 'bw') as f:
     ...     f.write(r.content)
     >>> grass_orig = imageio.imread('grass_orig.jpg')
-    >>> grass = skimage.util.rescale_to_ubyte(skimage.color.rgb2gray(grass_orig[:512, :512]))
+    >>> grass = skimage.util.rescale_to_uint8(skimage.color.rgb2gray(grass_orig[:512, :512]))
     >>> imageio.imwrite('grass.png', grass)
     """
     return _load("data/grass.png", as_gray=True)
@@ -564,7 +564,7 @@ def gravel():
     >>> from skimage.transform import resize
     >>> gravel_orig = imageio.imread('Gravel04_col.jpg')
     >>> gravel = resize(gravel_orig, (1024, 1024))
-    >>> gravel = skimage.util.rescale_to_ubyte(skimage.color.rgb2gray(gravel[:512, :512]))
+    >>> gravel = skimage.util.rescale_to_uint8(skimage.color.rgb2gray(gravel[:512, :512]))
     >>> imageio.imwrite('gravel.png', gravel)
     """
     return _load("data/gravel.png", as_gray=True)

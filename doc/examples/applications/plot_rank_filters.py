@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 
 import skimage as ski
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 hist, hist_centers = ski.exposure.histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
@@ -64,7 +64,7 @@ fig.tight_layout()
 
 rng = np.random.default_rng()
 noise = rng.random(noisy_image.shape)
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
@@ -152,7 +152,7 @@ fig.tight_layout()
 #     :func:`skimage.restoration.denoise_bilateral`.
 
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 bilat = ski.filters.rank.mean_bilateral(
     noisy_image.astype(np.uint16), ski.morphology.disk(20), s0=10, s1=10
@@ -193,7 +193,7 @@ fig.tight_layout()
 # .. [4] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 # equalize globally and locally
 glob = ski.exposure.equalize_hist(noisy_image) * 255
@@ -236,7 +236,7 @@ fig.tight_layout()
 # picture.
 
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 auto = ski.filters.rank.autolevel(
     noisy_image.astype(np.uint16), ski.morphology.disk(20)
@@ -312,7 +312,7 @@ fig.tight_layout()
 # the local maximum if the original pixel value is closest to local maximum,
 # otherwise by the minimum local.
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 enh = ski.filters.rank.enhance_contrast(noisy_image, ski.morphology.disk(5))
 
@@ -338,7 +338,7 @@ fig.tight_layout()
 # The percentile version of the local morphological contrast enhancement uses
 # percentile *p0* and *p1* instead of the local minimum and maximum.
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 penh = ski.filters.rank.enhance_contrast_percentile(
     noisy_image, ski.morphology.disk(5), p0=0.1, p1=0.9
@@ -488,7 +488,7 @@ fig.tight_layout()
 # opening, closing and morphological gradient.
 
 
-noisy_image = ski.util.rescale_to_ubyte(ski.data.camera())
+noisy_image = ski.util.rescale_to_uint8(ski.data.camera())
 
 disk_5 = ski.morphology.disk(5)
 opening = ski.filters.rank.maximum(

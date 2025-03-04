@@ -33,7 +33,7 @@ from ..util import (
     rescale_to_uint16,
     rescale_to_float,
     rescale_to_int16,
-    rescale_to_ubyte,
+    rescale_to_uint8,
 )
 from ._warnings import expected_warnings
 from ._dependency_checks import is_wasm
@@ -137,7 +137,7 @@ def color_check(plugin, fmt='png'):
     All major input types should be handled as ubytes and read
     back correctly.
     """
-    img = rescale_to_ubyte(data.chelsea())
+    img = rescale_to_uint8(data.chelsea())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 
@@ -156,7 +156,7 @@ def color_check(plugin, fmt='png'):
         testing.assert_allclose(r4, img4)
     else:
         r4 = roundtrip(img4, plugin, fmt)
-        testing.assert_allclose(r4, rescale_to_ubyte(img4))
+        testing.assert_allclose(r4, rescale_to_uint8(img4))
 
     img5 = rescale_to_uint16(img)
     r5 = roundtrip(img5, plugin, fmt)
@@ -169,7 +169,7 @@ def mono_check(plugin, fmt='png'):
     All major input types should be handled.
     """
 
-    img = rescale_to_ubyte(data.moon())
+    img = rescale_to_uint8(data.moon())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
 

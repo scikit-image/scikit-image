@@ -11,7 +11,7 @@ from skimage.util import (
     rescale_to_float64,
     rescale_to_int16,
     rescale_to_uint16,
-    rescale_to_ubyte,
+    rescale_to_uint8,
 )
 from skimage.util.dtype import _convert
 
@@ -35,7 +35,7 @@ rescale_funcs = (
     partial(rescale_to_float64, legacy_float_range=True),
     partial(rescale_to_float32, legacy_float_range=True),
     rescale_to_uint16,
-    rescale_to_ubyte,
+    rescale_to_uint8,
 )
 dtypes_for_rescale_funcs = (np.int16, np.float64, np.float32, np.uint16, np.ubyte)
 rescale_funcs_and_types = zip(rescale_funcs, dtypes_for_rescale_funcs)
@@ -142,7 +142,7 @@ def test_bool():
         (rescale_to_int16, np.int16),
         (rescale_to_float, np.float64),
         (rescale_to_uint16, np.uint16),
-        (rescale_to_ubyte, np.ubyte),
+        (rescale_to_uint8, np.ubyte),
     ]:
         converted_ = func(img_)
         assert np.sum(converted_) == dtype_range[dt][1]
@@ -246,15 +246,15 @@ def test_int_to_float():
     assert_equal(floats.min(), -1)
 
 
-def test_rescale_to_ubyte_supports_npulonglong():
+def test_rescale_to_uint8_supports_npulonglong():
     # Pre NumPy <2.0.0, `data_scaled.dtype.type` is `np.ulonglong` instead of
-    # np.uint64 as one might expect. This caused issues with `rescale_to_ubyte` due
+    # np.uint64 as one might expect. This caused issues with `rescale_to_uint8` due
     # to `np.ulonglong` missing from `skimage.util.dtype._integer_types`.
     # This doesn't seem to be an issue for NumPy >=2.0.0.
     # https://github.com/scikit-image/scikit-image/issues/7385
     data = np.arange(50, dtype=np.uint64)
     data_scaled = data * 256 ** (data.dtype.itemsize - 1)
-    result = rescale_to_ubyte(data_scaled)
+    result = rescale_to_uint8(data_scaled)
     assert result.dtype == np.uint8
 
 

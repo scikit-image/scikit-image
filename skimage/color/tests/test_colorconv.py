@@ -54,7 +54,7 @@ from skimage.color import (
     rgba2rgb,
     gray2rgba,
 )
-from skimage.util import rescale_to_float, rescale_to_ubyte, rescale_to_float32
+from skimage.util import rescale_to_float, rescale_to_uint8, rescale_to_float32
 
 # TODO: when minimum numpy dependency is 1.25 use:
 # np..exceptions.AxisError instead of AxisError
@@ -271,9 +271,9 @@ class TestColorconv:
 
     # HED<->RGB roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
-        img_in = rescale_to_ubyte(self.img_stains)
+        img_in = rescale_to_uint8(self.img_stains)
         img_out = rgb2hed(hed2rgb(img_in))
-        assert_equal(rescale_to_ubyte(img_out), img_in)
+        assert_equal(rescale_to_uint8(img_out), img_in)
 
     # HED<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
@@ -289,10 +289,10 @@ class TestColorconv:
     def test_bro_rgb_roundtrip(self):
         from skimage.color.colorconv import bro_from_rgb, rgb_from_bro
 
-        img_in = rescale_to_ubyte(self.img_stains)
+        img_in = rescale_to_uint8(self.img_stains)
         img_out = combine_stains(img_in, rgb_from_bro)
         img_out = separate_stains(img_out, bro_from_rgb)
-        assert_equal(rescale_to_ubyte(img_out), img_in)
+        assert_equal(rescale_to_uint8(img_out), img_in)
 
     # BRO<->RGB roundtrip with float image
     @pytest.mark.parametrize("channel_axis", [0, 1, -1])
@@ -908,7 +908,7 @@ def test_gray2rgb_channel_axis(shape, channel_axis):
 def test_gray2rgba_dtype():
     img_f64 = np.random.random((5, 5))
     img_f32 = img_f64.astype('float32')
-    img_u8 = rescale_to_ubyte(img_f64)
+    img_u8 = rescale_to_uint8(img_f64)
     img_int = img_u8.astype(int)
 
     for img in [img_f64, img_f32, img_u8, img_int]:
@@ -917,7 +917,7 @@ def test_gray2rgba_dtype():
 
 def test_gray2rgba_alpha():
     img = np.random.random((5, 5))
-    img_u8 = rescale_to_ubyte(img)
+    img_u8 = rescale_to_uint8(img)
 
     # Default
     alpha = None
