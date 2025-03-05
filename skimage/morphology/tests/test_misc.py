@@ -11,7 +11,7 @@ from skimage.morphology import (
 )
 
 from skimage._shared import testing
-from skimage._shared.testing import assert_array_equal, assert_equal
+from skimage._shared.testing import assert_array_equal, assert_equal, assert_stacklevel
 from skimage._shared._warnings import expected_warnings
 
 
@@ -174,6 +174,39 @@ def test_out_remove_small_holes():
     out = remove_small_holes(image, area_threshold=3, out=expected_out)
 
     assert out is expected_out
+
+
+def test_remove_small_holes_deprecated_area_threshold():
+    expected = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+        ],
+        bool,
+    )
+
+    # This is fine
+    observed = remove_small_holes(test_holes_image, 3)
+    assert_array_equal(observed, expected)
+
+    # Using area_threshold= warns
+    regex = "Parameter `area_threshold` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        observed = remove_small_holes(test_holes_image, area_threshold=3)
+    assert_stacklevel(record)
+    assert_array_equal(observed, expected)
+
+    # Misusing signature should raise
+    with pytest.raises(ValueError, match="Both.*are used.*avoid ambiguity"):
+        remove_small_holes(test_holes_image, area_threshold=3, min_size=3)
+    with pytest.raises(TypeError, match=".*got multiple values for.*min_size"):
+        remove_small_holes(test_holes_image, 3, min_size=3)
 
 
 def test_non_bool_out():

@@ -2,6 +2,7 @@
 
 import numpy as np
 import functools
+import warnings
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
@@ -92,6 +93,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
 
     See Also
     --------
+    skimage.morphology.remove_small_holes
     skimage.morphology.remove_objects_by_distance
 
     Examples
@@ -155,16 +157,62 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
+def _deprecate_area_threshold(func):
+    """Deprecate parameter `area_threshold` in favor of `min_size`.
+
+    This deprecation is intended for completion only in version 2.0 (skimage2)!
+
+    Parameters
+    ----------
+    func : callable
+
+    Returns
+    -------
+    wrapped : callable
+    """
+
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        if "area_threshold" in kwargs and "min_size" in kwargs:
+            msg = (
+                "Both deprecated parameter `area_threshold` and new parameter "
+                "`min_size` are used. Use only the latter to avoid ambiguity."
+            )
+            raise ValueError(msg)
+
+        elif "area_threshold" in kwargs:
+            msg = (
+                "Parameter `area_threshold` is deprecated since version 0.26"
+                "and will be removed in 2.0.0. To avoid this warning, please "
+                "use the parameter `min_size` instead. For more details, see"
+                f"the documentation of `{func.__qualname__}`."
+            )
+            warnings.warn(msg, category=FutureWarning, stacklevel=2)
+
+            assert "min_size" not in kwargs
+            kwargs["min_size"] = kwargs.pop("area_threshold")
+
+        return func(*args, **kwargs)
+
+    return wrapped
+
+
+@_deprecate_area_threshold
+def remove_small_holes(ar, min_size=64, connectivity=1, *, out=None):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
-    area_threshold : int, optional (default: 64)
-        The maximum area, in pixels, of a contiguous hole that will be filled.
-        Replaces `min_size`.
+    min_size : int, optional (default: 64)
+        The smallest allowed hole size. A contiguious hole whose area contains
+        fewer pixels will be filled.
+
+        .. versionchanged:: 0.26
+            Replaces deprecated `area_threshold`. This is more consistent with
+            the sister function :func:`~.remove_small_objects`.
+
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     out : ndarray
@@ -182,6 +230,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     -------
     out : ndarray, same shape and type as input `ar`
         The input array with small holes within connected components removed.
+
+    See Also
+    --------
+    skimage.morphology.remove_small_objects
+    skimage.morphology.remove_objects_by_distance
 
     Examples
     --------
@@ -234,7 +287,7 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, out=out)
+    out = remove_small_objects(out, min_size, connectivity, out=out)
 
     np.logical_not(out, out=out)
 
@@ -295,6 +348,8 @@ def remove_objects_by_distance(
     --------
     skimage.morphology.remove_small_objects
         Remove objects smaller than the specified size.
+    skimage.morphology.remove_small_holes
+        Remove holes smaller than the specified size.
 
     Notes
     -----
