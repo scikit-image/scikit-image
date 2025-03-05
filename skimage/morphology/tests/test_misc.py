@@ -138,7 +138,7 @@ def test_one_connectivity_holes():
         ],
         bool,
     )
-    observed = remove_small_holes(test_holes_image, area_threshold=3)
+    observed = remove_small_holes(test_holes_image, min_size=3)
     assert_array_equal(observed, expected)
 
 
@@ -156,13 +156,13 @@ def test_two_connectivity_holes():
         ],
         bool,
     )
-    observed = remove_small_holes(test_holes_image, area_threshold=3, connectivity=2)
+    observed = remove_small_holes(test_holes_image, min_size=3, connectivity=2)
     assert_array_equal(observed, expected)
 
 
 def test_in_place_holes():
     image = test_holes_image.copy()
-    observed = remove_small_holes(image, area_threshold=3, out=image)
+    observed = remove_small_holes(image, min_size=3, out=image)
     assert_equal(
         observed is image, True, "remove_small_holes in_place argument failed."
     )
@@ -171,7 +171,7 @@ def test_in_place_holes():
 def test_out_remove_small_holes():
     image = test_holes_image.copy()
     expected_out = np.empty_like(image)
-    out = remove_small_holes(image, area_threshold=3, out=expected_out)
+    out = remove_small_holes(image, min_size=3, out=expected_out)
 
     assert out is expected_out
 
@@ -213,7 +213,7 @@ def test_non_bool_out():
     image = test_holes_image.copy()
     expected_out = np.empty_like(image, dtype=int)
     with testing.raises(TypeError):
-        remove_small_holes(image, area_threshold=3, out=expected_out)
+        remove_small_holes(image, min_size=3, out=expected_out)
 
 
 def test_labeled_image_holes():
@@ -244,7 +244,7 @@ def test_labeled_image_holes():
         dtype=bool,
     )
     with expected_warnings(['returned as a boolean array']):
-        observed = remove_small_holes(labeled_holes_image, area_threshold=3)
+        observed = remove_small_holes(labeled_holes_image, min_size=3)
     assert_array_equal(observed, expected)
 
 
@@ -276,7 +276,7 @@ def test_uint_image_holes():
         dtype=bool,
     )
     with expected_warnings(['returned as a boolean array']):
-        observed = remove_small_holes(labeled_holes_image, area_threshold=3)
+        observed = remove_small_holes(labeled_holes_image, min_size=3)
     assert_array_equal(observed, expected)
 
 
@@ -295,8 +295,8 @@ def test_label_warning_holes():
         dtype=int,
     )
     with expected_warnings(['use a boolean array?']):
-        remove_small_holes(labeled_holes_image, area_threshold=3)
-    remove_small_holes(labeled_holes_image.astype(bool), area_threshold=3)
+        remove_small_holes(labeled_holes_image, min_size=3)
+    remove_small_holes(labeled_holes_image.astype(bool), min_size=3)
 
 
 def test_float_input_holes():
