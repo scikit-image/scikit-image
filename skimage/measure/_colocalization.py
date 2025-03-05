@@ -119,7 +119,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
     Notes
     -----
     Manders' colocalization coefficient (MCC) was developed in the context of
-    confocal fluorescence microscopy, to measure the fraction of colocalizing
+    confocal biological microscopy, to measure the fraction of colocalizing
     objects in each component of a dual-channel image. Out of the total
     intensity of, say, channel A, how much is found within the features
     (objects) of, say, channel B [1]_? The measure thus ranges from 0 for no
