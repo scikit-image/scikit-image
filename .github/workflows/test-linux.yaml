@@ -150,20 +150,9 @@ jobs:
         with:
           persist-credentials: false
 
-      # TODO: replace with setup-python when there is support
-      # TODO: replace with setup-python when there is support
-      - uses: astral-sh/setup-uv@b5f58b2abc5763ade55e4e9d0fe52cd1ff7979ca
+      - uses: actions/setup-python@9e62be81b28222addecf85e47571213eb7680449
         with:
-          # python-version: ${{ matrix.version }}
-          enable-cache: false
-
-      - name: Setup free-threaded Python via uv
-        run: |
-          pushd $HOME/work
-          uv python install ${{ matrix.version }}
-          uv venv --python=${{ matrix.version }}
-          uv pip install --python=${{ matrix.version }} pip
-          popd
+          python-version: ${{ matrix.version }}
 
       - name: Install build dependencies
         # See special clause inside setup-build-env.sh that detects when
@@ -172,12 +161,10 @@ jobs:
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source $HOME/work/.venv/bin/activate
           source .github/scripts/setup-build-env.sh
 
       - name: Build and install
         run: |
-          source $HOME/work/.venv/bin/activate
           pip install -v --no-build-isolation .
 
       - name: Install test dependencies
@@ -187,14 +174,12 @@ jobs:
         env:
           PIP_FLAGS: "--pre"
         run: |
-          source $HOME/work/.venv/bin/activate
           source .github/scripts/setup-test-env.sh
 
       - name: Install pytest-run-parallel
         if: ${{ matrix.run_parallel == '1' }}
         run: |
-          source $HOME/work/.venv/bin/activate
-          uv pip install --python=${{ matrix.version }} pytest-run-parallel
+          pip install pytest-run-parallel
 
       - name: Run tests
         env:
@@ -204,5 +189,4 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          source $HOME/work/.venv/bin/activate
           (cd .. && $PYTEST $NUM_PARALLEL_THREADS $DOCTEST_FLAG --showlocals --pyargs skimage)
