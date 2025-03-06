@@ -19,22 +19,6 @@ from ..transform import integral_image
 from ..util import dtype_limits
 from ..filters._sparse import _correlate_sparse, _validate_window_size
 
-__all__ = [
-    'try_all_threshold',
-    'threshold_otsu',
-    'threshold_yen',
-    'threshold_isodata',
-    'threshold_li',
-    'threshold_local',
-    'threshold_minimum',
-    'threshold_mean',
-    'threshold_niblack',
-    'threshold_sauvola',
-    'threshold_triangle',
-    'apply_hysteresis_threshold',
-    'threshold_multiotsu',
-]
-
 
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """Returns a figure comparing the outputs of different methods.
@@ -106,7 +90,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
 
 @require("matplotlib", ">=3.3")
-def try_all_threshold(image, figsize=(8, 5), verbose=True):
+def try_all_threshold(image, *, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
     Parameters
@@ -161,21 +145,28 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     # Global algorithms.
     methods = OrderedDict(
         {
-            'Isodata': thresh(threshold_isodata),
-            'Li': thresh(threshold_li),
-            'Mean': thresh(threshold_mean),
-            'Minimum': thresh(threshold_minimum),
-            'Otsu': thresh(threshold_otsu),
-            'Triangle': thresh(threshold_triangle),
-            'Yen': thresh(threshold_yen),
+            'Isodata': thresh(isodata),
+            'Li': thresh(li),
+            'Mean': thresh(mean),
+            'Minimum': thresh(minimum),
+            'Otsu': thresh(otsu),
+            'Triangle': thresh(triangle),
+            'Yen': thresh(yen),
         }
     )
 
     return _try_all(image, figsize=figsize, methods=methods, verbose=verbose)
 
 
-def threshold_local(
-    image, block_size=3, method='gaussian', offset=0, mode='reflect', param=None, cval=0
+def local_image(
+    image,
+    block_size=3,
+    *,
+    method='gaussian',
+    offset=0,
+    mode='reflect',
+    param=None,
+    cval=0,
 ):
     """Compute a threshold mask image based on local pixel neighborhood.
 
@@ -231,12 +222,12 @@ def threshold_local(
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()[:50, :50]
-    >>> binary_image1 = image > threshold_local(image, 15, 'mean')
-    >>> func = lambda arr: arr.mean()
-    >>> binary_image2 = image > threshold_local(image, 15, 'generic',
-    ...                                         param=func)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()[:50, :50]
+    >>> binary_image1 = image > ski.threshold.local_image(image, 15, 'mean')
+    >>> binary_image2 = image > ski.threshold.local_image(
+    ...     image, 15, 'generic', param=lambda arr: arr.mean()
+    ... )
 
     """
 
@@ -333,7 +324,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     return counts.astype('float32', copy=False), bin_centers
 
 
-def threshold_otsu(image=None, nbins=256, *, hist=None):
+def otsu(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Otsu's method.
 
     Either image or hist must be provided. If hist is provided, the actual
@@ -362,16 +353,17 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     ----------
     .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
 
-    Examples
-    --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_otsu(image)
-    >>> binary = image <= thresh
-
     Notes
     -----
     The input image must be grayscale.
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.otsu(image)
+    >>> binary = image <= thresh
+
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         warn(
@@ -407,8 +399,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     return threshold
 
 
-def threshold_yen(image=None, nbins=256, *, hist=None):
+def yen(image=None, nbins=256, *, hist=None):
     """Return threshold value based on Yen's method.
+
     Either image or hist must be provided. In case hist is given, the actual
     histogram of the image is ignored.
 
@@ -443,9 +436,9 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_yen(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.yen(image)
     >>> binary = image <= thresh
     """
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
@@ -467,7 +460,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
     return bin_centers[crit.argmax()]
 
 
-def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
+def isodata(image=None, nbins=256, *, return_all=False, hist=None):
     """Return threshold value(s) based on ISODATA method.
 
     Histogram-based threshold, known as Ridler-Calvard method or inter-means.
@@ -522,9 +515,9 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import coins
-    >>> image = coins()
-    >>> thresh = threshold_isodata(image)
+    >>> import skimage as ski
+    >>> image = ski.data.coins()
+    >>> thresh = ski.threshold.isodata(image)
     >>> binary = image > thresh
     """
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
@@ -639,7 +632,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
-def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=None):
+def li(image, *, tolerance=None, initial_guess=None, iter_callback=None):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
     Parameters
@@ -686,9 +679,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_li(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.li(image)
     >>> binary = image > thresh
     """
     # Remove nan:
@@ -792,7 +785,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     return threshold
 
 
-def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
+def minimum(image=None, nbins=256, *, max_num_iter=10000, hist=None):
     """Return threshold value based on minimum method.
 
     The histogram of the input ``image`` is computed if not provided and
@@ -839,9 +832,9 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_minimum(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.minimum(image)
     >>> binary = image > thresh
     """
 
@@ -883,7 +876,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     return bin_centers[maximum_idxs[0] + threshold_idx]
 
 
-def threshold_mean(image):
+def mean(image):
     """Return threshold value based on the mean of grayscale values.
 
     Parameters
@@ -906,15 +899,15 @@ def threshold_mean(image):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_mean(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.mean(image)
     >>> binary = image > thresh
     """
     return np.mean(image)
 
 
-def threshold_triangle(image, nbins=256):
+def triangle(image, nbins=256):
     """Return threshold value based on the triangle algorithm.
 
     Parameters
@@ -942,9 +935,9 @@ def threshold_triangle(image, nbins=256):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_triangle(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.threshold.triangle(image)
     >>> binary = image > thresh
     """
     # nbins is ignored for integer arrays
@@ -1060,7 +1053,7 @@ def _mean_std(image, w):
     return m, s
 
 
-def threshold_niblack(image, window_size=15, k=0.2):
+def niblack_image(image, window_size=15, *, k=0.2):
     """Applies Niblack local threshold to an array.
 
     A threshold T is calculated for every pixel in the image using the
@@ -1115,15 +1108,15 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Examples
     --------
-    >>> from skimage import data
-    >>> image = data.page()
-    >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
+    >>> import skimage as ski
+    >>> image = ski.data.page()
+    >>> threshold_image = sk.threshold.niblack_image(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
     return m - k * s
 
 
-def threshold_sauvola(image, window_size=15, k=0.2, r=None):
+def sauvola_image(image, window_size=15, *, k=0.2, r=None):
     """Applies Sauvola local threshold to an array. Sauvola is a
     modification of Niblack technique.
 
@@ -1171,9 +1164,9 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Examples
     --------
-    >>> from skimage import data
-    >>> image = data.page()
-    >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
+    >>> import skimage as ski
+    >>> image = ski.data.page()
+    >>> t_sauvola = ski.threshold.sauvola_image(image, window_size=15, k=0.2)
     >>> binary_image = image > t_sauvola
     """
     if r is None:
@@ -1183,7 +1176,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     return m * (1 + k * ((s / r) - 1))
 
 
-def apply_hysteresis_threshold(image, low, high):
+def apply_hysteresis_threshold(image, *, low, high):
     """Apply hysteresis thresholding to ``image``.
 
     This algorithm finds regions where ``image`` is greater than ``high``
@@ -1230,7 +1223,7 @@ def apply_hysteresis_threshold(image, low, high):
     return thresholded
 
 
-def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
+def multiotsu(image=None, classes=3, *, nbins=256, hist=None):
     r"""Generate `classes`-1 threshold values to divide gray levels in `image`,
     following Otsu's method for multiple classes.
 
@@ -1294,12 +1287,11 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.color import label2rgb
-    >>> from skimage import data
-    >>> image = data.camera()
-    >>> thresholds = threshold_multiotsu(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresholds = ski.threshold.multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
-    >>> regions_colorized = label2rgb(regions)
+    >>> regions_colorized = ski.color.label2rgb(regions)
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         warn(
