@@ -308,6 +308,7 @@ class TestLBP:
         )
         np.testing.assert_array_equal(lbp, ref)
 
+    @pytest.mark.thread_unsafe
     def test_var(self):
         # Test idea: mean of variance is estimate of overall variance.
 
