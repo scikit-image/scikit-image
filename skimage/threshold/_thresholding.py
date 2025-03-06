@@ -17,7 +17,7 @@ from ..filters._multiotsu import (
 )
 from ..transform import integral_image
 from ..util import dtype_limits
-from ._sparse import _correlate_sparse, _validate_window_size
+from .filters._sparse import _correlate_sparse, _validate_window_size
 
 __all__ = [
     'try_all_threshold',

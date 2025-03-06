@@ -21,7 +21,7 @@ from skimage.filters._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
-from skimage.filters.thresholding import (
+from skimage.threshold._thresholding import (
     _cross_entropy,
     _mean_std,
     threshold_isodata,
