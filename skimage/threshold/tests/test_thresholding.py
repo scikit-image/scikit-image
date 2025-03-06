@@ -17,7 +17,7 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
-from skimage.filters._multiotsu import (
+from skimage.threshold._multiotsu import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )

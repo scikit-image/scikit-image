@@ -1,4 +1,5 @@
 extensions = [
+  '_multiotsu'
 ]
 
 foreach ext: extensions
