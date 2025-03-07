@@ -7,7 +7,7 @@ for use with data on a n-dimensional lattice.
 import cython
 import numpy as np
 from . import heap
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 cimport numpy as cnp
 from . cimport heap
@@ -391,9 +391,22 @@ cdef class MCP:
         """
         pass
 
-
+    @deprecate_parameter(
+        "max_cumulative_cost",
+        start_version="0.26",
+        stop_version="0.28",
+        stacklevel=2
+    )
+    @deprecate_parameter(
+        "max_cost",
+        new_name="max_step_cost",
+        start_version="0.26",
+        stop_version="0.28",
+        stacklevel=3,
+    )
     def find_costs(self, starts, ends=None, find_all_ends=True,
-                   max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=DEPRECATED,
+                   max_cost=DEPRECATED, *, max_step_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
@@ -415,6 +428,9 @@ cdef class MCP:
             end-position will be found; otherwise the algorithm will stop when
             a a path is found to any end-position. (If no `ends` were
             specified, then this parameter has no effect.)
+        max_step_cost : float, optional
+            Cost limit for each step between points. Costs
+            higher than this will form a barrier.
 
         Returns
         -------
@@ -586,9 +602,10 @@ cdef class MCP:
                 cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
 
-                # If the cost at this point is negative or infinite, ignore it
                 if new_cost < 0 or new_cost == inf:
-                    continue
+                    continue  # Ignore negative and inf cost
+                if max_step_cost is not None and new_cost > max_step_cost:
+                    continue  # Ignore, if it exceeds `max_step_cost`
 
                 # Calculate new cumulative cost
                 new_cumcost = cumcost + self._travel_cost(cost, new_cost,

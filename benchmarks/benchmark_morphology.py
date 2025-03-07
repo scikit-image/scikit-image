@@ -48,12 +48,28 @@ class Skeletonize3d:
         self.skeletonize(self.image)
 
 
-# For binary morphology all functions ultimately are based on a single erosion
-# function in the scipy.ndimage C code, so only benchmark binary_erosion here.
-
-
-class BinaryMorphology2D:
+class IsotropicMorphology2D:
     # skip rectangle as roughly equivalent to square
+    param_names = ["shape", "radius"]
+    params = [
+        ((512, 512),),
+        (1, 3, 5, 15, 25, 40),
+    ]
+
+    def setup(self, shape, radius):
+        rng = np.random.default_rng(123)
+        # Create an image that is mostly True, with random isolated False areas
+        # (so it will not become fully False for any of the footprints).
+        self.image = rng.standard_normal(shape) < 3.5
+
+    def time_erosion(self, shape, radius, *args):
+        morphology.isotropic_erosion(self.image, radius)
+
+
+# Repeat the same footprint tests for grayscale morphology
+
+
+class GrayMorphology2D:
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
         ((512, 512),),
@@ -106,10 +122,10 @@ class BinaryMorphology2D:
                 self.footprint = fp_func(radius, radius, **footprint_kwargs)
 
     def time_erosion(self, shape, footprint, radius, *args):
-        morphology.binary_erosion(self.image, self.footprint)
+        morphology.erosion(self.image, self.footprint)
 
 
-class BinaryMorphology3D:
+class GrayMorphology3D:
     # skip rectangle as roughly equivalent to square
     param_names = ["shape", "footprint", "radius", "decomposition"]
     params = [
@@ -141,38 +157,6 @@ class BinaryMorphology3D:
         elif footprint in ["ball", "octahedron"]:
             self.footprint = fp_func(radius, **footprint_kwargs)
 
-    def time_erosion(self, shape, footprint, radius, *args):
-        morphology.binary_erosion(self.image, self.footprint)
-
-
-class IsotropicMorphology2D:
-    # skip rectangle as roughly equivalent to square
-    param_names = ["shape", "radius"]
-    params = [
-        ((512, 512),),
-        (1, 3, 5, 15, 25, 40),
-    ]
-
-    def setup(self, shape, radius):
-        rng = np.random.default_rng(123)
-        # Make an image that is mostly True, with random isolated False areas
-        # (so it will not become fully False for any of the footprints).
-        self.image = rng.standard_normal(shape) < 3.5
-
-    def time_erosion(self, shape, radius, *args):
-        morphology.isotropic_erosion(self.image, radius)
-
-
-# Repeat the same footprint tests for grayscale morphology
-# just need to call morphology.erosion instead of morphology.binary_erosion
-
-
-class GrayMorphology2D(BinaryMorphology2D):
-    def time_erosion(self, shape, footprint, radius, *args):
-        morphology.erosion(self.image, self.footprint)
-
-
-class GrayMorphology3D(BinaryMorphology3D):
     def time_erosion(self, shape, footprint, radius, *args):
         morphology.erosion(self.image, self.footprint)
 
