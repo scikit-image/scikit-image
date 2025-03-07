@@ -9,7 +9,7 @@ subtracting the background is desirable. It is frequently used in biomedical
 image processing and was first proposed by Stanley R. Sternberg in
 1983 [1]_.
 
-The algorithm works as a filter. To get a grasp of it, think of the image
+The algorithm works as a filter: think of the image
 as a surface that has unit-sized blocks stacked on top of each other in place
 of each pixel. The number of blocks, and hence surface height, is determined
 by the intensity of the pixel. To get the intensity of the background at a
