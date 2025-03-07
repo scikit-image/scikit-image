@@ -20,7 +20,7 @@ foreground = image > ski.filters.threshold_li(image)
 objects = ski.measure.label(foreground)
 
 # Separate objects into regions larger and smaller than 100 pixels
-large_objects = ski.morphology.remove_small_objects(objects, min_size=100)
+large_objects = ski.morphology.remove_small_objects(objects, max_size=100)
 small_objects = objects ^ large_objects
 
 # Remove objects until remaining ones are at least 100 pixels apart.
