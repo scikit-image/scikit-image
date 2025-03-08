@@ -28,8 +28,7 @@ def fake_backends(monkeypatch):
 
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
 
             return fake_foo
@@ -37,8 +36,7 @@ def fake_backends(monkeypatch):
         def can_has(self, name, *args, **kwargs):
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
             return True
 
@@ -66,24 +64,27 @@ def fake_backends(monkeypatch):
         def load(self):
             return Backend2()
 
-    def mock_all_backends():
+    def mock_all_backends_with_eps_combined():
         return {
             "fake2": {
-                "implementation": BackendEntryPoint2(),
+                "skimage_backends_ep_obj": BackendEntryPoint2(),
                 "info": _backends.BackendInformation(
                     ["skimage.util.tests.test_backends:foo"]
                 ),
             },
             "fake1": {
-                "implementation": BackendEntryPoint1(),
+                "skimage_backends_ep_obj": BackendEntryPoint1(),
                 "info": _backends.BackendInformation(
                     ["skimage.util.tests.test_backends:foo"]
                 ),
             },
         }
 
-    monkeypatch.setattr(_backends, "all_backends", mock_all_backends)
+    monkeypatch.setattr(
+        _backends, "all_backends_with_eps_combined", mock_all_backends_with_eps_combined
+    )
     monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1, fake2")
 
 
 @pytest.fixture
@@ -93,11 +94,11 @@ def no_backends(monkeypatch):
     def mock_no_backends():
         return {}
 
-    monkeypatch.setattr(_backends, "all_backends", mock_no_backends)
+    monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_no_backends)
     monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
 
 
-def test_no_notification_without_backends(no_backends):
+def test_notification_without_backends(monkeypatch, no_backends):
     # Check that no DispatchNotification is raised when no backend
     # is installed.
     @_backends.dispatchable
@@ -108,9 +109,19 @@ def test_no_notification_without_backends(no_backends):
 
     assert r == 42 * 2
 
+    # no backends installed but `SKIMAGE_BACKENDS` is not "False"
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake1")
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Call to.*:foo' was not dispatched.",
+    ):
+        r = foo(42)
 
-def test_no_dispatching_when_disabled(fake_backends, monkeypatch):
-    monkeypatch.setenv("SKIMAGE_NO_DISPATCHING", "1")
+    assert r == 42 * 2
+
+
+def test_when_dispatching_disabled(fake_backends, monkeypatch):
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "False")
 
     @_backends.dispatchable
     def foo(x):
@@ -121,7 +132,7 @@ def test_no_dispatching_when_disabled(fake_backends, monkeypatch):
     assert r == 42 * 2
 
 
-def test_notification_raised(fake_backends):
+def test_notification_with_backends(monkeypatch, fake_backends):
     @_backends.dispatchable
     def foo(x):
         return x * 2
@@ -135,6 +146,15 @@ def test_notification_raised(fake_backends):
         r = foo(42)
 
     assert r == 42 * 3
+
+    monkeypatch.setenv("SKIMAGE_BACKENDS", "fake3")  # "fake3" is not a backend.
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Call to.*:foo' was not dispatched.",
+    ):
+        r = foo(42)
+
+    assert r == 42 * 2
 
 
 @pytest.mark.parametrize(
@@ -152,3 +172,22 @@ def test_module_name_determination(func, expected):
 
     mod = importlib.import_module(module_name)
     assert getattr(mod, func.__name__) is func
+
+
+@pytest.mark.parametrize(
+    "env_value, output",
+    [
+        ("False", False),
+        (
+            "backend1",
+            [
+                "backend1",
+            ],
+        ),
+        ("backend1,backend2, backend3", ["backend1", "backend2", "backend3"]),
+    ],
+)
+def test_get_skimage_backends(monkeypatch, env_value, output):
+    """Test the behavior of get_skimage_backends with different environment variable values."""
+    monkeypatch.setenv("SKIMAGE_BACKENDS", env_value)
+    assert _backends.get_skimage_backends() == output
