@@ -5,81 +5,14 @@ import re
 import warnings
 
 import pytest
-from numpy.testing import assert_equal
 from skimage._shared.testing import (
-    doctest_skip_parser,
     run_in_parallel,
     assert_stacklevel,
 )
-from skimage._shared import testing
 from skimage._shared._dependency_checks import is_wasm
 
 from skimage._shared._warnings import expected_warnings
 from warnings import warn
-
-
-def test_skipper():
-    def f():
-        pass
-
-    class c:
-        def __init__(self):
-            self.me = "I think, therefore..."
-
-    docstring = """ Header
-
-            >>> something # skip if not HAVE_AMODULE
-            >>> something + else
-            >>> a = 1 # skip if not HAVE_BMODULE
-            >>> something2   # skip if HAVE_AMODULE
-        """
-    f.__doc__ = docstring
-    c.__doc__ = docstring
-
-    global HAVE_AMODULE, HAVE_BMODULE
-    HAVE_AMODULE = False
-    HAVE_BMODULE = True
-
-    f2 = doctest_skip_parser(f)
-    c2 = doctest_skip_parser(c)
-    assert f is f2
-    assert c is c2
-
-    expected = """ Header
-
-            >>> something # doctest: +SKIP
-            >>> something + else
-            >>> a = 1
-            >>> something2
-        """
-    assert_equal(f2.__doc__, expected)
-    assert_equal(c2.__doc__, expected)
-
-    HAVE_AMODULE = True
-    HAVE_BMODULE = False
-    f.__doc__ = docstring
-    c.__doc__ = docstring
-    f2 = doctest_skip_parser(f)
-    c2 = doctest_skip_parser(c)
-
-    assert f is f2
-    expected = """ Header
-
-            >>> something
-            >>> something + else
-            >>> a = 1 # doctest: +SKIP
-            >>> something2   # doctest: +SKIP
-        """
-    assert_equal(f2.__doc__, expected)
-    assert_equal(c2.__doc__, expected)
-
-    del HAVE_AMODULE
-    f.__doc__ = docstring
-    c.__doc__ = docstring
-    with testing.raises(NameError):
-        doctest_skip_parser(f)
-    with testing.raises(NameError):
-        doctest_skip_parser(c)
 
 
 @pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
