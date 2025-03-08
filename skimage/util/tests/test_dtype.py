@@ -115,19 +115,17 @@ def test_float_out_of_range():
         rescale_to_int16(too_low)
 
 
-@pytest.mark.parametrize("legacy_float_range", [True, False])
-def test_float_float_all_ranges(legacy_float_range):
+def test_float_float_all_ranges():
     arr_in = np.array([[-10.0, 10.0, 1e20]], dtype=np.float32)
     np.testing.assert_array_equal(
-        rescale_to_float(arr_in, legacy_float_range=legacy_float_range), arr_in
+        rescale_to_float(arr_in, legacy_float_range=True), arr_in
     )
 
 
-@pytest.mark.parametrize("legacy_float_range", [True, False])
-def test_copy(legacy_float_range):
+def test_copy():
     x = np.array([1], dtype=np.float64)
-    y = rescale_to_float(x, legacy_float_range=legacy_float_range)
-    z = rescale_to_float(x, force_copy=True, legacy_float_range=legacy_float_range)
+    y = rescale_to_float(x, legacy_float_range=True)
+    z = rescale_to_float(x, force_copy=True, legacy_float_range=True)
 
     assert y is x
     assert z is not x
@@ -163,17 +161,15 @@ def test_clobber():
             assert_equal(img_in, img_in_before)
 
 
-@pytest.mark.parametrize("legacy_float_range", [True, False])
-def test_signed_scaling_float32(legacy_float_range):
+def test_signed_scaling_float32():
     x = np.array([-128, 127], dtype=np.int8)
-    y = rescale_to_float32(x, legacy_float_range=legacy_float_range)
+    y = rescale_to_float32(x, legacy_float_range=True)
     assert_equal(y.max(), 1)
 
 
-@pytest.mark.parametrize("legacy_float_range", [True, False])
-def test_float32_passthrough(legacy_float_range):
+def test_float32_passthrough():
     x = np.array([-1, 1], dtype=np.float32)
-    y = rescale_to_float(x, legacy_float_range=legacy_float_range)
+    y = rescale_to_float(x, legacy_float_range=True)
     assert_equal(y.dtype, x.dtype)
 
 
@@ -300,3 +296,147 @@ def test_convert_signed_to_float_legacy(dtype_in, dtype_out):
     result = _convert(image, dtype=dtype_out, legacy_float_range=True)
     assert result.dtype == dtype_out
     np.testing.assert_equal(expected, result)
+
+
+class Test_rescale_to_float:
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_in_range(self, dtype):
+        image = np.array([0.1, 0.9], dtype=dtype)
+        expected = np.array([0, 1], dtype=dtype)
+
+        result = rescale_to_float(image)
+        assert image is not result
+        assert result.dtype == dtype
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_float_max(self, dtype):
+        float_min = np.finfo(dtype).min
+        float_max = np.finfo(dtype).max
+        image = np.array([float_min, 0, float_max], dtype=dtype)
+        expected = np.array([0, 0.5, 1], dtype=dtype)
+
+        result = rescale_to_float(image)
+        assert image is not result
+        assert result.dtype == dtype
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_uniform(self, dtype):
+        image = np.array([10, 10], dtype=dtype)
+        expected = np.array([0, 0], dtype=dtype)
+
+        with pytest.warns(RuntimeWarning, match="uniform array") as record:
+            result = rescale_to_float(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == dtype
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_inf(self, dtype):
+        image = np.array([-np.inf, 0, 1, np.inf], dtype=dtype)
+        expected = np.array([np.nan, 0, 0, np.nan], dtype=dtype)
+
+        with pytest.warns(RuntimeWarning, match="encountered inf") as record:
+            result = rescale_to_float(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == dtype
+        np.testing.assert_equal(result, expected)
+
+
+class Test_rescale_to_float32:
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_in_range(self, dtype):
+        image = np.array([0.1, 0.9], dtype=dtype)
+        expected = np.array([0, 1], dtype=np.float32)
+
+        result = rescale_to_float32(image)
+        assert image is not result
+        assert result.dtype == np.float32
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_float_max(self, dtype):
+        float_min = np.finfo(dtype).min
+        float_max = np.finfo(dtype).max
+        image = np.array([float_min, 0, float_max], dtype=dtype)
+        expected = np.array([0, 0.5, 1], dtype=np.float32)
+
+        result = rescale_to_float32(image)
+        assert image is not result
+        assert result.dtype == np.float32
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_uniform(self, dtype):
+        image = np.array([10, 10], dtype=dtype)
+        expected = np.array([0, 0], dtype=np.float32)
+
+        with pytest.warns(RuntimeWarning, match="uniform array") as record:
+            result = rescale_to_float32(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == np.float32
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_inf(self, dtype):
+        image = np.array([-np.inf, 0, 1, np.inf], dtype=dtype)
+        expected = np.array([np.nan, 0, 0, np.nan], dtype=np.float32)
+
+        with pytest.warns(RuntimeWarning, match="encountered inf") as record:
+            result = rescale_to_float32(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == np.float32
+        np.testing.assert_equal(result, expected)
+
+
+class Test_rescale_to_float64:
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_in_range(self, dtype):
+        image = np.array([0.1, 0.9], dtype=dtype)
+        expected = np.array([0, 1], dtype=np.float64)
+
+        result = rescale_to_float64(image)
+        assert image is not result
+        assert result.dtype == np.float64
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_float_max(self, dtype):
+        float_min = np.finfo(dtype).min
+        float_max = np.finfo(dtype).max
+        image = np.array([float_min, 0, float_max], dtype=dtype)
+        expected = np.array([0, 0.5, 1], dtype=np.float64)
+
+        result = rescale_to_float64(image)
+        assert image is not result
+        assert result.dtype == np.float64
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_normalize_uniform(self, dtype):
+        image = np.array([10, 10], dtype=dtype)
+        expected = np.array([0, 0], dtype=np.float64)
+
+        with pytest.warns(RuntimeWarning, match="uniform array") as record:
+            result = rescale_to_float64(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == np.float64
+        np.testing.assert_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+    def test_inf(self, dtype):
+        image = np.array([-np.inf, 0, 1, np.inf], dtype=dtype)
+        expected = np.array([np.nan, 0, 0, np.nan], dtype=np.float64)
+
+        with pytest.warns(RuntimeWarning, match="encountered inf") as record:
+            result = rescale_to_float64(image)
+        assert_stacklevel(record)
+        assert image is not result
+        assert result.dtype == np.float64
+        np.testing.assert_equal(result, expected)

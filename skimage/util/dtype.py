@@ -215,6 +215,68 @@ def _scale(a, n, m, copy=True):
             return a
 
 
+def _normalize_float_0_to_1(image):
+    """Normalize a floating point array in interval [0, 1].
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image with floating dtype.
+
+    Returns
+    -------
+    out : ndarray
+        Normalized image with the same dtype as `image`.
+
+    Notes
+    -----
+    This function deals with edge cases in the following way:
+
+    - In case `image` contains inf, inf is normalized to NaN since inf / inf is
+      not defined. All other values x are normalized to x / inf  which is 0.
+
+    - Uniform arrays, where all pixels have the same value, are normalized to
+      all-zero.
+    """
+    if image.dtype.kind != "f":
+        msg = f"expected floating point, got {image.dtype=!r}"
+        raise ValueError(msg)
+
+    out = image.copy()  # always return a copy
+
+    with np.errstate(all="raise"):
+        float_min = out.min()
+        float_max = out.max()
+
+        try:
+            float_ptp = float_max - float_min
+        except FloatingPointError:
+            # range is bigger than max float, half range to fit
+            out /= 2
+            float_min /= 2
+            float_max /= 2
+            float_ptp = float_max - float_min
+
+        try:
+            out /= float_ptp
+            out -= float_min / float_ptp
+
+        except FloatingPointError:
+            if float_ptp == 0:
+                msg = "normalizing uniform array to 0"
+                warnings.warn(msg, category=RuntimeWarning, stacklevel=4)
+                out = np.zeros_like(out)
+            elif np.isinf(float_ptp):
+                msg = "encountered inf, normalizing inf to NaN and other values to 0"
+                warnings.warn(msg, category=RuntimeWarning, stacklevel=4)
+                out = np.zeros_like(out)
+                out[np.isinf(image)] = np.nan
+            else:
+                raise
+
+    return out
+
+
 def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_range=None):
     """
     Convert an image to the requested data-type.
@@ -255,8 +317,9 @@ def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_rang
         By default (``False``), the contents of integer images are
         scaled to the range [0.0, 1.0] if the target `dtype` is floating point.
         However, if legacy float range is enabled, images with signed integers
-        will be scaled to [-1.0, 1.0] instead. This parameter as no effect on
-        non-integer images.
+        will be scaled to [-1.0, 1.0] instead.
+
+        .. versionadded:: 0.26
 
     References
     ----------
@@ -295,6 +358,8 @@ def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_rang
     if np.issubdtype(dtype_in, dtype):
         if force_copy:
             image = image.copy()
+        if legacy_float_range is False and dtypeobj_in.kind == "f":
+            image = _normalize_float_0_to_1(image)
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
@@ -322,6 +387,8 @@ def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_rang
     if kind_in == 'f':
         if kind_out == 'f':
             # float -> float
+            if legacy_float_range is False:
+                image = _normalize_float_0_to_1(image)
             return image.astype(dtype_out)
 
         if np.min(image) < -1.0 or np.max(image) > 1.0:
@@ -668,9 +735,11 @@ def img_as_bool(image, force_copy=False):
 def rescale_to_float32(image, *, force_copy=False, legacy_float_range=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
-    As the name implies, this function will also rescale integer images. It
-    will map the minimal and maximal value supported by the respective integer
-    to [0.0, 1.0] (see `legacy_float_range` for previous legacy behavior).
+    As the name implies, this function will also rescale images. For integer
+    images, it will map the minimal and maximal value supported by the
+    respective integer to the value range [0.0, 1.0] (see `legacy_float_range`
+    for previous legacy behavior). For floating images, it will map the minimal
+    and maximal value to [0.0, 1.0].
 
     Parameters
     ----------
@@ -691,9 +760,15 @@ def rescale_to_float32(image, *, force_copy=False, legacy_float_range=False):
 
     Notes
     -----
-    When rescaling signed integers, the value 0 gets mapped cloes to 0.5. It
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
     is not exactly 0.5, since the negative value range of signed integers is
     one larger than the postive one, e.g., for int8 the range is [-128, 127].
+
+    When scaling floating images containing inf, a warning is emitted. All
+    values that are inf are assigned NaN, and all other values are assigned 0.
+
+    When scaling uniform floating images, a warning is emitted and all values
+    are assigned 0.
 
     Examples
     --------
@@ -722,6 +797,12 @@ def rescale_to_float32(image, *, force_copy=False, legacy_float_range=False):
 def rescale_to_float64(image, *, force_copy=False, legacy_float_range=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
+    As the name implies, this function will also rescale images. For integer
+    images, it will map the minimal and maximal value supported by the
+    respective integer to the value range [0.0, 1.0] (see `legacy_float_range`
+    for previous legacy behavior). For floating images, it will map the minimal
+    and maximal value to [0.0, 1.0].
+
     Parameters
     ----------
     image : ndarray
@@ -741,7 +822,7 @@ def rescale_to_float64(image, *, force_copy=False, legacy_float_range=False):
 
     Notes
     -----
-    When rescaling signed integers, the value 0 gets mapped cloes to 0.5. It
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
     is not exactly 0.5, since the negative value range of signed integers is
     one larger than the postive one, e.g., for int8 the range is [-128, 127].
 
@@ -772,8 +853,8 @@ def rescale_to_float64(image, *, force_copy=False, legacy_float_range=False):
 def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
     """Convert an image to floating point format.
 
-    This function is similar to :func:`~.rescale_to_float64`, but will not convert
-    and scale (!) lower-precision floating point arrays to `float64`.
+    This function is similar to :func:`~.rescale_to_float64`, but will not
+    convert lower-precision floating point arrays to `float64`.
 
     Parameters
     ----------
@@ -785,7 +866,6 @@ def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
         By default and if ``False``, the contents of integer images will be
         scaled to the range [0.0, 1.0]. However, if legacy behavior is enabled,
         images with signed integers will be scaled to [-1.0, 1.0] instead.
-        This parameter as no effect on on-integer images.
 
     Returns
     -------
@@ -794,7 +874,7 @@ def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
 
     Notes
     -----
-    When rescaling signed integers, the value 0 gets mapped cloes to 0.5. It
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
     is not exactly 0.5, since the negative value range of signed integers is
     one larger than the postive one, e.g., for int8 the range is [-128, 127].
 
