@@ -57,6 +57,7 @@ def test_basic():
     )
 
 
+@pytest.mark.thread_unsafe
 def test_neg_inf():
     expected_costs = np.where(a == 1, np.inf, 0)
     expected_path = [

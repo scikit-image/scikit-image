@@ -169,6 +169,7 @@ def test_gray_3d():
         assert_equal(seg[s], c)
 
 
+@pytest.mark.thread_unsafe
 def test_list_sigma():
     rng = np.random.default_rng(0)
     img = np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1]], float)
