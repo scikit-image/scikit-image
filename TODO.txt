@@ -50,4 +50,6 @@ Post numpy 2
 
 Version 2.0
 -----------
+- In `skimage.morphology.remove_small_holes`, complete deprecation of `area_threshold`.
+
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
