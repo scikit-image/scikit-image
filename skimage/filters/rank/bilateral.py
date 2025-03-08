@@ -26,6 +26,7 @@ References
 from ..._shared.utils import check_nD
 from . import bilateral_cy
 from .generic import _preprocess_input
+from ...util._backends import dispatchable
 
 __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
@@ -57,6 +58,7 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtyp
     return out.reshape(out.shape[:2])
 
 
+@dispatchable
 def mean_bilateral(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
@@ -125,6 +127,7 @@ def mean_bilateral(
     )
 
 
+@dispatchable
 def pop_bilateral(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
@@ -191,6 +194,7 @@ def pop_bilateral(
     )
 
 
+@dispatchable
 def sum_bilateral(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):

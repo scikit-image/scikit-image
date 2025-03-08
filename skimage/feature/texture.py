@@ -9,9 +9,11 @@ import numpy as np
 from .._shared.utils import check_nD
 from ..color import gray2rgb
 from ..util import img_as_float
+from ..util._backends import dispatchable
 from ._texture import _glcm_loop, _local_binary_pattern, _multiblock_lbp
 
 
+@dispatchable
 def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=False):
     """Calculate the gray-level co-occurrence matrix.
 
@@ -167,6 +169,7 @@ def graycomatrix(image, distances, angles, levels=None, symmetric=False, normed=
     return P
 
 
+@dispatchable
 def graycoprops(P, prop='contrast'):
     """Calculate texture properties of a GLCM.
 
@@ -315,6 +318,7 @@ def graycoprops(P, prop='contrast'):
     return results
 
 
+@dispatchable
 def local_binary_pattern(image, P, R, method='default'):
     """Compute the local binary patterns (LBP) of an image.
 
@@ -393,6 +397,7 @@ def local_binary_pattern(image, P, R, method='default'):
     return output
 
 
+@dispatchable
 def multiblock_lbp(int_image, r, c, width, height):
     """Multi-block local binary pattern (MB-LBP).
 
@@ -440,6 +445,7 @@ def multiblock_lbp(int_image, r, c, width, height):
     return lbp_code
 
 
+@dispatchable
 def draw_multiblock_lbp(
     image,
     r,
