@@ -26,12 +26,12 @@ achieved simply by averaging shifts of only n=0 and n=1 on each axis.
 import matplotlib.pyplot as plt
 
 from skimage.restoration import denoise_wavelet, cycle_spin
-from skimage import data, img_as_float
-from skimage.util import random_noise
+from skimage import data
+from skimage.util import random_noise, rescale_to_float
 from skimage.metrics import peak_signal_noise_ratio
 
 
-original = img_as_float(data.chelsea()[100:250, 50:300])
+original = rescale_to_float(data.chelsea()[100:250, 50:300])
 
 sigma = 0.155
 noisy = random_noise(original, var=sigma**2)

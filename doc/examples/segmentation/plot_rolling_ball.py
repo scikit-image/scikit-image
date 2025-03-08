@@ -153,7 +153,7 @@ plt.show()
 # be much larger than the image intensity, which can lead to
 # unexpected results.
 
-image = ski.util.img_as_float(ski.data.coins()[:200, :200])
+image = ski.util.rescale_to_float(ski.data.coins()[:200, :200])
 
 background = ski.restoration.rolling_ball(image, radius=70.5)
 plot_result(image, background)
@@ -175,7 +175,7 @@ plt.show()
 # multiplied by two.
 
 normalized_radius = 70.5 / 255
-image = ski.util.img_as_float(ski.data.coins())
+image = ski.util.rescale_to_float(ski.data.coins())
 kernel = ski.restoration.ellipsoid_kernel((70.5 * 2, 70.5 * 2), normalized_radius * 2)
 
 background = ski.restoration.rolling_ball(image, kernel=kernel)

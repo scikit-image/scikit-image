@@ -119,7 +119,7 @@ def resize(
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
         Whether to apply a Gaussian filter to smooth the image prior
@@ -261,7 +261,7 @@ def rescale(
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
     anti_aliasing : bool, optional
@@ -379,7 +379,7 @@ def rotate(
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -573,7 +573,7 @@ def swirl(
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -838,7 +838,7 @@ def warp(
         produce values outside the given input range.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 
@@ -1306,7 +1306,7 @@ def resize_local_mean(
         coordinate location 0 in each mode.
     preserve_range : bool, optional
         Whether to keep the original range of values. Otherwise, the input
-        image is converted according to the conventions of `img_as_float`.
+        image is converted according to the conventions of :func:`~.rescale_to_float`.
         Also see
         https://scikit-image.org/docs/dev/user_guide/data_types.html
 

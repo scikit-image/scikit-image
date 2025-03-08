@@ -48,6 +48,9 @@ Post numpy 2
 - scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.
 - Remove `np2` check in `skimage/feature/brief.py`.
 
-Version 2.0
------------
+
+skimage2 / version 2.0
+----------------------
+- Complete deprecation of `img_as_*` functions and remove all traces of them.
+
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2

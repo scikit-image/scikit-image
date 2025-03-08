@@ -10,7 +10,7 @@ from scipy.spatial.distance import pdist, squareform
 from .._shared import utils
 from .._shared.filters import gaussian
 from ..color import rgb2lab
-from ..util import img_as_float, regular_grid
+from ..util import rescale_to_float, regular_grid
 from ._slic import _enforce_label_connectivity_cython, _slic_cython
 
 
@@ -260,7 +260,8 @@ def slic(
             "the image is grayscale"
         )
 
-    image = img_as_float(image)
+    # Use new float scaling [0, 1], since image is normalized below anyway
+    image = rescale_to_float(image, legacy_float_range=True)
     float_dtype = utils._supported_float_type(image.dtype)
     # copy=True so subsequent in-place operations do not modify the
     # function input

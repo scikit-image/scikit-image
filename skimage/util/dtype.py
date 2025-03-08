@@ -3,6 +3,8 @@ from warnings import warn
 
 import numpy as np
 
+from .._shared.utils import deprecate_func
+
 
 __all__ = [
     'img_as_float32',
@@ -12,6 +14,13 @@ __all__ = [
     'img_as_uint',
     'img_as_ubyte',
     'img_as_bool',
+    'rescale_to_float32',
+    'rescale_to_float64',
+    'rescale_to_float',
+    'rescale_to_int16',
+    'rescale_to_uint16',
+    'rescale_to_uint8',
+    'rescale_to_bool',
     'dtype_limits',
 ]
 
@@ -206,7 +215,69 @@ def _scale(a, n, m, copy=True):
             return a
 
 
-def _convert(image, dtype, force_copy=False, uniform=False):
+def _normalize_float_0_to_1(image):
+    """Normalize a floating point array in interval [0, 1].
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image with floating dtype.
+
+    Returns
+    -------
+    out : ndarray
+        Normalized image with the same dtype as `image`.
+
+    Notes
+    -----
+    This function deals with edge cases in the following way:
+
+    - In case `image` contains inf, inf is normalized to NaN since inf / inf is
+      not defined. All other values x are normalized to x / inf  which is 0.
+
+    - Uniform arrays, where all pixels have the same value, are normalized to
+      all-zero.
+    """
+    if image.dtype.kind != "f":
+        msg = f"expected floating point, got {image.dtype=!r}"
+        raise ValueError(msg)
+
+    out = image.copy()  # always return a copy
+
+    with np.errstate(all="raise"):
+        float_min = out.min()
+        float_max = out.max()
+
+        try:
+            float_ptp = float_max - float_min
+        except FloatingPointError:
+            # range is bigger than max float, half range to fit
+            out /= 2
+            float_min /= 2
+            float_max /= 2
+            float_ptp = float_max - float_min
+
+        try:
+            out /= float_ptp
+            out -= float_min / float_ptp
+
+        except FloatingPointError:
+            if float_ptp == 0:
+                msg = "normalizing uniform array to 0"
+                warnings.warn(msg, category=RuntimeWarning, stacklevel=4)
+                out = np.zeros_like(out)
+            elif np.isinf(float_ptp):
+                msg = "encountered inf, normalizing inf to NaN and other values to 0"
+                warnings.warn(msg, category=RuntimeWarning, stacklevel=4)
+                out = np.zeros_like(out)
+                out[np.isinf(image)] = np.nan
+            else:
+                raise
+
+    return out
+
+
+def _convert(image, dtype, force_copy=False, uniform=False, *, legacy_float_range=None):
     """
     Convert an image to the requested data-type.
 
@@ -241,6 +312,14 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         https://github.com/scikit-image/scikit-image/issues/2602
         https://github.com/scikit-image/scikit-image/issues/543#issuecomment-208202228
         https://github.com/scikit-image/scikit-image/pull/3575
+
+    legacy_float_range : bool, optional
+        By default (``False``), the contents of integer images are
+        scaled to the range [0.0, 1.0] if the target `dtype` is floating point.
+        However, if legacy float range is enabled, images with signed integers
+        will be scaled to [-1.0, 1.0] instead.
+
+        .. versionadded:: 0.26
 
     References
     ----------
@@ -279,6 +358,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     if np.issubdtype(dtype_in, dtype):
         if force_copy:
             image = image.copy()
+        if legacy_float_range is False and dtypeobj_in.kind == "f":
+            image = _normalize_float_0_to_1(image)
         return image
 
     if not (dtype_in in _supported_types and dtype_out in _supported_types):
@@ -306,6 +387,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
     if kind_in == 'f':
         if kind_out == 'f':
             # float -> float
+            if legacy_float_range is False:
+                image = _normalize_float_0_to_1(image)
             return image.astype(dtype_out)
 
         if np.min(image) < -1.0 or np.max(image) > 1.0:
@@ -352,17 +435,28 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             # if imin_in:
             #     np.maximum(image, -1.0, out=image)
         elif kind_in == 'i':
-            # From DirectX conversions:
-            # The most negative value maps to -1.0f
-            # Every other value is converted to a float (call it c)
-            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
-
-            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
-            np.maximum(image, -1.0, out=image)
+            if legacy_float_range is True:
+                # From DirectX conversions:
+                # The most negative value maps to -1.0f
+                # Every other value is converted to a float (call it c)
+                # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+                image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
+                np.maximum(image, -1.0, out=image)
+            elif legacy_float_range is False:
+                ptp_in = imax_in - imin_in
+                image = np.multiply(image, 1.0 / ptp_in, dtype=computation_type)
+                image -= imin_in / ptp_in
+            else:
+                msg = (
+                    "must set `legacy_float_range` to True or False "
+                    "when rescaling from integers to float"
+                )
+                raise ValueError(msg)
 
         else:
             image = np.add(image, 0.5, dtype=computation_type)
             image *= 2 / (imax_in - imin_in)
+            raise RuntimeError()
 
         return np.asarray(image, dtype_out)
 
@@ -397,8 +491,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
 def convert(image, dtype, force_copy=False, uniform=False):
     warn(
         "The use of this function is discouraged as its behavior may change "
-        "dramatically in scikit-image 1.0. This function will be removed "
-        "in scikit-image 1.0.",
+        "dramatically in scikit-image 2.0. This function will be removed "
+        "in scikit-image 2.0.",
         FutureWarning,
         stacklevel=2,
     )
@@ -416,12 +510,18 @@ if _convert.__doc__ is not None:
         .. versionadded:: 0.17
 
         The use of this function is discouraged as its behavior may change
-        dramatically in scikit-image 1.0. This function will be removed
-        in scikit-image 1.0.
+        dramatically in scikit-image 2.0. This function will be removed
+        in scikit-image 2.0.
     """
     )
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float32(..., legacy_float_behavior=True)` "
+    "instead.",
+)
 def img_as_float32(image, force_copy=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
@@ -445,9 +545,15 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float32, force_copy)
+    return rescale_to_float32(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float64(..., legacy_float_behavior=True)` "
+    "instead.",
+)
 def img_as_float64(image, force_copy=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
@@ -471,13 +577,19 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float64, force_copy)
+    return rescale_to_float64(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_float(..., legacy_float_behavior=True)` "
+    "instead.",
+)
 def img_as_float(image, force_copy=False):
     """Convert an image to floating point format.
 
-    This function is similar to `img_as_float64`, but will not convert
+    This function is similar to :func:`~.rescale_to_float64`, but will not convert
     lower-precision floating point arrays to `float64`.
 
     Parameters
@@ -500,10 +612,297 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.floating, force_copy)
+    return rescale_to_float(image, force_copy=force_copy)
 
 
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_uint16` instead.",
+)
 def img_as_uint(image, force_copy=False):
+    """Convert an image to 16-bit unsigned integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of uint16
+        Output image.
+
+    Notes
+    -----
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 65535.
+
+    """
+    return rescale_to_uint16(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_int16` instead.",
+)
+def img_as_int(image, force_copy=False):
+    """Convert an image to 16-bit signed integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of int16
+        Output image.
+
+    Notes
+    -----
+    The values are scaled between -32768 and 32767.
+    If the input data-type is positive-only (e.g., uint8), then
+    the output image will still only have positive values.
+
+    """
+    return rescale_to_int16(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_uint8` instead.",
+)
+def img_as_ubyte(image, force_copy=False):
+    """Convert an image to 8-bit unsigned integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of ubyte (uint8)
+        Output image.
+
+    Notes
+    -----
+    Negative input values will be clipped.
+    Positive values are scaled between 0 and 255.
+
+    """
+    return rescale_to_uint8(image, force_copy=force_copy)
+
+
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0",
+    hint="Use `skimage.util.rescale_to_bool` instead.",
+)
+def img_as_bool(image, force_copy=False):
+    """Convert an image to boolean format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of bool (`bool_`)
+        Output image.
+
+    Notes
+    -----
+    The upper half of the input dtype's positive range is True, and the lower
+    half is False. All negative values (if present) are False.
+
+    """
+    return rescale_to_bool(image, force_copy=force_copy)
+
+
+def rescale_to_float32(image, *, force_copy=False, legacy_float_range=False):
+    """Convert an image to single-precision (32-bit) floating point format.
+
+    As the name implies, this function will also rescale images. For integer
+    images, it will map the minimal and maximal value supported by the
+    respective integer to the value range [0.0, 1.0] (see `legacy_float_range`
+    for previous legacy behavior). For floating images, it will map the minimal
+    and maximal value to [0.0, 1.0].
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+    legacy_float_range : bool, optional
+        By default and if ``False``, the contents of integer images will be
+        scaled to the range [0.0, 1.0]. However, if legacy behavior is enabled,
+        images with signed integers will be scaled to [-1.0, 1.0] instead.
+        This parameter as no effect on on-integer images.
+
+    Returns
+    -------
+    out : ndarray of float32
+        Output image.
+
+    Notes
+    -----
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
+    is not exactly 0.5, since the negative value range of signed integers is
+    one larger than the postive one, e.g., for int8 the range is [-128, 127].
+
+    When scaling floating images containing inf, a warning is emitted. All
+    values that are inf are assigned NaN, and all other values are assigned 0.
+
+    When scaling uniform floating images, a warning is emitted and all values
+    are assigned 0.
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> import numpy as np
+
+    >>> image_u8 = np.array([0, 255], dtype=np.uint8)
+    >>> out = ski.util.rescale_to_float32(image_u8)
+    >>> out
+    array([0., 1.], dtype=float32)
+    >>> out.dtype
+    dtype('float32')
+
+    >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
+    >>> ski.util.rescale_to_float32(image_i8)
+    array([0.       , 0.5019608, 1.       ], dtype=float32)
+
+    >>> ski.util.rescale_to_float32(image_i8, legacy_float_range=True)
+    array([-1.,  0.,  1.], dtype=float32)
+    """
+    return _convert(
+        image, np.float32, force_copy, legacy_float_range=legacy_float_range
+    )
+
+
+def rescale_to_float64(image, *, force_copy=False, legacy_float_range=False):
+    """Convert an image to double-precision (64-bit) floating point format.
+
+    As the name implies, this function will also rescale images. For integer
+    images, it will map the minimal and maximal value supported by the
+    respective integer to the value range [0.0, 1.0] (see `legacy_float_range`
+    for previous legacy behavior). For floating images, it will map the minimal
+    and maximal value to [0.0, 1.0].
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+    legacy_float_range : bool, optional
+        By default and if ``False``, the contents of integer images will be
+        scaled to the range [0.0, 1.0]. However, if legacy behavior is enabled,
+        images with signed integers will be scaled to [-1.0, 1.0] instead.
+        This parameter as no effect on on-integer images.
+
+    Returns
+    -------
+    out : ndarray of float64
+        Output image.
+
+    Notes
+    -----
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
+    is not exactly 0.5, since the negative value range of signed integers is
+    one larger than the postive one, e.g., for int8 the range is [-128, 127].
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> import numpy as np
+
+    >>> image_u8 = np.array([0, 255], dtype=np.uint8)
+    >>> out = ski.util.rescale_to_float64(image_u8)
+    >>> out
+    array([0., 1.])
+    >>> out.dtype
+    dtype('float64')
+
+    >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
+    >>> ski.util.rescale_to_float64(image_i8)
+    array([0.        , 0.50196078, 1.        ])
+
+    >>> ski.util.rescale_to_float64(image_i8, legacy_float_range=True)
+    array([-1.,  0.,  1.])
+    """
+    return _convert(
+        image, np.float64, force_copy, legacy_float_range=legacy_float_range
+    )
+
+
+def rescale_to_float(image, *, force_copy=False, legacy_float_range=False):
+    """Convert an image to floating point format.
+
+    This function is similar to :func:`~.rescale_to_float64`, but will not
+    convert lower-precision floating point arrays to `float64`.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool, optional
+        Force a copy of the data, irrespective of its current dtype.
+    legacy_float_range : bool, optional
+        By default and if ``False``, the contents of integer images will be
+        scaled to the range [0.0, 1.0]. However, if legacy behavior is enabled,
+        images with signed integers will be scaled to [-1.0, 1.0] instead.
+
+    Returns
+    -------
+    out : ndarray of float
+        Output image.
+
+    Notes
+    -----
+    When rescaling signed integers, the value 0 gets mapped close to 0.5. It
+    is not exactly 0.5, since the negative value range of signed integers is
+    one larger than the postive one, e.g., for int8 the range is [-128, 127].
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> import numpy as np
+
+    >>> image_u8 = np.array([0, 255], dtype=np.uint8)
+    >>> out = ski.util.rescale_to_float(image_u8)
+    >>> out
+    array([0., 1.])
+    >>> out.dtype
+    dtype('float64')
+
+    >>> image_i8 = np.array([-128, 0, 127], dtype=np.int8)
+    >>> ski.util.rescale_to_float(image_i8)
+    array([0.        , 0.50196078, 1.        ])
+
+    >>> ski.util.rescale_to_float(image_i8, legacy_float_range=True)
+    array([-1.,  0.,  1.])
+    """
+    return _convert(
+        image, np.floating, force_copy, legacy_float_range=legacy_float_range
+    )
+
+
+def rescale_to_uint16(image, *, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -527,7 +926,7 @@ def img_as_uint(image, force_copy=False):
     return _convert(image, np.uint16, force_copy)
 
 
-def img_as_int(image, force_copy=False):
+def rescale_to_int16(image, *, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -552,7 +951,7 @@ def img_as_int(image, force_copy=False):
     return _convert(image, np.int16, force_copy)
 
 
-def img_as_ubyte(image, force_copy=False):
+def rescale_to_uint8(image, *, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -576,7 +975,7 @@ def img_as_ubyte(image, force_copy=False):
     return _convert(image, np.uint8, force_copy)
 
 
-def img_as_bool(image, force_copy=False):
+def rescale_to_bool(image, *, force_copy=False):
     """Convert an image to boolean format.
 
     Parameters
