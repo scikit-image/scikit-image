@@ -1405,6 +1405,28 @@ class SimilarityTransform(EuclideanTransform):
     params : (dim+1, dim+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+
+    Calculating the tranformation parameters
+
+    >>> from skimage.transform import SimilarityTransform
+    >>> tform = SimilarityTransform(scale=0.5, rotation=0.2,
+    ...                               translation=(50, -20))
+    >>> tform.params
+    array([[  0.4900332889,  -0.0993346654,  50.          ],
+           [  0.0993346654,   0.4900332889, -20.          ],
+           [  0.          ,   0.          ,   1.          ]])
+
+    Image Warping
+
+    >>> from skimage import data
+    >>> from skimage.transform import SimilarityTransform, warp
+    >>> image = data.camera()
+    >>> tform2 = SimilarityTransform(scale=0.5, rotation=0.2,
+    ...                                translation=(50, -20))
+    >>> image_transformed = warp(image, tform2)
+
     """
 
     def __init__(
@@ -1475,7 +1497,23 @@ class SimilarityTransform(EuclideanTransform):
         -------
         success : bool
             True, if model estimation succeeds.
+            Parameter estimation
 
+        Examples
+        --------
+
+        Parameter estimation
+
+        >>> import numpy as np
+        >>> from skimage import data
+        >>> from skimage.transform import SimilarityTransform, warp
+        >>> text = data.text()
+        >>> src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
+        >>> dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
+        >>> tform3 = SimilarityTransform()
+        >>> tform3.estimate(src, dst)
+        True
+        >>> warped = warp(text, tform3, output_shape=(50, 300))
         """
 
         self.params = _umeyama(src, dst, estimate_scale=True)
