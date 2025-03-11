@@ -20,6 +20,7 @@ a[1, 1:-1] = 0
 warning_optional = r'|\A\Z'
 
 
+@pytest.mark.thread_unsafe
 def test_basic():
     with expected_warnings(['Upgrading NumPy' + warning_optional]):
         m = mcp.MCP(a, fully_connected=True)

@@ -194,12 +194,12 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(r5, img5)
 
 
-FETCH_LOCK = threading.Lock()
+_FETCH_LOCK = threading.Lock()
 
 
 def fetch(data_filename):
     """Attempt to fetch data, but if unavailable, skip the tests."""
-    with FETCH_LOCK:
+    with _FETCH_LOCK:
         try:
             return _fetch(data_filename)
         except (ConnectionError, ModuleNotFoundError):

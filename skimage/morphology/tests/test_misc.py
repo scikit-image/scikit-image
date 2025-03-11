@@ -400,7 +400,6 @@ class Test_remove_near_objects:
         desired = np.array([0, 1, 0, 1])
         assert_array_equal(result, desired)
 
-    @pytest.mark.thread_unsafe
     @pytest.mark.parametrize("order", ["C", "F"])
     def test_out(self, order):
         labels_original = np.array([[1, 0, 2], [1, 0, 2]], order=order)
