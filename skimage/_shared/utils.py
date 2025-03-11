@@ -19,6 +19,7 @@ __all__ = [
     'identity',
     'slice_at_axis',
     "deprecate_parameter",
+    "rename_parameter",
     "DEPRECATED",
 ]
 
@@ -400,6 +401,74 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     # strip any extra spaces from ends of lines
     final_docstring = '\n'.join([line.rstrip() for line in final_docstring.split('\n')])
     return final_docstring
+
+
+class rename_parameter:
+    """Decorator to rename a parameter.
+
+    Parameters
+    ----------
+    old_name : str
+        The old parameter name to be deprecated.
+    new_name : str
+        The new parameter name.
+    deprecated_version : str
+        The version in which the old parameter was deprecated.
+    removed_version : str
+        The version in which the old parameter will be removed.
+    """
+
+    def __init__(self, old_name, new_name, deprecated_version, removed_version):
+        self.old_name = old_name
+        self.new_name = new_name
+        self.deprecated_version = deprecated_version
+        self.removed_version = removed_version
+
+    def __call__(self, func):
+        def _update_docstring(docstring):
+            """Modify the docstring to add the deprecation warning below the parameter."""
+            lines = docstring.split('\n')
+            updated_lines = []
+            param_found = False
+
+            for line in lines:
+                if not param_found and line.strip().startswith(f"{self.old_name} :"):
+                    param_found = True
+                    updated_lines.append(line)
+                    updated_lines.append(f"    **Deprecated:** {message}")
+                else:
+                    updated_lines.append(line)
+
+            return '\n'.join(updated_lines)
+
+        message = (
+            f"'{self.old_name}' is deprecated since version {self.deprecated_version} "
+            f"and will be removed in version {self.removed_version}. "
+            f"Use '{self.new_name}' instead."
+        )
+
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            if self.old_name in kwargs:
+                if self.new_name in kwargs:
+                    raise TypeError(
+                        f"Cannot specify both '{self.old_name}' and '{self.new_name}' in {func.__name__}. "
+                        f"Use only '{self.new_name}'."
+                    )
+                warnings.warn(
+                    message,
+                    FutureWarning,
+                    stacklevel=2,
+                )
+            elif self.new_name in kwargs:
+                kwargs[self.old_name] = kwargs.pop(self.new_name)
+
+            return func(*args, **kwargs)
+
+        if func.__doc__:
+            func.__doc__ = _update_docstring(func.__doc__)
+
+        return wrapped
 
 
 class channel_as_last_axis:
