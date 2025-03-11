@@ -93,4 +93,4 @@ def test_out_argument():
 )
 def test_isotrophic_errors(func):
     with pytest.raises(TypeError, match="Input image must be a binary image"):
-        func(img)
+        func(img, radius=2)
