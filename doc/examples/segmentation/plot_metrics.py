@@ -63,7 +63,7 @@ im_test1 = watershed(edges, markers=468, compactness=0.001)
 
 edges = canny(image)
 fill_coins = ndi.binary_fill_holes(edges)
-im_test2 = ndi.label(remove_small_objects(fill_coins, 21))[0]
+im_test2 = ndi.label(remove_small_objects(fill_coins, max_size=20))[0]
 
 ###############################################################################
 # Finally, we use morphological geodesic active contours,

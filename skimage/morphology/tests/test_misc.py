@@ -30,14 +30,25 @@ supported_dtypes = [
 
 
 def test_one_connectivity():
-    expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], bool)
+    # With connectivity=1, the biggest object has a size of 6 pixels, so
+    # `max_size=6` should remove everything
     observed = remove_small_objects(test_object_image, max_size=6)
+    assert_equal(observed, 0)
+
+    # `max_size=5` should preserve biggest object
+    expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], bool)
+    observed = remove_small_objects(test_object_image, max_size=5)
     assert_array_equal(observed, expected)
 
 
 def test_two_connectivity():
-    expected = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], bool)
+    # With connectivity=1, the biggest object has a size of 7 pixels, so
+    # `max_size=7` should remove everything
     observed = remove_small_objects(test_object_image, max_size=7, connectivity=2)
+    assert_equal(observed, 0)
+
+    expected = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], bool)
+    observed = remove_small_objects(test_object_image, max_size=6, connectivity=2)
     assert_array_equal(observed, expected)
 
 
@@ -74,7 +85,7 @@ def test_labeled_image():
     expected = np.array(
         [[2, 2, 2, 0, 0], [2, 2, 2, 0, 0], [2, 0, 0, 0, 0], [0, 0, 3, 3, 3]], dtype=int
     )
-    observed = remove_small_objects(labeled_image, max_size=3)
+    observed = remove_small_objects(labeled_image, max_size=2)
     assert_array_equal(observed, expected)
 
 
@@ -87,7 +98,7 @@ def test_uint_image():
         [[2, 2, 2, 0, 0], [2, 2, 2, 0, 0], [2, 0, 0, 0, 0], [0, 0, 3, 3, 3]],
         dtype=np.uint8,
     )
-    observed = remove_small_objects(labeled_image, max_size=3)
+    observed = remove_small_objects(labeled_image, max_size=2)
     assert_array_equal(observed, expected)
 
 
@@ -107,6 +118,29 @@ def test_negative_input():
     negative_int = np.random.randint(-4, -1, size=(5, 5))
     with testing.raises(ValueError):
         remove_small_objects(negative_int)
+
+
+def test_remove_small_objects_deprecated_min_size():
+    expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], dtype=bool)
+
+    # This is fine
+    observed = remove_small_objects(test_object_image, max_size=3)
+    assert_array_equal(observed, expected)
+
+    # Using area_threshold= warns
+    regex = "Parameter `min_size` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        observed = remove_small_objects(test_object_image, min_size=5)
+    assert_stacklevel(record)
+    assert_array_equal(observed, expected)
+
+    # Misusing signature should raise
+    with pytest.warns(FutureWarning, match=regex):
+        with pytest.raises(ValueError, match=".* avoid conflicting values"):
+            remove_small_objects(test_object_image, min_size=3, max_size=3)
+    with pytest.warns(FutureWarning, match=regex):
+        with pytest.raises(ValueError, match=".* avoid conflicting values"):
+            remove_small_objects(test_object_image, 3, max_size=3)
 
 
 test_holes_image = np.array(
@@ -156,7 +190,7 @@ def test_two_connectivity_holes():
         ],
         bool,
     )
-    observed = remove_small_holes(test_holes_image, max_size=3, connectivity=2)
+    observed = remove_small_holes(test_holes_image, max_size=2, connectivity=2)
     assert_array_equal(observed, expected)
 
 
@@ -176,27 +210,6 @@ def test_out_remove_small_holes():
     assert out is expected_out
 
 
-def test_remove_small_objects_deprecated_area_threshold():
-    expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], dtype=bool)
-
-    # This is fine
-    observed = remove_small_objects(test_object_image, 3)
-    assert_array_equal(observed, expected)
-
-    # Using area_threshold= warns
-    regex = "Parameter `min_size` is deprecated"
-    with pytest.warns(FutureWarning, match=regex) as record:
-        observed = remove_small_objects(test_object_image, min_size=6)
-    assert_stacklevel(record)
-    assert_array_equal(observed, expected)
-
-    # Misusing signature should raise
-    with pytest.raises(ValueError, match="Both.*are used.*avoid ambiguity"):
-        remove_small_objects(test_object_image, min_size=3, max_size=3)
-    with pytest.raises(TypeError, match=".*got multiple values for.*max_size"):
-        remove_small_objects(test_object_image, 3, max_size=3)
-
-
 def test_remove_small_holes_deprecated_area_threshold():
     expected = np.array(
         [
@@ -213,7 +226,7 @@ def test_remove_small_holes_deprecated_area_threshold():
     )
 
     # This is fine
-    observed = remove_small_holes(test_holes_image, 3)
+    observed = remove_small_holes(test_holes_image, max_size=3)
     assert_array_equal(observed, expected)
 
     # Using area_threshold= warns
@@ -224,10 +237,12 @@ def test_remove_small_holes_deprecated_area_threshold():
     assert_array_equal(observed, expected)
 
     # Misusing signature should raise
-    with pytest.raises(ValueError, match="Both.*are used.*avoid ambiguity"):
-        remove_small_holes(test_holes_image, area_threshold=3, max_size=3)
-    with pytest.raises(TypeError, match=".*got multiple values for.*max_size"):
-        remove_small_holes(test_holes_image, 3, max_size=3)
+    with pytest.warns(FutureWarning, match=regex):
+        with pytest.raises(ValueError, match=".* avoid conflicting values"):
+            remove_small_holes(test_holes_image, area_threshold=3, max_size=3)
+    with pytest.warns(FutureWarning, match=regex):
+        with pytest.raises(ValueError, match=".* avoid conflicting values"):
+            remove_small_holes(test_holes_image, 3, max_size=3)
 
 
 def test_non_bool_out():

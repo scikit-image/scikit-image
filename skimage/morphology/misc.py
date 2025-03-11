@@ -6,7 +6,7 @@ import warnings
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ._misc_cy import _remove_objects_by_distance
 
 
@@ -57,71 +57,18 @@ def _check_dtype_supported(ar):
         )
 
 
-def _deprecate_positional_arg(*, old_name, new_name, start_version, stop_version):
-    """Deprecate positional argument.
-
-    This deprecation is intended for completion only in version 2.0 (skimage2)!
-
-    Parameters
-    ----------
-    old_name : str
-        Name of the deprecated argument.
-    new_name : str
-        Name of the new argument, replacing the deprecated one.
-    start_version : str
-        Version in which the deprecation is introduced.
-    stop_version : str
-        Version in which the deprecation is completed.
-
-    Returns
-    -------
-    decorator : callable
-        A decorator to apply to a function signature.
-
-    Notes
-    -----
-    Can't use our existing :func:`deprecate_parameter` here, because that one
-    expects the new replacing argument to be in a new position, while we want
-    to replace a argument in the same position here and only modify the name.
-    """
-
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-            if old_name in kwargs and new_name in kwargs:
-                msg = (
-                    f"Both deprecated parameter `{old_name}` and new parameter "
-                    f"`{new_name}` are used. Use only the latter to avoid ambiguity."
-                )
-                raise ValueError(msg)
-
-            elif old_name in kwargs:
-                msg = (
-                    f"Parameter `{old_name}` is deprecated since version "
-                    f"{start_version} and will be removed in {stop_version}. To "
-                    f"avoid this warning, please use the parameter `{new_name}` "
-                    f"instead. For more details, see the documentation of "
-                    f"`{func.__qualname__}`."
-                )
-                warnings.warn(msg, category=FutureWarning, stacklevel=2)
-
-                assert new_name not in kwargs
-                kwargs[new_name] = kwargs.pop(old_name)
-
-            return func(*args, **kwargs)
-
-        return wrapped
-
-    return decorator
-
-
-@_deprecate_positional_arg(
-    old_name="min_size",
+@deprecate_parameter(
+    deprecated_name="min_size",
     new_name="max_size",
     start_version="0.26.0",
     stop_version="2.0.0",
+    template=f"{deprecate_parameter.replace_parameter_template} "
+    "Note that the new threshold will remove objects smaller **and equal to** "
+    "to its value, while the previous parameter only removed smaller ones.",
 )
-def remove_small_objects(ar, max_size=64, connectivity=1, *, out=None):
+def remove_small_objects(
+    ar, min_size=DEPRECATED, connectivity=1, *, max_size=64, out=None
+):
     """Remove objects smaller than the specified size.
 
     Expects ar to be an array with labeled objects, and removes objects
@@ -135,7 +82,7 @@ def remove_small_objects(ar, max_size=64, connectivity=1, *, out=None):
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
     max_size : int, optional (default: 64)
-        Remove objects whose contiguous area contains fewer pixels than this size.
+        Remove objects whose contiguous area contains this many or fewer pixels.
 
         .. versionchanged:: 0.26
             Replaces deprecated `min_size`.
@@ -170,17 +117,17 @@ def remove_small_objects(ar, max_size=64, connectivity=1, *, out=None):
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
-    >>> b = morphology.remove_small_objects(a, 6)
+    >>> b = morphology.remove_small_objects(a, max_size=5)
     >>> b
     array([[False, False, False, False, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> c = morphology.remove_small_objects(a, 7, connectivity=2)
+    >>> c = morphology.remove_small_objects(a, max_size=6, connectivity=2)
     >>> c
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> d = morphology.remove_small_objects(a, 6, out=a)
+    >>> d = morphology.remove_small_objects(a, max_size=5, out=a)
     >>> d is a
     True
 
@@ -218,20 +165,30 @@ def remove_small_objects(ar, max_size=64, connectivity=1, *, out=None):
             "Did you mean to use a boolean array?"
         )
 
-    too_small = component_sizes < max_size
+    if min_size is not DEPRECATED:
+        # Exclusive threshold is deprecated behavior
+        too_small = component_sizes < min_size
+    else:
+        # New behavior uses inclusive threshold
+        too_small = component_sizes <= max_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
 
     return out
 
 
-@_deprecate_positional_arg(
-    old_name="area_threshold",
+@deprecate_parameter(
+    deprecated_name="area_threshold",
     new_name="max_size",
     start_version="0.26.0",
     stop_version="2.0.0",
+    template=f"{deprecate_parameter.replace_parameter_template} "
+    "Note that the new threshold will remove objects smaller **and equal to** "
+    "to its value, while the previous parameter only removed smaller ones.",
 )
-def remove_small_holes(ar, max_size=64, connectivity=1, *, out=None):
+def remove_small_holes(
+    ar, area_threshold=DEPRECATED, connectivity=1, *, max_size=64, out=None
+):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
@@ -239,7 +196,7 @@ def remove_small_holes(ar, max_size=64, connectivity=1, *, out=None):
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
     max_size : int, optional (default: 64)
-        Remove holes whose contiguous area contains fewer pixels than this size.
+        Remove holes whose contiguous area contains this many or fewer pixels.
 
         .. versionchanged:: 0.26
             Replaces deprecated `area_threshold`.
@@ -274,19 +231,19 @@ def remove_small_holes(ar, max_size=64, connectivity=1, *, out=None):
     ...               [1, 1, 1, 0, 1, 0],
     ...               [1, 0, 0, 1, 1, 0],
     ...               [1, 1, 1, 1, 1, 0]], bool)
-    >>> b = morphology.remove_small_holes(a, 2)
+    >>> b = morphology.remove_small_holes(a, max_size=1)
     >>> b
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True,  True,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> c = morphology.remove_small_holes(a, 2, connectivity=2)
+    >>> c = morphology.remove_small_holes(a, max_size=1, connectivity=2)
     >>> c
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> d = morphology.remove_small_holes(a, 2, out=a)
+    >>> d = morphology.remove_small_holes(a, max_size=1, out=a)
     >>> d is a
     True
 
@@ -318,7 +275,19 @@ def remove_small_holes(ar, max_size=64, connectivity=1, *, out=None):
     np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, max_size, connectivity, out=out)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="Parameter `min_size` is deprecated",
+            category=FutureWarning,
+        )
+        out = remove_small_objects(
+            out,
+            min_size=area_threshold,
+            max_size=max_size,
+            connectivity=connectivity,
+            out=out,
+        )
 
     np.logical_not(out, out=out)
 
