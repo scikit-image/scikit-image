@@ -22,6 +22,7 @@ from skimage.transform._geometric import (
     _affine_matrix_from_vector,
     _center_and_normalize_points,
     _euler_rotation_matrix,
+    TRANSFORMS,
 )
 
 SRC = np.array(
@@ -740,9 +741,9 @@ def test_union_differing_types():
 )
 def test_inverse_all_transforms(tform):
     assert isinstance(tform.inverse, type(tform))
-    try:
+    if hasattr(tform, 'params'):
         assert_almost_equal(tform.inverse.inverse.params, tform.params)
-    except AttributeError:
+    else:
         assert isinstance(tform, PiecewiseAffineTransform)
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
     # Test addition with inverse, not implemented for all
@@ -756,6 +757,21 @@ def test_inverse_all_transforms(tform):
     ):
         assert_almost_equal((tform + tform.inverse)(SRC), SRC)
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
+
+
+@pytest.mark.parametrize('tform_class', TRANSFORMS.values())
+def test_identity(tform_class):
+    rng = np.random.default_rng()
+    if tform_class is PiecewiseAffineTransform:
+        return  # Identity transform unusable.
+    for ndim in tform_class.valid_dims:
+        src = rng.normal(size=(10, ndim))
+        t = tform_class.identity(ndim)
+        if isinstance(t, FundamentalMatrixTransform):
+            out = np.hstack((src, np.ones((len(src), 1))))
+        else:
+            out = src
+        assert np.allclose(t(src), out)
 
 
 def test_geometric_tform():
@@ -1058,8 +1074,18 @@ def test_euclidean_param_defaults():
 def test_similarity_transform_params():
     with pytest.raises(ValueError):
         _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
-    tf = SimilarityTransform(scale=4, dimensionality=3)
+    # With scalar scale and 3D, we get a deprecationwarning.  This is to
+    # generalize the rule that dimensionality should be implied by
+    # input parameters, when given.
+    with pytest.deprecated_call():
+        tf = SimilarityTransform(scale=4, dimensionality=3)
     assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Not so if we specify some other input giving dimensionality.
+    tf = SimilarityTransform(scale=4, translation=(0, 0, 0), dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Or if we are in 2D, by analogy to shear etc - scalar implies 2D.
+    tf = SimilarityTransform(scale=4, dimensionality=2)
+    assert_equal(tf([[1, 1]]), [[4, 4]])
 
 
 def test_euler_angle_consistency():
