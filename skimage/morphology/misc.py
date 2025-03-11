@@ -63,15 +63,15 @@ def _check_dtype_supported(ar):
     start_version="0.26.0",
     stop_version="2.0.0",
     template=f"{deprecate_parameter.replace_parameter_template} "
-    "Note that the new threshold will remove objects smaller **and equal to** "
-    "to its value, while the previous parameter only removed smaller ones.",
+    "Note that the new threshold removes objects smaller than **or equal to** "
+    "its value, while the previous parameter only removed smaller ones.",
 )
 def remove_small_objects(
     ar, min_size=DEPRECATED, connectivity=1, *, max_size=64, out=None
 ):
     """Remove objects smaller than the specified size.
 
-    Expects ar to be an array with labeled objects, and removes objects
+    Expects `ar` to be an array with labeled objects, and removes objects
     smaller than `max_size`. If `ar` is bool, the image is first labeled.
     This leads to potentially different behavior for bool and 0-and-1
     arrays.
@@ -82,7 +82,8 @@ def remove_small_objects(
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
     max_size : int, optional (default: 64)
-        Remove objects whose contiguous area contains this many or fewer pixels.
+        Remove objects whose contiguous area contains this number of pixels or
+        fewer.
 
         .. versionchanged:: 0.26
             Replaces deprecated `min_size`.
@@ -183,8 +184,8 @@ def remove_small_objects(
     start_version="0.26.0",
     stop_version="2.0.0",
     template=f"{deprecate_parameter.replace_parameter_template} "
-    "Note that the new threshold will remove objects smaller **and equal to** "
-    "to its value, while the previous parameter only removed smaller ones.",
+    "Note that the new threshold removes objects smaller than **or equal to** "
+    "its value, while the previous parameter only removed smaller ones.",
 )
 def remove_small_holes(
     ar, area_threshold=DEPRECATED, connectivity=1, *, max_size=64, out=None
@@ -196,7 +197,8 @@ def remove_small_holes(
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
     max_size : int, optional (default: 64)
-        Remove holes whose contiguous area contains this many or fewer pixels.
+        Remove holes whose contiguous area contains this number of pixels or
+        fewer.
 
         .. versionchanged:: 0.26
             Replaces deprecated `area_threshold`.
