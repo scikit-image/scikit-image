@@ -6,4 +6,4 @@ Cython>=3.0.8
 pythran>=0.16
 numpy>=2.0
 spin==0.13
-build>=1.2.1
+build
