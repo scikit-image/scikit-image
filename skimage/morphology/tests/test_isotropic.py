@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal
+import pytest
 
 from skimage import color, data, morphology
 from skimage.morphology import isotropic
@@ -79,3 +80,17 @@ def test_out_argument():
         func(img, radius, out=out)
         assert np.any(out != out_saved)
         assert_array_equal(out, func(img, radius))
+
+
+@pytest.mark.parametrize(
+    "func",
+    [
+        isotropic.isotropic_erosion,
+        isotropic.isotropic_dilation,
+        isotropic.isotropic_closing,
+        isotropic.isotropic_opening,
+    ],
+)
+def test_isotrophic_errors(func):
+    with pytest.raises(TypeError, match="Input image must be a binary image"):
+        func(img)

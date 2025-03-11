@@ -69,7 +69,8 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
            [0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
     """
-
+    if image.dtype != bool:
+        raise TypeError("Input image must be a binary image")
     dist = ndi.distance_transform_edt(image, sampling=spacing)
     return np.greater(dist, radius, out=out)
 
@@ -137,7 +138,8 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
            [0, 1, 1, 1, 1],
            [0, 0, 1, 1, 0]], dtype=uint8)
     """
-
+    if image.dtype != bool:
+        raise TypeError("Input image must be a binary image")
     dist = ndi.distance_transform_edt(np.logical_not(image), sampling=spacing)
     return np.less_equal(dist, radius, out=out)
 
