@@ -62,4 +62,5 @@ jobs:
       - name: Run tests (dependency analysis)
         run: |
           git branch main origin/main
+          spin install
           spin test --detect-dependencies -- --config-file ${{ github.workspace }}}/pyproject.toml
