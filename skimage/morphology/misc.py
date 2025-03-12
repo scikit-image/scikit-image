@@ -73,7 +73,7 @@ def remove_small_objects(
 
     Expects `ar` to be an array with labeled objects, and removes objects
     smaller than `max_size`. If `ar` is bool, the image is first labeled.
-    This leads to potentially different behavior for bool and 0-and-1
+    This leads to potentially different behavior for bool vs. 0-and-1
     arrays.
 
     Parameters
