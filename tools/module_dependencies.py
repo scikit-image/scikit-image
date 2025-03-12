@@ -87,7 +87,7 @@ def dependency_toml():
     return toml
 
 
-def modules_dependent_on(modules: set[str] | list[str]) -> set[str]:
+def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
     """Return the set of modules that depend on any of the given modules."""
     changed_modules = modules
 
@@ -101,7 +101,7 @@ def modules_dependent_on(modules: set[str] | list[str]) -> set[str]:
         dependent_mods = pkg_mods_arr[A[:, pkg_mods_idx[changed_mod]]]
         all_dependent_mods.extend(dependent_mods.tolist())
 
-    return set(all_dependent_mods)
+    return sorted(set(all_dependent_mods))
 
 
 if __name__ == "__main__":

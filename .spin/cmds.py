@@ -98,6 +98,8 @@ def test(*, parent_callback, detect_dependencies=False, **kwargs):
         sys.path.insert(0, 'tools/')
         import module_dependencies
 
+        pkg_mods, pkg_mods_idx = module_dependencies._pkg_modules()
+
         p = spin.util.run(
             ['git', 'diff', 'main', '--stat', '--name-only'], output=False, echo=False
         )
@@ -105,11 +107,7 @@ def test(*, parent_callback, detect_dependencies=False, **kwargs):
             raise (click.ClickException('Could not git-diff against main'))
 
         git_diff = p.stdout.decode('utf-8')
-        changed_modules = {
-            mod
-            for mod in module_dependencies._pkg_modules()
-            if mod.replace('.', '/') in git_diff
-        }
+        changed_modules = {mod for mod in pkg_mods if mod.replace('.', '/') in git_diff}
 
         pytest_args = kwargs.get('pytest_args', ())
         kwargs['pytest_args'] = (
