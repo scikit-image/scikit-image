@@ -1396,7 +1396,7 @@ def pixelcount(regionmask):
     return np.sum(regionmask)
 
 
-def intensity_median(regionmask, image_intensity):
+def custom_intensity_median(regionmask, image_intensity):
     return np.median(image_intensity[regionmask])
 
 
@@ -1420,9 +1420,11 @@ def test_extra_properties():
 
 def test_extra_properties_intensity():
     region = regionprops(
-        SAMPLE, intensity_image=INTENSITY_SAMPLE, extra_properties=(intensity_median,)
+        SAMPLE,
+        intensity_image=INTENSITY_SAMPLE,
+        extra_properties=(custom_intensity_median,),
     )[0]
-    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.custom_intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
 
 
 @pytest.mark.parametrize('intensity_prop', _require_intensity_image)
@@ -1439,8 +1441,8 @@ def test_intensity_image_required(intensity_prop):
 
 def test_extra_properties_no_intensity_provided():
     with pytest.raises(AttributeError):
-        region = regionprops(SAMPLE, extra_properties=(intensity_median,))[0]
-        _ = region.intensity_median
+        region = regionprops(SAMPLE, extra_properties=(custom_intensity_median,))[0]
+        _ = region.custom_intensity_median
 
 
 def test_extra_properties_nr_args():
@@ -1457,9 +1459,9 @@ def test_extra_properties_mixed():
     region = regionprops(
         SAMPLE,
         intensity_image=INTENSITY_SAMPLE,
-        extra_properties=(intensity_median, pixelcount),
+        extra_properties=(custom_intensity_median, pixelcount),
     )[0]
-    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.custom_intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
     assert region.pixelcount == np.sum(SAMPLE == 1)
 
 
@@ -1468,9 +1470,9 @@ def test_extra_properties_table():
         SAMPLE_MULTIPLE,
         intensity_image=INTENSITY_SAMPLE_MULTIPLE,
         properties=('label',),
-        extra_properties=(intensity_median, pixelcount, bbox_list),
+        extra_properties=(custom_intensity_median, pixelcount, bbox_list),
     )
-    assert_array_almost_equal(out['intensity_median'], np.array([2.0, 4.0]))
+    assert_array_almost_equal(out['custom_intensity_median'], np.array([2.0, 4.0]))
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
 
     assert out['bbox_list'].dtype == np.object_
@@ -1485,14 +1487,14 @@ def test_multichannel():
     labels = slic(astro.astype(float), start_label=1)
 
     segment_idx = np.max(labels) // 2
-    region = regionprops(labels, astro_green, extra_properties=[intensity_median])[
-        segment_idx
-    ]
-    region_multi = regionprops(labels, astro, extra_properties=[intensity_median])[
-        segment_idx
-    ]
+    region = regionprops(
+        labels, astro_green, extra_properties=[custom_intensity_median]
+    )[segment_idx]
+    region_multi = regionprops(
+        labels, astro, extra_properties=[custom_intensity_median]
+    )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["intensity_median"]:
+    for prop in list(PROPS.keys()) + ["custom_intensity_median"]:
         p = region[prop]
         p_multi = region_multi[prop]
         if np.shape(p) == np.shape(p_multi):
