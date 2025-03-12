@@ -704,6 +704,13 @@ def test_intensity_mean():
     assert_almost_equal(intensity, 1.02777777777777)
 
 
+def test_intensity_median():
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[
+        0
+    ].intensity_median
+    assert_almost_equal(intensity, 1.0)
+
+
 def test_intensity_min():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_min
     assert_almost_equal(intensity, 1)
