@@ -1,27 +1,25 @@
-name: Test macOS
+name: Run tests identified via dependency analysis
 
-on: [push, pull_request, merge_group]
-
-concurrency:
-  # Cancel previous workflows of the same PR, but only for PRs
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
+on: [pull_request]
 
 permissions:
   contents: read
 
 env:
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml --detect-dependencies"
 
 jobs:
-  test_skimage_macos:
-    name: macos-cp${{ matrix.python-version }}
+  test_skimage_autodetect:
+    name: macos-auto-cp${{ matrix.python-version }}
     runs-on: macos-13
 
     strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: true
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
         OPTIONAL_DEPS: [1]
+
     env:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
@@ -63,10 +61,6 @@ jobs:
         run: |
           source .github/scripts/setup-test-env.sh
 
-      - name: Run tests
+      - name: Run tests (dependency analysis)
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
-
-      - name: Check benchmarks
-        run: |
-          asv check -v -E existing
