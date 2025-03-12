@@ -111,8 +111,11 @@ def test(*, parent_callback, detect_dependencies=False, **kwargs):
             if mod.replace('.', '/') in git_diff
         }
 
-        kwargs['pytest_args'] = ('--pyargs',) + tuple(
-            module_dependencies.modules_dependent_on(changed_modules)
+        pytest_args = kwargs.get('pytest_args', ())
+        kwargs['pytest_args'] = (
+            pytest_args
+            + ('--pyargs',)
+            + tuple(module_dependencies.modules_dependent_on(changed_modules))
         )
 
     parent_callback(**kwargs)

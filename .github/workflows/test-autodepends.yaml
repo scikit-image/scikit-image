@@ -5,9 +5,6 @@ on: [pull_request]
 permissions:
   contents: read
 
-env:
-  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml --detect-dependencies"
-
 jobs:
   test_skimage_autodetect:
     name: macos-auto-cp${{ matrix.python-version }}
@@ -51,9 +48,9 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Build and install
+      - name: Build
         run: |
-          pip install -v --no-build-isolation .
+          spin build
 
       - name: Install test dependencies
         env:
@@ -63,4 +60,4 @@ jobs:
 
       - name: Run tests (dependency analysis)
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          spin test --detect-dependencies -- --config-file ${{ github.workspace }}
