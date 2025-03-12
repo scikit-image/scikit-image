@@ -82,11 +82,12 @@ def remove_small_objects(
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
     max_size : int, optional (default: 64)
-        Remove objects whose contiguous area contains this number of pixels or
-        fewer.
+        Remove objects whose contiguous area (or volume in N-D) contains this
+        number of pixels or fewer.
 
         .. versionchanged:: 0.26
-            Replaces deprecated `min_size`.
+            Replaces deprecated `min_size` which only removed objects strictly
+            smaller than its size.
 
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel. Used during
@@ -197,11 +198,12 @@ def remove_small_holes(
     ar : ndarray (arbitrary shape, int or bool type)
         The array containing the connected components of interest.
     max_size : int, optional (default: 64)
-        Remove holes whose contiguous area contains this number of pixels or
-        fewer.
+        Remove holes whose contiguous area (or volume in N-D) contains this
+        number of pixels or fewer.
 
         .. versionchanged:: 0.26
-            Replaces deprecated `area_threshold`.
+            Replaces deprecated `area_threshold` which only removed holes
+            strictly smaller than its size.
 
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
