@@ -92,11 +92,16 @@ def sdist(pyproject_build_args):
     "and test them and their dependencies. "
     "This overrides any pytest arguments.",
 )
+@spin.cmds.meson.build_dir_option
 @spin.util.extend_command(spin.cmds.meson.test)
-def test(*, parent_callback, detect_dependencies=False, **kwargs):
+def test(*, parent_callback, build_dir, detect_dependencies=False, **kwargs):
     if detect_dependencies:
         sys.path.insert(0, 'tools/')
         import module_dependencies
+
+        # Ensure spin-built version of skimage is accessible
+        p = spin.cmds.meson._set_pythonpath(build_dir, quiet=True)
+        sys.path.insert(0, p)
 
         pkg_mods, pkg_mods_idx = module_dependencies._pkg_modules()
 
@@ -116,4 +121,5 @@ def test(*, parent_callback, detect_dependencies=False, **kwargs):
             + tuple(module_dependencies.modules_dependent_on(changed_modules))
         )
 
+    kwargs['build_dir'] = build_dir
     parent_callback(**kwargs)
