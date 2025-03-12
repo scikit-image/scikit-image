@@ -210,7 +210,7 @@ def normalized_mutual_information(image0, image1, *, bins=100):
        Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 
     where :math:`H(X) := - \sum_{x \in X}{p(x) \log p(x)}` is the entropy,
-    :math:`X` is the set of image values, and :math:`p(x)` is the probability 
+    :math:`X` is the set of image values, and :math:`p(x)` is the probability
     of observing a specific value :math:`x \in X`.
 
     It was proposed to be useful in registering images by Colin Studholme and
