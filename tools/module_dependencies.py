@@ -20,18 +20,6 @@ excluded_mods = [
 ]
 
 
-def _get_submodules(package):
-    pkg = importlib.import_module(package)
-
-    members = {f'{package}.{attr}' for attr in dir(pkg)}
-    included_mods_full = {f'{package}.{mod}' for mod in included_mods}
-    excluded_mods_full = {f'{package}.{mod}' for mod in excluded_mods}
-
-    submodules = sorted((members | included_mods_full) - excluded_mods_full)
-
-    return submodules
-
-
 @functools.cache
 def _pkg_modules() -> tuple[list[str], dict[str, int]]:
     """List all package submodules.
@@ -44,13 +32,21 @@ def _pkg_modules() -> tuple[list[str], dict[str, int]]:
         Mapping of submodule to integer, its index
         in `submodules`.
     """
-    # Isolate package import, to be entirely sure we don't contaminate
-    # sys.modules prior to spawning our dependency detector
-    pool = multiprocessing.Pool(processes=1)
-    submodules = pool.map(_get_submodules, [package])[0]
+    pkg = importlib.import_module(package)
+
+    members = {f'{package}.{attr}' for attr in dir(pkg)}
+    included_mods_full = {f'{package}.{mod}' for mod in included_mods}
+    excluded_mods_full = {f'{package}.{mod}' for mod in excluded_mods}
+
+    submodules = sorted((members | included_mods_full) - excluded_mods_full)
 
     # Sort entries, so that all adjacency matrix calculations are stable
     submodule_idx = {mod: index for index, mod in enumerate(submodules)}
+
+    # # Clear out sys.modules for when we spawn our import detector
+    pkg_mods = [mod for mod in sys.modules if f"{package}." in mod]
+    for mod in pkg_mods:
+        del sys.modules[mod]
 
     return submodules, submodule_idx
 
@@ -82,7 +78,7 @@ def _import_dependencies(module: str) -> set[str]:
             pass
 
     pkg_modules, _ = _pkg_modules()
-    pkg_sys_modules = {mod for mod in sys.modules if f"{package}." in mod}
+    pkg_sys_modules = {mod for mod in sys.modules if mod.startswith(f"{package}.")}
 
     return set(pkg_modules) & pkg_sys_modules
 
@@ -125,6 +121,8 @@ def dependency_toml():
 def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
     """Return the set of modules that depend on any of the given modules."""
     changed_modules = modules
+    if not isinstance(modules, (set, list)):
+        raise ValueError("`modules` must be set or list")
 
     A = dependency_graph().astype(bool)
 
