@@ -45,18 +45,11 @@ jobs:
           # OpenMP is not present on macOS by default
           brew install libomp
 
-      - name: Install build dependencies
-        run: |
-          source .github/scripts/setup-build-env.sh
-
-      - name: Build
-        run: |
-          spin build
-
-      - name: Install test dependencies
+      - name: Install build & test dependencies
         env:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
         run: |
+          source .github/scripts/setup-build-env.sh
           source .github/scripts/setup-test-env.sh
 
       - name: Run tests (dependency analysis)
