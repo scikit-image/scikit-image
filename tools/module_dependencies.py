@@ -17,6 +17,18 @@ excluded_mods = [
 ]
 
 
+def _get_submodules(package):
+    pkg = importlib.import_module(package)
+
+    members = {f'{package}.{attr}' for attr in dir(pkg)}
+    included_mods_full = {f'{package}.{mod}' for mod in included_mods}
+    excluded_mods_full = {f'{package}.{mod}' for mod in excluded_mods}
+
+    submodules = sorted((members | included_mods_full) - excluded_mods_full)
+
+    return submodules
+
+
 @functools.cache
 def _pkg_modules() -> tuple[list[str], dict[str, int]]:
     """List all package submodules.
@@ -29,20 +41,24 @@ def _pkg_modules() -> tuple[list[str], dict[str, int]]:
         Mapping of submodule to integer, its index
         in `submodules`.
     """
-    pkg = importlib.import_module(package)
-
-    members = {f'{package}.{attr}' for attr in dir(pkg)}
-    included_mods_full = {f'{package}.{mod}' for mod in included_mods}
-    excluded_mods_full = {f'{package}.{mod}' for mod in excluded_mods}
+    # Isolate package import, to be entirely sure we don't contaminate
+    # sys.modules prior to spawning our dependency detector
+    pool = multiprocessing.Pool(processes=1)
+    submodules = pool.map(_get_submodules, [package])[0]
 
     # Sort entries, so that all adjacency matrix calculations are stable
-    submodules = sorted((members | included_mods_full) - excluded_mods_full)
     submodule_idx = {mod: index for index, mod in enumerate(submodules)}
 
     return submodules, submodule_idx
 
 
 def _import_dependencies(module: str) -> set[str]:
+    bad_sys_modules = {mod for mod in sys.modules if f"{package}." in mod}
+    if bad_sys_modules:
+        raise RuntimeError(
+            f"Yikes! No package modules present at this point, but seeing {bad_sys_modules}!"
+        )
+
     importlib.import_module(module)
     importlib.import_module(f"{module}.tests")
 
@@ -63,7 +79,7 @@ def dependency_graph():
     n = len(mods)
     A = np.zeros((n, n), dtype=bool)
 
-    with multiprocessing.Pool() as p:
+    with multiprocessing.Pool(maxtasksperchild=1) as p:
         mod_deps = p.map(_import_dependencies, mods)
         for k, dependencies in enumerate(mod_deps):
             for mod in dependencies:
