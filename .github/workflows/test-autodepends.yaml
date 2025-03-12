@@ -29,6 +29,7 @@ jobs:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Python
@@ -60,4 +61,5 @@ jobs:
 
       - name: Run tests (dependency analysis)
         run: |
-          spin test --detect-dependencies -- --config-file ${{ github.workspace }}
+          git branch main origin/main
+          spin test --detect-dependencies -- --config-file ${{ github.workspace }}}/pyproject.toml
