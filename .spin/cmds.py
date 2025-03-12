@@ -81,3 +81,38 @@ def sdist(pyproject_build_args):
     sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
     print(f"Validating {sdist}...")
     spin.util.run(["tools/check_sdist.py", sdist])
+
+
+@click.option(
+    "--detect-dependencies",
+    is_flag=True,
+    default=None,
+    help="Look for changes against main, "
+    "detect which modules were involved, "
+    "and test them and their dependencies. "
+    "This overrides any pytest arguments.",
+)
+@spin.util.extend_command(spin.cmds.meson.test)
+def test(*, parent_callback, detect_dependencies=False, **kwargs):
+    if detect_dependencies:
+        sys.path.insert(0, 'tools/')
+        import module_dependencies
+
+        p = spin.util.run(
+            ['git', 'diff', 'main', '--stat', '--name-only'], output=False, echo=False
+        )
+        if p.returncode != 0:
+            raise (click.ClickException('Could not git-diff against main'))
+
+        git_diff = p.stdout.decode('utf-8')
+        changed_modules = {
+            mod
+            for mod in module_dependencies._pkg_modules()
+            if mod.replace('.', '/') in git_diff
+        }
+
+        kwargs['pytest_args'] = ('--pyargs',) + tuple(
+            module_dependencies.modules_dependent_on(changed_modules)
+        )
+
+    parent_callback(**kwargs)
