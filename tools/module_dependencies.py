@@ -6,6 +6,9 @@ import importlib
 import multiprocessing
 import functools
 import sys
+import os
+import glob
+import pytest
 
 
 package = 'skimage'
@@ -60,7 +63,23 @@ def _import_dependencies(module: str) -> set[str]:
         )
 
     importlib.import_module(module)
-    importlib.import_module(f"{module}.tests")
+
+    # This is a workaround for identifying the test modules
+    # associated with an skimage submodule.
+    #
+    # Other libraries would need to do something different, and
+    # we should think how to generalize.
+    test_mod = importlib.import_module(f"{module}.tests")
+    test_mod_dir = os.path.dirname(test_mod.__file__)
+    test_files = [
+        os.path.basename(f) for f in glob.glob(os.path.join(test_mod_dir, 'test_*.py'))
+    ]
+    test_modules = [f"{module}.tests.{os.path.splitext(f)[0]}" for f in test_files]
+    for mod in test_modules:
+        try:
+            importlib.import_module(mod)
+        except (ImportError, pytest.skip.Exception):
+            pass
 
     pkg_modules, _ = _pkg_modules()
     pkg_sys_modules = {mod for mod in sys.modules if f"{package}." in mod}
