@@ -77,22 +77,9 @@ def _center_and_normalize_points(points):
 
     norm_factor = np.sqrt(d) / rms
 
-    part_matrix = norm_factor * np.concatenate(
-        (np.eye(d), -centroid[:, np.newaxis]), axis=1
-    )
-    matrix = np.concatenate(
-        (
-            part_matrix,
-            [
-                [
-                    0,
-                ]
-                * d
-                + [1]
-            ],
-        ),
-        axis=0,
-    )
+    matrix = np.eye(d + 1)
+    matrix[:d, d] = -centroid
+    matrix[:d, :] *= norm_factor
 
     points_h = np.vstack([points.T, np.ones(n)])
 
