@@ -41,6 +41,7 @@ import numpy as np
 
 from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import invert
+from ..util._backends import dispatchable
 
 from . import _max_tree
 
@@ -50,6 +51,7 @@ signed_float_types = [np.float16, np.float32, np.float64]
 
 
 # building the max tree.
+@dispatchable
 def max_tree(image, connectivity=1):
     """Build the max tree from an image.
 
@@ -147,6 +149,7 @@ def max_tree(image, connectivity=1):
     return parent, tree_traverser
 
 
+@dispatchable
 def area_opening(
     image, area_threshold=64, connectivity=1, parent=None, tree_traverser=None
 ):
@@ -262,6 +265,7 @@ def area_opening(
     return output
 
 
+@dispatchable
 def diameter_opening(
     image, diameter_threshold=8, connectivity=1, parent=None, tree_traverser=None
 ):
@@ -364,6 +368,7 @@ def diameter_opening(
     return output
 
 
+@dispatchable
 def area_closing(
     image, area_threshold=64, connectivity=1, parent=None, tree_traverser=None
 ):
@@ -494,6 +499,7 @@ def area_closing(
     return output
 
 
+@dispatchable
 def diameter_closing(
     image, diameter_threshold=8, connectivity=1, parent=None, tree_traverser=None
 ):
@@ -609,6 +615,7 @@ def diameter_closing(
     return output
 
 
+@dispatchable
 def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=None):
     """Determine all local maxima of the image.
 

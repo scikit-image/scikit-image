@@ -4,6 +4,7 @@ import numpy as np
 from scipy.signal import fftconvolve
 
 from .._shared.utils import check_nD, _supported_float_type
+from ..util._backends import dispatchable
 
 
 def _window_sum_2d(image, window_shape):
@@ -30,6 +31,7 @@ def _window_sum_3d(image, window_shape):
     return window_sum
 
 
+@dispatchable
 def match_template(
     image, template, pad_input=False, mode='constant', constant_values=0
 ):

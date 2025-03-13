@@ -4,8 +4,10 @@ Binary morphological operations
 
 import numpy as np
 from scipy import ndimage as ndi
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def isotropic_erosion(image, radius, out=None, spacing=None):
     """Return binary morphological erosion of an image.
 
@@ -74,6 +76,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     return np.greater(dist, radius, out=out)
 
 
+@dispatchable
 def isotropic_dilation(image, radius, out=None, spacing=None):
     """Return binary morphological dilation of an image.
 
@@ -142,6 +145,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
     return np.less_equal(dist, radius, out=out)
 
 
+@dispatchable
 def isotropic_opening(image, radius, out=None, spacing=None):
     """Return binary morphological opening of an image.
 
@@ -208,6 +212,7 @@ def isotropic_opening(image, radius, out=None, spacing=None):
     return isotropic_dilation(eroded, radius, out=out, spacing=spacing)
 
 
+@dispatchable
 def isotropic_closing(image, radius, out=None, spacing=None):
     """Return binary morphological closing of an image.
 

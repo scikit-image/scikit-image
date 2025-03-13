@@ -14,8 +14,10 @@ from ._util import (
     _set_border_values,
 )
 from .._shared.dtype import numeric_dtype_min_max
+from ..util._backends import dispatchable
 
 
+@dispatchable
 def flood_fill(
     image,
     seed_point,
@@ -126,6 +128,7 @@ def flood_fill(
     return image
 
 
+@dispatchable
 def flood(image, seed_point, *, footprint=None, connectivity=None, tolerance=None):
     """Mask corresponding to a flood fill.
 
