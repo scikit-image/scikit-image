@@ -70,6 +70,7 @@ def test_imagecollection_input():
     assert len(images) == 3
 
 
+@pytest.mark.thread_unsafe
 class TestImageCollection:
     pics = [fetch('data/brick.png'), fetch('data/color.png'), fetch('data/moon.png')]
     pattern = pics[:2]

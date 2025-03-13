@@ -18,6 +18,7 @@ from skimage._shared._warnings import expected_warnings
 from warnings import warn
 
 
+@pytest.mark.thread_unsafe
 def test_skipper():
     def f():
         pass
@@ -82,6 +83,7 @@ def test_skipper():
         doctest_skip_parser(c)
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
 def test_run_in_parallel():
     state = []
@@ -108,6 +110,7 @@ def test_run_in_parallel():
     assert len(state) == 6
 
 
+@pytest.mark.thread_unsafe
 @pytest.mark.skipif(is_wasm, reason="Cannot run parallel code in WASM")
 def test_parallel_warning():
     @run_in_parallel()
@@ -124,6 +127,7 @@ def test_parallel_warning():
     change_state_warns_passes()
 
 
+@pytest.mark.thread_unsafe
 def test_expected_warnings_noop():
     # This will ensure the line beolow it behaves like a no-op
     with expected_warnings(['Expected warnings test']):
