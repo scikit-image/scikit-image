@@ -72,8 +72,8 @@ def remove_small_objects(
     """Remove objects smaller than the specified size.
 
     Expects `ar` to be an array with labeled objects, and removes objects
-    smaller than `max_size`. If `ar` is bool, the image is first labeled.
-    This leads to potentially different behavior for bool vs. 0-and-1
+    smaller than or equal to `max_size`. If `ar` is bool, the image is first
+    labeled. This leads to potentially different behavior for bool vs. 0-and-1
     arrays.
 
     Parameters
@@ -85,9 +85,9 @@ def remove_small_objects(
         Remove objects whose contiguous area (or volume in N-D) contains this
         number of pixels or fewer.
 
-        .. versionchanged:: 0.26
-            Replaces deprecated `min_size` which only removed objects strictly
-            smaller than its size.
+        .. versionadded:: 0.26
+            To make the naming less confusing, replaces deprecated `min_size`
+            which only removed objects strictly smaller than its size.
 
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel. Used during
@@ -201,9 +201,9 @@ def remove_small_holes(
         Remove holes whose contiguous area (or volume in N-D) contains this
         number of pixels or fewer.
 
-        .. versionchanged:: 0.26
-            Replaces deprecated `area_threshold` which only removed holes
-            strictly smaller than its size.
+        .. versionadded:: 0.26
+            To make the naming less confusing, replaces deprecated `area_threshold`
+            which only removed holes strictly smaller than its size.
 
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
