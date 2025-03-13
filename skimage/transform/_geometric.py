@@ -614,7 +614,8 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
             raise ValueError("Translation vector must have unit length")
         # Matrix representation of the cross product for t.
         t0, t1, t2 = translation
-        return np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]])
+        t_arr = np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]], dtype=float)
+        return t_arr @ rotation
 
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
