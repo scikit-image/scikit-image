@@ -59,4 +59,5 @@ jobs:
       - name: Run tests (dependency analysis)
         run: |
           git branch main origin/main
+          pip uninstall -y SimpleITK  # Causes np.lookfor test to fail 🤔
           spin test --detect-dependencies -- --config-file ${{ github.workspace }}/pyproject.toml
