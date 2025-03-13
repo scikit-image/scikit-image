@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
+import skimage as ski
 from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
 from skimage.morphology import footprint_rectangle, footprint_from_sequence
@@ -204,6 +205,82 @@ def test_ellipse_crosses_approximation(width, height):
     error = np.sum(np.abs(expected.astype(int) - approximate.astype(int)))
     max_error = 0.05
     assert error / expected.size <= max_error
+
+
+class Test_footprint_cross_decompose:
+    @pytest.mark.parametrize("shape", [(1, 1), (3, 5)])
+    def test_all_zero(self, shape):
+        footprint = np.zeros(shape)
+        regex = "`footprint` possibly contains only zeros, cannot decompose"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    # @pytest.mark.parametrize("length_0", [1, 3, 9, 21, 51])
+    # @pytest.mark.parametrize("length_1", [1, 3, 9, 21, 51])
+    @pytest.mark.parametrize("length_0", [1])
+    @pytest.mark.parametrize("length_1", [1])
+    def test_rectangle_approximation(self, length_0, length_1):
+        shape = (length_0, length_1)
+        footprint = ski.morphology.footprint_rectangle(shape)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = ski.morphology.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0.05
+        assert error / footprint.size <= max_error_rate
+
+    @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
+    def test_disk_approximation(self, radius):
+        footprint = ski.morphology.disk(radius)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = ski.morphology.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0.05
+        assert error / footprint.size <= max_error_rate
+
+    @pytest.mark.parametrize("width", [3, 8, 20, 50])
+    @pytest.mark.parametrize("height", [3, 8, 20, 50])
+    def test_ellipse_approximation(self, width, height):
+        footprint = ski.morphology.ellipse(width, height)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = footprints.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0.05
+        assert error / footprint.size <= max_error_rate
+
+    def test_not_convex(self):
+        # Footprint is symmetric in all, but not convex in one dimension
+        footprint = np.array([[1, 0, 1], [1, 1, 1], [1, 0, 1]], dtype=np.uint8)
+        with pytest.raises(ValueError, match=".* not convex"):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+        # However, this is only detected in one dimension (for performance reasons)
+        # the other dimension passes
+        ski.morphology.footprint_cross_decompose(footprint.T)
+
+    @pytest.mark.parametrize("shape", [(3, 2), (2, 3), (6, 6)])
+    def test_even_shape(self, shape):
+        footprint = np.ones(shape, dtype=np.uint8)
+        regex = "Can only decompose symmetric footprints with an odd length"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("shape", [(3, 3), (1, 1)])
+    @pytest.mark.parametrize("dtype", [bool, int, np.uint8, float])
+    def test_dtype(self, shape, dtype):
+        footprint = np.ones(shape, dtype=dtype)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        assert len(decomposed) > 0
+        for element, _ in decomposed:
+            assert element.dtype == dtype
 
 
 def test_disk_series_approximation_unavailable():

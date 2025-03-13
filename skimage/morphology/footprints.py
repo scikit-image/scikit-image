@@ -593,12 +593,12 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
         fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = _cross_decomposition(fp)
+        sequence = footprint_cross_decompose(fp)
     return sequence
 
 
 def _cross(r0, r1, dtype=np.uint8):
-    """Cross-shaped structuring element of shape (r0, r1).
+    """Cross-shaped structuring element of shape (r0 * 2 + 1, r1 * 2 + 1).
 
     Only the central row and column are ones.
     """
@@ -612,41 +612,127 @@ def _cross(r0, r1, dtype=np.uint8):
     return c
 
 
-def _cross_decomposition(footprint, dtype=np.uint8):
+def footprint_cross_decompose(footprint):
     """Decompose a symmetric convex footprint into cross-shaped elements.
 
     This is a decomposition of the footprint into a sequence of
-    (possibly asymmetric) cross-shaped elements. This technique was proposed in
-    [1]_ and corresponds roughly to algorithm 1 of that publication (some
-    details had to be modified to get reliable operation).
+    (possibly asymmetric) cross-shaped elements. Applying this series of
+    smaller footprints will give a result close to (or even equivalent to) the
+    dense original `footprint` but with better computational performance for
+    large footprints.
 
+    Parameters
+    ----------
+    footprint : (N, M) ndarray
+        A symmetric convex footprint as a 2-D array of 1's and 0's.
+        N and M must be of odd length.
+
+        .. warning::
+            For performance reasons, it isn't checked whether `footprint` is
+            symmetric or convex or contains only 0 and 1. So, for unsupported
+            footprints, this function may return an incorrect decomposition!
+
+    Returns
+    -------
+    decomposed : tuple[tuple[ndarray, int], ...]
+        A footprint consisting of multiple array-integer pairs. A tuple whose
+        length is equal to the number of unique structuring elements to apply.
+        Each array has the same dtype as `footprint`.
+
+    Notes
+    -----
+    This technique was proposed in [1]_ and corresponds roughly to algorithm 1
+    of that publication (some details had to be modified to get reliable
+    operation).
+
+    References
+    ----------
     .. [1] Li, D. and Ritter, G.X. Decomposition of Separable and Symmetric
            Convex Templates. Proc. SPIE 1350, Image Algebra and Morphological
            Image Processing, (1 November 1990).
            :DOI:`10.1117/12.23608`
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> footprint = ski.morphology.footprint_rectangle((3, 9))
+    >>> ski.morphology.footprint_cross_decompose(footprint)
+    ((array([[1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=uint8), 1),
+     (array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1))
+
+    >>> footprint_ellipse = ski.morphology.ellipse(3, 2)
+    >>> footprint_ellipse
+    array([[0, 1, 1, 1, 1, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [1, 1, 1, 1, 1, 1, 1],
+           [0, 1, 1, 1, 1, 1, 0]], dtype=uint8)
+    >>> ski.morphology.footprint_cross_decompose(footprint_ellipse)
+    ((array([[1, 1, 1, 1, 1]], dtype=uint8), 1),
+     (array([[0, 1, 0],
+             [1, 1, 1],
+             [0, 1, 0]], dtype=uint8),
+      1),
+     (array([[1],
+             [1],
+             [1]], dtype=uint8),
+      1))
     """
+    if footprint.ndim != 2:
+        msg = (
+            "Can only decompose footprints with 2 dimensions (for now), "
+            f"got {footprint.ndim}"
+        )
+        raise ValueError(msg)
+    if not np.mod(footprint.shape, 2).all():
+        msg = (
+            f"Can only decompose symmetric footprints with an odd length in "
+            f"each dimension, got `{footprint.shape=}`"
+        )
+        raise ValueError(msg)
+
     quadrant = footprint[footprint.shape[0] // 2 :, footprint.shape[1] // 2 :]
     col_sums = quadrant.sum(0, dtype=int)
+
+    if not np.any(col_sums):
+        msg = "`footprint` possibly contains only zeros, cannot decompose"
+        raise ValueError(msg)
+
+    if footprint.shape == (1, 1):
+        # Special case, not covered by code below which would return an empty tuple
+        decomposed = ((np.ones_like(footprint), 1),)
+        return decomposed
+
+    # Pad with zeros to avoid index errors in later iteration
     col_sums = np.concatenate((col_sums, np.asarray([0], dtype=int)))
+
     i_prev = 0
-    idx = {}
-    sum0 = 0
+    crosses = {}  # Found elements, key encodes the shape, value the count
+    sum0 = 0  # Summed length of found elements in first dimension
     for i in range(col_sums.size - 1):
         if col_sums[i] > col_sums[i + 1]:
             if i == 0:
                 continue
             key = (col_sums[i_prev] - col_sums[i], i - i_prev)
             sum0 += key[0]
-            if key not in idx:
-                idx[key] = 1
-            else:
-                idx[key] += 1
+            crosses[key] = crosses.get(key, 0) + 1
             i_prev = i
+        elif col_sums[i] < col_sums[i + 1]:
+            raise ValueError("`footprint` is not convex")
+
     n = quadrant.shape[0] - 1 - sum0
     if n > 0:
+        # Need another vertical element to match length of `footprint`'s first dimension
         key = (n, 0)
-        idx[key] = idx.get(key, 0) + 1
-    return tuple([(_cross(r0, r1, dtype), n) for (r0, r1), n in idx.items()])
+        crosses[key] = crosses.get(key, 0) + 1
+
+    decomposed = tuple(
+        [(_cross(r0, r1, footprint.dtype), n) for (r0, r1), n in crosses.items()]
+    )
+    return decomposed
 
 
 def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
@@ -715,7 +801,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         return footprint
     elif decomposition == 'crosses':
         fp = ellipse(width, height, dtype, decomposition=None)
-        sequence = _cross_decomposition(fp)
+        sequence = footprint_cross_decompose(fp)
     return sequence
 
 
