@@ -496,10 +496,18 @@ def test_fundamental_matrix_epipolar_projection():
 
 
 def test_essential_matrix_init():
-    tform = EssentialMatrixTransform(
-        rotation=np.eye(3), translation=np.array([0, 0, 1])
-    )
+    r = np.eye(3)
+    t = np.array([0, 0, 1])
+    tform = EssentialMatrixTransform(rotation=r, translation=t)
     assert_equal(tform.params, np.array([0, -1, 0, 1, 0, 0, 0, 0, 0]).reshape(3, 3))
+    t2 = np.array([0, 0, 2])
+    with pytest.raises(ValueError, match="Translation vector must have unit length"):
+        EssentialMatrixTransform(rotation=r, translation=t2)
+    with pytest.raises(ValueError, match="Rotation matrix must have unit determinant"):
+        EssentialMatrixTransform(rotation=np.eye(3)[::-1], translation=t)
+    r2 = r[[2, 0, 1]]
+    tform = EssentialMatrixTransform(rotation=r2, translation=t)
+    assert_equal(tform.params, [[-1, 0, 0], [0, 0, 1], [0, 0, 0]])
 
 
 def test_essential_matrix_estimation():
