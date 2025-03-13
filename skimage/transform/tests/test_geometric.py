@@ -21,6 +21,7 @@ from skimage.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
     _center_and_normalize_points,
+    _apply_homogenous,
     _euler_rotation_matrix,
     TRANSFORMS,
 )
@@ -913,6 +914,12 @@ def test_degenerate():
             assert not np.all(np.isnan(affine.params))
     for affine in tform.inverse_affines:
         assert not np.all(np.isnan(affine.params))
+
+
+def test_normalize_points():
+    mat, normed = _center_and_normalize_points(SRC)
+    assert np.allclose(np.mean(normed, axis=0), 0)
+    assert np.allclose(normed, _apply_homogenous(mat, SRC))
 
 
 def test_normalize_degenerate_points():

@@ -80,15 +80,35 @@ def _center_and_normalize_points(points):
     matrix = np.eye(d + 1)
     matrix[:d, d] = -centroid
     matrix[:d, :] *= norm_factor
+    return matrix, _apply_homogenous(matrix, points)
 
+
+def _apply_homogenous(matrix, points):
+    """Transform (N, D) `points` array with homogenous (D+1, D+1) `matrix`
+
+    Parameters
+    ----------
+    matrix : (D+1, D+1) array_like
+        The transformation matrix to obtain the new points.
+    points : (N, D) array
+        The coordinates of the image points.
+
+    Returns
+    -------
+    new_points : (N, D) array
+        The transformed image points.
+    """
+    matrix = np.asarray(matrix)
+    points = np.array(points, copy=NP_COPY_IF_NEEDED, ndmin=2)
+    n, d = points.shape
     points_h = np.vstack([points.T, np.ones(n)])
-
     new_points_h = (matrix @ points_h).T
-
-    new_points = new_points_h[:, :d]
-    new_points /= new_points_h[:, d:]
-
-    return matrix, new_points
+    # We divide by the last dimension of the homogeneous
+    # coordinate matrix. In order to avoid division by zero,
+    # we replace exact zeros in this column with a very small number.
+    divs = new_points_h[:, -1]
+    divs = np.where(divs == 0, np.finfo(float).eps, divs)
+    return new_points_h[:, :d] / divs[:, None]
 
 
 def _umeyama(src, dst, estimate_scale):
@@ -698,27 +718,8 @@ class ProjectiveTransform(_MatrixTransform):
     def _inv_matrix(self):
         return np.linalg.inv(self.params)
 
-    def _apply_mat(self, coords, matrix):
-        ndim = matrix.shape[0] - 1
-        coords = np.array(coords, copy=NP_COPY_IF_NEEDED, ndmin=2)
-
-        src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
-        dst = src @ matrix.T
-
-        # below, we will divide by the last dimension of the homogeneous
-        # coordinate matrix. In order to avoid division by zero,
-        # we replace exact zeros in this column with a very small number.
-        dst[dst[:, ndim] == 0, ndim] = np.finfo(float).eps
-        # rescale to homogeneous coordinates
-        dst[:, :ndim] /= dst[:, ndim : ndim + 1]
-
-        return dst[:, :ndim]
-
     def __array__(self, dtype=None, copy=None):
-        if dtype is None:
-            return self.params
-        else:
-            return self.params.astype(dtype)
+        return self.params if dtype is None else self.params.astype(dtype)
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -734,7 +735,7 @@ class ProjectiveTransform(_MatrixTransform):
             Destination coordinates.
 
         """
-        return self._apply_mat(coords, self.params)
+        return _apply_homogenous(self.params, coords)
 
     @property
     def inverse(self):
