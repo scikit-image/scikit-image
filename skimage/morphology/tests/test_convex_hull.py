@@ -347,3 +347,32 @@ def test_few_points():
     with testing.assert_warns(UserWarning):
         chimage3d = convex_hull_image(image3d)
         assert_array_equal(chimage3d, np.zeros(image3d.shape, dtype=bool))
+
+
+def test_3d_singleton_dim():
+    image3d = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=bool,
+    )[np.newaxis, :, :]
+
+    expected = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 1, 0, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 0, 0],
+            [0, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=bool,
+    )[np.newaxis, :, :]
+
+    chimage3d = convex_hull_image(image3d)
+    assert_array_equal(chimage3d, expected)
