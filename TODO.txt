@@ -50,4 +50,11 @@ Post numpy 2
 
 Version 2.0
 -----------
+- In `skimage.morphology.remove_small_objects`, complete the deprecation of
+  `min_size` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.morphology.remove_small_holes`, complete the deprecation of
+  `area_threshold` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
