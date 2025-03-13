@@ -5,20 +5,44 @@ import os
 import warnings
 
 
-def dispatching_disabled():
-    """Determine if dispatching has been disabled by the user."""
-    no_dispatching = os.environ.get("SKIMAGE_NO_DISPATCHING", False)
-    if no_dispatching == "1":
-        return True
-    else:
+def get_skimage_backends():
+    """Returns the backend priority list stored in `SKIMAGE_BACKENDS`
+    environment variable, or `False` if the dispatching is disabled.
+
+    This function interprets the value of the environment variable
+    `SKIMAGE_BACKENDS` as follows:
+    - If unset or explicitly set to `"False"`, return `False`.
+    - If a comma-separated string, return it as a list of backend names.
+    - If a single string, return it as a list with that single backend name.
+    """
+    backend_priority = os.environ.get("SKIMAGE_BACKENDS", False)
+
+    if backend_priority in ["False", False]:
         return False
+    elif "," in backend_priority:
+        return [item.strip() for item in backend_priority.split(",")]
+    else:
+        return [
+            backend_priority,
+        ]
 
 
 def public_api_module(func):
-    """Get the name of the public module for a scikit-image function.
+    """Returns the public module in which the given skimage `func` is present.
 
-    This computes the name of the public submodule in which the function can
-    be found.
+    Since scikit-image does not use sub-submodules in its public API
+    (except `skimage.filters.rank`), the function infers the public module name
+    based on the function's module path.
+
+    Parameters
+    ----------
+    func : function
+        A function from the scikit-image library.
+
+    Returns
+    -------
+    public_name : str
+        The name of the public module in scikit-image where the `func` resides.
     """
     full_name = func.__module__
     # This relies on the fact that scikit-image does not use
@@ -52,20 +76,40 @@ def public_api_module(func):
 
 
 @cache
-def all_backends():
-    """List all installed backends and information about them."""
+def all_backends_with_eps_combined():
+    """Returns a dictionary with all the installed scikit-image backends and the infos
+    stored in their two entry-points.
+
+    Returns
+    -------
+    backends : dict
+        A dictionary where keys are backend names, and values are dictionaries with:
+        - `skimage_backends_ep_obj` : EntryPoint
+          The backend's entry point object from the `skimage_backends` group.
+        - `info` : object
+          `BackendInformation` object stored in the `skimage_backend_infos` entry-point.
+
+    For example::
+
+        {
+            'backend1': {
+                'skimage_backends_ep_obj': EntryPoint(...),
+                'info': <BackendInformation object at ...>
+            },
+            ...
+        }
+
+    """
     backends = {}
     backends_ = entry_points(group="skimage_backends")
     backend_infos = entry_points(group="skimage_backend_infos")
 
     for backend in backends_:
-        backends[backend.name] = {"implementation": backend}
-        try:
-            info = backend_infos[backend.name]
-            # Double () to load and then call the backend information function
-            backends[backend.name]["info"] = info.load()()
-        except KeyError:
-            pass
+        backends[backend.name] = {"skimage_backends_ep_obj": backend}
+        info = backend_infos[backend.name]
+        # Only loading and calling the infos ep bcoz it is
+        # assumed to be cheap operation --> saves time
+        backends[backend.name]["info"] = info.load()()
 
     return backends
 
@@ -80,26 +124,38 @@ def dispatchable(func):
     func_name = func.__name__
     func_module = public_api_module(func)
 
-    # If no backends are installed at all or dispatching is disabled,
-    # return the original function. This way people who don't care about it
-    # don't see anything related to dispatching
-    if dispatching_disabled() or not all_backends():
-        return func
-
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Backends are tried in alphabetical order, this makes things
-        # predictable and stable across runs. Might need a better solution
-        # when it becomes common that users have more than one backend
-        # that would accept a call.
-        for name in sorted(all_backends()):
-            backend = all_backends()[name]
+        backend_priority = get_skimage_backends()
+        installed_backends = all_backends_with_eps_combined()
+
+        # If no backends are installed or dispatching is disabled,
+        # return the original function.
+        if not all_backends_with_eps_combined():
+            if backend_priority:
+                # no installed backends but `SKIMAGE_BACKENDS` is not False
+                warnings.warn(
+                    f"Call to '{func_module}:{func_name}' was not dispatched."
+                    " No backends installed and SKIMAGE_BACKENDS is not 'False',"
+                    f"but '{backend_priority}'. Falling back to scikit-image.",
+                    DispatchNotification,
+                    stacklevel=2,
+                )
+            return func(*args, **kwargs)
+        elif not backend_priority:
+            # backends installed but `SKIMAGE_BACKENDS` is False
+            return func(*args, **kwargs)
+
+        for backend_name in backend_priority:
+            if backend_name not in installed_backends:
+                continue
+            backend = installed_backends[backend_name]
             # Check if the function we are looking for is implemented in
             # the backend
             if f"{func_module}:{func_name}" not in backend["info"].supported_functions:
                 continue
 
-            backend_impl = backend["implementation"].load()
+            backend_impl = backend["skimage_backends_ep_obj"].load()
 
             # Allow the backend to accept/reject a call based on the function
             # name and the arguments
@@ -112,8 +168,8 @@ def dispatchable(func):
             func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was dispatched to"
-                f" the '{name}' backend. Set SKIMAGE_NO_DISPATCHING=1 to"
-                " disable this.",
+                f" the '{backend_name}' backend. Set SKIMAGE_BACKENDS='False' to"
+                " disable dispatching.",
                 DispatchNotification,
                 # XXX from where should this warning originate?
                 # XXX from where the function that was dispatched was called?
@@ -124,16 +180,35 @@ def dispatchable(func):
             return func_impl(*args, **kwargs)
 
         else:
+            if backend_priority:
+                warnings.warn(
+                    f"Call to '{func_module}:{func_name}' was not dispatched."
+                    " All backends rejected the call. Falling back to scikit-image."
+                    f"Installed backends : {installed_backends.keys()}",
+                    DispatchNotification,
+                    stacklevel=2,
+                )
+
             return func(*args, **kwargs)
 
     return wrapper
 
 
 class BackendInformation:
-    """Information about a backend
+    """To store the information about a backend.
 
-    A backend that wants to provide additional information about itself
-    should return an instance of this from its information entry point.
+    An instance of this class is expected to be returned by the
+    `skimage_backend_infos` entry-point.
+
+    Parameters
+    ----------
+    supported_functions : list of strings
+        A list of all the functions supported by a backend. The functions are
+        present in the list as strings of the form `"public_module_name:func_name"`.
+        For example: `["skimage.metrics:mean_squared_error", ...]`.
+
+    In future, a backend would be able to provide more additional information
+    about itself.
     """
 
     def __init__(self, supported_functions):
@@ -141,6 +216,7 @@ class BackendInformation:
 
 
 class DispatchNotification(RuntimeWarning):
-    """Notification issued when a function is dispatched to a backend."""
+    """This type of runtime warning is issued when a function is dispatched to
+    a backend."""
 
     pass
