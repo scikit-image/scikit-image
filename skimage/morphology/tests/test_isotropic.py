@@ -74,7 +74,8 @@ def test_footprint_overflow():
 def test_out_argument():
     for func in (isotropic.isotropic_erosion, isotropic.isotropic_dilation):
         radius = 3
-        img = np.ones((10, 10))
+        img_arr = np.ones((10, 10))
+        img = img_arr.astype(bool)
         out = np.zeros_like(img)
         out_saved = out.copy()
         func(img, radius, out=out)
