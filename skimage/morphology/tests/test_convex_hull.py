@@ -344,9 +344,13 @@ def test_few_points():
         dtype=np.uint8,
     )
     image3d = np.stack([image, image, image])
-    with testing.assert_warns(UserWarning):
-        chimage3d = convex_hull_image(image3d)
-        assert_array_equal(chimage3d, np.zeros(image3d.shape, dtype=bool))
+    chimage3d = convex_hull_image(image3d)
+
+    # 3D hull result should be stacked result of the 2D hull case
+    chimage = convex_hull_image(image)
+    expected_3d = np.stack([chimage, chimage, chimage])
+
+    assert_array_equal(chimage3d, expected_3d)
 
 
 def test_3d_singleton_dim():

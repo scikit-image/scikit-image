@@ -2,6 +2,7 @@
 
 from itertools import product
 import numpy as np
+import scipy.ndimage as ndi
 from scipy.spatial import ConvexHull, QhullError
 from ..measure.pnpoly import grid_points_in_poly
 from ._convex_hull import possible_hull
@@ -125,21 +126,12 @@ def convex_hull_image(
     if ndim == 2:
         coords = possible_hull(np.ascontiguousarray(image, dtype=np.uint8))
     else:
-        coords = np.transpose(np.nonzero(image))
-        if offset_coordinates:
-            # when offsetting, we multiply number of vertices by 2 * ndim.
-            # therefore, we reduce the number of coordinates by using a
-            # convex hull on the original set, before offsetting.
-            try:
-                hull0 = ConvexHull(coords)
-            except QhullError as err:
-                warn(
-                    f"Failed to get convex hull image. "
-                    f"Returning empty image, see error message below:\n"
-                    f"{err}"
-                )
-                return np.zeros(image.shape, dtype=bool)
-            coords = hull0.points[hull0.vertices]
+        # xor with eroded version to keep only edge pixels of the binary image
+        footprint = ndi.generate_binary_structure(ndim, connectivity=1)
+        image = np.ascontiguousarray(image, dtype=bool)
+        image_eroded = ndi.binary_erosion(image, footprint)
+        image_boundary = np.bitwise_xor(image, image_eroded)
+        coords = np.stack(np.nonzero(image_boundary), axis=-1)
 
     # Add a vertex for the middle of each pixel edge
     if offset_coordinates:
