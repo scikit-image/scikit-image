@@ -211,7 +211,7 @@ def normalized_mutual_information(image0, image1, *, bins=100):
 
     where :math:`H(X) := - \sum_{x \in X}{p(x) \log p(x)}` is the entropy,
     :math:`X` is the set of image values, and :math:`p(x)` is the probability
-    of ocurrence of a specific value :math:`x \in X`.
+    of occurrence of value :math:`x \in X`.
 
     It was proposed to be useful in registering images by Colin Studholme and
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)
