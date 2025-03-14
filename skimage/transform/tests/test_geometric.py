@@ -1094,16 +1094,22 @@ def test_affine_transform_from_linearized_parameters():
         _ = AffineTransform(matrix=v[:-1])
 
 
-def test_affine_transform_order():
+EG_OPS = dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12))
+
+
+@pytest.mark.parametrize(
+    'tform_class,op_order',
+    (
+        (AffineTransform, ('scale', 'shear', 'rotation', 'translation')),
+        (EuclideanTransform, ('rotation', 'translation')),
+        (SimilarityTransform, ('scale', 'rotation', 'translation')),
+    ),
+)
+def test_transform_order(tform_class, op_order):
     # Test transforms are applied in order stated.
-    ops = (
-        ('scale', (4, 5)),
-        ('shear', (1.4, 1.8)),
-        ('rotation', 0.4),
-        ('translation', (10, 12)),
-    )
-    part_xforms = [AffineTransform(**{k: v}) for k, v in ops]
-    full_xform = AffineTransform(**dict(ops))
+    ops = [(k, EG_OPS[k]) for k in op_order]
+    part_xforms = [tform_class(**{k: v}) for k, v in ops]
+    full_xform = tform_class(**dict(ops))
     # Assemble affine transform via matrices.
     out = np.eye(3)
     for tf in part_xforms:

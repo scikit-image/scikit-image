@@ -1256,6 +1256,11 @@ class EuclideanTransform(ProjectiveTransform):
     transformation is only a translation, you may use the implicit parameter
     `translation`; otherwise, you must use `matrix`.
 
+    The implicit parameters are applied in the following order:
+
+    1. Rotation;
+    2. Translation.
+
     Parameters
     ----------
     matrix : (D+1, D+1) array_like, optional
@@ -1394,6 +1399,12 @@ class SimilarityTransform(EuclideanTransform):
     The similarity transformation extends the Euclidean transformation with a
     single scaling factor in addition to the rotation and translation
     parameters.
+
+    The implicit parameters are applied in the following order:
+
+    1. Scale;
+    2. Rotation;
+    3. Translation.
 
     Parameters
     ----------
