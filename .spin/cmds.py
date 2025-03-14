@@ -103,7 +103,7 @@ def test(*, parent_callback, build_dir, detect_dependencies=False, **kwargs):
         p = spin.cmds.meson._set_pythonpath(build_dir, quiet=True)
         sys.path.insert(0, p)
 
-        pkg_mods, pkg_mods_idx = module_dependencies._pkg_modules()
+        pkg_mods = module_dependencies._pkg_modules()
 
         p = spin.util.run(
             ['git', 'diff', 'main', '--stat', '--name-only'], output=False, echo=False
