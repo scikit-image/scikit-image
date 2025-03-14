@@ -78,8 +78,10 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
 
         pixel_type neighb[27]
 
+        int[::1] Euler_LUT = LUT
+
     # loop over the six directions in this order (for consistency with ImageJ)
-    borders[:] = [4, 3, 2, 1, 5, 6]
+    borders[:] = [4, 2, 5, 3, 1, 6]
 
     with nogil:
         # no need to worry about the z direction if the original image is 2D.
@@ -107,7 +109,12 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     r = point.r
                     c = point.c
                     get_neighborhood(img, p, r, c, neighb)
-                    if is_simple_point(neighb):
+
+                    if (
+                        is_simple_point(neighb)
+                        and is_Euler_invariant(neighb, Euler_LUT)
+                        and not is_endpoint(neighb)
+                    ):
                         img[p, r, c] = 0
                         no_change = False
 
