@@ -16,7 +16,7 @@ def integral_image(image, *, dtype=None):
     image : ndarray
         Input image.
     dtype : data-type, optional
-        Data type (Numpy dtype specifier) to be use for calculation, and for
+        Data type (NumPy dtype) to be used for calculation, and for
         output array `S`.  If None, default to at least double float precision.
 
     Returns
