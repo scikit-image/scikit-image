@@ -233,6 +233,24 @@ class _GeometricTransform(ABC):
         """
         return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
 
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, so None or 2 are
+            the only acceptable values.  The parameter exists for compatibility
+            with other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return cls(dimensionality=dimensionality)
+
 
 class _MatrixTransform(_GeometricTransform):
     valid_dims = (2,)
@@ -257,6 +275,20 @@ class _MatrixTransform(_GeometricTransform):
 
     @classmethod
     def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, so None or 2 are
+            the only acceptable values.  The parameter exists for compatibility
+            with other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
         d = cls._default_dim() if dimensionality is None else dimensionality
         return cls(matrix=np.eye(d + 1))
 
@@ -900,6 +932,23 @@ class ProjectiveTransform(_MatrixTransform):
         """The dimensionality of the transformation."""
         return self.params.shape[0] - 1
 
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2, 3}, optional
+            This transform only allows dimensionality of 2 or 3, so None or 2
+            or 3 are the only acceptable values.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return super().identity(dimensionality=dimensionality)
+
 
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
@@ -1203,6 +1252,20 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
     @classmethod
     def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : optional
+            This transform does not use the `dimensionality` parameter, so the
+            value is ignored.  The parameter exists for compatibility with
+            other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
         return cls()
 
 
@@ -1647,6 +1710,20 @@ class PolynomialTransform(_GeometricTransform):
 
     @classmethod
     def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, so None or 2 are
+            the only acceptable values.  The parameter exists for compatibility
+            with other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
         if dimensionality not in (2, None):
             raise ValueError('Dimensionality must be None or == 2')
         return cls(params=None)
