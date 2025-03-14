@@ -1,3 +1,4 @@
+from itertools import product
 import re
 import textwrap
 
@@ -288,6 +289,45 @@ def test_affine_shear():
 
     tform = AffineTransform(shear=shear)
     assert_almost_equal(tform.params, expected)
+
+
+@pytest.mark.parametrize(
+    'pts,params',
+    product(
+        (SRC, DST),
+        (
+            dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)),
+            dict(
+                scale=(-0.5, 3), shear=(-0.3, -0.1), rotation=1.4, translation=(-4, 3)
+            ),
+        ),
+    ),
+)
+def test_affine_params(pts, params):
+    # Test AffineTransform against docstring algorithm.
+    out = AffineTransform(**params)(pts)
+    docstr_out = _apply_aff_2d(pts, **params)
+    assert np.allclose(out, docstr_out)
+
+
+def _apply_aff_2d(pts, scale, rotation, shear, translation):
+    # Algorithm from AffineTransform docstring.
+    x, y = pts.T
+    sx, sy = scale
+    shear_x, shear_y = shear
+    translation_x, translation_y = translation
+    cos, tan, sin = np.cos, np.tan, np.sin
+    X = (
+        sx * x * (cos(rotation) + tan(shear_y) * sin(rotation))
+        - sy * y * (tan(shear_x) * cos(rotation) + sin(rotation))
+        + translation_x
+    )
+    Y = (
+        sx * x * (sin(rotation) - tan(shear_y) * cos(rotation))
+        - sy * y * (tan(shear_x) * sin(rotation) - cos(rotation))
+        + translation_y
+    )
+    return np.stack((X, Y), axis=1)
 
 
 def test_piecewise_affine():
