@@ -1,5 +1,4 @@
 extensions = [
-  '_multiotsu'
 ]
 
 foreach ext: extensions
@@ -27,7 +26,6 @@ python_sources = [
   'edges.py',
   'lpi_filter.py',
   'ridges.py',
-  'thresholding.py'
 ]
 
 py3.install_sources(
