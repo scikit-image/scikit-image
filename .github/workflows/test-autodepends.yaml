@@ -25,6 +25,8 @@ jobs:
       CXXFLAGS: "-I/usr/local/opt/libomp/include"
       LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
 
+    if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
+
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
@@ -56,8 +58,22 @@ jobs:
         run: |
           spin build
 
-      - name: Run tests (dependency analysis)
+      - name: "Run tests: modified modules"
         run: |
           git branch main origin/main
           pip uninstall -y SimpleITK  # Causes np.lookfor test to fail 🤔
-          spin test --detect-dependencies -- --config-file ${{ github.workspace }}/pyproject.toml
+
+          spin test --test-modified -- --config-file ${{ github.workspace }}/pyproject.toml
+
+      - name: "Run tests: modified module importers"
+        run: |
+          TEST_CMD="spin test --test-modified-importers -- --config-file ${{ github.workspace }}/pyproject.toml"
+          if ! $TEST_CMD; then
+            echo
+            echo "!!! Tests failed. This is **unexpected**, since the"
+            echo "!!! modified modules tests above passed."
+            echo "!!! You should find out what went wrong, and then update"
+            echo "!!! those modified module test suites to be more complete."
+            echo
+            exit 1
+          fi

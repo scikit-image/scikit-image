@@ -84,18 +84,28 @@ def sdist(pyproject_build_args):
 
 
 @click.option(
-    "--detect-dependencies",
+    "--test-modified",
     is_flag=True,
     default=None,
-    help="Look for changes against main, "
-    "detect which modules were involved, "
-    "and test them and their dependencies. "
-    "This overrides any pytest arguments.",
+    help="Test only modified submodules",
+)
+@click.option(
+    "--test-modified-importers",
+    is_flag=True,
+    default=None,
+    help="Test all submodules that import changed submodules.",
 )
 @spin.cmds.meson.build_dir_option
 @spin.util.extend_command(spin.cmds.meson.test)
-def test(*, parent_callback, build_dir, detect_dependencies=False, **kwargs):
-    if detect_dependencies:
+def test(
+    *,
+    parent_callback,
+    build_dir,
+    test_modified=False,
+    test_modified_importers=False,
+    **kwargs,
+):
+    if test_modified or test_modified_importers:
         sys.path.insert(0, 'tools/')
         import module_dependencies
 
@@ -114,12 +124,25 @@ def test(*, parent_callback, build_dir, detect_dependencies=False, **kwargs):
         git_diff = p.stdout.decode('utf-8')
         changed_modules = {mod for mod in pkg_mods if mod.replace('.', '/') in git_diff}
 
+        if test_modified:
+            to_test = changed_modules
+        else:
+            to_test = set()
+
+        if test_modified_importers:
+            importers_of_modified = (
+                set(module_dependencies.modules_dependent_on(changed_modules))
+                - changed_modules
+            )
+            to_test = to_test | importers_of_modified
+
         pytest_args = kwargs.get('pytest_args', ())
-        kwargs['pytest_args'] = (
-            pytest_args
-            + ('--pyargs',)
-            + tuple(module_dependencies.modules_dependent_on(changed_modules))
-        )
+        if "--pyargs" in pytest_args:
+            raise RuntimeError(
+                "--test-modified / --test-deps-of-modified will override --pyargs"
+            )
+
+        kwargs['pytest_args'] = pytest_args + ('--pyargs',) + tuple(sorted(to_test))
 
     kwargs['build_dir'] = build_dir
     parent_callback(**kwargs)
