@@ -13,7 +13,9 @@ import pytest
 
 package = 'skimage'
 included_mods = [
+    # Add private and nested modules here
     '_shared',
+    'filters.rank',
 ]
 excluded_mods = [
     '__version__',
@@ -41,31 +43,24 @@ def _pkg_modules() -> list[str]:
 
 
 def _import_dependencies(module: str) -> set[str]:
-    bad_sys_modules = {mod for mod in sys.modules if f"{package}." in mod}
-    if bad_sys_modules:
-        raise RuntimeError(
-            f"Yikes! No package modules present at this point, but seeing {bad_sys_modules}!"
-        )
+    # Check that process is fresh (we've had trouble with it being forked!)
+    bad_modules = {mod for mod in sys.modules if f"{package}." in mod}
+    if bad_modules:
+        msg = f"Expected a fresh process, but {bad_modules} were already imported."
+        raise RuntimeError(msg)
 
-    importlib.import_module(module)
+    # Import the module
+    mod = importlib.import_module(module)
 
-    # This is a workaround for identifying the test modules
-    # associated with an skimage submodule.
-    #
-    # Other libraries would need to do something different, and
-    # we should think how to generalize.
-    test_mod = importlib.import_module(f"{module}.tests")
-    test_mod_dir = os.path.dirname(test_mod.__file__)
-    test_files = [
-        os.path.basename(f) for f in glob.glob(os.path.join(test_mod_dir, 'test_*.py'))
-    ]
-    test_modules = [f"{module}.tests.{os.path.splitext(f)[0]}" for f in test_files]
+    # Import its test modules
+    mod_dir = os.path.dirname(mod.__file__)
+    test_files = glob.glob('**/test_*.py', root_dir=mod_dir, recursive=True)
+    test_modules = [f"{module}/{f}".replace("/", ".")[:-3] for f in test_files]
     for mod in test_modules:
-        try:
-            importlib.import_module(mod)
-        except pytest.skip.Exception:  # raised by `pytest.importorskip`
-            pass
+        try: importlib.import_module(mod)
+        except pytest.skip.Exception: pass  # raised by `pytest.importorskip`
 
+    # Return the modules that `module` depends on
     return set(_pkg_modules()) & set(sys.modules)
 
 
