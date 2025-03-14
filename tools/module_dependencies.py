@@ -115,7 +115,7 @@ def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
         j = pkg_mods.index(module)
         A_j |= A[:, j]
 
-    return sorted(set(np.array(pkg_mods, dtype=object)[j]))
+    return sorted(set(np.array(pkg_mods, dtype=object)[A_j]))
 
 
 if __name__ == "__main__":
