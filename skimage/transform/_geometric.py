@@ -585,7 +585,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     """
 
     def __init__(
-        self, rotation=None, translation=None, matrix=None, *, dimensionality=None
+        self, *, rotation=None, translation=None, matrix=None, dimensionality=None
     ):
         n_rt_none = sum(p is None for p in (rotation, translation))
         if n_rt_none == 1:
@@ -952,13 +952,13 @@ class AffineTransform(ProjectiveTransform):
 
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
-    rotation : float, optional
-        Rotation angle, clockwise, as radians. Only available for 2D.
     shear : float or 2-tuple of float, optional
         The x and y shear angles, clockwise, by which these axes are
         rotated around the origin [2].
         If a single value is given, take that to be the x shear angle, with
         the y angle remaining 0. Only available in 2D.
+    rotation : float, optional
+        Rotation angle, clockwise, as radians. Only available for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
@@ -1013,11 +1013,11 @@ class AffineTransform(ProjectiveTransform):
     def __init__(
         self,
         matrix=None,
-        scale=None,
-        rotation=None,
-        shear=None,
-        translation=None,
         *,
+        scale=None,
+        shear=None,
+        rotation=None,
+        translation=None,
         dimensionality=None,
     ):
         n_srst_none = sum(p is None for p in (scale, rotation, shear, translation))
@@ -1293,7 +1293,7 @@ class EuclideanTransform(ProjectiveTransform):
     _estimate_scale = False
 
     def __init__(
-        self, matrix=None, rotation=None, translation=None, *, dimensionality=None
+        self, matrix=None, *, rotation=None, translation=None, dimensionality=None
     ):
         n_rt_none = sum(p is None for p in (rotation, translation))
         if n_rt_none != 2:
@@ -1436,10 +1436,10 @@ class SimilarityTransform(EuclideanTransform):
     def __init__(
         self,
         matrix=None,
+        *,
         scale=None,
         rotation=None,
         translation=None,
-        *,
         dimensionality=None,
     ):
         n_srt_none = sum(p is None for p in (scale, rotation, translation))
