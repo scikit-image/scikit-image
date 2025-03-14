@@ -1181,3 +1181,15 @@ def test_2D_only_implementations():
         _ = tf.rotation
     with pytest.raises(NotImplementedError):
         _ = tf.shear
+
+
+@pytest.mark.parametrize(
+    'tform_class',
+    (EssentialMatrixTransform,
+     AffineTransform,
+     EuclideanTransform,
+     SimilarityTransform))
+def test_kw_only_params(tform_class):
+    # Check only matrix can be passed as positional arg.
+    with pytest.raises(TypeError):
+        tform_class(None, None)
