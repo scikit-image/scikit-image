@@ -68,6 +68,7 @@ def dependency_graph():
     """Calculate the dependency graph of the current module.
 
     Each row represents the dependencies of one subpackage.
+    `A[i, j]` is True if module `i` depends on (imports) module `j`.
 
     """
     mods = _pkg_modules()
@@ -79,9 +80,10 @@ def dependency_graph():
 
     with multiprocessing.Pool(maxtasksperchild=1) as p:
         mod_deps = p.imap(_import_dependencies, mods)
-        for k, dependencies in enumerate(mod_deps):
+        for i, dependencies in enumerate(mod_deps):
             for mod in dependencies:
-                A[k, mods.index(mod)] = True
+                j = mods.index(mod)
+                A[i, j] = True
 
     return A
 
@@ -93,8 +95,8 @@ def dependency_toml():
     A = dependency_graph()
 
     toml = []
-    for i, mod in enumerate(mods):
-        dependency_names = mods_arr[A[:, i]].tolist()
+    for j, mod in enumerate(mods):
+        dependency_names = mods_arr[A[:, j]].tolist()
 
         toml.append({"modules": {"path": mod, "depends_on": dependency_names}})
 
@@ -102,15 +104,16 @@ def dependency_toml():
 
 
 def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
-    """Return the set of modules that depend on any of the given modules."""
+    """Return the set of modules that is a dependency of at least one of the given modules."""
     if not isinstance(modules, (set, list)):
         raise ValueError("`modules` must be set or list")
 
     pkg_mods = _pkg_modules()
     A = dependency_graph()
-    j = np.zeros_like(A[:, 0])  # boolean indices of dependent modules
+    A_j = np.zeros_like(A[:, 0])  # boolean indices of dependent modules
     for module in modules:
-        j |= A[:, pkg_mods.index(module)]
+        j = pkg_mods.index(module)
+        A_j |= A[:, j]
 
     return sorted(set(np.array(pkg_mods, dtype=object)[j]))
 
