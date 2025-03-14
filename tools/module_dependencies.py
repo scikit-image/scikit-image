@@ -92,7 +92,7 @@ def dependency_graph():
     multiprocessing.set_start_method('spawn')
 
     with multiprocessing.Pool(maxtasksperchild=1) as p:
-        mod_deps = p.map(_import_dependencies, mods)
+        mod_deps = p.imap(_import_dependencies, mods)
         for k, dependencies in enumerate(mod_deps):
             for mod in dependencies:
                 A[k, mods_idx[mod]] = True
