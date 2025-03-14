@@ -37,11 +37,6 @@ def _pkg_modules() -> list[str]:
 
     submodules = sorted((members | included_mods_full) - excluded_mods_full)
 
-    # # Clear out sys.modules for when we spawn our import detector
-    pkg_mods = [mod for mod in sys.modules if f"{package}." in mod]
-    for mod in pkg_mods:
-        del sys.modules[mod]
-
     return submodules
 
 
@@ -85,8 +80,10 @@ def dependency_graph():
     n = len(mods)
     A = np.zeros((n, n), dtype=bool)
 
+    multiprocessing.set_start_method('spawn')
+
     with multiprocessing.Pool(maxtasksperchild=1) as p:
-        mod_deps = p.map(_import_dependencies, mods)
+        mod_deps = p.imap(_import_dependencies, mods)
         for k, dependencies in enumerate(mod_deps):
             for mod in dependencies:
                 A[k, mods.index(mod)] = True
