@@ -1094,6 +1094,23 @@ def test_affine_transform_from_linearized_parameters():
         _ = AffineTransform(matrix=v[:-1])
 
 
+def test_affine_transform_order():
+    # Test transforms are applied in order stated.
+    ops = (
+        ('scale', (4, 5)),
+        ('shear', (1.4, 1.8)),
+        ('rotation', 0.4),
+        ('translation', (10, 12)),
+    )
+    part_xforms = [AffineTransform(**{k: v}) for k, v in ops]
+    full_xform = AffineTransform(**dict(ops))
+    # Assemble affine transform via matrices.
+    out = np.eye(3)
+    for tf in part_xforms:
+        out = tf @ out
+    assert np.allclose(full_xform.params, out)
+
+
 def test_affine_params_nD_error():
     with pytest.raises(ValueError):
         _ = AffineTransform(scale=5, dimensionality=3)
