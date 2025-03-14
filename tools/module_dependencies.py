@@ -57,8 +57,10 @@ def _import_dependencies(module: str) -> set[str]:
     test_files = glob.glob('**/test_*.py', root_dir=mod_dir, recursive=True)
     test_modules = [f"{module}/{f}".replace("/", ".")[:-3] for f in test_files]
     for mod in test_modules:
-        try: importlib.import_module(mod)
-        except pytest.skip.Exception: pass  # raised by `pytest.importorskip`
+        try:
+            importlib.import_module(mod)
+        except pytest.skip.Exception:
+            pass  # raised by `pytest.importorskip`
 
     # Return the modules that `module` depends on
     return set(_pkg_modules()) & set(sys.modules)
