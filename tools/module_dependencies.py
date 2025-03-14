@@ -111,21 +111,16 @@ def dependency_toml():
 
 def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
     """Return the set of modules that depend on any of the given modules."""
-    changed_modules = modules
     if not isinstance(modules, (set, list)):
         raise ValueError("`modules` must be set or list")
 
-    A = dependency_graph().astype(bool)
-
     pkg_mods = _pkg_modules()
-    pkg_mods_arr: np.typing.NDArray = np.array(pkg_mods, dtype=object)
+    A = dependency_graph()
+    j = np.zeros_like(A[:, 0])  # boolean indices of dependent modules
+    for module in modules:
+        j |= A[:, pkg_mods.index(module)]
 
-    all_dependent_mods = []
-    for changed_mod in changed_modules:
-        dependent_mods = pkg_mods_arr[A[:, pkg_mods.index(changed_mod)]]
-        all_dependent_mods.extend(dependent_mods.tolist())
-
-    return sorted(set(all_dependent_mods))
+    return sorted(set(np.array(pkg_mods, dtype=object)[j]))
 
 
 if __name__ == "__main__":
