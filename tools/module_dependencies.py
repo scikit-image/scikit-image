@@ -21,16 +21,13 @@ excluded_mods = [
 
 
 @functools.cache
-def _pkg_modules() -> tuple[list[str], dict[str, int]]:
+def _pkg_modules() -> list[str]:
     """List all package submodules.
 
     Returns
     -------
     submodules : list
         Sorted list of package submodules.
-    submodule_idx : dict
-        Mapping of submodule to integer, its index
-        in `submodules`.
     """
     pkg = importlib.import_module(package)
 
@@ -40,10 +37,7 @@ def _pkg_modules() -> tuple[list[str], dict[str, int]]:
 
     submodules = sorted((members | included_mods_full) - excluded_mods_full)
 
-    # Sort entries, so that all adjacency matrix calculations are stable
-    submodule_idx = {mod: index for index, mod in enumerate(submodules)}
-
-    return submodules, submodule_idx
+    return submodules
 
 
 def _import_dependencies(module: str) -> set[str]:
@@ -69,13 +63,10 @@ def _import_dependencies(module: str) -> set[str]:
     for mod in test_modules:
         try:
             importlib.import_module(mod)
-        except (ImportError, pytest.skip.Exception):
+        except pytest.skip.Exception:  # raised by `pytest.importorskip`
             pass
 
-    pkg_modules, _ = _pkg_modules()
-    pkg_sys_modules = {mod for mod in sys.modules if mod.startswith(f"{package}.")}
-
-    return set(pkg_modules) & pkg_sys_modules
+    return set(_pkg_modules()) & set(sys.modules)
 
 
 def dependency_graph():
@@ -84,7 +75,7 @@ def dependency_graph():
     Each row represents the dependencies of one subpackage.
 
     """
-    mods, mods_idx = _pkg_modules()
+    mods = _pkg_modules()
 
     n = len(mods)
     A = np.zeros((n, n), dtype=bool)
@@ -95,13 +86,13 @@ def dependency_graph():
         mod_deps = p.imap(_import_dependencies, mods)
         for k, dependencies in enumerate(mod_deps):
             for mod in dependencies:
-                A[k, mods_idx[mod]] = True
+                A[k, mods.index(mod)] = True
 
     return A
 
 
 def dependency_toml():
-    mods, mods_idx = _pkg_modules()
+    mods = _pkg_modules()
     mods_arr = np.array(mods, dtype=object)
 
     A = dependency_graph()
@@ -117,21 +108,16 @@ def dependency_toml():
 
 def modules_dependent_on(modules: set[str] | list[str]) -> list[str]:
     """Return the set of modules that depend on any of the given modules."""
-    changed_modules = modules
     if not isinstance(modules, (set, list)):
         raise ValueError("`modules` must be set or list")
 
-    A = dependency_graph().astype(bool)
+    pkg_mods = _pkg_modules()
+    A = dependency_graph()
+    j = np.zeros_like(A[:, 0])  # boolean indices of dependent modules
+    for module in modules:
+        j |= A[:, pkg_mods.index(module)]
 
-    pkg_mods, pkg_mods_idx = _pkg_modules()
-    pkg_mods_arr: np.typing.NDArray = np.array(pkg_mods, dtype=object)
-
-    all_dependent_mods = []
-    for changed_mod in changed_modules:
-        dependent_mods = pkg_mods_arr[A[:, pkg_mods_idx[changed_mod]]]
-        all_dependent_mods.extend(dependent_mods.tolist())
-
-    return sorted(set(all_dependent_mods))
+    return sorted(set(np.array(pkg_mods, dtype=object)[j]))
 
 
 if __name__ == "__main__":
