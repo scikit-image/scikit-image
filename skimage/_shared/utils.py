@@ -162,7 +162,11 @@ class DEPRECATED(metaclass=PatchClassRepr):
 
 
 class deprecate_parameter:
-    """Deprecate a parameter of a function.
+    """Deprecate a parameter of a function by position and name.
+
+    This decorator can be used to deprecate a parameter that can be reached
+    via position or keyword. Optionally, this decorator can introduce a new
+    replacing parameter at a *different position*.
 
     Parameters
     ----------
@@ -196,6 +200,10 @@ class deprecate_parameter:
     HTML docs.
 
     This decorator can be stacked to deprecate more than one parameter.
+
+    This decorator can't be used to rename a parameter in place. The current
+    implementation expects the old parameter to be set to `DEPRECATED` and
+    the new parameter to be in a different place.
 
     Examples
     --------
