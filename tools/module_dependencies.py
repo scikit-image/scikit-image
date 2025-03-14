@@ -43,11 +43,6 @@ def _pkg_modules() -> tuple[list[str], dict[str, int]]:
     # Sort entries, so that all adjacency matrix calculations are stable
     submodule_idx = {mod: index for index, mod in enumerate(submodules)}
 
-    # # Clear out sys.modules for when we spawn our import detector
-    pkg_mods = [mod for mod in sys.modules if f"{package}." in mod]
-    for mod in pkg_mods:
-        del sys.modules[mod]
-
     return submodules, submodule_idx
 
 
@@ -93,6 +88,8 @@ def dependency_graph():
 
     n = len(mods)
     A = np.zeros((n, n), dtype=bool)
+
+    multiprocessing.set_start_method('spawn')
 
     with multiprocessing.Pool(maxtasksperchild=1) as p:
         mod_deps = p.map(_import_dependencies, mods)
