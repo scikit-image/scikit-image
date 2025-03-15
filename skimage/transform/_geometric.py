@@ -1059,6 +1059,7 @@ class AffineTransform(ProjectiveTransform):
                 )
             if dimensionality is not None and dimensionality > 2:
                 raise ValueError('Implicit parameters only valid for 2D transforms')
+            # 2D parameter checks explicit or implicit in _srst2matrix.
             matrix = self._srst2matrix(scale, rotation, shear, translation)
             if matrix.shape[0] != 3:
                 raise ValueError('Implicit parameters must give 2D transforms')
@@ -1067,29 +1068,31 @@ class AffineTransform(ProjectiveTransform):
 
     def _srst2matrix(self, scale, rotation, shear, translation):
         scale = (1, 1) if scale is None else scale
-        rotation = 0 if rotation is None else rotation
-        shear = 0 if shear is None else shear
-        translation = (0, 0) if translation is None else translation
         sx, sy = (scale, scale) if np.isscalar(scale) else scale
+        rotation = 0 if rotation is None else rotation
+        if not np.isscalar(rotation):
+            raise ValueError('rotation must be scalar (2D rotation)')
+        shear = 0 if shear is None else shear
         shear_x, shear_y = (shear, 0) if np.isscalar(shear) else shear
+        translation = (0, 0) if translation is None else translation
+        if np.isscalar(translation):
+            raise ValueError('translation must be length 2')
+        a2, b2 = translation
 
         a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
         a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
-        a2 = translation[0]
 
         b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
         b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
-        b2 = translation[1]
         return np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
 
     @property
     def scale(self):
         if self.dimensionality != 2:
             return np.sqrt(np.sum(self.params**2, axis=0))[: self.dimensionality]
-        else:
-            ss = np.sum(self.params**2, axis=0)
-            ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
-            return np.sqrt(ss)[: self.dimensionality]
+        ss = np.sum(self.params**2, axis=0)
+        ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
+        return np.sqrt(ss)[: self.dimensionality]
 
     @property
     def rotation(self):
@@ -1573,8 +1576,8 @@ class PolynomialTransform(_GeometricTransform):
                 'Polynomial transforms are only implemented for 2D.'
             )
         self.params = np.array([[0, 1, 0], [0, 0, 1]] if params is None else params)
-        if self.params.shape[0] != 2:
-            raise ValueError("invalid shape of transformation parameters")
+        if self.params.shape == () or self.params.shape[0] != 2:
+            raise ValueError("Transformation parameters must be shape (2, N)")
 
     def estimate(self, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -1712,18 +1715,16 @@ class PolynomialTransform(_GeometricTransform):
         Parameters
         ----------
         dimensionality : {None, 2}, optional
-            This transform only allows dimensionality of 2, so None or 2 are
-            the only acceptable values.  The parameter exists for compatibility
-            with other transforms.
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
 
         Returns
         -------
         tform : transform
             Transform such that ``np.all(tform(pts) == pts)``.
         """
-        if dimensionality not in (2, None):
-            raise ValueError('Dimensionality must be None or == 2')
-        return cls(params=None)
+        return cls(params=None, dimensionality=dimensionality)
 
     @property
     def inverse(self):

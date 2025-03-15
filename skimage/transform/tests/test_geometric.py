@@ -52,6 +52,23 @@ DST = np.array(
     ]
 )
 
+# Transforms accepting homogenous matrix as input.
+HMAT_TFORMS = (
+    FundamentalMatrixTransform,
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
+)
+
+# Transforms allowing ND matrix.
+HMAT_TFORMS_ND = (
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
+)
+
 
 def test_estimate_transform():
     for tform in ('euclidean', 'similarity', 'affine', 'projective', 'polynomial'):
@@ -561,6 +578,18 @@ def test_essential_matrix_init():
     r2 = r[[2, 0, 1]]
     tform = EssentialMatrixTransform(rotation=r2, translation=t)
     assert_equal(tform.params, [[-1, 0, 0], [0, 0, 1], [0, 0, 0]])
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(matrix=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 3)), translation=t)
+    # Both must be specified.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3))
+    # Dimensionality must match.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3), translation=[1, 0])
 
 
 def test_essential_matrix_estimation():
@@ -732,13 +761,29 @@ def test_polynomial_weighted_estimation():
 @pytest.mark.parametrize('array_like_input', [False, True])
 def test_polynomial_init(array_like_input):
     tform = estimate_transform('polynomial', SRC, DST, order=10)
-    # init with transformation parameters
+    # Init with transformation parameters.
     if array_like_input:
         params = [list(p) for p in tform.params]
     else:
         params = tform.params
     tform2 = PolynomialTransform(params)
     assert_almost_equal(tform2.params, tform.params)
+    # Can't specify parameters and dimensionality.
+    with pytest.raises(ValueError):
+        _ = PolynomialTransform(params, dimensionality=2)
+    # Can't specify scalar params.
+    with pytest.raises(ValueError):
+        _ = PolynomialTransform(0)
+    # Parameters must be (2, N).
+    for inp in (np.eye(3), np.zeros(3)):
+        with pytest.raises(ValueError):
+            _ = PolynomialTransform(inp)
+    # Transform always 2D.
+    for d in (1, 3, 4):
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform(dimensionality=d)
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform.identity(d)
 
 
 def test_polynomial_default_order():
@@ -821,18 +866,6 @@ def test_inverse_all_transforms(tform):
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
 
 
-# Transforms accepting homogenous matrix as input.
-HMAT_TFORMS = (
-    FundamentalMatrixTransform,
-    AffineTransform,
-    EuclideanTransform,
-    SimilarityTransform,
-)
-
-# Transforms allowing ND matrix.
-HMAT_TFORMS_ND = (AffineTransform, EuclideanTransform, SimilarityTransform)
-
-
 @pytest.mark.parametrize('tform_class', TRANSFORMS.values())
 def test_identity(tform_class):
     rng = np.random.default_rng()
@@ -874,42 +907,6 @@ def test_geometric_tform():
         dst = tform(src)  # Obtain the dst coords
         # Ensure dst coords are finite numeric values
         assert np.isfinite(dst).all()
-
-
-def test_invalid_input():
-    with pytest.raises(ValueError):
-        ProjectiveTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        SimilarityTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        EuclideanTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        SimilarityTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        EuclideanTransform(matrix=np.zeros((2, 3)), translation=(0, 0))
-    with pytest.raises(ValueError):
-        PolynomialTransform(np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        FundamentalMatrixTransform(matrix=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(matrix=np.zeros((3, 2)))
-
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((3,)))
 
 
 def test_degenerate():
@@ -1143,9 +1140,22 @@ def test_transform_order(tform_class, op_order):
     assert np.allclose(full_xform.params, out)
 
 
-def test_affine_params_nD_error():
+# AffineTransform only allows 2D implicit parameters.
+@pytest.mark.parametrize(
+    'inp',
+    (
+        dict(scale=5, dimensionality=3),
+        dict(scale=(5, 5, 5), dimensionality=3),
+        dict(scale=(5, 5, 5)),
+        dict(shear=(0.1, 0.2, 0.3)),
+        dict(rotation=(0.1, 0.2)),
+        dict(translation=1),
+        dict(translation=(1, 2, 3)),
+    ),
+)
+def test_affine_params_nD_error(inp):
     with pytest.raises(ValueError):
-        _ = AffineTransform(scale=5, dimensionality=3)
+        _ = AffineTransform(**inp)
 
 
 def test_euler_rotation():
@@ -1250,3 +1260,6 @@ def test_init_contract_dims(tform_class):
     for matrix in [np.eye(d + 1) for d in err_dims]:
         with pytest.raises(NotImplementedError):
             tform_class(matrix)
+    # Test vector matrix input invalid.
+    with pytest.raises(ValueError):
+        tform_class(np.zeros((2, 3)))
