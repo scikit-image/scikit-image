@@ -97,8 +97,8 @@ def dependency_toml():
     A = dependency_graph()
 
     toml = []
-    for j, mod in enumerate(mods):
-        dependency_names = mods_arr[A[:, j]].tolist()
+    for i, mod in enumerate(mods):
+        dependency_names = mods_arr[A[i, :]].tolist()
 
         toml.append({"modules": {"path": mod, "depends_on": dependency_names}})
 
