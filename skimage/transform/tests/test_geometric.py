@@ -868,9 +868,9 @@ def test_inverse_all_transforms(tform):
 
 @pytest.mark.parametrize('tform_class', TRANSFORMS.values())
 def test_identity(tform_class):
-    rng = np.random.default_rng()
     if tform_class is PiecewiseAffineTransform:
         return  # Identity transform unusable.
+    rng = np.random.default_rng()
     allows_nd = tform_class in HMAT_TFORMS_ND
     for ndim in (2, 3, 4, 5) if allows_nd else (2,):
         src = rng.normal(size=(10, ndim))
