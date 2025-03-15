@@ -103,12 +103,12 @@ jobs:
           source .github/scripts/setup-build-env.sh
 
       - name: Build from source
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }}
         run: |
           spin build
 
       - name: Save meson build cache
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
           path: ./build
@@ -131,7 +131,7 @@ jobs:
           source .github/scripts/setup-test-env.sh
 
       - name: Verify non-conflicting dependencies
-        if: ${{ matrix.OPTIONAL_DEPS == 1 && matrix.MINIMUM_REQUIREMENTS == 0}}
+        if: ${{ matrix.OPTIONAL_DEPS == 1 && matrix.MINIMUM_REQUIREMENTS == 1 }}
         run: |
           # Attempt to resolve all requirements simultaneously
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
@@ -141,14 +141,16 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
           INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
         run: |
-          if [[ "$INSTALL_FROM_SDIST" == 1 ]]; then
+          if [[ "$INSTALL_FROM_SDIST" == 1 && "$MINIMUM_REQUIREMENTS" != 1 ]]; then
             (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
           else
             $TEST --doctest-plus --showlocals --pyargs skimage
           fi
 
       - name: Check benchmarks
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
         run: |
           asv check -v -E existing
 
