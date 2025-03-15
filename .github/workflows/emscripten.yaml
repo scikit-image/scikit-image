@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   build-wasm-emscripten:
+    if: false # temporarily disable
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-24.04
     env:
