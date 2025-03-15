@@ -1569,8 +1569,6 @@ class PolynomialTransform(_GeometricTransform):
     def __init__(self, params=None, *, dimensionality=None):
         if dimensionality is None:
             dimensionality = 2
-        elif params is not None:
-            raise ValueError('Do not pass dimensionality with not-None parameters')
         elif dimensionality != 2:
             raise NotImplementedError(
                 'Polynomial transforms are only implemented for 2D.'

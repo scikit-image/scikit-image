@@ -768,9 +768,6 @@ def test_polynomial_init(array_like_input):
         params = tform.params
     tform2 = PolynomialTransform(params)
     assert_almost_equal(tform2.params, tform.params)
-    # Can't specify parameters and dimensionality.
-    with pytest.raises(ValueError):
-        _ = PolynomialTransform(params, dimensionality=2)
     # Can't specify scalar params.
     with pytest.raises(ValueError):
         _ = PolynomialTransform(0)
