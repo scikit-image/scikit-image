@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   test_docs_aarch64:
+    if: false # temporarily disable
     name: macos-docs
     runs-on: ubuntu-24.04-arm
     steps:

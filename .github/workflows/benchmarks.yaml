@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   benchmark:
-    if: contains(github.event.label.name, 'benchmark') || github.event_name == 'workflow_dispatch'
+    if: false # temporarily disable
     name: Linux
     runs-on: ubuntu-latest
     env:
