@@ -229,6 +229,19 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
+    # With scalar scale and 3D, we get a deprecationwarning.  This is to
+    # generalize the rule that dimensionality should be implied by
+    # input parameters, when given.
+    with pytest.deprecated_call():
+        tf = SimilarityTransform(scale=4, dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Not so if we specify some other input giving dimensionality.
+    tf = SimilarityTransform(scale=4, translation=(0, 0, 0))
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Or if we are in 2D, by analogy to shear etc - scalar implies 2D.
+    tf = SimilarityTransform(scale=4)
+    assert_equal(tf([[1, 1]]), [[4, 4]])
+
 
 def test_affine_estimation():
     # exact solution
@@ -808,12 +821,25 @@ def test_inverse_all_transforms(tform):
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
 
 
+# Transforms accepting homogenous matrix as input.
+HMAT_TFORMS = (
+    FundamentalMatrixTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
+)
+
+# Transforms allowing ND matrix.
+HMAT_TFORMS_ND = (AffineTransform, EuclideanTransform, SimilarityTransform)
+
+
 @pytest.mark.parametrize('tform_class', TRANSFORMS.values())
 def test_identity(tform_class):
     rng = np.random.default_rng()
     if tform_class is PiecewiseAffineTransform:
         return  # Identity transform unusable.
-    for ndim in tform_class.valid_dims:
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    for ndim in (2, 3, 4, 5) if allows_nd else (2,):
         src = rng.normal(size=(10, ndim))
         t = tform_class.identity(ndim)
         if isinstance(t, FundamentalMatrixTransform):
@@ -1131,39 +1157,37 @@ def test_euler_rotation():
         assert_almost_equal(R @ v, expected, decimal=1)
 
 
-def test_euclidean_param_defaults():
+def _from_matvec(mat, vec):
+    mat, vec = (np.array(p) for p in (mat, vec))
+    d = mat.shape[0]
+    out = np.eye(d + 1)
+    out[:-1, :-1] = mat
+    out[:-1, -1] = vec
+    return out
+
+
+@pytest.mark.parametrize('tform_class', (EuclideanTransform, SimilarityTransform))
+def test_euclidean_param_defaults(tform_class):
     # 2D rotation is 0 when only translation is given
-    tf = EuclideanTransform(translation=(5, 5))
+    tf = tform_class(translation=(5, 5))
     assert np.array(tf)[0, 1] == 0
     # off diagonals are 0 when only translation is given
-    tf = EuclideanTransform(translation=(4, 5, 9), dimensionality=3)
+    tf = tform_class(translation=(4, 5, 9), dimensionality=3)
     assert_equal(np.array(tf)[[0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1]], 0)
+    # Specifying translations for D>3 is supported.
+    tf = tform_class(translation=(5, 6, 7, 8))
+    assert_equal(tf.params, _from_matvec(np.eye(4), (5, 6, 7, 8)))
+    # But must match the dimensionality.
     with pytest.raises(ValueError):
-        # specifying parameters for D>3 is not supported
-        _ = EuclideanTransform(translation=(5, 6, 7, 8), dimensionality=4)
+        _ = tform_class(translation=(5, 6, 7, 8), dimensionality=3)
+    # Incorrect number of angles (must be 1 or 3
     with pytest.raises(ValueError):
-        # incorrect number of angles for given dimensionality
-        _ = EuclideanTransform(rotation=(4, 8), dimensionality=3)
+        _ = tform_class(rotation=(4, 8))
+    with pytest.raises(ValueError):
+        _ = tform_class(rotation=(4, 8, 2, 4))
     # translation is 0 when rotation is given
-    tf = EuclideanTransform(rotation=np.pi * np.arange(3), dimensionality=3)
+    tf = tform_class(rotation=np.pi * np.arange(3), dimensionality=3)
     assert_equal(np.array(tf)[:-1, 3], 0)
-
-
-def test_similarity_transform_params():
-    with pytest.raises(ValueError):
-        _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
-    # With scalar scale and 3D, we get a deprecationwarning.  This is to
-    # generalize the rule that dimensionality should be implied by
-    # input parameters, when given.
-    with pytest.deprecated_call():
-        tf = SimilarityTransform(scale=4, dimensionality=3)
-    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
-    # Not so if we specify some other input giving dimensionality.
-    tf = SimilarityTransform(scale=4, translation=(0, 0, 0), dimensionality=3)
-    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
-    # Or if we are in 2D, by analogy to shear etc - scalar implies 2D.
-    tf = SimilarityTransform(scale=4, dimensionality=2)
-    assert_equal(tf([[1, 1]]), [[4, 4]])
 
 
 def test_euler_angle_consistency():
@@ -1183,13 +1207,46 @@ def test_2D_only_implementations():
         _ = tf.shear
 
 
-@pytest.mark.parametrize(
-    'tform_class',
-    (EssentialMatrixTransform,
-     AffineTransform,
-     EuclideanTransform,
-     SimilarityTransform))
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
 def test_kw_only_params(tform_class):
     # Check only matrix can be passed as positional arg.
     with pytest.raises(TypeError):
         tform_class(None, None)
+
+
+def test_kw_only_emt():
+    # Check all parameters are keyword only for EssentialMatrixTransform.
+    with pytest.raises(TypeError):
+        EssentialMatrixTransform(None)
+
+
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
+def test_init_contract_dims(tform_class):
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    # 2D identity is default.
+    for tf in (
+        tform_class(),
+        tform_class(dimensionality=2),
+        tform_class.identity(),
+        tform_class.identity(None),
+        tform_class(None),
+    ):
+        assert_equal(tf.params, np.eye(3))
+    ok_dims = (2, 3, 4, 5) if allows_nd else (2,)
+    for d in ok_dims:
+        h_d = d + 1
+        # Identity for acceptable dimensions.
+        for tf in (
+            tform_class(dimensionality=d),
+            tform_class.identity(d),
+            tform_class.identity(dimensionality=d),
+        ):
+            assert_equal(tf.params, np.eye(h_d))
+        # Wrong shape for given dimensions.
+        for matrix in np.eye(h_d)[:-1], np.eye(h_d)[:, :-1]:
+            with pytest.raises(ValueError):
+                tform_class(matrix)
+    err_dims = (1,) if allows_nd else (1, 3, 4, 5)
+    for matrix in [np.eye(d + 1) for d in err_dims]:
+        with pytest.raises(NotImplementedError):
+            tform_class(matrix)

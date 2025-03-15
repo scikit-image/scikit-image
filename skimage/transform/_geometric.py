@@ -252,26 +252,36 @@ class _GeometricTransform(ABC):
         return cls(dimensionality=dimensionality)
 
 
-class _MatrixTransform(_GeometricTransform):
-    valid_dims = (2,)
+class _HMatrixTransform(_GeometricTransform):
+    """Transform accepting homogenous matrix as input"""
 
     def __init__(self, matrix=None, *, dimensionality=None):
         if matrix is None:
-            d = self._default_dim() if dimensionality is None else dimensionality
+            d = 2 if dimensionality is None else dimensionality
             matrix = np.eye(d + 1)
-        elif dimensionality is not None and dimensionality != matrix.shape[0] - 1:
-            raise ValueError(
-                f'Dimensionality {dimensionality} does not match matrix {matrix}'
-            )
-        self.params = self._check_matrix(matrix)
+        else:
+            matrix = np.asarray(matrix)
+        self._check_matrix(matrix, dimensionality)
+        self._check_dims(matrix.shape[0] - 1)
+        self.params = matrix
 
-    def _check_matrix(self, matrix):
-        matrix = np.asarray(matrix)
+    def _check_matrix(self, matrix, dimensionality):
+        if dimensionality is not None:
+            if dimensionality != matrix.shape[0] - 1:
+                raise ValueError(
+                    f'Dimensionality {dimensionality} does not match matrix '
+                    f'{matrix}'
+                )
         m = matrix.shape[0]
         if matrix.shape != (m, m):
             raise ValueError("Invalid shape of transformation matrix")
-        self._check_dims(m - 1)
-        return matrix
+
+    def _check_dims(self, d):
+        if d == 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in 2D transform'
+        )
 
     @classmethod
     def identity(cls, dimensionality=None):
@@ -289,31 +299,15 @@ class _MatrixTransform(_GeometricTransform):
         tform : transform
             Transform such that ``np.all(tform(pts) == pts)``.
         """
-        d = cls._default_dim() if dimensionality is None else dimensionality
+        d = 2 if dimensionality is None else dimensionality
         return cls(matrix=np.eye(d + 1))
-
-    def _check_dims(self, dims):
-        vds = self.valid_dims
-        if dims in vds:
-            return
-        msg = f'Invalid dimensionality {dims} for {type(self)}; '
-        if len(vds) == 1:
-            msg += f'should be dimensionality {vds[0]}'
-        else:
-            vds_str = ", ".join(str(d) for d in vds)
-            msg += f'valid dimensionalities are {vds_str}'
-        raise NotImplementedError(msg)
-
-    @classmethod
-    def _default_dim(cls):
-        return cls.valid_dims[0]
 
     @property
     def dimensionality(self):
         return self.matrix.shape[0] - 1
 
 
-class FundamentalMatrixTransform(_MatrixTransform):
+class FundamentalMatrixTransform(_HMatrixTransform):
     """Fundamental matrix transformation.
 
     The fundamental matrix relates corresponding points between a pair of
@@ -685,7 +679,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
-class ProjectiveTransform(_MatrixTransform):
+class ProjectiveTransform(_HMatrixTransform):
     r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -724,28 +718,16 @@ class ProjectiveTransform(_MatrixTransform):
 
     """
 
-    valid_dims = (2, 3)
-
     def __init__(self, matrix=None, *, dimensionality=None):
         super().__init__(matrix, dimensionality=dimensionality)
         self._coeffs = range(self.params.size - 1)
 
-    def _checked_scale(self, scale, other_params, dimensionality):
-        """Check, warn for scalar scaling"""
-        if dimensionality in (None, 2) or scale is None or not np.isscalar(scale):
-            return scale
-        if all(p is None for p in other_params):
-            warnings.warn(
-                'In the future, it will be a ValueError to pass a '
-                'scalar ``scale`` value with a ``dimensionality`` '
-                '> 2\n,and without other implicit parameters '
-                'to indicate the dimensionality of the transform.\n'
-                'Please indicate dimensionality by passing a vector '
-                'of suitable length to ``scale``.',
-                DeprecationWarning,
-                stacklevel=2,
-            )
-        return np.ones(dimensionality) * scale
+    def _check_dims(self, d):
+        if d >= 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in transform of >=2D'
+        )
 
     @property
     def _inv_matrix(self):
@@ -1077,10 +1059,9 @@ class AffineTransform(ProjectiveTransform):
                 )
             if dimensionality is not None and dimensionality > 2:
                 raise ValueError('Implicit parameters only valid for 2D transforms')
-            scale = self._checked_scale(
-                scale, (rotation, shear, translation), dimensionality
-            )
             matrix = self._srst2matrix(scale, rotation, shear, translation)
+            if matrix.shape[0] != 3:
+                raise ValueError('Implicit parameters must give 2D transforms')
         super().__init__(matrix=matrix, dimensionality=dimensionality)
         self._coeffs = range(self.dimensionality * (self.dimensionality + 1))
 
@@ -1147,8 +1128,6 @@ class PiecewiseAffineTransform(_GeometricTransform):
         Inverse affine transformations for each triangle in the mesh.
 
     """
-
-    valid_dims = (2, 3)
 
     def __init__(self):
         self._tesselation = None
@@ -1365,7 +1344,7 @@ class EuclideanTransform(ProjectiveTransform):
                     "matrix is specified."
                 )
             n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
-            if n_dims not in self.valid_dims:
+            if chk_msg is not None:
                 raise ValueError(chk_msg)
             matrix = self._rt2matrix(rotation, translation, n_dims)
         super().__init__(matrix=matrix, dimensionality=dimensionality)
@@ -1374,14 +1353,15 @@ class EuclideanTransform(ProjectiveTransform):
         if rotation is not None:
             N = 1 if np.isscalar(rotation) else len(rotation)
             return (
-                2 if N == 1 else 3 if N == 3 else None,
-                '``rotations`` must be scalar (2D) or length 3 (3D)',
+                2 if N == 1 else N,
+                (
+                    None
+                    if N in (1, 3)
+                    else '``rotations`` must be scalar (2D) or length 3 (3D)'
+                ),
             )
         if translation is not None:
-            return (
-                len(translation),
-                '``len(translations)`` (dimensionality) must be == 2 or 3',
-            )
+            return (len(np.array(translation)), None)
         return None, None
 
     def _rt2matrix(self, rotation, translation, n_dims):
@@ -1511,22 +1491,42 @@ class SimilarityTransform(EuclideanTransform):
                     "Do not specify any implicit parameters when "
                     "matrix is specified."
                 )
-            scale = self._checked_scale(scale, (rotation, translation), dimensionality)
-            n_dims, chk_msg = self._srt2ndims_msg(scale, rotation, translation)
-            if n_dims not in self.valid_dims:
+            self._check_scale(scale, (rotation, translation), dimensionality)
+            # Scale is special.  Scalar scale does not tell us the dimensions.
+            if scale is not None and not np.isscalar(scale):
+                n_dims, chk_msg = len(scale), None
+            else:
+                n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
+            if chk_msg is not None:
                 raise ValueError(chk_msg)
+            # n_dims can be None for scalar scale, other parameters are None.
+            n_dims = (
+                n_dims
+                if n_dims is not None
+                else dimensionality
+                if dimensionality is not None
+                else 2
+            )
             matrix = self._rt2matrix(rotation, translation, n_dims)
-            scale = 1 if scale is None else scale
-            matrix[:n_dims, :n_dims] *= scale
+            if scale not in (None, 1):
+                matrix[:n_dims, :n_dims] *= scale
         super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-    def _srt2ndims_msg(self, scale, rotation, translation):
-        if scale is not None:
-            return (
-                2 if np.isscalar(scale) else len(scale),
-                '``scale`` must be scalar (2D) or length 3 (3D)',
+    def _check_scale(self, scale, other_params, dimensionality):
+        """Check, warn for scalar scaling"""
+        if dimensionality in (None, 2) or scale is None or not np.isscalar(scale):
+            return
+        if all(p is None for p in other_params):
+            warnings.warn(
+                'In the future, it will be a ValueError to pass a '
+                'scalar ``scale`` value with a ``dimensionality`` '
+                '> 2\n,and without other implicit parameters '
+                'to indicate the dimensionality of the transform.\n'
+                'Please indicate dimensionality by passing a vector '
+                'of suitable length to ``scale``.',
+                DeprecationWarning,
+                stacklevel=2,
             )
-        return super()._rt2ndims_msg(rotation, translation)
 
     @property
     def scale(self):
@@ -1562,8 +1562,6 @@ class PolynomialTransform(_GeometricTransform):
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
     """
-
-    valid_dims = (2,)
 
     def __init__(self, params=None, *, dimensionality=None):
         if dimensionality is None:
