@@ -107,7 +107,7 @@ jobs:
           spin build
 
       - name: Save meson build cache
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && }}
         uses: actions/cache/save@v4
         with:
           path: ./build
@@ -188,7 +188,7 @@ jobs:
           spin build
 
       - name: Save meson build cache
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }} # TODO: && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
           path: ./build
