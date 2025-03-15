@@ -140,7 +140,7 @@ jobs:
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDITS }}
+          INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
           if $INSTALL_FROM_SDIST; then
             (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
