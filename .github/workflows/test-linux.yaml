@@ -80,6 +80,7 @@ jobs:
           persist-credentials: false
 
       - name: Restore meson build cache
+        if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
         uses: actions/cache/restore@v4
         id: cache-meson-restore
         with:
@@ -107,7 +108,7 @@ jobs:
           spin build
 
       - name: Save meson build cache
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
           path: ./build
@@ -188,7 +189,7 @@ jobs:
           spin build
 
       - name: Save meson build cache
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }} # TODO: && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
           path: ./build
