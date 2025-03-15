@@ -240,9 +240,9 @@ class _GeometricTransform(ABC):
         Parameters
         ----------
         dimensionality : {None, 2}, optional
-            This transform only allows dimensionality of 2, so None or 2 are
-            the only acceptable values.  The parameter exists for compatibility
-            with other transforms.
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
 
         Returns
         -------
@@ -280,9 +280,9 @@ class _MatrixTransform(_GeometricTransform):
         Parameters
         ----------
         dimensionality : {None, 2}, optional
-            This transform only allows dimensionality of 2, so None or 2 are
-            the only acceptable values.  The parameter exists for compatibility
-            with other transforms.
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
 
         Returns
         -------
@@ -938,9 +938,8 @@ class ProjectiveTransform(_MatrixTransform):
 
         Parameters
         ----------
-        dimensionality : {None, 2, 3}, optional
-            This transform only allows dimensionality of 2 or 3, so None or 2
-            or 3 are the only acceptable values.
+        dimensionality : {None, int}, optional
+            Dimensionality of identity transform.
 
         Returns
         -------
