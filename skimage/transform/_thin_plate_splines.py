@@ -42,7 +42,7 @@ class ThinPlateSplineTransform:
 
     Appyling the transformation to `src` approximates `dst`:
 
-    >>> np.round(tps(src))
+    >>> np.round(tps(src), 4)  # doctest: +FLOAT_CMP
     array([[5., 0.],
            [0., 0.],
            [0., 5.],
