@@ -1389,12 +1389,12 @@ class EuclideanTransform(ProjectiveTransform):
             translation = translation = (0,) * n_dims
         if rotation is None:
             rotation = 0 if n_dims == 2 else np.zeros(3)
+        matrix = np.eye(n_dims + 1)
         if n_dims == 2:
             cos_r, sin_r = math.cos(rotation), math.sin(rotation)
-            matrix = np.array([[cos_r, -sin_r, 0], [sin_r, cos_r, 0], [0, 0, 1]])
+            matrix[:2, :2] = [[cos_r, -sin_r], [sin_r, cos_r]]
         elif n_dims == 3:
-            matrix = np.eye(n_dims + 1)
-            matrix[:n_dims, :n_dims] = _euler_rotation_matrix(rotation)
+            matrix[:3, :3] = _euler_rotation_matrix(rotation)
         matrix[0:n_dims, n_dims] = translation
         return matrix
 
