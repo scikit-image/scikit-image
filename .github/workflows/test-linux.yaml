@@ -142,7 +142,7 @@ jobs:
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
           INSTALL_FROM_SDIST: ${{ matrix.INSTALL_FROM_SDIST }}
         run: |
-          if $INSTALL_FROM_SDIST; then
+          if [[ "$INSTALL_FROM_SDIST" == 1 ]]; then
             (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
           else
             $TEST --doctest-plus --showlocals --pyargs skimage
