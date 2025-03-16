@@ -15,6 +15,10 @@ env:
   CXX: clang
   PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test_skimage_linux:
     name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
@@ -58,12 +62,10 @@ jobs:
       - name: Install build dependencies
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-        shell: bash
         run: |
           source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
-        shell: bash
         run: |
           pip install -v --no-build-isolation .
 
@@ -73,11 +75,54 @@ jobs:
           OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
           WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-        shell: bash
         run: |
           source .github/scripts/setup-test-env.sh
 
       - name: Run tests
-        shell: bash
+        run: |
+          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+  test_skimage_windows_free_threaded:
+    name: windows-cp313t-default
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@9e62be81b28222addecf85e47571213eb7680449
+        name: Install Python
+        with:
+          python-version: "3.13t"
+
+      - name: Install build dependencies
+        # See special clause inside setup-build-env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install test dependencies
+        # See special clause inside setup-test-env.sh that detects when
+        # free threaded build is used, and then installs dependencies
+        # from nightly wheels
+        env:
+          PIP_FLAGS: "--pre"
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Run tests
+        env:
+          PYTHON_GIL: 0
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
