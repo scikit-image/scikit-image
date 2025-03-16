@@ -45,7 +45,7 @@ astro_noisy /= np.max(astro_noisy)
 # Restore image by means of deconvolution
 deconvolved_RL = ski.restoration.richardson_lucy(astro_noisy, psf, num_iter=30)
 
-fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
+fig, ax = plt.subplots(ncols=3, figsize=(8, 5))
 plt.gray()
 
 for a in (ax[0], ax[1], ax[2]):
