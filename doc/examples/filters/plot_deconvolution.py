@@ -3,7 +3,7 @@
 Image Deconvolution
 =====================
 In this example, we deconvolve an image using the
-Richardson–Lucy algorithm ([1]_, [2]_).
+Richardson–Lucy algorithm ([1]_, [2]_, [3]_).
 
 The algorithm is based on a point spread function (PSF),
 described as the impulse response of the
@@ -15,6 +15,8 @@ iterations, which needs to be hand-tuned.
        J. Opt. Soc. Am. A 27, 1593-1607 (1972), :DOI:`10.1364/JOSA.62.000055`
 
 .. [2] https://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
+
+.. [3] https://www.strollswithmydog.com/richardson-lucy-algorithm/
 """
 
 import numpy as np
