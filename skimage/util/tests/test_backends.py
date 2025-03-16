@@ -97,12 +97,13 @@ def no_backends(monkeypatch):
 
     monkeypatch.setattr(_backends, "all_backends_with_eps_combined", mock_no_backends)
     monkeypatch.setattr(_backends, "public_api_module", mock_public_api_module)
-    monkeypatch.setenv("SKIMAGE_DISPATCHING", "True")
 
 
 def test_notification_without_backends(monkeypatch, no_backends):
     # Check that no DispatchNotification is raised when no backend
-    # is installed.
+    # is installed and `SKIMAGE_DISPATCHING` is "False".
+    monkeypatch.setenv("SKIMAGE_DISPATCHING", "False")
+
     @_backends.dispatchable
     def foo(x):
         return x * 2
@@ -112,6 +113,7 @@ def test_notification_without_backends(monkeypatch, no_backends):
     assert r == 42 * 2
 
     # no backends installed but `SKIMAGE_DISPATCHING` is "True"
+    monkeypatch.setenv("SKIMAGE_DISPATCHING", "True")
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake1")
     with pytest.warns(
         _backends.DispatchNotification,
@@ -176,9 +178,7 @@ def test_module_name_determination(func, expected):
     assert getattr(mod, func.__name__) is func
 
 
-@pytest.mark.parametrize(
-    "env_value, output", [("True", True), ("False", False), ("invalid", False)]
-)
+@pytest.mark.parametrize("env_value, output", [("True", True), ("False", False)])
 def test_get_skimage_dispatching(monkeypatch, env_value, output):
     """Test the behavior of get_skimage_dispatching with different environment variable values."""
     monkeypatch.setenv("SKIMAGE_DISPATCHING", env_value)
@@ -192,7 +192,7 @@ def test_get_skimage_dispatching_warning(monkeypatch):
         _backends.DispatchNotification,
         match="Invalid value for SKIMAGE_DISPATCH",
     ):
-        _backends.get_skimage_dispatching()
+        assert _backends.get_skimage_dispatching() == False
 
 
 @pytest.mark.parametrize(
