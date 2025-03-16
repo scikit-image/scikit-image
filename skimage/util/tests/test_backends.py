@@ -111,7 +111,7 @@ def test_notification_without_backends(monkeypatch, no_backends):
 
     assert r == 42 * 2
 
-    # no backends installed but `SKIMAGE_BACKENDS` is not "False"
+    # no backends installed but `SKIMAGE_DISPATCHING` is "True"
     monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake1")
     with pytest.warns(
         _backends.DispatchNotification,
