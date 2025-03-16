@@ -5,17 +5,35 @@ import os
 import warnings
 
 
-def get_skimage_backends():
-    """Returns the backend priority list stored in `SKIMAGE_BACKENDS`
-    environment variable, or `False` if the dispatching is disabled.
+def get_skimage_dispatching():
+    """Returns the value of the `SKIMAGE_DISPATCHING` environment variable."""
+    dispatch_flag = os.environ.get("SKIMAGE_DISPATCHING", False)
+    if dispatch_flag in ["False", False]:
+        return False
+    elif dispatch_flag in ["True", True]:
+        return True
+    else:
+        warnings.warn(
+            f"Invalid value for SKIMAGE_DISPATCHING: {dispatch_flag}."
+            "Expected 'True' or 'False'."
+            f"Setting SKIMAGE_DISPATCHING to 'False'.",
+            DispatchNotification,
+            stacklevel=2,
+        )
+        return False
+
+
+def get_skimage_backend_priority():
+    """Returns the backend priority list stored in `SKIMAGE_BACKEND_PRIORITY`
+    environment variable, or `False`.
 
     This function interprets the value of the environment variable
-    `SKIMAGE_BACKENDS` as follows:
+    `SKIMAGE_BACKEND_PRIORITY` as follows:
     - If unset or explicitly set to `"False"`, return `False`.
     - If a comma-separated string, return it as a list of backend names.
     - If a single string, return it as a list with that single backend name.
     """
-    backend_priority = os.environ.get("SKIMAGE_BACKENDS", False)
+    backend_priority = os.environ.get("SKIMAGE_BACKEND_PRIORITY", False)
 
     if backend_priority in ["False", False]:
         return False
@@ -123,28 +141,36 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_module(func)
+    if not get_skimage_dispatching():
+        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        backend_priority = get_skimage_backends()
+        backend_priority = get_skimage_backend_priority()
         installed_backends = all_backends_with_eps_combined()
 
-        # If no backends are installed or dispatching is disabled,
-        # return the original function.
-        if not all_backends_with_eps_combined():
-            if backend_priority:
-                # no installed backends but `SKIMAGE_BACKENDS` is not False
-                warnings.warn(
-                    f"Call to '{func_module}:{func_name}' was not dispatched."
-                    " No backends installed and SKIMAGE_BACKENDS is not 'False',"
-                    f"but '{backend_priority}'. Falling back to scikit-image.",
-                    DispatchNotification,
-                    stacklevel=2,
-                )
+        if not installed_backends:
+            # no backends installed falling back to scikit-image
+            warnings.warn(
+                f"Call to '{func_module}:{func_name}' was not dispatched."
+                " No backends installed and SKIMAGE_DISPATCHING is set to"
+                f"'{get_skimage_dispatching()}'. Falling back to scikit-image.",
+                DispatchNotification,
+                stacklevel=2,
+            )
             return func(*args, **kwargs)
-        elif not backend_priority:
-            # backends installed but `SKIMAGE_BACKENDS` is False
-            return func(*args, **kwargs)
+
+        if not backend_priority:
+            # backend priority is not set; using default priority--
+            # i.e. backend names sorted in alphabetical order
+            default_backend_priority = installed_backends.keys().sort()
+            warnings.warn(
+                f"`SKIMAGE_BACKEND_PRIORITY` was set to {backend_priority}. Defaulting to priority: "
+                f"'{default_backend_priority}'. Use `SKIMAGE_BACKEND_PRIORITY` to set a custom backend priority.",
+                DispatchNotification,
+                stacklevel=2,
+            )
+            backend_priority = default_backend_priority
 
         for backend_name in backend_priority:
             if backend_name not in installed_backends:
@@ -168,7 +194,7 @@ def dispatchable(func):
             func_impl = backend_impl.get_implementation(f"{func_module}:{func_name}")
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was dispatched to"
-                f" the '{backend_name}' backend. Set SKIMAGE_BACKENDS='False' to"
+                f" the '{backend_name}' backend. Set SKIMAGE_DISPATCHING='False' to"
                 " disable dispatching.",
                 DispatchNotification,
                 # XXX from where should this warning originate?
