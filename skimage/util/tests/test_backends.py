@@ -177,12 +177,22 @@ def test_module_name_determination(func, expected):
 
 
 @pytest.mark.parametrize(
-    "env_value, output", [("True", True), ("False", False), ("xyz", False)]
+    "env_value, output", [("True", True), ("False", False), ("invalid", False)]
 )
 def test_get_skimage_dispatching(monkeypatch, env_value, output):
     """Test the behavior of get_skimage_dispatching with different environment variable values."""
     monkeypatch.setenv("SKIMAGE_DISPATCHING", env_value)
     assert _backends.get_skimage_dispatching() == output
+
+
+def test_get_skimage_dispatching_warning(monkeypatch):
+    """Test the behavior of get_skimage_dispatching with an invalid environment variable value."""
+    monkeypatch.setenv("SKIMAGE_DISPATCHING", "invalid")
+    with pytest.warns(
+        _backends.DispatchNotification,
+        match="Invalid value for SKIMAGE_DISPATCH",
+    ):
+        _backends.get_skimage_dispatching()
 
 
 @pytest.mark.parametrize(
