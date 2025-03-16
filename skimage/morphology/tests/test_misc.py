@@ -54,7 +54,7 @@ def test_two_connectivity():
 
 def test_in_place():
     image = test_object_image.copy()
-    observed = remove_small_objects(image, max_size=6, out=image)
+    observed = remove_small_objects(image, max_size=5, out=image)
     assert_equal(
         observed is image, True, "remove_small_objects in_place argument failed."
     )
@@ -73,7 +73,7 @@ def test_out(in_dtype, out_dtype):
         exp_warn = []
 
     with expected_warnings(exp_warn):
-        out = remove_small_objects(image, max_size=6, out=expected_out)
+        out = remove_small_objects(image, max_size=5, out=expected_out)
 
     assert out is expected_out
 
@@ -105,7 +105,7 @@ def test_uint_image():
 def test_single_label_warning():
     image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], int)
     with expected_warnings(['use a boolean array?']):
-        remove_small_objects(image, max_size=6)
+        remove_small_objects(image, max_size=5)
 
 
 def test_float_input():
@@ -172,7 +172,7 @@ def test_one_connectivity_holes():
         ],
         bool,
     )
-    observed = remove_small_holes(test_holes_image, max_size=3)
+    observed = remove_small_holes(test_holes_image, max_size=2)
     assert_array_equal(observed, expected)
 
 
@@ -196,7 +196,7 @@ def test_two_connectivity_holes():
 
 def test_in_place_holes():
     image = test_holes_image.copy()
-    observed = remove_small_holes(image, max_size=3, out=image)
+    observed = remove_small_holes(image, max_size=2, out=image)
     assert_equal(
         observed is image, True, "remove_small_holes in_place argument failed."
     )
@@ -205,7 +205,7 @@ def test_in_place_holes():
 def test_out_remove_small_holes():
     image = test_holes_image.copy()
     expected_out = np.empty_like(image)
-    out = remove_small_holes(image, max_size=3, out=expected_out)
+    out = remove_small_holes(image, max_size=2, out=expected_out)
 
     assert out is expected_out
 
@@ -249,7 +249,7 @@ def test_non_bool_out():
     image = test_holes_image.copy()
     expected_out = np.empty_like(image, dtype=int)
     with testing.raises(TypeError):
-        remove_small_holes(image, max_size=3, out=expected_out)
+        remove_small_holes(image, max_size=2, out=expected_out)
 
 
 def test_labeled_image_holes():
