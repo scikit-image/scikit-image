@@ -244,11 +244,10 @@ jobs:
         shell: bash
         run: |
           NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
-          TEST_COMMAND="set PYTHON_GIL=0 && pytest --pyargs skimage"
           echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
           # Remove once Cython is out that supports free-threaded build
           echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
-          echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
+          echo "PYTHON_GIL=0" >> "$GITHUB_ENV"
 
       - name: Build AMD64 Windows wheels for CPython
         if: matrix.cibw_arch == 'AMD64'
