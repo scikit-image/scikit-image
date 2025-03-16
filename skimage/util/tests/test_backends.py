@@ -102,8 +102,6 @@ def no_backends(monkeypatch):
 def test_notification_without_backends(monkeypatch, no_backends):
     # Check that no DispatchNotification is raised when no backend
     # is installed and `SKIMAGE_DISPATCHING` is "False".
-    monkeypatch.setenv("SKIMAGE_DISPATCHING", "False")
-
     @_backends.dispatchable
     def foo(x):
         return x * 2
@@ -190,7 +188,7 @@ def test_get_skimage_dispatching_warning(monkeypatch):
     monkeypatch.setenv("SKIMAGE_DISPATCHING", "invalid")
     with pytest.warns(
         _backends.DispatchNotification,
-        match="Invalid value for SKIMAGE_DISPATCH",
+        match="Invalid value for SKIMAGE_DISPATCHING",
     ):
         assert _backends.get_skimage_dispatching() == False
 

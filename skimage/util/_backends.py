@@ -163,7 +163,8 @@ def dispatchable(func):
         if not backend_priority:
             # backend priority is not set; using default priority--
             # i.e. backend names sorted in alphabetical order
-            default_backend_priority = installed_backends.keys().sort()
+            default_backend_priority = list(installed_backends.keys())
+            default_backend_priority.sort()
             warnings.warn(
                 f"`SKIMAGE_BACKEND_PRIORITY` was set to {backend_priority}. Defaulting to priority: "
                 f"'{default_backend_priority}'. Use `SKIMAGE_BACKEND_PRIORITY` to set a custom backend priority.",
