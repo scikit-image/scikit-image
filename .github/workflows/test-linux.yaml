@@ -154,7 +154,7 @@ jobs:
           fi
 
       - name: Check benchmarks
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST == 1 && matrix.MINIMUM_REQUIREMENTS != 1 }}
         run: |
           asv check -v -E existing
 
