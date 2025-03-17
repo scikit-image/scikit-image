@@ -610,6 +610,12 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     """
 
+    # Threshold for determinant of rotation matrix.
+    _rot_det_tol = 1e-6
+
+    # Threshold for difference of translation vector from unit length.
+    _trans_len_tol = 1e-6
+
     def __init__(
         self, *, rotation=None, translation=None, matrix=None, dimensionality=None
     ):
@@ -632,11 +638,11 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         translation = np.asarray(translation)
         if rotation.shape != (3, 3):
             raise ValueError("Invalid shape of rotation matrix")
-        if abs(np.linalg.det(rotation) - 1) > 1e-6:
+        if abs(np.linalg.det(rotation) - 1) > self._rot_det_tol:
             raise ValueError("Rotation matrix must have unit determinant")
         if translation.size != 3:
             raise ValueError("Invalid shape of translation vector")
-        if abs(np.linalg.norm(translation) - 1) > 1e-6:
+        if abs(np.linalg.norm(translation) - 1) > self._trans_len_tol:
             raise ValueError("Translation vector must have unit length")
         # Matrix representation of the cross product for t.
         t0, t1, t2 = translation
