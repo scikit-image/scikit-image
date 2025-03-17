@@ -22,7 +22,7 @@ from skimage.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
     _center_and_normalize_points,
-    _apply_homogenous,
+    _apply_homogeneous,
     _euler_rotation_matrix,
     TRANSFORMS,
 )
@@ -52,7 +52,7 @@ DST = np.array(
     ]
 )
 
-# Transforms accepting homogenous matrix as input.
+# Transforms accepting homogeneous matrix as input.
 HMAT_TFORMS = (
     FundamentalMatrixTransform,
     ProjectiveTransform,
@@ -987,7 +987,7 @@ def test_degenerate():
 def test_normalize_points():
     mat, normed = _center_and_normalize_points(SRC)
     assert np.allclose(np.mean(normed, axis=0), 0)
-    assert np.allclose(normed, _apply_homogenous(mat, SRC))
+    assert np.allclose(normed, _apply_homogeneous(mat, SRC))
 
 
 def test_normalize_degenerate_points():

@@ -80,10 +80,10 @@ def _center_and_normalize_points(points):
     matrix = np.eye(d + 1)
     matrix[:d, d] = -centroid
     matrix[:d, :] *= norm_factor
-    return matrix, _apply_homogenous(matrix, points)
+    return matrix, _apply_homogeneous(matrix, points)
 
 
-def _apply_homogenous(matrix, points):
+def _apply_homogeneous(matrix, points):
     """Transform (N, D) `points` array with homogenous (D+1, D+1) `matrix`
 
     Parameters
@@ -756,7 +756,7 @@ class ProjectiveTransform(_HMatrixTransform):
             Destination coordinates.
 
         """
-        return _apply_homogenous(self.params, coords)
+        return _apply_homogeneous(self.params, coords)
 
     @property
     def inverse(self):
