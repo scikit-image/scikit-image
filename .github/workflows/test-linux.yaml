@@ -79,13 +79,17 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Restore meson build cache
+      - name: Install ccache
+        run: |
+          sudo apt-get install -y ccache
+
+      - name: Restore ccache build cache
         if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
         uses: actions/cache/restore@v4
-        id: cache-meson-restore
+        id: ccache-restore
         with:
           path: ./build
-          key: ${{ runner.os }}-meson-py${{ matrix.python-version }}
+          key: ${{ runner.os }}-ccache-py${{ matrix.python-version }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -107,12 +111,12 @@ jobs:
         run: |
           spin build
 
-      - name: Save meson build cache
+      - name: Save ccache build cache
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
           path: ./build
-          key: ${{ steps.cache-meson-restore.outputs.cache-primary-key }}
+          key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
 
       - name: Build and install from sdist
         if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
@@ -164,12 +168,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Restore meson build cache
+      - name: Install ccache
+        run: |
+          sudo apt-get install -y ccache
+
+      - name: Restore ccache build cache
         uses: actions/cache/restore@v4
-        id: cache-meson-restore
+        id: ccache-restore
         with:
-          path: ./build
-          key: ${{ runner.os }}-meson-py313t
+          path: ~/.ccache
+          key: ${{ runner.os }}-ccache-py313t
 
       # TODO: replace with setup-python when there is support
       - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
@@ -194,8 +202,8 @@ jobs:
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
-          path: ./build
-          key: ${{ steps.cache-meson-restore.outputs.cache-primary-key }}
+          path: ~/.ccache
+          key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
 
       - name: Install test dependencies
         # See special clause inside setup-test-env.sh that detects when
