@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-"""Generate requirements/*.txt files from pyproject.toml."""
+"""Generate requirements/*.txt files from pyproject.toml.
+
+Also builda a conda environment.yml
+"""
 
 import sys
+import re
 from pathlib import Path
 
 try:  # standard module since Python 3.11
@@ -26,6 +30,32 @@ def generate_requirement_file(name: str, req_list: list[str]) -> None:
     req_fname.write_text("\n".join(header + req_list) + "\n")
 
 
+def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
+    # Some packages in conda-forge have different names than they do on pypi
+    rename_idx = {
+        'build': 'python-build',
+        'kaleido': 'python-kaleido',
+        'sphinx_design': 'sphinx-design',
+    }
+    out = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
+    with open("environment.yml", "w") as f:
+        for section in req_sections:
+            out.append(f"  # {section}")
+            for dep in req_sections[section]:
+                # Remove optional specifiers such as `[parallel]`
+                dep = re.sub('\\[.*?\\]', '', dep)
+
+                # Remove platform specifiers such as `; sys_platform != "emscripten"`
+                dep = re.sub('; .*', '', dep)
+
+                pkgname = re.split('[>=]', dep)[0]
+                dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
+
+                out.append(f"  - {dep}")
+
+        f.writelines(f"{line}\n" for line in out)
+
+
 def main() -> None:
     pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
@@ -33,6 +63,13 @@ def main() -> None:
 
     for key, opt_list in pyproject["project"]["optional-dependencies"].items():
         generate_requirement_file(key, opt_list)
+
+    generate_environment_yml(
+        {
+            **{'base': pyproject["project"]["dependencies"]},
+            **pyproject["project"]["optional-dependencies"],
+        }
+    )
 
 
 if __name__ == "__main__":
