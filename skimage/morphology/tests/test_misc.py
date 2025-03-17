@@ -280,7 +280,7 @@ def test_labeled_image_holes():
         dtype=bool,
     )
     with expected_warnings(['returned as a boolean array']):
-        observed = remove_small_holes(labeled_holes_image, max_size=3)
+        observed = remove_small_holes(labeled_holes_image, max_size=2)
     assert_array_equal(observed, expected)
 
 
@@ -312,7 +312,7 @@ def test_uint_image_holes():
         dtype=bool,
     )
     with expected_warnings(['returned as a boolean array']):
-        observed = remove_small_holes(labeled_holes_image, max_size=3)
+        observed = remove_small_holes(labeled_holes_image, max_size=2)
     assert_array_equal(observed, expected)
 
 
@@ -331,8 +331,8 @@ def test_label_warning_holes():
         dtype=int,
     )
     with expected_warnings(['use a boolean array?']):
-        remove_small_holes(labeled_holes_image, max_size=3)
-    remove_small_holes(labeled_holes_image.astype(bool), max_size=3)
+        remove_small_holes(labeled_holes_image, max_size=2)
+    remove_small_holes(labeled_holes_image.astype(bool), max_size=2)
 
 
 def test_float_input_holes():
