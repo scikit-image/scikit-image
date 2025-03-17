@@ -74,7 +74,7 @@ docs = [
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
-    'plotly>=6.0',
+    'plotly>=6.0.1',
     "kaleido@git+https://github.com/plotly/kaleido@v1.0.0rc6#subdirectory=src/py",
     'scikit-learn>=1.2',
     'sphinx_design>=0.5',
