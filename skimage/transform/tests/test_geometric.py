@@ -246,10 +246,10 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
-    # With scalar scale and 3D, we get a deprecationwarning.  This is to
+    # With scalar scale and 3D, we get a FutureWarning.  This is to
     # generalize the rule that dimensionality should be implied by
     # input parameters, when given.
-    with pytest.deprecated_call():
+    with pytest.warns(FutureWarning):
         tf = SimilarityTransform(scale=4, dimensionality=3)
     assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
     # Not so if we specify some other input giving dimensionality.

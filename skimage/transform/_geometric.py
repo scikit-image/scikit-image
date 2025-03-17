@@ -1533,7 +1533,7 @@ class SimilarityTransform(EuclideanTransform):
                 'to indicate the dimensionality of the transform.\n'
                 'Please indicate dimensionality by passing a vector '
                 'of suitable length to ``scale``.',
-                DeprecationWarning,
+                FutureWarning,
                 stacklevel=2,
             )
 
