@@ -100,6 +100,10 @@ def resize(
     -------
     resized : ndarray
         Resized version of the input.
+        The dtype is ``float64`` with the following exceptions:
+
+        - ``order==0``: resized dtype is ``image.dtype``.
+        - ``image.dtype`` is ``float16`` or ``float32``: resized dtype is``float32``.
 
     Other parameters
     ----------------
