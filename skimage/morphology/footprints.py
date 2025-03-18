@@ -98,6 +98,38 @@ def footprint_from_sequence(footprints):
     return morphology.dilation(imag, footprints)
 
 
+def footprint_compose(footprints, *, dtype=None):
+    """Convert a footprint sequence into an equivalent ndarray.
+
+    Use this function to convert a decomposed footprint into a dense footprint
+    consisting of a single array.
+
+    Parameters
+    ----------
+    footprints : tuple of 2-tuples
+        A sequence of footprint tuples where the first element of each tuple
+        is an array corresponding to a footprint and the second element is the
+        number of times it is to be applied. Currently, all footprints should
+        have odd size.
+    dtype : data-type, optional
+        The data type of the composed footprint. If not given, defaults to
+        the data type of the arrays in `footprints`.
+
+    Returns
+    -------
+    footprint : ndarray
+        An single array equivalent to applying the sequence of ``footprints``.
+    """
+    # Create a single pixel image of sufficient size and apply binary dilation.
+    shape = _shape_from_sequence(footprints)
+    if dtype is None:
+        dtype = footprints[0][0].dtype
+    imag = np.zeros(shape, dtype=dtype)
+    imag[tuple(s // 2 for s in shape)] = 1
+    composed = morphology.dilation(imag, footprints)
+    return composed
+
+
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     """Generate a rectangular or hyper-rectangular footprint.
 
@@ -627,7 +659,7 @@ def footprint_cross_decompose(footprint, max_error=0.01):
         A symmetric convex footprint as a 2-D array of 1's and 0's.
         N and M must be of odd length.
     max_error : float or None, optional
-        Maximal allowed approximation erreor that the decomposition can deviate
+        Maximal allowed approximation error that the decomposition can deviate
         from the original `footprint`. The deviation is calculated by
         recomposing the approximation into a dense footprint again. If the rate
         of different pixels compared to the total footprint size exceeds this
