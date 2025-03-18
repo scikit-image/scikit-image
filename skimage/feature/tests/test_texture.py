@@ -275,6 +275,7 @@ class TestLBP:
         )
         np.testing.assert_array_equal(lbp, ref)
 
+    @pytest.mark.thread_unsafe
     @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
     def test_float_warning(self, dtype):
         image = self.image.astype(dtype)
@@ -307,6 +308,7 @@ class TestLBP:
         )
         np.testing.assert_array_equal(lbp, ref)
 
+    @pytest.mark.thread_unsafe
     def test_var(self):
         # Test idea: mean of variance is estimate of overall variance.
 
