@@ -9,6 +9,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   CC: clang
@@ -16,7 +17,7 @@ env:
   PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 jobs:
-  test_skimage_linux:
+  test_skimage_windows:
     name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
     runs-on: windows-latest
 
@@ -81,3 +82,12 @@ jobs:
         shell: bash
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "windows tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
