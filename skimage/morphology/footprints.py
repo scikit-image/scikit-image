@@ -98,38 +98,6 @@ def footprint_from_sequence(footprints):
     return morphology.dilation(imag, footprints)
 
 
-def footprint_compose(footprints, *, dtype=None):
-    """Convert a footprint sequence into an equivalent ndarray.
-
-    Use this function to convert a decomposed footprint into a dense footprint
-    consisting of a single array.
-
-    Parameters
-    ----------
-    footprints : tuple of 2-tuples
-        A sequence of footprint tuples where the first element of each tuple
-        is an array corresponding to a footprint and the second element is the
-        number of times it is to be applied. Currently, all footprints should
-        have odd size.
-    dtype : data-type, optional
-        The data type of the composed footprint. If not given, defaults to
-        the data type of the arrays in `footprints`.
-
-    Returns
-    -------
-    footprint : ndarray
-        An single array equivalent to applying the sequence of ``footprints``.
-    """
-    # Create a single pixel image of sufficient size and apply binary dilation.
-    shape = _shape_from_sequence(footprints)
-    if dtype is None:
-        dtype = footprints[0][0].dtype
-    imag = np.zeros(shape, dtype=dtype)
-    imag[tuple(s // 2 for s in shape)] = 1
-    composed = morphology.dilation(imag, footprints)
-    return composed
-
-
 @deprecate_parameter(
     deprecated_name="decomposition",
     start_version="0.26.0",
