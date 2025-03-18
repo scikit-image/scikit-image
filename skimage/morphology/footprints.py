@@ -696,6 +696,11 @@ def footprint_cross_decompose(footprint, max_error=0.01):
             f"each dimension, got `{footprint.shape=}`"
         )
         raise ValueError(msg)
+    for dim in range(footprint.ndim):
+        mirrored = np.flip(footprint, axis=dim)
+        if np.any(footprint != mirrored):
+            msg = f"`footprint` isn't symmetric in dimension {dim}"
+            raise ValueError(msg)
 
     quadrant = footprint[footprint.shape[0] // 2 :, footprint.shape[1] // 2 :]
     col_sums = quadrant.sum(0, dtype=int)

@@ -215,10 +215,8 @@ class Test_footprint_cross_decompose:
         with pytest.raises(ValueError, match=regex):
             ski.morphology.footprint_cross_decompose(footprint)
 
-    # @pytest.mark.parametrize("length_0", [1, 3, 9, 21, 51])
-    # @pytest.mark.parametrize("length_1", [1, 3, 9, 21, 51])
-    @pytest.mark.parametrize("length_0", [1])
-    @pytest.mark.parametrize("length_1", [1])
+    @pytest.mark.parametrize("length_0", [1, 3, 9, 21, 51])
+    @pytest.mark.parametrize("length_1", [1, 3, 9, 21, 51])
     def test_rectangle_approximation(self, length_0, length_1):
         shape = (length_0, length_1)
         footprint = ski.morphology.footprint_rectangle(shape)
@@ -228,7 +226,7 @@ class Test_footprint_cross_decompose:
 
         # verify that maximum error does not exceed some fraction of the size
         error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
-        max_error_rate = 0.05
+        max_error_rate = 0
         assert error / footprint.size <= max_error_rate
 
     @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
@@ -240,7 +238,7 @@ class Test_footprint_cross_decompose:
 
         # verify that maximum error does not exceed some fraction of the size
         error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
-        max_error_rate = 0.05
+        max_error_rate = 0.01
         assert error / footprint.size <= max_error_rate
 
     @pytest.mark.parametrize("width", [3, 8, 20, 50])
@@ -253,18 +251,41 @@ class Test_footprint_cross_decompose:
 
         # verify that maximum error does not exceed some fraction of the size
         error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
-        max_error_rate = 0.05
+        max_error_rate = 0.01
         assert error / footprint.size <= max_error_rate
 
-    def test_not_convex(self):
-        # Footprint is symmetric in all, but not convex in one dimension
+    def test_not_convex_h(self):
+        # Footprint with H shape is symmetric in all, but not convex in one dimension
         footprint = np.array([[1, 0, 1], [1, 1, 1], [1, 0, 1]], dtype=np.uint8)
         with pytest.raises(ValueError, match=".* not convex"):
             ski.morphology.footprint_cross_decompose(footprint)
 
-        # However, this is only detected in one dimension (for performance reasons)
-        # the other dimension passes
-        ski.morphology.footprint_cross_decompose(footprint.T)
+        # In the other dimension, this is caught by `max_error` being exceeded
+        with pytest.raises(RuntimeError, match=".*exceeds the given `max_error"):
+            ski.morphology.footprint_cross_decompose(footprint.T)
+
+    @pytest.mark.parametrize("dim", [0, 1])
+    def test_not_convex_holes(self, dim):
+        footprint = np.array(
+            [
+                [0, 1, 1, 1, 0],
+                [1, 0, 1, 0, 1],
+                [1, 1, 1, 1, 1],
+                [1, 0, 1, 0, 1],
+                [0, 1, 1, 1, 0],
+            ]
+        )
+        footprint = np.moveaxis(footprint, source=0, destination=dim)
+        with pytest.raises(RuntimeError, match=".*exceeds the given `max_error"):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("dim", [0, 1])
+    def test_not_symmetric(self, dim):
+        footprint = np.array([[1, 0, 1], [1, 1, 1], [1, 1, 1]])
+        footprint = np.moveaxis(footprint, source=0, destination=dim)
+        regex = f".*isn't symmetric in dimension {dim}"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
 
     @pytest.mark.parametrize("shape", [(3, 2), (2, 3), (6, 6)])
     def test_even_shape(self, shape):
