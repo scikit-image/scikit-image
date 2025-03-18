@@ -642,11 +642,26 @@ def footprint_cross_decompose(footprint, max_error=0.01):
         length is equal to the number of unique structuring elements to apply.
         Each array has the same dtype as `footprint`.
 
+    Raises
+    ------
+    ValueError
+        If `footprint` isn't symmetric, isn't 2-dimensinonal or isn't of odd
+        length in each dimension.
+    RuntimeError
+        If the difference between the decomposed and original footprint exceeds
+        a given `max_error`. This may be because the given footprint isn't
+        convex or because the decomposition is an approximation.
+        Try checking the given footprint or increase `max_error` if
+        a bigger approximation error is allowed.
+
     Notes
     -----
     This technique was proposed in [1]_ and corresponds roughly to algorithm 1
     of that publication (some details had to be modified to get reliable
     operation).
+
+    A convex footprint, in terms of this function, is a footprint that doesn't
+    contain holes, and whose surface doesn't contain notches / inlets.
 
     References
     ----------
