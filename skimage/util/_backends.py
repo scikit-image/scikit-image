@@ -5,6 +5,59 @@ import os
 import warnings
 
 
+__all__ = [
+    "set_backends",
+]
+
+
+class set_backends:
+    _active_instance = None
+
+    def __init__(self, *backends, dispatch=False):
+        if not isinstance(dispatch, bool):
+            raise ValueError(
+                f"Invalid value for 'dispatch': {dispatch}. Expected True or False."
+            )
+
+        self.dispatch = dispatch
+        self.backend_priority = list(backends) if backends else None
+
+        set_backends._previous_instance = None  # for nested context managers
+        set_backends._active_instance = self
+
+    def __enter__(self):
+        self._previous_instance = set_backends._active_instance
+        set_backends._active_instance = self
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        set_backends._active_instance = self._previous_instance
+
+    @classmethod
+    def get_dispatch_and_priority(cls):
+        env_var_dispatch = get_skimage_dispatching()
+        env_var_priority = get_skimage_backend_priority()
+
+        if cls._active_instance:
+            if env_var_dispatch or env_var_priority:
+                warnings.warn(
+                    "`set_backends` instance is currently active. Ignoring values in"
+                    "`SKIMAGE_DISPATCHING` and `SKIMAGE_BACKEND_PRIORITY`.",
+                    DispatchNotification,
+                    stacklevel=3,
+                )
+            return cls._active_instance.dispatch, cls._active_instance.backend_priority
+        else:
+            return env_var_dispatch, env_var_priority
+
+    @classmethod
+    def delete_active_instance(cls):
+        """Deletes the currently active instance."""
+        if cls._active_instance:
+            del cls._active_instance
+            cls._active_instance = None
+
+
 def get_skimage_dispatching():
     """Returns the value of the `SKIMAGE_DISPATCHING` environment variable."""
     dispatch_flag = os.environ.get("SKIMAGE_DISPATCHING", False)
@@ -18,7 +71,7 @@ def get_skimage_dispatching():
             "Expected 'True' or 'False'."
             f"Setting SKIMAGE_DISPATCHING to 'False'.",
             DispatchNotification,
-            stacklevel=2,
+            stacklevel=4,
         )
         return False
 
@@ -141,20 +194,21 @@ def dispatchable(func):
     """
     func_name = func.__name__
     func_module = public_api_module(func)
-    if not get_skimage_dispatching():
-        return func
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        backend_priority = get_skimage_backend_priority()
+        dispatch, backend_priority = set_backends.get_dispatch_and_priority()
+        if not dispatch:
+            return func(*args, **kwargs)
+
         installed_backends = all_backends_with_eps_combined()
 
         if not installed_backends:
             # no backends installed falling back to scikit-image
             warnings.warn(
                 f"Call to '{func_module}:{func_name}' was not dispatched."
-                " No backends installed and SKIMAGE_DISPATCHING is set to"
-                f"'{get_skimage_dispatching()}'. Falling back to scikit-image.",
+                " No backends installed and `SKIMAGE_DISPATCHING` is set to"
+                f"'{dispatch}'. Falling back to scikit-image.",
                 DispatchNotification,
                 stacklevel=2,
             )
@@ -163,8 +217,7 @@ def dispatchable(func):
         if not backend_priority:
             # backend priority is not set; using default priority--
             # i.e. backend names sorted in alphabetical order
-            default_backend_priority = list(installed_backends.keys())
-            default_backend_priority.sort()
+            default_backend_priority = sorted(installed_backends.keys())
             warnings.warn(
                 f"`SKIMAGE_BACKEND_PRIORITY` was set to {backend_priority}. Defaulting to priority: "
                 f"'{default_backend_priority}'. Use `SKIMAGE_BACKEND_PRIORITY` to set a custom backend priority.",
@@ -175,6 +228,11 @@ def dispatchable(func):
 
         for backend_name in backend_priority:
             if backend_name not in installed_backends:
+                warnings.warn(
+                    f"'{backend_name}' backend not installed. Falling onto the next backend in the priority.",
+                    DispatchNotification,
+                    stacklevel=2,
+                )
                 continue
             backend = installed_backends[backend_name]
             # Check if the function we are looking for is implemented in
@@ -211,7 +269,7 @@ def dispatchable(func):
                 warnings.warn(
                     f"Call to '{func_module}:{func_name}' was not dispatched."
                     " All backends rejected the call. Falling back to scikit-image."
-                    f"Installed backends : {installed_backends.keys()}",
+                    f"Installed backends : {list(installed_backends.keys())}",
                     DispatchNotification,
                     stacklevel=2,
                 )
