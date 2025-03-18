@@ -625,7 +625,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
         sequence = _nsphere_series_decomposition(radius, ndim=2, dtype=dtype)
     elif decomposition == 'crosses':
         fp = disk(radius, dtype, strict_radius=strict_radius, decomposition=None)
-        sequence = footprint_cross_decompose(fp)
+        sequence = footprint_cross_decompose(fp, max_error=None)
     return sequence
 
 
@@ -647,11 +647,11 @@ def _cross(r0, r1, dtype=np.uint8):
 def footprint_cross_decompose(footprint, max_error=0.01):
     """Decompose a symmetric convex footprint into cross-shaped elements.
 
-    This is a decomposition of the footprint into a sequence of
-    (possibly asymmetric) cross-shaped elements. Applying this series of
-    smaller footprints will give a result close to (or even equivalent to) the
-    dense original `footprint` but with better computational performance for
-    large footprints.
+    This decomposes the footprint into a sequence of (possibly asymmetric)
+    cross-shaped elements. Applying this series of smaller footprints will
+    give a result close to (or even equivalent to) the dense original
+    `footprint` but often with better computational performance for large
+    footprints.
 
     Parameters
     ----------
@@ -872,7 +872,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         return footprint
     elif decomposition == 'crosses':
         fp = ellipse(width, height, dtype, decomposition=None)
-        sequence = footprint_cross_decompose(fp)
+        sequence = footprint_cross_decompose(fp, max_error=None)
     return sequence
 
 
