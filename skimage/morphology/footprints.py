@@ -74,7 +74,7 @@ def _shape_from_sequence(footprints, require_odd_size=False):
     return tuple(shape)
 
 
-def footprint_from_sequence(footprints, *, dtype=bool):
+def footprint_from_sequence(footprints):
     """Convert a footprint sequence into an equivalent ndarray.
 
     Parameters
@@ -84,8 +84,6 @@ def footprint_from_sequence(footprints, *, dtype=bool):
         is an array corresponding to a footprint and the second element is the
         number of times it is to be applied. Currently, all footprints should
         have odd size.
-    dtype : data-type, optional
-        The data type of the footprint.
 
     Returns
     -------
@@ -95,7 +93,7 @@ def footprint_from_sequence(footprints, *, dtype=bool):
 
     # Create a single pixel image of sufficient size and apply binary dilation.
     shape = _shape_from_sequence(footprints)
-    imag = np.zeros(shape, dtype=dtype)
+    imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
     return morphology.dilation(imag, footprints)
 
