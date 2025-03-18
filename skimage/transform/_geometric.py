@@ -89,7 +89,10 @@ def _apply_homogeneous(matrix, points):
     Parameters
     ----------
     matrix : (D+1, D+1) array_like
-        The transformation matrix to obtain the new points.
+        The transformation matrix to obtain the new points. Note that any
+        object with an `__array__` method [1]_ that returns a matrix with the
+        correct dimensions can be used as input here. This includes all
+        subclasses of :class:`ProjectiveTransform`, for example.
     points : (N, D) array
         The coordinates of the image points.
 
@@ -97,6 +100,11 @@ def _apply_homogeneous(matrix, points):
     -------
     new_points : (N, D) array
         The transformed image points.
+
+    References
+    ----------
+    .. [1]:
+        https://numpy.org/doc/stable/user/basics.interoperability.html#using-arbitrary-objects-in-numpy
     """
     matrix = np.asarray(matrix)
     points = np.array(points, copy=NP_COPY_IF_NEEDED, ndmin=2)
