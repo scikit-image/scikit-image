@@ -299,6 +299,21 @@ def _decompose_size(size, kernel_size=3):
     `kernel_size` is equivalent to a morphology with a single kernel of size
     `n`.
 
+    Parameters
+    ----------
+    size : int
+    kernel_size : int, optional
+
+    Returns
+    -------
+    repetitions : int
+
+    Examples
+    --------
+    >>> _decompose_size(9, kernel_size=3)
+    4
+    >>> _decompose_size(9, kernel_size=5)
+    2
     """
     if kernel_size % 2 != 1:
         raise ValueError("only odd length kernel_size is supported")
