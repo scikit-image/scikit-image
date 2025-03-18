@@ -141,11 +141,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # TODO: replace with setup-python when there is support
-      - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
+      - uses: actions/setup-python@9e62be81b28222addecf85e47571213eb7680449
+        name: Install Python
         with:
-          python-version: "3.13"
-          nogil: true
+          python-version: "3.13t"
 
       - name: Install build dependencies
         # See special clause inside setup-build-env.sh that detects when
