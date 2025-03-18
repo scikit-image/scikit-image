@@ -118,6 +118,11 @@ jobs:
           path: ./build
           key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
 
+      - name: Ccache statistics
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }}
+        run: |
+          ccache -s
+
       - name: Build and install from sdist
         if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
         run: |
