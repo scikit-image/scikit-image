@@ -59,7 +59,7 @@ ax[0].set_title('Original Data')
 ax[1].imshow(astro_noisy)
 ax[1].set_title('Noisy data')
 
-ax[2].imshow(deconvolved_RL, vmin=astro_noisy.min(), vmax=astro_noisy.max())
+ax[2].imshow(deconvolved_RL)
 ax[2].set_title('Restoration using\nRichardson-Lucy')
 
 
