@@ -612,7 +612,7 @@ def _cross(r0, r1, dtype=np.uint8):
     return c
 
 
-def footprint_cross_decompose(footprint):
+def footprint_cross_decompose(footprint, max_error=0.01):
     """Decompose a symmetric convex footprint into cross-shaped elements.
 
     This is a decomposition of the footprint into a sequence of
@@ -626,11 +626,14 @@ def footprint_cross_decompose(footprint):
     footprint : (N, M) ndarray
         A symmetric convex footprint as a 2-D array of 1's and 0's.
         N and M must be of odd length.
-
-        .. warning::
-            For performance reasons, it isn't checked whether `footprint` is
-            symmetric or convex or contains only 0 and 1. So, for unsupported
-            footprints, this function may return an incorrect decomposition!
+    max_error : float or None, optional
+        Maximal allowed approximation erreor that the decomposition can deviate
+        from the original `footprint`. The deviation is calculated by
+        recomposing the approximation into a dense footprint again. If the rate
+        of different pixels compared to the total footprint size exceeds this
+        value, raise a RuntimeError.
+        Pass None, to skip this error calculation entirely for performance
+        reasons.
 
     Returns
     -------
@@ -732,6 +735,22 @@ def footprint_cross_decompose(footprint):
     decomposed = tuple(
         [(_cross(r0, r1, footprint.dtype), n) for (r0, r1), n in crosses.items()]
     )
+
+    if max_error is not None:
+        recomposed = footprint_from_sequence(decomposed)
+        diff = footprint.astype(int) - recomposed.astype(int)
+        error_rate = np.abs(diff).sum() / footprint.size
+        if error_rate > max_error:
+            msg = (
+                "Difference between decomposed and original footprint exceeds "
+                f"the given `{max_error=}`, error rate is {error_rate:.5f}. "
+                "This may be because the given footprint isn't convex or "
+                "because the decomposition is an approximation. "
+                "Try checking the given footprint or increase `max_error` if "
+                "a bigger approximation error is allowed."
+            )
+            raise RuntimeError(msg)
+
     return decomposed
 
 
