@@ -37,23 +37,23 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         'kaleido': 'python-kaleido',
         'sphinx_design': 'sphinx-design',
     }
-    out = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
+    lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
+    for section in req_sections:
+        lines.append(f"  # {section}")
+        for dep in req_sections[section]:
+            # Remove optional specifiers such as `[parallel]`
+            dep = re.sub('\\[.*?\\]', '', dep)
+
+            # Remove platform specifiers such as `; sys_platform != "emscripten"`
+            dep = re.sub('; .*', '', dep)
+
+            pkgname = re.split('[>=]', dep)[0]
+            dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
+
+            lines.append(f"  - {dep}")
+
     with open("environment.yml", "w") as f:
-        for section in req_sections:
-            out.append(f"  # {section}")
-            for dep in req_sections[section]:
-                # Remove optional specifiers such as `[parallel]`
-                dep = re.sub('\\[.*?\\]', '', dep)
-
-                # Remove platform specifiers such as `; sys_platform != "emscripten"`
-                dep = re.sub('; .*', '', dep)
-
-                pkgname = re.split('[>=]', dep)[0]
-                dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
-
-                out.append(f"  - {dep}")
-
-        f.writelines(f"{line}\n" for line in out)
+        f.writelines(f"{line}\n" for line in lines)
 
 
 def main() -> None:
