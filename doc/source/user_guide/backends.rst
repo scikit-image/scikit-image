@@ -44,7 +44,11 @@ priority or a single backend in the following ways:
 - Dispatching within a context manager::
 
         with skimage.set_backends("backend_1", "backend_2", dispatch=True):
-            skimage.metrics.mean_squared_error(img1, img2)
+            skimage.metrics.mean_squared_error(img1, img2, additional_arg="foo")
+
+  Here, ``additional_arg`` is an additional parameter supported by ``backend_1`` and ``backend_2``.
+  It is recommended to wrap such function calls within a context manager to prevent errors or
+  unexpected behavior when falling back to the default scikit-image implementation.
 
 - You can also set the backend(s) without modifying your existing scikit-image code, like this::
 

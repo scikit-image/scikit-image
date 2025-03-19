@@ -86,9 +86,10 @@ return the backend function that implements the behaviour of the function ``name
 Once the implementation has been retrieved from the backend, it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
 
-Note that we don't check the passed in args and kwargs when calling the backend
-implementation. So, this allows you to take in additional backend-specific kwargs
-from users but make sure this doesn't harm your backend in anyway.
+Note that we don't check whether args and keyword args match the original function
+signature when dispatching to the backend implementation. So, this allows you to take
+in additional backend-specific kwargs from users but make sure this doesn't harm your
+backend in anyway.
 
 When returning an array, it has to be of the same type as the array(s) passed in to the
 function by the user. This means a backend implementation can convert the input to a different
