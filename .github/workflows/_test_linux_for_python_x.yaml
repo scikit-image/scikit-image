@@ -43,10 +43,10 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/download-artifact@v4
-        id: download
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
         with:
-          name: skimage-linux-${{ inputs.python-version }}
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -54,6 +54,12 @@ jobs:
           python-version: ${{ inputs.python-version }}
           allow-prereleases: true
           cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - uses: actions/download-artifact@v4
+        id: download
+        with:
+          name: skimage-linux-${{ inputs.python-version }}
 
       - name: Install
         env:
