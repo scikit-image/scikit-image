@@ -88,7 +88,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: ccache-restore
         with:
-          path: ./build
+          path: ~/.ccache
           key: ${{ runner.os }}-ccache-py${{ matrix.python-version }}
 
       - name: Setup Python
@@ -115,7 +115,7 @@ jobs:
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.MINIMUM_REQUIREMENTS != 1 }} # && github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main' }}
         uses: actions/cache/save@v4
         with:
-          path: ./build
+          path: ~/.ccache
           key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
 
       - name: Ccache statistics
