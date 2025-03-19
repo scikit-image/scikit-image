@@ -32,7 +32,7 @@ on:
 
 jobs:
   test-linux:
-    name: linux-cp${{ input.python-version }}-${{ input.OPTIONS_NAME }}
+    name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -43,32 +43,32 @@ jobs:
       - uses: actions/download-artifact@v4
         id: download
         with:
-          name: skimage-linux-${{ input.python-version }}
+          name: skimage-linux-${{ inputs.python-version }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ input.python-version }}
+          python-version: ${{ inputs.python-version }}
           allow-prereleases: true
           cache: "pip"
 
       - name: Install
         env:
-          PIP_FLAGS: ${{ input.PIP_FLAGS }}
+          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
         run: |
           pip install dist/*.whl
 
       - name: Install test dependencies
         env:
-          MINIMUM_REQUIREMENTS: ${{ input.MINIMUM_REQUIREMENTS }}
-          OPTIONAL_DEPS: ${{ input.OPTIONAL_DEPS }}
-          WITHOUT_POOCH: ${{ input.WITHOUT_POOCH }}
-          PIP_FLAGS: ${{ input.PIP_FLAGS }}
+          MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
+          OPTIONAL_DEPS: ${{ inputs.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ inputs.WITHOUT_POOCH }}
+          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
         run: |
           source .github/scripts/setup-test-env.sh
 
       - name: Verify non-conflicting dependencies
-        if: ${{ input.OPTIONAL_DEPS == 1 && input.MINIMUM_REQUIREMENTS == 0 }}
+        if: ${{ inputs.OPTIONAL_DEPS == 1 && inputs.MINIMUM_REQUIREMENTS == 0 }}
         run: |
           # Attempt to resolve all requirements simultaneously
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
@@ -76,8 +76,8 @@ jobs:
       - name: Run tests
         env:
           # A lazy loader configuration parameter
-          EAGER_IMPORT: ${{ input.EAGER_IMPORT }}
-          MINIMUM_REQUIREMENTS: ${{ input.MINIMUM_REQUIREMENTS }}
-          PYTHONOPTIMIZE: ${{ input.PYTHONOPTIMIZE }}
+          EAGER_IMPORT: ${{ inputs.EAGER_IMPORT }}
+          MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
+          PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
           pytest --doctest-plus --showlocals --pyargs skimage

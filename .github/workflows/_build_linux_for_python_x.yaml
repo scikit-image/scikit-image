@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-skimage-spin:
-    name: linux-cp${{ input.python-version }}
+    name: linux-cp${{ inputs.python-version }}
     runs-on: ubuntu latest
 
     steps:
@@ -32,19 +32,19 @@ jobs:
         id: ccache-restore
         with:
           path: ~/.ccache
-          key: ${{ runner.os }}-ccache-py${{ input.python-version }}
+          key: ${{ runner.os }}-ccache-py${{ inputs.python-version }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ input.python-version }}
+          python-version: ${{ inputs.python-version }}
           allow-prereleases: true
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
       - name: Install build dependencies
         env:
-          PIP_FLAGS: ${{ input.PIP_FLAGS }}
+          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
         run: |
           source .github/scripts/setup-build-env.sh
 
@@ -54,7 +54,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: skimage-linux-${{ input.python-version }}
+          name: skimage-linux-${{ inputs.python-version }}
           path: ./dist
 
       - name: Ccache statistics
