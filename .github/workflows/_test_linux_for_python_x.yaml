@@ -90,4 +90,4 @@ jobs:
           MINIMUM_REQUIREMENTS: ${{ inputs.MINIMUM_REQUIREMENTS }}
           PYTHONOPTIMIZE: ${{ inputs.PYTHONOPTIMIZE }}
         run: |
-          pytest --doctest-plus --showlocals --pyargs skimage
+          (cd .. && pytest --doctest-plus --showlocals --pyargs skimage)
