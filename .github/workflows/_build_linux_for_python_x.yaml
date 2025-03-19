@@ -50,7 +50,7 @@ jobs:
 
       - name: Build from sdist
         run: |
-          python -m build --no-isolation
+          python -m build --no-isolation --skip-dependency-check
 
       - uses: actions/upload-artifact@v4
         with:
