@@ -17,22 +17,22 @@ env:
 jobs:
   # GH does not support creating separate jobs out of a matrix,
   # so this is a workaround
-  build-linux-3.11:
+  build-linux-311:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.11
 
-  build-linux-3.12:
+  build-linux-312:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.12
 
-  build-linux-3.13:
+  build-linux-313:
     uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.13
 
-  test-linux-3.11:
+  test-linux-311:
     name: test-linux-cp3.11-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-311]
     strategy:
@@ -60,7 +60,7 @@ jobs:
       WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
 
-  test-linux-3.12:
+  test-linux-312:
     name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-312]
     strategy:
@@ -90,7 +90,7 @@ jobs:
       PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
       PYTHONOPTIMIZE: ${{ matrix.PYTHONOPTIMIZE }}
 
-  test-linux-3.13:
+  test-linux-313:
     name: test-linux-cp3.13-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-313]
     strategy:
