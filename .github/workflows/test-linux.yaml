@@ -18,17 +18,17 @@ jobs:
   # GH does not support creating separate jobs out of a matrix,
   # so this is a workaround
   build-linux-3.11:
-    uses: ./.github/workflows/reusable/build_linux_for_python_x.yaml
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.11
 
   build-linux-3.12:
-    uses: ./.github/workflows/reusable/build_linux_for_python_x.yaml
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.12
 
   build-linux-3.13:
-    uses: ./.github/workflows/reusable/build_linux_for_python_x.yaml
+    uses: ./.github/workflows/_build_linux_for_python_x.yaml
     with:
       python-version: 3.13
 
@@ -52,7 +52,7 @@ jobs:
           - MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "mini-req-optional-deps"
-    uses: ./.github/workflows/reusable/test_linux_for_python_x.yaml
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
@@ -81,7 +81,7 @@ jobs:
             WITHOUT_POOCH: 1
             OPTIONS_NAME: "optimize-and-no-pooch"
 
-    uses: ./.github/workflows/reusable/test_linux_for_python_x.yaml
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
@@ -102,7 +102,7 @@ jobs:
         WITHOUT_POOCH: [0]
         PIP_FLAGS: [""]
 
-    uses: ./.github/workflows/reusable/test_linux_for_python_x.yaml
+    uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
