@@ -7,19 +7,19 @@ on:
         type: string
       MINIMUM_REQUIREMENTS:
         required: false
-        type: int
+        type: string
         default: 0
       OPTIONAL_DEPS:
         required: false
-        type: int
+        type: string
         default: 0
       EAGER_IMPORT:
         required: false
-        type: int
+        type: string
         default: 0
       WITHOUT_POOCH:
         required: false
-        type: int
+        type: string
         default: 0
       PIP_FLAGS:
         required: false
@@ -27,7 +27,7 @@ on:
         default: ""
       PYTHONOPTIMIZE:
         required: false
-        type: int
+        type: string
         default: 0
 
 jobs:
