@@ -68,7 +68,7 @@ int values
 iso-valued contour
     See {term}`contour`.
 
-labels
+label image
     An image of labels is of integer type, where pixels with the same
     integer value belong to the same object. For example, the result of a
     segmentation is an image of labels. {func}`skimage.measure.label` labels
@@ -76,9 +76,6 @@ labels
     labels. Labels are usually contiguous integers, and
     {func}`skimage.segmentation.relabel_sequential` can be used to relabel
     arbitrary labels to sequential (contiguous) ones.
-
-label image
-    See {term}`labels`.
 
 pixel
     Smallest element of an image. An image is a grid of pixels, and the
@@ -91,7 +88,7 @@ pixel
 segmentation
     Partitioning an image into multiple objects (segments), for
     example an object of interest and its background. The output of a
-    segmentation is typically an image of {term}`labels`, where
+    segmentation is typically a {term}`label image`, where
     the pixels of different objects have been attributed different
     integer labels. Several segmentation algorithms are available in
     {mod}`skimage.segmentation`.
