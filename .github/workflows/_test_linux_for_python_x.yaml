@@ -2,6 +2,9 @@ name: Test Linux wheel for a given Python version
 on:
   workflow_call:
     inputs:
+      python-version:
+        required: true
+        type: string
       OPTIONS_NAME:
         required: true
         type: string

@@ -54,6 +54,7 @@ jobs:
             OPTIONS_NAME: "mini-req-optional-deps"
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      python-version: 3.11
       OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
@@ -84,6 +85,7 @@ jobs:
 
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      python-version: 3.12
       OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
@@ -106,6 +108,7 @@ jobs:
 
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      python-version: 3.13
       OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
