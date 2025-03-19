@@ -54,6 +54,7 @@ jobs:
             OPTIONS_NAME: "mini-req-optional-deps"
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
       EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
@@ -83,6 +84,7 @@ jobs:
 
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
       EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
@@ -104,6 +106,7 @@ jobs:
 
     uses: ./.github/workflows/_test_linux_for_python_x.yaml
     with:
+      OPTIONS_NAME: ${{ matrix.OPTIONS_NAME }}
       MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
       OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
       EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
