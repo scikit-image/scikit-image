@@ -82,6 +82,7 @@ jobs:
       - name: Install ccache
         run: |
           sudo apt-get install -y ccache
+          mkdir -p ~/.ccache
 
       - name: Restore ccache build cache
         if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
@@ -176,6 +177,7 @@ jobs:
       - name: Install ccache
         run: |
           sudo apt-get install -y ccache
+          mkdir -p ~/.ccache
 
       - name: Restore ccache build cache
         uses: actions/cache/restore@v4
