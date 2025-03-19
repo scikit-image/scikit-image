@@ -157,7 +157,7 @@ def test_notification_with_backends(monkeypatch, fake_backends):
 
     assert r == 42 * 3
 
-    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake3")  # "fake3" is not a backend.
+    monkeypatch.setenv("SKIMAGE_BACKEND_PRIORITY", "fake3")  # "fake3" does not exists.
     with pytest.warns(
         _backends.DispatchNotification,
         match="Call to.*:foo' was not dispatched.",

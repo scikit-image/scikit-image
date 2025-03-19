@@ -228,11 +228,6 @@ def dispatchable(func):
 
         for backend_name in backend_priority:
             if backend_name not in installed_backends:
-                warnings.warn(
-                    f"'{backend_name}' backend not installed. Falling onto the next backend in the priority.",
-                    DispatchNotification,
-                    stacklevel=2,
-                )
                 continue
             backend = installed_backends[backend_name]
             # Check if the function we are looking for is implemented in
@@ -269,7 +264,7 @@ def dispatchable(func):
                 warnings.warn(
                     f"Call to '{func_module}:{func_name}' was not dispatched."
                     " All backends rejected the call. Falling back to scikit-image."
-                    f"Installed backends : {list(installed_backends.keys())}",
+                    f" Installed backends : {list(installed_backends.keys())}",
                     DispatchNotification,
                     stacklevel=2,
                 )
