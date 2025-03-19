@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         # Dependency options for setup-test-env.sh
-        OPTIONS_NAME: "main"
+        OPTIONS_NAME: ["main"]
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
@@ -66,7 +66,7 @@ jobs:
     strategy:
       matrix:
         # Dependency options for setup-test-env.sh
-        OPTIONS_NAME: "main"
+        OPTIONS_NAME: ["main"]
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
@@ -96,7 +96,7 @@ jobs:
     strategy:
       matrix:
         # Dependency options for setup-test-env.sh
-        OPTIONS_NAME: "main"
+        OPTIONS_NAME: ["main"]
         MINIMUM_REQUIREMENTS: [0]
         OPTIONAL_DEPS: [0]
         WITHOUT_POOCH: [0]
