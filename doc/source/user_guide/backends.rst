@@ -17,40 +17,53 @@ like C++ or Rust, or be tailored for specific hardware such as GPUs.
 Using backends
 --------------
 
-Firstly, you need to install the scikit-image backend package you need to use.
+Firstly, you need to install the scikit-image backend package that you want to use.
 
-By default, the backend dispatching is **disabled**. To enable and customize backend dispatching, set
-the ``SKIMAGE_DISPATCHING`` environment variable to ``"True"``.
+By default, the backend dispatching is **disabled**. To enable it you can either:
+
+- set the environment variable ``SKIMAGE_DISPATCHING = "True"``, or
+- use the ``skimage.set_backends(dispatch=True)`` function in your script.
 
 By default, backends are prioritized alphabetically by name. But, you can further configure the backend
-priority or a single backend using the ``SKIMAGE_BACKEND_PRIORITY`` environment variable at runtime in
-the following ways:
+priority or a single backend in the following ways:
 
 - Setting a single backend::
 
-        os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name"
+        skimage.set_backends("backend_name", dispatch=True)
 
 - Setting backend priority::
 
-        os.environ["SKIMAGE_BACKEND_PRIORITY"] = "backend_name_1, backend_name_2, backend_name_3"
+        skimage.set_backends("backend_1", "backend_2", "backend_3")
 
-  Here, the first backend (``backend_name_1``) will be queried for the implementation of an algorithm.
-  If it does not implement that algorithm, then the next backend in the list (``backend_name_2``) will be
+  Here, the first backend (``backend_1``) will be queried for the implementation of an algorithm.
+  If it does not implement that algorithm, then the next backend in the list (``backend_2``) will be
   checked, and so on, until the we encounter a backend that does have the implementation for the algorithm.
   If none of the backends in the list implement the algorithm, then the scikit-image's original
   implementation is executed.
 
-You can also set the backend(s) without modifying your existing scikit-image code file, like this::
+- Dispatching within a context manager::
 
-        $ export SKIMAGE_DISPATCHING="True" && export SKIMAGE_BACKEND_PRIORITY="backend_name1, backend_name_2" && python scikit_image_code.py
+        with skimage.set_backends("backend_1", "backend_2", dispatch=True):
+            skimage.metrics.mean_squared_error(img1, img2)
+
+- You can also set the backend(s) without modifying your existing scikit-image code, like this::
+
+        $ export SKIMAGE_DISPATCHING="True" && export SKIMAGE_BACKEND_PRIORITY="backend_1, backend_2" && python scikit_image_code.py
 
 
-To disable backend dispatching::
+To disable backend dispatching run::
 
-        os.environ["SKIMAGE_DISPATCHING"] = "False"
+        skimage.set_backends(dispatch=False)
 
 
-Note that if no backend(s) in ``SKIMAGE_BACKEND_PRIORITY``,
+Note that if a ``set_backends`` instance is active in a runtime, then the values
+stored in the above two environment variables will be ignored. To delete an
+active ``set_backends`` instance run::
+
+        skimage.set_backends.delete_active_instance()
+
+
+Also, if no backend(s) in the given backend priority,
 
 - are installed on your local machine, or
 - provide an alternate implementation for an algorithm,
