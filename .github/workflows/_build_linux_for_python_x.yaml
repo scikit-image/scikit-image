@@ -55,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: skimage-linux-${{ inputs.python-version }}
-          path: ./dist
+          path: ./dist/*.whl
 
       - name: Ccache statistics
         run: |

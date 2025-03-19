@@ -60,6 +60,7 @@ jobs:
         id: download
         with:
           name: skimage-linux-${{ inputs.python-version }}
+          path: ./dist
 
       - name: Install
         env:
