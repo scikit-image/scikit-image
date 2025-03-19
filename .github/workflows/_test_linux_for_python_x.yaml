@@ -38,10 +38,6 @@ jobs:
     name: linux-cp${{ inputs.python-version }}-${{ inputs.OPTIONS_NAME }}
     runs-on: ubuntu-latest
 
-    strategy:
-      # Ensure that a wheel builder finishes even if another fails
-      fail-fast: false
-
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4

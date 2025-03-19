@@ -36,6 +36,7 @@ jobs:
     name: test-linux-cp3.11-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-311]
     strategy:
+      fail-fast: false
       matrix:
         # Dependency options for setup-test-env.sh
         OPTIONS_NAME: ["main"]
@@ -66,6 +67,7 @@ jobs:
     name: test-linux-cp3.12-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-312]
     strategy:
+      fail-fast: false
       matrix:
         # Dependency options for setup-test-env.sh
         OPTIONS_NAME: ["main"]
@@ -98,6 +100,7 @@ jobs:
     name: test-linux-cp3.13-${{ matrix.OPTIONS_NAME }}
     needs: [build-linux-313]
     strategy:
+      fail-fast: false
       matrix:
         # Dependency options for setup-test-env.sh
         OPTIONS_NAME: ["main"]
