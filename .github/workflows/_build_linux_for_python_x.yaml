@@ -50,7 +50,8 @@ jobs:
 
       - name: Build from sdist
         run: |
-          python -m build --no-isolation --skip-dependency-check
+          # Debug build is able to utilize ccache better
+          python -m build --no-isolation -Csetup-args="-Dbuildtype=debug"
 
       - uses: actions/upload-artifact@v4
         with:
