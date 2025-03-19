@@ -1,0 +1,83 @@
+name: Test Linux wheel for a given Python version
+on:
+  workflow_call:
+    inputs:
+      OPTIONS_NAME:
+        required: true
+        type: string
+      MINIMUM_REQUIREMENTS:
+        required: false
+        type: int
+        default: 0
+      OPTIONAL_DEPS:
+        required: false
+        type: int
+        default: 0
+      EAGER_IMPORT:
+        required: false
+        type: int
+        default: 0
+      WITHOUT_POOCH:
+        required: false
+        type: int
+        default: 0
+      PIP_FLAGS:
+        required: false
+        type: string
+        default: ""
+      PYTHONOPTIMIZE:
+        required: false
+        type: int
+        default: 0
+
+jobs:
+  test-linux:
+    name: linux-cp${{ input.python-version }}-${{ input.OPTIONS_NAME }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+
+    steps:
+      - uses: actions/download-artifact@v4
+        id: download
+        with:
+          name: skimage-linux-${{ input.python-version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ input.python-version }}
+          allow-prereleases: true
+          cache: "pip"
+
+      - name: Install
+        env:
+          PIP_FLAGS: ${{ input.PIP_FLAGS }}
+        run: |
+          pip install dist/*.whl
+
+      - name: Install test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: ${{ input.MINIMUM_REQUIREMENTS }}
+          OPTIONAL_DEPS: ${{ input.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ input.WITHOUT_POOCH }}
+          PIP_FLAGS: ${{ input.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Verify non-conflicting dependencies
+        if: ${{ input.OPTIONAL_DEPS == 1 && input.MINIMUM_REQUIREMENTS == 0 }}
+        run: |
+          # Attempt to resolve all requirements simultaneously
+          pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
+
+      - name: Run tests
+        env:
+          # A lazy loader configuration parameter
+          EAGER_IMPORT: ${{ input.EAGER_IMPORT }}
+          MINIMUM_REQUIREMENTS: ${{ input.MINIMUM_REQUIREMENTS }}
+          PYTHONOPTIMIZE: ${{ input.PYTHONOPTIMIZE }}
+        run: |
+          pytest --doctest-plus --showlocals --pyargs skimage
