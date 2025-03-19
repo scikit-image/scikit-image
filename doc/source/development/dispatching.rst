@@ -76,7 +76,7 @@ only want to handle calls where the input arrays are of a particular type or siz
 If your backend cannot handle a particular call, the ``can_has`` function should return
 ``False`` as quickly as possible. This means you should perform fast checks first and
 more expensive checks later in your ``can_has`` function. Note that the ``can_has`` function
-should not import the backend or backend implementation, that should be done in the
+should not import the backend or backend implementation, that should be done in
 ``get_implementation``.
 
 If the ``can_has`` function indicates that the backend wants to handle the call then the

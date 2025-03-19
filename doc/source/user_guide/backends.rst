@@ -17,9 +17,8 @@ like C++ or Rust, or be tailored for specific hardware such as GPUs.
 Using backends
 --------------
 
-Firstly, you need to install the scikit-image backend package that you want to use.
-
-By default, the backend dispatching is **disabled**. To enable it you can either:
+First, install the scikit-image backend you want to use. By default, the backend
+dispatching is **disabled**. To enable it you can either:
 
 - set the environment variable ``SKIMAGE_DISPATCHING = "True"``, or
 - use the ``skimage.set_backends(dispatch=True)`` function in your script.
