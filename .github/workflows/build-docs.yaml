@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   build:
+    if: false # temporarily disable
     permissions:
       contents: write # for Git to git push
     name: Build docs
