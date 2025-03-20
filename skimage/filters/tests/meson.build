@@ -8,7 +8,6 @@ python_sources = [
   'test_lpi_filter.py',
   'test_median.py',
   'test_ridges.py',
-  'test_thresholding.py',
   'test_unsharp_mask.py',
   'test_window.py'
 ]

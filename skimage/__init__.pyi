@@ -14,6 +14,7 @@ _submodules = [
     'registration',
     'restoration',
     'segmentation',
+    'threshold',
     'transform',
     'util',
 ]
@@ -36,6 +37,7 @@ from . import (
     registration,
     restoration,
     segmentation,
+    threshold,
     transform,
     util,
 )
