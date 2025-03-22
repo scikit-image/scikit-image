@@ -653,8 +653,34 @@ class ProjectiveTransform(_GeometricTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
-    """
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage import data
+    >>> from skimage.transform import warp, ProjectiveTransform
+    >>> img = data.rocket()
+    >>> height, width, dim = img.shape
 
+    Provide four pairs of matching points between the source and
+    destination images to estimate the homography matrix H:
+
+    >>> src_points = np.array([[0, 0],
+    ...                 [height, 0.],
+    ...                 [height, width],
+    ...                 [0., width]])
+    >>> dst_points = np.array([[height*0.5, 0.],
+    ...                 [height, 0.],
+    ...                 [height, width],
+    ...                 [0., width]])
+    >>> pt = ProjectiveTransform()
+    >>> pt.estimate(src_points, dst_points)
+    True
+
+    Apply the transformation to the image
+
+    >>> warped_img = warp(img, pt.inverse)
+
+    """
     def __init__(self, matrix=None, *, dimensionality=2):
         if matrix is None:
             # default to an identity transform
