@@ -65,13 +65,13 @@ can be contributed to scikit-image.
 
    * Pull the latest changes from upstream::
 
-      git checkout main
+      git switch main
       git pull upstream main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
-      git checkout -b transform-speedups
+      git switch -c transform-speedups
 
    * Commit locally as you progress (with ``git add`` and ``git commit``).
      Please write `good commit messages
