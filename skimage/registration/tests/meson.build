@@ -3,7 +3,8 @@ python_sources = [
   'test_ilk.py',
   'test_masked_phase_cross_correlation.py',
   'test_phase_cross_correlation.py',
-  'test_tvl1.py'
+  'test_tvl1.py',
+  'test_enhanced_correlation_coef.py'
 ]
 
 py3.install_sources(
