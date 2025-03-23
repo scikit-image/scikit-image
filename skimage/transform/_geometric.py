@@ -10,8 +10,9 @@ from .._shared.compat import NP_COPY_IF_NEEDED
 
 
 def _affine_matrix_from_vector(v):
-    """Affine matrix from linearized (d, d + 1) matrix entries."""
+    """Affine matrix from linearized (n, n + 1) matrix entries."""
     nparam = v.size
+    # In the code, d denotes n (dimensionality).
     # solve for d in: d * (d + 1) = nparam
     d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
     dimensionality = int(np.round(d))  # round to prevent approx errors
@@ -25,9 +26,9 @@ def _affine_matrix_from_vector(v):
 
 
 def _center_and_normalize_points(points):
-    """Center and normalize image points.
+    """Center and normalize points of an nD image.
 
-    The points are transformed in a two-step procedure that is expressed
+    The N points are transformed in a two-step procedure that is expressed
     as a transformation matrix. The matrix of the resulting points is usually
     better conditioned than the matrix of the original points.
 
@@ -35,21 +36,21 @@ def _center_and_normalize_points(points):
     origin at the centroid of the image points.
 
     Normalize the image points, such that the mean distance from the points
-    to the origin of the coordinate system is sqrt(D).
+    to the origin of the coordinate system is sqrt(n).
 
     If the points are all identical, the returned values will contain nan.
 
     Parameters
     ----------
-    points : (N, D) array
+    points : (N, n) array
         The coordinates of the image points.
 
     Returns
     -------
-    matrix : (D+1, D+1) array_like
+    matrix : (n+1, n+1) array_like
         The transformation matrix to obtain the new points.
-    new_points : (N, D) array
-        The transformed image points.
+    new_points : (N, n) array
+        Coordinates of the transformed image points.
 
     References
     ----------
@@ -103,20 +104,20 @@ def _center_and_normalize_points(points):
 
 
 def _umeyama(src, dst, estimate_scale):
-    """Estimate N-D similarity transformation with or without scaling.
+    """Estimate nD similarity transformation with or without scaling.
 
     Parameters
     ----------
-    src : (M, N) array_like
+    src : (N, n) array_like
         Source coordinates.
-    dst : (M, N) array_like
+    dst : (N, n) array_like
         Destination coordinates.
     estimate_scale : bool
         Whether to estimate scaling factor.
 
     Returns
     -------
-    T : (N + 1, N + 1)
+    T : (n + 1, n + 1)
         The homogeneous similarity transformation matrix. The matrix contains
         NaN values only if the problem is not well-conditioned.
 
@@ -642,7 +643,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     dimensionality : int, optional
         The number of dimensions of the transform. This is ignored if
@@ -650,7 +651,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     """
@@ -1217,9 +1218,9 @@ def _euler_rotation_matrix(angles, degrees=False):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """Euclidean transformation, also known as a rigid transform.
+    """Euclidean transformation of an nD image.
 
-    Has the following form::
+    For n = 2, the Euclidean transformation has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
@@ -1235,7 +1236,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
-    transformation with a single scaling factor.
+    transformation with a (single) scale factor.
 
     In 2D and 3D, the transformation parameters may be provided either via
     `matrix`, the homogeneous transformation matrix, above, or via the
@@ -1246,7 +1247,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
         Rotation angle, clockwise, as radians. If given as
@@ -1254,14 +1255,14 @@ class EuclideanTransform(ProjectiveTransform):
         (single rotation) and 3D (Euler rotations) values are supported. For
         higher dimensions, you must provide or estimate the transformation
         matrix.
-    translation : (x, y[, z, ...]) sequence of float, length D, optional
+    translation : (x, y[, z, ...]) sequence of float, length n, optional
         Translation parameters for each axis.
     dimensionality : int, optional
         The dimensionality of the transform.
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     References
@@ -1369,7 +1370,11 @@ class EuclideanTransform(ProjectiveTransform):
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
-    Has the following form in 2D::
+    The similarity transformation extends the Euclidean transformation with a
+    scale factor in addition to the rotation and translation parameters.
+    Let n denote the number of dimensions of the image.
+
+    For n = 2, the similarity transformation has the following form::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -1383,13 +1388,9 @@ class SimilarityTransform(EuclideanTransform):
          [b0  a0  b1]
          [0   0   1 ]]
 
-    The similarity transformation extends the Euclidean transformation with a
-    single scaling factor in addition to the rotation and translation
-    parameters.
-
     Parameters
     ----------
-    matrix : (dim+1, dim+1) array_like, optional
+    matrix : (n+1, n+1) array_like, optional
         Homogeneous transformation matrix.
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
@@ -1397,12 +1398,12 @@ class SimilarityTransform(EuclideanTransform):
         Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : (dim,) array_like, optional
-        x, y[, z] translation parameters. Implemented only for 2D and 3D.
+    translation : (x, y[, z]) sequence of float, length n, optional
+        Translation parameters for each axis. Implemented only for 2D and 3D.
 
     Attributes
     ----------
-    params : (dim+1, dim+1) array
+    params : (n+1, n+1) array
         Homogeneous transformation matrix.
 
     """
