@@ -84,9 +84,15 @@ be ``skimage.feature:canny``.
 Once the implementation has been retrieved from the backend, it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
 
-When returning an array, it has to be of the same type as the array(s) passed in to the
-function by the user. This means a backend implementation can convert the input to a different
-array type, but it has to convert the result back to the original array type.
+When returning an array there are two separate cases to consider. The first case applies
+to functions that take arrays as arguments: the returned array has to be of the same type as
+the array(s) passed in to the function by the user. This means a backend implementation
+can convert the input to a different array type, but it has to convert the result back to
+the original array type.
+
+The second case applies to functions that do not take arrays as arguments: the returned value
+should be the "native array type" of the backend. For example, for a CuPy based backend
+the function ``skimage.morphology.star`` should return a CuPy array.
 
 
 An example backend
