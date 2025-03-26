@@ -42,7 +42,7 @@ im_true = ndi.label(ndi.binary_fill_holes(im_true - 1))[0]
 # final result. We will see how this causes the oversegmentation metrics to
 # shoot up.
 
-edges = ski.filter.sobel(image)
+edges = ski.filters.sobel(image)
 im_test1 = ski.segmentation.watershed(edges, markers=468, compactness=0.001)
 
 ###############################################################################
