@@ -5,10 +5,12 @@ from skimage._shared import testing
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import (
     arch32,
+    is_wasm,
     assert_almost_equal,
     assert_array_less,
     assert_equal,
     xfail,
+    assert_stacklevel,
 )
 from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
 from skimage.measure.fit import _dynamic_max_trials
@@ -150,9 +152,7 @@ def test_circle_model_residuals():
     model = CircleModel()
     model.params = (0, 0, 5)
     assert_almost_equal(abs(model.residuals(np.array([[5, 0]]))), 0)
-    assert_almost_equal(
-        abs(model.residuals(np.array([[6, 6]]))), np.sqrt(2 * 6**2) - 5
-    )
+    assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))), np.sqrt(2 * 6**2) - 5)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
 
 
@@ -171,9 +171,8 @@ def test_circle_model_insufficient_data():
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    # Check that stacklevel is correct
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
-    assert _warnings[0].filename == __file__
 
 
 def test_circle_model_estimate_from_small_scale_data():
@@ -449,8 +448,9 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     assert_almost_equal(params, model.params)
 
 
+# Passing on WASM
 @xfail(
-    condition=arch32,
+    condition=arch32 and not is_wasm,
     reason=(
         'Known test failure on 32-bit platforms. See links for '
         'details: '
@@ -461,17 +461,21 @@ def test_ellipse_model_estimate_from_far_shifted_data():
 def test_ellipse_model_estimate_failers():
     # estimate parameters of real data
     model = EllipseModel()
+
     warning_message = (
         "Standard deviation of data is too small to estimate "
         "ellipse with meaningful precision."
     )
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
         assert not model.estimate(np.ones((6, 2)))
-    # Check that stacklevel is correct
+    assert_stacklevel(_warnings)
     assert len(_warnings) == 1
-    assert _warnings[0].filename == __file__
 
-    assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    warning_message = "Need at least 5 data points to estimate an ellipse."
+    with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
+        assert not model.estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+    assert_stacklevel(_warnings)
+    assert len(_warnings) == 1
 
 
 def test_ellipse_model_residuals():
@@ -603,6 +607,22 @@ def test_ransac_dynamic_max_trials():
     assert_equal(_dynamic_max_trials(1, 100, 5, 1), 360436504051)
 
 
+def test_ransac_dynamic_max_trials_clipping():
+    """Test that the function behaves well when `nom` or `denom` become almost 1.0."""
+    # e = 0%, min_samples = 10
+    # Ensure that (1 - inlier_ratio ** min_samples) approx 1 does not fail.
+    assert_equal(_dynamic_max_trials(1, 100, 10, 0), 0)
+
+    EPSILON = np.finfo(np.float64).eps
+    desired = np.ceil(np.log(EPSILON) / np.log(1 - EPSILON))
+    assert desired > 0
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1), desired)
+
+    # Ensure that (1 - probability) approx 1 does not fail.
+    assert_equal(_dynamic_max_trials(1, 100, 10, 1e-40), 1)
+    assert_equal(_dynamic_max_trials(1, 100, 1000, 1e-40), 1)
+
+
 def test_ransac_invalid_input():
     # `residual_threshold` must be greater than zero
     with testing.raises(ValueError):
@@ -643,7 +663,6 @@ def test_ransac_invalid_input():
 
 def test_ransac_sample_duplicates():
     class DummyModel:
-
         """Dummy model to check for duplicates."""
 
         def estimate(self, data):

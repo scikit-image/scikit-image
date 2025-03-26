@@ -263,7 +263,7 @@ def threshold_local(
             sigma = tuple([(b - 1) / 6.0 for b in block_size])
         else:
             sigma = param
-        gaussian(image, sigma, output=thresh_image, mode=mode, cval=cval)
+        gaussian(image, sigma=sigma, out=thresh_image, mode=mode, cval=cval)
     elif method == 'mean':
         ndi.uniform_filter(image, block_size, output=thresh_image, mode=mode, cval=cval)
     elif method == 'median':
@@ -313,7 +313,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
         raise Exception("Either image or hist must be provided.")
 
     if hist is not None:
-        if isinstance(hist, tuple | list):
+        if isinstance(hist, (tuple, list)):
             counts, bin_centers = hist
         else:
             counts = hist

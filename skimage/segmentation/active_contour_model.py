@@ -11,7 +11,7 @@ def active_contour(
     snake,
     alpha=0.01,
     beta=0.1,
-    w_line=0,
+    w_line=0.0,
     w_edge=1,
     gamma=0.01,
     max_px_move=1.0,
@@ -85,7 +85,7 @@ def active_contour(
     >>> img = np.zeros((100, 100))
     >>> rr, cc = circle_perimeter(35, 45, 25)
     >>> img[rr, cc] = 1
-    >>> img = gaussian(img, 2, preserve_range=False)
+    >>> img = gaussian(img, sigma=2, preserve_range=False)
 
     Initialize spline:
 
@@ -94,7 +94,7 @@ def active_contour(
 
     Fit spline to image:
 
-    >>> snake = active_contour(img, init, w_edge=0, w_line=1, coordinates='rc')  # doctest: +SKIP
+    >>> snake = active_contour(img, init, w_edge=0, w_line=1)  # doctest: +SKIP
     >>> dist = np.sqrt((45-snake[:, 0])**2 + (35-snake[:, 1])**2)  # doctest: +SKIP
     >>> int(np.mean(dist))  # doctest: +SKIP
     25

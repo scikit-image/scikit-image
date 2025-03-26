@@ -335,7 +335,7 @@ def blob_dog(
     -----
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
-    """  # noqa: E501
+    """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -367,9 +367,9 @@ def blob_dog(
     # to obtain an approximation of the scale invariant Laplacian of the
     # Gaussian operator
     dog_image_cube = np.empty(image.shape + (k,), dtype=float_dtype)
-    gaussian_previous = gaussian(image, sigma_list[0], mode='reflect')
+    gaussian_previous = gaussian(image, sigma=sigma_list[0], mode='reflect')
     for i, s in enumerate(sigma_list[1:]):
-        gaussian_current = gaussian(image, s, mode='reflect')
+        gaussian_current = gaussian(image, sigma=s, mode='reflect')
         dog_image_cube[..., i] = gaussian_previous - gaussian_current
         gaussian_previous = gaussian_current
 
@@ -517,7 +517,7 @@ def blob_log(
     -----
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
-    """  # noqa: E501
+    """
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -678,7 +678,7 @@ def blob_doh(
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
-    """  # noqa: E501
+    """
     check_nD(image, 2)
 
     image = img_as_float(image)

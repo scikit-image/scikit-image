@@ -1,6 +1,5 @@
 """Data structures to hold collections of images, with optional caching."""
 
-
 import os
 from glob import glob
 import re
@@ -300,7 +299,7 @@ class ImageCollection:
         if hasattr(n, '__index__'):
             n = n.__index__()
 
-        if not isinstance(n, int | slice):
+        if not isinstance(n, (int, slice)):
             raise TypeError('slicing must be with an int or slice object')
 
         if isinstance(n, int):
@@ -436,7 +435,6 @@ def imread_collection_wrapper(imread):
 
 
 class MultiImage(ImageCollection):
-
     """A class containing all frames from multi-frame TIFF images.
 
     Parameters

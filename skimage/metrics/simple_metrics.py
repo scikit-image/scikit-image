@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import entropy
 
+from ..util._backends import dispatchable
 from ..util.dtype import dtype_range
 from .._shared.utils import _supported_float_type, check_shape_equality, warn
 
@@ -22,6 +23,7 @@ def _as_floats(image0, image1):
     return image0, image1
 
 
+@dispatchable
 def mean_squared_error(image0, image1):
     """
     Compute the mean-squared error between two images.
@@ -48,6 +50,7 @@ def mean_squared_error(image0, image1):
     return np.mean((image0 - image1) ** 2, dtype=np.float64)
 
 
+@dispatchable
 def normalized_root_mse(image_true, image_test, *, normalization='euclidean'):
     """
     Compute the normalized root mean-squared error (NRMSE) between two
@@ -164,6 +167,7 @@ def peak_signal_noise_ratio(image_true, image_test, *, data_range=None):
     image_true, image_test = _as_floats(image_true, image_test)
 
     err = mean_squared_error(image_true, image_test)
+    data_range = float(data_range)  # prevent overflow for small integer types
     return 10 * np.log10((data_range**2) / err)
 
 
@@ -199,13 +203,15 @@ def _pad_to(arr, shape):
 def normalized_mutual_information(image0, image1, *, bins=100):
     r"""Compute the normalized mutual information (NMI).
 
-    The normalized mutual information of :math:`A` and :math:`B` is given by::
+    The normalized mutual information of :math:`A` and :math:`B` is given by:
 
     .. math::
 
-        Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
+       Y(A, B) = \frac{H(A) + H(B)}{H(A, B)}
 
-    where :math:`H(X) := - \sum_{x \in X}{x \log x}` is the entropy.
+    where :math:`H(X) := - \sum_{x \in X}{p(x) \log p(x)}` is the entropy,
+    :math:`X` is the set of image values, and :math:`p(x)` is the probability
+    of occurrence of value :math:`x \in X`.
 
     It was proposed to be useful in registering images by Colin Studholme and
     colleagues [1]_. It ranges from 1 (perfectly uncorrelated image values)

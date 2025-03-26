@@ -3,17 +3,24 @@
 How to contribute to scikit-image
 =================================
 
-Developing Open Source is great fun! Join us on the `scikit-image
-developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_.
+Developing open source software as part of a community is fun, and
+often quite educational!
 
-If you're looking for something to implement or to fix, you can browse the
-`open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__.
+We coordinate our work using GitHub, where you can find lists of `open
+issues
+<https://github.com/scikit-image/scikit-image/issues?q=is%3Aopen>`__
+and `new feature requests
+<https://github.com/scikit-image/scikit-image/labels/%3Apray%3A%20Feature%20request>`__.
 
-.. warning::
+To follow along with discussions, or to get in touch with the
+developer team, please join us on the `scikit-image developer forum
+<https://discuss.scientific-python.org/c/contributor/skimage>`_ and
+the `Zulip chat <https://skimage.zulipchat.com/>`_.
 
-   Given the uncertainty around licensing of AI-generated code, we
-   require that you **not** make use of these tools during the development
-   of any contributions to scikit-image.
+Please post questions to these public forums (rather than contacting
+developers directly); that way, everyone can benefit from the answers,
+and developers can answer according to their availability. Don't feel
+shy, the team is very friendly!
 
 .. contents::
    :local:
@@ -115,19 +122,33 @@ For a more detailed discussion, read these :doc:`detailed documents
 
    * A pull request must be approved by two core team members before merging.
 
-5. Document changes
+.. _documenting-changes:
 
-   If your change introduces any API modifications, please update
-   ``doc/release/release_dev.rst``.
+5. Document changes
 
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.
 
+   scikit-image uses `changelist <https://github.com/scientific-python/changelist>`_
+   to generate a list of release notes automatically from pull requests. By
+   default, changelist will use the title of a pull request and its GitHub
+   labels to sort it into the appropriate section. However, for more complex
+   changes, we encourage you to describe them in more detail using the
+   `release-note` code block within the pull request description; e.g.::
+
+       ```release-note
+       Remove the deprecated function `skimage.color.blue`. Blend
+       `skimage.color.cyan` and `skimage.color.magenta` instead.
+       ```
+
+   You can refer to :doc:`/release_notes/index` for examples and to
+   `changelist's documentation <https://github.com/scientific-python/changelist>`_
+   for more details.
+
 .. note::
 
-   To reviewers: if it is not obvious from the PR description, add a short
-   explanation of what a branch did to the merge message and, if closing a
-   bug, also add "Closes #123" where 123 is the issue number.
+   To reviewers: if it is not obvious from the PR description, make sure that
+   the reason and context for a change are described in the merge message.
 
 
 Divergence between ``upstream main`` and your feature branch
@@ -282,9 +303,9 @@ i.e., statement coverage should be at 100%.
 
 To measure test coverage run::
 
-  $ spin coverage
+  $ spin test --coverage
 
-This will print a report with one line for each file in `skimage`,
+This will run tests and print a report with one line for each file in `skimage`,
 detailing the test coverage::
 
   Name                                             Stmts   Exec  Cover   Missing

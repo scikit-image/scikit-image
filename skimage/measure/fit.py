@@ -217,7 +217,6 @@ class LineModelND(BaseModel):
 
 
 class CircleModel(BaseModel):
-
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -441,12 +440,20 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        if len(data) < 5:
+            warn(
+                "Need at least 5 data points to estimate an ellipse.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
+
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
         # normalize value range to avoid misfitting due to numeric errors if
-        # the relative distanceses are small compared to absolute distances
+        # the relative distances are small compared to absolute distances
         origin = data.mean(axis=0)
         data = data - origin
         scale = data.std()
@@ -663,8 +670,13 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     if n_inliers == 0:
         return np.inf
     inlier_ratio = n_inliers / n_samples
-    nom = max(_EPSILON, 1 - probability)
-    denom = max(_EPSILON, 1 - inlier_ratio**min_samples)
+    nom = 1 - probability
+    denom = 1 - inlier_ratio**min_samples
+    # Keep (de-)nominator in the range of [_EPSILON, 1 - _EPSILON] so that
+    # it is always guaranteed that the logarithm is negative and we return
+    # a positive number of trials.
+    nom = np.clip(nom, a_min=_EPSILON, a_max=1 - _EPSILON)
+    denom = np.clip(denom, a_min=_EPSILON, a_max=1 - _EPSILON)
     return np.ceil(np.log(nom) / np.log(denom))
 
 
@@ -858,7 +870,7 @@ def ransac(
     rng = np.random.default_rng(rng)
 
     # in case data is not pair of input and output, male it like it
-    if not isinstance(data, tuple | list):
+    if not isinstance(data, (tuple, list)):
         data = (data,)
     num_samples = len(data[0])
 

@@ -6,6 +6,7 @@ import numpy as np
 from scipy import spatial
 
 from .._shared.utils import safe_as_int
+from .._shared.compat import NP_COPY_IF_NEEDED
 
 
 def _affine_matrix_from_vector(v):
@@ -281,20 +282,20 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
     >>> tform_matrix.estimate(src, dst)
     True
-    >>> tform_matrix.params  # doctest: +FLOAT_CMP
+    >>> tform_matrix.params
     array([[-0.21785884,  0.41928191, -0.03430748],
            [-0.07179414,  0.04516432,  0.02160726],
            [ 0.24806211, -0.42947814,  0.02210191]])
 
     Compute the Sampson distance:
 
-    >>> tform_matrix.residuals(src, dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.residuals(src, dst)
     array([0.0053886 , 0.00526101, 0.08689701, 0.01850534, 0.09418259,
            0.00185967, 0.06160489, 0.02655136])
 
     Apply inverse transformation:
 
-    >>> tform_matrix.inverse(dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.inverse(dst)
     array([[-0.0513591 ,  0.04170974,  0.01213043],
            [-0.21599496,  0.29193419,  0.00978184],
            [-0.0079222 ,  0.03758889, -0.00915389],
@@ -531,7 +532,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [0.642616, 1.028681]])
     >>> tform_matrix.estimate(src, dst)
     True
-    >>> tform_matrix.residuals(src, dst)  # doctest: +FLOAT_CMP
+    >>> tform_matrix.residuals(src, dst)
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
@@ -672,7 +673,7 @@ class ProjectiveTransform(_GeometricTransform):
 
     def _apply_mat(self, coords, matrix):
         ndim = matrix.shape[0] - 1
-        coords = np.array(coords, copy=False, ndmin=2)
+        coords = np.array(coords, copy=NP_COPY_IF_NEEDED, ndmin=2)
 
         src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
         dst = src @ matrix.T
@@ -686,7 +687,7 @@ class ProjectiveTransform(_GeometricTransform):
 
         return dst[:, :ndim]
 
-    def __array__(self, dtype=None):
+    def __array__(self, dtype=None, copy=None):
         if dtype is None:
             return self.params
         else:
@@ -1194,60 +1195,25 @@ class PiecewiseAffineTransform(_GeometricTransform):
         return tform
 
 
-def _euler_rotation(axis, angle):
-    """Produce a single-axis Euler rotation matrix.
-
-    Parameters
-    ----------
-    axis : int in {0, 1, 2}
-        The axis of rotation.
-    angle : float
-        The angle of rotation in radians.
-
-    Returns
-    -------
-    Ri : array of float, shape (3, 3)
-        The rotation matrix along axis `axis`.
-    """
-    i = axis
-    s = (-1) ** i * np.sin(angle)
-    c = np.cos(angle)
-    R2 = np.array([[c, -s], [s, c]])
-    Ri = np.eye(3)
-    # We need the axes other than the rotation axis, in the right order:
-    # 0 -> (1, 2); 1 -> (0, 2); 2 -> (0, 1).
-    axes = sorted({0, 1, 2} - {axis})
-    # We then embed the 2-axis rotation matrix into the full matrix.
-    # (1, 2) -> R[1:3:1, 1:3:1] = R2, (0, 2) -> R[0:3:2, 0:3:2] = R2, etc.
-    sl = slice(axes[0], axes[1] + 1, axes[1] - axes[0])
-    Ri[sl, sl] = R2
-    return Ri
-
-
-def _euler_rotation_matrix(angles, axes=None):
-    """Produce an Euler rotation matrix from the given angles.
-
-    The matrix will have dimension equal to the number of angles given.
+def _euler_rotation_matrix(angles, degrees=False):
+    """Produce an Euler rotation matrix from the given intrinsic rotation angles
+    for the axes x, y and z.
 
     Parameters
     ----------
     angles : array of float, shape (3,)
         The transformation angles in radians.
-    axes : list of int
-        The axes about which to produce the rotation. Defaults to 0, 1, 2.
+    degrees : bool, optional
+        If True, then the given angles are assumed to be in degrees. Default is False.
 
     Returns
     -------
     R : array of float, shape (3, 3)
         The Euler rotation matrix.
     """
-    if axes is None:
-        axes = range(3)
-    dim = len(angles)
-    R = np.eye(dim)
-    for i, angle in zip(axes, angles):
-        R = R @ _euler_rotation(i, angle)
-    return R
+    return spatial.transform.Rotation.from_euler(
+        'XYZ', angles=angles, degrees=degrees
+    ).as_matrix()
 
 
 class EuclideanTransform(ProjectiveTransform):
@@ -1263,9 +1229,9 @@ class EuclideanTransform(ProjectiveTransform):
 
     where the homogeneous transformation matrix is::
 
-        [[a0  b0  a1]
+        [[a0 -b0  a1]
          [b0  a0  b1]
-         [0   0    1]]
+         [0   0   1 ]]
 
     The Euclidean transformation is a rigid transformation with rotation and
     translation parameters. The similarity transformation extends the Euclidean
@@ -1413,9 +1379,9 @@ class SimilarityTransform(EuclideanTransform):
 
     where ``s`` is a scale factor and the homogeneous transformation matrix is::
 
-        [[a0  -b0  a1]
+        [[a0 -b0  a1]
          [b0  a0  b1]
-         [0   0    1]]
+         [0   0   1 ]]
 
     The similarity transformation extends the Euclidean transformation with a
     single scaling factor in addition to the rotation and translation

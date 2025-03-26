@@ -2,64 +2,31 @@ import os
 import sys
 
 import click
-from spin.cmds import meson
-from spin import util
+import spin
 
 
-@click.command()
-@click.argument("sphinx_target", default="html")
-@click.option(
-    "--clean",
-    is_flag=True,
-    default=False,
-    help="Clean previously built docs before building",
-)
-@click.option(
-    "--build/--no-build",
-    "first_build",
-    default=True,
-    help="Build project before generating docs",
-)
-@click.option(
-    "--plot/--no-plot",
-    "sphinx_gallery_plot",
-    default=True,
-    help="Sphinx gallery: enable/disable plots",
-)
-@click.option("--jobs", "-j", default="1", help="Number of parallel build jobs")
 @click.option(
     "--install-deps/--no-install-deps",
     default=False,
     help="Install dependencies before building",
 )
-@click.pass_context
-def docs(
-    ctx, sphinx_target, clean, first_build, jobs, sphinx_gallery_plot, install_deps
-):
-    """📖 Build documentation
-
-    By default, SPHINXOPTS="-W", raising errors on warnings.
-    To build without raising on warnings:
-
-      SPHINXOPTS="" spin docs
-
-    The command is roughly equivalent to `cd doc && make SPHINX_TARGET`.
-    To get a list of viable `SPHINX_TARGET`:
-
-      spin docs help
-
-    """
+@spin.util.extend_command(spin.cmds.meson.docs)
+def docs(*, parent_callback, install_deps, **kwargs):
     if install_deps:
-        util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
+        spin.util.run(['pip', 'install', '-q', '-r', 'requirements/docs.txt'])
 
-    for extra_param in ('install_deps',):
-        del ctx.params[extra_param]
-    ctx.forward(meson.docs)
+    parent_callback(**kwargs)
+
+
+# Override default jobs to 1
+jobs_param = next(p for p in docs.params if p.name == 'jobs')
+jobs_param.default = 1
 
 
 @click.command()
 @click.argument("asv_args", nargs=-1)
-def asv(asv_args):
+@spin.cmds.meson.build_dir_option
+def asv(asv_args, build_dir):
     """🏃 Run `asv` to collect benchmarks
 
     ASV_ARGS are passed through directly to asv, e.g.:
@@ -68,34 +35,49 @@ def asv(asv_args):
 
     Please see CONTRIBUTING.txt
     """
-    site_path = meson._get_site_packages()
+    site_path = spin.cmds.meson._get_site_packages(build_dir)
     if site_path is None:
         print("No built scikit-image found; run `spin build` first.")
         sys.exit(1)
 
     os.environ['PYTHONPATH'] = f'{site_path}{os.sep}:{os.environ.get("PYTHONPATH", "")}'
-    util.run(['asv'] + list(asv_args))
+    spin.util.run(['asv'] + list(asv_args))
 
 
-@click.command(context_settings={'ignore_unknown_options': True})
-@click.argument("ipython_args", metavar='', nargs=-1)
-@click.pass_context
-def ipython(ctx, ipython_args):
-    """💻 Launch IPython shell with PYTHONPATH set
-
-    OPTIONS are passed through directly to IPython, e.g.:
-
-    spin ipython -i myscript.py
-    """
+@spin.util.extend_command(spin.cmds.meson.ipython)
+def ipython(*, parent_callback, **kwargs):
     env = os.environ
     env['PYTHONWARNINGS'] = env.get('PYTHONWARNINGS', 'all')
 
-    preimport = (
+    pre_import = (
         r"import skimage as ski; "
         r"print(f'\nPreimported scikit-image {ski.__version__} as ski')"
     )
-    ctx.params['ipython_args'] = (
-        f"--TerminalIPythonApp.exec_lines={preimport}",
-    ) + ipython_args
+    parent_callback(pre_import=pre_import, **kwargs)
 
-    ctx.forward(meson.ipython)
+
+@click.command()
+@click.argument("pyproject-build-args", metavar="", nargs=-1)
+def sdist(pyproject_build_args):
+    """📦 Build a source distribution in `dist/`
+
+    Extra arguments are passed to `pyproject-build`, e.g.
+
+      spin sdist -- -x -n
+    """
+    p = spin.util.run(
+        ["pyproject-build", ".", "--sdist"] + list(pyproject_build_args), output=False
+    )
+    try:
+        built_line = next(
+            line
+            for line in p.stdout.decode('utf-8').split('\n')
+            if line.startswith('Successfully built')
+        )
+    except StopIteration:
+        print("Error: could not identify built wheel")
+        sys.exit(1)
+    print(built_line)
+    sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
+    print(f"Validating {sdist}...")
+    spin.util.run(["tools/check_sdist.py", sdist])

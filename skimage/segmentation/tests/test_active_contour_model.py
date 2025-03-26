@@ -17,7 +17,7 @@ def test_periodic_reference(dtype):
     r = 100 + 100 * np.sin(s)
     c = 220 + 100 * np.cos(s)
     init = np.array([r, c]).T
-    img_smooth = gaussian(img, 3, preserve_range=False).astype(dtype, copy=False)
+    img_smooth = gaussian(img, sigma=3, preserve_range=False).astype(dtype, copy=False)
     snake = active_contour(
         img_smooth, init, alpha=0.015, beta=10, w_line=0, w_edge=1, gamma=0.001
     )
@@ -34,7 +34,9 @@ def test_fixed_reference(dtype):
     r = np.linspace(136, 50, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    image_smooth = gaussian(img, 1, preserve_range=False).astype(dtype, copy=False)
+    image_smooth = gaussian(img, sigma=1, preserve_range=False).astype(
+        dtype, copy=False
+    )
     snake = active_contour(
         image_smooth,
         init,
@@ -58,7 +60,7 @@ def test_free_reference(dtype):
     r = np.linspace(70, 40, 100)
     c = np.linspace(5, 424, 100)
     init = np.array([r, c]).T
-    img_smooth = gaussian(img, 3, preserve_range=False).astype(dtype, copy=False)
+    img_smooth = gaussian(img, sigma=3, preserve_range=False).astype(dtype, copy=False)
     snake = active_contour(
         img_smooth,
         init,
@@ -78,7 +80,7 @@ def test_free_reference(dtype):
 
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
 def test_RGB(dtype):
-    img = gaussian(data.text(), 1, preserve_range=False)
+    img = gaussian(data.text(), sigma=1, preserve_range=False)
     imgR = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgG = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
     imgRGB = np.zeros((img.shape[0], img.shape[1], 3), dtype=dtype)
@@ -140,7 +142,7 @@ def test_end_points():
     c = 220 + 100 * np.cos(s)
     init = np.array([r, c]).T
     snake = active_contour(
-        gaussian(img, 3),
+        gaussian(img, sigma=3),
         init,
         boundary_condition='periodic',
         alpha=0.015,
@@ -152,7 +154,7 @@ def test_end_points():
     )
     assert np.sum(np.abs(snake[0, :] - snake[-1, :])) < 2
     snake = active_contour(
-        gaussian(img, 3),
+        gaussian(img, sigma=3),
         init,
         boundary_condition='free',
         alpha=0.015,
@@ -164,7 +166,7 @@ def test_end_points():
     )
     assert np.sum(np.abs(snake[0, :] - snake[-1, :])) > 2
     snake = active_contour(
-        gaussian(img, 3),
+        gaussian(img, sigma=3),
         init,
         boundary_condition='fixed',
         alpha=0.015,

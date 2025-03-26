@@ -63,16 +63,21 @@ def test_imread_uint16_big_endian():
 @pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.float32, np.float64])
 def test_imsave_roundtrip(shape, dtype, tmp_path):
     if np.issubdtype(dtype, np.floating):
-        info_func = np.finfo
+        expected = np.linspace(
+            0,
+            1,
+            endpoint=True,
+            num=np.prod(shape),
+            dtype=dtype,
+        )
     else:
-        info_func = np.iinfo
-    expected = np.linspace(
-        info_func(dtype).min,
-        info_func(dtype).max,
-        endpoint=True,
-        num=np.prod(shape),
-        dtype=dtype,
-    )
+        expected = np.linspace(
+            0,
+            np.iinfo(dtype).max,
+            endpoint=True,
+            num=np.prod(shape),
+            dtype=dtype,
+        )
     expected = expected.reshape(shape)
     file_path = tmp_path / "roundtrip.mha"
     imsave(file_path, expected)

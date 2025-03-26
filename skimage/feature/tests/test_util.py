@@ -7,7 +7,7 @@ from skimage.feature.util import (
     DescriptorExtractor,
     _prepare_grayscale_input_2D,
     _mask_border_keypoints,
-    plot_matches,
+    plot_matched_features,
 )
 
 
@@ -53,12 +53,9 @@ def test_mask_border_keypoints():
 
 
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
-def test_plot_matches():
-    from matplotlib import pyplot as plt
-
-    fig, ax = plt.subplots(nrows=1, ncols=1)
-
-    shapes = (
+@pytest.mark.parametrize(
+    "shapes",
+    [
         ((10, 10), (10, 10)),
         ((10, 10), (12, 10)),
         ((10, 10), (10, 12)),
@@ -66,23 +63,161 @@ def test_plot_matches():
         ((12, 10), (10, 10)),
         ((10, 12), (10, 10)),
         ((12, 12), (10, 10)),
+    ],
+)
+def test_plot_matched_features(shapes):
+    from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
+
+    fig, ax = plt.subplots()
+
+    rng = np.random.default_rng(202410101501)
+    keypoints0 = 10 * rng.random((10, 2))
+    keypoints1 = 10 * rng.random((10, 2))
+    idxs0 = rng.integers(10, size=10)
+    idxs1 = rng.integers(10, size=10)
+    matches = np.column_stack((idxs0, idxs1))
+
+    shape0, shape1 = shapes
+    img0 = np.zeros(shape0)
+    img1 = np.zeros(shape1)
+    plot_matched_features(
+        img0,
+        img1,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        ax=ax,
     )
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        only_matches=True,
+    )
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        keypoints_color='r',
+    )
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        matches_color='r',
+    )
+    # Pass colors as random list of color strings
+    rng = np.random.default_rng(202409281822)
+    random_matches_color = [
+        rng.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
+    ]
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        matches_color=random_matches_color,
+    )
+    # Pass colors as single array of shape (len(matches), 3)
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        matches_color=np.linspace((0, 0, 0), (1, 1, 1), num=len(matches)),
+    )
+    plot_matched_features(
+        img0,
+        img1,
+        ax=ax,
+        keypoints0=keypoints0,
+        keypoints1=keypoints1,
+        matches=matches,
+        alignment='vertical',
+    )
+    plt.close()
 
+
+@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
+def test_plot_matched_features_color_error(matches_color):
+    from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
+
+    _, ax = plt.subplots()
+
+    keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
-    keypoints2 = 10 * np.random.rand(10, 2)
+    idxs0 = np.random.randint(10, size=10)
     idxs1 = np.random.randint(10, size=10)
-    idxs2 = np.random.randint(10, size=10)
-    matches = np.column_stack((idxs1, idxs2))
+    matches = np.column_stack((idxs0, idxs1))
+    assert len(matches_color) != len(matches)
 
-    for shape1, shape2 in shapes:
-        img1 = np.zeros(shape1)
-        img2 = np.zeros(shape2)
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches)
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, only_matches=True)
-        plot_matches(
-            ax, img1, img2, keypoints1, keypoints2, matches, keypoints_color='r'
+    img0 = np.zeros((10, 10))
+    img1 = np.zeros_like(img0)
+
+    regex = (
+        '`matches_color` needs to be a single color '
+        'or a sequence of length equal to the number of matches'
+    )
+    with pytest.raises(ValueError, match=regex):
+        plot_matched_features(
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            matches_color=matches_color,
         )
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches, matches_color='r')
-        plot_matches(
-            ax, img1, img2, keypoints1, keypoints2, matches, alignment='vertical'
+
+
+@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+def test_plot_matched_features_matplotlib_color_error():
+    # Error is raised from matplotlib itself if we pass a sequence of correct length
+    # but with values that aren't colors
+
+    from matplotlib import pyplot as plt
+    from matplotlib import use
+
+    use('Agg')
+
+    _, ax = plt.subplots()
+
+    keypoints0 = 10 * np.random.rand(10, 2)
+    keypoints1 = 10 * np.random.rand(10, 2)
+    idxs0 = np.random.randint(10, size=10)
+    idxs1 = np.random.randint(10, size=10)
+    matches = np.column_stack((idxs0, idxs1))
+
+    img0 = np.zeros((10, 10))
+    img1 = np.zeros_like(img0)
+
+    with pytest.raises(ValueError, match=".* not a valid value for color"):
+        plot_matched_features(
+            img0,
+            img1,
+            ax=ax,
+            keypoints0=keypoints0,
+            keypoints1=keypoints1,
+            matches=matches,
+            matches_color=np.arange(len(matches)),
         )

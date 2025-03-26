@@ -33,7 +33,13 @@ __all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtype=None):
     check_nD(image, 2)
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        shift_x=shift_x,
+        shift_y=shift_y,
     )
 
     func(
@@ -52,7 +58,7 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtyp
 
 
 def mean_bilateral(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
     """Apply a flat kernel bilateral filter.
 
@@ -120,7 +126,7 @@ def mean_bilateral(
 
 
 def pop_bilateral(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
     """Return the local number (population) of pixels.
 
@@ -156,14 +162,14 @@ def pop_bilateral(
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.morphology import square
+    >>> from skimage.morphology import footprint_rectangle
     >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.pop_bilateral(img, square(3), s0=10, s1=10)
+    >>> rank.pop_bilateral(img, footprint_rectangle((3, 3)), s0=10, s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
            [3, 6, 9, 6, 3],
@@ -186,7 +192,7 @@ def pop_bilateral(
 
 
 def sum_bilateral(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
     """Apply a flat kernel bilateral filter.
 

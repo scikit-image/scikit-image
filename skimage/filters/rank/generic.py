@@ -78,7 +78,14 @@ __all__ = [
 
 
 def _preprocess_input(
-    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+    image,
+    footprint=None,
+    out=None,
+    mask=None,
+    out_dtype=None,
+    pixel_size=1,
+    shift_x=None,
+    shift_y=None,
 ):
     """Preprocess and verify input for filters.rank methods.
 
@@ -98,6 +105,9 @@ def _preprocess_input(
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
+    shift_x, shift_y : int, optional
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint size (center must be inside of the given footprint).
 
     Returns
     -------
@@ -169,11 +179,28 @@ def _preprocess_input(
             stacklevel=2,
         )
 
+    for name, value in zip(("shift_x", "shift_y"), (shift_x, shift_y)):
+        if np.dtype(type(value)) == bool:
+            warn(
+                f"Paramter `{name}` is boolean and will be interpreted as int. "
+                "This is not officially supported, use int instead.",
+                category=UserWarning,
+                stacklevel=4,
+            )
+
     return image, footprint, out, mask, n_bins
 
 
 def _handle_input_3D(
-    image, footprint=None, out=None, mask=None, out_dtype=None, pixel_size=1
+    image,
+    footprint=None,
+    out=None,
+    mask=None,
+    out_dtype=None,
+    pixel_size=1,
+    shift_x=None,
+    shift_y=None,
+    shift_z=None,
 ):
     """Preprocess and verify input for filters.rank methods.
 
@@ -193,6 +220,9 @@ def _handle_input_3D(
         in input dtype.
     pixel_size : int, optional
         Dimension of each pixel. Default value is 1.
+    shift_x, shift_y, shift_z : int, optional
+        Offset added to the footprint center point. Shift is bounded to the
+        footprint size (center must be inside of the given footprint).
 
     Returns
     -------
@@ -258,6 +288,17 @@ def _handle_input_3D(
             stacklevel=2,
         )
 
+    for name, value in zip(
+        ("shift_x", "shift_y", "shift_z"), (shift_x, shift_y, shift_z)
+    ):
+        if np.dtype(type(value)) == bool:
+            warn(
+                f"Parameter `{name}` is boolean and will be interpreted as int. "
+                "This is not officially supported, use int instead.",
+                category=UserWarning,
+                stacklevel=4,
+            )
+
     return image, footprint, out, mask, n_bins
 
 
@@ -289,7 +330,7 @@ def _apply_scalar_per_pixel(
     """
     # preprocess and verify the input
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype
+        image, footprint, out, mask, out_dtype, shift_x=shift_x, shift_y=shift_y
     )
 
     # apply cython function
@@ -310,7 +351,14 @@ def _apply_scalar_per_pixel_3D(
     func, image, footprint, out, mask, shift_x, shift_y, shift_z, out_dtype=None
 ):
     image, footprint, out, mask, n_bins = _handle_input_3D(
-        image, footprint, out, mask, out_dtype
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        shift_x=shift_x,
+        shift_y=shift_y,
+        shift_z=shift_z,
     )
 
     func(
@@ -367,7 +415,14 @@ def _apply_vector_per_pixel(
     """
     # preprocess and verify the input
     image, footprint, out, mask, n_bins = _preprocess_input(
-        image, footprint, out, mask, out_dtype, pixel_size
+        image,
+        footprint,
+        out,
+        mask,
+        out_dtype,
+        pixel_size,
+        shift_x=shift_x,
+        shift_y=shift_y,
     )
 
     # apply cython function
@@ -384,9 +439,7 @@ def _apply_vector_per_pixel(
     return out
 
 
-def autolevel(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Auto-level image using local histogram.
 
     This filter locally stretches the histogram of gray values to cover the
@@ -451,9 +504,7 @@ def autolevel(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def equalize(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Equalize image using local histogram.
 
     Parameters
@@ -515,9 +566,7 @@ def equalize(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def gradient(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local gradient of an image (i.e. local maximum - local minimum).
 
     Parameters
@@ -579,9 +628,7 @@ def gradient(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def maximum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local maximum of an image.
 
     Parameters
@@ -652,9 +699,7 @@ def maximum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mean of an image.
 
     Parameters
@@ -717,7 +762,7 @@ def mean(
 
 
 def geometric_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return local geometric mean of an image.
 
@@ -786,7 +831,7 @@ def geometric_mean(
 
 
 def subtract_mean(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Return image subtracted from its local mean.
 
@@ -862,9 +907,9 @@ def median(
     footprint=None,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Return local median of an image.
 
@@ -935,9 +980,7 @@ def median(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def minimum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local minimum of an image.
 
     Parameters
@@ -1008,9 +1051,7 @@ def minimum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def modal(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return local mode of an image.
 
     The mode is the value that appears most often in the local histogram.
@@ -1075,7 +1116,7 @@ def modal(
 
 
 def enhance_contrast(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Enhance contrast of an image.
 
@@ -1142,9 +1183,7 @@ def enhance_contrast(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def pop(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local number (population) of pixels.
 
     The number of pixels is defined as the number of pixels which are included
@@ -1172,14 +1211,14 @@ def pop(
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.pop(img, square(3))
+    >>> rank.pop(img, footprint_rectangle((3, 3)))
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -1213,9 +1252,7 @@ def pop(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def sum(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Return the local sum of pixels.
 
     Note that the sum may overflow depending on the data type of the input
@@ -1243,14 +1280,14 @@ def sum(
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank         # Cube seems to fail but
     >>> img = np.array([[0, 0, 0, 0, 0],            # Ball can pass
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.sum(img, square(3))
+    >>> rank.sum(img, footprint_rectangle((3, 3)))
     array([[1, 2, 3, 2, 1],
            [2, 4, 6, 4, 2],
            [3, 6, 9, 6, 3],
@@ -1284,9 +1321,7 @@ def sum(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def threshold(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local threshold of an image.
 
     The resulting binary mask is True if the gray value of the center pixel is
@@ -1314,14 +1349,14 @@ def threshold(
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> from skimage.filters.rank import threshold
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> threshold(img, square(3))
+    >>> threshold(img, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 0, 1, 0],
@@ -1356,7 +1391,7 @@ def threshold(
 
 
 def noise_filter(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 ):
     """Noise feature.
 
@@ -1444,9 +1479,7 @@ def noise_filter(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def entropy(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local entropy.
 
     The entropy is computed using base 2 logarithm i.e. the filter returns the
@@ -1518,9 +1551,7 @@ def entropy(
     raise ValueError(f'`image` must have 2 or 3 dimensions, got {np_image.ndim}.')
 
 
-def otsu(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, shift_z=False
-):
+def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
     """Local Otsu's threshold value for each pixel.
 
     Parameters
@@ -1589,7 +1620,7 @@ def otsu(
 
 
 def windowed_histogram(
-    image, footprint, out=None, mask=None, shift_x=False, shift_y=False, n_bins=None
+    image, footprint, out=None, mask=None, shift_x=0, shift_y=0, n_bins=None
 ):
     """Normalized sliding window histogram
 
@@ -1656,9 +1687,9 @@ def majority(
     *,
     out=None,
     mask=None,
-    shift_x=False,
-    shift_y=False,
-    shift_z=False,
+    shift_x=0,
+    shift_y=0,
+    shift_z=0,
 ):
     """Assign to each pixel the most common value within its neighborhood.
 

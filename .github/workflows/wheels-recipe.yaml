@@ -19,7 +19,7 @@ on:
         default: "pytest --pyargs skimage"
 
 env:
-  CIBW_BUILD_VERBOSITY: 2
+  CIBW_BUILD_VERBOSITY: 1
   CIBW_TEST_REQUIRES: ${{ inputs.CIBW_TEST_REQUIRES }}
   CIBW_ENVIRONMENT: ${{ inputs.CIBW_ENVIRONMENT }}
   CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
@@ -29,26 +29,38 @@ permissions:
   contents: read
 
 jobs:
-  build_linux_39_and_above_wheels:
+  build_linux_wheels:
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*", "cp313t-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+          persist-credentials: false
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
+      - name: Setup free-threaded environment
+        if: endsWith(matrix.cibw_python, 't-*')
+        run: |
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
+          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
+          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
+          echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
       - name: Build the wheel
         run: python -m cibuildwheel --output-dir dist
         env:
@@ -59,9 +71,9 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_linux_aarch64_wheels:
@@ -70,21 +82,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
+        os: [ubuntu-24.04-arm]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_manylinux: [manylinux2014]
+        cibw_arch: ["aarch64"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+          persist-credentials: false
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
       - name: Build the wheel
@@ -94,14 +106,14 @@ jobs:
           CIBW_SKIP: "*-musllinux_*"
           # skip aarch64 tests which often exceed the 6 hour time limit
           CIBW_TEST_SKIP: "*_aarch64"
-          CIBW_ARCHS_LINUX: aarch64
+          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
           SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_macos_wheels:
@@ -110,58 +122,57 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
-        # TODO: add "universal2" once a universal2 libomp is available
+        os: [macos-13]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
+
+      # Needed to install a specific libomp version later
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
+        with:
+          python-version: "3.12"
+          channels: conda-forge
+          channel-priority: true
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
 
       - name: Build wheels for CPython Mac OS
         run: |
           # Make sure to use a libomp version binary compatible with the oldest
           # supported version of the macos SDK as libomp will be vendored into
           # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/.  Currently, the oldest
-          # supported macos version is: High Sierra / 10.13. When upgrading
-          # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
-          # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          #
-          # We need to set both MACOS_DEPLOYMENT_TARGET and MACOSX_DEPLOYMENT_TARGET
-          # until there is a new release with this commit:
-          # https://github.com/mesonbuild/meson-python/pull/309
+          # https://packages.macports.org/libomp/
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
-              # SciPy requires 12.0 on arm to prevent kernel panics
-              # https://github.com/scipy/scipy/issues/14688
-              # so being conservative, we just do the same here
-              export MACOSX_DEPLOYMENT_TARGET=12.0
-              export MACOS_DEPLOYMENT_TARGET=12.0
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
+              export MACOSX_DEPLOYMENT_TARGET=12.3
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
           else
-              export MACOSX_DEPLOYMENT_TARGET=10.9
-              export MACOS_DEPLOYMENT_TARGET=10.9
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-64/llvm-openmp-11.1.0-hda6cdc1_1.tar.bz2"
+              export MACOSX_DEPLOYMENT_TARGET=10.14
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-64/llvm-openmp-19.1.7-ha54dae1_0.conda"
           fi
           echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
-          echo MACOS_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET}
 
           # use conda to install llvm-openmp
           # Note that we do NOT activate the conda environment, we just add the
           # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
-          sudo conda create -n build $OPENMP_URL
-          PREFIX="/usr/local/miniconda/envs/build"
+          conda create -n build $OPENMP_URL
+          PREFIX="/Users/runner/miniconda3/envs/build"
           export CC=/usr/bin/clang
           export CXX=/usr/bin/clang++
           export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
@@ -177,9 +188,9 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: manylinux1
           CIBW_TEST_SKIP: "*-macosx_arm64"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
   build_windows_wheels:
@@ -190,17 +201,20 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
       - name: Install cibuildwheel and add clang-cl to path
         run: |
@@ -235,7 +249,7 @@ jobs:
           # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl

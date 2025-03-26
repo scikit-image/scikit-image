@@ -1,26 +1,37 @@
-Version 0.25
+Please include necessary information to complete each entry. The
+release manager should be able to step through this file without
+external references.
+
+Version 0.28
 ------------
+* Complete deprecation of `skimage.morphology.binary_*` functions.
+  - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
+  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
+* Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
 * Remove all traces of deprecated parameter `num_threads` in
   `skimage.restoration.rolling_ball`.
 
-Version 0.26
+Version 0.27
 ------------
-* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
-  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
-  function ``_shift_footprint``.
-* Remove deprecated `skimage.lookfor`, `skimage/_vendored/numpy_lookfor.py`,
-  the associated note in `LICENSE.txt` and everything else associated with it.
+* Remove deprecated `skimage.io.imshow`,
+  `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
+* Complete deprecation of plugin infrastructure by doing the following:
+  - Replace calls to `call_plugin` with functions from the imageio plugin
+  - Remove `skimage/io/_plugins`
+  - Remove `skimage/io/manage_plugins.py`
+  - Remove `skimage/io/__init__.py::__getattr__`
+  - Remove related tests, imports, etc.
+  - Remove `doc/source/user_guide/plugins.rst`
+* Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
 
 Other
 -----
-* Remove custom code for ignored warning in `skimage/_shared/testing.py` relating
-  to (sparse) matricies (instead of arrays).
-* Remove warningsfilter for imageio and Pillow once
-  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
-  version of pillow (probably the release after Pillow 9.5.0).
-* NumPy 1.25.0 is minimal required version:
+* Once NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+* Delete FREE_THREADED_BUILD block in `.github/scripts/setup-*-env.sh` once free-threaded
+  wheels of Cython are available on PyPi.
+* Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
 
@@ -36,3 +47,16 @@ Post numpy 2
   dependencies. Also remove temporary assert for NumPy 2.0 in
   `nightly_wheel_build.yml`.
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
+- scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.
+- Remove `np2` check in `skimage/feature/brief.py`.
+
+Version 2.0
+-----------
+- In `skimage.morphology.remove_small_objects`, complete the deprecation of
+  `min_size` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.morphology.remove_small_holes`, complete the deprecation of
+  `area_threshold` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+
+See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2

@@ -3,7 +3,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: c4a0b883114b00d8d76b479c820ce7950211c99b # frozen: v4.5.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # frozen: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -15,30 +15,25 @@ repos:
       - id: check-json
       - id: check-added-large-files
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: ffb6a759a979008c0e6dff86e39f4745a2d9eac4 # v3.1.0
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: bc7af46104f0f5368b95878decf720f9f00c2559 # frozen: v3.4.2
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 1d42195ebc67a509991eaf68c2353e0181003a95 # frozen: v0.1.14
-
+    rev: 89c421dff2e1026ba12cdb9ebd731f4a83aa8021 # frozen: v0.8.6
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: 582556b052c898dc484a981bea48de3284a4b8ee # frozen: v0.16.0
+    rev: 1ac5158c1b0f405350517c218f03d3a21bbb381c # frozen: v0.16.6
     hooks:
       - id: cython-lint
         args: [--no-pycodestyle, --max-line-length=88]
-
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 3de533c80a7e95bb6efb213169d269267e9b234b # frozen: 23.12.1
-    hooks:
-      - id: black
 
   - repo: local
     hooks:
@@ -47,6 +42,11 @@ repos:
         language: system
         entry: python tools/generate_requirements.py
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
+
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
+    hooks:
+      - id: zizmor
 
 ci:
   autofix_prs: false

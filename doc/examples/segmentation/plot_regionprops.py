@@ -7,6 +7,7 @@ This example shows how to measure properties of labelled image regions. We
 first analyze an image with two ellipses. Below we show how to explore
 interactively the properties of labelled objects.
 """
+
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -92,8 +93,8 @@ img = data.coins()
 # Binary image, post-process the binary mask and compute labels
 threshold = filters.threshold_otsu(img)
 mask = img > threshold
-mask = morphology.remove_small_objects(mask, 50)
-mask = morphology.remove_small_holes(mask, 50)
+mask = morphology.remove_small_objects(mask, max_size=49)
+mask = morphology.remove_small_holes(mask, max_size=49)
 labels = measure.label(mask)
 
 fig = px.imshow(img, binary_string=True)
