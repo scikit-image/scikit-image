@@ -84,7 +84,7 @@ def _center_and_normalize_points(points):
 
 
 def _apply_homogeneous(matrix, points):
-    """Transform (N, D) `points` array with homogenous (D+1, D+1) `matrix`
+    """Transform (N, D) `points` array with homogeneous (D+1, D+1) `matrix`.
 
     Parameters
     ----------
