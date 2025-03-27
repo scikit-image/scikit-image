@@ -1370,16 +1370,14 @@ class EuclideanTransform(ProjectiveTransform):
     def _rt2ndims_msg(self, rotation, translation):
         if rotation is not None:
             N = 1 if np.isscalar(rotation) else len(rotation)
-            return (
-                2 if N == 1 else N,
-                (
-                    None
-                    if N in (1, 3)
-                    else '``rotations`` must be scalar (2D) or length 3 (3D)'
-                ),
+            msg = (
+                '``rotations`` must be scalar (3D) or length 3 (3D)'
+                if N not in (1, 3)
+                else None
             )
+            return 2 if N == 1 else N, msg
         if translation is not None:
-            return (len(np.array(translation)), None)
+            return (2 if np.isscalar(translation) else len(translation), None)
         return None, None
 
     def _rt2matrix(self, rotation, translation, n_dims):

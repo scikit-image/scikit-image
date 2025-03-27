@@ -1260,3 +1260,21 @@ def test_init_contract_dims(tform_class):
     # Test vector matrix input invalid.
     with pytest.raises(ValueError):
         tform_class(np.zeros((2, 3)))
+
+
+def test_broadcasting():
+    # Scalar scale broadcasts.
+    translation = [3, 4, 5]
+    tf = SimilarityTransform(scale=2, translation=translation)
+    assert_equal(tf.params, _from_matvec(np.eye(3) * 2, translation))
+    # Translation does broadcast.
+    # 2D.
+    tf = SimilarityTransform(scale=2, translation=10)
+    assert_equal(tf.params, _from_matvec(np.eye(2) * 2, [10, 10]))
+    # 3D.
+    tf = SimilarityTransform(scale=[2, 3, 4], translation=10)
+    assert_equal(tf.params, _from_matvec(np.diag([2, 3, 4]), [10] * 3))
+    # Scalar rotation does not broadclast
+    for tf_class in SimilarityTransform, EuclideanTransform:
+        with pytest.raises(ValueError):
+            tf_class(rotation=0.2, translation=translation)
