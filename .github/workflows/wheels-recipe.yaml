@@ -254,6 +254,10 @@ jobs:
           name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
 
+  # This job uses cibuildwheel to build wheels for Pyodide, unlike the one
+  # in emscripten.yaml which uses a more traditional workflow and has a bit
+  # of manual setup. The Pyodide version we build against here is largely
+  # controlled by cibuildwheel's at the moment.
   build_pyodide_wheel:
     name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
     runs-on: ubuntu-latest
