@@ -1,8 +1,5 @@
 {
   "LiteBuildConfig": {
     "no_sourcemaps": true
-  },
-  "PipliteAddon": {
-    "piplite_urls": ["skimage_docs_wasm_wheels/"]
   }
 }

@@ -65,7 +65,6 @@ extensions = [
     "skimage_extensions",
 ]
 
-
 autosummary_generate = True
 templates_path = ["_templates"]
 source_suffix = {".rst": "restructuredtext"}
@@ -126,16 +125,28 @@ def notebook_modification_function(notebook_content, notebook_filename):
     dummy_notebook_content = {"cells": []}
     add_markdown_cell(dummy_notebook_content, jupyterlite_warning_header)
 
-    # Add a code cell to install the correct version of scikit-image. We add
-    # this only for CI and the dev docs, as it includes a WASM build of
-    # scikit-image that might not be available when building the docs locally.
+    # Add a code cell to install the nightly WASM wheel for scikit-image that
+    # will be fetched from Anaconda.org, only for the dev docs.
+
+    # Work around https://github.com/jupyterlite/pyodide-kernel/issues/166
+    # and https://github.com/pyodide/micropip/issues/223 by installing the
+    # dependencies first, and then scikit-image from Anaconda.org.
     skimage_install_lines = ["# JupyterLite-specific code"]
-    skimage_pip_install_magic = (
-        [f"%pip install scikit-image=={version}\n\n"]
-        if (("dev" or "rc") in version and "CI" in os.environ)
+    skimage_pip_installation = (
+        [
+            "import piplite\n"
+            "await piplite.install(\n"
+            "    ['numpy', 'scipy', 'networkx', 'pillow', 'imageio', 'tifffile', 'packaging', 'lazy-loader']\n"
+            ")\n"
+            "await piplite.install(\n"
+            f"    'scikit-image=={version}',\n"
+            "    index_urls='https://pypi.anaconda.org/scientific-python-nightly-wheels/simple',\n"
+            ")",
+        ]
+        if "dev" in version
         else ["%pip install scikit-image\n\n"]
     )
-    skimage_install_lines.extend(skimage_pip_install_magic)
+    skimage_install_lines.extend(skimage_pip_installation)
     add_code_cell(dummy_notebook_content, "\n".join(skimage_install_lines))
 
     # Extra code lines, dynamically added based on the notebooks' contents.
