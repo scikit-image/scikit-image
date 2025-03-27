@@ -264,7 +264,7 @@ class _GeometricTransform(ABC):
 
 
 class _HMatrixTransform(_GeometricTransform):
-    """Transform accepting homogenous matrix as input"""
+    """Transform accepting homogeneous matrix as input."""
 
     def __init__(self, matrix=None, *, dimensionality=None):
         if matrix is None:
