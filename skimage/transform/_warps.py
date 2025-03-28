@@ -147,7 +147,7 @@ def resize(
     would be [0, 1, 2, 1, 0, 1, 2].
 
     `resize` uses interpolation. Unless the interpolation method is nearest-neighbor
-    (``order==0``), the algorithm will generate output values as a weighted average
+    (``order==0``), the algorithm will generate output values as weighted averages
     of input values. Accordingly, the output dtype is ``float64`` with the following
     exceptions:
 
