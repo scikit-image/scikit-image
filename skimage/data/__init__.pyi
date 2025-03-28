@@ -32,7 +32,6 @@ __all__ = [
     'moon',
     'nickel_solidification',
     'page',
-    'palisades_of_vogt',
     'protein_transport',
     'retina',
     'rocket',
