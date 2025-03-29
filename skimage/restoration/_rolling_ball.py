@@ -44,9 +44,8 @@ def rolling_ball(
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
 
-        .. versionchanged:: 0.23
-
-            Replaced old parameter `num_threads` in 0.23.
+        .. versionadded:: 0.26
+            Replaces deprecated parameter `num_threads`.
 
     Returns
     -------
