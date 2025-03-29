@@ -83,13 +83,13 @@ def test_preserve_peaks(radius):
     assert np.allclose(img - background, expected_img)
 
 
-@pytest.mark.parametrize("num_workers", [None, 1, 2])
-def test_workers(num_workers):
+@pytest.mark.parametrize("workers", [None, 1, 2])
+def test_workers(workers):
     # not testing if we use multiple threads
     # just checking if the API throws an exception
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    rolling_ball(img, radius=10, num_workers=num_workers)
-    rolling_ball(img, radius=10, nansafe=True, num_workers=num_workers)
+    rolling_ball(img, radius=10, workers=workers)
+    rolling_ball(img, radius=10, nansafe=True, workers=workers)
 
 
 def test_ndim():

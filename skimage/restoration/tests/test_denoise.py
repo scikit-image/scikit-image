@@ -7,6 +7,7 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_
 
 from skimage import color, data, img_as_float, restoration
 from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import assert_stacklevel
 from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
@@ -1141,7 +1142,7 @@ def test_cycle_spinning_multichannel(rescale_sigma, channel_axis):
 
 
 @xfail_without_pywt
-def test_cycle_spinning_num_workers():
+def test_cycle_spinning_workers():
     img = astro_gray
     sigma = 0.1
     rstate = np.random.default_rng(1234)
@@ -1157,13 +1158,13 @@ def test_cycle_spinning_num_workers():
         max_shifts=1,
         func_kw=func_kw,
         channel_axis=None,
-        num_workers=1,
+        workers=1,
     )
 
     # Repeat dn_cc1 computation, but without channel_axis specified to
     # verify that the default behavior is channel_axis=None
     dn_cc1_ = restoration.cycle_spin(
-        noisy, denoise_func, max_shifts=1, func_kw=func_kw, num_workers=1
+        noisy, denoise_func, max_shifts=1, func_kw=func_kw, workers=1
     )
     assert_array_equal(dn_cc1, dn_cc1_)
 
@@ -1174,7 +1175,7 @@ def test_cycle_spinning_num_workers():
             max_shifts=1,
             func_kw=func_kw,
             channel_axis=None,
-            num_workers=4,
+            workers=4,
         )
         dn_cc3 = restoration.cycle_spin(
             noisy,
@@ -1182,7 +1183,29 @@ def test_cycle_spinning_num_workers():
             max_shifts=1,
             func_kw=func_kw,
             channel_axis=None,
-            num_workers=None,
+            workers=None,
         )
     assert_array_almost_equal(dn_cc1, dn_cc2)
     assert_array_almost_equal(dn_cc1, dn_cc3)
+
+
+@pytest.mark.parametrize("num_workers", [None, 1])
+def test_cycle_spinner_deprecate_num_workers(num_workers):
+    img = astro_gray
+    sigma = 0.1
+    rstate = np.random.default_rng(1234)
+    noisy = img.copy() + 0.1 * rstate.standard_normal(img.shape)
+
+    denoise_func = restoration.denoise_wavelet
+    func_kw = dict(sigma=sigma, channel_axis=-1, rescale_sigma=True)
+
+    with pytest.warns(FutureWarning, match=".*`num_workers` is deprecated") as record:
+        restoration.cycle_spin(
+            noisy,
+            denoise_func,
+            max_shifts=1,
+            func_kw=func_kw,
+            channel_axis=None,
+            num_workers=num_workers,
+        )
+    assert_stacklevel(record, offset=-8)

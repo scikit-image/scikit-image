@@ -1,7 +1,7 @@
 from itertools import product
 import numpy as np
 from .._shared import utils
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 
 try:
     import dask
@@ -47,15 +47,22 @@ def _generate_shifts(ndim, multichannel, max_shifts, shift_steps=1):
     return product(*[range(0, s + 1, t) for s, t in zip(max_shifts, shift_steps)])
 
 
+@deprecate_parameter(
+    deprecated_name="num_workers",
+    new_name="workers",
+    start_version="0.26",
+    stop_version="0.28",
+)
 @utils.channel_as_last_axis()
 def cycle_spin(
     x,
     func,
     max_shifts,
     shift_steps=1,
-    num_workers=None,
+    num_workers=DEPRECATED,
     func_kw=None,
     *,
+    workers=None,
     channel_axis=None,
 ):
     """Cycle spinning (repeatedly apply func to shifted versions of x).
@@ -76,7 +83,7 @@ def cycle_spin(
         The step size for the shifts applied along axis, i, are::
         ``range((0, max_shifts[i]+1, shift_steps[i]))``. If an integer is
         provided, the same step size is used for all axes.
-    num_workers : int or None, optional
+    workers : int or None, optional
         The number of parallel threads to use during cycle spinning. If set to
         ``None``, the full set of available cores are used.
     func_kw : dict, optional
@@ -141,16 +148,16 @@ def cycle_spin(
         tmp = func(xs, **func_kw)
         return np.roll(tmp, tuple(-s for s in shift), axis=roll_axes)
 
-    if not dask_available and (num_workers is None or num_workers > 1):
-        num_workers = 1
+    if not dask_available and (workers is None or workers > 1):
+        workers = 1
         warn(
             'The optional dask dependency is not installed. '
             'The number of workers is set to 1. To silence '
-            'this warning, install dask or explicitly set `num_workers=1` '
+            'this warning, install dask or explicitly set `workers=1` '
             'when calling the `cycle_spin` function'
         )
     # compute a running average across the cycle shifts
-    if num_workers == 1:
+    if workers == 1:
         # serial processing
         mean = _run_one_shift(all_shifts[0])
         for shift in all_shifts[1:]:
@@ -160,5 +167,5 @@ def cycle_spin(
         # multithreaded via dask
         futures = [dask.delayed(_run_one_shift)(s) for s in all_shifts]
         mean = sum(futures) / len(futures)
-        mean = mean.compute(num_workers=num_workers)
+        mean = mean.compute(workers=workers)
     return mean

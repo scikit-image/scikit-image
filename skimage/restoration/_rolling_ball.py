@@ -5,7 +5,7 @@ from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
 @deprecate_parameter(
-    "num_threads", new_name="num_workers", start_version="0.23", stop_version="0.25"
+    "num_threads", new_name="workers", start_version="0.26", stop_version="0.28"
 )
 def rolling_ball(
     image,
@@ -14,7 +14,7 @@ def rolling_ball(
     kernel=None,
     nansafe=False,
     num_threads=DEPRECATED,
-    num_workers=None,
+    workers=None,
 ):
     """Estimate background intensity using the rolling-ball algorithm.
 
@@ -38,7 +38,7 @@ def rolling_ball(
     nansafe: bool, optional
         If ``False`` (default), the function assumes that none of the values
         in `image` are ``np.nan``, and uses a faster implementation.
-    num_workers: int, optional
+    workers: int, optional
         The maximum number of threads to use. If ``None``, use the OpenMP
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
@@ -101,8 +101,8 @@ def rolling_ball(
     float_type = _supported_float_type(image.dtype)
     img = image.astype(float_type, copy=False)
 
-    if num_workers is None:
-        num_workers = 0
+    if workers is None:
+        workers = 0
 
     if kernel is None:
         kernel = ball_kernel(radius, image.ndim)
@@ -129,7 +129,7 @@ def rolling_ball(
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape.astype(np.intp),
-        num_workers,
+        workers,
     )
 
     background = background.astype(image.dtype, copy=False)

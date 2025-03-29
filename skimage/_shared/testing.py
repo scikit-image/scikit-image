@@ -203,7 +203,7 @@ def fetch(data_filename):
 
 # Ref: about the lack of threading support in WASM, please see
 # https://github.com/pyodide/pyodide/issues/237
-def run_in_parallel(num_workers=2, warnings_matching=None):
+def run_in_parallel(workers=2, warnings_matching=None):
     """Decorator to run the same function multiple times in parallel.
 
     This decorator is useful to ensure that separate threads execute
@@ -214,7 +214,7 @@ def run_in_parallel(num_workers=2, warnings_matching=None):
 
     Parameters
     ----------
-    num_workers : int, optional
+    workers : int, optional
         The number of times the function is run in parallel.
 
     warnings_matching: list or None
@@ -225,7 +225,7 @@ def run_in_parallel(num_workers=2, warnings_matching=None):
 
     """
 
-    assert num_workers > 0
+    assert workers > 0
 
     def wrapper(func):
         if is_wasm:
@@ -238,7 +238,7 @@ def run_in_parallel(num_workers=2, warnings_matching=None):
         def inner(*args, **kwargs):
             with expected_warnings(warnings_matching):
                 threads = []
-                for i in range(num_workers - 1):
+                for i in range(workers - 1):
                     thread = threading.Thread(target=func, args=args, kwargs=kwargs)
                     threads.append(thread)
                 for thread in threads:

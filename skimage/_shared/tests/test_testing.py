@@ -93,14 +93,14 @@ def test_run_in_parallel():
     change_state1()
     assert len(state) == 2
 
-    @run_in_parallel(num_workers=1)
+    @run_in_parallel(workers=1)
     def change_state2():
         state.append(None)
 
     change_state2()
     assert len(state) == 3
 
-    @run_in_parallel(num_workers=3)
+    @run_in_parallel(workers=3)
     def change_state3():
         state.append(None)
 
