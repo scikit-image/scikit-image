@@ -10,6 +10,8 @@ Version 0.28
 * Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
 * Remove all traces of deprecated parameter `num_threads` in
   `skimage.restoration.rolling_ball`.
+* Remove all traces of deprecated parameter `num_workers` in
+  `skimage.restoration.cycle_spin`.
 
 Version 0.27
 ------------
