@@ -260,7 +260,7 @@ class _GeometricTransform(ABC):
         tform : transform
             Transform such that ``np.all(tform(pts) == pts)``.
         """
-        return cls(dimensionality=dimensionality)
+        raise NotImplementedError('identity not implemented for this class')
 
 
 class _HMatrixTransform(_GeometricTransform):
