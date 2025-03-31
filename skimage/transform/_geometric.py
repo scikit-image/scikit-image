@@ -1325,7 +1325,7 @@ class EuclideanTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle, clockwise, as radians. If given as a vector, it is
+        Rotation angle, clockwise, in radians. If given as a vector, it is
         interpreted as Euler rotation angles [1]_. Only 2D (single rotation)
         and 3D (Euler rotations) values are supported. For higher dimensions,
         you must provide or estimate the transformation matrix instead, and
