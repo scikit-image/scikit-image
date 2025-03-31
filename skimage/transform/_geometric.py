@@ -1382,7 +1382,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     def _rt2matrix(self, rotation, translation, n_dims):
         if translation is None:
-            translation = translation = (0,) * n_dims
+            translation = (0,) * n_dims
         if rotation is None:
             rotation = 0 if n_dims == 2 else np.zeros(3)
         matrix = np.eye(n_dims + 1)
