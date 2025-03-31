@@ -107,7 +107,7 @@ def _apply_homogeneous(matrix, points):
         https://numpy.org/doc/stable/user/basics.interoperability.html#using-arbitrary-objects-in-numpy
     """
     points = np.array(points, copy=NP_COPY_IF_NEEDED, ndmin=2)
-    points_h = _as_h(points)
+    points_h = _append_homogeneous_dim(points)
     new_points_h = points_h @ matrix.T
     # We divide by the last dimension of the homogeneous
     # coordinate matrix. In order to avoid division by zero,
@@ -117,8 +117,23 @@ def _apply_homogeneous(matrix, points):
     return new_points_h[:, :-1] / divs[:, None]
 
 
-def _as_h(points):
-    """Return array by adding column of ones to right of `points`"""
+def _append_homogeneous_dim(points):
+    """Append a column of ones to the right of `points`.
+
+    This creates the representation of the points in the homogeneous coordinate
+    space used by homogeneous matrix transforms.
+
+    Parameters
+    ----------
+    points : array, shape (N, D)
+        The input coordinates, where N is the number of points and D is the
+        dimension of the coordinate space.
+
+    Returns
+    -------
+    points_h : array, shape (N, D+1)
+        The same points as homogeneous coordinates.
+    """
     return np.hstack((points, np.ones((len(points), 1))))
 
 
@@ -417,7 +432,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             Epipolar lines in the destination image.
 
         """
-        return _as_h(coords) @ self.params.T
+        return _append_homogeneous_dim(coords) @ self.params.T
 
     @property
     def inverse(self):
@@ -533,8 +548,8 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             Sampson distance.
 
         """
-        src_homogeneous = _as_h(src)
-        dst_homogeneous = _as_h(dst)
+        src_homogeneous = _append_homogeneous_dim(src)
+        dst_homogeneous = _append_homogeneous_dim(dst)
 
         F_src = self.params @ src_homogeneous.T
         Ft_dst = self.params.T @ dst_homogeneous.T
