@@ -14,7 +14,7 @@ myst-parser
 intersphinx-registry>=0.2411.14
 ipywidgets
 ipykernel
-plotly>=6.0.1
+plotly>=6.1.0b0
 git+https://github.com/plotly/kaleido@v1.0.0rc6#subdirectory=src/py
 scikit-learn>=1.2
 sphinx_design>=0.5
