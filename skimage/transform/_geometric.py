@@ -1348,9 +1348,9 @@ class EuclideanTransform(ProjectiveTransform):
     translation : (x, y[, z, ...]) sequence of float, length D, optional
         Translation parameters for each axis.
     dimensionality : int, optional
-        Fallback number of dimensions for transform when neither of `matrix` nor
-        `rotation` are specified.  Otherwise ignored, and we infer
-        dimensionality from `matrix` shape, or ``len(translations)``.
+        Fallback number of dimensions for transform when no other paremeters
+        are specified.  Otherwise ignored, and we infer dimensionality from the
+        input parameters.
 
     Attributes
     ----------
