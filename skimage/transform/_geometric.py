@@ -1550,11 +1550,11 @@ class SimilarityTransform(EuclideanTransform):
         if all(p is None for p in other_params):
             warnings.warn(
                 'In the future, it will be a ValueError to pass a '
-                'scalar ``scale`` value with a ``dimensionality`` '
+                'scalar `scale` value with a ``dimensionality`` '
                 '> 2\n,and without other implicit parameters '
                 'to indicate the dimensionality of the transform.\n'
                 'Please indicate dimensionality by passing a vector '
-                'of suitable length to ``scale``.',
+                'of suitable length to `scale`.',
                 FutureWarning,
                 stacklevel=2,
             )
