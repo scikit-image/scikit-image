@@ -260,6 +260,7 @@ class _GeometricTransform(ABC):
         return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
 
     @classmethod
+    @abstractmethod
     def identity(cls, dimensionality=None):
         """Identity transform
 
@@ -275,7 +276,6 @@ class _GeometricTransform(ABC):
         tform : transform
             Transform such that ``np.all(tform(pts) == pts)``.
         """
-        raise NotImplementedError('identity not implemented for this class')
 
 
 class _HMatrixTransform(_GeometricTransform):
