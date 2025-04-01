@@ -1493,7 +1493,7 @@ class SimilarityTransform(EuclideanTransform):
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
     dimensionality : int, optional
         The dimensionality of the transform, corresponding to ``dim`` above.
-        Ignored if `matrix` is not None, and set to `matrix.shape[0] - 1`.
+        Ignored if `matrix` is not None, and set to ``matrix.shape[0] - 1``.
         Otherwise, must be one of 2 or 3.
 
     Attributes
