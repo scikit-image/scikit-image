@@ -322,7 +322,7 @@ def test_affine_shear():
 
 
 @pytest.mark.parametrize(
-    'pts,params',
+    'pts, params',
     product(
         (SRC, DST),
         (
