@@ -1274,7 +1274,7 @@ def test_broadcasting():
     # 3D.
     tf = SimilarityTransform(scale=[2, 3, 4], translation=10)
     assert_equal(tf.params, _from_matvec(np.diag([2, 3, 4]), [10] * 3))
-    # Scalar rotation does not broadclast
+    # Scalar rotation does not broadcast.
     for tf_class in SimilarityTransform, EuclideanTransform:
         with pytest.raises(ValueError):
             tf_class(rotation=0.2, translation=translation)
