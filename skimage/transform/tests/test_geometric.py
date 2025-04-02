@@ -1118,7 +1118,7 @@ EG_OPS = dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)
 
 
 @pytest.mark.parametrize(
-    'tform_class,op_order',
+    'tform_class, op_order',
     (
         (AffineTransform, ('scale', 'shear', 'rotation', 'translation')),
         (EuclideanTransform, ('rotation', 'translation')),
