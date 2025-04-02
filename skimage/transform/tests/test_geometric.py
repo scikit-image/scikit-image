@@ -1222,7 +1222,7 @@ def test_kw_only_params(tform_class):
 
 
 def test_kw_only_emt():
-    # Check all parameters are keyword only for EssentialMatrixTransform.
+    # Check all parameters are keyword-only for EssentialMatrixTransform.
     with pytest.raises(TypeError):
         EssentialMatrixTransform(None)
 
