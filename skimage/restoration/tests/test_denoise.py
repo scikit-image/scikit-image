@@ -1189,6 +1189,7 @@ def test_cycle_spinning_workers():
     assert_array_almost_equal(dn_cc1, dn_cc3)
 
 
+@xfail_without_pywt
 @pytest.mark.parametrize("num_workers", [None, 1])
 def test_cycle_spinner_deprecate_num_workers(num_workers):
     img = astro_gray
