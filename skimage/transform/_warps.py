@@ -99,7 +99,7 @@ def resize(
     Returns
     -------
     resized : ndarray
-        Resized version of the input.
+        Resized version of the input. See Notes regarding dtype.
 
     Other parameters
     ----------------
@@ -134,6 +134,10 @@ def resize(
         downsampling factor, where s > 1. For the up-size case, s < 1, no
         anti-aliasing is performed prior to rescaling.
 
+    See Also
+    --------
+    scipy.ndimage.zoom
+
     Notes
     -----
     Modes 'reflect' and 'symmetric' are similar, but differ in whether the edge
@@ -141,6 +145,18 @@ def resize(
     has values [0, 1, 2] and was padded to the right by four values using
     symmetric, the result would be [0, 1, 2, 2, 1, 0, 0], while for reflect it
     would be [0, 1, 2, 1, 0, 1, 2].
+
+    `resize` uses interpolation. Unless the interpolation method is nearest-neighbor
+    (``order==0``), the algorithm will generate output values as weighted averages
+    of input values. Accordingly, the output dtype is ``float64`` with the following
+    exceptions:
+
+    - When ``order==0``, the output dtype is ``image.dtype``.
+    - When ``image.dtype`` is ``float16`` or ``float32``, the output dtype is
+      ``float32``.
+
+    For a similar function that preserves the dtype of the input, consider
+    `scipy.ndimage.zoom`.
 
     Examples
     --------
