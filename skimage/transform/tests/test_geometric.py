@@ -21,9 +21,11 @@ from skimage.transform import (
 from skimage.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
+    _calc_center_normalize,
     _center_and_normalize_points,
     _apply_homogeneous,
     _euler_rotation_matrix,
+    _append_homogeneous_dim,
     TRANSFORMS,
 )
 
@@ -515,7 +517,57 @@ def test_fundamental_matrix_inverse_estimation():
     np.testing.assert_array_almost_equal(tform.inverse.params, tform_inv.params)
 
 
+def _calc_distances(src, dst, F, metric='distance'):
+    """Distances between calculated epipolar lines and points
+
+    Parameters
+    ----------
+    src : array shape (N, D)
+        Points in first image.
+    dst : array shape (N, D)
+        Matching points in second image.
+    F : array shape (3, 3)
+        Fundamental matrix mapping `src` to epipolar lines in `dst`.
+    metric : {'distance', 'epip-distances'}, optional
+        Matrix for distance between actual points `dst` and epipolar lines
+        generated from `F`.  'distance' is signed distance from [1]_.
+        'epip-distances' is the squared sum of distances of points from epipolar
+        lines in both images.  See [2]_, section 7.1.4.
+
+    Notes
+    -----
+    See [Wikipedia on point-line
+    distance](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof)
+    for standard distance formula, and various proofs.
+
+    References
+    ----------
+    .. [1] Zhang, Zhengyou. "Determining the epipolar geometry and its
+           uncertainty: A review." International journal of computer vision 27
+           (1998): 161-195.
+    .. [2] Hartley, Richard I. "In defense of the eight-point algorithm."
+           Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
+           (1997): 580-593.
+    """
+    src_h, dst_h = [_append_homogeneous_dim(pts) for pts in (src, dst)]
+    Fu = F @ src_h.T
+    uFu = np.sum(dst_h.T * Fu, axis=0)
+    if metric == 'distance':
+        # See Zhang, p163, and Notes above.
+        return uFu / np.sqrt(np.sum(Fu[:-1] ** 2, axis=0))
+    if metric == 'epip-distances':
+        # Hartley, p 585, section 7.1.4
+        Fu_dash = F.T @ dst_h.T
+        scaler = 1 / np.sum(Fu[:-1] ** 2, axis=0) + 1 / np.sum(
+            Fu_dash[:-1] ** 2, axis=0
+        )
+        return (uFu**2) * scaler
+    raise ValueError(f'Invalid metric "{metric}"')
+
+
 def test_fundamental_matrix_epipolar_projection():
+    # See https://github.com/matthew-brett/test-fundamental-matrices
+    # for validation of fundamental matrix estimation methods.
     src = np.array(
         [
             1.839035,
@@ -558,11 +610,68 @@ def test_fundamental_matrix_epipolar_projection():
         ]
     ).reshape(-1, 2)
 
-    tform = estimate_transform('fundamental', src, dst)
+    tform = FundamentalMatrixTransform()
+    assert tform.estimate(src, dst)
 
-    # calculate x' F x for each coordinate; should be close to zero
-    p = np.abs(np.sum(np.column_stack((dst, np.ones(len(dst)))) * tform(src), axis=1))
-    assert np.all(p < 0.01)
+    # Calculate and test pixel distances.
+    rms_ds = np.abs(_calc_distances(src, dst, tform.params))
+    assert np.all(rms_ds < 0.5)
+
+    # Check same output from utility function.
+    tform_from_func = estimate_transform('fundamental', src, dst)
+    assert np.allclose(tform.params, tform_from_func.params)
+
+    # Check this corresponds to RMS scaling.
+    class FMTRMS(FundamentalMatrixTransform):
+        scaling = 'rms'
+
+    tform_rms = FMTRMS()
+    assert tform_rms.estimate(src, dst)
+    assert np.allclose(tform.params, tform_rms.params)
+
+    # Check that we can also use MRS (Hartley distance).
+    class FMTMRS(FundamentalMatrixTransform):
+        scaling = 'mrs'
+
+    tform_mrs = FMTMRS()
+    # MRS gives us a different F matrix.
+    assert tform_mrs.estimate(src, dst)
+    assert not np.allclose(tform.params, tform_mrs.params)
+    # But with acceptable (in this case slightly larger) distances.
+    mrs_ds = _calc_distances(src, dst, tform_mrs.params)
+    assert np.all(np.abs(mrs_ds) < 0.6)
+
+    # F matrix is as for OpenCV (CV2) (but with different scaling).
+    # !pip install opencv-python-headless
+    # import cv2
+    # cv2.findFundamentalMat(src, dst, cv2.FM_8POINT)[0]
+    cv2_f = np.array(
+        [
+            [-10.30598589, 19.82710842, -1.61417041],
+            [-3.41654338, 2.12186874, 1.06697878],
+            [11.76321795, -20.29016731, 1.0],
+        ]
+    )
+    # OpenCV matrix scaled such that final element is 1.
+    assert np.allclose(tform_mrs.params / tform_mrs.params[-1, -1], cv2_f)
+    # Distances are the same (because difference is only in scaling).
+    assert np.allclose(mrs_ds, _calc_distances(src, dst, cv2_f), atol=1e-7)
+
+    # We can also (for comparison) use raw estimating (without centering or
+    # scaling).
+    class FMTRaw(FundamentalMatrixTransform):
+        scaling = 'raw'
+
+    tform_raw = FMTRaw()
+    # Raw gives us a different F matrix from RMS or MRS.
+    assert tform_raw.estimate(src, dst)
+    assert not np.allclose(tform.params, tform_raw.params)
+    assert not np.allclose(tform_mrs.params, tform_raw.params)
+    # Distances are greater than either scaling option.
+    raw_ds = _calc_distances(src, dst, tform_raw.params)
+    assert np.max(np.abs(raw_ds)) > 1
+    assert np.mean(np.abs(raw_ds)) > np.mean(np.abs(rms_ds))
+    assert np.mean(np.abs(raw_ds)) > np.mean(np.abs(mrs_ds))
 
 
 def test_essential_matrix_init():
@@ -984,20 +1093,40 @@ def test_degenerate():
         assert not np.all(np.isnan(affine.params))
 
 
-def test_normalize_points():
-    mat, normed = _center_and_normalize_points(SRC)
-    assert np.allclose(np.mean(normed, axis=0), 0)
-    assert np.allclose(normed, _apply_homogeneous(mat, SRC))
+def test_calc_center_normalize():
+    n, d = SRC.shape
+    for scaling in ('rms', 'mrs', 'raw'):
+        mat = _calc_center_normalize(SRC, scaling=scaling)
+        if scaling == 'raw':
+            assert_equal(mat, np.eye(3))
+            continue
+        out_pts = _apply_homogeneous(mat, SRC)
+        assert np.allclose(np.mean(out_pts, axis=0), 0)
+        if scaling == 'rms':
+            assert np.isclose(np.sqrt(np.mean(out_pts**2)), 1)
+        elif scaling == 'mrs':
+            scaler = np.mean(np.sqrt(np.sum(out_pts**2, axis=1)))
+            assert np.isclose(scaler, np.sqrt(2))
+
+            scaler = np.mean(np.sqrt(np.sum(out_pts**2, axis=1)))
+            assert np.isclose(scaler, np.sqrt(2))
+        mat2, normed = _center_and_normalize_points(SRC, scaling=scaling)
+        assert_equal(mat, mat2)
+        assert_equal(out_pts, normed)
+
+    with pytest.raises(ValueError, match='Unexpected "scaling"'):
+        _center_and_normalize_points(SRC, scaling='foo')
 
 
 def test_normalize_degenerate_points():
     """Return nan matrix *of appropriate size* when point is repeated."""
     pts = np.array([[73.42834308, 94.2977623]] * 3)
-    mat, pts_tf = _center_and_normalize_points(pts)
-    assert np.all(np.isnan(mat))
-    assert np.all(np.isnan(pts_tf))
-    assert mat.shape == (3, 3)
-    assert pts_tf.shape == pts.shape
+    for scaling in 'rms', 'mrs':
+        mat, pts_tf = _center_and_normalize_points(pts, scaling)
+        assert np.all(np.isnan(mat))
+        assert np.all(np.isnan(pts_tf))
+        assert mat.shape == (3, 3)
+        assert pts_tf.shape == pts.shape
 
 
 def test_projective_repr():
