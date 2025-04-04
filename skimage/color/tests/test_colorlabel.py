@@ -316,3 +316,12 @@ def test_saturation_warning():
         label2rgb(labels, image=rgb_img, bg_label=0, saturation=2)
     with expected_warnings(["saturation must be in range"]):
         label2rgb(labels, image=rgb_img, bg_label=0, saturation=-1)
+
+
+def test_label_rename_warning_and_error():
+    with pytest.raises(
+        TypeError, match="Cannot specify both 'label' and 'label_image' "
+    ):
+        label2rgb(label=np.array([0, 1, 0]), label_image=np.array([0, 1, 0]))
+    with pytest.warns(FutureWarning, match="'label' is deprecated since version 0.26 "):
+        label2rgb(label=np.array([0, 1, 0]))
