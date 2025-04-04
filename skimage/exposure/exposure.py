@@ -628,7 +628,8 @@ def adjust_gamma(image, gamma=1, gain=1):
 
     Also known as Power Law Transform.
     This function transforms the input image pixelwise according to the
-    equation ``O = I**gamma`` after scaling each pixel to the range 0 to 1.
+    equation ``O = gain * I**gamma`` after scaling each pixel to the
+    range 0 to 1.
 
     Parameters
     ----------
