@@ -832,9 +832,10 @@ class ProjectiveTransform(_HMatrixTransform):
 
     """
 
-    def __init__(self, matrix=None, *, dimensionality=None):
-        super().__init__(matrix, dimensionality=dimensionality)
-        self._coeffs = range(self.params.size - 1)
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.params.size - 1)
 
     def _check_dims(self, d):
         if d >= 2:
@@ -1032,7 +1033,7 @@ class ProjectiveTransform(_HMatrixTransform):
             A[ddim * n : (ddim + 1) * n, -d - 1 :] *= -dst[:, ddim : (ddim + 1)]
 
         # Select relevant columns, depending on params
-        A = A[:, list(self._coeffs) + [-1]]
+        A = A[:, list(self._coeff_inds) + [-1]]
 
         # Get the vectors that correspond to singular values, also applying
         # the weighting if provided
@@ -1054,7 +1055,7 @@ class ProjectiveTransform(_HMatrixTransform):
         H = np.zeros((d + 1, d + 1))
         # solution is right singular vector that corresponds to smallest
         # singular value
-        H.flat[list(self._coeffs) + [-1]] = -V[-1, :-1] / V[-1, -1]
+        H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
         H[d, d] = 1
 
         # De-center and de-normalize
@@ -1252,7 +1253,11 @@ class AffineTransform(ProjectiveTransform):
             if matrix.shape[0] != 3:
                 raise ValueError('Implicit parameters must give 2D transforms')
         super().__init__(matrix=matrix, dimensionality=dimensionality)
-        self._coeffs = range(self.dimensionality * (self.dimensionality + 1))
+
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.dimensionality * (self.dimensionality + 1))
 
     def _srst2matrix(self, scale, rotation, shear, translation):
         scale = (1, 1) if scale is None else scale
