@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import safe_as_int
+from .._shared.utils import safe_as_int, deprecate_func
 from .._shared.compat import NP_COPY_IF_NEEDED
 
 
@@ -214,6 +214,31 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
+def _get_base_func(func):
+    """Get not-wrapped base function from `func`
+
+    Parameters
+    ----------
+    func : callable
+
+    Returns
+    unwrapped_func : callable
+        `func` with any wrapping decoration removed.
+    """
+    while hasattr(func, '__wrapped__'):
+        func = func.__wrapped__
+    return func
+
+
+def _estimate_deprecator(cls):
+    cls.estimate = deprecate_func(
+        deprecated_version="0.26",
+        removed_version="2.0.0",
+        hint=(f"Please use `{cls.__name__}.from_estimate` class constructor instead."),
+    )(_get_base_func(cls.estimate))
+    return cls
+
+
 class _GeometricTransform(ABC):
     """Abstract base class for geometric transformations."""
 
@@ -277,6 +302,13 @@ class _GeometricTransform(ABC):
             Transform such that ``np.all(tform(pts) == pts)``.
         """
 
+    @classmethod
+    def _pts2tform_pts(cls, src, dst):
+        """Utility method for class constructors from points."""
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        return cls.identity(src.shape[1]), src, dst
+
 
 class _HMatrixTransform(_GeometricTransform):
     """Transform accepting homogeneous matrix as input."""
@@ -333,6 +365,7 @@ class _HMatrixTransform(_GeometricTransform):
         return self.matrix.shape[0] - 1
 
 
+@_estimate_deprecator
 class FundamentalMatrixTransform(_HMatrixTransform):
     """Fundamental matrix transformation.
 
@@ -498,6 +531,32 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         return F_normalized, src_matrix, dst_matrix
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate fundamental matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : :class:`FundamentalMatrixTransform` instance
+            Transform estimated from `src` and `dst`
+        """
+        tf, src, dst = cls._pts2tform_pts(src, dst)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+            tf.estimate(src, dst)
+        return tf
+
     def estimate(self, src, dst):
         """Estimate fundamental matrix using 8-point algorithm.
 
@@ -561,6 +620,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         )
 
 
+@_estimate_deprecator
 class EssentialMatrixTransform(FundamentalMatrixTransform):
     """Essential matrix transformation.
 
@@ -673,6 +733,29 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         t_arr = np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]], dtype=float)
         return t_arr @ rotation
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate essential matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : :class:`EssentialMatrixTransform` instance
+            Transform estimated from `src` and `dst`
+
+        """
+        return super().from_estimate(src, dst)
+
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
 
@@ -709,6 +792,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
+@_estimate_deprecator
 class ProjectiveTransform(_HMatrixTransform):
     r"""Projective transformation.
 
@@ -786,6 +870,79 @@ class ProjectiveTransform(_HMatrixTransform):
     def inverse(self):
         """Return a transform object representing the inverse."""
         return type(self)(matrix=self._inv_matrix)
+
+    @classmethod
+    def from_estimate(cls, src, dst, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
+            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
+
+        These equations can be transformed to the following form::
+
+            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
+            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[x y 1 0 0 0 -x*X -y*X -X]
+                   [0 0 0 x y 1 -x*Y -y*Y -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        In case of the affine transformation the coefficients c0 and c1 are 0.
+        Thus the system of equations is::
+
+            A   = [[x y 1 0 0 0 -X]
+                   [0 0 0 x y 1 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c3]
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        tf : {:class:`ProjectiveTransform` instance, None}
+            Transform estimated from `src` and `dst`, with optional `weights`,
+            unless estimation fails, in which case return None
+
+        """
+        tf, src, dst = cls._pts2tform_pts(src, dst)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+            success = tf.estimate(src, dst, weights)
+        return tf if success else None
 
     def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -961,6 +1118,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return super().identity(dimensionality=dimensionality)
 
 
+@_estimate_deprecator
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
 
@@ -1146,6 +1304,7 @@ class AffineTransform(ProjectiveTransform):
         return self.params[0 : self.dimensionality, self.dimensionality]
 
 
+@_estimate_deprecator
 class PiecewiseAffineTransform(_GeometricTransform):
     """Piecewise affine transformation.
 
@@ -1168,6 +1327,32 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self.affines = None
         self.inverse_affines = None
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, D) array_like
+            Source coordinates.
+        dst : (N, D) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : {:class:`ProjectiveTransform` instance, None}
+            Transform estimated from `src` and `dst`, with optional `weights`,
+            unless estimation fails, in which case return None
+
+        """
+        tf, src, dst = cls._pts2tform_pts(src, dst)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+            success = tf.estimate(src, dst)
+        return tf if success else None
+
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
@@ -1188,19 +1373,22 @@ class PiecewiseAffineTransform(_GeometricTransform):
         """
         src = np.asarray(src)
         dst = np.asarray(dst)
+        n, d = src.shape
 
-        ndim = src.shape[1]
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
 
         success = True
+        null_params = np.full((d + 1, d + 1), np.nan)
 
         # find affine mapping from source positions to destination
         self.affines = []
         for tri in self._tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(src[tri, :], dst[tri, :])
+            affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
+            if affine is None:
+                success = False
+                affine = AffineTransform(null_params.copy())
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -1209,8 +1397,10 @@ class PiecewiseAffineTransform(_GeometricTransform):
         # find affine mapping from source positions to destination
         self.inverse_affines = []
         for tri in self._inverse_tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(dst[tri, :], src[tri, :])
+            affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
+            if affine is None:
+                success = False
+                affine = AffineTransform(null_params.copy())
             self.inverse_affines.append(affine)
 
         return success
@@ -1302,6 +1492,7 @@ def _euler_rotation_matrix(angles, degrees=False):
     ).as_matrix()
 
 
+@_estimate_deprecator
 class EuclideanTransform(ProjectiveTransform):
     """Euclidean transformation, also known as a rigid transform.
 
@@ -1409,6 +1600,34 @@ class EuclideanTransform(ProjectiveTransform):
         matrix[0:n_dims, n_dims] = translation
         return matrix
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : {transform instance, None}
+            Transform estimated from `src` and `dst`, with optional `weights`,
+            unless estimation fails, in which case return None
+        """
+        tf, src, dst = cls._pts2tform_pts(src, dst)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+            success = tf.estimate(src, dst)
+        return tf if success else None
+
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
@@ -1452,6 +1671,7 @@ class EuclideanTransform(ProjectiveTransform):
         return self.params[0 : self.dimensionality, self.dimensionality]
 
 
+@_estimate_deprecator
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
@@ -1570,6 +1790,7 @@ class SimilarityTransform(EuclideanTransform):
             raise NotImplementedError('Scale is only implemented for 2D and 3D.')
 
 
+@_estimate_deprecator
 class PolynomialTransform(_GeometricTransform):
     """2D polynomial transformation.
 
@@ -1604,6 +1825,72 @@ class PolynomialTransform(_GeometricTransform):
         self.params = np.array([[0, 1, 0], [0, 0, 1]] if params is None else params)
         if self.params.shape == () or self.params.shape[0] != 2:
             raise ValueError("Transformation parameters must be shape (2, N)")
+
+    @classmethod
+    def from_estimate(cls, src, dst, order=2, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+        These equations can be transformed to the following form::
+
+            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
+            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[1 x y x**2 x*y y**2 ... 0 ...             0 -X]
+                   [0 ...                 0 1 x y x**2 x*y y**2 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a00 a10 a11 a20 a21 a22 ... ann
+                   b00 b10 b11 b20 b21 b22 ... bnn c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        order : int, optional
+            Polynomial order (number of coefficients is order + 1).
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        tf : {:class:`PolynomialTransform` instance, None}
+            Transform estimated from `src` and `dst`, with optional `order` and
+            `weights`, unless estimation fails, in which case return None
+
+        """
+        tf, src, dst = cls._pts2tform_pts(src, dst)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+            success = tf.estimate(src, dst, order, weights)
+        return tf if success else None
 
     def estimate(self, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -1840,10 +2127,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     if ttype not in TRANSFORMS:
         raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
-    tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
-    tform.estimate(src, dst, *args, **kwargs)
-
-    return tform
+    return TRANSFORMS[ttype].from_estimate(src, dst, *args, **kwargs)
 
 
 def matrix_transform(coords, matrix):
