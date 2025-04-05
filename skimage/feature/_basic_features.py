@@ -53,7 +53,7 @@ def _mutiscale_basic_features_singlechannel(
     sigma_min=0.5,
     sigma_max=16,
     num_sigma=None,
-    num_workers=None,
+    workers=None,
 ):
     """Features for a single channel nd image.
 
@@ -79,7 +79,7 @@ def _mutiscale_basic_features_singlechannel(
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.
-    num_workers : int or None, optional
+    workers : int or None, optional
         The number of parallel threads to use. If set to ``None``, the full
         set of available cores are used.
 
@@ -99,7 +99,7 @@ def _mutiscale_basic_features_singlechannel(
         base=2,
         endpoint=True,
     )
-    with PoolExecutor(max_workers=num_workers) as ex:
+    with PoolExecutor(max_workers=workers) as ex:
         out_sigmas = list(
             ex.map(
                 lambda s: _singlescale_basic_features_singlechannel(
@@ -120,7 +120,7 @@ def multiscale_basic_features(
     sigma_min=0.5,
     sigma_max=16,
     num_sigma=None,
-    num_workers=None,
+    workers=None,
     *,
     channel_axis=None,
 ):
@@ -151,7 +151,7 @@ def multiscale_basic_features(
     num_sigma : int, optional
         Number of values of the Gaussian kernel between sigma_min and sigma_max.
         If None, sigma_min multiplied by powers of 2 are used.
-    num_workers : int or None, optional
+    workers : int or None, optional
         The number of parallel threads to use. If set to ``None``, the full
         set of available cores are used.
     channel_axis : int or None, optional
@@ -189,7 +189,7 @@ def multiscale_basic_features(
             sigma_min=sigma_min,
             sigma_max=sigma_max,
             num_sigma=num_sigma,
-            num_workers=num_workers,
+            workers=workers,
         )
         for dim in range(image.shape[-1])
     )

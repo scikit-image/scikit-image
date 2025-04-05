@@ -78,7 +78,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
                      Py_ssize_t[::1] img_shape not None,
                      Py_ssize_t[::1] padded_img_shape not None,
                      Py_ssize_t[::1] kernel_shape not None,
-                     Py_ssize_t num_threads=0):
+                     Py_ssize_t workers=0):
     """Apply a ND kernel to an ND image.
 
     This function is the critical piece of code for
@@ -103,7 +103,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
         The shape of the unflattened, padded image.
     kernel_shape : (N) ndarray
         The shape of the unflattened kernel.
-    num_threads : int, optional
+    workers : int, optional
         The number of threads used to compute the result. If no value is
         provided (0, default) fall back to the number of threads that openMP
         is currently configured to use.
@@ -131,7 +131,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
 
     for offset_idx in prange(
             out_data_size,
-            num_threads=num_threads,
+            num_threads=workers,
             nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
@@ -162,7 +162,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
                  Py_ssize_t[::1] img_shape not None,
                  Py_ssize_t[::1] padded_img_shape not None,
                  Py_ssize_t[::1] kernel_shape not None,
-                 Py_ssize_t num_threads=0):
+                 Py_ssize_t workers=0):
     """Apply a ND kernel to an ND image.
 
     This function is the critical piece of code for
@@ -187,7 +187,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
         The shape of the unflattened, padded image.
     kernel_shape : (N) ndarray
         The shape of the unflattened kernel.
-    num_threads : int, optional
+    workers : int, optional
         The number of threads used to compute the result. If no value is
         provided (0, default) fall back to the number of threads that openMP
         is currently configured to use.
@@ -220,7 +220,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
 
     for offset_idx in prange(
             out_data_size,
-            num_threads=num_threads,
+            num_threads=workers,
             nogil=True):
         offset = ind2ind(offset_idx, 0, img_shape, padded_img_shape)
         min_value = INFINITY
