@@ -1013,6 +1013,7 @@ class ProjectiveTransform(_HMatrixTransform):
         src = np.asarray(src)
         dst = np.asarray(dst)
         n, d = src.shape
+        fail_matrix = np.full((d + 1, d + 1), np.nan)
 
         src_matrix, src = _center_and_normalize_points(src)
         dst_matrix, dst = _center_and_normalize_points(dst)
@@ -1045,8 +1046,12 @@ class ProjectiveTransform(_HMatrixTransform):
             _, _, V = np.linalg.svd(W @ A)
 
         H = np.zeros((d + 1, d + 1))
-        # solution is right singular vector that corresponds to smallest
-        # singular value
+        # Solution is right singular vector that corresponds to smallest
+        # singular value.
+        if np.isclose(V[-1, -1], 0):
+            self.params = fail_matrix
+            return False
+
         H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
         H[d, d] = 1
 
@@ -1055,7 +1060,7 @@ class ProjectiveTransform(_HMatrixTransform):
         # to a line rather than a plane.
         _, s, _ = np.linalg.svd(H)
         if np.isclose(s[-1], 0):
-            self.params = np.full((d + 1, d + 1), np.nan)
+            self.params = fail_matrix
             return False
 
         # De-center and de-normalize
