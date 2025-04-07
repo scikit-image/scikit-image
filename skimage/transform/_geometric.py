@@ -1044,19 +1044,19 @@ class ProjectiveTransform(_HMatrixTransform):
             W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
             _, _, V = np.linalg.svd(W @ A)
 
-        # if the last element of the vector corresponding to the smallest
-        # singular value is close to zero, this implies a degenerate case
-        # because it is a rank-defective transform, which would map points
-        # to a line rather than a plane.
-        if np.isclose(V[-1, -1], 0):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
-
         H = np.zeros((d + 1, d + 1))
         # solution is right singular vector that corresponds to smallest
         # singular value
         H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
         H[d, d] = 1
+
+        # If the smallest singular value is close to zero, this implies a
+        # degenerate case with a rank-defective transform, which would map points
+        # to a line rather than a plane.
+        _, s, _ = np.linalg.svd(H)
+        if np.isclose(s[-1], 0):
+            self.params = np.full((d + 1, d + 1), np.nan)
+            return False
 
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
