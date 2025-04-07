@@ -680,6 +680,22 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
+class _FromEstimateWrapper:
+    """Compatibility wrapper for class using ``from_estimate``"""
+
+    def __init__(self, model):
+        self.model = model
+
+    def residuals(self, *args, **kwargs):
+        return self.model.residuals(*args, **kwargs)
+
+    def estimate(self, *args, **kwargs):
+        if (new_model := self.model.from_estimate(*args, **kwargs)) is None:
+            return False
+        self.model = new_model
+        return True
+
+
 def ransac(
     data,
     model_class,
@@ -905,6 +921,9 @@ def ransac(
 
     # estimate model for current random sample set
     model = model_class()
+    # Wrap Transforms with `from_estimate` classmethod.
+    if hasattr(model, 'from_estimate'):
+        model = _FromEstimateWrapper(model)
 
     num_trials = 0
     # max_trials can be updated inside the loop, so this cannot be a for-loop
@@ -974,4 +993,5 @@ def ransac(
         best_inliers = None
         warn("No inliers found. Model not fitted")
 
-    return model, best_inliers
+    # Return model from wrapper, otherwise model itself.
+    return getattr(model, 'model', model), best_inliers
