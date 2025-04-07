@@ -948,8 +948,11 @@ def test_degenerate_2():
 
     src = np.array([[0, 2, 0], [0, 2, 0], [0, 4, 0]])
     dst = np.array([[0, 1, 0], [0, 1, 0], [0, 3, 0]])
-    #### REVIEW
-    tform = AffineTransform()
+    # class constructor
+    tform = AffineTransform.from_estimate(src, dst)
+    assert tform is None
+    # estimate method
+    tform = AffineTransform.identity(3)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
         assert not tform.estimate(src, dst)
     # Prior to gh-6207, the above would set the parameters as the identity.
