@@ -62,7 +62,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
     """
     if channel_axis is None and image.ndim > 2:
         raise ValueError(
-            "This algorithm works only on single or " "multi-channel 2d images. "
+            "This algorithm works only on single or multi-channel 2d images. "
         )
 
     image = np.atleast_3d(image)

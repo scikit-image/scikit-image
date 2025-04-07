@@ -113,7 +113,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0, order='rc'):
     if not np.isscalar(sigma):
         sigma = tuple(sigma)
         if len(sigma) != image.ndim:
-            raise ValueError('sigma must have as many elements as image ' 'has axes')
+            raise ValueError('sigma must have as many elements as image has axes')
 
     image = _prepare_grayscale_input_nD(image)
 

@@ -61,8 +61,7 @@ def _preprocess_resize_output_shape(image, output_shape):
         output_shape = output_shape + (image.shape[-1],)
     elif output_ndim < image.ndim:
         raise ValueError(
-            "output_shape length cannot be smaller than the "
-            "image number of dimensions"
+            "output_shape length cannot be smaller than the image number of dimensions"
         )
 
     return image, output_shape
@@ -306,7 +305,7 @@ def rescale(
         if (not multichannel and len(scale) != image.ndim) or (
             multichannel and len(scale) != image.ndim - 1
         ):
-            raise ValueError("Supply a single scale, or one value per spatial " "axis")
+            raise ValueError("Supply a single scale, or one value per spatial axis")
         if multichannel:
             scale = np.concatenate((scale, [1]))
     orig_shape = np.asarray(image.shape)

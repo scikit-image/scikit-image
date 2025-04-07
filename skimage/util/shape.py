@@ -78,7 +78,7 @@ def view_as_blocks(arr_in, block_shape):
         raise ValueError("'block_shape' elements must be strictly positive")
 
     if block_shape.size != arr_in.ndim:
-        raise ValueError("'block_shape' must have the same length " "as 'arr_in.shape'")
+        raise ValueError("'block_shape' must have the same length as 'arr_in.shape'")
 
     arr_shape = np.array(arr_in.shape)
     if (arr_shape % block_shape).sum() != 0:

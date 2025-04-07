@@ -875,7 +875,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
     elif counter == max_num_iter - 1:
-        raise RuntimeError('Maximum iteration reached for histogram' 'smoothing')
+        raise RuntimeError('Maximum iteration reached for histogramsmoothing')
 
     # Find the lowest point between the maxima
     threshold_idx = np.argmin(smooth_hist[maximum_idxs[0] : maximum_idxs[1] + 1])

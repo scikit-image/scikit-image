@@ -224,7 +224,7 @@ ax.scatter(
 )
 ax.legend()
 ax.set_title(
-    'J-Invariant Denoiser Has Comparable Or ' 'Better Performance At Same Parameters'
+    'J-Invariant Denoiser Has Comparable Or Better Performance At Same Parameters'
 )
 ax.set_ylabel('MSE')
 ax.set_xlabel('sigma')

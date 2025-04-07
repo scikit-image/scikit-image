@@ -145,7 +145,7 @@ def _preprocess_input(
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
-        raise ValueError('Image dimensions and neighborhood dimensions' 'do not match')
+        raise ValueError('Image dimensions and neighborhood dimensionsdo not match')
 
     image = np.ascontiguousarray(image)
 
@@ -252,7 +252,7 @@ def _handle_input_3D(
 
     footprint = np.ascontiguousarray(img_as_ubyte(footprint > 0))
     if footprint.ndim != image.ndim:
-        raise ValueError('Image dimensions and neighborhood dimensions' 'do not match')
+        raise ValueError('Image dimensions and neighborhood dimensionsdo not match')
     image = np.ascontiguousarray(image)
 
     if mask is None:

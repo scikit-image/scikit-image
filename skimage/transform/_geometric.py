@@ -18,9 +18,7 @@ def _affine_matrix_from_vector(v):
     d = (1 + np.sqrt(1 + 4 * nparam)) / 2 - 1
     dimensionality = int(np.round(d))  # round to prevent approx errors
     if d != dimensionality:
-        raise ValueError(
-            'Invalid number of elements for ' f'linearized matrix: {nparam}'
-        )
+        raise ValueError(f'Invalid number of elements for linearized matrix: {nparam}')
     matrix = np.eye(dimensionality + 1)
     matrix[:-1, :] = np.reshape(v, (dimensionality, dimensionality + 1))
     return matrix
@@ -295,8 +293,7 @@ class _HMatrixTransform(_GeometricTransform):
         if dimensionality is not None:
             if dimensionality != matrix.shape[0] - 1:
                 raise ValueError(
-                    f'Dimensionality {dimensionality} does not match matrix '
-                    f'{matrix}'
+                    f'Dimensionality {dimensionality} does not match matrix {matrix}'
                 )
         m = matrix.shape[0]
         if matrix.shape != (m, m):
@@ -651,8 +648,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         elif n_rt_none == 0:
             if matrix is not None:
                 raise ValueError(
-                    "Do not specify rotation or translation when "
-                    "matrix is specified."
+                    "Do not specify rotation or translation when matrix is specified."
                 )
             matrix = self._rt2matrix(rotation, translation)
         super().__init__(matrix=matrix, dimensionality=dimensionality)
@@ -922,7 +918,7 @@ class ProjectiveTransform(_HMatrixTransform):
                 tform = ProjectiveTransform
             return tform(other.params @ self.params)
         else:
-            raise TypeError("Cannot combine transformations of differing " "types.")
+            raise TypeError("Cannot combine transformations of differing types.")
 
     def __nice__(self):
         """common 'paramstr' used by __str__ and __repr__"""
@@ -1084,8 +1080,7 @@ class AffineTransform(ProjectiveTransform):
         if n_srst_none != 4:
             if matrix is not None:
                 raise ValueError(
-                    "Do not specify any implicit parameters when "
-                    "matrix is specified."
+                    "Do not specify any implicit parameters when matrix is specified."
                 )
             if dimensionality is not None and dimensionality > 2:
                 raise ValueError('Implicit parameters only valid for 2D transforms')
@@ -1373,8 +1368,7 @@ class EuclideanTransform(ProjectiveTransform):
         if n_rt_none != 2:
             if matrix is not None:
                 raise ValueError(
-                    "Do not specify any implicit parameters when "
-                    "matrix is specified."
+                    "Do not specify any implicit parameters when matrix is specified."
                 )
             n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
             if chk_msg is not None:
@@ -1519,8 +1513,7 @@ class SimilarityTransform(EuclideanTransform):
         if n_srt_none != 3:
             if matrix is not None:
                 raise ValueError(
-                    "Do not specify any implicit parameters when "
-                    "matrix is specified."
+                    "Do not specify any implicit parameters when matrix is specified."
                 )
             self._check_scale(scale, (rotation, translation), dimensionality)
             # Scale is special.  Scalar scale does not tell us the dimensions.

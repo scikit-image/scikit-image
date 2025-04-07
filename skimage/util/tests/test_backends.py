@@ -28,8 +28,7 @@ def fake_backends(monkeypatch):
 
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
 
             return fake_foo
@@ -37,8 +36,7 @@ def fake_backends(monkeypatch):
         def can_has(self, name, *args, **kwargs):
             if not name.endswith(":foo"):
                 raise ValueError(
-                    "Backend only implements the 'foo' function."
-                    f" Called with '{name}'"
+                    f"Backend only implements the 'foo' function. Called with '{name}'"
                 )
             return True
 

@@ -243,7 +243,7 @@ class CENSURE(FeatureDetector):
 
         if min_scale < 1 or max_scale < 1 or max_scale - min_scale < 2:
             raise ValueError(
-                'The scales must be >= 1 and the number of ' 'scales should be >= 3.'
+                'The scales must be >= 1 and the number of scales should be >= 3.'
             )
 
         self.min_scale = min_scale

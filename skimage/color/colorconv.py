@@ -163,10 +163,7 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     arr = np.asanyarray(arr)
 
     if arr.shape[channel_axis] != 3:
-        msg = (
-            f'the input array must have size 3 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 3 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -228,10 +225,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     channel_axis = channel_axis % arr.ndim
 
     if arr.shape[channel_axis] != 4:
-        msg = (
-            f'the input array must have size 4 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 4 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -247,7 +241,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
             f'values. Got {len(background)} items'
         )
     if np.any(background < 0) or np.any(background > 1):
-        raise ValueError('background RGB values must be floats between ' '0 and 1.')
+        raise ValueError('background RGB values must be floats between 0 and 1.')
     # reshape background for broadcasting along non-channel axes
     background = reshape_nd(background, arr.ndim, channel_axis)
 
@@ -624,8 +618,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
         return np.asarray(_illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(
-            f'Unknown illuminant/observer combination '
-            f'(`{illuminant}`, `{observer}`)'
+            f'Unknown illuminant/observer combination (`{illuminant}`, `{observer}`)'
         )
 
 
