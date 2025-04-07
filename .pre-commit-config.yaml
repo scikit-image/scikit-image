@@ -16,14 +16,14 @@ repos:
       - id: check-added-large-files
 
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: bc7af46104f0f5368b95878decf720f9f00c2559 # frozen: v3.4.2
+    rev: 787fb9f542b140ba0b2aced38e6a3e68021647a3  # frozen: v3.5.3
     hooks:
       - id: prettier
         files: \.(md|rst|yml|yaml)
         args: [--prose-wrap=preserve]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 89c421dff2e1026ba12cdb9ebd731f4a83aa8021 # frozen: v0.8.6
+    rev: 971923581912ef60a6b70dbf0c3e9a39563c9d47  # frozen: v0.11.4
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --exit-non-zero-on-fix]
@@ -44,7 +44,7 @@ repos:
         files: "pyproject.toml|requirements/.*\\.txt|tools/generate_requirements.py"
 
   - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: a0912e39df36b50365d8cdfb123c0e013dc6e50d # v1.3.0
+    rev: v1.5.2 # v1.3.0
     hooks:
       - id: zizmor
 
