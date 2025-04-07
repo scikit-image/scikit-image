@@ -987,7 +987,10 @@ def test_degenerate_2():
             [0, 142, 206],
         ]
     )
-    #### REVIEW
+    # from_estimate
+    tform = PiecewiseAffineTransform.from_estimate(src, dst)
+    assert tform is None
+    # estimate method records steps in affine estimation.
     tform = PiecewiseAffineTransform()
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
         assert not tform.estimate(src, dst)
