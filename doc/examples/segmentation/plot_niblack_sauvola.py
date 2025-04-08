@@ -42,25 +42,26 @@ thresh_sauvola = threshold_sauvola(image, window_size=window_size)
 binary_niblack = image > thresh_niblack
 binary_sauvola = image > thresh_sauvola
 
-plt.figure(figsize=(8, 7))
-plt.subplot(2, 2, 1)
-plt.imshow(image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(8, 7))
 
-plt.subplot(2, 2, 2)
-plt.title('Global Threshold')
-plt.imshow(binary_global, cmap=plt.cm.gray)
-plt.axis('off')
+axes[0, 0] = plt.subplot(2, 2, 1)
+axes[0, 0].imshow(image, cmap=plt.cm.gray)
+axes[0, 0].set_title('Original')
+axes[0, 0].axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(binary_niblack, cmap=plt.cm.gray)
-plt.title('Niblack Threshold')
-plt.axis('off')
+axes[0, 1] = plt.subplot(2, 2, 2)
+axes[0, 1].imshow(binary_global, cmap=plt.cm.gray)
+axes[0, 1].set_title('Global Threshold')
+axes[0, 1].axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(binary_sauvola, cmap=plt.cm.gray)
-plt.title('Sauvola Threshold')
-plt.axis('off')
+axes[1, 0] = plt.subplot(2, 2, 3)
+axes[1, 0].imshow(binary_niblack, cmap=plt.cm.gray)
+axes[1, 0].set_title('Niblack Threshold')
+axes[1, 0].axis('off')
+
+axes[1, 1] = plt.subplot(2, 2, 4)
+axes[1, 1].imshow(binary_sauvola, cmap=plt.cm.gray)
+axes[1, 1].set_title('Sauvola Threshold')
+axes[1, 1].axis('off')
 
 plt.show()

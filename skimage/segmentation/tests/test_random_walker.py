@@ -113,6 +113,9 @@ def test_2d_cg(dtype):
     assert data.shape == labels.shape
 
 
+@pytest.mark.filterwarnings(
+    "ignore:\"cg_mg\" not available, it requires pyamg to be installed"
+)
 @pytest.mark.filterwarnings("ignore:Implicit conversion of A to CSR::pyamg")
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'

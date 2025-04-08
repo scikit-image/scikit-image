@@ -79,7 +79,7 @@ ax.set_axis_off()
 # valid objects.
 
 
-coins_cleaned = ski.morphology.remove_small_objects(fill_coins, 21)
+coins_cleaned = ski.morphology.remove_small_objects(fill_coins, max_size=20)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray)
