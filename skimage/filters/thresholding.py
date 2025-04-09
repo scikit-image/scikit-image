@@ -966,7 +966,9 @@ def threshold_triangle(image=None, nbins=256, *, hist=None):
 
     if arg_low_level == arg_high_level:
         # Image has constant intensity.
-        return image.ravel()[0]
+        if image is not None:
+            return image.ravel()[0]
+        return bin_centers[arg_low_level]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height

@@ -630,6 +630,15 @@ def test_triangle_uniform_images(dtype):
     assert threshold_triangle(np.zeros((10, 10), dtype=dtype)) == 0
     assert threshold_triangle(np.ones((10, 10), dtype=dtype)) == 1
     assert threshold_triangle(np.full((10, 10), 2, dtype=dtype)) == 2
+    assert (
+        threshold_triangle(
+            hist=(
+                np.array([0, 100, 0], dtype=np.float32),
+                np.array([1, 2, 3], dtype=dtype),
+            )
+        )
+        == 2
+    )
 
 
 def test_triangle_uint_images():
