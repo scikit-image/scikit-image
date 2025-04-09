@@ -928,9 +928,10 @@ def threshold_triangle(image=None, nbins=256, *, hist=None):
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     hist : array, or 2-tuple of arrays, optional
-        Histogram from which to determine the threshold, and optionally a
-        corresponding array of bin center intensities. If no hist provided,
-        this function will compute it from the image.
+        An array containing a histogram from which to determine the threshold.
+        If not given, the histogram is computed from `image` which is mandatory
+        in that case. Optionally, two arrays can be passed to this argument:
+        a histogram first and a corresponding array of bin center intensities.
 
     Returns
     -------
