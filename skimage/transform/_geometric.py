@@ -188,7 +188,9 @@ def _umeyama(src, dst, estimate_scale):
     U, S, V = np.linalg.svd(A)
 
     # Eq. (40) and (43).
-    rank = np.linalg.matrix_rank(A)
+    # Matrix rank calculation from SVD (see numpy.linalg code).
+    tol = S.max() * np.max(A.shape) * np.finfo(float).eps
+    rank = np.count_nonzero(S > tol)
     if rank == 0:
         return np.nan * T
     elif rank == dim - 1:
