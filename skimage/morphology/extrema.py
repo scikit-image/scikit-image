@@ -24,7 +24,7 @@ def _add_constant_clip(image, const_value):
 
     if const_value > (max_dtype - min_dtype):
         raise ValueError(
-            "The added constant is not compatiblewith the image data type."
+            "The added constant is not compatible with the image data type."
         )
 
     result = image + const_value
@@ -38,7 +38,7 @@ def _subtract_constant_clip(image, const_value):
 
     if const_value > (max_dtype - min_dtype):
         raise ValueError(
-            "The subtracted constant is not compatiblewith the image data type."
+            "The subtracted constant is not compatible with the image data type."
         )
 
     result = image - const_value
