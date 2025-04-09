@@ -445,8 +445,7 @@ def _nsphere_series_decomposition(radius, ndim, dtype=np.uint8):
     max_radius = precomputed_decompositions.shape[0]
     if radius > max_radius:
         raise ValueError(
-            f"precomputed {ndim}D decomposition unavailable for "
-            f"radius > {max_radius}"
+            f"precomputed {ndim}D decomposition unavailable for radius > {max_radius}"
         )
     num_t_series, num_diamond, num_square = precomputed_decompositions[radius]
 

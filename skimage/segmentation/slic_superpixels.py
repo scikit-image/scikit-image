@@ -384,8 +384,7 @@ def slic(
                 sigma = np.insert(sigma, 0, 0)
         elif sigma.size != 3:
             raise ValueError(
-                f"Input image is 3D, but sigma has "
-                f"{sigma.size} elements (expected 3)."
+                f"Input image is 3D, but sigma has {sigma.size} elements (expected 3)."
             )
 
     if (sigma > 0).any():

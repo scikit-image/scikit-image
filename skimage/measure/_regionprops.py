@@ -495,7 +495,7 @@ class RegionProperties:
     def euler_number(self):
         if self._ndim not in [2, 3]:
             raise NotImplementedError(
-                'Euler number is implemented for ' '2D or 3D images only'
+                'Euler number is implemented for 2D or 3D images only'
             )
         return euler_number(self.image, self._ndim)
 

@@ -116,7 +116,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
         ranks = [len(e.shape) == len(expected_shape) for e in descriptors]
         if not all(ranks):
             raise DescriptorException(
-                'Please ensure all elements of your descriptor list ' 'are of rank 2.'
+                'Please ensure all elements of your descriptor list are of rank 2.'
             )
         dims = [e.shape[1] == descriptors[0].shape[1] for e in descriptors]
         if not all(dims):

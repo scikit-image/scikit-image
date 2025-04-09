@@ -75,7 +75,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     elif hasattr(wrap_around, '__getitem__') and not isinstance(wrap_around, str):
         if len(wrap_around) != image.ndim:
             raise ValueError(
-                'Length of `wrap_around` must equal the ' 'dimensionality of image'
+                'Length of `wrap_around` must equal the dimensionality of image'
             )
         wrap_around = [bool(wa) for wa in wrap_around]
     else:

@@ -128,13 +128,11 @@ def difference_of_gaussians(
 
     if len(low_sigma) != 1 and len(low_sigma) != spatial_dims:
         raise ValueError(
-            'low_sigma must have length equal to number of'
-            ' spatial dimensions of input'
+            'low_sigma must have length equal to number of spatial dimensions of input'
         )
     if len(high_sigma) != 1 and len(high_sigma) != spatial_dims:
         raise ValueError(
-            'high_sigma must have length equal to number of'
-            ' spatial dimensions of input'
+            'high_sigma must have length equal to number of spatial dimensions of input'
         )
 
     low_sigma = low_sigma * np.ones(spatial_dims)
@@ -142,7 +140,7 @@ def difference_of_gaussians(
 
     if any(high_sigma < low_sigma):
         raise ValueError(
-            'high_sigma must be equal to or larger than' 'low_sigma for all axes'
+            'high_sigma must be equal to or larger than low_sigma for all axes'
         )
 
     im1 = gaussian(
