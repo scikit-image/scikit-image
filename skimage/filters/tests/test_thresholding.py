@@ -639,6 +639,16 @@ def test_triangle_uint_images():
     assert threshold_triangle(np.invert(data.coins())) == 175
 
 
+def test_triangle_histogram():
+    hist_text = histogram(data.text(), nbins=256, source_range='image')
+    assert threshold_triangle(hist=hist_text) == 104
+
+
+def test_triangle_counts():
+    counts_text, bin_centers = histogram(data.text(), nbins=256, source_range='image')
+    assert threshold_triangle(hist=counts_text) + bin_centers[0] == 104
+
+
 def test_triangle_float_images():
     text = data.text()
     int_bins = text.max() - text.min() + 1
