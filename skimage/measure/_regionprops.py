@@ -1165,7 +1165,7 @@ def regionprops(
         and its dtype is inferred by calling the function on a small sample.
         If the name of an extra property clashes with the name of an existing
         property, the extra property will not be visible and a UserWarning will be
-        issued. A property computation function must take a label image as its
+        issued. A property computation function must take `label_image` as its
         first argument. If the property requires an intensity image, it must
         accept `intensity_image` as the second argument.
     spacing: tuple of float, shape (ndim,)
@@ -1283,7 +1283,7 @@ def regionprops(
 
             nu_ij = mu_ij / m_00^[(i+j)/2 + 1]
 
-        where ``m_00`` is the zero-th spatial moment.
+        where ``m_00`` is the zeroth spatial moment.
     **moments_weighted** : (3, 3) array
         Spatial moments of intensity image up to 3rd order::
 
