@@ -1242,7 +1242,7 @@ def regionprops(
         points around a region's convex hull contour as determined by
         ``find_contours`` [5]_.
     **image** : (H, J) ndarray
-        Binary region image sliced by bounding box.
+        Binary region image sliced by the bounding box.
     **image_convex** : (H, J) ndarray
         Binary convex hull image sliced by bounding box.
     **image_filled** : (H, J) ndarray
