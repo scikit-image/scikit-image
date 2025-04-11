@@ -1,9 +1,12 @@
+from warnings import catch_warnings, filterwarnings
+
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD,  _deprecate_estimate_method
 
 
+@_deprecate_estimate_method
 class ThinPlateSplineTransform:
     """Thin-plate spline transformation.
 
@@ -36,9 +39,7 @@ class ThinPlateSplineTransform:
 
     Estimate the transformation:
 
-    >>> tps = ski.transform.ThinPlateSplineTransform()
-    >>> tps.estimate(src, dst)
-    True
+    >>> tps = ski.transform.ThinPlateSplineTransform.from_estimate(src, dst)
 
     Appyling the transformation to `src` approximates `dst`:
 
@@ -106,6 +107,32 @@ class ThinPlateSplineTransform:
     @property
     def inverse(self):
         raise NotImplementedError("Not supported")
+
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate optimal spline mappings between source and destination points.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Control points at source coordinates.
+        dst : (N, 2) array_like
+            Control points at destination coordinates.
+
+        Returns
+        -------
+        tform : :class:`ThinPlateSpline` instance or None
+            Model instance if estimation succeeds, None otherwise.
+
+        Notes
+        -----
+        The number N of source and destination points must match.
+        """
+        instance = cls()
+        with catch_warnings():
+            filterwarnings("ignore", message="`estimate` is deprecated")
+            success = instance.estimate(src, dst)
+        return instance if success else None
 
     def estimate(self, src, dst):
         """Estimate optimal spline mappings between source and destination points.
