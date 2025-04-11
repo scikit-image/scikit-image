@@ -217,14 +217,15 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
-def _get_base_func(func):
-    """Get not-wrapped base function from `func`
+def _unwrap(func):
+    """Get not-wrapped base function from `func`.
 
     Parameters
     ----------
     func : callable
 
     Returns
+    -------
     unwrapped_func : callable
         `func` with any wrapping decoration removed.
     """
@@ -233,12 +234,12 @@ def _get_base_func(func):
     return func
 
 
-def _estimate_deprecator(cls):
+def _deprecate_estimate_method(cls):
     cls.estimate = deprecate_func(
         deprecated_version="0.26",
         removed_version="2.0.0",
         hint=(f"Please use `{cls.__name__}.from_estimate` class constructor instead."),
-    )(_get_base_func(cls.estimate))
+    )(_unwrap(cls.estimate))
     return cls
 
 
@@ -306,8 +307,8 @@ class _GeometricTransform(ABC):
         """
 
     @classmethod
-    def _pts2tform_pts(cls, src, dst):
-        """Utility method for class constructors from points."""
+    def _prepare_estimation(cls, src, dst):
+        """Create identity transform and make sure points are arrays."""
         src = np.asarray(src)
         dst = np.asarray(dst)
         return cls.identity(src.shape[1]), src, dst
@@ -368,7 +369,7 @@ class _HMatrixTransform(_GeometricTransform):
         return self.matrix.shape[0] - 1
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class FundamentalMatrixTransform(_HMatrixTransform):
     """Fundamental matrix transformation.
 
@@ -553,7 +554,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         tf : :class:`FundamentalMatrixTransform` instance
             Transform estimated from `src` and `dst`
         """
-        tf, src, dst = cls._pts2tform_pts(src, dst)
+        tf, src, dst = cls._prepare_estimation(src, dst)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="`estimate` is deprecated")
             tf.estimate(src, dst)
@@ -622,7 +623,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         )
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class EssentialMatrixTransform(FundamentalMatrixTransform):
     """Essential matrix transformation.
 
@@ -793,7 +794,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class ProjectiveTransform(_HMatrixTransform):
     r"""Projective transformation.
 
@@ -940,7 +941,7 @@ class ProjectiveTransform(_HMatrixTransform):
             unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._pts2tform_pts(src, dst)
+        tf, src, dst = cls._prepare_estimation(src, dst)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="`estimate` is deprecated")
             success = tf.estimate(src, dst, weights)
@@ -1123,7 +1124,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return super().identity(dimensionality=dimensionality)
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
 
@@ -1311,7 +1312,7 @@ class AffineTransform(ProjectiveTransform):
         return self.params[0 : self.dimensionality, self.dimensionality]
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class PiecewiseAffineTransform(_GeometricTransform):
     """Piecewise affine transformation.
 
@@ -1354,7 +1355,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
             unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._pts2tform_pts(src, dst)
+        tf, src, dst = cls._prepare_estimation(src, dst)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="`estimate` is deprecated")
             success = tf.estimate(src, dst)
@@ -1380,14 +1381,14 @@ class PiecewiseAffineTransform(_GeometricTransform):
         """
         src = np.asarray(src)
         dst = np.asarray(dst)
-        n, d = src.shape
+        N, D = src.shape
 
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
 
         success = True
-        null_params = np.full((d + 1, d + 1), np.nan)
+        fail_matrix = np.full((D + 1, D + 1), np.nan)
 
         # find affine mapping from source positions to destination
         self.affines = []
@@ -1395,7 +1396,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
             affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
             if affine is None:
                 success = False
-                affine = AffineTransform(null_params.copy())
+                affine = AffineTransform(fail_matrix.copy())
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -1407,7 +1408,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
             affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
             if affine is None:
                 success = False
-                affine = AffineTransform(null_params.copy())
+                affine = AffineTransform(fail_matrix.copy())
             self.inverse_affines.append(affine)
 
         return success
@@ -1499,7 +1500,7 @@ def _euler_rotation_matrix(angles, degrees=False):
     ).as_matrix()
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class EuclideanTransform(ProjectiveTransform):
     """Euclidean transformation, also known as a rigid transform.
 
@@ -1629,7 +1630,7 @@ class EuclideanTransform(ProjectiveTransform):
             Transform estimated from `src` and `dst`, with optional `weights`,
             unless estimation fails, in which case return None
         """
-        tf, src, dst = cls._pts2tform_pts(src, dst)
+        tf, src, dst = cls._prepare_estimation(src, dst)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="`estimate` is deprecated")
             success = tf.estimate(src, dst)
@@ -1678,7 +1679,7 @@ class EuclideanTransform(ProjectiveTransform):
         return self.params[0 : self.dimensionality, self.dimensionality]
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
@@ -1797,7 +1798,7 @@ class SimilarityTransform(EuclideanTransform):
             raise NotImplementedError('Scale is only implemented for 2D and 3D.')
 
 
-@_estimate_deprecator
+@_deprecate_estimate_method
 class PolynomialTransform(_GeometricTransform):
     """2D polynomial transformation.
 
@@ -1893,7 +1894,7 @@ class PolynomialTransform(_GeometricTransform):
             `weights`, unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._pts2tform_pts(src, dst)
+        tf, src, dst = cls._prepare_estimation(src, dst)
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="`estimate` is deprecated")
             success = tf.estimate(src, dst, order, weights)
