@@ -430,7 +430,7 @@ def _deprecate_estimate_method(cls):
     """
     cls.estimate = deprecate_func(
         deprecated_version="0.26",
-        removed_version="2.0.0",
+        removed_version="2.2",
         hint=(f"Please use `{cls.__name__}.from_estimate` class constructor instead."),
     )(_unwrap(cls.estimate))
     return cls
