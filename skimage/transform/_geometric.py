@@ -188,7 +188,8 @@ def _umeyama(src, dst, estimate_scale):
     U, S, V = np.linalg.svd(A)
 
     # Eq. (40) and (43).
-    # Matrix rank calculation from SVD (see numpy.linalg code).
+    # Matrix rank calculation from SVD (see numpy.linalg._linalg::matrix_rank code).
+    # (this does SVD to check for small singular values, replicated here).
     tol = S.max() * np.max(A.shape) * np.finfo(float).eps
     rank = np.count_nonzero(S > tol)
     if rank == 0:
