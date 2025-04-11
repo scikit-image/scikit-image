@@ -402,6 +402,40 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
+def _unwrap(func):
+    """Get not-wrapped base function from `func`.
+
+    Parameters
+    ----------
+    func : callable
+
+    Returns
+    -------
+    unwrapped_func : callable
+        `func` with any wrapping decoration removed.
+    """
+    while hasattr(func, '__wrapped__'):
+        func = func.__wrapped__
+    return func
+
+
+def _deprecate_estimate_method(cls):
+    """Deprecate ``estimate`` instance method.
+
+    Notes
+    -----
+    The ``estimate`` method may already be wrapped — for example, if we have
+    inherited from a class to which this decorator has already been applied.
+    Fetch the original (not-wrapped) method before applying this decoration.
+    """
+    cls.estimate = deprecate_func(
+        deprecated_version="0.26",
+        removed_version="2.0.0",
+        hint=(f"Please use `{cls.__name__}.from_estimate` class constructor instead."),
+    )(_unwrap(cls.estimate))
+    return cls
+
+
 class channel_as_last_axis:
     """Decorator for automatically making channels axis last for all arrays.
 
