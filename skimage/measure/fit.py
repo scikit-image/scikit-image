@@ -1,10 +1,11 @@
 import math
-from warnings import warn
+from warnings import warn, catch_warnings, filterwarnings
 
 import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
+from .._shared.utils import _deprecate_estimate_method
 
 _EPSILON = np.spacing(1)
 
@@ -23,7 +24,16 @@ class BaseModel:
     def __init__(self):
         self.params = None
 
+    @classmethod
+    def from_estimate(cls, data):
+        instance = cls()
+        with catch_warnings():
+            filterwarnings("ignore", message="`estimate` is deprecated")
+            success = instance.estimate(data)
+        return instance if success else None
 
+
+@_deprecate_estimate_method
 class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
@@ -44,9 +54,7 @@ class LineModelND(BaseModel):
     --------
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
-    >>> lm = LineModelND()
-    >>> lm.estimate(np.stack([x, y], axis=-1))
-    True
+    >>> lm = LineModelND.from_estimate(np.stack([x, y], axis=-1))
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
     >>> res = lm.residuals(np.stack([x, y], axis=-1))
@@ -59,6 +67,25 @@ class LineModelND(BaseModel):
     array([1.   , 1.042, 1.083, 1.125, 1.167])
 
     """
+
+    @classmethod
+    def from_estimate(cls, data):
+        """Estimate line model from data.
+
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimensionality dim >= 2.
+
+        Returns
+        -------
+        tform : :class:`LineModelND` instance or None
+            Model instance if estimation succeeds, None otherwise.
+        """
+        return super().from_estimate(data)
 
     def estimate(self, data):
         """Estimate line model from data.
@@ -216,6 +243,7 @@ class LineModelND(BaseModel):
         return y
 
 
+@_deprecate_estimate_method
 class CircleModel(BaseModel):
     """Total least squares estimator for 2D circles.
 
@@ -251,9 +279,7 @@ class CircleModel(BaseModel):
     --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
     >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
-    >>> model = CircleModel()
-    >>> model.estimate(xy)
-    True
+    >>> model = CircleModel.from_estimate(xy)
     >>> tuple(np.round(model.params, 5))
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
@@ -261,6 +287,23 @@ class CircleModel(BaseModel):
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
     """
+
+    @classmethod
+    def from_estimate(self, data):
+        """Estimate circle model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        tform : :class:`CircleModel` instance or None
+            Model instance if estimation succeeds, None otherwise.
+
+        """
+        return super().from_estimate(data)
 
     def estimate(self, data):
         """Estimate circle model from data using total least squares.
@@ -373,6 +416,7 @@ class CircleModel(BaseModel):
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
 
+@_deprecate_estimate_method
 class EllipseModel(BaseModel):
     """Total least squares estimator for 2D ellipses.
 
@@ -404,15 +448,37 @@ class EllipseModel(BaseModel):
 
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
     ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
-    >>> ellipse = EllipseModel()
-    >>> ellipse.estimate(xy)
-    True
+    >>> ellipse = EllipseModel.from_estimate(xy)
     >>> np.round(ellipse.params, 2)
     array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
     """
+
+    @classmethod
+    def from_estimate(self, data):
+        """Estimate ellipse model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        tform : :class:`EllipseModel` instance or None
+            Model instance if estimation succeeds, None otherwise.
+
+        References
+        ----------
+        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
+               fitting of ellipses". In Proc. 6th International Conference in
+               Central Europe on Computer Graphics and Visualization.
+               WSCG (Vol. 98, pp. 125-132).
+
+        """
+        return super().from_estimate(data)
 
     def estimate(self, data):
         """Estimate ellipse model from data using total least squares.
@@ -680,20 +746,28 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
-class _FromEstimateWrapper:
-    """Compatibility wrapper for class using ``from_estimate``"""
+def add_from_estimate(cls):
+    """Add ``from_estimate`` method  class using ``estimate`` method"""
 
-    def __init__(self, model):
-        self.model = model
+    if hasattr(cls, 'from_estimate'):
+        return cls
 
-    def residuals(self, *args, **kwargs):
-        return self.model.residuals(*args, **kwargs)
+    warn(
+        "Passing custom classes without `from_estimate` deprecated "
+        "since version 0.26 and will be removed in version 2.2. "
+        "Add `from_estimate` method to custom class to avoid this warning.",
+        category=FutureWarning,
+        stacklevel=2,
+    )
 
-    def estimate(self, *args, **kwargs):
-        if (new_model := self.model.from_estimate(*args, **kwargs)) is None:
-            return False
-        self.model = new_model
-        return True
+    class FromEstimated(cls):
+        @classmethod
+        def from_estimate(cls, *args, **kwargs):
+            instance = cls()
+            success = instance.estimate(*args, **kwargs)
+            return instance if success else None
+
+    return FromEstimated
 
 
 def ransac(
@@ -719,7 +793,7 @@ def ransac(
     1. Select `min_samples` random samples from the original data and check
        whether the set of data is valid (see `is_data_valid`).
     2. Estimate a model to the random subset
-       (`model_cls.estimate(*data[random_subset]`) and check whether the
+       (`model_cls.from_estimate(*data[random_subset]`) and check whether the
        estimated model is valid (see `is_model_valid`).
     3. Classify all data as inliers or outliers by calculating the residuals
        to the estimated model (`model_cls.residuals(*data)`) - all data samples
@@ -746,14 +820,18 @@ def ransac(
         ``is_model_valid(model, *random_data)`` and
         ``is_data_valid(*random_data)`` must all take each data array as
         separate arguments.
-    model_class : object
-        Object with the following object methods:
+    model_class : type
+        Class with the following methods:
 
-         * ``success = estimate(*data)``
+         * Either:
+           * ``tf = model_class.from_estimate(*data)`` (``from_estimate`` class
+             method) OR
+           * (deprecated) ``tf = model_class(); success = tf.estimate(*data)``
+             (``estimate`` instance method), where `success` indicates whether
+             the model estimation succeeded (`True` or `None` for success,
+             `False` for failure).
          * ``residuals(*data)``
 
-        where `success` indicates whether the model estimation succeeded
-        (`True` or `None` for success, `False` for failure).
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
@@ -824,9 +902,7 @@ def ransac(
 
     Estimate ellipse model using all available data:
 
-    >>> model = EllipseModel()
-    >>> model.estimate(data)
-    True
+    >>> model = EllipseModel.from_estimate(data)
     >>> np.round(model.params)  # doctest: +SKIP
     array([ 72.,  75.,  77.,  14.,   1.])
 
@@ -919,11 +995,8 @@ def ransac(
         else rng.choice(num_samples, min_samples, replace=False)
     )
 
-    # estimate model for current random sample set
-    model = model_class()
-    # Wrap Transforms with `from_estimate` classmethod.
-    if hasattr(model, 'from_estimate'):
-        model = _FromEstimateWrapper(model)
+    # Ensure model_class has from_estimate class method.
+    model_class = add_from_estimate(model_class)
 
     num_trials = 0
     # max_trials can be updated inside the loop, so this cannot be a for-loop
@@ -941,9 +1014,9 @@ def ransac(
         if validate_data and not is_data_valid(*samples):
             continue
 
-        success = model.estimate(*samples)
+        model = model_class.from_estimate(*samples)
         # backwards compatibility
-        if success is not None and not success:
+        if not model:
             continue
 
         # optional check if estimated model is valid
@@ -985,7 +1058,7 @@ def ransac(
     if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        model.estimate(*data_inliers)
+        model = model_class.from_estimate(*data_inliers)
         if validate_model and not is_model_valid(model, *data_inliers):
             warn("Estimated model is not valid. Try increasing max_trials.")
     else:
