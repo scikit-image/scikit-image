@@ -81,9 +81,10 @@ Transformations can be applied to images using :func:`skimage.transform.warp`::
    :align: center
    :width: 80%
 
-The different transformations in :mod:`skimage.transform` have a ``estimate``
-method in order to estimate the parameters of the transformation from two sets
-of points (the source and the destination), as explained in the
+The different transformations in :mod:`skimage.transform` have a
+``from_estimate`` class method in order to generate a matching tranform by
+estimating the transform parameters from two sets of points (the source and
+the destination), as explained in the
 :ref:`sphx_glr_auto_examples_transform_plot_geometric.py` tutorial::
 
    text = ski.data.text()
@@ -91,8 +92,7 @@ of points (the source and the destination), as explained in the
    src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
    dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
-   tform3 = ski.transform.ProjectiveTransform()
-   tform3.estimate(src, dst)
+   tform3 = ski.transform.ProjectiveTransform.from_estimate(src, dst)
    warped = ski.transform.warp(text, tform3, output_shape=(50, 300))
 
 
@@ -102,11 +102,10 @@ of points (the source and the destination), as explained in the
    :width: 80%
 
 
-The ``estimate`` method uses least-squares optimization to minimize the distance
-between source and optimization.
-Source and destination points can be determined manually, or using the
-different methods for feature detection available in :mod:`skimage.feature`,
-such as
+The ``from_estimate`` class method uses least-squares optimization to minimize
+the distance between source and optimization. Source and destination points
+can be determined manually, or using the different methods for feature
+detection available in :mod:`skimage.feature`, such as
 
  * :ref:`sphx_glr_auto_examples_features_detection_plot_corner.py`,
  * :ref:`sphx_glr_auto_examples_features_detection_plot_orb.py`,
@@ -130,10 +129,10 @@ Examples showing applications of transformation estimation are
    :ref:`sphx_glr_auto_examples_transform_plot_fundamental_matrix.py` and
  * image rectification :ref:`sphx_glr_auto_examples_transform_plot_geometric.py`
 
-The ``estimate`` method is point-based, that is, it uses only a set of points
-from the source and destination images. For estimating translations (shifts),
-it is also possible to use a *full-field* method using all pixels, based on
-Fourier-space cross-correlation. This method is implemented by
+The ``from_estimate`` class method is point-based, that is, it uses only a set
+of points from the source and destination images. For estimating translations
+(shifts), it is also possible to use a *full-field* method using all pixels,
+based on Fourier-space cross-correlation. This method is implemented by
 :func:`skimage.registration.phase_cross_correlation` and explained in the
 :ref:`sphx_glr_auto_examples_registration_plot_register_translation.py`
 tutorial.

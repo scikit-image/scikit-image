@@ -79,8 +79,8 @@ plt.tight_layout()
 # ====================
 #
 # In addition to the basic functionality mentioned above you can also
-# estimate the parameters of a geometric transformation using the least-
-# squares method.
+# generate a transform by estimating the parameters of a geometric
+# transformation using the least- squares method.
 #
 # This can amongst other things be used for image registration or
 # rectification, where you have a set of control points or
@@ -98,8 +98,7 @@ text = data.text()
 src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
 dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
-tform3 = transform.ProjectiveTransform()
-tform3.estimate(src, dst)
+tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
 warped = transform.warp(text, tform3, output_shape=(50, 300))
 
 fig, ax = plt.subplots(nrows=2, figsize=(8, 3))
