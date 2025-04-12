@@ -943,22 +943,11 @@ def test_degenerate_2():
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         tf = ProjectiveTransform.from_estimate(src, dst)
-        assert tf is None or np.isfinite(tform.params).all()
+        assert tf is None
         with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
             result = tform.estimate(src, dst)
-        assert not result or np.isfinite(tform.params).all()
-
-    src = np.array([[0, 2, 0], [0, 2, 0], [0, 4, 0]])
-    dst = np.array([[0, 1, 0], [0, 1, 0], [0, 3, 0]])
-    # class constructor
-    tform = AffineTransform.from_estimate(src, dst)
-    assert tform is None
-    # estimate method
-    tform = AffineTransform.identity(3)
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
-        assert not tform.estimate(src, dst)
-    # Prior to gh-6207, the above would set the parameters as the identity.
-    assert np.all(np.isnan(tform.params))
+        assert not result
+        assert np.all(np.isnan(tform.params))
 
     # The tessellation on the following points produces one degenerate affine
     # warp within PiecewiseAffineTransform.
