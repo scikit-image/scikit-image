@@ -26,6 +26,8 @@ from skimage.transform._geometric import (
     _euler_rotation_matrix,
     TRANSFORMS,
 )
+from skimage import data
+
 
 SRC = np.array(
     [
@@ -1281,6 +1283,28 @@ def test_init_contract_dims(tform_class):
     # Test vector matrix input invalid.
     with pytest.raises(ValueError):
         tform_class(np.zeros((2, 3)))
+
+
+def test_astronaut_piecewise():
+    # From doc/examples/transforms/plot_piecewise_affine.py
+    image = data.astronaut()
+    rows, cols = image.shape[0], image.shape[1]
+
+    src_cols = np.linspace(0, cols, 20)
+    src_rows = np.linspace(0, rows, 10)
+    src_rows, src_cols = np.meshgrid(src_rows, src_cols)
+    src = np.dstack([src_cols.flat, src_rows.flat])[0]
+
+    # add sinusoidal oscillation to row coordinates
+    dst_rows = src[:, 1] - np.sin(np.linspace(0, 3 * np.pi, src.shape[0])) * 50
+    dst_cols = src[:, 0]
+    dst_rows *= 1.5
+    dst_rows -= 1.5 * 50
+    dst = np.vstack([dst_cols, dst_rows]).T
+
+    # Transform will fail with strict check for rank deficiency of
+    # inverse matrices in ProjectiveTransform.estimate.
+    assert PiecewiseAffineTransform.from_estimate(src, dst) is not None
 
 
 def test_broadcasting():
