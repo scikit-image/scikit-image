@@ -493,7 +493,6 @@ class EllipseModel(BaseModel):
         success : bool
             True, if model estimation succeeds.
 
-
         References
         ----------
         .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
@@ -823,14 +822,16 @@ def ransac(
     model_class : type
         Class with the following methods:
 
-         * Either:
-           * ``tf = model_class.from_estimate(*data)`` (``from_estimate`` class
-             method) OR
-           * (deprecated) ``tf = model_class(); success = tf.estimate(*data)``
-             (``estimate`` instance method), where `success` indicates whether
-             the model estimation succeeded (`True` or `None` for success,
-             `False` for failure).
-         * ``residuals(*data)``
+        * Either:
+
+          * ``tf = model_class.from_estimate(*data)`` (``from_estimate`` class
+            method) OR
+          * (deprecated) ``tf = model_class(); success = tf.estimate(*data)``
+            (``estimate`` instance method), where `success` indicates whether
+            the model estimation succeeded (`True` or `None` for success,
+            `False` for failure).
+
+        * ``residuals(*data)``
 
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
