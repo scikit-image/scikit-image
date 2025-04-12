@@ -1031,12 +1031,6 @@ class ProjectiveTransform(_HMatrixTransform):
         H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
         H[d, d] = 1
 
-        # Fail with rank-deficient transform, which would map points to a line
-        # rather than a plane.
-        if np.isclose(np.linalg.det(H), 0):
-            self.params = fail_matrix
-            return False
-
         # De-center and de-normalize
         H = np.linalg.inv(dst_matrix) @ H @ src_matrix
 
