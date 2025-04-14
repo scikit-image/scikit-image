@@ -93,8 +93,10 @@ def test_line_model_nd_estimate():
 
     # With estimate method.
     model2 = LineModelND()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_array_equal(model2.params, model_est.params)
 
 
@@ -114,8 +116,10 @@ def test_circle_model_invalid_input():
     with testing.raises(ValueError):
         CircleModel.from_estimate(np.empty((5, 3)))
     with testing.raises(ValueError):
-        with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
             CircleModel().estimate(np.empty((5, 3)))
+        assert_stacklevel(record)
+        assert len(record) == 1
 
 
 def test_circle_model_predict():
@@ -147,8 +151,10 @@ def test_circle_model_estimate():
 
     # estimate method.
     model_est2 = CircleModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model_est2.estimate(data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_array_equal(model_est2.params, model_est.params)
 
 
@@ -161,8 +167,10 @@ def test_circle_model_int_overflow():
 
     # estimate method.
     model2 = CircleModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(xy)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_almost_equal(model2.params, [500, 500, 1])
 
 
@@ -219,8 +227,10 @@ def test_circle_model_estimate_from_small_scale_data():
     assert_almost_equal(params, model.params)
     # estimate method
     model = CircleModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model.estimate(float_data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_almost_equal(params, model.params)
 
 
@@ -261,8 +271,10 @@ def test_ellipse_model_estimate(angle):
 
     # Estimate method.
     model_est2 = EllipseModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model_est2.estimate(data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_array_equal(model_est.params, model_est2.params)
 
 
@@ -293,8 +305,10 @@ def test_ellipse_parameter_stability(angle):
 
     # Estimate method
     ellipse_model2 = EllipseModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert ellipse_model2.estimate(points.T)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_array_equal(ellipse_model.params, ellipse_model2.params)
 
 
@@ -453,8 +467,10 @@ def test_ellipse_model_estimate_from_data():
 
     # estimate method
     model2 = EllipseModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_array_equal(model.params, model2.params)
 
 
@@ -484,8 +500,10 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     # test whether the predicted parameters are close to the original ones
     assert_almost_equal(params, model.params)
     model2 = EllipseModel()
-    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(float_data)
+    assert_stacklevel(record)
+    assert len(record) == 1
     assert_almost_equal(params, model2.params)
 
 
@@ -513,8 +531,7 @@ def test_ellipse_model_estimate_failers():
 
     warning_message = "Need at least 5 data points to estimate an ellipse."
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
-        assert not EllipseModel.from_estimate(
-            np.array([[50, 80], [51, 81], [52, 80]]))
+        assert not EllipseModel.from_estimate(np.array([[50, 80], [51, 81], [52, 80]]))
     assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
@@ -797,5 +814,7 @@ def test_estimate_api(tf_class):
         f'`estimate` is deprecated since .* Please use `{tf_class.__name__}'
         '.from_estimate` class constructor instead.'
     )
-    with pytest.warns(FutureWarning, match=msg):
+    with pytest.warns(FutureWarning, match=msg) as record:
         assert tf.estimate(data)
+    assert_stacklevel(record)
+    assert len(record) == 1

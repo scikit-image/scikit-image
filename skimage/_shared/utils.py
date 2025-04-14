@@ -23,8 +23,23 @@ __all__ = [
 ]
 
 
-def _count_wrappers(func):
-    """Count the number of wrappers around `func`."""
+def count_inner_wrappers(func):
+    """Count the number of inner wrappers by unpacking ``__wrapped__``.
+
+    Parameters
+    ----------
+    func : callable
+        The callable of which to determine the number of inner wrappers.
+
+    Returns
+    -------
+    count : int
+        The number of times `func` has been wrapped.
+
+    See Also
+    --------
+    count_global_wrappers
+    """
     unwrapped = func
     count = 0
     while hasattr(unwrapped, "__wrapped__"):
@@ -49,7 +64,7 @@ def _warning_stacklevel(func):
         The stacklevel. Minimum of 2.
     """
     # Count number of wrappers around `func`
-    wrapped_count = _count_wrappers(func)
+    wrapped_count = count_inner_wrappers(func)
 
     # Count number of total wrappers around global version of `func`
     module = sys.modules.get(func.__module__)
@@ -62,39 +77,55 @@ def _warning_stacklevel(func):
             f" may be a closure. Set stacklevel manually. ",
         ) from e
     else:
-        global_wrapped_count = _count_wrappers(global_func)
+        global_wrapped_count = count_inner_wrappers(global_func)
 
     stacklevel = global_wrapped_count - wrapped_count + 1
     return max(stacklevel, 2)
 
 
-def _get_stack_length(func):
-    """Return function call stack length."""
-    _func = func.__globals__.get(func.__name__, func)
-    length = _count_wrappers(_func)
-    return length
+def count_global_wrappers(func):
+    """Count the total number of times a function as been wrapped globally.
 
+    Similar to :func:`count_inner_wrappers`, this counts the number of times
+    `func` has been wrapped. However, this function doesn't start counting
+    from `func` but instead tries to access the "global representation" of
+    `func`. This means that you cold use this function from inside a wrapper
+    that was applied first, and still count wrappers that were applied on
+    top of it afterwards.
 
-class _DecoratorBaseClass:
-    """Used to manage decorators' warnings stacklevel.
+    E.g., `func` might be wrapped by multiple decorators that emit
+    warnings. In that case, calling this function in the inner-most decorator
+    will still return the total count of wrappers.
 
-    The `_stack_length` class variable is used to store the number of
-    times a function is wrapped by a decorator.
+    Parameters
+    ----------
+    func : callable
+        The callable of which to determine the number of wrappers. Can be a
+        function or method of a class.
 
-    Let `stack_length` be the total number of times a decorated
-    function is wrapped, and `stack_rank` be the rank of the decorator
-    in the decorators stack. The stacklevel of a warning is then
-    `stacklevel = 1 + stack_length - stack_rank`.
+    Returns
+    -------
+    count : int
+        The number of times `func` has been wrapped.
+
+    See Also
+    --------
+    count_inner_wrappers
     """
+    first_name, *other = func.__qualname__.split(".")
+    global_func = func.__globals__.get(first_name, func)
 
-    _stack_length = {}
+    # Account for `func` being a method, in which case it's an attribute of
+    # what we got from `func.__globals__`
+    for part in other:
+        global_func = getattr(global_func, part, global_func)
 
-    def get_stack_length(self, func):
-        length = self._stack_length.get(func.__name__, _get_stack_length(func))
-        return length
+    count = count_inner_wrappers(global_func)
+    assert count >= 0
+    return count
 
 
-class change_default_value(_DecoratorBaseClass):
+class change_default_value:
     """Decorator for changing the default value of an argument.
 
     Parameters
@@ -122,7 +153,7 @@ class change_default_value(_DecoratorBaseClass):
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
 
-        stack_rank = _count_wrappers(func)
+        stack_rank = count_inner_wrappers(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -136,7 +167,7 @@ class change_default_value(_DecoratorBaseClass):
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
+            stacklevel = 1 + count_global_wrappers(func) - stack_rank
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
                 # warn that arg_name default value changed:
                 warnings.warn(self.warning_msg, FutureWarning, stacklevel=stacklevel)
@@ -516,7 +547,7 @@ class channel_as_last_axis:
         return fixed_func
 
 
-class deprecate_func(_DecoratorBaseClass):
+class deprecate_func:
     """Decorate a deprecated function and warn when it is called.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
@@ -563,11 +594,11 @@ class deprecate_func(_DecoratorBaseClass):
             # Prepend space and make sure it closes with "."
             message += f" {self.hint.rstrip('.')}."
 
-        stack_rank = _count_wrappers(func)
+        stack_rank = count_inner_wrappers(func)
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            stacklevel = 1 + self.get_stack_length(func) - stack_rank
+            stacklevel = 1 + count_global_wrappers(func) - stack_rank
             warnings.warn(message, category=FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
 
