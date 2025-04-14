@@ -582,7 +582,6 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
         return np.clip(image, omin, omax).astype(out_dtype)
 
 
-
 def _assert_non_negative(image):
     if np.any(image < 0):
         raise ValueError(
