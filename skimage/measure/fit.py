@@ -1,11 +1,14 @@
 import math
-from warnings import warn, catch_warnings, filterwarnings
+from warnings import warn
 
 import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import _deprecate_estimate_method
+from .._shared.utils import (
+    _deprecate_estimate_method,
+    _ignore_deprecated_estimate_warning,
+)
 
 _EPSILON = np.spacing(1)
 
@@ -27,8 +30,7 @@ class BaseModel:
     @classmethod
     def from_estimate(cls, data):
         instance = cls()
-        with catch_warnings():
-            filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = instance.estimate(data)
         return instance if success else None
 

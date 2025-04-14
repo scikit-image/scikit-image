@@ -1,9 +1,11 @@
-from warnings import catch_warnings, filterwarnings
-
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD,  _deprecate_estimate_method
+from .._shared.utils import (
+    check_nD,
+    _deprecate_estimate_method,
+    _ignore_deprecated_estimate_warning,
+)
 
 
 @_deprecate_estimate_method
@@ -129,8 +131,7 @@ class ThinPlateSplineTransform:
         The number N of source and destination points must match.
         """
         instance = cls()
-        with catch_warnings():
-            filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = instance.estimate(src, dst)
         return instance if success else None
 

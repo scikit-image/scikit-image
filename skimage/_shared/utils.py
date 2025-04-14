@@ -2,6 +2,7 @@ import functools
 import inspect
 import sys
 import warnings
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -470,6 +471,22 @@ def _deprecate_estimate_method(cls):
         hint=f"Please use `{cls.__name__}.from_estimate` class constructor instead.",
     )(_unwrap(cls.estimate))
     return cls
+
+
+@contextmanager
+def _ignore_deprecated_estimate_warning():
+    """Filter warnings about the deprecated `estimate` method.
+
+    Use either as decorator or context manager.
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            action="ignore",
+            category=FutureWarning,
+            message="`estimate` is deprecated",
+            module="skimage",
+        )
+        yield
 
 
 class channel_as_last_axis:
