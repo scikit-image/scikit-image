@@ -2,6 +2,13 @@ Please include necessary information to complete each entry. The
 release manager should be able to step through this file without
 external references.
 
+Version 0.28
+------------
+* Complete deprecation of `skimage.morphology.binary_*` functions.
+  - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
+  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
+* Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
+
 Version 0.27
 ------------
 * Remove deprecated `skimage.io.imshow`,
@@ -11,26 +18,12 @@ Version 0.27
   - Remove `skimage/io/_plugins`
   - Remove `skimage/io/manage_plugins.py`
   - Remove `skimage/io/__init__.py::__getattr__`
-  - Remove related tests, imports, etc...
+  - Remove related tests, imports, etc.
+  - Remove `doc/source/user_guide/plugins.rst`
 * Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
-
-Version 0.26
-------------
-* In ``skimage/morphology/gray.py``, remove deprecated parameters ``shift_x``
-  and ``shift_y`` from ``erosion`` and ``dilation``, along with associated
-  function ``_shift_footprint``.
-* In `skimage/util/compare.py`, remove deprecated parameter `image2` as
-  well as `test_compare_images_replaced_param` in `skimage/util/tests/test_compare.py`
-  (and all `pytest.warns(FutureWarning)` context managers there).
-
-Version 0.25
-------------
 
 Other
 -----
-* Remove warningsfilter for imageio and Pillow once
-  https://github.com/python-pillow/Pillow/pull/7125 is shipped in the minimal required
-  version of pillow (probably the release after Pillow 9.5.0).
 * Once NumPy 1.25.0 is minimal required version:
     * Remove optional test for a NaN-related deprecation warning from numpy.clip in
       skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
@@ -54,3 +47,14 @@ Post numpy 2
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
 - scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.
 - Remove `np2` check in `skimage/feature/brief.py`.
+
+Version 2.0
+-----------
+- In `skimage.morphology.remove_small_objects`, complete the deprecation of
+  `min_size` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.morphology.remove_small_holes`, complete the deprecation of
+  `area_threshold` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+
+See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
