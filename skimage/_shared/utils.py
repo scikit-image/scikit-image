@@ -453,6 +453,11 @@ def _unwrap(func):
 def _deprecate_estimate_method(cls):
     """Deprecate ``estimate`` instance method.
 
+    Parameters
+    ----------
+    cls : object
+        Transform classes whose ``estimate`` should be marked as deprecated.
+
     Notes
     -----
     The ``estimate`` method may already be wrapped — for example, if we have
@@ -462,7 +467,7 @@ def _deprecate_estimate_method(cls):
     cls.estimate = deprecate_func(
         deprecated_version="0.26",
         removed_version="2.2",
-        hint=(f"Please use `{cls.__name__}.from_estimate` class constructor instead."),
+        hint=f"Please use `{cls.__name__}.from_estimate` class constructor instead.",
     )(_unwrap(cls.estimate))
     return cls
 
