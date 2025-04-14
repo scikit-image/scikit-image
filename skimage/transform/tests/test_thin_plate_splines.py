@@ -10,7 +10,6 @@ DST = np.array([[5, 0], [0, 0], [0, 5], [5, 5]])
 
 
 class TestThinPlateSplineTransform:
-
     tform_class = ThinPlateSplineTransform
 
     def test_call_before_estimation(self):
@@ -62,8 +61,9 @@ class TestThinPlateSplineTransform:
         tps = self.tform_class()
         assert tps.src is None
         with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
-            with pytest.raises(ValueError,
-                               match=".*`dst` must be a 2-dimensional array"):
+            with pytest.raises(
+                ValueError, match=".*`dst` must be a 2-dimensional array"
+            ):
                 tps.estimate(src, not_2d)
         assert tps.src is None
 
