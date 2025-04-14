@@ -7,7 +7,11 @@ import warnings
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import safe_as_int, _deprecate_estimate_method
+from .._shared.utils import (
+    safe_as_int,
+    _deprecate_estimate_method,
+    _ignore_deprecated_estimate_warning,
+)
 from .._shared.compat import NP_COPY_IF_NEEDED
 
 
@@ -529,8 +533,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             Transform estimated from `src` and `dst`
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             tf.estimate(src, dst)
         return tf
 
@@ -916,8 +919,7 @@ class ProjectiveTransform(_HMatrixTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = tf.estimate(src, dst, weights)
         return tf if success else None
 
@@ -1324,8 +1326,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = tf.estimate(src, dst)
         return tf if success else None
 
@@ -1599,8 +1600,7 @@ class EuclideanTransform(ProjectiveTransform):
             unless estimation fails, in which case return None
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = tf.estimate(src, dst)
         return tf if success else None
 
@@ -1863,8 +1863,7 @@ class PolynomialTransform(_GeometricTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", message="`estimate` is deprecated")
+        with _ignore_deprecated_estimate_warning():
             success = tf.estimate(src, dst, order, weights)
         return tf if success else None
 
