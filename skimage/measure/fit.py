@@ -289,7 +289,7 @@ class CircleModel(BaseModel):
     """
 
     @classmethod
-    def from_estimate(self, data):
+    def from_estimate(cls, data):
         """Estimate circle model from data using total least squares.
 
         Parameters
@@ -457,7 +457,7 @@ class EllipseModel(BaseModel):
     """
 
     @classmethod
-    def from_estimate(self, data):
+    def from_estimate(cls, data):
         """Estimate ellipse model from data using total least squares.
 
         Parameters
