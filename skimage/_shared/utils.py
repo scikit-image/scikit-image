@@ -435,21 +435,26 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-def _unwrap(func):
-    """Get not-wrapped base function from `func`.
+def _replace_estimate_returns(docstring):
+    return re.sub(
+        r'''
+                  \s*\n
+                  ^\s{8}Returns\n
+                  ^\s{8}--+\n
+                  .*?\n
+                  \n
+                  ''',
+        r'''
 
-    Parameters
-    ----------
-    func : callable
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds, False otherwise.
 
-    Returns
-    -------
-    unwrapped_func : callable
-        `func` with any wrapping decoration removed.
-    """
-    while hasattr(func, '__wrapped__'):
-        func = func.__wrapped__
-    return func
+''',
+        docstring,
+        flags=re.VERBOSE | re.MULTILINE | re.DOTALL,
+    )
 
 
 def _replace_estimate_returns(docstring):
