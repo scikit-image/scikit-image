@@ -516,9 +516,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     def from_estimate(cls, src, dst):
         """Estimate fundamental matrix using 8-point algorithm.
 
-        The 8-point algorithm requires at least 8 corresponding point pairs for
-        a well-conditioned solution, otherwise the over-determined solution is
-        estimated.
+        The 8-point algorithm requires at least 8 corresponding point pairs.
 
         Parameters
         ----------
@@ -531,6 +529,11 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         -------
         tf : :class:`FundamentalMatrixTransform` instance
             Transform estimated from `src` and `dst`
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
         with _ignore_deprecated_estimate_warning():
@@ -540,9 +543,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     def estimate(self, src, dst):
         """Estimate fundamental matrix using 8-point algorithm.
 
-        The 8-point algorithm requires at least 8 corresponding point pairs for
-        a well-conditioned solution, otherwise the over-determined solution is
-        estimated.
+        The 8-point algorithm requires at least 8 corresponding point pairs.
 
         Parameters
         ----------
@@ -555,6 +556,11 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         -------
         success : bool
             True, if model estimation succeeds.
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
 
         """
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
