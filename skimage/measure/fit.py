@@ -30,9 +30,7 @@ class BaseModel:
     @classmethod
     def from_estimate(cls, data):
         instance = cls()
-        with _ignore_deprecated_estimate_warning():
-            success = instance.estimate(data)
-        return instance if success else None
+        return instance if instance._estimate(data) else None
 
 
 @_deprecate_estimate_method
@@ -89,22 +87,7 @@ class LineModelND(BaseModel):
         """
         return super().from_estimate(data)
 
-    def estimate(self, data):
-        """Estimate line model from data.
-
-        This minimizes the sum of shortest (orthogonal) distances
-        from the given data points to the estimated line.
-
-        Parameters
-        ----------
-        data : (N, dim) array
-            N points in a space of dimensionality dim >= 2.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-        """
+    def _estimate(self, data):
         _check_data_atleast_2D(data)
 
         origin = data.mean(axis=0)
@@ -307,21 +290,7 @@ class CircleModel(BaseModel):
         """
         return super().from_estimate(data)
 
-    def estimate(self, data):
-        """Estimate circle model from data using total least squares.
-
-        Parameters
-        ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
-
+    def _estimate(self, data):
         _check_data_dim(data, dim=2)
 
         # to prevent integer overflow, cast data to float, if it isn't already
@@ -337,7 +306,7 @@ class CircleModel(BaseModel):
                 "Standard deviation of data is too small to estimate "
                 "circle with meaningful precision.",
                 category=RuntimeWarning,
-                stacklevel=2,
+                stacklevel=4,
             )
             return False
         data /= scale
@@ -482,27 +451,7 @@ class EllipseModel(BaseModel):
         """
         return super().from_estimate(data)
 
-    def estimate(self, data):
-        """Estimate ellipse model from data using total least squares.
-
-        Parameters
-        ----------
-        data : (N, 2) array
-            N points with ``(x, y)`` coordinates, respectively.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        References
-        ----------
-        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
-               fitting of ellipses". In Proc. 6th International Conference in
-               Central Europe on Computer Graphics and Visualization.
-               WSCG (Vol. 98, pp. 125-132).
-
-        """
+    def _estimate(self, data):
         # Original Implementation: Ben Hammel, Nick Sullivan-Molina
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
@@ -511,7 +460,7 @@ class EllipseModel(BaseModel):
             warn(
                 "Need at least 5 data points to estimate an ellipse.",
                 category=RuntimeWarning,
-                stacklevel=2,
+                stacklevel=4,
             )
             return False
 
@@ -529,7 +478,7 @@ class EllipseModel(BaseModel):
                 "Standard deviation of data is too small to estimate "
                 "ellipse with meaningful precision.",
                 category=RuntimeWarning,
-                stacklevel=2,
+                stacklevel=4,
             )
             return False
         data /= scale

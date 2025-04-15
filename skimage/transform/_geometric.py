@@ -536,33 +536,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             If `src` has fewer than 8 rows.
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with _ignore_deprecated_estimate_warning():
-            tf.estimate(src, dst)
-        return tf
+        return tf if tf._estimate(src, dst) else None
 
-    def estimate(self, src, dst):
-        """Estimate fundamental matrix using 8-point algorithm.
-
-        The 8-point algorithm requires at least 8 corresponding point pairs.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        Raises
-        ------
-        ValueError
-            If `src` has fewer than 8 rows.
-
-        """
+    def _estimate(self, src, dst):
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
 
         # Enforcing the internal constraint that two singular values must be
@@ -741,27 +717,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         """
         return super().from_estimate(src, dst)
 
-    def estimate(self, src, dst):
-        """Estimate essential matrix using 8-point algorithm.
-
-        The 8-point algorithm requires at least 8 corresponding point pairs for
-        a well-conditioned solution, otherwise the over-determined solution is
-        estimated.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
-
+    def _estimate(self, src, dst):
         E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
 
         # Enforcing the internal constraint that two singular values must be
@@ -925,75 +881,9 @@ class ProjectiveTransform(_HMatrixTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with _ignore_deprecated_estimate_warning():
-            success = tf.estimate(src, dst, weights)
-        return tf if success else None
+        return tf if tf._estimate(src, dst, weights) else None
 
-    def estimate(self, src, dst, weights=None):
-        """Estimate the transformation from a set of corresponding points.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
-
-        The transformation is defined as::
-
-            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
-            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
-
-        These equations can be transformed to the following form::
-
-            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
-            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
-
-        which exist for each set of corresponding points, so we have a set of
-        N * 2 equations. The coefficients appear linearly so we can write
-        A x = 0, where::
-
-            A   = [[x y 1 0 0 0 -x*X -y*X -X]
-                   [0 0 0 x y 1 -x*Y -y*Y -Y]
-                    ...
-                    ...
-                  ]
-            x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
-
-        In case of total least-squares the solution of this homogeneous system
-        of equations is the right singular vector of A which corresponds to the
-        smallest singular value normed by the coefficient c3.
-
-        Weights can be applied to each pair of corresponding points to
-        indicate, particularly in an overdetermined system, if point pairs have
-        higher or lower confidence or uncertainties associated with them. From
-        the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
-        A is multiplied.
-
-        In case of the affine transformation the coefficients c0 and c1 are 0.
-        Thus the system of equations is::
-
-            A   = [[x y 1 0 0 0 -X]
-                   [0 0 0 x y 1 -Y]
-                    ...
-                    ...
-                  ]
-            x.T = [a0 a1 a2 b0 b1 b2 c3]
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-        weights : (N,) array_like, optional
-            Relative weight values for each pair of points.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
+    def _estimate(self, src, dst, weights=None):
         src = np.asarray(src)
         dst = np.asarray(dst)
         n, d = src.shape
@@ -1332,28 +1222,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with _ignore_deprecated_estimate_warning():
-            success = tf.estimate(src, dst)
-        return tf if success else None
+        return tf if tf._estimate(src, dst) else None
 
-    def estimate(self, src, dst):
-        """Estimate the transformation from a set of corresponding points.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, D) array_like
-            Source coordinates.
-        dst : (N, D) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if all pieces of the model are successfully estimated.
-
-        """
+    def _estimate(self, src, dst):
         src = np.asarray(src)
         dst = np.asarray(dst)
         N, D = src.shape
@@ -1606,31 +1477,9 @@ class EuclideanTransform(ProjectiveTransform):
             unless estimation fails, in which case return None
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with _ignore_deprecated_estimate_warning():
-            success = tf.estimate(src, dst)
-        return tf if success else None
+        return tf if tf._estimate(src, dst) else None
 
-    def estimate(self, src, dst):
-        """Estimate the transformation from a set of corresponding points.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
+    def _estimate(self, src, dst):
         self.params = _umeyama(src, dst, self._estimate_scale)
 
         # _umeyama will return nan if the problem is not well-conditioned.
@@ -1869,68 +1718,9 @@ class PolynomialTransform(_GeometricTransform):
 
         """
         tf, src, dst = cls._prepare_estimation(src, dst)
-        with _ignore_deprecated_estimate_warning():
-            success = tf.estimate(src, dst, order, weights)
-        return tf if success else None
+        return tf if tf._estimate(src, dst, order, weights) else None
 
-    def estimate(self, src, dst, order=2, weights=None):
-        """Estimate the transformation from a set of corresponding points.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
-
-        The transformation is defined as::
-
-            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
-
-        These equations can be transformed to the following form::
-
-            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
-            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
-
-        which exist for each set of corresponding points, so we have a set of
-        N * 2 equations. The coefficients appear linearly so we can write
-        A x = 0, where::
-
-            A   = [[1 x y x**2 x*y y**2 ... 0 ...             0 -X]
-                   [0 ...                 0 1 x y x**2 x*y y**2 -Y]
-                    ...
-                    ...
-                  ]
-            x.T = [a00 a10 a11 a20 a21 a22 ... ann
-                   b00 b10 b11 b20 b21 b22 ... bnn c3]
-
-        In case of total least-squares the solution of this homogeneous system
-        of equations is the right singular vector of A which corresponds to the
-        smallest singular value normed by the coefficient c3.
-
-        Weights can be applied to each pair of corresponding points to
-        indicate, particularly in an overdetermined system, if point pairs have
-        higher or lower confidence or uncertainties associated with them. From
-        the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
-        A is multiplied.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-        order : int, optional
-            Polynomial order (number of coefficients is order + 1).
-        weights : (N,) array_like, optional
-            Relative weight values for each pair of points.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
+    def _estimate(self, src, dst, order=2, weights=None):
         src = np.asarray(src)
         dst = np.asarray(dst)
         xs = src[:, 0]
