@@ -1,5 +1,6 @@
 import functools
 import inspect
+import re
 import sys
 import warnings
 from contextlib import contextmanager
@@ -451,6 +452,28 @@ def _unwrap(func):
     return func
 
 
+def _replace_estimate_returns(docstring):
+    return re.sub(
+        r'''
+                  \s*\n
+                  ^\s{8}Returns\n
+                  ^\s{8}--+\n
+                  .*?\n
+                  \n
+                  ''',
+        r'''
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds, False otherwise.
+
+''',
+        docstring,
+        flags=re.VERBOSE | re.MULTILINE | re.DOTALL,
+    )
+
+
 def _deprecate_estimate_method(cls):
     """Deprecate ``estimate`` instance method.
 
@@ -465,11 +488,18 @@ def _deprecate_estimate_method(cls):
     inherited from a class to which this decorator has already been applied.
     Fetch the original (not-wrapped) method before applying this decoration.
     """
+
+    def estimate(self, *args, **kwargs):
+        return self._estimate(*args, **kwargs)
+
+    estimate.__doc__ = _replace_estimate_returns(cls.from_estimate.__doc__)
+    estimate.__signature__ = inspect.signature(cls.from_estimate)
+
     cls.estimate = deprecate_func(
         deprecated_version="0.26",
         removed_version="2.2",
         hint=f"Please use `{cls.__name__}.from_estimate` class constructor instead.",
-    )(_unwrap(cls.estimate))
+    )(estimate)
     return cls
 
 

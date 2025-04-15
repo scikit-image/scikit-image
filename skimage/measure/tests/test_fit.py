@@ -531,7 +531,8 @@ def test_ellipse_model_estimate_failers():
 
     warning_message = "Need at least 5 data points to estimate an ellipse."
     with pytest.warns(RuntimeWarning, match=warning_message) as _warnings:
-        assert not EllipseModel.from_estimate(np.array([[50, 80], [51, 81], [52, 80]]))
+        inp_arr = np.array([[50, 80], [51, 81], [52, 80]])
+        assert not EllipseModel.from_estimate(inp_arr)
     assert_stacklevel(_warnings)
     assert len(_warnings) == 1
 
@@ -609,9 +610,10 @@ def test_ransac_geometric():
             return self._model.residuals(src, dst)
 
     msg = (
-        "Passing custom classes without `from_estimate` deprecated "
+        "Passing custom classes without `from_estimate` has been deprecated "
         "since version 0.26 and will be removed in version 2.2. "
-        "Add `from_estimate` method to custom class to avoid this warning."
+        "Add `from_estimate` class method to custom class to avoid this "
+        "warning."
     )
     with pytest.warns(FutureWarning, match=msg):
         model_est, inliers = ransac((src, dst), C, 2, 20, rng=rng)
