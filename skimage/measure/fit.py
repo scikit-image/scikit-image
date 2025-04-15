@@ -756,7 +756,8 @@ def add_from_estimate(cls):
     warn(
         "Passing custom classes without `from_estimate` deprecated "
         "since version 0.26 and will be removed in version 2.2. "
-        "Add `from_estimate` method to custom class to avoid this warning.",
+        "Add `from_estimate` class method to custom class to avoid this "
+        "warning.",
         category=FutureWarning,
         stacklevel=2,
     )
