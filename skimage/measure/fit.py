@@ -7,7 +7,6 @@ from scipy import optimize, spatial
 
 from .._shared.utils import (
     _deprecate_estimate_method,
-    _ignore_deprecated_estimate_warning,
 )
 
 _EPSILON = np.spacing(1)
