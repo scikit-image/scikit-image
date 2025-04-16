@@ -453,28 +453,6 @@ def _replace_estimate_returns(docstring):
     )
 
 
-def _replace_estimate_returns(docstring):
-    return re.sub(
-        r'''
-                  \s*\n
-                  ^\s{8}Returns\n
-                  ^\s{8}--+\n
-                  .*?\n
-                  \n
-                  ''',
-        r'''
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds, False otherwise.
-
-''',
-        docstring,
-        flags=re.VERBOSE | re.MULTILINE | re.DOTALL,
-    )
-
-
 def _deprecate_estimate_method(cls):
     """Deprecate ``estimate`` instance method.
 
