@@ -51,14 +51,15 @@ def count_inner_wrappers(func):
 
 
 def _warning_stacklevel(func):
-    """Find stacklevel for a warning raised from a wrapper around `func`.
+    """Find stacklevel of `func` relative its global representation.
 
-    Try to determine the number of
+    Determine automatically with which stacklevel a warning should be raised.
 
     Parameters
     ----------
     func : Callable
-
+        Tries to find the global version of `func` and counts the number of
+        additional wrappers around `func`.
 
     Returns
     -------
@@ -66,22 +67,10 @@ def _warning_stacklevel(func):
         The stacklevel. Minimum of 2.
     """
     # Count number of wrappers around `func`
-    wrapped_count = count_inner_wrappers(func)
+    inner_wrapped_count = count_inner_wrappers(func)
+    global_wrapped_count = count_global_wrappers(func)
 
-    # Count number of total wrappers around global version of `func`
-    module = sys.modules.get(func.__module__)
-    try:
-        for name in func.__qualname__.split("."):
-            global_func = getattr(module, name)
-    except AttributeError as e:
-        raise RuntimeError(
-            f"Could not access `{func.__qualname__}` in {module!r}, "
-            f" may be a closure. Set stacklevel manually. ",
-        ) from e
-    else:
-        global_wrapped_count = count_inner_wrappers(global_func)
-
-    stacklevel = global_wrapped_count - wrapped_count + 1
+    stacklevel = global_wrapped_count - inner_wrapped_count + 1
     return max(stacklevel, 2)
 
 
@@ -114,6 +103,13 @@ def count_global_wrappers(func):
     --------
     count_inner_wrappers
     """
+    if "<locals>" in func.__qualname__:
+        msg = (
+            "Cannot determine stacklevel of a function defined in another "
+            "function's local namespace. Set the stacklevel manually."
+        )
+        raise ValueError(msg)
+
     first_name, *other = func.__qualname__.split(".")
     global_func = func.__globals__.get(first_name, func)
 
@@ -618,6 +614,12 @@ class deprecate_func:
     hint : str, optional
         A hint on how to address this deprecation,
         e.g., "Use `skimage.submodule.alternative_func` instead."
+    stacklevel : int, optional
+        This decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. If this fails, e.g., due to
+        decorating a closure, you can set the stacklevel manually. The
+        outermost decorator should have stacklevel 2, the next inner one
+        stacklevel 3, etc.
 
     Examples
     --------
@@ -635,10 +637,13 @@ class deprecate_func:
         and will be removed in version 1.2.0. Use `bar` instead.
     """
 
-    def __init__(self, *, deprecated_version, removed_version=None, hint=None):
+    def __init__(
+        self, *, deprecated_version, removed_version=None, hint=None, stacklevel=None
+    ):
         self.deprecated_version = deprecated_version
         self.removed_version = removed_version
         self.hint = hint
+        self.stacklevel = stacklevel
 
     def __call__(self, func):
         message = (
@@ -651,11 +656,13 @@ class deprecate_func:
             # Prepend space and make sure it closes with "."
             message += f" {self.hint.rstrip('.')}."
 
-        stack_rank = count_inner_wrappers(func)
-
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
-            stacklevel = 1 + count_global_wrappers(func) - stack_rank
+            stacklevel = (
+                self.stacklevel
+                if self.stacklevel is not None
+                else _warning_stacklevel(func)
+            )
             warnings.warn(message, category=FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
 
