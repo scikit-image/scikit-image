@@ -10,7 +10,6 @@ from scipy import spatial
 from .._shared.utils import (
     safe_as_int,
     _deprecate_estimate_method,
-    _ignore_deprecated_estimate_warning,
 )
 from .._shared.compat import NP_COPY_IF_NEEDED
 
