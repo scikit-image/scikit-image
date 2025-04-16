@@ -1,4 +1,6 @@
+from inspect import ismethod
 import math
+from typing import Protocol, runtime_checkable
 from warnings import warn
 
 import numpy as np
@@ -20,6 +22,16 @@ def _check_data_dim(data, dim):
 def _check_data_atleast_2D(data):
     if data.ndim < 2 or data.shape[1] < 2:
         raise ValueError('Input data must be at least 2D.')
+
+
+@runtime_checkable
+class RansacModel(Protocol):
+    """Protocol for `ransac` model class."""
+
+    @classmethod
+    def from_estimate(cls, *data): ...
+
+    def residuals(self, *data): ...
 
 
 class BaseModel:
@@ -699,7 +711,15 @@ def add_from_estimate(cls):
     """Add ``from_estimate`` method  class using ``estimate`` method"""
 
     if hasattr(cls, 'from_estimate'):
+        if not ismethod(cls.from_estimate):
+            raise TypeError(f'Class {cls} `from_estimate` must be a ' 'class method.')
         return cls
+
+    if not hasattr(cls, 'estimate'):
+        raise TypeError(
+            f'Class {cls} must have `from_estimate` class method '
+            'or `estimate` method.'
+        )
 
     warn(
         "Passing custom classes without `from_estimate` has been deprecated "
@@ -707,7 +727,7 @@ def add_from_estimate(cls):
         "Add `from_estimate` class method to custom class to avoid this "
         "warning.",
         category=FutureWarning,
-        stacklevel=2,
+        stacklevel=3,
     )
 
     class FromEstimated(cls):
@@ -783,6 +803,10 @@ def ransac(
             `False` for failure).
 
         * ``residuals(*data)``
+
+        See :class:`RansacModel` for the protocol definition.  In general,
+        ensure that `model_class` is an instance of ``RansacModel`` (this
+        checks it conforms to the protocol).
 
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
@@ -949,6 +973,12 @@ def ransac(
 
     # Ensure model_class has from_estimate class method.
     model_class = add_from_estimate(model_class)
+
+    # Check protocol.
+    if not isinstance(model_class, RansacModel):
+        raise TypeError(
+            f"`model_class` {model_class} should be of " "(protocol) type RansacModel"
+        )
 
     num_trials = 0
     # max_trials can be updated inside the loop, so this cannot be a for-loop
