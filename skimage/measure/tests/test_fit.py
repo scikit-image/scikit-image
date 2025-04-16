@@ -569,20 +569,25 @@ def test_ransac_shape():
         assert outlier not in inliers
 
 
-def test_ransac_geometric():
+@pytest.fixture
+def ransac_params():
     rng = np.random.default_rng(12373240)
 
     # generate original data without noise
     src = 100 * rng.random((50, 2))
-    model0 = AffineTransform(scale=(0.5, 0.3), rotation=1, translation=(10, 20))
-    dst = model0(src)
+    model = AffineTransform(scale=(0.5, 0.3), rotation=1, translation=(10, 20))
+    dst = model(src)
 
     # add some faulty data
     outliers = (0, 5, 20)
     dst[outliers[0]] = (10000, 10000)
     dst[outliers[1]] = (-100, 100)
     dst[outliers[2]] = (50, 50)
+    return src, dst, model, outliers, rng
 
+
+def test_ransac_geometric(ransac_params):
+    src, dst, model0, outliers, rng = ransac_params
     # estimate parameters of corrupted data
     model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=rng)
 
@@ -590,7 +595,10 @@ def test_ransac_geometric():
     assert_almost_equal(model0.params, model_est.params)
     assert np.all(np.nonzero(inliers == False)[0] == outliers)
 
+
+def test_custom_estimate_warning(ransac_params):
     # Test that custom estimate class raises warning.
+    src, dst, model0, outliers, rng = ransac_params
 
     class C:
         """Custom class"""
@@ -615,10 +623,53 @@ def test_ransac_geometric():
         "Add `from_estimate` class method to custom class to avoid this "
         "warning."
     )
-    with pytest.warns(FutureWarning, match=msg):
+    with pytest.warns(FutureWarning, match=msg) as record:
         model_est, inliers = ransac((src, dst), C, 2, 20, rng=rng)
+    assert_stacklevel(record)
+    assert len(record) == 1
 
     assert_almost_equal(model0.params, model_est.params)
+
+
+def test_ransac_model_class_protocol(ransac_params):
+    # Test custom classes that don't match protocol.
+    src, dst, model0, outliers, rng = ransac_params
+
+    class D:
+        """Class without `residuals` method."""
+
+        @classmethod
+        def from_estimate(cls, data):
+            return cls()
+
+    with pytest.raises(TypeError, match='`model_class` '):
+        ransac((src, dst), D, 2, 20, rng=rng)
+
+    class E:
+        """Class without `from_estimate` or `estimate`"""
+
+        def residuals(self, data):
+            return data
+
+    with pytest.raises(TypeError, match='Class .* must have `from_estimate` '):
+        ransac((src, dst), E, 2, 20, rng=rng)
+
+
+def test_custom_from_estimate_classmethod(ransac_params):
+    # Test assertion that custom class `from_estimate` is class method.
+    src, dst, model0, outliers, rng = ransac_params
+
+    class F:
+        """Class without `from_estimate` or `estimate`"""
+
+        def from_estimate(self, data):
+            return self
+
+        def residuals(self, data):
+            return data
+
+    with pytest.raises(TypeError, match='`from_estimate` must be a class method'):
+        ransac((src, dst), F, 2, 20, rng=rng)
 
 
 def test_ransac_is_data_valid():
