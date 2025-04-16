@@ -30,7 +30,7 @@ except ImportError:
 
 
 def test_change_default_value():
-    @change_default_value('arg1', new_value=-1, changed_version='0.12')
+    @change_default_value('arg1', new_value=-1, changed_version='0.12', stacklevel=2)
     def foo(arg0, arg1=0, arg2=1):
         """Expected docstring"""
         return arg0, arg1, arg2
@@ -40,6 +40,7 @@ def test_change_default_value():
         new_value=-1,
         changed_version='0.12',
         warning_msg="Custom warning message",
+        stacklevel=2,
     )
     def bar(arg0, arg1=0, arg2=1):
         """Expected docstring"""
@@ -499,7 +500,8 @@ class Test_deprecate_parameter:
         def foo(arg0, old=DEPRECATED):
             pass
 
-        with pytest.raises(RuntimeError, match="Set stacklevel manually"):
+        regex = "Cannot determine stacklevel.*Set the stacklevel manually"
+        with pytest.raises(ValueError, match=regex):
             foo(0, 1)
 
         @deprecate_parameter(
