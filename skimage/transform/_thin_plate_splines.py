@@ -135,7 +135,7 @@ class ThinPlateSplineTransform:
             success = instance.estimate(src, dst)
         return instance if success else None
 
-    def estimate(self, src, dst):
+    def _estimate(self, src, dst):
         """Estimate optimal spline mappings between source and destination points.
 
         Parameters
