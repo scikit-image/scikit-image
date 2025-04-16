@@ -137,21 +137,27 @@ class change_default_value:
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
-
+    stacklevel : int, optional
+        This decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. If this fails, e.g., due to
+        decorating a closure, you can set the stacklevel manually. The
+        outermost decorator should have stacklevel 2, the next inner one
+        stacklevel 3, etc.
     """
 
-    def __init__(self, arg_name, *, new_value, changed_version, warning_msg=None):
+    def __init__(
+        self, arg_name, *, new_value, changed_version, warning_msg=None, stacklevel=None
+    ):
         self.arg_name = arg_name
         self.new_value = new_value
         self.warning_msg = warning_msg
         self.changed_version = changed_version
+        self.stacklevel = stacklevel
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
         arg_idx = list(parameters.keys()).index(self.arg_name)
         old_value = parameters[self.arg_name].default
-
-        stack_rank = count_inner_wrappers(func)
 
         if self.warning_msg is None:
             self.warning_msg = (
@@ -165,8 +171,12 @@ class change_default_value:
 
         @functools.wraps(func)
         def fixed_func(*args, **kwargs):
-            stacklevel = 1 + count_global_wrappers(func) - stack_rank
             if len(args) < arg_idx + 1 and self.arg_name not in kwargs.keys():
+                stacklevel = (
+                    self.stacklevel
+                    if self.stacklevel is not None
+                    else _warning_stacklevel(func)
+                )
                 # warn that arg_name default value changed:
                 warnings.warn(self.warning_msg, FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
