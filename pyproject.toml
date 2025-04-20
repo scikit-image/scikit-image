@@ -75,7 +75,7 @@ docs = [
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
     'plotly>=6.1.0b0',
-    "kaleido@git+https://github.com/plotly/kaleido@v1.0.0rc6#subdirectory=src/py",
+    "kaleido@git+https://github.com/plotly/kaleido@v1.0.0rc11#subdirectory=src/py",
     'scikit-learn>=1.2',
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.16',
