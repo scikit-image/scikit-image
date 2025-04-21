@@ -1190,6 +1190,7 @@ def test_cycle_spinning_workers():
 
 
 @xfail_without_pywt
+@pytest.mark.filterwarnings("ignore:.*dask dependency is not installed:UserWarning")
 @pytest.mark.parametrize("num_workers", [None, 1])
 def test_cycle_spinner_deprecate_num_workers(num_workers):
     img = astro_gray

@@ -154,7 +154,8 @@ def cycle_spin(
             'The optional dask dependency is not installed. '
             'The number of workers is set to 1. To silence '
             'this warning, install dask or explicitly set `workers=1` '
-            'when calling the `cycle_spin` function'
+            'when calling the `cycle_spin` function',
+            stacklevel=4,
         )
     # compute a running average across the cycle shifts
     if workers == 1:
