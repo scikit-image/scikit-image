@@ -2,10 +2,11 @@
 
 import numpy as np
 import functools
+import warnings
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 
-from .._shared.utils import warn
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ._misc_cy import _remove_objects_by_distance
 
 
@@ -16,10 +17,6 @@ skimage2ndimage = {x: 'grey_' + x for x in funcs}
 
 # These function names are the same in ndimage.
 funcs = (
-    'binary_erosion',
-    'binary_dilation',
-    'binary_opening',
-    'binary_closing',
     'black_tophat',
     'white_tophat',
 )
@@ -60,12 +57,23 @@ def _check_dtype_supported(ar):
         )
 
 
-def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
+@deprecate_parameter(
+    deprecated_name="min_size",
+    new_name="max_size",
+    start_version="0.26.0",
+    stop_version="2.0.0",
+    template=f"{deprecate_parameter.replace_parameter_template} "
+    "Note that the new threshold removes objects smaller than **or equal to** "
+    "its value, while the previous parameter only removed smaller ones.",
+)
+def remove_small_objects(
+    ar, min_size=DEPRECATED, connectivity=1, *, max_size=64, out=None
+):
     """Remove objects smaller than the specified size.
 
-    Expects ar to be an array with labeled objects, and removes objects
-    smaller than min_size. If `ar` is bool, the image is first labeled.
-    This leads to potentially different behavior for bool and 0-and-1
+    Expects `ar` to be an array with labeled objects, and removes objects
+    smaller than or equal to `max_size`. If `ar` is bool, the image is first
+    labeled. This leads to potentially different behavior for bool vs. 0-and-1
     arrays.
 
     Parameters
@@ -73,8 +81,14 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     ar : ndarray, arbitrary shape, int or bool type
         The array containing the objects of interest. If the array type is
         int, the ints must be non-negative.
-    min_size : int, optional (default: 64)
-        The smallest allowable object size.
+    max_size : int, optional (default: 64)
+        Remove objects whose contiguous area (or volume, in N-D) contains this
+        number of pixels or fewer.
+
+        .. versionadded:: 0.26
+            To make the naming clearer, replaces deprecated `min_size`
+            which only removed objects strictly smaller than its size.
+
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel. Used during
         labelling if `ar` is bool.
@@ -96,6 +110,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
 
     See Also
     --------
+    skimage.morphology.remove_small_holes
     skimage.morphology.remove_objects_by_distance
 
     Examples
@@ -104,17 +119,17 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
-    >>> b = morphology.remove_small_objects(a, 6)
+    >>> b = morphology.remove_small_objects(a, max_size=5)
     >>> b
     array([[False, False, False, False, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> c = morphology.remove_small_objects(a, 7, connectivity=2)
+    >>> c = morphology.remove_small_objects(a, max_size=6, connectivity=2)
     >>> c
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]])
-    >>> d = morphology.remove_small_objects(a, 6, out=a)
+    >>> d = morphology.remove_small_objects(a, max_size=5, out=a)
     >>> d is a
     True
 
@@ -127,7 +142,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
     else:
         out[:] = ar
 
-    if min_size == 0:  # shortcut for efficiency
+    if max_size == 0:  # shortcut for efficiency
         return out
 
     if out.dtype == bool:
@@ -152,23 +167,44 @@ def remove_small_objects(ar, min_size=64, connectivity=1, *, out=None):
             "Did you mean to use a boolean array?"
         )
 
-    too_small = component_sizes < min_size
+    if min_size is not DEPRECATED:
+        # Exclusive threshold is deprecated behavior
+        too_small = component_sizes < min_size
+    else:
+        # New behavior uses inclusive threshold
+        too_small = component_sizes <= max_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
 
     return out
 
 
-def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
+@deprecate_parameter(
+    deprecated_name="area_threshold",
+    new_name="max_size",
+    start_version="0.26.0",
+    stop_version="2.0.0",
+    template=f"{deprecate_parameter.replace_parameter_template} "
+    "Note that the new threshold removes objects smaller than **or equal to** "
+    "its value, while the previous parameter only removed smaller ones.",
+)
+def remove_small_holes(
+    ar, area_threshold=DEPRECATED, connectivity=1, *, max_size=64, out=None
+):
     """Remove contiguous holes smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray, arbitrary shape, int or bool type
         The array containing the connected components of interest.
-    area_threshold : int, optional (default: 64)
-        The maximum area, in pixels, of a contiguous hole that will be filled.
-        Replaces `min_size`.
+    max_size : int, optional (default: 64)
+        Remove holes whose contiguous area (or volume, in N-D) contains this
+        number of pixels or fewer.
+
+        .. versionadded:: 0.26
+            To make the naming clearer, replaces deprecated `area_threshold`
+            which only removed holes strictly smaller than its size.
+
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
         The connectivity defining the neighborhood of a pixel.
     out : ndarray
@@ -187,6 +223,11 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     out : ndarray, same shape and type as input `ar`
         The input array with small holes within connected components removed.
 
+    See Also
+    --------
+    skimage.morphology.remove_small_objects
+    skimage.morphology.remove_objects_by_distance
+
     Examples
     --------
     >>> from skimage import morphology
@@ -194,19 +235,19 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     ...               [1, 1, 1, 0, 1, 0],
     ...               [1, 0, 0, 1, 1, 0],
     ...               [1, 1, 1, 1, 1, 0]], bool)
-    >>> b = morphology.remove_small_holes(a, 2)
+    >>> b = morphology.remove_small_holes(a, max_size=1)
     >>> b
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True,  True,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> c = morphology.remove_small_holes(a, 2, connectivity=2)
+    >>> c = morphology.remove_small_holes(a, max_size=1, connectivity=2)
     >>> c
     array([[ True,  True,  True,  True,  True, False],
            [ True,  True,  True, False,  True, False],
            [ True, False, False,  True,  True, False],
            [ True,  True,  True,  True,  True, False]])
-    >>> d = morphology.remove_small_holes(a, 2, out=a)
+    >>> d = morphology.remove_small_holes(a, max_size=1, out=a)
     >>> d is a
     True
 
@@ -238,7 +279,19 @@ def remove_small_holes(ar, area_threshold=64, connectivity=1, *, out=None):
     np.logical_not(ar, out=out)
 
     # removing small objects from the inverse of ar
-    out = remove_small_objects(out, area_threshold, connectivity, out=out)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="Parameter `min_size` is deprecated",
+            category=FutureWarning,
+        )
+        out = remove_small_objects(
+            out,
+            min_size=area_threshold,
+            max_size=max_size,
+            connectivity=connectivity,
+            out=out,
+        )
 
     np.logical_not(out, out=out)
 
@@ -299,6 +352,8 @@ def remove_objects_by_distance(
     --------
     skimage.morphology.remove_small_objects
         Remove objects smaller than the specified size.
+    skimage.morphology.remove_small_holes
+        Remove holes smaller than the specified size.
 
     Notes
     -----

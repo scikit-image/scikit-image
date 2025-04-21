@@ -1211,14 +1211,14 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.pop(img, square(3))
+    >>> rank.pop(img, footprint_rectangle((3, 3)))
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -1280,14 +1280,14 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> import skimage.filters.rank as rank         # Cube seems to fail but
     >>> img = np.array([[0, 0, 0, 0, 0],            # Ball can pass
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 1, 1, 1, 0],
     ...                 [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.sum(img, square(3))
+    >>> rank.sum(img, footprint_rectangle((3, 3)))
     array([[1, 2, 3, 2, 1],
            [2, 4, 6, 4, 2],
            [3, 6, 9, 6, 3],
@@ -1349,14 +1349,14 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Examples
     --------
-    >>> from skimage.morphology import square, cube # Need to add 3D example
+    >>> from skimage.morphology import footprint_rectangle # Need to add 3D example
     >>> from skimage.filters.rank import threshold
     >>> img = 255 * np.array([[0, 0, 0, 0, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> threshold(img, square(3))
+    >>> threshold(img, footprint_rectangle((3, 3)))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 0, 1, 0],

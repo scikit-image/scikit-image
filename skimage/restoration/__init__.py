@@ -1,6 +1,4 @@
-"""Image restoration module.
-
-"""
+"""Restoration algorithms, e.g., deconvolution algorithms, denoising, etc."""
 
 import lazy_loader as _lazy
 

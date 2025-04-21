@@ -286,12 +286,19 @@ class deprecate_parameter:
             # Extract value of deprecated parameter
             if len(args) > deprecated_idx:
                 deprecated_value = args[deprecated_idx]
-                args = (
-                    args[:deprecated_idx] + (DEPRECATED,) + args[deprecated_idx + 1 :]
-                )
+                # Overwrite old with DEPRECATED if replacement exists
+                if self.new_name is not None:
+                    args = (
+                        args[:deprecated_idx]
+                        + (DEPRECATED,)
+                        + args[deprecated_idx + 1 :]
+                    )
             if self.deprecated_name in kwargs.keys():
                 deprecated_value = kwargs[self.deprecated_name]
-                kwargs[self.deprecated_name] = DEPRECATED
+                # Overwrite old with DEPRECATED if replacement exists
+                if self.new_name is not None:
+                    kwargs[self.deprecated_name] = DEPRECATED
+
             # Extract value of new parameter (if present)
             if new_idx is not False and len(args) > new_idx:
                 new_value = args[new_idx]

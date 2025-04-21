@@ -64,7 +64,20 @@ if incdir_numpy == 'not-given'
   ).stdout().strip()
 endif
 
-inc_np = include_directories(incdir_numpy)
+# Don't use the deprecated NumPy C API. Define this to a fixed version instead of
+# NPY_API_VERSION in order not to break compilation for released SciPy versions
+# when NumPy introduces a new deprecation. Use in a meson.build file::
+#
+#   py3.extension_module('_name',
+#     'source_fname',
+#     numpy_nodepr_api)
+#
+numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_24_API_VERSION'
+
+np_dep = declare_dependency(
+  include_directories: incdir_numpy,
+  compile_args: numpy_nodepr_api
+)
 
 cc = meson.get_compiler('c')
 
@@ -98,16 +111,6 @@ if is_windows
 else
   use_math_defines = []
 endif
-
-# Don't use the deprecated NumPy C API. Define this to a fixed version instead of
-# NPY_API_VERSION in order not to break compilation for released SciPy versions
-# when NumPy introduces a new deprecation. Use in a meson.build file::
-#
-#   py3.extension_module('_name',
-#     'source_fname',
-#     numpy_nodepr_api)
-#
-numpy_nodepr_api = '-DNPY_NO_DEPRECATED_API=NPY_1_9_API_VERSION'
 
 python_sources = [
   '__init__.py',

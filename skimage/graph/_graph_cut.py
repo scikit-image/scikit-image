@@ -165,7 +165,7 @@ def partition_by_cut(cut, rag):
     """
     # `cut` is derived from `D` and `W` matrices, which also follow the
     # ordering returned by `rag.nodes()` because we use
-    # nx.to_scipy_sparse_matrix.
+    # nx.to_scipy_sparse_array.
 
     # Example
     # rag.nodes() = [3, 7, 9, 13]
@@ -267,14 +267,26 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
     d, w = _ncut.DW_matrices(rag)
     m = w.shape[0]
 
-    if m > 2:
+    if (m > 2) and (d != w).nnz > 0:
+        # This avoids further segmenting a graph that is too small,
+        # and the degenerate case (d == w), which typically occurs
+        # when only three single pixels remain.
+        #
+        # We're not sure exactly why this latter case arises. For
+        # SciPy <= 0.14, SciPy continued to compute an eigenvector,
+        # but newer versions (correctly) won't.  We refuse to guess,
+        # and stop further segmentation.
+        #
+        # It may make sense to a warning here; on the other hand segmentations
+        # are not a ground truth, so this level of "noise" should be acceptable.
+
         d2 = d.copy()
         # Since d is diagonal, we can directly operate on its data
         # the inverse of the square root
         d2.data = np.reciprocal(np.sqrt(d2.data, out=d2.data), out=d2.data)
 
         # Refer Shi & Malik 2001, Equation 7, Page 891
-        A = d2 * (d - w) * d2
+        A = d2 @ (d - w) @ d2
         # Initialize the vector to ensure reproducibility.
         v0 = random_generator.random(A.shape[0])
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))

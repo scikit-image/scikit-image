@@ -1,6 +1,4 @@
-"""Common tools to optical flow algorithms.
-
-"""
+"""Common tools to optical flow algorithms."""
 
 import numpy as np
 from scipy import ndimage as ndi

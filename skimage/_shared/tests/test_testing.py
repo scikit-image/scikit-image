@@ -1,5 +1,4 @@
-""" Testing decorators module
-"""
+"""Testing decorators module"""
 
 import inspect
 import re
@@ -150,6 +149,6 @@ class Test_assert_stacklevel:
             self.raise_warning("wrong", UserWarning, stacklevel=level)
         # Check that message contains expected line on right side
         line_number = inspect.currentframe().f_lineno - 2
-        regex = ".*" + re.escape(f"!= {__file__}:{line_number}")
+        regex = ".*" + re.escape(f"Expected: {__file__}:{line_number}")
         with pytest.raises(AssertionError, match=regex):
             assert_stacklevel(record, offset=-5)

@@ -5,6 +5,7 @@ import pytest
 from skimage._shared._dependency_checks import has_mpl
 from skimage import io
 from skimage.io import manage_plugins
+from skimage._shared.testing import fetch, assert_stacklevel
 
 
 priority_plugin = 'pil'
@@ -70,3 +71,23 @@ def test_load_preferred_plugins_imread():
         assert func == pil_plugin.imread
         plug, func = manage_plugins.plugin_store['imshow'][0]
         assert func == matplotlib_plugin.imshow, func.__module__
+
+
+@pytest.mark.parametrize(
+    ("func", "args"),
+    [
+        (io.use_plugin, ["imageio"]),
+        (io.call_plugin, ["imread", fetch("data/camera.png")]),
+        (io.plugin_info, ["imageio"]),
+        (io.plugin_order, tuple()),
+        (io.reset_plugins, tuple()),
+        (io.find_available_plugins, tuple()),
+        (getattr, [io, "available_plugins"]),
+    ],
+)
+def test_deprecation_warnings_on_plugin_funcs(func, args):
+    regex = ".*use `imageio` or other I/O packages directly.*"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(*args)
+    assert len(record) == 1
+    assert_stacklevel(record, offset=-2)

@@ -440,12 +440,20 @@ class EllipseModel(BaseModel):
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
+        if len(data) < 5:
+            warn(
+                "Need at least 5 data points to estimate an ellipse.",
+                category=RuntimeWarning,
+                stacklevel=2,
+            )
+            return False
+
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
         data = data.astype(float_type, copy=False)
 
         # normalize value range to avoid misfitting due to numeric errors if
-        # the relative distanceses are small compared to absolute distances
+        # the relative distances are small compared to absolute distances
         origin = data.mean(axis=0)
         data = data - origin
         scale = data.std()
