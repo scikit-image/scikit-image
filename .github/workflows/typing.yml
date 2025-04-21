@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -27,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          DOCSTUB_REF: f0147836b0c3bab98a6c3ff23ff86965665b70c2 # v0.2.2.dev24+gaf69621
+          DOCSTUB_REF: 04b17b0f3a923f8de0a1810834de0c567b02a843 # v0.2.2.dev53+g7a9700c.d20250418
         run: |
           pip install "docstub [optional] @ git+https://github.com/scientific-python/docstub@${DOCSTUB_REF}"
           docstub --version
