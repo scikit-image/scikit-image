@@ -11,6 +11,12 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Many color libraries just need this to be set to any value, but at least
+  # one distinguishes color depth, where "3" -> "256-bit color".
+  FORCE_COLOR: 3
+  MYPYPATH: ${{ github.workspace }}/stubs
+
 jobs:
   docstub_mypy:
     name: Generate and test type annotations
@@ -27,17 +33,43 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
 
-      - name: Install dependencies
+      - name: Install build dependencies
+        env:
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install from source
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install docstub
         env:
           DOCSTUB_REF: 04b17b0f3a923f8de0a1810834de0c567b02a843 # v0.2.2.dev53+g7a9700c.d20250418
         run: |
-          pip install "docstub [optional] @ git+https://github.com/scientific-python/docstub@${DOCSTUB_REF}"
+          pip install mypy "docstub [optional] @ git+https://github.com/scientific-python/docstub@${DOCSTUB_REF}"
           docstub --version
 
       - name: Generate stubs
+        continue-on-error: true
         run: |
-          docstub -v skimage
+          docstub -v skimage -o ${MYPYPATH}/docstub
+
+      - name: Check with mypy.stubtest
+        continue-on-error: true
+        run: |
+          python -m mypy.stubtest \
+            --mypy-config-file pyproject.toml \
+            skimage
+
+      - name: Check tests/ with mypy
+        continue-on-error: true
+        run: |
+          python .github/scripts/extract_test_suite.py skimage/ tests/
+          python -m mypy tests/
 
       - uses: actions/upload-artifact@v4
         with:

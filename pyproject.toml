@@ -211,3 +211,15 @@ scipy = {import = "scipy"}
 matplotlib = {import = "matplotlib"}
 sklearn = {import = "sklearn"}
 pathlib = {import = "pathlib"}
+
+
+[tool.mypy]
+strict = true
+disable_error_code = ["type-arg"]
+
+# Don't type test suite itself but check if usage makes sense with stubs
+[[tool.mypy.overrides]]
+module = "tests.*"
+check_untyped_defs = true
+allow_untyped_defs = true
+disable_error_code = ["var-annotated", "union-attr"]
