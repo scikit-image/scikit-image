@@ -545,9 +545,11 @@ def _calc_distances(src, dst, F, metric='distance'):
     .. [1] Zhang, Zhengyou. "Determining the epipolar geometry and its
            uncertainty: A review." International journal of computer vision 27
            (1998): 161-195.
+           https://www.microsoft.com/en-us/research/publication/determining-epipolar-geometry-uncertainty-review
     .. [2] Hartley, Richard I. "In defense of the eight-point algorithm."
            Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
            (1997): 580-593.
+           https://users.cecs.anu.edu.au/~hartley/Papers/fundamental/fundamental.pdf
     """
     src_h, dst_h = [_append_homogeneous_dim(pts) for pts in (src, dst)]
     Fu = F @ src_h.T

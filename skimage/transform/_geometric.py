@@ -375,10 +375,19 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     intrinsic calibration of the images is known, the essential matrix describes
     the metric relation between the two images (`EssentialMatrixTransform`).
 
+    Notes
+    -----
+    See [1]_ and [2]_ for details of the estimation procedure.  [2]_ is a good
+    place to start.
+
     References
     ----------
     .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
            computer vision. Cambridge university press, 2003.
+    .. [2] Zhang, Zhengyou. "Determining the epipolar geometry and its
+           uncertainty: A review." International journal of computer vision 27
+           (1998): 161-195.
+           https://www.microsoft.com/en-us/research/publication/determining-epipolar-geometry-uncertainty-review
 
     Parameters
     ----------
