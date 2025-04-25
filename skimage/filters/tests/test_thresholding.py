@@ -23,7 +23,6 @@ from skimage.filters._multiotsu import (
 )
 from skimage.filters.thresholding import (
     _cross_entropy,
-    _mean_std,
     threshold_isodata,
     threshold_li,
     threshold_local,
@@ -36,6 +35,12 @@ from skimage.filters.thresholding import (
     threshold_triangle,
     threshold_yen,
     try_all_threshold,
+)
+from skimage.segmentation._thresholding_local import _mean_std
+
+
+pytestmark = pytest.mark.filterwarnings(
+    r"ignore:.*(threshold_|try_all).* is deprecated since version 0\.26:FutureWarning"
 )
 
 
@@ -326,7 +331,7 @@ def test_otsu_coins_image_as_float():
 
 def test_otsu_astro_image():
     img = util.img_as_ubyte(data.astronaut())
-    with expected_warnings(['grayscale']):
+    with expected_warnings(['grayscale', '`threshold_otsu` is deprecated']):
         assert 109 < threshold_otsu(img) < 111
 
 
@@ -776,7 +781,7 @@ def test_multiotsu_output():
 
 def test_multiotsu_astro_image():
     img = util.img_as_ubyte(data.astronaut())
-    with expected_warnings(['grayscale']):
+    with expected_warnings(['grayscale', '`threshold_multiotsu` is deprecated']):
         assert_almost_equal(threshold_multiotsu(img), [58, 149])
 
 

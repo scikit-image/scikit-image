@@ -24,6 +24,8 @@ python_sources = [
   '_felzenszwalb.py',
   '_join.py',
   '_quickshift.py',
+  '_thresholding_global.py',
+  '_thresholding_local.py',
   '_watershed.py',
   'active_contour_model.py',
   'boundaries.py',

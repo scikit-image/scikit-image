@@ -19,6 +19,22 @@ from .morphsnakes import (
     checkerboard_level_set,
 )
 from ..morphology import flood, flood_fill
+from ._thresholding_global import (
+    threshold_isodata,
+    threshold_li,
+    threshold_mean,
+    threshold_minimum,
+    threshold_multiotsu,
+    threshold_otsu,
+    threshold_triangle,
+    threshold_yen,
+    threshold_try_global,
+)
+from ._thresholding_local import (
+    threshold_local,
+    threshold_local_niblack,
+    threshold_local_sauvola,
+)
 
 
 __all__ = [
@@ -42,4 +58,16 @@ __all__ = [
     'checkerboard_level_set',
     'flood',
     'flood_fill',
+    'threshold_isodata',
+    'threshold_li',
+    'threshold_local',
+    'threshold_mean',
+    'threshold_minimum',
+    'threshold_multiotsu',
+    'threshold_otsu',
+    'threshold_triangle',
+    'threshold_yen',
+    'threshold_try_global',
+    'threshold_local_niblack',
+    'threshold_local_sauvola',
 ]
