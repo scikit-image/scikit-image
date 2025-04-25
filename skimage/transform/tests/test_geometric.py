@@ -24,6 +24,8 @@ from skimage.transform._geometric import (
     _center_and_normalize_points,
     _apply_homogeneous,
     _euler_rotation_matrix,
+    TransformEstimationError,
+    FailedEstimation,
     TRANSFORMS,
 )
 from skimage import data
@@ -82,6 +84,23 @@ def test_estimate_transform():
 def test_matrix_transform():
     tform = AffineTransform(scale=(0.1, 0.5), rotation=2)
     assert_equal(tform(SRC), matrix_transform(SRC, tform.params))
+
+
+def test_failed_estimation():
+    msg = 'Something went wrong with estimation'
+    fe = FailedEstimation(msg)
+    assert fe.message == msg
+    assert str(fe) == msg
+    assert bool(fe) is False
+    with pytest.raises(
+        TransformEstimationError, match=f'Call on failed estimation: {msg}'
+    ):
+        fe(np.ones((10, 2)))
+    with pytest.raises(
+        TransformEstimationError,
+        match=f'No attribute "params" for failed estimation: {msg}',
+    ):
+        fe.params
 
 
 def test_euclidean_estimation():
