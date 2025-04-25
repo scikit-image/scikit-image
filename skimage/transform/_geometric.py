@@ -220,6 +220,49 @@ def _umeyama(src, dst, estimate_scale):
     return T
 
 
+class TransformEstimationError(Exception):
+    """Error from use of failed estimation instance
+
+    This error arises from attempts to use an instance of
+    :class:`FailedEstimation`.
+    """
+
+
+class FailedEstimation:
+    """Class to indicate a failed transform estimation.
+
+    The ``from_estimate`` class method of each transform type may return an
+    instance of this class to indicate some failure in the estimation process.
+
+    Parameters
+    ----------
+    message : str
+        Message indicating reason for failed estimation.
+
+    Attributes
+    ----------
+    message : str
+        Message above.
+    """
+
+    def __init__(self, message):
+        self.message = message
+
+    def __bool__(self):
+        return False
+
+    def __str__(self):
+        return self.message
+
+    def __call__(self, *args, **kwargs):
+        raise TransformEstimationError(f'Call on failed estimation: {self.message}')
+
+    def __getattr__(self, name):
+        raise TransformEstimationError(
+            f'No attribute "{name}" for failed estimation: {self.message}'
+        )
+
+
 class _GeometricTransform(ABC):
     """Abstract base class for geometric transformations."""
 
