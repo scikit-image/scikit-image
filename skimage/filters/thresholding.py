@@ -22,13 +22,13 @@ __all__ = [
 @deprecate_func(
     deprecated_version="0.26",
     removed_version="2.0 (or later)",
-    hint="Use `skimage.segmentation.threshold_try_global` instead",
+    hint="Use `skimage.segmentation.threshold_plot_all_global` instead",
 )
 @require("matplotlib", ">=3.3")
 def try_all_threshold(image, figsize=(8, 5), verbose=True):
     from ..segmentation import _thresholding_global
 
-    return _thresholding_global.threshold_try_global(
+    return _thresholding_global.threshold_plot_all_global(
         image=image, figsize=figsize, verbose=verbose
     )
 

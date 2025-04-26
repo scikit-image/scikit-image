@@ -35,7 +35,9 @@ import skimage as ski
 
 img = ski.data.page()
 
-fig, ax = ski.segmentation.threshold_try_global(img, figsize=(10, 8), verbose=False)
+fig, ax = ski.segmentation.threshold_plot_all_global(
+    img, figsize=(10, 8), verbose=False
+)
 
 plt.show()
 

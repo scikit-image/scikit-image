@@ -21,7 +21,7 @@ def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
     neighborhood defined by a rectangular window size ``w``.
     The algorithm uses integral images to speedup computation. This is
-    used by :func:`threshold_niblack` and :func:`threshold_sauvola`.
+    used by :func:`threshold_local_niblack` and :func:`threshold_local_sauvola`.
 
     Parameters
     ----------

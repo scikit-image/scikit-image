@@ -61,9 +61,9 @@ plt.show()
 # mechanisms.
 #
 
-from skimage.segmentation import threshold_try_global
+from skimage.segmentation import threshold_plot_all_global
 
 img = data.page()
 
-fig, ax = threshold_try_global(img, figsize=(10, 8), verbose=False)
+fig, ax = threshold_plot_all_global(img, figsize=(10, 8), verbose=False)
 plt.show()

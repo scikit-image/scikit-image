@@ -28,7 +28,7 @@ from ._thresholding_global import (
     threshold_otsu,
     threshold_triangle,
     threshold_yen,
-    threshold_try_global,
+    threshold_plot_all_global,
 )
 from ._thresholding_local import (
     threshold_local,
@@ -68,7 +68,7 @@ __all__ = [
     'threshold_otsu',
     'threshold_triangle',
     'threshold_yen',
-    'threshold_try_global',
+    'threshold_plot_all_global',
     'threshold_local_niblack',
     'threshold_local_sauvola',
     'threshold_labels_hysteresis',

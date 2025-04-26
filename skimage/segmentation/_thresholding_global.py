@@ -916,7 +916,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
 
 @require("matplotlib", ">=3.3")
-def threshold_try_global(image, *, figsize=(8, 5), verbose=True):
+def threshold_plot_all_global(image, *, figsize=(8, 5), verbose=True):
     """Returns a figure comparing the outputs of different thresholding methods.
 
     Parameters
@@ -951,7 +951,7 @@ def threshold_try_global(image, *, figsize=(8, 5), verbose=True):
         >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> from skimage.data import text
-    >>> fig, ax = threshold_try_global(text(), figsize=(10, 6), verbose=False)
+    >>> fig, ax = threshold_plot_all_global(text(), figsize=(10, 6), verbose=False)
     """
 
     def thresh(func):
