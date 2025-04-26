@@ -2,7 +2,8 @@ extensions = [
   '_felzenszwalb_cy',
   '_quickshift_cy',
   '_slic',
-  '_watershed_cy'
+  '_watershed_cy',
+  '_multiotsu_cy',
 ]
 
 foreach ext: extensions

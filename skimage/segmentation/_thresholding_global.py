@@ -13,7 +13,7 @@ from scipy import ndimage as ndi
 from .._shared.utils import warn
 from .._shared.version_requirements import require
 from ..exposure import histogram
-from ..filters._multiotsu import (
+from ._multiotsu_cy import (
     _get_multiotsu_thresh_indices,
     _get_multiotsu_thresh_indices_lut,
 )
