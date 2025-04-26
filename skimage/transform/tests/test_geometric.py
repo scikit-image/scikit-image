@@ -938,6 +938,26 @@ def test_geometric_tform():
 
 
 @pytest.mark.parametrize(
+    'tform_class', (FundamentalMatrixTransform, EssentialMatrixTransform)
+)
+def test_identical_fundamental(tform_class):
+    # Test identical points to transform gives failed estimation.
+    assert tform_class.from_estimate(SRC, DST)
+    bad_src = np.ones((8, 2))
+    bad_tform = tform_class.from_estimate(bad_src, DST)
+    assert not bad_tform
+    with pytest.raises(
+        TransformEstimationError,
+        match=(
+            'No attribute "params" for failed estimation: '
+            f'{tform_class.__name__}: Scaling failed '
+            'for input points'
+        ),
+    ):
+        bad_tform.params
+
+
+@pytest.mark.parametrize(
     'tform_class, msg',
     (
         (ProjectiveTransform, 'Scaling generated NaN values'),

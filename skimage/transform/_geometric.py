@@ -502,6 +502,27 @@ class FundamentalMatrixTransform(_HMatrixTransform):
            [ 0.01339569, -0.03388123,  0.00497605],
            [ 0.03420927, -0.1135812 ,  0.02228236]])
 
+    The estimation can fail when calculating scaling for the points - for
+    example, if all the input or output points are the same.  If this happens,
+    you will get a transform for which ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params
+    Traceback (most recent call last):
+      ...
+    skimage.transform._geometric.TransformEstimationError: No attribute "params" for failed estimation: FundamentalMatrixTransform: Scaling failed for input points
     """
 
     def __call__(self, coords):
@@ -563,10 +584,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             raise ValueError('src.shape[0] must be equal or larger than 8.')
 
         # Center and normalize image points for better numerical stability.
-        try:
-            src_matrix, src = _center_and_normalize_points(src)
-            dst_matrix, dst = _center_and_normalize_points(dst)
-        except ZeroDivisionError:
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+        if np.any(np.isnan(src_matrix + dst_matrix)):
             self.params = np.full((3, 3), np.nan)
             return 3 * [np.full((3, 3), np.nan)]
 
@@ -611,6 +631,8 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
     def _estimate(self, src, dst):
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(F_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
 
         # Enforcing the internal constraint that two singular values must be
         # non-zero and one must be zero.
@@ -790,6 +812,8 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     def _estimate(self, src, dst):
         E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(E_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
 
         # Enforcing the internal constraint that two singular values must be
         # equal and one must be zero.
