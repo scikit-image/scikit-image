@@ -14,6 +14,8 @@ from skimage._shared.utils import (
     deprecate_func,
     deprecate_parameter,
     DEPRECATED,
+    TransformEstimationError,
+    FailedEstimation,
 )
 
 complex_dtypes = [np.complex64, np.complex128]
@@ -516,3 +518,20 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
             bar(0, 1)
             testing.assert_stacklevel(records)
+
+
+def test_failed_estimation():
+    msg = 'Something went wrong with estimation'
+    fe = FailedEstimation(msg)
+    assert fe.message == msg
+    assert str(fe) == msg
+    assert bool(fe) is False
+    with pytest.raises(
+        TransformEstimationError, match=f'Call on failed estimation: {msg}'
+    ):
+        fe(np.ones((10, 2)))
+    with pytest.raises(
+        TransformEstimationError,
+        match=f'No attribute "params" for failed estimation: {msg}',
+    ):
+        fe.params

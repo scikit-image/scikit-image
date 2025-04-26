@@ -7,10 +7,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import (
-    _deprecate_estimate_method,
-)
-from ..transform._geometric import FailedEstimation
+from .._shared.utils import _deprecate_estimate_method, FailedEstimation
 
 _EPSILON = np.spacing(1)
 

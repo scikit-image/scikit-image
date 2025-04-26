@@ -1,8 +1,7 @@
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD, _deprecate_estimate_method
-from ._geometric import FailedEstimation
+from .._shared.utils import check_nD, _deprecate_estimate_method, FailedEstimation
 
 
 @_deprecate_estimate_method
