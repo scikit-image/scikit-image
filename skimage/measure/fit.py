@@ -10,6 +10,7 @@ from scipy import optimize, spatial
 from .._shared.utils import (
     _deprecate_estimate_method,
 )
+from ..transform._geometric import FailedEstimation
 
 _EPSILON = np.spacing(1)
 
@@ -40,8 +41,25 @@ class BaseModel:
 
     @classmethod
     def from_estimate(cls, data):
-        instance = cls()
-        return instance if instance._estimate(data) else None
+        tf = cls()
+        msg = tf._estimate(data, warn_only=False)
+        return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
+
+def _warn_or_msg(msg, warn_only=True):
+    """If `warn_only`, warn with `msg`, return ``None``, else return `msg`
+
+    For `from_estimate` API, we want to return a ``FailedEstimation`` for these
+    estimation failures, which we do by passing back the `msg` from the
+    ``_estimation`` method via this function.  For the deprecated ``estimate``
+    API, we want to warn, and return an incomplete transform.  The ``None``
+    return value indicates the estimation has kind-of succeeded, for back
+    compatibility.
+    """
+    if not warn_only:
+        return msg
+    warn(msg, category=RuntimeWarning, stacklevel=5)
+    return None
 
 
 @_deprecate_estimate_method
@@ -98,7 +116,7 @@ class LineModelND(BaseModel):
         """
         return super().from_estimate(data)
 
-    def _estimate(self, data):
+    def _estimate(self, data, warn_only=True):
         _check_data_atleast_2D(data)
 
         origin = data.mean(axis=0)
@@ -114,11 +132,11 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            return False
+            return 'estimate under-determined'
 
         self.params = (origin, direction)
 
-        return True
+        return None
 
     def residuals(self, data, params=None):
         """Determine residuals of data to model.
@@ -301,7 +319,7 @@ class CircleModel(BaseModel):
         """
         return super().from_estimate(data)
 
-    def _estimate(self, data):
+    def _estimate(self, data, warn_only=True):
         _check_data_dim(data, dim=2)
 
         # to prevent integer overflow, cast data to float, if it isn't already
@@ -313,13 +331,12 @@ class CircleModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "circle with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=4,
+                warn_only=warn_only,
             )
-            return False
+
         data /= scale
 
         # Adapted from a spherical estimator covered in a blog post by Charles
@@ -330,8 +347,10 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input does not contain enough significant data points.")
-            return False
+            return _warn_or_msg(
+                "Input does not contain enough significant data points.",
+                warn_only=warn_only,
+            )
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
@@ -343,7 +362,7 @@ class CircleModel(BaseModel):
         center += origin
         self.params = tuple(center) + (r,)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -462,18 +481,16 @@ class EllipseModel(BaseModel):
         """
         return super().from_estimate(data)
 
-    def _estimate(self, data):
+    def _estimate(self, data, warn_only=True):
         # Original Implementation: Ben Hammel, Nick Sullivan-Molina
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
         if len(data) < 5:
-            warn(
+            return _warn_or_msg(
                 "Need at least 5 data points to estimate an ellipse.",
-                category=RuntimeWarning,
-                stacklevel=4,
+                warn_only=warn_only,
             )
-            return False
 
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
@@ -485,13 +502,11 @@ class EllipseModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "ellipse with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=4,
+                warn_only=warn_only,
             )
-            return False
         data /= scale
 
         x = data[:, 0]
@@ -514,7 +529,7 @@ class EllipseModel(BaseModel):
             # Reduced scatter matrix [eqn. 29]
             M = inv(C1) @ (S1 - S2 @ inv(S3) @ S2.T)
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
-            return False
+            return 'Singular matrix from estimation'
 
         # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
         # from this equation [eqn. 28]
@@ -527,7 +542,7 @@ class EllipseModel(BaseModel):
         a1 = eig_vecs[:, (cond > 0)]
         # seeks for empty matrix
         if 0 in a1.shape or len(a1.ravel()) != 3:
-            return False
+            return 'Eigenvector constraints not met'
         a, b, c = a1.ravel()
 
         # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
@@ -574,7 +589,7 @@ class EllipseModel(BaseModel):
 
         self.params = tuple(float(p) for p in params)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
