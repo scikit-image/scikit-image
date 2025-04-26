@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial import distance_matrix
 
 from .._shared.utils import check_nD, _deprecate_estimate_method
+from ._geometric import FailedEstimation
 
 
 @_deprecate_estimate_method
@@ -126,19 +127,20 @@ class ThinPlateSplineTransform:
         -----
         The number N of source and destination points must match.
         """
-        instance = cls()
-        return instance if instance._estimate(src, dst) else None
+        tf = cls()
+        msg = tf._estimate(src, dst)
+        return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
     def _estimate(self, src, dst):
         check_nD(src, 2, arg_name="src")
         check_nD(dst, 2, arg_name="dst")
 
         if src.shape[0] < 3 or dst.shape[0] < 3:
-            msg = "Need at least 3 points in in `src` and `dst`"
-            raise ValueError(msg)
+            raise ValueError("Need at least 3 points in in `src` and `dst`")
         if src.shape != dst.shape:
-            msg = f"Shape of `src` and `dst` didn't match, {src.shape} != {dst.shape}"
-            raise ValueError(msg)
+            raise ValueError(
+                f"Shape of `src` and `dst` didn't match, {src.shape} " f"!= {dst.shape}"
+            )
 
         self.src = src
         n, d = src.shape
@@ -155,8 +157,8 @@ class ThinPlateSplineTransform:
         try:
             self._spline_mappings = np.linalg.solve(L, V)
         except np.linalg.LinAlgError:
-            return False
-        return True
+            return 'Unable to solve for spline mappings'
+        return None
 
     def _radial_distance(self, coords):
         """Compute the radial distance between input points and source points."""
