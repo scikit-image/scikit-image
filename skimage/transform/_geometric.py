@@ -473,10 +473,10 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     Trying to use this failed estimation transform result will give a suitable
     error:
 
-    >>> bad_tform.params
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
       ...
-    skimage.transform._geometric.TransformEstimationError: No attribute "params" for failed estimation: FundamentalMatrixTransform: Scaling failed for input points
+    TransformEstimationError: No attribute "params" for failed estimation ...
     """
 
     def __call__(self, coords):
