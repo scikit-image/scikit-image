@@ -87,11 +87,11 @@ pd.DataFrame(props)
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
-from skimage import data, filters, measure, morphology
+from skimage import data, segmentation, measure, morphology
 
 img = data.coins()
 # Binary image, post-process the binary mask and compute labels
-threshold = filters.threshold_otsu(img)
+threshold = segmentation.threshold_otsu(img)
 mask = img > threshold
 mask = morphology.remove_small_objects(mask, max_size=49)
 mask = morphology.remove_small_holes(mask, max_size=49)

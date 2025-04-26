@@ -106,14 +106,14 @@ fig.tight_layout()
 # local) thresholding, as opposed to the usual thresholding procedure which
 # employs a single (global) threshold for all pixels in the image.
 #
-# When calling the ``threshold_local`` function from the ``filters`` module,
+# When calling the ``threshold_local`` function from the ``segmentation`` module,
 # we may change the default neighborhood size (``block_size``), i.e., the
 # typical size (number of pixels) over which illumination varies,
 # as well as the ``offset`` (shifting the neighborhood's weighted mean).
 # Let us try two different values for ``block_size``:
 
-thresh_1 = ski.filters.threshold_local(image_med, block_size=21, offset=15)
-thresh_2 = ski.filters.threshold_local(image_med, block_size=43, offset=15)
+thresh_1 = ski.segmentation.threshold_local(image_med, block_size=21, offset=15)
+thresh_2 = ski.segmentation.threshold_local(image_med, block_size=43, offset=15)
 
 mask_1 = image_med < thresh_1
 mask_2 = image_med < thresh_2
@@ -143,7 +143,7 @@ plot_comparison(mask_1, mask_2, "block_size = 21", "block_size = 43")
 # understanding of the method being used, which can typically move us
 # closer to the desired results.
 
-thresh_0 = ski.filters.threshold_local(image_med, block_size=43)
+thresh_0 = ski.segmentation.threshold_local(image_med, block_size=43)
 
 mask_0 = image_med < thresh_0
 

@@ -126,7 +126,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
         point, while a callable should take in an array of image intensities
         and return a float value. Example valid callables include
         ``numpy.mean`` (default), ``lambda arr: numpy.quantile(arr, 0.95)``,
-        or even :func:`skimage.filters.threshold_otsu`.
+        or even :func:`skimage.segmentation.threshold_otsu`.
     iter_callback : Callable[[float], Any], optional
         A function that will be called on the threshold at every iteration of
         the algorithm.
