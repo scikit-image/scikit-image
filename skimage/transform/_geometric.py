@@ -333,6 +333,36 @@ class _GeometricTransform(ABC):
         dst = np.asarray(dst)
         return cls.identity(src.shape[1]), src, dst
 
+    @classmethod
+    def from_estimate(cls, src, dst, *args, **kwargs):
+        r"""Estimate transform.
+
+        Parameters
+        ----------
+        src : (N, M) array_like
+            Source coordinates.
+        dst : (N, M) array_like
+            Destination coordinates.
+        \*args : sequence
+            Any other positional arguments.
+        \*\*kwargs : dict
+            Any other keyword arguments.
+
+        Returns
+        -------
+        tf : Transform instance or :class:`FailedEstimation` instance.
+            Transform estimated from `src` and `dst`, or
+            :class:`FailedEstimation` if transform cannot be estimated.
+        """
+        return _from_estimate(cls, src, dst, *args, **kwargs)
+
+
+def _from_estimate(cls, src, dst, *args, **kwargs):
+    """Detached function for from_estimate bas implementation."""
+    tf, src, dst = cls._prepare_estimation(src, dst)
+    msg = tf._estimate(src, dst, *args, **kwargs)
+    return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
 
 class _HMatrixTransform(_GeometricTransform):
     """Transform accepting homogeneous matrix as input."""
@@ -577,8 +607,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         ValueError
             If `src` has fewer than 8 rows.
         """
-        tf, src, dst = cls._prepare_estimation(src, dst)
-        return tf if tf._estimate(src, dst) else None
+        return super().from_estimate(src, dst)
 
     def _estimate(self, src, dst):
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
@@ -591,7 +620,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         self.params = dst_matrix.T @ F @ src_matrix
 
-        return True
+        return None
 
     def residuals(self, src, dst):
         """Compute the Sampson distance.
@@ -772,7 +801,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         self.params = dst_matrix.T @ E @ src_matrix
 
-        return True
+        return None
 
 
 @_deprecate_estimate_method
@@ -922,8 +951,7 @@ class ProjectiveTransform(_HMatrixTransform):
             unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._prepare_estimation(src, dst)
-        return tf if tf._estimate(src, dst, weights) else None
+        return super().from_estimate(src, dst, weights)
 
     def _estimate(self, src, dst, weights=None):
         src = np.asarray(src)
@@ -934,8 +962,8 @@ class ProjectiveTransform(_HMatrixTransform):
         src_matrix, src = _center_and_normalize_points(src)
         dst_matrix, dst = _center_and_normalize_points(dst)
         if not np.all(np.isfinite(src_matrix + dst_matrix)):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
+            self.params = fail_matrix
+            return 'Scaling generated NaN values'
 
         # params: a0, a1, a2, b0, b1, b2, c0, c1
         A = np.zeros((n * d, (d + 1) ** 2))
@@ -966,7 +994,7 @@ class ProjectiveTransform(_HMatrixTransform):
         # singular value.
         if np.isclose(V[-1, -1], 0):
             self.params = fail_matrix
-            return False
+            return 'Right singular vector has 0 final element'
 
         H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
         H[d, d] = 1
@@ -980,7 +1008,7 @@ class ProjectiveTransform(_HMatrixTransform):
 
         self.params = H
 
-        return True
+        return None
 
     def __add__(self, other):
         """Combine this transformation with another."""
@@ -1263,8 +1291,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
             unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._prepare_estimation(src, dst)
-        return tf if tf._estimate(src, dst) else None
+        return super().from_estimate(src, dst)
 
     def _estimate(self, src, dst):
         src = np.asarray(src)
@@ -1275,15 +1302,15 @@ class PiecewiseAffineTransform(_GeometricTransform):
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
 
-        success = True
         fail_matrix = np.full((D + 1, D + 1), np.nan)
 
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self._tesselation.simplices:
+        messages = []
+        for i, tri in enumerate(self._tesselation.simplices):
             affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
-            if affine is None:
-                success = False
+            if not affine:
+                messages.append(f'Failure at forward simplex {i}: {affine}')
                 affine = AffineTransform(fail_matrix.copy())
             self.affines.append(affine)
 
@@ -1292,14 +1319,14 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
         self.inverse_affines = []
-        for tri in self._inverse_tesselation.simplices:
+        for i, tri in enumerate(self._inverse_tesselation.simplices):
             affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
-            if affine is None:
-                success = False
+            if not affine:
+                messages.append(f'Failure at inverse simplex {i}: {affine}')
                 affine = AffineTransform(fail_matrix.copy())
             self.inverse_affines.append(affine)
 
-        return success
+        return '; '.join(messages) if messages else None
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -1518,14 +1545,19 @@ class EuclideanTransform(ProjectiveTransform):
             Transform estimated from `src` and `dst`, with optional `weights`,
             unless estimation fails, in which case return None
         """
-        tf, src, dst = cls._prepare_estimation(src, dst)
-        return tf if tf._estimate(src, dst) else None
+        # Use base implementation to avoid weights argument of
+        # ProjectiveTransform ancestor class.
+        return _from_estimate(cls, src, dst)
 
     def _estimate(self, src, dst):
         self.params = _umeyama(src, dst, self._estimate_scale)
 
         # _umeyama will return nan if the problem is not well-conditioned.
-        return not np.any(np.isnan(self.params))
+        return (
+            'Poor conditioning for estimation'
+            if np.any(np.isnan(self.params))
+            else None
+        )
 
     @property
     def rotation(self):
@@ -1759,8 +1791,7 @@ class PolynomialTransform(_GeometricTransform):
             `weights`, unless estimation fails, in which case return None
 
         """
-        tf, src, dst = cls._prepare_estimation(src, dst)
-        return tf if tf._estimate(src, dst, order, weights) else None
+        return super().from_estimate(src, dst, order, weights)
 
     def _estimate(self, src, dst, order=2, weights=None):
         src = np.asarray(src)
@@ -1801,7 +1832,7 @@ class PolynomialTransform(_GeometricTransform):
 
         self.params = params.reshape((2, u // 2))
 
-        return True
+        return None
 
     def __call__(self, coords):
         """Apply forward transformation.
