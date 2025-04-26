@@ -110,7 +110,7 @@ def expected_warnings(matching):
     """
     if isinstance(matching, str):
         raise ValueError(
-            '``matching`` should be a list of strings and not ' 'a string itself.'
+            '``matching`` should be a list of strings and not a string itself.'
         )
 
     # Special case for disabling the context manager
