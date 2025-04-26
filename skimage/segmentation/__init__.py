@@ -34,6 +34,7 @@ from ._thresholding_local import (
     threshold_local,
     threshold_local_niblack,
     threshold_local_sauvola,
+    threshold_labels_hysteresis,
 )
 
 
@@ -70,4 +71,5 @@ __all__ = [
     'threshold_try_global',
     'threshold_local_niblack',
     'threshold_local_sauvola',
+    'threshold_labels_hysteresis',
 ]
