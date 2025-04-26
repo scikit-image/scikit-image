@@ -951,7 +951,7 @@ def threshold_try_global(image, *, figsize=(8, 5), verbose=True):
         >>> import pytest; _ = pytest.importorskip('matplotlib')
 
     >>> from skimage.data import text
-    >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
+    >>> fig, ax = threshold_try_global(text(), figsize=(10, 6), verbose=False)
     """
 
     def thresh(func):

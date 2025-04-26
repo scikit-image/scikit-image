@@ -148,10 +148,13 @@ def threshold_local(
     --------
     >>> from skimage.data import camera
     >>> image = camera()[:50, :50]
-    >>> binary_image1 = image > threshold_local(image, 15, 'mean')
+    >>> binary_image1 = image > threshold_local(
+    ...     image, block_size=15, method='mean'
+    ... )
     >>> func = lambda arr: arr.mean()
-    >>> binary_image2 = image > threshold_local(image, 15, 'generic',
-    ...                                         param=func)
+    >>> binary_image2 = image > threshold_local(
+    ...     image, block_size=15, method='generic', param=func
+    ... )
 
     """
 
@@ -232,7 +235,7 @@ def threshold_local_niblack(image, *, window_size=15, k=0.2):
     >>> from skimage import data
     >>> image = data.page()
     >>> q = 1
-    >>> threshold_image = threshold_niblack(image, k=0) * q
+    >>> threshold_image = threshold_local_niblack(image, k=0) * q
 
     for some value ``q``. By default, Bradley and Roth use ``q=1``.
 
@@ -340,7 +343,7 @@ def threshold_labels_hysteresis(image, *, low, high):
     Examples
     --------
     >>> image = np.array([1, 2, 3, 2, 1, 2, 1, 3, 2])
-    >>> threshold_labels_hysteresis(image, 1.5, 2.5).astype(int)
+    >>> threshold_labels_hysteresis(image, low=1.5, high=2.5).astype(int)
     array([0, 1, 1, 1, 0, 0, 0, 1, 1])
 
     References
