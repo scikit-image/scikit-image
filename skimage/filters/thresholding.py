@@ -3,7 +3,6 @@ from scipy import ndimage as ndi
 
 from .._shared.utils import deprecate_func
 from .._shared.version_requirements import require
-from ..segmentation import _thresholding_global, _thresholding_local
 
 
 __all__ = [
@@ -66,6 +65,8 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
     >>> from skimage.data import text
     >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_try_global(
         image=image, figsize=figsize, verbose=verbose
     )
@@ -141,6 +142,8 @@ def threshold_local(
     ...                                         param=func)
 
     """
+    from ..segmentation import _thresholding_local
+
     return _thresholding_local.threshold_local(
         image=image,
         block_size=block_size,
@@ -197,6 +200,8 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
     -----
     The input image must be grayscale.
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_otsu(image=image, nbins=nbins, hist=hist)
 
 
@@ -246,6 +251,8 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_yen(image=image, nbins=nbins, hist=hist)
 
 
@@ -314,6 +321,8 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_isodata(
         image=image, nbins=nbins, return_all=return_all, hist=hist
     )
@@ -324,7 +333,9 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     removed_version="2.0 (or later)",
     hint="Use `skimage.segmentation._thresholding_global._cross_entropy` instead",
 )
-def _cross_entropy(image, threshold, bins=_thresholding_global._DEFAULT_ENTROPY_BINS):
+def _cross_entropy(image, threshold, bins=None):
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global._cross_entropy(
         image=image, threshold=threshold, bins=bins
     )
@@ -387,6 +398,8 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     >>> thresh = threshold_li(image)
     >>> binary = image > thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_li(
         image=image,
         tolerance=tolerance,
@@ -452,6 +465,8 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     >>> thresh = threshold_minimum(image)
     >>> binary = image > thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_minimum(
         image=image, nbins=nbins, max_num_iter=max_num_iter, hist=hist
     )
@@ -490,6 +505,8 @@ def threshold_mean(image):
     >>> thresh = threshold_mean(image)
     >>> binary = image > thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_mean(image)
 
 
@@ -531,6 +548,8 @@ def threshold_triangle(image, nbins=256):
     >>> thresh = threshold_triangle(image)
     >>> binary = image > thresh
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_triangle(image=image, nbins=nbins)
 
 
@@ -598,6 +617,8 @@ def threshold_niblack(image, window_size=15, k=0.2):
     >>> image = data.page()
     >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
     """
+    from ..segmentation import _thresholding_local
+
     return _thresholding_local.threshold_local_niblack(
         image=image, window_size=window_size, k=k
     )
@@ -661,6 +682,8 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
     >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
     >>> binary_image = image > t_sauvola
     """
+    from ..segmentation import _thresholding_local
+
     return _thresholding_local.threshold_local_sauvola(
         image=image, window_size=window_size, k=k, r=r
     )
@@ -789,6 +812,8 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     >>> regions = np.digitize(image, bins=thresholds)
     >>> regions_colorized = label2rgb(regions)
     """
+    from ..segmentation import _thresholding_global
+
     return _thresholding_global.threshold_multiotsu(
         image=image, classes=classes, nbins=nbins, hist=hist
     )

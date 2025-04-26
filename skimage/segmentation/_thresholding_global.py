@@ -791,13 +791,7 @@ def threshold_multiotsu(image=None, *, classes=3, nbins=256, hist=None):
     return thresh
 
 
-# Computing a histogram using np.histogram on a uint8 image with bins=256
-# doesn't work and results in aliasing problems. We use a fully specified set
-# of bins to ensure that each uint8 value false into its own bin.
-_DEFAULT_ENTROPY_BINS = tuple(np.arange(-0.5, 255.51, 1))
-
-
-def _cross_entropy(image, *, threshold, bins=_DEFAULT_ENTROPY_BINS):
+def _cross_entropy(image, *, threshold, bins=None):
     """Compute cross-entropy between distributions above and below a threshold.
 
     Parameters
@@ -833,6 +827,12 @@ def _cross_entropy(image, *, threshold, bins=_DEFAULT_ENTROPY_BINS):
            Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
            :DOI:`10.1016/S0167-8655(98)00057-9`
     """
+    if bins is None:
+        # Computing a histogram using np.histogram on a uint8 image with bins=256
+        # doesn't work and results in aliasing problems. We use a fully specified set
+        # of bins to ensure that each uint8 value false into its own bin.
+        bins = np.arange(-0.5, 255.51, 1)
+
     histogram, bin_edges = np.histogram(image, bins=bins, density=True)
     bin_centers = np.convolve(bin_edges, [0.5, 0.5], mode='valid')
     t = np.flatnonzero(bin_centers > threshold)[0]
