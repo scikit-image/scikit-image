@@ -149,7 +149,7 @@ def test_3d_euclidean_similarity_estimation(tform_class, has_scale):
     dst_points = np.array(dst_points)
     # estimating the transformation
     tform = tform_class.from_estimate(src_points, dst_points)
-    assert tform is not None
+    assert tform
     assert_almost_equal(tform.rotation, rotation_matrix)
     assert_almost_equal(tform.translation, translation_vector)
     if has_scale:
@@ -208,7 +208,7 @@ def test_similarity_estimation():
     # via estimate method
     tform4 = SimilarityTransform()
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
-        assert tform4.estimate(SRC, DST) is not None
+        assert tform4.estimate(SRC, DST)
     assert_almost_equal(tform4.params, tform2.params)
 
 
@@ -379,7 +379,7 @@ def _apply_aff_2d(pts, scale, rotation, shear, translation):
 
 def test_piecewise_affine():
     tform = PiecewiseAffineTransform.from_estimate(SRC, DST)
-    assert tform is not None
+    assert tform
     # make sure each single affine transform is exactly estimated
     assert_almost_equal(tform(SRC), DST)
     assert_almost_equal(tform.inverse(DST), SRC)
@@ -937,12 +937,21 @@ def test_geometric_tform():
         assert np.isfinite(dst).all()
 
 
-@pytest.mark.parametrize('tform_class', HMAT_TFORMS_ND)
-def test_degenerate(tform_class):
+@pytest.mark.parametrize(
+    'tform_class, msg',
+    (
+        (ProjectiveTransform, 'Scaling generated NaN values'),
+        (AffineTransform, 'Scaling generated NaN values'),
+        (EuclideanTransform, 'Poor conditioning for estimation'),
+        (SimilarityTransform, 'Poor conditioning for estimation'),
+    ),
+)
+def test_degenerate(tform_class, msg):
     src = dst = np.zeros((10, 2))
 
-    assert tform_class.from_estimate(src, dst) is None
-
+    tf = tform_class.from_estimate(src, dst)
+    assert not tf
+    assert str(tf) == f'{tform_class.__name__}: {msg}'
     tform = tform_class.identity()
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
         assert not tform.estimate(src, dst)
@@ -962,7 +971,10 @@ def test_degenerate_2():
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
         tf = ProjectiveTransform.from_estimate(src, dst)
-        assert tf is None
+        assert not tf
+        assert str(tf) == (
+            'ProjectiveTransform: Right singular vector has 0 final element'
+        )
         with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
             result = tform.estimate(src, dst)
         assert not result
@@ -999,14 +1011,20 @@ def test_degenerate_2():
     )
     # from_estimate
     tform = PiecewiseAffineTransform.from_estimate(src, dst)
-    assert tform is None
+    # Simplex group index 4 has degenerate affine.
+    bad_affine_i = 4
+    assert not tform
+    assert str(tform).startswith(
+        f'PiecewiseAffineTransform: Failure at forward simplex {bad_affine_i}'
+    )
     # estimate method records steps in affine estimation.
     tform = PiecewiseAffineTransform()
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
         assert not tform.estimate(src, dst)
-    assert np.all(np.isnan(tform.affines[4].params))  # degenerate affine
+    # Check for degenerate affine.
+    assert np.all(np.isnan(tform.affines[bad_affine_i].params))
     for idx, affine in enumerate(tform.affines):
-        if idx != 4:
+        if idx != bad_affine_i:
             assert not np.all(np.isnan(affine.params))
     for affine in tform.inverse_affines:
         assert not np.all(np.isnan(affine.params))
@@ -1312,7 +1330,7 @@ def test_astronaut_piecewise():
 
     # Transform will fail with strict check for rank deficiency of
     # inverse matrices in ProjectiveTransform.estimate.
-    assert PiecewiseAffineTransform.from_estimate(src, dst) is not None
+    assert PiecewiseAffineTransform.from_estimate(src, dst)
 
 
 def test_broadcasting():

@@ -479,7 +479,7 @@ def _deprecate_estimate_method(cls):
     """
 
     def estimate(self, *args, **kwargs):
-        return self._estimate(*args, **kwargs)
+        return self._estimate(*args, **kwargs) is None
 
     estimate.__doc__ = _replace_estimate_returns(cls.from_estimate.__doc__)
     estimate.__signature__ = inspect.signature(cls.from_estimate)
