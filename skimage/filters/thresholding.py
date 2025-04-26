@@ -319,59 +319,15 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
     )
 
 
-# Computing a histogram using np.histogram on a uint8 image with bins=256
-# doesn't work and results in aliasing problems. We use a fully specified set
-# of bins to ensure that each uint8 value false into its own bin.
-_DEFAULT_ENTROPY_BINS = tuple(np.arange(-0.5, 255.51, 1))
-
-
-def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
-    """Compute cross-entropy between distributions above and below a threshold.
-
-    Parameters
-    ----------
-    image : array
-        The input array of values.
-    threshold : float
-        The value dividing the foreground and background in ``image``.
-    bins : int or array of float, optional
-        The number of bins or the bin edges. (Any valid value to the ``bins``
-        argument of ``np.histogram`` will work here.) For an exact calculation,
-        each unique value should have its own bin. The default value for bins
-        ensures exact handling of uint8 images: ``bins=256`` results in
-        aliasing problems due to bin width not being equal to 1.
-
-    Returns
-    -------
-    nu : float
-        The cross-entropy target value as defined in [1]_.
-
-    Notes
-    -----
-    See Li and Lee, 1993 [1]_; this is the objective function ``threshold_li``
-    minimizes. This function can be improved but this implementation most
-    closely matches equation 8 in [1]_ and equations 1-3 in [2]_.
-
-    References
-    ----------
-    .. [1] Li C.H. and Lee C.K. (1993) "Minimum Cross Entropy Thresholding"
-           Pattern Recognition, 26(4): 617-625
-           :DOI:`10.1016/0031-3203(93)90115-D`
-    .. [2] Li C.H. and Tam P.K.S. (1998) "An Iterative Algorithm for Minimum
-           Cross Entropy Thresholding" Pattern Recognition Letters, 18(8): 771-776
-           :DOI:`10.1016/S0167-8655(98)00057-9`
-    """
-    histogram, bin_edges = np.histogram(image, bins=bins, density=True)
-    bin_centers = np.convolve(bin_edges, [0.5, 0.5], mode='valid')
-    t = np.flatnonzero(bin_centers > threshold)[0]
-    m0a = np.sum(histogram[:t])  # 0th moment, background
-    m0b = np.sum(histogram[t:])
-    m1a = np.sum(histogram[:t] * bin_centers[:t])  # 1st moment, background
-    m1b = np.sum(histogram[t:] * bin_centers[t:])
-    mua = m1a / m0a  # mean value, background
-    mub = m1b / m0b
-    nu = -m1a * np.log(mua) - m1b * np.log(mub)
-    return nu
+@deprecate_func(
+    deprecated_version="0.26",
+    removed_version="2.0 (or later)",
+    hint="Use `skimage.segmentation._thresholding_global._cross_entropy` instead",
+)
+def _cross_entropy(image, threshold, bins=_thresholding_global._DEFAULT_ENTROPY_BINS):
+    return _thresholding_global._cross_entropy(
+        image=image, threshold=threshold, bins=bins
+    )
 
 
 @deprecate_func(

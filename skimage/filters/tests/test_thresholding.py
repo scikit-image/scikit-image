@@ -40,7 +40,9 @@ from skimage.segmentation._thresholding_local import _mean_std
 
 
 pytestmark = pytest.mark.filterwarnings(
-    r"ignore:.*(threshold_|try_all).* is deprecated since version 0\.26:FutureWarning"
+    "ignore:"
+    r".*(threshold_|try_all|_cross_entropy).* is deprecated since version 0\.26:"
+    "FutureWarning"
 )
 
 
