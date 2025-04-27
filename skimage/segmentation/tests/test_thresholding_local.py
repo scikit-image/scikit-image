@@ -7,7 +7,6 @@ from skimage.segmentation import (
     threshold_local,
     threshold_local_niblack,
     threshold_local_sauvola,
-    threshold_labels_hysteresis,
 )
 from skimage._shared.utils import _supported_float_type
 
@@ -263,3 +262,8 @@ class Test_threshold_local_sauvola:
         value = 0.03082192 + 2.19178082e-09
         src_img = np.full((4, 4), value).astype(np.float64)
         assert not np.any(np.isnan(threshold_local_sauvola(src_img)))
+
+
+class Test_threshold_labels_hysteresis:
+    # TODO add more tests since currently only a simple doctest exists
+    pass
