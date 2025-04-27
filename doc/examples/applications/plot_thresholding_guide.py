@@ -215,7 +215,7 @@ ax[2].set_title('Original >= Local Otsu')
 ax[2].set_axis_off()
 
 ax[3].imshow(global_otsu, cmap=plt.cm.gray)
-ax[3].set_title('Global Otsu (threshold = {threshold_global_otsu})')
+ax[3].set_title(f'Global Otsu (threshold = {threshold_global_otsu})')
 ax[3].set_axis_off()
 
 plt.show()
