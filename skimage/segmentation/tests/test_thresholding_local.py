@@ -137,3 +137,66 @@ class Test_threshold_local:
         out = threshold_local(r, block_size=9)
         assert out.dtype == _supported_float_type(dtype)
         assert_allclose(out, expected, rtol=1e-5, atol=1e-5)
+
+
+class Test_threshold_local_niblack:
+    def setup_method(self):
+        self.image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+
+    def test_simple(self):
+        ref = np.array(
+            [
+                [False, False, False, True, True],
+                [False, True, True, True, True],
+                [False, True, True, True, False],
+                [False, True, True, True, True],
+                [True, True, False, False, False],
+            ]
+        )
+        thres = threshold_local_niblack(self.image, window_size=3, k=0.5)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    def test_iterable_window_size(self):
+        ref = np.array(
+            [
+                [False, False, False, True, True],
+                [False, False, True, True, True],
+                [False, True, True, True, False],
+                [False, True, True, True, False],
+                [True, True, False, False, False],
+            ]
+        )
+        thres = threshold_local_niblack(self.image, window_size=[3, 5], k=0.5)
+        out = self.image > thres
+        assert_equal(ref, out)
+
+    @pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
+    def test_dtypes(self, dtype):
+        r = 255 * np.random.rand(32, 16)
+        r = r.astype(dtype, copy=False)
+
+        # use double precision result as a reference
+        expected = threshold_local_niblack(r.astype(float))
+
+        out = threshold_local_niblack(r)
+        assert out.dtype == _supported_float_type(dtype)
+        assert_allclose(out, expected, rtol=1e-5, atol=1e-5)
+
+    def test_pathological_image(self):
+        # For certain values, floating point error can cause
+        # E(X^2) - (E(X))^2 to be negative, and taking the square root of this
+        # resulted in NaNs. Here we check that these are safely caught.
+        # see https://github.com/scikit-image/scikit-image/issues/3007
+        value = 0.03082192 + 2.19178082e-09
+        src_img = np.full((4, 4), value).astype(np.float64)
+        assert not np.any(np.isnan(threshold_local_niblack(src_img)))
