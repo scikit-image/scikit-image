@@ -11,6 +11,7 @@ python_sources = [
   'test_quickshift.py',
   'test_random_walker.py',
   'test_slic.py',
+  'test_thresholding_local.py',
   'test_watershed.py'
 ]
 
