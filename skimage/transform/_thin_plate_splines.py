@@ -66,6 +66,28 @@ class ThinPlateSplineTransform:
            [0, 1, 2, 3, 4],
            [0, 1, 2, 3, 4],
            [0, 1, 2, 3, 4]])
+
+    The estimation can fail when calculating scaling for the points - for
+    example, if all the input or output points are the same.  If this happens,
+    you will get a transform for which ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tps)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((4, 2))
+    >>> bad_tps = ski.transform.ThinPlateSplineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tps)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tps.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     def __init__(self):
