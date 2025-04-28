@@ -440,7 +440,7 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-class TransformEstimationError(Exception):
+class UsingFailedEstimationError(AttributeError):
     """Error from use of failed estimation instance
 
     This error arises from attempts to use an instance of
@@ -463,9 +463,23 @@ class FailedEstimation:
     ----------
     message : str
         Message above.
+
+    Raises
+    ------
+    UsingFailedEstimationError
+        Subclass AttributeError that is raised for missing attributes or if
+        the instance is used as a callable.
     """
 
-    error_cls = TransformEstimationError
+    error_cls = UsingFailedEstimationError
+
+    hint = (
+        "You can check for a failed estimation by truth testing the returned "
+        "object. For failed estimations, `bool(estimation_result)` will be `False`. "
+        "E.g.\n\n"
+        "    if not estimation_result:\n"
+        "        # handle failed estimation..."
+    )
 
     def __init__(self, message):
         self.message = message
@@ -473,16 +487,25 @@ class FailedEstimation:
     def __bool__(self):
         return False
 
+    def __repr__(self):
+        return f"{type(self).__name__}({self.message!r})"
+
     def __str__(self):
         return self.message
 
     def __call__(self, *args, **kwargs):
-        raise self.error_cls(f'Call on failed estimation: {self.message}')
+        msg = (
+            f'{type(self).__name__} is not callable. {self.message}\n\n'
+            f'Hint: {self.hint}'
+        )
+        raise self.error_cls(msg)
 
     def __getattr__(self, name):
-        raise self.error_cls(
-            f'No attribute "{name}" for failed estimation: {self.message}'
+        msg = (
+            f'{type(self).__name__} has no attribute {name!r}. {self.message}\n\n'
+            f'Hint: {self.hint}'
         )
+        raise self.error_cls(msg)
 
 
 @contextmanager
