@@ -928,14 +928,9 @@ def test_identical_fundamental(tform_class):
     bad_src = np.ones((8, 2))
     bad_tform = tform_class.from_estimate(bad_src, DST)
     assert not bad_tform
-    with pytest.raises(
-        UsingFailedEstimationError,
-        match=(
-            'No attribute "params" for failed estimation: '
-            f'{tform_class.__name__}: Scaling failed '
-            'for input points'
-        ),
-    ):
+
+    regex = "has no attribute 'params'.*Scaling failed for input points"
+    with pytest.raises(UsingFailedEstimationError, match=regex):
         bad_tform.params
 
 
