@@ -717,14 +717,16 @@ def _fix_inherited_from_estimate(cls):
     class method.
     """
 
-    def from_estimate(self, *args, **kwargs):
-        return super().from_estimate(*args, **kwargs) is None
-
     inherited_cmeth = getattr(cls, 'from_estimate')
-    inherited_class_name = inherited_cmeth.__qualname__.split('.')[0]
+
+    def from_estimate(cls, *args, **kwargs):
+        return inherited_cmeth(*args, **kwargs)
+
+    inherited_class_name = inherited_cmeth.__qualname__.split('.')[-2]
 
     from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
-        inherited_class_name, cls.__name__)
+        inherited_class_name, cls.__name__
+    )
     from_estimate.__signature__ = inspect.signature(inherited_cmeth)
 
     cls.from_estimate = classmethod(from_estimate)
