@@ -710,6 +710,27 @@ def _deprecate_inherited_estimate(cls):
     return cls
 
 
+def _fix_inherited_from_estimate(cls):
+    """Fix docstring for inherited ``from_estimate`` class method.
+
+    This needs a class decorator so we can modify the docstring of the new
+    class method.
+    """
+
+    def from_estimate(self, *args, **kwargs):
+        return super().from_estimate(*args, **kwargs) is None
+
+    inherited_cmeth = getattr(cls, 'from_estimate')
+    inherited_class_name = inherited_cmeth.__qualname__.split('.')[0]
+
+    from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
+        inherited_class_name, cls.__name__)
+    from_estimate.__signature__ = inspect.signature(inherited_cmeth)
+
+    cls.from_estimate = classmethod(from_estimate)
+    return cls
+
+
 def get_bound_method_class(m):
     """Return the class for a bound method."""
     return m.im_class if sys.version < '3' else m.__self__.__class__
