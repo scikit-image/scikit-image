@@ -1,10 +1,9 @@
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD, _deprecate_estimate_method, FailedEstimation
+from .._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
 
 
-@_deprecate_estimate_method
 class ThinPlateSplineTransform:
     """Thin-plate spline transformation.
 
@@ -191,3 +190,25 @@ class ThinPlateSplineTransform:
         r_sq = r**2
         U = np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
         return U
+
+    @_deprecate_estimate
+    def estimate(self, src, dst):
+        """Estimate optimal spline mappings between source and destination points.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Control points at source coordinates.
+        dst : (N, 2) array_like
+            Control points at destination coordinates.
+
+        Returns
+        -------
+        success: bool
+            True indicates that the estimation was successful.
+
+        Notes
+        -----
+        The number N of source and destination points must match.
+        """
+        return self._estimate(src, dst) is None
