@@ -11,6 +11,7 @@ from scipy import spatial
 from .._shared.utils import (
     safe_as_int,
     _deprecate_estimate,
+    _fix_inherited_from_estimate,
     _deprecate_inherited_estimate,
     FailedEstimation,
 )
@@ -318,7 +319,7 @@ class _GeometricTransform(ABC):
 
             .. code-block:: python
 
-                tf = TransformClass.from_estimation(...)
+                tf = TransformClass.from_estimate(...)
                 if not tf:
                     # Handle failed estimation
         """
@@ -586,9 +587,17 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Returns
         -------
-        tf : :class:`FundamentalMatrixTransform` instance
-            Transform estimated from `src` and `dst`
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
 
+            .. code-block:: python
+
+                tf = FundamentalMatrixTransform.from_estimate(...)
+                if not tf:
+                    # Handle failed estimation
         Raises
         ------
         ValueError
@@ -814,8 +823,22 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Returns
         -------
-        tf : :class:`EssentialMatrixTransform` instance
-            Transform estimated from `src` and `dst`
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = EssentialMatrixTransform.from_estimate(...)
+                if not tf:
+                    # Handle failed estimation
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
 
         """
         return super().from_estimate(src, dst)
@@ -1056,9 +1079,17 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Returns
         -------
-        tf : {:class:`ProjectiveTransform` instance, None}
-            Transform estimated from `src` and `dst`, with optional `weights`,
-            unless estimation fails, in which case return None
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = ProjectiveTransform.from_estimate(...)
+                if not tf:
+                    # Handle failed estimation
 
         """
         return super().from_estimate(src, dst, weights)
@@ -1238,6 +1269,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return self._estimate(src, dst, weights) is None
 
 
+@_fix_inherited_from_estimate
 @_deprecate_inherited_estimate
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
@@ -1559,9 +1591,17 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Returns
         -------
-        tf : {:class:`ProjectiveTransform` instance, None}
-            Transform estimated from `src` and `dst`, with optional `weights`,
-            unless estimation fails, in which case return None
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PiecewiseAffineTransform.from_estimate(...)
+                if not tf:
+                    # Handle failed estimation
 
         """
         return super().from_estimate(src, dst)
@@ -1906,7 +1946,7 @@ class EuclideanTransform(ProjectiveTransform):
 
             .. code-block:: python
 
-                tf = TransformClass.from_estimation(...)
+                tf = EuclideanTransform.from_estimate(...)
                 if not tf:
                     # Handle failed estimation
         """
@@ -1965,6 +2005,7 @@ class EuclideanTransform(ProjectiveTransform):
         return self._estimate(src, dst) is None
 
 
+@_fix_inherited_from_estimate
 @_deprecate_inherited_estimate
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
@@ -2274,9 +2315,17 @@ class PolynomialTransform(_GeometricTransform):
 
         Returns
         -------
-        tf : {:class:`PolynomialTransform` instance, None}
-            Transform estimated from `src` and `dst`, with optional `order` and
-            `weights`, unless estimation fails, in which case return None
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PolynomialTransform.from_estimate(...)
+                if not tf:
+                    # Handle failed estimation
 
         """
         return super().from_estimate(src, dst, order, weights)
@@ -2483,9 +2532,17 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tform : :class:`_GeometricTransform`
-        Transform object containing the transformation parameters and providing
-        access to forward and inverse transformation functions.
+    tf : :class:`_GeometricTransform` or ``FailedEstimation``
+        An instance of the requested transformation if the estimation
+        succeeded. Otherwise, a sentinel object will be returned and signal a
+        failed estimation. Testing the truth value of the failed estimation
+        sentinel will return ``False``. E.g.
+
+        .. code-block:: python
+
+            tf = estimate_transform(...)
+            if not tf:
+                # Handle failed estimation
 
     Examples
     --------
