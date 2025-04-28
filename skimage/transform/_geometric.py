@@ -489,7 +489,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
       ...
-    TransformEstimationError: No attribute "params" for failed estimation ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     def __call__(self, coords):
@@ -735,6 +735,27 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
+    The estimation can fail when calculating scaling for the points - for
+    example, if all the input or output points are the same.  If this happens,
+    you will get a transform for which ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.EssentialMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     # Threshold for determinant of rotation matrix.
@@ -877,6 +898,60 @@ class ProjectiveTransform(_HMatrixTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.ProjectiveTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.ProjectiveTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ -16.56,    5.82,  895.81],
+    ...                            [ -10.31,   -8.29, 2075.43],
+    ...                            [  -0.05,    0.02,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail when — for example — all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.ProjectiveTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     @property
@@ -1244,9 +1319,25 @@ class AffineTransform(ProjectiveTransform):
     --------
     >>> import numpy as np
     >>> import skimage as ski
-    >>> img = ski.data.astronaut()
 
-    Define source and destination points:
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.AffineTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.AffineTransform(scale=4, rotation=0.2)
+    >>> np.round(tform.params, 2)
+    array([[ 3.92, -0.79,  0.  ],
+           [ 0.79,  3.92,  0.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
 
     >>> src = np.array([[150, 150],
     ...                 [250, 100],
@@ -1254,14 +1345,38 @@ class AffineTransform(ProjectiveTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-
-    Estimate the transformation matrix:
-
     >>> tform = ski.transform.AffineTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[   0.5,   -1. ,  275. ],
+    ...                            [   1.5,    4. , -625. ],
+    ...                            [   0. ,    0. ,    1. ]])
+    True
 
-    Apply the transformation:
+    Apply the transformation to some image data.
 
+    >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail when — for example — all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.AffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
 
     References
     ----------
@@ -1365,6 +1480,62 @@ class PiecewiseAffineTransform(_GeometricTransform):
     inverse_affines : list of AffineTransform objects
         Inverse affine transformations for each triangle in the mesh.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PiecewiseAffineTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> np.allclose(tform(src), dst)
+    True
+
+    You can apply the inverse transform:
+
+    >>> np.allclose(tform.inverse(dst), src)
+    True
+
+    The estimation can fail when — for example — all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with some identical points.
+    >>> bad_src = [[1, 1]] * 6 + src[6:]
+    >>> bad_tform = ski.transform.PiecewiseAffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     def __init__(self):
@@ -1593,6 +1764,70 @@ class EuclideanTransform(ProjectiveTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.EuclideanTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.EuclideanTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.EuclideanTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 0.99, 0.12,  16.77],
+    ...                            [-0.12, 0.99, 122.91],
+    ...                            [ 0.  , 0.  ,   1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail when — for example — all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.EuclideanTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
@@ -1780,6 +2015,69 @@ class SimilarityTransform(EuclideanTransform):
     params : (dim+1, dim+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.SimilarityTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.SimilarityTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.SimilarityTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 1.79, 0.21, -142.86],
+    ...                            [-0.21, 1.79,   21.43],
+    ...                            [ 0.  , 0.  ,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail when — for example — all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.SimilarityTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
     """
 
     # Whether to estimate scale during estimation.
@@ -1871,6 +2169,43 @@ class PolynomialTransform(_GeometricTransform):
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PolynomialTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> pts = tform(src)
+    >>> np.allclose(pts, [[   7.54,   12.27],
+    ...                   [   2.98, 5796.95],
+    ...                   [4870.44, 5766.59],
+    ...                   [4889.72,   -6.72],
+    ...                   [4515.62, 4617.5 ],
+    ...                   [1183.25, 3694.  ],
+    ...                   [3767.57,  800.53],
+    ...                   [ 998.02, 1881.97]], atol=0.01)
+    True
     """
 
     def __init__(self, params=None, *, dimensionality=None):
@@ -2179,6 +2514,28 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     >>> tform3 = tform + tform2
     >>> np.allclose(tform3(src), tform2(tform(src)))
     True
+
+    The estimation can fail for some transforms when — for example — all the
+    input or output points are the same.  If this happens, you will get a
+    transform for which ``bool(tform)`` is ``False``:
+
+    >>> # bool on a successful transform (as above) gives True:
+    >>> bool(tform)
+    True
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((2, 2))
+    >>> bad_tform = ski.transform.estimate_transform('similarity',
+    ...                                              bad_src, dst)
+    >>> bool(bad_tform)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "params" for failed estimation ...
 
     """
     ttype = ttype.lower()
