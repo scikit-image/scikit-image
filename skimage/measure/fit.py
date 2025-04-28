@@ -323,6 +323,27 @@ class CircleModel(BaseModel):
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get a circl model for which
+    ``bool(model)`` is ``False``:
+
+    >>> # bool on a successful model (as above) gives True:
+    >>> bool(model)
+    True
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_model = CircleModel.from_estimate(bad_data)
+    >>> bool(bad_model)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_model.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "residuals" for failed estimation ...
     """
 
     @classmethod
@@ -502,6 +523,27 @@ class EllipseModel(BaseModel):
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get a ellipse model for
+    which ``bool(model)`` is ``False``:
+
+    >>> # bool on a successful model (as above) gives True:
+    >>> bool(ellipse)
+    True
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_ellipse = EllipseModel.from_estimate(bad_data)
+    >>> bool(bad_ellipse)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_ellipse.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    UsingFailedEstimationError: No attribute "residuals" for failed estimation ...
     """
 
     @classmethod
