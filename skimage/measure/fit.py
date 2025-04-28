@@ -7,7 +7,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import _deprecate_estimate_method, FailedEstimation
+from .._shared.utils import _deprecate_estimate, FailedEstimation
 
 _EPSILON = np.spacing(1)
 
@@ -59,7 +59,6 @@ def _warn_or_msg(msg, warn_only=True):
     return None
 
 
-@_deprecate_estimate_method
 class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
@@ -253,8 +252,26 @@ class LineModelND(BaseModel):
         y = self.predict(x, axis=0, params=params)[:, 1]
         return y
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate line model from data.
 
-@_deprecate_estimate_method
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimensionality dim >= 2.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+        """
+        return self._estimate(data) is None
+
+
 class CircleModel(BaseModel):
     """Total least squares estimator for 2D circles.
 
@@ -413,8 +430,24 @@ class CircleModel(BaseModel):
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate circle model from data using total least squares.
 
-@_deprecate_estimate_method
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        return self._estimate(data) is None
+
+
 class EllipseModel(BaseModel):
     """Total least squares estimator for 2D ellipses.
 
@@ -682,6 +715,31 @@ class EllipseModel(BaseModel):
         y = yc + a * stheta * ct + b * ctheta * st
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
+
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate ellipse model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+
+        References
+        ----------
+        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
+               fitting of ellipses". In Proc. 6th International Conference in
+               Central Europe on Computer Graphics and Visualization.
+               WSCG (Vol. 98, pp. 125-132).
+
+        """
+        return self._estimate(data) is None
 
 
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
