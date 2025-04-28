@@ -40,7 +40,7 @@ camera = data.camera()
 # image at all possible thresholds.
 
 thresholds = np.arange(np.min(camera) + 1.5, np.max(camera) - 1.5)
-entropies = [_cross_entropy(camera, t) for t in thresholds]
+entropies = [_cross_entropy(camera, threshold=t) for t in thresholds]
 
 optimal_camera_threshold = thresholds[np.argmin(entropies)]
 
@@ -80,7 +80,7 @@ iter_thresholds = []
 optimal_threshold = segmentation.threshold_li(
     camera, iter_callback=iter_thresholds.append
 )
-iter_entropies = [_cross_entropy(camera, t) for t in iter_thresholds]
+iter_entropies = [_cross_entropy(camera, threshold=t) for t in iter_thresholds]
 
 print('Only', len(iter_thresholds), 'thresholds examined.')
 
@@ -107,8 +107,8 @@ opt_threshold2 = segmentation.threshold_li(
 )
 
 thresholds2 = np.arange(np.min(cell) + 1.5, np.max(cell) - 1.5)
-entropies2 = [_cross_entropy(cell, t) for t in thresholds]
-iter_entropies2 = [_cross_entropy(cell, t) for t in iter_thresholds2]
+entropies2 = [_cross_entropy(cell, threshold=t) for t in thresholds]
+iter_entropies2 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds2]
 
 fig, ax = plt.subplots(1, 3, figsize=(8, 3))
 
@@ -137,7 +137,7 @@ iter_thresholds3 = []
 
 opt_threshold3 = segmentation.threshold_li(cell, iter_callback=iter_thresholds3.append)
 
-iter_entropies3 = [_cross_entropy(cell, t) for t in iter_thresholds3]
+iter_entropies3 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds3]
 
 fig, ax = plt.subplots(1, 3, figsize=(8, 3))
 
@@ -184,7 +184,7 @@ iter_thresholds4 = []
 opt_threshold4 = segmentation.threshold_li(
     cell, initial_guess=68, iter_callback=iter_thresholds4.append
 )
-iter_entropies4 = [_cross_entropy(cell, t) for t in iter_thresholds4]
+iter_entropies4 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds4]
 print(len(iter_thresholds4), 'examined, optimum:', opt_threshold4)
 
 gradients = [li_gradient(cell, t) for t in thresholds2]
@@ -233,7 +233,7 @@ iter_thresholds5 = []
 opt_threshold5 = segmentation.threshold_li(
     cell, initial_guess=quantile_95, iter_callback=iter_thresholds5.append
 )
-iter_entropies5 = [_cross_entropy(cell, t) for t in iter_thresholds5]
+iter_entropies5 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds5]
 print(len(iter_thresholds5), 'examined, optimum:', opt_threshold5)
 
 fig, ax1 = plt.subplots()

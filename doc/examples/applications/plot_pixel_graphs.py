@@ -61,7 +61,7 @@ _ = axes[1].set_title('Sato vesselness')
 # `hysteresis thresholding <skimage.segmentation.threshold_labels_hysteresis>` to
 # define the main vessels.
 
-thresholded = ski.segmentation.threshold_labels_hysteresis(vessels, 0.01, 0.03)
+thresholded = ski.segmentation.threshold_labels_hysteresis(vessels, low=0.01, high=0.03)
 labeled = ndi.label(thresholded)[0]
 
 _, ax = plt.subplots()

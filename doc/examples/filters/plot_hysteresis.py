@@ -27,7 +27,7 @@ high = 0.35
 
 lowt = (edges > low).astype(int)
 hight = (edges > high).astype(int)
-hyst = segmentation.threshold_labels_hysteresis(edges, low, high)
+hyst = segmentation.threshold_labels_hysteresis(edges, low=low, high=high)
 
 ax[0, 0].imshow(image, cmap='gray')
 ax[0, 0].set_title('Original image')

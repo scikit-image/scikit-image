@@ -156,7 +156,7 @@ global_thresh = ski.segmentation.threshold_otsu(image)
 binary_global = image > global_thresh
 
 block_size = 35
-local_thresh = ski.segmentation.threshold_local(image, block_size, offset=10)
+local_thresh = ski.segmentation.threshold_local(image, block_size=block_size, offset=10)
 binary_local = image > local_thresh
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))

@@ -5,7 +5,6 @@ import pytest
 from numpy.testing import (
     assert_allclose,
     assert_almost_equal,
-    assert_array_equal,
     assert_equal,
 )
 from scipy import ndimage as ndi
@@ -13,7 +12,6 @@ from scipy import ndimage as ndi
 from skimage import data, util
 from skimage._shared._dependency_checks import has_mpl
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
@@ -25,13 +23,10 @@ from skimage.filters.thresholding import (
     _cross_entropy,
     threshold_isodata,
     threshold_li,
-    threshold_local,
     threshold_mean,
     threshold_minimum,
     threshold_multiotsu,
-    threshold_niblack,
     threshold_otsu,
-    threshold_sauvola,
     threshold_triangle,
     threshold_yen,
     try_all_threshold,
@@ -145,150 +140,6 @@ class TestSimpleImage:
         imfloat = np.random.rand(256, 256)
         assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
         assert all(0.49 < threshold_isodata(imfloat, nbins=1024, return_all=True))
-
-    @pytest.mark.parametrize('ndim', [2, 3])
-    def test_threshold_local_gaussian(self, ndim):
-        ref = np.array(
-            [
-                [False, False, False, False, True],
-                [False, False, True, False, True],
-                [False, False, True, True, False],
-                [False, True, True, False, False],
-                [True, True, False, False, False],
-            ]
-        )
-        if ndim == 2:
-            image = self.image
-            block_sizes = [3, (3,) * image.ndim]
-        else:
-            image = np.stack((self.image,) * 5, axis=-1)
-            ref = np.stack((ref,) * 5, axis=-1)
-            block_sizes = [3, (3,) * image.ndim, (3,) * (image.ndim - 1) + (1,)]
-
-        for block_size in block_sizes:
-            out = threshold_local(image, block_size, method='gaussian', mode='reflect')
-            assert_equal(ref, image > out)
-
-        out = threshold_local(image, 3, method='gaussian', mode='reflect', param=1 / 3)
-        assert_equal(ref, image > out)
-
-    @pytest.mark.parametrize('ndim', [2, 3])
-    def test_threshold_local_mean(self, ndim):
-        ref = np.array(
-            [
-                [False, False, False, False, True],
-                [False, False, True, False, True],
-                [False, False, True, True, False],
-                [False, True, True, False, False],
-                [True, True, False, False, False],
-            ]
-        )
-        if ndim == 2:
-            image = self.image
-            block_sizes = [3, (3,) * image.ndim]
-        else:
-            image = np.stack((self.image,) * 5, axis=-1)
-            ref = np.stack((ref,) * 5, axis=-1)
-            # Given the same data at each z location, the following block sizes
-            # will all give an equivalent result.
-            block_sizes = [3, (3,) * image.ndim, (3,) * (image.ndim - 1) + (1,)]
-        for block_size in block_sizes:
-            out = threshold_local(image, block_size, method='mean', mode='reflect')
-            assert_equal(ref, image > out)
-
-    @pytest.mark.parametrize('block_size', [(3,), (3, 3, 3)])
-    def test_threshold_local_invalid_block_size(self, block_size):
-        # len(block_size) != image.ndim
-        with pytest.raises(ValueError):
-            threshold_local(self.image, block_size, method='mean')
-
-    @pytest.mark.parametrize('ndim', [2, 3])
-    def test_threshold_local_median(self, ndim):
-        ref = np.array(
-            [
-                [False, False, False, False, True],
-                [False, False, True, False, False],
-                [False, False, True, False, False],
-                [False, False, True, True, False],
-                [False, True, False, False, False],
-            ]
-        )
-        if ndim == 2:
-            image = self.image
-        else:
-            image = np.stack((self.image,) * 5, axis=-1)
-            ref = np.stack((ref,) * 5, axis=-1)
-        out = threshold_local(image, 3, method='median', mode='reflect')
-        assert_equal(ref, image > out)
-
-    def test_threshold_local_median_constant_mode(self):
-        out = threshold_local(self.image, 3, method='median', mode='constant', cval=20)
-        expected = np.array(
-            [
-                [20.0, 1.0, 3.0, 4.0, 20.0],
-                [1.0, 1.0, 3.0, 4.0, 4.0],
-                [2.0, 2.0, 4.0, 4.0, 4.0],
-                [4.0, 4.0, 4.0, 1.0, 2.0],
-                [20.0, 5.0, 5.0, 2.0, 20.0],
-            ]
-        )
-        assert_equal(expected, out)
-
-    def test_threshold_niblack(self):
-        ref = np.array(
-            [
-                [False, False, False, True, True],
-                [False, True, True, True, True],
-                [False, True, True, True, False],
-                [False, True, True, True, True],
-                [True, True, False, False, False],
-            ]
-        )
-        thres = threshold_niblack(self.image, window_size=3, k=0.5)
-        out = self.image > thres
-        assert_equal(ref, out)
-
-    def test_threshold_sauvola(self):
-        ref = np.array(
-            [
-                [False, False, False, True, True],
-                [False, False, True, True, True],
-                [False, False, True, True, False],
-                [False, True, True, True, False],
-                [True, True, False, False, False],
-            ]
-        )
-        thres = threshold_sauvola(self.image, window_size=3, k=0.2, r=128)
-        out = self.image > thres
-        assert_equal(ref, out)
-
-    def test_threshold_niblack_iterable_window_size(self):
-        ref = np.array(
-            [
-                [False, False, False, True, True],
-                [False, False, True, True, True],
-                [False, True, True, True, False],
-                [False, True, True, True, False],
-                [True, True, False, False, False],
-            ]
-        )
-        thres = threshold_niblack(self.image, window_size=[3, 5], k=0.5)
-        out = self.image > thres
-        assert_array_equal(ref, out)
-
-    def test_threshold_sauvola_iterable_window_size(self):
-        ref = np.array(
-            [
-                [False, False, False, True, True],
-                [False, False, True, True, True],
-                [False, False, True, True, False],
-                [False, True, True, True, False],
-                [True, True, False, False, False],
-            ]
-        )
-        thres = threshold_sauvola(self.image, window_size=(3, 5), k=0.2, r=128)
-        out = self.image > thres
-        assert_array_equal(ref, out)
 
 
 def test_otsu_camera_image():
@@ -467,12 +318,6 @@ def test_yen_coins_image():
 def test_yen_coins_image_as_float():
     coins = util.img_as_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
-
-
-def test_local_even_block_size_error():
-    img = data.camera()
-    with pytest.raises(ValueError):
-        threshold_local(img, block_size=4)
 
 
 def test_isodata_camera_image():
@@ -715,39 +560,6 @@ def test_mean_std_3d(window_size, mean_kernel):
     assert_allclose(m, expected_m)
     expected_s = ndi.generic_filter(image, np.std, size=window_size, mode='mirror')
     assert_allclose(s, expected_s)
-
-
-@pytest.mark.parametrize(
-    "threshold_func",
-    [threshold_local, threshold_niblack, threshold_sauvola],
-)
-@pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
-def test_variable_dtypes(threshold_func, dtype):
-    r = 255 * np.random.rand(32, 16)
-    r = r.astype(dtype, copy=False)
-
-    kwargs = {}
-    if threshold_func is threshold_local:
-        kwargs = dict(block_size=9)
-    elif threshold_func is threshold_sauvola:
-        kwargs = dict(r=128)
-
-    # use double precision result as a reference
-    expected = threshold_func(r.astype(float), **kwargs)
-
-    out = threshold_func(r, **kwargs)
-    assert out.dtype == _supported_float_type(dtype)
-    assert_allclose(out, expected, rtol=1e-5, atol=1e-5)
-
-
-def test_niblack_sauvola_pathological_image():
-    # For certain values, floating point error can cause
-    # E(X^2) - (E(X))^2 to be negative, and taking the square root of this
-    # resulted in NaNs. Here we check that these are safely caught.
-    # see https://github.com/scikit-image/scikit-image/issues/3007
-    value = 0.03082192 + 2.19178082e-09
-    src_img = np.full((4, 4), value).astype(np.float64)
-    assert not np.any(np.isnan(threshold_niblack(src_img)))
 
 
 def test_bimodal_multiotsu_hist():
