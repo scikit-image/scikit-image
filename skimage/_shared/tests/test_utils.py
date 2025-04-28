@@ -1,3 +1,4 @@
+import re
 import sys
 import warnings
 
@@ -14,7 +15,7 @@ from skimage._shared.utils import (
     deprecate_func,
     deprecate_parameter,
     DEPRECATED,
-    TransformEstimationError,
+    UsingFailedEstimationError,
     FailedEstimation,
 )
 
@@ -525,13 +526,15 @@ def test_failed_estimation():
     fe = FailedEstimation(msg)
     assert fe.message == msg
     assert str(fe) == msg
+    assert repr(fe).startswith("FailedEstimation(")
     assert bool(fe) is False
-    with pytest.raises(
-        TransformEstimationError, match=f'Call on failed estimation: {msg}'
-    ):
+
+    regex = re.compile('FailedEstimation is not callable.*Hint', flags=re.DOTALL)
+    with pytest.raises(UsingFailedEstimationError, match=regex):
         fe(np.ones((10, 2)))
-    with pytest.raises(
-        TransformEstimationError,
-        match=f'No attribute "params" for failed estimation: {msg}',
-    ):
+
+    regex = re.compile(
+        "FailedEstimation has no attribute 'params'.*Hint", flags=re.DOTALL
+    )
+    with pytest.raises(UsingFailedEstimationError, match=regex):
         fe.params
