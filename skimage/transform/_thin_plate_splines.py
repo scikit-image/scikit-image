@@ -1,3 +1,5 @@
+from typing import Self
+
 import numpy as np
 from scipy.spatial import distance_matrix
 
@@ -106,7 +108,7 @@ class ThinPlateSplineTransform:
         raise NotImplementedError("Not supported")
 
     @classmethod
-    def from_estimate(cls, src, dst):
+    def from_estimate(cls, src, dst) -> Self | FailedEstimation:
         """Estimate optimal spline mappings between source and destination points.
 
         Parameters
@@ -118,8 +120,17 @@ class ThinPlateSplineTransform:
 
         Returns
         -------
-        tform : :class:`ThinPlateSpline` instance or None
-            Model instance if estimation succeeds, None otherwise.
+        tform : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testingn the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tform = ThinPlateSplineTransform.from_estimation(...)
+                if not tform:
+                    # Handle failed estimation
 
         Notes
         -----

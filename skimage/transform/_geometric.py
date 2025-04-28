@@ -2,6 +2,7 @@ from copy import copy
 import math
 import textwrap
 from abc import ABC, abstractmethod
+from typing import Self
 import warnings
 
 import numpy as np
@@ -293,7 +294,7 @@ class _GeometricTransform(ABC):
         return cls.identity(src.shape[1]), src, dst
 
     @classmethod
-    def from_estimate(cls, src, dst, *args, **kwargs):
+    def from_estimate(cls, src, dst, *args, **kwargs) -> Self | FailedEstimation:
         r"""Estimate transform.
 
         Parameters
@@ -309,15 +310,23 @@ class _GeometricTransform(ABC):
 
         Returns
         -------
-        tf : Transform instance or :class:`FailedEstimation` instance.
-            Transform estimated from `src` and `dst`, or
-            :class:`FailedEstimation` if transform cannot be estimated.
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = TransformClass.from_estimation(...)
+                if not tf:
+                    # Handle failed estimation
         """
         return _from_estimate(cls, src, dst, *args, **kwargs)
 
 
 def _from_estimate(cls, src, dst, *args, **kwargs):
-    """Detached function for from_estimate bas implementation."""
+    """Detached function for from_estimate base implementation."""
     tf, src, dst = cls._prepare_estimation(src, dst)
     msg = tf._estimate(src, dst, *args, **kwargs)
     return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
@@ -1637,7 +1646,7 @@ class EuclideanTransform(ProjectiveTransform):
         return matrix
 
     @classmethod
-    def from_estimate(cls, src, dst):
+    def from_estimate(cls, src, dst) -> Self | FailedEstimation:
         """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
@@ -1654,9 +1663,17 @@ class EuclideanTransform(ProjectiveTransform):
 
         Returns
         -------
-        tf : {transform instance, None}
-            Transform estimated from `src` and `dst`, with optional `weights`,
-            unless estimation fails, in which case return None
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = TransformClass.from_estimation(...)
+                if not tf:
+                    # Handle failed estimation
         """
         # Use base implementation to avoid weights argument of
         # ProjectiveTransform ancestor class.
