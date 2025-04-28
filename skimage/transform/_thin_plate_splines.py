@@ -67,9 +67,9 @@ class ThinPlateSplineTransform:
            [0, 1, 2, 3, 4],
            [0, 1, 2, 3, 4]])
 
-    The estimation can fail when calculating scaling for the points - for
-    example, if all the input or output points are the same.  If this happens,
-    you will get a transform for which ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform for which
+    ``bool(tform)`` is ``False``:
 
     >>> # bool on a successful transform (as above) gives True:
     >>> bool(tps)
