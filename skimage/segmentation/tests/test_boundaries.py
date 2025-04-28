@@ -128,8 +128,8 @@ def test_mark_boundaries_subpixel(dtype):
         [[0, 0, 0, 0], [0, 0, 5, 0], [0, 1, 5, 0], [0, 0, 5, 0], [0, 0, 0, 0]],
         dtype=np.uint8,
     )
-    np.random.seed(0)
-    image = np.round(np.random.rand(*labels.shape), 2)
+    rng = np.random.RandomState(0)
+    image = np.round(rng.random(labels.shape), 2)
     image = image.astype(dtype, copy=False)
     marked = mark_boundaries(image, labels, color=white, mode='subpixel')
     assert marked.dtype == _supported_float_type(dtype)

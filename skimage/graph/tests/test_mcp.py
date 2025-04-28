@@ -20,6 +20,7 @@ a[1, 1:-1] = 0
 warning_optional = r'|\A\Z'
 
 
+@pytest.mark.thread_unsafe
 def test_basic():
     with expected_warnings(['Upgrading NumPy' + warning_optional]):
         m = mcp.MCP(a, fully_connected=True)
@@ -57,6 +58,7 @@ def test_basic():
     )
 
 
+@pytest.mark.thread_unsafe
 def test_neg_inf():
     expected_costs = np.where(a == 1, np.inf, 0)
     expected_path = [

@@ -532,6 +532,7 @@ def test_ransac_geometric():
     assert np.all(np.nonzero(inliers == False)[0] == outliers)
 
 
+@pytest.mark.thread_unsafe
 def test_ransac_is_data_valid():
     def is_data_valid(data):
         return data.shape[0] > 2
@@ -549,6 +550,7 @@ def test_ransac_is_data_valid():
     assert_equal(inliers, None)
 
 
+@pytest.mark.thread_unsafe
 def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
@@ -661,6 +663,7 @@ def test_ransac_invalid_input():
         ransac(np.zeros((10, 2)), None, min_samples=-1, residual_threshold=0)
 
 
+@pytest.mark.thread_unsafe
 def test_ransac_sample_duplicates():
     class DummyModel:
         """Dummy model to check for duplicates."""
@@ -680,6 +683,7 @@ def test_ransac_sample_duplicates():
         ransac(data, DummyModel, min_samples=3, residual_threshold=0.0, max_trials=10)
 
 
+@pytest.mark.thread_unsafe
 def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
     with expected_warnings(['No inliers found. Model not fitted']):
@@ -694,6 +698,7 @@ def test_ransac_with_no_final_inliers():
     assert model is None
 
 
+@pytest.mark.thread_unsafe
 def test_ransac_non_valid_best_model():
     """Example from GH issue #5572"""
 

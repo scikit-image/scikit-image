@@ -8,6 +8,9 @@ from skimage._shared.testing import fetch
 from skimage.io import imread, imsave, reset_plugins, use_plugin
 
 
+pytestmark = pytest.mark.thread_unsafe
+
+
 @pytest.fixture(autouse=True)
 def _use_tifffile_plugin():
     """Ensure that PIL plugin is used in tests here."""
@@ -36,6 +39,7 @@ def test_imread_multipage_rgb_tif():
     assert img.shape == (2, 10, 10, 3), img.shape
 
 
+@pytest.mark.thread_unsafe
 def test_tifffile_kwarg_passthrough():
     img = imread(fetch('data/multipage.tif'), key=[1], is_ome=True)
     assert img.shape == (15, 10), img.shape
@@ -49,6 +53,7 @@ def test_imread_handle():
     assert_array_almost_equal(img, expected)
 
 
+@pytest.mark.thread_unsafe
 class TestSave:
     def roundtrip(self, dtype, x, use_pathlib=False, **kwargs):
         with NamedTemporaryFile(suffix='.tif') as f:
