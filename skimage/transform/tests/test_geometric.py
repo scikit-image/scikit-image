@@ -28,7 +28,7 @@ from skimage.transform._geometric import (
 )
 from skimage import data
 
-from skimage._shared.utils import TransformEstimationError
+from skimage._shared.utils import UsingFailedEstimationError
 
 SRC = np.array(
     [
@@ -929,7 +929,7 @@ def test_identical_fundamental(tform_class):
     bad_tform = tform_class.from_estimate(bad_src, DST)
     assert not bad_tform
     with pytest.raises(
-        TransformEstimationError,
+        UsingFailedEstimationError,
         match=(
             'No attribute "params" for failed estimation: '
             f'{tform_class.__name__}: Scaling failed '

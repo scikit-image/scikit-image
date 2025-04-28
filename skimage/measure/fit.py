@@ -1,6 +1,6 @@
 from inspect import ismethod
 import math
-from typing import Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable, Self
 from warnings import warn
 
 import numpy as np
@@ -37,7 +37,7 @@ class BaseModel:
         self.params = None
 
     @classmethod
-    def from_estimate(cls, data):
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         tf = cls()
         msg = tf._estimate(data, warn_only=False)
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
@@ -94,7 +94,7 @@ class LineModelND(BaseModel):
     """
 
     @classmethod
-    def from_estimate(cls, data):
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate line model from data.
 
         This minimizes the sum of shortest (orthogonal) distances
@@ -107,8 +107,17 @@ class LineModelND(BaseModel):
 
         Returns
         -------
-        tform : :class:`LineModelND` instance or None
-            Model instance if estimation succeeds, None otherwise.
+        model : Self or ``FailedEstimation``
+            An instance of the line model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                model = LineModelND.from_estimation(...)
+                if not model:
+                    # Handle failed estimation
         """
         return super().from_estimate(data)
 
@@ -317,7 +326,7 @@ class CircleModel(BaseModel):
     """
 
     @classmethod
-    def from_estimate(cls, data):
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate circle model from data using total least squares.
 
         Parameters
@@ -327,9 +336,17 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        tform : :class:`CircleModel` instance or None
-            Model instance if estimation succeeds, None otherwise.
+        model : Self or ``FailedEstimation``
+            An instance of the circle model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
 
+            .. code-block:: python
+
+                model = CircleModel.from_estimation(...)
+                if not model:
+                    # Handle failed estimation
         """
         return super().from_estimate(data)
 
@@ -488,7 +505,7 @@ class EllipseModel(BaseModel):
     """
 
     @classmethod
-    def from_estimate(cls, data):
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate ellipse model from data using total least squares.
 
         Parameters
@@ -498,8 +515,17 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        tform : :class:`EllipseModel` instance or None
-            Model instance if estimation succeeds, None otherwise.
+        model : Self or ``FailedEstimation``
+            An instance of the ellipse model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                model = EllipseModel.from_estimation(...)
+                if not model:
+                    # Handle failed estimation
 
         References
         ----------
