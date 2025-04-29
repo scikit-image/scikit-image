@@ -99,6 +99,15 @@ jobs:
           cache-dependency-path: "requirements/*.txt"
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel
+      - name: Setup free-threaded environment
+        if: endsWith(matrix.cibw_python, 't-*')
+        run: |
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
+          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
+          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
+          echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
       - name: Build the wheel
         run: python -m cibuildwheel --output-dir dist
         env:
@@ -123,7 +132,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-13]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*", "cp313t-*"]
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
@@ -152,6 +161,16 @@ jobs:
           channel-priority: true
           miniforge-variant: Miniforge3
           miniforge-version: latest
+
+      - name: Setup free-threaded environment
+        if: endsWith(matrix.cibw_python, 't-*')
+        run: |
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
+          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
+          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
+          echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
 
       - name: Build wheels for CPython Mac OS
         run: |
@@ -201,7 +220,7 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*", "cp313t-*"]
 
     steps:
       - uses: actions/checkout@v4
@@ -216,9 +235,19 @@ jobs:
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
-      - name: Install cibuildwheel and add clang-cl to path
+      - name: Install cibuildwheel
         run: |
           python -m pip install cibuildwheel
+
+      - name: Setup free-threaded environment
+        if: endsWith(matrix.cibw_python, 't-*')
+        shell: bash
+        run: |
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
+          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
+          echo "PYTHON_GIL=0" >> "$GITHUB_ENV"
 
       - name: Build AMD64 Windows wheels for CPython
         if: matrix.cibw_arch == 'AMD64'
