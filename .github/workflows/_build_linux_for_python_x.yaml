@@ -1,0 +1,69 @@
+name: Build on Linux for a given Python version
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      PIP-FLAGS:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build-skimage-spin:
+    name: linux-cp${{ inputs.python-version }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install ccache
+        run: |
+          sudo apt-get install -y ccache
+          mkdir -p ~/.ccache
+
+      - name: Restore ccache build cache
+        if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
+        uses: actions/cache/restore@v4
+        id: ccache-restore
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-ccache-py${{ inputs.python-version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Install build dependencies
+        env:
+          PIP_FLAGS: ${{ inputs.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build from sdist
+        run: |
+          # Debug build is able to utilize ccache better
+          python -m build --no-isolation --skip-dependency-check -Csetup-args="-Doptimization=2"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skimage-linux-${{ inputs.python-version }}
+          path: ./dist/*.whl
+
+      - name: Ccache statistics
+        run: |
+          ccache -s
+
+      - name: Save ccache build cache
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.ccache
+          key: ${{ steps.ccache-restore.outputs.cache-primary-key }}

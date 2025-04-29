@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   build_linux_wheels:
+    if: false # temporarily disable
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
