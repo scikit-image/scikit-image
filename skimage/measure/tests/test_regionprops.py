@@ -1574,8 +1574,10 @@ def test_deprecated_properties(old_name):
     np.testing.assert_equal(result, regions[0][current_name])
 
     if old_name == old_name.lower():
-        # lower case names in PROPS are still accessible as attributes
-        # Make sure those emit an appropriate warning
+        # Lower-case properties in PROPS – such as "bbox_area" or
+        # "convex_image" – were accessible as attributes in addition to being
+        # available via `__getitem__`.
+        # Make sure those emit an appropriate deprecation warning too
         regex = f"`RegionProperties.{old_name}` is deprecated."
         with pytest.warns(FutureWarning, match=regex) as record:
             result = getattr(regions[0], old_name)

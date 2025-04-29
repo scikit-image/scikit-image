@@ -24,9 +24,8 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
 # All values in this PROPS dict correspond to current scikit-image property
-# names. The keys in this PROPS dict correspond to older names used in prior
-# releases. For backwards compatibility, these older names will continue to
-# work, but will not be documented.
+# names. The keys in this PROPS dict correspond to deprecated names used in
+# prior releases
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
