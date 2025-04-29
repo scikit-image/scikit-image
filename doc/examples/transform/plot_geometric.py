@@ -99,6 +99,24 @@ src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
 dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
 tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
+
+######################################################################
+# For many transform types, including the ``ProjectiveTransform`, it is
+# possible for the estimation process to fail.  If this is the case,
+# ``from_estimate`` returns a special object of type ``FailedEstimation``.
+# If you apply a truth test (e.g. ``bool(tform3)``, ``FailedEstimation``
+# returns False, and this is a good way to check for the failure.  Applying
+# ``str`` to the failed estimation object gives the error message describing
+# the reason for failure.  Putting these together, the following is a typical
+# pattern for using the return value of ``from_estimation``
+
+if not tform3:  # If result is Falsey, we have a failed estimation.
+    raise RuntimeError(f'Failed estimation: {tform3}')
+
+######################################################################
+# In fact, our estimation succeeded, so we can apply it, for example, to the
+# coordinates of an image, using ``transform.warp``.
+
 warped = transform.warp(text, tform3, output_shape=(50, 300))
 
 fig, ax = plt.subplots(nrows=2, figsize=(8, 3))
