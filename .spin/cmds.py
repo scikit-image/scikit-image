@@ -81,3 +81,25 @@ def sdist(pyproject_build_args):
     sdist = os.path.join('dist', built_line.replace('Successfully built ', ''))
     print(f"Validating {sdist}...")
     spin.util.run(["tools/check_sdist.py", sdist])
+
+
+@click.option(
+    "-d",
+    "--with-doctest",
+    is_flag=True,
+    default=False,
+    help="Also run doctests (using doctest-plus)",
+)
+@spin.util.extend_command(spin.cmds.meson.test)
+def test(*, parent_callback, with_doctest=False, **kwargs):
+    pytest_args = kwargs.get('pytest_args', ())
+
+    if with_doctest:
+        if '--doctest-plus' not in pytest_args:
+            pytest_args = ('--doctest-plus',) + pytest_args
+
+    if '--import-mode' not in pytest_args:
+        pytest_args = ('--import-mode=importlib',) + pytest_args
+
+    kwargs["pytest_args"] = pytest_args
+    parent_callback(**kwargs)
