@@ -491,6 +491,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     Traceback (most recent call last):
       ...
     UsingFailedEstimationError: No attribute "params" for failed estimation ...
+
     """
 
     def __call__(self, coords):
@@ -598,6 +599,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
                 tf = FundamentalMatrixTransform.from_estimate(...)
                 if not tf:
                     # Handle failed estimation
+
         Raises
         ------
         ValueError
@@ -1949,6 +1951,7 @@ class EuclideanTransform(ProjectiveTransform):
                 tf = EuclideanTransform.from_estimate(...)
                 if not tf:
                     # Handle failed estimation
+
         """
         # Use base implementation to avoid weights argument of
         # ProjectiveTransform ancestor class.
