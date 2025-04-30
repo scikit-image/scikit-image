@@ -440,7 +440,7 @@ def _docstring_add_deprecated(func, kwarg_mapping, deprecated_version):
     return final_docstring
 
 
-class UsingFailedEstimationError(AttributeError):
+class FailedEstimationAccessError(Exception):
     """Error from use of failed estimation instance
 
     This error arises from attempts to use an instance of
@@ -466,12 +466,12 @@ class FailedEstimation:
 
     Raises
     ------
-    UsingFailedEstimationError
-        Subclass AttributeError that is raised for missing attributes or if
-        the instance is used as a callable.
+    FailedEstimationAccessError
+        Exception raised for missing attributes or if the instance is used as a
+        callable.
     """
 
-    error_cls = UsingFailedEstimationError
+    error_cls = FailedEstimationAccessError
 
     hint = (
         "You can check for a failed estimation by truth testing the returned "

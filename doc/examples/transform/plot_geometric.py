@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import transform
+from skimage.util import FailedEstimationAccessError
 
 ######################################################################
 # Basics
@@ -124,11 +125,11 @@ bad_tform
 
 ######################################################################
 # If you try and use any attributes of this failed estimation, you get
-# a ``UsingFailedEstimationError``. This inherits from ``AttributeError``.
+# a ``FailedEstimationAccessError``.
 
 try:
     bad_tform.params
-except AttributeError as exc:
+except FailedEstimationAccessError as exc:
     print('We got the following error:')
     print(exc)
 
