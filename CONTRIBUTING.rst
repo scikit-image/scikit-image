@@ -284,7 +284,7 @@ Run:
   ``spin test skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
-- Run tests **matching** a specific name:
+- Run tests **matching** a specific expression:
   ``spin test -- -k threshold``
 - Run all tests and **doctests**:
   ``spin test --with-doctest``
