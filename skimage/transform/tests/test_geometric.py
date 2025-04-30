@@ -28,7 +28,7 @@ from skimage.transform._geometric import (
 )
 from skimage import data
 
-from skimage._shared.utils import UsingFailedEstimationError
+from skimage._shared.utils import FailedEstimationAccessError
 
 SRC = np.array(
     [
@@ -930,7 +930,7 @@ def test_identical_fundamental(tform_class):
     assert not bad_tform
 
     regex = "has no attribute 'params'.*Scaling failed for input points"
-    with pytest.raises(UsingFailedEstimationError, match=regex):
+    with pytest.raises(FailedEstimationAccessError, match=regex):
         bad_tform.params
 
 

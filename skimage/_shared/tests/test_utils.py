@@ -15,7 +15,7 @@ from skimage._shared.utils import (
     deprecate_func,
     deprecate_parameter,
     DEPRECATED,
-    UsingFailedEstimationError,
+    FailedEstimationAccessError,
     FailedEstimation,
 )
 
@@ -530,11 +530,11 @@ def test_failed_estimation():
     assert bool(fe) is False
 
     regex = re.compile('FailedEstimation is not callable.*Hint', flags=re.DOTALL)
-    with pytest.raises(UsingFailedEstimationError, match=regex):
+    with pytest.raises(FailedEstimationAccessError, match=regex):
         fe(np.ones((10, 2)))
 
     regex = re.compile(
         "FailedEstimation has no attribute 'params'.*Hint", flags=re.DOTALL
     )
-    with pytest.raises(UsingFailedEstimationError, match=regex):
+    with pytest.raises(FailedEstimationAccessError, match=regex):
         fe.params
