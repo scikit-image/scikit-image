@@ -84,17 +84,16 @@ def sdist(pyproject_build_args):
 
 
 @click.option(
-    "-d",
-    "--with-doctest",
-    is_flag=True,
-    default=False,
-    help="Also run doctests (using doctest-plus)",
+    "--doctest/--no-doctest",
+    default=True,
+    help="Run doctests with doctest-plus "
+    "(sets `--import-mode=importlib` unless specified explicitly)",
 )
 @spin.util.extend_command(spin.cmds.meson.test)
-def test(*, parent_callback, with_doctest=False, **kwargs):
+def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
 
-    if with_doctest:
+    if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
 
