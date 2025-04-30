@@ -97,8 +97,15 @@ def test(*, parent_callback, doctest=False, **kwargs):
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
 
-        if not any('--import-mode' in arg for arg in pytest_args):
-            pytest_args = ('--import-mode=importlib',) + pytest_args
+    # --import-mode="importlib" is necessary to successfully collect doctests.
+    # Otherwise, the doctest-plus plugin will fail because it finds doctests
+    # in skimage/ which don't exist at runtime. Set mode in case it doesn't
+    # exist and doctests are requested. Also catch `spin test -- --doctest-plus`
+    # or `... -- --doctest-modules`
+    if any('--doctest' in arg for arg in pytest_args) and not any(
+        '--import-mode' in arg for arg in pytest_args
+    ):
+        pytest_args = ('--import-mode=importlib',) + pytest_args
 
     kwargs["pytest_args"] = pytest_args
     parent_callback(**kwargs)
