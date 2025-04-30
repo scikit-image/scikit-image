@@ -142,6 +142,10 @@ tutorial.
    :align: center
    :width: 80%
 
+Bear in mind that the estimation can fail, in which case ``from_estimate``
+returns a special ``FailedEstimation`` object instead of a valid transform.
+See the :ref:`sphx_glr_auto_examples_transform_plot_geometric.py` tutorial for
+more detail on testing for such estimation failures.
 
 The
 :ref:`sphx_glr_auto_examples_registration_plot_register_rotation.py` tutorial

@@ -114,8 +114,27 @@ if not tform3:  # If result is Falsey, we have a failed estimation.
     raise RuntimeError(f'Failed estimation: {tform3}')
 
 ######################################################################
-# In fact, our estimation succeeded, so we can apply it, for example, to the
-# coordinates of an image, using ``transform.warp``.
+# Here is an example of a failed estimation, where all the input points are the
+# same:
+
+# Repeat last point 4 times, for four identical points.
+bad_src = np.tile(src[-1, :], (4, 1))
+bad_tform = transform.ProjectiveTransform.from_estimate(bad_src, dst)
+bad_tform
+
+######################################################################
+# If you try and use any attributes of this failed estimation, you get
+# a ``UsingFailedEstimationError``. This inherits from ``AttributeError``.
+
+try:
+    bad_tform.params
+except AttributeError as exc:
+    print('We got the following error:')
+    print(exc)
+
+######################################################################
+# In fact, our original estimation succeeded, so we can apply it, for example,
+# to the coordinates of an image, using ``transform.warp``.
 
 warped = transform.warp(text, tform3, output_shape=(50, 300))
 
