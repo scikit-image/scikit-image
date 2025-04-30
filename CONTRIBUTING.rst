@@ -286,6 +286,8 @@ Run:
   ``spin test -- any pytest args you want``.
 - Run tests **matching** a specific name:
   ``spin test -- -k threshold``
+- Run all tests and **doctests**:
+  ``spin test --with-doctest``
 
 
 Warnings during testing phase
