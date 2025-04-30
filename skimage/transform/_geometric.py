@@ -80,7 +80,7 @@ def _center_and_normalize_points(points):
     # small value; ie, we don't need to worry about numerical stability here,
     # only actual 0.
     if rms == 0:
-        return np.full((d + 1, d + 1), np.nan), np.full_like(points, np.nan)
+        return np.full((d + 1, d + 1), np.nan), np.full(points.shape, np.nan)
 
     norm_factor = np.sqrt(d) / rms
 
