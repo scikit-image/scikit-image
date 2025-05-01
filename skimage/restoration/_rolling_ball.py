@@ -1,10 +1,21 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from .._shared.utils import _supported_float_type, deprecate_parameter, DEPRECATED
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
 
 
-def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=None):
+@deprecate_parameter(
+    "num_threads", new_name="workers", start_version="0.26", stop_version="0.28"
+)
+def rolling_ball(
+    image,
+    *,
+    radius=100,
+    kernel=None,
+    nansafe=False,
+    num_threads=DEPRECATED,
+    workers=None,
+):
     """Estimate background intensity using the rolling-ball algorithm.
 
     This function is a generalization of the rolling-ball algorithm [1]_ to
@@ -27,12 +38,14 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     nansafe: bool, optional
         If ``False`` (default), the function assumes that none of the values
         in `image` are ``np.nan``, and uses a faster implementation.
-    num_threads: int, optional
-        The maximum number of threads to use. If ``None``, the function uses
-        the OpenMP default value; typically, it is equal to the maximum number
-        of virtual cores.
+    workers: int, optional
+        The maximum number of threads to use. If ``None``, use the OpenMP
+        default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
+
+        .. versionadded:: 0.26
+            Replaces deprecated parameter `num_threads`.
 
     Returns
     -------
@@ -88,8 +101,8 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
     float_type = _supported_float_type(image.dtype)
     img = image.astype(float_type, copy=False)
 
-    if num_threads is None:
-        num_threads = 0
+    if workers is None:
+        workers = 0
 
     if kernel is None:
         kernel = ball_kernel(radius, image.ndim)
@@ -116,7 +129,7 @@ def rolling_ball(image, *, radius=100, kernel=None, nansafe=False, num_threads=N
         np.array(image.shape, dtype=np.intp),
         np.array(img.shape, dtype=np.intp),
         kernel_shape.astype(np.intp),
-        num_threads,
+        workers,
     )
 
     background = background.astype(image.dtype, copy=False)
