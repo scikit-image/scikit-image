@@ -266,7 +266,7 @@ jobs:
       issues: write
     steps:
       - name: "Job has failed: reporting"
-        uses: JasonEtco/create-an-issue@v2
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_TYPE: "wheels build"
