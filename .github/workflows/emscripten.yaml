@@ -22,7 +22,7 @@ jobs:
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-24.04
     env:
-      PYODIDE_VERSION: 0.27.3
+      PYODIDE_VERSION: 0.27.5
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
