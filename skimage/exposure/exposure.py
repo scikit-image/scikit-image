@@ -680,7 +680,8 @@ def adjust_gamma(image, gamma=1, gain=1):
     else:
         _assert_non_negative(image)
 
-        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+        limits = dtype_limits(image, clip_negative=True)
+        scale = float(limits[1] - limits[0])
 
         out = (((image / scale) ** gamma) * scale * gain).astype(dtype)
 
