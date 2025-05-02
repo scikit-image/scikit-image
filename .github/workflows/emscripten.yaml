@@ -51,7 +51,7 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build
+        run: pip install pyodide-build==0.30.0
 
       - name: Build scikit-image for Pyodide
         run: pyodide build
