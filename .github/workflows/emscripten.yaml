@@ -22,7 +22,7 @@ jobs:
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-24.04
     env:
-      PYODIDE_VERSION: 0.27.3
+      PYODIDE_VERSION: 0.27.5
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
@@ -51,10 +51,12 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build
+        run: pip install pyodide-build==0.30.0
 
       - name: Build scikit-image for Pyodide
-        run: pyodide build
+        run: |
+          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
+          pyodide build
 
       - name: Set up Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
@@ -64,7 +66,6 @@ jobs:
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
           # Set up Pyodide virtual environment
-          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
 
           # Activate the virtual environment and install the built scikit-image wheel
