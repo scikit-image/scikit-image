@@ -624,9 +624,9 @@ def _adjust_gamma_u8(image, gamma, gain):
 
 
 def adjust_gamma(image, gamma=1, gain=1):
-    """Performs Gamma Correction on the input image.
+    """Perform gamma correction on the input image.
 
-    Gamma correction is a power-law transform. [1]_ This function
+    Gamma correction is a power-law transform [1]_. This function
     transforms the input `image` pixel-wise according to the power law
     ``image**gamma`` after scaling each pixel to the range 0 to 1. Then
     it is rescaled to its original range and muliplied by `gain`.
@@ -664,7 +664,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     Examples
     --------
     >>> import skimage as ski
-    >>> image = ski.img_as_float(ski.data.moon())
+    >>> image = ski.util.img_as_float(ski.data.moon())
     >>> gamma_corrected = ski.exposure.adjust_gamma(image, 2)
     >>> # Output is darker for gamma > 1
     >>> image.mean() > gamma_corrected.mean()
