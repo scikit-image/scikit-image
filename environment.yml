@@ -39,8 +39,8 @@ dependencies:
   - intersphinx-registry>=0.2411.14
   - ipywidgets
   - ipykernel
-  - plotly>=5.20
-  - python-kaleido==0.2.1
+  - plotly>=6.1.0rc0
+  - kaleido@git+https://github.com/plotly/kaleido@v1.0.0rc11#subdirectory=src/py
   - scikit-learn>=1.2
   - sphinx-design>=0.5
   - pydata-sphinx-theme>=0.16
