@@ -59,5 +59,5 @@ __all__ = [
     'unique_rows',
     'label_points',
     'lookfor',
-    'FailedEstimationAccessError'
+    'FailedEstimationAccessError',
 ]
