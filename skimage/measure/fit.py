@@ -936,12 +936,15 @@ def ransac(
 
         * Either:
 
-          * ``tf = model_class.from_estimate(*data)`` (``from_estimate`` class
-            method) OR
-          * (deprecated) ``tf = model_class(); success = tf.estimate(*data)``
-            (``estimate`` instance method), where `success` indicates whether
-            the model estimation succeeded (`True` or `None` for success,
-            `False` for failure).
+          * ``from_estimate`` class method returning transform instance, as in
+            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform`` should be truthy (``bool(tform) == True``) where
+            estimation succeeded, or falsey (``bool(tform) == False``) where it
+            failed;  OR
+          * (deprecated) ``estimate`` instance method, returning flag to
+            indicate successful estimation, as in ``tform = model_class();
+            success = tform.estimate(*data)``. ``success == True`` when
+            estimation succeeded, ``success == False`` when it failed.
 
         * ``residuals(*data)``
 
@@ -1118,7 +1121,7 @@ def ransac(
     # Check protocol.
     if not isinstance(model_class, RansacModel):
         raise TypeError(
-            f"`model_class` {model_class} should be of " "(protocol) type RansacModel"
+            f"`model_class` {model_class} should be of (protocol) type RansacModel"
         )
 
     num_trials = 0
