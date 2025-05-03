@@ -136,12 +136,12 @@ class change_default_value:
     warning_msg: str
         Optional warning message. If None, a generic warning message
         is used.
-    stacklevel : int, optional
-        This decorator attempts to detect the appropriate stacklevel for the
-        deprecation warning automatically. If this fails, e.g., due to
-        decorating a closure, you can set the stacklevel manually. The
-        outermost decorator should have stacklevel 2, the next inner one
-        stacklevel 3, etc.
+    stacklevel : {None, int}, optional
+        If None, the decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. This can fail, e.g., due to
+        decorating a closure, in which case you can set the stacklevel manually
+        here. The outermost decorator should have stacklevel 2, the next inner
+        one stacklevel 3, etc.
     """
 
     def __init__(
@@ -220,12 +220,12 @@ class deprecate_parameter:
     modify_docstring : bool, optional
         If the wrapped function has a docstring, add the deprecated parameters
         to the "Other Parameters" section.
-    stacklevel : int, optional
-        This decorator attempts to detect the appropriate stacklevel for the
-        deprecation warning automatically. If this fails, e.g., due to
-        decorating a closure, you can set the stacklevel manually. The
-        outermost decorator should have stacklevel 2, the next inner one
-        stacklevel 3, etc.
+    stacklevel : {None, int}, optional
+        If None, the decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. This can fail, e.g., due to
+        decorating a closure, in which case you can set the stacklevel manually
+        here. The outermost decorator should have stacklevel 2, the next inner
+        one stacklevel 3, etc.
 
     Notes
     -----
@@ -618,12 +618,12 @@ class deprecate_func:
     hint : str, optional
         A hint on how to address this deprecation,
         e.g., "Use `skimage.submodule.alternative_func` instead."
-    stacklevel : int, optional
-        This decorator attempts to detect the appropriate stacklevel for the
-        deprecation warning automatically. If this fails, e.g., due to
-        decorating a closure, you can set the stacklevel manually. The
-        outermost decorator should have stacklevel 2, the next inner one
-        stacklevel 3, etc.
+    stacklevel :  {None, int}, optional
+        If None, the decorator attempts to detect the appropriate stacklevel for the
+        deprecation warning automatically. This can fail, e.g., due to
+        decorating a closure, in which case you can set the stacklevel manually
+        here. The outermost decorator should have stacklevel 2, the next inner
+        one stacklevel 3, etc.
 
     Examples
     --------
@@ -944,9 +944,10 @@ def _validate_interpolation_order(image_dtype, order):
     ----------
     image_dtype : dtype
         Image dtype.
-    order : int, optional
-        The order of the spline interpolation. The order has to be in
-        the range 0-5. See `skimage.transform.warp` for detail.
+    order : {None, int}, optional
+        The order of the spline interpolation. The order has to be in the range
+        0-5. If ``None`` assume order 0 for Boolean images, otherwise 1. See
+        `skimage.transform.warp` for detail.
 
     Returns
     -------
