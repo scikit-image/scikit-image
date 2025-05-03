@@ -81,7 +81,7 @@ plt.tight_layout()
 #
 # In addition to the basic functionality mentioned above you can also
 # generate a transform by estimating the parameters of a geometric
-# transformation using the least- squares method.
+# transformation using the least squares method.
 #
 # This can amongst other things be used for image registration or
 # rectification, where you have a set of control points or
@@ -103,9 +103,9 @@ tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
 
 ######################################################################
 # For many transform types, including the ``ProjectiveTransform`, it is
-# possible for the estimation process to fail.  If this is the case,
+# possible for the estimation to fail.  If this is the case,
 # ``from_estimate`` returns a special object of type ``FailedEstimation``.
-# If you apply a truth test (e.g. ``bool(tform3)``, ``FailedEstimation``
+# If you apply a truth test (e.g. ``bool(tform3)``), ``FailedEstimation``
 # returns False, and this is a good way to check for the failure.  Applying
 # ``str`` to the failed estimation object gives the error message describing
 # the reason for failure.  Putting these together, the following is a typical

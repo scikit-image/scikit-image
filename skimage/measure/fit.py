@@ -271,7 +271,7 @@ class LineModelND(BaseModel):
         Parameters
         ----------
         data : (N, dim) array
-            N points in a space of dimensionality dim >= 2.
+            N points in a space of dimensionality ``dim >= 2``.
 
         Returns
         -------
@@ -325,7 +325,7 @@ class CircleModel(BaseModel):
            0., 0., 0., 0., 0., 0., 0., 0.])
 
     The estimation can fail when — for example — all the input or output
-    points are the same.  If this happens, you will get a circl model for which
+    points are the same.  If this happens, you will get a circle model for which
     ``bool(model)`` is ``False``:
 
     >>> # A successfully estimated model is truthy (applying ``bool()``
@@ -528,7 +528,7 @@ class EllipseModel(BaseModel):
            0., 0., 0., 0., 0., 0., 0., 0.])
 
     The estimation can fail when — for example — all the input or output
-    points are the same.  If this happens, you will get a ellipse model for
+    points are the same.  If this happens, you will get an ellipse model for
     which ``bool(model)`` is ``False``:
 
     >>> # bool on a successful model (as above) gives True:

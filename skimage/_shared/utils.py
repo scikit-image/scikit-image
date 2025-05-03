@@ -50,7 +50,7 @@ def count_inner_wrappers(func):
 
 
 def _warning_stacklevel(func):
-    """Find stacklevel of `func` relative its global representation.
+    """Find stacklevel of `func` relative to its global representation.
 
     Determine automatically with which stacklevel a warning should be raised.
 
@@ -79,7 +79,7 @@ def count_global_wrappers(func):
     Similar to :func:`count_inner_wrappers`, this counts the number of times
     `func` has been wrapped. However, this function doesn't start counting
     from `func` but instead tries to access the "global representation" of
-    `func`. This means that you cold use this function from inside a wrapper
+    `func`. This means that you could use this function from inside a wrapper
     that was applied first, and still count wrappers that were applied on
     top of it afterwards.
 
