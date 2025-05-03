@@ -102,7 +102,7 @@ the destination), as explained in the
    :width: 80%
 
 
-The ``from_estimate`` class method uses least-squares optimization to minimize
+The ``from_estimate`` class method uses least squares optimization to minimize
 the distance between source and optimization. Source and destination points
 can be determined manually, or using the different methods for feature
 detection available in :mod:`skimage.feature`, such as
