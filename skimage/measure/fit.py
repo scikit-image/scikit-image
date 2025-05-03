@@ -328,14 +328,17 @@ class CircleModel(BaseModel):
     points are the same.  If this happens, you will get a circl model for which
     ``bool(model)`` is ``False``:
 
-    >>> # bool on a successful model (as above) gives True:
-    >>> bool(model)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if model:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate model with identical points.
     >>> bad_data = np.ones((4, 2))
     >>> bad_model = CircleModel.from_estimate(bad_data)
-    >>> bool(bad_model)
-    False
+    >>> if not bad_model:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
