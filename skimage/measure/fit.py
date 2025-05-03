@@ -325,8 +325,8 @@ class CircleModel(BaseModel):
            0., 0., 0., 0., 0., 0., 0., 0.])
 
     The estimation can fail when — for example — all the input or output
-    points are the same.  If this happens, you will get a circle model for which
-    ``bool(model)`` is ``False``:
+    points are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
     >>> # A successfully estimated model is truthy (applying ``bool()``
     >>> # gives ``True``):
