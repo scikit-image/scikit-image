@@ -176,3 +176,18 @@ jobs:
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+  report-failures:
+    runs-on: ubuntu-latest
+    needs: [test_skimage_linux, test_skimage_linux_free_threaded]
+    if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    permissions:
+      issues: write
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "linux tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md

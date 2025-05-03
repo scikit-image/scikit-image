@@ -253,3 +253,49 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
+
+  # This job uses cibuildwheel to build wheels for Pyodide, unlike the one
+  # in emscripten.yaml which uses a more traditional workflow and has some
+  # manual setup. The Pyodide version we build against here is largely
+  # controlled by cibuildwheel's at the moment.
+  build_pyodide_wheel:
+    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and test scikit-image for Pyodide
+        uses: pypa/cibuildwheel@faf86a6ed7efa889faf6996aa23820831055001a # v2.23.3
+        with:
+          output-dir: dist
+        env:
+          # We override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
+          # in favour of Pyodide-related settings.
+          CIBW_PLATFORM: pyodide
+          CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn"
+          # Don't use the cache provider plugin, as it doesn't work with Pyodide
+          # right now: https://github.com/pypa/cibuildwheel/issues/1966
+          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage"
+
+  report-failures:
+    runs-on: ubuntu-latest
+    needs:
+      - build_linux_wheels
+      - build_linux_aarch64_wheels
+      - build_macos_wheels
+      - build_windows_wheels
+      - build_pyodide_wheel
+    if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    permissions:
+      issues: write
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "wheels build"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md

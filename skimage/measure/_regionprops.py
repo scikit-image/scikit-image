@@ -24,9 +24,8 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
 # All values in this PROPS dict correspond to current scikit-image property
-# names. The keys in this PROPS dict correspond to older names used in prior
-# releases. For backwards compatibility, these older names will continue to
-# work, but will not be documented.
+# names. The keys in this PROPS dict correspond to deprecated names used in
+# prior releases
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -413,10 +412,18 @@ class RegionProperties:
                     f"Attribute '{attr}' unavailable when `intensity_image` "
                     f"has not been specified."
                 )
+            warn(
+                f"`RegionProperties.{attr}` is deprecated starting in "
+                "version 0.26 and will be removed in version 2.0. Use "
+                f"`RegionProperties.{PROPS[attr]}` instead. ",
+                category=FutureWarning,
+                stacklevel=2,
+            )
             # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
-        else:
-            raise AttributeError(f"'{type(self)}' object has no attribute '{attr}'")
+
+        # Fallback to default behavior, potentially raising an attribute error
+        return self.__getattribute__(attr)
 
     def __setattr__(self, name, value):
         if name in PROPS:
@@ -772,11 +779,16 @@ class RegionProperties:
         return iter(sorted(props))
 
     def __getitem__(self, key):
-        value = getattr(self, key, None)
-        if value is not None:
-            return value
-        else:  # backwards compatibility
-            return getattr(self, PROPS[key])
+        if key in PROPS:
+            warn(
+                f"`RegionProperties[{key!r}]` is deprecated starting in "
+                "version 0.26 and will be removed in version 2.0. Use "
+                f"`RegionProperties[{PROPS[key]!r}]` instead. ",
+                category=FutureWarning,
+                stacklevel=2,
+            )
+            key = PROPS[key]
+        return getattr(self, key)
 
     def __eq__(self, other):
         if not isinstance(other, RegionProperties):
