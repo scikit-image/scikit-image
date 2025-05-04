@@ -115,7 +115,7 @@ class LineModelND(BaseModel):
 
             .. code-block:: python
 
-                model = LineModelND.from_estimation(...)
+                model = LineModelND.from_estimate(...)
                 if not model:
                     # Handle failed estimation
         """
@@ -368,7 +368,7 @@ class CircleModel(BaseModel):
 
             .. code-block:: python
 
-                model = CircleModel.from_estimation(...)
+                model = CircleModel.from_estimate(...)
                 if not model:
                     # Handle failed estimation
         """
@@ -568,7 +568,7 @@ class EllipseModel(BaseModel):
 
             .. code-block:: python
 
-                model = EllipseModel.from_estimation(...)
+                model = EllipseModel.from_estimate(...)
                 if not model:
                     # Handle failed estimation
 

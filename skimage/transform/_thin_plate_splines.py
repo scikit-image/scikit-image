@@ -153,7 +153,7 @@ class ThinPlateSplineTransform:
 
             .. code-block:: python
 
-                tform = ThinPlateSplineTransform.from_estimation(...)
+                tform = ThinPlateSplineTransform.from_estimate(...)
                 if not tform:
                     # Handle failed estimation
 

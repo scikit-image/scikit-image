@@ -109,7 +109,7 @@ tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
 # returns False, and this is a good way to check for the failure.  Applying
 # ``str`` to the failed estimation object gives the error message describing
 # the reason for failure.  Putting these together, the following is a typical
-# pattern for using the return value of ``from_estimation``
+# pattern for using the return value of ``from_estimate``
 
 if not tform3:  # If result is Falsey, we have a failed estimation.
     raise RuntimeError(f'Failed estimation: {tform3}')
