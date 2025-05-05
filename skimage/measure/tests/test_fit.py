@@ -41,18 +41,18 @@ def test_line_model_nd_invalid_input():
         none_model = LineModelND()
 
     scalar = np.zeros(1)
-    data2d= np.zeros((4, 2))
-    for meth, inp in ((none_model.predict_x, scalar),
-                      (none_model.predict_y, scalar),
-                      (none_model.residuals, data2d),
-                     ):
+    data2d = np.zeros((4, 2))
+    for meth, inp in (
+        (none_model.predict_x, scalar),
+        (none_model.predict_y, scalar),
+        (none_model.residuals, data2d),
+    ):
         # We need extra parameters to predict for the None model.
         with testing.raises(ValueError):
             meth(inp)
 
         # If we do pass parameters as `params`, they need to match init.
-        with testing.raises(ValueError,
-                            match='Input `params` must be length 2'):
+        with testing.raises(ValueError, match='Input `params` must be length 2'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 meth(inp, np.zeros(1))
 
@@ -84,7 +84,7 @@ def test_line_model_nd_estimate():
     # generate original data without noise
     model0 = LineModelND(
         np.array([0, 0, 0], dtype='float'),
-        np.array([1, 1, 1], dtype='float') / np.sqrt(3)
+        np.array([1, 1, 1], dtype='float') / np.sqrt(3),
     )
     # we scale the unit vector with a factor 10 when generating points on the
     # line in order to compensate for the scale of the random noise
@@ -135,7 +135,6 @@ def test_line_model_nd_residuals():
 
 
 def test_circle_model_invalid_input():
-
     # A valid default model.
     default_model = CircleModel((0, 0), 1)
     # Predict a couple of points.
@@ -152,11 +151,11 @@ def test_circle_model_invalid_input():
         none_model.predict_xy(angles)
 
     # If we do pass parameters as `params`, they need to match init.
-    for params in (np.zeros(1),  # center should be length 2.
-                   np.zeros(2),  # Need radius.
-                  ):
-        with testing.raises(ValueError,
-                            match='Input `params` must be length 3'):
+    for params in (
+        np.zeros(1),  # center should be length 2.
+        np.zeros(2),  # Need radius.
+    ):
+        with testing.raises(ValueError, match='Input `params` must be length 3'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
@@ -301,7 +300,6 @@ def test_circle_model_estimate_from_small_scale_data():
 
 
 def test_ellipse_model_invalid_input():
-
     # A valid default model, in fact corresponding to a unit cicle.
     default_model = EllipseModel((0, 0), (1, 1), 0)
     # Predict a couple of points.
@@ -318,24 +316,22 @@ def test_ellipse_model_invalid_input():
         none_model.predict_xy(angles)
 
     # If we do pass parameters as `params`, they need to match init.
-    for params in (np.zeros(1),  # center should be length 2.
-                   np.zeros(2),  # Need first axis length.
-                   [0, 0, 1],  # Need second axis length.
-                   [0, 0, 1, 1],  # Need theta
-                  ):
-        with testing.raises(ValueError,
-                            match='Input `params` must be length 5'):
+    for params in (
+        np.zeros(1),  # center should be length 2.
+        np.zeros(2),  # Need first axis length.
+        [0, 0, 1],  # Need second axis length.
+        [0, 0, 1, 1],  # Need theta
+    ):
+        with testing.raises(ValueError, match='Input `params` must be length 5'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
     with testing.raises(ValueError):
         EllipseModel.from_estimate(np.empty((5, 3)))
 
-    with testing.raises(ValueError,
-                        match='Center coordinates should be length 2'):
+    with testing.raises(ValueError, match='Center coordinates should be length 2'):
         EllipseModel((0,), (1, 1), 0)
-    with testing.raises(ValueError,
-                        match='Axis lengths should be length 2'):
+    with testing.raises(ValueError, match='Axis lengths should be length 2'):
         EllipseModel((0, 0), (1,), 0)
 
 

@@ -7,8 +7,12 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import ( _deprecate_estimate, FailedEstimation,
-                             deprecate_parameter, DEPRECATED)
+from .._shared.utils import (
+    _deprecate_estimate,
+    FailedEstimation,
+    deprecate_parameter,
+    DEPRECATED,
+)
 
 _EPSILON = np.spacing(1)
 
@@ -53,7 +57,7 @@ class BaseModel:
 
 
 class _ParamsBaseModel(BaseModel):
-    """ Adds parameter parsing to BaseModel.
+    """Adds parameter parsing to BaseModel.
 
     We need this sub-class as long as we still have the deprecated ``params``
     argument to ``predict*`` methods.
@@ -65,12 +69,13 @@ class _ParamsBaseModel(BaseModel):
                 # Until the deprecation of no-argument initialization expires,
                 # it is easy to create a model where ``params is None``.
                 cls_name = type(self).__name__
-                raise ValueError('`params` argument must be specified when '
-                                 'applied to model initialized with '
-                                 f'``{cls_name}()``; Consider creating new '
-                                 f'{cls_name} with suitable input arguments, '
-                                 f'or by using ``{cls_name}.from_estimate``.'
-                                )
+                raise ValueError(
+                    '`params` argument must be specified when '
+                    'applied to model initialized with '
+                    f'``{cls_name}()``; Consider creating new '
+                    f'{cls_name} with suitable input arguments, '
+                    f'or by using ``{cls_name}.from_estimate``.'
+                )
             return self.params
         new_model = type(self)(*self._params2init_params(params))
         return new_model.params
@@ -102,7 +107,7 @@ _PARAMS_DEP_STOP = '2.2'
 
 
 def _deprecate_no_args(cls):
-    """ Class decorator to allow, deprecate no input arguments to ``__init__``.
+    """Class decorator to allow, deprecate no input arguments to ``__init__``.
 
     Makes a new ``__init__`` method, that a) will allow option of passing no
     arguments, and b) when used thus, raises a deprecation warning.  Otherwise
@@ -117,12 +122,14 @@ def _deprecate_no_args(cls):
         if len(args) or len(kwargs):
             self._args_init(*args, **kwargs)
             return
-        warn(f'Calling ``{cls.__name__}()`` (without arguments) has been '
-             f'deprecated since version {_PARAMS_DEP_START} and will be '
-             f'removed in version {_PARAMS_DEP_STOP}; see help for '
-             f'``{cls.__name__}``.',
-             category=FutureWarning,
-             stacklevel=2)
+        warn(
+            f'Calling ``{cls.__name__}()`` (without arguments) has been '
+            f'deprecated since version {_PARAMS_DEP_START} and will be '
+            f'removed in version {_PARAMS_DEP_STOP}; see help for '
+            f'``{cls.__name__}``.',
+            category=FutureWarning,
+            stacklevel=2,
+        )
         self.params = None
 
     init.__signature__ = inspect.signature(cls._args_init)
@@ -132,13 +139,13 @@ def _deprecate_no_args(cls):
 
 
 def _deprecate_model_params(func):
-    """ Deprecate `params` argument of various model methods.
-    """
+    """Deprecate `params` argument of various model methods."""
     func = deprecate_parameter(
         'params',
         start_version=_PARAMS_DEP_START,
         stop_version=_PARAMS_DEP_STOP,
-        modify_docstring=False)(func)
+        modify_docstring=False,
+    )(func)
     func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
     return func
 
@@ -191,7 +198,7 @@ class LineModelND(_ParamsBaseModel):
     """
 
     def _args_init(self, origin, direction):
-        """ Initialize LineModelND instance.
+        """Initialize LineModelND instance.
 
         Parameters
         ----------
@@ -202,8 +209,9 @@ class LineModelND(_ParamsBaseModel):
         """
         origin, direction = (np.array(v) for v in (origin, direction))
         if len(origin) != len(direction):
-            raise ValueError('Direction vector should be same length as '
-                             'origin point.')
+            raise ValueError(
+                'Direction vector should be same length as origin point.'
+            )
         self.params = origin, direction
 
     @classmethod
@@ -283,8 +291,9 @@ class LineModelND(_ParamsBaseModel):
         _check_data_atleast_2D(data)
         origin, direction = self._get_params(params)
         if len(origin) != data.shape[1]:
-            raise ValueError(f'`origin` is {len(origin)}D, but '
-                             f'`data` is {data.shape[1]}D')
+            raise ValueError(
+                f'`origin` is {len(origin)}D, but `data` is {data.shape[1]}D'
+            )
         res = (data - origin) - ((data - origin) @ direction)[
             ..., np.newaxis
         ] * direction
@@ -355,8 +364,11 @@ class LineModelND(_ParamsBaseModel):
 
         """
         # Avoid triggering deprecationwarning in predict.
-        tf = (self if (params is None or params is DEPRECATED) else
-              type(self)(*self._params2init_params(params)))
+        tf = (
+            self
+            if (params is None or params is DEPRECATED)
+            else type(self)(*self._params2init_params(params))
+        )
         x = tf.predict(y, axis=1)[:, 0]
         return x
 
@@ -387,8 +399,11 @@ class LineModelND(_ParamsBaseModel):
 
         """
         # Avoid triggering deprecationwarning in predict.
-        tf = (self if (params is None or params is DEPRECATED)
-              else type(self)(*self._params2init_params(params)))
+        tf = (
+            self
+            if (params is None or params is DEPRECATED)
+            else type(self)(*self._params2init_params(params))
+        )
         y = tf.predict(x, axis=0)[:, 1]
         return y
 
@@ -494,7 +509,7 @@ class CircleModel(_ParamsBaseModel):
     """
 
     def _args_init(self, center, radius):
-        """ Initialize CircleModel instance.
+        """Initialize CircleModel instance.
 
         Parameters
         ----------
@@ -729,7 +744,7 @@ class EllipseModel(_ParamsBaseModel):
     """
 
     def _args_init(self, center, ax_lens, theta):
-        """ Initialize CircleModel instance.
+        """Initialize CircleModel instance.
 
         Parameters
         ----------
