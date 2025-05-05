@@ -664,7 +664,6 @@ def test_custom_estimate_warning(ransac_params):
     assert str(bad_tf) == '`C` estimation failed'
 
 
-
 def test_ransac_model_class_protocol(ransac_params):
     # Test custom classes that don't match protocol.
     src, dst, model0, outliers, rng = ransac_params
