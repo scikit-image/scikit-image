@@ -209,9 +209,7 @@ class LineModelND(_ParamsBaseModel):
         """
         origin, direction = (np.array(v) for v in (origin, direction))
         if len(origin) != len(direction):
-            raise ValueError(
-                'Direction vector should be same length as origin point.'
-            )
+            raise ValueError('Direction vector should be same length as origin point.')
         self.params = origin, direction
 
     @classmethod
