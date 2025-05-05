@@ -39,10 +39,15 @@ class BaseModel:
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
-        # In order to defer to the _estimate method, we first need to
-        # create a default instance with some (ignored) initialization,
-        # that we can override by executing the ``_estimate`` method.
-        tf = cls._default_instance()
+        # In order to defer to the ``_estimate`` method, we first need to
+        # create an empty not-initialized instance, that we can override by
+        # executing the ``_estimate`` method.  This relies on the assumption
+        # that `_estimate` can work with an uninitialized instance.  This
+        # assumption only need hold until we can expire the deprecation of the
+        # `estimate` method, at which point we can move the estimation logic
+        # from the ``_estimate`` methods, to the respective ``from_estimate``
+        # class methods.
+        tf = object.__new__(cls)
         msg = tf._estimate(data, warn_only=False)
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
@@ -198,13 +203,6 @@ class LineModelND(_ParamsBaseModel):
             raise ValueError('Direction vector should be same length as '
                              'origin point.')
         self.params = origin, direction
-
-    @classmethod
-    def _default_instance(cls):
-        # So we can use the ``_estimate`` method to implement
-        # ``from_estimate``. Remove this class method when deprecation of
-        # ``estimate`` expires.
-        return cls((0, 0), (1, 1))
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -508,14 +506,6 @@ class CircleModel(_ParamsBaseModel):
         self.params = tuple(center) + (radius,)
 
     @classmethod
-    def _default_instance(cls):
-        # So we can use the ``_estimate`` method to implement
-        # ``from_estimate``. Remove this class method when deprecation of
-        # ``estimate`` expires.
-        return cls((0, 0), 1)
-
-
-    @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate circle model from data using total least squares.
 
@@ -753,13 +743,6 @@ class EllipseModel(_ParamsBaseModel):
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
         self.params = tuple(center) + (a, b, theta)
-
-    @classmethod
-    def _default_instance(cls):
-        # So we can use the ``_estimate`` method to implement
-        # ``from_estimate``. Remove this class method when deprecation of
-        # ``estimate`` expires.
-        return cls((0, 0), 1, 1, 0)
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
