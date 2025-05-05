@@ -873,10 +873,12 @@ def add_from_estimate(cls):
 
     class FromEstimated(cls):
         @classmethod
-        def from_estimate(cls, *args, **kwargs):
-            instance = cls()
+        def from_estimate(klass, *args, **kwargs):
+            # Assume we can make default instance without input arguments.
+            instance = klass()
             success = instance.estimate(*args, **kwargs)
-            return instance if success else None
+            return instance if success else FailedEstimation(
+                f'`{cls.__name__}` estimation failed')
 
     return FromEstimated
 
