@@ -301,7 +301,7 @@ def test_circle_model_estimate_from_small_scale_data():
 def test_ellipse_model_invalid_input():
 
     # A valid default model, in fact corresponding to a unit cicle.
-    default_model = EllipseModel((0, 0), 1, 1, 0)
+    default_model = EllipseModel((0, 0), (1, 1), 0)
     # Predict a couple of points.
     angles = [0, np.pi / 2]
     assert_almost_equal(default_model.predict_xy(angles), [[1, 0], [0, 1]])
@@ -321,16 +321,24 @@ def test_ellipse_model_invalid_input():
                    [0, 0, 1],  # Need second axis length.
                    [0, 0, 1, 1],  # Need theta
                   ):
-        with testing.raises(ValueError):
+        with testing.raises(ValueError,
+                            match='Input `params` must be length 5'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
     with testing.raises(ValueError):
         EllipseModel.from_estimate(np.empty((5, 3)))
 
+    with testing.raises(ValueError,
+                        match='Center coordinates should be length 2'):
+        EllipseModel((0,), (1, 1), 0)
+    with testing.raises(ValueError,
+                        match='Axis lengths should be length 2'):
+        EllipseModel((0, 0), (1,), 0)
+
 
 def test_ellipse_model_predict():
-    model = EllipseModel((0, 0), 5, 10, 0)
+    model = EllipseModel((0, 0), (5, 10), 0)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
     xy = np.array(((5, 0), (0, 10), (-5, 0), (0, -10)))
@@ -341,7 +349,7 @@ def test_ellipse_model_predict():
 def test_ellipse_model_estimate(angle):
     rad = np.deg2rad(angle)
     # generate original data without noise
-    model0 = EllipseModel((10, 20), 15, 25, rad)
+    model0 = EllipseModel((10, 20), (15, 25), rad)
     t = np.linspace(0, 2 * np.pi, 100)
     data0 = model0.predict_xy(t)
 
@@ -393,7 +401,7 @@ def test_ellipse_parameter_stability(angle):
     assert_almost_equal(b_prime, b)
 
     # Estimate method
-    ellipse_model2 = EllipseModel((0, 0), 1, 2, 0.2)  # Dummy parameters.
+    ellipse_model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert ellipse_model2.estimate(points.T)
     assert_stacklevel(record)
@@ -555,7 +563,7 @@ def test_ellipse_model_estimate_from_data():
     assert_array_less(np.zeros(4), np.abs(model.params[:4]))
 
     # estimate method
-    model2 = EllipseModel((0, 0), 1, 2, 0.2)  # Dummy parameters.
+    model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(data)
     assert_stacklevel(record)
@@ -583,14 +591,14 @@ def test_ellipse_model_estimate_from_far_shifted_data():
         ],
         dtype=np.float64,
     )
-    em = EllipseModel(center, a, b, theta)
+    em = EllipseModel(center, (a, b), theta)
     data = em.predict_xy(angles)
     # assert that far shifted data can be estimated
     float_data = data.astype(np.float64)
     model = EllipseModel.from_estimate(float_data)
     # test whether the predicted parameters are close to the original ones
     assert_almost_equal(params, model.params)
-    model2 = EllipseModel((0, 0), 1, 2, 0.2)  # Dummy parameters.
+    model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(float_data)
     assert_stacklevel(record)
@@ -626,7 +634,7 @@ def test_ellipse_model_estimate_failers():
         tf = EllipseModel.from_estimate(data)
         assert not tf and str(tf).endswith(msg)
 
-        tf = EllipseModel((0, 0), 1, 2, 0.2)  # Dummy parameters.
+        tf = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
         with pytest.warns(FutureWarning, match=dep_msg):
             with pytest.warns(RuntimeWarning, match=msg) as _warnings:
                 assert tf.estimate(data)
@@ -636,7 +644,7 @@ def test_ellipse_model_estimate_failers():
 
 def test_ellipse_model_residuals():
     # vertical line through origin
-    model = EllipseModel((0, 0), 10, 5, 0)
+    model = EllipseModel((0, 0), (10, 5), 0)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[0, 5]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[0, 10]]))), 5)

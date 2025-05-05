@@ -60,7 +60,7 @@ class _ParamsBaseModel(BaseModel):
     """
 
     def _get_params(self, params):
-        if params in (None, DEPRECATED):
+        if params is None or params is DEPRECATED:
             if self.params is None:
                 # Until the deprecation of no-argument initialization expires,
                 # it is easy to create a model where ``params is None``.
@@ -353,8 +353,8 @@ class LineModelND(_ParamsBaseModel):
 
         """
         # Avoid triggering deprecationwarning in predict.
-        tf = (self if params in (None, DEPRECATED)
-              else type(self)(*self._params2init_params(params)))
+        tf = (self if (params is None or params is DEPRECATED) else
+              type(self)(*self._params2init_params(params)))
         x = tf.predict(y, axis=1)[:, 0]
         return x
 
@@ -385,7 +385,7 @@ class LineModelND(_ParamsBaseModel):
 
         """
         # Avoid triggering deprecationwarning in predict.
-        tf = (self if params in (None, DEPRECATED)
+        tf = (self if (params is None or params is DEPRECATED)
               else type(self)(*self._params2init_params(params)))
         y = tf.predict(x, axis=0)[:, 1]
         return y
@@ -674,10 +674,9 @@ class EllipseModel(_ParamsBaseModel):
     ----------
     center : array-like, shape (2,)
         Coordinates of ellipse center.
-    a : float
-        Length of first axis.
-    b : float
-        Length of second axis.
+    ax_lens : array-like, shape (2,)
+        Length of first axis and length of second axis.  Call these ``a`` and
+        ``b``.
     theta : float
         Angle of first axis.
 
@@ -695,7 +694,7 @@ class EllipseModel(_ParamsBaseModel):
     Examples
     --------
 
-    >>> em = EllipseModel((10, 15), 8, 4, np.deg2rad(30))
+    >>> em = EllipseModel((10, 15), (8, 4), np.deg2rad(30))
     >>> xy = em.predict_xy(np.linspace(0, 2 * np.pi, 25))
     >>> ellipse = EllipseModel.from_estimate(xy)
     >>> np.round(ellipse.params, 2)
@@ -726,23 +725,24 @@ class EllipseModel(_ParamsBaseModel):
     FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def _args_init(self, center, a, b, theta):
+    def _args_init(self, center, ax_lens, theta):
         """ Initialize CircleModel instance.
 
         Parameters
         ----------
         center : array-like, shape (2,)
             Coordinates of ellipse center.
-        a : float
-            Length of first axis.
-        b : float
-            Length of second axis.
+        ax_lens : array-like, shape (2,)
+            Length of first axis and length of second axis.  Call these ``a`` and
+            ``b``.
         theta : float
             Angle of first axis.
         """
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
-        self.params = tuple(center) + (a, b, theta)
+        if not len(ax_lens) == 2:
+            raise ValueError('Axis lengths should be length 2')
+        self.params = tuple(center) + tuple(ax_lens) + (theta,)
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -950,8 +950,9 @@ class EllipseModel(_ParamsBaseModel):
         return residuals
 
     def _params2init_params(self, params):
-        *center, a, b, theta = params
-        return center, a, b, theta
+        if len(params) < 5:
+            raise ValueError('Input `params` must be length 5')
+        return params[:2], params[2:4], params[4]
 
     @_deprecate_model_params
     def predict_xy(self, t, params=DEPRECATED):
