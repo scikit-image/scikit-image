@@ -14,7 +14,7 @@ from skimage._shared.testing import (
     assert_stacklevel,
 )
 from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
-from skimage.measure.fit import _dynamic_max_trials
+from skimage.measure.fit import _dynamic_max_trials, add_from_estimate
 from skimage.transform import AffineTransform
 
 
@@ -635,7 +635,7 @@ def test_custom_estimate_warning(ransac_params):
 
         def estimate(self, src, dst):
             self._model = AffineTransform.from_estimate(src, dst)
-            return self._model is not None
+            return bool(self._model)
 
         def residuals(self, src, dst):
             return self._model.residuals(src, dst)
@@ -652,6 +652,17 @@ def test_custom_estimate_warning(ransac_params):
     assert len(record) == 1
 
     assert_almost_equal(model0.params, model_est.params)
+
+    # Test modified class maatches standard from_estimate behavior.
+    with pytest.warns(FutureWarning, match=msg) as record:
+        patched_class = add_from_estimate(C)
+
+    tf = patched_class.from_estimate(src, dst)
+    assert bool(tf)
+    bad_tf = patched_class.from_estimate(np.ones_like(src), dst)
+    assert not bool(bad_tf)
+    assert str(bad_tf) == '`C` estimation failed'
+
 
 
 def test_ransac_model_class_protocol(ransac_params):
