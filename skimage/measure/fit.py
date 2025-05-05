@@ -76,6 +76,8 @@ class _ParamsBaseModel(BaseModel):
         return new_model.params
 
     def _params2init_params(self, params):
+        if len(params) != 2:
+            raise ValueError('Input `params` must be length 2')
         return params
 
 
@@ -602,8 +604,9 @@ class CircleModel(_ParamsBaseModel):
         return r - np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
 
     def _params2init_params(self, params):
-        *center, radius = params
-        return center, radius
+        if len(params) < 3:
+            raise ValueError('Input `params` must be length 3')
+        return params[:2], params[2]
 
     @_deprecate_model_params
     def predict_xy(self, t, params=DEPRECATED):

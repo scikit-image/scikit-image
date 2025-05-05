@@ -51,7 +51,8 @@ def test_line_model_nd_invalid_input():
             meth(inp)
 
         # If we do pass parameters as `params`, they need to match init.
-        with testing.raises(TypeError):
+        with testing.raises(ValueError,
+                            match='Input `params` must be length 2'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 meth(inp, np.zeros(1))
 
@@ -154,7 +155,8 @@ def test_circle_model_invalid_input():
     for params in (np.zeros(1),  # center should be length 2.
                    np.zeros(2),  # Need radius.
                   ):
-        with testing.raises(ValueError):
+        with testing.raises(ValueError,
+                            match='Input `params` must be length 3'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
