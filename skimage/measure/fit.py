@@ -426,7 +426,7 @@ class CircleModel(_ParamsBaseModel):
     A minimum number of 3 points is required to solve for the parameters.
 
     Parameters
-    ---------
+    ----------
     center : array-like, shape (2,)
         Coordinates of circle center.
     radius : float
@@ -495,7 +495,7 @@ class CircleModel(_ParamsBaseModel):
         """ Initialize CircleModel instance.
 
         Parameters
-        ---------
+        ----------
         center : array-like, shape (2,)
             Coordinates of circle center.
         radius : float
@@ -671,7 +671,7 @@ class EllipseModel(_ParamsBaseModel):
     to a simple, stable and robust fitting method.
 
     Parameters
-    ---------
+    ----------
     center : array-like, shape (2,)
         Coordinates of ellipse center.
     a : float
