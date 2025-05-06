@@ -7,6 +7,7 @@ from skimage.segmentation import (
     threshold_otsu,
     threshold_yen,
     threshold_minimum,
+    threshold_triangle,
 )
 from skimage.segmentation._thresholding_global import _cross_entropy
 from skimage._shared.testing import assert_stacklevel
@@ -374,3 +375,51 @@ class Test_threshold_minimum:
         img = np.zeros((16 * 16), dtype=np.uint8)
         with pytest.raises(RuntimeError):
             threshold_minimum(img)
+
+
+class Test_threshold_triangle:
+    @pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])
+    def test_uniform_images(self, dtype):
+        assert threshold_triangle(np.zeros((10, 10), dtype=dtype)) == 0
+        assert threshold_triangle(np.ones((10, 10), dtype=dtype)) == 1
+        assert threshold_triangle(np.full((10, 10), 2, dtype=dtype)) == 2
+
+    def test_uint_images(self):
+        assert threshold_triangle(np.invert(ski.data.text())) == 151
+        assert threshold_triangle(ski.data.text()) == 104
+        assert threshold_triangle(ski.data.coins()) == 80
+        assert threshold_triangle(np.invert(ski.data.coins())) == 175
+
+    def test_float_images(self):
+        text = ski.data.text()
+        int_bins = text.max() - text.min() + 1
+        # Set nbins to match the uint case and threshold as float.
+        assert round(threshold_triangle(text.astype(float), nbins=int_bins)) == 104
+        # Check that rescaling image to floats in unit interval is equivalent.
+        assert round(threshold_triangle(text / 255.0, nbins=int_bins) * 255) == 104
+        # Repeat for inverted image.
+        assert (
+            round(threshold_triangle(np.invert(text).astype(float), nbins=int_bins))
+            == 151
+        )
+        assert (
+            round(threshold_triangle(np.invert(text) / 255.0, nbins=int_bins) * 255)
+            == 151
+        )
+
+    def test_flip(self):
+        # Depending on the skewness, the algorithm flips the histogram.
+        # We check that the flip doesn't affect too much the result.
+        img = ski.data.camera()
+        inv_img = np.invert(img)
+        t = threshold_triangle(inv_img)
+        t_inv_img = inv_img > t
+        t_inv_inv_img = np.invert(t_inv_img)
+
+        t = threshold_triangle(img)
+        t_img = img > t
+
+        # Check that most of the pixels are identical
+        # See numpy #7685 for a future np.testing API
+        unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
+        assert len(unequal_pos[0]) / t_img.size < 1e-2
