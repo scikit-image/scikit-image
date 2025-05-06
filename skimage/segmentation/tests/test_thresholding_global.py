@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 import skimage as ski
-from skimage.segmentation import threshold_li, threshold_otsu
+from skimage.segmentation import threshold_li, threshold_otsu, threshold_yen
 from skimage.segmentation._thresholding_global import _cross_entropy
 from skimage._shared.testing import assert_stacklevel
 
@@ -230,3 +230,87 @@ class Test_threshold_otsu:
     def test_uniform_3d(self):
         img = np.ones((10, 10, 10), dtype=np.uint8)
         assert threshold_otsu(img) == 1
+
+
+class Test_threshold_yen:
+    def test_simple(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        assert threshold_yen(image) == 2
+
+    def test_negative_int(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        image = image - 2
+        assert threshold_yen(image) == 0
+
+    def test_float(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=float,
+        )
+        assert 2 <= threshold_yen(image) < 3
+
+    def test_arange(self):
+        image = np.arange(256)
+        assert threshold_yen(image) == 127
+
+    def test_uint8(self):
+        image = np.zeros([2, 256], dtype=np.uint8)
+        image[0] = 255
+        assert threshold_yen(image) < 1
+
+    def test_blank_zero(self):
+        image = np.zeros((5, 5), dtype=np.uint8)
+        assert threshold_yen(image) == 0
+
+    def test_blank_max(self):
+        image = np.empty((5, 5), dtype=np.uint8)
+        image.fill(255)
+        assert threshold_yen(image) == 255
+
+    def test_camera(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        assert 145 < threshold_yen(camera) < 147
+
+    def test_camera_histogram(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        hist = ski.exposure.histogram(camera.ravel(), 256, source_range='image')
+        assert 145 < threshold_yen(hist=hist) < 147
+
+    def test_camera_counts(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        counts, bin_centers = ski.exposure.histogram(
+            camera.ravel(), 256, source_range='image'
+        )
+        assert 145 < threshold_yen(hist=counts) < 147
+
+    def test_coins(self):
+        coins = ski.util.img_as_ubyte(ski.data.coins())
+        assert 109 < threshold_yen(coins) < 111
+
+    def test_coins_as_float(self):
+        coins = ski.util.img_as_float(ski.data.coins())
+        assert 0.43 < threshold_yen(coins) < 0.44
