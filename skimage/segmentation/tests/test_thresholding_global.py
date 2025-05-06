@@ -2,7 +2,12 @@ import pytest
 import numpy as np
 
 import skimage as ski
-from skimage.segmentation import threshold_li, threshold_otsu, threshold_yen
+from skimage.segmentation import (
+    threshold_li,
+    threshold_otsu,
+    threshold_yen,
+    threshold_minimum,
+)
 from skimage.segmentation._thresholding_global import _cross_entropy
 from skimage._shared.testing import assert_stacklevel
 
@@ -314,3 +319,58 @@ class Test_threshold_yen:
     def test_coins_as_float(self):
         coins = ski.util.img_as_float(ski.data.coins())
         assert 0.43 < threshold_yen(coins) < 0.44
+
+
+class Test_threshold_minimum:
+    def test_minimum(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        with pytest.raises(
+            RuntimeError, match="Unable to find two maxima in histogram"
+        ):
+            threshold_minimum(image)
+
+    def test_camera(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+
+        threshold = threshold_minimum(camera)
+        assert threshold == 85
+
+    def test_astronaut(self):
+        astronaut = ski.util.img_as_ubyte(ski.data.astronaut())
+        threshold = threshold_minimum(astronaut)
+        assert threshold == 114
+
+    def test_camera_histogram(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        hist = ski.exposure.histogram(camera.ravel(), 256, source_range='image')
+        threshold = threshold_minimum(hist=hist)
+        assert threshold == 85
+
+    def test_camera_counts(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        counts, bin_centers = ski.exposure.histogram(
+            camera.ravel(), 256, source_range='image'
+        )
+        threshold = threshold_minimum(hist=counts)
+        assert threshold == 85
+
+    def test_synthetic(self):
+        img = np.arange(25 * 25, dtype=np.uint8).reshape((25, 25))
+        img[0:9, :] = 50
+        img[14:25, :] = 250
+        threshold = threshold_minimum(img)
+        assert threshold == 95
+
+    def test_failure(self):
+        img = np.zeros((16 * 16), dtype=np.uint8)
+        with pytest.raises(RuntimeError):
+            threshold_minimum(img)
