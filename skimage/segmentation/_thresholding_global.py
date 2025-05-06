@@ -52,7 +52,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     ValueError : if image and hist are both None
     """
     if image is None and hist is None:
-        raise Exception("Either image or hist must be provided.")
+        raise TypeError("Either image or hist must be provided.")
 
     if hist is not None:
         if isinstance(hist, (tuple, list)):

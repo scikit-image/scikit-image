@@ -10,8 +10,13 @@ from skimage.segmentation import (
     threshold_minimum,
     threshold_triangle,
     threshold_isodata,
+    threshold_multiotsu,
 )
 from skimage.segmentation._thresholding_global import _cross_entropy
+from skimage.segmentation._multiotsu_cy import (
+    _get_multiotsu_thresh_indices_lut,
+    _get_multiotsu_thresh_indices,
+)
 from skimage._shared.testing import assert_stacklevel
 
 
@@ -571,3 +576,85 @@ class Test_threshold_isodata:
                 39.95117188,
             ],
         )
+
+
+class Test_threshold_multiotsu:
+    @pytest.mark.parametrize(
+        "name", ['camera', 'moon', 'coins', 'text', 'clock', 'page']
+    )
+    def test_bimodal_hist_datasets(self, name):
+        img = getattr(ski.data, name)()
+        assert threshold_otsu(img) == threshold_multiotsu(img, classes=2)
+
+    @pytest.mark.parametrize("name", ['chelsea', 'coffee', 'astronaut', 'rocket'])
+    def test_bimodal_hist_rgb_datasets(self, name):
+        img = ski.color.rgb2gray(getattr(ski.data, name)())
+        assert threshold_otsu(img) == threshold_multiotsu(img, classes=2)
+
+    def test_simple(self):
+        image = 0.25 * np.array(
+            [[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]
+        )
+        for idx in range(3, 6):
+            thr_multi = threshold_multiotsu(image, classes=idx)
+            assert len(thr_multi) == idx - 1
+
+    def test_output(self):
+        image = np.zeros((100, 100), dtype='int')
+        coords = [(25, 25), (50, 50), (75, 75)]
+        values = [64, 128, 192]
+        for coor, val in zip(coords, values):
+            rr, cc = ski.draw.disk(coor, radius=20)
+            image[rr, cc] = val
+        thresholds = [0, 64, 128]
+        assert_equal(thresholds, threshold_multiotsu(image, classes=4))
+
+    def test_astronaut(self):
+        img = ski.util.img_as_ubyte(ski.data.astronaut())
+        regex = ".*expected to work correctly only for grayscale images"
+        with pytest.warns(UserWarning, match=regex) as record:
+            result = threshold_multiotsu(img)
+        assert_stacklevel(record)
+        assert len(record) == 1
+        assert_allclose(result, [58, 149])
+
+    def test_more_classes_then_values(self):
+        img = np.ones((10, 10), dtype=np.uint8)
+        with pytest.raises(ValueError, match=".*cannot be thresholded in 2 classes"):
+            threshold_multiotsu(img, classes=2)
+        img[:, 3:] = 2
+        with pytest.raises(ValueError, match=".*cannot be thresholded in 3 classes"):
+            threshold_multiotsu(img, classes=3)
+        img[:, 6:] = 3
+        with pytest.raises(ValueError, match=".*cannot be thresholded in 4 classes"):
+            threshold_multiotsu(img, classes=4)
+
+    def test_missing_img_and_hist(self):
+        with pytest.raises(TypeError, match="Either image or hist must be provided"):
+            threshold_multiotsu()
+
+    @pytest.mark.parametrize("classes", [2, 3, 4])
+    @pytest.mark.parametrize(
+        "name", ['camera', 'moon', 'coins', 'text', 'clock', 'page']
+    )
+    def test_hist_parameter(self, classes, name):
+        img = getattr(ski.data, name)()
+        sk_hist = ski.exposure.histogram(img, nbins=256)
+        thresh_img = threshold_multiotsu(img, classes=classes)
+        thresh_sk_hist = threshold_multiotsu(classes=classes, hist=sk_hist)
+        assert_allclose(thresh_img, thresh_sk_hist)
+
+
+@pytest.mark.parametrize("classes", [2, 3, 4])
+@pytest.mark.parametrize("name", ['camera', 'moon', 'coins', 'text', 'clock', 'page'])
+def test_multiotsu_lut(classes, name):
+    img = getattr(ski.data, name)()
+    prob, bin_centers = ski.exposure.histogram(
+        img.ravel(), nbins=256, source_range='image', normalize=True
+    )
+    prob = prob.astype('float32')
+
+    result_lut = _get_multiotsu_thresh_indices_lut(prob, classes - 1)
+    result = _get_multiotsu_thresh_indices(prob, classes - 1)
+
+    assert_equal(result_lut, result)
