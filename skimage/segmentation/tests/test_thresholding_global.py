@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from numpy.testing import assert_equal, assert_allclose
 
 import skimage as ski
 from skimage.segmentation import (
@@ -8,6 +9,7 @@ from skimage.segmentation import (
     threshold_yen,
     threshold_minimum,
     threshold_triangle,
+    threshold_isodata,
 )
 from skimage.segmentation._thresholding_global import _cross_entropy
 from skimage._shared.testing import assert_stacklevel
@@ -423,3 +425,149 @@ class Test_threshold_triangle:
         # See numpy #7685 for a future np.testing API
         unequal_pos = np.where(t_img.ravel() != t_inv_inv_img.ravel())
         assert len(unequal_pos[0]) / t_img.size < 1e-2
+
+
+class Test_threshold_isodata:
+    def test_simple(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        assert threshold_isodata(image.copy()) == 2
+        assert threshold_isodata(image.copy(), return_all=True) == [2]
+
+    def test_blank_zero(self):
+        image = np.zeros((5, 5), dtype=np.uint8)
+        assert threshold_isodata(image) == 0
+        assert threshold_isodata(image, return_all=True) == [0]
+
+    def test_linspace(self):
+        image = np.linspace(-127, 0, 256)
+        assert -63.8 < threshold_isodata(image) < -63.6
+        assert_allclose(
+            threshold_isodata(image, return_all=True), [-63.74804688, -63.25195312]
+        )
+
+    def test_16bit(self):
+        np.random.seed(0)
+        imfloat = np.random.rand(256, 256)
+        assert 0.49 < threshold_isodata(imfloat, nbins=1024) < 0.51
+        assert all(0.49 < threshold_isodata(imfloat, nbins=1024, return_all=True))
+
+    def test_camera_image(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+
+        threshold = threshold_isodata(camera)
+        assert (
+            np.floor(
+                (camera[camera <= threshold].mean() + camera[camera > threshold].mean())
+                / 2.0
+            )
+            == threshold
+        )
+        assert threshold == 102
+
+        assert (threshold_isodata(camera, return_all=True) == [102, 103]).all()
+
+    def test_camera_image_histogram(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        hist = ski.exposure.histogram(camera.ravel(), 256, source_range='image')
+        threshold = threshold_isodata(hist=hist)
+        assert threshold == 102
+
+    def test_camera_image_counts(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        counts, bin_centers = ski.exposure.histogram(
+            camera.ravel(), 256, source_range='image'
+        )
+        threshold = threshold_isodata(hist=counts)
+        assert threshold == 102
+
+    def test_coins_image(self):
+        coins = ski.util.img_as_ubyte(ski.data.coins())
+
+        threshold = threshold_isodata(coins)
+        assert (
+            np.floor(
+                (coins[coins <= threshold].mean() + coins[coins > threshold].mean())
+                / 2.0
+            )
+            == threshold
+        )
+        assert threshold == 107
+
+        assert threshold_isodata(coins, return_all=True) == [107]
+
+    def test_moon_image(self):
+        moon = ski.util.img_as_ubyte(ski.data.moon())
+
+        threshold = threshold_isodata(moon)
+        assert (
+            np.floor(
+                (moon[moon <= threshold].mean() + moon[moon > threshold].mean()) / 2.0
+            )
+            == threshold
+        )
+        assert threshold == 86
+
+        thresholds = threshold_isodata(moon, return_all=True)
+        for threshold in thresholds:
+            assert (
+                np.floor(
+                    (moon[moon <= threshold].mean() + moon[moon > threshold].mean())
+                    / 2.0
+                )
+                == threshold
+            )
+        assert_equal(thresholds, [86, 87, 88, 122, 123, 124, 139, 140])
+
+    def test_moon_image_negative_int(self):
+        moon = ski.util.img_as_ubyte(ski.data.moon()).astype(np.int32)
+        moon -= 100
+
+        threshold = threshold_isodata(moon)
+        assert (
+            np.floor(
+                (moon[moon <= threshold].mean() + moon[moon > threshold].mean()) / 2.0
+            )
+            == threshold
+        )
+        assert threshold == -14
+
+        thresholds = threshold_isodata(moon, return_all=True)
+        for threshold in thresholds:
+            assert (
+                np.floor(
+                    (moon[moon <= threshold].mean() + moon[moon > threshold].mean())
+                    / 2.0
+                )
+                == threshold
+            )
+        assert_equal(thresholds, [-14, -13, -12, 22, 23, 24, 39, 40])
+
+    def test_moon_image_negative_float(self):
+        moon = ski.util.img_as_ubyte(ski.data.moon()).astype(np.float64)
+        moon -= 100
+
+        assert -14 < threshold_isodata(moon) < -13
+
+        thresholds = threshold_isodata(moon, return_all=True)
+        assert_allclose(
+            thresholds,
+            [
+                -13.83789062,
+                -12.84179688,
+                -11.84570312,
+                22.02148438,
+                23.01757812,
+                24.01367188,
+                38.95507812,
+                39.95117188,
+            ],
+        )
