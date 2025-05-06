@@ -8,6 +8,10 @@ Version 0.28
   - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
   - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
 * Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
+* Remove all traces of deprecated parameter `num_threads` in
+  `skimage.restoration.rolling_ball`.
+* Remove all traces of deprecated parameter `num_workers` in
+  `skimage.restoration.cycle_spin`.
 
 Version 0.27
 ------------
@@ -58,5 +62,7 @@ Version 2.0
 - In `skimage.morphology.remove_small_holes`, complete the deprecation of
   `area_threshold` and re-order the argument `connectivity` after the
   keyword-only parameter `max_size`.
+- In `skimage.measure.regionprops` complete deprecation of old property names.
+  Remove `PROPS` dict, related logic and warnings.
 
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
