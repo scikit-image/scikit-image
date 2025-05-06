@@ -2,8 +2,9 @@ import pytest
 import numpy as np
 
 import skimage as ski
-from skimage.segmentation import threshold_li
+from skimage.segmentation import threshold_li, threshold_otsu
 from skimage.segmentation._thresholding_global import _cross_entropy
+from skimage._shared.testing import assert_stacklevel
 
 
 class Test_threshold_li:
@@ -135,3 +136,97 @@ class Test_threshold_li:
         image = np.array(image)
         threshold = threshold_li(image)
         assert np.isfinite(threshold)
+
+
+class Test_threshold_otsu:
+    def test_simple(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        assert threshold_otsu(image) == 2
+
+    def test_negative_int(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=int,
+        )
+        image = image - 2
+        assert threshold_otsu(image) == 0
+
+    def test_float(self):
+        image = np.array(
+            [
+                [0, 0, 1, 3, 5],
+                [0, 1, 4, 3, 4],
+                [1, 2, 5, 4, 1],
+                [2, 4, 5, 2, 1],
+                [4, 5, 1, 0, 0],
+            ],
+            dtype=float,
+        )
+        assert 2 <= threshold_otsu(image) < 3
+
+    def test_camera(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        assert 101 < threshold_otsu(camera) < 103
+
+    def test_camera_histogram(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        hist = ski.exposure.histogram(camera.ravel(), 256, source_range='image')
+        assert 101 < threshold_otsu(hist=hist) < 103
+
+    def test_camera_counts(self):
+        camera = ski.util.img_as_ubyte(ski.data.camera())
+        counts, bin_centers = ski.exposure.histogram(
+            camera.ravel(), 256, source_range='image'
+        )
+        assert 101 < threshold_otsu(hist=counts) < 103
+
+    def test_zero_count_histogram(self):
+        """Issue #5497.
+
+        As the histogram returned by np.bincount starts with zero,
+        it resulted in NaN-related issues.
+        """
+        x = np.array([1, 2])
+
+        t1 = threshold_otsu(x)
+        t2 = threshold_otsu(hist=np.bincount(x))
+        assert t1 == t2
+
+    def test_coins(self):
+        coins = ski.util.img_as_ubyte(ski.data.coins())
+        assert 106 < threshold_otsu(coins) < 108
+
+    def test_coins_as_float(self):
+        coins = ski.util.img_as_float(ski.data.coins())
+        assert 0.41 < threshold_otsu(coins) < 0.42
+
+    def test_astronaut(self):
+        img = ski.util.img_as_ubyte(ski.data.astronaut())
+        regex = ".*expected to work correctly only for grayscale images"
+        with pytest.warns(UserWarning, match=regex) as record:
+            assert 109 < threshold_otsu(img) < 111
+        assert_stacklevel(record)
+        assert len(record) == 1
+
+    def test_uniform(self):
+        img = np.ones((10, 10), dtype=np.uint8)
+        assert threshold_otsu(img) == 1
+
+    def test_uniform_3d(self):
+        img = np.ones((10, 10, 10), dtype=np.uint8)
+        assert threshold_otsu(img) == 1
