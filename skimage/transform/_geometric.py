@@ -470,19 +470,22 @@ class FundamentalMatrixTransform(_HMatrixTransform):
            [ 0.01339569, -0.03388123,  0.00497605],
            [ 0.03420927, -0.1135812 ,  0.02228236]])
 
-    The estimation can fail when calculating scaling for the points - for
-    example, if all the input or output points are the same.  If this happens,
-    you will get a transform for which ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((8, 2))
     >>> bad_tform = ski.transform.FundamentalMatrixTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -746,19 +749,22 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
-    The estimation can fail when calculating scaling for the points - for
-    example, if all the input or output points are the same.  If this happens,
-    you will get a transform for which ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((8, 2))
     >>> bad_tform = ski.transform.EssentialMatrixTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -956,19 +962,22 @@ class ProjectiveTransform(_HMatrixTransform):
     >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
-    The estimation can fail when — for example — all the input or output points
-    are the same.  If this happens, you will get a transform for which
-    ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
     >>> bad_tform = ski.transform.ProjectiveTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -1390,19 +1399,22 @@ class AffineTransform(ProjectiveTransform):
     >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
-    The estimation can fail when — for example — all the input or output points
-    are the same.  If this happens, you will get a transform for which
-    ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
     >>> bad_tform = ski.transform.AffineTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -1549,19 +1561,22 @@ class PiecewiseAffineTransform(_GeometricTransform):
     >>> np.allclose(tform.inverse(dst), src)
     True
 
-    The estimation can fail when — for example — all the input or output points
-    are the same.  If this happens, you will get a transform for which
-    ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
-    >>> # Not so for a degenerate transform with some identical points.
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = [[1, 1]] * 6 + src[6:]
     >>> bad_tform = ski.transform.PiecewiseAffineTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -1848,19 +1863,22 @@ class EuclideanTransform(ProjectiveTransform):
     >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
-    The estimation can fail when — for example — all the input or output points
-    are the same.  If this happens, you will get a transform for which
-    ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
     >>> bad_tform = ski.transform.EuclideanTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -2101,19 +2119,22 @@ class SimilarityTransform(EuclideanTransform):
     >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
 
-    The estimation can fail when — for example — all the input or output points
-    are the same.  If this happens, you will get a transform for which
-    ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((3, 2))
     >>> bad_tform = ski.transform.SimilarityTransform.from_estimate(
     ...      bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
@@ -2575,19 +2596,22 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     >>> np.allclose(tform3(src), tform2(tform(src)))
     True
 
-    The estimation can fail for some transforms when — for example — all the
-    input or output points are the same.  If this happens, you will get a
-    transform for which ``bool(tform)`` is ``False``:
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # bool on a successful transform (as above) gives True:
-    >>> bool(tform)
-    True
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate transform with identical points.
     >>> bad_src = np.ones((2, 2))
     >>> bad_tform = ski.transform.estimate_transform('similarity',
     ...                                              bad_src, dst)
-    >>> bool(bad_tform)
-    False
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
