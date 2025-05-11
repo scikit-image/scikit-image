@@ -65,7 +65,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
         'speckle'
             Multiplicative noise using ``out = image + n * image``, where ``n``
             is Gaussian noise with specified mean & variance.
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : `numpy.random.Generator` or int, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
