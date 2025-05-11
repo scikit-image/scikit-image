@@ -119,7 +119,7 @@ class ThinPlateSplineTransform:
 
         Returns
         -------
-        success: bool
+        success : bool
             True indicates that the estimation was successful.
 
         Notes
