@@ -1,18 +1,19 @@
 (skimage2_migration)=
 
-# Migration guide: skimage 0.x to skimage2
+# Migration guide: from skimage to skimage2
 
 :::{hint}
 This document is a work in progress and still subject to change.
 :::
 
 scikit-image is preparing to release version 2.0 as a new package: `skimage2`.
-Alongside skimage2, we will release version 1.0.0, the last using the current API.
-Version 1.0.1 will emit a notification (FutureWarning) on import, telling users to either upgrade to skimage2 or pin to version 1.0.0.
+Alongside skimage2, we will release version 1.0.0. Versions 1.x will be using the current API.
+Versions 1.1.x will throw a FutureWarning upon import, as a means to notify users that
+they should either upgrade to skimage2 or pin to version 1.0.x.
 
-We do this to make some long-outstanding, backward-incomptible changes to our API.
+We have undertaken this to make some long-outstanding, backward-incomptible changes to the scikit-image API.
 Most changes were difficult or impossible to make using deprecations alone.
-To honor the Hinsen principle—that is, we never change results silently, unless it is to fix a bug—we introduce a new package, which gives users an explicit way of upgrading.
+To honor the Hinsen principle—that is, never change results silently, unless to fix a bug—we introduce a new package, which gives users an explicit way of upgrading.
 Users also have the option to use the two versions side-by-side while they do so.
 
 You can find a more detailed description of our motivation and discussion leading up to this in {doc}`SKIP 4 <../skips/4-transition-to-v2>`.
