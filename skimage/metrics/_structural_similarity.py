@@ -17,6 +17,7 @@ def structural_similarity(
     im2,
     *,
     win_size=None,
+    padding_mode='reflect',
     gradient=False,
     data_range=None,
     channel_axis=None,
@@ -36,6 +37,10 @@ def structural_similarity(
         The side-length of the sliding window used in comparison. Must be an
         odd value. If `gaussian_weights` is True, this is ignored and the
         window size will depend on `sigma`.
+    padding_mode: 'reflect', 'constant', 'nearest', 'mirror', 'wrap' or None, optional
+        The padding mode specifying how the images should be padded. If None, no
+        padding is applied. Padding size is determined by the window size
+        to ensure the SSIM image is the same shape as the input images.
     gradient : bool, optional
         If True, also return the gradient with respect to im2.
     data_range : float, optional
@@ -72,7 +77,8 @@ def structural_similarity(
     Returns
     -------
     mssim : float
-        The mean structural similarity index over the image.
+        The mean structural similarity index over the SSIM image. If present in the
+        image, edge artefacts from padding are ignored in the computation.
     grad : ndarray
         The gradient of the structural similarity between im1 and im2 [2]_.
         This is only returned if `gradient` is set to True.
@@ -118,10 +124,25 @@ def structural_similarity(
     check_shape_equality(im1, im2)
     float_type = _supported_float_type(im1.dtype)
 
+    sigma = kwargs.pop('sigma', 1.5)
+    if gaussian_weights:
+        # Set to give an 11-tap filter with the default sigma of 1.5 to match
+        # Wang et. al. 2004.
+        truncate = 3.5
+
+    if win_size is None:
+        if gaussian_weights:
+            # set win_size used by crop to match the filter size
+            r = int(truncate * sigma + 0.5)  # radius as in ndimage
+            win_size = 2 * r + 1
+        else:
+            win_size = 7  # backwards compatibility
+
     if channel_axis is not None:
         # loop over channels
         args = dict(
             win_size=win_size,
+            padding_mode=padding_mode,
             gradient=gradient,
             data_range=data_range,
             channel_axis=None,
@@ -132,10 +153,23 @@ def structural_similarity(
         nch = im1.shape[channel_axis]
         mssim = np.empty(nch, dtype=float_type)
 
-        if gradient:
-            G = np.empty(im1.shape, dtype=float_type)
-        if full:
-            S = np.empty(im1.shape, dtype=float_type)
+        if padding_mode:
+            if gradient:
+                G = np.empty(im1.shape, dtype=float_type)
+            if full:
+                S = np.empty(im1.shape, dtype=float_type)
+        else:
+            if channel_axis < 0:
+                channel_axis += len(im1.shape)
+            shape = [
+                l - (win_size - 1) if ax != channel_axis else l
+                for ax, l in enumerate(im1.shape)
+            ]
+            if gradient:
+                G = np.empty(shape, dtype=float_type)
+            if full:
+                S = np.empty(shape, dtype=float_type)
+
         channel_axis = channel_axis % im1.ndim
         _at = functools.partial(utils.slice_at_axis, axis=channel_axis)
         for ch in range(nch):
@@ -160,7 +194,6 @@ def structural_similarity(
 
     K1 = kwargs.pop('K1', 0.01)
     K2 = kwargs.pop('K2', 0.03)
-    sigma = kwargs.pop('sigma', 1.5)
     if K1 < 0:
         raise ValueError("K1 must be positive")
     if K2 < 0:
@@ -168,19 +201,6 @@ def structural_similarity(
     if sigma < 0:
         raise ValueError("sigma must be positive")
     use_sample_covariance = kwargs.pop('use_sample_covariance', True)
-
-    if gaussian_weights:
-        # Set to give an 11-tap filter with the default sigma of 1.5 to match
-        # Wang et. al. 2004.
-        truncate = 3.5
-
-    if win_size is None:
-        if gaussian_weights:
-            # set win_size used by crop to match the filter size
-            r = int(truncate * sigma + 0.5)  # radius as in ndimage
-            win_size = 2 * r + 1
-        else:
-            win_size = 7  # backwards compatibility
 
     if np.any((np.asarray(im1.shape) - win_size) < 0):
         raise ValueError(
@@ -226,10 +246,12 @@ def structural_similarity(
 
     if gaussian_weights:
         filter_func = gaussian
-        filter_args = {'sigma': sigma, 'truncate': truncate, 'mode': 'reflect'}
+        filter_args = {'sigma': sigma, 'truncate': truncate}
     else:
         filter_func = uniform_filter
         filter_args = {'size': win_size}
+    if padding_mode:
+        filter_args['mode'] = padding_mode
 
     # ndimage filters need floating point data
     im1 = im1.astype(float_type, copy=False)
@@ -268,12 +290,6 @@ def structural_similarity(
     D = B1 * B2
     S = (A1 * A2) / D
 
-    # to avoid edge effects will ignore filter radius strip around edges
-    pad = (win_size - 1) // 2
-
-    # compute (weighted) mean of ssim. Use float64 for accuracy.
-    mssim = crop(S, pad).mean(dtype=np.float64)
-
     if gradient:
         # The following is Eqs. 7-8 of Avanaki 2009.
         grad = filter_func(A1 / D, **filter_args) * im1
@@ -281,6 +297,18 @@ def structural_similarity(
         grad += filter_func((ux * (A2 - A1) - uy * (B2 - B1) * S) / D, **filter_args)
         grad *= 2 / im1.size
 
+    pad = (win_size - 1) // 2
+    if padding_mode:
+        # remove filter edge effects from mean
+        mssim = crop(S, pad).mean(dtype=np.float64)
+    else:
+        # remove filter edge effects from all potentially returned values
+        S = crop(S, pad)
+        mssim = S.mean(dtype=np.float64)
+        if gradient:
+            grad = crop(grad, pad)
+
+    if gradient:
         if full:
             return mssim, grad, S
         else:
