@@ -13,6 +13,7 @@ from skimage._shared.utils import (
     check_nD,
     deprecate_func,
     deprecate_parameter,
+    rename_parameter,
     DEPRECATED,
 )
 
@@ -514,3 +515,19 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
             bar(0, 1)
             testing.assert_stacklevel(records)
+
+
+class Test_rename_parameter:
+    def test_warning(self):
+        @rename_parameter(
+            "old", "new", deprecated_version="0.10", removed_version="0.12"
+        )
+        def foo(arg0, old=None):
+            return arg0, old
+
+        with pytest.raises(TypeError, match="Cannot specify both 'old' and 'new' "):
+            foo(arg0=3, new=1, old=1)
+        with pytest.warns(
+            FutureWarning, match="'old' is deprecated since version 0.10 "
+        ):
+            foo(arg0=2, old=3)
