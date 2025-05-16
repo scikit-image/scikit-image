@@ -35,7 +35,9 @@ import skimage as ski
 
 img = ski.data.page()
 
-fig, ax = ski.filters.try_all_threshold(img, figsize=(10, 8), verbose=False)
+fig, ax = ski.segmentation.threshold_plot_all_global(
+    img, figsize=(10, 8), verbose=False
+)
 
 plt.show()
 
@@ -51,7 +53,7 @@ plt.show()
 
 
 image = ski.data.camera()
-thresh = ski.filters.threshold_mean(image)
+thresh = ski.segmentation.threshold_mean(image)
 binary = image > thresh
 
 fig, axes = plt.subplots(ncols=2, figsize=(8, 3))
@@ -79,7 +81,7 @@ plt.show()
 
 image = ski.data.camera()
 
-thresh_min = ski.filters.threshold_minimum(image)
+thresh_min = ski.segmentation.threshold_minimum(image)
 binary_min = image > thresh_min
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 10))
@@ -112,7 +114,7 @@ plt.show()
 
 
 image = ski.data.camera()
-thresh = ski.filters.threshold_otsu(image)
+thresh = ski.segmentation.threshold_otsu(image)
 binary = image > thresh
 
 fig, ax = plt.subplots(ncols=3, figsize=(8, 2.5))
@@ -150,11 +152,11 @@ plt.show()
 
 image = ski.data.page()
 
-global_thresh = ski.filters.threshold_otsu(image)
+global_thresh = ski.segmentation.threshold_otsu(image)
 binary_global = image > global_thresh
 
 block_size = 35
-local_thresh = ski.filters.threshold_local(image, block_size, offset=10)
+local_thresh = ski.segmentation.threshold_local(image, block_size=block_size, offset=10)
 binary_local = image > local_thresh
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
@@ -191,7 +193,7 @@ radius = 15
 footprint = ski.morphology.disk(radius)
 
 local_otsu = ski.filters.rank.otsu(img, footprint)
-threshold_global_otsu = ski.filters.threshold_otsu(img)
+threshold_global_otsu = ski.segmentation.threshold_otsu(img)
 global_otsu = img >= threshold_global_otsu
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 5), sharex=True, sharey=True)

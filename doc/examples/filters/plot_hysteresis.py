@@ -15,7 +15,7 @@ edges.
 """
 
 import matplotlib.pyplot as plt
-from skimage import data, filters
+from skimage import data, filters, segmentation
 
 fig, ax = plt.subplots(nrows=2, ncols=2)
 
@@ -27,7 +27,7 @@ high = 0.35
 
 lowt = (edges > low).astype(int)
 hight = (edges > high).astype(int)
-hyst = filters.apply_hysteresis_threshold(edges, low, high)
+hyst = segmentation.threshold_labels_hysteresis(edges, low=low, high=high)
 
 ax[0, 0].imshow(image, cmap='gray')
 ax[0, 0].set_title('Original image')
