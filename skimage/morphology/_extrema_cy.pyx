@@ -6,6 +6,7 @@
 """Cython code used in extrema.py."""
 
 cimport numpy as cnp
+from .._shared.fused_numerics cimport *
 cnp.import_array()
 
 
@@ -13,19 +14,6 @@ cnp.import_array()
 ctypedef Py_ssize_t QueueItem
 
 include "_queue_with_history.pxi"
-
-
-ctypedef fused dtype_t:
-    cnp.uint8_t
-    cnp.uint16_t
-    cnp.uint32_t
-    cnp.uint64_t
-    cnp.int8_t
-    cnp.int16_t
-    cnp.int32_t
-    cnp.int64_t
-    cnp.float32_t
-    cnp.float64_t
 
 
 # Definition of flag values used for `flags` in _local_maxima & _fill_plateau
@@ -41,7 +29,7 @@ cdef:
     unsigned char NOT_MAXIMUM = 0
 
 
-def _local_maxima(dtype_t[::1] image not None,
+def _local_maxima(np_real_numeric[::1] image not None,
                   unsigned char[::1] flags,
                   Py_ssize_t[::1] neighbor_offsets not None):
     """Detect local maxima in n-dimensional array.
@@ -96,7 +84,7 @@ def _local_maxima(dtype_t[::1] image not None,
 
 
 cdef inline void _mark_candidates_in_last_dimension(
-        dtype_t[::1] image, unsigned char[::1] flags) noexcept nogil:
+        np_real_numeric[::1] image, unsigned char[::1] flags) noexcept nogil:
     """Mark local maxima in last dimension.
 
     This function considers only the last dimension of the image and marks
@@ -163,7 +151,7 @@ cdef inline void _mark_candidates_all(unsigned char[::1] flags) noexcept nogil:
 
 
 cdef inline void _fill_plateau(
-        dtype_t[::1] image, unsigned char[::1] flags,
+        np_real_numeric[::1] image, unsigned char[::1] flags,
         Py_ssize_t[::1] neighbor_offsets, QueueWithHistory* queue_ptr,
         Py_ssize_t start_index) noexcept nogil:
     """Fill with 1 if plateau is local maximum else with 0.
@@ -184,7 +172,7 @@ cdef inline void _fill_plateau(
         Start position for the flood-fill.
     """
     cdef:
-        dtype_t height
+        np_real_numeric height
         unsigned char is_maximum
         QueueItem current_index, neighbor
 
