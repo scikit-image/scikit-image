@@ -37,6 +37,11 @@ jobs:
         run: |
           source .github/scripts/setup-docs-env.sh
 
+      - name: Install Chrome for plotly
+        run: |
+          sudo apt-get update
+          sudo apt-get install chromium-browser
+
       - name: Build docs / run examples
         run: |
           SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html
