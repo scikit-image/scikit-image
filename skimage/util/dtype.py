@@ -1,4 +1,7 @@
 import warnings
+import os
+from contextlib import contextmanager
+from contextvars import ContextVar
 from warnings import warn
 
 import numpy as np
@@ -59,6 +62,91 @@ with warnings.catch_warnings():
 dtype_range.update(_integer_ranges)
 
 _supported_types = list(dtype_range.keys())
+
+
+def _preserve_range_envvar():
+    """Fetch truthiness of environment variable ``SKIMAGE_PRESERVE_RANGE``.
+
+    .. important::
+
+        This should be only used to fetch the state once at import time. The state
+        is managed by the `contextvars.ContextVar`. This allows manipulating it
+        with `preserve_range`. Use `is_preserving_range` to check.
+
+    Returns
+    -------
+    is_enabled : bool
+        Whether ``SKIMAGE_PRESERVE_RANGE`` has been set to somthing "truthy".
+    """
+    env_var = os.getenv("SKIMAGE_PRESERVE_RANGE")
+    try:
+        env_var = int(env_var)
+    except (ValueError, TypeError):
+        pass
+    is_enabled = bool(env_var)
+    return is_enabled
+
+
+# Context variable to manage toggling range preservation in a thread-safe and
+# context-local manner
+_preserve_range_ctx = ContextVar("_preserve_range", default=_preserve_range_envvar())
+
+
+def is_preserving_range():
+    """Check if range preservation of input values has been enabled.
+
+    Range preservation can be enabled by setting the environment variable
+    ``SKIMAGE_PRESERVE_RANGE`` to anything that evaluates to ``True``. If
+    enabled, scikit-image's functions no longer scale user provided input
+    implicitly to ranges documented in [1]_. Instead, if the provided input
+    doesn't match the expected range, an error is raised.
+
+    Returns
+    -------
+    is_enabled : bool
+        Whether preserving range is enabled or not.
+
+    References
+    ----------
+    [1] https://scikit-image.org/docs/dev/user_guide/data_types.html
+
+    Notes
+    -----
+    This function is thread-safe.
+    """
+    return _preserve_range_ctx.get()
+
+
+@contextmanager
+def preserve_range(*, set_=True):
+    """Enable range preservation within this context manager.
+
+    Parameters
+    ----------
+    set_ : bool, optional
+        Allows setting the state explicitly. This allows disabling range
+        preservation as well.
+
+    Notes
+    -----
+    This context manager can also be used as a decorator.
+
+    Examples
+    --------
+    >>> import skimage as ski
+    >>> with ski.util.dtype.preserve_range():
+    ...     print(ski.util.dtype.is_preserving_range())
+    ...
+    ...     with ski.util.dtype.preserve_range(set_=False):
+    ...         print(ski.util.dtype.is_preserving_range())
+    True
+    False
+    """
+    old = _preserve_range_ctx.set(set_)
+    try:
+        yield
+    finally:
+        _preserve_range_ctx.reset(old)
 
 
 def dtype_limits(image, clip_negative=False):
