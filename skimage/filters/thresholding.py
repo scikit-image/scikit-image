@@ -33,6 +33,7 @@ __all__ = [
     'threshold_triangle',
     'apply_hysteresis_threshold',
     'threshold_multiotsu',
+    'threshold_elen'
 ]
 
 
