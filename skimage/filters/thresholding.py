@@ -1337,3 +1337,74 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
+
+def threshold_elen(image=None, nbins=256, *, hist=None):
+    """Return threshold value based on Elen & Donmez's method.
+
+    Either `image` or `hist` must be provided. If `hist` is given, it is used directly.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray, optional
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. Ignored for integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        Histogram from which to determine the threshold, and optionally a
+        corresponding array of bin center intensities. If no histogram is
+        provided, this function will compute it from the image.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels with an intensity higher than
+        this value are assumed to be foreground.
+
+    References
+    ----------
+    .. [1] Elen, A. & Donmez, E. (2024), "Histogram-based thresholding",
+           Optik, 306: 1-20, :DOI:`10.1109/83.366472`
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_elen(image)
+    >>> binary = image > thresh
+    """
+    if image is not None:
+        if image.ndim > 2:
+            if image.shape[-1] in (3, 4):
+                warn('Input should be a grayscale image, but a color image was provided.')
+        if np.all(image == image.flat[0]):
+            return image.flat[0]
+
+    counts, bin_centers = _validate_image_histogram(image, hist, nbins)
+
+    # Normalize histogram to obtain probability distribution
+    prob = counts / np.sum(counts)
+
+    # Calculate global mean and standard deviation of the intensity distribution
+    mean = np.sum(bin_centers * prob)
+    std = np.sqrt(np.sum(((bin_centers - mean) ** 2) * prob))
+
+    # Define alpha region as [mean - std, mean + std]
+    mask_alpha = (bin_centers >= mean - std) & (bin_centers <= mean + std)
+
+    # Separate histogram bins into alpha (central) and beta (peripheral) regions
+    counts_alpha = counts[mask_alpha]
+    bins_alpha = bin_centers[mask_alpha]
+    counts_beta = counts[~mask_alpha]
+    bins_beta = bin_centers[~mask_alpha]
+
+    # Compute weights (sum of counts) for each region
+    weight_alpha = counts_alpha.sum()
+    weight_beta = counts_beta.sum()
+
+    # Compute average intensity within each region
+    avg_alpha = np.sum(bins_alpha * counts_alpha) / weight_alpha if weight_alpha > 0 else 0
+    avg_beta = np.sum(bins_beta * counts_beta) / weight_beta if weight_beta > 0 else 0
+
+    # Final threshold is the midpoint between regional means
+    return (avg_alpha + avg_beta) / 2.0
