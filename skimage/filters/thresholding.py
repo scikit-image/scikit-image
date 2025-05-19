@@ -33,7 +33,7 @@ __all__ = [
     'threshold_triangle',
     'apply_hysteresis_threshold',
     'threshold_multiotsu',
-    'threshold_elen'
+    'threshold_elen',
 ]
 
 
@@ -1377,7 +1377,9 @@ def threshold_elen(image=None, nbins=256, *, hist=None):
     if image is not None:
         if image.ndim > 2:
             if image.shape[-1] in (3, 4):
-                warn('Input should be a grayscale image, but a color image was provided.')
+                warn(
+                    'Input should be a grayscale image, but a color image was provided.'
+                )
         if np.all(image == image.flat[0]):
             return image.flat[0]
 
@@ -1404,7 +1406,9 @@ def threshold_elen(image=None, nbins=256, *, hist=None):
     weight_beta = counts_beta.sum()
 
     # Compute average intensity within each region
-    avg_alpha = np.sum(bins_alpha * counts_alpha) / weight_alpha if weight_alpha > 0 else 0
+    avg_alpha = (
+        np.sum(bins_alpha * counts_alpha) / weight_alpha if weight_alpha > 0 else 0
+    )
     avg_beta = np.sum(bins_beta * counts_beta) / weight_beta if weight_beta > 0 else 0
 
     # Final threshold is the midpoint between regional means
