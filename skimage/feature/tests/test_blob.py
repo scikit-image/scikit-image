@@ -181,6 +181,52 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
         assert blobs.shape[0] == 0, msg
 
 
+@pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+def test_blog_dog_preserve_range(dtype):
+    r2 = math.sqrt(2)
+    img = np.ones((512, 512), dtype=dtype)
+    xs, ys = disk((400, 130), 5)
+    img[xs, ys] = 255
+    xs, ys = disk((100, 300), 25)
+    img[xs, ys] = 255
+    xs, ys = disk((200, 350), 45)
+    img[xs, ys] = 255
+
+    if img.dtype.kind != "f":
+        empty = blob_dog(img, min_sigma=4, max_sigma=50, threshold=2.0)
+        assert empty.size == 0
+
+    blobs = blob_dog(
+        img,
+        min_sigma=4,
+        max_sigma=50,
+        threshold=2.0,
+        preserve_range=True,
+    )
+
+    def radius(x):
+        return r2 * x[2]
+
+    s = sorted(blobs, key=radius)
+    thresh = 5
+    ratio_thresh = 0.25
+
+    b = s[0]
+    assert abs(b[0] - 400) <= thresh
+    assert abs(b[1] - 130) <= thresh
+    assert abs(radius(b) - 5) <= ratio_thresh * 5
+
+    b = s[1]
+    assert abs(b[0] - 100) <= thresh
+    assert abs(b[1] - 300) <= thresh
+    assert abs(radius(b) - 25) <= ratio_thresh * 25
+
+    b = s[2]
+    assert abs(b[0] - 200) <= thresh
+    assert abs(b[1] - 350) <= thresh
+    assert abs(radius(b) - 45) <= ratio_thresh * 45
+
+
 @pytest.mark.parametrize('anisotropic', [False, True])
 @pytest.mark.parametrize('ndim', [1, 2, 3, 4])
 @pytest.mark.parametrize('function_name', ['blob_dog', 'blob_log'])

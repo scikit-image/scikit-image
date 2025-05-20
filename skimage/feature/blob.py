@@ -228,6 +228,7 @@ def blob_dog(
     *,
     threshold_rel=None,
     exclude_border=False,
+    preserve_range=False,
 ):
     r"""Finds blobs in the given grayscale image.
 
@@ -258,6 +259,14 @@ def blob_dog(
         than `threshold` are ignored. Reduce this to detect blobs with lower
         intensities. If `threshold_rel` is also specified, whichever threshold
         is larger will be used. If None, `threshold_rel` is used instead.
+
+        .. attention::
+            Depending on the dtype of `image`, its value range is rescaled with
+            :func:`~.img_as_float` internally before the `threshold` is
+            applied. So `threshold` may need to be adjusted accordingly.
+            Use ``preserve_range=True`` to disable rescaling of `image`.
+            This will become the default in version 2.0.
+
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -276,6 +285,20 @@ def blob_dog(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
+    preserve_range : bool, optional
+        Preserve the value range of `image`. This affects how the `threshold`
+        parameter must be chosen.
+        If ``False`` (default), `image` is scaled with  :func:`~.img_as_float`.
+        If `image` has an unsigned or signed integer dtype, it is scaled to the
+        ranges [0.0, 1.0] and [-1.0, 1.0] respectively. Floating dtypes aren't
+        scaled. So the absolute `threshold` will have a different meaning
+        depending on the dtype of `image`.
+        If set to ``True``, `image` is no longer rescaled, and `threshold` will
+        always have the same meaning regardless of `image`'s dtype.
+
+        .. tip::
+            Preserving the range of `image` will become the default in
+            version 2.0.
 
     Returns
     -------
@@ -336,7 +359,9 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    if preserve_range is False:
+        image = img_as_float(image)
+
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
