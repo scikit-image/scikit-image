@@ -1,4 +1,5 @@
 import math
+import os
 
 import numpy as np
 import pytest
@@ -412,6 +413,31 @@ def test_li_negative_inital_guess():
     with pytest.raises(ValueError, match=".*initial guess.*must be within the range"):
         threshold_li(coins, initial_guess=-5)
 
+def test_threshold_li_warns_on_oscillating_input():
+    img_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 
+        "..",
+        "..",
+        "data",
+        "threshold_li_oscillation_img.txt.gz"
+    ))
+    oscillating_image = np.loadtxt(img_path, dtype="float32")
+
+    with pytest.warns(UserWarning, match="threshold_li oscillates between two threshold values"):
+        threshold_li(oscillating_image)
+
+def test_threshold_li_breaks_at_max_iteration():
+    img_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 
+        "..",
+        "..",
+        "data",
+        "threshold_li_oscillation_img.txt.gz"
+    ))
+    oscillating_image = np.loadtxt(img_path, dtype="float32")
+    
+    with pytest.warns(UserWarning, match="threshold_li did not converge"):
+        threshold_li(oscillating_image, tolerance=1e-12, max_iter=5)
 
 @pytest.mark.parametrize(
     "image",

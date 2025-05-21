@@ -785,12 +785,14 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
             
-            if round(float(t_next), 10) in seen_thresholds:
+
+            if round(float(t_curr), 10) in seen_thresholds:
+                warnings.warn("threshold_li oscillates between two threshold values", UserWarning)
                 break
-            seen_thresholds.append(round(float(t_next), 10))
+            seen_thresholds.append(round(float(t_curr), 10))
             
             if iteration >= max_iter:
-                warnings.warn("threshold_li did not converge")
+                warnings.warn("threshold_li did not converge", UserWarning)
                 break
             iteration += 1
 
@@ -809,12 +811,13 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
 
-            if round(float(t_next), 10) in seen_thresholds:
+            if round(float(t_curr), 10) in seen_thresholds:
+                warnings.warn("threshold_li oscillates between two threshold values", UserWarning)
                 break
-            seen_thresholds.append(round(float(t_next), 10))
+            seen_thresholds.append(round(float(t_curr), 10))
             
             if iteration >= max_iter:
-                warnings.warn("threshold_li did not converge", RuntimeWarning)
+                warnings.warn("threshold_li did not converge", UserWarning)
                 break
             iteration += 1
 
