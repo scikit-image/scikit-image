@@ -5,7 +5,7 @@ import scipy.ndimage as ndi
 from scipy import spatial
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import _supported_float_type, check_nD, warn_not_preserve_range
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
@@ -218,6 +218,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
+@warn_not_preserve_range()
 def blob_dog(
     image,
     min_sigma=1,
@@ -328,7 +329,9 @@ def blob_dog(
     --------
     >>> from skimage import data, feature
     >>> coins = data.coins()
-    >>> feature.blob_dog(coins, threshold=.05, min_sigma=10, max_sigma=40)
+    >>> feature.blob_dog(
+    ...     coins, threshold=12.75, min_sigma=10, max_sigma=40, preserve_range=True,
+    ... )
     array([[128., 155.,  10.],
            [198., 155.,  10.],
            [124., 338.,  10.],

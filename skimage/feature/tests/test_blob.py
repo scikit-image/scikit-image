@@ -1,4 +1,5 @@
 import math
+import warnings
 
 import numpy as np
 import pytest
@@ -9,6 +10,13 @@ from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
+from skimage._shared.testing import assert_stacklevel
+
+
+# Inline modifier "(?s)" makes ".*" match newlines too
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:(?s).*preserve_range:FutureWarning:skimage"
+)
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
@@ -225,6 +233,24 @@ def test_blog_dog_preserve_range(dtype):
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 45) <= ratio_thresh * 45
+
+
+def test_blog_dog_preserve_range_warning():
+    image = np.ones((10, 10), dtype=int)
+
+    with pytest.warns(FutureWarning, match=".*preserve_range") as record:
+        blob_dog(image)
+    assert_stacklevel(record)
+
+    with pytest.warns(FutureWarning, match=".*preserve_range") as record:
+        blob_dog(image, preserve_range=False)
+    assert_stacklevel(record)
+
+    # When using preserve_range=True, explicitly test that warning isn't emitted
+    # since we are filtering exactly this warning at module level (see `pytestmark`)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error")
+        blob_dog(image, preserve_range=True)
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])
