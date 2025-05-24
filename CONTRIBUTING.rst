@@ -274,7 +274,11 @@ We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
 framework, with tests located in the various
 ``skimage/submodule/tests`` folders.
 
-Testing requirements are listed in `requirements/test.txt`.
+Testing requirements are listed in `pyprojects.toml`, under
+`dependency-groups`, and can be installed with::
+
+  pip install --group test
+
 Run:
 
 - **All tests**: ``spin test``

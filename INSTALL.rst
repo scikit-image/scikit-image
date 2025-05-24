@@ -199,8 +199,8 @@ venv
   source ~/envs/skimage-dev/bin/activate
 
   # Install development dependencies
-  pip install -r requirements.txt
-  pip install -r requirements/build.txt
+  pip install -U pip
+  pip install --group build --group dev --group docs --group test
 
   # Install scikit-image in editable mode. In editable mode,
   # scikit-image will be recompiled, as necessary, on import.
