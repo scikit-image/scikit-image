@@ -43,6 +43,20 @@ email = 'skimage-core@discuss.scientific-python.org'
 file = 'LICENSE.txt'
 
 [project.optional-dependencies]
+data = ['pooch>=1.6.0']
+optional = [
+    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
+    'astropy>=6.0',
+    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
+    'dask[array]>=2023.2.0',
+    'matplotlib>=3.7',
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
+    'PyWavelets>=1.6',
+    'scikit-learn>=1.2',
+]
+
+[dependency-groups]
 build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
@@ -54,8 +68,7 @@ build = [
     'spin==0.13',
     'build>=1.2.1',
 ]
-data = ['pooch>=1.6.0']
-developer = [
+dev = [
     'pre-commit',
     'ipython',
 ]
@@ -81,17 +94,6 @@ docs = [
     'pydata-sphinx-theme>=0.16',
     'PyWavelets>=1.6',
     'pytest-doctestplus',
-]
-optional = [
-    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
-    'astropy>=6.0',
-    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2023.2.0',
-    'matplotlib>=3.7',
-    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
-    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
-    'PyWavelets>=1.6',
-    'scikit-learn>=1.2',
 ]
 test = [
     'asv',
