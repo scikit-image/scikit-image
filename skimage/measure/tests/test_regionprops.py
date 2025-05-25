@@ -100,6 +100,9 @@ def get_central_moment_function(img, spacing=(1, 1)):
     return lambda p, q: np.sum((Y - cY) ** p * (X - cX) ** q * img)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
@@ -117,6 +120,9 @@ def test_all_props():
             pass
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_all_props_3d():
     region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
     for prop in PROPS:
@@ -1487,6 +1493,9 @@ def test_extra_properties_table():
     assert out["bbox_list"][1] == [1] * 1
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_multichannel():
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]
@@ -1559,3 +1568,33 @@ def test_pickling_region_properties():
     pickled = pickle.dumps(regions[0])
     unpickled = pickle.loads(pickled)  # RecursionError here
     assert regions[0] == unpickled
+
+
+@pytest.mark.parametrize("old_name", list(PROPS))
+def test_deprecated_properties(old_name):
+    regions = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)
+
+    regex = rf"`RegionProperties\['{old_name}'\]` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = regions[0][old_name]
+    testing.assert_stacklevel(record)
+
+    current_name = PROPS[old_name]
+    np.testing.assert_equal(result, regions[0][current_name])
+
+    if old_name == old_name.lower():
+        # Lower-case properties in PROPS – such as "bbox_area" or
+        # "convex_image" – were accessible as attributes in addition to being
+        # available via `__getitem__`.
+        # Make sure those emit an appropriate deprecation warning too
+        regex = f"`RegionProperties.{old_name}` is deprecated."
+        with pytest.warns(FutureWarning, match=regex) as record:
+            result = getattr(regions[0], old_name)
+        testing.assert_stacklevel(record)
+        current_name = PROPS[old_name]
+        np.testing.assert_equal(result, regions[0][current_name])
+
+    else:
+        regex = f"'RegionProperties' object has no attribute {old_name!r}"
+        with pytest.raises(AttributeError, match=regex):
+            getattr(regions[0], old_name)
