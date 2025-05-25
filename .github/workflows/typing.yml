@@ -48,7 +48,7 @@ jobs:
 
       - name: Install docstub
         run: |
-          pip install docstub
+          pip install docstub==0.3.0.post0
           docstub --version
 
       - name: Generate stubs

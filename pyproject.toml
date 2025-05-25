@@ -58,7 +58,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub',
+    'docstub==0.3.0.post0',
 ]
 docs = [
     'sphinx>=8.0',
