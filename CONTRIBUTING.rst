@@ -61,7 +61,16 @@ can be contributed to scikit-image.
        pip install pre-commit
        pre-commit install
 
-2. Develop your contribution:
+2. Install development dependencies:
+
+These are required for building the library and documentation, as well
+as for testing.
+
+::
+
+  pip install --group dev
+
+3. Develop your contribution:
 
    * Pull the latest changes from upstream::
 
@@ -77,7 +86,7 @@ can be contributed to scikit-image.
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
-3. To submit your contribution:
+4. To submit your contribution:
 
    * Push your changes back to your fork on GitHub::
 
@@ -97,7 +106,7 @@ can be contributed to scikit-image.
 For a more detailed discussion, read these :doc:`detailed documents
 <../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
-4. Review process:
+5. Review process:
 
    * Reviewers (the other developers and interested community members) will
      write inline and/or general comments on your pull request (PR) to help
@@ -124,7 +133,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 .. _documenting-changes:
 
-5. Document changes
+6. Document changes
 
    If your change introduces a deprecation, add a reminder to ``TODO.txt``
    for the team to remove the deprecated functionality in the future.
@@ -273,11 +282,6 @@ tests should be added to cover all modifications in behavior.
 We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
 framework, with tests located in the various
 ``skimage/submodule/tests`` folders.
-
-Testing requirements are listed in `pyprojects.toml`, under
-`dependency-groups`, and can be installed with::
-
-  pip install --group test
 
 Run:
 

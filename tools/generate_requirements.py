@@ -36,6 +36,10 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
     for section in req_sections:
         lines.append(f"  # {section}")
         for dep in req_sections[section]:
+            if isinstance(dep, dict):
+                # Likely an `{ 'include-group': ... }` statement
+                continue
+
             # Remove optional specifiers such as `[parallel]`
             dep = re.sub('\\[.*?\\]', '', dep)
 

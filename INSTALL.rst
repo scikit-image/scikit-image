@@ -200,7 +200,7 @@ venv
 
   # Install development dependencies
   pip install -U pip
-  pip install --group build --group dev --group docs --group test
+  pip install --group dev
 
   # Install scikit-image in editable mode. In editable mode,
   # scikit-image will be recompiled, as necessary, on import.
