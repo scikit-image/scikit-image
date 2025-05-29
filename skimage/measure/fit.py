@@ -23,7 +23,7 @@ def _check_data_atleast_2D(data):
 
 
 @runtime_checkable
-class RansacModel(Protocol):
+class RansacModelProtocol(Protocol):
     """Protocol for `ransac` model class."""
 
     @classmethod
@@ -953,9 +953,9 @@ def ransac(
 
         * ``residuals(*data)``
 
-        See :class:`RansacModel` for the protocol definition.  In general,
-        ensure that `model_class` is an instance of ``RansacModel`` (this
-        checks it conforms to the protocol).
+        See :class:`RansacModelProtocol` for the protocol definition.  In
+        general, ensure that `model_class` is an instance of
+        ``RansacModelProtocol`` (this checks it conforms to the protocol).
 
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
@@ -1124,9 +1124,10 @@ def ransac(
     model_class = add_from_estimate(model_class)
 
     # Check protocol.
-    if not isinstance(model_class, RansacModel):
+    if not isinstance(model_class, RansacModelProtocol):
         raise TypeError(
-            f"`model_class` {model_class} should be of (protocol) type RansacModel"
+            f"`model_class` {model_class} should be of (protocol) type "
+            "RansacModelProtocol"
         )
 
     num_trials = 0
