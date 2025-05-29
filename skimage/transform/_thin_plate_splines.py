@@ -171,11 +171,11 @@ class ThinPlateSplineTransform:
         check_nD(dst, 2, arg_name="dst")
 
         if src.shape[0] < 3 or dst.shape[0] < 3:
-            raise ValueError("Need at least 3 points in in `src` and `dst`")
+            msg = "Need at least 3 points in in `src` and `dst`"
+            raise ValueError(msg)
         if src.shape != dst.shape:
-            raise ValueError(
-                f"Shape of `src` and `dst` didn't match, {src.shape} " f"!= {dst.shape}"
-            )
+            msg = f"Shape of `src` and `dst` didn't match, {src.shape} != {dst.shape}"
+            raise ValueError(msg)
 
         self.src = src
         n, d = src.shape
