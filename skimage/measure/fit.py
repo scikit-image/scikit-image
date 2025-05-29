@@ -47,11 +47,11 @@ def _warn_or_msg(msg, warn_only=True):
     """If `warn_only`, warn with `msg`, return ``None``, else return `msg`
 
     For `from_estimate` API, we want to return a ``FailedEstimation`` for these
-    estimation failures, which we do by passing back the `msg` from the
-    ``_estimation`` method via this function.  For the deprecated ``estimate``
-    API, we want to warn, and return an incomplete transform.  The ``None``
-    return value indicates the estimation has kind-of succeeded, for back
-    compatibility.
+    estimation failures, which we do by setting ``warn_only=False``, and
+    passing back the `msg` from the ``_estimation`` method via this function.
+    For the deprecated ``estimate`` API, we want to warn (``warn_only=True``),
+    and return an incomplete transform.  The ``None`` return value indicates
+    the estimation has kind-of succeeded, for back compatibility.
     """
     if not warn_only:
         return msg

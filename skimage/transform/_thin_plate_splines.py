@@ -74,9 +74,9 @@ class ThinPlateSplineTransform:
     >>> if tps:
     ...     print("Estimation succeeded.")
     Estimation succeeded.
-    
+
     Not so for a degenerate transform with identical points.
-    
+
     >>> bad_src = np.ones((4, 2))
     >>> bad_tps = ski.transform.ThinPlateSplineTransform.from_estimate(
     ...      bad_src, dst)
@@ -166,7 +166,7 @@ class ThinPlateSplineTransform:
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
     def _estimate(self, src, dst):
-        """Try to estimate and return reason if estimation fails.""" 
+        """Try to estimate and return reason if estimation fails."""
         check_nD(src, 2, arg_name="src")
         check_nD(dst, 2, arg_name="dst")
 
