@@ -71,12 +71,12 @@ class ThinPlateSplineTransform:
     are the same.  If this happens, you will get a transform that is not
     "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # A successfully estimated model is truthy (applying ``bool()``
-    >>> # gives ``True``):
     >>> if tps:
     ...     print("Estimation succeeded.")
     Estimation succeeded.
-    >>> # Not so for a degenerate transform with identical points.
+    
+    Not so for a degenerate transform with identical points.
+    
     >>> bad_src = np.ones((4, 2))
     >>> bad_tps = ski.transform.ThinPlateSplineTransform.from_estimate(
     ...      bad_src, dst)
@@ -148,7 +148,7 @@ class ThinPlateSplineTransform:
         tform : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
             Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testingn the truth value of the failed estimation
+            estimation. Testing the truth value of the failed estimation
             sentinel will return ``False``. E.g.
 
             .. code-block:: python
@@ -166,6 +166,7 @@ class ThinPlateSplineTransform:
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
     def _estimate(self, src, dst):
+        """Try to estimate and return reason if estimation fails.""" 
         check_nD(src, 2, arg_name="src")
         check_nD(dst, 2, arg_name="dst")
 
