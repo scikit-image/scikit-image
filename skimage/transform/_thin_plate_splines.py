@@ -1,7 +1,9 @@
+from typing import Self
+
 import numpy as np
 from scipy.spatial import distance_matrix
 
-from .._shared.utils import check_nD
+from .._shared.utils import check_nD, _deprecate_estimate, FailedEstimation
 
 
 class ThinPlateSplineTransform:
@@ -36,9 +38,7 @@ class ThinPlateSplineTransform:
 
     Estimate the transformation:
 
-    >>> tps = ski.transform.ThinPlateSplineTransform()
-    >>> tps.estimate(src, dst)
-    True
+    >>> tps = ski.transform.ThinPlateSplineTransform.from_estimate(src, dst)
 
     Appyling the transformation to `src` approximates `dst`:
 
@@ -66,6 +66,31 @@ class ThinPlateSplineTransform:
            [0, 1, 2, 3, 4],
            [0, 1, 2, 3, 4],
            [0, 1, 2, 3, 4]])
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tps:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((4, 2))
+    >>> bad_tps = ski.transform.ThinPlateSplineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tps:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tps.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     def __init__(self):
@@ -107,7 +132,8 @@ class ThinPlateSplineTransform:
     def inverse(self):
         raise NotImplementedError("Not supported")
 
-    def estimate(self, src, dst):
+    @classmethod
+    def from_estimate(cls, src, dst) -> Self | FailedEstimation:
         """Estimate optimal spline mappings between source and destination points.
 
         Parameters
@@ -119,22 +145,36 @@ class ThinPlateSplineTransform:
 
         Returns
         -------
-        success: bool
-            True indicates that the estimation was successful.
+        tform : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testingn the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tform = ThinPlateSplineTransform.from_estimate(...)
+                if not tform:
+                    # Handle failed estimation
 
         Notes
         -----
         The number N of source and destination points must match.
         """
+        tf = cls()
+        msg = tf._estimate(src, dst)
+        return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
+    def _estimate(self, src, dst):
         check_nD(src, 2, arg_name="src")
         check_nD(dst, 2, arg_name="dst")
 
         if src.shape[0] < 3 or dst.shape[0] < 3:
-            msg = "Need at least 3 points in in `src` and `dst`"
-            raise ValueError(msg)
+            raise ValueError("Need at least 3 points in in `src` and `dst`")
         if src.shape != dst.shape:
-            msg = f"Shape of `src` and `dst` didn't match, {src.shape} != {dst.shape}"
-            raise ValueError(msg)
+            raise ValueError(
+                f"Shape of `src` and `dst` didn't match, {src.shape} " f"!= {dst.shape}"
+            )
 
         self.src = src
         n, d = src.shape
@@ -151,8 +191,8 @@ class ThinPlateSplineTransform:
         try:
             self._spline_mappings = np.linalg.solve(L, V)
         except np.linalg.LinAlgError:
-            return False
-        return True
+            return 'Unable to solve for spline mappings'
+        return None
 
     def _radial_distance(self, coords):
         """Compute the radial distance between input points and source points."""
@@ -186,3 +226,25 @@ class ThinPlateSplineTransform:
         r_sq = r**2
         U = np.where(r == 0.0, 0.0, r_sq * np.log(r_sq + _small))
         return U
+
+    @_deprecate_estimate
+    def estimate(self, src, dst):
+        """Estimate optimal spline mappings between source and destination points.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Control points at source coordinates.
+        dst : (N, 2) array_like
+            Control points at destination coordinates.
+
+        Returns
+        -------
+        success: bool
+            True indicates that the estimation was successful.
+
+        Notes
+        -----
+        The number N of source and destination points must match.
+        """
+        return self._estimate(src, dst) is None

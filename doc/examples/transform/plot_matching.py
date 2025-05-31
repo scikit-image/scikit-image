@@ -113,8 +113,7 @@ dst = np.array(dst)
 
 
 # estimate affine transform model using all coordinates
-model = AffineTransform()
-model.estimate(src, dst)
+model = AffineTransform.from_estimate(src, dst)
 
 # robustly estimate affine transform model with RANSAC
 model_robust, inliers = ransac(
