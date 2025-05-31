@@ -78,7 +78,7 @@ image_t_0_channel_0 = image_sequence[0, 0, :, :]
 
 smooth = ski.filters.gaussian(image_t_0_channel_0, sigma=1.5)
 
-thresh_value = ski.filters.threshold_otsu(smooth)
+thresh_value = ski.segmentation.threshold_otsu(smooth)
 thresh = smooth > thresh_value
 
 fill = ndi.binary_fill_holes(thresh)
@@ -193,7 +193,7 @@ props['area'] * props['intensity_mean']
 n_z = image_sequence.shape[0]  # number of frames
 
 smooth_seq = ski.filters.gaussian(image_sequence[:, 0, :, :], sigma=(0, 1.5, 1.5))
-thresh_values = [ski.filters.threshold_otsu(s) for s in smooth_seq[:]]
+thresh_values = [ski.segmentation.threshold_otsu(s) for s in smooth_seq[:]]
 thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 
 #####################################################################
@@ -207,7 +207,7 @@ thresh_seq = [smooth_seq[k, ...] > val for k, val in enumerate(thresh_values)]
 #      :caption: NumPy's `apply_along_axis` applies a function to 1D slices of
 #                `arr` along `axis`.
 #
-#       thresh_values = np.apply_along_axis(filters.threshold_otsu,
+#       thresh_values = np.apply_along_axis(segmentation.threshold_otsu,
 #                                           axis=1,
 #                                           arr=smooth_seq.reshape(n_z, -1))
 #

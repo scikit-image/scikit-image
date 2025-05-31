@@ -126,10 +126,10 @@ plotly.io.show(fig)
 # We need
 # a threshold value ``thresh_val`` to create our binary images, ``binarized``.
 # This can be set manually, but we shall use an automated minimum threshold
-# method from the ``filters`` submodule of scikit-image (there are other
+# method from the ``segmentation`` submodule of scikit-image (there are other
 # methods that may work better for different applications).
 
-thresh_val = ski.filters.threshold_minimum(denoised)
+thresh_val = ski.segmentation.threshold_minimum(denoised)
 binarized = denoised > thresh_val
 
 fig = px.imshow(
