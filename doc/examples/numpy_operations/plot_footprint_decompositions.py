@@ -45,6 +45,7 @@ from skimage.morphology import (
     octagon,
     octahedron,
     footprint_rectangle,
+    footprint_decomposed_rectangle,
 )
 from skimage.morphology.footprints import footprint_from_sequence
 
@@ -52,20 +53,20 @@ from skimage.morphology.footprints import footprint_from_sequence
 # Generate 2D and 3D structuring elements.
 footprint_dict = {
     "square 11x11 (separable)": (
-        footprint_rectangle((11, 11), decomposition=None),
-        footprint_rectangle((11, 11), decomposition="separable"),
+        footprint_rectangle((11, 11)),
+        footprint_decomposed_rectangle((11, 11), method="separable"),
     ),
     "square 11x11 (sequence)": (
-        footprint_rectangle((11, 11), decomposition=None),
-        footprint_rectangle((11, 11), decomposition="sequence"),
+        footprint_rectangle((11, 11)),
+        footprint_decomposed_rectangle((11, 11), method="sequence"),
     ),
     "rectangle 7x11 (separable)": (
-        footprint_rectangle((7, 11), decomposition=None),
-        footprint_rectangle((7, 11), decomposition="separable"),
+        footprint_rectangle((7, 11)),
+        footprint_decomposed_rectangle((7, 11), method="separable"),
     ),
     "rectangle 7x11 (sequence)": (
-        footprint_rectangle((7, 11), decomposition=None),
-        footprint_rectangle((7, 11), decomposition="sequence"),
+        footprint_rectangle((7, 11)),
+        footprint_decomposed_rectangle((7, 11), method="sequence"),
     ),
     "diamond(5) (sequence)": (
         diamond(5, decomposition=None),
@@ -92,12 +93,12 @@ footprint_dict = {
         octagon(7, 4, decomposition="sequence"),
     ),
     "cube 11x11x11 (separable)": (
-        footprint_rectangle((11, 11, 11), decomposition=None),
-        footprint_rectangle((11, 11, 11), decomposition="separable"),
+        footprint_rectangle((11, 11, 11)),
+        footprint_decomposed_rectangle((11, 11, 11), method="separable"),
     ),
     "cube 11x11x11 (sequence)": (
-        footprint_rectangle((11, 11, 11), decomposition=None),
-        footprint_rectangle((11, 11, 11), decomposition="sequence"),
+        footprint_rectangle((11, 11, 11)),
+        footprint_decomposed_rectangle((11, 11, 11), method="sequence"),
     ),
     "octahedron(7) (sequence)": (
         octahedron(7, decomposition=None),
