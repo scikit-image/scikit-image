@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 
-from .._shared.utils import _supported_float_type, warn
+from .._shared.utils import _supported_float_type, warn, rename_parameter
 from ..util import img_as_float
 from . import rgb_colors
 from .colorconv import gray2rgb, rgb2hsv, hsv2rgb
@@ -82,6 +82,12 @@ def _match_label_with_color(label, colors, bg_label, bg_color):
     return mapped_labels, color_cycle
 
 
+@rename_parameter(
+    new_name="label_image",
+    old_name="label",
+    deprecated_version="0.26",
+    removed_version="0.28",
+)
 def label2rgb(
     label,
     image=None,
