@@ -1276,7 +1276,7 @@ def regionprops(
     **intensity_mean** : float
         Average of intensity values in the region.
     **intensity_median** : float
-        Value with the median intensity in the region.
+        Value of median intensity in the region.
     **intensity_min** : float
         Value of lowest intensity in the region.
     **intensity_std** : float
