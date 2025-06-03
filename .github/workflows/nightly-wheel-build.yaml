@@ -28,6 +28,7 @@ jobs:
         (cd .. && pytest --pyargs skimage)
 
   run-on-failure:
+    needs: call-workflow-build-wheels
     runs-on: ubuntu-latest
     if: ${{ failure() && github.ref == 'refs/heads/main' }}
     steps:
