@@ -15,7 +15,7 @@ At each iteration the following steps are performed:
 1. Select ``min_samples`` random samples from the original data and check
    whether the set of data is valid (see ``is_data_valid`` option).
 2. Estimate a model on the random subset
-   (``model_cls.estimate(*data[random_subset]``) and check whether the
+   (``model_cls.from_estimate(*data[random_subset]``) and check whether the
    estimated model is valid (see ``is_model_valid`` option).
 3. Classify all the data points as either inliers or outliers by calculating
    the residuals using the estimated model (``model_cls.residuals(*data)``) -
@@ -56,8 +56,7 @@ faulty += 10 * rng.normal(size=faulty.shape)
 data[: faulty.shape[0]] = faulty
 
 # fit line using all data
-model = LineModelND()
-model.estimate(data)
+model = LineModelND.from_estimate(data)
 
 # robustly fit line only using inlier data with RANSAC algorithm
 model_robust, inliers = ransac(
