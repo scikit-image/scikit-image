@@ -4,7 +4,7 @@ name: Typing
 on: [push, pull_request, merge_group]
 
 concurrency:
-  # Cancel previous workflows of the same PR, but only for PRs
+  # Cancel previously triggered workflows for the same PR
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
@@ -19,7 +19,7 @@ env:
 
 jobs:
   docstub:
-    name: Generate stubs & test
+    name: Generate and test stubs
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
