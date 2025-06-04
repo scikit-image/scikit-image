@@ -327,23 +327,24 @@ cdef class MCP:
         """_reset()
         Clears paths found by find_costs().
         """
-
         cdef INDEX_T start
+        cdef FLOAT_T start_cost
 
         self.costs_heap.reset()
         self.traceback_offsets[...] = -2  # -2 is not reached, -1 is start
         self.flat_cumulative_costs[...] = np.inf
         self.dirty = 0
 
-        # Get starts and ends
-        # We do not pass them in as arguments for backwards compat
         starts, _ = self._starts, self._ends
 
-        # push each start point into the heap. Note that we use flat indexing!
         for start in _ravel_index_fortran(starts, self.costs_shape):
             self.traceback_offsets[start] = -1
             if self.use_start_cost:
-                self.costs_heap.push_fast(self.flat_costs[start], start)
+                start_cost = self.flat_costs[start]
+                # Fix for Issue #7190: Ignore start points with negative cost
+                if start_cost < 0:
+                    continue
+                self.costs_heap.push_fast(start_cost, start)
             else:
                 self.costs_heap.push_fast(0, start)
 
