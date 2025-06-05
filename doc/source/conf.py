@@ -362,4 +362,6 @@ def linkcode_resolve(domain, info):
 myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
+    # Enable fencing directives with `:::`
+    "colon_fence",
 ]
