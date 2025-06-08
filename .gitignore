@@ -41,3 +41,6 @@ skimage/morphology/_skeletonize_lee_cy.pyx
 .vscode/
 .mesonpy-native-file.ini
 /.pyodide-xbuildenv-*
+doc/source/.jupyterlite.doit.db
+doc/examples/applications/plot_3d_interaction.png
+/doc/source/jupyterlite_contents/auto_examples
