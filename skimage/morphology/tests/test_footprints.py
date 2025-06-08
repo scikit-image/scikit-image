@@ -9,9 +9,14 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal
 
+import skimage as ski
 from skimage._shared.testing import fetch, assert_stacklevel
 from skimage.morphology import footprints
-from skimage.morphology import footprint_rectangle, footprint_from_sequence
+from skimage.morphology import (
+    footprint_rectangle,
+    footprint_from_sequence,
+    footprint_decomposed_rectangle,
+)
 
 
 class TestFootprints:
@@ -139,7 +144,6 @@ class TestFootprints:
         (footprints.ball, (3,), True),
         (footprints.diamond, (3,), True),
         (footprints.octahedron, (3,), True),
-        (footprint_rectangle, ((3, 5),), True),
         (footprints.ellipse, (3, 4), False),
         (footprints.octagon, (3, 4), True),
         (footprints.star, (3,), False),
@@ -206,6 +210,103 @@ def test_ellipse_crosses_approximation(width, height):
     assert error / expected.size <= max_error
 
 
+class Test_footprint_cross_decompose:
+    @pytest.mark.parametrize("shape", [(1, 1), (3, 5)])
+    def test_all_zero(self, shape):
+        footprint = np.zeros(shape)
+        regex = "`footprint` possibly contains only zeros, cannot decompose"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("length_0", [1, 3, 9, 21, 51])
+    @pytest.mark.parametrize("length_1", [1, 3, 9, 21, 51])
+    def test_rectangle_approximation(self, length_0, length_1):
+        shape = (length_0, length_1)
+        footprint = ski.morphology.footprint_rectangle(shape)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = ski.morphology.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0
+        assert error / footprint.size <= max_error_rate
+
+    @pytest.mark.parametrize("radius", [1, 2, 3, 4, 5, 10, 20, 50, 75])
+    def test_disk_approximation(self, radius):
+        footprint = ski.morphology.disk(radius)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = ski.morphology.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0.01
+        assert error / footprint.size <= max_error_rate
+
+    @pytest.mark.parametrize("width", [3, 8, 20, 50])
+    @pytest.mark.parametrize("height", [3, 8, 20, 50])
+    def test_ellipse_approximation(self, width, height):
+        footprint = ski.morphology.ellipse(width, height)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        approximate = footprints.footprint_from_sequence(decomposed)
+        assert approximate.shape == footprint.shape
+
+        # verify that maximum error does not exceed some fraction of the size
+        error = np.abs(footprint.astype(int) - approximate.astype(int)).sum()
+        max_error_rate = 0.01
+        assert error / footprint.size <= max_error_rate
+
+    def test_not_convex_h(self):
+        # Footprint with H shape is symmetric in all, but not convex in one dimension
+        footprint = np.array([[1, 0, 1], [1, 1, 1], [1, 0, 1]], dtype=np.uint8)
+        with pytest.raises(ValueError, match=".* not convex"):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+        # In the other dimension, this is caught by `max_error` being exceeded
+        with pytest.raises(RuntimeError, match=".*exceeds the given `max_error"):
+            ski.morphology.footprint_cross_decompose(footprint.T)
+
+    @pytest.mark.parametrize("dim", [0, 1])
+    def test_not_convex_holes(self, dim):
+        footprint = np.array(
+            [
+                [0, 1, 1, 1, 0],
+                [1, 0, 1, 0, 1],
+                [1, 1, 1, 1, 1],
+                [1, 0, 1, 0, 1],
+                [0, 1, 1, 1, 0],
+            ]
+        )
+        footprint = np.moveaxis(footprint, source=0, destination=dim)
+        with pytest.raises(RuntimeError, match=".*exceeds the given `max_error"):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("dim", [0, 1])
+    def test_not_symmetric(self, dim):
+        footprint = np.array([[1, 0, 1], [1, 1, 1], [1, 1, 1]])
+        footprint = np.moveaxis(footprint, source=0, destination=dim)
+        regex = f".*isn't symmetric in dimension {dim}"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("shape", [(3, 2), (2, 3), (6, 6)])
+    def test_even_shape(self, shape):
+        footprint = np.ones(shape, dtype=np.uint8)
+        regex = "Can only decompose symmetric footprints with an odd length"
+        with pytest.raises(ValueError, match=regex):
+            ski.morphology.footprint_cross_decompose(footprint)
+
+    @pytest.mark.parametrize("shape", [(3, 3), (1, 1)])
+    @pytest.mark.parametrize("dtype", [bool, int, np.uint8, float])
+    def test_dtype(self, shape, dtype):
+        footprint = np.ones(shape, dtype=dtype)
+        decomposed = ski.morphology.footprint_cross_decompose(footprint)
+        assert len(decomposed) > 0
+        for element, _ in decomposed:
+            assert element.dtype == dtype
+
+
 def test_disk_series_approximation_unavailable():
     # ValueError if radius is too large (only precomputed up to radius=250)
     with pytest.raises(ValueError):
@@ -246,12 +347,14 @@ def test_pad_footprint(as_sequence, pad_end):
     assert_equal(expected_res, actual_res)
 
 
-class Test_footprint_rectangule:
+class Test_footprint_rectangle:
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
     @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
-    def test_rectangle(self, i, j):
-        desired = np.ones((i, j), dtype='uint8')
-        actual = footprint_rectangle((i, j))
+    @pytest.mark.parametrize("dtype", [np.uint8, bool, np.float64])
+    def test_rectangle(self, i, j, dtype):
+        desired = np.ones((i, j), dtype=dtype)
+        actual = footprint_rectangle((i, j), dtype=dtype)
+        assert actual.dtype == dtype
         assert_equal(actual, desired)
 
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
@@ -266,16 +369,29 @@ class Test_footprint_rectangule:
     @pytest.mark.parametrize("decomposition", ["separable", "sequence"])
     def test_decomposition(self, shape, decomposition):
         regular = footprint_rectangle(shape)
-        decomposed = footprint_rectangle(shape, decomposition=decomposition)
+        with pytest.warns(FutureWarning, match=".*`decomposition` is deprecated"):
+            decomposed = footprint_rectangle(shape, decomposition=decomposition)
         recomposed = footprint_from_sequence(decomposed)
         assert_equal(recomposed, regular)
 
+
+class Test_footprint_decomposed_rectangle:
+    @pytest.mark.parametrize("shape", [(3,), (5, 5), (5, 5, 7)])
+    @pytest.mark.parametrize("method", ["separable", "sequence"])
+    @pytest.mark.parametrize("dtype", [np.uint8, bool, np.float64])
+    def test_recomposition(self, shape, method, dtype):
+        regular = footprint_rectangle(shape, dtype=dtype)
+        decomposed = footprint_decomposed_rectangle(shape, dtype=dtype, method=method)
+        recomposed = footprint_from_sequence(decomposed)
+        assert_equal(recomposed, regular)
+        assert all([elem[0].dtype == dtype for elem in decomposed])
+
     @pytest.mark.parametrize("shape", [(2,), (3, 4)])
     def test_uneven_sequence_decomposition_warning(self, shape):
-        """Should fall back to decomposition="separable" for uneven footprint size."""
-        desired = footprint_rectangle(shape, decomposition="separable")
-        regex = "decomposition='sequence' is only supported for uneven footprints"
+        """Should fall back to method="separable" for uneven footprint size."""
+        desired = footprint_decomposed_rectangle(shape, method="separable")
+        regex = "method='sequence' is only supported for uneven footprints"
         with pytest.warns(UserWarning, match=regex) as record:
-            actual = footprint_rectangle(shape, decomposition="sequence")
+            actual = footprint_decomposed_rectangle(shape, method="sequence")
         assert_stacklevel(record)
         assert_equal(actual, desired)
