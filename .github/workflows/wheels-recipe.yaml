@@ -145,20 +145,24 @@ jobs:
 
       # Needed to install a specific libomp version later
       - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
+        uses: conda-incubator/setup-miniconda@505e6394dae86d6a5c7fbb6e3fb8938e3e863830 # v3.1.1
         with:
           python-version: "3.12"
           channels: conda-forge
           channel-priority: true
-          miniforge-variant: Miniforge3
           miniforge-version: latest
 
       - name: Build wheels for CPython Mac OS
         run: |
-          # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into
-          # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/
+          # You need to use a libomp library built for the
+          # appropriate MACOSX_DEPLOYMENT_TARGET.
+          #
+          # Navigate to
+          # https://anaconda.org/conda-forge/llvm-openmp/files
+          # and, for the latest version, search for the `osx-arm64` and
+          # `osx-64` prefixes. Update the filenames below with those
+          # filenames.
+
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
               export MACOSX_DEPLOYMENT_TARGET=12.3
               OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
