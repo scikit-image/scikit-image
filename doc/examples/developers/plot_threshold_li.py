@@ -13,7 +13,7 @@ Until 1998, though, the way to find this threshold was by trying all possible
 thresholds and then choosing the one with the smallest cross-entropy. At that
 point, Li and Tam implemented a new, iterative method to more quickly find the
 optimum point by using the slope of the cross-entropy [2]_. This is the method
-implemented in scikit-image's :func:`skimage.filters.threshold_li`.
+implemented in scikit-image's :func:`skimage.segmentation.threshold_li`.
 
 Here, we demonstrate the cross-entropy and its optimization by Li's iterative
 method. Note that we are using the private function `_cross_entropy`, which
@@ -29,9 +29,8 @@ should not be used in production code, as it could change.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data
-from skimage import filters
-from skimage.filters.thresholding import _cross_entropy
+from skimage import data, segmentation
+from skimage.segmentation._thresholding_global import _cross_entropy
 
 cell = data.cell()
 camera = data.camera()
@@ -41,7 +40,7 @@ camera = data.camera()
 # image at all possible thresholds.
 
 thresholds = np.arange(np.min(camera) + 1.5, np.max(camera) - 1.5)
-entropies = [_cross_entropy(camera, t) for t in thresholds]
+entropies = [_cross_entropy(camera, threshold=t) for t in thresholds]
 
 optimal_camera_threshold = thresholds[np.argmin(entropies)]
 
@@ -68,7 +67,7 @@ ax[2].set_title('optimal threshold')
 fig.tight_layout()
 
 print('The brute force optimal threshold is:', optimal_camera_threshold)
-print('The computed optimal threshold is:', filters.threshold_li(camera))
+print('The computed optimal threshold is:', segmentation.threshold_li(camera))
 
 plt.show()
 
@@ -78,8 +77,10 @@ plt.show()
 
 iter_thresholds = []
 
-optimal_threshold = filters.threshold_li(camera, iter_callback=iter_thresholds.append)
-iter_entropies = [_cross_entropy(camera, t) for t in iter_thresholds]
+optimal_threshold = segmentation.threshold_li(
+    camera, iter_callback=iter_thresholds.append
+)
+iter_entropies = [_cross_entropy(camera, threshold=t) for t in iter_thresholds]
 
 print('Only', len(iter_thresholds), 'thresholds examined.')
 
@@ -101,13 +102,13 @@ plt.show()
 
 iter_thresholds2 = []
 
-opt_threshold2 = filters.threshold_li(
+opt_threshold2 = segmentation.threshold_li(
     cell, initial_guess=64, iter_callback=iter_thresholds2.append
 )
 
 thresholds2 = np.arange(np.min(cell) + 1.5, np.max(cell) - 1.5)
-entropies2 = [_cross_entropy(cell, t) for t in thresholds]
-iter_entropies2 = [_cross_entropy(cell, t) for t in iter_thresholds2]
+entropies2 = [_cross_entropy(cell, threshold=t) for t in thresholds]
+iter_entropies2 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds2]
 
 fig, ax = plt.subplots(1, 3, figsize=(8, 3))
 
@@ -134,9 +135,9 @@ plt.show()
 
 iter_thresholds3 = []
 
-opt_threshold3 = filters.threshold_li(cell, iter_callback=iter_thresholds3.append)
+opt_threshold3 = segmentation.threshold_li(cell, iter_callback=iter_thresholds3.append)
 
-iter_entropies3 = [_cross_entropy(cell, t) for t in iter_thresholds3]
+iter_entropies3 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds3]
 
 fig, ax = plt.subplots(1, 3, figsize=(8, 3))
 
@@ -180,10 +181,10 @@ def li_gradient(image, t):
 
 
 iter_thresholds4 = []
-opt_threshold4 = filters.threshold_li(
+opt_threshold4 = segmentation.threshold_li(
     cell, initial_guess=68, iter_callback=iter_thresholds4.append
 )
-iter_entropies4 = [_cross_entropy(cell, t) for t in iter_thresholds4]
+iter_entropies4 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds4]
 print(len(iter_thresholds4), 'examined, optimum:', opt_threshold4)
 
 gradients = [li_gradient(cell, t) for t in thresholds2]
@@ -217,7 +218,7 @@ plt.show()
 
 ###############################################################################
 # In addition to allowing users to provide a number as an initial guess,
-# :func:`skimage.filters.threshold_li` can receive a function that makes a
+# :func:`skimage.segmentation.threshold_li` can receive a function that makes a
 # guess from the image intensities, just like :func:`numpy.mean` does by
 # default. This might be a good option when many images with different ranges
 # need to be processed.
@@ -229,10 +230,10 @@ def quantile_95(image):
 
 
 iter_thresholds5 = []
-opt_threshold5 = filters.threshold_li(
+opt_threshold5 = segmentation.threshold_li(
     cell, initial_guess=quantile_95, iter_callback=iter_thresholds5.append
 )
-iter_entropies5 = [_cross_entropy(cell, t) for t in iter_thresholds5]
+iter_entropies5 = [_cross_entropy(cell, threshold=t) for t in iter_thresholds5]
 print(len(iter_thresholds5), 'examined, optimum:', opt_threshold5)
 
 fig, ax1 = plt.subplots()
