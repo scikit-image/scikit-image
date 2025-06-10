@@ -62,5 +62,9 @@ Version 2.0
   keyword-only parameter `max_size`.
 - In `skimage.measure.regionprops` complete deprecation of old property names.
   Remove `PROPS` dict, related logic and warnings.
+- In `skimage.feature.blob`
+    - `_deprecate_threshold_n_scaling`: remove if-block marked as pre version 2.0
+    - `blob_dog`: switch default behavior, set `threshold=DEPRECATED`.
+
 
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2

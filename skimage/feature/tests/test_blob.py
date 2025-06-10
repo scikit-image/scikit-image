@@ -13,12 +13,6 @@ from skimage.feature.blob import _blob_overlap
 from skimage._shared.testing import assert_stacklevel
 
 
-# Inline modifier "(?s)" makes ".*" match newlines too
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:(?s).*preserve_range:FutureWarning:skimage"
-)
-
-
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
 def test_blob_dog(dtype, threshold_type):
@@ -35,20 +29,19 @@ def test_blob_dog(dtype, threshold_type):
     img[xs, ys] = 255
 
     if threshold_type == 'absolute':
-        threshold = 2.0
-        if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
-            threshold /= np.ptp(img)
+        threshold_abs = 2.0
         threshold_rel = None
     elif threshold_type == 'relative':
-        threshold = None
+        threshold_abs = None
         threshold_rel = 0.5
+    else:
+        raise RuntimeError(f"unknown threshold_type: {threshold_type}")
 
     blobs = blob_dog(
         img,
         min_sigma=4,
         max_sigma=50,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
     )
 
@@ -89,10 +82,10 @@ def test_blob_dog_3d(dtype, threshold_type):
     im3 = np.pad(im3, pad, mode='constant')
 
     if threshold_type == 'absolute':
-        threshold = 0.001
+        threshold_abs = 0.001
         threshold_rel = 0
     elif threshold_type == 'relative':
-        threshold = 0
+        threshold_abs = 0
         threshold_rel = 0.5
 
     blobs = blob_dog(
@@ -100,7 +93,7 @@ def test_blob_dog_3d(dtype, threshold_type):
         min_sigma=3,
         max_sigma=10,
         sigma_ratio=1.2,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
     )
     b = blobs[0]
@@ -122,10 +115,10 @@ def test_blob_dog_3d_anisotropic(dtype, threshold_type):
     im3 = np.pad(im3, pad, mode='constant')
 
     if threshold_type == 'absolute':
-        threshold = 0.001
+        threshold_abs = 0.001
         threshold_rel = None
     elif threshold_type == 'relative':
-        threshold = None
+        threshold_abs = None
         threshold_rel = 0.5
 
     blobs = blob_dog(
@@ -133,7 +126,7 @@ def test_blob_dog_3d_anisotropic(dtype, threshold_type):
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
     )
     b = blobs[0]
@@ -189,68 +182,50 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
         assert blobs.shape[0] == 0, msg
 
 
-@pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-def test_blog_dog_preserve_range(dtype):
-    r2 = math.sqrt(2)
-    img = np.ones((512, 512), dtype=dtype)
-    xs, ys = disk((400, 130), 5)
-    img[xs, ys] = 255
-    xs, ys = disk((100, 300), 25)
-    img[xs, ys] = 255
-    xs, ys = disk((200, 350), 45)
-    img[xs, ys] = 255
+def test_blog_dog_deprecate_threshold_warning():
+    image = np.ones((10, 10), dtype=np.uint8)
 
-    if img.dtype.kind != "f":
-        empty = blob_dog(img, min_sigma=4, max_sigma=50, threshold=2.0)
-        assert empty.size == 0
+    blob_dog(image)  # no warning
 
-    blobs = blob_dog(
-        img,
-        min_sigma=4,
-        max_sigma=50,
-        threshold=2.0,
-        preserve_range=True,
-    )
-
-    def radius(x):
-        return r2 * x[2]
-
-    s = sorted(blobs, key=radius)
-    thresh = 5
-    ratio_thresh = 0.25
-
-    b = s[0]
-    assert abs(b[0] - 400) <= thresh
-    assert abs(b[1] - 130) <= thresh
-    assert abs(radius(b) - 5) <= ratio_thresh * 5
-
-    b = s[1]
-    assert abs(b[0] - 100) <= thresh
-    assert abs(b[1] - 300) <= thresh
-    assert abs(radius(b) - 25) <= ratio_thresh * 25
-
-    b = s[2]
-    assert abs(b[0] - 200) <= thresh
-    assert abs(b[1] - 350) <= thresh
-    assert abs(radius(b) - 45) <= ratio_thresh * 45
-
-
-def test_blog_dog_preserve_range_warning():
-    image = np.ones((10, 10), dtype=int)
-
-    with pytest.warns(FutureWarning, match=".*preserve_range") as record:
-        blob_dog(image)
+    with pytest.warns(FutureWarning, match=".* `threshold` is deprecated") as record:
+        blob_dog(image, threshold=0.5)
     assert_stacklevel(record)
 
-    with pytest.warns(FutureWarning, match=".*preserve_range") as record:
-        blob_dog(image, preserve_range=False)
-    assert_stacklevel(record)
+    with pytest.raises(TypeError, match="got .* `threshold` and .* `threshold_abs`"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                action="ignore",
+                message=".* `threshold` is deprecated",
+                category=FutureWarning,
+                module="skimage",
+            )
+            blob_dog(image, threshold=0.5, threshold_abs=0.5)
 
-    # When using preserve_range=True, explicitly test that warning isn't emitted
-    # since we are filtering exactly this warning at module level (see `pytestmark`)
-    with warnings.catch_warnings():
-        warnings.filterwarnings("error")
-        blob_dog(image, preserve_range=True)
+
+@pytest.mark.filterwarnings("ignore:.*`threshold` is deprecated:FutureWarning:skimage")
+def test_blog_dog_threshold_rescaling():
+    image = np.ones((100, 100), dtype=np.uint8)
+
+    # Add cycle with value 255 which should translate to a maximum of
+    # ~0.55 (rescaled) and ~141.2 (preserved range) in the stacked DoG image
+    xs, ys = disk((50, 50), 5)
+    image[xs, ys] = 255
+
+    # Default threshold=0.5 with rescaling should find circle
+    result = blob_dog(image)
+    assert result.shape == (1, 3)
+
+    # threshold=0.6 with rescaling should ignore circle
+    result = blob_dog(image, threshold=0.6)
+    assert result.shape == (0, 3)
+
+    # threshold=142 with range preservation should ignore circle
+    result = blob_dog(image, threshold_abs=142)
+    assert result.shape == (0, 3)
+
+    # threshold=141 with range preservation should find circle
+    result = blob_dog(image, threshold_abs=141)
+    assert result.shape == (1, 3)
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])
