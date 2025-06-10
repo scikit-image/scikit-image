@@ -37,7 +37,7 @@ dependencies:
   # dev
   - pre-commit
   - ipython
-  # doc
+  # docs
   - sphinx>=8.0
   - sphinx-gallery>=0.18
   - numpydoc>=1.7

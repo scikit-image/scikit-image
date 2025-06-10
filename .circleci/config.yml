@@ -11,9 +11,6 @@ jobs:
           command: |
             sudo apt-get update
             sudo apt-get install ccache
-      - run:
-          name: Concatenate requirement files
-          command: cat requirements/*.txt > requirements/all_requirements
       - restore_cache:
           name: restore cached data files
           keys:
@@ -21,7 +18,7 @@ jobs:
       - restore_cache:
           name: Restore cached pip dependencies
           keys:
-            - packages-v1-{{ checksum "requirements/all_requirements" }}
+            - packages-v1-{{ checksum "pyproject.toml" }}
       - restore_cache:
           name: Restore cached build files (ccache)
           keys:
@@ -30,18 +27,17 @@ jobs:
           name: Install dependencies and build package
           command: |
             python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements/build.txt
+            python3 -m pip install --group build
             python3 -m pip install -vv --no-build-isolation .
             # Ensure build succeeds without runtime requirements
-            python3 -m pip install -r requirements/default.txt
-            python3 -m pip install -r requirements/docs.txt
+            python3 -m pip install --group docs
       - run:
           name: Print ccache performance
           command: |
             ccache -s
       - save_cache:
           name: Cache pip dependencies
-          key: packages-v1-{{ checksum "requirements/all_requirements" }}
+          key: packages-v1-{{ checksum "pyproject.toml" }}
           paths:
             - ~/.cache/pip
       - save_cache:

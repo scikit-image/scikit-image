@@ -17,7 +17,7 @@ export PIP_DEFAULT_TIMEOUT=60
 python -m pip install --upgrade pip
 
 # Install build time requirements
-python -m pip install $PIP_FLAGS -r requirements/build.txt
+python -m pip install $PIP_FLAGS --group build
 
 # TODO: delete when cython free-threaded wheels are available on PyPi
 FREE_THREADED_BUILD="$(python -c"import sysconfig; print(bool(sysconfig.get_config_var('Py_GIL_DISABLED')))")"

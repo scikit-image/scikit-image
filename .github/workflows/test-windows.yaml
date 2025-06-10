@@ -53,7 +53,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version}}
           allow-prereleases: true
-          cache-dependency-path: "requirements/*.txt"
+          cache-dependency-path: "pyproject.toml"
           cache: "pip"
 
       - name: Install build dependencies

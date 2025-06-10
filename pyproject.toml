@@ -75,7 +75,7 @@ dev = [
     { include-group = "doc" },
     { include-group = "test" }
 ]
-doc = [
+docs = [
     'sphinx>=8.0',
     'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',

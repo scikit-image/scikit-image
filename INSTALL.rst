@@ -330,52 +330,20 @@ Install suitable compilers prior to library compilation:
 
   sudo apt-get install build-essential
 
+Optional Requirements
+------------------------------------------------------------------------------
 
-Full requirements list
-----------------------
-**Build Requirements**
-
-.. include:: ../../../requirements/build.txt
-   :literal:
-
-**Runtime Requirements**
-
-.. include:: ../../../requirements/default.txt
-   :literal:
-
-**Test Requirements**
-
-.. include:: ../../../requirements/test.txt
-   :literal:
-
-**Documentation Requirements**
-
-.. include:: ../../../requirements/docs.txt
-   :literal:
-
-**Developer Requirements**
-
-.. include:: ../../../requirements/developer.txt
-   :literal:
-
-**Data Requirements**
-
-The full selection of demo datasets is only available with the
-following installed:
-
-.. include:: ../../../requirements/data.txt
-   :literal:
-
-**Optional Requirements**
-
-You can use ``scikit-image`` with the basic requirements listed above, but some
-functionality is only available with the following installed:
+Some optional functionality is only available with the following installed:
 
 * `Matplotlib <https://matplotlib.org>`__
   Used in various functions, e.g., for drawing, segmenting, reading images.
 
 * `Dask <https://dask.org/>`__
   The ``dask`` module is used to parallelize certain functions.
+
+* `Pooch <https://www.fatiando.org/pooch/latest/>`__
+
+  For downloading hosted example datasets using ``skimage.data.*``.
 
 More rarely, you may also need:
 
@@ -390,9 +358,15 @@ More rarely, you may also need:
   Optional I/O plugin providing a wide variety of `formats <https://itk.org/Wiki/ITK_File_Formats>`__.
   including specialized formats used in biomedical imaging.
 
-.. include:: ../../../requirements/optional.txt
-  :literal:
+If you are using pip, you may install these optional extras as follows:
 
+.. code-block:: sh
+
+   # install scikit-image + pooch
+   pip install scikit-image[data]
+
+   # install scikit-image + all optional extras
+   pip install scikit-image[optional]
 
 Help with contributor installation
 ------------------------------------------------------------------------------
