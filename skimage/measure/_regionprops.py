@@ -24,9 +24,8 @@ __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
 
 
 # All values in this PROPS dict correspond to current scikit-image property
-# names. The keys in this PROPS dict correspond to older names used in prior
-# releases. For backwards compatibility, these older names will continue to
-# work, but will not be documented.
+# names. The keys in this PROPS dict correspond to deprecated names used in
+# prior releases
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -123,6 +122,7 @@ COL_DTYPES = {
     'inertia_tensor_eigvals': float,
     'intensity_max': float,
     'intensity_mean': float,
+    'intensity_median': float,
     'intensity_min': float,
     'intensity_std': float,
     'label': int,
@@ -150,6 +150,7 @@ _require_intensity_image = (
     'image_intensity',
     'intensity_max',
     'intensity_mean',
+    'intensity_median',
     'intensity_min',
     'intensity_std',
     'moments_weighted',
@@ -413,10 +414,18 @@ class RegionProperties:
                     f"Attribute '{attr}' unavailable when `intensity_image` "
                     f"has not been specified."
                 )
+            warn(
+                f"`RegionProperties.{attr}` is deprecated starting in "
+                "version 0.26 and will be removed in version 2.0. Use "
+                f"`RegionProperties.{PROPS[attr]}` instead. ",
+                category=FutureWarning,
+                stacklevel=2,
+            )
             # retrieve deprecated property (excluding old CamelCase ones)
             return getattr(self, PROPS[attr])
-        else:
-            raise AttributeError(f"'{type(self)}' object has no attribute '{attr}'")
+
+        # Fallback to default behavior, potentially raising an attribute error
+        return self.__getattribute__(attr)
 
     def __setattr__(self, name, value):
         if name in PROPS:
@@ -578,6 +587,10 @@ class RegionProperties:
     @property
     def intensity_mean(self):
         return np.mean(self.image_intensity[self.image], axis=0)
+
+    @property
+    def intensity_median(self):
+        return np.median(self.image_intensity[self.image], axis=0)
 
     @property
     def intensity_min(self):
@@ -772,11 +785,16 @@ class RegionProperties:
         return iter(sorted(props))
 
     def __getitem__(self, key):
-        value = getattr(self, key, None)
-        if value is not None:
-            return value
-        else:  # backwards compatibility
-            return getattr(self, PROPS[key])
+        if key in PROPS:
+            warn(
+                f"`RegionProperties[{key!r}]` is deprecated starting in "
+                "version 0.26 and will be removed in version 2.0. Use "
+                f"`RegionProperties[{PROPS[key]!r}]` instead. ",
+                category=FutureWarning,
+                stacklevel=2,
+            )
+            key = PROPS[key]
+        return getattr(self, key)
 
     def __eq__(self, other):
         if not isinstance(other, RegionProperties):
@@ -1257,6 +1275,8 @@ def regionprops(
         Value of greatest intensity in the region.
     **intensity_mean** : float
         Average of intensity values in the region.
+    **intensity_median** : float
+        Value of median intensity in the region.
     **intensity_min** : float
         Value of lowest intensity in the region.
     **intensity_std** : float
