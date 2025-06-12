@@ -954,9 +954,12 @@ def ransac(
 
         * ``residuals(*data)``
 
-        See :class:`RansacModelProtocol` for the protocol definition.  In
-        general, ensure that `model_class` is an instance of
-        ``RansacModelProtocol`` (this checks it conforms to the protocol).
+        Your model should conform to the ``RansacModelProtocol`` — meaning
+        implement all of the methods / attributes specified by the
+        :class:``RansacModelProctocol``. An easy check to see whether that is
+        the case is to use ``isinstance(MyModel, RansacModelProtocol)``. See
+        https://docs.python.org/3/library/typing.html#typing.Protocol for more
+        details.
 
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
