@@ -724,11 +724,17 @@ def _deprecate_inherited_estimate(cls):
     return cls
 
 
-def _fix_inherited_from_estimate(cls):
+def _update_from_estimate_docstring(cls):
     """Fix docstring for inherited ``from_estimate`` class method.
 
+    Even for classes that inherit the `from_estimate` method, and do not
+    override it, we nevertheless need to change the *docstring* of the
+    `from_estimate` method to point the user to the current (inheriting) class,
+    rather than the class in which the method is defined (the inherited class).
+
     This needs a class decorator so we can modify the docstring of the new
-    class method.
+    class method.  CPython currently does not allow us to modify class method
+    docstrings by updating ``__doc__``.
     """
 
     inherited_cmeth = getattr(cls, 'from_estimate')

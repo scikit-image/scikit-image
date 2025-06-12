@@ -11,7 +11,7 @@ from scipy import spatial
 from .._shared.utils import (
     safe_as_int,
     _deprecate_estimate,
-    _fix_inherited_from_estimate,
+    _update_from_estimate_docstring,
     _deprecate_inherited_estimate,
     FailedEstimation,
 )
@@ -1280,7 +1280,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return self._estimate(src, dst, weights) is None
 
 
-@_fix_inherited_from_estimate
+@_update_from_estimate_docstring
 @_deprecate_inherited_estimate
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
@@ -2026,7 +2026,7 @@ class EuclideanTransform(ProjectiveTransform):
         return self._estimate(src, dst) is None
 
 
-@_fix_inherited_from_estimate
+@_update_from_estimate_docstring
 @_deprecate_inherited_estimate
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
