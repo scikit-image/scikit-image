@@ -27,6 +27,20 @@ __all__ = [
 def count_inner_wrappers(func):
     """Count the number of inner wrappers by unpacking ``__wrapped__``.
 
+    If a wrapped function wraps another wrapped function, then we refer to the
+    wrapping of the second function as an *inner wrapper*.
+
+    For example, consider this code fragment:
+
+    .. code-block:: python
+        @wrap_outer
+        @wrap_inner
+        def foo():
+            pass
+
+    Here ``@wrap_inner`` applies a wrapper to ``foo``, and ``@wrap_outer``
+    applies a wrapper to the result.
+
     Parameters
     ----------
     func : callable
