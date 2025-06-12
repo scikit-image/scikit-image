@@ -14,6 +14,7 @@ __all__ = [
     'LineModelND',
     'CircleModel',
     'EllipseModel',
+    'RansacModelProtocol',
     'ransac',
     'block_reduce',
     'moments',
@@ -62,7 +63,7 @@ from ._moments import (
     inertia_tensor_eigvals,
 )
 from .profile import profile_line
-from .fit import LineModelND, CircleModel, EllipseModel, ransac
+from .fit import LineModelND, CircleModel, EllipseModel, ransac, RansacModelProtocol
 from .block import block_reduce
 from ._label import label
 from .entropy import shannon_entropy
