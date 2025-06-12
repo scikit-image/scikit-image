@@ -328,8 +328,7 @@ class CircleModel(BaseModel):
     points are the same.  If this happens, you will get a transform that is not
     "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    >>> # A successfully estimated model is truthy (applying ``bool()``
-    >>> # gives ``True``):
+    >>> # A successfully estimated model is truthy:
     >>> if model:
     ...     print("Estimation succeeded.")
     Estimation succeeded.
@@ -531,14 +530,16 @@ class EllipseModel(BaseModel):
     points are the same.  If this happens, you will get an ellipse model for
     which ``bool(model)`` is ``False``:
 
-    >>> # bool on a successful model (as above) gives True:
-    >>> bool(ellipse)
-    True
+    >>> # A successfully estimated model is truthy:
+    >>> if ellipse:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
     >>> # Not so for a degenerate model with identical points.
     >>> bad_data = np.ones((4, 2))
     >>> bad_ellipse = EllipseModel.from_estimate(bad_data)
-    >>> bool(bad_ellipse)
-    False
+    >>> if not bad_ellipse:
+    ...     print("Estimation failed.")
+    Estimation failed.
 
     Trying to use this failed estimation transform result will give a suitable
     error:
