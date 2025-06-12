@@ -93,7 +93,6 @@ def _moments_raw_to_central_fast(moments_raw):
             m021 = m[0, 2, 1]
             m020 = m[0, 2, 0]
             m003 = m[0, 0, 3]
-            m003_ = m[0, 0, 3]
             m100 = m[1, 0, 0]
             m101 = m[1, 0, 1]
             m102 = m[1, 0, 2]
