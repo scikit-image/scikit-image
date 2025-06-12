@@ -313,9 +313,9 @@ class _GeometricTransform(ABC):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -593,9 +593,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -833,9 +833,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -1092,9 +1092,9 @@ class ProjectiveTransform(_HMatrixTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -1610,9 +1610,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -1960,9 +1960,9 @@ class EuclideanTransform(ProjectiveTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -2341,9 +2341,9 @@ class PolynomialTransform(_GeometricTransform):
         -------
         tf : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
@@ -2558,9 +2558,9 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     -------
     tf : :class:`_GeometricTransform` or ``FailedEstimation``
         An instance of the requested transformation if the estimation
-        succeeded. Otherwise, a sentinel object will be returned and signal a
+        Otherwise, we return a special ``FailedEstimation`` object to signal a
         failed estimation. Testing the truth value of the failed estimation
-        sentinel will return ``False``. E.g.
+        object will return ``False``. E.g.
 
         .. code-block:: python
 

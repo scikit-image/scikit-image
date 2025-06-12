@@ -147,9 +147,9 @@ class ThinPlateSplineTransform:
         -------
         tform : Self or ``FailedEstimation``
             An instance of the transformation if the estimation succeeded.
-            Otherwise, a sentinel object will be returned and signal a failed
-            estimation. Testing the truth value of the failed estimation
-            sentinel will return ``False``. E.g.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
             .. code-block:: python
 
