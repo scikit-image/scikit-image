@@ -30,7 +30,11 @@ def _moments_raw_to_central_fast(moments_raw):
 
     """
     float_dtype = moments_raw.dtype
-    m = moments_raw if moments_raw.dtype == np.float64 else moments_raw.astype(np.float64, copy=False)
+    m = (
+        moments_raw
+        if moments_raw.dtype == np.float64
+        else moments_raw.astype(np.float64, copy=False)
+    )
     ndim = m.ndim
     order = m.shape[0] - 1
     if order >= 4 or ndim not in [2, 3]:
@@ -59,7 +63,9 @@ def _moments_raw_to_central_fast(moments_raw):
             m20 = m[2, 0]
             m02 = m[0, 2]
             # 3rd order moments
-            moments_central[2, 1] = m[2, 1] - 2 * cx * m11 - cy * m20 + cx2 * m01 + cxcy * m10
+            moments_central[2, 1] = (
+                m[2, 1] - 2 * cx * m11 - cy * m20 + cx2 * m01 + cxcy * m10
+            )
             moments_central[1, 2] = m[1, 2] - 2 * cy * m11 - cx * m02 + 2 * cxcy * m01
             moments_central[3, 0] = m[3, 0] - 3 * cx * m20 + 2 * cx2 * m10
             moments_central[0, 3] = m[0, 3] - 3 * cy * m02 + 2 * cy2 * m01
@@ -106,13 +112,21 @@ def _moments_raw_to_central_fast(moments_raw):
             # 3rd order moments
             moments_central[0, 0, 3] = 2 * cz2 * m001 - 3 * cz * m002 + m003
             moments_central[0, 1, 2] = -cy * m002 + 2 * cz * (cy * m001 - m011) + m012
-            moments_central[0, 2, 1] = cy2 * m001 - 2 * cy * m011 + cz * (cy * m010 - m020) + m021
+            moments_central[0, 2, 1] = (
+                cy2 * m001 - 2 * cy * m011 + cz * (cy * m010 - m020) + m021
+            )
             moments_central[0, 3, 0] = 2 * cy2 * m010 - 3 * cy * m020 + m[0, 3, 0]
             moments_central[1, 0, 2] = -cx * m002 + 2 * cz * (cx * m001 - m101) + m102
-            moments_central[1, 1, 1] = -cx * m011 + cy * (cx * m001 - m101) + cz * (cx * m010 - m110) + m111
+            moments_central[1, 1, 1] = (
+                -cx * m011 + cy * (cx * m001 - m101) + cz * (cx * m010 - m110) + m111
+            )
             moments_central[1, 2, 0] = -cx * m020 - 2 * cy * (-cx * m010 + m110) + m120
-            moments_central[2, 0, 1] = cx2 * m001 - 2 * cx * m101 + cz * (cx * m100 - m200) + m201
-            moments_central[2, 1, 0] = cx2 * m010 - 2 * cx * m110 + cy * (cx * m100 - m200) + m210
+            moments_central[2, 0, 1] = (
+                cx2 * m001 - 2 * cx * m101 + cz * (cx * m100 - m200) + m201
+            )
+            moments_central[2, 1, 0] = (
+                cx2 * m010 - 2 * cx * m110 + cy * (cx * m100 - m200) + m210
+            )
             moments_central[3, 0, 0] = 2 * cx2 * m100 - 3 * cx * m200 + m300
 
     # --- OPT: Only cast back if needed ---
