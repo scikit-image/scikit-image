@@ -1,10 +1,18 @@
+import inspect
 import math
+from typing import Protocol, runtime_checkable, Self
 from warnings import warn
 
 import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
+from .._shared.utils import (
+    _deprecate_estimate,
+    FailedEstimation,
+    deprecate_parameter,
+    DEPRECATED,
+)
 
 _EPSILON = np.spacing(1)
 
@@ -19,12 +27,131 @@ def _check_data_atleast_2D(data):
         raise ValueError('Input data must be at least 2D.')
 
 
+@runtime_checkable
+class RansacModel(Protocol):
+    """Protocol for `ransac` model class."""
+
+    @classmethod
+    def from_estimate(cls, *data): ...
+
+    def residuals(self, *data): ...
+
+
 class BaseModel:
     def __init__(self):
         self.params = None
 
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
+        # In order to defer to the ``_estimate`` method, we first need to
+        # create an empty not-initialized instance, that we can override by
+        # executing the ``_estimate`` method.  This relies on the assumption
+        # that `_estimate` can work with an uninitialized instance.  This
+        # assumption only need hold until we can expire the deprecation of the
+        # `estimate` method, at which point we can move the estimation logic
+        # from the ``_estimate`` methods, to the respective ``from_estimate``
+        # class methods.
+        tf = object.__new__(cls)
+        msg = tf._estimate(data, warn_only=False)
+        return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
-class LineModelND(BaseModel):
+
+class _ParamsBaseModel(BaseModel):
+    """Adds parameter parsing to BaseModel.
+
+    We need this sub-class as long as we still have the deprecated ``params``
+    argument to ``predict*`` methods.
+    """
+
+    def _get_params(self, params):
+        if params is None or params is DEPRECATED:
+            if self.params is None:
+                # Until the deprecation of no-argument initialization expires,
+                # it is easy to create a model where ``params is None``.
+                cls_name = type(self).__name__
+                raise ValueError(
+                    '`params` argument must be specified when '
+                    'applied to model initialized with '
+                    f'``{cls_name}()``; Consider creating new '
+                    f'{cls_name} with suitable input arguments, '
+                    f'or by using ``{cls_name}.from_estimate``.'
+                )
+            return self.params
+        new_model = type(self)(*self._params2init_params(params))
+        return new_model.params
+
+    def _params2init_params(self, params):
+        if len(params) != 2:
+            raise ValueError('Input `params` must be length 2')
+        return params
+
+
+def _warn_or_msg(msg, warn_only=True):
+    """If `warn_only`, warn with `msg`, return ``None``, else return `msg`
+
+    For `from_estimate` API, we want to return a ``FailedEstimation`` for these
+    estimation failures, which we do by passing back the `msg` from the
+    ``_estimation`` method via this function.  For the deprecated ``estimate``
+    API, we want to warn, and return an incomplete transform.  The ``None``
+    return value indicates the estimation has kind-of succeeded, for back
+    compatibility.
+    """
+    if not warn_only:
+        return msg
+    warn(msg, category=RuntimeWarning, stacklevel=5)
+    return None
+
+
+_PARAMS_DEP_START = '0.26'
+_PARAMS_DEP_STOP = '2.2'
+
+
+def _deprecate_no_args(cls):
+    """Class decorator to allow, deprecate no input arguments to ``__init__``.
+
+    Makes a new ``__init__`` method, that a) will allow option of passing no
+    arguments, and b) when used thus, raises a deprecation warning.  Otherwise
+    defers to an assumed-existing ``_args_init`` instance method to deal with
+    input arguments.
+
+    At the end of deprecationg we can drop this decorator, and rename
+    ``_args_init`` to ``__init__``.
+    """
+
+    def init(self, *args, **kwargs):
+        if len(args) or len(kwargs):
+            self._args_init(*args, **kwargs)
+            return
+        warn(
+            f'Calling ``{cls.__name__}()`` (without arguments) has been '
+            f'deprecated since version {_PARAMS_DEP_START} and will be '
+            f'removed in version {_PARAMS_DEP_STOP}; see help for '
+            f'``{cls.__name__}``.',
+            category=FutureWarning,
+            stacklevel=2,
+        )
+        self.params = None
+
+    init.__signature__ = inspect.signature(cls._args_init)
+
+    cls.__init__ = init
+    return cls
+
+
+def _deprecate_model_params(func):
+    """Deprecate `params` argument of various model methods."""
+    func = deprecate_parameter(
+        'params',
+        start_version=_PARAMS_DEP_START,
+        stop_version=_PARAMS_DEP_STOP,
+        modify_docstring=False,
+    )(func)
+    func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
+    return func
+
+
+@_deprecate_no_args
+class LineModelND(_ParamsBaseModel):
     """Total least squares estimator for N-dimensional lines.
 
     In contrast to ordinary least squares line estimation, this estimator
@@ -35,18 +162,28 @@ class LineModelND(BaseModel):
 
         X = origin + lambda * direction
 
+    Parameters
+    ----------
+    origin : array-like, shape (N,)
+        Coordinates of line origin in N dimensions.
+    direction : array-like, shape (N,)
+        Vector giving line direction.
+
     Attributes
     ----------
     params : tuple
         Line model parameters in the following order `origin`, `direction`.
 
+    Raises
+    ------
+    ValueError
+        If length of `origin` and `direction` differ.
+
     Examples
     --------
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
-    >>> lm = LineModelND()
-    >>> lm.estimate(np.stack([x, y], axis=-1))
-    True
+    >>> lm = LineModelND.from_estimate(np.stack([x, y], axis=-1))
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
     >>> res = lm.residuals(np.stack([x, y], axis=-1))
@@ -60,7 +197,23 @@ class LineModelND(BaseModel):
 
     """
 
-    def estimate(self, data):
+    def _args_init(self, origin, direction):
+        """Initialize LineModelND instance.
+
+        Parameters
+        ----------
+        origin : array-like, shape (N,)
+            Coordinates of line origin in N dimensions.
+        direction : array-like, shape (N,)
+            Vector giving line direction.
+        """
+        origin, direction = (np.array(v) for v in (origin, direction))
+        if len(origin) != len(direction):
+            raise ValueError('Direction vector should be same length as origin point.')
+        self.params = origin, direction
+
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate line model from data.
 
         This minimizes the sum of shortest (orthogonal) distances
@@ -73,9 +226,21 @@ class LineModelND(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the line model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
+
+            .. code-block:: python
+
+                model = LineModelND.from_estimate(...)
+                if not model:
+                    # Handle failed estimation
         """
+        return super().from_estimate(data)
+
+    def _estimate(self, data, warn_only=True):
         _check_data_atleast_2D(data)
 
         origin = data.mean(axis=0)
@@ -91,13 +256,14 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            return False
+            return 'estimate under-determined'
 
         self.params = (origin, direction)
 
-        return True
+        return None
 
-    def residuals(self, data, params=None):
+    @_deprecate_model_params
+    def residuals(self, data, params=DEPRECATED):
         """Determine residuals of data to model.
 
         For each point, the shortest (orthogonal) distance to the line is
@@ -107,31 +273,33 @@ class LineModelND(BaseModel):
         ----------
         data : (N, dim) array
             N points in a space of dimension dim.
-        params : (2,) array, optional
-            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
         residuals : (N,) array
             Residual for each data point.
+
+        Other parameters
+        ----------------
+        params : DEPRECATED, {None, length 2 sequence), optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+            .. deprecated:: {{ start_version }}
         """
         _check_data_atleast_2D(data)
-        if params is None:
-            if self.params is None:
-                raise ValueError('Parameters cannot be None')
-            params = self.params
-        if len(params) != 2:
-            raise ValueError('Parameters are defined by 2 sets.')
-
-        origin, direction = params
+        origin, direction = self._get_params(params)
+        if len(origin) != data.shape[1]:
+            raise ValueError(
+                f'`origin` is {len(origin)}D, but `data` is {data.shape[1]}D'
+            )
         res = (data - origin) - ((data - origin) @ direction)[
             ..., np.newaxis
         ] * direction
         return np.linalg.norm(res, axis=1)
 
-    def predict(self, x, axis=0, params=None):
-        """Predict intersection of the estimated line model with a hyperplane
-        orthogonal to a given axis.
+    @_deprecate_model_params
+    def predict(self, x, axis=0, params=DEPRECATED):
+        """Predict intersection of line model with orthogonal hyperplane.
 
         Parameters
         ----------
@@ -139,27 +307,25 @@ class LineModelND(BaseModel):
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
-        params : (2,) array, optional
-            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
         data : (n, m) array
             Predicted coordinates.
 
+        Other parameters
+        ----------------
+        params : DEPRECATED {None, length 2 sequence}, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+            .. deprecated:: {{ start_version }}
+
         Raises
         ------
         ValueError
             If the line is parallel to the given axis.
         """
-        if params is None:
-            if self.params is None:
-                raise ValueError('Parameters cannot be None')
-            params = self.params
-        if len(params) != 2:
-            raise ValueError('Parameters are defined by 2 sets.')
-
-        origin, direction = params
+        origin, direction = self._get_params(params)
 
         if direction[axis] == 0:
             # line parallel to axis
@@ -169,7 +335,8 @@ class LineModelND(BaseModel):
         data = origin + l[..., np.newaxis] * direction
         return data
 
-    def predict_x(self, y, params=None):
+    @_deprecate_model_params
+    def predict_x(self, y, params=DEPRECATED):
         """Predict x-coordinates for 2D lines using the estimated model.
 
         Alias for::
@@ -180,19 +347,31 @@ class LineModelND(BaseModel):
         ----------
         y : array
             y-coordinates.
-        params : (2,) array, optional
-            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
         x : array
             Predicted x-coordinates.
 
+        Other parameters
+        ----------------
+        params : DEPRECATED {None, length 2 sequence}, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+            .. deprecated:: {{ start_version }}
+
         """
-        x = self.predict(y, axis=1, params=params)[:, 0]
+        # Avoid triggering deprecationwarning in predict.
+        tf = (
+            self
+            if (params is None or params is DEPRECATED)
+            else type(self)(*self._params2init_params(params))
+        )
+        x = tf.predict(y, axis=1)[:, 0]
         return x
 
-    def predict_y(self, x, params=None):
+    @_deprecate_model_params
+    def predict_y(self, x, params=DEPRECATED):
         """Predict y-coordinates for 2D lines using the estimated model.
 
         Alias for::
@@ -203,20 +382,51 @@ class LineModelND(BaseModel):
         ----------
         x : array
             x-coordinates.
-        params : (2,) array, optional
-            Optional custom parameter set in the form (`origin`, `direction`).
 
         Returns
         -------
         y : array
             Predicted y-coordinates.
 
+        Other parameters
+        ----------------
+        params : DEPRECATED {None, length 2 sequence}, optional
+            Optional custom parameter set in the form (`origin`, `direction`).
+
+            .. deprecated:: {{ start_version }}
+
         """
-        y = self.predict(x, axis=0, params=params)[:, 1]
+        # Avoid triggering deprecationwarning in predict.
+        tf = (
+            self
+            if (params is None or params is DEPRECATED)
+            else type(self)(*self._params2init_params(params))
+        )
+        y = tf.predict(x, axis=0)[:, 1]
         return y
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate line model from data.
 
-class CircleModel(BaseModel):
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimensionality ``dim >= 2``.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+        """
+        return self._estimate(data) is None
+
+
+@_deprecate_no_args
+class CircleModel(_ParamsBaseModel):
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -229,6 +439,13 @@ class CircleModel(BaseModel):
         min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
 
     A minimum number of 3 points is required to solve for the parameters.
+
+    Parameters
+    ----------
+    center : array-like, shape (2,)
+        Coordinates of circle center.
+    radius : float
+        Circle radius.
 
     Attributes
     ----------
@@ -247,22 +464,64 @@ class CircleModel(BaseModel):
            Thesis (MEng), Stellenbosch University, 2016. Appendix A, pp. 83-87.
            https://hdl.handle.net/10019.1/98627
 
+    Raises
+    ------
+    ValueError
+        If `center` does not have length 2.
+
     Examples
     --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
-    >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
-    >>> model = CircleModel()
-    >>> model.estimate(xy)
-    True
+    >>> xy = CircleModel((2, 3), 4).predict_xy(t)
+    >>> model = CircleModel.from_estimate(xy)
     >>> tuple(np.round(model.params, 5))
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if model:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_model = CircleModel.from_estimate(bad_data)
+    >>> if not bad_model:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_model.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def estimate(self, data):
+    def _args_init(self, center, radius):
+        """Initialize CircleModel instance.
+
+        Parameters
+        ----------
+        center : array-like, shape (2,)
+            Coordinates of circle center.
+        radius : float
+            Circle radius.
+        """
+        if not len(center) == 2:
+            raise ValueError('Center coordinates should be length 2')
+        self.params = tuple(center) + (radius,)
+
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate circle model from data using total least squares.
 
         Parameters
@@ -272,11 +531,21 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the circle model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
 
+            .. code-block:: python
+
+                model = CircleModel.from_estimate(...)
+                if not model:
+                    # Handle failed estimation
         """
+        return super().from_estimate(data)
 
+    def _estimate(self, data, warn_only=True):
         _check_data_dim(data, dim=2)
 
         # to prevent integer overflow, cast data to float, if it isn't already
@@ -288,13 +557,12 @@ class CircleModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "circle with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
+
         data /= scale
 
         # Adapted from a spherical estimator covered in a blog post by Charles
@@ -305,8 +573,10 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input does not contain enough significant data points.")
-            return False
+            return _warn_or_msg(
+                "Input does not contain enough significant data points.",
+                warn_only=warn_only,
+            )
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
@@ -318,7 +588,7 @@ class CircleModel(BaseModel):
         center += origin
         self.params = tuple(center) + (r,)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -346,34 +616,61 @@ class CircleModel(BaseModel):
 
         return r - np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
 
-    def predict_xy(self, t, params=None):
+    def _params2init_params(self, params):
+        if len(params) < 3:
+            raise ValueError('Input `params` must be length 3')
+        return params[:2], params[2]
+
+    @_deprecate_model_params
+    def predict_xy(self, t, params=DEPRECATED):
         """Predict x- and y-coordinates using the estimated model.
 
         Parameters
         ----------
-        t : array
+        t : array-like
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (3,) array, optional
-            Optional custom parameter set.
 
         Returns
         -------
         xy : (..., 2) array
             Predicted x- and y-coordinates.
 
+        Other parameters
+        ----------------
+        params : DEPRECATED {None, (3,) array}, optional
+            Optional parameters ``xc``, ``yc``, `radius`.
+
+            .. deprecated:: {{ start_version }}
         """
-        if params is None:
-            params = self.params
-        xc, yc, r = params
+        t = np.asanyarray(t)
+        xc, yc, r = self._get_params(params)
 
         x = xc + r * np.cos(t)
         y = yc + r * np.sin(t)
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate circle model from data using total least squares.
 
-class EllipseModel(BaseModel):
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        return self._estimate(data) is None
+
+
+@_deprecate_no_args
+class EllipseModel(_ParamsBaseModel):
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
@@ -389,32 +686,82 @@ class EllipseModel(BaseModel):
     solution is computed directly, no iterations are required. This leads
     to a simple, stable and robust fitting method.
 
-    The ``params`` attribute contains the parameters in the following order::
-
-        xc, yc, a, b, theta
+    Parameters
+    ----------
+    center : array-like, shape (2,)
+        Coordinates of ellipse center.
+    ax_lens : array-like, shape (2,)
+        Length of first axis and length of second axis.  Call these ``a`` and
+        ``b``.
+    theta : float
+        Angle of first axis.
 
     Attributes
     ----------
     params : tuple
-        Ellipse model parameters in the following order `xc`, `yc`, `a`, `b`,
-        `theta`.
+        Ellipse model parameters in the following order ``xc``, ``yc``, `a`,
+        `b`, `theta`.
+
+    Raises
+    ------
+    ValueError
+        If `center` does not have length 2.
 
     Examples
     --------
 
-    >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
-    ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
-    >>> ellipse = EllipseModel()
-    >>> ellipse.estimate(xy)
-    True
+    >>> em = EllipseModel((10, 15), (8, 4), np.deg2rad(30))
+    >>> xy = em.predict_xy(np.linspace(0, 2 * np.pi, 25))
+    >>> ellipse = EllipseModel.from_estimate(xy)
     >>> np.round(ellipse.params, 2)
     array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get an ellipse model for
+    which ``bool(model)`` is ``False``:
+
+    >>> # bool on a successful model (as above) gives True:
+    >>> bool(ellipse)
+    True
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_ellipse = EllipseModel.from_estimate(bad_data)
+    >>> bool(bad_ellipse)
+    False
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_ellipse.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def estimate(self, data):
+    def _args_init(self, center, ax_lens, theta):
+        """Initialize CircleModel instance.
+
+        Parameters
+        ----------
+        center : array-like, shape (2,)
+            Coordinates of ellipse center.
+        ax_lens : array-like, shape (2,)
+            Length of first axis and length of second axis.  Call these ``a`` and
+            ``b``.
+        theta : float
+            Angle of first axis.
+        """
+        if not len(center) == 2:
+            raise ValueError('Center coordinates should be length 2')
+        if not len(ax_lens) == 2:
+            raise ValueError('Axis lengths should be length 2')
+        self.params = tuple(center) + tuple(ax_lens) + (theta,)
+
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate ellipse model from data using total least squares.
 
         Parameters
@@ -424,9 +771,17 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the ellipse model if the estimation succeeded.
+            Otherwise, a sentinel object will be returned and signal a failed
+            estimation. Testing the truth value of the failed estimation
+            sentinel will return ``False``. E.g.
 
+            .. code-block:: python
+
+                model = EllipseModel.from_estimate(...)
+                if not model:
+                    # Handle failed estimation
 
         References
         ----------
@@ -436,17 +791,18 @@ class EllipseModel(BaseModel):
                WSCG (Vol. 98, pp. 125-132).
 
         """
+        return super().from_estimate(data)
+
+    def _estimate(self, data, warn_only=True):
         # Original Implementation: Ben Hammel, Nick Sullivan-Molina
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
         if len(data) < 5:
-            warn(
+            return _warn_or_msg(
                 "Need at least 5 data points to estimate an ellipse.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
 
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
@@ -458,13 +814,11 @@ class EllipseModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "ellipse with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
         data /= scale
 
         x = data[:, 0]
@@ -487,7 +841,7 @@ class EllipseModel(BaseModel):
             # Reduced scatter matrix [eqn. 29]
             M = inv(C1) @ (S1 - S2 @ inv(S3) @ S2.T)
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
-            return False
+            return 'Singular matrix from estimation'
 
         # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
         # from this equation [eqn. 28]
@@ -500,7 +854,7 @@ class EllipseModel(BaseModel):
         a1 = eig_vecs[:, (cond > 0)]
         # seeks for empty matrix
         if 0 in a1.shape or len(a1.ravel()) != 3:
-            return False
+            return 'Eigenvector constraints not met'
         a, b, c = a1.ravel()
 
         # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
@@ -547,7 +901,7 @@ class EllipseModel(BaseModel):
 
         self.params = tuple(float(p) for p in params)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -611,7 +965,13 @@ class EllipseModel(BaseModel):
 
         return residuals
 
-    def predict_xy(self, t, params=None):
+    def _params2init_params(self, params):
+        if len(params) < 5:
+            raise ValueError('Input `params` must be length 5')
+        return params[:2], params[2:4], params[4]
+
+    @_deprecate_model_params
+    def predict_xy(self, t, params=DEPRECATED):
         """Predict x- and y-coordinates using the estimated model.
 
         Parameters
@@ -619,20 +979,23 @@ class EllipseModel(BaseModel):
         t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
-        params : (5,) array, optional
-            Optional custom parameter set.
 
         Returns
         -------
         xy : (..., 2) array
             Predicted x- and y-coordinates.
 
+        Other parameters
+        ----------------
+        params : DEPRECATED, {None, (5,) array}, optional
+            Optional ellipse model parameters in the following order ``xc``,
+            ``yc``, `a`, `b`, `theta`.
+
+            .. deprecated:: {{ start_version }}
         """
+        t = np.asanyarray(t)
 
-        if params is None:
-            params = self.params
-
-        xc, yc, a, b, theta = params
+        xc, yc, a, b, theta = self._get_params(params)
 
         ct = np.cos(t)
         st = np.sin(t)
@@ -643,6 +1006,31 @@ class EllipseModel(BaseModel):
         y = yc + a * stheta * ct + b * ctheta * st
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
+
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate ellipse model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+
+        References
+        ----------
+        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
+               fitting of ellipses". In Proc. 6th International Conference in
+               Central Europe on Computer Graphics and Visualization.
+               WSCG (Vol. 98, pp. 125-132).
+
+        """
+        return self._estimate(data) is None
 
 
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
@@ -680,6 +1068,44 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
+def add_from_estimate(cls):
+    """Add ``from_estimate`` method  class using ``estimate`` method"""
+
+    if hasattr(cls, 'from_estimate'):
+        if not inspect.ismethod(cls.from_estimate):
+            raise TypeError(f'Class {cls} `from_estimate` must be a ' 'class method.')
+        return cls
+
+    if not hasattr(cls, 'estimate'):
+        raise TypeError(
+            f'Class {cls} must have `from_estimate` class method '
+            'or `estimate` method.'
+        )
+
+    warn(
+        "Passing custom classes without `from_estimate` has been deprecated "
+        "since version 0.26 and will be removed in version 2.2. "
+        "Add `from_estimate` class method to custom class to avoid this "
+        "warning.",
+        category=FutureWarning,
+        stacklevel=3,
+    )
+
+    class FromEstimated(cls):
+        @classmethod
+        def from_estimate(klass, *args, **kwargs):
+            # Assume we can make default instance without input arguments.
+            instance = klass()
+            success = instance.estimate(*args, **kwargs)
+            return (
+                instance
+                if success
+                else FailedEstimation(f'`{cls.__name__}` estimation failed')
+            )
+
+    return FromEstimated
+
+
 def ransac(
     data,
     model_class,
@@ -703,7 +1129,7 @@ def ransac(
     1. Select `min_samples` random samples from the original data and check
        whether the set of data is valid (see `is_data_valid`).
     2. Estimate a model to the random subset
-       (`model_cls.estimate(*data[random_subset]`) and check whether the
+       (`model_cls.from_estimate(*data[random_subset]`) and check whether the
        estimated model is valid (see `is_model_valid`).
     3. Classify all data as inliers or outliers by calculating the residuals
        to the estimated model (`model_cls.residuals(*data)`) - all data samples
@@ -730,14 +1156,27 @@ def ransac(
         ``is_model_valid(model, *random_data)`` and
         ``is_data_valid(*random_data)`` must all take each data array as
         separate arguments.
-    model_class : object
-        Object with the following object methods:
+    model_class : type
+        Class with the following methods:
 
-         * ``success = estimate(*data)``
-         * ``residuals(*data)``
+        * Either:
 
-        where `success` indicates whether the model estimation succeeded
-        (`True` or `None` for success, `False` for failure).
+          * ``from_estimate`` class method returning transform instance, as in
+            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform`` should be truthy (``bool(tform) == True``) where
+            estimation succeeded, or falsey (``bool(tform) == False``) where it
+            failed;  OR
+          * (deprecated) ``estimate`` instance method, returning flag to
+            indicate successful estimation, as in ``tform = model_class();
+            success = tform.estimate(*data)``. ``success == True`` when
+            estimation succeeded, ``success == False`` when it failed.
+
+        * ``residuals(*data)``
+
+        See :class:`RansacModel` for the protocol definition.  In general,
+        ensure that `model_class` is an instance of ``RansacModel`` (this
+        checks it conforms to the protocol).
+
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
@@ -808,9 +1247,7 @@ def ransac(
 
     Estimate ellipse model using all available data:
 
-    >>> model = EllipseModel()
-    >>> model.estimate(data)
-    True
+    >>> model = EllipseModel.from_estimate(data)
     >>> np.round(model.params)  # doctest: +SKIP
     array([ 72.,  75.,  77.,  14.,   1.])
 
@@ -903,8 +1340,14 @@ def ransac(
         else rng.choice(num_samples, min_samples, replace=False)
     )
 
-    # estimate model for current random sample set
-    model = model_class()
+    # Ensure model_class has from_estimate class method.
+    model_class = add_from_estimate(model_class)
+
+    # Check protocol.
+    if not isinstance(model_class, RansacModel):
+        raise TypeError(
+            f"`model_class` {model_class} should be of (protocol) type RansacModel"
+        )
 
     num_trials = 0
     # max_trials can be updated inside the loop, so this cannot be a for-loop
@@ -922,9 +1365,9 @@ def ransac(
         if validate_data and not is_data_valid(*samples):
             continue
 
-        success = model.estimate(*samples)
+        model = model_class.from_estimate(*samples)
         # backwards compatibility
-        if success is not None and not success:
+        if not model:
             continue
 
         # optional check if estimated model is valid
@@ -966,7 +1409,7 @@ def ransac(
     if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        model.estimate(*data_inliers)
+        model = model_class.from_estimate(*data_inliers)
         if validate_model and not is_model_valid(model, *data_inliers):
             warn("Estimated model is not valid. Try increasing max_trials.")
     else:
@@ -974,4 +1417,5 @@ def ransac(
         best_inliers = None
         warn("No inliers found. Model not fitted")
 
-    return model, best_inliers
+    # Return model from wrapper, otherwise model itself.
+    return getattr(model, 'model', model), best_inliers

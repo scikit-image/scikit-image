@@ -29,8 +29,7 @@ dst_rows -= 1.5 * 50
 dst = np.vstack([dst_cols, dst_rows]).T
 
 
-tform = PiecewiseAffineTransform()
-tform.estimate(src, dst)
+tform = PiecewiseAffineTransform.from_estimate(src, dst)
 
 out_rows = image.shape[0] - 1.5 * 50
 out_cols = cols

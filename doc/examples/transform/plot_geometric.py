@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import transform
+from skimage.util import FailedEstimationAccessError
 
 ######################################################################
 # Basics
@@ -79,8 +80,8 @@ plt.tight_layout()
 # ====================
 #
 # In addition to the basic functionality mentioned above you can also
-# estimate the parameters of a geometric transformation using the least-
-# squares method.
+# generate a transform by estimating the parameters of a geometric
+# transformation using the least squares method.
 #
 # This can amongst other things be used for image registration or
 # rectification, where you have a set of control points or
@@ -98,8 +99,44 @@ text = data.text()
 src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
 dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 
-tform3 = transform.ProjectiveTransform()
-tform3.estimate(src, dst)
+tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
+
+######################################################################
+# For many transform types, including the ``ProjectiveTransform`, it is
+# possible for the estimation to fail.  If this is the case,
+# ``from_estimate`` returns a special object of type ``FailedEstimation``.
+# If you apply a truth test (e.g. ``bool(tform3)``), ``FailedEstimation``
+# returns False, and this is a good way to check for the failure.  Applying
+# ``str`` to the failed estimation object gives the error message describing
+# the reason for failure.  Putting these together, the following is a typical
+# pattern for using the return value of ``from_estimate``
+
+if not tform3:  # If result is Falsey, we have a failed estimation.
+    raise RuntimeError(f'Failed estimation: {tform3}')
+
+######################################################################
+# Here is an example of a failed estimation, where all the input points are the
+# same:
+
+# Repeat last point 4 times, for four identical points.
+bad_src = np.tile(src[-1, :], (4, 1))
+bad_tform = transform.ProjectiveTransform.from_estimate(bad_src, dst)
+bad_tform
+
+######################################################################
+# If you try and use any attributes of this failed estimation, you get
+# a ``FailedEstimationAccessError``.
+
+try:
+    bad_tform.params
+except FailedEstimationAccessError as exc:
+    print('We got the following error:')
+    print(exc)
+
+######################################################################
+# In fact, our original estimation succeeded, so we can apply it, for example,
+# to the coordinates of an image, using ``transform.warp``.
+
 warped = transform.warp(text, tform3, output_shape=(50, 300))
 
 fig, ax = plt.subplots(nrows=2, figsize=(8, 3))
