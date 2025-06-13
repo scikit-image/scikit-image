@@ -63,4 +63,11 @@ Version 2.0
 - In `skimage.measure.regionprops` complete deprecation of old property names.
   Remove `PROPS` dict, related logic and warnings.
 
+
+Version 2.2
+-----------
+- In `skimage.feature.blob`, remove decorator `_deprecate_threshold_with_scaling`
+  and related tests and the documentation of the `threshold` parameter in the
+  docstrings. Turn `threshold_abs=` into a required parameter.
+
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
