@@ -52,7 +52,7 @@ blobs_log = blob_log(image_gray, max_sigma=30, num_sigma=10, threshold=0.1)
 # Compute radii in the 3rd column.
 blobs_log[:, 2] = blobs_log[:, 2] * sqrt(2)
 
-blobs_dog = blob_dog(image_gray, max_sigma=30, threshold=0.1)
+blobs_dog = blob_dog(image_gray, max_sigma=30, threshold_abs=0.1)
 blobs_dog[:, 2] = blobs_dog[:, 2] * sqrt(2)
 
 blobs_doh = blob_doh(image_gray, max_sigma=30, threshold=0.01)
