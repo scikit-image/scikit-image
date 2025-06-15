@@ -5,7 +5,13 @@ from scipy import ndimage as ndi
 
 from skimage import data, color, morphology
 from skimage.util import img_as_bool
-from skimage.morphology import binary, footprints, gray, footprint_rectangle
+from skimage.morphology import (
+    binary,
+    footprints,
+    gray,
+    footprint_rectangle,
+    footprint_decomposed_rectangle,
+)
 from skimage._shared.testing import assert_stacklevel
 
 
@@ -102,8 +108,8 @@ def test_rectangle_decomposition(function, nrows, ncols, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
-    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols))
+    footprint = footprint_decomposed_rectangle((nrows, ncols), method=decomposition)
     img = _get_decomp_test_data(function)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)
@@ -173,8 +179,8 @@ def test_cube_decomposition(function, shape, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
-    footprint = footprint_rectangle(shape, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape)
+    footprint = footprint_decomposed_rectangle(shape, method=decomposition)
     img = _get_decomp_test_data(function, ndim=3)
     func = getattr(binary, function)
     expected = func(img, footprint=footprint_ndarray)

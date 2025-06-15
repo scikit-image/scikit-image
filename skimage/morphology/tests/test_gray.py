@@ -6,7 +6,12 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 from skimage import color, data, transform
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
-from skimage.morphology import gray, footprints, footprint_rectangle
+from skimage.morphology import (
+    gray,
+    footprints,
+    footprint_rectangle,
+    footprint_decomposed_rectangle,
+)
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -395,8 +400,8 @@ def test_rectangle_decomposition(cam_image, function, nrows, ncols, decompositio
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
-    footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle((nrows, ncols))
+    footprint = footprint_decomposed_rectangle((nrows, ncols), method=decomposition)
     func = getattr(gray, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
@@ -460,8 +465,8 @@ def test_cube_decomposition(cell3d_image, function, shape, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprint_rectangle(shape, decomposition=None)
-    footprint = footprint_rectangle(shape, decomposition=decomposition)
+    footprint_ndarray = footprint_rectangle(shape)
+    footprint = footprint_decomposed_rectangle(shape, method=decomposition)
     func = getattr(gray, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
