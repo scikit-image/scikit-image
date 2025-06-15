@@ -43,7 +43,7 @@ References
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from skimage.morphology import max_tree
+import skimage as ski
 import networkx as nx
 
 
@@ -209,7 +209,7 @@ image = np.array(
 # ========
 # Next, we calculate the max-tree of this image.
 # max-tree of the image
-P, S = max_tree(image)
+P, S = ski.morphology.max_tree(image)
 
 P_rav = P.ravel()
 
