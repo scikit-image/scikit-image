@@ -2,6 +2,8 @@ import numpy as np
 from skimage.restoration import unwrap_phase
 import sys
 
+import pytest
+
 from skimage._shared import testing
 from skimage._shared.testing import (
     assert_array_almost_equal_nulp,
@@ -234,3 +236,16 @@ def test_unwrap_3d_all_masked():
     assert_(np.ma.isMaskedArray(unwrap))
     assert_(np.sum(unwrap.mask) == 999)  # all but one masked
     assert_(unwrap[0, 0, 0] == 0)
+
+
+def test_unwrap_2d_raise_on_nan():
+    """Check that unwrap_phase fails for NaN input.
+
+    Regression test for
+    https://github.com/scikit-image/scikit-image/issues/3831.
+    """
+    x = np.linspace(1, 100)
+    x[1] = np.nan
+    xx, yy = np.meshgrid(x, x)
+    with pytest.raises(RuntimeError, match="NaN encountered while sorting edges"):
+        unwrap_phase(xx)
