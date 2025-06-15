@@ -20,6 +20,18 @@ set -ex
 
 export PIP_DEFAULT_TIMEOUT=60
 
+
+# Convert pyproject.toml to pyproject.json
+python -c 'import tomllib as t, json as j; f = open("pyproject.json", "w"); j.dump(t.load(open("pyproject.toml", "rb")), f); f.close()'
+
+# Grab various dependencies, and write to requirements/*.txt
+mkdir requirements
+cat pyproject.json | jq -r '.project.dependencies[]' > requirements/default.txt
+cat pyproject.json | jq -r '.project."optional-dependencies".optional[]' > requirements/optional.txt
+cat pyproject.json | jq -r '."dependency-groups".docs[]' > requirements/docs.txt
+cat pyproject.json | jq -r '."dependency-groups".test[]' > requirements/test.txt
+
+
 if [[ $MINIMUM_REQUIREMENTS == 1 ]]; then
     for filename in requirements/*.txt; do
         sed -i 's/>=/==/g' "$filename"
