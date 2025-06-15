@@ -57,6 +57,8 @@ Version 2.0
 - In `skimage.morphology.remove_small_objects`, complete the deprecation of
   `min_size` and re-order the argument `connectivity` after the
   keyword-only parameter `max_size`.
+- Complete refactoring of thresholding functions to `segmentation`
+  * Remove `skimage/filters/(thresholding.py|tests/test_thresholding)`
 - In `skimage.morphology.remove_small_holes`, complete the deprecation of
   `area_threshold` and re-order the argument `connectivity` after the
   keyword-only parameter `max_size`.
