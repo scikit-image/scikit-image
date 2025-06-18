@@ -1,14 +1,14 @@
 """
-===========================
-Structural similarity index
-===========================
+========================================
+Compute mean structural similarity index
+========================================
 
 When comparing images, the mean squared error (MSE)--while simple to
-implement--is not highly indicative of perceived similarity.  Structural
-similarity aims to address this shortcoming by taking texture into account
-[1]_, [2]_.
+implement--is not highly indicative of perceived similarity. The structural
+similarity index measure (SSIM) aims to address this shortcoming by taking
+texture into account [1]_, [2]_.
 
-The example shows two modifications of the input image, each with the same MSE,
+The example shows two modifications of an original image, each with the same MSE,
 but with very different mean structural similarity indices.
 
 .. [1] Zhou Wang; Bovik, A.C.; ,"Mean squared error: Love it or leave it? A new
@@ -37,34 +37,35 @@ noise[rng.random(size=noise.shape) > 0.5] *= -1
 img_noise = img + noise
 img_const = img + abs(noise)
 
+#####################################################################
+# Ensure that the (floating-point) values in the original image range
+# from 0 to 1.
+
+assert img.min() == 0.0
+assert img.max() == 1.0
+
+mse_none = ski.metrics.mean_squared_error(img, img)
+ssim_none = ski.metrics.structural_similarity(img, img, data_range=1.0)
+
+mse_noise = ski.metrics.mean_squared_error(img, img_noise)
+ssim_noise = ski.metrics.structural_similarity(img, img_noise, data_range=1.0)
+
+mse_const = ski.metrics.mean_squared_error(img, img_const)
+ssim_const = ski.metrics.structural_similarity(img, img_const, data_range=1.0)
+
 fig, axes = plt.subplots(ncols=3, figsize=(10, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
-mse_none = ski.metrics.mean_squared_error(img, img)
-ssim_none = ski.metrics.structural_similarity(
-    img, img, data_range=img.max() - img.min()
-)
-
-mse_noise = ski.metrics.mean_squared_error(img, img_noise)
-ssim_noise = ski.metrics.structural_similarity(
-    img, img_noise, data_range=img_noise.max() - img_noise.min()
-)
-
-mse_const = ski.metrics.mean_squared_error(img, img_const)
-ssim_const = ski.metrics.structural_similarity(
-    img, img_const, data_range=img_const.max() - img_const.min()
-)
-
 ax[0].imshow(img, cmap='gray', vmin=0, vmax=1)
-ax[0].set_xlabel(f'MSE: {mse_none:.2f}, SSIM: {ssim_none:.2f}')
+ax[0].set_xlabel(f'MSE = {mse_none:.2f}, SSIM = {ssim_none:.2f}')
 ax[0].set_title('Original image')
 
 ax[1].imshow(img_noise, cmap='gray', vmin=0, vmax=1)
-ax[1].set_xlabel(f'MSE: {mse_noise:.2f}, SSIM: {ssim_noise:.2f}')
+ax[1].set_xlabel(f'MSE = {mse_noise:.2f}, SSIM = {ssim_noise:.2f}')
 ax[1].set_title('Image with noise')
 
 ax[2].imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
-ax[2].set_xlabel(f'MSE: {mse_const:.2f}, SSIM: {ssim_const:.2f}')
+ax[2].set_xlabel(f'MSE = {mse_const:.2f}, SSIM = {ssim_const:.2f}')
 ax[2].set_title('Image plus constant')
 
 plt.tight_layout()
