@@ -37,7 +37,7 @@ noise[rng.random(size=noise.shape) > 0.5] *= -1
 img_noise = img + noise
 img_const = img + abs(noise)
 
-fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 4), sharex=True, sharey=True)
+fig, axes = plt.subplots(ncols=3, figsize=(10, 4), sharex=True, sharey=True)
 ax = axes.ravel()
 
 mse_none = ski.metrics.mean_squared_error(img, img)
@@ -55,11 +55,11 @@ ssim_const = ski.metrics.structural_similarity(
     img, img_const, data_range=img_const.max() - img_const.min()
 )
 
-ax[0].imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[0].imshow(img, cmap='gray', vmin=0, vmax=1)
 ax[0].set_xlabel(f'MSE: {mse_none:.2f}, SSIM: {ssim_none:.2f}')
 ax[0].set_title('Original image')
 
-ax[1].imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[1].imshow(img_noise, cmap='gray', vmin=0, vmax=1)
 ax[1].set_xlabel(f'MSE: {mse_noise:.2f}, SSIM: {ssim_noise:.2f}')
 ax[1].set_title('Image with noise')
 
