@@ -43,17 +43,6 @@ try:
     amg_loaded = True
 except ImportError:
     amg_loaded = False
-except AttributeError as error:
-    if "`np.deprecate` was removed" in error.args[0]:
-        warn(
-            "found optional dependency pyamg, which cannot (yet) be imported with "
-            "NumPy >=2 and will be treated as if not available",
-            RuntimeWarning,
-        )
-        amg_loaded = False
-    else:
-        raise error
-
 
 from ..util import img_as_float
 
@@ -156,9 +145,9 @@ def _build_laplacian(data, spacing, mask, beta, multichannel):
     i_indices = edges.ravel()
     j_indices = edges[::-1].ravel()
     data = np.hstack((weights, weights))
-    lap = sparse.coo_matrix((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
+    lap = sparse.csr_array((data, (i_indices, j_indices)), shape=(pixel_nb, pixel_nb))
     lap.setdiag(-np.ravel(lap.sum(axis=0)))
-    return lap.tocsr()
+    return lap
 
 
 def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichannel):
@@ -185,10 +174,10 @@ def _build_linear_system(data, spacing, labels, nlabels, mask, beta, multichanne
     B = -rows[:, seeds_indices]
 
     seeds = labels[seeds_mask]
-    seeds_mask = sparse.csc_matrix(
+    seeds_mask = sparse.csc_array(
         np.hstack([np.atleast_2d(seeds == lab).T for lab in range(1, nlabels + 1)])
     )
-    rhs = B.dot(seeds_mask)
+    rhs = B @ seeds_mask
 
     return lap_sparse, rhs
 
@@ -219,16 +208,19 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
                 )
             M = None
         elif mode == 'cg_j':
-            M = sparse.diags(1.0 / lap_sparse.diagonal())
+            n = lap_sparse.shape[-1]
+            M = sparse.dia_array((1.0 / lap_sparse.diagonal(), 0), shape=(n, n))
         else:
             # mode == 'cg_mg'
-            lap_sparse = lap_sparse.tocsr()
+            lap_sparse.indices, lap_sparse.indptr = _safe_downcast_indices(
+                lap_sparse, np.int32, "index values too large for int32 mode 'cg_mg'"
+            )
             ml = ruge_stuben_solver(lap_sparse, coarse_solver='pinv')
             M = ml.aspreconditioner(cycle='V')
             maxiter = 30
         rtol = {SCIPY_CG_TOL_PARAM_NAME: tol}
         cg_out = [
-            cg(lap_sparse, B[:, i].toarray(), **rtol, atol=0, M=M, maxiter=maxiter)
+            cg(lap_sparse, B[:, [i]].toarray(), **rtol, atol=0, M=M, maxiter=maxiter)
             for i in range(B.shape[1])
         ]
         if np.any([info > 0 for _, info in cg_out]):
@@ -240,6 +232,22 @@ def _solve_linear_system(lap_sparse, B, tol, mode):
         X = np.asarray([x for x, _ in cg_out])
 
     return X
+
+
+def _safe_downcast_indices(A, itype, msg):
+    # check for safe downcasting
+    max_value = np.iinfo(itype).max
+
+    if A.indptr[-1] > max_value:  # indptr[-1] is max b/c indptr always sorted
+        raise ValueError(msg)
+
+    if max(*A.shape) > max_value:  # only check large enough arrays
+        if np.any(A.indices > max_value):
+            raise ValueError(msg)
+
+    indices = A.indices.astype(itype, copy=False)
+    indptr = A.indptr.astype(itype, copy=False)
+    return indices, indptr
 
 
 def _preprocess(labels):
@@ -482,6 +490,11 @@ def random_walker(
             f"{mode} is not a valid mode. Valid modes are 'cg_mg', "
             f"'cg', 'cg_j', 'bf', and None"
         )
+
+    if data.dtype == np.float16:
+        # SciPy sparse, which is used later on, doesn't officially support float16
+        # This led to failures when testing with NumPy 1.26 (see gh-7635).
+        data = data.astype(np.float32, casting="safe")
 
     # Spacing kwarg checks
     if spacing is None:

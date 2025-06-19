@@ -1,4 +1,4 @@
-"""This module includes tools to transform images and volumetric data.
+"""Geometric and other transformations, e.g., rotations, Radon transform.
 
 - Geometric transformation:
   These transforms change the shape or position of an image.

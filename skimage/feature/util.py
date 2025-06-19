@@ -76,15 +76,24 @@ def plot_matched_features(
         The Axes object where the images and their matched features are drawn.
     keypoints_color : matplotlib color, optional
         Color for keypoint locations.
-    matches_color : matplotlib color, optional
-        Color for lines which connect keypoint matches. By default the
-        color is chosen randomly.
+    matches_color : matplotlib color or sequence thereof, optional
+        Single color or sequence of colors for each line defined by `matches`,
+        which connect keypoint matches. See [1]_ for an overview of supported
+        color formats. By default, colors are picked randomly.
     only_matches : bool, optional
         Set to True to plot matches only and not the keypoint locations.
     alignment : {'horizontal', 'vertical'}, optional
         Whether to show the two images side by side (`'horizontal'`), or one above
         the other (`'vertical'`).
 
+    References
+    ----------
+    .. [1] https://matplotlib.org/stable/users/explain/colors/colors.html#specifying-colors
+
+    Notes
+    -----
+    To make a sequence of colors passed to `matches_color` work for any number of
+    `matches`, you can wrap that sequence in :func:`itertools.cycle`.
     """
     image0 = img_as_float(image0)
     image1 = img_as_float(image1)
@@ -145,22 +154,32 @@ def plot_matched_features(
     ax.imshow(image, cmap='gray')
     ax.axis((0, image0.shape[1] + offset[1], image0.shape[0] + offset[0], 0))
 
-    rng = np.random.default_rng()
+    number_of_matches = matches.shape[0]
 
-    for i in range(matches.shape[0]):
-        idx0 = matches[i, 0]
-        idx1 = matches[i, 1]
+    from matplotlib.colors import is_color_like
 
-        if matches_color is None:
-            color = rng.random(3)
-        else:
-            color = matches_color
+    if matches_color is None:
+        rng = np.random.default_rng(seed=0)
+        colors = [rng.random(3) for _ in range(number_of_matches)]
+    elif is_color_like(matches_color):
+        colors = [matches_color for _ in range(number_of_matches)]
+    elif hasattr(matches_color, "__len__") and len(matches_color) == number_of_matches:
+        # No need to check each color, matplotlib does so for us
+        colors = matches_color
+    else:
+        error_message = (
+            '`matches_color` needs to be a single color '
+            'or a sequence of length equal to the number of matches.'
+        )
+        raise ValueError(error_message)
 
+    for i, match in enumerate(matches):
+        idx0, idx1 = match
         ax.plot(
             (keypoints0[idx0, 1], keypoints1[idx1, 1] + offset[1]),
             (keypoints0[idx0, 0], keypoints1[idx1, 0] + offset[0]),
             '-',
-            color=color,
+            color=colors[i],
         )
 
 

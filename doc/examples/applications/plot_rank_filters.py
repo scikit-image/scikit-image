@@ -37,12 +37,10 @@ from `skimage.data` for all comparisons.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.util import img_as_ubyte
-from skimage import data
-from skimage.exposure import histogram
+import skimage as ski
 
-noisy_image = img_as_ubyte(data.camera())
-hist, hist_centers = histogram(noisy_image)
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
+hist, hist_centers = ski.exposure.histogram(noisy_image)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
 
@@ -63,12 +61,10 @@ fig.tight_layout()
 # are randomly set to 0. The **median** filter is applied to remove the
 # noise.
 
-from skimage.filters.rank import median
-from skimage.morphology import disk, ball
 
 rng = np.random.default_rng()
 noise = rng.random(noisy_image.shape)
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
@@ -78,13 +74,28 @@ ax = axes.ravel()
 ax[0].imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
 ax[0].set_title('Noisy image')
 
-ax[1].imshow(median(noisy_image, disk(1)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[1].imshow(
+    ski.filters.rank.median(noisy_image, ski.morphology.disk(1)),
+    vmin=0,
+    vmax=255,
+    cmap=plt.cm.gray,
+)
 ax[1].set_title('Median $r=1$')
 
-ax[2].imshow(median(noisy_image, disk(5)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[2].imshow(
+    ski.filters.rank.median(noisy_image, ski.morphology.disk(5)),
+    vmin=0,
+    vmax=255,
+    cmap=plt.cm.gray,
+)
 ax[2].set_title('Median $r=5$')
 
-ax[3].imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax[3].imshow(
+    ski.filters.rank.median(noisy_image, ski.morphology.disk(20)),
+    vmin=0,
+    vmax=255,
+    cmap=plt.cm.gray,
+)
 ax[3].set_title('Median $r=20$')
 
 for a in ax:
@@ -112,9 +123,8 @@ fig.tight_layout()
 # The example hereunder shows how a local **mean** filter smooths the camera
 # man image.
 
-from skimage.filters.rank import mean
 
-loc_mean = mean(noisy_image, disk(10))
+loc_mean = ski.filters.rank.mean(noisy_image, ski.morphology.disk(10))
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
@@ -141,11 +151,12 @@ fig.tight_layout()
 #     A different implementation is available for color images in
 #     :func:`skimage.restoration.denoise_bilateral`.
 
-from skimage.filters.rank import mean_bilateral
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
-bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
+bilat = ski.filters.rank.mean_bilateral(
+    noisy_image.astype(np.uint16), ski.morphology.disk(20), s0=10, s1=10
+)
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
@@ -181,14 +192,12 @@ fig.tight_layout()
 # .. [3] https://en.wikipedia.org/wiki/Histogram_equalization
 # .. [4] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
-from skimage import exposure
-from skimage.filters import rank
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
 # equalize globally and locally
-glob = exposure.equalize_hist(noisy_image) * 255
-loc = rank.equalize(noisy_image, disk(20))
+glob = ski.exposure.equalize_hist(noisy_image) * 255
+loc = ski.filters.rank.equalize(noisy_image, ski.morphology.disk(20))
 
 # extract histogram for each image
 hist = np.histogram(noisy_image, bins=np.arange(0, 256))
@@ -226,11 +235,12 @@ fig.tight_layout()
 # The following example shows how local auto-level enhances the camara man
 # picture.
 
-from skimage.filters.rank import autolevel
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
-auto = autolevel(noisy_image.astype(np.uint16), disk(20))
+auto = ski.filters.rank.autolevel(
+    noisy_image.astype(np.uint16), ski.morphology.disk(20)
+)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
@@ -252,16 +262,23 @@ fig.tight_layout()
 # of local minimum and maximum. The example below illustrates how the
 # percentile parameters influence the local auto-level result.
 
-from skimage.filters.rank import autolevel_percentile
 
-image = data.camera()
+image = ski.data.camera()
 
-footprint = disk(20)
-loc_autolevel = autolevel(image, footprint=footprint)
-loc_perc_autolevel0 = autolevel_percentile(image, footprint=footprint, p0=0.01, p1=0.99)
-loc_perc_autolevel1 = autolevel_percentile(image, footprint=footprint, p0=0.05, p1=0.95)
-loc_perc_autolevel2 = autolevel_percentile(image, footprint=footprint, p0=0.1, p1=0.9)
-loc_perc_autolevel3 = autolevel_percentile(image, footprint=footprint, p0=0.15, p1=0.85)
+footprint = ski.morphology.disk(20)
+loc_autolevel = ski.filters.rank.autolevel(image, footprint=footprint)
+loc_perc_autolevel0 = ski.filters.rank.autolevel_percentile(
+    image, footprint=footprint, p0=0.01, p1=0.99
+)
+loc_perc_autolevel1 = ski.filters.rank.autolevel_percentile(
+    image, footprint=footprint, p0=0.05, p1=0.95
+)
+loc_perc_autolevel2 = ski.filters.rank.autolevel_percentile(
+    image, footprint=footprint, p0=0.1, p1=0.9
+)
+loc_perc_autolevel3 = ski.filters.rank.autolevel_percentile(
+    image, footprint=footprint, p0=0.15, p1=0.85
+)
 
 fig, axes = plt.subplots(nrows=3, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
 ax = axes.ravel()
@@ -295,11 +312,9 @@ fig.tight_layout()
 # the local maximum if the original pixel value is closest to local maximum,
 # otherwise by the minimum local.
 
-from skimage.filters.rank import enhance_contrast
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
-noisy_image = img_as_ubyte(data.camera())
-
-enh = enhance_contrast(noisy_image, disk(5))
+enh = ski.filters.rank.enhance_contrast(noisy_image, ski.morphology.disk(5))
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
@@ -323,11 +338,11 @@ fig.tight_layout()
 # The percentile version of the local morphological contrast enhancement uses
 # percentile *p0* and *p1* instead of the local minimum and maximum.
 
-from skimage.filters.rank import enhance_contrast_percentile
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
-noisy_image = img_as_ubyte(data.camera())
-
-penh = enhance_contrast_percentile(noisy_image, disk(5), p0=0.1, p1=0.9)
+penh = ski.filters.rank.enhance_contrast_percentile(
+    noisy_image, ski.morphology.disk(5), p0=0.1, p1=0.9
+)
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex='row', sharey='row')
 ax = axes.ravel()
@@ -365,21 +380,18 @@ fig.tight_layout()
 #
 # .. [5] https://en.wikipedia.org/wiki/Otsu's_method
 
-from skimage.filters.rank import otsu
-from skimage.filters import threshold_otsu
-from skimage import exposure
 
-p8 = data.page()
+p8 = ski.data.page()
 
 radius = 10
-footprint = disk(radius)
+footprint = ski.morphology.disk(radius)
 
 # t_loc_otsu is an image
-t_loc_otsu = otsu(p8, footprint)
+t_loc_otsu = ski.filters.rank.otsu(p8, footprint)
 loc_otsu = p8 >= t_loc_otsu
 
 # t_glob_otsu is a scalar
-t_glob_otsu = threshold_otsu(p8)
+t_glob_otsu = ski.filters.threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
@@ -405,17 +417,17 @@ fig.tight_layout()
 ######################################################################
 # The example below performs the same comparison, using a 3D image this time.
 
-brain = exposure.rescale_intensity(data.brain().astype(float))
+brain = ski.exposure.rescale_intensity(ski.data.brain().astype(float))
 
 radius = 5
-neighborhood = ball(radius)
+neighborhood = ski.morphology.ball(radius)
 
 # t_loc_otsu is an image
-t_loc_otsu = rank.otsu(brain, neighborhood)
+t_loc_otsu = ski.filters.rank.otsu(brain, neighborhood)
 loc_otsu = brain >= t_loc_otsu
 
 # t_glob_otsu is a scalar
-t_glob_otsu = threshold_otsu(brain)
+t_glob_otsu = ski.filters.threshold_otsu(brain)
 glob_otsu = brain >= t_glob_otsu
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
@@ -450,7 +462,7 @@ x = np.sin(theta)
 m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 
 radius = 10
-t = rank.otsu(m, disk(radius))
+t = ski.filters.rank.otsu(m, ski.morphology.disk(radius))
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5), sharex=True, sharey=True)
 
@@ -475,13 +487,17 @@ fig.tight_layout()
 # Here is an example of the classical morphological gray-level filters:
 # opening, closing and morphological gradient.
 
-from skimage.filters.rank import maximum, minimum, gradient
 
-noisy_image = img_as_ubyte(data.camera())
+noisy_image = ski.util.img_as_ubyte(ski.data.camera())
 
-opening = maximum(minimum(noisy_image, disk(5)), disk(5))
-closing = minimum(maximum(noisy_image, disk(5)), disk(5))
-grad = gradient(noisy_image, disk(5))
+disk_5 = ski.morphology.disk(5)
+opening = ski.filters.rank.maximum(
+    ski.filters.rank.minimum(noisy_image, disk_5), disk_5
+)
+closing = ski.filters.rank.minimum(
+    ski.filters.rank.maximum(noisy_image, disk_5), disk_5
+)
+grad = ski.filters.rank.gradient(noisy_image, disk_5)
 
 # display results
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10), sharex=True, sharey=True)
@@ -523,20 +539,22 @@ fig.tight_layout()
 #     To better use the available image bit, the function returns 10x entropy
 #     for 8-bit images and 1000x entropy for 16-bit images.
 
-from skimage import data
-from skimage.filters.rank import entropy
-from skimage.morphology import disk
 import numpy as np
 import matplotlib.pyplot as plt
 
-image = data.camera()
+image = ski.data.camera()
 
 fig, ax = plt.subplots(ncols=2, figsize=(12, 6), sharex=True, sharey=True)
 
 fig.colorbar(ax[0].imshow(image, cmap=plt.cm.gray), ax=ax[0])
 ax[0].set_title('Image')
 
-fig.colorbar(ax[1].imshow(entropy(image, disk(5)), cmap=plt.cm.gray), ax=ax[1])
+fig.colorbar(
+    ax[1].imshow(
+        ski.filters.rank.entropy(image, ski.morphology.disk(5)), cmap=plt.cm.gray
+    ),
+    ax=ax[1],
+)
 ax[1].set_title('Entropy')
 
 for a in ax:
@@ -560,8 +578,6 @@ fig.tight_layout()
 from time import time
 
 from scipy.ndimage import percentile_filter
-from skimage.morphology import dilation
-from skimage.filters.rank import median, maximum
 
 
 def exec_and_timeit(func):
@@ -579,17 +595,17 @@ def exec_and_timeit(func):
 
 @exec_and_timeit
 def cr_med(image, footprint):
-    return median(image=image, footprint=footprint)
+    return ski.filters.rank.median(image=image, footprint=footprint)
 
 
 @exec_and_timeit
 def cr_max(image, footprint):
-    return maximum(image=image, footprint=footprint)
+    return ski.filters.rank.maximum(image=image, footprint=footprint)
 
 
 @exec_and_timeit
 def cm_dil(image, footprint):
-    return dilation(image=image, footprint=footprint)
+    return ski.morphology.dilation(image=image, footprint=footprint)
 
 
 @exec_and_timeit
@@ -605,12 +621,12 @@ def ndi_med(image, n):
 #
 # on increasing structuring element size:
 
-a = data.camera()
+a = ski.data.camera()
 
 rec = []
 e_range = range(1, 20, 2)
 for r in e_range:
-    elem = disk(r + 1)
+    elem = ski.morphology.disk(r + 1)
     rc, ms_rc = cr_max(a, elem)
     rcm, ms_rcm = cm_dil(a, elem)
     rec.append((ms_rc, ms_rcm))
@@ -630,7 +646,7 @@ fig.tight_layout()
 # and increasing image size:
 
 r = 9
-elem = disk(r + 1)
+elem = ski.morphology.disk(r + 1)
 
 rec = []
 s_range = range(100, 1000, 100)
@@ -659,12 +675,12 @@ fig.tight_layout()
 #
 # on increasing structuring element size:
 
-a = data.camera()
+a = ski.data.camera()
 
 rec = []
 e_range = range(2, 30, 4)
 for r in e_range:
-    elem = disk(r + 1)
+    elem = ski.morphology.disk(r + 1)
     rc, ms_rc = cr_med(a, elem)
     rndi, ms_ndi = ndi_med(a, r)
     rec.append((ms_rc, ms_ndi))
@@ -698,7 +714,7 @@ fig.tight_layout()
 # on increasing image size:
 
 r = 9
-elem = disk(r + 1)
+elem = ski.morphology.disk(r + 1)
 
 rec = []
 s_range = [100, 200, 500, 1000]

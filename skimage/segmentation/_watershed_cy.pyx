@@ -2,7 +2,6 @@
 """
 from libc.math cimport sqrt
 from .._shared.fused_numerics cimport np_anyint
-import numpy as np
 
 cimport numpy as cnp
 cimport cython
@@ -116,14 +115,13 @@ def watershed_raveled(cnp.float64_t[::1] image,
     cdef Py_ssize_t index = 0
     cdef Py_ssize_t neighbor_index = 0
     cdef DTYPE_BOOL_t compact = (compactness > 0)
-    cdef cnp.float64_t neg_inf = -np.inf
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 
     with nogil:
         for i in range(marker_locations.shape[0]):
             index = marker_locations[i]
-            elem.value = neg_inf
+            elem.value = image[index]
             elem.age = 0
             elem.index = index
             elem.source = index
@@ -182,8 +180,12 @@ def watershed_raveled(cnp.float64_t[::1] image,
                 new_elem.index = neighbor_index
                 new_elem.source = elem.source
 
-                # watershed cost of moving to neighbor is at least the cost of
-                # its own neighboring pixel
+                # The cost adding a neighbor should be at least the cost of its
+                # originating pixel, effectively its marker. This leads to "fairer"
+                # outcomes in edge cases. It prevents one marker from conquering a basin
+                # against other markers with a similar claim, just because it spills
+                # into the basin one step earlier. Instead `age` will distribute the
+                # basin more evenly between contesting markers with the same cost.
                 if new_elem.value < elem.value:
                     new_elem.value = elem.value
 
