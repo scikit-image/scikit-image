@@ -15,10 +15,10 @@ def _hog_normalize_block(block, method, eps=1e-5):
         out = block / np.sqrt(np.sum(block**2) + eps**2)
         out = np.minimum(out, 0.2)
         out = out / np.sqrt(np.sum(out**2) + eps**2)
-    elif method is None:
+    elif method == 'None':
         out = block
     else:
-        raise ValueError(f'Unexpected block normalization method: {method}')
+        raise ValueError(f'Selected block normalization method \'{method}\' is invalid.')
 
     return out
 
@@ -80,7 +80,8 @@ def hog(
         Size (in pixels) of a cell.
     cells_per_block : 2-tuple (int, int), optional
         Number of cells in each block.
-    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, None. optional
+    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys', 'None'}, optional
+
         Block normalization method:
 
         ``L1``
@@ -94,8 +95,8 @@ def hog(
            maximum values to 0.2 (`Hys` stands for `hysteresis`) and
            renormalization using L2-norm. (default)
            For details, see [3]_, [4]_.
-        None:
-            No normalization step is performed.
+        ``None``
+           No normalization performed.
 
     visualize : bool, optional
         Also return an image of the HOG.  For each cell and orientation bin,
