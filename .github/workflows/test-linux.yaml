@@ -22,7 +22,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
 
         # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
@@ -44,13 +44,13 @@ jobs:
 
         include:
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.11"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 0
             EAGER_IMPORT: 1
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: "3.10"
+            python-version: "3.11"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "mini-req-optional-deps"
@@ -75,6 +75,8 @@ jobs:
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -136,6 +138,8 @@ jobs:
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # TODO: replace with setup-python when there is support
       - uses: deadsnakes/action@6c8b9b82fe0b4344f4b98f2775fcc395df45e494 # v3.1.0
@@ -172,3 +176,18 @@ jobs:
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+  report-failures:
+    runs-on: ubuntu-latest
+    needs: [test_skimage_linux, test_skimage_linux_free_threaded]
+    if: ${{ always() && github.ref == 'refs/heads/main' && contains(needs.*.result, 'failure') }}
+    permissions:
+      issues: write
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "linux tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md

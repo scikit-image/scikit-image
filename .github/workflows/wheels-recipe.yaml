@@ -19,7 +19,7 @@ on:
         default: "pytest --pyargs skimage"
 
 env:
-  CIBW_BUILD_VERBOSITY: 2
+  CIBW_BUILD_VERBOSITY: 1
   CIBW_TEST_REQUIRES: ${{ inputs.CIBW_TEST_REQUIRES }}
   CIBW_ENVIRONMENT: ${{ inputs.CIBW_ENVIRONMENT }}
   CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
@@ -36,13 +36,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*", "cp313t-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@v5
         name: Install Python
         with:
@@ -54,13 +55,11 @@ jobs:
       - name: Setup free-threaded environment
         if: endsWith(matrix.cibw_python, 't-*')
         run: |
-          ANACONDA_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
-          NIGHTLY_INSTALL="pip install --pre -i $ANACONDA_URL cython numpy scipy pywavelets"
+          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
           TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
-          echo "CIBW_PRERELEASE_PYTHONS=1" >> "$GITHUB_ENV"
-          echo "CIBW_FREE_THREADED_SUPPORT=1" >> "$GITHUB_ENV"
-          echo "CIBW_BEFORE_BUILD=$NIGHTLY_INSTALL" >> "$GITHUB_ENV"
-          echo "CIBW_BEFORE_TEST=$NIGHTLY_INSTALL" >> "$GITHUB_ENV"
+          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
+          # Remove once Cython is out that supports free-threaded build
+          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
           echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
       - name: Build the wheel
         run: python -m cibuildwheel --output-dir dist
@@ -84,13 +83,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04-arm]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["aarch64"]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@v5
         name: Install Python
         with:
@@ -123,13 +123,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-13]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         name: Install Python
@@ -157,28 +158,15 @@ jobs:
           # Make sure to use a libomp version binary compatible with the oldest
           # supported version of the macos SDK as libomp will be vendored into
           # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/.  Currently, the oldest
-          # supported macos version is: High Sierra / 10.13. When upgrading
-          # this, be sure to update the MACOSX_DEPLOYMENT_TARGET environment
-          # variable accordingly. Note that Darwin_17 == High Sierra / 10.13.
-          #
-          # We need to set both MACOS_DEPLOYMENT_TARGET and MACOSX_DEPLOYMENT_TARGET
-          # until there is a new release with this commit:
-          # https://github.com/mesonbuild/meson-python/pull/309
+          # https://packages.macports.org/libomp/
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
-              # SciPy requires 12.0 on arm to prevent kernel panics
-              # https://github.com/scipy/scipy/issues/14688
-              # so being conservative, we just do the same here
-              export MACOSX_DEPLOYMENT_TARGET=12.0
-              export MACOS_DEPLOYMENT_TARGET=12.0
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-arm64/llvm-openmp-11.1.0-hf3c4609_1.tar.bz2"
+              export MACOSX_DEPLOYMENT_TARGET=12.3
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
           else
-              export MACOSX_DEPLOYMENT_TARGET=10.9
-              export MACOS_DEPLOYMENT_TARGET=10.9
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/11.1.0/download/osx-64/llvm-openmp-11.1.0-hda6cdc1_1.tar.bz2"
+              export MACOSX_DEPLOYMENT_TARGET=10.14
+              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-64/llvm-openmp-19.1.7-ha54dae1_0.conda"
           fi
           echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
-          echo MACOS_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET}
 
           # use conda to install llvm-openmp
           # Note that we do NOT activate the conda environment, we just add the
@@ -213,12 +201,13 @@ jobs:
       matrix:
         os: [windows-latest]
         cibw_arch: ["AMD64"]
-        cibw_python: ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-python@v5
         name: Install Python
@@ -264,3 +253,29 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
+
+  # This job uses cibuildwheel to build wheels for Pyodide, unlike the one
+  # in emscripten.yaml which uses a more traditional workflow and has some
+  # manual setup. The Pyodide version we build against here is largely
+  # controlled by cibuildwheel's at the moment.
+  build_pyodide_wheel:
+    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and test scikit-image for Pyodide
+        uses: pypa/cibuildwheel@faf86a6ed7efa889faf6996aa23820831055001a # v2.23.3
+        with:
+          output-dir: dist
+        env:
+          # We override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
+          # in favour of Pyodide-related settings.
+          CIBW_PLATFORM: pyodide
+          CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn"
+          # Don't use the cache provider plugin, as it doesn't work with Pyodide
+          # right now: https://github.com/pypa/cibuildwheel/issues/1966
+          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage"

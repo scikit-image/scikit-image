@@ -15,12 +15,9 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  PYTEST: "--config-file ${{ github.workspace }}/pyproject.toml"
-
 jobs:
   call-workflow-build-wheels:
-    uses: ./.github/workflows/wheels_recipe.yml
+    uses: ./.github/workflows/wheels-recipe.yaml
     with:
       CIBW_ENVIRONMENT: >
         PIP_PRE=1
@@ -28,7 +25,7 @@ jobs:
       # assert NumPy 2.0 before running tests
       CIBW_TEST_COMMAND: >
         pip list --pre --format=freeze | grep -q 'numpy==2' &&
-        (cd .. && $PYTEST --pyargs skimage)
+        (cd .. && pytest --pyargs skimage)
 
   upload_anaconda:
     permissions:

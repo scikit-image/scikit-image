@@ -1,3 +1,4 @@
+from itertools import product
 import re
 import textwrap
 
@@ -21,7 +22,9 @@ from skimage.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
     _center_and_normalize_points,
+    _apply_homogeneous,
     _euler_rotation_matrix,
+    TRANSFORMS,
 )
 
 SRC = np.array(
@@ -47,6 +50,23 @@ DST = np.array(
         [3754, 790],
         [1024, 1931],
     ]
+)
+
+# Transforms accepting homogeneous matrix as input.
+HMAT_TFORMS = (
+    FundamentalMatrixTransform,
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
+)
+
+# Transforms allowing ND matrix.
+HMAT_TFORMS_ND = (
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
 )
 
 
@@ -226,6 +246,19 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
+    # With scalar scale and 3D, we get a FutureWarning.  This is to
+    # generalize the rule that dimensionality should be implied by
+    # input parameters, when given.
+    with pytest.warns(FutureWarning):
+        tf = SimilarityTransform(scale=4, dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Not so if we specify some other input giving dimensionality.
+    tf = SimilarityTransform(scale=4, translation=(0, 0, 0))
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Or if we are in 2D, by analogy to shear etc - scalar implies 2D.
+    tf = SimilarityTransform(scale=4)
+    assert_equal(tf([[1, 1]]), [[4, 4]])
+
 
 def test_affine_estimation():
     # exact solution
@@ -286,6 +319,45 @@ def test_affine_shear():
 
     tform = AffineTransform(shear=shear)
     assert_almost_equal(tform.params, expected)
+
+
+@pytest.mark.parametrize(
+    'pts, params',
+    product(
+        (SRC, DST),
+        (
+            dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)),
+            dict(
+                scale=(-0.5, 3), shear=(-0.3, -0.1), rotation=1.4, translation=(-4, 3)
+            ),
+        ),
+    ),
+)
+def test_affine_params(pts, params):
+    # Test AffineTransform against docstring algorithm.
+    out = AffineTransform(**params)(pts)
+    docstr_out = _apply_aff_2d(pts, **params)
+    assert np.allclose(out, docstr_out)
+
+
+def _apply_aff_2d(pts, scale, rotation, shear, translation):
+    # Algorithm from AffineTransform docstring.
+    x, y = pts.T
+    sx, sy = scale
+    shear_x, shear_y = shear
+    translation_x, translation_y = translation
+    cos, tan, sin = np.cos, np.tan, np.sin
+    X = (
+        sx * x * (cos(rotation) + tan(shear_y) * sin(rotation))
+        - sy * y * (tan(shear_x) * cos(rotation) + sin(rotation))
+        + translation_x
+    )
+    Y = (
+        sx * x * (sin(rotation) - tan(shear_y) * cos(rotation))
+        - sy * y * (tan(shear_x) * sin(rotation) - cos(rotation))
+        + translation_y
+    )
+    return np.stack((X, Y), axis=1)
 
 
 def test_piecewise_affine():
@@ -494,10 +566,30 @@ def test_fundamental_matrix_epipolar_projection():
 
 
 def test_essential_matrix_init():
-    tform = EssentialMatrixTransform(
-        rotation=np.eye(3), translation=np.array([0, 0, 1])
-    )
+    r = np.eye(3)
+    t = np.array([0, 0, 1])
+    tform = EssentialMatrixTransform(rotation=r, translation=t)
     assert_equal(tform.params, np.array([0, -1, 0, 1, 0, 0, 0, 0, 0]).reshape(3, 3))
+    t2 = np.array([0, 0, 2])
+    with pytest.raises(ValueError, match="Translation vector must have unit length"):
+        EssentialMatrixTransform(rotation=r, translation=t2)
+    with pytest.raises(ValueError, match="Rotation matrix must have unit determinant"):
+        EssentialMatrixTransform(rotation=np.eye(3)[::-1], translation=t)
+    r2 = r[[2, 0, 1]]
+    tform = EssentialMatrixTransform(rotation=r2, translation=t)
+    assert_equal(tform.params, [[-1, 0, 0], [0, 0, 1], [0, 0, 0]])
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(matrix=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 3)), translation=t)
+    # Both must be specified.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3))
+    # Dimensionality must match.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3), translation=[1, 0])
 
 
 def test_essential_matrix_estimation():
@@ -669,13 +761,26 @@ def test_polynomial_weighted_estimation():
 @pytest.mark.parametrize('array_like_input', [False, True])
 def test_polynomial_init(array_like_input):
     tform = estimate_transform('polynomial', SRC, DST, order=10)
-    # init with transformation parameters
+    # Init with transformation parameters.
     if array_like_input:
         params = [list(p) for p in tform.params]
     else:
         params = tform.params
     tform2 = PolynomialTransform(params)
     assert_almost_equal(tform2.params, tform.params)
+    # Can't specify scalar params.
+    with pytest.raises(ValueError):
+        _ = PolynomialTransform(0)
+    # Parameters must be (2, N).
+    for inp in (np.eye(3), np.zeros(3)):
+        with pytest.raises(ValueError):
+            _ = PolynomialTransform(inp)
+    # Transform always 2D.
+    for d in (1, 3, 4):
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform(dimensionality=d)
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform.identity(d)
 
 
 def test_polynomial_default_order():
@@ -740,9 +845,9 @@ def test_union_differing_types():
 )
 def test_inverse_all_transforms(tform):
     assert isinstance(tform.inverse, type(tform))
-    try:
+    if hasattr(tform, 'params'):
         assert_almost_equal(tform.inverse.inverse.params, tform.params)
-    except AttributeError:
+    else:
         assert isinstance(tform, PiecewiseAffineTransform)
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
     # Test addition with inverse, not implemented for all
@@ -756,6 +861,22 @@ def test_inverse_all_transforms(tform):
     ):
         assert_almost_equal((tform + tform.inverse)(SRC), SRC)
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
+
+
+@pytest.mark.parametrize('tform_class', TRANSFORMS.values())
+def test_identity(tform_class):
+    if tform_class is PiecewiseAffineTransform:
+        return  # Identity transform unusable.
+    rng = np.random.default_rng()
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    for ndim in (2, 3, 4, 5) if allows_nd else (2,):
+        src = rng.normal(size=(10, ndim))
+        t = tform_class.identity(ndim)
+        if isinstance(t, FundamentalMatrixTransform):
+            out = np.hstack((src, np.ones((len(src), 1))))
+        else:
+            out = src
+        assert np.allclose(t(src), out)
 
 
 def test_geometric_tform():
@@ -783,42 +904,6 @@ def test_geometric_tform():
         dst = tform(src)  # Obtain the dst coords
         # Ensure dst coords are finite numeric values
         assert np.isfinite(dst).all()
-
-
-def test_invalid_input():
-    with pytest.raises(ValueError):
-        ProjectiveTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        SimilarityTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        EuclideanTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        SimilarityTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        EuclideanTransform(matrix=np.zeros((2, 3)), translation=(0, 0))
-    with pytest.raises(ValueError):
-        PolynomialTransform(np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        FundamentalMatrixTransform(matrix=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(matrix=np.zeros((3, 2)))
-
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((3,)))
 
 
 def test_degenerate():
@@ -897,6 +982,12 @@ def test_degenerate():
             assert not np.all(np.isnan(affine.params))
     for affine in tform.inverse_affines:
         assert not np.all(np.isnan(affine.params))
+
+
+def test_normalize_points():
+    mat, normed = _center_and_normalize_points(SRC)
+    assert np.allclose(np.mean(normed, axis=0), 0)
+    assert np.allclose(normed, _apply_homogeneous(mat, SRC))
 
 
 def test_normalize_degenerate_points():
@@ -1023,9 +1114,45 @@ def test_affine_transform_from_linearized_parameters():
         _ = AffineTransform(matrix=v[:-1])
 
 
-def test_affine_params_nD_error():
+EG_OPS = dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12))
+
+
+@pytest.mark.parametrize(
+    'tform_class, op_order',
+    (
+        (AffineTransform, ('scale', 'shear', 'rotation', 'translation')),
+        (EuclideanTransform, ('rotation', 'translation')),
+        (SimilarityTransform, ('scale', 'rotation', 'translation')),
+    ),
+)
+def test_transform_order(tform_class, op_order):
+    # Test transforms are applied in order stated.
+    ops = [(k, EG_OPS[k]) for k in op_order]
+    part_xforms = [tform_class(**{k: v}) for k, v in ops]
+    full_xform = tform_class(**dict(ops))
+    # Assemble affine transform via matrices.
+    out = np.eye(3)
+    for tf in part_xforms:
+        out = tf @ out
+    assert np.allclose(full_xform.params, out)
+
+
+# AffineTransform only allows 2D implicit parameters.
+@pytest.mark.parametrize(
+    'inp',
+    (
+        dict(scale=5, dimensionality=3),
+        dict(scale=(5, 5, 5), dimensionality=3),
+        dict(scale=(5, 5, 5)),
+        dict(shear=(0.1, 0.2, 0.3)),
+        dict(rotation=(0.1, 0.2)),
+        dict(translation=1),
+        dict(translation=(1, 2, 3)),
+    ),
+)
+def test_affine_params_nD_error(inp):
     with pytest.raises(ValueError):
-        _ = AffineTransform(scale=5, dimensionality=3)
+        _ = AffineTransform(**inp)
 
 
 def test_euler_rotation():
@@ -1037,29 +1164,37 @@ def test_euler_rotation():
         assert_almost_equal(R @ v, expected, decimal=1)
 
 
-def test_euclidean_param_defaults():
+def _from_matvec(mat, vec):
+    mat, vec = (np.array(p) for p in (mat, vec))
+    d = mat.shape[0]
+    out = np.eye(d + 1)
+    out[:-1, :-1] = mat
+    out[:-1, -1] = vec
+    return out
+
+
+@pytest.mark.parametrize('tform_class', (EuclideanTransform, SimilarityTransform))
+def test_euclidean_param_defaults(tform_class):
     # 2D rotation is 0 when only translation is given
-    tf = EuclideanTransform(translation=(5, 5))
+    tf = tform_class(translation=(5, 5))
     assert np.array(tf)[0, 1] == 0
     # off diagonals are 0 when only translation is given
-    tf = EuclideanTransform(translation=(4, 5, 9), dimensionality=3)
+    tf = tform_class(translation=(4, 5, 9), dimensionality=3)
     assert_equal(np.array(tf)[[0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1]], 0)
+    # Specifying translations for D>3 is supported.
+    tf = tform_class(translation=(5, 6, 7, 8))
+    assert_equal(tf.params, _from_matvec(np.eye(4), (5, 6, 7, 8)))
+    # But must match the dimensionality.
     with pytest.raises(ValueError):
-        # specifying parameters for D>3 is not supported
-        _ = EuclideanTransform(translation=(5, 6, 7, 8), dimensionality=4)
+        _ = tform_class(translation=(5, 6, 7, 8), dimensionality=3)
+    # Incorrect number of angles (must be 1 or 3
     with pytest.raises(ValueError):
-        # incorrect number of angles for given dimensionality
-        _ = EuclideanTransform(rotation=(4, 8), dimensionality=3)
+        _ = tform_class(rotation=(4, 8))
+    with pytest.raises(ValueError):
+        _ = tform_class(rotation=(4, 8, 2, 4))
     # translation is 0 when rotation is given
-    tf = EuclideanTransform(rotation=np.pi * np.arange(3), dimensionality=3)
+    tf = tform_class(rotation=np.pi * np.arange(3), dimensionality=3)
     assert_equal(np.array(tf)[:-1, 3], 0)
-
-
-def test_similarity_transform_params():
-    with pytest.raises(ValueError):
-        _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
-    tf = SimilarityTransform(scale=4, dimensionality=3)
-    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
 
 
 def test_euler_angle_consistency():
@@ -1077,3 +1212,69 @@ def test_2D_only_implementations():
         _ = tf.rotation
     with pytest.raises(NotImplementedError):
         _ = tf.shear
+
+
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
+def test_kw_only_params(tform_class):
+    # Check only matrix can be passed as positional arg.
+    with pytest.raises(TypeError):
+        tform_class(None, None)
+
+
+def test_kw_only_emt():
+    # Check all parameters are keyword-only for EssentialMatrixTransform.
+    with pytest.raises(TypeError):
+        EssentialMatrixTransform(None)
+
+
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
+def test_init_contract_dims(tform_class):
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    # 2D identity is default.
+    for tf in (
+        tform_class(),
+        tform_class(dimensionality=2),
+        tform_class.identity(),
+        tform_class.identity(None),
+        tform_class(None),
+    ):
+        assert_equal(tf.params, np.eye(3))
+    ok_dims = (2, 3, 4, 5) if allows_nd else (2,)
+    for d in ok_dims:
+        h_d = d + 1
+        # Identity for acceptable dimensions.
+        for tf in (
+            tform_class(dimensionality=d),
+            tform_class.identity(d),
+            tform_class.identity(dimensionality=d),
+        ):
+            assert_equal(tf.params, np.eye(h_d))
+        # Wrong shape for given dimensions.
+        for matrix in np.eye(h_d)[:-1], np.eye(h_d)[:, :-1]:
+            with pytest.raises(ValueError):
+                tform_class(matrix)
+    err_dims = (1,) if allows_nd else (1, 3, 4, 5)
+    for matrix in [np.eye(d + 1) for d in err_dims]:
+        with pytest.raises(NotImplementedError):
+            tform_class(matrix)
+    # Test vector matrix input invalid.
+    with pytest.raises(ValueError):
+        tform_class(np.zeros((2, 3)))
+
+
+def test_broadcasting():
+    # Scalar scale broadcasts.
+    translation = [3, 4, 5]
+    tf = SimilarityTransform(scale=2, translation=translation)
+    assert_equal(tf.params, _from_matvec(np.eye(3) * 2, translation))
+    # Translation does broadcast.
+    # 2D.
+    tf = SimilarityTransform(scale=2, translation=10)
+    assert_equal(tf.params, _from_matvec(np.eye(2) * 2, [10, 10]))
+    # 3D.
+    tf = SimilarityTransform(scale=[2, 3, 4], translation=10)
+    assert_equal(tf.params, _from_matvec(np.diag([2, 3, 4]), [10] * 3))
+    # Scalar rotation does not broadcast.
+    for tf_class in SimilarityTransform, EuclideanTransform:
+        with pytest.raises(ValueError):
+            tf_class(rotation=0.2, translation=translation)

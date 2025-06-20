@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   PYTHONOPTIMIZE: 0
@@ -31,6 +32,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,3 +63,12 @@ jobs:
       - name: Run tests
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly test"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md

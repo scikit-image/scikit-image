@@ -1,6 +1,8 @@
+from copy import copy
 import math
 import textwrap
 from abc import ABC, abstractmethod
+import warnings
 
 import numpy as np
 from scipy import spatial
@@ -75,31 +77,64 @@ def _center_and_normalize_points(points):
 
     norm_factor = np.sqrt(d) / rms
 
-    part_matrix = norm_factor * np.concatenate(
-        (np.eye(d), -centroid[:, np.newaxis]), axis=1
-    )
-    matrix = np.concatenate(
-        (
-            part_matrix,
-            [
-                [
-                    0,
-                ]
-                * d
-                + [1]
-            ],
-        ),
-        axis=0,
-    )
+    matrix = np.eye(d + 1)
+    matrix[:d, d] = -centroid
+    matrix[:d, :] *= norm_factor
+    return matrix, _apply_homogeneous(matrix, points)
 
-    points_h = np.vstack([points.T, np.ones(n)])
 
-    new_points_h = (matrix @ points_h).T
+def _apply_homogeneous(matrix, points):
+    """Transform (N, D) `points` array with homogeneous (D+1, D+1) `matrix`.
 
-    new_points = new_points_h[:, :d]
-    new_points /= new_points_h[:, d:]
+    Parameters
+    ----------
+    matrix : (D+1, D+1) array_like
+        The transformation matrix to obtain the new points. Note that any
+        object with an `__array__` method [1]_ that returns a matrix with the
+        correct dimensions can be used as input here. This includes all
+        subclasses of :class:`ProjectiveTransform`, for example.
+    points : (N, D) array
+        The coordinates of the image points.
 
-    return matrix, new_points
+    Returns
+    -------
+    new_points : (N, D) array
+        The transformed image points.
+
+    References
+    ----------
+    .. [1]:
+        https://numpy.org/doc/stable/user/basics.interoperability.html#using-arbitrary-objects-in-numpy
+    """
+    points = np.array(points, copy=NP_COPY_IF_NEEDED, ndmin=2)
+    points_h = _append_homogeneous_dim(points)
+    new_points_h = points_h @ matrix.T
+    # We divide by the last dimension of the homogeneous
+    # coordinate matrix. In order to avoid division by zero,
+    # we replace exact zeros in this column with a very small number.
+    divs = new_points_h[:, -1]
+    divs = np.where(divs == 0, np.finfo(float).eps, divs)
+    return new_points_h[:, :-1] / divs[:, None]
+
+
+def _append_homogeneous_dim(points):
+    """Append a column of ones to the right of `points`.
+
+    This creates the representation of the points in the homogeneous coordinate
+    space used by homogeneous matrix transforms.
+
+    Parameters
+    ----------
+    points : array, shape (N, D)
+        The input coordinates, where N is the number of points and D is the
+        dimension of the coordinate space.
+
+    Returns
+    -------
+    points_h : array, shape (N, D+1)
+        The same points as homogeneous coordinates.
+    """
+    return np.hstack((points, np.ones((len(points), 1))))
 
 
 def _umeyama(src, dst, estimate_scale):
@@ -224,8 +259,81 @@ class _GeometricTransform(ABC):
         """
         return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
 
+    @classmethod
+    @abstractmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
 
-class FundamentalMatrixTransform(_GeometricTransform):
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+
+
+class _HMatrixTransform(_GeometricTransform):
+    """Transform accepting homogeneous matrix as input."""
+
+    def __init__(self, matrix=None, *, dimensionality=None):
+        if matrix is None:
+            d = 2 if dimensionality is None else dimensionality
+            matrix = np.eye(d + 1)
+        else:
+            matrix = np.asarray(matrix)
+        self._check_matrix(matrix, dimensionality)
+        self._check_dims(matrix.shape[0] - 1)
+        self.params = matrix
+
+    def _check_matrix(self, matrix, dimensionality):
+        if dimensionality is not None:
+            if dimensionality != matrix.shape[0] - 1:
+                raise ValueError(
+                    f'Dimensionality {dimensionality} does not match matrix '
+                    f'{matrix}'
+                )
+        m = matrix.shape[0]
+        if matrix.shape != (m, m):
+            raise ValueError("Invalid shape of transformation matrix")
+
+    def _check_dims(self, d):
+        if d == 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in 2D transform'
+        )
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        d = 2 if dimensionality is None else dimensionality
+        return cls(matrix=np.eye(d + 1))
+
+    @property
+    def dimensionality(self):
+        return self.matrix.shape[0] - 1
+
+
+class FundamentalMatrixTransform(_HMatrixTransform):
     """Fundamental matrix transformation.
 
     The fundamental matrix relates corresponding points between a pair of
@@ -247,6 +355,9 @@ class FundamentalMatrixTransform(_GeometricTransform):
     ----------
     matrix : (3, 3) array_like, optional
         Fundamental matrix.
+    dimensionality : int, optional
+        Fallback number of dimensions when `matrix` not specified, in which
+        case, must equal 2 (the default).
 
     Attributes
     ----------
@@ -307,22 +418,6 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
     """
 
-    def __init__(self, matrix=None, *, dimensionality=2):
-        if matrix is None:
-            # default to an identity transform
-            matrix = np.eye(dimensionality + 1)
-        else:
-            matrix = np.asarray(matrix)
-            dimensionality = matrix.shape[0] - 1
-            if matrix.shape != (dimensionality + 1, dimensionality + 1):
-                raise ValueError("Invalid shape of transformation matrix")
-        self.params = matrix
-        if dimensionality != 2:
-            raise NotImplementedError(
-                f'{self.__class__} is only implemented for 2D coordinates '
-                '(i.e. 3D transformation matrices).'
-            )
-
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -337,9 +432,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
             Epipolar lines in the destination image.
 
         """
-        coords = np.asarray(coords)
-        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return coords_homogeneous @ self.params.T
+        return _append_homogeneous_dim(coords) @ self.params.T
 
     @property
     def inverse(self):
@@ -347,6 +440,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
         See Hartley & Zisserman, Ch. 8: Epipolar Geometry and the Fundamental
         Matrix, for an explanation of why F.T gives the inverse.
+
         """
         return type(self)(matrix=self.params.T)
 
@@ -424,7 +518,6 @@ class FundamentalMatrixTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
 
         # Enforcing the internal constraint that two singular values must be
@@ -455,8 +548,8 @@ class FundamentalMatrixTransform(_GeometricTransform):
             Sampson distance.
 
         """
-        src_homogeneous = np.column_stack([src, np.ones(src.shape[0])])
-        dst_homogeneous = np.column_stack([dst, np.ones(dst.shape[0])])
+        src_homogeneous = _append_homogeneous_dim(src)
+        dst_homogeneous = _append_homogeneous_dim(dst)
 
         F_src = self.params @ src_homogeneous.T
         Ft_dst = self.params.T @ dst_homogeneous.T
@@ -496,6 +589,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         have unit length.
     matrix : (3, 3) array_like, optional
         Essential matrix.
+    dimensionality : int, optional
+        Fallback number of dimensions when `matrix` not specified, in which
+        case, must equal 2 (the default).
 
     Attributes
     ----------
@@ -538,46 +634,44 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
     """
 
+    # Threshold for determinant of rotation matrix.
+    _rot_det_tol = 1e-6
+
+    # Threshold for difference of translation vector from unit length.
+    _trans_len_tol = 1e-6
+
     def __init__(
-        self, rotation=None, translation=None, matrix=None, *, dimensionality=2
+        self, *, rotation=None, translation=None, matrix=None, dimensionality=None
     ):
+        n_rt_none = sum(p is None for p in (rotation, translation))
+        if n_rt_none == 1:
+            raise ValueError(
+                "Both rotation and translation required when one is specified."
+            )
+        elif n_rt_none == 0:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify rotation or translation when "
+                    "matrix is specified."
+                )
+            matrix = self._rt2matrix(rotation, translation)
         super().__init__(matrix=matrix, dimensionality=dimensionality)
-        if rotation is not None:
-            rotation = np.asarray(rotation)
-            if translation is None:
-                raise ValueError("Both rotation and translation required")
-            translation = np.asarray(translation)
-            if rotation.shape != (3, 3):
-                raise ValueError("Invalid shape of rotation matrix")
-            if abs(np.linalg.det(rotation) - 1) > 1e-6:
-                raise ValueError("Rotation matrix must have unit determinant")
-            if translation.size != 3:
-                raise ValueError("Invalid shape of translation vector")
-            if abs(np.linalg.norm(translation) - 1) > 1e-6:
-                raise ValueError("Translation vector must have unit length")
-            # Matrix representation of the cross product for t.
-            t_x = np.array(
-                [
-                    0,
-                    -translation[2],
-                    translation[1],
-                    translation[2],
-                    0,
-                    -translation[0],
-                    -translation[1],
-                    translation[0],
-                    0,
-                ]
-            ).reshape(3, 3)
-            self.params = t_x @ rotation
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.shape != (3, 3):
-                raise ValueError("Invalid shape of transformation matrix")
-            self.params = matrix
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
+
+    def _rt2matrix(self, rotation, translation):
+        rotation = np.asarray(rotation)
+        translation = np.asarray(translation)
+        if rotation.shape != (3, 3):
+            raise ValueError("Invalid shape of rotation matrix")
+        if abs(np.linalg.det(rotation) - 1) > self._rot_det_tol:
+            raise ValueError("Rotation matrix must have unit determinant")
+        if translation.size != 3:
+            raise ValueError("Invalid shape of translation vector")
+        if abs(np.linalg.norm(translation) - 1) > self._trans_len_tol:
+            raise ValueError("Translation vector must have unit length")
+        # Matrix representation of the cross product for t.
+        t0, t1, t2 = translation
+        t_arr = np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]], dtype=float)
+        return t_arr @ rotation
 
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
@@ -615,7 +709,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return True
 
 
-class ProjectiveTransform(_GeometricTransform):
+class ProjectiveTransform(_HMatrixTransform):
     r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -645,8 +739,7 @@ class ProjectiveTransform(_GeometricTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     dimensionality : int, optional
-        The number of dimensions of the transform. This is ignored if
-        ``matrix`` is not None.
+        Fallback number of dimensions when `matrix` not specified.
 
     Attributes
     ----------
@@ -655,43 +748,23 @@ class ProjectiveTransform(_GeometricTransform):
 
     """
 
-    def __init__(self, matrix=None, *, dimensionality=2):
-        if matrix is None:
-            # default to an identity transform
-            matrix = np.eye(dimensionality + 1)
-        else:
-            matrix = np.asarray(matrix)
-            dimensionality = matrix.shape[0] - 1
-            if matrix.shape != (dimensionality + 1, dimensionality + 1):
-                raise ValueError("invalid shape of transformation matrix")
-        self.params = matrix
-        self._coeffs = range(matrix.size - 1)
+    def __init__(self, matrix=None, *, dimensionality=None):
+        super().__init__(matrix, dimensionality=dimensionality)
+        self._coeffs = range(self.params.size - 1)
+
+    def _check_dims(self, d):
+        if d >= 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in transform of >=2D'
+        )
 
     @property
     def _inv_matrix(self):
         return np.linalg.inv(self.params)
 
-    def _apply_mat(self, coords, matrix):
-        ndim = matrix.shape[0] - 1
-        coords = np.array(coords, copy=NP_COPY_IF_NEEDED, ndmin=2)
-
-        src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
-        dst = src @ matrix.T
-
-        # below, we will divide by the last dimension of the homogeneous
-        # coordinate matrix. In order to avoid division by zero,
-        # we replace exact zeros in this column with a very small number.
-        dst[dst[:, ndim] == 0, ndim] = np.finfo(float).eps
-        # rescale to homogeneous coordinates
-        dst[:, :ndim] /= dst[:, ndim : ndim + 1]
-
-        return dst[:, :ndim]
-
     def __array__(self, dtype=None, copy=None):
-        if dtype is None:
-            return self.params
-        else:
-            return self.params.astype(dtype)
+        return self.params if dtype is None else self.params.astype(dtype)
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -707,7 +780,7 @@ class ProjectiveTransform(_GeometricTransform):
             Destination coordinates.
 
         """
-        return self._apply_mat(coords, self.params)
+        return _apply_homogeneous(self.params, coords)
 
     @property
     def inverse(self):
@@ -853,28 +926,39 @@ class ProjectiveTransform(_GeometricTransform):
 
     def __nice__(self):
         """common 'paramstr' used by __str__ and __repr__"""
+        if not hasattr(self, 'params'):
+            return '<not yet initialized>'
         npstring = np.array2string(self.params, separator=', ')
-        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
-        return paramstr
+        return 'matrix=\n' + textwrap.indent(npstring, '    ')
 
     def __repr__(self):
         """Add standard repr formatting around a __nice__ string"""
-        paramstr = self.__nice__()
-        classname = self.__class__.__name__
-        classstr = classname
-        return f'<{classstr}({paramstr}) at {hex(id(self))}>'
+        return f'<{type(self).__name__}({self.__nice__()}) at {hex(id(self))}>'
 
     def __str__(self):
         """Add standard str formatting around a __nice__ string"""
-        paramstr = self.__nice__()
-        classname = self.__class__.__name__
-        classstr = classname
-        return f'<{classstr}({paramstr})>'
+        return f'<{type(self).__name__}({self.__nice__()})>'
 
     @property
     def dimensionality(self):
         """The dimensionality of the transformation."""
         return self.params.shape[0] - 1
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, int}, optional
+            Dimensionality of identity transform.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return super().identity(dimensionality=dimensionality)
 
 
 class AffineTransform(ProjectiveTransform):
@@ -928,18 +1012,20 @@ class AffineTransform(ProjectiveTransform):
 
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
-    rotation : float, optional
-        Rotation angle, clockwise, as radians. Only available for 2D.
     shear : float or 2-tuple of float, optional
         The x and y shear angles, clockwise, by which these axes are
         rotated around the origin [2].
         If a single value is given, take that to be the x shear angle, with
         the y angle remaining 0. Only available in 2D.
+    rotation : float, optional
+        Rotation angle, clockwise, as radians. Only available for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
-        The dimensionality of the transform. This is not used if any other
-        parameters are provided.
+        Fallback number of dimensions for transform when none of `matrix`,
+        `scale`, `rotation`, `shear` or `translation` are specified.  If any of
+        `scale`, `rotation`, `shear` or `translation` are specified, must equal
+        2 (the default).
 
     Attributes
     ----------
@@ -987,76 +1073,56 @@ class AffineTransform(ProjectiveTransform):
     def __init__(
         self,
         matrix=None,
-        scale=None,
-        rotation=None,
-        shear=None,
-        translation=None,
         *,
-        dimensionality=2,
+        scale=None,
+        shear=None,
+        rotation=None,
+        translation=None,
+        dimensionality=None,
     ):
-        params = any(
-            param is not None for param in (scale, rotation, shear, translation)
-        )
+        n_srst_none = sum(p is None for p in (scale, rotation, shear, translation))
+        if n_srst_none != 4:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            if dimensionality is not None and dimensionality > 2:
+                raise ValueError('Implicit parameters only valid for 2D transforms')
+            # 2D parameter checks explicit or implicit in _srst2matrix.
+            matrix = self._srst2matrix(scale, rotation, shear, translation)
+            if matrix.shape[0] != 3:
+                raise ValueError('Implicit parameters must give 2D transforms')
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
+        self._coeffs = range(self.dimensionality * (self.dimensionality + 1))
 
-        # these parameters get overwritten if a higher-D matrix is given
-        self._coeffs = range(dimensionality * (dimensionality + 1))
+    def _srst2matrix(self, scale, rotation, shear, translation):
+        scale = (1, 1) if scale is None else scale
+        sx, sy = (scale, scale) if np.isscalar(scale) else scale
+        rotation = 0 if rotation is None else rotation
+        if not np.isscalar(rotation):
+            raise ValueError('rotation must be scalar (2D rotation)')
+        shear = 0 if shear is None else shear
+        shear_x, shear_y = (shear, 0) if np.isscalar(shear) else shear
+        translation = (0, 0) if translation is None else translation
+        if np.isscalar(translation):
+            raise ValueError('translation must be length 2')
+        a2, b2 = translation
 
-        if params and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
-            )
-        if params and dimensionality > 2:
-            raise ValueError('Parameter input is only supported in 2D.')
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
-            else:
-                dimensionality = matrix.shape[0] - 1
-                nparam = dimensionality * (dimensionality + 1)
-            self._coeffs = range(nparam)
-            self.params = matrix
-        elif params:  # note: 2D only
-            if scale is None:
-                scale = (1, 1)
-            if rotation is None:
-                rotation = 0
-            if shear is None:
-                shear = 0
-            if translation is None:
-                translation = (0, 0)
+        a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
+        a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
 
-            if np.isscalar(scale):
-                sx = sy = scale
-            else:
-                sx, sy = scale
-
-            if np.isscalar(shear):
-                shear_x, shear_y = (shear, 0)
-            else:
-                shear_x, shear_y = shear
-
-            a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
-            a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
-            a2 = translation[0]
-
-            b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
-            b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
-            b2 = translation[1]
-            self.params = np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
-        else:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
+        b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
+        b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
+        return np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
 
     @property
     def scale(self):
         if self.dimensionality != 2:
             return np.sqrt(np.sum(self.params**2, axis=0))[: self.dimensionality]
-        else:
-            ss = np.sum(self.params**2, axis=0)
-            ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
-            return np.sqrt(ss)[: self.dimensionality]
+        ss = np.sum(self.params**2, axis=0)
+        ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
+        return np.sqrt(ss)[: self.dimensionality]
 
     @property
     def rotation(self):
@@ -1188,11 +1254,30 @@ class PiecewiseAffineTransform(_GeometricTransform):
     def inverse(self):
         """Return a transform object representing the inverse."""
         tform = type(self)()
-        tform._tesselation = self._inverse_tesselation
-        tform._inverse_tesselation = self._tesselation
-        tform.affines = self.inverse_affines
-        tform.inverse_affines = self.affines
+        # Copy parameters (None or list) for safety.
+        tform._tesselation = copy(self._inverse_tesselation)
+        tform._inverse_tesselation = copy(self._tesselation)
+        tform.affines = copy(self.inverse_affines)
+        tform.inverse_affines = copy(self.affines)
         return tform
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : optional
+            This transform does not use the `dimensionality` parameter, so the
+            value is ignored.  The parameter exists for compatibility with
+            other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return cls()
 
 
 def _euler_rotation_matrix(angles, degrees=False):
@@ -1210,6 +1295,7 @@ def _euler_rotation_matrix(angles, degrees=False):
     -------
     R : array of float, shape (3, 3)
         The Euler rotation matrix.
+
     """
     return spatial.transform.Rotation.from_euler(
         'XYZ', angles=angles, degrees=degrees
@@ -1244,20 +1330,27 @@ class EuclideanTransform(ProjectiveTransform):
     transformation is only a translation, you may use the implicit parameter
     `translation`; otherwise, you must use `matrix`.
 
+    The implicit parameters are applied in the following order:
+
+    1. Rotation;
+    2. Translation.
+
     Parameters
     ----------
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle, clockwise, as radians. If given as
-        a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
-        (single rotation) and 3D (Euler rotations) values are supported. For
-        higher dimensions, you must provide or estimate the transformation
-        matrix.
+        Rotation angle, clockwise, in radians. If given as a vector, it is
+        interpreted as Euler rotation angles [1]_. Only 2D (single rotation)
+        and 3D (Euler rotations) values are supported. For higher dimensions,
+        you must provide or estimate the transformation matrix instead, and
+        pass that as `matrix` above.
     translation : (x, y[, z, ...]) sequence of float, length D, optional
         Translation parameters for each axis.
     dimensionality : int, optional
-        The dimensionality of the transform.
+        Fallback number of dimensions for transform when no other parameter
+        is specified.  Otherwise ignored, and we infer dimensionality from the
+        input parameters.
 
     Attributes
     ----------
@@ -1267,61 +1360,54 @@ class EuclideanTransform(ProjectiveTransform):
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+
     """
 
+    # Whether to estimate scale during estimation.
+    _estimate_scale = False
+
     def __init__(
-        self, matrix=None, rotation=None, translation=None, *, dimensionality=2
+        self, matrix=None, *, rotation=None, translation=None, dimensionality=None
     ):
-        params_given = rotation is not None or translation is not None
+        n_rt_none = sum(p is None for p in (rotation, translation))
+        if n_rt_none != 2:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
+            if chk_msg is not None:
+                raise ValueError(chk_msg)
+            matrix = self._rt2matrix(rotation, translation, n_dims)
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-        if params_given and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
+    def _rt2ndims_msg(self, rotation, translation):
+        if rotation is not None:
+            N = 1 if np.isscalar(rotation) else len(rotation)
+            msg = (
+                '``rotations`` must be scalar (3D) or length 3 (3D)'
+                if N not in (1, 3)
+                else None
             )
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
-            self.params = matrix
-        elif params_given:
-            if rotation is None:
-                dimensionality = len(translation)
-                if dimensionality == 2:
-                    rotation = 0
-                elif dimensionality == 3:
-                    rotation = np.zeros(3)
-                else:
-                    raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
-                    )
-            else:
-                if not np.isscalar(rotation) and len(rotation) != 3:
-                    raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
-                    )
-            if translation is None:
-                translation = (0,) * dimensionality
+            return 2 if N == 1 else N, msg
+        if translation is not None:
+            return (2 if np.isscalar(translation) else len(translation), None)
+        return None, None
 
-            if dimensionality == 2:
-                self.params = np.array(
-                    [
-                        [math.cos(rotation), -math.sin(rotation), 0],
-                        [math.sin(rotation), math.cos(rotation), 0],
-                        [0, 0, 1],
-                    ]
-                )
-            elif dimensionality == 3:
-                self.params = np.eye(dimensionality + 1)
-                self.params[:dimensionality, :dimensionality] = _euler_rotation_matrix(
-                    rotation
-                )
-            self.params[0:dimensionality, dimensionality] = translation
-        else:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
+    def _rt2matrix(self, rotation, translation, n_dims):
+        if translation is None:
+            translation = (0,) * n_dims
+        if rotation is None:
+            rotation = 0 if n_dims == 2 else np.zeros(3)
+        matrix = np.eye(n_dims + 1)
+        if n_dims == 2:
+            cos_r, sin_r = math.cos(rotation), math.sin(rotation)
+            matrix[:2, :2] = [[cos_r, -sin_r], [sin_r, cos_r]]
+        elif n_dims == 3:
+            matrix[:3, :3] = _euler_rotation_matrix(rotation)
+        matrix[0:n_dims, n_dims] = translation
+        return matrix
 
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
@@ -1344,7 +1430,7 @@ class EuclideanTransform(ProjectiveTransform):
             True, if model estimation succeeds.
 
         """
-        self.params = _umeyama(src, dst, False)
+        self.params = _umeyama(src, dst, self._estimate_scale)
 
         # _umeyama will return nan if the problem is not well-conditioned.
         return not np.any(np.isnan(self.params))
@@ -1387,6 +1473,12 @@ class SimilarityTransform(EuclideanTransform):
     single scaling factor in addition to the rotation and translation
     parameters.
 
+    The implicit parameters are applied in the following order:
+
+    1. Scale;
+    2. Rotation;
+    3. Translation.
+
     Parameters
     ----------
     matrix : (dim+1, dim+1) array_like, optional
@@ -1399,6 +1491,10 @@ class SimilarityTransform(EuclideanTransform):
         angles.
     translation : (dim,) array_like, optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
+    dimensionality : int, optional
+        The dimensionality of the transform, corresponding to ``dim`` above.
+        Ignored if `matrix` is not None, and set to ``matrix.shape[0] - 1``.
+        Otherwise, must be one of 2 or 3.
 
     Attributes
     ----------
@@ -1407,81 +1503,61 @@ class SimilarityTransform(EuclideanTransform):
 
     """
 
+    # Whether to estimate scale during estimation.
+    _estimate_scale = True
+
     def __init__(
         self,
         matrix=None,
+        *,
         scale=None,
         rotation=None,
         translation=None,
-        *,
-        dimensionality=2,
+        dimensionality=None,
     ):
-        self.params = None
-        params = any(param is not None for param in (scale, rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
-            )
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
+        n_srt_none = sum(p is None for p in (scale, rotation, translation))
+        if n_srt_none != 3:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            self._check_scale(scale, (rotation, translation), dimensionality)
+            # Scale is special.  Scalar scale does not tell us the dimensions.
+            if scale is not None and not np.isscalar(scale):
+                n_dims, chk_msg = len(scale), None
             else:
-                self.params = matrix
-                dimensionality = matrix.shape[0] - 1
-        if params:
-            if dimensionality not in (2, 3):
-                raise ValueError('Parameters only supported for 2D and 3D.')
-            matrix = np.eye(dimensionality + 1, dtype=float)
-            if scale is None:
-                scale = 1
-            if rotation is None:
-                rotation = 0 if dimensionality == 2 else (0, 0, 0)
-            if translation is None:
-                translation = (0,) * dimensionality
-            if dimensionality == 2:
-                ax = (0, 1)
-                c, s = np.cos(rotation), np.sin(rotation)
-                matrix[ax, ax] = c
-                matrix[ax, ax[::-1]] = -s, s
-            else:  # 3D rotation
-                matrix[:3, :3] = _euler_rotation_matrix(rotation)
+                n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
+            if chk_msg is not None:
+                raise ValueError(chk_msg)
+            # n_dims can be None for scalar scale, other parameters are None.
+            n_dims = (
+                n_dims
+                if n_dims is not None
+                else dimensionality
+                if dimensionality is not None
+                else 2
+            )
+            matrix = self._rt2matrix(rotation, translation, n_dims)
+            if scale not in (None, 1):
+                matrix[:n_dims, :n_dims] *= scale
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-            matrix[:dimensionality, :dimensionality] *= scale
-            matrix[:dimensionality, dimensionality] = translation
-            self.params = matrix
-        elif self.params is None:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
-
-    def estimate(self, src, dst):
-        """Estimate the transformation from a set of corresponding points.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
-
-        self.params = _umeyama(src, dst, estimate_scale=True)
-
-        # _umeyama will return nan if the problem is not well-conditioned.
-        return not np.any(np.isnan(self.params))
+    def _check_scale(self, scale, other_params, dimensionality):
+        """Check, warn for scalar scaling"""
+        if dimensionality in (None, 2) or scale is None or not np.isscalar(scale):
+            return
+        if all(p is None for p in other_params):
+            warnings.warn(
+                'In the future, it will be a ValueError to pass a '
+                'scalar `scale` value with a ``dimensionality`` '
+                '> 2\n,and without other implicit parameters '
+                'to indicate the dimensionality of the transform.\n'
+                'Please indicate dimensionality by passing a vector '
+                'of suitable length to `scale`.',
+                FutureWarning,
+                stacklevel=2,
+            )
 
     @property
     def scale(self):
@@ -1507,6 +1583,8 @@ class PolynomialTransform(_GeometricTransform):
     params : (2, N) array_like, optional
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
+    dimensionality : int, optional
+        Must have value 2 (the default) for polynomial transforms.
 
     Attributes
     ----------
@@ -1516,19 +1594,16 @@ class PolynomialTransform(_GeometricTransform):
 
     """
 
-    def __init__(self, params=None, *, dimensionality=2):
-        if dimensionality != 2:
+    def __init__(self, params=None, *, dimensionality=None):
+        if dimensionality is None:
+            dimensionality = 2
+        elif dimensionality != 2:
             raise NotImplementedError(
                 'Polynomial transforms are only implemented for 2D.'
             )
-        if params is None:
-            # default to transformation which preserves original coordinates
-            params = np.array([[0, 1, 0], [0, 0, 1]])
-        else:
-            params = np.asarray(params)
-        if params.shape[0] != 2:
-            raise ValueError("invalid shape of transformation parameters")
-        self.params = params
+        self.params = np.array([[0, 1, 0], [0, 0, 1]] if params is None else params)
+        if self.params.shape == () or self.params.shape[0] != 2:
+            raise ValueError("Transformation parameters must be shape (2, N)")
 
     def estimate(self, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
@@ -1658,6 +1733,24 @@ class PolynomialTransform(_GeometricTransform):
                 pidx += 1
 
         return dst
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return cls(params=None, dimensionality=dimensionality)
 
     @property
     def inverse(self):

@@ -9,6 +9,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   CC: clang
@@ -16,7 +17,7 @@ env:
   PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 jobs:
-  test_skimage_linux:
+  test_skimage_windows:
     name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
     runs-on: windows-latest
 
@@ -25,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - python-version: "3.10"
+          - python-version: "3.11"
             MINIMUM_REQUIREMENTS: 0
             OPTIONAL_DEPS: 0
             OPTIONS_NAME: "default"
@@ -44,6 +45,8 @@ jobs:
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -79,3 +82,12 @@ jobs:
         shell: bash
         run: |
           (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "windows tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
