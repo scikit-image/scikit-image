@@ -46,7 +46,8 @@ util
     Generic utilities.
 """
 
-__version__ = '0.25.1-hog-patch'
+__version__ = "0.25.2+hogpatch"
+
 
 
 import lazy_loader as _lazy
