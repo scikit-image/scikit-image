@@ -81,6 +81,7 @@ def hog(
     cells_per_block : 2-tuple (int, int), optional
         Number of cells in each block.
     block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys', 'None'}, optional
+
         Block normalization method:
 
         ``L1``
