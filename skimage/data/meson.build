@@ -13,7 +13,7 @@ py3.install_sources(
 )
 
 py3.install_sources([
-  # See legacy_datasets in _registry.py
+  # Legacy datasets which are still included in the wheel
   'README.txt',
   'astronaut.png',
   'brick.png',
