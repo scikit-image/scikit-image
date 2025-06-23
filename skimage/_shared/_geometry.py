@@ -5,7 +5,7 @@ import numpy as np
 from .version_requirements import require
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def polygon_clip(rp, cp, r0, c0, r1, c1):
     """Clip a polygon to the given bounding box.
 
