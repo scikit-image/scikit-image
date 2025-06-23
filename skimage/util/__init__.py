@@ -59,3 +59,17 @@ __all__ = [
     'label_points',
     'lookfor',
 ]
+
+
+class PendingSkimage2Change(PendingDeprecationWarning):
+    """Warnings about API usage that will silently change or break in skimage2.
+
+    By default, this warning isn't shown, but it can be enabled with a warnings
+    filter::
+
+        import warnings
+        import skimage as ski
+        warnings.filterwarnings(
+            action="default", category=ski.util.PendingSkimage2Change
+        )
+    """

@@ -11,6 +11,7 @@ from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
 from skimage._shared.testing import assert_stacklevel
+from skimage.util import PendingSkimage2Change
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
@@ -69,7 +70,7 @@ def test_blob_dog(dtype, threshold_type):
 
     # Testing no peaks
     img_empty = np.zeros((100, 100), dtype=dtype)
-    assert blob_dog(img_empty).size == 0
+    assert blob_dog(img_empty, threshold_abs=None, threshold_rel=None).size == 0
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
@@ -154,6 +155,8 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
         min_sigma=1.5,
         max_sigma=5,
         sigma_ratio=1.2,
+        threshold_abs=0.5,
+        threshold_rel=None,
     )
     assert blobs.shape[0] == 1, "one blob should have been detected"
     b = blobs[0]
@@ -166,6 +169,8 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
         max_sigma=5,
         sigma_ratio=1.2,
         exclude_border=exclude_border,
+        threshold_abs=0.5,
+        threshold_rel=None,
     )
 
     if disc_center == (5, 20) and exclude_border == (4, 15):
@@ -184,7 +189,8 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
 
 # Regex flag "(?s)" makes "." match newline too
 @pytest.mark.filterwarnings(
-    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage"
+    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage",
+    "ignore::skimage.util.PendingSkimage2Change",
 )
 def test_blob_dog_threshold_rescaling():
     image = np.ones((100, 100), dtype=np.uint8)
@@ -210,14 +216,16 @@ def test_blob_dog_threshold_rescaling():
     result = blob_dog(image, threshold_abs=0.6 * scale_factor)
     assert result.shape == (0, 3)
 
+    # Warning about pending skimage2 breakage
     regex = (
         "(?s).*"
+        "Must set new parameter `threshold_abs` explicitly.*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
         ".*"
         "Hint: For `image` with dtype .*, `threshold=0.5` is equivalent to\n"
         f"`threshold_abs={0.5 * scale_factor}`."
     )
-    with pytest.warns(FutureWarning, match=regex) as record:
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_dog(image)
     assert_stacklevel(record)
 
@@ -233,7 +241,7 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
     else:
         max_sigma = 8
     blob_func = getattr(feature, function_name)
-    blobs = blob_func(z, max_sigma=max_sigma)
+    blobs = blob_func(z, max_sigma=max_sigma, threshold_abs=None, threshold_rel=None)
     # z.ndim +  (z.ndim sigmas if anisotropic, only one sigma otherwise)
     expected_shape = 2 * z.ndim if anisotropic else z.ndim + 1
     assert blobs.shape == (0, expected_shape)
@@ -258,17 +266,18 @@ def test_blob_log(dtype, threshold_type):
     img[xs, ys] = 255
 
     if threshold_type == 'absolute':
-        threshold = 1
-        if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
-            threshold /= np.ptp(img)
+        threshold_abs = 1
         threshold_rel = None
     elif threshold_type == 'relative':
-        threshold = None
+        threshold_abs = None
         threshold_rel = 0.5
 
     blobs = blob_log(
-        img, min_sigma=5, max_sigma=20, threshold=threshold, threshold_rel=threshold_rel
+        img,
+        min_sigma=5,
+        max_sigma=20,
+        threshold_abs=threshold_abs,
+        threshold_rel=threshold_rel,
     )
 
     def radius(x):
@@ -302,7 +311,7 @@ def test_blob_log(dtype, threshold_type):
         img,
         min_sigma=5,
         max_sigma=20,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
         log_scale=True,
     )
@@ -329,7 +338,7 @@ def test_blob_log(dtype, threshold_type):
 
     # Testing no peaks
     img_empty = np.zeros((100, 100))
-    assert blob_log(img_empty).size == 0
+    assert blob_log(img_empty, threshold_abs=None, threshold_rel=None).size == 0
 
 
 def test_blob_log_no_warnings():
@@ -341,7 +350,7 @@ def test_blob_log_no_warnings():
     xs, ys = disk((7, 6), 2)
     img[xs, ys] = 255
 
-    blob_log(img, max_sigma=20, num_sigma=10, threshold=0.1)
+    blob_log(img, max_sigma=20, num_sigma=10, threshold_abs=0.1, threshold_rel=None)
 
 
 def test_blob_log_3d():
@@ -351,7 +360,9 @@ def test_blob_log_3d():
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    blobs = blob_log(im3, min_sigma=3, max_sigma=10)
+    blobs = blob_log(
+        im3, min_sigma=3, max_sigma=10, threshold_abs=0.2, threshold_rel=None
+    )
     b = blobs[0]
 
     assert b.shape == (4,)
@@ -372,6 +383,8 @@ def test_blob_log_3d_anisotropic():
         im3,
         min_sigma=[1, 2, 2],
         max_sigma=[5, 10, 10],
+        threshold_abs=0.2,
+        threshold_rel=None,
     )
 
     b = blobs[0]
@@ -396,6 +409,8 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
         img,
         min_sigma=1.5,
         max_sigma=5,
+        threshold_abs=0.2,
+        threshold_rel=None,
     )
     assert blobs.shape[0] == 1
     b = blobs[0]
@@ -407,6 +422,8 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
         min_sigma=1.5,
         max_sigma=5,
         exclude_border=exclude_border,
+        threshold_abs=0.2,
+        threshold_rel=None,
     )
 
     if disc_center == (5, 20) and exclude_border == (4, 15):
@@ -425,7 +442,8 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
 
 # Regex flag "(?s)" makes "." match newline too
 @pytest.mark.filterwarnings(
-    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage"
+    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage",
+    "ignore::skimage.util.PendingSkimage2Change",
 )
 def test_blob_log_threshold_rescaling():
     image = np.ones((100, 100), dtype=np.uint8)
@@ -451,6 +469,7 @@ def test_blob_log_threshold_rescaling():
     result = blob_log(image, threshold_abs=0.21 * scale_factor)
     assert result.shape == (0, 3)
 
+    # Warning about pending skimage2 breakage
     regex = (
         "(?s).*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
@@ -458,7 +477,7 @@ def test_blob_log_threshold_rescaling():
         "Hint: For `image` with dtype .*, `threshold=0.2` is equivalent to\n"
         f"`threshold_abs={0.2 * scale_factor}`."
     )
-    with pytest.warns(FutureWarning, match=regex) as record:
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_log(image)
     assert_stacklevel(record)
 
@@ -481,16 +500,10 @@ def test_blob_doh(dtype, threshold_type):
     img[xs, ys] = 255
 
     if threshold_type == 'absolute':
-        # Note: have to either scale up threshold or rescale the image to the
-        #       range [0, 1] internally.
-        threshold = 0.05
-        if img.dtype.kind == 'f':
-            # account for lack of internal scaling to [0, 1] by img_as_float
-            ptp = np.ptp(img)
-            threshold *= ptp**2
+        threshold_abs = 3251.25
         threshold_rel = None
     elif threshold_type == 'relative':
-        threshold = None
+        threshold_abs = None
         threshold_rel = 0.5
 
     blobs = blob_doh(
@@ -498,7 +511,7 @@ def test_blob_doh(dtype, threshold_type):
         min_sigma=1,
         max_sigma=60,
         num_sigma=10,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
     )
 
@@ -545,7 +558,13 @@ def test_blob_doh_log_scale():
     img[xs, ys] = 255
 
     blobs = blob_doh(
-        img, min_sigma=1, max_sigma=60, num_sigma=10, log_scale=True, threshold=0.05
+        img,
+        min_sigma=1,
+        max_sigma=60,
+        num_sigma=10,
+        log_scale=True,
+        threshold_abs=3251.25,
+        threshold_rel=None,
     )
 
     def radius(x):
@@ -578,7 +597,7 @@ def test_blob_doh_log_scale():
 def test_blob_doh_no_peaks():
     # Testing no peaks
     img_empty = np.zeros((100, 100))
-    assert blob_doh(img_empty).size == 0
+    assert blob_doh(img_empty, threshold_abs=None, threshold_rel=None).size == 0
 
 
 def test_blob_doh_overlap():
@@ -590,14 +609,22 @@ def test_blob_doh_overlap():
     xs, ys = disk((120, 100), 30)
     img[xs, ys] = 255
 
-    blobs = blob_doh(img, min_sigma=1, max_sigma=60, num_sigma=10, threshold=0.05)
+    blobs = blob_doh(
+        img,
+        min_sigma=1,
+        max_sigma=60,
+        num_sigma=10,
+        threshold_abs=3251.25,
+        threshold_rel=None,
+    )
 
     assert len(blobs) == 1
 
 
 # Regex flag "(?s)" makes "." match newline too
 @pytest.mark.filterwarnings(
-    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage"
+    "ignore:(?s).*`threshold` is deprecated:FutureWarning:skimage",
+    "ignore::skimage.util.PendingSkimage2Change",
 )
 def test_blob_doh_threshold_rescaling():
     image = np.ones((100, 100), dtype=np.uint8)
@@ -623,6 +650,7 @@ def test_blob_doh_threshold_rescaling():
     result = blob_doh(image, threshold_abs=0.011 * scale_factor)
     assert result.shape == (0, 3)
 
+    # Test the upgrade hint
     regex = (
         "(?s).*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max \*\* 2"
@@ -630,7 +658,7 @@ def test_blob_doh_threshold_rescaling():
         "Hint: For `image` with dtype .*, `threshold=0.01` is equivalent to\n"
         f"`threshold_abs={0.01 * scale_factor}`."
     )
-    with pytest.warns(FutureWarning, match=regex) as record:
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_doh(image)
     assert_stacklevel(record)
 
@@ -646,7 +674,14 @@ def test_blob_log_overlap_3d():
     )
     im3 = np.logical_or(blob1, blob2)
 
-    blobs = blob_log(im3, min_sigma=2, max_sigma=10, overlap=0.1)
+    blobs = blob_log(
+        im3,
+        min_sigma=2,
+        max_sigma=10,
+        overlap=0.1,
+        threshold_abs=0.2,
+        threshold_rel=None,
+    )
     assert len(blobs) == 1
 
 
@@ -672,10 +707,22 @@ def test_blob_overlap_3d_anisotropic():
 def test_blob_log_anisotropic():
     image = np.zeros((50, 50))
     image[20, 10:20] = 1
-    isotropic_blobs = blob_log(image, min_sigma=0.5, max_sigma=2, num_sigma=3)
+    isotropic_blobs = blob_log(
+        image,
+        min_sigma=0.5,
+        max_sigma=2,
+        num_sigma=3,
+        threshold_abs=0.2,
+        threshold_rel=None,
+    )
     assert len(isotropic_blobs) > 1  # many small blobs found in line
     ani_blobs = blob_log(
-        image, min_sigma=[0.5, 5], max_sigma=[2, 20], num_sigma=3
+        image,
+        min_sigma=[0.5, 5],
+        max_sigma=[2, 20],
+        num_sigma=3,
+        threshold_abs=0.2,
+        threshold_rel=None,
     )  # 10x anisotropy, line is 1x10
     assert len(ani_blobs) == 1  # single anisotropic blob found
 
@@ -691,7 +738,14 @@ def test_blob_log_overlap_3d_anisotropic():
     )
     im3 = np.logical_or(blob1, blob2)
 
-    blobs = blob_log(im3, min_sigma=[2, 2.01, 2.005], max_sigma=10, overlap=0.1)
+    blobs = blob_log(
+        im3,
+        min_sigma=[2, 2.01, 2.005],
+        max_sigma=10,
+        overlap=0.1,
+        threshold_abs=0.2,
+        threshold_rel=None,
+    )
     assert len(blobs) == 1
 
     # Two circles with distance between centers equal to radius
@@ -705,22 +759,19 @@ def test_blob_log_overlap_3d_anisotropic():
 
 def test_no_blob():
     im = np.zeros((10, 10))
-    blobs = blob_log(im, min_sigma=2, max_sigma=5, num_sigma=4)
+    blobs = blob_log(
+        im, min_sigma=2, max_sigma=5, num_sigma=4, threshold_abs=0.2, threshold_rel=None
+    )
     assert len(blobs) == 0
 
 
+@pytest.mark.filterwarnings("ignore::skimage.util.PendingSkimage2Change")
 @pytest.mark.parametrize("blob_func", [blob_dog, blob_doh, blob_log])
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 def test_blob_funcs_deprecate_threshold_warning(blob_func, dtype):
     image = np.ones((10, 10), dtype=dtype)
 
     blob_func(image, threshold_abs=None)  # no warning
-
-    with pytest.warns(
-        FutureWarning, match="Must set .* `threshold_abs` explicitly"
-    ) as record:
-        blob_func(image)
-    assert_stacklevel(record)
 
     with pytest.warns(FutureWarning, match=".* `threshold` is deprecated") as record:
         blob_func(image, threshold=0.5)
@@ -739,3 +790,24 @@ def test_blob_funcs_deprecate_threshold_warning(blob_func, dtype):
                 module="skimage",
             )
             blob_func(image, threshold=0.5, threshold_abs=0.5)
+
+
+@pytest.mark.filterwarnings("ignore::skimage.util.PendingSkimage2Change")
+@pytest.mark.parametrize("blob_func", [blob_dog, blob_doh, blob_log])
+@pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
+def test_blob_funcs_pending_skimage2_warnings(blob_func, dtype):
+    image = np.ones((10, 10), dtype=dtype)
+
+    blob_func(image, threshold_abs=None)  # no warning
+
+    with pytest.warns(
+        PendingSkimage2Change, match="Must set .* `threshold_abs` explicitly"
+    ) as record:
+        blob_func(image)
+    assert_stacklevel(record)
+
+    with pytest.warns(
+        PendingSkimage2Change, match="Must set .* `threshold_rel` explicitly"
+    ) as record:
+        blob_func(image)
+    assert_stacklevel(record)

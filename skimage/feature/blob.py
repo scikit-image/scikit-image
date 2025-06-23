@@ -13,6 +13,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
 )
+from ..util import PendingSkimage2Change
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
@@ -226,19 +227,32 @@ def _format_exclude_border(img_ndim, exclude_border):
 _THRESHOLD_WARNING = """{summary}
 
 Starting with version 0.26, the parameter `threshold` is deprecated in favor of
-`threshold_abs` that preserves the value range of `image`. This includes leaving
-`threshold` unspecified and relying on its default value. In version 2.2 (or
-later), this parameter will be removed completely. Set `threshold_abs`
-explicitly to `None` or a valid value to silence this warning. When switching
-to `threshold_abs`, if `image` is of integer dtype, adjust the old `threshold`
-with:
+`threshold_abs` that preserves the value range of `image`. Starting with
+version 2.0, this includes leaving `threshold` unspecified and relying on its
+default value which will be changed.  In version 2.2 (or later), this parameter
+will be removed completely. Set `threshold_abs` explicitly to `None` or a valid
+value to silence this warning. When switching to `threshold_abs`, if `image` is
+of integer dtype, adjust the old `threshold` with:
 
     import numpy as np
     threshold_abs = threshold * {scale_factor_eq}
 
 Hint: {hint}
 
-For more details, see the documentation.
+For more details, see the migration guide:
+https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs
+"""
+
+
+_THRESHOLD_REL_WARNING = """Must set parameter `threshold_rel` explicitly.
+
+Starting in version 2.0 and skimage2, the default of the parameter
+`threshold_rel` will change to the former value of the deprecated parameter
+`threshold`. If you want to preserve the old behavior, set `threshold_rel=None`
+explicitly.
+
+For more details, see the migration guide:
+https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs
 """
 
 
@@ -270,10 +284,11 @@ def _deprecate_threshold_with_scaling(func):
     @wraps(func)
     def wrapper(image, *args, **kwargs):
         if len(args) >= 5 or "threshold" in kwargs:
+            # Deprecated `threshold` is passed explicitly
+
             threshold = kwargs["threshold"] if "threshold" in kwargs else args[4]
             threshold_abs = scale_threshold(image, threshold)
 
-            # Deprecated `threshold` is passed explicitly
             msg = _THRESHOLD_WARNING.format(
                 summary="Parameter `threshold` is deprecated.",
                 hint=f"For `image` with dtype '{image.dtype}', "
@@ -297,25 +312,35 @@ def _deprecate_threshold_with_scaling(func):
             kwargs["threshold_abs"] = threshold_abs
 
         elif "threshold_abs" not in kwargs:
+            # Required `threshold_abs` is not given explicitly, extract old
+            # default from `threshold` and scale
             sig = inspect.signature(func)
             threshold = sig.parameters["threshold"].default
             assert isinstance(threshold, float)
             threshold_abs = scale_threshold(image, threshold)
 
-            # Default of deprecated `threshold` is used implicitly
+            kwargs["threshold"] = DEPRECATED
+            kwargs["threshold_abs"] = threshold_abs
+
+            # Default of deprecated `threshold` was used implicitly,
+            # will change in skimage2
             msg = _THRESHOLD_WARNING.format(
                 summary="Must set new parameter `threshold_abs` explicitly.",
                 hint=f"For `image` with dtype '{image.dtype}', "
                 f"`{threshold=}` is equivalent to\n`{threshold_abs=}`.",
                 scale_factor_eq=scale_factor_eq,
             )
-            warnings.warn(msg, category=FutureWarning, stacklevel=2)
-
-            kwargs["threshold"] = DEPRECATED
-            kwargs["threshold_abs"] = threshold_abs
+            warnings.warn(msg, category=PendingSkimage2Change, stacklevel=2)
 
         else:
             kwargs["threshold"] = DEPRECATED
+
+        if "threshold_rel" not in kwargs:
+            # Default of deprecated `threshold_rel` is used implicitly which
+            # will change in skimage2
+            warnings.warn(
+                _THRESHOLD_REL_WARNING, category=PendingSkimage2Change, stacklevel=2
+            )
 
         return func(image, *args, **kwargs)
 
@@ -793,8 +818,11 @@ def blob_doh(
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
     threshold_abs : float or None, optional
-        Minimum absolute intensity of peaks. If `threshold_rel` is also
-        specified, whichever threshold is larger will be used.
+        Minimum absolute intensity of peaks in the internally computed stack of
+        Determinant-of-Hessian (DoH) images. Note that the amplitude
+        relationship between `image` and DoH is cubic – so you need to square
+        `threshold_abs` relative to values in `image`. If `threshold_rel` is
+        also specified, whichever threshold is larger will be used.
 
         .. versionadded:: 0.26.0
             Replaces the `threshold` parameter with a range preserving option.

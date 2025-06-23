@@ -62,12 +62,15 @@ Version 2.0
   keyword-only parameter `max_size`.
 - In `skimage.measure.regionprops` complete deprecation of old property names.
   Remove `PROPS` dict, related logic and warnings.
-
+- In `skimage.feature.blob`, set the default of the deprecated `threshold`
+  parameter to `None`, and set the default of `threshold_rel` to the old value
+  of `threshold`. Adjust tests, docstrings and decorator
+  `_deprecate_threshold_with_scaling` accordingly.
 
 Version 2.2
 -----------
 - In `skimage.feature.blob`, remove decorator `_deprecate_threshold_with_scaling`
   and related tests and the documentation of the `threshold` parameter in the
-  docstrings. Turn `threshold_abs=` into a required parameter.
+  docstrings.
 
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
