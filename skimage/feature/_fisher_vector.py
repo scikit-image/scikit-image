@@ -26,6 +26,8 @@ scikit-image (here) by other authors.)
 
 import numpy as np
 
+from .._shared.version_requirements import require
+
 
 class FisherVectorException(Exception):
     pass
@@ -35,6 +37,7 @@ class DescriptorException(FisherVectorException):
     pass
 
 
+@require("sklearn")
 def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     """Estimate a Gaussian mixture model (GMM) given a set of descriptors and
     number of modes (i.e. Gaussians). This function is essentially a wrapper
@@ -80,9 +83,6 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('sklearn')
-
     >>> from skimage.feature import fisher_vector
     >>> rng = np.random.Generator(np.random.PCG64())
     >>> sift_for_images = [rng.standard_normal((10, 128)) for _ in range(10)]
@@ -90,14 +90,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     >>> # Estimate 16-mode GMM with these synthetic SIFT vectors
     >>> gmm = learn_gmm(sift_for_images, n_modes=num_modes)
     """
-
-    try:
-        from sklearn.mixture import GaussianMixture
-    except ImportError:
-        raise ImportError(
-            'scikit-learn is not installed. Please ensure it is installed in '
-            'order to use the Fisher vector functionality.'
-        )
+    from sklearn.mixture import GaussianMixture
 
     if not isinstance(descriptors, (list, np.ndarray)):
         raise DescriptorException(
@@ -152,6 +145,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
     return gmm
 
 
+@require("sklearn")
 def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     """Compute the Fisher vector given some descriptors/vectors,
     and an associated estimated GMM.
@@ -193,9 +187,6 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('sklearn')
-
     >>> from skimage.feature import fisher_vector, learn_gmm
     >>> sift_for_images = [np.random.random((10, 128)) for _ in range(10)]
     >>> num_modes = 16
@@ -205,13 +196,7 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
     >>> # Compute the Fisher vector
     >>> fv = fisher_vector(test_image_descriptors, gmm)
     """
-    try:
-        from sklearn.mixture import GaussianMixture
-    except ImportError:
-        raise ImportError(
-            'scikit-learn is not installed. Please ensure it is installed in '
-            'order to use the Fisher vector functionality.'
-        )
+    from sklearn.mixture import GaussianMixture
 
     if not isinstance(descriptors, np.ndarray):
         raise DescriptorException('Please ensure descriptors is a NumPy array.')

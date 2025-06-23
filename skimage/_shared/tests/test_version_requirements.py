@@ -19,16 +19,18 @@ def test_is_installed():
 
 
 def test_require():
+    pass
+
     # A function that only runs on Python >2.7 and numpy > 1.5 (should pass)
-    @version_req.require('python', '>2.7')
-    @version_req.require('numpy', '>1.5')
+    @version_req.require('python', version='>2.7')
+    @version_req.require('numpy', version='>1.5')
     def foo():
         return 1
 
     assert_equal(foo(), 1)
 
     # function that requires scipy < 0.1 (should fail)
-    @version_req.require('scipy', '<0.1')
+    @version_req.require('scipy', version='<0.1')
     def bar():
         return 0
 

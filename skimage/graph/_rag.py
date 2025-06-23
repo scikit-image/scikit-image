@@ -455,7 +455,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def show_rag(
     labels,
     rag,
@@ -506,9 +506,6 @@ def show_rag(
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> from skimage import data, segmentation, graph
     >>> import matplotlib.pyplot as plt
     >>>

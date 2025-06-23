@@ -8,6 +8,7 @@ import numpy as np
 from ..util.dtype import img_as_float
 from .._shared import utils
 from .._shared.utils import _supported_float_type, warn
+from .._shared.version_requirements import require
 from ._denoise_cy import _denoise_bilateral, _denoise_tv_bregman
 from .. import color
 from ..color.colorconv import ycbcr_from_rgb
@@ -846,6 +847,7 @@ def _rescale_sigma_rgb2ycbcr(sigmas):
     return sigmas
 
 
+@require("pywt")
 @utils.channel_as_last_axis()
 def denoise_wavelet(
     image,
@@ -961,9 +963,6 @@ def denoise_wavelet(
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('pywt')
-
     >>> from skimage import color, data
     >>> img = img_as_float(data.astronaut())
     >>> img = color.rgb2gray(img)
@@ -1046,6 +1045,7 @@ def denoise_wavelet(
     return out
 
 
+@require("pywt")
 def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
     """
     Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
@@ -1087,9 +1087,6 @@ def estimate_sigma(image, average_sigmas=False, *, channel_axis=None):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('pywt')
-
     >>> import skimage.data
     >>> from skimage import img_as_float
     >>> img = img_as_float(skimage.data.camera())
