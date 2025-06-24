@@ -231,8 +231,11 @@ Starting with version 0.26, the parameter `threshold` is deprecated in favor of
 version 2.0, this includes leaving `threshold` unspecified and relying on its
 default value which will be changed.  In version 2.2 (or later), this parameter
 will be removed completely. Set `threshold_abs` explicitly to `None` or a valid
-value to silence this warning. When switching to `threshold_abs`, if `image` is
-of integer dtype, adjust the old `threshold` with:
+value to silence this warning.
+
+To maintain the old behavior, if `image` is of floating dtype, simple use the
+old `threshold` value for `threshold_abs`. If `image` is of integer dtype,
+adjust the old `threshold` value with:
 
     import numpy as np
     threshold_abs = threshold * {scale_factor_eq}
@@ -326,7 +329,7 @@ def _deprecate_threshold_with_scaling(func):
             # will change in skimage2
             msg = _THRESHOLD_WARNING.format(
                 summary="Must set new parameter `threshold_abs` explicitly.",
-                hint=f"For `image` with dtype '{image.dtype}', "
+                hint=f"For `image` with dtype '{image.dtype}', the default "
                 f"`{threshold=}` is equivalent to\n`{threshold_abs=}`.",
                 scale_factor_eq=scale_factor_eq,
             )

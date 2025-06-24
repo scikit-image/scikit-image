@@ -222,7 +222,7 @@ def test_blob_dog_threshold_rescaling():
         "Must set new parameter `threshold_abs` explicitly.*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
         ".*"
-        "Hint: For `image` with dtype .*, `threshold=0.5` is equivalent to\n"
+        "Hint: For `image` with dtype .* `threshold=0.5` is equivalent to\n"
         f"`threshold_abs={0.5 * scale_factor}`."
     )
     with pytest.warns(PendingSkimage2Change, match=regex) as record:
@@ -474,7 +474,7 @@ def test_blob_log_threshold_rescaling():
         "(?s).*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
         ".*"
-        "Hint: For `image` with dtype .*, `threshold=0.2` is equivalent to\n"
+        "Hint: For `image` with dtype .* `threshold=0.2` is equivalent to\n"
         f"`threshold_abs={0.2 * scale_factor}`."
     )
     with pytest.warns(PendingSkimage2Change, match=regex) as record:
@@ -655,7 +655,7 @@ def test_blob_doh_threshold_rescaling():
         "(?s).*"
         r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max \*\* 2"
         ".*"
-        "Hint: For `image` with dtype .*, `threshold=0.01` is equivalent to\n"
+        "Hint: For `image` with dtype .* `threshold=0.01` is equivalent to\n"
         f"`threshold_abs={0.01 * scale_factor}`."
     )
     with pytest.warns(PendingSkimage2Change, match=regex) as record:

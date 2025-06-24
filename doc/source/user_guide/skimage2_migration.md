@@ -52,6 +52,7 @@ These changes require an intervention in order to keep the code working as befor
 Starting with version 0.26, the value range of the parameter `image` is always preserved.
 When `image` had an integer dtype, its value range was scaled (`uint -> [0, 1]`, `int -> [-1, 1]`).
 This affected the now deprecated `threshold` parameter, whose absolute value would compare differently to a scaled or untouched value range.
+In other words, the same `threshold` value would have different effect depending on `image.dtype`.
 With this deprecation, the new parameter `threshold_abs` is preferred instead.
 `threshold_abs` will always be compared against a range preserving version of `image` and behave consistent regardless of `image.dtype`.
 
@@ -59,14 +60,19 @@ Starting with version 2.0 and the new `skimage2` namespace, the default values o
 The default of `threshold` will be set to `None` and `threshold_rel` will be set to the old value of `threshold`.
 Calls to these functions that rely on default values may change behavior, so we recommend setting `threshold_abs` and `threshold_rel` explicitly.
 
+In version 2.2 (or later), the old `threshold` parameter will be removed completely.
+
 **How to update:**
 
-We recommend setting both parameters `threshold_abs` and `threshold_rel` explicitly if you want to preserve old behavior.
-You can also [enable skimage2 warnings]{#enable-skimage2-warnings} to that should instruct you how to use the new API.
+We recommend setting both parameters `threshold_abs` and `threshold_rel` explicitly if you want to preserve behavior throughout the migration.
+To discover all calls that need to be updated, [enable skimage2-related warnings](#enable-skimage2-warnings).
+These warnings will flag code that needs to be updated and will hint at the appropriate value for `threshold_abs` for a given `image.dtype`.
+Here is what the warning messages will advise:
 
 - Remove all uses of the deprecated parameter `threshold`.
 
-- If `image` is of integer dtype, adjust the old value of `threshold`
+- If `image` is of floating dtype, simply set `threshold_abs` to the old value of `threshold`.
+  If `image` is of integer dtype, adjust the old value of `threshold`
 
   ```python
   threshold_abs = threshold * scaling_factor
@@ -75,7 +81,6 @@ You can also [enable skimage2 warnings]{#enable-skimage2-warnings} to that shoul
   and pass it to `threshold_abs`.
   For `blob_dog` and `blob_log`, use `scaling_factor = np.iinfo(image.dtype).max`.
   For `blob_doh`, you need the squared version: `scaling_factor = np.iinfo(image.dtype).max ** 2`.
-  If `image` is of floating dtype, simply set `threshold_abs` to the old value of `threshold`.
 
 - Set `threshold_rel=None` explicitly if you are not passing an explicit value already.
   E.g., `blob_doh(image)` becomes `blob_doh(image, threshold_rel=None)` but `blob_doh(image, threshold_rel=0.6)` does not need to be modified.
