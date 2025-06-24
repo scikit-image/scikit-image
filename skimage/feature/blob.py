@@ -457,7 +457,9 @@ def blob_dog(
     --------
     >>> from skimage import data, feature
     >>> coins = data.coins()
-    >>> feature.blob_dog(coins, threshold_abs=12.75, min_sigma=10, max_sigma=40)
+    >>> feature.blob_dog(
+    ...     coins, threshold_abs=12.75, threshold_rel=None, min_sigma=10, max_sigma=40
+    ... )
     array([[128., 155.,  10.],
            [198., 155.,  10.],
            [124., 338.,  10.],
@@ -670,7 +672,7 @@ def blob_log(
     >>> from skimage import data, feature, exposure
     >>> img = data.coins()
     >>> img = exposure.equalize_hist(img)  # improves detection
-    >>> feature.blob_log(img, threshold_abs= .3)
+    >>> feature.blob_log(img, threshold_abs=0.3, threshold_rel=None)
     array([[124.        , 336.        ,  11.88888889],
            [198.        , 155.        ,  11.88888889],
            [194.        , 213.        ,  17.33333333],
@@ -853,7 +855,7 @@ def blob_doh(
     --------
     >>> from skimage import data, feature
     >>> img = data.coins()
-    >>> feature.blob_doh(img)
+    >>> feature.blob_doh(img, threshold_abs=650.25, threshold_rel=None)
     array([[197.        , 153.        ,  20.33333333],
            [124.        , 336.        ,  20.33333333],
            [126.        , 153.        ,  20.33333333],
