@@ -13,16 +13,16 @@ they should either upgrade to skimage2 or pin to version 1.0.x.
 
 We have undertaken this to make some long-outstanding, backward-incomptible changes to the scikit-image API.
 Most changes were difficult or impossible to make using deprecations alone.
-To honor the Hinsen principle---that is, never change results silently, unless to fix a bug---we introduce a new package, which gives users an explicit way of upgrading.
+To honor the Hinsen principle (that is, never change results silently unless to fix a bug), we introduce a new package, which gives users an explicit way of upgrading.
 Users also have the option to use the two versions side-by-side while they do so.
 
 You can find a more detailed description of our motivation and discussion leading up to this in {doc}`SKIP 4 <../skips/4-transition-to-v2>`.
 
 (enable-skimage2-warnings)=
 
-## Enable skimage2 related warnings
+## Enable skimage2-related warnings
 
-Even before the release of skimage2, you can enable early warnings to prepare your code.
+Even before skimage2 is released, you may enable skimage2-related warnings to prepare for code changes early on.
 Run the following [warnings filter](https://docs.python.org/3/library/warnings.html#the-warnings-filter) before you use scikit-image in your code:
 
 ```python
@@ -31,7 +31,7 @@ import skimage as ski
 warnings.filterwarnings(action="default", category=ski.util.PendingSkimage2Change)
 ```
 
-This will raise warnings for all code that needs to be updated to work as before with the new skimage2 API.
+This will raise a warning for any piece of code which needs updating to continue working with the new (skimage2) API the exact same way it used to (in the old API).
 
 ## Breaking changes in skimage2
 
@@ -39,7 +39,7 @@ When switching to version 2.0, the following changes would silently break or cha
 To keep your code working as before, we have compiled the following guidelines.
 
 :::{note}
-Because these changes live in a new namespace, your code will never break automatically if you don't explicitly start importing from `skimage2`!
+Because these changes live in a new namespace, your code will *not* break automatically if you don't explicitly change your imports and start importing from `skimage2`!
 :::
 
 (threshold-blob-funcs)=
