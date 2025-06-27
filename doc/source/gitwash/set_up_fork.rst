@@ -57,7 +57,7 @@ Note that we've used ``https://`` for the URL rather than ``git@``.  The
 use it to merge into our own code.
 
 Just for your own satisfaction, show yourself that you now have a new
-'remote', with ``git remote -v show``, giving you something like::
+'remote', with ``git remote -v``, giving you something like::
 
    upstream	https://github.com/scikit-image/scikit-image.git (fetch)
    upstream	https://github.com/scikit-image/scikit-image.git (push)
