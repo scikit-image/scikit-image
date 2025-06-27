@@ -33,18 +33,17 @@ warnings.filterwarnings(action="default", category=ski.util.PendingSkimage2Chang
 
 This will raise a warning for any piece of code which needs updating to continue working with the new (skimage2) API the exact same way it used to (in the old API).
 
-## Breaking changes in skimage2
+## Updating existing code
 
-When switching to version 2.0, the following changes would silently break or change behavior of your code.
-To keep your code working as before, we have compiled the following guidelines.
+When switching to the new namespace in version 2.0, some code needs to be updated to keep working as before.
 
 :::{note}
-Because these changes live in a new namespace, your code will *not* break automatically if you don't explicitly change your imports and start importing from `skimage2`!
+Because these changes live in a new namespace, your code will _not_ break automatically if you don't explicitly change your imports and start importing from `skimage2`!
 :::
 
 (threshold-blob-funcs)=
 
-### Deprecate range sensitive `threshold` parameter in `feature.blob_*` functions
+### Range-preserving thresholding in `feature.blob_*` functions
 
 **Affects:**
 
