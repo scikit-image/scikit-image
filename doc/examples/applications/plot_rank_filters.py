@@ -375,7 +375,7 @@ fig.tight_layout()
 # These algorithms can be used on both 2D and 3D images.
 #
 # The example compares local thresholding with global thresholding, which is
-# provided by :func:`skimage.filters.threshold_otsu`. Note that the former is
+# provided by :func:`skimage.segmentation.threshold_otsu`. Note that the former is
 # much slower than the latter.
 #
 # .. [5] https://en.wikipedia.org/wiki/Otsu's_method
@@ -391,7 +391,7 @@ t_loc_otsu = ski.filters.rank.otsu(p8, footprint)
 loc_otsu = p8 >= t_loc_otsu
 
 # t_glob_otsu is a scalar
-t_glob_otsu = ski.filters.threshold_otsu(p8)
+t_glob_otsu = ski.segmentation.threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
@@ -427,7 +427,7 @@ t_loc_otsu = ski.filters.rank.otsu(brain, neighborhood)
 loc_otsu = brain >= t_loc_otsu
 
 # t_glob_otsu is a scalar
-t_glob_otsu = ski.filters.threshold_otsu(brain)
+t_glob_otsu = ski.segmentation.threshold_otsu(brain)
 glob_otsu = brain >= t_glob_otsu
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 12), sharex=True, sharey=True)
