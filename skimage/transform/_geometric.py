@@ -1160,8 +1160,20 @@ class PiecewiseAffineTransform(_GeometricTransform):
     inverse_affines : list of AffineTransform objects
         Inverse affine transformations for each triangle in the mesh.
 
-    """
+    Examples
+    --------
+    >>> from numpy import np
+    >>> from skimage.transform import PiecewiseAffineTransform
+    >>> from skimage import data
+    >>> img = data.camera()
+    >>> rows, cols = img.shape[:2]
+    >>> src_points = np.float32([[0,0], [0,rows-1], [cols/2,0], [cols/2,rows-1]])
+    >>> dst_points = np.float32([[0,100], [0,rows-101], [cols/2,0], [cols/2,rows-1]])
+    >>> tform = PiecewiseAffineTransform()
+    >>> tform.estimate(src, dst)
+    True
 
+    """
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
