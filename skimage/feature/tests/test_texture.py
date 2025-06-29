@@ -69,7 +69,9 @@ class TestGLCM:
     def test_image_data_types(self):
         for dtype in [np.uint16, np.uint32, np.uint64, np.int16, np.int32, np.int64]:
             img = self.image.astype(dtype)
-            result = graycomatrix(img, [1], [np.pi / 2], 4, symmetric=True)
+            result = graycomatrix(
+                img, distances=[1], angles=[np.pi / 2], levels=4, symmetric=True
+            )
             assert result.shape == (4, 4, 1, 1)
             expected = np.array(
                 [[6, 0, 2, 0], [0, 4, 2, 0], [2, 2, 2, 2], [0, 0, 2, 0]],
@@ -230,6 +232,42 @@ class TestGLCM:
             'entropy',
         ]:
             graycoprops(result, prop)
+
+    def test_zero_mask(self):
+        mask = np.array(
+            [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]],
+            dtype=np.bool_,
+        )
+
+        result = graycomatrix(
+            self.image,
+            [1],
+            [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4],
+            levels=4,
+            mask=mask,
+        )
+        expected = np.zeros((4, 4, 1, 4))
+        np.testing.assert_array_equal(result, expected)
+
+    def test_mask(self):
+        mask = np.where(self.image == 0, 1, 0).astype(np.bool_)
+        result = graycomatrix(
+            self.image,
+            [1],
+            [0, np.pi / 4],
+            levels=4,
+            mask=mask,
+        )
+        assert result.shape == (4, 4, 1, 2)
+        expected1 = np.array([[0, 0], [0, 0], [0, 0], [0, 0]]).astype(np.uint32)
+        np.testing.assert_array_equal(result[0, :, 0, :], expected1)
+
+        expected2 = np.array([[0, 0], [2, 1], [0, 1], [0, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[1, :, 0, :], expected2)
+        expected3 = np.array([[0, 0], [0, 0], [3, 0], [1, 2]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[2, :, 0, :], expected3)
+        expected4 = np.array([[0, 0], [0, 0], [0, 0], [1, 0]], dtype=np.uint32)
+        np.testing.assert_array_equal(result[3, :, 0, :], expected4)
 
 
 class TestLBP:
