@@ -492,7 +492,7 @@ class FailedEstimation:
         "object. For failed estimations, `bool(estimation_result)` will be `False`. "
         "E.g.\n\n"
         "    if not estimation_result:\n"
-        "        # handle failed estimation..."
+        "        raise RuntimeError(f'Failed estimation: {estimation_result}')"
     )
 
     def __init__(self, message):

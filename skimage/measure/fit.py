@@ -117,7 +117,7 @@ class LineModelND(BaseModel):
 
                 model = LineModelND.from_estimate(...)
                 if not model:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {model}")
         """
         return super().from_estimate(data)
 
@@ -369,7 +369,7 @@ class CircleModel(BaseModel):
 
                 model = CircleModel.from_estimate(...)
                 if not model:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {model}")
         """
         return super().from_estimate(data)
 
@@ -571,7 +571,7 @@ class EllipseModel(BaseModel):
 
                 model = EllipseModel.from_estimate(...)
                 if not model:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {model}")
 
         References
         ----------

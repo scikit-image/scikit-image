@@ -155,7 +155,7 @@ class ThinPlateSplineTransform:
 
                 tform = ThinPlateSplineTransform.from_estimate(...)
                 if not tform:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         Notes
         -----

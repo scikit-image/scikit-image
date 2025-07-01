@@ -321,7 +321,7 @@ class _GeometricTransform(ABC):
 
                 tf = TransformClass.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
         """
         return _from_estimate(cls, src, dst, *args, **kwargs)
 
@@ -601,7 +601,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
                 tf = FundamentalMatrixTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         Raises
         ------
@@ -841,7 +841,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
                 tf = EssentialMatrixTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         Raises
         ------
@@ -1100,7 +1100,7 @@ class ProjectiveTransform(_HMatrixTransform):
 
                 tf = ProjectiveTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
         return super().from_estimate(src, dst, weights)
@@ -1618,7 +1618,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
                 tf = PiecewiseAffineTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
         return super().from_estimate(src, dst)
@@ -1968,7 +1968,7 @@ class EuclideanTransform(ProjectiveTransform):
 
                 tf = EuclideanTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
         # Use base implementation to avoid weights argument of
@@ -2349,7 +2349,7 @@ class PolynomialTransform(_GeometricTransform):
 
                 tf = PolynomialTransform.from_estimate(...)
                 if not tf:
-                    # Handle failed estimation
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
         return super().from_estimate(src, dst, order, weights)
@@ -2566,7 +2566,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
             tf = estimate_transform(...)
             if not tf:
-                # Handle failed estimation
+                raise RuntimeError(f"Failed estimation: {tf}")
 
     Examples
     --------
