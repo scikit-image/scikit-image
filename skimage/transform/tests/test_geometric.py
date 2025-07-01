@@ -739,8 +739,8 @@ def test_polynomial_estimation():
     assert_almost_equal(tform(SRC), DST, 6)
 
     # via from_estimate classmethod
-    tform2 = PolynomialTransform.from_estimate(SRC, DST)
-    assert_almost_equal(tform2.params, tform2.params)
+    tform2 = PolynomialTransform.from_estimate(SRC, DST, order=10)
+    assert_almost_equal(tform2.params, tform.params)
     # via estimate method
     tform3 = PolynomialTransform()
     with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
