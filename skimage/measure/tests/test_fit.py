@@ -42,10 +42,10 @@ def test_line_model_nd_invalid_input():
     with testing.raises(ValueError):
         LineModelND().predict_y(np.zeros(1), np.zeros(1))
 
-    tf = LineModelND.from_estimate(np.empty((1, 3)))
+    tf = LineModelND.from_estimate(np.ones((1, 3)))
     assert not tf
     assert str(tf) == 'LineModelND: estimate under-determined'
-    tf = LineModelND.from_estimate(np.empty((1, 2)))
+    tf = LineModelND.from_estimate(np.ones((1, 2)))
     assert not tf
     assert str(tf) == 'LineModelND: estimate under-determined'
 
@@ -193,7 +193,8 @@ def test_circle_model_insufficient_data():
     for data in ([[1, 2], [3, 4]], [[0, 0], [1, 1], [2, 2]]):
         data = np.array(data)
         tf = CircleModel.from_estimate(data)
-        assert not tf and str(tf).endswith(msg)
+        assert not tf
+        assert str(tf).endswith(msg)
 
         # Deprecated estimate warning.
         tf = CircleModel()
@@ -550,7 +551,8 @@ def test_ellipse_model_estimate_failers():
         ),
     ):
         tf = EllipseModel.from_estimate(data)
-        assert not tf and str(tf).endswith(msg)
+        assert not tf
+        assert str(tf).endswith(msg)
 
         tf = EllipseModel()
         with pytest.warns(FutureWarning, match=dep_msg):
