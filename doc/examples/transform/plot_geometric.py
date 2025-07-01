@@ -102,38 +102,22 @@ dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
 tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
 
 ######################################################################
-# For many transform types, including the ``ProjectiveTransform`, it is
-# possible for the estimation to fail.  If this is the case,
-# ``from_estimate`` returns a special object of type ``FailedEstimation``.
-# If you apply a truth test (e.g. ``bool(tform3)``), ``FailedEstimation``
-# returns False, and this is a good way to check for the failure.  Applying
-# ``str`` to the failed estimation object gives the error message describing
-# the reason for failure.  Putting these together, the following is a typical
-# pattern for using the return value of ``from_estimate``
+# For many transform types, including the ``ProjectiveTransform``, it is
+# possible for the estimation to fail.  If this is the case, ``from_estimate``
+# returns a special object of type ``FailedEstimation``. If you apply a truth
+# test (e.g. ``bool(tform3)``), ``FailedEstimation`` returns False, and this is
+# a good way to check for the failure.  Applying ``str`` to the failed
+# estimation object gives the error message describing the reason for failure.
+# Putting these together, the following is a typical pattern for using the
+# return value of ``from_estimate``
 
 if not tform3:  # If result is Falsey, we have a failed estimation.
     raise RuntimeError(f'Failed estimation: {tform3}')
 
 ######################################################################
-# Here is an example of a failed estimation, where all the input points are the
-# same:
-
-# Repeat last point 4 times, for four identical points.
-bad_src = np.tile(src[-1, :], (4, 1))
-bad_tform = transform.ProjectiveTransform.from_estimate(bad_src, dst)
-bad_tform
-
-######################################################################
-# If you try and use any attributes of this failed estimation, you get
-# a ``FailedEstimationAccessError``.
-
-try:
-    bad_tform.params
-except FailedEstimationAccessError as exc:
-    print('We got the following error:')
-    print(exc)
-
-######################################################################
+# See :ref:`failed-estimation` below for more detail on failed
+# estimations.
+#
 # In fact, our original estimation succeeded, so we can apply it, for example,
 # to the coordinates of an image, using ``transform.warp``.
 
@@ -162,3 +146,71 @@ plt.show()
 # is useful when the correspondence points are not perfectly accurate.
 # See the :ref:`sphx_glr_auto_examples_transform_plot_matching.py` tutorial
 # for an in-depth description of how to use this approach in scikit-image.
+
+######################################################################
+# .. _failed-estimation:
+#
+# Failed estimation
+# ====================
+#
+# There are situations where transform classes can fail to estimate a valid
+# transformation, and we recommend that you always check for this possible
+# case.
+#
+# Here (again) is an example of a successful estimation:
+
+src = np.array([[0, 0], [0, 50], [300, 50], [300, 0]])
+dst = np.array([[155, 15], [65, 40], [260, 130], [360, 95]])
+
+tform3 = transform.ProjectiveTransform.from_estimate(src, dst)
+tform3
+
+######################################################################
+# If estimation succeeds, the result you get back will be a valid estimated
+# transform.  You can check if you have a valid transform by truth testing,
+# because valid transforms give True for ``bool(tform)``.  You can use this
+# common pattern to check if estimation succeeded:
+
+if not tform3:  # If result is False, we have a failed estimation.
+    raise RuntimeError(f'Failed estimation: {tform3}')
+
+######################################################################
+# In this case ``tform3`` is a valid transformation.  However, if estimation
+# failed, the ``from_estimate`` method returns a special object of type
+# ``FailedEstimation``.  The easiest way to check whether this has happened is
+# to truth-test the object, because ``FailedEstimation`` objects are falsey —
+# meaning that ``bool(tform)`` is ``False``.  Here is an example of a failed
+# estimation, where all the input points are the same:
+
+# Repeat last point 4 times, for four identical points.
+bad_src = np.tile(src[-1, :], (4, 1))
+bad_tform = transform.ProjectiveTransform.from_estimate(bad_src, dst)
+bad_tform
+
+
+######################################################################
+# We recommend that you put in a routine check to confirm the estimation
+# succeeded:
+
+if not bad_tform:  # If result is False, we have a failed estimation.
+    print('Sadly, the estimation failed')
+
+######################################################################
+# If you try to use any attributes of this failed estimation object, you get a
+# ``FailedEstimationAccessError``.
+
+try:
+    bad_tform.params
+except FailedEstimationAccessError as exc:
+    print('We got the following error:')
+    print(exc)
+
+######################################################################
+# Of course, there may be times where you did not check the truthiness of the
+# estimation when you make it (with ``from_estimate``), and you nevertheless
+# try to use the returned estimate.  If the estimation has failed, you'll see
+# these ``FailedEstimationAccessError`` exceptions cropping up at the point
+# where you use the transform.  In that case, you will need to track back
+# through your code to find where you have estimated the transform. If you
+# check the transform when you estimate it (with ``if not tform:`` or similar)
+# it will likely make the problem easier to debug.
