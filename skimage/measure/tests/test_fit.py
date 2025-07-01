@@ -186,33 +186,43 @@ def test_circle_model_residuals():
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
 
 
-def test_circle_model_insufficient_data():
+@pytest.mark.parametrize(
+    "data",
+    (
+        [[1, 2], [3, 4]],
+        [[0, 0], [1, 1], [2, 2]],
+    ),
+)
+def test_circle_model_insufficient_data(data):
     msg = "Input does not contain enough significant data points."
     dep_msg = '`estimate` is deprecated'
 
-    for data in ([[1, 2], [3, 4]], [[0, 0], [1, 1], [2, 2]]):
-        data = np.array(data)
-        tf = CircleModel.from_estimate(data)
-        assert not tf
-        assert str(tf).endswith(msg)
+    data = np.array(data)
+    tf = CircleModel.from_estimate(data)
+    assert not tf
+    assert str(tf).endswith(msg)
 
-        # Deprecated estimate warning.
-        tf = CircleModel()
-        with expected_warnings([dep_msg, msg]) as _warnings:
-            assert tf.estimate(data)
-        assert_stacklevel(_warnings)
+    # Deprecated estimate warning.
+    tf = CircleModel()
+    with expected_warnings([dep_msg, msg]) as _warnings:
+        assert tf.estimate(data)
+    assert_stacklevel(_warnings)
 
-    msg2 = (
+
+def test_circle_model_std_too_small():
+    msg = (
         "Standard deviation of data is too small to estimate "
         "circle with meaningful precision."
     )
+    dep_msg = '`estimate` is deprecated'
+
     data = np.ones((6, 2))
     tf = CircleModel.from_estimate(data)
-    assert not tf and str(tf).endswith(msg2)
+    assert not tf and str(tf).endswith(msg)
 
     tf = CircleModel()
     with pytest.warns(FutureWarning, match=dep_msg):
-        with pytest.warns(RuntimeWarning, match=msg2) as _warnings:
+        with pytest.warns(RuntimeWarning, match=msg) as _warnings:
             assert tf.estimate(data)
     assert_stacklevel(_warnings)
     assert len(_warnings) == 2
@@ -535,11 +545,9 @@ def test_ellipse_model_estimate_from_far_shifted_data():
         'https://github.com/scikit-image/scikit-image/issues/2670'
     ),
 )
-def test_ellipse_model_estimate_failers():
-    # estimate parameters of real data
-    dep_msg = '`estimate` is deprecated'
-
-    for data, msg in (
+@pytest.mark.parametrize(
+    ("data", "msg"),
+    [
         (
             np.ones((6, 2)),
             "Standard deviation of data is too small to estimate "
@@ -549,17 +557,22 @@ def test_ellipse_model_estimate_failers():
             np.array([[50, 80], [51, 81], [52, 80]]),
             "Need at least 5 data points to estimate an ellipse.",
         ),
-    ):
-        tf = EllipseModel.from_estimate(data)
-        assert not tf
-        assert str(tf).endswith(msg)
+    ],
+)
+def test_ellipse_model_estimate_failers(data, msg):
+    # estimate parameters of real data
+    dep_msg = '`estimate` is deprecated'
 
-        tf = EllipseModel()
-        with pytest.warns(FutureWarning, match=dep_msg):
-            with pytest.warns(RuntimeWarning, match=msg) as _warnings:
-                assert tf.estimate(data)
-        assert_stacklevel(_warnings)
-        assert len(_warnings) == 2
+    tf = EllipseModel.from_estimate(data)
+    assert not tf
+    assert str(tf).endswith(msg)
+
+    tf = EllipseModel()
+    with pytest.warns(FutureWarning, match=dep_msg):
+        with pytest.warns(RuntimeWarning, match=msg) as _warnings:
+            assert tf.estimate(data)
+    assert_stacklevel(_warnings)
+    assert len(_warnings) == 2
 
 
 def test_ellipse_model_residuals():
