@@ -36,6 +36,8 @@ Other
 * Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
+* Once Python 3.14 is minimal required version:
+    * Deconditionalize exception messages in `skimage._shared.tests.test_utils`
 
 Post numpy 2
 ------------
