@@ -131,7 +131,6 @@ def _generic_edge_filter(
     axis=None,
     mode='reflect',
     cval=0.0,
-    mask=None,
 ):
     """Apply a generic, n-dimensional edge filter.
 
