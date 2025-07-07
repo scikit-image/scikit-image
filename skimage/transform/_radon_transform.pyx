@@ -29,7 +29,7 @@ cdef bilinear_ray_sum(np_floats[:, :] image, np_floats theta,
     -------
     projected_value : float
         Ray sum along the projection.
-    norm_of_weights :
+    norm_of_weights : float
         A measure of how long the ray's path through the reconstruction circle was.
     """
     theta = theta / 180. * M_PI
@@ -110,7 +110,7 @@ cdef bilinear_ray_update(np_floats[:, :] image,
 
     Returns
     -------
-    deviation :
+    deviation : float
         Deviation before updating the image.
     """
     cdef np_floats ray_sum, weight_norm, deviation
@@ -177,9 +177,9 @@ def sart_projection_update(np_floats[:, :] image not None,
                            np_floats theta,
                            np_floats[:] projection not None,
                            np_floats projection_shift=0.):
-    """
-    Compute update to a reconstruction estimate from a single projection
-    using bilinear interpolation.
+    """ Compute update to a reconstruction estimate from a single projection.
+
+    Uses bilinear interpolation.
 
     Parameters
     ----------
