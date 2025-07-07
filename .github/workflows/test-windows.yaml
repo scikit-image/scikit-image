@@ -19,7 +19,7 @@ env:
 jobs:
   test_skimage_windows:
     name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
