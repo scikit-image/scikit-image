@@ -167,14 +167,13 @@ def ndarray_to_pil(arr, format_str=None):
 
     elif format_str in ['png', 'PNG']:
         mode = 'I;16'
-        mode_base = 'I'
 
         if arr.dtype.kind == 'f':
             arr = img_as_uint(arr)
 
         elif arr.max() < 256 and arr.min() >= 0:
             arr = arr.astype(np.uint8)
-            mode = mode_base = 'L'
+            mode = 'L'
 
         else:
             arr = img_as_uint(arr)
@@ -182,7 +181,6 @@ def ndarray_to_pil(arr, format_str=None):
     else:
         arr = img_as_ubyte(arr)
         mode = 'L'
-        mode_base = 'L'
 
     try:
         array_buffer = arr.tobytes()
@@ -190,7 +188,7 @@ def ndarray_to_pil(arr, format_str=None):
         array_buffer = arr.tostring()  # Numpy < 1.9
 
     if arr.ndim == 2:
-        im = Image.new(mode_base, arr.T.shape)
+        im = Image.new(mode, arr.T.shape)
         try:
             im.frombytes(array_buffer, 'raw', mode)
         except AttributeError:
