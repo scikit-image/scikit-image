@@ -1,11 +1,20 @@
+from copy import copy
 import math
 import textwrap
 from abc import ABC, abstractmethod
+from typing import Self
+import warnings
 
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import safe_as_int
+from .._shared.utils import (
+    safe_as_int,
+    _deprecate_estimate,
+    _update_from_estimate_docstring,
+    _deprecate_inherited_estimate,
+    FailedEstimation,
+)
 from .._shared.compat import NP_COPY_IF_NEEDED
 
 
@@ -71,35 +80,68 @@ def _center_and_normalize_points(points):
     # small value; ie, we don't need to worry about numerical stability here,
     # only actual 0.
     if rms == 0:
-        return np.full((d + 1, d + 1), np.nan), np.full_like(points, np.nan)
+        return np.full((d + 1, d + 1), np.nan), np.full(points.shape, np.nan)
 
     norm_factor = np.sqrt(d) / rms
 
-    part_matrix = norm_factor * np.concatenate(
-        (np.eye(d), -centroid[:, np.newaxis]), axis=1
-    )
-    matrix = np.concatenate(
-        (
-            part_matrix,
-            [
-                [
-                    0,
-                ]
-                * d
-                + [1]
-            ],
-        ),
-        axis=0,
-    )
+    matrix = np.eye(d + 1)
+    matrix[:d, d] = -centroid
+    matrix[:d, :] *= norm_factor
+    return matrix, _apply_homogeneous(matrix, points)
 
-    points_h = np.vstack([points.T, np.ones(n)])
 
-    new_points_h = (matrix @ points_h).T
+def _apply_homogeneous(matrix, points):
+    """Transform (N, D) `points` array with homogeneous (D+1, D+1) `matrix`.
 
-    new_points = new_points_h[:, :d]
-    new_points /= new_points_h[:, d:]
+    Parameters
+    ----------
+    matrix : (D+1, D+1) array_like
+        The transformation matrix to obtain the new points. Note that any
+        object with an `__array__` method [1]_ that returns a matrix with the
+        correct dimensions can be used as input here. This includes all
+        subclasses of :class:`ProjectiveTransform`, for example.
+    points : (N, D) array
+        The coordinates of the image points.
 
-    return matrix, new_points
+    Returns
+    -------
+    new_points : (N, D) array
+        The transformed image points.
+
+    References
+    ----------
+    .. [1]:
+        https://numpy.org/doc/stable/user/basics.interoperability.html#using-arbitrary-objects-in-numpy
+    """
+    points = np.array(points, copy=NP_COPY_IF_NEEDED, ndmin=2)
+    points_h = _append_homogeneous_dim(points)
+    new_points_h = points_h @ matrix.T
+    # We divide by the last dimension of the homogeneous
+    # coordinate matrix. In order to avoid division by zero,
+    # we replace exact zeros in this column with a very small number.
+    divs = new_points_h[:, -1]
+    divs = np.where(divs == 0, np.finfo(float).eps, divs)
+    return new_points_h[:, :-1] / divs[:, None]
+
+
+def _append_homogeneous_dim(points):
+    """Append a column of ones to the right of `points`.
+
+    This creates the representation of the points in the homogeneous coordinate
+    space used by homogeneous matrix transforms.
+
+    Parameters
+    ----------
+    points : array, shape (N, D)
+        The input coordinates, where N is the number of points and D is the
+        dimension of the coordinate space.
+
+    Returns
+    -------
+    points_h : array, shape (N, D+1)
+        The same points as homogeneous coordinates.
+    """
+    return np.hstack((points, np.ones((len(points), 1))))
 
 
 def _umeyama(src, dst, estimate_scale):
@@ -153,7 +195,10 @@ def _umeyama(src, dst, estimate_scale):
     U, S, V = np.linalg.svd(A)
 
     # Eq. (40) and (43).
-    rank = np.linalg.matrix_rank(A)
+    # Matrix rank calculation from SVD (see numpy.linalg._linalg::matrix_rank code).
+    # (this does SVD to check for small singular values, replicated here).
+    tol = S.max() * np.max(A.shape) * np.finfo(float).eps
+    rank = np.count_nonzero(S > tol)
     if rank == 0:
         return np.nan * T
     elif rank == dim - 1:
@@ -224,8 +269,126 @@ class _GeometricTransform(ABC):
         """
         return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
 
+    @classmethod
+    @abstractmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
 
-class FundamentalMatrixTransform(_GeometricTransform):
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+
+    @classmethod
+    def _prepare_estimation(cls, src, dst):
+        """Create identity transform and make sure points are arrays."""
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        return cls.identity(src.shape[1]), src, dst
+
+    @classmethod
+    def from_estimate(cls, src, dst, *args, **kwargs) -> Self | FailedEstimation:
+        r"""Estimate transform.
+
+        Parameters
+        ----------
+        src : (N, M) array_like
+            Source coordinates.
+        dst : (N, M) array_like
+            Destination coordinates.
+        \*args : sequence
+            Any other positional arguments.
+        \*\*kwargs : dict
+            Any other keyword arguments.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = TransformClass.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+        """
+        return _from_estimate(cls, src, dst, *args, **kwargs)
+
+
+def _from_estimate(cls, src, dst, *args, **kwargs):
+    """Detached function for from_estimate base implementation."""
+    tf, src, dst = cls._prepare_estimation(src, dst)
+    msg = tf._estimate(src, dst, *args, **kwargs)
+    return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
+
+class _HMatrixTransform(_GeometricTransform):
+    """Transform accepting homogeneous matrix as input."""
+
+    def __init__(self, matrix=None, *, dimensionality=None):
+        if matrix is None:
+            d = 2 if dimensionality is None else dimensionality
+            matrix = np.eye(d + 1)
+        else:
+            matrix = np.asarray(matrix)
+        self._check_matrix(matrix, dimensionality)
+        self._check_dims(matrix.shape[0] - 1)
+        self.params = matrix
+
+    def _check_matrix(self, matrix, dimensionality):
+        if dimensionality is not None:
+            if dimensionality != matrix.shape[0] - 1:
+                raise ValueError(
+                    f'Dimensionality {dimensionality} does not match matrix '
+                    f'{matrix}'
+                )
+        m = matrix.shape[0]
+        if matrix.shape != (m, m):
+            raise ValueError("Invalid shape of transformation matrix")
+
+    def _check_dims(self, d):
+        if d == 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in 2D transform'
+        )
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        d = 2 if dimensionality is None else dimensionality
+        return cls(matrix=np.eye(d + 1))
+
+    @property
+    def dimensionality(self):
+        return self.matrix.shape[0] - 1
+
+
+class FundamentalMatrixTransform(_HMatrixTransform):
     """Fundamental matrix transformation.
 
     The fundamental matrix relates corresponding points between a pair of
@@ -247,6 +410,9 @@ class FundamentalMatrixTransform(_GeometricTransform):
     ----------
     matrix : (3, 3) array_like, optional
         Fundamental matrix.
+    dimensionality : int, optional
+        Fallback number of dimensions when `matrix` not specified, in which
+        case, must equal 2 (the default).
 
     Attributes
     ----------
@@ -257,7 +423,6 @@ class FundamentalMatrixTransform(_GeometricTransform):
     --------
     >>> import numpy as np
     >>> import skimage as ski
-    >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
 
     Define source and destination points:
 
@@ -280,22 +445,22 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
     Estimate the transformation matrix:
 
-    >>> tform_matrix.estimate(src, dst)
-    True
-    >>> tform_matrix.params
+    >>> tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    ...      src, dst)
+    >>> tform.params
     array([[-0.21785884,  0.41928191, -0.03430748],
            [-0.07179414,  0.04516432,  0.02160726],
            [ 0.24806211, -0.42947814,  0.02210191]])
 
     Compute the Sampson distance:
 
-    >>> tform_matrix.residuals(src, dst)
+    >>> tform.residuals(src, dst)
     array([0.0053886 , 0.00526101, 0.08689701, 0.01850534, 0.09418259,
            0.00185967, 0.06160489, 0.02655136])
 
     Apply inverse transformation:
 
-    >>> tform_matrix.inverse(dst)
+    >>> tform.inverse(dst)
     array([[-0.0513591 ,  0.04170974,  0.01213043],
            [-0.21599496,  0.29193419,  0.00978184],
            [-0.0079222 ,  0.03758889, -0.00915389],
@@ -305,23 +470,32 @@ class FundamentalMatrixTransform(_GeometricTransform):
            [ 0.01339569, -0.03388123,  0.00497605],
            [ 0.03420927, -0.1135812 ,  0.02228236]])
 
-    """
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
 
-    def __init__(self, matrix=None, *, dimensionality=2):
-        if matrix is None:
-            # default to an identity transform
-            matrix = np.eye(dimensionality + 1)
-        else:
-            matrix = np.asarray(matrix)
-            dimensionality = matrix.shape[0] - 1
-            if matrix.shape != (dimensionality + 1, dimensionality + 1):
-                raise ValueError("Invalid shape of transformation matrix")
-        self.params = matrix
-        if dimensionality != 2:
-            raise NotImplementedError(
-                f'{self.__class__} is only implemented for 2D coordinates '
-                '(i.e. 3D transformation matrices).'
-            )
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
+    """
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -337,9 +511,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
             Epipolar lines in the destination image.
 
         """
-        coords = np.asarray(coords)
-        coords_homogeneous = np.column_stack([coords, np.ones(coords.shape[0])])
-        return coords_homogeneous @ self.params.T
+        return _append_homogeneous_dim(coords) @ self.params.T
 
     @property
     def inverse(self):
@@ -347,6 +519,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
         See Hartley & Zisserman, Ch. 8: Epipolar Geometry and the Fundamental
         Matrix, for an explanation of why F.T gives the inverse.
+
         """
         return type(self)(matrix=self.params.T)
 
@@ -383,10 +556,9 @@ class FundamentalMatrixTransform(_GeometricTransform):
             raise ValueError('src.shape[0] must be equal or larger than 8.')
 
         # Center and normalize image points for better numerical stability.
-        try:
-            src_matrix, src = _center_and_normalize_points(src)
-            dst_matrix, dst = _center_and_normalize_points(dst)
-        except ZeroDivisionError:
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+        if np.any(np.isnan(src_matrix + dst_matrix)):
             self.params = np.full((3, 3), np.nan)
             return 3 * [np.full((3, 3), np.nan)]
 
@@ -404,6 +576,86 @@ class FundamentalMatrixTransform(_GeometricTransform):
 
         return F_normalized, src_matrix, dst_matrix
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate fundamental matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = FundamentalMatrixTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
+        """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
+        F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(F_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
+
+        # Enforcing the internal constraint that two singular values must be
+        # non-zero and one must be zero.
+        U, S, V = np.linalg.svd(F_normalized)
+        S[2] = 0
+        F = U @ np.diag(S) @ V
+
+        self.params = dst_matrix.T @ F @ src_matrix
+
+        return None
+
+    def residuals(self, src, dst):
+        """Compute the Sampson distance.
+
+        The Sampson distance is the first approximation to the geometric error.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        residuals : (N,) array
+            Sampson distance.
+
+        """
+        src_homogeneous = _append_homogeneous_dim(src)
+        dst_homogeneous = _append_homogeneous_dim(dst)
+
+        F_src = self.params @ src_homogeneous.T
+        Ft_dst = self.params.T @ dst_homogeneous.T
+
+        dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
+
+        return np.abs(dst_F_src) / np.sqrt(
+            F_src[0] ** 2 + F_src[1] ** 2 + Ft_dst[0] ** 2 + Ft_dst[1] ** 2
+        )
+
+    @_deprecate_estimate
     def estimate(self, src, dst):
         """Estimate fundamental matrix using 8-point algorithm.
 
@@ -424,48 +676,7 @@ class FundamentalMatrixTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-
-        F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
-
-        # Enforcing the internal constraint that two singular values must be
-        # non-zero and one must be zero.
-        U, S, V = np.linalg.svd(F_normalized)
-        S[2] = 0
-        F = U @ np.diag(S) @ V
-
-        self.params = dst_matrix.T @ F @ src_matrix
-
-        return True
-
-    def residuals(self, src, dst):
-        """Compute the Sampson distance.
-
-        The Sampson distance is the first approximation to the geometric error.
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        residuals : (N,) array
-            Sampson distance.
-
-        """
-        src_homogeneous = np.column_stack([src, np.ones(src.shape[0])])
-        dst_homogeneous = np.column_stack([dst, np.ones(dst.shape[0])])
-
-        F_src = self.params @ src_homogeneous.T
-        Ft_dst = self.params.T @ dst_homogeneous.T
-
-        dst_F_src = np.sum(dst_homogeneous * F_src.T, axis=1)
-
-        return np.abs(dst_F_src) / np.sqrt(
-            F_src[0] ** 2 + F_src[1] ** 2 + Ft_dst[0] ** 2 + Ft_dst[1] ** 2
-        )
+        return self._estimate(src, dst) is None
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
@@ -496,6 +707,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         have unit length.
     matrix : (3, 3) array_like, optional
         Essential matrix.
+    dimensionality : int, optional
+        Fallback number of dimensions when `matrix` not specified, in which
+        case, must equal 2 (the default).
 
     Attributes
     ----------
@@ -507,10 +721,10 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     >>> import numpy as np
     >>> import skimage as ski
     >>>
-    >>> tform_matrix = ski.transform.EssentialMatrixTransform(
+    >>> tform = ski.transform.EssentialMatrixTransform(
     ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
     ... )
-    >>> tform_matrix.params
+    >>> tform.params
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
            [ 0.,  0.,  0.]])
@@ -530,55 +744,131 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [1.779735, 1.116857],
     ...                 [0.878616, 0.602447],
     ...                 [0.642616, 1.028681]])
-    >>> tform_matrix.estimate(src, dst)
-    True
-    >>> tform_matrix.residuals(src, dst)
+    >>> tform = ski.transform.EssentialMatrixTransform.from_estimate(src, dst)
+    >>> tform.residuals(src, dst)
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.EssentialMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
-    def __init__(
-        self, rotation=None, translation=None, matrix=None, *, dimensionality=2
-    ):
-        super().__init__(matrix=matrix, dimensionality=dimensionality)
-        if rotation is not None:
-            rotation = np.asarray(rotation)
-            if translation is None:
-                raise ValueError("Both rotation and translation required")
-            translation = np.asarray(translation)
-            if rotation.shape != (3, 3):
-                raise ValueError("Invalid shape of rotation matrix")
-            if abs(np.linalg.det(rotation) - 1) > 1e-6:
-                raise ValueError("Rotation matrix must have unit determinant")
-            if translation.size != 3:
-                raise ValueError("Invalid shape of translation vector")
-            if abs(np.linalg.norm(translation) - 1) > 1e-6:
-                raise ValueError("Translation vector must have unit length")
-            # Matrix representation of the cross product for t.
-            t_x = np.array(
-                [
-                    0,
-                    -translation[2],
-                    translation[1],
-                    translation[2],
-                    0,
-                    -translation[0],
-                    -translation[1],
-                    translation[0],
-                    0,
-                ]
-            ).reshape(3, 3)
-            self.params = t_x @ rotation
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.shape != (3, 3):
-                raise ValueError("Invalid shape of transformation matrix")
-            self.params = matrix
-        else:
-            # default to an identity transform
-            self.params = np.eye(3)
+    # Threshold for determinant of rotation matrix.
+    _rot_det_tol = 1e-6
 
+    # Threshold for difference of translation vector from unit length.
+    _trans_len_tol = 1e-6
+
+    def __init__(
+        self, *, rotation=None, translation=None, matrix=None, dimensionality=None
+    ):
+        n_rt_none = sum(p is None for p in (rotation, translation))
+        if n_rt_none == 1:
+            raise ValueError(
+                "Both rotation and translation required when one is specified."
+            )
+        elif n_rt_none == 0:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify rotation or translation when "
+                    "matrix is specified."
+                )
+            matrix = self._rt2matrix(rotation, translation)
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
+
+    def _rt2matrix(self, rotation, translation):
+        rotation = np.asarray(rotation)
+        translation = np.asarray(translation)
+        if rotation.shape != (3, 3):
+            raise ValueError("Invalid shape of rotation matrix")
+        if abs(np.linalg.det(rotation) - 1) > self._rot_det_tol:
+            raise ValueError("Rotation matrix must have unit determinant")
+        if translation.size != 3:
+            raise ValueError("Invalid shape of translation vector")
+        if abs(np.linalg.norm(translation) - 1) > self._trans_len_tol:
+            raise ValueError("Translation vector must have unit length")
+        # Matrix representation of the cross product for t.
+        t0, t1, t2 = translation
+        t_arr = np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]], dtype=float)
+        return t_arr @ rotation
+
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate essential matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = EssentialMatrixTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
+
+        """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
+        E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(E_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
+
+        # Enforcing the internal constraint that two singular values must be
+        # equal and one must be zero.
+        U, S, V = np.linalg.svd(E_normalized)
+        S[0] = (S[0] + S[1]) / 2.0
+        S[1] = S[0]
+        S[2] = 0
+        E = U @ np.diag(S) @ V
+
+        self.params = dst_matrix.T @ E @ src_matrix
+
+        return None
+
+    @_deprecate_estimate
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
 
@@ -599,23 +889,10 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
             True, if model estimation succeeds.
 
         """
-
-        E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
-
-        # Enforcing the internal constraint that two singular values must be
-        # equal and one must be zero.
-        U, S, V = np.linalg.svd(E_normalized)
-        S[0] = (S[0] + S[1]) / 2.0
-        S[1] = S[0]
-        S[2] = 0
-        E = U @ np.diag(S) @ V
-
-        self.params = dst_matrix.T @ E @ src_matrix
-
-        return True
+        return self._estimate(src, dst) is None
 
 
-class ProjectiveTransform(_GeometricTransform):
+class ProjectiveTransform(_HMatrixTransform):
     r"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -645,53 +922,90 @@ class ProjectiveTransform(_GeometricTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     dimensionality : int, optional
-        The number of dimensions of the transform. This is ignored if
-        ``matrix`` is not None.
+        Fallback number of dimensions when `matrix` not specified.
 
     Attributes
     ----------
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.ProjectiveTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.ProjectiveTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ -16.56,    5.82,  895.81],
+    ...                            [ -10.31,   -8.29, 2075.43],
+    ...                            [  -0.05,    0.02,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.ProjectiveTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
-    def __init__(self, matrix=None, *, dimensionality=2):
-        if matrix is None:
-            # default to an identity transform
-            matrix = np.eye(dimensionality + 1)
-        else:
-            matrix = np.asarray(matrix)
-            dimensionality = matrix.shape[0] - 1
-            if matrix.shape != (dimensionality + 1, dimensionality + 1):
-                raise ValueError("invalid shape of transformation matrix")
-        self.params = matrix
-        self._coeffs = range(matrix.size - 1)
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.params.size - 1)
+
+    def _check_dims(self, d):
+        if d >= 2:
+            return
+        raise NotImplementedError(
+            f'Input for {type(self)} should result in transform of >=2D'
+        )
 
     @property
     def _inv_matrix(self):
         return np.linalg.inv(self.params)
 
-    def _apply_mat(self, coords, matrix):
-        ndim = matrix.shape[0] - 1
-        coords = np.array(coords, copy=NP_COPY_IF_NEEDED, ndmin=2)
-
-        src = np.concatenate([coords, np.ones((coords.shape[0], 1))], axis=1)
-        dst = src @ matrix.T
-
-        # below, we will divide by the last dimension of the homogeneous
-        # coordinate matrix. In order to avoid division by zero,
-        # we replace exact zeros in this column with a very small number.
-        dst[dst[:, ndim] == 0, ndim] = np.finfo(float).eps
-        # rescale to homogeneous coordinates
-        dst[:, :ndim] /= dst[:, ndim : ndim + 1]
-
-        return dst[:, :ndim]
-
     def __array__(self, dtype=None, copy=None):
-        if dtype is None:
-            return self.params
-        else:
-            return self.params.astype(dtype)
+        return self.params if dtype is None else self.params.astype(dtype)
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -707,13 +1021,197 @@ class ProjectiveTransform(_GeometricTransform):
             Destination coordinates.
 
         """
-        return self._apply_mat(coords, self.params)
+        return _apply_homogeneous(self.params, coords)
 
     @property
     def inverse(self):
         """Return a transform object representing the inverse."""
         return type(self)(matrix=self._inv_matrix)
 
+    @classmethod
+    def from_estimate(cls, src, dst, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
+            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
+
+        These equations can be transformed to the following form::
+
+            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
+            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[x y 1 0 0 0 -x*X -y*X -X]
+                   [0 0 0 x y 1 -x*Y -y*Y -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        In case of the affine transformation the coefficients c0 and c1 are 0.
+        Thus the system of equations is::
+
+            A   = [[x y 1 0 0 0 -X]
+                   [0 0 0 x y 1 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c3]
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = ProjectiveTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        """
+        return super().from_estimate(src, dst, weights)
+
+    def _estimate(self, src, dst, weights=None):
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        n, d = src.shape
+        fail_matrix = np.full((d + 1, d + 1), np.nan)
+
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+        if not np.all(np.isfinite(src_matrix + dst_matrix)):
+            self.params = fail_matrix
+            return 'Scaling generated NaN values'
+
+        # params: a0, a1, a2, b0, b1, b2, c0, c1
+        A = np.zeros((n * d, (d + 1) ** 2))
+        # fill the A matrix with the appropriate block matrices; see docstring
+        # for 2D example — this can be generalised to more blocks in the 3D and
+        # higher-dimensional cases.
+        for ddim in range(d):
+            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) : ddim * (d + 1) + d] = src
+            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) + d] = 1
+            A[ddim * n : (ddim + 1) * n, -d - 1 : -1] = src
+            A[ddim * n : (ddim + 1) * n, -1] = -1
+            A[ddim * n : (ddim + 1) * n, -d - 1 :] *= -dst[:, ddim : (ddim + 1)]
+
+        # Select relevant columns, depending on params
+        A = A[:, list(self._coeff_inds) + [-1]]
+
+        # Get the vectors that correspond to singular values, also applying
+        # the weighting if provided
+        if weights is None:
+            _, _, V = np.linalg.svd(A)
+        else:
+            weights = np.asarray(weights)
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
+            _, _, V = np.linalg.svd(W @ A)
+
+        H = np.zeros((d + 1, d + 1))
+        # Solution is right singular vector that corresponds to smallest
+        # singular value.
+        if np.isclose(V[-1, -1], 0):
+            self.params = fail_matrix
+            return 'Right singular vector has 0 final element'
+
+        H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
+        H[d, d] = 1
+
+        # De-center and de-normalize
+        H = np.linalg.inv(dst_matrix) @ H @ src_matrix
+
+        # Small errors can creep in if points are not exact, causing the last
+        # element of H to deviate from unity. Correct for that here.
+        H /= H[-1, -1]
+
+        self.params = H
+
+        return None
+
+    def __add__(self, other):
+        """Combine this transformation with another."""
+        if isinstance(other, ProjectiveTransform):
+            # combination of the same types result in a transformation of this
+            # type again, otherwise use general projective transformation
+            if type(self) == type(other):
+                tform = self.__class__
+            else:
+                tform = ProjectiveTransform
+            return tform(other.params @ self.params)
+        else:
+            raise TypeError("Cannot combine transformations of differing " "types.")
+
+    def __nice__(self):
+        """common 'paramstr' used by __str__ and __repr__"""
+        if not hasattr(self, 'params'):
+            return '<not yet initialized>'
+        npstring = np.array2string(self.params, separator=', ')
+        return 'matrix=\n' + textwrap.indent(npstring, '    ')
+
+    def __repr__(self):
+        """Add standard repr formatting around a __nice__ string"""
+        return f'<{type(self).__name__}({self.__nice__()}) at {hex(id(self))}>'
+
+    def __str__(self):
+        """Add standard str formatting around a __nice__ string"""
+        return f'<{type(self).__name__}({self.__nice__()})>'
+
+    @property
+    def dimensionality(self):
+        """The dimensionality of the transformation."""
+        return self.params.shape[0] - 1
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, int}, optional
+            Dimensionality of identity transform.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return super().identity(dimensionality=dimensionality)
+
+    @_deprecate_estimate
     def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
@@ -779,104 +1277,11 @@ class ProjectiveTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        src = np.asarray(src)
-        dst = np.asarray(dst)
-        n, d = src.shape
-
-        src_matrix, src = _center_and_normalize_points(src)
-        dst_matrix, dst = _center_and_normalize_points(dst)
-        if not np.all(np.isfinite(src_matrix + dst_matrix)):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
-
-        # params: a0, a1, a2, b0, b1, b2, c0, c1
-        A = np.zeros((n * d, (d + 1) ** 2))
-        # fill the A matrix with the appropriate block matrices; see docstring
-        # for 2D example — this can be generalised to more blocks in the 3D and
-        # higher-dimensional cases.
-        for ddim in range(d):
-            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) : ddim * (d + 1) + d] = src
-            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) + d] = 1
-            A[ddim * n : (ddim + 1) * n, -d - 1 : -1] = src
-            A[ddim * n : (ddim + 1) * n, -1] = -1
-            A[ddim * n : (ddim + 1) * n, -d - 1 :] *= -dst[:, ddim : (ddim + 1)]
-
-        # Select relevant columns, depending on params
-        A = A[:, list(self._coeffs) + [-1]]
-
-        # Get the vectors that correspond to singular values, also applying
-        # the weighting if provided
-        if weights is None:
-            _, _, V = np.linalg.svd(A)
-        else:
-            weights = np.asarray(weights)
-            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
-            _, _, V = np.linalg.svd(W @ A)
-
-        # if the last element of the vector corresponding to the smallest
-        # singular value is close to zero, this implies a degenerate case
-        # because it is a rank-defective transform, which would map points
-        # to a line rather than a plane.
-        if np.isclose(V[-1, -1], 0):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
-
-        H = np.zeros((d + 1, d + 1))
-        # solution is right singular vector that corresponds to smallest
-        # singular value
-        H.flat[list(self._coeffs) + [-1]] = -V[-1, :-1] / V[-1, -1]
-        H[d, d] = 1
-
-        # De-center and de-normalize
-        H = np.linalg.inv(dst_matrix) @ H @ src_matrix
-
-        # Small errors can creep in if points are not exact, causing the last
-        # element of H to deviate from unity. Correct for that here.
-        H /= H[-1, -1]
-
-        self.params = H
-
-        return True
-
-    def __add__(self, other):
-        """Combine this transformation with another."""
-        if isinstance(other, ProjectiveTransform):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise use general projective transformation
-            if type(self) == type(other):
-                tform = self.__class__
-            else:
-                tform = ProjectiveTransform
-            return tform(other.params @ self.params)
-        else:
-            raise TypeError("Cannot combine transformations of differing " "types.")
-
-    def __nice__(self):
-        """common 'paramstr' used by __str__ and __repr__"""
-        npstring = np.array2string(self.params, separator=', ')
-        paramstr = 'matrix=\n' + textwrap.indent(npstring, '    ')
-        return paramstr
-
-    def __repr__(self):
-        """Add standard repr formatting around a __nice__ string"""
-        paramstr = self.__nice__()
-        classname = self.__class__.__name__
-        classstr = classname
-        return f'<{classstr}({paramstr}) at {hex(id(self))}>'
-
-    def __str__(self):
-        """Add standard str formatting around a __nice__ string"""
-        paramstr = self.__nice__()
-        classname = self.__class__.__name__
-        classstr = classname
-        return f'<{classstr}({paramstr})>'
-
-    @property
-    def dimensionality(self):
-        """The dimensionality of the transformation."""
-        return self.params.shape[0] - 1
+        return self._estimate(src, dst, weights) is None
 
 
+@_update_from_estimate_docstring
+@_deprecate_inherited_estimate
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
 
@@ -928,18 +1333,20 @@ class AffineTransform(ProjectiveTransform):
 
         .. versionadded:: 0.17
            Added support for supplying a single scalar value.
-    rotation : float, optional
-        Rotation angle, clockwise, as radians. Only available for 2D.
     shear : float or 2-tuple of float, optional
         The x and y shear angles, clockwise, by which these axes are
         rotated around the origin [2].
         If a single value is given, take that to be the x shear angle, with
         the y angle remaining 0. Only available in 2D.
+    rotation : float, optional
+        Rotation angle, clockwise, as radians. Only available for 2D.
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters. Only available for 2D.
     dimensionality : int, optional
-        The dimensionality of the transform. This is not used if any other
-        parameters are provided.
+        Fallback number of dimensions for transform when none of `matrix`,
+        `scale`, `rotation`, `shear` or `translation` are specified.  If any of
+        `scale`, `rotation`, `shear` or `translation` are specified, must equal
+        2 (the default).
 
     Attributes
     ----------
@@ -955,9 +1362,25 @@ class AffineTransform(ProjectiveTransform):
     --------
     >>> import numpy as np
     >>> import skimage as ski
-    >>> img = ski.data.astronaut()
 
-    Define source and destination points:
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.AffineTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.AffineTransform(scale=4, rotation=0.2)
+    >>> np.round(tform.params, 2)
+    array([[ 3.92, -0.79,  0.  ],
+           [ 0.79,  3.92,  0.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
 
     >>> src = np.array([[150, 150],
     ...                 [250, 100],
@@ -965,16 +1388,41 @@ class AffineTransform(ProjectiveTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-
-    Estimate the transformation matrix:
-
-    >>> tform = ski.transform.AffineTransform()
-    >>> tform.estimate(src, dst)
+    >>> tform = ski.transform.AffineTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[   0.5,   -1. ,  275. ],
+    ...                            [   1.5,    4. , -625. ],
+    ...                            [   0. ,    0. ,    1. ]])
     True
 
-    Apply the transformation:
+    Apply the transformation to some image data.
 
+    >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.AffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
 
     References
     ----------
@@ -987,76 +1435,60 @@ class AffineTransform(ProjectiveTransform):
     def __init__(
         self,
         matrix=None,
-        scale=None,
-        rotation=None,
-        shear=None,
-        translation=None,
         *,
-        dimensionality=2,
+        scale=None,
+        shear=None,
+        rotation=None,
+        translation=None,
+        dimensionality=None,
     ):
-        params = any(
-            param is not None for param in (scale, rotation, shear, translation)
-        )
+        n_srst_none = sum(p is None for p in (scale, rotation, shear, translation))
+        if n_srst_none != 4:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            if dimensionality is not None and dimensionality > 2:
+                raise ValueError('Implicit parameters only valid for 2D transforms')
+            # 2D parameter checks explicit or implicit in _srst2matrix.
+            matrix = self._srst2matrix(scale, rotation, shear, translation)
+            if matrix.shape[0] != 3:
+                raise ValueError('Implicit parameters must give 2D transforms')
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-        # these parameters get overwritten if a higher-D matrix is given
-        self._coeffs = range(dimensionality * (dimensionality + 1))
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.dimensionality * (self.dimensionality + 1))
 
-        if params and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
-            )
-        if params and dimensionality > 2:
-            raise ValueError('Parameter input is only supported in 2D.')
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
-            else:
-                dimensionality = matrix.shape[0] - 1
-                nparam = dimensionality * (dimensionality + 1)
-            self._coeffs = range(nparam)
-            self.params = matrix
-        elif params:  # note: 2D only
-            if scale is None:
-                scale = (1, 1)
-            if rotation is None:
-                rotation = 0
-            if shear is None:
-                shear = 0
-            if translation is None:
-                translation = (0, 0)
+    def _srst2matrix(self, scale, rotation, shear, translation):
+        scale = (1, 1) if scale is None else scale
+        sx, sy = (scale, scale) if np.isscalar(scale) else scale
+        rotation = 0 if rotation is None else rotation
+        if not np.isscalar(rotation):
+            raise ValueError('rotation must be scalar (2D rotation)')
+        shear = 0 if shear is None else shear
+        shear_x, shear_y = (shear, 0) if np.isscalar(shear) else shear
+        translation = (0, 0) if translation is None else translation
+        if np.isscalar(translation):
+            raise ValueError('translation must be length 2')
+        a2, b2 = translation
 
-            if np.isscalar(scale):
-                sx = sy = scale
-            else:
-                sx, sy = scale
+        a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
+        a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
 
-            if np.isscalar(shear):
-                shear_x, shear_y = (shear, 0)
-            else:
-                shear_x, shear_y = shear
-
-            a0 = sx * (math.cos(rotation) + math.tan(shear_y) * math.sin(rotation))
-            a1 = -sy * (math.tan(shear_x) * math.cos(rotation) + math.sin(rotation))
-            a2 = translation[0]
-
-            b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
-            b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
-            b2 = translation[1]
-            self.params = np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
-        else:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
+        b0 = sx * (math.sin(rotation) - math.tan(shear_y) * math.cos(rotation))
+        b1 = -sy * (math.tan(shear_x) * math.sin(rotation) - math.cos(rotation))
+        return np.array([[a0, a1, a2], [b0, b1, b2], [0, 0, 1]])
 
     @property
     def scale(self):
         if self.dimensionality != 2:
             return np.sqrt(np.sum(self.params**2, axis=0))[: self.dimensionality]
-        else:
-            ss = np.sum(self.params**2, axis=0)
-            ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
-            return np.sqrt(ss)[: self.dimensionality]
+        ss = np.sum(self.params**2, axis=0)
+        ss[1] = ss[1] / (math.tan(self.shear) ** 2 + 1)
+        return np.sqrt(ss)[: self.dimensionality]
 
     @property
     def rotation(self):
@@ -1094,6 +1526,65 @@ class PiecewiseAffineTransform(_GeometricTransform):
     inverse_affines : list of AffineTransform objects
         Inverse affine transformations for each triangle in the mesh.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PiecewiseAffineTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> np.allclose(tform(src), dst)
+    True
+
+    You can apply the inverse transform:
+
+    >>> np.allclose(tform.inverse(dst), src)
+    True
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = [[1, 1]] * 6 + src[6:]
+    >>> bad_tform = ski.transform.PiecewiseAffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     def __init__(self):
@@ -1102,7 +1593,8 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self.affines = None
         self.inverse_affines = None
 
-    def estimate(self, src, dst):
+    @classmethod
+    def from_estimate(cls, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
         Number of source and destination coordinates must match.
@@ -1116,25 +1608,40 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Returns
         -------
-        success : bool
-            True, if all pieces of the model are successfully estimated.
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PiecewiseAffineTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
         src = np.asarray(src)
         dst = np.asarray(dst)
+        N, D = src.shape
 
-        ndim = src.shape[1]
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
 
-        success = True
+        fail_matrix = np.full((D + 1, D + 1), np.nan)
 
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self._tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(src[tri, :], dst[tri, :])
+        messages = []
+        for i, tri in enumerate(self._tesselation.simplices):
+            affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
+            if not affine:
+                messages.append(f'Failure at forward simplex {i}: {affine}')
+                affine = AffineTransform(fail_matrix.copy())
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -1142,12 +1649,14 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
         self.inverse_affines = []
-        for tri in self._inverse_tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(dst[tri, :], src[tri, :])
+        for i, tri in enumerate(self._inverse_tesselation.simplices):
+            affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
+            if not affine:
+                messages.append(f'Failure at inverse simplex {i}: {affine}')
+                affine = AffineTransform(fail_matrix.copy())
             self.inverse_affines.append(affine)
 
-        return success
+        return '; '.join(messages) if messages else None
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -1188,11 +1697,51 @@ class PiecewiseAffineTransform(_GeometricTransform):
     def inverse(self):
         """Return a transform object representing the inverse."""
         tform = type(self)()
-        tform._tesselation = self._inverse_tesselation
-        tform._inverse_tesselation = self._tesselation
-        tform.affines = self.inverse_affines
-        tform.inverse_affines = self.affines
+        # Copy parameters (None or list) for safety.
+        tform._tesselation = copy(self._inverse_tesselation)
+        tform._inverse_tesselation = copy(self._tesselation)
+        tform.affines = copy(self.inverse_affines)
+        tform.inverse_affines = copy(self.affines)
         return tform
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : optional
+            This transform does not use the `dimensionality` parameter, so the
+            value is ignored.  The parameter exists for compatibility with
+            other transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return cls()
+
+    @_deprecate_estimate
+    def estimate(self, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, D) array_like
+            Source coordinates.
+        dst : (N, D) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if all pieces of the model are successfully estimated.
+
+        """
+        return self._estimate(src, dst) is None
 
 
 def _euler_rotation_matrix(angles, degrees=False):
@@ -1210,6 +1759,7 @@ def _euler_rotation_matrix(angles, degrees=False):
     -------
     R : array of float, shape (3, 3)
         The Euler rotation matrix.
+
     """
     return spatial.transform.Rotation.from_euler(
         'XYZ', angles=angles, degrees=degrees
@@ -1244,85 +1794,214 @@ class EuclideanTransform(ProjectiveTransform):
     transformation is only a translation, you may use the implicit parameter
     `translation`; otherwise, you must use `matrix`.
 
+    The implicit parameters are applied in the following order:
+
+    1. Rotation;
+    2. Translation.
+
     Parameters
     ----------
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle, clockwise, as radians. If given as
-        a vector, it is interpreted as Euler rotation angles [1]_. Only 2D
-        (single rotation) and 3D (Euler rotations) values are supported. For
-        higher dimensions, you must provide or estimate the transformation
-        matrix.
+        Rotation angle, clockwise, in radians. If given as a vector, it is
+        interpreted as Euler rotation angles [1]_. Only 2D (single rotation)
+        and 3D (Euler rotations) values are supported. For higher dimensions,
+        you must provide or estimate the transformation matrix instead, and
+        pass that as `matrix` above.
     translation : (x, y[, z, ...]) sequence of float, length D, optional
         Translation parameters for each axis.
     dimensionality : int, optional
-        The dimensionality of the transform.
+        Fallback number of dimensions for transform when no other parameter
+        is specified.  Otherwise ignored, and we infer dimensionality from the
+        input parameters.
 
     Attributes
     ----------
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.EuclideanTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.EuclideanTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.EuclideanTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 0.99, 0.12,  16.77],
+    ...                            [-0.12, 0.99, 122.91],
+    ...                            [ 0.  , 0.  ,   1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.EuclideanTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+
     """
 
+    # Whether to estimate scale during estimation.
+    _estimate_scale = False
+
     def __init__(
-        self, matrix=None, rotation=None, translation=None, *, dimensionality=2
+        self, matrix=None, *, rotation=None, translation=None, dimensionality=None
     ):
-        params_given = rotation is not None or translation is not None
+        n_rt_none = sum(p is None for p in (rotation, translation))
+        if n_rt_none != 2:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
+            if chk_msg is not None:
+                raise ValueError(chk_msg)
+            matrix = self._rt2matrix(rotation, translation, n_dims)
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-        if params_given and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
+    def _rt2ndims_msg(self, rotation, translation):
+        if rotation is not None:
+            N = 1 if np.isscalar(rotation) else len(rotation)
+            msg = (
+                '``rotations`` must be scalar (3D) or length 3 (3D)'
+                if N not in (1, 3)
+                else None
             )
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
-            self.params = matrix
-        elif params_given:
-            if rotation is None:
-                dimensionality = len(translation)
-                if dimensionality == 2:
-                    rotation = 0
-                elif dimensionality == 3:
-                    rotation = np.zeros(3)
-                else:
-                    raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
-                    )
-            else:
-                if not np.isscalar(rotation) and len(rotation) != 3:
-                    raise ValueError(
-                        'Parameters cannot be specified for dimension '
-                        f'{dimensionality} transforms'
-                    )
-            if translation is None:
-                translation = (0,) * dimensionality
+            return 2 if N == 1 else N, msg
+        if translation is not None:
+            return (2 if np.isscalar(translation) else len(translation), None)
+        return None, None
 
-            if dimensionality == 2:
-                self.params = np.array(
-                    [
-                        [math.cos(rotation), -math.sin(rotation), 0],
-                        [math.sin(rotation), math.cos(rotation), 0],
-                        [0, 0, 1],
-                    ]
-                )
-            elif dimensionality == 3:
-                self.params = np.eye(dimensionality + 1)
-                self.params[:dimensionality, :dimensionality] = _euler_rotation_matrix(
-                    rotation
-                )
-            self.params[0:dimensionality, dimensionality] = translation
+    def _rt2matrix(self, rotation, translation, n_dims):
+        if translation is None:
+            translation = (0,) * n_dims
+        if rotation is None:
+            rotation = 0 if n_dims == 2 else np.zeros(3)
+        matrix = np.eye(n_dims + 1)
+        if n_dims == 2:
+            cos_r, sin_r = math.cos(rotation), math.sin(rotation)
+            matrix[:2, :2] = [[cos_r, -sin_r], [sin_r, cos_r]]
+        elif n_dims == 3:
+            matrix[:3, :3] = _euler_rotation_matrix(rotation)
+        matrix[0:n_dims, n_dims] = translation
+        return matrix
+
+    @classmethod
+    def from_estimate(cls, src, dst) -> Self | FailedEstimation:
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = EuclideanTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        """
+        # Use base implementation to avoid weights argument of
+        # ProjectiveTransform ancestor class.
+        return _from_estimate(cls, src, dst)
+
+    def _estimate(self, src, dst):
+        self.params = _umeyama(src, dst, self._estimate_scale)
+
+        # _umeyama will return nan if the problem is not well-conditioned.
+        return (
+            'Poor conditioning for estimation'
+            if np.any(np.isnan(self.params))
+            else None
+        )
+
+    @property
+    def rotation(self):
+        if self.dimensionality == 2:
+            return math.atan2(self.params[1, 0], self.params[1, 1])
+        elif self.dimensionality == 3:
+            # Returning 3D Euler rotation matrix
+            return self.params[:3, :3]
         else:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
+            raise NotImplementedError(
+                'Rotation only implemented for 2D and 3D transforms.'
+            )
 
+    @property
+    def translation(self):
+        return self.params[0 : self.dimensionality, self.dimensionality]
+
+    @_deprecate_estimate
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
@@ -1344,28 +2023,11 @@ class EuclideanTransform(ProjectiveTransform):
             True, if model estimation succeeds.
 
         """
-        self.params = _umeyama(src, dst, False)
-
-        # _umeyama will return nan if the problem is not well-conditioned.
-        return not np.any(np.isnan(self.params))
-
-    @property
-    def rotation(self):
-        if self.dimensionality == 2:
-            return math.atan2(self.params[1, 0], self.params[1, 1])
-        elif self.dimensionality == 3:
-            # Returning 3D Euler rotation matrix
-            return self.params[:3, :3]
-        else:
-            raise NotImplementedError(
-                'Rotation only implemented for 2D and 3D transforms.'
-            )
-
-    @property
-    def translation(self):
-        return self.params[0 : self.dimensionality, self.dimensionality]
+        return self._estimate(src, dst) is None
 
 
+@_update_from_estimate_docstring
+@_deprecate_inherited_estimate
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
@@ -1387,6 +2049,12 @@ class SimilarityTransform(EuclideanTransform):
     single scaling factor in addition to the rotation and translation
     parameters.
 
+    The implicit parameters are applied in the following order:
+
+    1. Scale;
+    2. Rotation;
+    3. Translation.
+
     Parameters
     ----------
     matrix : (dim+1, dim+1) array_like, optional
@@ -1399,89 +2067,139 @@ class SimilarityTransform(EuclideanTransform):
         angles.
     translation : (dim,) array_like, optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
+    dimensionality : int, optional
+        The dimensionality of the transform, corresponding to ``dim`` above.
+        Ignored if `matrix` is not None, and set to ``matrix.shape[0] - 1``.
+        Otherwise, must be one of 2 or 3.
 
     Attributes
     ----------
     params : (dim+1, dim+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.SimilarityTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.SimilarityTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.SimilarityTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 1.79, 0.21, -142.86],
+    ...                            [-0.21, 1.79,   21.43],
+    ...                            [ 0.  , 0.  ,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.SimilarityTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
+
+    # Whether to estimate scale during estimation.
+    _estimate_scale = True
 
     def __init__(
         self,
         matrix=None,
+        *,
         scale=None,
         rotation=None,
         translation=None,
-        *,
-        dimensionality=2,
+        dimensionality=None,
     ):
-        self.params = None
-        params = any(param is not None for param in (scale, rotation, translation))
-
-        if params and matrix is not None:
-            raise ValueError(
-                "You cannot specify the transformation matrix and"
-                " the implicit parameters at the same time."
-            )
-        elif matrix is not None:
-            matrix = np.asarray(matrix)
-            if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
-                raise ValueError("Invalid shape of transformation matrix.")
+        n_srt_none = sum(p is None for p in (scale, rotation, translation))
+        if n_srt_none != 3:
+            if matrix is not None:
+                raise ValueError(
+                    "Do not specify any implicit parameters when "
+                    "matrix is specified."
+                )
+            self._check_scale(scale, (rotation, translation), dimensionality)
+            # Scale is special.  Scalar scale does not tell us the dimensions.
+            if scale is not None and not np.isscalar(scale):
+                n_dims, chk_msg = len(scale), None
             else:
-                self.params = matrix
-                dimensionality = matrix.shape[0] - 1
-        if params:
-            if dimensionality not in (2, 3):
-                raise ValueError('Parameters only supported for 2D and 3D.')
-            matrix = np.eye(dimensionality + 1, dtype=float)
-            if scale is None:
-                scale = 1
-            if rotation is None:
-                rotation = 0 if dimensionality == 2 else (0, 0, 0)
-            if translation is None:
-                translation = (0,) * dimensionality
-            if dimensionality == 2:
-                ax = (0, 1)
-                c, s = np.cos(rotation), np.sin(rotation)
-                matrix[ax, ax] = c
-                matrix[ax, ax[::-1]] = -s, s
-            else:  # 3D rotation
-                matrix[:3, :3] = _euler_rotation_matrix(rotation)
+                n_dims, chk_msg = self._rt2ndims_msg(rotation, translation)
+            if chk_msg is not None:
+                raise ValueError(chk_msg)
+            # n_dims can be None for scalar scale, other parameters are None.
+            n_dims = (
+                n_dims
+                if n_dims is not None
+                else dimensionality
+                if dimensionality is not None
+                else 2
+            )
+            matrix = self._rt2matrix(rotation, translation, n_dims)
+            if scale not in (None, 1):
+                matrix[:n_dims, :n_dims] *= scale
+        super().__init__(matrix=matrix, dimensionality=dimensionality)
 
-            matrix[:dimensionality, :dimensionality] *= scale
-            matrix[:dimensionality, dimensionality] = translation
-            self.params = matrix
-        elif self.params is None:
-            # default to an identity transform
-            self.params = np.eye(dimensionality + 1)
-
-    def estimate(self, src, dst):
-        """Estimate the transformation from a set of corresponding points.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array_like
-            Source coordinates.
-        dst : (N, 2) array_like
-            Destination coordinates.
-
-        Returns
-        -------
-        success : bool
-            True, if model estimation succeeds.
-
-        """
-
-        self.params = _umeyama(src, dst, estimate_scale=True)
-
-        # _umeyama will return nan if the problem is not well-conditioned.
-        return not np.any(np.isnan(self.params))
+    def _check_scale(self, scale, other_params, dimensionality):
+        """Check, warn for scalar scaling"""
+        if dimensionality in (None, 2) or scale is None or not np.isscalar(scale):
+            return
+        if all(p is None for p in other_params):
+            warnings.warn(
+                'In the future, it will be a ValueError to pass a '
+                'scalar `scale` value with a ``dimensionality`` '
+                '> 2\n,and without other implicit parameters '
+                'to indicate the dimensionality of the transform.\n'
+                'Please indicate dimensionality by passing a vector '
+                'of suitable length to `scale`.',
+                FutureWarning,
+                stacklevel=2,
+            )
 
     @property
     def scale(self):
@@ -1507,6 +2225,8 @@ class PolynomialTransform(_GeometricTransform):
     params : (2, N) array_like, optional
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
+    dimensionality : int, optional
+        Must have value 2 (the default) for polynomial transforms.
 
     Attributes
     ----------
@@ -1514,22 +2234,226 @@ class PolynomialTransform(_GeometricTransform):
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PolynomialTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> pts = tform(src)
+    >>> np.allclose(pts, [[   7.54,   12.27],
+    ...                   [   2.98, 5796.95],
+    ...                   [4870.44, 5766.59],
+    ...                   [4889.72,   -6.72],
+    ...                   [4515.62, 4617.5 ],
+    ...                   [1183.25, 3694.  ],
+    ...                   [3767.57,  800.53],
+    ...                   [ 998.02, 1881.97]], atol=0.01)
+    True
     """
 
-    def __init__(self, params=None, *, dimensionality=2):
-        if dimensionality != 2:
+    def __init__(self, params=None, *, dimensionality=None):
+        if dimensionality is None:
+            dimensionality = 2
+        elif dimensionality != 2:
             raise NotImplementedError(
                 'Polynomial transforms are only implemented for 2D.'
             )
-        if params is None:
-            # default to transformation which preserves original coordinates
-            params = np.array([[0, 1, 0], [0, 0, 1]])
-        else:
-            params = np.asarray(params)
-        if params.shape[0] != 2:
-            raise ValueError("invalid shape of transformation parameters")
-        self.params = params
+        self.params = np.array([[0, 1, 0], [0, 0, 1]] if params is None else params)
+        if self.params.shape == () or self.params.shape[0] != 2:
+            raise ValueError("Transformation parameters must be shape (2, N)")
 
+    @classmethod
+    def from_estimate(cls, src, dst, order=2, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+        These equations can be transformed to the following form::
+
+            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
+            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[1 x y x**2 x*y y**2 ... 0 ...             0 -X]
+                   [0 ...                 0 1 x y x**2 x*y y**2 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a00 a10 a11 a20 a21 a22 ... ann
+                   b00 b10 b11 b20 b21 b22 ... bnn c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        order : int, optional
+            Polynomial order (number of coefficients is order + 1).
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PolynomialTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        """
+        return super().from_estimate(src, dst, order, weights)
+
+    def _estimate(self, src, dst, order=2, weights=None):
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        # number of unknown polynomial coefficients
+        order = safe_as_int(order)
+        u = (order + 1) * (order + 2)
+
+        A = np.zeros((rows * 2, u + 1))
+        pidx = 0
+        for j in range(order + 1):
+            for i in range(j + 1):
+                A[:rows, pidx] = xs ** (j - i) * ys**i
+                A[rows:, pidx + u // 2] = xs ** (j - i) * ys**i
+                pidx += 1
+
+        A[:rows, -1] = xd
+        A[rows:, -1] = yd
+
+        # Get the vectors that correspond to singular values, also applying
+        # the weighting if provided
+        if weights is None:
+            _, _, V = np.linalg.svd(A)
+        else:
+            weights = np.asarray(weights)
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), 2))
+            _, _, V = np.linalg.svd(W @ A)
+
+        # solution is right singular vector that corresponds to smallest
+        # singular value
+        params = -V[-1, :-1] / V[-1, -1]
+
+        self.params = params.reshape((2, u // 2))
+
+        return None
+
+    def __call__(self, coords):
+        """Apply forward transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array_like
+            source coordinates
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+        coords = np.asarray(coords)
+        x = coords[:, 0]
+        y = coords[:, 1]
+        u = len(self.params.ravel())
+        # number of coefficients -> u = (order + 1) * (order + 2)
+        order = int((-3 + math.sqrt(9 - 4 * (2 - u))) / 2)
+        dst = np.zeros(coords.shape)
+
+        pidx = 0
+        for j in range(order + 1):
+            for i in range(j + 1):
+                dst[:, 0] += self.params[0, pidx] * x ** (j - i) * y**i
+                dst[:, 1] += self.params[1, pidx] * x ** (j - i) * y**i
+                pidx += 1
+
+        return dst
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, 2}, optional
+            This transform only allows dimensionality of 2, where None
+            corresponds to 2. The parameter exists for compatibility with other
+            transforms.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return cls(params=None, dimensionality=dimensionality)
+
+    @property
+    def inverse(self):
+        raise NotImplementedError(
+            'There is no explicit way to do the inverse polynomial '
+            'transformation. Instead, estimate the inverse transformation '
+            'parameters by exchanging source and destination coordinates,'
+            'then apply the forward transformation.'
+        )
+
+    @_deprecate_estimate
     def estimate(self, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
@@ -1588,85 +2512,7 @@ class PolynomialTransform(_GeometricTransform):
             True, if model estimation succeeds.
 
         """
-        src = np.asarray(src)
-        dst = np.asarray(dst)
-        xs = src[:, 0]
-        ys = src[:, 1]
-        xd = dst[:, 0]
-        yd = dst[:, 1]
-        rows = src.shape[0]
-
-        # number of unknown polynomial coefficients
-        order = safe_as_int(order)
-        u = (order + 1) * (order + 2)
-
-        A = np.zeros((rows * 2, u + 1))
-        pidx = 0
-        for j in range(order + 1):
-            for i in range(j + 1):
-                A[:rows, pidx] = xs ** (j - i) * ys**i
-                A[rows:, pidx + u // 2] = xs ** (j - i) * ys**i
-                pidx += 1
-
-        A[:rows, -1] = xd
-        A[rows:, -1] = yd
-
-        # Get the vectors that correspond to singular values, also applying
-        # the weighting if provided
-        if weights is None:
-            _, _, V = np.linalg.svd(A)
-        else:
-            weights = np.asarray(weights)
-            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), 2))
-            _, _, V = np.linalg.svd(W @ A)
-
-        # solution is right singular vector that corresponds to smallest
-        # singular value
-        params = -V[-1, :-1] / V[-1, -1]
-
-        self.params = params.reshape((2, u // 2))
-
-        return True
-
-    def __call__(self, coords):
-        """Apply forward transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array_like
-            source coordinates
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Transformed coordinates.
-
-        """
-        coords = np.asarray(coords)
-        x = coords[:, 0]
-        y = coords[:, 1]
-        u = len(self.params.ravel())
-        # number of coefficients -> u = (order + 1) * (order + 2)
-        order = int((-3 + math.sqrt(9 - 4 * (2 - u))) / 2)
-        dst = np.zeros(coords.shape)
-
-        pidx = 0
-        for j in range(order + 1):
-            for i in range(j + 1):
-                dst[:, 0] += self.params[0, pidx] * x ** (j - i) * y**i
-                dst[:, 1] += self.params[1, pidx] * x ** (j - i) * y**i
-                pidx += 1
-
-        return dst
-
-    @property
-    def inverse(self):
-        raise NotImplementedError(
-            'There is no explicit way to do the inverse polynomial '
-            'transformation. Instead, estimate the inverse transformation '
-            'parameters by exchanging source and destination coordinates,'
-            'then apply the forward transformation.'
-        )
+        return self._estimate(src, dst, order, weights) is None
 
 
 TRANSFORMS = {
@@ -1710,9 +2556,17 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tform : :class:`_GeometricTransform`
-        Transform object containing the transformation parameters and providing
-        access to forward and inverse transformation functions.
+    tf : :class:`_GeometricTransform` or ``FailedEstimation``
+        An instance of the requested transformation if the estimation
+        Otherwise, we return a special ``FailedEstimation`` object to signal a
+        failed estimation. Testing the truth value of the failed estimation
+        object will return ``False``. E.g.
+
+        .. code-block:: python
+
+            tf = estimate_transform(...)
+            if not tf:
+                raise RuntimeError(f"Failed estimation: {tf}")
 
     Examples
     --------
@@ -1742,15 +2596,37 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     >>> np.allclose(tform3(src), tform2(tform(src)))
     True
 
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((2, 2))
+    >>> bad_tform = ski.transform.estimate_transform('similarity',
+    ...                                              bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
     """
     ttype = ttype.lower()
     if ttype not in TRANSFORMS:
         raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
-    tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
-    tform.estimate(src, dst, *args, **kwargs)
-
-    return tform
+    return TRANSFORMS[ttype].from_estimate(src, dst, *args, **kwargs)
 
 
 def matrix_transform(coords, matrix):
