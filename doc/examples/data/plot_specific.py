@@ -35,7 +35,7 @@ plt.show()
 # =============
 
 
-fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+fig, axes = plt.subplots(ncols=2, figsize=(8, 4))
 ax = axes.ravel()
 
 vortex_images = ski.data.vortex()

@@ -15,10 +15,10 @@ The example below shows how to explore this dataset. This 3D image can be used
 to test the various functions of scikit-image.
 """
 
+import numpy as np
 import skimage as ski
 import plotly
 import plotly.express as px
-import numpy as np
 
 img = ski.data.cells3d()[20:]
 
