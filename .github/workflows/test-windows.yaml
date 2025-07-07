@@ -102,3 +102,4 @@ jobs:
           BUILD_TYPE: "windows tests"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
