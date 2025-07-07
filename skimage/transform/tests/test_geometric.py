@@ -541,8 +541,8 @@ def _calc_distances(src, dst, F, metric='distance'):
 
     Notes
     -----
-    See [Wikipedia on point-line
-    distance](https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof)
+    See `Wikipedia on point-line distance
+    <https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof>`_
     for standard distance formula, and various proofs.
 
     References
