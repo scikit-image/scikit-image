@@ -2,12 +2,19 @@ from copy import copy
 import math
 import textwrap
 from abc import ABC, abstractmethod
+from typing import Self
 import warnings
 
 import numpy as np
 from scipy import spatial
 
-from .._shared.utils import safe_as_int
+from .._shared.utils import (
+    safe_as_int,
+    _deprecate_estimate,
+    _update_from_estimate_docstring,
+    _deprecate_inherited_estimate,
+    FailedEstimation,
+)
 from .._shared.compat import NP_COPY_IF_NEEDED
 
 
@@ -217,7 +224,10 @@ def _umeyama(src, dst, estimate_scale):
     U, S, V = np.linalg.svd(A)
 
     # Eq. (40) and (43).
-    rank = np.linalg.matrix_rank(A)
+    # Matrix rank calculation from SVD (see numpy.linalg._linalg::matrix_rank code).
+    # (this does SVD to check for small singular values, replicated here).
+    tol = S.max() * np.max(A.shape) * np.finfo(float).eps
+    rank = np.count_nonzero(S > tol)
     if rank == 0:
         return np.nan * T
     elif rank == dim - 1:
@@ -305,6 +315,51 @@ class _GeometricTransform(ABC):
         tform : transform
             Transform such that ``np.all(tform(pts) == pts)``.
         """
+
+    @classmethod
+    def _prepare_estimation(cls, src, dst):
+        """Create identity transform and make sure points are arrays."""
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        return cls.identity(src.shape[1]), src, dst
+
+    @classmethod
+    def from_estimate(cls, src, dst, *args, **kwargs) -> Self | FailedEstimation:
+        r"""Estimate transform.
+
+        Parameters
+        ----------
+        src : (N, M) array_like
+            Source coordinates.
+        dst : (N, M) array_like
+            Destination coordinates.
+        \*args : sequence
+            Any other positional arguments.
+        \*\*kwargs : dict
+            Any other keyword arguments.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = TransformClass.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+        """
+        return _from_estimate(cls, src, dst, *args, **kwargs)
+
+
+def _from_estimate(cls, src, dst, *args, **kwargs):
+    """Detached function for from_estimate base implementation."""
+    tf, src, dst = cls._prepare_estimation(src, dst)
+    msg = tf._estimate(src, dst, *args, **kwargs)
+    return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
 
 
 class _HMatrixTransform(_GeometricTransform):
@@ -406,7 +461,6 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     --------
     >>> import numpy as np
     >>> import skimage as ski
-    >>> tform_matrix = ski.transform.FundamentalMatrixTransform()
 
     Define source and destination points:
 
@@ -429,22 +483,22 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
     Estimate the transformation matrix:
 
-    >>> tform_matrix.estimate(src, dst)
-    True
-    >>> tform_matrix.params
+    >>> tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    ...      src, dst)
+    >>> tform.params
     array([[-0.21785884,  0.41928191, -0.03430748],
            [-0.07179414,  0.04516432,  0.02160726],
            [ 0.24806211, -0.42947814,  0.02210191]])
 
     Compute the Sampson distance:
 
-    >>> tform_matrix.residuals(src, dst)
+    >>> tform.residuals(src, dst)
     array([0.0053886 , 0.00526101, 0.08689701, 0.01850534, 0.09418259,
            0.00185967, 0.06160489, 0.02655136])
 
     Apply inverse transformation:
 
-    >>> tform_matrix.inverse(dst)
+    >>> tform.inverse(dst)
     array([[-0.0513591 ,  0.04170974,  0.01213043],
            [-0.21599496,  0.29193419,  0.00978184],
            [-0.0079222 ,  0.03758889, -0.00915389],
@@ -453,6 +507,31 @@ class FundamentalMatrixTransform(_HMatrixTransform):
            [-0.21985267,  0.36717464, -0.01482408],
            [ 0.01339569, -0.03388123,  0.00497605],
            [ 0.03420927, -0.1135812 ,  0.02228236]])
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.FundamentalMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
 
     """
 
@@ -518,7 +597,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         src_matrix = _calc_center_normalize(src, self.scaling)
         dst_matrix = _calc_center_normalize(dst, self.scaling)
-        if not np.all(np.isfinite(src_matrix + dst_matrix)):
+        if np.any(np.isnan(src_matrix + dst_matrix)):
             self.params = np.full((3, 3), np.nan)
             return 3 * [np.full((3, 3), np.nan)]
         src_h = _append_homogeneous_dim(_apply_homogeneous(src_matrix, src))
@@ -537,12 +616,11 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         return F_normalized, src_matrix, dst_matrix
 
-    def estimate(self, src, dst):
+    @classmethod
+    def from_estimate(cls, src, dst):
         """Estimate fundamental matrix using 8-point algorithm.
 
-        The 8-point algorithm requires at least 8 corresponding point pairs for
-        a well-conditioned solution, otherwise the over-determined solution is
-        estimated.
+        The 8-point algorithm requires at least 8 corresponding point pairs.
 
         Parameters
         ----------
@@ -553,11 +631,29 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
+            .. code-block:: python
+
+                tf = FundamentalMatrixTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
         """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
         F_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(F_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
 
         # Enforcing the internal constraint that two singular values must be
         # non-zero and one must be zero (rank 2).
@@ -567,7 +663,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         self.params = dst_matrix.T @ F @ src_matrix
 
-        return True
+        return None
 
     def residuals(self, src, dst):
         """Compute the Sampson distance.
@@ -598,6 +694,29 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         return np.abs(dst_F_src) / np.sqrt(
             F_src[0] ** 2 + F_src[1] ** 2 + Ft_dst[0] ** 2 + Ft_dst[1] ** 2
         )
+
+    @_deprecate_estimate
+    def estimate(self, src, dst):
+        """Estimate fundamental matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        return self._estimate(src, dst) is None
 
 
 class EssentialMatrixTransform(FundamentalMatrixTransform):
@@ -642,10 +761,10 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     >>> import numpy as np
     >>> import skimage as ski
     >>>
-    >>> tform_matrix = ski.transform.EssentialMatrixTransform(
+    >>> tform = ski.transform.EssentialMatrixTransform(
     ...     rotation=np.eye(3), translation=np.array([0, 0, 1])
     ... )
-    >>> tform_matrix.params
+    >>> tform.params
     array([[ 0., -1.,  0.],
            [ 1.,  0.,  0.],
            [ 0.,  0.,  0.]])
@@ -665,12 +784,35 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
     ...                 [1.779735, 1.116857],
     ...                 [0.878616, 0.602447],
     ...                 [0.642616, 1.028681]])
-    >>> tform_matrix.estimate(src, dst)
-    True
-    >>> tform_matrix.residuals(src, dst)
+    >>> tform = ski.transform.EssentialMatrixTransform.from_estimate(src, dst)
+    >>> tform.residuals(src, dst)
     array([0.42455187, 0.01460448, 0.13847034, 0.12140951, 0.27759346,
            0.32453118, 0.00210776, 0.26512283])
 
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((8, 2))
+    >>> bad_tform = ski.transform.EssentialMatrixTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     # Threshold for determinant of rotation matrix.
@@ -712,6 +854,61 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         t_arr = np.array([[0, -t2, t1], [t2, 0, -t0], [-t1, t0, 0]], dtype=float)
         return t_arr @ rotation
 
+    @classmethod
+    def from_estimate(cls, src, dst):
+        """Estimate essential matrix using 8-point algorithm.
+
+        The 8-point algorithm requires at least 8 corresponding point pairs for
+        a well-conditioned solution, otherwise the over-determined solution is
+        estimated.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = EssentialMatrixTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        Raises
+        ------
+        ValueError
+            If `src` has fewer than 8 rows.
+
+        """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
+        E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
+        if np.any(np.isnan(E_normalized + src_matrix + dst_matrix)):
+            return 'Scaling failed for input points'
+
+        # Enforcing the internal constraint that two singular values must be
+        # equal and one must be zero.
+        U, S, V = np.linalg.svd(E_normalized)
+        S[0] = (S[0] + S[1]) / 2.0
+        S[1] = S[0]
+        S[2] = 0
+        E = U @ np.diag(S) @ V
+
+        self.params = dst_matrix.T @ E @ src_matrix
+
+        return None
+
+    @_deprecate_estimate
     def estimate(self, src, dst):
         """Estimate essential matrix using 8-point algorithm.
 
@@ -732,20 +929,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
             True, if model estimation succeeds.
 
         """
-
-        E_normalized, src_matrix, dst_matrix = self._setup_constraint_matrix(src, dst)
-
-        # Enforcing the internal constraint that two singular values must be
-        # equal and one must be zero.
-        U, S, V = np.linalg.svd(E_normalized)
-        S[0] = (S[0] + S[1]) / 2.0
-        S[1] = S[0]
-        S[2] = 0
-        E = U @ np.diag(S) @ V
-
-        self.params = dst_matrix.T @ E @ src_matrix
-
-        return True
+        return self._estimate(src, dst) is None
 
 
 class ProjectiveTransform(_HMatrixTransform):
@@ -785,13 +969,71 @@ class ProjectiveTransform(_HMatrixTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.ProjectiveTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.ProjectiveTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ -16.56,    5.82,  895.81],
+    ...                            [ -10.31,   -8.29, 2075.43],
+    ...                            [  -0.05,    0.02,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.ProjectiveTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     scaling = 'rms'
 
-    def __init__(self, matrix=None, *, dimensionality=None):
-        super().__init__(matrix, dimensionality=dimensionality)
-        self._coeffs = range(self.params.size - 1)
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.params.size - 1)
 
     def _check_dims(self, d):
         if d >= 2:
@@ -828,6 +1070,190 @@ class ProjectiveTransform(_HMatrixTransform):
         """Return a transform object representing the inverse."""
         return type(self)(matrix=self._inv_matrix)
 
+    @classmethod
+    def from_estimate(cls, src, dst, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
+            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
+
+        These equations can be transformed to the following form::
+
+            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
+            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[x y 1 0 0 0 -x*X -y*X -X]
+                   [0 0 0 x y 1 -x*Y -y*Y -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        In case of the affine transformation the coefficients c0 and c1 are 0.
+        Thus the system of equations is::
+
+            A   = [[x y 1 0 0 0 -X]
+                   [0 0 0 x y 1 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c3]
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = ProjectiveTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        """
+        return super().from_estimate(src, dst, weights)
+
+    def _estimate(self, src, dst, weights=None):
+        src = np.asarray(src)
+        dst = np.asarray(dst)
+        n, d = src.shape
+        fail_matrix = np.full((d + 1, d + 1), np.nan)
+
+        src_matrix, src = _center_and_normalize_points(src)
+        dst_matrix, dst = _center_and_normalize_points(dst)
+        if not np.all(np.isfinite(src_matrix + dst_matrix)):
+            self.params = fail_matrix
+            return 'Scaling generated NaN values'
+
+        # params: a0, a1, a2, b0, b1, b2, c0, c1
+        A = np.zeros((n * d, (d + 1) ** 2))
+        # fill the A matrix with the appropriate block matrices; see docstring
+        # for 2D example — this can be generalised to more blocks in the 3D and
+        # higher-dimensional cases.
+        for ddim in range(d):
+            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) : ddim * (d + 1) + d] = src
+            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) + d] = 1
+            A[ddim * n : (ddim + 1) * n, -d - 1 : -1] = src
+            A[ddim * n : (ddim + 1) * n, -1] = -1
+            A[ddim * n : (ddim + 1) * n, -d - 1 :] *= -dst[:, ddim : (ddim + 1)]
+
+        # Select relevant columns, depending on params
+        A = A[:, list(self._coeff_inds) + [-1]]
+
+        # Get the vectors that correspond to singular values, also applying
+        # the weighting if provided
+        if weights is None:
+            _, _, V = np.linalg.svd(A)
+        else:
+            weights = np.asarray(weights)
+            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
+            _, _, V = np.linalg.svd(W @ A)
+
+        H = np.zeros((d + 1, d + 1))
+        # Solution is right singular vector that corresponds to smallest
+        # singular value.
+        if np.isclose(V[-1, -1], 0):
+            self.params = fail_matrix
+            return 'Right singular vector has 0 final element'
+
+        H.flat[list(self._coeff_inds) + [-1]] = -V[-1, :-1] / V[-1, -1]
+        H[d, d] = 1
+
+        # De-center and de-normalize
+        H = np.linalg.inv(dst_matrix) @ H @ src_matrix
+
+        # Small errors can creep in if points are not exact, causing the last
+        # element of H to deviate from unity. Correct for that here.
+        H /= H[-1, -1]
+
+        self.params = H
+
+        return None
+
+    def __add__(self, other):
+        """Combine this transformation with another."""
+        if isinstance(other, ProjectiveTransform):
+            # combination of the same types result in a transformation of this
+            # type again, otherwise use general projective transformation
+            if type(self) == type(other):
+                tform = self.__class__
+            else:
+                tform = ProjectiveTransform
+            return tform(other.params @ self.params)
+        else:
+            raise TypeError("Cannot combine transformations of differing " "types.")
+
+    def __nice__(self):
+        """common 'paramstr' used by __str__ and __repr__"""
+        if not hasattr(self, 'params'):
+            return '<not yet initialized>'
+        npstring = np.array2string(self.params, separator=', ')
+        return 'matrix=\n' + textwrap.indent(npstring, '    ')
+
+    def __repr__(self):
+        """Add standard repr formatting around a __nice__ string"""
+        return f'<{type(self).__name__}({self.__nice__()}) at {hex(id(self))}>'
+
+    def __str__(self):
+        """Add standard str formatting around a __nice__ string"""
+        return f'<{type(self).__name__}({self.__nice__()})>'
+
+    @property
+    def dimensionality(self):
+        """The dimensionality of the transformation."""
+        return self.params.shape[0] - 1
+
+    @classmethod
+    def identity(cls, dimensionality=None):
+        """Identity transform
+
+        Parameters
+        ----------
+        dimensionality : {None, int}, optional
+            Dimensionality of identity transform.
+
+        Returns
+        -------
+        tform : transform
+            Transform such that ``np.all(tform(pts) == pts)``.
+        """
+        return super().identity(dimensionality=dimensionality)
+
+    @_deprecate_estimate
     def estimate(self, src, dst, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
@@ -893,117 +1319,11 @@ class ProjectiveTransform(_HMatrixTransform):
             True, if model estimation succeeds.
 
         """
-        src = np.asarray(src)
-        dst = np.asarray(dst)
-        n, d = src.shape
-
-        src_matrix = _calc_center_normalize(src, self.scaling)
-        dst_matrix = _calc_center_normalize(dst, self.scaling)
-        if not np.all(np.isfinite(src_matrix + dst_matrix)):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
-        src = _apply_homogeneous(src_matrix, src)
-        dst = _apply_homogeneous(dst_matrix, dst)
-
-        # params: a0, a1, a2, b0, b1, b2, c0, c1
-        A = np.zeros((n * d, (d + 1) ** 2))
-        # fill the A matrix with the appropriate block matrices; see docstring
-        # for 2D example — this can be generalised to more blocks in the 3D and
-        # higher-dimensional cases.
-        for ddim in range(d):
-            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) : ddim * (d + 1) + d] = src
-            A[ddim * n : (ddim + 1) * n, ddim * (d + 1) + d] = 1
-            A[ddim * n : (ddim + 1) * n, -d - 1 : -1] = src
-            A[ddim * n : (ddim + 1) * n, -1] = -1
-            A[ddim * n : (ddim + 1) * n, -d - 1 :] *= -dst[:, ddim : (ddim + 1)]
-
-        # Select relevant columns, depending on params
-        A = A[:, list(self._coeffs) + [-1]]
-
-        # Get the vectors that correspond to singular values, also applying
-        # the weighting if provided
-        if weights is None:
-            _, _, V = np.linalg.svd(A)
-        else:
-            weights = np.asarray(weights)
-            W = np.diag(np.tile(np.sqrt(weights / np.max(weights)), d))
-            _, _, V = np.linalg.svd(W @ A)
-
-        # if the last element of the vector corresponding to the smallest
-        # singular value is close to zero, this implies a degenerate case
-        # because it is a rank-defective transform, which would map points
-        # to a line rather than a plane.
-        if np.isclose(V[-1, -1], 0):
-            self.params = np.full((d + 1, d + 1), np.nan)
-            return False
-
-        H = np.zeros((d + 1, d + 1))
-        # solution is right singular vector that corresponds to smallest
-        # singular value
-        H.flat[list(self._coeffs) + [-1]] = -V[-1, :-1] / V[-1, -1]
-        H[d, d] = 1
-
-        # De-center and de-normalize
-        H = np.linalg.inv(dst_matrix) @ H @ src_matrix
-
-        # Small errors can creep in if points are not exact, causing the last
-        # element of H to deviate from unity. Correct for that here.
-        H /= H[-1, -1]
-
-        self.params = H
-
-        return True
-
-    def __add__(self, other):
-        """Combine this transformation with another."""
-        if isinstance(other, ProjectiveTransform):
-            # combination of the same types result in a transformation of this
-            # type again, otherwise use general projective transformation
-            if type(self) == type(other):
-                tform = self.__class__
-            else:
-                tform = ProjectiveTransform
-            return tform(other.params @ self.params)
-        else:
-            raise TypeError("Cannot combine transformations of differing " "types.")
-
-    def __nice__(self):
-        """common 'paramstr' used by __str__ and __repr__"""
-        if not hasattr(self, 'params'):
-            return '<not yet initialized>'
-        npstring = np.array2string(self.params, separator=', ')
-        return 'matrix=\n' + textwrap.indent(npstring, '    ')
-
-    def __repr__(self):
-        """Add standard repr formatting around a __nice__ string"""
-        return f'<{type(self).__name__}({self.__nice__()}) at {hex(id(self))}>'
-
-    def __str__(self):
-        """Add standard str formatting around a __nice__ string"""
-        return f'<{type(self).__name__}({self.__nice__()})>'
-
-    @property
-    def dimensionality(self):
-        """The dimensionality of the transformation."""
-        return self.params.shape[0] - 1
-
-    @classmethod
-    def identity(cls, dimensionality=None):
-        """Identity transform
-
-        Parameters
-        ----------
-        dimensionality : {None, int}, optional
-            Dimensionality of identity transform.
-
-        Returns
-        -------
-        tform : transform
-            Transform such that ``np.all(tform(pts) == pts)``.
-        """
-        return super().identity(dimensionality=dimensionality)
+        return self._estimate(src, dst, weights) is None
 
 
+@_update_from_estimate_docstring
+@_deprecate_inherited_estimate
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
 
@@ -1084,9 +1404,25 @@ class AffineTransform(ProjectiveTransform):
     --------
     >>> import numpy as np
     >>> import skimage as ski
-    >>> img = ski.data.astronaut()
 
-    Define source and destination points:
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.AffineTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.AffineTransform(scale=4, rotation=0.2)
+    >>> np.round(tform.params, 2)
+    array([[ 3.92, -0.79,  0.  ],
+           [ 0.79,  3.92,  0.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
 
     >>> src = np.array([[150, 150],
     ...                 [250, 100],
@@ -1094,16 +1430,41 @@ class AffineTransform(ProjectiveTransform):
     >>> dst = np.array([[200, 200],
     ...                 [300, 150],
     ...                 [150, 400]])
-
-    Estimate the transformation matrix:
-
-    >>> tform = ski.transform.AffineTransform()
-    >>> tform.estimate(src, dst)
+    >>> tform = ski.transform.AffineTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[   0.5,   -1. ,  275. ],
+    ...                            [   1.5,    4. , -625. ],
+    ...                            [   0. ,    0. ,    1. ]])
     True
 
-    Apply the transformation:
+    Apply the transformation to some image data.
 
+    >>> img = ski.data.astronaut()
     >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.AffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
 
     References
     ----------
@@ -1137,7 +1498,11 @@ class AffineTransform(ProjectiveTransform):
             if matrix.shape[0] != 3:
                 raise ValueError('Implicit parameters must give 2D transforms')
         super().__init__(matrix=matrix, dimensionality=dimensionality)
-        self._coeffs = range(self.dimensionality * (self.dimensionality + 1))
+
+    @property
+    def _coeff_inds(self):
+        """Indices into flat ``self.params`` with coefficients to estimate"""
+        return range(self.dimensionality * (self.dimensionality + 1))
 
     def _srst2matrix(self, scale, rotation, shear, translation):
         scale = (1, 1) if scale is None else scale
@@ -1203,6 +1568,65 @@ class PiecewiseAffineTransform(_GeometricTransform):
     inverse_affines : list of AffineTransform objects
         Inverse affine transformations for each triangle in the mesh.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PiecewiseAffineTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> np.allclose(tform(src), dst)
+    True
+
+    You can apply the inverse transform:
+
+    >>> np.allclose(tform.inverse(dst), src)
+    True
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = [[1, 1]] * 6 + src[6:]
+    >>> bad_tform = ski.transform.PiecewiseAffineTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     def __init__(self):
@@ -1211,7 +1635,8 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self.affines = None
         self.inverse_affines = None
 
-    def estimate(self, src, dst):
+    @classmethod
+    def from_estimate(cls, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
         Number of source and destination coordinates must match.
@@ -1225,25 +1650,40 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Returns
         -------
-        success : bool
-            True, if all pieces of the model are successfully estimated.
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PiecewiseAffineTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
+        return super().from_estimate(src, dst)
+
+    def _estimate(self, src, dst):
         src = np.asarray(src)
         dst = np.asarray(dst)
+        N, D = src.shape
 
-        ndim = src.shape[1]
         # forward piecewise affine
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
 
-        success = True
+        fail_matrix = np.full((D + 1, D + 1), np.nan)
 
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self._tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(src[tri, :], dst[tri, :])
+        messages = []
+        for i, tri in enumerate(self._tesselation.simplices):
+            affine = AffineTransform.from_estimate(src[tri, :], dst[tri, :])
+            if not affine:
+                messages.append(f'Failure at forward simplex {i}: {affine}')
+                affine = AffineTransform(fail_matrix.copy())
             self.affines.append(affine)
 
         # inverse piecewise affine
@@ -1251,12 +1691,14 @@ class PiecewiseAffineTransform(_GeometricTransform):
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
         self.inverse_affines = []
-        for tri in self._inverse_tesselation.simplices:
-            affine = AffineTransform(dimensionality=ndim)
-            success &= affine.estimate(dst[tri, :], src[tri, :])
+        for i, tri in enumerate(self._inverse_tesselation.simplices):
+            affine = AffineTransform.from_estimate(dst[tri, :], src[tri, :])
+            if not affine:
+                messages.append(f'Failure at inverse simplex {i}: {affine}')
+                affine = AffineTransform(fail_matrix.copy())
             self.inverse_affines.append(affine)
 
-        return success
+        return '; '.join(messages) if messages else None
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -1321,6 +1763,27 @@ class PiecewiseAffineTransform(_GeometricTransform):
             Transform such that ``np.all(tform(pts) == pts)``.
         """
         return cls()
+
+    @_deprecate_estimate
+    def estimate(self, src, dst):
+        """Estimate the transformation from a set of corresponding points.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, D) array_like
+            Source coordinates.
+        dst : (N, D) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        success : bool
+            True, if all pieces of the model are successfully estimated.
+
+        """
+        return self._estimate(src, dst) is None
 
 
 def _euler_rotation_matrix(angles, degrees=False):
@@ -1400,6 +1863,73 @@ class EuclideanTransform(ProjectiveTransform):
     params : (D+1, D+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.EuclideanTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.EuclideanTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.EuclideanTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 0.99, 0.12,  16.77],
+    ...                            [-0.12, 0.99, 122.91],
+    ...                            [ 0.  , 0.  ,   1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.EuclideanTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
@@ -1452,6 +1982,68 @@ class EuclideanTransform(ProjectiveTransform):
         matrix[0:n_dims, n_dims] = translation
         return matrix
 
+    @classmethod
+    def from_estimate(cls, src, dst) -> Self | FailedEstimation:
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+
+        Returns
+        -------
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = EuclideanTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
+
+        """
+        # Use base implementation to avoid weights argument of
+        # ProjectiveTransform ancestor class.
+        return _from_estimate(cls, src, dst)
+
+    def _estimate(self, src, dst):
+        self.params = _umeyama(src, dst, self._estimate_scale)
+
+        # _umeyama will return nan if the problem is not well-conditioned.
+        return (
+            'Poor conditioning for estimation'
+            if np.any(np.isnan(self.params))
+            else None
+        )
+
+    @property
+    def rotation(self):
+        if self.dimensionality == 2:
+            return math.atan2(self.params[1, 0], self.params[1, 1])
+        elif self.dimensionality == 3:
+            # Returning 3D Euler rotation matrix
+            return self.params[:3, :3]
+        else:
+            raise NotImplementedError(
+                'Rotation only implemented for 2D and 3D transforms.'
+            )
+
+    @property
+    def translation(self):
+        return self.params[0 : self.dimensionality, self.dimensionality]
+
+    @_deprecate_estimate
     def estimate(self, src, dst):
         """Estimate the transformation from a set of corresponding points.
 
@@ -1473,28 +2065,11 @@ class EuclideanTransform(ProjectiveTransform):
             True, if model estimation succeeds.
 
         """
-        self.params = _umeyama(src, dst, self._estimate_scale)
-
-        # _umeyama will return nan if the problem is not well-conditioned.
-        return not np.any(np.isnan(self.params))
-
-    @property
-    def rotation(self):
-        if self.dimensionality == 2:
-            return math.atan2(self.params[1, 0], self.params[1, 1])
-        elif self.dimensionality == 3:
-            # Returning 3D Euler rotation matrix
-            return self.params[:3, :3]
-        else:
-            raise NotImplementedError(
-                'Rotation only implemented for 2D and 3D transforms.'
-            )
-
-    @property
-    def translation(self):
-        return self.params[0 : self.dimensionality, self.dimensionality]
+        return self._estimate(src, dst) is None
 
 
+@_update_from_estimate_docstring
+@_deprecate_inherited_estimate
 class SimilarityTransform(EuclideanTransform):
     """Similarity transformation.
 
@@ -1544,6 +2119,72 @@ class SimilarityTransform(EuclideanTransform):
     params : (dim+1, dim+1) array
         Homogeneous transformation matrix.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transform with an homogeneous transformation matrix:
+
+    >>> tform = ski.transform.SimilarityTransform(np.diag([2., 3., 1.]))
+    >>> tform.params
+    array([[2., 0., 0.],
+           [0., 3., 0.],
+           [0., 0., 1.]])
+
+    Define a transform with parameters:
+
+    >>> tform = ski.transform.SimilarityTransform(
+    ...             rotation=0.2, translation=[1, 2])
+    >>> np.round(tform.params, 2)
+    array([[ 0.98, -0.2 ,  1.  ],
+           [ 0.2 ,  0.98,  2.  ],
+           [ 0.  ,  0.  ,  1.  ]])
+
+    You can estimate a transformation to map between source and destination
+    points:
+
+    >>> src = np.array([[150, 150],
+    ...                 [250, 100],
+    ...                 [150, 200]])
+    >>> dst = np.array([[200, 200],
+    ...                 [300, 150],
+    ...                 [150, 400]])
+    >>> tform = ski.transform.SimilarityTransform.from_estimate(src, dst)
+    >>> np.allclose(tform.params, [[ 1.79, 0.21, -142.86],
+    ...                            [-0.21, 1.79,   21.43],
+    ...                            [ 0.  , 0.  ,    1.  ]], atol=0.01)
+    True
+
+    Apply the transformation to some image data.
+
+    >>> img = ski.data.astronaut()
+    >>> warped = ski.transform.warp(img, inverse_map=tform.inverse)
+
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((3, 2))
+    >>> bad_tform = ski.transform.SimilarityTransform.from_estimate(
+    ...      bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
 
     # Whether to estimate scale during estimation.
@@ -1635,6 +2276,43 @@ class PolynomialTransform(_GeometricTransform):
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import skimage as ski
+
+    Define a transformation by estimation:
+
+    >>> src = [[-12.3705, -10.5075],
+    ...        [-10.7865, 15.4305],
+    ...        [8.6985, 10.8675],
+    ...        [11.4975, -9.5715],
+    ...        [7.8435, 7.4835],
+    ...        [-5.3325, 6.5025],
+    ...        [6.7905, -6.3765],
+    ...        [-6.1695, -0.8235]]
+    >>> dst = [[0, 0],
+    ...        [0, 5800],
+    ...        [4900, 5800],
+    ...        [4900, 0],
+    ...        [4479, 4580],
+    ...        [1176, 3660],
+    ...        [3754, 790],
+    ...        [1024, 1931]]
+    >>> tform = ski.transform.PolynomialTransform.from_estimate(src, dst)
+
+    Calling the transform applies the transformation to the points:
+
+    >>> pts = tform(src)
+    >>> np.allclose(pts, [[   7.54,   12.27],
+    ...                   [   2.98, 5796.95],
+    ...                   [4870.44, 5766.59],
+    ...                   [4889.72,   -6.72],
+    ...                   [4515.62, 4617.5 ],
+    ...                   [1183.25, 3694.  ],
+    ...                   [3767.57,  800.53],
+    ...                   [ 998.02, 1881.97]], atol=0.01)
+    True
     """
 
     def __init__(self, params=None, *, dimensionality=None):
@@ -1648,7 +2326,8 @@ class PolynomialTransform(_GeometricTransform):
         if self.params.shape == () or self.params.shape[0] != 2:
             raise ValueError("Transformation parameters must be shape (2, N)")
 
-    def estimate(self, src, dst, order=2, weights=None):
+    @classmethod
+    def from_estimate(cls, src, dst, order=2, weights=None):
         """Estimate the transformation from a set of corresponding points.
 
         You can determine the over-, well- and under-determined parameters
@@ -1702,10 +2381,22 @@ class PolynomialTransform(_GeometricTransform):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        tf : Self or ``FailedEstimation``
+            An instance of the transformation if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                tf = PolynomialTransform.from_estimate(...)
+                if not tf:
+                    raise RuntimeError(f"Failed estimation: {tf}")
 
         """
+        return super().from_estimate(src, dst, order, weights)
+
+    def _estimate(self, src, dst, order=2, weights=None):
         src = np.asarray(src)
         dst = np.asarray(dst)
         xs = src[:, 0]
@@ -1744,7 +2435,7 @@ class PolynomialTransform(_GeometricTransform):
 
         self.params = params.reshape((2, u // 2))
 
-        return True
+        return None
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -1804,6 +2495,67 @@ class PolynomialTransform(_GeometricTransform):
             'then apply the forward transformation.'
         )
 
+    @_deprecate_estimate
+    def estimate(self, src, dst, order=2, weights=None):
+        """Estimate the transformation from a set of corresponding points.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+        These equations can be transformed to the following form::
+
+            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
+            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[1 x y x**2 x*y y**2 ... 0 ...             0 -X]
+                   [0 ...                 0 1 x y x**2 x*y y**2 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a00 a10 a11 a20 a21 a22 ... ann
+                   b00 b10 b11 b20 b21 b22 ... bnn c3]
+
+        In case of total least-squares the solution of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        Weights can be applied to each pair of corresponding points to
+        indicate, particularly in an overdetermined system, if point pairs have
+        higher or lower confidence or uncertainties associated with them. From
+        the matrix treatment of least squares problems, these weight values are
+        normalised, square-rooted, then built into a diagonal matrix, by which
+        A is multiplied.
+
+        Parameters
+        ----------
+        src : (N, 2) array_like
+            Source coordinates.
+        dst : (N, 2) array_like
+            Destination coordinates.
+        order : int, optional
+            Polynomial order (number of coefficients is order + 1).
+        weights : (N,) array_like, optional
+            Relative weight values for each pair of points.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        return self._estimate(src, dst, order, weights) is None
+
 
 TRANSFORMS = {
     'euclidean': EuclideanTransform,
@@ -1846,9 +2598,17 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tform : :class:`_GeometricTransform`
-        Transform object containing the transformation parameters and providing
-        access to forward and inverse transformation functions.
+    tf : :class:`_GeometricTransform` or ``FailedEstimation``
+        An instance of the requested transformation if the estimation
+        Otherwise, we return a special ``FailedEstimation`` object to signal a
+        failed estimation. Testing the truth value of the failed estimation
+        object will return ``False``. E.g.
+
+        .. code-block:: python
+
+            tf = estimate_transform(...)
+            if not tf:
+                raise RuntimeError(f"Failed estimation: {tf}")
 
     Examples
     --------
@@ -1878,15 +2638,37 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
     >>> np.allclose(tform3(src), tform2(tform(src)))
     True
 
+    The estimation can fail - for example, if all the input or output points
+    are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy (applying ``bool()``
+    >>> # gives ``True``):
+    >>> if tform:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate transform with identical points.
+    >>> bad_src = np.ones((2, 2))
+    >>> bad_tform = ski.transform.estimate_transform('similarity',
+    ...                                              bad_src, dst)
+    >>> if not bad_tform:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_tform.params  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
     """
     ttype = ttype.lower()
     if ttype not in TRANSFORMS:
         raise ValueError(f'the transformation type \'{ttype}\' is not implemented')
 
-    tform = TRANSFORMS[ttype](dimensionality=src.shape[1])
-    tform.estimate(src, dst, *args, **kwargs)
-
-    return tform
+    return TRANSFORMS[ttype].from_estimate(src, dst, *args, **kwargs)
 
 
 def matrix_transform(coords, matrix):

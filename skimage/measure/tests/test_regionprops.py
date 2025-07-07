@@ -100,6 +100,9 @@ def get_central_moment_function(img, spacing=(1, 1)):
     return lambda p, q: np.sum((Y - cY) ** p * (X - cX) ** q * img)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
@@ -117,6 +120,9 @@ def test_all_props():
             pass
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_all_props_3d():
     region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
     for prop in PROPS:
@@ -702,6 +708,13 @@ def test_intensity_max():
 def test_intensity_mean():
     intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[0].intensity_mean
     assert_almost_equal(intensity, 1.02777777777777)
+
+
+def test_intensity_median():
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)[
+        0
+    ].intensity_median
+    assert_almost_equal(intensity, 1.0)
 
 
 def test_intensity_min():
@@ -1396,7 +1409,7 @@ def pixelcount(regionmask):
     return np.sum(regionmask)
 
 
-def intensity_median(regionmask, image_intensity):
+def custom_intensity_median(regionmask, image_intensity):
     return np.median(image_intensity[regionmask])
 
 
@@ -1420,9 +1433,11 @@ def test_extra_properties():
 
 def test_extra_properties_intensity():
     region = regionprops(
-        SAMPLE, intensity_image=INTENSITY_SAMPLE, extra_properties=(intensity_median,)
+        SAMPLE,
+        intensity_image=INTENSITY_SAMPLE,
+        extra_properties=(custom_intensity_median,),
     )[0]
-    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.custom_intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
 
 
 @pytest.mark.parametrize('intensity_prop', _require_intensity_image)
@@ -1439,8 +1454,8 @@ def test_intensity_image_required(intensity_prop):
 
 def test_extra_properties_no_intensity_provided():
     with pytest.raises(AttributeError):
-        region = regionprops(SAMPLE, extra_properties=(intensity_median,))[0]
-        _ = region.intensity_median
+        region = regionprops(SAMPLE, extra_properties=(custom_intensity_median,))[0]
+        _ = region.custom_intensity_median
 
 
 def test_extra_properties_nr_args():
@@ -1457,9 +1472,9 @@ def test_extra_properties_mixed():
     region = regionprops(
         SAMPLE,
         intensity_image=INTENSITY_SAMPLE,
-        extra_properties=(intensity_median, pixelcount),
+        extra_properties=(custom_intensity_median, pixelcount),
     )[0]
-    assert region.intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
+    assert region.custom_intensity_median == np.median(INTENSITY_SAMPLE[SAMPLE == 1])
     assert region.pixelcount == np.sum(SAMPLE == 1)
 
 
@@ -1468,9 +1483,9 @@ def test_extra_properties_table():
         SAMPLE_MULTIPLE,
         intensity_image=INTENSITY_SAMPLE_MULTIPLE,
         properties=('label',),
-        extra_properties=(intensity_median, pixelcount, bbox_list),
+        extra_properties=(custom_intensity_median, pixelcount, bbox_list),
     )
-    assert_array_almost_equal(out['intensity_median'], np.array([2.0, 4.0]))
+    assert_array_almost_equal(out['custom_intensity_median'], np.array([2.0, 4.0]))
     assert_array_equal(out['pixelcount'], np.array([10, 2]))
 
     assert out['bbox_list'].dtype == np.object_
@@ -1478,6 +1493,9 @@ def test_extra_properties_table():
     assert out["bbox_list"][1] == [1] * 1
 
 
+@pytest.mark.filterwarnings(
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+)
 def test_multichannel():
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]
@@ -1485,14 +1503,14 @@ def test_multichannel():
     labels = slic(astro.astype(float), start_label=1)
 
     segment_idx = np.max(labels) // 2
-    region = regionprops(labels, astro_green, extra_properties=[intensity_median])[
-        segment_idx
-    ]
-    region_multi = regionprops(labels, astro, extra_properties=[intensity_median])[
-        segment_idx
-    ]
+    region = regionprops(
+        labels, astro_green, extra_properties=[custom_intensity_median]
+    )[segment_idx]
+    region_multi = regionprops(
+        labels, astro, extra_properties=[custom_intensity_median]
+    )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["intensity_median"]:
+    for prop in list(PROPS.keys()) + ["custom_intensity_median"]:
         p = region[prop]
         p_multi = region_multi[prop]
         if np.shape(p) == np.shape(p_multi):
@@ -1550,3 +1568,33 @@ def test_pickling_region_properties():
     pickled = pickle.dumps(regions[0])
     unpickled = pickle.loads(pickled)  # RecursionError here
     assert regions[0] == unpickled
+
+
+@pytest.mark.parametrize("old_name", list(PROPS))
+def test_deprecated_properties(old_name):
+    regions = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE)
+
+    regex = rf"`RegionProperties\['{old_name}'\]` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        result = regions[0][old_name]
+    testing.assert_stacklevel(record)
+
+    current_name = PROPS[old_name]
+    np.testing.assert_equal(result, regions[0][current_name])
+
+    if old_name == old_name.lower():
+        # Lower-case properties in PROPS – such as "bbox_area" or
+        # "convex_image" – were accessible as attributes in addition to being
+        # available via `__getitem__`.
+        # Make sure those emit an appropriate deprecation warning too
+        regex = f"`RegionProperties.{old_name}` is deprecated."
+        with pytest.warns(FutureWarning, match=regex) as record:
+            result = getattr(regions[0], old_name)
+        testing.assert_stacklevel(record)
+        current_name = PROPS[old_name]
+        np.testing.assert_equal(result, regions[0][current_name])
+
+    else:
+        regex = f"'RegionProperties' object has no attribute {old_name!r}"
+        with pytest.raises(AttributeError, match=regex):
+            getattr(regions[0], old_name)
