@@ -124,7 +124,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
         ax.imshow(footprint, cmap=cmap, vmin=0, vmax=1)
         if approximate_decomposition:
             ax2 = fig.add_subplot(1, num_subplots, num_subplots - 1)
-            footprint_composite = ski.morphology.footprints.footprint_from_sequence(
+            footprint_composite = ski.morphology.footprint_from_sequence(
                 footprint_sequence
             )
             ax2.imshow(footprint_composite, cmap=cmap, vmin=0, vmax=1)
@@ -136,7 +136,7 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
             ax2 = fig.add_subplot(
                 1, num_subplots, num_subplots - 1, projection=Axes3D.name
             )
-            footprint_composite = ski.morphology.footprints.footprint_from_sequence(
+            footprint_composite = ski.morphology.footprint_from_sequence(
                 footprint_sequence
             )
             ax2.voxels(footprint_composite, cmap=cmap)
