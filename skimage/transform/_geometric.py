@@ -442,7 +442,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     .. [2] Zhang, Zhengyou. "Determining the epipolar geometry and its
            uncertainty: A review." International journal of computer vision 27
            (1998): 161-195.
-           https://www.microsoft.com/en-us/research/publication/determining-epipolar-geometry-uncertainty-review
+           https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/RR-2927.pdf
 
     Parameters
     ----------
