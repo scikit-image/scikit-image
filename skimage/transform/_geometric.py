@@ -595,6 +595,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         if src.shape[0] < 8:
             raise ValueError('src.shape[0] must be equal or larger than 8.')
 
+        # Center and normalize image points for better numerical stability.
         src_matrix = _calc_center_normalize(src, self.scaling)
         dst_matrix = _calc_center_normalize(dst, self.scaling)
         if np.any(np.isnan(src_matrix + dst_matrix)):
