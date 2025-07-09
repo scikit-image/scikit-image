@@ -527,12 +527,12 @@ def _calc_distances(src, dst, F, metric='distance'):
 
     Parameters
     ----------
-    src : array shape (N, D)
+    src : (N, D) array
         Points in first image.
-    dst : array shape (N, D)
+    dst : (N, D) array
         Matching points in second image.
-    F : array shape (3, 3)
-        Fundamental matrix mapping `src` to epipolar lines in `dst`.
+    F : (3, 3) array
+        Fundamental matrix mapping `src` to epipolar lines passing through `dst`.
     metric : {'distance', 'epip-distances'}, optional
         Matrix for distance between actual points `dst` and epipolar lines
         generated from `F`.  'distance' is signed distance from [1]_.
@@ -674,7 +674,7 @@ def test_fundamental_matrix_epipolar_projection():
     assert tform_raw.estimate(src, dst)
     assert not np.allclose(tform.params, tform_raw.params)
     assert not np.allclose(tform_mrs.params, tform_raw.params)
-    # Distances are greater than either scaling option.
+    # Distances are greater than with either scaling option.
     raw_ds = _calc_distances(src, dst, tform_raw.params)
     assert np.max(np.abs(raw_ds)) > 1
     assert np.mean(np.abs(raw_ds)) > np.mean(np.abs(rms_ds))

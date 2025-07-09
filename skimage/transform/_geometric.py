@@ -36,7 +36,7 @@ def _affine_matrix_from_vector(v):
 def _calc_center_normalize(points, scaling='rms'):
     """Calculate transformation `matrix` to center and normalize image points.
 
-    Points are an array shape (N, D).
+    Points are an array of shape (N, D).
 
     For `scaling` of 'raw', transformation returned `matrix` will be ``np.eye(D
     + 1)``.  For other values of `scaling`, `matrix` expresses a two-step
@@ -44,19 +44,19 @@ def _calc_center_normalize(points, scaling='rms'):
     usually give better conditioning for fundamental matrix estimation than the
     original `points` [1]_.
 
-    The two stages of transformation, for `scaling` other than 'raw', are:
+    The two steps of transformation, for `scaling` other than 'raw', are:
 
     * Center the image points, such that the new coordinate system has its
       origin at the centroid of the image points.
     * Normalize the image points, such that the mean coordinate value of the
-      centered points is 1 (scaling='rms') or (scaling of 'mrs') such that the
+      centered points is 1 (`scaling` == 'rms') or such that the
       mean distance from the points to the origin of the coordinate system is
-      ``sqrt(D)``
+      ``sqrt(D)`` (`scaling` == 'mrs').
 
-    If `scaling` != 'raw', and the points are all identical, the returned
+    If `scaling` != 'raw' and the points are all identical, the returned
     `matrix` will be all ``np.nan``.
 
-    The 'mrs' transformation corresponds to the isotropic transformation
+    The 'mrs' scaling corresponds to the isotropic transformation
     algorithm in [1]_. 'rms' is the default, and gives very similar
     conditioning.
 
@@ -604,7 +604,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         dst_h = _append_homogeneous_dim(_apply_homogeneous(dst_matrix, dst))
 
         # Setup homogeneous linear equation as dst' * F * src = 0.
-        # Hartley 97 notation u -> src[:, 0], v -> src[:, 1],
+        # Hartley notation u -> src[:, 0], v -> src[:, 1],
         # u' -> dst[:, 0], v' -> dst[:, 1].  Required output cols are:
         # uu', vu' u', uv', vv', v', u, v, 1
         cols = [(d_v * s_v) for d_v in dst_h.T for s_v in src_h.T]
