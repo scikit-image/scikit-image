@@ -617,8 +617,8 @@ def test_fundamental_matrix_epipolar_projection():
         ]
     ).reshape(-1, 2)
 
-    tform = FundamentalMatrixTransform()
-    assert tform.estimate(src, dst)
+    tform = FundamentalMatrixTransform.from_estimate(src, dst)
+    assert tform
 
     # Calculate and test pixel distances.
     rms_ds = np.abs(_calc_distances(src, dst, tform.params))
@@ -632,17 +632,17 @@ def test_fundamental_matrix_epipolar_projection():
     class FMTRMS(FundamentalMatrixTransform):
         scaling = 'rms'
 
-    tform_rms = FMTRMS()
-    assert tform_rms.estimate(src, dst)
+    tform_rms = FMTRMS.from_estimate(src, dst)
+    assert tform_rms
     assert np.allclose(tform.params, tform_rms.params)
 
     # Check that we can also use MRS (Hartley distance).
     class FMTMRS(FundamentalMatrixTransform):
         scaling = 'mrs'
 
-    tform_mrs = FMTMRS()
+    tform_mrs = FMTMRS.from_estimate(src, dst)
     # MRS gives us a different F matrix.
-    assert tform_mrs.estimate(src, dst)
+    assert tform_mrs
     assert not np.allclose(tform.params, tform_mrs.params)
     # But with acceptable (in this case slightly larger) distances.
     mrs_ds = _calc_distances(src, dst, tform_mrs.params)
@@ -669,9 +669,9 @@ def test_fundamental_matrix_epipolar_projection():
     class FMTRaw(FundamentalMatrixTransform):
         scaling = 'raw'
 
-    tform_raw = FMTRaw()
+    tform_raw = FMTRaw.from_estimate(src, dst)
     # Raw gives us a different F matrix from RMS or MRS.
-    assert tform_raw.estimate(src, dst)
+    assert tform_raw
     assert not np.allclose(tform.params, tform_raw.params)
     assert not np.allclose(tform_mrs.params, tform_raw.params)
     # Distances are greater than with either scaling option.
