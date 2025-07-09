@@ -542,7 +542,7 @@ def _calc_distances(src, dst, F, metric='distance'):
     Notes
     -----
     See `Wikipedia on point-line distance
-    <https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof>`_
+    <https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof>`__
     for standard distance formula, and various proofs.
 
     References
@@ -550,6 +550,7 @@ def _calc_distances(src, dst, F, metric='distance'):
     .. [1] Zhang, Zhengyou. "Determining the epipolar geometry and its
            uncertainty: A review." International journal of computer vision 27
            (1998): 161-195.
+           :DOI:`10.1023/A:1007941100561`
            https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/RR-2927.pdf
     .. [2] Hartley, Richard I. "In defense of the eight-point algorithm."
            Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6

@@ -442,6 +442,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     .. [2] Zhang, Zhengyou. "Determining the epipolar geometry and its
            uncertainty: A review." International journal of computer vision 27
            (1998): 161-195.
+           :DOI:`10.1023/A:1007941100561`
            https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/RR-2927.pdf
 
     Parameters
@@ -607,7 +608,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
         # Setup homogeneous linear equation as dst' * F * src = 0.
         # Hartley notation u -> src[:, 0], v -> src[:, 1],
         # u' -> dst[:, 0], v' -> dst[:, 1].  Required output cols are:
-        # uu', vu' u', uv', vv', v', u, v, 1
+        # uu', vu', u', uv', vv', v', u, v, 1
         cols = [(d_v * s_v) for d_v in dst_h.T for s_v in src_h.T]
         A = np.stack(cols, axis=1)
 
