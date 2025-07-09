@@ -33,32 +33,45 @@ def _affine_matrix_from_vector(v):
     return matrix
 
 
-def _center_and_normalize_points(points):
-    """Center and normalize image points.
+def _calc_center_normalize(points, scaling='rms'):
+    """Calculate transformation `matrix` to center and normalize image points.
 
-    The points are transformed in a two-step procedure that is expressed
-    as a transformation matrix. The matrix of the resulting points is usually
-    better conditioned than the matrix of the original points.
+    Points are an array of shape (N, D).
 
-    Center the image points, such that the new coordinate system has its
-    origin at the centroid of the image points.
+    For `scaling` of 'raw', transformation returned `matrix` will be ``np.eye(D
+    + 1)``.  For other values of `scaling`, `matrix` expresses a two-step
+    translation and scaling procedure.  Points transformed with this `matrix`
+    usually give better conditioning for fundamental matrix estimation than the
+    original `points` [1]_.
 
-    Normalize the image points, such that the mean distance from the points
-    to the origin of the coordinate system is sqrt(D).
+    The two steps of transformation, for `scaling` other than 'raw', are:
 
-    If the points are all identical, the returned values will contain nan.
+    * Center the image points, such that the new coordinate system has its
+      origin at the centroid of the image points.
+    * Normalize the image points, such that the mean coordinate value of the
+      centered points is 1 (`scaling` == 'rms') or such that the
+      mean distance from the points to the origin of the coordinate system is
+      ``sqrt(D)`` (`scaling` == 'mrs').
+
+    If `scaling` != 'raw' and the points are all identical, the returned
+    `matrix` will be all ``np.nan``.
+
+    The 'mrs' scaling corresponds to the isotropic transformation
+    algorithm in [1]_. 'rms' is the default, and gives very similar
+    conditioning.
 
     Parameters
     ----------
     points : (N, D) array
         The coordinates of the image points.
+    scaling : {'rms', 'mrs', 'raw'}, optional
+        Scaling algorithm adjusting for magnitude of `points` after applying
+        calculated translation. See above for explanation.
 
     Returns
     -------
     matrix : (D+1, D+1) array_like
         The transformation matrix to obtain the new points.
-    new_points : (N, D) array
-        The transformed image points.
 
     References
     ----------
@@ -68,10 +81,18 @@ def _center_and_normalize_points(points):
 
     """
     n, d = points.shape
+    scaling = scaling.lower()
+    matrix = np.eye(d + 1)
+    if scaling == 'raw':
+        return matrix
     centroid = np.mean(points, axis=0)
-
     centered = points - centroid
-    rms = np.sqrt(np.sum(centered**2) / n)
+    if scaling == 'rms':
+        divisor = np.sqrt(np.mean(centered**2))
+    elif scaling == 'mrs':
+        divisor = np.mean(np.sqrt(np.sum(centered**2, axis=1))) / np.sqrt(d)
+    else:
+        raise ValueError(f'Unexpected "scaling" of "{scaling}"')
 
     # if all the points are the same, the transformation matrix cannot be
     # created. We return an equivalent matrix with np.nans as sentinel values.
@@ -79,14 +100,22 @@ def _center_and_normalize_points(points):
     # one, and those are only needed when actual 0 is reached, rather than some
     # small value; ie, we don't need to worry about numerical stability here,
     # only actual 0.
-    if rms == 0:
-        return np.full((d + 1, d + 1), np.nan), np.full(points.shape, np.nan)
+    if divisor == 0:
+        return matrix + np.nan
 
-    norm_factor = np.sqrt(d) / rms
-
-    matrix = np.eye(d + 1)
     matrix[:d, d] = -centroid
-    matrix[:d, :] *= norm_factor
+    matrix[:d, :] /= divisor
+    return matrix
+
+
+def _center_and_normalize_points(points, scaling='rms'):
+    """Convenience function to calculate and apply scaling
+
+    See: :func:`_calc_center_normalize` for details of the algorithm.
+    """
+    matrix = _calc_center_normalize(points, scaling)
+    if not np.all(np.isfinite(matrix)):
+        return matrix + np.nan, np.full_like(points, np.nan)
     return matrix, _apply_homogeneous(matrix, points)
 
 
@@ -401,10 +430,20 @@ class FundamentalMatrixTransform(_HMatrixTransform):
     intrinsic calibration of the images is known, the essential matrix describes
     the metric relation between the two images (`EssentialMatrixTransform`).
 
+    Notes
+    -----
+    See [1]_ and [2]_ for details of the estimation procedure.  [2]_ is a good
+    place to start.
+
     References
     ----------
     .. [1] Hartley, Richard, and Andrew Zisserman. Multiple view geometry in
            computer vision. Cambridge university press, 2003.
+    .. [2] Zhang, Zhengyou. "Determining the epipolar geometry and its
+           uncertainty: A review." International journal of computer vision 27
+           (1998): 161-195.
+           :DOI:`10.1023/A:1007941100561`
+           https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/RR-2927.pdf
 
     Parameters
     ----------
@@ -497,6 +536,8 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
     """
 
+    scaling = 'rms'
+
     def __call__(self, coords):
         """Apply forward transformation.
 
@@ -556,19 +597,20 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             raise ValueError('src.shape[0] must be equal or larger than 8.')
 
         # Center and normalize image points for better numerical stability.
-        src_matrix, src = _center_and_normalize_points(src)
-        dst_matrix, dst = _center_and_normalize_points(dst)
+        src_matrix = _calc_center_normalize(src, self.scaling)
+        dst_matrix = _calc_center_normalize(dst, self.scaling)
         if np.any(np.isnan(src_matrix + dst_matrix)):
             self.params = np.full((3, 3), np.nan)
             return 3 * [np.full((3, 3), np.nan)]
+        src_h = _append_homogeneous_dim(_apply_homogeneous(src_matrix, src))
+        dst_h = _append_homogeneous_dim(_apply_homogeneous(dst_matrix, dst))
 
         # Setup homogeneous linear equation as dst' * F * src = 0.
-        A = np.ones((src.shape[0], 9))
-        A[:, :2] = src
-        A[:, :3] *= dst[:, 0, np.newaxis]
-        A[:, 3:5] = src
-        A[:, 3:6] *= dst[:, 1, np.newaxis]
-        A[:, 6:8] = src
+        # Hartley notation u -> src[:, 0], v -> src[:, 1],
+        # u' -> dst[:, 0], v' -> dst[:, 1].  Required output cols are:
+        # uu', vu', u', uv', vv', v', u, v, 1
+        cols = [(d_v * s_v) for d_v in dst_h.T for s_v in src_h.T]
+        A = np.stack(cols, axis=1)
 
         # Solve for the nullspace of the constraint matrix.
         _, _, V = np.linalg.svd(A)
@@ -616,7 +658,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
             return 'Scaling failed for input points'
 
         # Enforcing the internal constraint that two singular values must be
-        # non-zero and one must be zero.
+        # non-zero and one must be zero (rank 2).
         U, S, V = np.linalg.svd(F_normalized)
         S[2] = 0
         F = U @ np.diag(S) @ V
@@ -987,6 +1029,8 @@ class ProjectiveTransform(_HMatrixTransform):
       ...
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
     """
+
+    scaling = 'rms'
 
     @property
     def _coeff_inds(self):
