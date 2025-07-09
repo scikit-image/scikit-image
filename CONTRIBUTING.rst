@@ -111,7 +111,8 @@ For a more detailed discussion, read these :doc:`detailed documents
 
    * To update your pull request, make your changes on your local repository
      and commit. As soon as those changes are pushed up (to the same branch as
-     before) the pull request will update automatically.
+     before) the pull request will update automatically. Please do *not*
+     force-push any commit once the review process has started.
 
    * Continuous integration (CI) services are triggered after each pull request
      submission to build the package, run unit tests, measure code coverage,
