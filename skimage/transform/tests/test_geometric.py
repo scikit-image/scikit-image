@@ -561,10 +561,10 @@ def _calc_distances(src, dst, F, metric='distance'):
     Fu = F @ src_h.T
     uFu = np.sum(dst_h.T * Fu, axis=0)
     if metric == 'distance':
-        # See Zhang, p163, and Notes above.
+        # See Zhang, p 163, and Notes above.
         return uFu / np.sqrt(np.sum(Fu[:-1] ** 2, axis=0))
     if metric == 'epip-distances':
-        # Hartley, p 585, section 7.1.4
+        # Hartley, p 585, section 7.1.4.
         Fu_dash = F.T @ dst_h.T
         scaler = 1 / np.sum(Fu[:-1] ** 2, axis=0) + 1 / np.sum(
             Fu_dash[:-1] ** 2, axis=0
