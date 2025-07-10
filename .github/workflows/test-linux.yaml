@@ -191,3 +191,4 @@ jobs:
           BUILD_TYPE: "linux tests"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

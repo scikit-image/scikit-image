@@ -1,3 +1,4 @@
+import re
 import sys
 import warnings
 
@@ -14,6 +15,8 @@ from skimage._shared.utils import (
     deprecate_func,
     deprecate_parameter,
     DEPRECATED,
+    FailedEstimationAccessError,
+    FailedEstimation,
 )
 
 complex_dtypes = [np.complex64, np.complex128]
@@ -30,7 +33,7 @@ except ImportError:
 
 
 def test_change_default_value():
-    @change_default_value('arg1', new_value=-1, changed_version='0.12')
+    @change_default_value('arg1', new_value=-1, changed_version='0.12', stacklevel=2)
     def foo(arg0, arg1=0, arg2=1):
         """Expected docstring"""
         return arg0, arg1, arg2
@@ -40,6 +43,7 @@ def test_change_default_value():
         new_value=-1,
         changed_version='0.12',
         warning_msg="Custom warning message",
+        stacklevel=2,
     )
     def bar(arg0, arg1=0, arg2=1):
         """Expected docstring"""
@@ -513,7 +517,8 @@ class Test_deprecate_parameter:
         def foo(arg0, old=DEPRECATED):
             pass
 
-        with pytest.raises(RuntimeError, match="Set stacklevel manually"):
+        regex = "Cannot determine stacklevel.*Set the stacklevel manually"
+        with pytest.raises(ValueError, match=regex):
             foo(0, 1)
 
         @deprecate_parameter(
@@ -528,3 +533,22 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match="`old` is deprecated") as records:
             bar(0, 1)
             testing.assert_stacklevel(records)
+
+
+def test_failed_estimation():
+    msg = 'Something went wrong with estimation'
+    fe = FailedEstimation(msg)
+    assert fe.message == msg
+    assert str(fe) == msg
+    assert repr(fe).startswith("FailedEstimation(")
+    assert bool(fe) is False
+
+    regex = re.compile('FailedEstimation is not callable.*Hint', flags=re.DOTALL)
+    with pytest.raises(FailedEstimationAccessError, match=regex):
+        fe(np.ones((10, 2)))
+
+    regex = re.compile(
+        "FailedEstimation has no attribute 'params'.*Hint", flags=re.DOTALL
+    )
+    with pytest.raises(FailedEstimationAccessError, match=regex):
+        fe.params

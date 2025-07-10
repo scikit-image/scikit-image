@@ -72,3 +72,4 @@ jobs:
           BUILD_TYPE: "nightly test"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
