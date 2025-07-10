@@ -35,7 +35,7 @@ This will raise a warning for any piece of code which needs updating to continue
 
 ## Updating existing code
 
-When switching to the new namespace in version 2.0, some code needs to be updated to keep working as before.
+When switching to the new namespace in version 2.0, some code will need updating to keep working as before.
 
 :::{note}
 Because these changes live in a new namespace, your code will _not_ break automatically if you don't explicitly change your imports and start importing from `skimage2`!
@@ -53,14 +53,14 @@ Because these changes live in a new namespace, your code will _not_ break automa
 
 **Description:**
 
-Starting with **version 0.26**, the value range of the parameter `image` is always preserved.
+Starting with **version 0.26**, the value range of the input `image` is always preserved.
 When `image` had an integer dtype, its value range was scaled -- unsigned integers to the interval [0, 1], signed integers to [-1, 1].
-This affected the now deprecated `threshold` parameter, whose absolute value would compare differently to a scaled or untouched value range.
-In other words, the same `threshold` value would have different effect depending on `image.dtype`.
+This affected the now deprecated `threshold` parameter, whose absolute value would compare differently with a scaled or preserved value range.
+In other words, the same `threshold` value would have different effects depending on `image.dtype`.
 With this deprecation, the new parameter `threshold_abs` is introduced.
-It will always be compared against a range preserving version of `image` and behave consistent regardless of `image.dtype`.
+It will always be compared against a range-preserving version of `image` and behave consistently regardless of `image.dtype`.
 
-Starting with **version 2.0** and the new `skimage2` namespace, the default values of these functions are updated too.
+Starting with **version 2.0** and the new `skimage2` namespace, the default values of these parameters are updated too.
 The default of `threshold` will be set to `None` and `threshold_rel` will be set to the old value of `threshold`.
 Calls to these functions that rely on default values may change behavior, so we recommend setting `threshold_abs` and `threshold_rel` explicitly.
 
@@ -89,7 +89,7 @@ Here is what the warning messages will advise:
 - Set `threshold_rel=None` explicitly if you are not passing an explicit value already.
   E.g., `blob_doh(image)` becomes `blob_doh(image, threshold_rel=None)` but `blob_doh(image, threshold_rel=0.6)` does not need to be modified.
 
-## Changes un-related to skimage2
+## Changes unrelated to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
 These are part of the API cleanup for skimage2 but are not breaking.
