@@ -61,6 +61,21 @@ def test_sobel_zeros():
     assert np.all(result == 0)
 
 
+def test_sobel_constant_cval():
+    """Sobel with non-zero cval in constant mode."""
+    value = 42.0
+    input = np.full((4, 4), value)
+
+    # Non-zero gradient at the boundary because by default it is being extended by zero.
+    s1 = filters.sobel(input, mode='constant')
+    assert np.any(s1 != 0)
+
+    # Gradient vanishes at the boundary as we extend the matrix with the same value
+    # as inside.
+    s2 = filters.sobel(input, mode='constant', cval=value)
+    assert np.all(s2 == 0)
+
+
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_sobel_mask(dtype):
     """Sobel on a masked array should be zero."""

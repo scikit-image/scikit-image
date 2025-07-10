@@ -1,10 +1,13 @@
+from inspect import ismethod
 import math
+from typing import Protocol, runtime_checkable, Self
 from warnings import warn
 
 import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
+from .._shared.utils import _deprecate_estimate, FailedEstimation
 
 _EPSILON = np.spacing(1)
 
@@ -19,9 +22,41 @@ def _check_data_atleast_2D(data):
         raise ValueError('Input data must be at least 2D.')
 
 
+@runtime_checkable
+class RansacModelProtocol(Protocol):
+    """Protocol for `ransac` model class."""
+
+    @classmethod
+    def from_estimate(cls, *data): ...
+
+    def residuals(self, *data): ...
+
+
 class BaseModel:
     def __init__(self):
         self.params = None
+
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
+        tf = cls()
+        msg = tf._estimate(data, warn_only=False)
+        return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
+
+def _warn_or_msg(msg, warn_only=True):
+    """If `warn_only`, warn with `msg`, return ``None``, else return `msg`
+
+    For `from_estimate` API, we want to return a ``FailedEstimation`` for these
+    estimation failures, which we do by setting ``warn_only=False``, and
+    passing back the `msg` from the ``_estimation`` method via this function.
+    For the deprecated ``estimate`` API, we want to warn (``warn_only=True``),
+    and return an incomplete transform.  The ``None`` return value indicates
+    the estimation has kind-of succeeded, for back compatibility.
+    """
+    if not warn_only:
+        return msg
+    warn(msg, category=RuntimeWarning, stacklevel=5)
+    return None
 
 
 class LineModelND(BaseModel):
@@ -44,9 +79,7 @@ class LineModelND(BaseModel):
     --------
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
-    >>> lm = LineModelND()
-    >>> lm.estimate(np.stack([x, y], axis=-1))
-    True
+    >>> lm = LineModelND.from_estimate(np.stack([x, y], axis=-1))
     >>> tuple(np.round(lm.params, 5))
     (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
     >>> res = lm.residuals(np.stack([x, y], axis=-1))
@@ -60,7 +93,8 @@ class LineModelND(BaseModel):
 
     """
 
-    def estimate(self, data):
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate line model from data.
 
         This minimizes the sum of shortest (orthogonal) distances
@@ -73,9 +107,21 @@ class LineModelND(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the line model if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
+
+            .. code-block:: python
+
+                model = LineModelND.from_estimate(...)
+                if not model:
+                    raise RuntimeError(f"Failed estimation: {model}")
         """
+        return super().from_estimate(data)
+
+    def _estimate(self, data, warn_only=True):
         _check_data_atleast_2D(data)
 
         origin = data.mean(axis=0)
@@ -91,11 +137,11 @@ class LineModelND(BaseModel):
             _, _, v = np.linalg.svd(data, full_matrices=False)
             direction = v[0]
         else:  # under-determined
-            return False
+            return 'estimate under-determined'
 
         self.params = (origin, direction)
 
-        return True
+        return None
 
     def residuals(self, data, params=None):
         """Determine residuals of data to model.
@@ -215,6 +261,25 @@ class LineModelND(BaseModel):
         y = self.predict(x, axis=0, params=params)[:, 1]
         return y
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate line model from data.
+
+        This minimizes the sum of shortest (orthogonal) distances
+        from the given data points to the estimated line.
+
+        Parameters
+        ----------
+        data : (N, dim) array
+            N points in a space of dimensionality ``dim >= 2``.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+        """
+        return self._estimate(data) is None
+
 
 class CircleModel(BaseModel):
     """Total least squares estimator for 2D circles.
@@ -251,18 +316,40 @@ class CircleModel(BaseModel):
     --------
     >>> t = np.linspace(0, 2 * np.pi, 25)
     >>> xy = CircleModel().predict_xy(t, params=(2, 3, 4))
-    >>> model = CircleModel()
-    >>> model.estimate(xy)
-    True
+    >>> model = CircleModel.from_estimate(xy)
     >>> tuple(np.round(model.params, 5))
     (2.0, 3.0, 4.0)
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get a transform that is not
+    "truthy" - meaning that ``bool(tform)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy:
+    >>> if model:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_model = CircleModel.from_estimate(bad_data)
+    >>> if not bad_model:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_model.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def estimate(self, data):
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate circle model from data using total least squares.
 
         Parameters
@@ -272,11 +359,21 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the circle model if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
+            .. code-block:: python
+
+                model = CircleModel.from_estimate(...)
+                if not model:
+                    raise RuntimeError(f"Failed estimation: {model}")
         """
+        return super().from_estimate(data)
 
+    def _estimate(self, data, warn_only=True):
         _check_data_dim(data, dim=2)
 
         # to prevent integer overflow, cast data to float, if it isn't already
@@ -288,13 +385,12 @@ class CircleModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "circle with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
+
         data /= scale
 
         # Adapted from a spherical estimator covered in a blog post by Charles
@@ -305,8 +401,10 @@ class CircleModel(BaseModel):
         C, _, rank, _ = np.linalg.lstsq(A, f, rcond=None)
 
         if rank != 3:
-            warn("Input does not contain enough significant data points.")
-            return False
+            return _warn_or_msg(
+                "Input does not contain enough significant data points.",
+                warn_only=warn_only,
+            )
 
         center = C[0:2]
         distances = spatial.minkowski_distance(center, data)
@@ -318,7 +416,7 @@ class CircleModel(BaseModel):
         center += origin
         self.params = tuple(center) + (r,)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -372,6 +470,23 @@ class CircleModel(BaseModel):
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate circle model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+        """
+        return self._estimate(data) is None
+
 
 class EllipseModel(BaseModel):
     """Total least squares estimator for 2D ellipses.
@@ -404,17 +519,39 @@ class EllipseModel(BaseModel):
 
     >>> xy = EllipseModel().predict_xy(np.linspace(0, 2 * np.pi, 25),
     ...                                params=(10, 15, 8, 4, np.deg2rad(30)))
-    >>> ellipse = EllipseModel()
-    >>> ellipse.estimate(xy)
-    True
+    >>> ellipse = EllipseModel.from_estimate(xy)
     >>> np.round(ellipse.params, 2)
     array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
+
+    The estimation can fail when — for example — all the input or output
+    points are the same.  If this happens, you will get an ellipse model for
+    which ``bool(model)`` is ``False``:
+
+    >>> # A successfully estimated model is truthy:
+    >>> if ellipse:
+    ...     print("Estimation succeeded.")
+    Estimation succeeded.
+    >>> # Not so for a degenerate model with identical points.
+    >>> bad_data = np.ones((4, 2))
+    >>> bad_ellipse = EllipseModel.from_estimate(bad_data)
+    >>> if not bad_ellipse:
+    ...     print("Estimation failed.")
+    Estimation failed.
+
+    Trying to use this failed estimation transform result will give a suitable
+    error:
+
+    >>> bad_ellipse.residuals(xy)  # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+      ...
+    FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def estimate(self, data):
+    @classmethod
+    def from_estimate(cls, data) -> Self | FailedEstimation:
         """Estimate ellipse model from data using total least squares.
 
         Parameters
@@ -424,9 +561,17 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        success : bool
-            True, if model estimation succeeds.
+        model : Self or ``FailedEstimation``
+            An instance of the ellipse model if the estimation succeeded.
+            Otherwise, we return a special ``FailedEstimation`` object to
+            signal a failed estimation. Testing the truth value of the failed
+            estimation object will return ``False``. E.g.
 
+            .. code-block:: python
+
+                model = EllipseModel.from_estimate(...)
+                if not model:
+                    raise RuntimeError(f"Failed estimation: {model}")
 
         References
         ----------
@@ -436,17 +581,18 @@ class EllipseModel(BaseModel):
                WSCG (Vol. 98, pp. 125-132).
 
         """
+        return super().from_estimate(data)
+
+    def _estimate(self, data, warn_only=True):
         # Original Implementation: Ben Hammel, Nick Sullivan-Molina
         # another REFERENCE: [2] http://mathworld.wolfram.com/Ellipse.html
         _check_data_dim(data, dim=2)
 
         if len(data) < 5:
-            warn(
+            return _warn_or_msg(
                 "Need at least 5 data points to estimate an ellipse.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
 
         # to prevent integer overflow, cast data to float, if it isn't already
         float_type = np.promote_types(data.dtype, np.float32)
@@ -458,13 +604,11 @@ class EllipseModel(BaseModel):
         data = data - origin
         scale = data.std()
         if scale < np.finfo(float_type).tiny:
-            warn(
+            return _warn_or_msg(
                 "Standard deviation of data is too small to estimate "
                 "ellipse with meaningful precision.",
-                category=RuntimeWarning,
-                stacklevel=2,
+                warn_only=warn_only,
             )
-            return False
         data /= scale
 
         x = data[:, 0]
@@ -487,7 +631,7 @@ class EllipseModel(BaseModel):
             # Reduced scatter matrix [eqn. 29]
             M = inv(C1) @ (S1 - S2 @ inv(S3) @ S2.T)
         except np.linalg.LinAlgError:  # LinAlgError: Singular matrix
-            return False
+            return 'Singular matrix from estimation'
 
         # M*|a b c >=l|a b c >. Find eigenvalues and eigenvectors
         # from this equation [eqn. 28]
@@ -500,7 +644,7 @@ class EllipseModel(BaseModel):
         a1 = eig_vecs[:, (cond > 0)]
         # seeks for empty matrix
         if 0 in a1.shape or len(a1.ravel()) != 3:
-            return False
+            return 'Eigenvector constraints not met'
         a, b, c = a1.ravel()
 
         # |d f g> = -S3^(-1)*S2^(T)*|a b c> [eqn. 24]
@@ -547,7 +691,7 @@ class EllipseModel(BaseModel):
 
         self.params = tuple(float(p) for p in params)
 
-        return True
+        return None
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -644,6 +788,31 @@ class EllipseModel(BaseModel):
 
         return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
+    @_deprecate_estimate
+    def estimate(self, data):
+        """Estimate ellipse model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with ``(x, y)`` coordinates, respectively.
+
+        Returns
+        -------
+        success : bool
+            True, if model estimation succeeds.
+
+
+        References
+        ----------
+        .. [1] Halir, R.; Flusser, J. "Numerically stable direct least squares
+               fitting of ellipses". In Proc. 6th International Conference in
+               Central Europe on Computer Graphics and Visualization.
+               WSCG (Vol. 98, pp. 125-132).
+
+        """
+        return self._estimate(data) is None
+
 
 def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     """Determine number trials such that at least one outlier-free subset is
@@ -680,6 +849,44 @@ def _dynamic_max_trials(n_inliers, n_samples, min_samples, probability):
     return np.ceil(np.log(nom) / np.log(denom))
 
 
+def add_from_estimate(cls):
+    """Add ``from_estimate`` method  class using ``estimate`` method"""
+
+    if hasattr(cls, 'from_estimate'):
+        if not ismethod(cls.from_estimate):
+            raise TypeError(f'Class {cls} `from_estimate` must be a ' 'class method.')
+        return cls
+
+    if not hasattr(cls, 'estimate'):
+        raise TypeError(
+            f'Class {cls} must have `from_estimate` class method '
+            'or `estimate` method.'
+        )
+
+    warn(
+        "Passing custom classes without `from_estimate` has been deprecated "
+        "since version 0.26 and will be removed in version 2.2. "
+        "Add `from_estimate` class method to custom class to avoid this "
+        "warning.",
+        category=FutureWarning,
+        stacklevel=3,
+    )
+
+    class FromEstimated(cls):
+        @classmethod
+        def from_estimate(klass, *args, **kwargs):
+            # Assume we can make default instance without input arguments.
+            instance = klass()
+            success = instance.estimate(*args, **kwargs)
+            return (
+                instance
+                if success
+                else FailedEstimation(f'`{cls.__name__}` estimation failed')
+            )
+
+    return FromEstimated
+
+
 def ransac(
     data,
     model_class,
@@ -703,7 +910,7 @@ def ransac(
     1. Select `min_samples` random samples from the original data and check
        whether the set of data is valid (see `is_data_valid`).
     2. Estimate a model to the random subset
-       (`model_cls.estimate(*data[random_subset]`) and check whether the
+       (`model_cls.from_estimate(*data[random_subset]`) and check whether the
        estimated model is valid (see `is_model_valid`).
     3. Classify all data as inliers or outliers by calculating the residuals
        to the estimated model (`model_cls.residuals(*data)`) - all data samples
@@ -730,14 +937,30 @@ def ransac(
         ``is_model_valid(model, *random_data)`` and
         ``is_data_valid(*random_data)`` must all take each data array as
         separate arguments.
-    model_class : object
-        Object with the following object methods:
+    model_class : type
+        Class with the following methods:
 
-         * ``success = estimate(*data)``
-         * ``residuals(*data)``
+        * Either:
 
-        where `success` indicates whether the model estimation succeeded
-        (`True` or `None` for success, `False` for failure).
+          * ``from_estimate`` class method returning transform instance, as in
+            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform`` should be truthy (``bool(tform) == True``) where
+            estimation succeeded, or falsey (``bool(tform) == False``) where it
+            failed;  OR
+          * (deprecated) ``estimate`` instance method, returning flag to
+            indicate successful estimation, as in ``tform = model_class();
+            success = tform.estimate(*data)``. ``success == True`` when
+            estimation succeeded, ``success == False`` when it failed.
+
+        * ``residuals(*data)``
+
+        Your model should conform to the ``RansacModelProtocol`` — meaning
+        implement all of the methods / attributes specified by the
+        :class:``RansacModelProctocol``. An easy check to see whether that is
+        the case is to use ``isinstance(MyModel, RansacModelProtocol)``. See
+        https://docs.python.org/3/library/typing.html#typing.Protocol for more
+        details.
+
     min_samples : int in range (0, N)
         The minimum number of data points to fit a model to.
     residual_threshold : float larger than 0
@@ -808,9 +1031,7 @@ def ransac(
 
     Estimate ellipse model using all available data:
 
-    >>> model = EllipseModel()
-    >>> model.estimate(data)
-    True
+    >>> model = EllipseModel.from_estimate(data)
     >>> np.round(model.params)  # doctest: +SKIP
     array([ 72.,  75.,  77.,  14.,   1.])
 
@@ -903,8 +1124,15 @@ def ransac(
         else rng.choice(num_samples, min_samples, replace=False)
     )
 
-    # estimate model for current random sample set
-    model = model_class()
+    # Ensure model_class has from_estimate class method.
+    model_class = add_from_estimate(model_class)
+
+    # Check protocol.
+    if not isinstance(model_class, RansacModelProtocol):
+        raise TypeError(
+            f"`model_class` {model_class} should be of (protocol) type "
+            "RansacModelProtocol"
+        )
 
     num_trials = 0
     # max_trials can be updated inside the loop, so this cannot be a for-loop
@@ -922,9 +1150,9 @@ def ransac(
         if validate_data and not is_data_valid(*samples):
             continue
 
-        success = model.estimate(*samples)
+        model = model_class.from_estimate(*samples)
         # backwards compatibility
-        if success is not None and not success:
+        if not model:
             continue
 
         # optional check if estimated model is valid
@@ -966,7 +1194,7 @@ def ransac(
     if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        model.estimate(*data_inliers)
+        model = model_class.from_estimate(*data_inliers)
         if validate_model and not is_model_valid(model, *data_inliers):
             warn("Estimated model is not valid. Try increasing max_trials.")
     else:
@@ -974,4 +1202,5 @@ def ransac(
         best_inliers = None
         warn("No inliers found. Model not fitted")
 
-    return model, best_inliers
+    # Return model from wrapper, otherwise model itself.
+    return getattr(model, 'model', model), best_inliers
