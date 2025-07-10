@@ -20,8 +20,13 @@ from skimage.transform import AffineTransform
 MODEL_CLASSES = CircleModel, EllipseModel, LineModelND
 
 
+DUMMY_LINE_ARGS = ((0, 0), (1, 1))
+DUMMY_CIRCLE_ARGS = ((0, 0), 1)
+DUMMY_ELLIPSE_ARGS = ((0, 0), (1, 2), 0.2)
+
+
 def test_line_model_predict():
-    model = LineModelND((0, 0), (1, 1))
+    model = LineModelND(*DUMMY_LINE_ARGS)
     x = np.arange(-10, 10)
     y = model.predict_y(x)
     assert_almost_equal(x, model.predict_x(y))
@@ -31,7 +36,7 @@ def test_line_model_nd_invalid_input():
     # Test combinations of init and params.
 
     # A default model.
-    default_lm = LineModelND((0, 0), (1, 1))
+    default_lm = LineModelND(*DUMMY_LINE_ARGS)
     x = default_lm.predict_x(np.zeros(1))
     assert x == 0
 
@@ -52,7 +57,7 @@ def test_line_model_nd_invalid_input():
             meth(inp)
 
         # If we do pass parameters as `params`, they need to match init.
-        with testing.raises(ValueError, match='Input `params` must be length 2'):
+        with testing.raises(ValueError, match='Input `params` should be length 4'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 meth(inp, np.zeros(1))
 
@@ -89,7 +94,7 @@ def test_line_model_nd_estimate():
     # we scale the unit vector with a factor 10 when generating points on the
     # line in order to compensate for the scale of the random noise
     data0 = (
-        model0.params[0] + 10 * np.arange(-100, 100)[..., np.newaxis] * model0.params[1]
+        model0.origin + 10 * np.arange(-100, 100)[..., np.newaxis] * model0.direction
     )
 
     # add gaussian noise to data
@@ -105,13 +110,13 @@ def test_line_model_nd_estimate():
     # a cross-product equal to zero
     # test if direction vectors are aligned
     assert_almost_equal(
-        np.linalg.norm(np.cross(model0.params[1], model_est.params[1])), 0, 1
+        np.linalg.norm(np.cross(model0.direction, model_est.direction)), 0, 1
     )
     # test if origins are aligned with the direction
-    a = model_est.params[0] - model0.params[0]
+    a = model_est.origin - model0.origin
     if np.linalg.norm(a) > 0:
         a /= np.linalg.norm(a)
-    assert_almost_equal(np.linalg.norm(np.cross(model0.params[1], a)), 0, 1)
+    assert_almost_equal(np.linalg.norm(np.cross(model0.direction, a)), 0, 1)
 
     # With estimate method.
     with pytest.warns(FutureWarning, match='Calling ``LineModelND'):
@@ -120,7 +125,8 @@ def test_line_model_nd_estimate():
         assert model2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_array_equal(model2.params, model_est.params)
+    assert_array_equal(model2.origin, model_est.origin)
+    assert_array_equal(model2.direction, model_est.direction)
 
 
 def test_line_model_nd_residuals():
@@ -128,7 +134,7 @@ def test_line_model_nd_residuals():
     assert_equal(abs(model.residuals(np.array([[0, 0, 0]]))), 0)
     assert_equal(abs(model.residuals(np.array([[0, 0, 1]]))), 0)
     assert_equal(abs(model.residuals(np.array([[10, 0, 0]]))), 10)
-    # test params argument in model.rediduals
+    # Test params argument in model.rediduals.
     data = np.array([[10, 0, 0]])
     model = LineModelND(np.array([0, 0, 0]), np.array([2, 0, 0]))
     assert_equal(abs(model.residuals(data)), 30)
@@ -155,7 +161,7 @@ def test_circle_model_invalid_input():
         np.zeros(1),  # center should be length 2.
         np.zeros(2),  # Need radius.
     ):
-        with testing.raises(ValueError, match='Input `params` must be length 3'):
+        with testing.raises(ValueError, match='Input `params` should be length 3'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
@@ -197,7 +203,8 @@ def test_circle_model_estimate():
     model_est = CircleModel.from_estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params, model_est.params, 0)
+    assert_almost_equal(model0.center, model_est.center, 0)
+    assert_almost_equal(model0.radius, model_est.radius, 0)
 
     # estimate method.
     with pytest.warns(FutureWarning, match='Calling ``CircleModel'):
@@ -206,7 +213,8 @@ def test_circle_model_estimate():
         assert model_est2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_array_equal(model_est2.params, model_est.params)
+    assert_array_equal(model_est2.center, model_est.center)
+    assert_array_equal(model_est2.radius, model_est.radius)
 
 
 def test_circle_model_int_overflow():
@@ -214,7 +222,8 @@ def test_circle_model_int_overflow():
     xy += 500
 
     model = CircleModel.from_estimate(xy)
-    assert_almost_equal(model.params, [500, 500, 1])
+    assert_almost_equal(model.center, [500, 500])
+    assert_almost_equal(model.radius, 1)
 
     # estimate method.
     with pytest.warns(FutureWarning, match='Calling ``CircleModel'):
@@ -223,7 +232,8 @@ def test_circle_model_int_overflow():
         assert model2.estimate(xy)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_almost_equal(model2.params, [500, 500, 1])
+    assert_almost_equal(model2.center, [500, 500])
+    assert_almost_equal(model2.radius, 1)
 
 
 def test_circle_model_residuals():
@@ -250,7 +260,7 @@ def test_circle_model_insufficient_data(data):
     assert str(tf).endswith(msg)
 
     # Deprecated estimate warning.
-    tf = CircleModel((0, 0), 1)  # Dummy parameters.
+    tf = CircleModel(*DUMMY_CIRCLE_ARGS)
     with expected_warnings([dep_msg, msg]) as _warnings:
         assert tf.estimate(data)
     assert_stacklevel(_warnings)
@@ -267,7 +277,7 @@ def test_circle_model_std_too_small():
     tf = CircleModel.from_estimate(data)
     assert not tf and str(tf).endswith(msg)
 
-    tf = CircleModel((0, 0), 1)  # Dummy parameters.
+    tf = CircleModel(*DUMMY_CIRCLE_ARGS)
     with pytest.warns(FutureWarning, match=dep_msg):
         with pytest.warns(RuntimeWarning, match=msg) as _warnings:
             assert tf.estimate(data)
@@ -300,14 +310,28 @@ def test_circle_model_estimate_from_small_scale_data():
     float_data = data.astype(np.float64)
     model = CircleModel.from_estimate(float_data)
     # test whether the predicted parameters are close to the original ones
-    assert_almost_equal(params, model.params)
+    assert_almost_equal(center, model.center)
+    assert_almost_equal(radius, model.radius)
     # estimate method
-    model = CircleModel((0, 0), 1)  # Dummy parameters.
+    model = CircleModel(*DUMMY_CIRCLE_ARGS)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model.estimate(float_data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_almost_equal(params, model.params)
+    assert_almost_equal(center, model.center)
+    assert_almost_equal(radius, model.radius)
+
+
+def _chk_ellipse_equal(model, model2):
+    assert_array_equal(model.center, model2.center)
+    assert_array_equal(model.ax_lens, model2.ax_lens)
+    assert_array_equal(model.theta, model2.theta)
+
+
+def _chk_ellipse_almost_equal(model, model2):
+    assert_almost_equal(model.center, model2.center)
+    assert_almost_equal(model.ax_lens, model2.ax_lens)
+    assert_almost_equal(model.theta, model2.theta)
 
 
 def test_ellipse_model_invalid_input():
@@ -333,7 +357,7 @@ def test_ellipse_model_invalid_input():
         [0, 0, 1],  # Need second axis length.
         [0, 0, 1, 1],  # Need theta
     ):
-        with testing.raises(ValueError, match='Input `params` must be length 5'):
+        with testing.raises(ValueError, match='Input `params` should be length 5'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 none_model.predict_xy(angles, params)
 
@@ -369,8 +393,8 @@ def test_ellipse_model_estimate(angle):
     # estimate parameters of noisy data
     model_est = EllipseModel.from_estimate(data)
 
-    # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params[:2], model_est.params[:2], 0)
+    # Test whether estimated parameters almost equal original parameters.
+    assert_almost_equal(model0.center, model_est.center, 0)
     res = model_est.residuals(data0)
     assert_array_less(res, np.ones(res.shape))
 
@@ -381,7 +405,7 @@ def test_ellipse_model_estimate(angle):
         assert model_est2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_array_equal(model_est.params, model_est2.params)
+    _chk_ellipse_equal(model_est, model_est2)
 
 
 @pytest.mark.parametrize('angle', np.arange(0, 180 + 1, 1))
@@ -403,19 +427,20 @@ def test_ellipse_parameter_stability(angle):
 
     # fit model to points
     ellipse_model = EllipseModel.from_estimate(points.T)
-    _, _, a_prime, b_prime, theta_prime = ellipse_model.params
+    (a_prime, b_prime) = ellipse_model.ax_lens
+    theta_prime = ellipse_model.theta
 
     assert_almost_equal(theta_prime, theta)
     assert_almost_equal(a_prime, a)
     assert_almost_equal(b_prime, b)
 
     # Estimate method
-    ellipse_model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
+    ellipse_model2 = EllipseModel(*DUMMY_ELLIPSE_ARGS)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert ellipse_model2.estimate(points.T)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_array_equal(ellipse_model.params, ellipse_model2.params)
+    _chk_ellipse_equal(ellipse_model, ellipse_model2)
 
 
 def test_ellipse_model_estimate_from_data():
@@ -565,19 +590,21 @@ def test_ellipse_model_estimate_from_data():
     model = EllipseModel.from_estimate(data)
 
     # test whether estimated parameters are smaller then 1000, so means stable
-    assert_array_less(model.params[:4], np.full(4, 1000))
+    assert np.all(model.center < 1000)
+    assert np.all(model.ax_lens < 1000)
 
     # test whether all parameters are more than 0. Negative values were the
     # result of an integer overflow
-    assert_array_less(np.zeros(4), np.abs(model.params[:4]))
+    assert np.all(model.center > 0)
+    assert np.all(model.ax_lens > 0)
 
     # estimate method
-    model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
+    model2 = EllipseModel(*DUMMY_ELLIPSE_ARGS)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_array_equal(model.params, model2.params)
+    _chk_ellipse_equal(model, model2)
 
 
 def test_ellipse_model_estimate_from_far_shifted_data():
@@ -606,13 +633,13 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     float_data = data.astype(np.float64)
     model = EllipseModel.from_estimate(float_data)
     # test whether the predicted parameters are close to the original ones
-    assert_almost_equal(params, model.params)
-    model2 = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
+    _chk_ellipse_almost_equal(em, model)
+    model2 = EllipseModel(*DUMMY_ELLIPSE_ARGS)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(float_data)
     assert_stacklevel(record)
     assert len(record) == 1
-    assert_almost_equal(params, model2.params)
+    _chk_ellipse_almost_equal(em, model2)
 
 
 # Passing on WASM
@@ -647,7 +674,7 @@ def test_ellipse_model_estimate_failers(data, msg):
     assert not tf
     assert str(tf).endswith(msg)
 
-    tf = EllipseModel((0, 0), (1, 2), 0.2)  # Dummy parameters.
+    tf = EllipseModel(*DUMMY_ELLIPSE_ARGS)
     with pytest.warns(FutureWarning, match=dep_msg):
         with pytest.warns(RuntimeWarning, match=msg) as _warnings:
             assert tf.estimate(data)
@@ -680,7 +707,8 @@ def test_ransac_shape():
     ransac(data0, CircleModel, 3, 5, rng=1)
 
     # test whether estimated parameters equal original parameters
-    assert_almost_equal(model0.params, model_est.params)
+    assert_almost_equal(model0.center, model_est.center)
+    assert_almost_equal(model0.radius, model_est.radius)
     for outlier in outliers:
         assert outlier not in inliers
 
@@ -966,7 +994,7 @@ def test_ransac_non_valid_best_model():
 
     def is_model_valid(model, *random_data) -> bool:
         """Allow models with a maximum of 10 degree tilt from the vertical"""
-        tilt = abs(np.arccos(np.dot(model.params[1], [0, 0, 1])))
+        tilt = abs(np.arccos(np.dot(model.direction, [0, 0, 1])))
         return tilt <= (10 / 180 * np.pi)
 
     rng = np.random.RandomState(1)
@@ -1006,3 +1034,20 @@ def test_init_estimate_deprecations(tf_class):
         assert tf.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
+
+
+@pytest.mark.parametrize(
+    'tf_class, dummy_args',
+    (
+        (LineModelND, DUMMY_LINE_ARGS),
+        (CircleModel, DUMMY_CIRCLE_ARGS),
+        (EllipseModel, DUMMY_ELLIPSE_ARGS),
+    ),
+)
+def test_params(tf_class, dummy_args):
+    tf = tf_class(*dummy_args)
+    msg = '`params` attribute deprecated; use object attributes directly'
+    with pytest.warns(FutureWarning, match=msg) as record:
+        p = tf.params
+    assert_stacklevel(record)
+    assert np.all(p == np.r_[*dummy_args])

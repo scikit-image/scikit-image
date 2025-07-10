@@ -1,7 +1,7 @@
 import inspect
 import math
 from typing import Protocol, runtime_checkable, Self
-from warnings import warn
+from warnings import warn, catch_warnings
 
 import numpy as np
 from numpy.linalg import inv
@@ -11,6 +11,7 @@ from .._shared.utils import (
     _deprecate_estimate,
     FailedEstimation,
     deprecate_parameter,
+    deprecate_func,
     DEPRECATED,
 )
 
@@ -38,9 +39,6 @@ class RansacModelProtocol(Protocol):
 
 
 class BaseModel:
-    def __init__(self):
-        self.params = None
-
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
         # In order to defer to the ``_estimate`` method, we first need to
@@ -51,9 +49,14 @@ class BaseModel:
         # `estimate` method, at which point we can move the estimation logic
         # from the ``_estimate`` methods, to the respective ``from_estimate``
         # class methods.
-        tf = object.__new__(cls)
+        with catch_warnings(action='ignore'):
+            tf = cls()
         msg = tf._estimate(data, warn_only=False)
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
+
+
+_PARAMS_DEP_START = '0.26'
+_PARAMS_DEP_STOP = '2.2'
 
 
 class _ParamsBaseModel(BaseModel):
@@ -61,13 +64,19 @@ class _ParamsBaseModel(BaseModel):
 
     We need this sub-class as long as we still have the deprecated ``params``
     argument to ``predict*`` methods.
+
+    Note that each inheriting class will need to implement
+    ``_params2init_params``, that breaks up the ``params`` vector into separate
+    components comprising the arguments to the function ``__init__``, and
+    checks the resulting input arguments for validity.
     """
 
-    def _get_params(self, params):
+    def _get_init_values(self, params):
         if params is None or params is DEPRECATED:
-            if self.params is None:
+            if getattr(self, self._init_args[0]) is None:
                 # Until the deprecation of no-argument initialization expires,
-                # it is easy to create a model where ``params is None``.
+                # it is easy to create a not-initialized model, evidenced by
+                # None values of the init attributes.
                 cls_name = type(self).__name__
                 raise ValueError(
                     '`params` argument must be specified when '
@@ -76,14 +85,17 @@ class _ParamsBaseModel(BaseModel):
                     f'{cls_name} with suitable input arguments, '
                     f'or by using ``{cls_name}.from_estimate``.'
                 )
-            return self.params
-        new_model = type(self)(*self._params2init_params(params))
-        return new_model.params
+            return [getattr(self, a) for a in self._init_args]
+        return self._params2init_params(params)
 
-    def _params2init_params(self, params):
-        if len(params) != 2:
-            raise ValueError('Input `params` must be length 2')
-        return params
+    @property
+    @deprecate_func(
+        deprecated_version=_PARAMS_DEP_START,
+        removed_version=_PARAMS_DEP_STOP,
+        hint='`params` attribute deprecated; use object attributes directly',
+    )
+    def params(self):
+        return np.r_[*[np.array(getattr(self, a)) for a in self._init_args]]
 
 
 def _warn_or_msg(msg, warn_only=True):
@@ -102,21 +114,21 @@ def _warn_or_msg(msg, warn_only=True):
     return None
 
 
-_PARAMS_DEP_START = '0.26'
-_PARAMS_DEP_STOP = '2.2'
-
-
 def _deprecate_no_args(cls):
     """Class decorator to allow, deprecate no input arguments to ``__init__``.
 
     Makes a new ``__init__`` method, that a) will allow option of passing no
     arguments, and b) when used thus, raises a deprecation warning.  Otherwise
     defers to an assumed-existing ``_args_init`` instance method to deal with
-    input arguments.
+    input arguments.  If there are no parameters, set desired parameters to
+    None, to signal uninitialized object.
 
-    At the end of deprecationg we can drop this decorator, and rename
+    At the end of deprecation we can drop this decorator, and rename
     ``_args_init`` to ``__init__``.
     """
+
+    args_init_sig = inspect.signature(cls._args_init)
+    cls._init_args = [k for k in args_init_sig.parameters if k != 'self']
 
     def init(self, *args, **kwargs):
         if len(args) or len(kwargs):
@@ -130,10 +142,11 @@ def _deprecate_no_args(cls):
             category=FutureWarning,
             stacklevel=2,
         )
-        self.params = None
+        # Blank initialization.
+        for k in cls._init_args:
+            setattr(self, k, None)
 
-    init.__signature__ = inspect.signature(cls._args_init)
-
+    init.__signature__ = args_init_sig
     cls.__init__ = init
     return cls
 
@@ -169,11 +182,6 @@ class LineModelND(_ParamsBaseModel):
     direction : array-like, shape (N,)
         Vector giving line direction.
 
-    Attributes
-    ----------
-    params : tuple
-        Line model parameters in the following order `origin`, `direction`.
-
     Raises
     ------
     ValueError
@@ -184,8 +192,10 @@ class LineModelND(_ParamsBaseModel):
     >>> x = np.linspace(1, 2, 25)
     >>> y = 1.5 * x + 3
     >>> lm = LineModelND.from_estimate(np.stack([x, y], axis=-1))
-    >>> tuple(np.round(lm.params, 5))
-    (array([1.5 , 5.25]), array([0.5547 , 0.83205]))
+    >>> lm.origin
+    array([1.5 , 5.25])
+    >>> lm.direction  # doctest: +FLOAT_CMP
+    array([0.5547 , 0.83205])
     >>> res = lm.residuals(np.stack([x, y], axis=-1))
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
@@ -198,7 +208,7 @@ class LineModelND(_ParamsBaseModel):
     """
 
     def _args_init(self, origin, direction):
-        """Initialize LineModelND instance.
+        """Initialize ``LineModelND`` instance.
 
         Parameters
         ----------
@@ -207,10 +217,19 @@ class LineModelND(_ParamsBaseModel):
         direction : array-like, shape (N,)
             Vector giving line direction.
         """
+        self.origin, self.direction = self._chk_init_params(origin, direction)
+
+    def _chk_init_params(self, origin, direction):
         origin, direction = (np.array(v) for v in (origin, direction))
         if len(origin) != len(direction):
             raise ValueError('Direction vector should be same length as origin point.')
-        self.params = origin, direction
+        return origin, direction
+
+    def _params2init_params(self, params):
+        params = np.array(params)
+        if len(params) != 4:
+            raise ValueError('Input `params` should be length 4')
+        return self._chk_init_params(params[:2], params[2:])
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -258,8 +277,8 @@ class LineModelND(_ParamsBaseModel):
         else:  # under-determined
             return 'estimate under-determined'
 
-        self.params = (origin, direction)
-
+        self.origin = origin
+        self.direction = direction
         return None
 
     @_deprecate_model_params
@@ -287,7 +306,7 @@ class LineModelND(_ParamsBaseModel):
             .. deprecated:: {{ start_version }}
         """
         _check_data_atleast_2D(data)
-        origin, direction = self._get_params(params)
+        origin, direction = self._get_init_values(params)
         if len(origin) != data.shape[1]:
             raise ValueError(
                 f'`origin` is {len(origin)}D, but `data` is {data.shape[1]}D'
@@ -325,8 +344,7 @@ class LineModelND(_ParamsBaseModel):
         ValueError
             If the line is parallel to the given axis.
         """
-        origin, direction = self._get_params(params)
-
+        origin, direction = self._get_init_values(params)
         if direction[axis] == 0:
             # line parallel to axis
             raise ValueError(f'Line parallel to axis {axis}')
@@ -447,11 +465,6 @@ class CircleModel(_ParamsBaseModel):
     radius : float
         Circle radius.
 
-    Attributes
-    ----------
-    params : tuple
-        Circle model parameters in the following order `xc`, `yc`, `r`.
-
     Notes
     -----
     The estimation is carried out using a 2D version of the spherical
@@ -474,8 +487,10 @@ class CircleModel(_ParamsBaseModel):
     >>> t = np.linspace(0, 2 * np.pi, 25)
     >>> xy = CircleModel((2, 3), 4).predict_xy(t)
     >>> model = CircleModel.from_estimate(xy)
-    >>> tuple(np.round(model.params, 5))
-    (2.0, 3.0, 4.0)
+    >>> model.center
+    array([2., 3.])
+    >>> model.radius
+    4.0
     >>> res = model.residuals(xy)
     >>> np.abs(np.round(res, 9))
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
@@ -515,9 +530,19 @@ class CircleModel(_ParamsBaseModel):
         radius : float
             Circle radius.
         """
+        self.center, self.radius = self._chk_init_params(center, radius)
+
+    def _chk_init_params(self, center, radius):
+        center = np.array(center)
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
-        self.params = tuple(center) + (radius,)
+        return center, radius
+
+    def _params2init_params(self, params):
+        params = np.array(params)
+        if len(params) != 3:
+            raise ValueError('Input `params` should be length 3')
+        return self._chk_init_params(params[:2], params[2])
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -581,12 +606,9 @@ class CircleModel(_ParamsBaseModel):
         distances = spatial.minkowski_distance(center, data)
         r = np.sqrt(np.mean(distances**2))
 
-        # revert normalization and set params
-        center *= scale
-        r *= scale
-        center += origin
-        self.params = tuple(center) + (r,)
-
+        # Revert normalization and set init params.
+        self.center = center * scale + origin
+        self.radius = r * scale
         return None
 
     def residuals(self, data):
@@ -608,17 +630,13 @@ class CircleModel(_ParamsBaseModel):
 
         _check_data_dim(data, dim=2)
 
-        xc, yc, r = self.params
+        xc, yc = self.center
+        r = self.radius
 
         x = data[:, 0]
         y = data[:, 1]
 
         return r - np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
-
-    def _params2init_params(self, params):
-        if len(params) < 3:
-            raise ValueError('Input `params` must be length 3')
-        return params[:2], params[2]
 
     @_deprecate_model_params
     def predict_xy(self, t, params=DEPRECATED):
@@ -643,7 +661,7 @@ class CircleModel(_ParamsBaseModel):
             .. deprecated:: {{ start_version }}
         """
         t = np.asanyarray(t)
-        xc, yc, r = self._get_params(params)
+        (xc, yc), r = self._get_init_values(params)
 
         x = xc + r * np.cos(t)
         y = yc + r * np.sin(t)
@@ -695,12 +713,6 @@ class EllipseModel(_ParamsBaseModel):
     theta : float
         Angle of first axis.
 
-    Attributes
-    ----------
-    params : tuple
-        Ellipse model parameters in the following order ``xc``, ``yc``, `a`,
-        `b`, `theta`.
-
     Raises
     ------
     ValueError
@@ -712,8 +724,12 @@ class EllipseModel(_ParamsBaseModel):
     >>> em = EllipseModel((10, 15), (8, 4), np.deg2rad(30))
     >>> xy = em.predict_xy(np.linspace(0, 2 * np.pi, 25))
     >>> ellipse = EllipseModel.from_estimate(xy)
-    >>> np.round(ellipse.params, 2)
-    array([10.  , 15.  ,  8.  ,  4.  ,  0.52])
+    >>> ellipse.center
+    array([10., 15.])
+    >>> ellipse.ax_lens
+    array([8., 4.])
+    >>> round(ellipse.theta, 2)
+    0.52
     >>> np.round(abs(ellipse.residuals(xy)), 5)
     array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
            0., 0., 0., 0., 0., 0., 0., 0.])
@@ -743,23 +759,35 @@ class EllipseModel(_ParamsBaseModel):
     """
 
     def _args_init(self, center, ax_lens, theta):
-        """Initialize CircleModel instance.
+        """Initialize ``EllipseModel`` instance.
 
         Parameters
         ----------
         center : array-like, shape (2,)
             Coordinates of ellipse center.
         ax_lens : array-like, shape (2,)
-            Length of first axis and length of second axis.  Call these ``a`` and
-            ``b``.
+            Length of first axis and length of second axis.  Call these ``a``
+            and ``b``.
         theta : float
             Angle of first axis.
         """
+        self.center, self.ax_lens, self.theta = self._chk_init_params(
+            center, ax_lens, theta
+        )
+
+    def _chk_init_params(self, center, ax_lens, theta):
+        center, ax_lens = [np.array(v) for v in (center, ax_lens)]
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
         if not len(ax_lens) == 2:
             raise ValueError('Axis lengths should be length 2')
-        self.params = tuple(center) + tuple(ax_lens) + (theta,)
+        return center, ax_lens, theta
+
+    def _params2init_params(self, params):
+        params = np.array(params)
+        if len(params) != 5:
+            raise ValueError('Input `params` should be length 5')
+        return self._chk_init_params(params[:2], params[2:4], params[4])
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -895,13 +923,12 @@ class EllipseModel(_ParamsBaseModel):
 
         phi %= np.pi
 
-        # revert normalization and set params
+        # Revert normalization and set parameters.
         params = np.nan_to_num([x0, y0, width, height, phi]).real
         params[:4] *= scale
         params[:2] += origin
 
-        self.params = tuple(float(p) for p in params)
-
+        self.center, self.ax_lens, self.theta = (params[:2], params[2:4], params[-1])
         return None
 
     def residuals(self, data):
@@ -923,7 +950,9 @@ class EllipseModel(_ParamsBaseModel):
 
         _check_data_dim(data, dim=2)
 
-        xc, yc, a, b, theta = self.params
+        xc, yc = self.center
+        a, b = self.ax_lens
+        theta = self.theta
 
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
@@ -966,11 +995,6 @@ class EllipseModel(_ParamsBaseModel):
 
         return residuals
 
-    def _params2init_params(self, params):
-        if len(params) < 5:
-            raise ValueError('Input `params` must be length 5')
-        return params[:2], params[2:4], params[4]
-
     @_deprecate_model_params
     def predict_xy(self, t, params=DEPRECATED):
         """Predict x- and y-coordinates using the estimated model.
@@ -995,8 +1019,7 @@ class EllipseModel(_ParamsBaseModel):
             .. deprecated:: {{ start_version }}
         """
         t = np.asanyarray(t)
-
-        xc, yc, a, b, theta = self._get_params(params)
+        (xc, yc), (a, b), theta = self._get_init_values(params)
 
         ct = np.cos(t)
         st = np.sin(t)
@@ -1252,14 +1275,22 @@ def ransac(
     Estimate ellipse model using all available data:
 
     >>> model = EllipseModel.from_estimate(data)
-    >>> np.round(model.params)  # doctest: +SKIP
-    array([ 72.,  75.,  77.,  14.,   1.])
+    >>> np.round(model.center)
+    array([71., 75.])
+    >>> np.round(model.ax_lens)
+    array([77., 13.])
+    >>> np.round(model.theta)
+    1.0
 
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
-    >>> abs(np.round(ransac_model.params))  # doctest: +SKIP
-    array([20., 30., 10.,  6.,  2.])
+    >>> np.abs(np.round(ransac_model.center))
+    array([20., 30.])
+    >>> np.abs(np.round(ransac_model.ax_lens))
+    array([10., 6.])
+    >>> np.abs(np.round(ransac_model.theta))
+    2.0
     >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
