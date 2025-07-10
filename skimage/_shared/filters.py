@@ -6,6 +6,8 @@ The unit tests remain under skimage/filters/tests/
 """
 
 from collections.abc import Iterable
+from functools import wraps
+import warnings
 
 import numpy as np
 from scipy import ndimage as ndi
@@ -14,6 +16,50 @@ from .._shared.utils import (
     _supported_float_type,
     convert_to_float,
 )
+from ..util import img_as_float
+
+
+_PRESERVE_RANGE_DEFAULT_WARNING = """\
+Must set parameter `preserve_range` explicitly.
+
+Starting in version 2.0 and skimage2, the default of the parameter
+`preserve_range` will change from `True` to `False`.
+
+We suggest setting `preserve_range=True` and updating your code to account for
+the new preserved value range.
+
+However, if you want to maintain the exact old behavior across all releases:
+
+- Set `preserve_range=True`.
+- Wrap the input to the `image` parameter with `skimage.util.img_as_float`
+  before passing it to the function. This will conditionally rescale the input
+  range of the `image` as before depending on its dtype.
+
+For more details, see the migration guide:
+https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html
+"""
+
+
+def _deprecate_range_scaling(func):
+    @wraps(func)
+    def wrapper(image, *args, **kwargs):
+        if "preserve_range" not in kwargs:
+            warnings.warn(
+                message=_PRESERVE_RANGE_DEFAULT_WARNING,
+                stacklevel=2,
+                # TODO use PendingSkimage2Change
+                category=PendingDeprecationWarning,
+            )
+            image = img_as_float(image)
+
+        elif kwargs["preserve_range"] is False:
+            warnings.warn(
+                message=_PRESERVE_RANGE_DEFAULT_WARNING,
+                stacklevel=2,
+                # TODO use PendingSkimage2Change
+                category=PendingDeprecationWarning,
+            )
+            image = img_as_float(image)
 
 
 def gaussian(
