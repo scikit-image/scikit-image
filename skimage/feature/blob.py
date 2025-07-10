@@ -13,7 +13,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
 )
-from ..util import PendingSkimage2Change
+from ..util import PendingSkimage2Change, img_as_float
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
@@ -233,14 +233,17 @@ default value which will be changed.  In version 2.2 (or later), this parameter
 will be removed completely. Set `threshold_abs` explicitly to `None` or a valid
 value to silence this warning.
 
-To maintain the old behavior, if `image` is of floating dtype, simple use the
-old `threshold` value for `threshold_abs`. If `image` is of integer dtype,
-adjust the old `threshold` value with:
+Since the old behavior dtype-specific behavior might have been unexpected, we
+suggest setting `threshold_abs=None` and finding an appropriate relative value
+for `threshold_rel`.
 
-    import numpy as np
-    threshold_abs = threshold * {scale_factor_eq}
+However, if you want to maintain the exact old behavior across all releases:
 
-Hint: {hint}
+- Set `threshold_rel=None` (to ignore the new default in version 2.0).
+- Set `threshold_abs` to the old value of `threshold`.
+- Wrap the input to the `image` parameter with `skimage.util.img_as_float`
+  before passing it to the function. This will conditionally rescale the input
+  range of the `image` as before depending on its dtype.
 
 For more details, see the migration guide:
 https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs
@@ -263,40 +266,19 @@ def _deprecate_threshold_with_scaling(func):
     """Warn if deprecated `threshold` is used or `threshold_abs` isn't.
 
     If the deprecated `threshold` is used implicitly or explicitly, its value
-    is adjusted if necessary and passed to the new `threshold_abs` instead.
-    `threshold` is then assigned `DEPRECATED`.
-
-    `blob_doh` is special cased, because the scaling factor needs to be
-    squared.
+    is passed to `threshold_abs` instead. `threshold` is then assigned
+    `DEPRECATED`. Finally, `image` is rescaled with :func:`~.img_as_float`
+    to preserve the old behavior during the deprecation cycle.
     """
-    scale_factor_eq = "np.iinfo(image.dtype).max"
-
-    def scale_threshold(image, threshold):
-        if threshold is not None and image.dtype.kind in "ui":
-            threshold *= np.iinfo(image.dtype).max
-        return threshold
-
-    if func.__name__ == "blob_doh":
-        scale_factor_eq = "np.iinfo(image.dtype).max ** 2"
-
-        def scale_threshold(image, threshold):
-            if threshold is not None and image.dtype.kind in "ui":
-                threshold *= np.iinfo(image.dtype).max ** 2
-            return threshold
 
     @wraps(func)
     def wrapper(image, *args, **kwargs):
         if len(args) >= 5 or "threshold" in kwargs:
             # Deprecated `threshold` is passed explicitly
-
             threshold = kwargs["threshold"] if "threshold" in kwargs else args[4]
-            threshold_abs = scale_threshold(image, threshold)
 
             msg = _THRESHOLD_WARNING.format(
-                summary="Parameter `threshold` is deprecated.",
-                hint=f"For `image` with dtype '{image.dtype}', "
-                f"`{threshold=}` is equivalent to\n`{threshold_abs=}`.",
-                scale_factor_eq=scale_factor_eq,
+                summary="Parameter `threshold` is deprecated."
             )
             warnings.warn(msg, category=FutureWarning, stacklevel=2)
 
@@ -312,28 +294,30 @@ def _deprecate_threshold_with_scaling(func):
                 kwargs["threshold"] = DEPRECATED
             else:
                 args = args[:4] + (DEPRECATED, *args[5:])
-            kwargs["threshold_abs"] = threshold_abs
+            kwargs["threshold_abs"] = threshold
+
+            # Rescale `image` to preserve old behavior during deprecation
+            image = img_as_float(image)
 
         elif "threshold_abs" not in kwargs:
             # Required `threshold_abs` is not given explicitly, extract old
-            # default from `threshold` and scale
+            # default from `threshold`
             sig = inspect.signature(func)
             threshold = sig.parameters["threshold"].default
             assert isinstance(threshold, float)
-            threshold_abs = scale_threshold(image, threshold)
 
             kwargs["threshold"] = DEPRECATED
-            kwargs["threshold_abs"] = threshold_abs
+            kwargs["threshold_abs"] = threshold
 
             # Default of deprecated `threshold` was used implicitly,
             # will change in skimage2
             msg = _THRESHOLD_WARNING.format(
-                summary="Must set new parameter `threshold_abs` explicitly.",
-                hint=f"For `image` with dtype '{image.dtype}', the default "
-                f"`{threshold=}` is equivalent to\n`{threshold_abs=}`.",
-                scale_factor_eq=scale_factor_eq,
+                summary="Must set new parameter `threshold_abs` explicitly."
             )
             warnings.warn(msg, category=PendingSkimage2Change, stacklevel=2)
+
+            # Rescale `image` to preserve old behavior during deprecation
+            image = img_as_float(image)
 
         else:
             kwargs["threshold"] = DEPRECATED
@@ -395,16 +379,24 @@ def blob_dog(
             affects the value of maxima relative to this absolute value.
 
         .. deprecated:: 0.26.0
+
             This parameter is deprecated in favor of the new `threshold_abs`
             parameter which preservers the value range of `image`. This
             includes leaving `threshold` unspecified and relying on its default
             value. In version 2.2 (or later), this parameter will be removed
-            completely. When switching to `threshold_abs`, if `image` is of
-            integer dtype, adjust the old `threshold` with:
+            completely.
 
-            .. code:: python
+            Since the old behavior dtype-specific behavior might have been
+            unexpected, we suggest setting `threshold_abs=None` and finding an
+            appropriate relative value for `threshold_rel`. However, if you
+            want to maintain the exact old behavior across all releases:
 
-                threshold_abs = threshold * np.iinfo(image.dtype).max
+            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
+            - Set `threshold_abs` to the old value of `threshold`.
+            - Wrap the input to the `image` parameter with
+              :func:`skimage.util.img_as_float` before passing it to the
+              function. This will conditionally rescale the input
+              range of the `image` as before depending on its dtype.
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -613,16 +605,24 @@ def blob_log(
             affects the value of maxima relative to this absolute value.
 
         .. deprecated:: 0.26.0
+
             This parameter is deprecated in favor of the new `threshold_abs`
             parameter which preservers the value range of `image`. This
             includes leaving `threshold` unspecified and relying on its default
             value. In version 2.2 (or later), this parameter will be removed
-            completely. When switching to `threshold_abs`, if `image` is of
-            integer dtype, adjust the old `threshold` with:
+            completely.
 
-            .. code:: python
+            Since the old behavior dtype-specific behavior might have been
+            unexpected, we suggest setting `threshold_abs=None` and finding an
+            appropriate relative value for `threshold_rel`. However, if you
+            want to maintain the exact old behavior across all releases:
 
-                threshold_abs = threshold * np.iinfo(image.dtype).max
+            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
+            - Set `threshold_abs` to the old value of `threshold`.
+            - Wrap the input to the `image` parameter with
+              :func:`skimage.util.img_as_float` before passing it to the
+              function. This will conditionally rescale the input
+              range of the `image` as before depending on its dtype.
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -804,16 +804,24 @@ def blob_doh(
             affects the value of maxima relative to this absolute value.
 
         .. deprecated:: 0.26.0
+
             This parameter is deprecated in favor of the new `threshold_abs`
             parameter which preservers the value range of `image`. This
             includes leaving `threshold` unspecified and relying on its default
             value. In version 2.2 (or later), this parameter will be removed
-            completely. When switching to `threshold_abs`, if `image` is of
-            integer dtype, adjust the old `threshold` with:
+            completely.
 
-            .. code:: python
+            Since the old behavior dtype-specific behavior might have been
+            unexpected, we suggest setting `threshold_abs=None` and finding an
+            appropriate relative value for `threshold_rel`. However, if you
+            want to maintain the exact old behavior across all releases:
 
-                threshold_abs = threshold * np.iinfo(image.dtype).max ** 2
+            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
+            - Set `threshold_abs` to the old value of `threshold`.
+            - Wrap the input to the `image` parameter with
+              :func:`skimage.util.img_as_float` before passing it to the
+              function. This will conditionally rescale the input
+              range of the `image` as before depending on its dtype.
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -881,7 +889,7 @@ def blob_doh(
     -----
     The radius of each blob is approximately `sigma`.
     Computation of Determinant of Hessians is independent of the standard
-    deviation. Therefore detecting larger blobs won't take more time. In
+    deviation. Therefore, detecting larger blobs won't take more time. In
     methods line :py:meth:`blob_dog` and :py:meth:`blob_log` the computation
     of Gaussians for larger `sigma` takes more time. The downside is that
     this method can't be used for detecting blobs of radius less than `3px`

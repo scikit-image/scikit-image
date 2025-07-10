@@ -217,14 +217,7 @@ def test_blob_dog_threshold_rescaling():
     assert result.shape == (0, 3)
 
     # Warning about pending skimage2 breakage
-    regex = (
-        "(?s).*"
-        "Must set new parameter `threshold_abs` explicitly.*"
-        r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
-        ".*"
-        "Hint: For `image` with dtype .* `threshold=0.5` is equivalent to\n"
-        f"`threshold_abs={0.5 * scale_factor}`."
-    )
+    regex = "(?s).*Must set new parameter `threshold_abs` explicitly.*"
     with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_dog(image)
     assert_stacklevel(record)
@@ -470,13 +463,7 @@ def test_blob_log_threshold_rescaling():
     assert result.shape == (0, 3)
 
     # Warning about pending skimage2 breakage
-    regex = (
-        "(?s).*"
-        r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max"
-        ".*"
-        "Hint: For `image` with dtype .* `threshold=0.2` is equivalent to\n"
-        f"`threshold_abs={0.2 * scale_factor}`."
-    )
+    regex = "(?s).*Must set new parameter `threshold_abs` explicitly.*"
     with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_log(image)
     assert_stacklevel(record)
@@ -651,13 +638,7 @@ def test_blob_doh_threshold_rescaling():
     assert result.shape == (0, 3)
 
     # Test the upgrade hint
-    regex = (
-        "(?s).*"
-        r"threshold_abs = threshold \* np.iinfo\(image.dtype\).max \*\* 2"
-        ".*"
-        "Hint: For `image` with dtype .* `threshold=0.01` is equivalent to\n"
-        f"`threshold_abs={0.01 * scale_factor}`."
-    )
+    regex = "(?s).*Must set new parameter `threshold_abs` explicitly.*"
     with pytest.warns(PendingSkimage2Change, match=regex) as record:
         blob_doh(image)
     assert_stacklevel(record)
