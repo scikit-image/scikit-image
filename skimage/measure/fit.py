@@ -66,7 +66,7 @@ class _ParamsBaseModel(BaseModel):
     argument to ``predict*`` methods.
 
     Note that each inheriting class will need to implement
-    ``_params2init_params``, that breaks up the ``params`` vector into separate
+    ``_params2init_values``, that breaks up the ``params`` vector into separate
     components comprising the arguments to the function ``__init__``, and
     checks the resulting input arguments for validity.
     """
@@ -86,7 +86,7 @@ class _ParamsBaseModel(BaseModel):
                     f'or by using ``{cls_name}.from_estimate``.'
                 )
             return [getattr(self, a) for a in self._init_args]
-        return self._params2init_params(params)
+        return self._params2init_values(params)
 
     @property
     @deprecate_func(
@@ -217,19 +217,20 @@ class LineModelND(_ParamsBaseModel):
         direction : array-like, shape (N,)
             Vector giving line direction.
         """
-        self.origin, self.direction = self._chk_init_params(origin, direction)
+        self.origin, self.direction = self._chk_init_values(origin, direction)
 
-    def _chk_init_params(self, origin, direction):
+    def _chk_init_values(self, origin, direction):
         origin, direction = (np.array(v) for v in (origin, direction))
         if len(origin) != len(direction):
             raise ValueError('Direction vector should be same length as origin point.')
         return origin, direction
 
-    def _params2init_params(self, params):
+    def _params2init_values(self, params):
         params = np.array(params)
         if len(params) != 4:
             raise ValueError('Input `params` should be length 4')
-        return self._chk_init_params(params[:2], params[2:])
+        return self._chk_init_values(params[:2], params[2:])
+
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -383,7 +384,7 @@ class LineModelND(_ParamsBaseModel):
         tf = (
             self
             if (params is None or params is DEPRECATED)
-            else type(self)(*self._params2init_params(params))
+            else type(self)(*self._params2init_values(params))
         )
         x = tf.predict(y, axis=1)[:, 0]
         return x
@@ -418,7 +419,7 @@ class LineModelND(_ParamsBaseModel):
         tf = (
             self
             if (params is None or params is DEPRECATED)
-            else type(self)(*self._params2init_params(params))
+            else type(self)(*self._params2init_values(params))
         )
         y = tf.predict(x, axis=0)[:, 1]
         return y
@@ -530,19 +531,19 @@ class CircleModel(_ParamsBaseModel):
         radius : float
             Circle radius.
         """
-        self.center, self.radius = self._chk_init_params(center, radius)
+        self.center, self.radius = self._chk_init_values(center, radius)
 
-    def _chk_init_params(self, center, radius):
+    def _chk_init_values(self, center, radius):
         center = np.array(center)
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
         return center, radius
 
-    def _params2init_params(self, params):
+    def _params2init_values(self, params):
         params = np.array(params)
         if len(params) != 3:
             raise ValueError('Input `params` should be length 3')
-        return self._chk_init_params(params[:2], params[2])
+        return self._chk_init_values(params[:2], params[2])
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -771,11 +772,11 @@ class EllipseModel(_ParamsBaseModel):
         theta : float
             Angle of first axis.
         """
-        self.center, self.ax_lens, self.theta = self._chk_init_params(
+        self.center, self.ax_lens, self.theta = self._chk_init_values(
             center, ax_lens, theta
         )
 
-    def _chk_init_params(self, center, ax_lens, theta):
+    def _chk_init_values(self, center, ax_lens, theta):
         center, ax_lens = [np.array(v) for v in (center, ax_lens)]
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
@@ -783,11 +784,11 @@ class EllipseModel(_ParamsBaseModel):
             raise ValueError('Axis lengths should be length 2')
         return center, ax_lens, theta
 
-    def _params2init_params(self, params):
+    def _params2init_values(self, params):
         params = np.array(params)
         if len(params) != 5:
             raise ValueError('Input `params` should be length 5')
-        return self._chk_init_params(params[:2], params[2:4], params[4])
+        return self._chk_init_values(params[:2], params[2:4], params[4])
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
