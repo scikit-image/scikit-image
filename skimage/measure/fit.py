@@ -46,7 +46,7 @@ class RansacModelProtocol(Protocol):
 # * Delete `BaseModel`
 # * Delete `_params2init_values` methods.
 # * Delete `params` properties of models.
-# * Nove `_chk_init_values` into `_args_init`.
+# * Nove `_check_init_values` into `_args_init`.
 # * Rename `_arg_init` methods to `__init__`.
 # * Clean `params` parsing from `predict_*` methods.
 
@@ -219,9 +219,9 @@ class LineModelND(BaseModel):
         direction : array-like, shape (N,)
             Vector giving line direction.
         """
-        self.origin, self.direction = self._chk_init_values(origin, direction)
+        self.origin, self.direction = self._check_init_values(origin, direction)
 
-    def _chk_init_values(self, origin, direction):
+    def _check_init_values(self, origin, direction):
         origin, direction = (np.array(v) for v in (origin, direction))
         if len(origin) != len(direction):
             raise ValueError('Direction vector should be same length as origin point.')
@@ -230,7 +230,7 @@ class LineModelND(BaseModel):
     def _params2init_values(self, params):
         if len(params) != 2:
             raise ValueError('Input `params` should be length 2')
-        return self._chk_init_values(*params)
+        return self._check_init_values(*params)
 
     @property
     @deprecate_func(
@@ -541,9 +541,9 @@ class CircleModel(BaseModel):
         radius : float
             Circle radius.
         """
-        self.center, self.radius = self._chk_init_values(center, radius)
+        self.center, self.radius = self._check_init_values(center, radius)
 
-    def _chk_init_values(self, center, radius):
+    def _check_init_values(self, center, radius):
         center = np.array(center)
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
@@ -553,7 +553,7 @@ class CircleModel(BaseModel):
         params = np.array(params)
         if len(params) != 3:
             raise ValueError('Input `params` should be length 3')
-        return self._chk_init_values(params[:2], params[2])
+        return self._check_init_values(params[:2], params[2])
 
     @property
     @deprecate_func(
@@ -792,11 +792,11 @@ class EllipseModel(BaseModel):
         theta : float
             Angle of first axis.
         """
-        self.center, self.ax_lens, self.theta = self._chk_init_values(
+        self.center, self.ax_lens, self.theta = self._check_init_values(
             center, ax_lens, theta
         )
 
-    def _chk_init_values(self, center, ax_lens, theta):
+    def _check_init_values(self, center, ax_lens, theta):
         center, ax_lens = [np.array(v) for v in (center, ax_lens)]
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
@@ -808,7 +808,7 @@ class EllipseModel(BaseModel):
         params = np.array(params)
         if len(params) != 5:
             raise ValueError('Input `params` should be length 5')
-        return self._chk_init_values(params[:2], params[2:4], params[4])
+        return self._check_init_values(params[:2], params[2:4], params[4])
 
     @property
     @deprecate_func(
