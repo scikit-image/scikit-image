@@ -109,8 +109,7 @@ class _ParamsBaseModel(BaseModel):
         hint='`params` attribute deprecated; use object attributes directly',
     )
     def params(self):
-        """ Return model attributes as 1D array.
-        """
+        """Return model attributes as 1D array."""
         return np.r_[*[np.array(getattr(self, a)) for a in self._init_args]]
 
 
@@ -253,8 +252,7 @@ class LineModelND(_ParamsBaseModel):
         hint='`params` attribute deprecated; use object attributes directly',
     )
     def params(self):
-        """ Return model attributes as tuple.
-        """
+        """Return model attributes as tuple."""
         return self.origin, self.direction
 
     @classmethod

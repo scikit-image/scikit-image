@@ -57,8 +57,7 @@ def test_line_model_nd_invalid_input():
             meth(inp)
 
         # If we do pass parameters as `params`, they need to match init.
-        with testing.raises(ValueError,
-                            match='Input `params` should be length 2'):
+        with testing.raises(ValueError, match='Input `params` should be length 2'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 meth(inp, np.zeros(1))
 
