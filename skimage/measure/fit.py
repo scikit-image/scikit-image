@@ -43,11 +43,10 @@ class RansacModelProtocol(Protocol):
 # * Move `_estimate` code into `from_estimate`.
 # * Delete `_deprecate_no_args`.
 # * Delete `_deprecate_model_params`.
-# * Delete `BaseModel` and `_ParamsBaseModel` (though check `BaseModel` - is it
-#   used outside our codebase?)
-# * Nove `_chk_init_values` into `_args_init`.
+# * Delete `BaseModel`
 # * Delete `_params2init_values` methods.
-# * Delete `params` property of LineModelND.
+# * Delete `params` properties of models.
+# * Nove `_chk_init_values` into `_args_init`.
 # * Rename `_arg_init` methods to `__init__`.
 # * Clean `params` parsing from `predict_*` methods.
 
@@ -57,6 +56,17 @@ _PARAMS_DEP_STOP = '2.2'
 
 
 class BaseModel:
+    """Implement common methods for model classes.
+
+    This class can be removed when we expire deprecations of ``estimate``
+    method, and `params` arguments to ``predict*`` methods.
+
+    Note that each inheriting class will need to implement
+    ``_params2init_values``, that breaks up the ``params`` vector into separate
+    components comprising the arguments to the function ``__init__``, and
+    checks the resulting input arguments for validity.
+    """
+
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
         # In order to defer to the ``_estimate`` method, we first need to
@@ -71,19 +81,6 @@ class BaseModel:
             tf = cls()
         msg = tf._estimate(data, warn_only=False)
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
-
-
-class _ParamsBaseModel(BaseModel):
-    """Adds parameter parsing to BaseModel.
-
-    We need this sub-class as long as we still have the deprecated ``params``
-    argument to ``predict*`` methods.
-
-    Note that each inheriting class will need to implement
-    ``_params2init_values``, that breaks up the ``params`` vector into separate
-    components comprising the arguments to the function ``__init__``, and
-    checks the resulting input arguments for validity.
-    """
 
     def _get_init_values(self, params):
         if params is None or params is DEPRECATED:
@@ -101,16 +98,6 @@ class _ParamsBaseModel(BaseModel):
                 )
             return [getattr(self, a) for a in self._init_args]
         return self._params2init_values(params)
-
-    @property
-    @deprecate_func(
-        deprecated_version=_PARAMS_DEP_START,
-        removed_version=_PARAMS_DEP_STOP,
-        hint='`params` attribute deprecated; use object attributes directly',
-    )
-    def params(self):
-        """Return model attributes as 1D array."""
-        return np.r_[*[np.array(getattr(self, a)) for a in self._init_args]]
 
 
 def _warn_or_msg(msg, warn_only=True):
@@ -179,7 +166,7 @@ def _deprecate_model_params(func):
 
 
 @_deprecate_no_args
-class LineModelND(_ParamsBaseModel):
+class LineModelND(BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
     In contrast to ordinary least squares line estimation, this estimator
@@ -249,10 +236,10 @@ class LineModelND(_ParamsBaseModel):
     @deprecate_func(
         deprecated_version=_PARAMS_DEP_START,
         removed_version=_PARAMS_DEP_STOP,
-        hint='`params` attribute deprecated; use object attributes directly',
+        hint='`params` attribute deprecated; use ``origin, direction`` attributes instead',
     )
     def params(self):
-        """Return model attributes as tuple."""
+        """Return model attributes as ``origin, direction`` tuple."""
         return self.origin, self.direction
 
     @classmethod
@@ -468,7 +455,7 @@ class LineModelND(_ParamsBaseModel):
 
 
 @_deprecate_no_args
-class CircleModel(_ParamsBaseModel):
+class CircleModel(BaseModel):
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -567,6 +554,16 @@ class CircleModel(_ParamsBaseModel):
         if len(params) != 3:
             raise ValueError('Input `params` should be length 3')
         return self._chk_init_values(params[:2], params[2])
+
+    @property
+    @deprecate_func(
+        deprecated_version=_PARAMS_DEP_START,
+        removed_version=_PARAMS_DEP_STOP,
+        hint='`params` attribute deprecated; use `center, radius` attributes instead',
+    )
+    def params(self):
+        """Return model attributes ``center, radius`` as 1D array."""
+        return np.r_[self.center, self.radius]
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -711,7 +708,7 @@ class CircleModel(_ParamsBaseModel):
 
 
 @_deprecate_no_args
-class EllipseModel(_ParamsBaseModel):
+class EllipseModel(BaseModel):
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
@@ -812,6 +809,16 @@ class EllipseModel(_ParamsBaseModel):
         if len(params) != 5:
             raise ValueError('Input `params` should be length 5')
         return self._chk_init_values(params[:2], params[2:4], params[4])
+
+    @property
+    @deprecate_func(
+        deprecated_version=_PARAMS_DEP_START,
+        removed_version=_PARAMS_DEP_STOP,
+        hint='`params` attribute deprecated; use `center, ax_lens, theta` attributes instead',
+    )
+    def params(self):
+        """Return model attributes ``center, ax_lens, theta`` as 1D array."""
+        return np.r_[self.center, self.ax_lens, self.theta]
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:

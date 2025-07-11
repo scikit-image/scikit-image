@@ -1052,7 +1052,7 @@ def test_init_estimate_deprecations(tf_class):
 )
 def test_params(tf_class, dummy_args):
     tf = tf_class(*dummy_args)
-    msg = '`params` attribute deprecated; use object attributes directly'
+    msg = '`params` attribute deprecated; use .* attributes instead'
     with pytest.warns(FutureWarning, match=msg) as record:
         p = tf.params
     assert_stacklevel(record)
