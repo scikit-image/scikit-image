@@ -57,7 +57,8 @@ def test_line_model_nd_invalid_input():
             meth(inp)
 
         # If we do pass parameters as `params`, they need to match init.
-        with testing.raises(ValueError, match='Input `params` should be length 4'):
+        with testing.raises(ValueError,
+                            match='Input `params` should be length 2'):
             with pytest.warns(FutureWarning, match='Parameter `params` is deprecated'):
                 meth(inp, np.zeros(1))
 
@@ -79,10 +80,16 @@ def test_line_model_nd_invalid_input():
 
 
 def test_line_model_nd_predict():
-    model = LineModelND(np.array([0, 0]), np.array([0.2, 0.8]))
+    origin, direction = np.array([0, 0]), np.array([0.2, 0.8])
+    model = LineModelND(origin, direction)
     x = np.arange(-10, 10)
     y = model.predict_y(x)
     assert_almost_equal(x, model.predict_x(y))
+    # Same result from passing params into null object.
+    with pytest.warns(FutureWarning, match='Calling'):
+        null_model = LineModelND()
+    with pytest.warns(FutureWarning, match='Parameter'):
+        assert_almost_equal(x, null_model.predict_x(y, (origin, direction)))
 
 
 def test_line_model_nd_estimate():

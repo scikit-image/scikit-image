@@ -242,10 +242,9 @@ class LineModelND(_ParamsBaseModel):
         return origin, direction
 
     def _params2init_values(self, params):
-        params = np.array(params)
-        if len(params) != 4:
-            raise ValueError('Input `params` should be length 4')
-        return self._chk_init_values(params[:2], params[2:])
+        if len(params) != 2:
+            raise ValueError('Input `params` should be length 2')
+        return self._chk_init_values(*params)
 
     @property
     @deprecate_func(
