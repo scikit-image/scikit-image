@@ -38,6 +38,24 @@ class RansacModelProtocol(Protocol):
     def residuals(self, *data): ...
 
 
+# A note on expiring model init parameter deprecations
+#
+# * Move `_estimate` code into `from_estimate`.
+# * Delete `_deprecate_no_args`.
+# * Delete `_deprecate_model_params`.
+# * Delete `BaseModel` and `_ParamsBaseModel` (though check `BaseModel` - is it
+#   used outside our codebase?)
+# * Nove `_chk_init_values` into `_args_init`.
+# * Delete `_params2init_values` methods.
+# * Delete `params` property of LineModelND.
+# * Rename `_arg_init` methods to `__init__`.
+# * Clean `params` parsing from `predict_*` methods.
+
+
+_PARAMS_DEP_START = '0.26'
+_PARAMS_DEP_STOP = '2.2'
+
+
 class BaseModel:
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -53,10 +71,6 @@ class BaseModel:
             tf = cls()
         msg = tf._estimate(data, warn_only=False)
         return tf if msg is None else FailedEstimation(f'{cls.__name__}: {msg}')
-
-
-_PARAMS_DEP_START = '0.26'
-_PARAMS_DEP_STOP = '2.2'
 
 
 class _ParamsBaseModel(BaseModel):
