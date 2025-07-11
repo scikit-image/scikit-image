@@ -1050,4 +1050,8 @@ def test_params(tf_class, dummy_args):
     with pytest.warns(FutureWarning, match=msg) as record:
         p = tf.params
     assert_stacklevel(record)
-    assert np.all(p == np.r_[*dummy_args])
+    if tf_class is LineModelND:
+        assert np.all(p[0] == tf.origin)
+        assert np.all(p[1] == tf.direction)
+    else:
+        assert np.all(p == np.r_[*dummy_args])
