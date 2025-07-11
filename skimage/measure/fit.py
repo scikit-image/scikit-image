@@ -109,6 +109,8 @@ class _ParamsBaseModel(BaseModel):
         hint='`params` attribute deprecated; use object attributes directly',
     )
     def params(self):
+        """ Return model attributes as 1D array.
+        """
         return np.r_[*[np.array(getattr(self, a)) for a in self._init_args]]
 
 
@@ -245,6 +247,16 @@ class LineModelND(_ParamsBaseModel):
             raise ValueError('Input `params` should be length 4')
         return self._chk_init_values(params[:2], params[2:])
 
+    @property
+    @deprecate_func(
+        deprecated_version=_PARAMS_DEP_START,
+        removed_version=_PARAMS_DEP_STOP,
+        hint='`params` attribute deprecated; use object attributes directly',
+    )
+    def params(self):
+        """ Return model attributes as tuple.
+        """
+        return self.origin, self.direction
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
