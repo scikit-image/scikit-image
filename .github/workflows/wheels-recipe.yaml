@@ -254,7 +254,7 @@ jobs:
           CXX: clang-cl
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          # define CC, CXX so meson will use clang-cl instead of MSVC
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
           
       - name: Build ARM64 Windows wheels for CPython
