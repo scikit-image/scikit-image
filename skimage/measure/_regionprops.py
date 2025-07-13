@@ -78,6 +78,7 @@ PROPS = {
     'CroftonPerimeter': 'perimeter_crofton',
     # 'PixelIdxList',
     # 'PixelList',
+    'Roundness': 'roundness',
     'Slice': 'slice',
     'Solidity': 'solidity',
     # 'SubarrayIdx'
@@ -138,6 +139,7 @@ COL_DTYPES = {
     'orientation': float,
     'perimeter': float,
     'perimeter_crofton': float,
+    'roundness': float,
     'slice': object,
     'solidity': float,
 }
@@ -682,6 +684,12 @@ class RegionProperties:
         if len(np.unique(self._spacing)) != 1:
             raise NotImplementedError('`perimeter` supports isotropic spacings only')
         return perimeter_crofton(self.image, 4) * self._spacing[0]
+
+    @property
+    def roundness(self):
+        return self.area / (self.major_axis_length
+                            / 2 * self.minor_axis_length
+                            / 2 * math.pi)
 
     @property
     def solidity(self):
