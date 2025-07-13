@@ -202,3 +202,14 @@ ignored_user_logins = [
     "web-flow",
     "pre-commit-ci[bot]"
 ]
+
+
+[tool.isort]
+supported_extensions = ["pxd", "py", "pyi", "pyx"]
+force_single_line = "False"
+multi_line_output = "GRID"
+line_length = "80"
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+default_section = "THIRDPARTY"
+known_first_party = "skimage"
+skip = [".eggs", "build", "dist", "auto_examples"]
