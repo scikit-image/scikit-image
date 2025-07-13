@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Set up Emscripten toolchain
         uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
