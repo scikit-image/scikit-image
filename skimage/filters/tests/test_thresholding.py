@@ -630,6 +630,15 @@ def test_triangle_uniform_images(dtype):
     assert threshold_triangle(np.zeros((10, 10), dtype=dtype)) == 0
     assert threshold_triangle(np.ones((10, 10), dtype=dtype)) == 1
     assert threshold_triangle(np.full((10, 10), 2, dtype=dtype)) == 2
+    assert (
+        threshold_triangle(
+            hist=(
+                np.array([0, 100, 0], dtype=np.float32),
+                np.array([1, 2, 3], dtype=dtype),
+            )
+        )
+        == 2
+    )
 
 
 def test_triangle_uint_images():
@@ -637,6 +646,16 @@ def test_triangle_uint_images():
     assert threshold_triangle(data.text()) == 104
     assert threshold_triangle(data.coins()) == 80
     assert threshold_triangle(np.invert(data.coins())) == 175
+
+
+def test_triangle_histogram():
+    hist_text = histogram(data.text(), nbins=256, source_range='image')
+    assert threshold_triangle(hist=hist_text) == 104
+
+
+def test_triangle_counts():
+    counts_text, bin_centers = histogram(data.text(), nbins=256, source_range='image')
+    assert threshold_triangle(hist=counts_text) + bin_centers[0] == 104
 
 
 def test_triangle_float_images():
