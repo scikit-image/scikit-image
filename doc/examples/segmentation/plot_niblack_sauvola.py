@@ -26,7 +26,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage.data import page
-from skimage.filters import threshold_otsu, threshold_niblack, threshold_sauvola
+from skimage.segmentation import (
+    threshold_otsu,
+    threshold_local_niblack,
+    threshold_local_sauvola,
+)
 
 
 matplotlib.rcParams['font.size'] = 9
@@ -36,8 +40,8 @@ image = page()
 binary_global = image > threshold_otsu(image)
 
 window_size = 25
-thresh_niblack = threshold_niblack(image, window_size=window_size, k=0.8)
-thresh_sauvola = threshold_sauvola(image, window_size=window_size)
+thresh_niblack = threshold_local_niblack(image, window_size=window_size, k=0.8)
+thresh_sauvola = threshold_local_sauvola(image, window_size=window_size)
 
 binary_niblack = image > thresh_niblack
 binary_sauvola = image > thresh_sauvola

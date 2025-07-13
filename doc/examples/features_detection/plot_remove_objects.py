@@ -16,7 +16,7 @@ import skimage as ski
 
 # Extract foreground by thresholding an image taken by the Hubble Telescope
 image = ski.color.rgb2gray(ski.data.hubble_deep_field())
-foreground = image > ski.filters.threshold_li(image)
+foreground = image > ski.segmentation.threshold_li(image)
 objects = ski.measure.label(foreground)
 
 # Separate objects into regions larger and smaller than 100 pixels

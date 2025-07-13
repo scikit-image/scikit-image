@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data
-from skimage.filters import threshold_multiotsu
+from skimage.segmentation import threshold_multiotsu
 
 # Setting the font size for all plots.
 matplotlib.rcParams['font.size'] = 9

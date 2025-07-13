@@ -70,7 +70,7 @@ qcs.levels
 # To separate these three different classes of pixels, we
 # resort to :ref:`sphx_glr_auto_examples_segmentation_plot_multiotsu.py`.
 
-thresholds = ski.filters.threshold_multiotsu(image, classes=3)
+thresholds = ski.segmentation.threshold_multiotsu(image, classes=3)
 regions = np.digitize(image, bins=thresholds)
 
 fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
