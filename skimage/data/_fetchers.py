@@ -96,9 +96,36 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "{version}/skimage/"
+        url = "https://github.com/scikit-image/scikit-image/raw/{version}/skimage/"
     else:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "v{version}/skimage/"
+        url = "https://github.com/scikit-image/scikit-image/raw/v{version}/skimage/"
+
+    is_jupyterlite = False
+    try:
+        import pyodide_kernel  # noqa: F401
+
+        is_jupyterlite = True
+    except (ModuleNotFoundError, ImportError):
+        pass
+
+    # This code path modifies the registry_urls dictionary to route all
+    # GitLab resources through a CORS proxy (cdn.statically.io), making
+    # them accessible in environments with CORS restrictions, such as
+    # JupyterLite. See https://gitlab.com/gitlab-org/gitlab/-/issues/16732.
+    # GitHub's raw URLs provide CORS headers and don't need a proxy.
+    if is_jupyterlite:
+        import re
+
+        global registry_urls
+        new_registry_urls = {
+            k: re.sub(
+                r'https://gitlab.com/(.+)/-/raw(.+)',
+                r'https://cdn.statically.io/gl/\1\2',
+                url,
+            )
+            for k, url in registry_urls.items()
+        }
+        registry_urls = new_registry_urls
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
