@@ -1664,6 +1664,36 @@ class PiecewiseAffineTransform(_GeometricTransform):
                 if not tf:
                     raise RuntimeError(f"Failed estimation: {tf}")
 
+        Examples
+        --------
+        >>> import numpy as np
+        >>> import skimage as ski
+
+        Define source and destination points:
+
+        >>> src = np.array([[0, 3],
+        ...                [0, -1],
+        ...                [1, 2],
+        ...                [-1, 0],
+        ...                [1, 1],
+        ...                [-1, 1]])
+        >>> dst = np.array([[0, 0],
+        ...                [1, 0],
+        ...                [1, 1],
+        ...                [1, 2],
+        ...                [0, 2],
+        ...                [0, 1]])
+
+        Estimate the transformation matrix:
+
+        >>> tform = ski.transform.PiecewiseAffineTransform()
+        >>> tform.estimate(src, dst)
+        True
+
+        Check that all resulting residuals are small:
+
+        >>> tform.residuals(src, dst) < 1e-15
+        array([ True,  True,  True,  True,  True,  True])
         """
         return super().from_estimate(src, dst)
 
@@ -1719,23 +1749,26 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         """
         coords = np.asarray(coords)
-        out = np.empty_like(coords, np.float64)
 
         # determine triangle index for each coordinate
         simplex = self._tesselation.find_simplex(coords)
 
+        # stack of affine transforms to be applied to every coord
+        affines = np.stack([affine.params for affine in self.affines])[simplex]
+
+        # convert coords to homgeneous points
+        points = np.c_[coords, np.ones((coords.shape[0], 1))]
+
+        # apply affine transform to every point
+        result = np.einsum("ikj,ij->ik", affines, points)
+
         # coordinates outside of mesh
-        out[simplex == -1, :] = -1
+        result[simplex == -1, :] = -1
 
-        for index in range(len(self._tesselation.simplices)):
-            # affine transform for triangle
-            affine = self.affines[index]
-            # all coordinates within triangle
-            index_mask = simplex == index
+        # convert back to 2d coords
+        result = result[:, :2]
 
-            out[index_mask, :] = affine(coords[index_mask, :])
-
-        return out
+        return result
 
     @property
     def inverse(self):
