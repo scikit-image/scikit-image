@@ -1,3 +1,4 @@
+from itertools import product
 import re
 import textwrap
 
@@ -20,9 +21,16 @@ from skimage.transform import (
 from skimage.transform._geometric import (
     _GeometricTransform,
     _affine_matrix_from_vector,
+    _calc_center_normalize,
     _center_and_normalize_points,
+    _apply_homogeneous,
     _euler_rotation_matrix,
+    _append_homogeneous_dim,
+    TRANSFORMS,
 )
+from skimage import data
+
+from skimage._shared.utils import FailedEstimationAccessError
 
 SRC = np.array(
     [
@@ -47,6 +55,23 @@ DST = np.array(
         [3754, 790],
         [1024, 1931],
     ]
+)
+
+# Transforms accepting homogeneous matrix as input.
+HMAT_TFORMS = (
+    FundamentalMatrixTransform,
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
+)
+
+# Transforms allowing ND matrix.
+HMAT_TFORMS_ND = (
+    ProjectiveTransform,
+    AffineTransform,
+    EuclideanTransform,
+    SimilarityTransform,
 )
 
 
@@ -75,18 +100,28 @@ def test_euclidean_estimation():
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], -tform2.params[1, 0])
 
-    # via estimate method
-    tform3 = EuclideanTransform()
-    assert tform3.estimate(SRC, DST)
+    # via from_estimate classmethod
+    tform3 = EuclideanTransform.from_estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
+    # via estimate method
+    tform4 = EuclideanTransform.identity()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform4.estimate(SRC, DST)
+    assert_almost_equal(tform4.params, tform2.params)
 
 
-def test_3d_euclidean_estimation():
+@pytest.mark.parametrize(
+    'tform_class, has_scale', ((EuclideanTransform, False), (SimilarityTransform, True))
+)
+def test_3d_euclidean_similarity_estimation(tform_class, has_scale):
     src_points = np.random.rand(1000, 3)
 
     # Random transformation for testing
     angles = np.random.random((3,)) * 2 * np.pi - np.pi
     rotation_matrix = _euler_rotation_matrix(angles)
+    if has_scale:
+        scale = np.random.randint(0, 20)
+        rotation_matrix *= scale
     translation_vector = np.random.random((3,))
     dst_points = []
     for pt in src_points:
@@ -97,12 +132,17 @@ def test_3d_euclidean_estimation():
 
     dst_points = np.array(dst_points)
     # estimating the transformation
-    tform = EuclideanTransform(dimensionality=3)
-    assert tform.estimate(src_points, dst_points)
-    estimated_rotation = tform.rotation
-    estimated_translation = tform.translation
-    assert_almost_equal(estimated_rotation, rotation_matrix)
-    assert_almost_equal(estimated_translation, translation_vector)
+    tform = tform_class.from_estimate(src_points, dst_points)
+    assert tform
+    assert_almost_equal(tform.rotation, rotation_matrix)
+    assert_almost_equal(tform.translation, translation_vector)
+    if has_scale:
+        assert_almost_equal(tform.scale, scale)
+    # estimate method
+    tform2 = tform_class.identity(3)
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform2.estimate(src_points, dst_points)
+    assert_equal(tform.params, tform2.params)
 
 
 def test_euclidean_init():
@@ -146,37 +186,14 @@ def test_similarity_estimation():
     assert_almost_equal(tform2.params[0, 0], tform2.params[1, 1])
     assert_almost_equal(tform2.params[0, 1], -tform2.params[1, 0])
 
-    # via estimate method
-    tform3 = SimilarityTransform()
-    assert tform3.estimate(SRC, DST)
+    # via from_estimate classmethod
+    tform3 = SimilarityTransform.from_estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
-
-
-def test_3d_similarity_estimation():
-    src_points = np.random.rand(1000, 3)
-
-    # Random transformation for testing
-    angles = np.random.random((3,)) * 2 * np.pi - np.pi
-    scale = np.random.randint(0, 20)
-    rotation_matrix = _euler_rotation_matrix(angles) * scale
-    translation_vector = np.random.random((3,))
-    dst_points = []
-    for pt in src_points:
-        pt_r = pt.reshape(3, 1)
-        dst = np.matmul(rotation_matrix, pt_r) + translation_vector.reshape(3, 1)
-        dst = dst.reshape(3)
-        dst_points.append(dst)
-
-    dst_points = np.array(dst_points)
-    # estimating the transformation
-    tform = SimilarityTransform(dimensionality=3)
-    assert tform.estimate(src_points, dst_points)
-    estimated_rotation = tform.rotation
-    estimated_translation = tform.translation
-    estimated_scale = tform.scale
-    assert_almost_equal(estimated_translation, translation_vector)
-    assert_almost_equal(estimated_scale, scale)
-    assert_almost_equal(estimated_rotation, rotation_matrix)
+    # via estimate method
+    tform4 = SimilarityTransform()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform4.estimate(SRC, DST)
+    assert_almost_equal(tform4.params, tform2.params)
 
 
 def test_similarity_init():
@@ -226,6 +243,19 @@ def test_similarity_init():
     assert_almost_equal(tform.rotation, rotation)
     assert_almost_equal(tform.translation, translation)
 
+    # With scalar scale and 3D, we get a FutureWarning.  This is to
+    # generalize the rule that dimensionality should be implied by
+    # input parameters, when given.
+    with pytest.warns(FutureWarning):
+        tf = SimilarityTransform(scale=4, dimensionality=3)
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Not so if we specify some other input giving dimensionality.
+    tf = SimilarityTransform(scale=4, translation=(0, 0, 0))
+    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
+    # Or if we are in 2D, by analogy to shear etc - scalar implies 2D.
+    tf = SimilarityTransform(scale=4)
+    assert_equal(tf([[1, 1]]), [[4, 4]])
+
 
 def test_affine_estimation():
     # exact solution
@@ -236,10 +266,14 @@ def test_affine_estimation():
     tform2 = estimate_transform('affine', SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
-    # via estimate method
-    tform3 = AffineTransform()
-    assert tform3.estimate(SRC, DST)
+    # via from_estimate classmethod
+    tform3 = AffineTransform.from_estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
+    # via estimate method
+    tform4 = AffineTransform.identity()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform4.estimate(SRC, DST)
+    assert_almost_equal(tform4.params, tform2.params)
 
 
 def test_affine_init():
@@ -288,12 +322,57 @@ def test_affine_shear():
     assert_almost_equal(tform.params, expected)
 
 
+@pytest.mark.parametrize(
+    'pts, params',
+    product(
+        (SRC, DST),
+        (
+            dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12)),
+            dict(
+                scale=(-0.5, 3), shear=(-0.3, -0.1), rotation=1.4, translation=(-4, 3)
+            ),
+        ),
+    ),
+)
+def test_affine_params(pts, params):
+    # Test AffineTransform against docstring algorithm.
+    out = AffineTransform(**params)(pts)
+    docstr_out = _apply_aff_2d(pts, **params)
+    assert np.allclose(out, docstr_out)
+
+
+def _apply_aff_2d(pts, scale, rotation, shear, translation):
+    # Algorithm from AffineTransform docstring.
+    x, y = pts.T
+    sx, sy = scale
+    shear_x, shear_y = shear
+    translation_x, translation_y = translation
+    cos, tan, sin = np.cos, np.tan, np.sin
+    X = (
+        sx * x * (cos(rotation) + tan(shear_y) * sin(rotation))
+        - sy * y * (tan(shear_x) * cos(rotation) + sin(rotation))
+        + translation_x
+    )
+    Y = (
+        sx * x * (sin(rotation) - tan(shear_y) * cos(rotation))
+        - sy * y * (tan(shear_x) * sin(rotation) - cos(rotation))
+        + translation_y
+    )
+    return np.stack((X, Y), axis=1)
+
+
 def test_piecewise_affine():
-    tform = PiecewiseAffineTransform()
-    assert tform.estimate(SRC, DST)
+    tform = PiecewiseAffineTransform.from_estimate(SRC, DST)
+    assert tform
     # make sure each single affine transform is exactly estimated
     assert_almost_equal(tform(SRC), DST)
     assert_almost_equal(tform.inverse(DST), SRC)
+    # via estimate method
+    tform2 = PiecewiseAffineTransform()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform2.estimate(SRC, DST)
+    assert_almost_equal(tform2(SRC), DST)
+    assert_almost_equal(tform2.inverse(DST), SRC)
 
 
 def test_fundamental_matrix_estimation():
@@ -443,7 +522,60 @@ def test_fundamental_matrix_inverse_estimation():
     np.testing.assert_array_almost_equal(tform.inverse.params, tform_inv.params)
 
 
+def _calc_distances(src, dst, F, metric='distance'):
+    """Distances between calculated epipolar lines and points
+
+    Parameters
+    ----------
+    src : (N, D) array
+        Points in first image.
+    dst : (N, D) array
+        Matching points in second image.
+    F : (3, 3) array
+        Fundamental matrix mapping `src` to epipolar lines passing through `dst`.
+    metric : {'distance', 'epip-distances'}, optional
+        Matrix for distance between actual points `dst` and epipolar lines
+        generated from `F`.  'distance' is signed distance from [1]_.
+        'epip-distances' is the squared sum of distances of points from epipolar
+        lines in both images.  See [2]_, section 7.1.4.
+
+    Notes
+    -----
+    See `Wikipedia on point-line distance
+    <https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#A_vector_projection_proof>`__
+    for standard distance formula, and various proofs.
+
+    References
+    ----------
+    .. [1] Zhang, Zhengyou. "Determining the epipolar geometry and its
+           uncertainty: A review." International journal of computer vision 27
+           (1998): 161-195.
+           :DOI:`10.1023/A:1007941100561`
+           https://www.microsoft.com/en-us/research/wp-content/uploads/2016/11/RR-2927.pdf
+    .. [2] Hartley, Richard I. "In defense of the eight-point algorithm."
+           Pattern Analysis and Machine Intelligence, IEEE Transactions on 19.6
+           (1997): 580-593.
+           https://users.cecs.anu.edu.au/~hartley/Papers/fundamental/fundamental.pdf
+    """
+    src_h, dst_h = [_append_homogeneous_dim(pts) for pts in (src, dst)]
+    Fu = F @ src_h.T
+    uFu = np.sum(dst_h.T * Fu, axis=0)
+    if metric == 'distance':
+        # See Zhang, p 163, and Notes above.
+        return uFu / np.sqrt(np.sum(Fu[:-1] ** 2, axis=0))
+    if metric == 'epip-distances':
+        # Hartley, p 585, section 7.1.4.
+        Fu_dash = F.T @ dst_h.T
+        scaler = 1 / np.sum(Fu[:-1] ** 2, axis=0) + 1 / np.sum(
+            Fu_dash[:-1] ** 2, axis=0
+        )
+        return (uFu**2) * scaler
+    raise ValueError(f'Invalid metric "{metric}"')
+
+
 def test_fundamental_matrix_epipolar_projection():
+    # See https://github.com/matthew-brett/test-fundamental-matrices
+    # for validation of fundamental matrix estimation methods.
     src = np.array(
         [
             1.839035,
@@ -486,18 +618,95 @@ def test_fundamental_matrix_epipolar_projection():
         ]
     ).reshape(-1, 2)
 
-    tform = estimate_transform('fundamental', src, dst)
+    tform = FundamentalMatrixTransform.from_estimate(src, dst)
+    assert tform
 
-    # calculate x' F x for each coordinate; should be close to zero
-    p = np.abs(np.sum(np.column_stack((dst, np.ones(len(dst)))) * tform(src), axis=1))
-    assert np.all(p < 0.01)
+    # Calculate and test pixel distances.
+    rms_ds = np.abs(_calc_distances(src, dst, tform.params))
+    assert np.all(rms_ds < 0.5)
+
+    # Check same output from utility function.
+    tform_from_func = estimate_transform('fundamental', src, dst)
+    assert np.allclose(tform.params, tform_from_func.params)
+
+    # Check this corresponds to RMS scaling.
+    class FMTRMS(FundamentalMatrixTransform):
+        scaling = 'rms'
+
+    tform_rms = FMTRMS.from_estimate(src, dst)
+    assert tform_rms
+    assert np.allclose(tform.params, tform_rms.params)
+
+    # Check that we can also use MRS (Hartley distance).
+    class FMTMRS(FundamentalMatrixTransform):
+        scaling = 'mrs'
+
+    tform_mrs = FMTMRS.from_estimate(src, dst)
+    # MRS gives us a different F matrix.
+    assert tform_mrs
+    assert not np.allclose(tform.params, tform_mrs.params)
+    # But with acceptable (in this case slightly larger) distances.
+    mrs_ds = _calc_distances(src, dst, tform_mrs.params)
+    assert np.all(np.abs(mrs_ds) < 0.6)
+
+    # F matrix is as for OpenCV (CV2) (but with different scaling).
+    # !pip install opencv-python-headless
+    # import cv2
+    # cv2.findFundamentalMat(src, dst, cv2.FM_8POINT)[0]
+    cv2_f = np.array(
+        [
+            [-10.30598589, 19.82710842, -1.61417041],
+            [-3.41654338, 2.12186874, 1.06697878],
+            [11.76321795, -20.29016731, 1.0],
+        ]
+    )
+    # OpenCV matrix scaled such that final element is 1.
+    assert np.allclose(tform_mrs.params / tform_mrs.params[-1, -1], cv2_f)
+    # Distances are the same (because difference is only in scaling).
+    assert np.allclose(mrs_ds, _calc_distances(src, dst, cv2_f), atol=1e-7)
+
+    # We can also (for comparison) use raw estimating (without centering or
+    # scaling).
+    class FMTRaw(FundamentalMatrixTransform):
+        scaling = 'raw'
+
+    tform_raw = FMTRaw.from_estimate(src, dst)
+    # Raw gives us a different F matrix from RMS or MRS.
+    assert tform_raw
+    assert not np.allclose(tform.params, tform_raw.params)
+    assert not np.allclose(tform_mrs.params, tform_raw.params)
+    # Distances are greater than with either scaling option.
+    raw_ds = _calc_distances(src, dst, tform_raw.params)
+    assert np.max(np.abs(raw_ds)) > 1
+    assert np.mean(np.abs(raw_ds)) > np.mean(np.abs(rms_ds))
+    assert np.mean(np.abs(raw_ds)) > np.mean(np.abs(mrs_ds))
 
 
 def test_essential_matrix_init():
-    tform = EssentialMatrixTransform(
-        rotation=np.eye(3), translation=np.array([0, 0, 1])
-    )
+    r = np.eye(3)
+    t = np.array([0, 0, 1])
+    tform = EssentialMatrixTransform(rotation=r, translation=t)
     assert_equal(tform.params, np.array([0, -1, 0, 1, 0, 0, 0, 0, 0]).reshape(3, 3))
+    t2 = np.array([0, 0, 2])
+    with pytest.raises(ValueError, match="Translation vector must have unit length"):
+        EssentialMatrixTransform(rotation=r, translation=t2)
+    with pytest.raises(ValueError, match="Rotation matrix must have unit determinant"):
+        EssentialMatrixTransform(rotation=np.eye(3)[::-1], translation=t)
+    r2 = r[[2, 0, 1]]
+    tform = EssentialMatrixTransform(rotation=r2, translation=t)
+    assert_equal(tform.params, [[-1, 0, 0], [0, 0, 1], [0, 0, 0]])
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(matrix=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 2)), translation=t)
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.zeros((3, 3)), translation=t)
+    # Both must be specified.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3))
+    # Dimensionality must match.
+    with pytest.raises(ValueError):
+        EssentialMatrixTransform(rotation=np.eye(3), translation=[1, 0])
 
 
 def test_essential_matrix_estimation():
@@ -589,10 +798,14 @@ def test_projective_estimation():
     tform2 = estimate_transform('projective', SRC, DST)
     assert_almost_equal(tform2.inverse(tform2(SRC)), SRC)
 
-    # via estimate method
-    tform3 = ProjectiveTransform()
-    assert tform3.estimate(SRC, DST)
+    # via from_estimate classmethod
+    tform3 = ProjectiveTransform.from_estimate(SRC, DST)
     assert_almost_equal(tform3.params, tform2.params)
+    # via estimate method
+    tform4 = ProjectiveTransform.identity()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform4.estimate(SRC, DST)
+    assert_almost_equal(tform4.params, tform2.params)
 
 
 def test_projective_weighted_estimation():
@@ -637,10 +850,14 @@ def test_polynomial_estimation():
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     assert_almost_equal(tform(SRC), DST, 6)
 
-    # via estimate method
-    tform2 = PolynomialTransform()
-    assert tform2.estimate(SRC, DST, order=10)
+    # via from_estimate classmethod
+    tform2 = PolynomialTransform.from_estimate(SRC, DST, order=10)
     assert_almost_equal(tform2.params, tform.params)
+    # via estimate method
+    tform3 = PolynomialTransform()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tform3.estimate(SRC, DST, order=10)
+    assert_almost_equal(tform3.params, tform.params)
 
 
 def test_polynomial_weighted_estimation():
@@ -669,13 +886,26 @@ def test_polynomial_weighted_estimation():
 @pytest.mark.parametrize('array_like_input', [False, True])
 def test_polynomial_init(array_like_input):
     tform = estimate_transform('polynomial', SRC, DST, order=10)
-    # init with transformation parameters
+    # Init with transformation parameters.
     if array_like_input:
         params = [list(p) for p in tform.params]
     else:
         params = tform.params
     tform2 = PolynomialTransform(params)
     assert_almost_equal(tform2.params, tform.params)
+    # Can't specify scalar params.
+    with pytest.raises(ValueError):
+        _ = PolynomialTransform(0)
+    # Parameters must be (2, N).
+    for inp in (np.eye(3), np.zeros(3)):
+        with pytest.raises(ValueError):
+            _ = PolynomialTransform(inp)
+    # Transform always 2D.
+    for d in (1, 3, 4):
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform(dimensionality=d)
+        with pytest.raises(NotImplementedError):
+            _ = PolynomialTransform.identity(d)
 
 
 def test_polynomial_default_order():
@@ -735,14 +965,14 @@ def test_union_differing_types():
                 rotation=np.eye(3), translation=(1 / np.sqrt(2), 1 / np.sqrt(2), 0)
             ).params
         ),
-        ((t := PiecewiseAffineTransform()).estimate(SRC, DST) and t),
+        PiecewiseAffineTransform.from_estimate(SRC, DST),
     ],
 )
 def test_inverse_all_transforms(tform):
     assert isinstance(tform.inverse, type(tform))
-    try:
+    if hasattr(tform, 'params'):
         assert_almost_equal(tform.inverse.inverse.params, tform.params)
-    except AttributeError:
+    else:
         assert isinstance(tform, PiecewiseAffineTransform)
     assert_almost_equal(tform.inverse.inverse(SRC), tform(SRC))
     # Test addition with inverse, not implemented for all
@@ -756,6 +986,22 @@ def test_inverse_all_transforms(tform):
     ):
         assert_almost_equal((tform + tform.inverse)(SRC), SRC)
         assert_almost_equal((tform.inverse + tform)(SRC), SRC)
+
+
+@pytest.mark.parametrize('tform_class', TRANSFORMS.values())
+def test_identity(tform_class):
+    if tform_class is PiecewiseAffineTransform:
+        return  # Identity transform unusable.
+    rng = np.random.default_rng()
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    for ndim in (2, 3, 4, 5) if allows_nd else (2,):
+        src = rng.normal(size=(10, ndim))
+        t = tform_class.identity(ndim)
+        if isinstance(t, FundamentalMatrixTransform):
+            out = np.hstack((src, np.ones((len(src), 1))))
+        else:
+            out = src
+        assert np.allclose(t(src), out)
 
 
 def test_geometric_tform():
@@ -785,61 +1031,43 @@ def test_geometric_tform():
         assert np.isfinite(dst).all()
 
 
-def test_invalid_input():
-    with pytest.raises(ValueError):
-        ProjectiveTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        SimilarityTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        EuclideanTransform(np.zeros((2, 3)))
-    with pytest.raises(ValueError):
-        AffineTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        SimilarityTransform(matrix=np.zeros((2, 3)), scale=1)
-    with pytest.raises(ValueError):
-        EuclideanTransform(matrix=np.zeros((2, 3)), translation=(0, 0))
-    with pytest.raises(ValueError):
-        PolynomialTransform(np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        FundamentalMatrixTransform(matrix=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(matrix=np.zeros((3, 2)))
+@pytest.mark.parametrize(
+    'tform_class', (FundamentalMatrixTransform, EssentialMatrixTransform)
+)
+def test_identical_fundamental(tform_class):
+    # Test identical points to transform gives failed estimation.
+    assert tform_class.from_estimate(SRC, DST)
+    bad_src = np.ones((8, 2))
+    bad_tform = tform_class.from_estimate(bad_src, DST)
+    assert not bad_tform
 
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 2)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.zeros((3, 3)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((2,)))
-    with pytest.raises(ValueError):
-        EssentialMatrixTransform(rotation=np.eye(3), translation=np.zeros((3,)))
+    regex = "has no attribute 'params'.*Scaling failed for input points"
+    with pytest.raises(FailedEstimationAccessError, match=regex):
+        bad_tform.params
 
 
-def test_degenerate():
+@pytest.mark.parametrize(
+    'tform_class, msg',
+    (
+        (ProjectiveTransform, 'Scaling generated NaN values'),
+        (AffineTransform, 'Scaling generated NaN values'),
+        (EuclideanTransform, 'Poor conditioning for estimation'),
+        (SimilarityTransform, 'Poor conditioning for estimation'),
+    ),
+)
+def test_degenerate(tform_class, msg):
     src = dst = np.zeros((10, 2))
 
-    tform = SimilarityTransform()
-    assert not tform.estimate(src, dst)
+    tf = tform_class.from_estimate(src, dst)
+    assert not tf
+    assert str(tf) == f'{tform_class.__name__}: {msg}'
+    tform = tform_class.identity()
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert not tform.estimate(src, dst)
     assert np.all(np.isnan(tform.params))
 
-    tform = EuclideanTransform()
-    assert not tform.estimate(src, dst)
-    assert np.all(np.isnan(tform.params))
 
-    tform = AffineTransform()
-    assert not tform.estimate(src, dst)
-    assert np.all(np.isnan(tform.params))
-
-    tform = ProjectiveTransform()
-    assert not tform.estimate(src, dst)
-    assert np.all(np.isnan(tform.params))
-
+def test_degenerate_2():
     # See gh-3926 for discussion details
     tform = ProjectiveTransform()
     for i in range(20):
@@ -851,14 +1079,15 @@ def test_degenerate():
         src[:, 1] = np.random.rand()
         # Prior to gh-3926, under the above circumstances,
         # a transform could be returned with nan values.
-        assert not tform.estimate(src, dst) or np.isfinite(tform.params).all()
-
-    src = np.array([[0, 2, 0], [0, 2, 0], [0, 4, 0]])
-    dst = np.array([[0, 1, 0], [0, 1, 0], [0, 3, 0]])
-    tform = AffineTransform()
-    assert not tform.estimate(src, dst)
-    # Prior to gh-6207, the above would set the parameters as the identity.
-    assert np.all(np.isnan(tform.params))
+        tf = ProjectiveTransform.from_estimate(src, dst)
+        assert not tf
+        assert str(tf) == (
+            'ProjectiveTransform: Right singular vector has 0 final element'
+        )
+        with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+            result = tform.estimate(src, dst)
+        assert not result
+        assert np.all(np.isnan(tform.params))
 
     # The tessellation on the following points produces one degenerate affine
     # warp within PiecewiseAffineTransform.
@@ -889,24 +1118,61 @@ def test_degenerate():
             [0, 142, 206],
         ]
     )
+    # from_estimate
+    tform = PiecewiseAffineTransform.from_estimate(src, dst)
+    # Simplex group index 4 has degenerate affine.
+    bad_affine_i = 4
+    assert not tform
+    assert str(tform).startswith(
+        f'PiecewiseAffineTransform: Failure at forward simplex {bad_affine_i}'
+    )
+    # estimate method records steps in affine estimation.
     tform = PiecewiseAffineTransform()
-    assert not tform.estimate(src, dst)
-    assert np.all(np.isnan(tform.affines[4].params))  # degenerate affine
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert not tform.estimate(src, dst)
+    # Check for degenerate affine.
+    assert np.all(np.isnan(tform.affines[bad_affine_i].params))
     for idx, affine in enumerate(tform.affines):
-        if idx != 4:
+        if idx != bad_affine_i:
             assert not np.all(np.isnan(affine.params))
     for affine in tform.inverse_affines:
         assert not np.all(np.isnan(affine.params))
 
 
+def test_calc_center_normalize():
+    n, d = SRC.shape
+    for scaling in ('rms', 'mrs', 'raw'):
+        mat = _calc_center_normalize(SRC, scaling=scaling)
+        if scaling == 'raw':
+            assert_equal(mat, np.eye(3))
+            continue
+        out_pts = _apply_homogeneous(mat, SRC)
+        assert np.allclose(np.mean(out_pts, axis=0), 0)
+        if scaling == 'rms':
+            assert np.isclose(np.sqrt(np.mean(out_pts**2)), 1)
+        elif scaling == 'mrs':
+            scaler = np.mean(np.sqrt(np.sum(out_pts**2, axis=1)))
+            assert np.isclose(scaler, np.sqrt(2))
+
+            scaler = np.mean(np.sqrt(np.sum(out_pts**2, axis=1)))
+            assert np.isclose(scaler, np.sqrt(2))
+        mat2, normed = _center_and_normalize_points(SRC, scaling=scaling)
+        assert_equal(mat, mat2)
+        assert_equal(out_pts, normed)
+
+    with pytest.raises(ValueError, match='Unexpected "scaling"'):
+        _center_and_normalize_points(SRC, scaling='foo')
+
+
 def test_normalize_degenerate_points():
     """Return nan matrix *of appropriate size* when point is repeated."""
     pts = np.array([[73.42834308, 94.2977623]] * 3)
-    mat, pts_tf = _center_and_normalize_points(pts)
-    assert np.all(np.isnan(mat))
-    assert np.all(np.isnan(pts_tf))
-    assert mat.shape == (3, 3)
-    assert pts_tf.shape == pts.shape
+    for scaling in 'rms', 'mrs':
+        mat, pts_tf = _center_and_normalize_points(pts, scaling)
+        assert np.all(np.isnan(mat))
+        assert np.all(np.isnan(pts_tf))
+        assert mat.shape == (3, 3)
+        assert pts_tf.shape == pts.shape
 
 
 def test_projective_repr():
@@ -986,14 +1252,17 @@ def test_estimate_affine_3d(array_like_input):
     if array_like_input:
         # list of lists for destination coords
         dst = [list(c) for c in dst]
-    tf2 = AffineTransform(dimensionality=ndim)
-    assert tf2.estimate(src, dst_noisy)
+    tf2 = AffineTransform.from_estimate(src, dst_noisy)
     # we check rot/scale/etc more tightly than translation because translation
     # estimation is on the 1 pixel scale
     matrix = np.asarray(matrix)
     assert_almost_equal(tf2.params[:, :-1], matrix[:, :-1], decimal=2)
     assert_almost_equal(tf2.params[:, -1], matrix[:, -1], decimal=0)
     _assert_least_squares(tf2, src, dst_noisy)
+    tf3 = AffineTransform(dimensionality=ndim)
+    with pytest.warns(FutureWarning, match='`estimate` is deprecated'):
+        assert tf3.estimate(src, dst_noisy)
+    assert_equal(tf2.params, tf3.params)
 
 
 def test_fundamental_3d_not_implemented():
@@ -1023,9 +1292,45 @@ def test_affine_transform_from_linearized_parameters():
         _ = AffineTransform(matrix=v[:-1])
 
 
-def test_affine_params_nD_error():
+EG_OPS = dict(scale=(4, 5), shear=(1.4, 1.8), rotation=0.4, translation=(10, 12))
+
+
+@pytest.mark.parametrize(
+    'tform_class, op_order',
+    (
+        (AffineTransform, ('scale', 'shear', 'rotation', 'translation')),
+        (EuclideanTransform, ('rotation', 'translation')),
+        (SimilarityTransform, ('scale', 'rotation', 'translation')),
+    ),
+)
+def test_transform_order(tform_class, op_order):
+    # Test transforms are applied in order stated.
+    ops = [(k, EG_OPS[k]) for k in op_order]
+    part_xforms = [tform_class(**{k: v}) for k, v in ops]
+    full_xform = tform_class(**dict(ops))
+    # Assemble affine transform via matrices.
+    out = np.eye(3)
+    for tf in part_xforms:
+        out = tf @ out
+    assert np.allclose(full_xform.params, out)
+
+
+# AffineTransform only allows 2D implicit parameters.
+@pytest.mark.parametrize(
+    'inp',
+    (
+        dict(scale=5, dimensionality=3),
+        dict(scale=(5, 5, 5), dimensionality=3),
+        dict(scale=(5, 5, 5)),
+        dict(shear=(0.1, 0.2, 0.3)),
+        dict(rotation=(0.1, 0.2)),
+        dict(translation=1),
+        dict(translation=(1, 2, 3)),
+    ),
+)
+def test_affine_params_nD_error(inp):
     with pytest.raises(ValueError):
-        _ = AffineTransform(scale=5, dimensionality=3)
+        _ = AffineTransform(**inp)
 
 
 def test_euler_rotation():
@@ -1037,29 +1342,37 @@ def test_euler_rotation():
         assert_almost_equal(R @ v, expected, decimal=1)
 
 
-def test_euclidean_param_defaults():
+def _from_matvec(mat, vec):
+    mat, vec = (np.array(p) for p in (mat, vec))
+    d = mat.shape[0]
+    out = np.eye(d + 1)
+    out[:-1, :-1] = mat
+    out[:-1, -1] = vec
+    return out
+
+
+@pytest.mark.parametrize('tform_class', (EuclideanTransform, SimilarityTransform))
+def test_euclidean_param_defaults(tform_class):
     # 2D rotation is 0 when only translation is given
-    tf = EuclideanTransform(translation=(5, 5))
+    tf = tform_class(translation=(5, 5))
     assert np.array(tf)[0, 1] == 0
     # off diagonals are 0 when only translation is given
-    tf = EuclideanTransform(translation=(4, 5, 9), dimensionality=3)
+    tf = tform_class(translation=(4, 5, 9), dimensionality=3)
     assert_equal(np.array(tf)[[0, 0, 1, 1, 2, 2], [1, 2, 0, 2, 0, 1]], 0)
+    # Specifying translations for D>3 is supported.
+    tf = tform_class(translation=(5, 6, 7, 8))
+    assert_equal(tf.params, _from_matvec(np.eye(4), (5, 6, 7, 8)))
+    # But must match the dimensionality.
     with pytest.raises(ValueError):
-        # specifying parameters for D>3 is not supported
-        _ = EuclideanTransform(translation=(5, 6, 7, 8), dimensionality=4)
+        _ = tform_class(translation=(5, 6, 7, 8), dimensionality=3)
+    # Incorrect number of angles (must be 1 or 3
     with pytest.raises(ValueError):
-        # incorrect number of angles for given dimensionality
-        _ = EuclideanTransform(rotation=(4, 8), dimensionality=3)
+        _ = tform_class(rotation=(4, 8))
+    with pytest.raises(ValueError):
+        _ = tform_class(rotation=(4, 8, 2, 4))
     # translation is 0 when rotation is given
-    tf = EuclideanTransform(rotation=np.pi * np.arange(3), dimensionality=3)
+    tf = tform_class(rotation=np.pi * np.arange(3), dimensionality=3)
     assert_equal(np.array(tf)[:-1, 3], 0)
-
-
-def test_similarity_transform_params():
-    with pytest.raises(ValueError):
-        _ = SimilarityTransform(translation=(4, 5, 6, 7), dimensionality=4)
-    tf = SimilarityTransform(scale=4, dimensionality=3)
-    assert_equal(tf([[1, 1, 1]]), [[4, 4, 4]])
 
 
 def test_euler_angle_consistency():
@@ -1077,3 +1390,102 @@ def test_2D_only_implementations():
         _ = tf.rotation
     with pytest.raises(NotImplementedError):
         _ = tf.shear
+
+
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
+def test_kw_only_params(tform_class):
+    # Check only matrix can be passed as positional arg.
+    with pytest.raises(TypeError):
+        tform_class(None, None)
+
+
+def test_kw_only_emt():
+    # Check all parameters are keyword-only for EssentialMatrixTransform.
+    with pytest.raises(TypeError):
+        EssentialMatrixTransform(None)
+
+
+@pytest.mark.parametrize('tform_class', HMAT_TFORMS)
+def test_init_contract_dims(tform_class):
+    allows_nd = tform_class in HMAT_TFORMS_ND
+    # 2D identity is default.
+    for tf in (
+        tform_class(),
+        tform_class(dimensionality=2),
+        tform_class.identity(),
+        tform_class.identity(None),
+        tform_class(None),
+    ):
+        assert_equal(tf.params, np.eye(3))
+    ok_dims = (2, 3, 4, 5) if allows_nd else (2,)
+    for d in ok_dims:
+        h_d = d + 1
+        # Identity for acceptable dimensions.
+        for tf in (
+            tform_class(dimensionality=d),
+            tform_class.identity(d),
+            tform_class.identity(dimensionality=d),
+        ):
+            assert_equal(tf.params, np.eye(h_d))
+        # Wrong shape for given dimensions.
+        for matrix in np.eye(h_d)[:-1], np.eye(h_d)[:, :-1]:
+            with pytest.raises(ValueError):
+                tform_class(matrix)
+    err_dims = (1,) if allows_nd else (1, 3, 4, 5)
+    for matrix in [np.eye(d + 1) for d in err_dims]:
+        with pytest.raises(NotImplementedError):
+            tform_class(matrix)
+    # Test vector matrix input invalid.
+    with pytest.raises(ValueError):
+        tform_class(np.zeros((2, 3)))
+
+
+def test_astronaut_piecewise():
+    # From doc/examples/transforms/plot_piecewise_affine.py
+    image = data.astronaut()
+    rows, cols = image.shape[0], image.shape[1]
+
+    src_cols = np.linspace(0, cols, 20)
+    src_rows = np.linspace(0, rows, 10)
+    src_rows, src_cols = np.meshgrid(src_rows, src_cols)
+    src = np.dstack([src_cols.flat, src_rows.flat])[0]
+
+    # add sinusoidal oscillation to row coordinates
+    dst_rows = src[:, 1] - np.sin(np.linspace(0, 3 * np.pi, src.shape[0])) * 50
+    dst_cols = src[:, 0]
+    dst_rows *= 1.5
+    dst_rows -= 1.5 * 50
+    dst = np.vstack([dst_cols, dst_rows]).T
+
+    # Transform will fail with strict check for rank deficiency of
+    # inverse matrices in ProjectiveTransform.estimate.
+    assert PiecewiseAffineTransform.from_estimate(src, dst)
+
+
+def test_broadcasting():
+    # Scalar scale broadcasts.
+    translation = [3, 4, 5]
+    tf = SimilarityTransform(scale=2, translation=translation)
+    assert_equal(tf.params, _from_matvec(np.eye(3) * 2, translation))
+    # Translation does broadcast.
+    # 2D.
+    tf = SimilarityTransform(scale=2, translation=10)
+    assert_equal(tf.params, _from_matvec(np.eye(2) * 2, [10, 10]))
+    # 3D.
+    tf = SimilarityTransform(scale=[2, 3, 4], translation=10)
+    assert_equal(tf.params, _from_matvec(np.diag([2, 3, 4]), [10] * 3))
+    # Scalar rotation does not broadcast.
+    for tf_class in SimilarityTransform, EuclideanTransform:
+        with pytest.raises(ValueError):
+            tf_class(rotation=0.2, translation=translation)
+
+
+@pytest.mark.parametrize('tf_class', TRANSFORMS.values())
+def test_estimate_futurewarn(tf_class):
+    tf = tf_class.identity()
+    msg = (
+        f'`estimate` is deprecated since .* Please use `{tf_class.__name__}'
+        '.from_estimate` class constructor instead.'
+    )
+    with pytest.warns(FutureWarning, match=msg):
+        assert tf.estimate(SRC, DST)
