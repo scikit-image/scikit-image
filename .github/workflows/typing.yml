@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout scikit-image
+      - name: Clone scikit-image
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
