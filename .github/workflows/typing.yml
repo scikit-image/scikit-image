@@ -20,7 +20,7 @@ env:
 
 jobs:
   docstub:
-    name: Generate and test stubs
+    name: Test docstub
     runs-on: ubuntu-latest
 
     steps:
@@ -52,7 +52,7 @@ jobs:
           pip install docstub==0.3.0.post0
           docstub --version
 
-      - name: Generate stubs
+      - name: Create stubs with docstub
         run: |
           docstub run --verbose --group-errors --allow-errors=722 \
               --out-dir ${MYPYPATH}/skimage skimage/
