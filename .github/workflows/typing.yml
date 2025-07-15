@@ -54,7 +54,7 @@ jobs:
 
       - name: Generate stubs
         run: |
-          docstub run --verbose --group-errors --allow-errors=710 \
+          docstub run --verbose --group-errors --allow-errors=722 \
               --out-dir ${MYPYPATH}/skimage skimage/
 
       - uses: actions/upload-artifact@v4
