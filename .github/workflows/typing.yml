@@ -53,7 +53,12 @@ jobs:
 
       - name: Generate stubs
         run: |
-          docstub run -v --group-errors --allow-errors=710 -o ${MYPYPATH}/skimage skimage/
+          docstub run --verbose --group-errors --allow-errors=710 \
+              --out-dir ${MYPYPATH}/skimage skimage/ \
+              | tee $GITHUB_STEP_SUMMARY
+          if [ "${PIPESTATUS[0]}" != "0" ]; then
+              echo "::error::docstub returned exit code ${PIPESTATUS[0]}."
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
