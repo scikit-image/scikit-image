@@ -58,6 +58,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
+    'docstub==0.3.0.post0',
 ]
 docs = [
     'sphinx>=8.0',
@@ -205,3 +206,8 @@ ignored_user_logins = [
     "web-flow",
     "pre-commit-ci[bot]"
 ]
+
+
+[tool.docstub.type_prefixes]
+matplotlib = "matplotlib"
+scipy = "scipy"
