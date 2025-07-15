@@ -12,8 +12,9 @@ permissions:
   contents: read
 
 env:
-  # Many color libraries just need this variable to be set to any value, but at
-  # least one distinguishes color depth, where "3" -> "256-bit color".
+  # Many color libraries just need this variable to be set to any value.
+  # Set it to 3 to support 8-bit color graphics (256 colors per channel)
+  # for libraries that care about the value set.
   FORCE_COLOR: 3
   MYPYPATH: ${{ github.workspace }}/stubs
 
