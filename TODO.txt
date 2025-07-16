@@ -77,3 +77,28 @@ Version 2.2
   `EuclideanTransform`, `FundamentalMatrixTransform`,
   `PiecewiseAffineTransform`, `PolynomialTransform`, `ProjectiveTransform`,
   `SimilarityTransform`, and `ThinPlateSplineTransform`
+
+- Complete deprecation of:
+  * `params` argument to `predict_*` methods of `LineModelND`, `CircleModel`
+    and `EllipseModel` from `skimage.measure.fit`.
+  * Ability to create uninitialized models of the same classes, by passing no
+    input arguments to constructor.
+
+  The procedure is:
+
+  * Move `_estimate` code into `from_estimate` (this as part of expiring
+    deprecation of `estimate` methods).
+  * Delete deprecated `BaseModel`, and `_BaseModel` class for supporting deprecations.
+  * Delete `_deprecate_no_args` (class decorator to deprecate no-argument call
+    to class constructor).
+  * Delete `_deprecate_model_params` (method decorator to deprecate `params`
+    argument to `predict_*` methods).
+  * Remove `params` arguments (and parsing) to `predict_*` methods.
+  * Delete `_params2init_values` methods (these were for processing deprecated `params` arguments).
+  * Delete `params` properties of models.
+  * Move `_check_init_values` into `_args_init` (these were for checking *both*
+    deprecated `params` arguments, *and* `__init__` arguments; after expiry,
+    the code only needs to check `__init__` arguments).
+  * Rename `_arg_init` methods to `__init__`.
+  * Remove tests for `params` arguments, and no-args initialization.  These
+    will become apparent when running the test suite after making the changes above.
