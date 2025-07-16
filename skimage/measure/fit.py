@@ -240,7 +240,7 @@ class LineModelND(_BaseModel):
         return self.origin, self.direction
 
     @classmethod
-    def from_estimate(cls, data) -> Self | FailedEstimation:
+    def from_estimate(cls, data):
         """Estimate line model from data.
 
         This minimizes the sum of shortest (orthogonal) distances
@@ -253,7 +253,7 @@ class LineModelND(_BaseModel):
 
         Returns
         -------
-        model : Self or ``FailedEstimation``
+        model : Self or `~.FailedEstimation`
             An instance of the line model if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -308,7 +308,7 @@ class LineModelND(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED, {None, length 2 sequence), optional
+        params : `~.DEPRECATED`, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
             .. deprecated:: {{ start_version }}
@@ -342,7 +342,7 @@ class LineModelND(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED {None, length 2 sequence}, optional
+        params : `~.DEPRECATED`, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
             .. deprecated:: {{ start_version }}
@@ -381,7 +381,7 @@ class LineModelND(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED {None, length 2 sequence}, optional
+        params : `~.DEPRECATED`, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
             .. deprecated:: {{ start_version }}
@@ -416,7 +416,7 @@ class LineModelND(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED {None, length 2 sequence}, optional
+        params : `~.DEPRECATED`, optional
             Optional custom parameter set in the form (`origin`, `direction`).
 
             .. deprecated:: {{ start_version }}
@@ -563,7 +563,7 @@ class CircleModel(_BaseModel):
         return np.r_[self.center, self.radius]
 
     @classmethod
-    def from_estimate(cls, data) -> Self | FailedEstimation:
+    def from_estimate(cls, data):
         """Estimate circle model from data using total least squares.
 
         Parameters
@@ -573,7 +573,7 @@ class CircleModel(_BaseModel):
 
         Returns
         -------
-        model : Self or ``FailedEstimation``
+        model : Self or `~.FailedEstimation`
             An instance of the circle model if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -673,7 +673,7 @@ class CircleModel(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED {None, (3,) array}, optional
+        params : `~.DEPRECATED`, optional
             Optional parameters ``xc``, ``yc``, `radius`.
 
             .. deprecated:: {{ start_version }}
@@ -818,7 +818,7 @@ class EllipseModel(_BaseModel):
         return np.r_[self.center, self.ax_lens, self.theta]
 
     @classmethod
-    def from_estimate(cls, data) -> Self | FailedEstimation:
+    def from_estimate(cls, data):
         """Estimate ellipse model from data using total least squares.
 
         Parameters
@@ -828,7 +828,7 @@ class EllipseModel(_BaseModel):
 
         Returns
         -------
-        model : Self or ``FailedEstimation``
+        model : Self or `~.FailedEstimation`
             An instance of the ellipse model if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -1040,7 +1040,7 @@ class EllipseModel(_BaseModel):
 
         Other parameters
         ----------------
-        params : DEPRECATED, {None, (5,) array}, optional
+        params : `~.DEPRECATED`, optional
             Optional ellipse model parameters in the following order ``xc``,
             ``yc``, `a`, `b`, `theta`.
 
@@ -1198,7 +1198,7 @@ def ransac(
 
     Parameters
     ----------
-    data : [list, tuple of] (N, ...) array
+    data : list or tuple or array of shape (N,)
         Data set to which the model is fitted, where N is the number of data
         points and the remaining dimension are depending on model requirements.
         If the model class requires multiple input data arrays (e.g. source and
@@ -1232,14 +1232,14 @@ def ransac(
         https://docs.python.org/3/library/typing.html#typing.Protocol for more
         details.
 
-    min_samples : int in range (0, N)
+    min_samples : int, in range (0, N)
         The minimum number of data points to fit a model to.
-    residual_threshold : float larger than 0
+    residual_threshold : float, >0
         Maximum distance for a data point to be classified as an inlier.
-    is_data_valid : function, optional
+    is_data_valid : Callable, optional
         This function is called with the randomly selected data before the
         model is fitted to it: `is_data_valid(*random_data)`.
-    is_model_valid : function, optional
+    is_model_valid : Callable, optional
         This function is called with the estimated model and the randomly
         selected data: `is_model_valid(model, *random_data)`, .
     max_trials : int, optional
@@ -1249,7 +1249,7 @@ def ransac(
     stop_residuals_sum : float, optional
         Stop iteration if sum of residuals is less than or equal to this
         threshold.
-    stop_probability : float in range [0, 1], optional
+    stop_probability : float, optional, in range [0, 1]
         RANSAC iteration stops if at least one outlier-free set of the
         training data is sampled with ``probability >= stop_probability``,
         depending on the current best model's inlier ratio and the number
