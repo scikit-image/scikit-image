@@ -35,13 +35,13 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        Regularization operator. Laplacian by default. It can
        be an impulse response or a transfer function, as for the PSF.
        Shape constraints are the same as for `psf`.
-    is_real : boolean, optional
+    is_real : bool, optional
        True by default. Specify if `psf` and `reg` are provided over just half
        the frequency space (thanks to the redundancy of the Fourier transform
        for real signals). Applies only if `psf` and/or `reg` are
        provided as transfer functions.
        See ``uft`` module and :func:`np.fft.rfftn`.
-    clip : boolean, optional
+    clip : bool, optional
        True by default. If True, pixel values of the deconvolved image (which
        is the return value) above 1 (resp. below -1) are clipped to 1 (resp.
        to -1). Be careful to set `clip=False` if you do not want this clipping
@@ -184,7 +184,7 @@ def unsupervised_wiener(
            mean. It has no influence on the algorithm execution and is
            only for inspection.
 
-    clip : boolean, optional
+    clip : bool, optional
         True by default. If true, pixel values of the result above 1 or
         under -1 are thresholded for skimage pipeline compatibility.
     rng : {`numpy.random.Generator`, int}, optional
@@ -371,7 +371,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     num_iter : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
-    clip : boolean, optional
+    clip : bool, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
     filter_epsilon : float, optional

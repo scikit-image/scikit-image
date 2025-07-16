@@ -317,7 +317,7 @@ def denoise_tv_bregman(
         The algorithm stops when :math:`\|u_n - u_{n-1}\|_2 < \varepsilon`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
-    isotropic : boolean, optional
+    isotropic : bool, optional
         Switch between isotropic and anisotropic TV denoising.
     channel_axis : int or None, optional
         If ``None``, the image is assumed to be grayscale (single-channel).
