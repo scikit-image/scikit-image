@@ -22,7 +22,7 @@ Version 2.2
   - Remove `params` arguments (and parsing) to `predict_*` methods.
   - Delete `_params2init_values` methods (these were for processing deprecated `params` arguments).
   - Delete `params` properties of models.
-  - Nove `_check_init_values` into `_args_init` (these were for checking *both*
+  - Move `_check_init_values` into `_args_init` (these were for checking *both*
     deprecated `params` arguments, *and* `__init__` arguments; after expiry,
     the code only needs to check `__init__` arguments).
   - Rename `_arg_init` methods to `__init__`.
