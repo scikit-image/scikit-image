@@ -54,3 +54,4 @@ jobs:
           BUILD_TYPE: "docs build"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
