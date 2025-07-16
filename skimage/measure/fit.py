@@ -43,7 +43,6 @@ _PARAMS_DEP_STOP = '2.2'
 
 
 class BaseModel:
-
     def __init_subclass__(self):
         warn(
             f'`BaseModel` deprecated since version {_PARAMS_DEP_START} and '
@@ -64,7 +63,6 @@ class _BaseModel:
     components comprising the arguments to the function ``__init__``, and
     checks the resulting input arguments for validity.
     """
-
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
