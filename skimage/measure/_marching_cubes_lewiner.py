@@ -35,7 +35,7 @@ def marching_cubes(
     spacing : length-3 tuple of floats, optional
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
-    gradient_direction : string, optional
+    gradient_direction : {'descent', 'ascent'}, optional
         Controls if the mesh was generated from an isosurface with gradient
         descent toward objects of interest (the default), or the opposite,
         considering the *left-hand* rule.

@@ -9,7 +9,7 @@ def temporary_file(suffix=''):
 
     Parameters
     ----------
-    suffix : string, optional
+    suffix : str, optional
         The suffix for the file.
 
     Examples

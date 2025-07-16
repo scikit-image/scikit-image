@@ -68,7 +68,7 @@ def _bincount_histogram(image, source_range, bin_centers=None):
     ----------
     image : array
         Input image.
-    source_range : string
+    source_range : {'image', 'dtype'}
         'image' determines the range from the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
@@ -210,7 +210,7 @@ def histogram(
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    source_range : string, optional
+    source_range : {'image', 'dtype'}, optional
         'image' (default) determines the range from the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
@@ -288,7 +288,7 @@ def _histogram(image, bins, source_range, normalize):
         containing the bin centers can also be provided. For images with
         floating point dtype, this can be an array of bin_edges for use by
         ``np.histogram``.
-    source_range : string, optional
+    source_range : {'image', 'dtype'}, optional
         'image' (default) determines the range from the input image.
         'dtype' determines the range from the expected range of the images
         of that data type.
