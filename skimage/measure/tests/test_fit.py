@@ -330,13 +330,13 @@ def test_circle_model_estimate_from_small_scale_data():
 
 def _assert_ellipse_equal(model, model2):
     assert_array_equal(model.center, model2.center)
-    assert_array_equal(model.ax_lens, model2.ax_lens)
+    assert_array_equal(model.axis_lengths, model2.axis_lengths)
     assert_array_equal(model.theta, model2.theta)
 
 
 def _assert_ellipse_almost_equal(model, model2):
     assert_almost_equal(model.center, model2.center)
-    assert_almost_equal(model.ax_lens, model2.ax_lens)
+    assert_almost_equal(model.axis_lengths, model2.axis_lengths)
     assert_almost_equal(model.theta, model2.theta)
 
 
@@ -433,7 +433,7 @@ def test_ellipse_parameter_stability(angle):
 
     # fit model to points
     ellipse_model = EllipseModel.from_estimate(points.T)
-    (a_prime, b_prime) = ellipse_model.ax_lens
+    (a_prime, b_prime) = ellipse_model.axis_lengths
     theta_prime = ellipse_model.theta
 
     assert_almost_equal(theta_prime, theta)
@@ -597,12 +597,12 @@ def test_ellipse_model_estimate_from_data():
 
     # test whether estimated parameters are smaller then 1000, so means stable
     assert np.all(model.center < 1000)
-    assert np.all(model.ax_lens < 1000)
+    assert np.all(model.axis_lengths < 1000)
 
     # test whether all parameters are more than 0. Negative values were the
     # result of an integer overflow
     assert np.all(model.center > 0)
-    assert np.all(model.ax_lens > 0)
+    assert np.all(model.axis_lengths > 0)
 
     # estimate method
     model2 = EllipseModel(*DUMMY_ELLIPSE_ARGS)

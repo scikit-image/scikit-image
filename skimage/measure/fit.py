@@ -725,7 +725,7 @@ class EllipseModel(_BaseModel):
     ----------
     center : array-like, shape (2,)
         Coordinates of ellipse center.
-    ax_lens : array-like, shape (2,)
+    axis_lengths : array-like, shape (2,)
         Length of first axis and length of second axis.  Call these ``a`` and
         ``b``.
     theta : float
@@ -744,7 +744,7 @@ class EllipseModel(_BaseModel):
     >>> ellipse = EllipseModel.from_estimate(xy)
     >>> ellipse.center
     array([10., 15.])
-    >>> ellipse.ax_lens
+    >>> ellipse.axis_lengths
     array([8., 4.])
     >>> round(ellipse.theta, 2)
     0.52
@@ -776,30 +776,30 @@ class EllipseModel(_BaseModel):
     FailedEstimationAccessError: No attribute "residuals" for failed estimation ...
     """
 
-    def _args_init(self, center, ax_lens, theta):
+    def _args_init(self, center, axis_lengths, theta):
         """Initialize ``EllipseModel`` instance.
 
         Parameters
         ----------
         center : array-like, shape (2,)
             Coordinates of ellipse center.
-        ax_lens : array-like, shape (2,)
+        axis_lengths : array-like, shape (2,)
             Length of first axis and length of second axis.  Call these ``a``
             and ``b``.
         theta : float
             Angle of first axis.
         """
-        self.center, self.ax_lens, self.theta = self._check_init_values(
-            center, ax_lens, theta
+        self.center, self.axis_lengths, self.theta = self._check_init_values(
+            center, axis_lengths, theta
         )
 
-    def _check_init_values(self, center, ax_lens, theta):
-        center, ax_lens = [np.array(v) for v in (center, ax_lens)]
+    def _check_init_values(self, center, axis_lengths, theta):
+        center, axis_lengths = [np.array(v) for v in (center, axis_lengths)]
         if not len(center) == 2:
             raise ValueError('Center coordinates should be length 2')
-        if not len(ax_lens) == 2:
+        if not len(axis_lengths) == 2:
             raise ValueError('Axis lengths should be length 2')
-        return center, ax_lens, theta
+        return center, axis_lengths, theta
 
     def _params2init_values(self, params):
         params = np.array(params)
@@ -811,11 +811,11 @@ class EllipseModel(_BaseModel):
     @deprecate_func(
         deprecated_version=_PARAMS_DEP_START,
         removed_version=_PARAMS_DEP_STOP,
-        hint='`params` attribute deprecated; use `center, ax_lens, theta` attributes instead',
+        hint='`params` attribute deprecated; use `center, axis_lengths, theta` attributes instead',
     )
     def params(self):
-        """Return model attributes ``center, ax_lens, theta`` as 1D array."""
-        return np.r_[self.center, self.ax_lens, self.theta]
+        """Return model attributes ``center, axis_lengths, theta`` as 1D array."""
+        return np.r_[self.center, self.axis_lengths, self.theta]
 
     @classmethod
     def from_estimate(cls, data):
@@ -956,7 +956,11 @@ class EllipseModel(_BaseModel):
         params[:4] *= scale
         params[:2] += origin
 
-        self.center, self.ax_lens, self.theta = (params[:2], params[2:4], params[-1])
+        self.center, self.axis_lengths, self.theta = (
+            params[:2],
+            params[2:4],
+            params[-1],
+        )
         return None
 
     def residuals(self, data):
@@ -979,7 +983,7 @@ class EllipseModel(_BaseModel):
         _check_data_dim(data, dim=2)
 
         xc, yc = self.center
-        a, b = self.ax_lens
+        a, b = self.axis_lengths
         theta = self.theta
 
         ctheta = math.cos(theta)
@@ -1305,7 +1309,7 @@ def ransac(
     >>> model = EllipseModel.from_estimate(data)
     >>> np.round(model.center)
     array([71., 75.])
-    >>> np.round(model.ax_lens)
+    >>> np.round(model.axis_lengths)
     array([77., 13.])
     >>> np.round(model.theta)
     1.0
@@ -1315,7 +1319,7 @@ def ransac(
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
     >>> np.abs(np.round(ransac_model.center))
     array([20., 30.])
-    >>> np.abs(np.round(ransac_model.ax_lens))
+    >>> np.abs(np.round(ransac_model.axis_lengths))
     array([10., 6.])
     >>> np.abs(np.round(ransac_model.theta))
     2.0
