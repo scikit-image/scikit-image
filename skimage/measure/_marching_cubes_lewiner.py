@@ -50,7 +50,7 @@ def marching_cubes(
         Whether to allow degenerate (i.e. zero-area) triangles in the
         end-result. Default True. If False, degenerate triangles are
         removed, at the cost of making the algorithm slower.
-    method: {'lewiner', 'lorensen'}, optional
+    method : {'lewiner', 'lorensen'}, optional
         Whether the method of Lewiner et al. or Lorensen et al. will be used.
     mask : (M, N, P) array, optional
         Boolean array. The marching cube algorithm will be computed only on

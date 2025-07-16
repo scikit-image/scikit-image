@@ -88,12 +88,12 @@ def _dtype_itemsize(itemsize, *dtypes):
 
     Parameters
     ----------
-    itemsize: int
+    itemsize : int
         The data type object element size.
 
     Other Parameters
     ----------------
-    *dtypes:
+    *dtypes
         Any Object accepted by `np.dtype` to be converted to a data
         type object
 

@@ -377,7 +377,7 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     clip : boolean, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    filter_epsilon: float, optional
+    filter_epsilon : float, optional
        Value below which intermediate results become 0 to avoid division
        by small numbers.
 

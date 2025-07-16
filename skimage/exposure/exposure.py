@@ -100,7 +100,7 @@ def _get_outer_edges(image, hist_range):
     ----------
     image : ndarray
         Image for which the histogram is to be computed.
-    hist_range: 2-tuple of int or None
+    hist_range : 2-tuple of int or None
         Range of values covered by the histogram bins. If None, the minimum
         and maximum values of `image` are used.
 
@@ -149,7 +149,7 @@ def _get_bin_edges(image, nbins, hist_range):
         Image for which the histogram is to be computed.
     nbins : int
         The number of bins.
-    hist_range: 2-tuple of int
+    hist_range : 2-tuple of int
         Range of values covered by the histogram bins.
 
     Returns

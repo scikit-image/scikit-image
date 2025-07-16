@@ -291,7 +291,7 @@ def euler_number(image, connectivity=None):
 
     Parameters
     ----------
-    image: (M, N[, P]) ndarray
+    image : (M, N[, P]) ndarray
         Input image. If image is not binary, all values greater than zero
         are considered as the object.
     connectivity : int, optional
