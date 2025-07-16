@@ -55,11 +55,12 @@ jobs:
       - name: Create stubs with docstub
         shell: bash
         run: |
-          echo -e "## docstub output\n" >> $GITHUB_STEP_SUMMARY
+          echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
            docstub run --verbose --group-errors --allow-errors=722 \
-                       --out-dir ${MYPYPATH}/skimage skimage/ \
-           | tee -a $GITHUB_STEP_SUMMARY)
+                       --out-dir ${MYPYPATH}/skimage skimage/\
+           2>&1 | tee -a $GITHUB_STEP_SUMMARY)
+           echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v4
         with:
