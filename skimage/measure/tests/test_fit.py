@@ -341,7 +341,7 @@ def _chk_ellipse_almost_equal(model, model2):
 
 
 def test_ellipse_model_invalid_input():
-    # A valid default model, in fact corresponding to a unit cicle.
+    # A valid default model, in fact corresponding to a unit circle.
     default_model = EllipseModel((0, 0), (1, 1), 0)
     # Predict a couple of points.
     angles = [0, np.pi / 2]
