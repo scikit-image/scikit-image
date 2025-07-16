@@ -12,8 +12,8 @@ permissions:
   issues: write
 
 jobs:
-  test_docs_aarch64:
-    name: macos-docs
+  build-docs-run-gallery:
+    name: Build docs and run gallery examples
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
@@ -39,11 +39,8 @@ jobs:
 
       - name: Install Chrome for plotly
         run: |
-          choreo_get_chrome
-
-          sudo apt update
-          # This list obtained from a kaleido error message:
-          sudo apt-get install libnss3 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
 
       - name: Build docs / run examples
         run: |
