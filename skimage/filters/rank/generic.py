@@ -462,7 +462,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -524,7 +524,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -586,7 +586,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -648,7 +648,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     See also
@@ -719,7 +719,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -783,7 +783,7 @@ def geometric_mean(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -852,7 +852,7 @@ def subtract_mean(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Notes
@@ -931,7 +931,7 @@ def median(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     See also
@@ -1000,7 +1000,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     See also
@@ -1073,7 +1073,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -1141,7 +1141,7 @@ def enhance_contrast(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image
 
     Examples
@@ -1206,7 +1206,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -1275,7 +1275,7 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -1344,7 +1344,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -1417,7 +1417,7 @@ def noise_filter(
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     Examples
@@ -1571,7 +1571,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (same dtype as input image)
+    out : ([P,] M, N) ndarray, same dtype as input `image`
         Output image.
 
     References
@@ -1710,7 +1710,7 @@ def majority(
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     Examples
