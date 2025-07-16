@@ -594,7 +594,7 @@ def _normalize_spacing(spacing, ndims):
     spacing along all dimensions.
 
     Parameters
-    ---------
+    ----------
     spacing : Any
         User-provided `spacing` keyword.
     ndims : int

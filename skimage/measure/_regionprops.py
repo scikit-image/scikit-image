@@ -264,7 +264,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
 
     Parameters
-    ---------
+    ----------
     inertia_tensor_eigvals : sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
