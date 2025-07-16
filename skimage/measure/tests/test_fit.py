@@ -328,13 +328,13 @@ def test_circle_model_estimate_from_small_scale_data():
     assert_almost_equal(radius, model.radius)
 
 
-def _chk_ellipse_equal(model, model2):
+def _assert_ellipse_equal(model, model2):
     assert_array_equal(model.center, model2.center)
     assert_array_equal(model.ax_lens, model2.ax_lens)
     assert_array_equal(model.theta, model2.theta)
 
 
-def _chk_ellipse_almost_equal(model, model2):
+def _assert_ellipse_almost_equal(model, model2):
     assert_almost_equal(model.center, model2.center)
     assert_almost_equal(model.ax_lens, model2.ax_lens)
     assert_almost_equal(model.theta, model2.theta)
@@ -411,7 +411,7 @@ def test_ellipse_model_estimate(angle):
         assert model_est2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    _chk_ellipse_equal(model_est, model_est2)
+    _assert_ellipse_equal(model_est, model_est2)
 
 
 @pytest.mark.parametrize('angle', np.arange(0, 180 + 1, 1))
@@ -446,7 +446,7 @@ def test_ellipse_parameter_stability(angle):
         assert ellipse_model2.estimate(points.T)
     assert_stacklevel(record)
     assert len(record) == 1
-    _chk_ellipse_equal(ellipse_model, ellipse_model2)
+    _assert_ellipse_equal(ellipse_model, ellipse_model2)
 
 
 def test_ellipse_model_estimate_from_data():
@@ -610,7 +610,7 @@ def test_ellipse_model_estimate_from_data():
         assert model2.estimate(data)
     assert_stacklevel(record)
     assert len(record) == 1
-    _chk_ellipse_equal(model, model2)
+    _assert_ellipse_equal(model, model2)
 
 
 def test_ellipse_model_estimate_from_far_shifted_data():
@@ -639,13 +639,13 @@ def test_ellipse_model_estimate_from_far_shifted_data():
     float_data = data.astype(np.float64)
     model = EllipseModel.from_estimate(float_data)
     # test whether the predicted parameters are close to the original ones
-    _chk_ellipse_almost_equal(em, model)
+    _assert_ellipse_almost_equal(em, model)
     model2 = EllipseModel(*DUMMY_ELLIPSE_ARGS)
     with pytest.warns(FutureWarning, match='`estimate` is deprecated') as record:
         assert model2.estimate(float_data)
     assert_stacklevel(record)
     assert len(record) == 1
-    _chk_ellipse_almost_equal(em, model2)
+    _assert_ellipse_almost_equal(em, model2)
 
 
 # Passing on WASM
