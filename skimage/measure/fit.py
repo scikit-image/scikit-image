@@ -38,24 +38,22 @@ class RansacModelProtocol(Protocol):
     def residuals(self, *data): ...
 
 
-# A note on expiring model init parameter deprecations
-#
-# * Move `_estimate` code into `from_estimate`.
-# * Delete `_deprecate_no_args`.
-# * Delete `_deprecate_model_params`.
-# * Delete `BaseModel`
-# * Delete `_params2init_values` methods.
-# * Delete `params` properties of models.
-# * Nove `_check_init_values` into `_args_init`.
-# * Rename `_arg_init` methods to `__init__`.
-# * Clean `params` parsing from `predict_*` methods.
-
-
 _PARAMS_DEP_START = '0.26'
 _PARAMS_DEP_STOP = '2.2'
 
 
 class BaseModel:
+
+    def __init_subclass__(self):
+        warn(
+            f'`BaseModel` deprecated since version {_PARAMS_DEP_START} and '
+            f'will be removed in version {_PARAMS_DEP_STOP}',
+            category=FutureWarning,
+            stacklevel=2,
+        )
+
+
+class _BaseModel:
     """Implement common methods for model classes.
 
     This class can be removed when we expire deprecations of ``estimate``
@@ -66,6 +64,7 @@ class BaseModel:
     components comprising the arguments to the function ``__init__``, and
     checks the resulting input arguments for validity.
     """
+
 
     @classmethod
     def from_estimate(cls, data) -> Self | FailedEstimation:
@@ -166,7 +165,7 @@ def _deprecate_model_params(func):
 
 
 @_deprecate_no_args
-class LineModelND(BaseModel):
+class LineModelND(_BaseModel):
     """Total least squares estimator for N-dimensional lines.
 
     In contrast to ordinary least squares line estimation, this estimator
@@ -455,7 +454,7 @@ class LineModelND(BaseModel):
 
 
 @_deprecate_no_args
-class CircleModel(BaseModel):
+class CircleModel(_BaseModel):
     """Total least squares estimator for 2D circles.
 
     The functional model of the circle is::
@@ -708,7 +707,7 @@ class CircleModel(BaseModel):
 
 
 @_deprecate_no_args
-class EllipseModel(BaseModel):
+class EllipseModel(_BaseModel):
     """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is::
