@@ -39,6 +39,7 @@ jobs:
           BUILD_TYPE: "nightly build & test"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
 
   upload_anaconda:
     permissions:
@@ -69,3 +70,4 @@ jobs:
           BUILD_TYPE: "nightly wheel upload"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
