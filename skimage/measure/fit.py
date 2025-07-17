@@ -1314,14 +1314,18 @@ def ransac(
     >>> np.round(model.theta)
     1.0
 
-    Estimate ellipse model using RANSAC:
+    Next we estimate an ellipse model using RANSAC.
+
+    Note that the results are not deterministic, because the RANSAC algorithm
+    uses some randomness.   If you need the results to be deterministic, pass a
+    seeded number generator with the ``rng`` argument to ``ransac``.
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 20, 3, max_trials=50)
-    >>> np.abs(np.round(ransac_model.center))
+    >>> np.abs(np.round(ransac_model.center))  # doctest: +SKIP
     array([20., 30.])
-    >>> np.abs(np.round(ransac_model.axis_lengths))
+    >>> np.abs(np.round(ransac_model.axis_lengths))  # doctest: +SKIP
     array([10., 6.])
-    >>> np.abs(np.round(ransac_model.theta))
+    >>> np.abs(np.round(ransac_model.theta))    # doctest: +SKIP
     2.0
     >>> inliers  # doctest: +SKIP
     array([False, False, False, False,  True,  True,  True,  True,  True,
