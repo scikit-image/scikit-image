@@ -47,7 +47,7 @@ class ApiDocWriter:
         package_name : string
             Name of the top-level package. *package_name* must be the
             name of an importable package.
-        rst_extension : string, optional
+        rst_extension : str, optional
             Extension for reST files, default '.rst'.
         package_skip_patterns : None or sequence of {strings, regexps}
             Sequence of strings giving URIs of packages to be excluded
@@ -440,7 +440,7 @@ class ApiDocWriter:
         ----------
         outdir : string
             Directory to which to write generated index file.
-        froot : string, optional
+        froot : str, optional
             Root (filename without extension) of filename to write to
             Defaults to 'gen'. We add ``self.rst_extension``.
         relative_to : string

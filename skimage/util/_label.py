@@ -8,9 +8,9 @@ def label_points(coords, output_shape):
 
     Parameters
     ----------
-    coords: ndarray
+    coords : ndarray
         An array of N coordinates with dimension D
-    output_shape: tuple
+    output_shape : tuple
         The shape of the mask on which `coords` are labelled
 
     Returns

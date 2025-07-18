@@ -255,7 +255,7 @@ def hessian_matrix(
         of the first axis initially (Hrr, Hrc, Hcc), whilst 'xy' indicates the
         usage of the last axis initially (Hxx, Hxy, Hyy). Images with higher
         dimension must always use 'rc' order.
-    use_gaussian_derivatives : boolean, optional
+    use_gaussian_derivatives : bool, optional
         Indicates whether the Hessian is computed by convolving with Gaussian
         derivatives, or by a simple finite-difference operation.
 

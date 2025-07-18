@@ -256,7 +256,7 @@ def download_all(directory=None):
 
     Parameters
     ----------
-    directory: path-like, optional
+    directory : path-like, optional
         The directory where the dataset should be stored.
 
     Raises

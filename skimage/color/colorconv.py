@@ -575,7 +575,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
     observer : {"2", "10", "R"}
         One of: 2-degree observer, 10-degree observer, or 'R' observer as in
         R function ``grDevices::convertColor`` [3]_.
-    dtype: dtype, optional
+    dtype : dtype, optional
         Output data type.
 
     Returns
@@ -1673,7 +1673,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     rgb : (..., C=3, ...) array_like
         The image in RGB format. By default, the final dimension denotes
         channels.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
@@ -1749,7 +1749,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     stains : (..., C=3, ...) array_like
         The image in stain color space. By default, the final dimension denotes
         channels.
-    conv_matrix: ndarray
+    conv_matrix : ndarray
         The stain separation matrix as described by G. Landini [1]_.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to

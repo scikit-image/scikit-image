@@ -12,11 +12,11 @@ def _sin_flow_gen(image0, max_motion=4.5, npics=5):
 
     Parameters
     ----------
-    image0: ndarray
+    image0 : ndarray
         The base image to be warped.
-    max_motion: float
+    max_motion : float
         Maximum flow magnitude.
-    npics: int
+    npics : int
         Number of sinusoid pics.
 
     Returns

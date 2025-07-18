@@ -88,10 +88,10 @@ def hough_circle(image, radius, normalize=True, full_output=False):
     radius : scalar or sequence of scalars
         Radii at which to compute the Hough transform.
         Floats are converted to integers.
-    normalize : boolean, optional
+    normalize : bool, optional
         Normalize the accumulator with the number
         of pixels used to draw the radius.
-    full_output : boolean, optional
+    full_output : bool, optional
         Extend the output size by twice the largest
         radius in order to detect centers outside the
         input picture.

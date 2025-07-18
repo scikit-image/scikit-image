@@ -35,10 +35,10 @@ def rolling_ball(
     kernel : ndarray, optional
         An alternative way to specify the rolling ball, as an arbitrary
         kernel. It must have the same number of axes as `image`.
-    nansafe: bool, optional
+    nansafe : bool, optional
         If ``False`` (default), the function assumes that none of the values
         in `image` are ``np.nan``, and uses a faster implementation.
-    workers: int, optional
+    workers : int, optional
         The maximum number of threads to use. If ``None``, use the OpenMP
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number

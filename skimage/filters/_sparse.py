@@ -97,7 +97,7 @@ def correlate_sparse(image, kernel, mode='reflect'):
         The kernel to be correlated. Must have the same number of
         dimensions as `padded_array`. For high performance, it should
         be sparse (few nonzero entries).
-    mode : string, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'valid'}, optional
         See `scipy.ndimage.correlate` for valid modes.
         Additionally, mode 'valid' is accepted, in which case no padding is
         applied and the result is the result for the smaller image for which

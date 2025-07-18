@@ -55,7 +55,7 @@ def active_contour(
         Maximum iterations to optimize snake shape.
     convergence : float, optional
         Convergence criteria.
-    boundary_condition : string, optional
+    boundary_condition : str, optional
         Boundary conditions for the contour. Can be one of 'periodic',
         'free', 'fixed', 'free-fixed', or 'fixed-free'. 'periodic' attaches
         the two ends of the snake, 'fixed' holds the end-points in place,

@@ -91,7 +91,7 @@ def convex_hull_image(
         Tolerance when determining whether a point is inside the hull. Due
         to numerical floating point errors, a tolerance of 0 can result in
         some points erroneously being classified as being outside the hull.
-    include_borders: bool, optional
+    include_borders : bool, optional
         If ``False``, vertices/edges are excluded from the final hull mask.
 
     Returns

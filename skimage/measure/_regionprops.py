@@ -264,7 +264,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     """Compute ellipsoid axis lengths from inertia tensor eigenvalues.
 
     Parameters
-    ---------
+    ----------
     inertia_tensor_eigvals : sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
@@ -1015,7 +1015,7 @@ def regionprops_table(
         issued. A property computation function must take a region mask as its
         first argument. If the property requires an intensity image, it must
         accept the intensity image as the second argument.
-    spacing: tuple of float, shape (ndim,)
+    spacing : tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
 
     Returns
@@ -1186,7 +1186,7 @@ def regionprops(
         issued. A property computation function must take `label_image` as its
         first argument. If the property requires an intensity image, it must
         accept `intensity_image` as the second argument.
-    spacing: tuple of float, shape (ndim,)
+    spacing : tuple of float, shape (ndim,)
         The pixel spacing along each axis of the image.
     offset : array-like of int, shape `(label_image.ndim,)`, optional
         Coordinates of the origin ("top-left" corner) of the label image.

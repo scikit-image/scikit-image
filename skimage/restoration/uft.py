@@ -359,7 +359,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     dim : int, optional
         The last axis along which to compute the transform. All
         axes by default.
-    is_real : boolean, optional
+    is_real : bool, optional
        If True (default), imp_resp is supposed real and the Hermitian property
        is used with rfftn Fourier transform.
 
@@ -419,7 +419,7 @@ def laplacian(ndim, shape, is_real=True):
         The dimension of the Laplacian.
     shape : tuple
         The support on which to compute the transfer function.
-    is_real : boolean, optional
+    is_real : bool, optional
        If True (default), imp_resp is assumed to be real-valued and
        the Hermitian property is used with rfftn Fourier transform
        to return the transfer function.

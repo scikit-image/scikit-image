@@ -39,7 +39,7 @@ def meijering(
     alpha : float, optional
         Shaping filter constant, that selects maximally flat elongated
         features.  The default, None, selects the optimal value -1/(ndim+1).
-    black_ridges : boolean, optional
+    black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
@@ -118,7 +118,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
         Array with input image data.
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
-    black_ridges : boolean, optional
+    black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
@@ -218,7 +218,7 @@ def frangi(
         .. versionchanged:: 0.20
             The default, None, uses half of the maximum Hessian norm.
 
-    black_ridges : boolean, optional
+    black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
@@ -352,7 +352,7 @@ def hessian(
     gamma : float, optional
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
-    black_ridges : boolean, optional
+    black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional

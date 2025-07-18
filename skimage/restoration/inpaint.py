@@ -206,7 +206,7 @@ def inpaint_biharmonic(image, mask, *, split_into_regions=False, channel_axis=No
         Array of pixels to be inpainted. Have to be the same shape as one
         of the 'image' channels. Unknown pixels have to be represented with 1,
         known pixels - with 0.
-    split_into_regions : boolean, optional
+    split_into_regions : bool, optional
         If True, inpainting is performed on a region-by-region basis. This is
         likely to be slower, but will have reduced memory requirements.
     channel_axis : int or None, optional

@@ -106,7 +106,7 @@ def denoise_invariant(
     masks : list of ndarray, optional
         Set of masks to use for computing J-invariant output. If `None`,
         a full set of masks covering the image will be used.
-    denoiser_kwargs:
+    denoiser_kwargs :
         Keyword arguments passed to `denoise_function`.
 
     Returns
