@@ -378,30 +378,16 @@ def blob_dog(
         computing the Difference of Gaussians
     threshold : float or None, optional, DEPRECATED!
 
-        .. attention::
-            The current behavior of this parameter rescales the value range of
-            `image` based on its dtype with :func:`~.img_as_float`. This
-            affects the value of maxima relative to this absolute value.
-
         .. deprecated:: 0.26.0
 
-            This parameter is deprecated in favor of the new `threshold_abs`
-            parameter which preservers the value range of `image`. This
-            includes leaving `threshold` unspecified and relying on its default
-            value. In version 2.2 (or later), this parameter will be removed
-            completely.
+            Starting with version 0.26, this parameter is deprecated and this
+            function no longer automatically rescales the value range of input
+            `image` with :func:`~.img_as_float`. This affects this parameter,
+            whose value from before would no longer be correct.In version 2.0,
+            the default values `threshold`, `threshold` will be set to `None`.
+            This parameter will be removed completely in version 2.2 (or later).
 
-            Since the old behavior dtype-specific behavior might have been
-            unexpected, we suggest setting `threshold_abs=None` and finding an
-            appropriate relative value for `threshold_rel`. However, if you
-            want to maintain the exact old behavior across all releases:
-
-            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
-            - Set `threshold_abs` to the old value of `threshold`.
-            - Wrap the input to the `image` parameter with
-              :func:`skimage.util.img_as_float` before passing it to the
-              function. This will conditionally rescale the input
-              range of the `image` as before depending on its dtype.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -411,7 +397,8 @@ def blob_dog(
         specified, whichever threshold is larger will be used.
 
         .. versionadded:: 0.26.0
-            Replaces the `threshold` parameter with a range preserving option.
+            Replaces the `threshold` parameter.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     threshold_rel : float or None, optional
         Minimum relative intensity of peaks, calculated as
@@ -604,30 +591,16 @@ def blob_log(
         between `min_sigma` and `max_sigma`.
     threshold : float or None, optional, DEPRECATED!
 
-        .. attention::
-            The current behavior of this parameter rescales the value range of
-            `image` based on its dtype with :func:`~.img_as_float`. This
-            affects the value of maxima relative to this absolute value.
-
         .. deprecated:: 0.26.0
 
-            This parameter is deprecated in favor of the new `threshold_abs`
-            parameter which preservers the value range of `image`. This
-            includes leaving `threshold` unspecified and relying on its default
-            value. In version 2.2 (or later), this parameter will be removed
-            completely.
+            Starting with version 0.26, this parameter is deprecated and this
+            function no longer automatically rescales the value range of input
+            `image` with :func:`~.img_as_float`. This affects this parameter,
+            whose value from before would no longer be correct.In version 2.0,
+            the default values `threshold`, `threshold` will be set to `None`.
+            This parameter will be removed completely in version 2.2 (or later).
 
-            Since the old behavior dtype-specific behavior might have been
-            unexpected, we suggest setting `threshold_abs=None` and finding an
-            appropriate relative value for `threshold_rel`. However, if you
-            want to maintain the exact old behavior across all releases:
-
-            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
-            - Set `threshold_abs` to the old value of `threshold`.
-            - Wrap the input to the `image` parameter with
-              :func:`skimage.util.img_as_float` before passing it to the
-              function. This will conditionally rescale the input
-              range of the `image` as before depending on its dtype.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -641,7 +614,8 @@ def blob_log(
         specified, whichever threshold is larger will be used.
 
         .. versionadded:: 0.26.0
-            Replaces the `threshold` parameter with a range preserving option.
+            Replaces the `threshold` parameter.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
@@ -803,30 +777,16 @@ def blob_doh(
         between `min_sigma` and `max_sigma`.
     threshold : float or None, optional, DEPRECATED!
 
-        .. attention::
-            The current behavior of this parameter rescales the value range of
-            `image` based on its dtype with :func:`~.img_as_float`. This
-            affects the value of maxima relative to this absolute value.
-
         .. deprecated:: 0.26.0
 
-            This parameter is deprecated in favor of the new `threshold_abs`
-            parameter which preservers the value range of `image`. This
-            includes leaving `threshold` unspecified and relying on its default
-            value. In version 2.2 (or later), this parameter will be removed
-            completely.
+            Starting with version 0.26, this parameter is deprecated and this
+            function no longer automatically rescales the value range of input
+            `image` with :func:`~.img_as_float`. This affects this parameter,
+            whose value from before would no longer be correct.In version 2.0,
+            the default values `threshold`, `threshold` will be set to `None`.
+            This parameter will be removed completely in version 2.2 (or later).
 
-            Since the old behavior dtype-specific behavior might have been
-            unexpected, we suggest setting `threshold_abs=None` and finding an
-            appropriate relative value for `threshold_rel`. However, if you
-            want to maintain the exact old behavior across all releases:
-
-            - Set `threshold_rel=None` (to ignore the new default in version 2.0).
-            - Set `threshold_abs` to the old value of `threshold`.
-            - Wrap the input to the `image` parameter with
-              :func:`skimage.util.img_as_float` before passing it to the
-              function. This will conditionally rescale the input
-              range of the `image` as before depending on its dtype.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -843,7 +803,8 @@ def blob_doh(
         also specified, whichever threshold is larger will be used.
 
         .. versionadded:: 0.26.0
-            Replaces the `threshold` parameter with a range preserving option.
+            Replaces the `threshold` parameter.
+            See the :ref:`migration guide <threshold-blob-funcs>` for more!
 
     threshold_rel : float or None, optional
         Minimum intensity of peaks, calculated as
