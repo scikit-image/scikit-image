@@ -226,16 +226,19 @@ def _format_exclude_border(img_ndim, exclude_border):
 
 _THRESHOLD_WARNING = """{summary}
 
-Starting with version 0.26, the parameter `threshold` is deprecated in favor of
-`threshold_abs` that preserves the value range of `image`. Starting with
-version 2.0, this includes leaving `threshold` unspecified and relying on its
-default value which will be changed.  In version 2.2 (or later), this parameter
-will be removed completely. Set `threshold_abs` explicitly to `None` or a valid
-value to silence this warning.
+Starting with version 0.26, we no longer automatically rescale the value
+range of input images. This affects the now deprecated `threshold` parameter,
+whose value from before would no longer be correct.
 
-Since the old behavior dtype-specific behavior might have been unexpected, we
-suggest setting `threshold_abs=None` and finding an appropriate relative value
-for `threshold_rel`.
+In version 2.0, the default values of these threshold parameters will be
+updated too: `threshold_rel` will be set to the old value of `threshold`,
+`threshold` will be set to `None`.
+
+In version 2.2 (or later), the parameter `threshold` will be removed completely.
+
+Since the old dtype-specific behavior might have been unexpected, we suggest
+setting `threshold_abs=None` and finding an appropriate relative value for
+`threshold_rel`.
 
 However, if you want to maintain the exact old behavior across all releases:
 
@@ -245,6 +248,9 @@ However, if you want to maintain the exact old behavior across all releases:
   passing it to the function. This will conditionally rescale the input range
   of the `image` as before depending on its dtype.
 
+Set `threshold_abs` explicitly to `None` or a valid value to silence this
+warning.
+
 For more details, see the migration guide:
 https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs
 """
@@ -252,10 +258,8 @@ https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-b
 
 _THRESHOLD_REL_WARNING = """Must set parameter `threshold_rel` explicitly.
 
-Starting in version 2.0 and skimage2, the default of the parameter
-`threshold_rel` will change to the former value of the deprecated parameter
-`threshold`. If you want to preserve the old behavior, set `threshold_rel=None`
-explicitly.
+Starting in version 2.0, the default values of `threshold_rel` will be set to
+the old value of `threshold`, the default of `threshold` will be set to `None`.
 
 For more details, see the migration guide:
 https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs
