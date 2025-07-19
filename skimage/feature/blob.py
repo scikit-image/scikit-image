@@ -241,9 +241,9 @@ However, if you want to maintain the exact old behavior across all releases:
 
 - Set `threshold_rel=None` (to ignore the new default in version 2.0).
 - Set `threshold_abs` to the old value of `threshold`.
-- Wrap the input to the `image` parameter with `skimage.util.img_as_float`
-  before passing it to the function. This will conditionally rescale the input
-  range of the `image` as before depending on its dtype.
+- Wrap the input `image` parameter with `skimage.util.img_as_float` before
+  passing it to the function. This will conditionally rescale the input range
+  of the `image` as before depending on its dtype.
 
 For more details, see the migration guide:
 https://scikit-image.org/docs/dev/user_guide/skimage2_migration.html#threshold-blob-funcs

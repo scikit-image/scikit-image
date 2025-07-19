@@ -31,14 +31,16 @@ import skimage as ski
 warnings.filterwarnings(action="default", category=ski.util.PendingSkimage2Change)
 ```
 
-This will raise a warning for any piece of code which needs updating to continue working with the new (skimage2) API the exact same way it used to (in the old API).
+This will raise a warning in code that needs to be modified to continue functioning with the new, skimage2 API.
 
 ## Updating existing code
 
-When switching to the new namespace in version 2.0, some code will need updating to keep working as before.
+When switching to the new `skimage2` namespace, some code will need to be updated to continue working the way it did before.
 
 :::{note}
-Because these changes live in a new namespace, your code will _not_ break automatically if you don't explicitly change your imports and start importing from `skimage2`!
+For a while, you will be able to use `skimage` and `skimage2` (the 2.0 API) side-by-side, to facilitate porting.
+The new API may, for the same function call, return different results—e.g., because of a change in a keyword argument default value.
+By importing functionality from `skimage2`, you explicitly opt in to the new behavior.
 :::
 
 (threshold-blob-funcs)=
@@ -53,11 +55,11 @@ Because these changes live in a new namespace, your code will _not_ break automa
 
 **Description:**
 
-Starting with **version 0.26**, the value range of the input `image` is always preserved.
-When `image` had an integer dtype, its value range was scaled -- unsigned integers to the interval [0, 1], signed integers to [-1, 1].
-This affected the now deprecated `threshold` parameter, whose absolute value would compare differently with a scaled or preserved value range.
-In other words, the same `threshold` value would have different effects depending on `image.dtype`.
-With this deprecation, the new parameter `threshold_abs` is introduced.
+Starting with **version 0.26**, we no longer automatically rescale input images to fit the `[0, 1]` interval (for unsigned integers) or `[-1, 1]` interval (for signed integers).
+This affects the now deprecated `threshold` parameter, whose value from before would no longer be correct, now that we avoid scaling the input images.
+Now, the `threshold` value would need to vary, depending on the image dtype.
+The `threshold_rel` argument is now the preferred way to set the threshold in a data-type agnostic way.
+Setting the threshold to a fixed value is still possible, using the newly-introduced `threshold_abs` keyword.
 It will always be compared against a range-preserving version of `image` and behave consistently regardless of `image.dtype`.
 
 Starting with **version 2.0** and the new `skimage2` namespace, the default values of these parameters are updated too.
@@ -70,23 +72,20 @@ In **version 2.2** (or later), the old `threshold` parameter will be removed com
 
 To discover all calls that need to be updated, [enable skimage2-related warnings](#enable-skimage2-warnings).
 
-Since the old behavior dtype-specific behavior might have been unexpected, we
-suggest setting `threshold_abs=None` and finding an appropriate relative value
-for `threshold_rel`.
+Since the old dtype-specific behavior might have been unexpected, we suggest setting `threshold_abs=None` and finding an appropriate relative value for `threshold_rel`.
 
 However, if you want to maintain the exact old behavior across all releases:
 
 - Set `threshold_rel=None` (to ignore the new default in version 2.0).
 - Set `threshold_abs` to the old value of `threshold`.
-- Wrap the input to the `image` parameter with {func}`skimage.util.img_as_float`
-  before passing it to the function. This will conditionally rescale the input
-  range of the `image` as before depending on its dtype.
+- Wrap the input `image` parameter with {func}`skimage.util.img_as_float` before passing it to the function.
+  This will conditionally rescale the input range of the `image` as before depending on its dtype.
 
-## Changes unrelated to skimage2
+## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
 These are part of the API cleanup for skimage2 but are not breaking.
 You will simply notice these as the classical deprecation warnings that you are already used to.
-We list them here, because updating your code to the new API will make it easier to transition to the skimage2 API.
+We list them here, because updating your code to the new API will make it easier to transition to skimage2.
 
 _To be defined._
