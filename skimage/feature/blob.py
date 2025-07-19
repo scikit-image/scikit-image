@@ -226,9 +226,10 @@ def _format_exclude_border(img_ndim, exclude_border):
 
 _THRESHOLD_WARNING = """{summary}
 
-Starting with version 0.26, we no longer automatically rescale the value
-range of input images. This affects the now deprecated `threshold` parameter,
-whose value from before would no longer be correct.
+Starting with version 0.26, we no longer automatically rescale the value range
+of input images with `skimage.util.img_as_float`. This affects the now
+deprecated `threshold` parameter, whose value from before would no longer be
+correct.
 
 In version 2.0, the default values of these threshold parameters will be
 updated too: `threshold_rel` will be set to the old value of `threshold`,
