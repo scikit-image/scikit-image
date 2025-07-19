@@ -62,7 +62,7 @@ It will always be compared against a range-preserving version of `image` and beh
 
 Starting with **version 2.0** and the new `skimage2` namespace, the default values of these parameters are updated too.
 The default of `threshold` will be set to `None` and `threshold_rel` will be set to the old value of `threshold`.
-Calls to these functions that rely on default values may change behavior, so we recommend setting `threshold_abs` and `threshold_rel` explicitly.
+This will make the defaults useful to a wider set of input images and should approximate the old behavior for many unsigned integer images.
 
 In **version 2.2** (or later), the old `threshold` parameter will be removed completely.
 
