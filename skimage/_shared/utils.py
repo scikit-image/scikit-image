@@ -21,7 +21,6 @@ __all__ = [
     'slice_at_axis',
     "deprecate_parameter",
     "DEPRECATED",
-    "warn_not_preserve_range",
 ]
 
 
@@ -1097,71 +1096,3 @@ def as_binary_ndarray(array, *, variable_name):
                 f"safely cast to boolean array."
             )
     return np.asarray(array, dtype=bool)
-
-
-PRESERVE_RANGE_WARNING_TEMPLATE = """
-`{func_name}` implicitly scales the value range of some of its arguments before
-processing. This behavior is deprecated and will be removed in version 2.0. To
-opt into the new behavior now, consult the documentation of the
-`preserve_range` parameter for this particular function. Find more details and
-background in our migration guide:
-https://scikit-image.org/docs/0.26.x/user_guide/skimage2_migration.html
-
-You can filter this warning with:
-
-    import warnings
-    warnings.filterwarnings(
-        "ignore", "(?s).*preserve_range", category=FutureWarning, module="skimage"
-    )
-""".strip()
-
-
-def warn_not_preserve_range(template=PRESERVE_RANGE_WARNING_TEMPLATE):
-    """Create decorator that warns when `preserve_range=True` isn't in kwargs.
-
-    This is a lightweight decorator to help with the skimage2 migration to
-    preserving range everywhere in our API. It won't modify the docstring of
-    decorated function but will check that the `preserve_range` parameter is
-    documented.
-
-    Parameters
-    ----------
-    template : str, None
-        The template for the warning message.
-
-    Returns
-    -------
-    decorator : callable
-        The decorator.
-
-    Raises
-    ------
-    AssertionError
-        If the docstring of the decorated function doesn't contain the string
-        ``"preserve_range : bool, optional"``. Since the documentation and reason
-        for preserving range may be different from function to function, this
-        decorator doesn't add modify the docstring automatically and only checks
-        that the parameter was documented.
-    """
-
-    def decorator(func):
-        assert (
-            "\npreserve_range : bool" in func.__doc__
-        ), "`preserve_range` parameter isn't documented in docstring"
-        message = template.format(func_name=func.__qualname__)
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            stacklevel = _warning_stacklevel(func)
-
-            if kwargs.get("preserve_range", False) is False:
-                warnings.warn(
-                    message,
-                    FutureWarning,
-                    stacklevel=stacklevel,
-                )
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
