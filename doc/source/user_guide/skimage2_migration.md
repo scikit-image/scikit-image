@@ -55,12 +55,12 @@ By importing functionality from `skimage2`, you explicitly opt in to the new beh
 
 **Description:**
 
-Starting with **version 0.26**, we no longer automatically rescale input images to fit the `[0, 1]` interval (for unsigned integers) or `[-1, 1]` interval (for signed integers).
+Starting with **version 0.26**, we no longer automatically rescale input images to fit the interval `[0, 1]` (for unsigned integers) or `[-1, 1]` (for signed integers).
 This affects the now deprecated `threshold` parameter, whose value from before would no longer be correct, now that we avoid scaling the input images.
-Now, the `threshold` value would need to vary, depending on the image dtype.
-The `threshold_rel` argument is now the preferred way to set the threshold in a data-type agnostic way.
+The value of `threshold` would need to vary, depending on the image dtype.
+Instead, the `threshold_rel` parameter is now the preferred way to set the threshold in a data-type agnostic way.
 Setting the threshold to a fixed value is still possible, using the newly-introduced `threshold_abs` keyword.
-It will always be compared against a range-preserving version of `image` and behave consistently regardless of `image.dtype`.
+`threshold_abs` will always be compared against a range-preserving version of `image` and behave consistently regardless of `image.dtype`.
 
 Starting with **version 2.0** and the new `skimage2` namespace, the default values of these parameters are updated too.
 The default of `threshold` will be set to `None` and `threshold_rel` will be set to the old value of `threshold`.
