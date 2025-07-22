@@ -49,6 +49,15 @@ SKIP_RE = re.compile(r"(\s*>>>.*?)(\s*)#\s*skip\s+if\s+(.*)$")
 # https://docs.python.org/3/library/struct.html
 arch32 = struct.calcsize("P") * 8 == 32
 
+# Corresponding lists for fused types (with respect to fused_numerics.pxd)
+dtypes_int = (np.int8, np.int16, np.int32, np.int64)
+dtypes_uint = (np.uint8, np.uint16, np.uint32, np.uint64)
+dtypes_anyint = dtypes_int + dtypes_uint
+dtypes_floats = (np.float32, np.float64)
+dtypes_complexes = (np.complex64, np.complex128)
+dtypes_real_numeric = dtypes_anyint + dtypes_floats
+dtypes_numeric = dtypes_real_numeric + dtypes_complexes
+
 
 def assert_less(a, b, msg=None):
     message = f"{a!r} is not lower than {b!r}"
