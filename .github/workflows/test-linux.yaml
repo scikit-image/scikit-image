@@ -22,7 +22,9 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        # Only need to include additional Python versions that aren't included
+        # below
+        python-version: []
 
         # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
@@ -50,25 +52,25 @@ jobs:
             EAGER_IMPORT: 1
             OPTIONS_NAME: "mini-req-eager-import"
           - platform_id: manylinux_x86_64
-            python-version: "3.11"
+            python-version: "3.12"
             MINIMUM_REQUIREMENTS: 1
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "mini-req-optional-deps"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
-            PIP_FLAGS: "--pre"
-            OPTIONS_NAME: "pre"
-          - platform_id: manylinux_x86_64
-            python-version: "3.12"
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
-            python-version: "3.12"
+            python-version: "3.13"
+            PIP_FLAGS: "--pre"
+            OPTIONS_NAME: "pre"
+          - platform_id: manylinux_x86_64
+            python-version: "3.13"
             PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
-            python-version: "3.12"
+            python-version: "3.14"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
 
