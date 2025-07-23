@@ -177,7 +177,7 @@ def unsupervised_wiener(
         max_num_iter : int
            The maximum number of iterations if ``threshold`` is not
            satisfied. 200 by default.
-        callback : callable (None by default)
+        callback : callable
            A user provided callable to which is passed, if the function
            exists, the current image sample for whatever purpose. The user
            can store the sample, or compute other moments than the
