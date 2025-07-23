@@ -22,27 +22,23 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        # Only need to include additional Python versions that aren't included
-        # below
-        python-version: []
+        # # Dependency options for setup-test-env.sh
+        # MINIMUM_REQUIREMENTS: [0]
+        # OPTIONAL_DEPS: [0]
+        # WITHOUT_POOCH: [0]
+        # PIP_FLAGS: [""]
 
-        # Dependency options for setup-test-env.sh
-        MINIMUM_REQUIREMENTS: [0]
-        OPTIONAL_DEPS: [0]
-        WITHOUT_POOCH: [0]
-        PIP_FLAGS: [""]
+        # # Flag that chooses between source and sdist build
+        # INSTALL_FROM_SDIST: [0]
 
-        # Flag that chooses between source and sdist build
-        INSTALL_FROM_SDIST: [0]
+        # # Flags that control lazy-loader behavior
+        # EAGER_IMPORT: [0]
 
-        # Flags that control lazy-loader behavior
-        EAGER_IMPORT: [0]
+        # # Python flags
+        # PYTHONOPTIMIZE: [0]
 
-        # Python flags
-        PYTHONOPTIMIZE: [0]
-
-        # Flag to control naming of workflow job
-        OPTIONS_NAME: ["default"]
+        # # Flag to control naming of workflow job
+        # OPTIONS_NAME: ["default"]
 
         include:
           - platform_id: manylinux_x86_64
