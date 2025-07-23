@@ -58,17 +58,17 @@ jobs:
             OPTIONS_NAME: "optional-deps"
           - platform_id: manylinux_x86_64
             python-version: "3.13"
-            PIP_FLAGS: "--pre"
-            OPTIONS_NAME: "pre"
-          - platform_id: manylinux_x86_64
-            python-version: "3.13"
             PYTHONOPTIMIZE: 2
             WITHOUT_POOCH: 1
             OPTIONS_NAME: "optimize and no pooch"
           - platform_id: manylinux_x86_64
-            python-version: "3.14"
+            python-version: "3.13"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
+          - platform_id: manylinux_x86_64
+            python-version: "3.14"
+            PIP_FLAGS: "--pre"
+            OPTIONS_NAME: "pre"
 
     steps:
       - name: Checkout scikit-image
