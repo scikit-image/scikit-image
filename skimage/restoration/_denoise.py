@@ -317,7 +317,7 @@ def denoise_tv_bregman(
         The algorithm stops when :math:`\|u_n - u_{n-1}\|_2 < \varepsilon`.
     max_num_iter : int, optional
         Maximal number of iterations used for the optimization.
-    isotropic : boolean, optional
+    isotropic : bool, optional
         Switch between isotropic and anisotropic TV denoising.
     channel_axis : int or None, optional
         If ``None``, the image is assumed to be grayscale (single-channel).
@@ -871,7 +871,7 @@ def denoise_wavelet(
         The noise standard deviation used when computing the wavelet detail
         coefficient threshold(s). When None (default), the noise standard
         deviation is estimated via the method in [2]_.
-    wavelet : string, optional
+    wavelet : str, optional
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
         ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more.

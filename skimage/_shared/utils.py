@@ -141,13 +141,13 @@ class change_default_value:
 
     Parameters
     ----------
-    arg_name: str
+    arg_name : str
         The name of the argument to be updated.
-    new_value: any
+    new_value : any
         The argument new value.
     changed_version : str
         The package version in which the change will be introduced.
-    warning_msg: str
+    warning_msg : str
         Optional warning message. If None, a generic warning message
         is used.
     stacklevel : {None, int}, optional

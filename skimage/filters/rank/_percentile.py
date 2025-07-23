@@ -81,7 +81,7 @@ def autolevel_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -89,13 +89,13 @@ def autolevel_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -126,7 +126,7 @@ def gradient_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -134,13 +134,13 @@ def gradient_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -171,7 +171,7 @@ def mean_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -179,13 +179,13 @@ def mean_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -216,7 +216,7 @@ def subtract_mean_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -224,13 +224,13 @@ def subtract_mean_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -265,7 +265,7 @@ def enhance_contrast_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -273,13 +273,13 @@ def enhance_contrast_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -311,7 +311,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -319,12 +319,12 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0 : float in [0, ..., 1]
+    p0 : float, optional, in interval [0, 1]
         Set the percentile value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -358,7 +358,7 @@ def pop_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -366,13 +366,13 @@ def pop_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -406,7 +406,7 @@ def sum_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -414,13 +414,13 @@ def sum_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0, p1 : float in [0, ..., 1]
+    p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """
@@ -454,7 +454,7 @@ def threshold_percentile(
         Input image.
     footprint : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (same dtype as input)
+    out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -462,12 +462,12 @@ def threshold_percentile(
     shift_x, shift_y : int
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
-    p0 : float in [0, ..., 1]
+    p0 : float, optional, in interval [0, 1]
         Set the percentile value.
 
     Returns
     -------
-    out : 2-D array (same dtype as input image)
+    out : 2-D array, same dtype as input `image`
         Output image.
 
     """

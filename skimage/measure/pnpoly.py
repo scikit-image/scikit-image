@@ -18,7 +18,7 @@ def grid_points_in_poly(shape, verts, binarize=True):
         Specify the V vertices of the polygon, sorted either clockwise
         or anti-clockwise. The first point may (but does not need to be)
         duplicated.
-    binarize: bool
+    binarize : bool
         If `True`, the output of the function is a boolean mask.
         Otherwise, it is a labeled array. The labels are:
         O - outside, 1 - inside, 2 - vertex, 3 - edge.

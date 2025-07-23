@@ -216,8 +216,7 @@ def run_in_parallel(workers=2, warnings_matching=None):
     ----------
     workers : int, optional
         The number of times the function is run in parallel.
-
-    warnings_matching: list or None
+    warnings_matching : list or None
         This parameter is passed on to `expected_warnings` so as not to have
         race conditions with the warnings filters. A single
         `expected_warnings` context manager is used for all threads.

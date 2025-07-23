@@ -41,9 +41,8 @@ def compare_images(image0, image1, *, method='diff', n_tiles=(8, 8)):
         .. versionchanged:: 0.24
             `image1` and `image2` were renamed into `image0` and `image1`
             respectively.
-    method : string, optional
+    method : {'diff', 'blend', 'checkerboard'}, optional
         Method used for the comparison.
-        Valid values are {'diff', 'blend', 'checkerboard'}.
         Details are provided in the note section.
 
         .. versionchanged:: 0.24
