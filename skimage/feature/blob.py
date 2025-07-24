@@ -5,7 +5,12 @@ import scipy.ndimage as ndi
 from scipy import spatial
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import (
+    _supported_float_type,
+    check_nD,
+    DEPRECATED,
+    deprecate_parameter,
+)
 from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
@@ -204,8 +209,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         for exclude in exclude_border:
             if not isinstance(exclude, int):
                 raise ValueError(
-                    "exclude border, when expressed as a tuple, must only "
-                    "contain ints."
+                    "exclude border, when expressed as a tuple, must only contain ints."
                 )
         return exclude_border + (0,)
     elif isinstance(exclude_border, int):
@@ -218,6 +222,98 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
+def _prescale_value_range(image, *, mode):
+    """Scale the image according to the selected mode.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to scale.
+    mode : {'normalize', 'legacy', 'none'} or tuple, optional
+        Controls the rescaling behavior for `image`.
+
+        ``'normalize'``
+            Normalize `image` between 0 and 1. After normalization its minimum
+            and maximum values will be 0 and 1 respectively.
+
+        ``('normalize', lower, higher)``
+            Normalize `image` such that ``lower`` and ``higher`` are scaled
+            to 0 and 1 respectively.
+
+        ``'legacy'``
+            Normalize only if `image` has a integer dtype, if `image` is of
+            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            more details.
+
+        ``'none'``
+            Don't scale `image` at all.
+
+    Returns
+    -------
+    scaled_image : ndarray
+        The rescald `image` of the same shape but possibly with a different
+        dtype.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> image = np.array([-10, 100], dtype=np.int8)
+
+    >>> _prescale_value_range(image, mode="normalize")
+    array([0.,  1.])
+
+    >>> _prescale_value_range(image, mode=("normalize", -100, 100))
+    array([0.45, 1.  ])
+
+    >>> _prescale_value_range(image, mode="legacy")
+    array([-0.07874016,  0.78740157])
+    """
+    if mode == "none":
+        return image
+
+    elif mode == "legacy":
+        return img_as_float(image)
+
+    elif isinstance(mode, tuple):
+        try:
+            mode_name, lower, higher = mode
+        except TypeError:
+            raise ValueError()
+        if mode_name != "normalize":
+            raise ValueError()
+        if not np.isscalar(lower) or not np.isscalar(higher):
+            raise ValueError()
+
+        dtype = _supported_float_type(image.dtype)
+        image = image.astype(dtype)
+
+        image -= lower
+        image /= higher - lower
+
+    elif mode == "normalize":
+        dtype = _supported_float_type(image.dtype)
+        image = image.astype(dtype)
+
+        image -= image.min()
+        image /= np.ptp(image)
+
+    else:
+        raise ValueError()
+
+    return image
+
+
+@deprecate_parameter(
+    deprecated_name="threshold_rel",
+    start_version="0.26",
+    stop_version="2.2",
+    modify_docstring=False,
+    template="Parameter `{deprecated_name}` is deprecated since version "
+    "{deprecated_version} and will be removed in {changed_version} (or "
+    "later). To avoid this warning, please use the parameters `threshold` "
+    "together with the desired `prescale` mode instead. "
+    "For more details, see the documentation of `{func_name}`.",
+)
 def blob_dog(
     image,
     min_sigma=1,
@@ -226,8 +322,9 @@ def blob_dog(
     threshold=0.5,
     overlap=0.5,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
     exclude_border=False,
+    prescale="legacy",
 ):
     r"""Finds blobs in the given grayscale image.
 
@@ -261,12 +358,15 @@ def blob_dog(
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
-        stack of Difference-of-Gaussian (DoG) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.26
+            Starting with version 0.26, `threshold_rel` is deprecated. Since
+            ``max(dog_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
+
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -276,6 +376,23 @@ def blob_dog(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
+    prescale : {'normalize', 'legacy', 'none'} or tuple, optional
+        Controls the rescaling behavior for `image` which affects the
+        internally computed stack of Difference-of-Gaussian (DoG) images. This
+        in turn affects the effect of the `threshold` parameter.
+
+        ``'normalize'``
+            Normalize `image` between 0 and 1. After normalization its minimum
+            and maximum values will be 0 and 1 respectively.
+
+        ``('normalize', lower, higher)``
+            Normalize `image` such that ``lower`` and ``higher`` are scaled
+            to 0 and 1 respectively.
+
+        ``'legacy'``
+            Normalize only if `image` has a integer dtype, if `image` is of
+            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            more details.
 
     Returns
     -------
@@ -336,7 +453,10 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
