@@ -11,6 +11,11 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
 
 
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:.*`threshold_rel` is deprecated:FutureWarning:skimage"
+)
+
+
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
 def test_blob_dog(dtype, threshold_type):
