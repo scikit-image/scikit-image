@@ -177,3 +177,11 @@ def test_no_descriptors_extracted_sift():
     detector_extractor = SIFT()
     with pytest.raises(RuntimeError):
         detector_extractor.detect_and_extract(img)
+
+
+def test_fit():
+    """Test a parabola fitting when h has the same values."""
+    detector_extractor = SIFT()
+    h = np.array([1.0, 1.0, 1.0], dtype=np.float32)
+    p = detector_extractor._fit(h)
+    assert p == 0.5

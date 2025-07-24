@@ -461,7 +461,11 @@ class SIFT(FeatureDetector, DescriptorExtractor):
 
     def _fit(self, h):
         """Refine the position of the peak by fitting it to a parabola"""
-        return (h[0] - h[2]) / (2 * (h[0] + h[2] - 2 * h[1]))
+        denom = 2 * (h[0] + h[2] - 2 * h[1])
+        if denom == 0.0:
+            return 0.5
+        else:
+            return (h[0] - h[2]) / denom
 
     def _compute_orientation(
         self, positions_oct, scales_oct, sigmas_oct, octaves, gaussian_scalespace
@@ -574,8 +578,8 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         return gradient_space
 
     def _rotate(self, row, col, angle):
-        c = math.cos(angle)
-        s = math.sin(angle)
+        c = np.cos(angle)
+        s = np.sin(angle)
         rot_row = c * row + s * col
         rot_col = -s * row + c * col
         return rot_row, rot_col
