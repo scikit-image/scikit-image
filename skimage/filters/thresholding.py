@@ -5,6 +5,7 @@ from collections import OrderedDict
 from collections.abc import Iterable
 
 import numpy as np
+import warnings
 from scipy import ndimage as ndi
 
 from .._shared.filters import gaussian
@@ -639,7 +640,7 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
     return nu
 
 
-def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=None):
+def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=None, max_iter=100):
     """Compute threshold value by Li's iterative Minimum Cross Entropy method.
 
     Parameters
@@ -663,6 +664,12 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     iter_callback : Callable[[float], Any], optional
         A function that will be called on the threshold at every iteration of
         the algorithm.
+    max_iter : int, optional
+        Maximum number of iterations to perform. If the threshold does not
+        converge within this number of steps, the algorithm stops and issues
+        a warning. This prevents infinite loops in cases where the threshold
+        oscillates between values or convergence is too slow.
+        Default is 100.
 
     Returns
     -------
@@ -753,10 +760,15 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
     # new and old threshold values is less than the tolerance
     # or if the background mode has only one value left,
     # since log(0) is not defined.
+    # Additionally, check for previously seen values to prevent 
+    # threshold oscillation between two values.
+    iteration = 0
+    seen_thresholds = []
 
     if image.dtype.kind in 'iu':
         hist, bin_centers = histogram(image.reshape(-1), source_range='image')
         hist = hist.astype('float32', copy=False)
+
         while abs(t_next - t_curr) > tolerance:
             t_curr = t_next
             foreground = bin_centers > t_curr
@@ -772,6 +784,17 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
+            
+
+            if round(float(t_curr), 10) in seen_thresholds:
+                warnings.warn("threshold_li oscillates between two threshold values", UserWarning)
+                break
+            seen_thresholds.append(round(float(t_curr), 10))
+            
+            if iteration >= max_iter:
+                warnings.warn("threshold_li did not converge", UserWarning)
+                break
+            iteration += 1
 
     else:
         while abs(t_next - t_curr) > tolerance:
@@ -787,6 +810,16 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
             if iter_callback is not None:
                 iter_callback(t_next + image_min)
+
+            if round(float(t_curr), 10) in seen_thresholds:
+                warnings.warn("threshold_li oscillates between two threshold values", UserWarning)
+                break
+            seen_thresholds.append(round(float(t_curr), 10))
+            
+            if iteration >= max_iter:
+                warnings.warn("threshold_li did not converge", UserWarning)
+                break
+            iteration += 1
 
     threshold = t_next + image_min
     return threshold
