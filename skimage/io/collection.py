@@ -102,19 +102,19 @@ class ImageCollection:
 
     Parameters
     ----------
-    load_pattern : str or list of str
-        Pattern string or list of strings to load. The filename path can be
-        absolute or relative.
+    load_pattern : str or sequence
+        A glob-like pattern or sequence of patterns to load files. If a
+        sequence of objects other than strings is passed, e.g. a range of
+        numbers, each item will be passed independently to `load_func` and
+        will represent an item in the collection.
     conserve_memory : bool, optional
-        If True, :class:`skimage.io.ImageCollection` does not keep more than one in
-        memory at a specific time. Otherwise, images will be cached once they are loaded.
-
-    Other parameters
-    ----------------
-    load_func : callable
-        ``imread`` by default. See Notes below.
-    **load_func_kwargs : dict
-        Any other keyword arguments are passed to `load_func`.
+        If True, `ImageCollection` does not keep more than one in memory at a
+        specific time. Otherwise, images will be cached once they are loaded.
+    load_func : callable, optional
+        Load images with a custom callable that accepts a single
+        Defaults to :func:`skimage.io.imread`.
+    **load_func_kwargs : dict, optional
+        Passed to `load_func` as additional keyword arguments on each call.
 
     Attributes
     ----------
@@ -125,84 +125,71 @@ class ImageCollection:
 
     Notes
     -----
-    Note that files are always returned in alphanumerical order. Also note that slicing
-    returns a new :class:`skimage.io.ImageCollection`, *not* a view into the data.
-
-    ImageCollection image loading can be customized through
-    `load_func`. For an ImageCollection ``ic``, ``ic[5]`` calls
-    ``load_func(load_pattern[5])`` to load that image.
-
-    For example, here is an ImageCollection that, for each video provided,
-    loads every second frame::
-
-      import imageio.v3 as iio3
-      import itertools
-
-      def vidread_step(f, step):
-          vid = iio3.imiter(f)
-          return list(itertools.islice(vid, None, None, step)
-
-      video_file = 'no_time_for_that_tiny.gif'
-      ic = ImageCollection(video_file, load_func=vidread_step, step=2)
-
-      ic  # is an ImageCollection object of length 1 because 1 video is provided
-
-      x = ic[0]
-      x[5]  # the 10th frame of the first video
-
-    Alternatively, if `load_func` is provided and `load_pattern` is a
-    sequence, an :class:`skimage.io.ImageCollection` of corresponding length will
-    be created, and the individual images will be loaded by calling `load_func` with the
-    matching element of the `load_pattern` as its first argument. In this
-    case, the elements of the sequence do not need to be names of existing
-    files (or strings at all). For example, to create an :class:`skimage.io.ImageCollection`
-    containing 500 images from a video::
-
-      class FrameReader:
-          def __init__ (self, f):
-              self.f = f
-          def __call__ (self, index):
-              return iio3.imread(self.f, index=index)
-
-      ic = ImageCollection(range(500), load_func=FrameReader('movie.mp4'))
-
-      ic  # is an ImageCollection object of length 500
-
-    Another use of `load_func` would be to convert all images to ``uint8``::
-
-      def imread_convert(f):
-          return imread(f).astype(np.uint8)
-
-      ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
+    Note that files are always returned in alphanumerical order. Also note
+    that slicing returns a new ImageCollection, *not* a view into the data.
 
     Examples
     --------
-    >>> import imageio.v3 as iio3
-    >>> import skimage.io as io
-
-    # Where your images are located
-    >>> data_dir = os.path.join(os.path.dirname(__file__), '../data')
-
-    >>> coll = io.ImageCollection(data_dir + '/chess*.png')
-    >>> len(coll)
+    >>> import pytest; _ = pytest.importorskip("pooch")  # Skip without pooch
+    >>> import skimage as ski
+    >>> ski.data.download_all()  # Make sure all files are present in data_dir
+    >>> collection = ski.io.ImageCollection(ski.data.data_dir + '/chess*.png')
+    >>> len(collection)
     2
-    >>> coll[0].shape
+    >>> collection[0].shape
     (200, 200)
 
-    >>> image_col = io.ImageCollection([f'{data_dir}/*.png', '{data_dir}/*.jpg'])
+    If `load_func` is provided and `load_pattern` is a sequence of objects other than
+    strings, an `ImageCollection` of corresponding length will be created, and the
+    individual images will be loaded by calling `load_func` with the matching element
+    of the `load_pattern` as its first argument. In this case, the elements of the
+    sequence do not need to be names of existing files (or strings at all).
 
-    >>> class MultiReader:
-    ...     def __init__ (self, f):
-    ...         self.f = f
-    ...     def __call__ (self, index):
-    ...         return iio3.imread(self.f, index=index)
+    E.g. `load_func` can be used to access frames in format's such as TIF, GIF
+    or MP4 by their (page) index. E.g.:
+
+    >>> import imageio.v3 as iio
+    >>> path = ski.data.data_dir + "/palisades_of_vogt.tif"
+    >>> collection = ski.io.ImageCollection(
+    ...     range(60), load_func=lambda i: iio.imread(path, page=i)
+    ... )
+    >>> len(collection)
+    60
+    >>> collection[10].shape
+    (1440, 1440)
+
+    The above example needs to re-open the file for each frame. If you
+    anticipate that this might be a bottleneck, open the file before:
+
+    >>> with iio.imopen(path, io_mode="r") as file:
+    ...     collection = ski.io.ImageCollection(
+    ...         range(60), load_func=lambda i: file.read(page=i)
+    ...     )
+    ...     collection[10].shape
+    (1440, 1440)
+
+    `load_func` can also be used to create data on the fly:
+
+    >>> def render_flower(petal_count, width):
+    ...     length = np.linspace(-1, 1, width)
+    ...     xx, yy = np.meshgrid(length, length)
+    ...     # Evaluate cosine function in polar coordinate space
+    ...     phi = np.cos(np.arctan2(xx, yy) * petal_count / 2)
+    ...     r = np.cos(np.sqrt(xx**2 + yy**2))
+    ...     image = ski.util.img_as_ubyte(np.abs(phi * r))
+    ...     return image
     ...
-    >>> filename = data_dir + '/no_time_for_that_tiny.gif'
-    >>> ic = io.ImageCollection(range(24), load_func=MultiReader(filename))
-    >>> len(image_col)
-    23
-    >>> isinstance(ic[0], np.ndarray)
-    True
+    >>> collection = ski.io.ImageCollection(
+    ...     range(10), load_func=render_flower, width=5
+    ... )
+    >>> len(collection)
+    10
+    >>> collection[4]
+    array([[  0,  67, 138,  67,   0],
+           [ 67,   0, 224,   0,  67],
+           [138, 224, 255, 224, 138],
+           [ 67,   0, 224,   0,  67],
+           [  0,  67, 138,  67,   0]], dtype=uint8)
     """
 
     def __init__(
