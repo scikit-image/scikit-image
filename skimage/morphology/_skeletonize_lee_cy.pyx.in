@@ -78,6 +78,8 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
 
         pixel_type neighb[27]
 
+        int[::1] Euler_LUT = LUT
+
     # loop over the six directions in this order (for consistency with ImageJ)
     borders[:] = [4, 3, 2, 1, 5, 6]
 
@@ -107,7 +109,12 @@ def _compute_thin_image(pixel_type[:, :, ::1] img not None):
                     r = point.r
                     c = point.c
                     get_neighborhood(img, p, r, c, neighb)
-                    if is_simple_point(neighb):
+
+                    if (
+                        is_simple_point(neighb)
+                        and is_Euler_invariant(neighb, Euler_LUT)
+                        and not is_endpoint(neighb)
+                    ):
                         img[p, r, c] = 0
                         no_change = False
 
@@ -138,6 +145,7 @@ cdef void find_simple_point_candidates(pixel_type[:, :, ::1] img,
         pixel_type neighborhood[27]
         npy_intp p, r, c
         bint is_border_pt
+        bint c1, c2, c3, c4, c5, c6, c7, c8
 
         # rebind a global name to avoid lookup. The table is filled in
         # at import time.
@@ -178,6 +186,44 @@ cdef void find_simple_point_candidates(pixel_type[:, :, ::1] img,
                     not is_Euler_invariant(neighborhood, Euler_LUT) or
                     not is_simple_point(neighborhood)):
                     continue
+
+                # check corner case
+                if curr_border in [1,2]:
+                    if r+2 < img.shape[1]:
+                        c1 = img[p,r-1,c] == 0
+                        c2 = img[p,r,c] == 1
+                        c3 = img[p,r+1,c] == 1
+                        c4 = img[p,r+2,c] == 0
+                        c5 = img[p-1,r,c] == 1
+                        c6 = img[p+1,r,c] == 1
+                        c7 = img[p-1,r+1,c] == 1
+                        c8 = img[p+1,r+1,c] == 1
+                        if c1 and c2 and c3 and c4 and c5 and c6 and c7 and c8:
+                            continue
+                elif curr_border in [3,4]:
+                    if c+2 < img.shape[2]:
+                        c1 = img[p,r,c-1] == 0
+                        c2 = img[p,r,c] == 1
+                        c3 = img[p,r,c+1] == 1
+                        c4 = img[p,r,c+2] == 0
+                        c5 = img[p-1,r,c] == 1
+                        c6 = img[p+1,r,c] == 1
+                        c7 = img[p-1,r,c+1] == 1
+                        c8 = img[p+1,r,c+1] == 1
+                        if c1 and c2 and c3 and c4 and c5 and c6 and c7 and c8:
+                            continue
+                elif curr_border in [5,6]:
+                    if c+2 < img.shape[2]:
+                        c1 = img[p,r,c-1] == 0
+                        c2 = img[p,r,c] == 1
+                        c3 = img[p,r,c+1] == 1
+                        c4 = img[p,r,c+2] == 0
+                        c5 = img[p,r-1,c] == 1
+                        c6 = img[p,r+1,c] == 1
+                        c7 = img[p,r-1,c+1] == 1
+                        c8 = img[p,r+1,c+1] == 1
+                        if c1 and c2 and c3 and c4 and c5 and c6 and c7 and c8:
+                            continue
 
                 # ok, add (p, r, c) to the list of simple border points
                 point.p = p
@@ -319,9 +365,9 @@ cdef inline bint is_endpoint(pixel_type neighbors[]) noexcept nogil:
 
 
 cdef bint is_simple_point(pixel_type neighbors[]) noexcept nogil:
-    """Check is a point is a Simple Point.
+    """Check if a point is a Simple Point.
 
-    A point is simple iff its deletion does not change connectivity in
+    A point is simple if its deletion does not change connectivity in
     the 3x3x3 neighborhood. (cf conditions 2 and 3 in [Lee94]_).
 
     This method is named "N(v)_labeling" in [Lee94]_.
