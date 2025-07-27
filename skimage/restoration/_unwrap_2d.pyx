@@ -7,7 +7,7 @@ cimport numpy as cnp
 
 
 cdef extern from "unwrap_2d_ljmu.h":
-    void unwrap2D(
+    int unwrap2D(
             cnp.float64_t *wrapped_image,
             cnp.float64_t *UnwrappedImage,
             unsigned char *input_mask,
@@ -27,15 +27,21 @@ def unwrap_2d(cnp.float64_t[:, ::1] image,
         char use_seed
         int wrap_around_x
         int wrap_around_y
+        int error_code = 0
 
     # convert from python types to C types so we can release the GIL
     use_seed = seed is None
     cseed = 0 if seed is None else seed
     wrap_around_y, wrap_around_x = wrap_around
     with nogil:
-        unwrap2D(&image[0, 0],
-                 &unwrapped_image[0, 0],
-                 &mask[0, 0],
-                 image.shape[1], image.shape[0],
-                 wrap_around_x, wrap_around_y,
-                 use_seed, cseed)
+        error_code = unwrap2D(&image[0, 0],
+                              &unwrapped_image[0, 0],
+                              &mask[0, 0],
+                              image.shape[1], image.shape[0],
+                              wrap_around_x, wrap_around_y,
+                              use_seed, cseed)
+    if error_code == 1:
+        raise RuntimeError(
+            "NaN encountered while sorting edges which may happen if `image` "
+            "contains unmasked NaNs."
+        )

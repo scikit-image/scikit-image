@@ -39,6 +39,7 @@
 #define NOMASK 0
 #define MASK 1
 
+#define NAN_ERROR 1
 
 typedef struct {
   double mod;
@@ -138,15 +139,23 @@ EDGE *partition(EDGE *left, EDGE *right, double pivot) {
   return left;
 }
 
-void quicker_sort(EDGE *left, EDGE *right) {
+int quicker_sort(EDGE *left, EDGE *right) {
   EDGE *p;
   double pivot;
+  int error_code = 0;
 
   if (find_pivot(left, right, &pivot) == yes) {
+    if (isnan(pivot)) {
+      return NAN_ERROR;
+    }
     p = partition(left, right, pivot);
-    quicker_sort(left, p - 1);
-    quicker_sort(p, right);
+    error_code = quicker_sort(left, p - 1);
+    if (error_code != 0) {
+      return error_code;
+    }
+    error_code = quicker_sort(p, right);
   }
+  return error_code;
 }
 //--------------end quicker_sort algorithm -----------------------------------
 
@@ -691,16 +700,17 @@ void returnImage(PIXELM *pixel, double *unwrapped_image, int image_width,
 }
 
 // the main function of the unwrapper
-void unwrap2D(double *wrapped_image, double *UnwrappedImage,
-              unsigned char *input_mask, int image_width, int image_height,
-              int wrap_around_x, int wrap_around_y,
-              char use_seed, unsigned int seed) {
+int unwrap2D(double *wrapped_image, double *UnwrappedImage,
+             unsigned char *input_mask, int image_width, int image_height,
+             int wrap_around_x, int wrap_around_y,
+             char use_seed, unsigned int seed) {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
   PIXELM *pixel;
   EDGE *edge;
   int image_size = image_height * image_width;
   int No_of_Edges_initially = 2 * image_width * image_height;
+  int error_code = 0;
 
   extended_mask = (unsigned char *)calloc(image_size, sizeof(unsigned char));
   pixel = (PIXELM *)calloc(image_size, sizeof(PIXELM));
@@ -717,7 +727,10 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
   if (params.no_of_edges != 0) {
       // sort the EDGEs depending on their reiability. The PIXELs with higher
       // relibility (small value) first
-      quicker_sort(edge, edge + params.no_of_edges - 1);
+      error_code = quicker_sort(edge, edge + params.no_of_edges - 1);
+      if (error_code != 0) {
+        return error_code;
+      }
   }
   // gather PIXELs into groups
   gatherPIXELs(edge, &params);
@@ -733,4 +746,5 @@ void unwrap2D(double *wrapped_image, double *UnwrappedImage,
   free(edge);
   free(pixel);
   free(extended_mask);
+  return error_code;
 }

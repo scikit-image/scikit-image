@@ -46,6 +46,9 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     ValueError
         If called with a masked 1D array or called with a 1D array and
         ``wrap_around=True``.
+    RuntimeError
+        If a NaN is encountered while sorting edges (abrupt phase steps). This
+        may happen if `image` contains unmasked NaNs.
 
     Examples
     --------
