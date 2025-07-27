@@ -2,7 +2,8 @@ import numpy as np
 
 from skimage._shared.testing import assert_array_almost_equal, assert_equal
 from skimage import color, data, img_as_float
-from skimage.filters import threshold_local, gaussian
+from skimage.filters import gaussian
+from skimage.segmentation import threshold_local
 from skimage.util.apply_parallel import apply_parallel
 
 import pytest
@@ -15,14 +16,13 @@ def test_apply_parallel():
     a = np.arange(144).reshape(12, 12).astype(float)
 
     # apply the filter
-    expected1 = threshold_local(a, 3)
+    expected1 = threshold_local(a, block_size=3)
     result1 = apply_parallel(
         threshold_local,
         a,
         chunks=(6, 6),
         depth=5,
-        extra_arguments=(3,),
-        extra_keywords={'mode': 'reflect'},
+        extra_keywords={'block_size': 3, 'mode': 'reflect'},
     )
 
     assert_array_almost_equal(result1, expected1)
@@ -50,14 +50,13 @@ def test_apply_parallel_lazy():
     d = da.from_array(a, chunks=(6, 6))
 
     # apply the filter
-    expected1 = threshold_local(a, 3)
+    expected1 = threshold_local(a, block_size=3)
     result1 = apply_parallel(
         threshold_local,
         a,
         chunks=(6, 6),
         depth=5,
-        extra_arguments=(3,),
-        extra_keywords={'mode': 'reflect'},
+        extra_keywords={'block_size': 3, 'mode': 'reflect'},
         compute=False,
     )
 
@@ -66,8 +65,7 @@ def test_apply_parallel_lazy():
         threshold_local,
         d,
         depth=5,
-        extra_arguments=(3,),
-        extra_keywords={'mode': 'reflect'},
+        extra_keywords={'block_size': 3, 'mode': 'reflect'},
     )
 
     assert isinstance(result1, da.Array)

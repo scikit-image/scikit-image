@@ -44,7 +44,7 @@ _ = ax.set_title('Human retina')
 # main vessels in the image.
 
 retina = ski.color.rgb2gray(retina_source)
-t0, t1 = ski.filters.threshold_multiotsu(retina, classes=3)
+t0, t1 = ski.segmentation.threshold_multiotsu(retina, classes=3)
 mask = retina > t0
 vessels = ski.filters.sato(retina, sigmas=range(1, 10)) * mask
 
@@ -58,10 +58,10 @@ _ = axes[1].set_title('Sato vesselness')
 
 ###############################################################################
 # Based on the observed vesselness values, we use
-# `hysteresis thresholding <skimage.filters.apply_hysteresis_threshold>` to
+# `hysteresis thresholding <skimage.segmentation.threshold_labels_hysteresis>` to
 # define the main vessels.
 
-thresholded = ski.filters.apply_hysteresis_threshold(vessels, 0.01, 0.03)
+thresholded = ski.segmentation.threshold_labels_hysteresis(vessels, low=0.01, high=0.03)
 labeled = ndi.label(thresholded)[0]
 
 _, ax = plt.subplots()

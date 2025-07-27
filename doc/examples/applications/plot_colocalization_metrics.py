@@ -37,7 +37,7 @@ rng = np.random.default_rng()
 # segment nucleus
 nucleus = ski.data.protein_transport()[0, 0, :, :180]
 smooth = ski.filters.gaussian(nucleus, sigma=1.5)
-thresh = smooth > ski.filters.threshold_otsu(smooth)
+thresh = smooth > ski.segmentation.threshold_otsu(smooth)
 fill = ndi.binary_fill_holes(thresh)
 nucleus_seg = ski.segmentation.clear_border(fill)
 

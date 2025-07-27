@@ -3,7 +3,7 @@
 import numpy as np
 
 from scipy import ndimage as ndi
-from skimage import color, data, filters, graph, morphology
+from skimage import color, data, filters, graph, morphology, segmentation
 
 
 class GraphSuite:
@@ -11,7 +11,7 @@ class GraphSuite:
 
     def setup(self):
         retina = color.rgb2gray(data.retina())
-        t0, _ = filters.threshold_multiotsu(retina, classes=3)
+        t0, _ = segmentation.threshold_multiotsu(retina, classes=3)
         mask = retina > t0
         vessels = filters.sato(retina, sigmas=range(1, 10)) * mask
         thresholded = filters.apply_hysteresis_threshold(vessels, 0.01, 0.03)
