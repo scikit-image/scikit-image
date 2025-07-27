@@ -914,8 +914,11 @@ def threshold_mean(image):
     return np.mean(image)
 
 
-def threshold_triangle(image, nbins=256):
+def threshold_triangle(image=None, nbins=256, *, hist=None):
     """Return threshold value based on the triangle algorithm.
+
+    Either image or hist must be provided. In case hist is given, the actual
+    histogram of the image is ignored.
 
     Parameters
     ----------
@@ -924,6 +927,11 @@ def threshold_triangle(image, nbins=256):
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
+    hist : array, or 2-tuple of arrays, optional
+        An array containing a histogram from which to determine the threshold.
+        If not given, the histogram is computed from `image` which is mandatory
+        in that case. Optionally, two arrays can be passed to this argument:
+        a histogram first and a corresponding array of bin center intensities.
 
     Returns
     -------
@@ -949,7 +957,7 @@ def threshold_triangle(image, nbins=256):
     """
     # nbins is ignored for integer arrays
     # so, we recalculate the effective nbins.
-    hist, bin_centers = histogram(image.reshape(-1), nbins, source_range='image')
+    hist, bin_centers = _validate_image_histogram(image, hist, nbins)
     nbins = len(hist)
 
     # Find peak, lowest and highest gray levels.
@@ -959,7 +967,9 @@ def threshold_triangle(image, nbins=256):
 
     if arg_low_level == arg_high_level:
         # Image has constant intensity.
-        return image.ravel()[0]
+        if image is not None:
+            return image.ravel()[0]
+        return bin_centers[arg_low_level]
 
     # Flip is True if left tail is shorter.
     flip = arg_peak_height - arg_low_level < arg_high_level - arg_peak_height
