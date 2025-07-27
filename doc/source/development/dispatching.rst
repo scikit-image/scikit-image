@@ -32,6 +32,9 @@ arguments that returns an instance of the :py:class:`skimage.util._backends.Back
 or something that behaves like it;
 * :ref:`backend-entry-point` should resolve to a namespace
 that contains two functions: ``can_has(name, *args, **kwargs)`` and ``get_implementation(name)``.
+The ``name`` parameter contains the public module name and the function name separated by a
+colon. For example, the ``name`` for the ``canny`` function from the ``feature`` module would
+be ``skimage.feature:canny``.
 
 .. _backend-infos-entry-point:
 
@@ -72,17 +75,21 @@ only want to handle calls where the input arrays are of a particular type or siz
 
 If your backend cannot handle a particular call, the ``can_has`` function should return
 ``False`` as quickly as possible. This means you should perform fast checks first and
-more expensive checks later in your ``can_has`` function.
+more expensive checks later in your ``can_has`` function. Note that the ``can_has`` function
+should not import the backend or backend implementation, that should be done in
+``get_implementation``.
 
 If the ``can_has`` function indicates that the backend wants to handle the call then the
 ``get_implementation(name)`` function is called to get the implementation. This should
 return the backend function that implements the behaviour of the function ``name`` in scikit-image.
-The ``name`` parameter will contain the public module name and the function name separated by a
-colon. For example, the ``name`` for the ``canny`` function from the ``feature`` module would
-be ``skimage.feature:canny``.
 
 Once the implementation has been retrieved from the backend, it will be called with the
 arguments the user provided and it is expected to return the result of the computation.
+
+Note that we don't check whether args and keyword args match the original function
+signature when dispatching to the backend implementation. So, this allows you to take
+in additional backend-specific kwargs from users but make sure this doesn't harm your
+backend in anyway.
 
 When returning an array, it has to be of the same type as the array(s) passed in to the
 function by the user. This means a backend implementation can convert the input to a different
@@ -96,3 +103,5 @@ To make the ideas described above more concrete, take a look at `an example back
 a single function <https://github.com/betatim/scikit-image-backend-phony>`_.
 This example gives you an idea of how everything fits together and lets you see the dispatching
 in action. It is designed to make it easy to understand and experiment with.
+
+To learn how to use backends refer the :doc:`User guide on backends <../user_guide/backends>`.

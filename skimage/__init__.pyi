@@ -53,3 +53,5 @@ from .util.dtype import (
 )
 from .util.lookfor import lookfor
 from .data import data_dir
+
+from .util._backends import set_backends
