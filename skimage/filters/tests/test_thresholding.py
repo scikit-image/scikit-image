@@ -24,6 +24,7 @@ from skimage.filters._multiotsu import (
 from skimage.filters.thresholding import (
     _cross_entropy,
     _mean_std,
+    threshold_elen,
     threshold_isodata,
     threshold_li,
     threshold_local,
@@ -821,3 +822,53 @@ def test_multiotsu_hist_parameter():
             thresh_img = threshold_multiotsu(img, classes)
             thresh_sk_hist = threshold_multiotsu(classes=classes, hist=sk_hist)
             assert np.allclose(thresh_img, thresh_sk_hist)
+
+
+def test_elen_camera_image():
+    camera = util.img_as_ubyte(data.camera())
+    thresh = threshold_elen(camera)
+    assert 126 < thresh < 128
+
+
+def test_elen_camera_image_hist():
+    camera = util.img_as_ubyte(data.camera())
+    hist = histogram(camera.ravel(), 256, source_range='image')
+    thresh = threshold_elen(hist=hist)
+    assert 126 < thresh < 128
+
+
+def test_elen_camera_hist_counts_only():
+    camera = util.img_as_ubyte(data.camera())
+    counts, _ = histogram(camera.ravel(), 256, source_range='image')
+    thresh = threshold_elen(hist=counts)
+    assert 126 < thresh < 128
+
+
+def test_elen_coins_image():
+    coins = util.img_as_ubyte(data.coins())
+    thresh = threshold_elen(coins)
+    assert 98 < thresh < 100
+
+
+def test_elen_coins_image_as_float():
+    coins = util.img_as_float(data.coins())
+    thresh = threshold_elen(coins)
+    assert 0.37 < thresh < 0.39
+
+
+def test_elen_one_color_image():
+    img = np.ones((10, 10), dtype=np.uint8) * 42
+    thresh = threshold_elen(img)
+    assert thresh == 42
+
+
+def test_elen_one_color_image_3d():
+    img = np.ones((10, 10, 10), dtype=np.uint8) * 42
+    thresh = threshold_elen(img)
+    assert thresh == 42
+
+
+def test_elen_rgb_warns():
+    img = util.img_as_ubyte(data.astronaut())
+    with expected_warnings(['grayscale']):
+        threshold_elen(img)
