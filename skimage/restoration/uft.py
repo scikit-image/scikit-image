@@ -434,7 +434,7 @@ def laplacian(ndim, shape, is_real=True):
     Examples
     --------
     >>> tf, ir = laplacian(2, (32, 32))
-    >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
+    >>> np.all(ir == np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]]))
     True
     >>> np.all(tf == ir2tf(ir, (32, 32)))
     True
@@ -444,8 +444,8 @@ def laplacian(ndim, shape, is_real=True):
         idx = tuple(
             [slice(1, 2)] * dim + [slice(None)] + [slice(1, 2)] * (ndim - dim - 1)
         )
-        impr[idx] = np.array([-1.0, 0.0, -1.0]).reshape(
+        impr[idx] = np.array([1.0, 0.0, 1.0]).reshape(
             [-1 if i == dim else 1 for i in range(ndim)]
         )
-    impr[(slice(1, 2),) * ndim] = 2.0 * ndim
+    impr[(slice(1, 2),) * ndim] = -2.0 * ndim
     return ir2tf(impr, shape, is_real=is_real), impr
