@@ -142,10 +142,14 @@ def denoise_invariant(
     Examples
     --------
     >>> import skimage
-    >>> from skimage.restoration import denoise_invariant, denoise_tv_chambolle
+    >>> from skimage.restoration import denoise_invariant, denoise_wavelet
     >>> image = skimage.util.img_as_float(skimage.data.chelsea())
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
-    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)
+
+    In this case, `denoise_wavelet` requires the optional dependency PyWavelets.
+
+    >>> import pytest; _ = pytest.importorskip("pywt")
+    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_wavelet)
     """
     image = img_as_float(image)
 
