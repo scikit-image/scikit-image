@@ -39,6 +39,7 @@ PROPS = {
     'ConvexImage': 'image_convex',
     'convex_image': 'image_convex',
     'Coordinates': 'coords',
+    'Circularity': 'circularity',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter_area',
     'equivalent_diameter': 'equivalent_diameter_area',
@@ -108,6 +109,7 @@ COL_DTYPES = {
     'centroid_weighted': float,
     'centroid_weighted_local': float,
     'coords': object,
+    'circularity': float,
     'coords_scaled': object,
     'eccentricity': float,
     'equivalent_diameter_area': float,
@@ -487,6 +489,11 @@ class RegionProperties:
         indices = np.argwhere(self.image)
         object_offset = np.array([self.slice[i].start for i in range(self._ndim)])
         return object_offset + indices + self._offset
+
+    @property
+    @only2d
+    def circularity(self):
+        return 4 * np.pi * self.area / self.perimeter**2
 
     @property
     @only2d
@@ -1239,6 +1246,11 @@ def regionprops(
         Coordinate list ``(row, col)`` of the region scaled by `spacing`.
     **coords** : (K, 2) ndarray
         Coordinate list ``(row, col)`` of the region.
+    **circularity** : float
+        Ratio of the circumference of the region to the circumference of a
+        circle with the same area. A value of 1.0 indicates a perfect circle.
+        Values lower than 1.0 indicate an extended perimeter.
+        Calculated as ``4π * area / perimeter^2``.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second moments as the
         region. The eccentricity is the ratio of the focal distance
