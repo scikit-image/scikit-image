@@ -6,6 +6,7 @@ __all__ = [
     'hough_circle',
     'hough_ellipse',
     'hough_line',
+    'gray_scale_hough_line',
     'probabilistic_hough_line',
     'hough_circle_peaks',
     'hough_line_peaks',
@@ -46,6 +47,7 @@ __all__ = [
 from .hough_transform import (
     hough_line,
     hough_line_peaks,
+    gray_scale_hough_line,
     probabilistic_hough_line,
     hough_circle,
     hough_circle_peaks,
