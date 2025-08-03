@@ -77,21 +77,26 @@ class TestSimpleImage:
     def test_li(self):
         assert 2 < threshold_li(self.image) < 3
 
-    def test_li_negative_values(self):
-        # Test with mixed positive/negative values
-        image = np.array([-1, 0, 1])
-        threshold = threshold_li(image)
-        assert threshold > 0  # Should be in shifted positive range
-        
-        # Test with all negative values
-        image = np.array([-5, -3, -1])
-        threshold = threshold_li(image)
-        assert threshold > -5 and threshold < -1  # Should be in shifted range
-        
-        # Test with floating point negative values
-        image = np.array([-2.5, -1.0, 0.0, 1.0])
-        threshold = threshold_li(image)
-        assert threshold > -2.5 and threshold < 1.0
+   def test_threshold_li_negative_values():
+    # Test with mixed positive/negative values
+    image = np.array([-1, 0, 1])
+    threshold = threshold_li(image)
+    assert -1 < threshold < 1  # In original value range
+    assert np.sum(image <= threshold) > 0  # Properly separates values
+    assert np.sum(image > threshold) > 0
+
+    # Test with all negative values
+    image = np.array([-5, -3, -1])
+    threshold = threshold_li(image)
+    assert -5 < threshold < -1  # In original value range
+    assert np.sum(image <= threshold) > 0
+    assert np.sum(image > threshold) > 0
+
+    # Test consistency with positive-shifted version
+    image = np.array([-2, -1, 0, 1, 2])
+    threshold = threshold_li(image)
+    shifted_threshold = threshold_li(image + 2)
+    assert_almost_equal(threshold + 2, shifted_threshold)
 
     def test_li_float_image(self):
         image = self.image.astype(float)
