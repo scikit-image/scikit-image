@@ -640,60 +640,21 @@ def _cross_entropy(image, threshold, bins=_DEFAULT_ENTROPY_BINS):
 
 
 def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=None):
-    """Compute threshold value by Li's iterative Minimum Cross Entropy method.
-
-    Parameters
-    ----------
-    image : (M, N[, ...]) ndarray
-        Grayscale input image. If the image contains negative values,
-        they will be shifted to non-negative values before processing.
-    tolerance : float, optional
-        Finish the computation when the change in the threshold in an iteration
-        is less than this value. By default, this is half the smallest
-        difference between intensity values in ``image``.
-    initial_guess : float or Callable[[array[float]], float], optional
-        Li's iterative method uses gradient descent to find the optimal
-        threshold. If the image intensity histogram contains more than two
-        modes (peaks), the gradient descent could get stuck in a local optimum.
-        An initial guess for the iteration can help the algorithm find the
-        globally-optimal threshold. A float value defines a specific start
-        point, while a callable should take in an array of image intensities
-        and return a float value. Example valid callables include
-        ``numpy.mean`` (default), ``lambda arr: numpy.quantile(arr, 0.95)``,
-        or even :func:`skimage.filters.threshold_otsu`.
-    iter_callback : Callable[[float], Any], optional
-        A function that will be called on the threshold at every iteration of
-        the algorithm.
-
-    Returns
-    -------
-    threshold : float
-        Upper threshold value. All pixels with an intensity higher than
-        this value are assumed to be foreground.
-    """
+    """Compute threshold value by Li's iterative method."""
     # Remove nan:
     image = image[~np.isnan(image)]
     if image.size == 0:
         return np.nan
 
-    # Make sure image has more than one intensity value; if not, return that value
+    # Make sure image has more than one intensity value
     if np.all(image == image.flat[0]):
         return image.flat[0]
 
-    # At this point, the image only contains np.inf, -np.inf, or valid numbers
-    image = image[np.isfinite(image)]
-    # if there are no finite values in the image, return 0. This is because
-    # at this point we *know* that there are *both* inf and -inf values,
-    # because inf == inf evaluates to True. We might as well separate them.
-    if image.size == 0:
-        return 0.0
-
     # Handle negative values by shifting to non-negative range
     image_min = np.min(image)
-    if image_min < 0:
-        image = image - image_min
+    image_shifted = image - image_min if image_min < 0 else image
         
-    # Rest of the existing implementation remains the same...
+   
     if image.dtype.kind in 'iu':
         tolerance = tolerance or 0.5
     else:
