@@ -423,11 +423,7 @@ class RegionProperties:
         return tuple(
             [self.slice[i].start for i in range(self._ndim)]
             + [self.slice[i].stop for i in range(self._ndim)]
-        )
-    def _obb_to_rectangular(region, intensity_image=None):
-    """Convert oriented bounding box to rectangular coordinates."""
-    if is_dask_array(region.image):
-        region.image = region.image.compute()  
+        ) 
 
     @property
     def area_bbox(self):
@@ -1436,6 +1432,45 @@ def _parse_docs():
     prop_doc = {m.group(1): textwrap.dedent(m.group(2)) for m in matches}
 
     return prop_doc
+def _obb_to_rectangular(region, intensity_image=None):
+    """Convert oriented bounding box to rectangular coordinates.
+    
+    Parameters
+    ----------
+    region : RegionProperties
+        Region properties object
+    intensity_image : ndarray, optional
+        Intensity image (not used in current implementation)
+    
+    Returns
+    -------
+    coords : ndarray
+        Array of (row, col) coordinates of the oriented bounding box vertices
+    """
+    if is_dask_array(region.image):
+        region.image = region.image.compute()
+    
+    c = region.local_centroid
+    r = region.major_axis_length / 2
+    s = region.minor_axis_length / 2
+    theta = region.orientation
+    
+    # Calculate vertices of the oriented bounding box
+    rot_matrix = np.array([[np.cos(theta), -np.sin(theta)],
+                          [np.sin(theta), np.cos(theta)]])
+    
+    vertices = np.array([
+        [-r, -s],
+        [ r, -s],
+        [ r,  s],
+        [-r,  s]
+    ])
+    
+    # Rotate and translate vertices
+    rotated_vertices = np.dot(vertices, rot_matrix.T)
+    coords = rotated_vertices + c
+    
+    return coords 
 
 
 def _install_properties_docs():
