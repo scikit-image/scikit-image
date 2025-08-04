@@ -1333,6 +1333,17 @@ def test_regionprops_table():
         'bbox+2': np.array([10]),
         'bbox+3': np.array([18]),
     }
+   
+def test_regionprops_axis_length_nonnegative():
+    """Test that axis lengths are never negative."""
+    from skimage.measure import regionprops
+    # Create small test image where numerical issues might occur
+    tiny_obj = np.zeros((5, 5), dtype=int)
+    tiny_obj[1:4, 1:4] = 1  # 3x3 square
+    
+    props = regionprops(tiny_obj)[0]
+    assert props.axis_minor_length >= 0  # Was sometimes negative
+    assert props.axis_major_length >= 0
 
 
 def test_regionprops_table_deprecated_vector_property():
