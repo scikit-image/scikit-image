@@ -1303,6 +1303,16 @@ def test_props_to_dict():
         'bbox+2': np.array([10]),
         'bbox+3': np.array([18]),
     }
+def test_regionprops_dask_obb():
+    # Test with Dask array input
+    dask_img = da.from_array(np.random.rand(50, 50) > 0.5
+    props = regionprops_table(dask_img, properties=['orientation'])
+    assert not np.allclose(props['orientation'], 0)
+    
+    # Test with chunked Dask array
+    dask_img_chunked = da.from_array(np.random.rand(50, 50) > 0.5, chunks=(25, 25))
+    props = regionprops_table(dask_img_chunked, properties=['orientation'])
+    assert not np.allclose(props['orientation'], 0)
 
 
 def test_regionprops_table():
