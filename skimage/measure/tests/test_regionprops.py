@@ -344,7 +344,16 @@ def test_moments_central_spacing():
     assert_almost_equal(mu[0, 2], centralMpq(0, 2))
     assert_almost_equal(mu[1, 2], centralMpq(1, 2))
     assert_almost_equal(mu[0, 3], centralMpq(0, 3))
-
+def test_regionprops_dask_obb():
+    # Test with Dask array input
+    dask_img = da.from_array(np.random.rand(50, 50) > 0.5
+    props = regionprops_table(dask_img, properties=['orientation'])
+    assert not np.allclose(props['orientation'], 0)
+    
+    # Test with chunked Dask array
+    dask_img_chunked = da.from_array(np.random.rand(50, 50) > 0.5, chunks=(25, 25))
+    props = regionprops_table(dask_img_chunked, properties=['orientation'])
+    assert not np.allclose(props['orientation'], 0)
 
 def test_centroid():
     centroid = regionprops(SAMPLE)[0].centroid
