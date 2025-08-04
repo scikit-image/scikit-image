@@ -274,8 +274,6 @@ jobs:
           Get-Command rc.exe | Format-Table -AutoSize
           python -m cibuildwheel --output-dir dist
         env:
-          CC: clang-cl
-          CXX: clang-cl
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
           LDFLAGS: "-Wl,-S"
