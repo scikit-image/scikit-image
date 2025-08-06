@@ -253,58 +253,54 @@ def run_in_parallel(workers=2, warnings_matching=None):
     return wrapper
 
 
+import inspect
+
 def assert_stacklevel(warnings, *, offset=-1):
     """Assert correct stacklevel of captured warnings.
 
     When scikit-image raises warnings, the stacklevel should ideally be set
     so that the origin of the warnings will point to the public function
     that was called by the user and not necessarily the very place where the
-    warnings were emitted (which may be inside some internal function).
-    This utility function helps with checking that
-    the stacklevel was set correctly on warnings captured by `pytest.warns`.
+    warnings were emitted. This utility checks that the stacklevel was set
+    correctly on warnings captured by `pytest.warns`.
 
     Parameters
     ----------
     warnings : collections.abc.Iterable[warning.WarningMessage]
         Warnings that were captured by `pytest.warns`.
     offset : int, optional
-        Offset from the line this function is called to the line were the
-        warning is supposed to originate from. For multiline calls, the
-        first line is relevant. Defaults to -1 which corresponds to the line
-        right above the one where this function is called.
+        Offset from the line this function is called to the line where the
+        warning is supposed to originate from. Defaults to -1 (line above).
 
     Raises
     ------
     AssertionError
-        If a warning in `warnings` does not match the expected line number or
-        file name.
-
-    Examples
-    --------
-    >>> def test_something():
-    ...     with pytest.warns(UserWarning, match="some message") as record:
-    ...         something_raising_a_warning()
-    ...     assert_stacklevel(record)
-    ...
-    >>> def test_another_thing():
-    ...     with pytest.warns(UserWarning, match="some message") as record:
-    ...         iam_raising_many_warnings(
-    ...             "A long argument that forces the call to wrap."
-    ...         )
-    ...     assert_stacklevel(record, offset=-3)
+        If the number of warnings ≠ 1, or if the warning does not match
+        the expected file/line.
     """
-    __tracebackhide__ = True  # Hide traceback for py.test
+    __tracebackhide__ = True  # Hide this utility from pytest tracebacks
 
-    frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
-    line_number = frame.f_lineno + offset
-    filename = frame.f_code.co_filename
-    expected = f"{filename}:{line_number}"
-    for warning in warnings:
-        actual = f"{warning.filename}:{warning.lineno}"
-        msg = (
-            "Warning with wrong stacklevel:\n"
-            f"  Expected: {expected}\n"
-            f"  Actual: {actual}\n"
-            f"  {warning.category.__name__}: {warning.message}"
+    # --- NEW: require exactly one warning and report clearly if not ---
+    n_warn = len(warnings)
+    if n_warn != 1:
+        msgs = ", ".join(f"{w.category.__name__}: {w.message}" for w in warnings)
+        raise AssertionError(
+            f"Expected exactly one warning, but got {n_warn} warnings: {msgs}"
         )
-        assert actual == expected, msg
+
+    # Grab the caller’s frame to compute expected file:line
+    frame = inspect.stack()[1].frame  # 0 is current frame, 1 is outer frame
+    expected_lineno = frame.f_lineno + offset
+    expected_file = frame.f_code.co_filename
+    expected = f"{expected_file}:{expected_lineno}"
+
+    # Now check the single warning’s actual origin
+    warning = warnings[0]
+    actual = f"{warning.filename}:{warning.lineno}"
+    msg = (
+        "Warning with wrong stacklevel:\n"
+        f"  Expected: {expected}\n"
+        f"  Actual:   {actual}\n"
+        f"  {warning.category.__name__}: {warning.message}"
+    )
+    assert actual == expected, msg
