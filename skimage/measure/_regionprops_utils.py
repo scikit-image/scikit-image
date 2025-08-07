@@ -476,9 +476,9 @@ def perimeter(image, neighborhood=4):
     # return perimeter_weights[perimeter_image].sum()
     # but that was measured as taking much longer than bincount + np.dot (5x
     # as much time)
-    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
-    total_perimeter = perimeter_histogram @ perimeter_weights
-    return total_perimeter
+    clipped = np.clip(perimeter_image, 0, 49)
+    perimeter_histogram = np.bincount(clipped.ravel(), minlength=50)
+    return perimeter_histogram @ perimeter_weights
 
 
 def perimeter_crofton(image, directions=4):
