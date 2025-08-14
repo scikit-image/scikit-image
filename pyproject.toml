@@ -185,7 +185,7 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["src", "benchmarks"]
+testpaths = ["tests", "benchmarks"]
 python_files = ["benchmark_*.py", "test_*.py"]
 python_classes = ["Test*", "*Suite"]
 python_functions = ["time_*", "test_*", "peakmem_*"]
@@ -195,8 +195,6 @@ filterwarnings = [
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
 
-[tool.coverage.run]
-omit = ['*/tests/*']
 
 [tool.changelist]
 ignored_user_logins = [

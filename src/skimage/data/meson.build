@@ -51,5 +51,3 @@ py3.install_sources([
   pure: false,
   subdir: 'skimage/data'
 )
-
-subdir('tests')

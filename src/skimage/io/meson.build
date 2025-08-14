@@ -15,4 +15,3 @@ py3.install_sources(
 )
 
 subdir('_plugins')
-subdir('tests')

@@ -10,5 +10,3 @@ py3.install_sources(
   pure: false,             # Will be installed next to binaries
   subdir: 'skimage/future'  # Folder relative to site-packages to install to
 )
-
-subdir('tests')

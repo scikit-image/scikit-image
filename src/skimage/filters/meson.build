@@ -37,4 +37,3 @@ py3.install_sources(
 )
 
 subdir('rank')
-subdir('tests')
