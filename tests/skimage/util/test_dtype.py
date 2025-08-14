@@ -1,5 +1,7 @@
 import numpy as np
 import itertools
+import pytest
+
 from skimage import (
     img_as_float,
     img_as_float32,
@@ -13,6 +15,7 @@ from skimage.util.dtype import _convert
 from skimage._shared._warnings import expected_warnings
 from skimage._shared import testing
 from skimage._shared.testing import assert_equal, parametrize
+from skimage._shared.dtype import numeric_dtype_min_max, numeric_types
 
 
 dtype_range = {
@@ -239,3 +242,12 @@ def test_img_as_ubyte_supports_npulonglong():
     data_scaled = data * 256 ** (data.dtype.itemsize - 1)
     result = img_as_ubyte(data_scaled)
     assert result.dtype == np.uint8
+
+
+class Test_numeric_dtype_min_max:
+    @pytest.mark.parametrize("dtype", numeric_types)
+    def test_all_numeric_types(self, dtype):
+        min_, max_ = numeric_dtype_min_max(dtype)
+        assert np.isscalar(min_)
+        assert np.isscalar(max_)
+        assert min_ < max_

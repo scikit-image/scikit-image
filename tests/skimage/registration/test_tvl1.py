@@ -6,6 +6,7 @@ from skimage.registration import optical_flow_tvl1
 from skimage.transform import warp
 
 
+# Sync with implementation in test_ilk.py
 def _sin_flow_gen(image0, max_motion=4.5, npics=5):
     """Generate a synthetic ground truth optical flow with a sinusoid as
       first component.
