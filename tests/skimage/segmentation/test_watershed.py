@@ -12,7 +12,7 @@ from skimage._shared.filters import gaussian
 from skimage.feature import peak_local_max
 from skimage.measure import label
 
-from .._watershed import watershed
+from skimage.segmentation._watershed import watershed
 
 eps = 1e-12
 # fmt: off

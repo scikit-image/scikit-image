@@ -19,10 +19,14 @@ from skimage._shared.testing import (
 )
 from skimage.metrics import structural_similarity
 
-from ... import img_as_float
-from ...color import rgb2lab
-from .. import imread, imsave, reset_plugins, use_plugin, plugin_order
-from .._plugins.pil_plugin import _palette_is_grayscale, ndarray_to_pil, pil_to_ndarray
+from skimage.util import img_as_float
+from skimage.color import rgb2lab
+from skimage.io import imread, imsave, reset_plugins, use_plugin, plugin_order
+from skimage.io._plugins.pil_plugin import (
+    _palette_is_grayscale,
+    ndarray_to_pil,
+    pil_to_ndarray,
+)
 
 
 plugin_deprecation_warning = r"use `imageio` or other I/O packages directly|\A\Z"

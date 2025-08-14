@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 
-from ..dtype import numeric_dtype_min_max, numeric_types
+from skimage._shared.dtype import numeric_dtype_min_max, numeric_types
 
 
 class Test_numeric_dtype_min_max:

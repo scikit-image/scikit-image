@@ -1,4 +1,4 @@
-from ..fast_exp import fast_exp
+from skimage._shared.fast_exp import fast_exp
 import numpy as np
 
 
