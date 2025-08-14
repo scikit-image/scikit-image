@@ -62,7 +62,7 @@ jobs:
 
       - name: Run tests
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
