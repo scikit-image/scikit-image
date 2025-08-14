@@ -1,4 +1,6 @@
 import functools
+import importlib.util
+
 import numpy as np
 import pytest
 
@@ -10,7 +12,15 @@ from skimage.metrics import mean_squared_error as mse
 from skimage.restoration import calibrate_denoiser, denoise_wavelet
 from skimage.restoration.j_invariant import denoise_invariant
 from skimage.util import img_as_float, random_noise
-from skimage.restoration.tests.test_denoise import xfail_without_pywt
+
+
+PYWT_NOT_INSTALLED = importlib.util.find_spec("pywt") is None
+xfail_without_pywt = pytest.mark.xfail(
+    condition=PYWT_NOT_INSTALLED,
+    reason="optional dependency PyWavelets is not installed",
+    raises=ImportError,
+)
+
 
 test_img = img_as_float(camera())
 test_img_color = img_as_float(chelsea())

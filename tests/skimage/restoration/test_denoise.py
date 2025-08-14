@@ -1,5 +1,6 @@
 import functools
 import itertools
+import importlib.util
 
 import numpy as np
 import pytest
@@ -12,13 +13,8 @@ from skimage._shared.utils import _supported_float_type, slice_at_axis
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.restoration._denoise import _wavelet_threshold
 
-try:
-    import pywt
-except ImportError:
-    PYWT_NOT_INSTALLED = True
-else:
-    PYWT_NOT_INSTALLED = False
 
+PYWT_NOT_INSTALLED = importlib.util.find_spec("pywt") is None
 xfail_without_pywt = pytest.mark.xfail(
     condition=PYWT_NOT_INSTALLED,
     reason="optional dependency PyWavelets is not installed",
@@ -899,6 +895,8 @@ def test_wavelet_invalid_method():
 @xfail_without_pywt
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_wavelet_denoising_levels(rescale_sigma):
+    import pywt
+
     rstate = np.random.default_rng(1234)
     ndim = 2
     N = 256
