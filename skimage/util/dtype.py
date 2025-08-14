@@ -88,12 +88,12 @@ def _dtype_itemsize(itemsize, *dtypes):
 
     Parameters
     ----------
-    itemsize: int
+    itemsize : int
         The data type object element size.
 
     Other Parameters
     ----------------
-    *dtypes:
+    *dtypes
         Any Object accepted by `np.dtype` to be converted to a data
         type object
 
@@ -235,6 +235,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
 
+    Notes
+    -----
     .. versionchanged:: 0.15
         ``_convert`` no longer warns about possible precision or sign
         information loss. See discussions on these warnings at:

@@ -213,10 +213,10 @@ def imsave(fname, arr, format_str=None, **kwargs):
         Array (image) to save.  Arrays of data-type uint8 should have
         values in [0, 255], whereas floating-point arrays must be
         in [0, 1].
-    format_str: str
+    format_str : str
         Format to save as, this is defaulted to PNG if using a file-like
         object; this will be derived from the extension if fname is a string
-    kwargs: dict
+    kwargs : dict
         Keyword arguments to the Pillow save function (or tifffile save
         function, for Tiff files). These are format dependent. For example,
         Pillow's JPEG save function supports an integer ``quality`` argument

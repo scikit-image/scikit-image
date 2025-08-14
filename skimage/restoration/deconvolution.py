@@ -35,13 +35,13 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
        Regularization operator. Laplacian by default. It can
        be an impulse response or a transfer function, as for the PSF.
        Shape constraints are the same as for `psf`.
-    is_real : boolean, optional
+    is_real : bool, optional
        True by default. Specify if `psf` and `reg` are provided over just half
        the frequency space (thanks to the redundancy of the Fourier transform
        for real signals). Applies only if `psf` and/or `reg` are
        provided as transfer functions.
        See ``uft`` module and :func:`np.fft.rfftn`.
-    clip : boolean, optional
+    clip : bool, optional
        True by default. If True, pixel values of the deconvolved image (which
        is the return value) above 1 (resp. below -1) are clipped to 1 (resp.
        to -1). Be careful to set `clip=False` if you do not want this clipping
@@ -153,20 +153,40 @@ def unsupervised_wiener(
     Parameters
     ----------
     image : (M, N) ndarray
-       The input degraded image.
+        The input degraded image.
     psf : ndarray
-       The impulse response (input image's space) or the transfer
-       function (Fourier space). Both are accepted. The transfer
-       function is automatically recognized as being complex
-       (``np.iscomplexobj(psf)``).
+        The impulse response (input image's space) or the transfer
+        function (Fourier space). Both are accepted. The transfer
+        function is automatically recognized as being complex
+        (``np.iscomplexobj(psf)``).
     reg : ndarray, optional
-       The regularisation operator. The Laplacian by default. It can
-       be an impulse response or a transfer function, as for the psf.
+        The regularisation operator. The Laplacian by default. It can
+        be an impulse response or a transfer function, as for the psf.
     user_params : dict, optional
-       Dictionary of parameters for the Gibbs sampler. See below.
-    clip : boolean, optional
-       True by default. If true, pixel values of the result above 1 or
-       under -1 are thresholded for skimage pipeline compatibility.
+        Dictionary of parameters for the Gibbs sampler. Accepted keys are:
+
+        threshold : float
+           The stopping criterion: the norm of the difference between to
+           successive approximated solution (empirical mean of object
+           samples, see Notes section). 1e-4 by default.
+        burnin : int
+           The number of sample to ignore to start computation of the
+           mean. 15 by default.
+        min_num_iter : int
+           The minimum number of iterations. 30 by default.
+        max_num_iter : int
+           The maximum number of iterations if ``threshold`` is not
+           satisfied. 200 by default.
+        callback : callable
+           A user provided callable to which is passed, if the function
+           exists, the current image sample for whatever purpose. The user
+           can store the sample, or compute other moments than the
+           mean. It has no influence on the algorithm execution and is
+           only for inspection.
+
+    clip : bool, optional
+        True by default. If true, pixel values of the result above 1 or
+        under -1 are thresholded for skimage pipeline compatibility.
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
@@ -177,33 +197,10 @@ def unsupervised_wiener(
     Returns
     -------
     x_postmean : (M, N) ndarray
-       The deconvolved image (the posterior mean).
+        The deconvolved image (the posterior mean).
     chains : dict
-       The keys ``noise`` and ``prior`` contain the chain list of
-       noise and prior precision respectively.
-
-    Other parameters
-    ----------------
-    The keys of ``user_params`` are:
-
-    threshold : float
-       The stopping criterion: the norm of the difference between to
-       successive approximated solution (empirical mean of object
-       samples, see Notes section). 1e-4 by default.
-    burnin : int
-       The number of sample to ignore to start computation of the
-       mean. 15 by default.
-    min_num_iter : int
-       The minimum number of iterations. 30 by default.
-    max_num_iter : int
-       The maximum number of iterations if ``threshold`` is not
-       satisfied. 200 by default.
-    callback : callable (None by default)
-       A user provided callable to which is passed, if the function
-       exists, the current image sample for whatever purpose. The user
-       can store the sample, or compute other moments than the
-       mean. It has no influence on the algorithm execution and is
-       only for inspection.
+        The keys ``noise`` and ``prior`` contain the chain list of
+        noise and prior precision respectively.
 
     Examples
     --------
@@ -374,10 +371,10 @@ def richardson_lucy(image, psf, num_iter=50, clip=True, filter_epsilon=None):
     num_iter : int, optional
        Number of iterations. This parameter plays the role of
        regularisation.
-    clip : boolean, optional
+    clip : bool, optional
        True by default. If true, pixel value of the result above 1 or
        under -1 are thresholded for skimage pipeline compatibility.
-    filter_epsilon: float, optional
+    filter_epsilon : float, optional
        Value below which intermediate results become 0 to avoid division
        by small numbers.
 

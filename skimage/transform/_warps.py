@@ -23,9 +23,9 @@ def _preprocess_resize_output_shape(image, output_shape):
 
     Parameters
     ----------
-    image: ndarray
+    image : ndarray
         Image to be resized.
-    output_shape: iterable
+    output_shape : iterable
         Size of the generated output image `(rows, cols[, ...][, dim])`. If
         `dim` is not provided, the number of channels is preserved.
 
@@ -1240,14 +1240,14 @@ def _local_mean_weights(old_size, new_size, grid_mode, dtype):
 
     Parameters
     ----------
-    old_size: int
+    old_size : int
         Old size.
-    new_size: int
+    new_size : int
         New size.
     grid_mode : bool
         Whether to use grid data model of pixel/voxel model for
         average weights computation.
-    dtype: dtype
+    dtype : dtype
         Output array data type.
 
     Returns

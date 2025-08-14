@@ -12,9 +12,9 @@ differentiation, but more recent studies (Mahy 1994) peg JND at 2.3
 
 The delta-E notation comes from the German word for "Sensation" (Empfindung).
 
-Reference
----------
-https://en.wikipedia.org/wiki/Color_difference
+References
+----------
+.. [1] https://en.wikipedia.org/wiki/Color_difference
 
 """
 
