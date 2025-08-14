@@ -43,7 +43,6 @@ Post numpy 2
   `# TODO: when minimum numpy`
   in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
   `skimage/measure/_blur_effect.py`, and `skimage/util/tests/test_montage.py`
-- Remove `handle_np2` from `skimage/conftest.py`
 - Once matplotlib doesn't constrain to numpy<2.0 via contourpy (or 2.0 is
   minimal required version): consider re-adding matplotlib to the test
   dependencies. Also remove temporary assert for NumPy 2.0 in
