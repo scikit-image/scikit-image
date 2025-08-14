@@ -57,7 +57,7 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
     from io import StringIO
 
     if module is None:
-        module = "numpy"
+        module = "skimage"
 
     if isinstance(module, str):
         try:
@@ -154,6 +154,7 @@ def _lookfor_generate_cache(module, import_modules, regenerate):
                         continue
                 elif not (inspect.ismodule(v) or _all is None or n in _all):
                     continue
+
                 stack.append((f"{name}.{n}", v))
         elif inspect.isclass(item):
             kind = "class"

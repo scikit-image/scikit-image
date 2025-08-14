@@ -1,4 +1,9 @@
 import skimage as ski
+import pytest
+
+
+# avoid bad interaction between SimpleITK, pytest, and lookfor
+pytest.importorskip('SimpleITK')
 
 
 def test_lookfor_basic(capsys):

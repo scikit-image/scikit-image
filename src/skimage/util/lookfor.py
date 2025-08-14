@@ -18,6 +18,9 @@ def lookfor(what):
 
     Examples
     --------
+    .. testsetup::
+        >>> import pytest; _ = pytest.importorskip('SimpleITK')
+
     >>> import skimage as ski
     >>> ski.util.lookfor('regular_grid')
     Search results for 'regular_grid'
