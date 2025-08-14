@@ -275,9 +275,6 @@ def show():
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> import skimage.io as io
     >>> rng = np.random.default_rng()
     >>> for i in range(4):

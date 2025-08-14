@@ -191,8 +191,7 @@ filterwarnings = [
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
-doctest_norecursedirs = ['io/_plugins']
-
+norecursedirs = ["io/_plugins"]
 
 [tool.changelist]
 ignored_user_logins = [
