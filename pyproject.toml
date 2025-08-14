@@ -185,10 +185,7 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["tests", "benchmarks"]
-python_files = ["benchmark_*.py", "test_*.py"]
-python_classes = ["Test*", "*Suite"]
-python_functions = ["time_*", "test_*", "peakmem_*"]
+testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
