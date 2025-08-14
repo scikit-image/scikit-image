@@ -3,13 +3,29 @@ Testing utilities.
 """
 
 import os
+import platform
 import re
 import struct
+import sys
 import functools
 import inspect
 from tempfile import NamedTemporaryFile
 
+import numpy as np
 from numpy import testing
+from numpy.testing import (
+    TestCase,
+    assert_,
+    assert_warns,
+    assert_no_warnings,
+    assert_equal,
+    assert_almost_equal,
+    assert_array_equal,
+    assert_allclose,
+    assert_array_almost_equal,
+    assert_array_almost_equal_nulp,
+    assert_array_less,
+)
 
 from .. import data, io
 from ..data._fetchers import _fetch
