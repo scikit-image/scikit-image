@@ -185,7 +185,7 @@ minversion = "6.0"
 addopts = "-ra  --strict-config  --strict-markers"
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["tests"]
+testpaths = ["src", "tests"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:tests",
