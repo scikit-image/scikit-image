@@ -92,7 +92,7 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          $PYTEST --doctest-plus --showlocals
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
