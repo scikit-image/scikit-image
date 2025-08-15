@@ -97,13 +97,12 @@ def _create_image_fetcher():
 
     if '+' in skimage_version_for_pooch:
         url = (
-            "https://github.com/scikit-image/scikit-image/raw/"
-            "{version}/{prefix}/skimage/"
+            "https://github.com/scikit-image/scikit-image/raw/" "{version}/src/skimage/"
         )
     else:
         url = (
             "https://github.com/scikit-image/scikit-image/raw/"
-            "v{version}/{prefix}/skimage/"
+            "v{version}/src/skimage/"
         )
 
     # Create a new friend to manage your sample data storage
@@ -201,6 +200,9 @@ def _fetch(data_filename, prefix="src"):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
+    if prefix == "tests":
+        return osp.join("tests", "skimage", data_filename)
+
     expected_hash = registry[data_filename]
     if _image_fetcher is None:
         cache_dir = osp.dirname(data_dir)
