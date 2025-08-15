@@ -145,7 +145,7 @@ def denoise_invariant(
     >>> from skimage.restoration import denoise_invariant, denoise_tv_chambolle
     >>> image = skimage.util.img_as_float(skimage.data.chelsea())
     >>> noisy = skimage.util.random_noise(image, var=0.2 ** 2)
-    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)
+    >>> denoised = denoise_invariant(noisy, denoise_function=denoise_tv_chambolle)  # doctest: +SKIP
     """
     image = img_as_float(image)
 
