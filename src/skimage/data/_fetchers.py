@@ -97,12 +97,13 @@ def _create_image_fetcher():
 
     if '+' in skimage_version_for_pooch:
         url = (
-            "https://github.com/scikit-image/scikit-image/raw/" "{version}/src/skimage/"
+            "https://github.com/scikit-image/scikit-image/raw/"
+            "{version}/{prefix}/skimage/"
         )
     else:
         url = (
             "https://github.com/scikit-image/scikit-image/raw/"
-            "v{version}/src/skimage/"
+            "v{version}/{prefix}/skimage/"
         )
 
     # Create a new friend to manage your sample data storage
@@ -169,7 +170,7 @@ def _ensure_cache_dir(*, target_dir):
         shutil.copy2(readme_src, readme_dest)
 
 
-def _fetch(data_filename):
+def _fetch(data_filename, prefix="src"):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
