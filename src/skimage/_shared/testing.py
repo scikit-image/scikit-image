@@ -196,7 +196,7 @@ def mono_check(plugin, fmt='png'):
 def fetch(data_filename, prefix=None):
     """Attempt to fetch data, but if unavailable, skip the tests."""
     try:
-        return _fetch(data_filename, prefix=None)
+        return _fetch(data_filename, prefix=prefix)
     except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
