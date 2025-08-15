@@ -100,9 +100,7 @@ def get_central_moment_function(img, spacing=(1, 1)):
     return lambda p, q: np.sum((Y - cY) ** p * (X - cX) ** q * img)
 
 
-@pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
-)
+@pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
@@ -120,9 +118,7 @@ def test_all_props():
             pass
 
 
-@pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
-)
+@pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
 def test_all_props_3d():
     region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
     for prop in PROPS:
@@ -1493,9 +1489,7 @@ def test_extra_properties_table():
     assert out["bbox_list"][1] == [1] * 1
 
 
-@pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
-)
+@pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
 def test_multichannel():
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]

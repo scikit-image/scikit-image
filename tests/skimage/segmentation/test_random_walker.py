@@ -90,7 +90,7 @@ def test_2d_bf(dtype):
     assert data.shape == labels.shape
 
 
-@pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning:skimage')
+@pytest.mark.filterwarnings('ignore:"cg" mode may be slow:UserWarning')
 @pytest.mark.filterwarnings(
     'ignore:Changing the sparsity structure of a csr_matrix is expensive:scipy.sparse.SparseEfficiencyWarning'
 )

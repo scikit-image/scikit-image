@@ -430,7 +430,7 @@ def test_diamond_decomposition(cam_image, function, radius, decomposition):
 @pytest.mark.parametrize("n", (0, 1, 2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
 @pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning:skimage"
+    "ignore:.*falling back to decomposition='separable':UserWarning"
 )
 def test_octagon_decomposition(cam_image, function, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
