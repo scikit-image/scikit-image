@@ -51,16 +51,16 @@ predetermined bins. The gradient magnitudes of the pixels in the
 cell are used to vote into the orientation histogram.
 
 The fourth stage computes normalisation, which takes local groups of
-cells and contrast normalises their overall responses before passing
+cells and contrast normalizes their overall responses before passing
 to next stage. Normalisation introduces better invariance to illumination,
 shadowing, and edge contrast. It is performed by accumulating a measure
 of local histogram "energy" over local groups of cells that we call
-"blocks". The result is used to normalise each cell in the block.
+"blocks". The result is used to normalize each cell in the block.
 Typically each individual cell is shared between several blocks, but
 its normalisations are block dependent and thus different. The cell
 thus appears several times in the final output vector with different
 normalisations. This may seem redundant but it improves the performance.
-We refer to the normalised block descriptors as Histogram of Oriented
+We refer to the normalized block descriptors as Histogram of Oriented
 Gradient (HOG) descriptors.
 
 The final step collects the HOG descriptors from all blocks of a dense
