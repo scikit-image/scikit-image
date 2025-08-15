@@ -174,7 +174,7 @@ ignore = [
     'F403',
     'F405',
 ]
-"skimage/_shared/testing.py" = ['F401']
+"src/skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
 [tool.ruff.lint.pydocstyle]
@@ -182,21 +182,16 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra  --strict-config  --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["skimage", "benchmarks"]
-python_files = ["benchmark_*.py", "test_*.py"]
-python_classes = ["Test*", "*Suite"]
-python_functions = ["time_*", "test_*", "peakmem_*"]
+testpaths = ["tests"]
 filterwarnings = [
     "error",
-    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
-
-[tool.coverage.run]
-omit = ['*/tests/*']
+norecursedirs = ["io/_plugins"]
 
 [tool.changelist]
 ignored_user_logins = [
