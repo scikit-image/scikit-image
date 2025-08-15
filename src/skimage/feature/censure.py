@@ -71,10 +71,13 @@ def _filter_image(image, min_scale, max_scale, mode):
     if mode == 'dob':
         # make response[:, :, i] contiguous memory block
         item_size = response.itemsize
-        response.strides = (
-            item_size * response.shape[1],
-            item_size,
-            item_size * response.shape[0] * response.shape[1],
+        response = np.lib.stride_tricks.as_strided(
+            response,
+            strides=(
+                item_size * response.shape[1],
+                item_size,
+                item_size * response.shape[0] * response.shape[1],
+            ),
         )
 
         integral_img = integral_image(image)
