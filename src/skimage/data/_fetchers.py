@@ -169,7 +169,7 @@ def _ensure_cache_dir(*, target_dir):
         shutil.copy2(readme_src, readme_dest)
 
 
-def _fetch(data_filename, prefix="src"):
+def _fetch(data_filename, prefix=None):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
@@ -200,7 +200,7 @@ def _fetch(data_filename, prefix="src"):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    if prefix == "tests":
+    if prefix is not None:
         return osp.join("tests", "skimage", data_filename)
 
     expected_hash = registry[data_filename]
