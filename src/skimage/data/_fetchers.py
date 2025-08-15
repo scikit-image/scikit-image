@@ -71,7 +71,7 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def _create_image_fetcher():
+def _create_image_fetcher(prefix=None):
     try:
         import pooch
 
@@ -96,14 +96,27 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = (
-            "https://github.com/scikit-image/scikit-image/raw/" "{version}/src/skimage/"
-        )
+        if prefix is not None:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "{version}/tests/skimage/"
+            )
+        else:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "{version}/src/skimage/"
+            )
     else:
-        url = (
-            "https://github.com/scikit-image/scikit-image/raw/"
-            "v{version}/src/skimage/"
-        )
+        if prefix is not None:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "v{version}/tests/skimage/"
+            )
+        else:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "v{version}/src/skimage/"
+            )
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -130,7 +143,7 @@ def _create_image_fetcher():
     return image_fetcher, data_dir
 
 
-_image_fetcher, data_dir = _create_image_fetcher()
+_image_fetcher, data_dir = _create_image_fetcher(prefix='tests')
 
 
 def _skip_pytest_case_requiring_pooch(data_filename):
