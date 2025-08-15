@@ -56,7 +56,7 @@ jobs:
         if: endsWith(matrix.cibw_python, 't-*')
         run: |
           NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
-          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage ./tests"
+          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage {project}/tests"
           echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
           # Remove once Cython is out that supports free-threaded build
           echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
@@ -278,4 +278,4 @@ jobs:
           CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn"
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage ./tests"
+          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
