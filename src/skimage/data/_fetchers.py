@@ -96,9 +96,14 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "{version}/skimage/"
+        url = (
+            "https://github.com/scikit-image/scikit-image/raw/" "{version}/src/skimage/"
+        )
     else:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "v{version}/skimage/"
+        url = (
+            "https://github.com/scikit-image/scikit-image/raw/"
+            "v{version}/src/skimage/"
+        )
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
