@@ -1110,7 +1110,7 @@ class ProjectiveTransform(_HMatrixTransform):
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
         the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
+        normalized, square-rooted, then built into a diagonal matrix, by which
         A is multiplied.
 
         In case of the affine transformation the coefficients c0 and c1 are 0.
@@ -1293,7 +1293,7 @@ class ProjectiveTransform(_HMatrixTransform):
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
         the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
+        normalized, square-rooted, then built into a diagonal matrix, by which
         A is multiplied.
 
         In case of the affine transformation the coefficients c0 and c1 are 0.
@@ -2367,7 +2367,7 @@ class PolynomialTransform(_GeometricTransform):
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
         the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
+        normalized, square-rooted, then built into a diagonal matrix, by which
         A is multiplied.
 
         Parameters
@@ -2536,7 +2536,7 @@ class PolynomialTransform(_GeometricTransform):
         indicate, particularly in an overdetermined system, if point pairs have
         higher or lower confidence or uncertainties associated with them. From
         the matrix treatment of least squares problems, these weight values are
-        normalised, square-rooted, then built into a diagonal matrix, by which
+        normalized, square-rooted, then built into a diagonal matrix, by which
         A is multiplied.
 
         Parameters
