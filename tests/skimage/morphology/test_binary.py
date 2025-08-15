@@ -17,7 +17,7 @@ pytestmark = pytest.mark.filterwarnings(
     "ignore:"
     "`binary_(dilation|erosion|opening|closing)` is deprecated.*"
     "Use `skimage.morphology.(dilation|erosion|opening|closing)` instead"
-    ":FutureWarning:skimage"
+    ":FutureWarning:tests"
 )
 
 
@@ -166,7 +166,7 @@ def test_diamond_decomposition(function, radius, decomposition):
 @pytest.mark.parametrize("shape", [(3, 3, 3), (3, 4, 5)])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
 @pytest.mark.filterwarnings(
-    "ignore:.*falling back to decomposition='separable':UserWarning:skimage"
+    "ignore:.*falling back to decomposition='separable':UserWarning:tests"
 )
 def test_cube_decomposition(function, shape, decomposition):
     """Validate footprint decomposition for various shapes.

@@ -101,7 +101,7 @@ def get_central_moment_function(img, spacing=(1, 1)):
 
 
 @pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
 )
 def test_all_props():
     region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
@@ -121,7 +121,7 @@ def test_all_props():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
 )
 def test_all_props_3d():
     region = regionprops(SAMPLE_3D, INTENSITY_SAMPLE_3D)[0]
@@ -1494,7 +1494,7 @@ def test_extra_properties_table():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:`RegionProperties.* is deprecated:FutureWarning:skimage"
+    "ignore:`RegionProperties.* is deprecated:FutureWarning:tests"
 )
 def test_multichannel():
     """Test that computing multichannel properties works."""

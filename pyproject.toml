@@ -188,7 +188,7 @@ xfail_strict = true
 testpaths = ["tests"]
 filterwarnings = [
     "error",
-    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:tests",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
 norecursedirs = ["io/_plugins"]
