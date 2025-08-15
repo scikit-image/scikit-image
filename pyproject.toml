@@ -182,7 +182,7 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra  --strict-config  --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
 log_cli_level = "INFO"
 xfail_strict = true
 testpaths = ["tests"]
