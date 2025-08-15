@@ -188,6 +188,7 @@ xfail_strict = true
 testpaths = ["tests"]
 filterwarnings = [
     "error",
+    "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
