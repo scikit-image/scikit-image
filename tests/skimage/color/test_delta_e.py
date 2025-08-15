@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
-from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.color.delta_e import (
     deltaE_cie76,
@@ -65,7 +64,7 @@ def load_ciede2000_data():
     ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = fetch('ciede2000_test_data.txt')
+    path = 'ciede2000_test_data.txt'
     return np.loadtxt(path, dtype=dtype)
 
 
