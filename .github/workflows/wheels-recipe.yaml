@@ -16,7 +16,7 @@ on:
       CIBW_TEST_COMMAND:
         required: false
         type: string
-        default: "pytest --pyargs skimage ${{ GITHUB_WORKSPACE }}/tests"
+        default: "pytest --pyargs skimage {project}/tests"
 
 env:
   CIBW_BUILD_VERBOSITY: 1
