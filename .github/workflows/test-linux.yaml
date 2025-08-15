@@ -125,7 +125,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
       - name: Check benchmarks
         run: |
@@ -175,7 +175,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
   report-failures:
     runs-on: ubuntu-latest
