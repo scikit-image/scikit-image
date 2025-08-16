@@ -12,10 +12,8 @@ from _pytest.pathlib import bestrelpath
 
 class SKTerminalReporter(CustomTerminalReporter):
     """
-    This ia s custom terminal reporter to how long it takes to finish given part of tests.
-    It prints time each time when test from different file is started.
-
-    It is created to be able to see if timeout is caused by long time execution, or it is just hanging.
+    Custom terminal reporter to display test runtimes.
+    It displays the cumulative runtime each time a new file is tested.
     """
 
     currentfspath: Path | None
@@ -25,7 +23,7 @@ class SKTerminalReporter(CustomTerminalReporter):
         if getattr(self, '_start_time', None) is None:
             self._start_time = perf_counter()
         fspath = self.config.rootpath / nodeid.split('::')[0]
-        if self.currentfspath is None or fspath != self.currentfspath:
+        if fspath != self.currentfspath:
             if self.currentfspath is not None and self._show_progress_info:
                 self._write_progress_information_filling_space()
                 if os.environ.get('CI', False):
@@ -41,7 +39,7 @@ class SKTerminalReporter(CustomTerminalReporter):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: pytest.Config) -> None:
-    # Get the standard terminal reporter plugin and replace it with our
+    # Get the standard terminal reporter plugin and replace it with ours
     standard_reporter = config.pluginmanager.getplugin('terminalreporter')
     custom_reporter = SKTerminalReporter(config, sys.stdout)
     if standard_reporter._session is not None:
