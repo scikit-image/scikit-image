@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 
-from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.color.delta_e import (
     deltaE_cie76,
@@ -16,8 +15,8 @@ from skimage.color.delta_e import (
 
 @pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_ciede2000_dE(dtype, channel_axis):
-    data = load_ciede2000_data()
+def test_ciede2000_dE(dtype, channel_axis, test_root_dir):
+    data = load_ciede2000_data(test_root_dir)
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
@@ -37,7 +36,7 @@ def test_ciede2000_dE(dtype, channel_axis):
     assert_allclose(dE2, data['dE'], rtol=1e-2)
 
 
-def load_ciede2000_data():
+def load_ciede2000_data(prefix):
     dtype = [
         ('pair', int),
         ('1', int),
@@ -65,14 +64,13 @@ def load_ciede2000_data():
     ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = fetch('color/ciede2000_test_data.txt', prefix='tests')
-    return np.loadtxt(path, dtype=dtype)
+    return np.loadtxt(prefix / 'color/ciede2000_test_data.txt', dtype=dtype)
 
 
 @pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_cie76(dtype, channel_axis):
-    data = load_ciede2000_data()
+def test_cie76(dtype, channel_axis, test_root_dir):
+    data = load_ciede2000_data(test_root_dir)
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
@@ -132,8 +130,8 @@ def test_cie76(dtype, channel_axis):
 
 @pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_ciede94(dtype, channel_axis):
-    data = load_ciede2000_data()
+def test_ciede94(dtype, channel_axis, test_root_dir):
+    data = load_ciede2000_data(test_root_dir)
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']
@@ -193,8 +191,8 @@ def test_ciede94(dtype, channel_axis):
 
 @pytest.mark.parametrize("channel_axis", [0, 1, -1])
 @pytest.mark.parametrize('dtype', [np.float32, np.float64])
-def test_cmc(dtype, channel_axis):
-    data = load_ciede2000_data()
+def test_cmc(dtype, channel_axis, test_root_dir):
+    data = load_ciede2000_data(test_root_dir)
     N = len(data)
     lab1 = np.zeros((N, 3), dtype=dtype)
     lab1[:, 0] = data['L1']

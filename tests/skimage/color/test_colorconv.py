@@ -420,7 +420,7 @@ class TestColorconv:
     # test matrices for xyz2lab and lab2xyz generated using
     # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
-    def test_xyz2lab(self):
+    def test_xyz2lab(self, test_root_dir):
         assert_array_almost_equal(xyz2lab(self.xyz_array), self.lab_array, decimal=3)
 
         # Test the conversion with the rest of the illuminants.
@@ -429,13 +429,13 @@ class TestColorconv:
             for obs in ["2", "10", "R"]:
                 obs = obs.lower()
                 fname = f'color/data/lab_array_{I}_{obs}.npy'
-                lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+                lab_array_I_obs = np.load(test_root_dir / fname)
                 assert_array_almost_equal(
                     lab_array_I_obs, xyz2lab(self.xyz_array, I, obs), decimal=2
                 )
         for I in ["d75", "e"]:
             fname = f'color/data/lab_array_{I}_2.npy'
-            lab_array_I_obs = np.load(fetch(fname, prefix="tests"))
+            lab_array_I_obs = np.load(test_root_dir / fname)
             assert_array_almost_equal(
                 lab_array_I_obs, xyz2lab(self.xyz_array, I, "2"), decimal=2
             )
