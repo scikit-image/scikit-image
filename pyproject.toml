@@ -218,6 +218,9 @@ test-skip = "*_aarch64"
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
 
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+
 [tool.cibuildwheel.macos]
 before-all = [
     "set",
