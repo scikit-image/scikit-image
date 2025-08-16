@@ -95,7 +95,7 @@ optional = [
     'scikit-learn>=1.2',
 ]
 test = [
-    'asv',
+    'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
     'pooch>=1.6.0',
     'pytest>=8',
