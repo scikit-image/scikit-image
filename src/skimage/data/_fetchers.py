@@ -193,7 +193,7 @@ def _fetch(data_filename, prefix=None):
     ----------
     data_filename : str
         Name of the file in the scikit-image repository. e.g.
-        'restoration/tess/camera_rl.npy'.
+        'restoration/camera_rl.npy'.
 
     Returns
     -------
