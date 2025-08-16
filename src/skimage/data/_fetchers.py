@@ -213,9 +213,8 @@ def _fetch(data_filename, prefix=None):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
-    test_path = osp.join(data_dir, data_filename)
-    if osp.exists(test_path):
-        return test_path
+    if prefix is not None:
+        return osp.join("tests", "skimage", data_filename)
 
     expected_hash = registry[data_filename]
     if _image_fetcher is None:
