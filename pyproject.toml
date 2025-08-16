@@ -203,3 +203,26 @@ ignored_user_logins = [
 [tool.docstub.type_prefixes]
 matplotlib = "matplotlib"
 scipy = "scipy"
+
+[tool.cibuildwheel]
+test-command = "pytest --pyargs skimage {package}/tests"
+test-extras = ["test", "optional"]
+environment = {PIP_PREFER_BINARY=1}
+environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
+build-verbosity = 1
+
+[tool.cibuildwheel.linux]
+test-skip = "*_aarch64"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp3??t-*"
+test-environment = {PYTHON_GIL=0}
+
+[tool.cibuildwheel.macos]
+before-all = [
+    "set",
+    "bash {project}/tools/build_libomp.sh",
+]
+
+[tool.cibuildwheel.pyodie]
+test-command = "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"

@@ -5,6 +5,9 @@ on:
       - v*
     branches:
       - maintenance/**
+  pull_request:
+    paths:
+      - ".github/workflows/wheels-test-and-release.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch
@@ -51,30 +54,9 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
-      - name: Build the source distribution
-        run: |
-          SK_VERSION=$(git describe --tags)
-          spin sdist -- --no-isolation --skip-dependency-check
-          ls -la ${{ github.workspace }}/dist
-
-      - name: Generate artifact attestation for sdist and wheels
-        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+      - uses: hynek/build-and-inspect-python-package@v2
         with:
-          subject-path: "dist/scikit_image-*"
-
-      - name: Verify the distribution
-        run: pipx run twine check --strict dist/*
-
-      # Ensure that a compromised twine couldn't have altered the distributions
-      - name: Verify artifact attestation
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          for artifact in dist/*; do
-              echo "# ${artifact}"
-              gh attestation verify "${artifact}" --repo ${{ github.repository }}
-          done
+          attest-build-provenance-github: "true"
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
