@@ -10,17 +10,6 @@ from pytest_pretty import CustomTerminalReporter
 from _pytest.pathlib import bestrelpath
 
 
-@pytest.fixture(autouse=True)
-def handle_np2():
-    # TODO: remove when we require numpy >= 2
-    try:
-        import numpy as np
-
-        np.set_printoptions(legacy="1.21")
-    except ImportError:
-        pass
-
-
 class SKTerminalReporter(CustomTerminalReporter):
     """
     This ia s custom terminal reporter to how long it takes to finish given part of tests.
