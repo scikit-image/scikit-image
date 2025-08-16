@@ -1,5 +1,7 @@
 """skimage2 namespace"""
 
+from skimage import __version__
+
 import warnings
 
 import lazy_loader as _lazy

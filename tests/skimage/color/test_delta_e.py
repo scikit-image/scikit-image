@@ -65,7 +65,7 @@ def load_ciede2000_data():
     ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = fetch('color/tests/ciede2000_test_data.txt')
+    path = fetch('color/ciede2000_test_data.txt', prefix='tests')
     return np.loadtxt(path, dtype=dtype)
 
 

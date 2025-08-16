@@ -71,7 +71,7 @@ def _has_hash(path, expected_hash):
     return file_hash(path) == expected_hash
 
 
-def _create_image_fetcher():
+def _create_image_fetcher(prefix=None):
     try:
         import pooch
 
@@ -96,9 +96,27 @@ def _create_image_fetcher():
         skimage_version_for_pooch = __version__.replace('.dev', '+')
 
     if '+' in skimage_version_for_pooch:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "{version}/skimage/"
+        if prefix is not None:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "{version}/tests/skimage/"
+            )
+        else:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "{version}/src/skimage/"
+            )
     else:
-        url = "https://github.com/scikit-image/scikit-image/raw/" "v{version}/skimage/"
+        if prefix is not None:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "v{version}/tests/skimage/"
+            )
+        else:
+            url = (
+                "https://github.com/scikit-image/scikit-image/raw/"
+                "v{version}/src/skimage/"
+            )
 
     # Create a new friend to manage your sample data storage
     image_fetcher = pooch.create(
@@ -125,7 +143,7 @@ def _create_image_fetcher():
     return image_fetcher, data_dir
 
 
-_image_fetcher, data_dir = _create_image_fetcher()
+_image_fetcher, data_dir = _create_image_fetcher(prefix='tests')
 
 
 def _skip_pytest_case_requiring_pooch(data_filename):
@@ -164,7 +182,7 @@ def _ensure_cache_dir(*, target_dir):
         shutil.copy2(readme_src, readme_dest)
 
 
-def _fetch(data_filename):
+def _fetch(data_filename, prefix=None):
     """Fetch a given data file from either the local cache or the repository.
 
     This function provides the path location of the data file given
@@ -175,7 +193,7 @@ def _fetch(data_filename):
     ----------
     data_filename : str
         Name of the file in the scikit-image repository. e.g.
-        'restoration/tess/camera_rl.npy'.
+        'restoration/camera_rl.npy'.
 
     Returns
     -------
@@ -195,6 +213,9 @@ def _fetch(data_filename):
         If scikit-image is unable to connect to the internet but the
         dataset has not been downloaded yet.
     """
+    if prefix is not None:
+        return osp.join("tests", "skimage", data_filename)
+
     expected_hash = registry[data_filename]
     if _image_fetcher is None:
         cache_dir = osp.dirname(data_dir)
