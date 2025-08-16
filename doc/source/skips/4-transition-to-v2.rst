@@ -8,7 +8,7 @@ SKIP 4 — Transitioning to scikit-image 2.0
 :Author: Lars Grüter
 :Status: Draft
 :Type: Standards Track
-:Created: 2022-04-08
+:Created: 2025-08-15
 :Resolved: <null>
 :Resolution: <null>
 :Version effective: None
@@ -31,18 +31,20 @@ disruptive. Given the rejection of :ref:`SKIP-3 <skip_3_transition_v1>`, this
 document proposes an alternative pathway to create a new API. The new pathway
 involves the following steps:
 
-- Any pending deprecations that were scheduled for v0.20 and v0.21 are
-  finalised (the new API suggested by deprecation messages in v0.19 becomes
-  the only API).
-- This is released as 1.0.
-- At this point, the branch ``main`` changes the package and import names to
-  ``skimage2``, and the API is free to evolve.
+- Introduce a new namespace `skimage2` that will be included in the package
+  alongside the existing `skimage` namespace during a transition period.
+- The new API will be implemented in `skimage2` and will initially be marked as
+  unstable and experimental. The old API in `skimage` will continue working.
+- Eventually, when the new API in `skimage2` is complete, the old namespace
+  `skimage` will be deprecated and eventually removed.
 
-Further motivation for the API changes is explained below, and largely
-duplicated from :ref:`SKIP-3 <skip_3_transition_v1>`.
+See the :ref:`skip4_implementation` section for a more detailed description of
+the changes and steps involved.
 
 Motivation and Scope
 --------------------
+
+.. note:: This is largely duplicated from :ref:`SKIP-3 <skip_3_transition_v1>`.
 
 scikit-image has grown organically over the past 12+ years, with functionality
 being added by a broad community of contributors from different backgrounds.
@@ -142,6 +144,8 @@ Several libraries have successfully migrated their user community to a new
 namespace with a version number on it, such as OpenCV (imported as ``cv2``) and
 BeautifulSoup (imported as ``bs4``), Jinja (``jinja2``) and psycopg (currently
 imported as ``psycopg2``). Further afield, R's ggplot is used as ``ggplot2``.
+
+.. _skip4_implementation:
 
 Implementation
 --------------
