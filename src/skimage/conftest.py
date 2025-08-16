@@ -15,7 +15,3 @@ def handle_np2():
         np.set_printoptions(legacy="1.21")
     except ImportError:
         pass
-
-
-def pytest_ignore_collect(collection_path):
-    return "_build_utils" in str(collection_path)
