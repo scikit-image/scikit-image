@@ -10,7 +10,6 @@ from numpy.testing import (
 from scipy.ndimage import fourier_shift, shift as real_shift
 import scipy.fft as fft
 
-from skimage._shared.testing import fetch
 from skimage._shared.utils import _supported_float_type
 from skimage.data import camera, brain
 
@@ -105,7 +104,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
     assert_equal(measured_shift, -np.array(shift))
 
 
-def test_masked_registration_padfield_data():
+def test_masked_registration_padfield_data(test_root_dir):
     """Masked translation registration should behave like in the original
     publication"""
     # Test translated from MATLABimplementation `MaskedFFTRegistrationTest`
@@ -115,9 +114,9 @@ def test_masked_registration_padfield_data():
     shifts = [(75, 75), (-130, 130), (130, 130)]
     for xi, yi in shifts:
         fname = f'registration/data/OriginalX{xi}Y{yi}.png'
-        fixed_image = imread(fetch(fname, prefix='tests'))
+        fixed_image = imread(test_root_dir / fname)
         fname = f'registration/data/TransformedX{xi}Y{yi}.png'
-        moving_image = imread(fetch(fname, prefix='tests'))
+        moving_image = imread(test_root_dir / fname)
 
         # Valid pixels are 1
         fixed_mask = fixed_image != 0
