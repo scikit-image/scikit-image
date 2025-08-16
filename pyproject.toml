@@ -224,5 +224,5 @@ before-all = [
     "bash {project}/tools/build_libomp.sh",
 ]
 
-[tool.cibuildwheel.pyodie]
+[tool.cibuildwheel.pyodide]
 test-command = "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
