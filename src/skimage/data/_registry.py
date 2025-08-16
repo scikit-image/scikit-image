@@ -138,7 +138,7 @@ registry_urls = {
     "data/solidification.tif": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/nickel_solidification.tif",
     "restoration/astronaut_rl.npy": "https://gitlab.com/scikit-image/data/-/raw/2cdc5ce89b334d28f06a58c9f0ca21aa6992a5ba/astronaut_rl.npy",
     "data/gray_morph_output.npz": "https://gitlab.com/scikit-image/data/-/raw/806548e112bcf2b708a9a32275d335cb592480fd/Tests_besides_Equalize_Otsu/gray_morph_output.npz",
-    "data/_blobs_3d_fiji_skeleton.tif": "e3449ad9819425959952050c147278555e5ffe1c2c4a30df29f6a1f9023e10c3",
+    "data/_blobs_3d_fiji_skeleton.tif": "https://gitlab.com/scikit-image/data/-/raw/5c090b56df3988d988ff97928e2ef2d2cbe38e1b/_blobs_3d_fiji_skeleton.tif",
     "data/astronaut.png": "https://gitlab.com/scikit-image/data/-/raw/5c090b56df3988d988ff97928e2ef2d2cbe38e1b/astronaut.png",
     "data/astronaut_GRAY_hog_L1.npy": "https://gitlab.com/scikit-image/data/-/raw/5c090b56df3988d988ff97928e2ef2d2cbe38e1b/astronaut_GRAY_hog_L1.npy",
     "data/astronaut_GRAY_hog_L2-Hys.npy": "https://gitlab.com/scikit-image/data/-/raw/5c090b56df3988d988ff97928e2ef2d2cbe38e1b/astronaut_GRAY_hog_L2-Hys.npy",
