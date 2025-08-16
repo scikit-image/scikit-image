@@ -5,6 +5,7 @@ numpydoc>=1.7
 pooch>=1.6.0
 pytest>=8
 pytest-cov>=2.11.0
+pytest-pretty
 pytest-localserver
 pytest-faulthandler
 pytest-doctestplus
