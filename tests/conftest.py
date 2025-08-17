@@ -46,7 +46,7 @@ def pytest_configure(config: pytest.Config) -> None:
     standard_reporter = config.pluginmanager.getplugin('terminalreporter')
     custom_reporter = SKTerminalReporter(config, sys.stdout)
     if standard_reporter._session is not None:
-        # if session is already set we need to copy them form
+        # if session is already set we need to copy them from
         # the previous reporter
         custom_reporter._session = standard_reporter._session
     config.pluginmanager.unregister(standard_reporter)
