@@ -115,8 +115,8 @@ endif
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  'py.typed',
   'conftest.py',
+  'py.typed'
 ]
 
 py3.install_sources(
