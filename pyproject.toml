@@ -230,3 +230,4 @@ before-all = [
 
 [tool.cibuildwheel.pyodide]
 test-command = "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
+pyodide-version = "0.27.5"
