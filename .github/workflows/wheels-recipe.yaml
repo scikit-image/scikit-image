@@ -32,7 +32,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_pyodie_wheel:
-    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
+    name: Build python pyodide on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
