@@ -1,4 +1,5 @@
 import numpy as np
+import platform
 
 from skimage._shared.testing import assert_array_almost_equal, assert_equal
 from skimage import color, data, img_as_float
@@ -8,6 +9,13 @@ from skimage.util.apply_parallel import apply_parallel
 import pytest
 
 da = pytest.importorskip('dask.array')
+
+
+IS_MACOS_ARM = platform.system() == 'Darwin' and platform.machine() == 'arm64'
+
+IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
+# on macOS arm64 the result is slightly different from other platforms,
+# so we need to lower the decimal precision
 
 
 def test_apply_parallel():
@@ -129,7 +137,9 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
 
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 
-    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
+    assert_array_almost_equal(
+        cat_ycbcr_expected, cat_ycbcr, decimal=IMG_COMPARE_PRECISION
+    )
 
 
 @pytest.mark.parametrize('chunks', (None, (128, 256), 'ndim'))
