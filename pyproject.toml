@@ -85,8 +85,10 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK; sys_platform != "emscripten" or platform_system != "Linux"',  # not packaged for Pyodide yet
+    'SimpleITK; sys_platform != "emscripten" or platform_system != "Linux"',
+    'scikit-learn>=1.2; python_version < "3.14"', # not packaged for Pyodide yet
     'scikit-image[optional_non_gil]'
+
 ]
 optional_non_gil = [
     'astropy>=6.0',
@@ -96,8 +98,8 @@ optional_non_gil = [
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
-    'scikit-learn>=1.2; python_version < "3.14"',
 ]
+
 test = [
     'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
