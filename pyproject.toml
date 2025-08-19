@@ -85,7 +85,7 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK; sys_platform != "emscripten" or platform_system != "Linux"',
+    'SimpleITK; sys_platform != "emscripten"',
     'scikit-learn>=1.2; python_version < "3.14"', # not packaged for Pyodide yet
     'scikit-image[optional_non_gil]'
 
