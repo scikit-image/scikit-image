@@ -56,13 +56,40 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         f.writelines(f"{line}\n" for line in lines)
 
 
+def explode_dependencies(
+    dep_list: list[str],
+    optional_dict: dict[str, list[str]],
+    package_name: str = 'scikit-image',
+) -> list[str]:
+    """Explode dependencies with optional extras into a flat list."""
+    exploded = []
+    for dep in dep_list:
+        if dep.startswith(package_name):
+            extras = dep.split('[')[1].rstrip(']').split(',')
+            exploded.extend(
+                explode_dependencies(
+                    optional_dict[extras[0]], optional_dict, package_name
+                )
+            )
+        else:
+            exploded.append(dep)
+    return exploded
+
+
 def main() -> None:
     pyproject = toml.loads((repo_dir / "pyproject.toml").read_text())
 
     generate_requirement_file("default", pyproject["project"]["dependencies"])
 
     for key, opt_list in pyproject["project"]["optional-dependencies"].items():
-        generate_requirement_file(key, opt_list)
+        generate_requirement_file(
+            key,
+            explode_dependencies(
+                opt_list,
+                pyproject["project"]["optional-dependencies"],
+                package_name='scikit-image',
+            ),
+        )
 
     generate_environment_yml(
         {
