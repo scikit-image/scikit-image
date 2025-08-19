@@ -213,7 +213,7 @@ test-command = "pytest --pyargs skimage {package}/tests"
 test-extras = ["test", "optional"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
-build-verbosity = 1
+build-verbosity = 0
 
 [tool.cibuildwheel.linux]
 test-skip = "*_aarch64"
@@ -224,7 +224,7 @@ test-environment = {PYTHON_GIL=0}
 test-extras = ["test", "optional_non_gil"]
 
 [[tool.cibuildwheel.overrides]]
-select = "-musllinux*"
+select = "*-musllinux*"
 test-extras = ["test", "optional_non_gil"]
 # SimpleITK does not support musllinux yet
 
