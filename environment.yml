@@ -47,8 +47,9 @@ dependencies:
   - pydata-sphinx-theme>=0.16
   - PyWavelets>=1.6
   - pytest-doctestplus
-  # optional
+  # gil_optional
   - SimpleITK
+  # optional
   - astropy>=6.0
   - cloudpickle>=3.0
   - dask>=2023.2.0
