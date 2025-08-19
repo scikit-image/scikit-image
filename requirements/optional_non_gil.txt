@@ -5,5 +5,4 @@ cloudpickle>=3.0
 dask[array]>=2023.2.0
 matplotlib>=3.7
 pooch>=1.6.0; sys_platform != "emscripten"
-pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"
 PyWavelets>=1.6

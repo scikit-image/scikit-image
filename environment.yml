@@ -50,6 +50,7 @@ dependencies:
   # optional
   - SimpleITK
   - scikit-learn>=1.2
+  - pyamg>=5.2
   - scikit-image
   # optional_non_gil
   - astropy>=6.0
@@ -57,7 +58,6 @@ dependencies:
   - dask>=2023.2.0
   - matplotlib>=3.7
   - pooch>=1.6.0
-  - pyamg>=5.2
   - PyWavelets>=1.6
   # test
   - asv
