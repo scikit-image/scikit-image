@@ -84,10 +84,11 @@ docs = [
     'PyWavelets>=1.6',
     'pytest-doctestplus',
 ]
-gil_optional = [
-    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
-]
 optional = [
+    'SimpleITK; sys_platform != "emscripten" or platform_system != "Linux"',  # not packaged for Pyodide yet
+    'scikit-image[optional_non_gil]'
+]
+optional_non_gil = [
     'astropy>=6.0',
     'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
@@ -209,7 +210,7 @@ scipy = "scipy"
 
 [tool.cibuildwheel]
 test-command = "pytest --pyargs skimage {package}/tests"
-test-extras = ["test", "optional", "gil_optional"]
+test-extras = ["test", "optional"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
 build-verbosity = 1
@@ -220,8 +221,12 @@ test-skip = "*_aarch64"
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
-test-extras = ["test", "optional"]
+test-extras = ["test", "optional_non_gil"]
 
+[[tool.cibuildwheel.overrides]]
+select = "-musllinux*"
+test-extras = ["test", "optional_non_gil"]
+# SimpleITK does not support musllinux yet
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
