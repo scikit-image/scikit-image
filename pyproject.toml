@@ -230,6 +230,10 @@ select = "*-m*linux_aarch64"
 test-extras = ["test", "optional_non_gil"]
 
 [[tool.cibuildwheel.overrides]]
+select = "*-win_arm64"
+test-extras = ["test", "optional_non_gil"]
+
+[[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
 test-extras = ["test", "optional_non_gil"]
 # SimpleITK does not support musllinux yet
