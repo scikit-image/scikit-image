@@ -9,7 +9,7 @@ updates:
     commit-message:
       prefix: "ci(dependabot):"
     labels:
-      - "maintenance"
+      - ":wrench: type: Maintenance"
     groups:
       actions:
         patterns:
