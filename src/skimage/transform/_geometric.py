@@ -934,26 +934,50 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
         return self._estimate(src, dst) is None
 
 
+_WARP_NOTES = '''Notes
+    -----
+
+    Whether a particular (positive) rotation will appear to be clockwise or
+    anti-clockwise depends on the way you apply the transform to an image, for
+    example using :func:`skimage.transform.warp`.  If you are using ``warp``
+    from the ``skimage`` namespace, ``warp``'s default behavior is to consider
+    the first coordinate axis to refer to (floating point) indices in the
+    *second axis* of an image array, and the second coordinate axis to refer to
+    the *first axis* of the image array.  This is known as the image processing
+    or "xy" convention.  In this case, a positive rotation, once applied, will
+    be clockwise.  If you are using ``warp`` from the ``skimage2`` namespace
+    (available in Scikit-image versions >= 2), the default behavior will be to
+    consider the first coordinate axis to refer to the first axis of the image
+    array. This is the "ij", "array" or "Numpy" convention.  In that case,
+    ``warp`` will generate a rotation that is anti-clockwise.'''
+
+
 class ProjectiveTransform(_HMatrixTransform):
-    r"""Projective transformation.
+    __doc__ = rf"""Projective transformation.
 
     Apply a projective transformation (homography) on coordinates.
 
-    For each homogeneous coordinate :math:`\mathbf{x} = [x, y, 1]^T`, its
+    In what follows, ``x`` refers to coordinates from the first coordinate
+    axis, and ``y`` refers to coordinates from the second coordinate axis.
+
+    For each homogeneous coordinate :math:`\mathbf{{x}} = [x, y, 1]^T`, its
     target position is calculated by multiplying with the given matrix,
-    :math:`H`, to give :math:`H \mathbf{x}`::
+    :math:`H`, to give :math:`H \mathbf{{x}}`::
 
       [[a0 a1 a2]
        [b0 b1 b2]
        [c0 c1 1 ]].
 
-    E.g., to rotate by theta degrees clockwise, the matrix should be::
+    E.g., to rotate by theta degrees, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
        [0            0         1]]
 
-    or, to translate x by 10 and y by 20::
+    Whether this will appear as a clockwise or counterclockwise rotation will
+    depend on how you apply the transform to the image; see the Notes section.
+
+    To translate x by 10 and y by 20::
 
       [[1 0 10]
        [0 1 20]
@@ -1028,6 +1052,8 @@ class ProjectiveTransform(_HMatrixTransform):
     Traceback (most recent call last):
       ...
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
+    {_WARP_NOTES}
     """
 
     scaling = 'rms'
@@ -1080,6 +1106,9 @@ class ProjectiveTransform(_HMatrixTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        In what follows, ``x`` refers to coordinates from the first coordinate
+        axis, and ``y`` refers to coordinates from the second coordinate axis.
 
         The transformation is defined as::
 
@@ -1264,6 +1293,9 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Number of source and destination coordinates must match.
 
+        In what follows, ``x`` refers to coordinates from the first coordinate
+        axis, and ``y`` refers to coordinates from the second coordinate axis.
+
         The transformation is defined as::
 
             X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
@@ -1329,7 +1361,10 @@ class ProjectiveTransform(_HMatrixTransform):
 class AffineTransform(ProjectiveTransform):
     """Affine transformation.
 
-    Has the following form::
+    In what follows, ``x`` refers to coordinates from the first coordinate
+    axis, and ``y`` refers to coordinates from the second coordinate axis.
+
+    The transform has the following form::
 
         X = a0 * x + a1 * y + a2
           =   sx * x * [cos(rotation) + tan(shear_y) * sin(rotation)]
@@ -1341,14 +1376,15 @@ class AffineTransform(ProjectiveTransform):
             - sy * y * [tan(shear_x) * sin(rotation) - cos(rotation)]
             + translation_y
 
-    where ``sx`` and ``sy`` are scale factors in the x and y directions.
+    where ``sx`` and ``sy`` are scale factors in the x (first coordinate axis)
+    and y (second coordinate axis) directions.
 
     This is equivalent to applying the operations in the following order:
 
-    1. Scale
-    2. Shear
-    3. Rotate
-    4. Translate
+    1. Scale;
+    2. Shear;
+    3. Rotate;
+    4. Translate.
 
     The homogeneous transformation matrix is::
 
@@ -1605,7 +1641,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
     >>> np.allclose(tform.inverse(dst), src)
     True
 
-    The estimation can fail - for example, if all the input or output points
+    The estimation can fail — for example, if all the input or output points
     are the same.  If this happens, you will get a transform that is not
     "truthy" - meaning that ``bool(tform)`` is ``False``:
 
@@ -1811,9 +1847,12 @@ def _euler_rotation_matrix(angles, degrees=False):
 
 
 class EuclideanTransform(ProjectiveTransform):
-    """Euclidean transformation, also known as a rigid transform.
+    __doc__ = f"""Euclidean transformation, also known as a rigid transform.
 
-    Has the following form::
+    In what follows, ``x`` refers to coordinates from the first coordinate
+    axis, and ``y`` refers to coordinates from the second coordinate axis.
+
+    The transform the following form::
 
         X = a0 * x - b0 * y + a1 =
           = x * cos(rotation) - y * sin(rotation) + a1
@@ -1848,11 +1887,12 @@ class EuclideanTransform(ProjectiveTransform):
     matrix : (D+1, D+1) array_like, optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
-        Rotation angle, clockwise, in radians. If given as a vector, it is
-        interpreted as Euler rotation angles [1]_. Only 2D (single rotation)
-        and 3D (Euler rotations) values are supported. For higher dimensions,
-        you must provide or estimate the transformation matrix instead, and
-        pass that as `matrix` above.
+        Rotation angle, in radians. See Notes for discussion of clockwise vs
+        anti-clockwise.  If given as a vector, it is interpreted as Euler
+        rotation angles [1]_. Only 2D (single rotation) and 3D (Euler
+        rotations) values are supported. For higher dimensions, you must
+        provide or estimate the transformation matrix instead, and pass that as
+        `matrix` above.
     translation : (x, y[, z, ...]) sequence of float, length D, optional
         Translation parameters for each axis.
     dimensionality : int, optional
@@ -1931,6 +1971,8 @@ class EuclideanTransform(ProjectiveTransform):
     Traceback (most recent call last):
       ...
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
+    {_WARP_NOTES}
 
     References
     ----------
@@ -2073,9 +2115,12 @@ class EuclideanTransform(ProjectiveTransform):
 @_update_from_estimate_docstring
 @_deprecate_inherited_estimate
 class SimilarityTransform(EuclideanTransform):
-    """Similarity transformation.
+    __doc__ = f"""Similarity transformation.
 
-    Has the following form in 2D::
+    In what follows, ``x`` refers to coordinates from the first coordinate
+    axis, and ``y`` refers to coordinates from the second coordinate axis.
+
+    The transform has the following form in 2D::
 
         X = a0 * x - b0 * y + a1 =
           = s * x * cos(rotation) - s * y * sin(rotation) + a1
@@ -2106,7 +2151,9 @@ class SimilarityTransform(EuclideanTransform):
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
     rotation : float, optional
-        Rotation angle, clockwise, as radians.
+        Rotation angle, in radians. See Notes for discussion of clockwise vs
+        anti-clockwise.
+
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
     translation : (dim,) array_like, optional
@@ -2187,6 +2234,8 @@ class SimilarityTransform(EuclideanTransform):
     Traceback (most recent call last):
       ...
     FailedEstimationAccessError: No attribute "params" for failed estimation ...
+
+    {_WARP_NOTES}
     """
 
     # Whether to estimate scale during estimation.
@@ -2259,7 +2308,10 @@ class SimilarityTransform(EuclideanTransform):
 class PolynomialTransform(_GeometricTransform):
     """2D polynomial transformation.
 
-    Has the following form::
+    In what follows, ``x`` refers to coordinates from the first coordinate
+    axis, and ``y`` refers to coordinates from the second coordinate axis.
+
+    The transform has the following form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
@@ -2336,6 +2388,9 @@ class PolynomialTransform(_GeometricTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        In what follows, ``x`` refers to coordinates from the first coordinate
+        axis, and ``y`` refers to coordinates from the second coordinate axis.
 
         The transformation is defined as::
 
@@ -2505,6 +2560,9 @@ class PolynomialTransform(_GeometricTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        In what follows, ``x`` refers to coordinates from the first coordinate
+        axis, and ``y`` refers to coordinates from the second coordinate axis.
 
         The transformation is defined as::
 
