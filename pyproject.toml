@@ -192,11 +192,7 @@ filterwarnings = [
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
 norecursedirs = ["io/_plugins"]
-doctest_optionflags = [
-    "NORMALIZE_WHITESPACE",
-    "ELLIPSIS",
-    "FLOAT_CMP",
-]
+doctest_optionflags = ["FLOAT_CMP"]
 
 [tool.changelist]
 ignored_user_logins = [
