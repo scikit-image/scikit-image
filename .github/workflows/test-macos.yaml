@@ -16,7 +16,7 @@ env:
 
 jobs:
   test_skimage_macos:
-    name: macos-cp${{ matrix.python-version }}
+    name: ${{ matrix.os }}-cp${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -67,6 +67,9 @@ jobs:
       - name: Build and install
         run: |
           pip install -v --no-build-isolation .
+        env:
+          LDFLAGS=: "-L/opt/homebrew/opt/libomp/lib"
+          CPPFLAGS: "-I/opt/homebrew/opt/libomp/include"
 
       - name: Install test dependencies
         env:
