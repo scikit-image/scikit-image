@@ -28,7 +28,7 @@ jobs:
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
         include:
-          - python-version: "3.14"
+          - python-version: "3.13"
             os: macos-latest
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
