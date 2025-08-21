@@ -76,7 +76,7 @@ jobs:
 
       - name: Run tests
         run: |
-          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
+          $PYTEST --showlocals ./tests
 
       - name: Check benchmarks
         run: |
