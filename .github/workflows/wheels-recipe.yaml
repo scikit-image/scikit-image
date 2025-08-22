@@ -18,7 +18,7 @@ jobs:
             windows-latest,
             # windows-11-arm, # need a separate PR for this, problem with python verison discovery
             macos-13,
-            macos-latest,  # ARM-version of MacOS
+            macos-latest, # ARM-version of MacOS
           ]
 
     steps:
