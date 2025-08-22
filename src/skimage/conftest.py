@@ -1,4 +1,7 @@
-# Fixtures for doctests
+"""
+This conftest is required to set the numpy print options
+to legacy mode for doctests
+"""
 
 import pytest
 
