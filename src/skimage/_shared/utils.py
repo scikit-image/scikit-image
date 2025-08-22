@@ -304,11 +304,17 @@ class deprecate_parameter:
 
     def __call__(self, func):
         parameters = inspect.signature(func).parameters
-        deprecated_idx = list(parameters.keys()).index(self.deprecated_name)
+        try:
+            deprecated_idx = list(parameters.keys()).index(self.deprecated_name)
+        except ValueError as e:
+            raise ValueError(f"{self.deprecated_name!r} not in parameters") from e
+
+        new_idx = False
         if self.new_name:
-            new_idx = list(parameters.keys()).index(self.new_name)
-        else:
-            new_idx = False
+            try:
+                new_idx = list(parameters.keys()).index(self.new_name)
+            except ValueError as e:
+                raise ValueError(f"{self.new_name!r} not in parameters") from e
 
         if parameters[self.deprecated_name].default is not DEPRECATED:
             raise RuntimeError(
@@ -665,8 +671,7 @@ class deprecate_func:
 
     def __call__(self, func):
         message = (
-            f"`{func.__name__}` is deprecated since version "
-            f"{self.deprecated_version}"
+            f"`{func.__name__}` is deprecated since version {self.deprecated_version}"
         )
         if self.removed_version:
             message += f" and will be removed in version {self.removed_version}."
@@ -819,9 +824,7 @@ def safe_as_int(val, atol=1e-3):
     try:
         np.testing.assert_allclose(mod, 0, atol=atol)
     except AssertionError:
-        raise ValueError(
-            f'Integer argument required but received ' f'{val}, check inputs.'
-        )
+        raise ValueError(f'Integer argument required but received {val}, check inputs.')
 
     return np.round(val).astype(np.int64)
 
@@ -983,7 +986,7 @@ def _validate_interpolation_order(image_dtype, order):
         return 0 if image_dtype == bool else 1
 
     if order < 0 or order > 5:
-        raise ValueError("Spline interpolation order has to be in the " "range 0-5.")
+        raise ValueError("Spline interpolation order has to be in the range 0-5.")
 
     if image_dtype == bool and order != 0:
         raise ValueError(
