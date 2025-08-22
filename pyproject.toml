@@ -217,9 +217,6 @@ environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
 build-verbosity = 0
 enable="cpython-freethreading"
 
-#[tool.cibuildwheel.linux]
-#test-skip = "*_aarch64"
-
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
@@ -249,4 +246,3 @@ before-all = [
 
 [tool.cibuildwheel.pyodide]
 test-command = "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
-pyodide-version = "0.27.6"
