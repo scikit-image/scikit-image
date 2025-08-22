@@ -210,7 +210,7 @@ matplotlib = "matplotlib"
 scipy = "scipy"
 
 [tool.cibuildwheel]
-test-command = "pytest --pyargs skimage {package}/tests"
+test-command = "pytest --doctest-plus --pyargs skimage {package}/tests"
 test-extras = ["test", "optional"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
@@ -235,10 +235,14 @@ select = "*-musllinux*"
 test-extras = ["test", "optional_non_gil"]
 # SimpleITK does not support musllinux yet
 
+[tool.cibuildwheel.linux]
+environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
+
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 
 [tool.cibuildwheel.macos]
+test-command = "pytest {package}/tests"
 before-all = [
     "set",
     "bash {project}/tools/build_libomp.sh",
