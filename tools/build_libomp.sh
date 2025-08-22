@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Build libomp for MacOS
+# Used in pyproject.toml [tool.cibuildwheel.macos]
 set -euo pipefail
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir=${DIR}/libs_build

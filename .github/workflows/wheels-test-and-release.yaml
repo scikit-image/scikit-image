@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/wheels-test-and-release.yaml"
+      - ".github/workflows/wheels-recipe.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch

@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/nightly-wheel-build.yaml"
+      - ".github/workflows/wheels-recipe.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch

@@ -63,7 +63,11 @@ def explode_dependencies(
     optional_dict: dict[str, list[str]],
     package_name: str = 'scikit-image',
 ) -> list[str]:
-    """Explode dependencies with optional extras into a flat list."""
+    """Explode dependencies with optional extras into a flat list.
+    
+    If `package_name[optional_group]` is used as a dependency itself, replace
+    with the actual dependencies of `optional_group`.      
+    """
     exploded = []
     for dep in dep_list:
         if dep.startswith(package_name):
