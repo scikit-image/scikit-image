@@ -36,6 +36,8 @@ Other
 * Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
+* Review why test precision needs to be lowered for macOS ARM in
+  `test_apply_parallel.py`
 
 Post numpy 2
 ------------
