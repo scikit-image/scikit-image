@@ -34,7 +34,7 @@ jobs:
           persist-credentials: false
       - uses: hynek/build-and-inspect-python-package@v2
         with:
-          attest-build-provenance-github: "true"
+          attest-build-provenance-github: ${{ github.event_name == 'push' && 'true' || 'false' }}
           skip-wheel: "true"
 
   deploy:
