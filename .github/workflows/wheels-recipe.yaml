@@ -13,8 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-            ubuntu-latest,
-            ubuntu-22.04-arm,
             windows-latest,
             # windows-11-arm, # need a separate PR for this, problem with python verison discovery
             macos-13,
@@ -32,7 +30,44 @@ jobs:
           CIBW_BUILD: ${{ matrix.build }}
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.arch }}
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-{{ matrix.build }}
+          path: ./wheelhouse/*.whl
+
+  build_wheel_linux:
+    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+            ubuntu-latest,
+            ubuntu-22.04-arm,
+            windows-latest,
+            # windows-11-arm, # need a separate PR for this, problem with python verison discovery
+            macos-13,
+            macos-latest, # ARM-version of MacOS
+          ]
+        build:
+          [
+            "cp31{1,2}*manylinux*",
+            "cp313*manylinux*",
+            "cp314*manylinux*",
+            "cp31{1,2}*musllinux*",
+            "cp313*musllinux*",
+            "cp314*musllinux*",
+          ]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pypa/cibuildwheel@v3.1.4
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-{{ matrix.build }}
           path: ./wheelhouse/*.whl
 
   build_pyodie_wheel:
