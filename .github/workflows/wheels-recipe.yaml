@@ -39,14 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [
-            ubuntu-latest,
-            ubuntu-22.04-arm,
-            windows-latest,
-            # windows-11-arm, # need a separate PR for this, problem with python verison discovery
-            macos-13,
-            macos-latest, # ARM-version of MacOS
-          ]
+        os: [ubuntu-latest, ubuntu-22.04-arm]
         build:
           [
             "cp31{1,2}*manylinux*",
