@@ -49,6 +49,8 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
 
             pkgname = re.split('[>=]', dep)[0]
             dep = dep.replace(pkgname, rename_idx.get(pkgname, pkgname))
+            if dep == "scikit-image":
+                continue
 
             lines.append(f"  - {dep}")
 
