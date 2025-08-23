@@ -1381,10 +1381,10 @@ class AffineTransform(ProjectiveTransform):
 
     This is equivalent to applying the operations in the following order:
 
-    1. Scale;
-    2. Shear;
-    3. Rotate;
-    4. Translate.
+    1. Scale
+    2. Shear
+    3. Rotate
+    4. Translate
 
     The homogeneous transformation matrix is::
 
@@ -1879,8 +1879,8 @@ class EuclideanTransform(ProjectiveTransform):
 
     The implicit parameters are applied in the following order:
 
-    1. Rotation;
-    2. Translation.
+    1. Rotation
+    2. Translation
 
     Parameters
     ----------
@@ -2140,9 +2140,9 @@ class SimilarityTransform(EuclideanTransform):
 
     The implicit parameters are applied in the following order:
 
-    1. Scale;
-    2. Rotation;
-    3. Translation.
+    1. Scale
+    2. Rotation
+    3. Translation
 
     Parameters
     ----------
