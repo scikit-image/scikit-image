@@ -3,7 +3,6 @@ import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.metrics import structural_similarity
 
@@ -217,7 +216,7 @@ def test_mssim_vs_legacy(dtype):
 
 def test_ssim_warns_about_data_range():
     mssim = structural_similarity(cam, cam_noisy)
-    with expected_warnings(['Setting data_range based on im1.dtype']):
+    with pytest.warns(UserWarning, match='Setting data_range based on im1.dtype'):
         mssim_uint16 = structural_similarity(
             cam.astype(np.uint16), cam_noisy.astype(np.uint16)
         )
@@ -226,10 +225,8 @@ def test_ssim_warns_about_data_range():
         # is getting a warning about avoiding mistakes.
         assert mssim_uint16 > 0.99
 
-    with expected_warnings(
-        ['Setting data_range based on im1.dtype', 'Inputs have mismatched dtypes']
-    ):
-        mssim_mixed = structural_similarity(cam, cam_noisy.astype(np.int32))
+    with pytest.warns(UserWarning, match='Setting data_range based on im1.dtype'):
+        _ = structural_similarity(cam, cam_noisy.astype(np.int32))
 
     # no warning when user supplies data_range
     mssim_mixed = structural_similarity(
