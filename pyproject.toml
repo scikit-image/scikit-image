@@ -214,7 +214,7 @@ scipy = "scipy"
 test-command = "pytest --doctest-plus --pyargs skimage {package}/tests"
 test-extras = ["test", "optional"]
 environment = {PIP_PREFER_BINARY=1}
-environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL"]
+environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
 enable="cpython-freethreading"
 
