@@ -245,16 +245,18 @@ the scikit-image developers and the developers of downstream libraries, for
 dubious benefit: ultimately, later versions of scikit-image will still be
 incompatible with prior versions, although over a longer time scale.
 
-A single package containing both versions
-.........................................
+A new package name
+..................
 
-Since the import name is changing, it would be possible to make a single
-package with both the ``skimage`` and ``skimage2`` namespaces shipping
-together, at least for some time. This option is attractive but it implies
-longer-term maintenance of the 1.0 namespace, for which we might lack
-maintainer time, or a long deprecation cycle for the 1.0 namespace, which would
-ultimately result in a lot of unhappy users getting deprecation messages from
-their scikit-image use.
+Since the import name is changing, it would be possible to also change the package name from ``scikit-image`` to ``skimage2``.
+This option was a previous proposal of this SKIP.
+It shares many of the same strength of the current proposal – chiefly – the new ``skimage2`` namespace.
+This option also requires informing users about the new package.
+Similarly to the suggestion here, we could raise a warning when the old package is imported.
+It could advise users to install the new package.
+
+However, managing and releasing two packages from the same repository is problematic.
+At the same time, introducing a new repository would eventually leave behind issues and pull requests and would also make it prohibitively difficult to implement one API as a wrapper around the other.
 
 Not making the proposed API changes
 ...................................
