@@ -127,6 +127,8 @@ included below for illustrative purposes:
   specific task. It would also help the community grow around common APIs,
   where now scikit-image APIs are essentially unique for each function.
 
+More examples can be found in `"API changes for skimage2" on our Wiki <https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2>`_.
+
 To make this transition with a minimum amount of user disruption, this SKIP
 proposes releasing a new namespace, ``skimage2``, that would provide the new
 API, *but only if users explicitly opt-in*. Additionally, by releasing a new
@@ -306,9 +308,12 @@ similar problems.
 Discussion
 ----------
 
-This SKIP is the result of discussion of :ref:`SKIP-3 <skip_3_transition_v1>`. See
-the "Resolution" section of that document for further background on the
-motivation for this SKIP.
+This SKIP is the result of many evolving discussions among the core team, with fellow projects and our users base:
+
+- :ref:`SKIP-3 <skip_3_transition_v1>` was an earlier iteration of this SKIP.
+  See the "Resolution" section of that document for further background on the motivation for this SKIP.
+- `A pragmatic pathway towards skimage2 <https://discuss.scientific-python.org/t/a-pragmatic-pathway-towards-skimage2/530>`_
+- Many discussions happened in `issues and pull requests tagged as "Path to skimage2" <https://github.com/scikit-image/scikit-image/pulls?q=label%3A%22%3Ahiking_boot%3A+Path+to+skimage2%22+>`_.
 
 Resolution
 ----------
