@@ -153,13 +153,15 @@ imported as ``psycopg2``). Further afield, R's ggplot is used as ``ggplot2``.
 Implementation
 --------------
 
-Before executing on this SKIP, scikit-image 1.0 will be released, finally celebrating the the maturity of the project.
+As a first execution step of this SKIP, scikit-image 1.0 will be released, celebrating the the maturity of the project.
 
 First phase: Building `skimage2`
 ................................
 
-Afterwards, a new empty ``skimage2`` namespace will be created alongside our existing ``skimage`` namespace, that will be included in releases (versioned 1.x) from now on.
-It will be marked as experimental – importing it will emit a warning that informs users that content in ``skimage2`` is still unstable.
+Afterwards, a new empty ``skimage2`` namespace will be created in our repository alongside our ``skimage`` namespace.
+It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
+Initially, this namespace will not be included full releases (versioned 1.x) on PyPI and elsewhere, but may already be included in our nightly releases.
+Towards the end of this phase, ``skimage2`` should be included in full releases to help downstream libraries and users try it out.
 
 With the new namespace available, we will start building the new API inside it.
 It will – where possible – wrap the existing implementation in the existing ``skimage`` namespace but will have its own independent test suite.
@@ -170,12 +172,12 @@ There may be some situations where we have to break this general rule, but an ar
 
 We will record the pathway for migrating from the old to the new API in detail in a migration guide, in the docstrings of the old API and with the help of runtime warnings.
 
-During this phase, new features can still be introduced into the old `skimage` namespace, not only in the new one.
+During this phase, new (additive) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
 If possible, their internal implementation should be added in the new namespace.
 This also includes conventional deprecations if there is a high confidence in the proposed API change.
 
-On the other hand, in cases for which we are not confident yet in the new API, these should only be introduced in the new experimental `skimage2` namespace.
-However, silent deprecation warnings related to these changes should still be introduced in `skimage`.
+On the other hand, in cases for which we are not confident yet in the new API, these should only be introduced in the new experimental ``skimage2`` namespace.
+Nevertheless, silent deprecation warnings related to these changes should be introduced in ``skimage``.
 This will later allow a simple transition from silent to visible warnings for the next phase.
 
 Second phase: Transitioning to `skimage2`
