@@ -192,6 +192,14 @@ On completion of these deprecation, we will remove the internal implementation f
 
 Eventually, once the `skimage` namespace is empty it will be removed.
 
+Code translation helper
+.......................
+
+Around the switch to the second phase, we will look into impementing a code translation tool that helps users automate the transition to ``skimage2``.
+This should alleviate the cost and work involved for switching – especially in cases that can be easily automated.
+Still, this tool might not support more ambiguous or complex updates of our API, or all the complex ways in which users might use our library.
+Supporting these cases might be impossible or might require prohibitive development effort.
+Therefore, users and downstream libraries must always have other means of completing the transition manually, e.g., with the help of conventional deprecation warnings.
 
 Backward compatibility
 ----------------------
