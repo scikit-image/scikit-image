@@ -95,6 +95,12 @@ def sdist(pyproject_build_args):
     default=None,
     help="Test all submodules that import changed submodules.",
 )
+@click.option(
+    "--doctest/--no-doctest",
+    default=True,
+    help="Run doctests with doctest-plus "
+    "(sets `--import-mode=importlib` unless specified explicitly)",
+)
 @spin.cmds.meson.build_dir_option
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(
@@ -103,8 +109,11 @@ def test(
     build_dir,
     test_modified=False,
     test_modified_importers=False,
+    doctest=False,
     **kwargs,
 ):
+    pytest_args = kwargs.get('pytest_args', ())
+
     if test_modified or test_modified_importers:
         sys.path.insert(0, 'tools/')
         import module_dependencies
@@ -136,7 +145,6 @@ def test(
             )
             to_test = to_test | importers_of_modified
 
-        pytest_args = kwargs.get('pytest_args', ())
         if "--pyargs" in pytest_args:
             raise RuntimeError(
                 "--test-modified / --test-deps-of-modified will override --pyargs"
@@ -144,5 +152,25 @@ def test(
 
         kwargs['pytest_args'] = pytest_args + ('--pyargs',) + tuple(sorted(to_test))
 
+    if not pytest_args:
+        pytest_args = ('./tests',)
+
+    if doctest:
+        if '--doctest-plus' not in pytest_args:
+            pytest_args = ('--doctest-plus',) + pytest_args
+        if '--pyargs' not in pytest_args:
+            pytest_args = (
+                '--pyargs',
+                'skimage',
+            ) + pytest_args
+
+    # `--import-mode="importlib"` is necessary to collect doctests
+    # for editable installs.
+    if any('--doctest' in arg for arg in pytest_args) and not any(
+        '--import-mode' in arg for arg in pytest_args
+    ):
+        pytest_args = ('--import-mode=importlib',) + pytest_args
+
+    kwargs["pytest_args"] = pytest_args
     kwargs['build_dir'] = build_dir
     parent_callback(**kwargs)

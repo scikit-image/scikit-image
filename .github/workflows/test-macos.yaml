@@ -9,26 +9,33 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 jobs:
   test_skimage_macos:
-    name: macos-cp${{ matrix.python-version }}
-    runs-on: macos-13
+    name: ${{ matrix.os }}-cp${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.13"]
+        os: [macos-13]
         OPTIONAL_DEPS: [1]
+        include:
+          - python-version: "3.13"
+            # Also test on ARM version of MacOS
+            os: macos-15
+            OPTIONAL_DEPS: 1
     env:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
       CPPFLAGS: "-Xpreprocessor -fopenmp"
-      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-      CXXFLAGS: "-I/usr/local/opt/libomp/include"
-      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      CXXFLAGS: "-I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib -lomp"
 
     steps:
       - name: Checkout scikit-image
@@ -65,8 +72,18 @@ jobs:
 
       - name: Run tests
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --showlocals ./tests
 
       - name: Check benchmarks
         run: |
           asv check -v -E existing
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "macos tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
