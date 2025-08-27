@@ -937,7 +937,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 _WARP_NOTES = '''Notes
     -----
 
-    Our axis convention changed from Scikit-image 1 to 2, and this changes the
+    Our axis convention will change from Scikit-image 1 to 2, and this changes the
     direction of (positive) rotation. In functions *applying* transformations,
     in the ``skimage2`` namespace, we use the NumPy or "ij" convention, where
     the first and second axis of the image correspond to the first and second
@@ -977,7 +977,7 @@ class ProjectiveTransform(_HMatrixTransform):
     Whether this will appear as a clockwise or counterclockwise rotation will
     depend on how you apply the transform to the image; see the Notes section.
 
-    To translate x by 10 and y by 20::
+    To translate ``x`` by 10 and ``y`` by 20::
 
       [[1 0 10]
        [0 1 20]
