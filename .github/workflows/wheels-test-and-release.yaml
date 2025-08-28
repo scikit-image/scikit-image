@@ -29,7 +29,7 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       attestations: write # for GitHub attestations
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -40,7 +40,7 @@ jobs:
           python-version: "3.12"
           # Important! No caching for wheel build to avoid cache poisoning
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         id: download
         with:
           pattern: wheels-*
@@ -58,7 +58,7 @@ jobs:
           ls -la ${{ github.workspace }}/dist
 
       - name: Generate artifact attestation for sdist and wheels
-        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: "dist/scikit_image-*"
 
@@ -82,7 +82,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
 
       - name: Github release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
