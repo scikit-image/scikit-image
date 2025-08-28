@@ -951,6 +951,7 @@ def convert_to_float(image, preserve_range):
         if image.dtype.char not in 'df':
             image = image.astype(float)
     else:
+        # Avoid circular import
         from ..util.dtype import img_as_float
 
         image = img_as_float(image)
@@ -1096,3 +1097,121 @@ def as_binary_ndarray(array, *, variable_name):
                 f"safely cast to boolean array."
             )
     return np.asarray(array, dtype=bool)
+
+
+def _prescale_value_range(image, *, mode, stacklevel=3):
+    """Scale the value range of `image` according to the selected `mode`.
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to scale.
+    mode : {'minmax', 'legacy', False} or tuple[float, float], optional
+        Controls the rescaling behavior for `image`.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization its minimum and maximum values will be 0 and 1
+            respectively. This is a shorthand for
+            ``prescale=(image.min(), image.max())``.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype, if `image` is of
+            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            more details.
+
+        ``(lower, higher)``
+            Normalize `image` such that ``lower`` and ``higher`` are scaled
+            with ``(img - lower) / (higher - lower)``
+            to 0 and 1 respectively.
+
+        ``False``
+            Don't prescale the value range of `image` at all.
+
+    stacklevel : int, optional
+        Set the correct stacklevel for warnings that may be raised during
+        normalization.
+
+    Returns
+    -------
+    scaled_image : ndarray
+        The rescald `image` of the same shape but possibly with a different
+        dtype.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> image = np.array([-10, 100], dtype=np.int8)
+
+    >>> _prescale_value_range(image, mode="minmax")
+    array([0.,  1.])
+
+    >>> _prescale_value_range(image, mode=(-100, 100))
+    array([0.45, 1.  ])
+
+    >>> _prescale_value_range(image, mode="legacy")
+    array([-0.07874016,  0.78740157])
+
+    >>> _prescale_value_range(image, mode=False)
+    array([-10,  100], dtype=int8)
+    """
+    # Early exits
+    if mode is False:
+        return image
+    if mode == "legacy":
+        # Avoid circular import
+        from ..util.dtype import img_as_float
+
+        return img_as_float(image)
+
+    # `mode` should call for normalization, validate and unpack to `lower` & `higher`
+    if mode == "minmax":
+        lower = image.min()
+        higher = image.max()
+    elif isinstance(mode, tuple) and len(mode) == 2:
+        lower, higher = mode
+    else:
+        raise ValueError(f"unsupported value for `mode`: {mode}")
+
+    # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
+    # unexpected promotion and / or precision problems during normalization
+    dtype = _supported_float_type(image.dtype)
+    out = image.astype(dtype)
+    try:
+        lower, higher = np.array([lower, higher], dtype=dtype)
+    except ValueError as e:
+        raise ValueError(f"could not coerce values given by `mode` to {dtype}") from e
+
+    # Normalize `out`
+    with np.errstate(all="raise"):
+        try:
+            peak_to_peak = higher - lower
+
+        except FloatingPointError:
+            # Range is bigger than max float, half range to fit
+            out /= 2
+            lower /= 2
+            higher /= 2
+            peak_to_peak = higher - lower
+
+        try:
+            # Scale first, to avoid over-/underflowing float range
+            out /= peak_to_peak
+            out -= lower / peak_to_peak
+
+        except FloatingPointError:
+            if peak_to_peak == 0:
+                msg = (
+                    "requested value lower and upper bound are equal, normalizing to 0"
+                )
+                warnings.warn(msg, category=RuntimeWarning)
+                out = np.zeros_like(out)
+            elif np.isinf(peak_to_peak):
+                msg = "encountered inf, normalizing inf to NaN and other values to 0"
+                warnings.warn(msg, category=RuntimeWarning)
+                out = np.zeros_like(out)
+                out[np.isinf(image)] = np.nan
+            else:
+                raise
+
+    return out

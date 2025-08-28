@@ -10,6 +10,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
     deprecate_parameter,
+    _prescale_value_range,
 )
 from ..transform import integral_image
 from ..util import img_as_float
@@ -222,87 +223,6 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
-def _prescale_value_range(image, *, mode):
-    """Scale the image according to the selected mode.
-
-    Parameters
-    ----------
-    image : ndarray
-        The image to scale.
-    mode : {'normalize', 'legacy', 'none'} or tuple, optional
-        Controls the rescaling behavior for `image`.
-
-        ``'normalize'``
-            Normalize `image` between 0 and 1. After normalization its minimum
-            and maximum values will be 0 and 1 respectively.
-
-        ``('normalize', lower, higher)``
-            Normalize `image` such that ``lower`` and ``higher`` are scaled
-            to 0 and 1 respectively.
-
-        ``'legacy'``
-            Normalize only if `image` has a integer dtype, if `image` is of
-            floating dtype, it is left alone. See :ref:`.img_as_float` for
-            more details.
-
-        ``'none'``
-            Don't scale `image` at all.
-
-    Returns
-    -------
-    scaled_image : ndarray
-        The rescald `image` of the same shape but possibly with a different
-        dtype.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> image = np.array([-10, 100], dtype=np.int8)
-
-    >>> _prescale_value_range(image, mode="normalize")
-    array([0.,  1.])
-
-    >>> _prescale_value_range(image, mode=("normalize", -100, 100))
-    array([0.45, 1.  ])
-
-    >>> _prescale_value_range(image, mode="legacy")
-    array([-0.07874016,  0.78740157])
-    """
-    if mode == "none":
-        return image
-
-    elif mode == "legacy":
-        return img_as_float(image)
-
-    elif isinstance(mode, tuple):
-        try:
-            mode_name, lower, higher = mode
-        except TypeError:
-            raise ValueError()
-        if mode_name != "normalize":
-            raise ValueError()
-        if not np.isscalar(lower) or not np.isscalar(higher):
-            raise ValueError()
-
-        dtype = _supported_float_type(image.dtype)
-        image = image.astype(dtype)
-
-        image -= lower
-        image /= higher - lower
-
-    elif mode == "normalize":
-        dtype = _supported_float_type(image.dtype)
-        image = image.astype(dtype)
-
-        image -= image.min()
-        image /= np.ptp(image)
-
-    else:
-        raise ValueError()
-
-    return image
-
-
 @deprecate_parameter(
     deprecated_name="threshold_rel",
     start_version="0.26",
@@ -376,23 +296,29 @@ def blob_dog(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
-    prescale : {'normalize', 'legacy', 'none'} or tuple, optional
+    prescale : {'minmax', 'legacy', False} or tuple[float, float], optional
         Controls the rescaling behavior for `image` which affects the
         internally computed stack of Difference-of-Gaussian (DoG) images. This
         in turn affects the effect of the `threshold` parameter.
 
-        ``'normalize'``
-            Normalize `image` between 0 and 1. After normalization its minimum
-            and maximum values will be 0 and 1 respectively.
-
-        ``('normalize', lower, higher)``
-            Normalize `image` such that ``lower`` and ``higher`` are scaled
-            to 0 and 1 respectively.
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization its minimum and maximum values will be 0 and 1
+            respectively. This is a shorthand for
+            ``prescale=(image.min(), image.max())``.
 
         ``'legacy'``
-            Normalize only if `image` has a integer dtype, if `image` is of
+            Normalize only if `image` has an integer dtype, if `image` is of
             floating dtype, it is left alone. See :ref:`.img_as_float` for
             more details.
+
+        ``(lower, higher)``
+            Normalize `image` such that ``lower`` and ``higher`` are scaled
+            with ``(img - lower) / (higher - lower)``
+            to 0 and 1 respectively.
+
+        ``False``
+            Don't prescale the value range of `image` at all.
 
     Returns
     -------
