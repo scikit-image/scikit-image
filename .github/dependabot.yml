@@ -5,11 +5,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
-    commit-message:
-      prefix: "ci(dependabot):"
+      interval: "quarterly"
     labels:
-      - ":wrench: type: Maintenance"
+      - ":robot: type: Infrastructure"
     groups:
       actions:
         patterns:
