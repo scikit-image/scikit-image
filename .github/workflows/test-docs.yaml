@@ -27,7 +27,7 @@ jobs:
           python-version: "3.13"
           allow-prereleases: true
           cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Build and install from source
         run: |

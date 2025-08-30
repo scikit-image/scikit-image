@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Setup build dependencies
         # PIP_FLAGS: exposed via global env
