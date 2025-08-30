@@ -73,7 +73,7 @@ dev = [
     'ipython',
     'docstub==0.3.0.post0',
     { include-group = "build" },
-    { include-group = "doc" },
+    { include-group = "docs" },
     { include-group = "test" }
 ]
 docs = [
