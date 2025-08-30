@@ -63,6 +63,17 @@ jobs:
         run: |
           source .github/scripts/setup-build-env.sh
 
+      # Please review frequently to see if it is still necessary.
+      # MSVC STL requires later clang than default on image.
+      # https://github.com/actions/runner-images/issues/12435#issuecomment-2997654523
+      - name: Install LLVM Clang 19 on Windows
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -OutFile "llvm.exe"
+          Start-Process -FilePath .\llvm.exe -ArgumentList "/S", "/D=C:\LLVM" -Wait
+          echo "C:\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Build and install from source
         shell: bash
         run: |
@@ -81,7 +92,7 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
@@ -91,3 +102,4 @@ jobs:
           BUILD_TYPE: "windows tests"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

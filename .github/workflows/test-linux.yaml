@@ -22,7 +22,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.13", "3.14"]
 
         # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
@@ -119,7 +119,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
       - name: Check benchmarks
         run: |
@@ -169,7 +169,7 @@ jobs:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
   report-failures:
     runs-on: ubuntu-latest
@@ -185,3 +185,4 @@ jobs:
           BUILD_TYPE: "linux tests"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

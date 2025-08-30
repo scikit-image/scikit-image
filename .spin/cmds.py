@@ -92,10 +92,17 @@ def sdist(pyproject_build_args):
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
+    if not pytest_args:
+        pytest_args = ('./tests',)
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
+        if '--pyargs' not in pytest_args:
+            pytest_args = (
+                '--pyargs',
+                'skimage',
+            ) + pytest_args
 
     # `--import-mode="importlib"` is necessary to collect doctests
     # for editable installs.
