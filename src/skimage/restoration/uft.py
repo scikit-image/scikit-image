@@ -21,6 +21,7 @@ References
 
 import numpy as np
 import scipy.fft as fft
+import scipy.ndimage as ndi
 
 from .._shared.utils import _supported_float_type
 
@@ -408,7 +409,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     return out.astype(cplx_dtype, copy=False)
 
 
-def laplacian(ndim, shape, is_real=True):
+def laplacian(ndim, shape, is_real=True, *, connectivity=1, sign=-1):
     """Return the transfer function of the Laplacian.
 
     Laplacian is the second order difference, on row and column.
@@ -423,29 +424,48 @@ def laplacian(ndim, shape, is_real=True):
        If True (default), imp_resp is assumed to be real-valued and
        the Hermitian property is used with rfftn Fourier transform
        to return the transfer function.
+    connectivity : int, optional
+        TBD
+    sign : {-1, 1}, optional
+        TBD
 
     Returns
     -------
     tf : array_like, complex
         The transfer function.
-    impr : array_like, real
-        The Laplacian.
+    impr : ndarray of shape (3, [..., 3]), real
+        Discrete approximation of the Laplacian operator.
 
     Examples
     --------
-    >>> tf, ir = laplacian(2, (32, 32))
-    >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
-    True
-    >>> np.all(tf == ir2tf(ir, (32, 32)))
-    True
+    >>> tf, impr = laplacian(2, (3, 3))
+    >>> impr
+    array([[-0., -1., -0.],
+           [-1.,  4., -1.],
+           [-0., -1., -0.]])
+    >>> tf
+    array([[0.+0.j, 3.+0.j],
+           [3.+0.j, 6.+0.j],
+           [3.+0.j, 6.+0.j]])
+
+    >>> tf, impr = laplacian(2, (3, 3), sign=1)
+    >>> impr
+    array([[ 0.,  1.,  0.],
+           [ 1., -4.,  1.],
+           [ 0.,  1.,  0.]])
+
+    >>> tf, impr = laplacian(2, (3, 3), connectivity=2)
+    >>> impr
+    array([[-1., -1., -1.],
+           [-1.,  8., -1.],
+           [-1., -1., -1.]])
     """
-    impr = np.zeros([3] * ndim)
-    for dim in range(ndim):
-        idx = tuple(
-            [slice(1, 2)] * dim + [slice(None)] + [slice(1, 2)] * (ndim - dim - 1)
-        )
-        impr[idx] = np.array([-1.0, 0.0, -1.0]).reshape(
-            [-1 if i == dim else 1 for i in range(ndim)]
-        )
-    impr[(slice(1, 2),) * ndim] = 2.0 * ndim
-    return ir2tf(impr, shape, is_real=is_real), impr
+    if sign not in (-1, 1):
+        raise ValueError(f"`sign` must be -1 or 1, was {sign!r}")
+
+    impr = ndi.generate_binary_structure(ndim, connectivity).astype(float)
+    impr *= sign
+    impr[(1,) * ndim] -= impr.sum()
+
+    tf = ir2tf(impr, shape, is_real=is_real)
+    return tf, impr

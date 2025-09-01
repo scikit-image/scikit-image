@@ -677,7 +677,7 @@ def roberts_neg_diag(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def laplace(image, ksize=3, mask=None):
+def laplace(image, ksize=3, mask=None, *, connectivity=1, sign=-1):
     """Find the edges of an image using the Laplace operator.
 
     Parameters
@@ -691,6 +691,10 @@ def laplace(image, ksize=3, mask=None):
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
+    connectivity : int, optional
+        TBD
+    sign : {-1, 1}, optional
+        TBD
 
     Returns
     -------
@@ -700,7 +704,7 @@ def laplace(image, ksize=3, mask=None):
     Notes
     -----
     The Laplacian operator is generated using the function
-    skimage.restoration.uft.laplacian().
+    :func:`skimage.restoration.uft.laplacian`.
 
     """
     if image.dtype.kind == 'f':
@@ -710,7 +714,9 @@ def laplace(image, ksize=3, mask=None):
         image = img_as_float(image)
     # Create the discrete Laplacian operator - We keep only the real part of
     # the filter
-    _, laplace_op = laplacian(image.ndim, (ksize,) * image.ndim)
+    _, laplace_op = laplacian(
+        image.ndim, shape=(ksize,) * image.ndim, connectivity=connectivity, sign=sign
+    )
     result = convolve(image, laplace_op)
     return _mask_filter_result(result, mask)
 
