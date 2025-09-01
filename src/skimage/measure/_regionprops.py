@@ -303,8 +303,21 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
 
 class RegionProperties:
-    """Please refer to `skimage.measure.regionprops` for more information
+    """Provides properties of a labeled image region.
+
+    Please refer to `skimage.measure.regionprops` for more information
     on the available region properties.
+
+    Examples
+    --------
+    >>> RegionProperties(
+    ...     slice=(slice(0, 2), slice(0, 4)),
+    ...     label=2,
+    ...     label_image=np.array([[0, 1, 1, 2, 0], [2, 2, 2, 2, 0]]),
+    ...     intensity_image=None,
+    ...     cache_active=False,
+    ... )
+    <RegionProperties: label=2, bbox=(0, 0, 2, 4)>
     """
 
     def __init__(
@@ -810,6 +823,11 @@ class RegionProperties:
                 return False
 
         return True
+
+    def __repr__(self):
+        cls_name = type(self).__qualname__
+        out = f"<{cls_name}: label={self.label!r}, bbox={self.bbox}>"
+        return out
 
 
 # For compatibility with code written prior to 0.16
