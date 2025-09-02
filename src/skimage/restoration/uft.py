@@ -410,7 +410,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
 
 
 def laplacian(ndim, shape, is_real=True, *, connectivity=1, sign=-1):
-    """Return the transfer function of the Laplacian.
+    """Return transfer function of the discrete Laplacian operator..
 
     Laplacian is the second order difference, on row and column.
 
@@ -421,13 +421,18 @@ def laplacian(ndim, shape, is_real=True, *, connectivity=1, sign=-1):
     shape : tuple
         The support on which to compute the transfer function.
     is_real : bool, optional
-       If True (default), imp_resp is assumed to be real-valued and
+       If True (default), `impr` is assumed to be real-valued and
        the Hermitian property is used with rfftn Fourier transform
        to return the transfer function.
     connectivity : int, optional
-        TBD
+        The `connectivity` determines which neighbors of a pixel are taken into
+        account by the Laplacian operator. Neighbors up to a squared distance
+        of `connectivity` from the center are considered neighbors.
+        `connectivity` may range from 1 (no diagonal neighbors) to `ndim` (all
+        neighbors are included).
     sign : {-1, 1}, optional
-        TBD
+        The sign used for the Laplacian operator. ``-1`` will correspond to
+       ``[-1, 2, -1]`` in one dimension, ``1`` to the opposite.
 
     Returns
     -------
@@ -436,9 +441,14 @@ def laplacian(ndim, shape, is_real=True, *, connectivity=1, sign=-1):
     impr : ndarray of shape (3, [..., 3]), real
         Discrete approximation of the Laplacian operator.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Discrete_Laplace_operator
+
     Examples
     --------
-    >>> tf, impr = laplacian(2, (3, 3))
+    The default transfer function and Laplacian operator in 2D:
+    >>> tf, impr = laplacian(2, shape=(3, 3))
     >>> impr
     array([[-0., -1., -0.],
            [-1.,  4., -1.],
@@ -448,13 +458,15 @@ def laplacian(ndim, shape, is_real=True, *, connectivity=1, sign=-1):
            [3.+0.j, 6.+0.j],
            [3.+0.j, 6.+0.j]])
 
-    >>> tf, impr = laplacian(2, (3, 3), sign=1)
+    The same operator with its signs flipped:
+    >>> tf, impr = laplacian(2, shape=(3, 3), sign=1)
     >>> impr
     array([[ 0.,  1.,  0.],
            [ 1., -4.,  1.],
            [ 0.,  1.,  0.]])
 
-    >>> tf, impr = laplacian(2, (3, 3), connectivity=2)
+    The Laplacian operator can also take into account diagonal directions:
+    >>> tf, impr = laplacian(2, shape=(3, 3), connectivity=2)
     >>> impr
     array([[-1., -1., -1.],
            [-1.,  8., -1.],

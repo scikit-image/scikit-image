@@ -692,9 +692,14 @@ def laplace(image, ksize=3, mask=None, *, connectivity=1, sign=-1):
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
     connectivity : int, optional
-        TBD
+        The `connectivity` determines which neighbors of a pixel are taken into
+        account by the Laplacian operator. Neighbors up to a squared distance
+        of `connectivity` from the center are considered neighbors.
+        `connectivity` may range from 1 (no diagonal neighbors) to `ndim` (all
+        neighbors are included).
     sign : {-1, 1}, optional
-        TBD
+        The sign used for the Laplacian operator. ``-1`` will correspond to
+       ``[-1, 2, -1]`` in one dimension, ``1`` to the opposite.
 
     Returns
     -------
@@ -706,6 +711,9 @@ def laplace(image, ksize=3, mask=None, *, connectivity=1, sign=-1):
     The Laplacian operator is generated using the function
     :func:`skimage.restoration.uft.laplacian`.
 
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Discrete_Laplace_operator
     """
     if image.dtype.kind == 'f':
         float_dtype = _supported_float_type(image.dtype)
