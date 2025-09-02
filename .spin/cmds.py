@@ -92,20 +92,29 @@ def sdist(pyproject_build_args):
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
-    if not pytest_args:
-        pytest_args = ('./tests',)
+
+    # We want to support both, editable and out-of-tree installations. For the
+    # latter, specifying a path to `src/skimage` doesn't work to detect
+    # doctests. So we can't use pytest's `testpaths` config field in the
+    # `pyproject.toml`. Instead, we append `--pyargs skimage` to make pytest
+    # pickup docstests, too. However, we don't want to override the user's
+    # wishes if they specify their own test selection in the form of positional
+    # arguments.
+    no_positional_args = all(arg.startswith("--") for arg in pytest_args)
+    if no_positional_args and not kwargs["tests"]:
+        pytest_args = pytest_args + (
+            '--pyargs',
+            'skimage',
+            'skimage2',
+            './tests',
+        )
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
-        if '--pyargs' not in pytest_args:
-            pytest_args = (
-                '--pyargs',
-                'skimage',
-            ) + pytest_args
 
-    # `--import-mode="importlib"` is necessary to collect doctests
-    # for editable installs.
+    # `--import-mode="importlib"` is necessary to collect doctests for editable
+    # installations.
     if any('--doctest' in arg for arg in pytest_args) and not any(
         '--import-mode' in arg for arg in pytest_args
     ):
