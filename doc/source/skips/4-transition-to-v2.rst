@@ -160,39 +160,38 @@ As a first execution step of this SKIP, scikit-image 1.0 will be released, celeb
 First phase: Building `skimage2`
 ................................
 
-Afterwards, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
+Afterward, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
 It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
-Initially, this namespace will not be included in full releases (versioned 1.x) on PyPI and elsewhere, but may already be included in our nightly releases.
-Towards the end of this phase, ``skimage2`` should be included in full releases to help downstream libraries and users try it out.
+This namespace will not be included in `final releases <https://packaging.python.org/en/latest/specifications/version-specifiers/#final-releases>`_ (versioned 1.x) on PyPI and elsewhere but may already be included in our nightly releases.
+Before the end of this phase, ``skimage2`` should be made available in `pre-releases <https://packaging.python.org/en/latest/specifications/version-specifiers/#pre-releases>`_ (2.0.0rcN or similar).
 
 With the new namespace available, we will start building the new API inside it.
 It will – where possible – wrap the implementation existing in the ``skimage`` namespace but will have its own independent test suite.
 
 While ``skimage2`` will be a new API, we will try to keep the differences from the old API reasonably small to make the eventual transition easier for users.
-As a general rule it should always be possible to achieve the current behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
+As a general rule, it should always be possible to achieve the current behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
 There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
 
-We will record the pathway for migrating from the old to the new API in detail in a migration guide, in the docstrings of the old API and with the help of runtime warnings.
+We will record the pathway for migrating from the old to the new API in detail in a migration guide.
+Additionally, deprecation warnings will be implemented for each API change.
+These warnings should be ignored by default and should not be shown to users yet.
+Users would have no means to act on these warnings because the ``skimage2`` namespace is not available yet.
 
 During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
-If possible, their internal implementation should be added in the new namespace.
-This also includes conventional deprecations if there is a high confidence in the proposed API change.
 
-On the other hand, in cases for which we are not confident yet in the new API, these should only be introduced in the new experimental ``skimage2`` namespace.
-Nevertheless, silent deprecation warnings related to these changes should be introduced in ``skimage``.
-This will later allow a simple transition from silent to visible warnings for the next phase.
 
 Second phase: Transitioning to `skimage2`
 .........................................
 
-Once the ``skimage2`` API is complete and considered stable, importing that namespace will no longer warn.
-At this point we will release version 2.0.
-Previously silent deprecation warnings related to the transition, will be made visible.
+Once we consider the API in ``skimage2`` complete and stable, it will be included in a "final release" versioned 2.0.0.
+From now on importing ``skimage2`` is encouraged, and no warnings will be raised.
+Instead, we will mark the API in ``skimage`` as deprecated by making deprecation messages from the first phase visible.
 
-Following this, we will successively mark the API in ``skimage`` as deprecated.
-On completion of these deprecation, we will remove the internal implementation from the old ``skimage`` namespace and move them to the ``skimage2`` namespace.
+On completion of each of these deprecations, we will remove the internal implementation from the old ``skimage`` namespace and move them to the ``skimage2`` namespace.
+This can happen over one or multiple releases.
 
-Eventually, once the ``skimage`` namespace is empty it will be removed.
+Once the ``skimage`` namespace is empty, it will be removed.
+
 
 Code translation helper
 .......................
