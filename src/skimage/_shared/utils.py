@@ -1135,7 +1135,7 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     Returns
     -------
     scaled_image : ndarray
-        The rescald `image` of the same shape but possibly with a different
+        The rescaled `image` of the same shape but possibly with a different
         dtype.
 
     Examples
