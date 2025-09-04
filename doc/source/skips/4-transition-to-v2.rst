@@ -131,7 +131,7 @@ More examples can be found in `"API changes for skimage2" on our Wiki <https://g
 
 To make this transition with a minimum amount of user disruption, this SKIP
 proposes releasing a new namespace, ``skimage2``, that would provide the new
-API, *but only if users explicitly opt-in*. Additionally, by releasing a new
+API, *but only if users explicitly opt in*. Additionally, by releasing a new
 namespace, users could use *both* APIs at the same time, allowing users to
 migrate their code progressively.
 
@@ -155,26 +155,26 @@ imported as ``psycopg2``). Further afield, R's ggplot is used as ``ggplot2``.
 Implementation
 --------------
 
-As a first execution step of this SKIP, scikit-image 1.0 will be released, celebrating the the maturity of the project.
+As a first execution step of this SKIP, scikit-image 1.0 will be released, celebrating the maturity of the project.
 
 First phase: Building `skimage2`
 ................................
 
-Afterwards, a new empty ``skimage2`` namespace will be created in our repository alongside our ``skimage`` namespace.
+Afterwards, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
 It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
-Initially, this namespace will not be included full releases (versioned 1.x) on PyPI and elsewhere, but may already be included in our nightly releases.
+Initially, this namespace will not be included in full releases (versioned 1.x) on PyPI and elsewhere, but may already be included in our nightly releases.
 Towards the end of this phase, ``skimage2`` should be included in full releases to help downstream libraries and users try it out.
 
 With the new namespace available, we will start building the new API inside it.
-It will – where possible – wrap the existing implementation in the existing ``skimage`` namespace but will have its own independent test suite.
+It will – where possible – wrap the implementation existing in the ``skimage`` namespace but will have its own independent test suite.
 
-While ``skimage2`` will be a new API, we will try to keep the differences to the old API reasonably small to make the eventual transition easier for users.
+While ``skimage2`` will be a new API, we will try to keep the differences from the old API reasonably small to make the eventual transition easier for users.
 As a general rule it should always be possible to achieve the current behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
 There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
 
 We will record the pathway for migrating from the old to the new API in detail in a migration guide, in the docstrings of the old API and with the help of runtime warnings.
 
-During this phase, new (additive) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
+During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
 If possible, their internal implementation should be added in the new namespace.
 This also includes conventional deprecations if there is a high confidence in the proposed API change.
 
@@ -185,7 +185,7 @@ This will later allow a simple transition from silent to visible warnings for th
 Second phase: Transitioning to `skimage2`
 .........................................
 
-Once the ``skimage2`` API is complete and considered stable, importing that namespace will now longer warn.
+Once the ``skimage2`` API is complete and considered stable, importing that namespace will no longer warn.
 At this point we will release version 2.0.
 Previously silent deprecation warnings related to the transition, will be made visible.
 
@@ -197,7 +197,7 @@ Eventually, once the `skimage` namespace is empty it will be removed.
 Code translation helper
 .......................
 
-Before the switch to the second phase, we will look into impementing a code translation tool that helps users automate the transition to ``skimage2``.
+Before switching to the second phase, we will look into implementing a code translation tool to help users automate the transition to ``skimage2``.
 This should alleviate the cost and work involved for switching – especially in cases that can be easily automated.
 Still, this tool might not support more ambiguous or complex updates of our API, or all the complex ways in which users might use our library.
 Supporting these cases might be impossible or might require prohibitive development effort.
@@ -252,7 +252,7 @@ A new package name
 
 Since the import name is changing, it would be possible to also change the package name from ``scikit-image`` to ``skimage2``.
 This option was a previous proposal of this SKIP.
-It shares many of the same strength of the current proposal – chiefly – the new ``skimage2`` namespace.
+It shares many of the same strengths as the current proposal – chiefly – the new ``skimage2`` namespace.
 This option also requires informing users about the new package.
 Similarly to the suggestion here, we could raise a warning when the old package is imported.
 It could advise users to install the new package.
@@ -308,7 +308,7 @@ similar problems.
 Discussion
 ----------
 
-This SKIP is the result of many evolving discussions among the core team, with fellow projects and our users base:
+This SKIP is the result of many evolving discussions among the core team, with fellow projects, and with our user base:
 
 - :ref:`SKIP-3 <skip_3_transition_v1>` was an earlier iteration of this SKIP.
   See the "Resolution" section of that document for further background on the motivation for this SKIP.
