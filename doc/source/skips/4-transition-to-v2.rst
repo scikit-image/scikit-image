@@ -189,10 +189,10 @@ Once the ``skimage2`` API is complete and considered stable, importing that name
 At this point we will release version 2.0.
 Previously silent deprecation warnings related to the transition, will be made visible.
 
-Following this, we will successively mark the API in `skimage` as deprecated.
-On completion of these deprecation, we will remove the internal implementation from the old `skimage` namespace and move them to the `skimage2` namespace.
+Following this, we will successively mark the API in ``skimage`` as deprecated.
+On completion of these deprecation, we will remove the internal implementation from the old ``skimage`` namespace and move them to the ``skimage2`` namespace.
 
-Eventually, once the `skimage` namespace is empty it will be removed.
+Eventually, once the ``skimage`` namespace is empty it will be removed.
 
 Code translation helper
 .......................
@@ -213,9 +213,9 @@ However, it does so in a new namespace, so that this proposal does not raise
 backward compatibility concerns for our users. That said, the authors will
 attempt to limit the number of backward incompatible changes to those likely to
 substantially improve the overall user experience. It is anticipated that
-porting `skimage` code to `skimage2` will be a straightforward process
+porting ``skimage`` code to ``skimage2`` will be a straightforward process
 and we will publish a user guide for making the transition by the time of
-the `skimage2` release. Users will be notified about these resources - among
+the ``skimage2`` release. Users will be notified about these resources - among
 other things - by a warning in scikit-image 1.1.
 
 Alternatives
