@@ -49,7 +49,7 @@ dependencies:
   - pytest-doctestplus
   # optional
   - SimpleITK
-  - astropy>=6.0
+  - astropy-base>=6.0
   - dask>=2023.2.0
   - matplotlib>=3.7
   - pooch>=1.6.0
