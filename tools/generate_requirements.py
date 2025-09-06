@@ -39,7 +39,7 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         'kaleido': 'python-kaleido',
         'sphinx_design': 'sphinx-design',
         'astropy': 'astropy-base',
-        'matplotlib': 'matplotlib-base'
+        'matplotlib': 'matplotlib-base',
     }
     lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
     for section in req_sections:
