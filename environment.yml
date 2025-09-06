@@ -49,14 +49,15 @@ dependencies:
   - pytest-doctestplus
   # optional
   - SimpleITK
+  - scikit-learn>=1.2
+  - pyamg>=5.2
+  # optional_non_gil
   - astropy>=6.0
   - cloudpickle>=3.0
   - dask>=2023.2.0
   - matplotlib>=3.7
   - pooch>=1.6.0
-  - pyamg>=5.2
   - PyWavelets>=1.6
-  - scikit-learn>=1.2
   # test
   - asv
   - numpydoc>=1.7
