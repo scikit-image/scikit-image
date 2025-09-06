@@ -12,8 +12,8 @@ permissions:
   issues: write
 
 jobs:
-  test_docs_aarch64:
-    name: macos-docs
+  build-docs-run-gallery:
+    name: Build docs and run gallery examples
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
@@ -36,6 +36,11 @@ jobs:
       - name: Install doc dependencies
         run: |
           source .github/scripts/setup-docs-env.sh
+
+      - name: Install Chrome for plotly
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
 
       - name: Build docs / run examples
         run: |
