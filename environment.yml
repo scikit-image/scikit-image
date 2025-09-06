@@ -30,7 +30,7 @@ dependencies:
   - sphinx-gallery>=0.18
   - numpydoc>=1.7
   - sphinx-copybutton
-  - matplotlib>=3.7
+  - matplotlib-base>=3.7
   - dask>=2023.2.0
   - pandas>=2.0
   - seaborn>=0.11
@@ -49,10 +49,9 @@ dependencies:
   - pytest-doctestplus
   # optional
   - SimpleITK
-  - astropy>=6.0
-  - cloudpickle>=3.0
+  - astropy-base>=6.0
   - dask>=2023.2.0
-  - matplotlib>=3.7
+  - matplotlib-base>=3.7
   - pooch>=1.6.0
   - pyamg>=5.2
   - PyWavelets>=1.6

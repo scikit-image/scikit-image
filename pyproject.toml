@@ -86,7 +86,6 @@ docs = [
 optional = [
     'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'astropy>=6.0',
-    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
