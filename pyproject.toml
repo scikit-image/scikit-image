@@ -189,6 +189,9 @@ testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
+    "ignore:.*`reset_plugins` is deprecated.*:FutureWarning",
+    "ignore:.*`use_plugin` is deprecated.*:FutureWarning",
+    "ignore:.*plugin infrastructure.*deprecated.*:FutureWarning",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
 norecursedirs = ["io/_plugins"]
