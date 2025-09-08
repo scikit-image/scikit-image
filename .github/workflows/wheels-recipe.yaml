@@ -275,7 +275,7 @@ jobs:
           # in favour of Pyodide-related settings.
           CIBW_PLATFORM: pyodide
           CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
-          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn"
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn pytest-pretty"
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
           CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
