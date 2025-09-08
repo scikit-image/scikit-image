@@ -2,11 +2,10 @@
 # numpy is present both in default.txt and build.txt
 # with pinning instructions which are slightly different,
 # therefore pip gives up and errors
-Cython>=3.0.4
+Cython>=3.0.8
 wheel
 scikit-learn
-dask[array]>=0.15.0
-cloudpickle>=0.2.1
-pandas>=0.23.0
-seaborn>=0.7.1
+dask[array]>=2023.2.0
+pandas>=2.0
+seaborn>=0.11
 sphinx-gallery
