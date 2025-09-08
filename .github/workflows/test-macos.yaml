@@ -16,23 +16,30 @@ env:
 
 jobs:
   test_skimage_macos:
-    name: macos-cp${{ matrix.python-version }}
-    runs-on: macos-13
+    name: ${{ matrix.os }}-cp${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.13"]
+        os: [macos-13]
         OPTIONAL_DEPS: [1]
         OPTIONS_NAME: ["default"]
+        include:
+          - python-version: "3.13"
+            # Also test on ARM version of MacOS
+            os: macos-15
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "default"
     env:
       CC: /usr/bin/clang
       CXX: /usr/bin/clang++
       CPPFLAGS: "-Xpreprocessor -fopenmp"
-      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
-      CXXFLAGS: "-I/usr/local/opt/libomp/include"
-      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      CXXFLAGS: "-I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib -lomp"
 
     steps:
       - name: Checkout scikit-image
@@ -69,7 +76,7 @@ jobs:
 
       - name: Run tests
         run: |
-          (cd .. && $PYTEST --doctest-plus --showlocals --pyargs skimage)
+          $PYTEST --showlocals ./tests
 
       - name: Check benchmarks
         run: |
@@ -83,3 +90,4 @@ jobs:
           BUILD_TYPE: "macos tests"
         with:
           filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
