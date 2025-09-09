@@ -24,7 +24,7 @@ jobs:
         PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
       # assert NumPy 2.0 before running tests
       CIBW_TEST_COMMAND: >
-        pip list --pre --format=freeze | grep -q 'numpy==2' && pytest --pyargs skimage {project}/tests
+        pip list --pre --format=freeze | grep -q 'numpy==2' && pytest -ra -l -v --strict-markers --pyargs skimage {project}/tests -k morphology
 
   upload_anaconda:
     permissions:
