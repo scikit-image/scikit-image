@@ -6,7 +6,6 @@ from numpy.testing import (
     assert_array_almost_equal,
     assert_array_equal,
     assert_no_warnings,
-    assert_warns,
 )
 
 from skimage._shared.testing import expected_warnings
@@ -206,7 +205,10 @@ def test_avg(channel_axis):
 def test_negative_intensity():
     labels = np.arange(100).reshape(10, 10)
     image = np.full((10, 10), -1, dtype='float64')
-    assert_warns(UserWarning, label2rgb, labels, image, bg_label=-1)
+    with pytest.warns(
+        UserWarning, match="Negative intensities in `image` are not supported"
+    ):
+        label2rgb(labels, image, bg_label=-1)
 
 
 def test_bg_color_rgb_string():
