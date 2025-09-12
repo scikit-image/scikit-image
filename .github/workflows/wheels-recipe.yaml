@@ -259,6 +259,10 @@ jobs:
           
       - name: Build ARM64 Windows wheels for CPython
         if: matrix.cibw_arch == 'ARM64'
+        # To avoid "LINK : fatal error LNK1158: cannot run 'rc.exe'"
+        # we explicitly add rc.exe to path using the method from:
+        # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
+        # with additional -arch=x86 flag to vsdevcmd.bat
         run: |
           function Invoke-VSDevEnvironment {
             $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
