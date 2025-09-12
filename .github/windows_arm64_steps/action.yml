@@ -6,8 +6,8 @@ runs:
     - name: Install LLVM for Win-ARM64
       shell: pwsh
       run: |
-        Invoke-WebRequest https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.6/LLVM-20.1.6-woa64.exe -UseBasicParsing -OutFile LLVM-woa64.exe
-        $expectedHash = "92f69a1134e32e54b07d51c6e24d9594852f6476f32c3d70471ae00fffc2d462"
+        Invoke-WebRequest https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.0/LLVM-21.1.0-woa64.exe -UseBasicParsing -OutFile LLVM-woa64.exe
+        $expectedHash = "3f181aecc83d0eb40fb966ce18b97a3602871dbff83fc91745e7e0fd6661a7f7"
         $fileHash = (Get-FileHash -Path "LLVM-woa64.exe" -Algorithm SHA256).Hash
         if ($fileHash -ne $expectedHash) {
             Write-Error "Checksum verification failed. The downloaded file may be corrupted or tampered with."
