@@ -277,7 +277,6 @@ jobs:
           CIBW_BUILD: ${{ matrix.cibw_python }}
           CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
           LDFLAGS: "-Wl,-S"
-          CIBW_TEST_SKIP: "-win_arm64" #Skip testing on Win-ARM64, since SciPy is yet to be supported
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
