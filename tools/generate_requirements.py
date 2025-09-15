@@ -32,10 +32,14 @@ def generate_requirement_file(name: str, req_list: list[str]) -> None:
 
 def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
     # Some packages in conda-forge have different names than they do on pypi
+    # Also, some packages have a 'base' flavoured conda package which
+    # doesn't install all their optional dependencies.
     rename_idx = {
         'build': 'python-build',
         'kaleido': 'python-kaleido',
         'sphinx_design': 'sphinx-design',
+        'astropy': 'astropy-base',
+        'matplotlib': 'matplotlib-base',
     }
     lines = ["name: skimage-dev", "channels:", "  - conda-forge", "dependencies:"]
     for section in req_sections:

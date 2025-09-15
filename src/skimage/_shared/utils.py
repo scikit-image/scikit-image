@@ -821,9 +821,7 @@ def safe_as_int(val, atol=1e-3):
     else:  # Iterable input, now ndarray
         mod[mod > 0.5] = 1 - mod[mod > 0.5]  # Test on each side of nearest int
 
-    try:
-        np.testing.assert_allclose(mod, 0, atol=atol)
-    except AssertionError:
+    if not np.allclose(mod, 0, atol=atol):
         raise ValueError(f'Integer argument required but received {val}, check inputs.')
 
     return np.round(val).astype(np.int64)

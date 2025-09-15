@@ -74,7 +74,7 @@ jobs:
 
           # Install pytest and optional dependencies that are available
           pip install pytest pytest-pretty
-          pip install "astropy" "cloudpickle" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
+          pip install "astropy" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
           $PYTEST -svra -p no:cacheprovider --pyargs skimage ./tests
