@@ -10,7 +10,7 @@ env:
 
 jobs:
   build_wheel:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} ${{ matrix.build }} wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.build }} ${{ matrix.cibw_arch }}  wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -37,7 +37,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheel_linux:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+    name: Build python ${{ matrix.build }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
