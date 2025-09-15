@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
@@ -357,6 +359,11 @@ def test_few_points():
         dtype=np.uint8,
     )
     image3d = np.stack([image, image, image])
-    with testing.assert_warns(UserWarning):
+    regex = (
+        "(?s)"  # Dot matches newline
+        "Failed to get convex hull image.*Returning empty image"
+        ".*Qhull precision error: Initial simplex is flat"
+    )
+    with pytest.warns(UserWarning, match=regex):
         chimage3d = convex_hull_image(image3d)
         assert_array_equal(chimage3d, np.zeros(image3d.shape, dtype=bool))

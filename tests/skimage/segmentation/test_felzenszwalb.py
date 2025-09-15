@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+
 from skimage import data
 from skimage.segmentation import felzenszwalb
 
@@ -8,7 +10,6 @@ from skimage._shared.testing import (
     run_in_parallel,
     assert_equal,
     assert_array_equal,
-    assert_warns,
     assert_no_warnings,
 )
 
@@ -57,10 +58,14 @@ def test_3D(channel_axis):
         felzenszwalb(grey_img, channel_axis=-1)
         felzenszwalb(grey_img, channel_axis=None)
         felzenszwalb(rgb_img, channel_axis=channel_axis)
-    with assert_warns(RuntimeWarning):
+    with pytest.warns(
+        RuntimeWarning,
+        match=".*image with third dimension of 10.*interpreted as a multichannel 2d",
+    ):
         felzenszwalb(three_d_img, channel_axis=channel_axis)
-    with testing.raises(ValueError):
+    with pytest.raises(ValueError, match=".*works only on single or multi-channel 2d"):
         felzenszwalb(rgb_img, channel_axis=None)
+    with pytest.raises(ValueError, match=".*works only on single or multi-channel 2d"):
         felzenszwalb(three_d_img, channel_axis=None)
 
 

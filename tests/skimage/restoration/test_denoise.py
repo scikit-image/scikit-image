@@ -4,7 +4,7 @@ import importlib.util
 
 import numpy as np
 import pytest
-from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_warns
+from numpy.testing import assert_array_almost_equal, assert_array_equal
 
 from skimage import color, data, img_as_float, restoration
 from skimage._shared._warnings import expected_warnings
@@ -994,7 +994,11 @@ def test_estimate_sigma_color(channel_axis):
 
     if channel_axis % img.ndim == 2:
         # default channel_axis=None should raise a warning about last axis size
-        assert_warns(UserWarning, restoration.estimate_sigma, img)
+        with pytest.warns(
+            UserWarning,
+            match="image is size 3 on the last axis, but channel_axis is None",
+        ):
+            restoration.estimate_sigma(img)
 
 
 @xfail_without_pywt
@@ -1034,19 +1038,27 @@ def test_wavelet_denoising_args(rescale_sigma):
                 )
 
 
-@xfail_without_pywt
+@pytest.mark.xfail(
+    condition=PYWT_NOT_INSTALLED,
+    reason="optional dependency PyWavelets is not installed",
+    # Same as `xfail_without_pywt` but without `raises=ImportError`. I couldn't
+    # figure out which exception I needed to add to `raises=` to ignore the
+    # failed `pytest.warns` check.
+)
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_denoise_wavelet_biorthogonal(rescale_sigma):
     """Biorthogonal wavelets should raise a warning during thresholding."""
     img = astro_gray
-    assert_warns(
+    with pytest.warns(
         UserWarning,
-        restoration.denoise_wavelet,
-        img,
-        wavelet='bior2.2',
-        channel_axis=None,
-        rescale_sigma=rescale_sigma,
-    )
+        match="nonorthogonal wavelets.*,results are likely to be suboptimal",
+    ):
+        restoration.denoise_wavelet(
+            img,
+            wavelet='bior2.2',
+            channel_axis=None,
+            rescale_sigma=rescale_sigma,
+        )
 
 
 @xfail_without_pywt
