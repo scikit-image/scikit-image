@@ -1038,7 +1038,13 @@ def test_wavelet_denoising_args(rescale_sigma):
                 )
 
 
-@xfail_without_pywt
+@pytest.mark.xfail(
+    condition=PYWT_NOT_INSTALLED,
+    reason="optional dependency PyWavelets is not installed",
+    # Same as `xfail_without_pywt` but without `raises=ImportError`. I couldn't
+    # figure out which exception I needed to add to `raises=` to ignore the
+    # failed `pytest.warns` check.
+)
 @pytest.mark.parametrize('rescale_sigma', [True, False])
 def test_denoise_wavelet_biorthogonal(rescale_sigma):
     """Biorthogonal wavelets should raise a warning during thresholding."""
