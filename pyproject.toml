@@ -210,7 +210,7 @@ matplotlib = "matplotlib"
 scipy = "scipy"
 
 [tool.cibuildwheel]
-test-command = "pytest --doctest-plus --pyargs skimage /tests"
+test-command = "pytest --doctest-plus --pyargs skimage tests"
 test-extras = ["test", "optional"]
 test-sources = ["tests"]
 environment = {PIP_PREFER_BINARY=1}
