@@ -11,7 +11,7 @@ from pathlib import Path
 
 def version_in_init():
     """Extract version string from ``skimage/__init__.py``."""
-    skimage_init = Path(__file__).parent / '../src/skimage/__init__.py'
+    skimage_init = Path(__file__).parent / '../__init__.py'
     assert skimage_init.is_file()
 
     with skimage_init.open("r") as file:
