@@ -25,13 +25,13 @@ def version_from_init():
 def append_git_revision_and_date(version):
     """Try to append last commit date and hash to version.
 
-    Apppends nothing if run outside a git repository.
+    Appends nothing if the current working directory is outside a git
+    repository.
     """
     try:
         result = subprocess.run(
             ['git', 'log', '-1', '--format="%H %aI"'],
             capture_output=True,
-            cwd=Path(__file__).parent,
             text=True,
             check=True,
         )
