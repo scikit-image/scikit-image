@@ -29,18 +29,18 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       attestations: write # for GitHub attestations
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.12"
           # Important! No caching for wheel build to avoid cache poisoning
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         id: download
         with:
           pattern: wheels-*
@@ -58,7 +58,7 @@ jobs:
           ls -la ${{ github.workspace }}/dist
 
       - name: Generate artifact attestation for sdist and wheels
-        uses: actions/attest-build-provenance@173725a1209d09b31f9d30a3890cf2757ebbff0d # v1.1.2
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: "dist/scikit_image-*"
 
@@ -79,10 +79,10 @@ jobs:
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
       - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
       - name: Github release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
