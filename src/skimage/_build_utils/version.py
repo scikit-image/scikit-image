@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 
-def version_in_init():
+def version_from_init():
     """Extract version string from ``skimage/__init__.py``."""
     skimage_init = Path(__file__).parent / '../__init__.py'
     assert skimage_init.is_file()
@@ -22,7 +22,7 @@ def version_in_init():
     return version
 
 
-def try_append_git_commit_n_date(version):
+def append_git_revision_and_date(version):
     """Try to append last commit date and hash to version.
 
     Apppends nothing if run outside a git repository.
@@ -50,7 +50,7 @@ def try_append_git_commit_n_date(version):
 
 
 if __name__ == "__main__":
-    version = version_in_init()
+    version = version_from_init()
     if 'dev' in version:
-        version = try_append_git_commit_n_date(version)
+        version = append_git_revision_and_date(version)
     print(version)
