@@ -12,10 +12,11 @@ from skimage._shared.testing import assert_array_equal, TestCase
 
 NP_VERSION = parse(np.__version__)
 
-pytestmark = pytest.mark.skipif(
+pytestmark = pytest.mark.xfail(
     NP_VERSION.is_devrelease,
     reason="Temporarily skip for nightly wheels (gh-7903). Unresolved why tests hang "
     "indefinitely. Use NumPy's nightly as a canary to decide when to skip.",
+    run=False,  # Don't trigger the hanging test
 )
 
 
