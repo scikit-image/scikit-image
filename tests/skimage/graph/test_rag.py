@@ -1,9 +1,15 @@
+import platform
+from importlib.metadata import version
 import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
+from packaging.version import parse as parse_version
 from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
+
+SCIPY_LE_1_17 = parse_version(version("scipy")) <= parse_version("1.17.0dev0")
+IS_ARM = platform.machine() in {'arm64', 'aarch64'}
 
 
 def max_edge(g, src, dst, n):
@@ -206,6 +212,10 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
+@pytest.mark.xfail(
+    reason="Reproducibility is not guaranteed.", condition=SCIPY_LE_1_17 and IS_ARM
+)
+# the scipy.sparse.linalg.eigsh is not stable https://github.com/scipy/scipy/issues/19756
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed
