@@ -190,7 +190,27 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
+addopts = [
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "--maxfail=5",
+    # Necessary for doctest collection with for editable installations
+    "--import-mode=importlib",
+    # See comment on `testpaths`
+    "--pyargs",
+]
+
+# For out-of-tree installations, selecting `src/` as a test path fails.
+# Pytest doesn't expect the doctest's sources and installation to be
+# different. Instead, we use `--pyargs` in the `addopts` field and point
+# pytest at the appropriate packages.
+testpaths = [
+    "skimage",
+    "skimage2",
+    "./tests/",
+]
+
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
