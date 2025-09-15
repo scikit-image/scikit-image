@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from packaging.version import parse
 
 from skimage.morphology import max_tree, area_closing, area_opening
@@ -12,11 +11,11 @@ from skimage._shared.testing import assert_array_equal, TestCase
 
 NP_VERSION = parse(np.__version__)
 
-pytestmark = pytest.mark.skipif(
-    NP_VERSION.is_devrelease,
-    reason="Temporarily skip for nightly wheels (gh-7903). Unresolved why tests hang "
-    "indefinitely. Use NumPy's nightly as a canary to decide when to skip.",
-)
+# pytestmark = pytest.mark.skipif(
+#     NP_VERSION.is_devrelease,
+#     reason="Temporarily skip for nightly wheels (gh-7903). Unresolved why tests hang "
+#     "indefinitely. Use NumPy's nightly as a canary to decide when to skip.",
+# )
 
 
 eps = 1e-12
