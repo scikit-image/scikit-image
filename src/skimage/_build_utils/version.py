@@ -22,24 +22,35 @@ def version_in_init():
     return version
 
 
-def append_git_commit_n_date(version):
-    """Append last commit date and hash to version, if available."""
-    result = subprocess.run(
-        ['git', 'log', '-1', '--format="%H %aI"'],
-        capture_output=True,
-        cwd=Path(__file__).parent,
-        text=True,
-        check=True,
-    )
-    git_hash, git_date = (
-        result.stdout.strip().replace('"', '').split('T')[0].replace('-', '').split()
-    )
-    version += f'+git{git_date}.{git_hash[:7]}'
+def try_append_git_commit_n_date(version):
+    """Try to append last commit date and hash to version.
+
+    Apppends nothing if run outside a git repository.
+    """
+    try:
+        result = subprocess.run(
+            ['git', 'log', '-1', '--format="%H %aI"'],
+            capture_output=True,
+            cwd=Path(__file__).parent,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        pass
+    else:
+        git_hash, git_date = (
+            result.stdout.strip()
+            .replace('"', '')
+            .split('T')[0]
+            .replace('-', '')
+            .split()
+        )
+        version += f'+git{git_date}.{git_hash[:7]}'
     return version
 
 
 if __name__ == "__main__":
     version = version_in_init()
     if 'dev' in version:
-        version = append_git_commit_n_date(version)
+        version = try_append_git_commit_n_date(version)
     print(version)
