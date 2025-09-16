@@ -210,9 +210,9 @@ matplotlib = "matplotlib"
 scipy = "scipy"
 
 [tool.cibuildwheel]
-test-command = "pytest --doctest-plus --pyargs skimage tests"
+test-command = "pytest --doctest-plus --pyargs skimage ./tests"
 test-extras = ["test", "optional"]
-test-sources = ["tests"]
+test-sources = ["tests", "pyproject.toml"]
 environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
@@ -243,7 +243,7 @@ environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 archs = ["AMD64"]
 
 [tool.cibuildwheel.macos]
-test-command = "pytest tests"
+test-command = "pytest ./tests"
 before-all = [
     "set",
     "bash {project}/tools/build_libomp.sh",
