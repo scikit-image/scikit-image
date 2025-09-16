@@ -213,7 +213,9 @@ def test_ncut_stable_subgraph():
 
 
 @pytest.mark.xfail(
-    reason="Reproducibility is not guaranteed.", condition=SCIPY_LE_1_17 and IS_ARM
+    reason="Reproducibility is not guaranteed.",
+    condition=SCIPY_LE_1_17 and IS_ARM,
+    strict=False,
 )
 # the scipy.sparse.linalg.eigsh is not stable https://github.com/scipy/scipy/issues/19756
 def test_reproducibility():
