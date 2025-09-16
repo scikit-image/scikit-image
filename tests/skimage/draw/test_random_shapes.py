@@ -7,20 +7,20 @@ from skimage.draw import random_shapes
 
 
 def test_generates_color_images_with_correct_shape():
-    image, _ = random_shapes((128, 128), max_shapes=10)
+    image, _ = random_shapes((128, 128), max_shapes=10, rng=1234)
     assert image.shape == (128, 128, 3)
 
 
 def test_generates_gray_images_with_correct_shape():
     image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None
+        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None, rng=1234
     )
     assert image.shape == (4567, 123)
 
 
 def test_generates_gray_images_with_correct_shape_deprecated_multichannel():
     image, _ = random_shapes(
-        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None
+        (4567, 123), min_shapes=3, max_shapes=20, channel_axis=None, rng=1234
     )
     assert image.shape == (4567, 123)
 
@@ -36,6 +36,7 @@ def test_generated_shape_for_channel_axis(channel_axis):
         min_shapes=3,
         max_shapes=10,
         channel_axis=channel_axis,
+        rng=1234,
     )
 
     if channel_axis is None:

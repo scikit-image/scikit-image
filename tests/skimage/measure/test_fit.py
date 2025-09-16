@@ -853,9 +853,9 @@ def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
 
-    with expected_warnings(["No inliers found"]):
+    with pytest.warns(UserWarning, match="No inliers found"):
         model, inliers = ransac(
-            np.empty((10, 2)),
+            np.zeros((10, 2), dtype=np.float64),
             LineModelND,
             2,
             np.inf,
@@ -977,13 +977,13 @@ def test_ransac_sample_duplicates():
     # Create dataset with four unique points. Force 10 iterations
     # and check that there are no duplicated data points.
     data = np.arange(4)
-    with expected_warnings(["No inliers found"]):
+    with pytest.warns(UserWarning, match="No inliers found"):
         ransac(data, DummyModel, min_samples=3, residual_threshold=0.0, max_trials=10)
 
 
 def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
-    with expected_warnings(['No inliers found. Model not fitted']):
+    with pytest.warns(UserWarning, match='No inliers found. Model not fitted'):
         model, inliers = ransac(
             data,
             model_class=LineModelND,
@@ -1005,7 +1005,7 @@ def test_ransac_non_valid_best_model():
 
     rng = np.random.RandomState(1)
     data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
-    with expected_warnings(["Estimated model is not valid"]):
+    with pytest.warns(UserWarning, match="Estimated model is not valid"):
         ransac(
             data,
             LineModelND,

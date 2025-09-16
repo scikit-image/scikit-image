@@ -1,11 +1,11 @@
 import math
 import unittest
 
+import pytest
 import numpy as np
 from numpy.testing import assert_equal
 from pytest import raises, warns
 
-from skimage._shared.testing import expected_warnings
 from skimage.morphology import extrema
 
 
@@ -214,11 +214,11 @@ class TestExtrema:
 
         for h in h_vals:
             if h % 1 != 0:
-                msgs = ['possible precision loss converting image']
+                with pytest.warns(
+                    UserWarning, match='possible precision loss converting image'
+                ):
+                    maxima = extrema.h_maxima(data, h)
             else:
-                msgs = []
-
-            with expected_warnings(msgs):
                 maxima = extrema.h_maxima(data, h)
 
             if maxima[2, 2] == 0:
@@ -292,11 +292,11 @@ class TestExtrema:
         failures = 0
         for h in h_vals:
             if h % 1 != 0:
-                msgs = ['possible precision loss converting image']
+                with pytest.warns(
+                    UserWarning, match='possible precision loss converting image'
+                ):
+                    minima = extrema.h_minima(data, h)
             else:
-                msgs = []
-
-            with expected_warnings(msgs):
                 minima = extrema.h_minima(data, h)
 
             if minima[2, 2] == 0:

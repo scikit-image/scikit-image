@@ -3,7 +3,6 @@ import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
-from skimage._shared._warnings import expected_warnings
 from skimage.metrics import (
     peak_signal_noise_ratio,
     normalized_root_mse,
@@ -60,12 +59,12 @@ def test_PSNR_float(dtype):
     assert_almost_equal(p_mixed, p_float64, decimal=decimal)
 
     # mismatched dtype results in a warning if data_range is unspecified
-    with expected_warnings(['Inputs have mismatched dtype']):
+    with pytest.warns(UserWarning, match='Inputs have mismatched dtype'):
         p_mixed = peak_signal_noise_ratio(cam / 255.0, np.float32(cam_noisy / 255.0))
     assert_almost_equal(p_mixed, p_float64, decimal=decimal)
 
     # mismatched dtype results in a warning if data_range is unspecified
-    with expected_warnings(['Inputs have mismatched dtype']):
+    with pytest.warns(UserWarning, match='Inputs have mismatched dtype'):
         p_mixed = peak_signal_noise_ratio(cam / 255.0, np.float32(cam_noisy / 255.0))
     assert_almost_equal(p_mixed, p_float64, decimal=decimal)
 
