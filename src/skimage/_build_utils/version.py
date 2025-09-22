@@ -1,49 +1,56 @@
 #!/usr/bin/env python3
-"""Extract version number from __init__.py"""
 
-import os
+"""Determine and print version number.
+
+Used in top level ``meson.build``.
+"""
+
+import subprocess
+from pathlib import Path
 
 
-def git_version(version):
-    """Append last commit date and hash to version, if available"""
-    import subprocess
-    import os.path
+def version_from_init():
+    """Extract version string from ``skimage/__init__.py``."""
+    skimage_init = Path(__file__).parent / '../__init__.py'
+    assert skimage_init.is_file()
 
-    git_hash = ''
-    try:
-        p = subprocess.Popen(
-            ['git', 'log', '-1', '--format="%H %aI"'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=os.path.dirname(__file__),
-        )
-    except FileNotFoundError:
-        pass
-    else:
-        out, err = p.communicate()
-        if p.returncode == 0:
-            git_hash, git_date = (
-                out.decode('utf-8')
-                .strip()
-                .replace('"', '')
-                .split('T')[0]
-                .replace('-', '')
-                .split()
-            )
+    with skimage_init.open("r") as file:
+        data = file.readlines()
 
-            version += f'+git{git_date}.{git_hash[:7]}'
-
+    version_line = next(line for line in data if line.startswith('__version__ ='))
+    version = version_line.strip().split(' = ')[1].replace('"', '').replace("'", '')
     return version
 
 
-ski_init = os.path.join(os.path.dirname(__file__), '../__init__.py')
+def append_git_revision_and_date(version):
+    """Try to append last commit date and hash to version.
 
-data = open(ski_init).readlines()
-version_line = next(line for line in data if line.startswith('__version__ ='))
+    Appends nothing if the current working directory is outside a git
+    repository.
+    """
+    try:
+        result = subprocess.run(
+            ['git', 'log', '-1', '--format="%H %aI"'],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        pass
+    else:
+        git_hash, git_date = (
+            result.stdout.strip()
+            .replace('"', '')
+            .split('T')[0]
+            .replace('-', '')
+            .split()
+        )
+        version += f'+git{git_date}.{git_hash[:7]}'
+    return version
 
-version = version_line.strip().split(' = ')[1].replace('"', '').replace("'", '')
 
-if 'dev' in version:
-    version = git_version(version)
-
-print(version)
+if __name__ == "__main__":
+    version = version_from_init()
+    if 'dev' in version:
+        version = append_git_revision_and_date(version)
+    print(version)
