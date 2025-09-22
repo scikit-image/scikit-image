@@ -1106,7 +1106,7 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     ----------
     image : ndarray
         The image to scale.
-    mode : {'minmax', 'legacy', False} or tuple[float, float], optional
+    mode : {'minmax', 'legacy', 'none'} or tuple[float, float], optional
         Controls the rescaling behavior for `image`.
 
         ``'minmax'``
@@ -1115,18 +1115,20 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
             respectively. This is a shorthand for
             ``prescale=(image.min(), image.max())``.
 
+        ``(lower, higher)``
+            Explicit input value range to be scaled to 0 and 1. Normalize
+            `image` such that ``lower`` and ``higher`` are scaled with
+            ``(img - lower) / (higher - lower)`` to 0 and 1 respectively. The
+            resulting output range can be outside [0, 1].
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`.
+
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
             floating dtype, it is left alone. See :ref:`.img_as_float` for
             more details.
-
-        ``(lower, higher)``
-            Normalize `image` such that ``lower`` and ``higher`` are scaled
-            with ``(img - lower) / (higher - lower)``
-            to 0 and 1 respectively.
-
-        ``False``
-            Don't prescale the value range of `image` at all.
 
     stacklevel : int, optional
         Set the correct stacklevel for warnings that may be raised during
@@ -1152,12 +1154,12 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     >>> _prescale_value_range(image, mode="legacy")
     array([-0.07874016,  0.78740157])
 
-    >>> _prescale_value_range(image, mode=False)
+    >>> _prescale_value_range(image, mode="none")
     array([-10,  100], dtype=int8)
     """
     # Early exits
-    if mode is False:
-        return image
+    if mode == "none":
+        return image.copy()
     if mode == "legacy":
         # Avoid circular import
         from ..util.dtype import img_as_float
