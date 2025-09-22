@@ -476,13 +476,13 @@ class Test_deprecate_parameter:
                 _func_deprecated_params(1, 2, old0=2)
 
     def test_wrong_param_name(self):
-        with pytest.raises(ValueError, match="'old' is not in list"):
+        with pytest.raises(ValueError, match="'old' not in parameters"):
 
             @deprecate_parameter("old", start_version="0.10", stop_version="0.12")
             def foo(arg0):
                 pass
 
-        with pytest.raises(ValueError, match="'new' is not in list"):
+        with pytest.raises(ValueError, match="'new' not in parameters"):
 
             @deprecate_parameter(
                 "old", new_name="new", start_version="0.10", stop_version="0.12"

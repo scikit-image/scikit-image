@@ -193,10 +193,27 @@ def mono_check(plugin, fmt='png'):
     testing.assert_allclose(r5, img5)
 
 
-def fetch(data_filename):
-    """Attempt to fetch data, but if unavailable, skip the tests."""
+def fetch(data_filename, prefix=None):
+    """Attempt to fetch data, but if unavailable, skip the tests.
+
+    Parameters
+    ----------
+    data_filename : str
+        File path in the scikit-image repo tree, e.g.,
+        'restoration/camera_rl.npy', possibly pointing to a remote location.
+
+    prefix : str, optional
+        If None, `data_filename` is prefixed by 'src/skimage'
+        If 'tests', `data_filename` is prefixed by 'tests/skimage'.
+
+    Returns
+    -------
+    file_path : str
+        Path of the local file, possibly pointing to a remote location.
+
+    """
     try:
-        return _fetch(data_filename)
+        return _fetch(data_filename, prefix=prefix)
     except (ConnectionError, ModuleNotFoundError):
         pytest.skip(f'Unable to download {data_filename}', allow_module_level=True)
 
