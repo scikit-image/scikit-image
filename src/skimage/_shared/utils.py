@@ -1166,54 +1166,77 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
 
         return img_as_float(image)
 
-    # `mode` should call for normalization, validate and unpack to `lower` & `higher`
+    # Derive `lower` and `higher` from `mode`
     if mode == "minmax":
         lower = image.min()
         higher = image.max()
     elif isinstance(mode, tuple) and len(mode) == 2:
         lower, higher = mode
     else:
-        raise ValueError(f"unsupported value for `mode`: {mode}")
+        raise ValueError(f"Unsupported `mode`: {mode}")
 
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
     # unexpected promotion and / or precision problems during normalization
-    dtype = _supported_float_type(image.dtype)
+    dtype = _supported_float_type(image.dtype, allow_complex=True)
     out = image.astype(dtype)
     try:
         lower, higher = np.array([lower, higher], dtype=dtype)
     except ValueError as e:
-        raise ValueError(f"could not coerce values given by `mode` to {dtype}") from e
+        msg = f"With `mode={mode}`, could not coerce {(lower, higher)} to {dtype}"
+        raise ValueError(msg) from e
 
-    # Normalize `out`
+    # Deal with unexpected or invalid `lower` and `higher` early
+    if np.isnan(lower) or np.isnan(higher):
+        warnings.warn(
+            "Input value range with NaN, normalizing `image` to NaN everywhere",
+            category=RuntimeWarning,
+            stacklevel=stacklevel,
+        )
+        out = np.empty_like(out)
+        out.fill(np.nan)
+        return out
+
+    if np.isinf(lower) or np.isinf(higher):
+        warnings.warn(
+            "Input value range with infinity, "
+            "in `image`, normalizing infinity to NaN and other values to 0",
+            category=RuntimeWarning,
+            stacklevel=stacklevel,
+        )
+        out = np.where(np.isinf(out), np.nan, 0)
+        out = out.astype(dtype)
+        return out
+
+    if lower == higher:
+        if mode == "minmax":
+            msg = "`image` is uniform, returning uniform array of 0"
+        else:
+            msg = "Requested value range is uniform, returning uniform array of 0"
+        warnings.warn(msg, category=RuntimeWarning, stacklevel=stacklevel)
+        out = np.zeros_like(out)
+        return out
+
+    if lower > higher:
+        raise ValueError(f"`lower` value is larger than `higher`: {mode!r}")
+
+    # Actual normalization
     with np.errstate(all="raise"):
         try:
             peak_to_peak = higher - lower
+            out -= lower
 
         except FloatingPointError:
-            # Range is bigger than max float, half range to fit
+            warnings.warn(
+                "Dividing by 2 before scaling to avoid over-/underflow",
+                category=RuntimeWarning,
+                stacklevel=stacklevel,
+            )
             out /= 2
             lower /= 2
             higher /= 2
             peak_to_peak = higher - lower
+            out -= lower
 
-        try:
-            # Scale first, to avoid over-/underflowing float range
-            out /= peak_to_peak
-            out -= lower / peak_to_peak
-
-        except FloatingPointError:
-            if peak_to_peak == 0:
-                msg = (
-                    "requested value lower and upper bound are equal, normalizing to 0"
-                )
-                warnings.warn(msg, category=RuntimeWarning)
-                out = np.zeros_like(out)
-            elif np.isinf(peak_to_peak):
-                msg = "encountered inf, normalizing inf to NaN and other values to 0"
-                warnings.warn(msg, category=RuntimeWarning)
-                out = np.zeros_like(out)
-                out[np.isinf(image)] = np.nan
-            else:
-                raise
+        out /= peak_to_peak
 
     return out

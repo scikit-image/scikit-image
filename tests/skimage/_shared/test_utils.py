@@ -17,7 +17,9 @@ from skimage._shared.utils import (
     DEPRECATED,
     FailedEstimationAccessError,
     FailedEstimation,
+    _prescale_value_range,
 )
+from skimage._shared.dtype import numeric_dtype_min_max
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -538,3 +540,218 @@ def test_failed_estimation():
     )
     with pytest.raises(FailedEstimationAccessError, match=regex):
         fe.params
+
+
+class Test_prescale_value_range:
+    # Supported dtypes
+    int_dtypes = [
+        np.uint8,
+        np.uint16,
+        np.uint32,
+        np.uint64,
+        np.int8,
+        np.int16,
+        np.int32,
+        np.int64,
+    ]
+    float_dtypes = [
+        np.float16,
+        np.float32,
+        np.float64,
+        # np.complex64,
+        # np.complex128,
+        # np.complex256,
+    ]
+    all_dtypes = int_dtypes + float_dtypes
+
+    @pytest.mark.parametrize("dtype", all_dtypes)
+    def test_none(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+
+        result = _prescale_value_range(image, mode="none")
+        assert result is not image
+        np.testing.assert_equal(result, image, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_minmax_float_max(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 0.5, 1], dtype=expected_dtype)
+
+        if dtype == np.float16:
+            # Special case: float16 is always scaled up to float32,
+            # thereby avoiding over- & underflow issues and the related warning
+            result = _prescale_value_range(image, mode="minmax")
+        else:
+            regex = "Dividing by 2 before scaling to avoid over-/underflow"
+            with pytest.warns(RuntimeWarning, match=regex):
+                result = _prescale_value_range(image, mode="minmax")
+
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", int_dtypes)
+    def test_minmax_int_max(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, dtype_max], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 1], dtype=expected_dtype)
+        result = _prescale_value_range(image, mode="minmax")
+        assert image is not result
+        np.testing.assert_almost_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", all_dtypes)
+    def test_minmax_uniform(self, dtype):
+        image = np.array([10, 10], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 0], dtype=expected_dtype)
+
+        with pytest.warns(RuntimeWarning, match="`image` is uniform"):
+            result = _prescale_value_range(image, mode="minmax")
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_minmax_nan(self, dtype):
+        image = np.array([np.nan, -1, 0, 1], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([np.nan] * 4, dtype=expected_dtype)
+
+        regex = "Input value range with NaN"
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode="minmax")
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    @pytest.mark.filterwarnings(
+        "ignore:Dividing by 2 before scaling to avoid over-/underflow:RuntimeWarning"
+    )
+    def test_minmax_inf(self, dtype):
+        image = np.array([-np.inf, -1, 0, 1, np.inf], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([np.nan, 0, 0, 0, np.nan], dtype=expected_dtype)
+
+        regex = "Input value range with infinity"
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode="minmax")
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_lower_higher_float_max(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 0.5, 1], dtype=expected_dtype)
+
+        mode = (dtype_min, dtype_max)
+
+        if dtype == np.float16:
+            # Special case: float16 is always scaled up to float32,
+            # thereby avoiding over- & underflow issues and the related warning
+            result = _prescale_value_range(image, mode=mode)
+        else:
+            regex = "Dividing by 2 before scaling to avoid over-/underflow"
+            with pytest.warns(RuntimeWarning, match=regex):
+                result = _prescale_value_range(image, mode=mode)
+
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", int_dtypes)
+    def test_lower_higher_int_max(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, dtype_max], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 1], dtype=expected_dtype)
+        result = _prescale_value_range(image, mode=(dtype_min, dtype_max))
+        assert image is not result
+        np.testing.assert_almost_equal(result, expected)
+
+    @pytest.mark.parametrize("dtype", all_dtypes)
+    def test_lower_higher_request_uniform(self, dtype):
+        image = np.array([0, 10], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 0], dtype=expected_dtype)
+
+        with pytest.warns(RuntimeWarning, match="Requested value range is uniform"):
+            result = _prescale_value_range(image, mode=(1, 1))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", all_dtypes)
+    def test_lower_higher_scale_uniform(self, dtype):
+        # A `uniform` image can be rescaled
+        # as long as the requested value range is not uniform
+        image = np.array([10, 10], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0.5, 0.5], dtype=expected_dtype)
+        result = _prescale_value_range(image, mode=(5, 15))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_lower_higher_inf_image(self, dtype):
+        image = np.array([-np.inf, -1, 0, 1, np.inf], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([-np.inf, 0.45, 0.5, 0.55, np.inf], dtype=expected_dtype)
+
+        result = _prescale_value_range(image, mode=(-10, 10))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_lower_higher_are_inf(self, dtype):
+        image = np.array([-1, 0, -np.inf, np.inf, 1], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array([0, 0, np.nan, np.nan, 0], dtype=expected_dtype)
+
+        regex = "Input value range with infinity"
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode=(-10, np.inf))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode=(-np.inf, 10))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", float_dtypes)
+    def test_lower_higher_are_nan(self, dtype):
+        image = np.array([-1, 0, -np.inf, np.inf, 1], dtype=dtype)
+        expected_dtype = _supported_float_type(dtype, allow_complex=True)
+        expected = np.array(
+            [np.nan, np.nan, np.nan, np.nan, np.nan], dtype=expected_dtype
+        )
+
+        regex = "Input value range with NaN"
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode=(-10, np.nan))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+        with pytest.warns(RuntimeWarning, match=regex):
+            result = _prescale_value_range(image, mode=(-np.nan, 10))
+        assert image is not result
+        np.testing.assert_equal(result, expected, strict=True)
+
+    @pytest.mark.parametrize("dtype", all_dtypes)
+    def test_lower_higher_not_larger(self, dtype):
+        image = np.array([0, 1], dtype=dtype)
+        with pytest.raises(ValueError, match="`lower` value is larger than `higher`"):
+            _prescale_value_range(image, mode=(1, -1))
+
+    @pytest.mark.parametrize("mode", ["ab", (1, 2, 3), (1,)])
+    def test_unknown_mode(self, mode):
+        image = np.array([0, 1])
+        with pytest.raises(ValueError, match="Unsupported `mode`"):
+            _prescale_value_range(image, mode=mode)
+
+    def test_invalid_tuple(self):
+        image = np.array([0, 1])
+        with pytest.raises(ValueError, match=".*could not coerce"):
+            _prescale_value_range(image, mode=(1, "b"))
