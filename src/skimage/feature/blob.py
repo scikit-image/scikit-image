@@ -322,7 +322,7 @@ def blob_dog(
             floating dtype, it is left alone. See :ref:`.img_as_float` for
             more details.
 
-            .. warnings::
+            .. warning::
                 The scaling and the effect of `threshold` will depent on the
                 dtype of `image`. For consistent behavior we recommend
                 ``'minmax'``.
