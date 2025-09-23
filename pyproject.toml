@@ -1,7 +1,7 @@
 [project]
 name = 'scikit-image'
 description = 'Image processing in Python'
-requires-python = '>=3.10'
+requires-python = '>=3.11'
 readme = 'README.md'
 classifiers = [
     'Development Status :: 4 - Beta',
@@ -12,7 +12,6 @@ classifiers = [
     'Programming Language :: C',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
@@ -27,7 +26,7 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'numpy>=1.24',
-    'scipy>=1.11.2',
+    'scipy>=1.11.4',
     'networkx>=3.0',
     'pillow>=10.1',
     'imageio>=2.33,!=2.35.0',
@@ -59,7 +58,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    "tomli; python_version < '3.11'",
+    'docstub==0.3.0.post0',
 ]
 docs = [
     'sphinx>=8.0',
@@ -67,7 +66,7 @@ docs = [
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'matplotlib>=3.7',
-    'dask[array]>=2022.9.2',
+    'dask[array]>=2023.2.0',
     'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
@@ -85,13 +84,12 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK',
-    'astropy>=5.0',
-    'cloudpickle>=0.2.1',  # necessary to provide the 'processes' scheduler for dask
-    'dask[array]>=2021.1.0,!=2024.8.0',
+    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
+    'astropy>=6.0',
+    'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
-    'pooch>=1.6.0',
-    'pyamg>=5.2',
+    'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
+    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
     'scikit-learn>=1.2',
 ]
@@ -99,8 +97,9 @@ test = [
     'asv',
     'numpydoc>=1.7',
     'pooch>=1.6.0',
-    'pytest>=7.0',
+    'pytest>=8',
     'pytest-cov>=2.11.0',
+    'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
     'pytest-doctestplus',
@@ -130,7 +129,7 @@ package = 'skimage'
 Build = [
     'spin.cmds.meson.build',
     'spin.cmds.pip.install',
-    'spin.cmds.meson.test',
+    '.spin/cmds.py:test',
     '.spin/cmds.py:sdist',
 ]
 Environments = [
@@ -175,7 +174,7 @@ ignore = [
     'F403',
     'F405',
 ]
-"skimage/_shared/testing.py" = ['F401']
+"src/skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
 [tool.ruff.lint.pydocstyle]
@@ -183,23 +182,24 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra  --strict-config  --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["skimage", "benchmarks"]
-python_files = ["benchmark_*.py", "test_*.py"]
-python_classes = ["Test*", "*Suite"]
-python_functions = ["time_*", "test_*", "peakmem_*"]
+testpaths = ["tests"]
 filterwarnings = [
     "error",
-    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
-
-[tool.coverage.run]
-omit = ['*/tests/*']
+norecursedirs = ["io/_plugins"]
 
 [tool.changelist]
 ignored_user_logins = [
     "web-flow",
     "pre-commit-ci[bot]"
 ]
+
+
+[tool.docstub.type_prefixes]
+matplotlib = "matplotlib"
+scipy = "scipy"

@@ -37,75 +37,66 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from mpl_toolkits.mplot3d import Axes3D
 
-from skimage.morphology import (
-    ball,
-    diamond,
-    disk,
-    ellipse,
-    octagon,
-    octahedron,
-    footprint_rectangle,
-)
-from skimage.morphology.footprints import footprint_from_sequence
+import skimage as ski
 
 
 # Generate 2D and 3D structuring elements.
 footprint_dict = {
     "square 11x11 (separable)": (
-        footprint_rectangle((11, 11), decomposition=None),
-        footprint_rectangle((11, 11), decomposition="separable"),
+        ski.morphology.footprint_rectangle((11, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((11, 11), decomposition="separable"),
     ),
     "square 11x11 (sequence)": (
-        footprint_rectangle((11, 11), decomposition=None),
-        footprint_rectangle((11, 11), decomposition="sequence"),
+        ski.morphology.footprint_rectangle((11, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((11, 11), decomposition="sequence"),
     ),
     "rectangle 7x11 (separable)": (
-        footprint_rectangle((7, 11), decomposition=None),
-        footprint_rectangle((7, 11), decomposition="separable"),
+        ski.morphology.footprint_rectangle((7, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((7, 11), decomposition="separable"),
     ),
     "rectangle 7x11 (sequence)": (
-        footprint_rectangle((7, 11), decomposition=None),
-        footprint_rectangle((7, 11), decomposition="sequence"),
+        ski.morphology.footprint_rectangle((7, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((7, 11), decomposition="sequence"),
     ),
     "diamond(5) (sequence)": (
-        diamond(5, decomposition=None),
-        diamond(5, decomposition="sequence"),
+        ski.morphology.diamond(5, decomposition=None),
+        ski.morphology.diamond(5, decomposition="sequence"),
     ),
     "disk(7, strict_radius=False) (sequence)": (
-        disk(7, strict_radius=False, decomposition=None),
-        disk(7, strict_radius=False, decomposition="sequence"),
+        ski.morphology.disk(7, strict_radius=False, decomposition=None),
+        ski.morphology.disk(7, strict_radius=False, decomposition="sequence"),
     ),
     "disk(7, strict_radius=True) (crosses)": (
-        disk(7, strict_radius=True, decomposition=None),
-        disk(7, strict_radius=True, decomposition="crosses"),
+        ski.morphology.disk(7, strict_radius=True, decomposition=None),
+        ski.morphology.disk(7, strict_radius=True, decomposition="crosses"),
     ),
     "ellipse(4, 9) (crosses)": (
-        ellipse(4, 9, decomposition=None),
-        ellipse(4, 9, decomposition="crosses"),
+        ski.morphology.ellipse(4, 9, decomposition=None),
+        ski.morphology.ellipse(4, 9, decomposition="crosses"),
     ),
     "disk(20) (sequence)": (
-        disk(20, strict_radius=False, decomposition=None),
-        disk(20, strict_radius=False, decomposition="sequence"),
+        ski.morphology.disk(20, strict_radius=False, decomposition=None),
+        ski.morphology.disk(20, strict_radius=False, decomposition="sequence"),
     ),
     "octagon(7, 4) (sequence)": (
-        octagon(7, 4, decomposition=None),
-        octagon(7, 4, decomposition="sequence"),
+        ski.morphology.octagon(7, 4, decomposition=None),
+        ski.morphology.octagon(7, 4, decomposition="sequence"),
     ),
     "cube 11x11x11 (separable)": (
-        footprint_rectangle((11, 11, 11), decomposition=None),
-        footprint_rectangle((11, 11, 11), decomposition="separable"),
+        ski.morphology.footprint_rectangle((11, 11, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((11, 11, 11), decomposition="separable"),
     ),
     "cube 11x11x11 (sequence)": (
-        footprint_rectangle((11, 11, 11), decomposition=None),
-        footprint_rectangle((11, 11, 11), decomposition="sequence"),
+        ski.morphology.footprint_rectangle((11, 11, 11), decomposition=None),
+        ski.morphology.footprint_rectangle((11, 11, 11), decomposition="sequence"),
     ),
     "octahedron(7) (sequence)": (
-        octahedron(7, decomposition=None),
-        octahedron(7, decomposition="sequence"),
+        ski.morphology.octahedron(7, decomposition=None),
+        ski.morphology.octahedron(7, decomposition="sequence"),
     ),
     "ball(9) (sequence)": (
-        ball(9, strict_radius=False, decomposition=None),
-        ball(9, strict_radius=False, decomposition="sequence"),
+        ski.morphology.ball(9, strict_radius=False, decomposition=None),
+        ski.morphology.ball(9, strict_radius=False, decomposition="sequence"),
     ),
 }
 
@@ -133,7 +124,9 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
         ax.imshow(footprint, cmap=cmap, vmin=0, vmax=1)
         if approximate_decomposition:
             ax2 = fig.add_subplot(1, num_subplots, num_subplots - 1)
-            footprint_composite = footprint_from_sequence(footprint_sequence)
+            footprint_composite = ski.morphology.footprint_from_sequence(
+                footprint_sequence
+            )
             ax2.imshow(footprint_composite, cmap=cmap, vmin=0, vmax=1)
 
     else:
@@ -143,7 +136,9 @@ for title, (footprint, footprint_sequence) in footprint_dict.items():
             ax2 = fig.add_subplot(
                 1, num_subplots, num_subplots - 1, projection=Axes3D.name
             )
-            footprint_composite = footprint_from_sequence(footprint_sequence)
+            footprint_composite = ski.morphology.footprint_from_sequence(
+                footprint_sequence
+            )
             ax2.voxels(footprint_composite, cmap=cmap)
 
     title1 = title.split(' (')[0]

@@ -40,3 +40,5 @@ skimage/morphology/_skeletonize_lee_cy.pyx
 .asv
 .vscode/
 .mesonpy-native-file.ini
+/.pyodide-xbuildenv-*
+stubs/
