@@ -117,7 +117,6 @@ ax3[0].set_axis_off()
 ax3[1].imshow(roi_clipped, cmap='gray')
 ax3[1].set_title('Result with clip=True')
 ax3[1].set_axis_off()
-ax3[1].set_anchor('C')  # ensure the ROI is centered within the right subplot
 
 r0o_i, c0o_i = np.floor([r0o, c0o]).astype(int)
 r1o_i, c1o_i = np.ceil([r1o, c1o]).astype(int)
