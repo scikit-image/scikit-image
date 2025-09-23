@@ -130,6 +130,9 @@ def test_binary_blobs():
     assert_almost_equal(blobs.mean(), 0.25, decimal=1)
     other_realization = data.binary_blobs(length=32, volume_fraction=0.25, n_dim=3)
     assert not np.all(blobs == other_realization)
+    wrap_blobs = data.binary_blobs(length=64, mode="wrap")
+    assert wrap_blobs.shape == (64, 64)
+    assert wrap_blobs.dtype == bool
 
 
 def test_lfw_subset():
