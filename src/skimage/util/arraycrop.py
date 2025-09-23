@@ -130,10 +130,6 @@ def bounding_box_crop(
     skimage.util.crop
         Crop by explicit widths on each axis.
 
-    .. versionadded:: 0.26
-       Added ``bounding_box_crop`` to crop N-D arrays using a spatial bounding box
-       with optional ``channel_axis`` support.
-
     Notes
     -----
     Mins are floored to the slice start; maxes are ceiled and used as the
