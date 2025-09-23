@@ -64,7 +64,7 @@ ax[1].imshow(img_noise, cmap='gray', vmin=0, vmax=1)
 ax[1].set_xlabel(f'MSE = {mse_noise:.2f}, SSIM = {ssim_noise:.2f}')
 ax[1].set_title('Image with noise')
 
-ax[2].imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
+ax[2].imshow(img_const, cmap='gray', vmin=0, vmax=1)
 ax[2].set_xlabel(f'MSE = {mse_const:.2f}, SSIM = {ssim_const:.2f}')
 ax[2].set_title('Image plus constant')
 
