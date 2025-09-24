@@ -10,15 +10,20 @@ from scipy import ndimage as ndi
 from skimage import data
 from skimage.registration import affine
 from skimage._shared.testing import assert_array_equal
-from skimage.registration._affine import _parameter_vector_to_matrix, _scale_parameters
+from skimage.registration._affine import (
+    _parameter_vector_to_matrix,
+    _matrix_to_parameter_vector,
+    _scale_parameters,
+)
 
 from skimage.registration import (
     solver_affine_lucas_kanade,
     solver_affine_studholme,
+    solver_affine_ecc,
     target_registration_error,
 )
 
-solvers = [solver_affine_lucas_kanade, solver_affine_studholme]
+solvers = [solver_affine_lucas_kanade, solver_affine_ecc, solver_affine_studholme]
 models = ["affine", "euclidean", "translation"]
 max_error = 2
 
@@ -111,6 +116,20 @@ def test_matrix_parameter_vector_conversion(model, ndim):
         p = np.zeros(ndim * (ndim + 1))
     m = _parameter_vector_to_matrix(p, model, ndim)
     assert m.shape == (ndim + 1, ndim + 1), f"shape missmatch {m.shape}"
+
+
+@pytest.mark.parametrize("model", models)
+@pytest.mark.parametrize("ndim", [2, 3])
+def test_matrix_parameter_vector_conversion2(model, ndim):
+    n = 512
+    r = 0.12  # rotation angle in radians
+    c, s = np.cos(r), np.sin(r)
+    T = np.array([[1, 0, -n / 2], [0, 1, -n / 2], [0, 0, 1]])
+    R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+    transform = np.linalg.inv(T) @ R @ T
+    params = _matrix_to_parameter_vector(transform, "euclidean")
+    matrix = _parameter_vector_to_matrix(params, "euclidean", 2)
+    assert_array_equal(transform, matrix)
 
 
 @pytest.mark.parametrize("ndim", [2, 3])

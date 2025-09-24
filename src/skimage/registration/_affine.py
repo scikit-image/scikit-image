@@ -101,6 +101,69 @@ def _parameter_vector_to_matrix(parameters, model, ndim):
     return matrix
 
 
+def _matrix_to_parameter_vector(matrix, model):
+    """
+    Transform a vector of parameters into an affine matrix.
+
+    Parameters
+    ----------
+    matrix : ndarray
+        Homogeneous matrix.
+    model : {'affine', 'euclidean', 'translation'}
+        Motion model 'affine', 'euclidean' or 'translation'.
+
+    Returns
+    -------
+    parameters : ndarray
+        Vector of parameters (see note).
+
+    Raises
+    ------
+    NotImplementedError
+        For unsupported motion models.
+
+    Note
+    ----
+    The parameters are:
+    - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D,
+    - euclidean : [dy,dx,angle] in 2D or [dz,dy,dx,yaw,pitch,roll] in 3D,
+    - affine: the top of the homogeneous matrix minus identity.
+    """
+
+    ndim = matrix.shape[0] - 1
+
+    if model.lower() == "translation":
+        parameters = matrix[:ndim, -1].ravel()
+    elif model.lower() == "euclidean":
+        parameters = np.zeros(ndim + len(list(combinations(range(ndim), 2))))
+        # Rotations
+        if ndim == 2:
+            parameters[ndim] = np.arctan2(matrix[1, 0], matrix[0, 0])
+        elif ndim == 3:
+            R = matrix[:3, :3]
+            sy = np.sqrt(R[0, 0] ** 2 + R[1, 0] ** 2)
+            if sy < 1e-6:  # not a gimbal lock
+                parameters[ndim] = np.arctan2(R[1, 0], R[0, 0])
+                parameters[ndim + 1] = np.arctan2(-R[2, 0], sy)
+                parameters[ndim + 2] = np.arctan2(R[2, 1], R[2, 2])
+            else:
+                parameters[ndim] = np.arctan2(R[1, 2], R[1, 1])
+                parameters[ndim + 1] = np.arctan2(-R[2, 0], sy)
+        else:
+            raise NotImplementedError("Eulidean motion model implemented only in 2D/3D")
+        # Translation along each axis
+        parameters[:ndim] = (
+            np.linalg.inv(matrix[:-1, :-1]) @ matrix[:ndim, -1]
+        ).ravel()
+    elif model.lower() == "affine":
+        parameters = np.zeros(ndim * (ndim + 1))
+        parameters[:ndim] = matrix[:ndim, -1].ravel()
+        parameters[ndim:] = (matrix[:ndim, :ndim] - np.eye(ndim)).ravel()
+    else:
+        raise NotImplementedError(f"Model {model} is not supported")
+    return parameters
+
+
 def _scale_parameters(parameters, model, ndim, scale):
     """
     Scale the parameter vector or homogeneous matrix.
@@ -222,12 +285,14 @@ def solver_affine_lucas_kanade(
 
     # Compute the ij grids along each non channel axis
     grid = np.meshgrid(
-        *[np.arange(n, dtype=float) for n in reference_image.shape[1:]], indexing="ij"
+        *[np.arange(n, dtype=np.float32) for n in reference_image.shape[1:]],
+        indexing="ij",
     )
 
     # Compute the 1st derivative of the image in each non channel axis
     grad = [
-        np.gradient(reference_image, axis=k) for k in range(1, reference_image.ndim)
+        np.gradient(reference_image.astype(np.float32), axis=k)
+        for k in range(1, reference_image.ndim)
     ]
 
     # Vector of gradients eg: [Iy Ix yIy xIy yIy yIx] (see eq. (27))
@@ -323,16 +388,109 @@ def _studholme_param_cost(
 
     ndim = reference_image.ndim - 1
 
+    # scale translation to image size
     scale = np.max(reference_image.shape)
-    scaled_parameters = _scale_parameters(parameters, model, ndim, scale)
+    parameters = _scale_parameters(parameters, model, ndim, scale)
 
-    matrix = _parameter_vector_to_matrix(scaled_parameters, model, ndim)
+    matrix = _parameter_vector_to_matrix(parameters, model, ndim)
 
     moving_image_warp = np.stack(
         [ndi.affine_transform(plane, matrix) for plane in moving_image]
     )
 
     return cost(reference_image, moving_image_warp, weights)
+
+
+def solver_affine_studholme(
+    reference_image,
+    moving_image,
+    weights,
+    channel_axis,
+    matrix,
+    model,
+    *,
+    method="Powell",
+    options={"maxiter": 30, "disp": False},
+    cost=lambda im0, im1, w: -normalized_mutual_information(
+        im0.squeeze(), im1.squeeze(), bins=100, weights=w
+    ),
+):
+    """
+    Solver minimizing the cost function to register an image pair.
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first image of the sequence.
+    moving_image : ndarray
+        The second image of the sequence.
+    weights : ndarray
+        Weights or mask.
+    channel_axis : int | None
+        Index of the channel axis.
+    matrix : ndarray
+        Initial value of the transform, here matrix are parameters.
+    model: str
+        Motion model: "affine", "translation" or "euclidean".
+    method: str
+        Minimization method for scipy.optimization.minimize.
+    options: dict
+        options for scipy.optimization.minimize.
+    cost: Callable, lambda (reference,moving,weights) -> float
+        Cost function to be minimized taking as input the two images and
+        the weights.
+
+    Returns
+    -------
+    matrix : ndarray
+        Homogeneous transform matrix.
+
+    Raises
+    ------
+    NotImplementedError
+        For unsupported motion models.
+
+    Reference
+    ---------
+    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
+           and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
+    .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
+           The Art of Scientific Python. O’Reilly Media, Inc., 2017.
+    """
+
+    if channel_axis is not None:
+        reference_image = np.moveaxis(reference_image, channel_axis, 0)
+        moving_image = np.moveaxis(moving_image, channel_axis, 0)
+    else:
+        reference_image = np.expand_dims(reference_image, 0)
+        moving_image = np.expand_dims(moving_image, 0)
+
+    ndim = reference_image.ndim - 1
+
+    if matrix is None:
+        matrix = np.eye(ndim + 1, dtype=float)
+
+    parameters = _matrix_to_parameter_vector(matrix, model)
+
+    # scale translation to image size
+    scale = np.max(reference_image.shape)
+    parameters = _scale_parameters(parameters, model, ndim, 1.0 / scale)
+
+    cost = partial(
+        _studholme_param_cost,
+        reference_image=reference_image,
+        moving_image=moving_image,
+        weights=weights,
+        cost=cost,
+        model=model,
+    )
+
+    result = minimize(cost, x0=parameters, method=method, options=options)
+
+    # scale translation to image size
+    param = _scale_parameters(result.x, model, ndim, scale)
+
+    return _parameter_vector_to_matrix(param, model, ndim)
 
 
 def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
@@ -657,7 +815,10 @@ def solver_affine_ecc(
 
     Reference
     ---------
-    .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
+    .. [1] G. D. Evangelidis and E. Z. Psarakis, "Parametric Image Alignment Using
+           Enhanced Correlation Coefficient Maximization," in IEEE Transactions on
+           Pattern Analysis and Machine Intelligence, vol. 30, no. 10, pp. 1858-1865,
+           Oct. 2008, doi: 10.1109/TPAMI.2008.113.
     """
 
     # The solver does not take into account multiple channels for now
@@ -740,104 +901,6 @@ def solver_affine_ecc(
     return matrix
 
 
-def solver_affine_studholme(
-    reference_image,
-    moving_image,
-    weights,
-    channel_axis,
-    matrix,
-    model,
-    *,
-    method="Powell",
-    options={"maxiter": 10, "disp": False},
-    cost=lambda im0, im1, w: -normalized_mutual_information(
-        im0.squeeze(), im1.squeeze(), bins=100, weights=w
-    ),
-):
-    """
-    Solver minimizing the cost function to register an image pair.
-
-    Parameters
-    ----------
-    reference_image : ndarray
-        The first image of the sequence.
-    moving_image : ndarray
-        The second image of the sequence.
-    weights : ndarray
-        Weights or mask.
-    channel_axis : int | None
-        Index of the channel axis.
-    matrix : ndarray
-        Initial value of the transform, here matrix are parameters.
-    model: str
-        Motion model: "affine", "translation" or "euclidean".
-    method: str
-        Minimization method for scipy.optimization.minimize.
-    options: dict
-        options for scipy.optimization.minimize.
-    cost: Callable, lambda (reference,moving,weights) -> float
-        Cost function to be minimized taking as input the two images and
-        the weights.
-
-    Returns
-    -------
-    matrix : ndarray
-        Homogeneous transform matrix.
-
-    Raises
-    ------
-    NotImplementedError
-        For unsupported motion models.
-
-    Reference
-    ---------
-    .. [1] Studholme C, Hill DL, Hawkes DJ. Automated 3-D registration of MR
-           and CT images of the head. Med Image Anal. 1996 Jun;1(2):163-75.
-    .. [2] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
-           The Art of Scientific Python. O’Reilly Media, Inc., 2017.
-    """
-
-    if channel_axis is not None:
-        reference_image = np.moveaxis(reference_image, channel_axis, 0)
-        moving_image = np.moveaxis(moving_image, channel_axis, 0)
-    else:
-        reference_image = np.expand_dims(reference_image, 0)
-        moving_image = np.expand_dims(moving_image, 0)
-
-    ndim = reference_image.ndim - 1
-
-    if matrix is None:
-        if model.lower() == "translation":
-            matrix = np.zeros(ndim)
-        elif model.lower() == "euclidean":
-            nrotations = len([x for x in combinations(range(ndim), 2)])
-            matrix = np.zeros(ndim + nrotations)
-        elif model.lower() == "affine":
-            matrix = np.zeros(ndim * (ndim + 1))
-        else:
-            raise NotImplementedError(f"Motion model {model} not implemented.")
-
-    # scale translation to image size
-    scale = np.max(reference_image.shape)
-    matrix = _scale_parameters(matrix, model, ndim, 1.0 / scale)
-
-    cost = partial(
-        _studholme_param_cost,
-        reference_image=reference_image,
-        moving_image=moving_image,
-        weights=weights,
-        cost=cost,
-        model=model,
-    )
-
-    result = minimize(cost, x0=matrix, method=method, options=options)
-
-    # scale translation to image size
-    param = _scale_parameters(result.x, model, ndim, scale)
-
-    return param
-
-
 def affine(
     reference_image,
     moving_image,
@@ -918,6 +981,7 @@ def affine(
         if min(shape) <= 6:
             warnings.warn(f"No channel axis specified for shape {shape}")
 
+    # Compute the maximum number of layers
     max_layer = int(
         floor(
             log(min(shape), pyramid_downscale)
@@ -925,6 +989,7 @@ def affine(
         )
     )
 
+    # Generate the pyramid
     pyramid = list(
         zip(
             *[
@@ -946,10 +1011,14 @@ def affine(
         )
     )
 
+    # Rescale the initial matrix if any to the coarsest level
     if matrix is not None:
         first_scale = pow(pyramid_downscale, -max_layer)
-        matrix = _scale_parameters(matrix, model, ndim, first_scale)
+        parameters = _matrix_to_parameter_vector(matrix, model)
+        scaled_parameters = _scale_parameters(parameters, model, ndim, first_scale)
+        matrix = _parameter_vector_to_matrix(scaled_parameters, model, ndim)
 
+    # First level
     matrix = solver(
         pyramid[0][0],
         pyramid[0][1],
@@ -959,8 +1028,11 @@ def affine(
         model=model,
     )
 
+    # Remaining levels
     for scaled_reference_image, scaled_moving_image, scaled_weights in pyramid[1:]:
-        matrix = _scale_parameters(matrix, model, ndim, pyramid_downscale)
+        parameters = _matrix_to_parameter_vector(matrix, model)
+        parameters = _scale_parameters(parameters, model, ndim, pyramid_downscale)
+        matrix = _parameter_vector_to_matrix(parameters, model, ndim)
         matrix = solver(
             reference_image=scaled_reference_image,
             moving_image=scaled_moving_image,
@@ -970,4 +1042,4 @@ def affine(
             model=model,
         )
 
-    return _parameter_vector_to_matrix(matrix, model, ndim)
+    return matrix
