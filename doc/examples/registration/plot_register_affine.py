@@ -34,7 +34,7 @@ import skimage as ski
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
 
-reference = ski.data.camera()
+reference = ski.data.camera()[::4, ::4]
 
 r = -0.12  # rotation angle in radians
 c, s = np.cos(r), np.sin(r)
@@ -67,25 +67,26 @@ def solver_affine_studholme_mse(
     matrix,
     model,
     method="Powell",
-    options={"maxiter": 10, "disp": False},
+    options={"maxiter": 10, "disp": True},
 ):
     return ski.registration.solver_affine_studholme(
-        moving_image,
+        reference_image,
         moving_image,
         weights,
         channel_axis,
         matrix,
         model,
-        method,
-        options,
-        cost=lambda im0, im1, _: np.mean(np.square(im0 - im1)),
+        method=method,
+        options=options,
+        cost=lambda im0, im1, w: np.mean(np.square(im0 - im1).ravel()),
     )
 
 
 solvers = [
     ski.registration.solver_affine_lucas_kanade,
+    # ski.registration.solver_affine_ecc,
     ski.registration.solver_affine_studholme,
-    solver_affine_studholme_mse,
+    # solver_affine_studholme_mse,
 ]
 
 results = []
@@ -95,7 +96,7 @@ for solver in solvers:
     stop_time = time.time()
     results.append(
         {
-            "test": "Affine/" + solver.__name__.replace("solver_affine_", ""),
+            "test": "Affine / " + solver.__name__.replace("solver_affine_", ""),
             "elapsed time": stop_time - start_time,
             "matrix": matrix,
         }
@@ -197,7 +198,7 @@ print(np.linalg.inv(transform))
 for item in results:
     print(
         f"{item['test']} in {item['elapsed time']:.2f} seconds,"
-        f" TRE {item['tre'].max():.2f}"
+        f" TRE max:{item['tre'].max():.2f}/mean:{item['tre'].mean():.2f}"
     )
     print(item["matrix"])
 
