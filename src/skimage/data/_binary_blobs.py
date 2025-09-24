@@ -10,7 +10,7 @@ def binary_blobs(
     volume_fraction=0.5,
     rng=None,
     *,
-    mode='nearest',
+    boundary_mode='nearest',
 ):
     """
     Generate synthetic binary image with several rounded blob-like objects.
@@ -31,7 +31,7 @@ def binary_blobs(
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
-    mode : str, default "nearest"
+    boundary_mode : str, default "nearest"
         The `mode` parameter passed to the Gaussian filter.
         Use "wrap" for periodic boundary conditions.
 
@@ -64,7 +64,10 @@ def binary_blobs(
     points = (length * rs.random((n_dim, n_pts))).astype(int)
     mask[tuple(indices for indices in points)] = 1
     mask = gaussian(
-        mask, sigma=0.25 * length * blob_size_fraction, preserve_range=False, mode=mode
+        mask,
+        sigma=0.25 * length * blob_size_fraction,
+        preserve_range=False,
+        mode=boundary_mode,
     )
     threshold = np.percentile(mask, 100 * (1 - volume_fraction))
     return np.logical_not(mask < threshold)
