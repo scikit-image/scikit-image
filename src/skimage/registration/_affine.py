@@ -14,7 +14,8 @@ from skimage.transform.pyramids import pyramid_gaussian
 
 
 def target_registration_error(shape, matrix):
-    """Compute the displacement norm of the transform at each pixel.
+    """
+    Compute the displacement norm of the transform at each pixel.
 
     Parameters
     ----------
@@ -101,7 +102,8 @@ def _parameter_vector_to_matrix(parameters, model, ndim):
 
 
 def _scale_parameters(parameters, model, ndim, scale):
-    """Scale the parameter vector or homogeneous matrix.
+    """
+    Scale the parameter vector or homogeneous matrix.
 
     Parameters
     ----------
@@ -128,7 +130,9 @@ def _scale_parameters(parameters, model, ndim, scale):
     ----
     See _parameter_vector_to_matrix for the indices.
     """
+
     scaled_parameters = parameters.copy()
+
     # Homogeneous matrix case
     if parameters.shape == (ndim + 1, ndim + 1):
         scaled_parameters[:ndim, -1] *= scale
@@ -153,15 +157,17 @@ def _scale_parameters(parameters, model, ndim, scale):
 def solver_affine_lucas_kanade(
     reference_image,
     moving_image,
+    *,
     weights,
     channel_axis,
     matrix,
     model,
-    *,
     max_iter=40,
     tol=1e-6,
 ):
-    """Estimate affine motion between two images using a least square approach.
+    """
+    Estimate affine motion between two images using a linearized least square
+    approach.
 
     Parameters
     ----------
@@ -216,7 +222,7 @@ def solver_affine_lucas_kanade(
 
     # Compute the ij grids along each non channel axis
     grid = np.meshgrid(
-        *[np.arange(n) for n in reference_image.shape[1:]], indexing="ij"
+        *[np.arange(n, dtype=float) for n in reference_image.shape[1:]], indexing="ij"
     )
 
     # Compute the 1st derivative of the image in each non channel axis
@@ -282,7 +288,7 @@ def solver_affine_lucas_kanade(
     return matrix
 
 
-def _param_cost(
+def _studholme_param_cost(
     parameters,
     reference_image,
     moving_image,
@@ -317,7 +323,10 @@ def _param_cost(
 
     ndim = reference_image.ndim - 1
 
-    matrix = _parameter_vector_to_matrix(parameters, model, ndim)
+    scale = np.max(reference_image.shape)
+    scaled_parameters = _scale_parameters(parameters, model, ndim, scale)
+
+    matrix = _parameter_vector_to_matrix(scaled_parameters, model, ndim)
 
     moving_image_warp = np.stack(
         [ndi.affine_transform(plane, matrix) for plane in moving_image]
@@ -325,7 +334,28 @@ def _param_cost(
 
     return cost(reference_image, moving_image_warp, weights)
 
-def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
+
+def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
+    """
+    Compute the Jacobian of the warp wrt the parameters.
+
+    Parameters
+    ----------
+    grad : ndarray
+        Gradient of the image to be warped.
+    xy_grid : tuple of ndarray
+        Meshgrid of the coordinates.
+    warp_matrix : ndarray
+        Current warping matrix.
+    motion_type : {'affine', 'euclidean', 'translation'}
+        Motion model 'affine', 'euclidean' or 'translation'.
+
+    Returns
+    -------
+    jac : ndarray
+        Jacobian of the warp wrt the parameters.
+    """
+
     def compute_jacobian_translation(grad):
         grad_iw_x, grad_iw_y = grad
         return np.stack([grad_iw_x, grad_iw_y])
@@ -440,7 +470,25 @@ def compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
                 return compute_jacobian_affine_3D(grad, xy_grid)
 
 
-def update_warping_matrix(map_matrix, update, motion_type="affine"):
+def _ecc_update_warping_matrix(map_matrix, update, motion_type="affine"):
+    """
+    Update the warping matrix with the update vector.
+
+    Parameters
+    ----------
+    map_matrix : ndarray
+        Current warping matrix.
+    update : ndarray
+        Update vector.
+    motion_type : {'affine', 'euclidean', 'translation'}
+        Motion model 'affine', 'euclidean' or 'translation'.
+
+    Returns
+    -------
+    map_matrix : ndarray
+        Updated warping matrix.
+    """
+
     def update_warping_matrix_translation(map_matrix, update):
         map_matrix[0, 2] += update[0]
         map_matrix[1, 2] += update[1]
@@ -517,7 +565,7 @@ def update_warping_matrix(map_matrix, update, motion_type="affine"):
                 return update_warping_matrix_affine_3D(map_matrix, update)
 
 
-def project_onto_jacobian(jac, mat):
+def _ecc_project_onto_jacobian(jac, mat):
     """
     In the orignal code the matrix is stored as a 2D [K*H,W] array, and the code is looping through K, splitting the matrix into K submatrices.Then the sub-matrix and the `mat` of size HxW are flattened into vectors.
     From there, a dot product is applied to the vectors.
@@ -530,7 +578,7 @@ def project_onto_jacobian(jac, mat):
     )  # axis=(1, 2)) if 2D, axis=(1, 2, 3)) if 3D
 
 
-def compute_hessian(jac):
+def _ecc_compute_hessian(jac):
     """
     the line below is equivalent to:
     hessian = np.empty((np.shape(jac)[0], np.shape(jac)[0]))
@@ -549,71 +597,100 @@ def compute_hessian(jac):
 
 
 def custom_warp(im, mat, motion_type="affine", order=1):
-    def coord_mapping(pt, mat):
-        pt += (1,)
-        points_unwarping = mat @ np.array(pt).T
-        return tuple(points_unwarping)
-
     if motion_type == 'homography':
+
+        def coord_mapping(pt, mat):
+            pt += (1,)
+            points_unwarping = mat @ np.array(pt).T
+            return tuple(points_unwarping)
+
         return ndi.geometric_transform(
             im, coord_mapping, order=order, extra_arguments=(mat,)
         )
     else:
         return ndi.affine_transform(im, mat, order=order)
 
-def solver_affine_ecc(
-        reference_image,
-        moving_image,
-        weights,
-        channel_axis,
-        matrix,
-        model,
-        *,
-        number_of_iterations=200,
-        termination_eps=-1.0,
-        gaussian_filter_size=5.0,
-        order=1):
-    
-    '''
-    if channel_axis is not None:
-        reference_image = np.moveaxis(reference_image, channel_axis, 0)
-        moving_image = np.moveaxis(moving_image, channel_axis, 0)
-    else:
-        reference_image = np.expand_dims(reference_image, 0)
-        moving_image = np.expand_dims(moving_image, 0)
 
-    ndim = reference_image.ndim - 1
-    '''
-    
+def solver_affine_ecc(
+    reference_image,
+    moving_image,
+    *,
+    weights,
+    channel_axis,
+    matrix,
+    model,
+    max_iter=200,
+    tol=-1.0,
+    order=1,
+):
+    """
+    Estimate affine motion between two images using the Enhanced Correlation Coefficient
+
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first image of the sequence.
+    moving_image : ndarray
+        The second image of the sequence.
+    weights : ndarray
+        Weights as an array with the same shape as reference_image.
+    channel_axis : int
+        Index of the channel axis.
+    matrix : ndarray
+        Initial homogeneous transformation matrix.
+    model : {'affine', 'euclidean', 'translation'}
+        Motion model 'affine', 'translation' or (2D only) 'euclidean'.
+    max_iter : int
+        Maximum number of inner iterations.
+    tol : float
+        Tolerance of the norm of the update vector.
+
+    Returns
+    -------
+    matrix : ndarray
+        The estimated homogeneous transformation matrix.
+
+    Raises
+    ------
+    ValueError
+        For numerical errors.
+
+    Reference
+    ---------
+    .. [1] http://robots.stanford.edu/cs223b04/algo_affine_tracking.pdf
+    """
+
+    # The solver does not take into account multiple channels for now
+    # Using the luminance (max across channels)
+    if channel_axis is not None:
+        reference_image = np.max(reference_image, channel_axis)
+        moving_image = np.max(moving_image, channel_axis)
+
     if matrix is None:
         if len(reference_image.shape) == 2:
             matrix = np.eye(3)
         else:
             matrix = np.eye(4)
-    mesh = np.meshgrid(*[np.arange(0, x) for x in reference_image.shape], indexing='ij')
-    mesh = [x.astype(np.float32) for x in mesh]
 
-    # This is replaced by the pyramid gaussian smoothing in the affine function
-    # ir = ndi.gaussian_filter(reference_image, gaussian_filter_size)
-    # iw = ndi.gaussian_filter(moving_image, gaussian_filter_size)
-    ir = reference_image
-    iw = moving_image
+    mesh = np.meshgrid(
+        *[np.arange(x, dtype=np.float32) for x in reference_image.shape], indexing='ij'
+    )
 
-    grad = np.gradient(iw)
+    grad = np.gradient(moving_image)
     rho = -1
-    last_rho = -termination_eps
+    last_rho = -tol
 
-    ir_mean = np.mean(ir)
-    ir_std = np.std(ir)
-    ir_meancorr = ir - ir_mean
+    ir_mean = np.mean(reference_image)
+    ir_std = np.std(reference_image)
+    ir_meancorr = reference_image - ir_mean
 
-    ir_norm = np.sqrt(np.sum(np.prod(ir.shape)) * ir_std**2)
+    ir_norm = np.sqrt(np.sum(np.prod(reference_image.shape)) * ir_std**2)
 
-    for _ in range(number_of_iterations):
-        if np.abs(rho - last_rho) < termination_eps:
+    for _ in range(max_iter):
+        if np.abs(rho - last_rho) < tol:
             break
 
-        iw_warped = custom_warp(iw, matrix, motion_type=model, order=order)
+        iw_warped = custom_warp(moving_image, matrix, motion_type=model, order=order)
 
         iw_mean = np.mean(iw_warped[iw_warped != 0])
         iw_std = np.std(iw_warped[iw_warped != 0])
@@ -621,14 +698,11 @@ def solver_affine_ecc(
 
         iw_warped_meancorr = iw_warped - iw_mean
         grad_iw_warped = np.array(
-            [
-                custom_warp(g, matrix, motion_type=model, order=order)
-                for g in grad
-            ]
+            [custom_warp(g, matrix, motion_type=model, order=order) for g in grad]
         )
 
-        jacobian = compute_jacobian(grad_iw_warped, mesh, matrix, model)
-        hessian = compute_hessian(jacobian)
+        jacobian = _ecc_compute_jacobian(grad_iw_warped, mesh, matrix, model)
+        hessian = _ecc_compute_hessian(jacobian)
         hessian_inv = np.linalg.inv(hessian)
 
         correlation = np.vdot(ir_meancorr, iw_warped_meancorr)
@@ -638,8 +712,8 @@ def solver_affine_ecc(
         if np.isnan(rho):
             raise ValueError("NaN encoutered.")
 
-        iw_projection = project_onto_jacobian(jacobian, iw_warped_meancorr)
-        ir_projection = project_onto_jacobian(jacobian, ir_meancorr)
+        iw_projection = _ecc_project_onto_jacobian(jacobian, iw_warped_meancorr)
+        ir_projection = _ecc_project_onto_jacobian(jacobian, ir_meancorr)
 
         iw_hessian_projection = np.matmul(hessian_inv, iw_projection)
 
@@ -648,8 +722,9 @@ def solver_affine_ecc(
         if den <= 0:
             warnings.warn(
                 (
-                    "The algorithm stopped before its convergence. The correlation is going to be minimized."
-                    "Images may be uncorrelated or non-overlapped."
+                    "The algorithm stopped before its convergence. The "
+                    "correlation is going to be minimized. Images may "
+                    "be uncorrelated or non-overlapped."
                 ),
                 RuntimeWarning,
             )
@@ -658,9 +733,9 @@ def solver_affine_ecc(
         _lambda = num / den
 
         error = _lambda * ir_meancorr - iw_warped_meancorr
-        error_projection = project_onto_jacobian(jacobian, error)
+        error_projection = _ecc_project_onto_jacobian(jacobian, error)
         delta_p = np.matmul(hessian_inv, error_projection)
-        matrix = update_warping_matrix(matrix, delta_p, model)
+        matrix = _ecc_update_warping_matrix(matrix, delta_p, model)
 
     return matrix
 
@@ -680,7 +755,7 @@ def solver_affine_studholme(
     ),
 ):
     """
-    Solver maximizing mutual information using Powell's method
+    Solver minimizing the cost function to register an image pair.
 
     Parameters
     ----------
@@ -742,8 +817,12 @@ def solver_affine_studholme(
         else:
             raise NotImplementedError(f"Motion model {model} not implemented.")
 
+    # scale translation to image size
+    scale = np.max(reference_image.shape)
+    matrix = _scale_parameters(matrix, model, ndim, 1.0 / scale)
+
     cost = partial(
-        _param_cost,
+        _studholme_param_cost,
         reference_image=reference_image,
         moving_image=moving_image,
         weights=weights,
@@ -753,7 +832,10 @@ def solver_affine_studholme(
 
     result = minimize(cost, x0=matrix, method=method, options=options)
 
-    return result.x
+    # scale translation to image size
+    param = _scale_parameters(result.x, model, ndim, scale)
+
+    return param
 
 
 def affine(
@@ -877,10 +959,15 @@ def affine(
         model=model,
     )
 
-    for image_0, image_1, w in pyramid[1:]:
+    for scaled_reference_image, scaled_moving_image, scaled_weights in pyramid[1:]:
         matrix = _scale_parameters(matrix, model, ndim, pyramid_downscale)
         matrix = solver(
-            image_0, image_1, w, channel_axis=channel_axis, matrix=matrix, model=model
+            reference_image=scaled_reference_image,
+            moving_image=scaled_moving_image,
+            weights=scaled_weights,
+            channel_axis=channel_axis,
+            matrix=matrix,
+            model=model,
         )
 
     return _parameter_vector_to_matrix(matrix, model, ndim)
