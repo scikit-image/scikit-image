@@ -9,6 +9,7 @@ def binary_blobs(
     n_dim=2,
     volume_fraction=0.5,
     rng=None,
+    *,
     mode='nearest',
 ):
     """
