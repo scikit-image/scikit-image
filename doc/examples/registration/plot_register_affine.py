@@ -36,14 +36,15 @@ import skimage as ski
 
 reference = ski.data.camera()[::4, ::4]
 
+# Define a rotation around the center of the image
 r = -0.12  # rotation angle in radians
 c, s = np.cos(r), np.sin(r)
+R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+# translation to center the rotation
 T = np.array(
     [[1, 0, -reference.shape[0] / 2], [0, 1, -reference.shape[1] / 2], [0, 0, 1]]
 )
-R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 transform = np.linalg.inv(T) @ R @ T
-
 moving = ndi.affine_transform(reference, transform)
 
 ###############################################################################
@@ -59,34 +60,10 @@ moving = ndi.affine_transform(reference, transform)
 import time
 
 
-def solver_affine_studholme_mse(
-    reference_image,
-    moving_image,
-    weights,
-    channel_axis,
-    matrix,
-    model,
-    method="Powell",
-    options={"maxiter": 10, "disp": True},
-):
-    return ski.registration.solver_affine_studholme(
-        reference_image,
-        moving_image,
-        weights,
-        channel_axis,
-        matrix,
-        model,
-        method=method,
-        options=options,
-        cost=lambda im0, im1, w: np.mean(np.square(im0 - im1).ravel()),
-    )
-
-
 solvers = [
     ski.registration.solver_affine_lucas_kanade,
-    # ski.registration.solver_affine_ecc,
+    ski.registration.solver_affine_ecc,
     ski.registration.solver_affine_studholme,
-    # solver_affine_studholme_mse,
 ]
 
 results = []
@@ -154,6 +131,9 @@ _, ax = plt.subplots(2, len(results) + 1)
 
 ax[0, 0].set_title("initial alignment")
 ax[0, 0].imshow(overlay(reference, moving))
+tre_initial = ski.registration.target_registration_error(reference.shape, transform)
+ax[1, 0].set_title(f"TRE (max:{tre_initial.max():.2f}px)")
+ax[1, 0].imshow(tre_initial)
 
 for k, item in enumerate(results):
     ax[0, k + 1].set_title(item["test"])
@@ -172,7 +152,6 @@ plt.show()
 # If we know that our transform is a *rigid* transform, also known as a
 # Euclidean transform, we can reduce the number of free parameters in the model.
 #
-
 for solver in solvers:
     start_time = time.time()
     matrix = ski.registration.affine(
@@ -198,7 +177,7 @@ print(np.linalg.inv(transform))
 for item in results:
     print(
         f"{item['test']} in {item['elapsed time']:.2f} seconds,"
-        f" TRE max:{item['tre'].max():.2f}/mean:{item['tre'].mean():.2f}"
+        f" TRE max:{item['tre'].max():.2f}/mean:{item['tre'].mean():.2f} pixels."
     )
     print(item["matrix"])
 
@@ -210,6 +189,9 @@ _, ax = plt.subplots(2, len(results) + 1)
 
 ax[0, 0].set_title("Initial alignment")
 ax[0, 0].imshow(overlay(reference, moving))
+ax[1, 0].set_title("Initial alignment")
+ax[1, 0].set_title(f"TRE (max:{tre_initial.max():.2f}px)")
+ax[1, 0].imshow(tre_initial)
 
 for k, item in enumerate(results):
     ax[0, k + 1].set_title(item["test"])
