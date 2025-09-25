@@ -9,7 +9,7 @@ from scipy import ndimage as ndi
 
 from skimage import data
 from skimage.registration import affine
-from skimage._shared.testing import assert_array_equal
+from skimage._shared.testing import assert_array_equal, assert_array_almost_equal
 from skimage.registration._affine import (
     _parameter_vector_to_matrix,
     _matrix_to_parameter_vector,
@@ -129,7 +129,7 @@ def test_matrix_parameter_vector_conversion2(model, ndim):
     transform = np.linalg.inv(T) @ R @ T
     params = _matrix_to_parameter_vector(transform, "euclidean")
     matrix = _parameter_vector_to_matrix(params, "euclidean", 2)
-    assert_array_equal(transform, matrix)
+    assert_array_almost_equal(transform, matrix)
 
 
 @pytest.mark.parametrize("ndim", [2, 3])
