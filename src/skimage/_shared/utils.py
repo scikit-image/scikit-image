@@ -1103,6 +1103,9 @@ def as_binary_ndarray(array, *, variable_name):
 def _prescale_value_range(image, *, mode, stacklevel=3):
     """Scale the value range of `image` according to the selected `mode`.
 
+    For now, this private function handles prescaling for public API that
+    needs a value range to be known and well-defined.
+
     Parameters
     ----------
     image : ndarray

@@ -271,10 +271,10 @@ def blob_dog(
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Difference-of-Gaussian (DoG). Local maxima in DoG smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
