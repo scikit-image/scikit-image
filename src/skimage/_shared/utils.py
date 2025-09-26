@@ -1134,6 +1134,13 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
         The rescaled `image` of the same shape but possibly with a different
         dtype.
 
+    Raises
+    ------
+    ValueError
+        Prescaling an `image` with ``mode='minmax'` that contains NaN or
+        inifinity is not supported for now. In those cases, replace the
+        unsupported values manually.
+
     Examples
     --------
     >>> import numpy as np
@@ -1171,55 +1178,49 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
 
     # Deal with unexpected or invalid `lower` and `higher` early
     if np.isnan(lower) or np.isnan(higher):
-        warnings.warn(
-            "Input value range with NaN, normalizing `image` to NaN everywhere",
-            category=RuntimeWarning,
-            stacklevel=stacklevel,
+        msg = (
+            "`image` contains NaN. "
+            "Min-max scaling with NaN is not supported. "
+            "Replace NaNs manually before scaling."
         )
-        out = np.empty_like(out)
-        out.fill(np.nan)
-        return out
+        raise ValueError(msg)
 
     if np.isinf(lower) or np.isinf(higher):
-        warnings.warn(
-            "Input value range with infinity, "
-            "in `image`, normalizing infinity to NaN and other values to 0",
-            category=RuntimeWarning,
-            stacklevel=stacklevel,
+        msg = (
+            "`image` contains inf. "
+            "Min-max scaling with inf is not supported. "
+            "Replace inf manually before scaling."
         )
-        out = np.where(np.isinf(out), np.nan, 0)
-        out = out.astype(dtype)
-        return out
+        raise ValueError(msg)
 
     if lower == higher:
-        if mode == "minmax":
-            msg = "`image` is uniform, returning uniform array of 0"
-        else:
-            msg = "Requested value range is uniform, returning uniform array of 0"
+        msg = "`image` is uniform, returning uniform array of 0"
         warnings.warn(msg, category=RuntimeWarning, stacklevel=stacklevel)
         out = np.zeros_like(out)
         return out
-
-    if lower > higher:
-        raise ValueError(f"`lower` value is larger than `higher`: {mode!r}")
+    assert lower < higher
 
     # Actual normalization
     with np.errstate(all="raise"):
         try:
             peak_to_peak = higher - lower
             out -= lower
-
-        except FloatingPointError:
-            warnings.warn(
-                "Dividing by 2 before scaling to avoid over-/underflow",
-                category=RuntimeWarning,
-                stacklevel=stacklevel,
-            )
-            out /= 2
-            lower /= 2
-            higher /= 2
-            peak_to_peak = higher - lower
-            out -= lower
+        except FloatingPointError as e:
+            if "overflow" in e.args[0]:
+                warnings.warn(
+                    "Overflow while attempting to rescale. This could be due to "
+                    "`image` containing unexpectedly large values. Dividing by 2 "
+                    "before scaling to avoid overflow.",
+                    category=RuntimeWarning,
+                    stacklevel=stacklevel,
+                )
+                out /= 2
+                lower /= 2
+                higher /= 2
+                peak_to_peak = higher - lower
+                out -= lower
+            else:
+                raise
 
         out /= peak_to_peak
 
