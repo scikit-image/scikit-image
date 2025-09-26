@@ -1100,7 +1100,7 @@ def as_binary_ndarray(array, *, variable_name):
     return np.asarray(array, dtype=bool)
 
 
-def _prescale_value_range(image, *, mode, stacklevel=3):
+def _scale_value_range(image, *, mode, stacklevel=3):
     """Scale the value range of `image` according to the selected `mode`.
 
     For now, this private function handles prescaling for public API that
@@ -1149,13 +1149,13 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     >>> import numpy as np
     >>> image = np.array([-10, 45, 100], dtype=np.int8)
 
-    >>> _prescale_value_range(image, mode="minmax")
+    >>> _scale_value_range(image, mode="minmax")
     array([0. , 0.5, 1. ])
 
-    >>> _prescale_value_range(image, mode="legacy")
+    >>> _scale_value_range(image, mode="legacy")
     array([-0.07874016,  0.35433071,  0.78740157])
 
-    >>> _prescale_value_range(image, mode="none")
+    >>> _scale_value_range(image, mode="none")
     array([-10, 45, 100], dtype=int8)
     """
     # Early exits

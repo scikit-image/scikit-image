@@ -10,7 +10,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
     deprecate_parameter,
-    _prescale_value_range,
+    _scale_value_range,
 )
 from ..transform import integral_image
 from ..util import img_as_float
@@ -382,7 +382,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _prescale_value_range(image, mode=prescale)
+    image = _scale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
