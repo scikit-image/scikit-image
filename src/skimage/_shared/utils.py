@@ -1100,7 +1100,95 @@ def as_binary_ndarray(array, *, variable_name):
     return np.asarray(array, dtype=bool)
 
 
-def _scale_value_range(image, *, mode, stacklevel=3):
+def _minmax_scale_value_range(image, *, stacklevel=2):
+    """Min-max scale `image` to the value range [0, 1].
+
+    Parameters
+    ----------
+    image : ndarray
+        The image to scale.
+    stacklevel : int, optional
+        Set the correct stacklevel for warnings that may be raised during
+        normalization.
+
+    Returns
+    -------
+    scaled_image : ndarray
+        The rescaled `image` of the same shape but with a floating dtype.
+
+    Raises
+    ------
+    ValueError
+        Prescaling an `image` that contains NaN or inifinity is not supported
+        for now. In those cases, replace the unsupported values manually.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> image = np.array([-10, 45, 100], dtype=np.int8)
+    >>> _minmax_scale_value_range(image)
+    array([0. , 0.5, 1. ])
+    """
+    # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
+    # unexpected promotion and / or precision problems during normalization
+    dtype = _supported_float_type(image.dtype, allow_complex=True)
+    out = image.astype(dtype)
+
+    lower = out.min()
+    higher = out.max()
+
+    # Deal with unexpected or invalid `lower` and `higher` early
+    if np.isnan(lower) or np.isnan(higher):
+        msg = (
+            "`image` contains NaN. "
+            "Min-max scaling with NaN is not supported. "
+            "Replace NaNs manually before scaling."
+        )
+        raise ValueError(msg)
+
+    if np.isinf(lower) or np.isinf(higher):
+        msg = (
+            "`image` contains inf. "
+            "Min-max scaling with inf is not supported. "
+            "Replace inf manually before scaling."
+        )
+        raise ValueError(msg)
+
+    if lower == higher:
+        msg = "`image` is uniform, returning uniform array of 0"
+        warnings.warn(msg, category=RuntimeWarning, stacklevel=stacklevel)
+        out = np.zeros_like(out)
+        return out
+    assert lower < higher
+
+    # Actual normalization
+    with np.errstate(all="raise"):
+        try:
+            peak_to_peak = higher - lower
+            out -= lower
+        except FloatingPointError as e:
+            if "overflow" in e.args[0]:
+                warnings.warn(
+                    "Overflow while attempting to rescale. This could be due to "
+                    "`image` containing unexpectedly large values. Dividing by 2 "
+                    "before scaling to avoid overflow.",
+                    category=RuntimeWarning,
+                    stacklevel=stacklevel,
+                )
+                out /= 2
+                lower /= 2
+                higher /= 2
+                peak_to_peak = higher - lower
+                out -= lower
+            else:
+                raise
+
+        out /= peak_to_peak
+
+    return out
+
+
+def _prescale_value_range(image, *, mode, stacklevel=3):
     """Scale the value range of `image` according to the selected `mode`.
 
     For now, this private function handles prescaling for public API that
@@ -1166,65 +1254,7 @@ def _scale_value_range(image, *, mode, stacklevel=3):
         from ..util.dtype import img_as_float
 
         return img_as_float(image)
-
-    # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
-    # unexpected promotion and / or precision problems during normalization
-    dtype = _supported_float_type(image.dtype, allow_complex=True)
-    out = image.astype(dtype)
-
-    # Derive `lower` and `higher` from `mode`
     if mode == "minmax":
-        lower = out.min()
-        higher = out.max()
+        return _minmax_scale_value_range(image, stacklevel=stacklevel)
     else:
-        raise ValueError(f"Unsupported `mode`: {mode}")
-
-    # Deal with unexpected or invalid `lower` and `higher` early
-    if np.isnan(lower) or np.isnan(higher):
-        msg = (
-            "`image` contains NaN. "
-            "Min-max scaling with NaN is not supported. "
-            "Replace NaNs manually before scaling."
-        )
-        raise ValueError(msg)
-
-    if np.isinf(lower) or np.isinf(higher):
-        msg = (
-            "`image` contains inf. "
-            "Min-max scaling with inf is not supported. "
-            "Replace inf manually before scaling."
-        )
-        raise ValueError(msg)
-
-    if lower == higher:
-        msg = "`image` is uniform, returning uniform array of 0"
-        warnings.warn(msg, category=RuntimeWarning, stacklevel=stacklevel)
-        out = np.zeros_like(out)
-        return out
-    assert lower < higher
-
-    # Actual normalization
-    with np.errstate(all="raise"):
-        try:
-            peak_to_peak = higher - lower
-            out -= lower
-        except FloatingPointError as e:
-            if "overflow" in e.args[0]:
-                warnings.warn(
-                    "Overflow while attempting to rescale. This could be due to "
-                    "`image` containing unexpectedly large values. Dividing by 2 "
-                    "before scaling to avoid overflow.",
-                    category=RuntimeWarning,
-                    stacklevel=stacklevel,
-                )
-                out /= 2
-                lower /= 2
-                higher /= 2
-                peak_to_peak = higher - lower
-                out -= lower
-            else:
-                raise
-
-        out /= peak_to_peak
-
-    return out
+        raise ValueError("unsupported mode")

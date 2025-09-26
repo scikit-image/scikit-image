@@ -17,7 +17,8 @@ from skimage._shared.utils import (
     DEPRECATED,
     FailedEstimationAccessError,
     FailedEstimation,
-    _scale_value_range,
+    _minmax_scale_value_range,
+    _prescale_value_range,
 )
 from skimage._shared.dtype import numeric_dtype_min_max
 
@@ -542,7 +543,7 @@ def test_failed_estimation():
         fe.params
 
 
-class Test_prescale_value_range:
+class Test_minmax_scale_value_range:
     # Supported dtypes
     int_dtypes = [
         np.uint8,
@@ -564,18 +565,8 @@ class Test_prescale_value_range:
     ]
     all_dtypes = int_dtypes + float_dtypes
 
-    @pytest.mark.parametrize("dtype", all_dtypes)
-    def test_none(self, dtype):
-        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
-        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
-
-        result = _scale_value_range(image, mode="none")
-        assert result is not image
-        assert result.dtype == dtype
-        np.testing.assert_equal(result, image)
-
     @pytest.mark.parametrize("dtype", float_dtypes)
-    def test_minmax_float_max(self, dtype):
+    def test_float_max(self, dtype):
         dtype_min, dtype_max = numeric_dtype_min_max(dtype)
         image = np.array(
             [dtype_min, dtype_min / 2, 0, dtype_max / 2, dtype_max], dtype=dtype
@@ -586,55 +577,61 @@ class Test_prescale_value_range:
         if dtype == np.float16:
             # Special case: float16 is always scaled up to float32,
             # thereby avoiding over- & underflow issues and the related warning
-            result = _scale_value_range(image, mode="minmax")
+            result = _minmax_scale_value_range(image)
         else:
             regex = "Overflow while attempting to rescale"
             with pytest.warns(RuntimeWarning, match=regex):
-                result = _scale_value_range(image, mode="minmax")
+                result = _minmax_scale_value_range(image)
 
         assert image is not result
         assert result.dtype == expected_dtype
         np.testing.assert_equal(result, expected)
 
     @pytest.mark.parametrize("dtype", int_dtypes)
-    def test_minmax_int_max(self, dtype):
+    def test_int_max(self, dtype):
         dtype_min, dtype_max = numeric_dtype_min_max(dtype)
         image = np.array([dtype_min, dtype_max], dtype=dtype)
         expected_dtype = _supported_float_type(dtype, allow_complex=True)
         expected = np.array([0, 1], dtype=expected_dtype)
-        result = _scale_value_range(image, mode="minmax")
+        result = _minmax_scale_value_range(image)
         assert image is not result
         np.testing.assert_almost_equal(result, expected)
 
     @pytest.mark.parametrize("dtype", all_dtypes)
-    def test_minmax_uniform(self, dtype):
+    def test_uniform(self, dtype):
         image = np.array([10, 10], dtype=dtype)
         expected_dtype = _supported_float_type(dtype, allow_complex=True)
         expected = np.array([0, 0], dtype=expected_dtype)
 
         with pytest.warns(RuntimeWarning, match="`image` is uniform"):
-            result = _scale_value_range(image, mode="minmax")
+            result = _minmax_scale_value_range(image)
         assert image is not result
         assert result.dtype == expected_dtype
         np.testing.assert_equal(result, expected)
 
     @pytest.mark.parametrize("dtype", float_dtypes)
-    def test_minmax_nan(self, dtype):
+    def test_nan(self, dtype):
         image = np.array([np.nan, -1, 0, 1], dtype=dtype)
         with pytest.raises(ValueError, match="`image` contains NaN"):
-            _scale_value_range(image, mode="minmax")
+            _minmax_scale_value_range(image)
 
     @pytest.mark.parametrize("dtype", float_dtypes)
     @pytest.mark.filterwarnings(
         "ignore:Dividing by 2 before scaling to avoid over-/underflow:RuntimeWarning"
     )
-    def test_minmax_inf(self, dtype):
+    def test_inf(self, dtype):
         image = np.array([-np.inf, -1, 0, 1, np.inf], dtype=dtype)
         with pytest.raises(ValueError, match="`image` contains inf"):
-            _scale_value_range(image, mode="minmax")
+            _minmax_scale_value_range(image)
 
-    @pytest.mark.parametrize("mode", ["ab", (1, 2, 3), (1,)])
-    def test_unknown_mode(self, mode):
-        image = np.array([0, 1])
-        with pytest.raises(ValueError, match="Unsupported `mode`"):
-            _scale_value_range(image, mode=mode)
+
+class Test_prescale_value_range:
+    @pytest.mark.parametrize("dtype", Test_minmax_scale_value_range.all_dtypes)
+    def test_mode_none(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+
+        result = _prescale_value_range(image, mode="none")
+        assert result is not image
+        assert result.dtype == dtype
+        np.testing.assert_equal(result, image)
