@@ -1,5 +1,5 @@
-scikits-image 0.6 release notes
-===============================
+scikits-image 0.6 (2012-06-24)
+==============================
 
 We're happy to announce the 6th version of scikits-image!
 

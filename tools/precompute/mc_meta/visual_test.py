@@ -2,6 +2,7 @@
 Script to show the results of the two marching cubes algorithms on different
 data.
 """
+
 import time
 from contextlib import contextmanager
 
@@ -21,7 +22,7 @@ def main(select=3, **kwargs):
         4: Ellipsoid
 
     """
-    import visvis as vv  # noqa: delay import visvis and GUI libraries
+    import visvis as vv
 
     # Create test volume
     if select == 1:

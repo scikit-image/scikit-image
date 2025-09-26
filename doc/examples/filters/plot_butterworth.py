@@ -14,7 +14,6 @@ leading to a sharper transition between the passband and stopband.
 
 """
 
-
 #####################################################################
 # Butterworth filtering example
 # =============================

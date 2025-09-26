@@ -25,4 +25,5 @@ and more advanced topics.
    :maxdepth: 1
    :caption: Other resources
 
+   skimage2_migration
    glossary

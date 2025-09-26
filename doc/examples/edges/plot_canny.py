@@ -15,6 +15,7 @@ noisier the image, the greater the width), and the low and high threshold for
 the hysteresis thresholding.
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage as ndi

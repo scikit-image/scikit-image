@@ -11,6 +11,7 @@ whether the surrounding points are greater than or less than the central point
 Before trying out LBP on an image, it helps to look at a schematic of LBPs.
 The below code is just used to plot the schematic.
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

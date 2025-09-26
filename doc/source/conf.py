@@ -11,6 +11,7 @@ from warnings import filterwarnings
 
 import plotly.io as pio
 import skimage
+from intersphinx_registry import get_intersphinx_mapping
 from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
@@ -26,11 +27,11 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-with open("../../skimage/__init__.py") as f:
+with open("../../src/skimage/__init__.py") as f:
     setup_lines = f.readlines()
 version = "vUndefined"
 for l in setup_lines:
-    if l.startswith("__version__"):
+    if l.startswith("__version__ ="):
         version = l.split("'")[1]
         break
 
@@ -55,18 +56,26 @@ extensions = [
     "sphinx_design",
     "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
 ]
 
 autosummary_generate = True
 templates_path = ["_templates"]
-source_suffix = ".rst"
+source_suffix = {".rst": "restructuredtext"}
+
+show_warning_types = True
+suppress_warnings = [
+    # Ignore new warning in Sphinx 7.3.0 while pickling environment:
+    #   WARNING: cannot cache unpickable configuration value: 'sphinx_gallery_conf'
+    "config.cache",
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 exclude_trees = []
-default_role = "autolink"
+default_role = "py:obj"
 pygments_style = "sphinx"
 
 # -- Sphinx-gallery configuration --------------------------------------------
@@ -78,8 +87,7 @@ if v.release is None:
 if v.is_devrelease:
     binder_branch = "main"
 else:
-    major, minor = v.release[:2]
-    binder_branch = f"v{major}.{minor}.x"
+    binder_branch = f"v{release}"
 
 # set plotly renderer to capture _repr_html_ for sphinx-gallery
 
@@ -119,6 +127,10 @@ sphinx_gallery_conf = {
     },
     # Remove sphinx_gallery_thumbnail_number from generated files
     "remove_config_comments": True,
+    # `True` defaults to the number of jobs used by Sphinx (see its flag `-j`)
+    #   Temporarily disabled because plotly scraper isn't parallel-safe
+    #   (see https://github.com/plotly/plotly.py/issues/4959)!
+    # "parallel": True,
 }
 
 
@@ -178,15 +190,12 @@ html_theme_options = {
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
     # Other
-    "pygment_light_style": "default",
-    "pygment_dark_style": "github-dark",
+    "pygments_light_style": "default",
+    "pygments_dark_style": "github-dark",
     "analytics": {
         "plausible_analytics_domain": "scikit-image.org",
         "plausible_analytics_url": ("https://views.scientific-python.org/js/script.js"),
     },
-    # Silence warning in pydata-sphinx-theme v0.14.2
-    # can be removed after >=0.15 is released and pinned
-    "navigation_with_keys": False,
 }
 
 # Custom sidebar templates, maps document names to template names.
@@ -212,9 +221,7 @@ latex_documents = [
     ),
 ]
 latex_elements = {}
-latex_elements[
-    "preamble"
-] = r"""
+latex_elements["preamble"] = r"""
 \usepackage{enumitem}
 \setlistdepth{100}
 
@@ -241,17 +248,20 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 # -- intersphinx --------------------------------------------------------------
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "neps": ("https://numpy.org/neps/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-    "matplotlib": ("https://matplotlib.org/stable/", None),
-    "networkx": ("https://networkx.org/documentation/stable/", None),
-    "plotly": ("https://plotly.com/python-api-reference/", None),
-    "seaborn": ("https://seaborn.pydata.org/", None),
-}
+# ...
+intersphinx_mapping = get_intersphinx_mapping(
+    packages={
+        "python",
+        "numpy",
+        "neps",
+        "scipy",
+        "sklearn",
+        "matplotlib",
+        "networkx",
+        "plotly",
+        "seaborn",
+    }
+)
 
 # Do not (yet) use nitpicky mode for checking cross-references
 nitpicky = False
@@ -352,4 +362,6 @@ def linkcode_resolve(domain, info):
 myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
+    # Enable fencing directives with `:::`
+    "colon_fence",
 ]

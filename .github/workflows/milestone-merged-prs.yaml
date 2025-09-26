@@ -1,15 +1,18 @@
 name: Milestone
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types:
       - closed
     branches:
       - "main"
 
+permissions: {}
+
 jobs:
   milestone_pr:
     name: attach to PR
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: scientific-python/attach-next-milestone@bc07be829f693829263e57d5e8489f4e57d3d420

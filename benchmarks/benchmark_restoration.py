@@ -5,7 +5,7 @@ import scipy.ndimage as ndi
 
 from skimage.data import camera
 from skimage import restoration, data, color
-from skimage.morphology import binary_dilation
+from skimage.morphology import dilation
 
 try:
     from skimage.morphology import disk
@@ -221,11 +221,11 @@ class RollingBall:
 
     time_rollingball_ndim.setup = _skip_slow
 
-    def time_rollingball_threads(self, threads):
-        restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
+    def time_rollingball_parallel(self, workers):
+        restoration.rolling_ball(data.coins(), radius=100, workers=workers)
 
-    time_rollingball_threads.params = (0, 2, 4, 8)
-    time_rollingball_threads.param_names = ["threads"]
+    time_rollingball_parallel.params = (0, 2, 4, 8)
+    time_rollingball_parallel.param_names = ["workers"]
 
 
 class Inpaint:
@@ -255,7 +255,7 @@ class Inpaint:
             thresh = 2.75 + 0.25 * radius  # larger defects are less common
             tmp_mask = rstate.randn(*image.shape[:-1]) > thresh
             if radius > 0:
-                tmp_mask = binary_dilation(tmp_mask, disk(radius, dtype=bool))
+                tmp_mask = dilation(tmp_mask, disk(radius, dtype=bool))
             mask[tmp_mask] = 1
 
         for layer in range(image.shape[-1]):

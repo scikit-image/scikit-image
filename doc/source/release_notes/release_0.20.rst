@@ -1,5 +1,5 @@
-scikit-image 0.20.0 release notes
-=================================
+scikit-image 0.20.0 (2023-02-28)
+================================
 
 scikit-image is an image processing toolbox built on SciPy that
 includes algorithms for segmentation, geometric transformations, color

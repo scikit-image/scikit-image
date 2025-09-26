@@ -48,7 +48,7 @@ fig, axs = plt.subplots(3, 2)
 for ax, img, feat_t in zip(np.ravel(axs), images, feature_types):
     coord, _ = haar_like_feature_coord(img.shape[0], img.shape[1], feat_t)
     haar_feature = draw_haar_like_feature(
-        img, 0, 0, img.shape[0], img.shape[1], coord, max_n_features=1, random_state=0
+        img, 0, 0, img.shape[0], img.shape[1], coord, max_n_features=1, rng=0
     )
     ax.imshow(haar_feature)
     ax.set_title(feat_t)

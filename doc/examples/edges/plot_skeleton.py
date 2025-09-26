@@ -10,6 +10,7 @@ can be useful for feature extraction, and/or representing an object's topology.
 border pixels are identified and removed on the condition that they do not
 break the connectivity of the corresponding object.
 """
+
 from skimage.morphology import skeletonize
 from skimage import data
 import matplotlib.pyplot as plt

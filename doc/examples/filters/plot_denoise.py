@@ -38,6 +38,7 @@ noise.
 .. _`YCbCr color space`: https://en.wikipedia.org/wiki/YCbCr
 
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.restoration import (

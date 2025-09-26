@@ -1,5 +1,5 @@
-scikit-image 0.16.2 release notes
-=================================
+scikit-image 0.16.2 (2019-10-22)
+================================
 
 We're happy to announce the release of scikit-image v0.16.2!
 
@@ -33,8 +33,8 @@ Bug fixes
 - Nelle Varoquaux
 
 
-scikit-image 0.16.1 release notes
-=================================
+scikit-image 0.16.1 (2019-10-11)
+================================
 
 We're happy to announce the release of scikit-image v0.16.1!
 

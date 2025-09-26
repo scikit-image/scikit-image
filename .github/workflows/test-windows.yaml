@@ -1,0 +1,105 @@
+name: Test Windows
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  CC: clang
+  CXX: clang
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
+jobs:
+  test_skimage_windows:
+    name: windows-cp${{ matrix.python-version }}-${{ matrix.OPTIONS_NAME }}
+    runs-on: windows-latest
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.11"
+            MINIMUM_REQUIREMENTS: 0
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
+          - python-version: "3.11"
+            MINIMUM_REQUIREMENTS: 0
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "optional-deps"
+          - python-version: "3.12"
+            PIP_FLAGS: "--pre"
+            OPTIONS_NAME: "pre"
+          - python-version: "3.13"
+            MINIMUM_REQUIREMENTS: 0
+            OPTIONAL_DEPS: 0
+            OPTIONS_NAME: "default"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+          cache-dependency-path: "requirements/*.txt"
+          cache: "pip"
+
+      - name: Install build dependencies
+        env:
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        shell: bash
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      # Please review frequently to see if it is still necessary.
+      # MSVC STL requires later clang than default on image.
+      # https://github.com/actions/runner-images/issues/12435#issuecomment-2997654523
+      - name: Install LLVM Clang 19 on Windows
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          Invoke-WebRequest -Uri "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-win64.exe" -OutFile "llvm.exe"
+          Start-Process -FilePath .\llvm.exe -ArgumentList "/S", "/D=C:\LLVM" -Wait
+          echo "C:\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build and install from source
+        shell: bash
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install test dependencies
+        env:
+          MINIMUM_REQUIREMENTS: ${{ matrix.MINIMUM_REQUIREMENTS }}
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+          WITHOUT_POOCH: ${{ matrix.WITHOUT_POOCH }}
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        shell: bash
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Run tests
+        shell: bash
+        run: |
+          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "windows tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

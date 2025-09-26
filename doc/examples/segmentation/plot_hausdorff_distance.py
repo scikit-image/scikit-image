@@ -10,6 +10,7 @@ between any point on the first set and its nearest point on the second set,
 and vice-versa.
 
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -15,6 +15,7 @@ DFT to achieve arbitrary subpixel precision [1]_.
        156-158 (2008). :DOI:`10.1364/OL.33.000156`
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

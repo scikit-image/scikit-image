@@ -22,6 +22,7 @@ achieved simply by averaging shifts of only n=0 and n=1 on each axis.
 
 .. _`shift-invariant`: https://en.wikipedia.org/wiki/Shift-invariant_system
 """
+
 import matplotlib.pyplot as plt
 
 from skimage.restoration import denoise_wavelet, cycle_spin

@@ -53,5 +53,5 @@ class InterpolationResize:
         References
         ----------
         .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
-        """  # noqa
+        """
         pass

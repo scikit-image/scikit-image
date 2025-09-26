@@ -17,22 +17,10 @@ affect the different scores.
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage as ndi
+import skimage as ski
 
-from skimage import data
-from skimage.metrics import adapted_rand_error, variation_of_information
-from skimage.filters import sobel
-from skimage.measure import label
-from skimage.util import img_as_float
-from skimage.feature import canny
-from skimage.morphology import remove_small_objects
-from skimage.segmentation import (
-    morphological_geodesic_active_contour,
-    inverse_gaussian_gradient,
-    watershed,
-    mark_boundaries,
-)
 
-image = data.coins()
+image = ski.data.coins()
 
 ###############################################################################
 # First, we generate the true segmentation. For this simple image, we know
@@ -40,11 +28,11 @@ image = data.coins()
 # a real scenario, typically you would generate ground truth by manual
 # annotation or "painting" of a segmentation.
 
-elevation_map = sobel(image)
+elevation_map = ski.filters.sobel(image)
 markers = np.zeros_like(image)
 markers[image < 30] = 1
 markers[image > 150] = 2
-im_true = watershed(elevation_map, markers)
+im_true = ski.segmentation.watershed(elevation_map, markers)
 im_true = ndi.label(ndi.binary_fill_holes(im_true - 1))[0]
 
 ###############################################################################
@@ -54,16 +42,16 @@ im_true = ndi.label(ndi.binary_fill_holes(im_true - 1))[0]
 # final result. We will see how this causes the oversegmentation metrics to
 # shoot up.
 
-edges = sobel(image)
-im_test1 = watershed(edges, markers=468, compactness=0.001)
+edges = ski.filters.sobel(image)
+im_test1 = ski.segmentation.watershed(edges, markers=468, compactness=0.001)
 
 ###############################################################################
 # The next approach uses the Canny edge filter, :func:`skimage.feature.canny`.
 # This is a very good edge finder, and gives balanced results.
 
-edges = canny(image)
+edges = ski.feature.canny(image)
 fill_coins = ndi.binary_fill_holes(edges)
-im_test2 = ndi.label(remove_small_objects(fill_coins, 21))[0]
+im_test2 = ndi.label(ski.morphology.remove_small_objects(fill_coins, max_size=20))[0]
 
 ###############################################################################
 # Finally, we use morphological geodesic active contours,
@@ -74,11 +62,11 @@ im_test2 = ndi.label(remove_small_objects(fill_coins, 21))[0]
 # merged into one segment. We will see the corresponding effect on the
 # segmentation metrics.
 
-image = img_as_float(image)
-gradient = inverse_gaussian_gradient(image)
+image = ski.util.img_as_float(image)
+gradient = ski.segmentation.inverse_gaussian_gradient(image)
 init_ls = np.zeros(image.shape, dtype=np.int8)
 init_ls[10:-10, 10:-10] = 1
-im_test3 = morphological_geodesic_active_contour(
+im_test3 = ski.segmentation.morphological_geodesic_active_contour(
     gradient,
     num_iter=100,
     init_level_set=init_ls,
@@ -86,7 +74,7 @@ im_test3 = morphological_geodesic_active_contour(
     balloon=-1,
     threshold=0.69,
 )
-im_test3 = label(im_test3)
+im_test3 = ski.measure.label(im_test3)
 
 method_names = [
     'Compact watershed',
@@ -100,8 +88,8 @@ recall_list = []
 split_list = []
 merge_list = []
 for name, im_test in zip(method_names, [im_test1, im_test2, im_test3]):
-    error, precision, recall = adapted_rand_error(im_true, im_test)
-    splits, merges = variation_of_information(im_true, im_test)
+    error, precision, recall = ski.metrics.adapted_rand_error(im_true, im_test)
+    splits, merges = ski.metrics.variation_of_information(im_true, im_test)
     split_list.append(splits)
     merge_list.append(merges)
     precision_list.append(precision)
@@ -132,19 +120,19 @@ ax[1].set_title('Adapted Rand precision vs. recall')
 ax[1].set_xlim(0, 1)
 ax[1].set_ylim(0, 1)
 
-ax[2].imshow(mark_boundaries(image, im_true))
+ax[2].imshow(ski.segmentation.mark_boundaries(image, im_true))
 ax[2].set_title('True Segmentation')
 ax[2].set_axis_off()
 
-ax[3].imshow(mark_boundaries(image, im_test1))
+ax[3].imshow(ski.segmentation.mark_boundaries(image, im_test1))
 ax[3].set_title('Compact Watershed')
 ax[3].set_axis_off()
 
-ax[4].imshow(mark_boundaries(image, im_test2))
+ax[4].imshow(ski.segmentation.mark_boundaries(image, im_test2))
 ax[4].set_title('Edge Detection')
 ax[4].set_axis_off()
 
-ax[5].imshow(mark_boundaries(image, im_test3))
+ax[5].imshow(ski.segmentation.mark_boundaries(image, im_test3))
 ax[5].set_title('Morphological GAC')
 ax[5].set_axis_off()
 

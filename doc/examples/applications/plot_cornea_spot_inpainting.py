@@ -147,7 +147,7 @@ thresh_0 = ski.filters.threshold_local(image_med, block_size=43)
 
 mask_0 = image_med < thresh_0
 
-plot_comparison(mask_0, mask_2, "No offset", "offset = 15")
+plot_comparison(mask_0, mask_2, "No offset", "Offset = 15")
 
 #####################################################################
 # Remove fine-grained features
@@ -184,7 +184,7 @@ plot_comparison(mask_2, mask_open, "mask before", "after opening")
 # Next, we can make the detected areas wider by applying a dilation filter:
 
 mask_dilate = ski.morphology.dilation(mask_open, footprint)
-plot_comparison(mask_open, mask_dilate, "before", "after dilation")
+plot_comparison(mask_open, mask_dilate, "Before", "After dilation")
 
 #####################################################################
 # Dilation enlarges bright regions and shrinks dark regions.

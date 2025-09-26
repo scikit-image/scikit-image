@@ -1,5 +1,5 @@
-scikits-image 0.5 release notes
-===============================
+scikits-image 0.5 (2012-02-26)
+==============================
 
 We're happy to announce the 0.5 release of scikits-image, our image processing
 toolbox for SciPy.

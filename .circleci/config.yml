@@ -17,7 +17,7 @@ jobs:
       - restore_cache:
           name: restore cached data files
           keys:
-            - data-v1-{{ checksum "skimage/data/_registry.py" }}
+            - data-v1-{{ checksum "src/skimage/data/_registry.py" }}
       - restore_cache:
           name: Restore cached pip dependencies
           keys:
@@ -58,7 +58,7 @@ jobs:
             PYTHON=python3 SPHINXOPTS="-j 1" make html
       - save_cache:
           name: Cache data files
-          key: data-v1-{{ checksum "skimage/data/_registry.py" }}
+          key: data-v1-{{ checksum "src/skimage/data/_registry.py" }}
           paths:
             - /home/circleci/.cache/scikit-image/master
       - store_artifacts:

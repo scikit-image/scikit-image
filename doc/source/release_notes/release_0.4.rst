@@ -1,5 +1,5 @@
-scikits-image 0.4 release notes
-===============================
+scikits-image 0.4 (2011-12-03)
+==============================
 
 We're happy to announce the 0.4 release of scikits-image, an image processing
 toolbox for SciPy.

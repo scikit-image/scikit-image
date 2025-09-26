@@ -15,6 +15,7 @@ E. Cline. Marching Cubes: A High Resolution 3D Surface Construction Algorithm.
 Computer Graphics SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
 
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 

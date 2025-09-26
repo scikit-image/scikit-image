@@ -10,6 +10,7 @@ subpixel position of corners ([1]_, [2]_).
 .. [2] https://en.wikipedia.org/wiki/Interest_point_detection
 
 """
+
 from matplotlib import pyplot as plt
 
 from skimage import data

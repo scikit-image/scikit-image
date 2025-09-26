@@ -76,7 +76,7 @@ img_list = [
 ref_img = img_list[0].copy()
 
 img_list = [
-    util.random_noise(filters.gaussian(im, 1.1), var=5e-4, rng=seed)
+    util.random_noise(filters.gaussian(im, sigma=1.1), var=5e-4, rng=seed)
     for seed, im in enumerate(img_list)
 ]
 
@@ -117,6 +117,13 @@ matching_corners = [
 ############################################################################
 # Once all the points are registered to the reference points, robust
 # relative affine transformations can be estimated using the RANSAC method.
+#
+# .. hint::
+#    :func:`skimage.measure.ransac` uses random sampling to estimate a model's
+#    parameters. Sometimes, the number of trials may not be enough to arrive
+#    at a successful estimation. To make this example deterministic, we pass a
+#    seed ``42`` to the parameter ``rng`` that is known to be successful.
+
 src = np.array(coords0)
 trfm_list = [
     measure.ransac(
@@ -125,6 +132,7 @@ trfm_list = [
         min_samples=3,
         residual_threshold=2,
         max_trials=100,
+        rng=42,
     )[0].params
     for dst in matching_corners
 ]

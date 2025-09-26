@@ -21,6 +21,7 @@ References
 .. [2] https://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 """
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

@@ -11,7 +11,7 @@ permissions (if not, you will need to ask an owner to grant you
 access), specifically to:
 
   - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/scikit-image-web
+  - https://github.com/scikit-image/skimage-web
 
 
 - Check ``TODO.txt`` for any outstanding tasks.
@@ -20,119 +20,146 @@ We use a variant of "semantic versioning", where version numbers are classified
 as v<major>.<minor>.<patch>.  By default, releases are made from the main
 branch as part of a linear release history and, as described below, are
 triggered by pushing a git tag to the scikit-image repository on github.  If
-a patch release is required for an older version, a branch can be created from
-the appropriate point in main and the following instructions are still apt.
+a patch release is required, a branch can be created from the appropriate point
+in main and the following instructions are still apt.
 
-- Update the release notes (note this will soon change with the addition of
-  Towncrier integrated directly into the CI):
+Example `version number`
 
-  1. Review and cleanup ``doc/release/release_dev.rst``.
+- 0.23.0rc0.dev0  # development version for 0.23.0 first release candidate
+- 0.23.0rc0       # 0.23.0 first release candidate
+- 0.23.0rc1.dev0  # development version for 0.23.0 second release candidate
+- 0.23.0          # 0.23.0 release
+- 0.24.0rc0.dev0  # development version for 0.24.0 first release candidate
 
-  2. Make a list of merges, contributors, and reviewers::
-
-       # Set release variables
-       export VERSION=<about-to-be-released version number>
-       export PREVIOUS=<previous version number>
-
-       pip install changelist
-       changelist scikit-image/scikit-image v${PREVIOUS} main --version ${VERSION} --out doc/source/release_notes/release_dev.rst --format rst
-
-  4. Scan the PR titles for highlights and mention these in the
-     relevant sections of the notes.
-     Ideally, all changed API objects are mentioned by name,
-     e.g. a new parameter or a deprecated function.
-
-  5. Check for duplicate names in the automatically generated list of
-     contributors and reviewers.
-
-  6. Rename the file to ``doc/release/release_<major>.<minor>.txt``
-
-  7. Copy ``doc/release/release_template.txt`` to
-     ``doc/release/release_dev.txt`` for the next release.
-
-  8. Copy relevant deprecations from ``release_<major>_<minor>.txt``
-     to ``release_dev.txt``.
-
-  9. Update the file ``skimage/data/_fetchers.py`` to point the pooch
-     repository to the new branch instead of main during testing.
-     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
-     change it to the newly created branch name.
-
-- Submit the release notes for review by other project maintainers:
-
-  - Create a PR from v<major>.<minor>.x branch to `main` (at this point,
-    the difference should show the full contents of the release notes).
-  - Discuss with others, and make the changes directly to v<major>.<minor>.x branch.
-  - Once the consensus is found, ask the project maintainers to merge
-    the PR.
-  - Cherry pick the change onto the release branch.
-
-- On the main branch, update the version number in ``skimage/__init__.py``
-  to the next ``.dev0`` version, commit, and push. This should follow PEP440
-  meaning that the appropriate version number would look something like
-  ``0.20.0.dev0`` with the period between ``0`` and ``dev`` and a trailing
-  ``0`` immediately after ``dev``. The final ``0`` is necessary to ensure
-  that
-  `NumpyVersion <https://github.com/scikit-image/scikit-image/pull/4947>`_
-  correctly interprets the version number.
+## Process
 
 - To debug building and testing wheels via CI, push to a branch named
   `maintenance/anything`.
 
   Once everything works as intended, remove those branches and proceed.
 
-- Edit ``doc/source/_static/docversions.js`` and
-  ``doc/source/_static/version_switcher.json`` in order to add the release, move the
-  key value pair `"preferred": true` to the most recent stable version, and commit.
+- Set release variables:
 
-- Update the version number to stable in ``skimage/__init__.py``, and commit.
+      export VERSION=<version number>
+      export PREVIOUS=<previous version number>
+      export ORG="scikit-image"
+      export REPO="scikit-image"
 
-- Make a release. You may wish to iterate initially with release candidates in
-  the steps below (add rc along with a number to the end of the tag version).
+  If this is a prerelease:
 
-  1. Add the version number as a tag in git::
+      export NOTES="doc/source/release_notes/release_dev.rst"
 
-   git tag -s -m <github_release_message> [-u <key-id>] v<major>.<minor>.0
+  If this is release:
+
+      export NOTES="doc/source/release_notes/release_${VERSION}.rst"
+      git rm doc/source/release_notes/release_dev.rst
+
+- Autogenerate release notes:
+
+      changelist ${ORG}/${REPO} v${PREVIOUS} main --version ${VERSION}  --out ${NOTES} --format rst
+      changelist ${ORG}/${REPO} v${PREVIOUS} main --version ${VERSION}  --out ${VERSION}.md
+
+- If you want, you can review the release notes:
+
+  - Scan the PR titles for highlights and mention these in the
+    relevant sections of the notes.
+    Ideally, all changed API objects are mentioned by name,
+    e.g. a new parameter or a deprecated function.
+
+  - Check for duplicate names in the automatically generated list of
+    contributors and reviewers.
+
+  - Append the release date to the title similar to previous iterations.
+
+- If this is a release:
+
+  - (Only needed if you create a new branch)
+    update the file ``skimage/data/_fetchers.py`` to point the pooch
+    repository to the new branch instead of main during testing.
+    Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
+    change it to the newly created branch name.
+
+  - Edit ``doc/source/_static/docversions.js`` and
+    ``doc/source/_static/version_switcher.json`` in order to add the release, move the
+    key value pair `"preferred": true` to the most recent stable version, and commit.
+
+      git add skimage/data/_fetchers.py doc/source/_static/docversions.js doc/source/_static/version_switcher.json
+
+- Update ``__version__`` in ``skimage/__init__.py``.
+
+- Commit changes:
+
+      git add skimage/__init__.py ${NOTES}
+      git commit -m "Designate ${VERSION} release"
+
+- Tag the release in git:
+
+      git tag -s v${VERSION} -m "signed ${VERSION} tag"
 
   (If you do not have a GPG key, follow the tutorial to set it up:
    https://help.github.com/articles/signing-commits-with-gpg/)
 
-  2. Push the new tag to GitHub::
+- Push the new meta-data to github:
 
-   git push upstream v<major>.<minor>.<patch>
+      git push --tags origin main
 
-  (where ``upstream`` is the name of the
-   ``github.com:scikit-image/scikit-image`` repository.)
+  where `origin` is the name of the ``github.com:scikit-image/scikit-image``
+  repository
 
-  Pushing the version tag will (for details see .github/workflows/wheel_tests_and_release.yml):
+- Create release from tag
 
-    1. Build and upload the wheels to PyPI
+      - go to https://github.com/scikit-image/scikit-image/releases/new?tag=v${VERSION}
+      - add v${VERSION} for the `Release title`
+      - paste contents (or upload) of ${VERSION}.md in the `Describe this release section`
+      - if pre-release check the box labelled `Set as a pre-release`
 
-    2. Publish the source distribution on PyPi
+- Update https://github.com/scikit-image/scikit-image/milestones:
 
-    3. Publish the release on github
+      - close old milestone
+      - ensure new milestone exists (perhaps setting due date)
 
-- Once the release is completed you should update the release docs:
-  - Edit ``doc/source/_static/docversions.js`` and commit
-  - On the release branch, build a clean version of the docs. In the
-    root directory, run ``pip install .``.
-  - In the ``doc/`` directory:
-    - Build using
-      ``make clean; make html; make gh-pages``.
-    - Check (since this a new feature) that binder links in gallery examples
-      point to the release branch, e.g. `0.16.x`.
-    - In the ``gh-pages/`` directory:
-      - Update the symlink to ``stable`` and commit.
-      - Upload the docs: ``git push origin gh-pages`` in ``doc/gh-pages``.
+- Update ``__version__`` in ``skimage/__init__.py``.
+
+- Commit changes:
+
+      git add skimage/__init__.py
+      git commit -m 'Bump version'
+      git push origin main
+
+- Update documentation on the web:
+  The documentation is kept in a separate repo: scikit-image/docs
+
+  - Wait for the CI service to deploy to GitHub Pages
+  - Sync your branch with the remote repo: ``git pull``.
+  - Update the docs
+
+      git switch gh-pages
+      git branch -C gh-pages gh-pages-backup
+      cp -a dev ../.
+      git reset --hard <commit from last release>
+      git rm -rf dev
+      cp -a ../dev .
+      git add dev
+      cp -a ../dev <release name, e.g., 0.23.x>
+      git add <release name, e.g., 0.23.x>
+      rm stable
+      ln -s <release name, e.g., 0.23.x> stable
+      git add stable
+      git commit -m "Add <release name, e.g., 0.23.x>"
+      git push -f origin gh-pages # force push---be careful!
 
 - Update the web frontpage:
+  The webpage is kept in a separate repo: scikit-image/skimage-web
 
-  The webpage source is kept in a separate repo: `scikit-image-web`.
+  - Highlight new release in the news section
 
-  - Add release date to ``index.rst`` under "News".
-  - Add previous stable version documentation path to disallowed paths
-    in `robots.txt`
-  - Commit and push (this will also build and update the website).
+      git pull
+      # Edit the ``News`` section of ``index.rst``
+      git add index.rst
+      git commit -m "Highlight ${VERSION} release"
+      git push
+
+----
 
 - Post release notes on user & dev forums, blog, Twitter, etc.
 

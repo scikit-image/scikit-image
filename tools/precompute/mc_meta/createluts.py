@@ -1,10 +1,11 @@
-""" Create lookup tables for the marching cubes algorithm, by parsing
+"""Create lookup tables for the marching cubes algorithm, by parsing
 the file "LookUpTable.h". This prints a text to the stdout which
 can then be copied to luts.py.
 
 The luts are tuples of shape and base64 encoded bytes.
 
 """
+
 import base64
 
 

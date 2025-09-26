@@ -36,6 +36,7 @@ is not rocket science.
 .. [6] https://en.wikipedia.org/wiki/K-means_clustering
 .. [7] https://en.wikipedia.org/wiki/Lateral_geniculate_nucleus
 """
+
 from scipy.cluster.vq import kmeans2
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt

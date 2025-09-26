@@ -7,10 +7,10 @@ masking and fancy indexing, in order to modify the pixel values of an image.
 """
 
 import numpy as np
-from skimage import data
+import skimage as ski
 import matplotlib.pyplot as plt
 
-camera = data.camera()
+camera = ski.data.camera()
 camera[:10] = 0
 mask = camera < 87
 camera[mask] = 255

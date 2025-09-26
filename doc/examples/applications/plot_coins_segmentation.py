@@ -11,15 +11,14 @@ against a darker background.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data
-from skimage.exposure import histogram
+import skimage as ski
 
-coins = data.coins()
-hist, hist_centers = histogram(coins)
+coins = ski.data.coins()
+hist, hist_centers = ski.exposure.histogram(coins)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3))
 axes[0].imshow(coins, cmap=plt.cm.gray)
-axes[0].axis('off')
+axes[0].set_axis_off()
 axes[1].plot(hist_centers, hist, lw=2)
 axes[1].set_title('histogram of gray values')
 
@@ -42,9 +41,9 @@ axes[1].imshow(coins > 150, cmap=plt.cm.gray)
 axes[1].set_title('coins > 150')
 
 for a in axes:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 ######################################################################
 # Edge-based segmentation
@@ -54,14 +53,13 @@ plt.tight_layout()
 # segmentation. To do this, we first get the edges of features using the
 # Canny edge-detector.
 
-from skimage.feature import canny
 
-edges = canny(coins)
+edges = ski.feature.canny(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray)
 ax.set_title('Canny detector')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # These contours are then filled using mathematical morphology.
@@ -73,21 +71,20 @@ fill_coins = ndi.binary_fill_holes(edges)
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(fill_coins, cmap=plt.cm.gray)
 ax.set_title('filling the holes')
-ax.axis('off')
+ax.set_axis_off()
 
 
 ######################################################################
 # Small spurious objects are easily removed by setting a minimum size for
 # valid objects.
 
-from skimage import morphology
 
-coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
+coins_cleaned = ski.morphology.remove_small_objects(fill_coins, max_size=20)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray)
 ax.set_title('removing small objects')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # However, this method is not very robust, since contours that are not
@@ -100,14 +97,13 @@ ax.axis('off')
 # We therefore try a region-based method using the watershed transform.
 # First, we find an elevation map using the Sobel gradient of the image.
 
-from skimage.filters import sobel
 
-elevation_map = sobel(coins)
+elevation_map = ski.filters.sobel(coins)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.gray)
 ax.set_title('elevation map')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # Next we find markers of the background and the coins based on the extreme
@@ -120,29 +116,26 @@ markers[coins > 150] = 2
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(markers, cmap=plt.cm.nipy_spectral)
 ax.set_title('markers')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # Finally, we use the watershed transform to fill regions of the elevation
 # map starting from the markers determined above:
-from skimage import segmentation
 
-segmentation_coins = segmentation.watershed(elevation_map, markers)
+segmentation_coins = ski.segmentation.watershed(elevation_map, markers)
 
 fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation_coins, cmap=plt.cm.gray)
 ax.set_title('segmentation')
-ax.axis('off')
+ax.set_axis_off()
 
 ######################################################################
 # This last method works even better, and the coins can be segmented and
 # labeled individually.
 
-from skimage.color import label2rgb
-
 segmentation_coins = ndi.binary_fill_holes(segmentation_coins - 1)
 labeled_coins, _ = ndi.label(segmentation_coins)
-image_label_overlay = label2rgb(labeled_coins, image=coins, bg_label=0)
+image_label_overlay = ski.color.label2rgb(labeled_coins, image=coins, bg_label=0)
 
 fig, axes = plt.subplots(1, 2, figsize=(8, 3), sharey=True)
 axes[0].imshow(coins, cmap=plt.cm.gray)
@@ -150,8 +143,8 @@ axes[0].contour(segmentation_coins, [0.5], linewidths=1.2, colors='y')
 axes[1].imshow(image_label_overlay)
 
 for a in axes:
-    a.axis('off')
+    a.set_axis_off()
 
-plt.tight_layout()
+fig.tight_layout()
 
 plt.show()

@@ -1,5 +1,5 @@
-scikit-image 0.19.3 release notes
-=================================
+scikit-image 0.19.3 (2022-06-12)
+================================
 
 We're happy to announce the release of scikit-image v0.19.3!
 
@@ -66,8 +66,8 @@ Pull Requests Included
 - Riadh Fezzani
 
 
-scikit-image 0.19.2 release notes
-=================================
+scikit-image 0.19.2 (2021-02-17)
+================================
 
 We're happy to announce the release of scikit-image v0.19.2! This is primarily
 a bug fix release, although there is one new gallery example related to
@@ -134,8 +134,8 @@ Pull Requests Included
 - Stefan van der Walt
 
 
-scikit-image 0.19.1 release notes
-=================================
+scikit-image 0.19.1 (2021-12-03)
+================================
 
 We're happy to announce the release of scikit-image v0.19.1!
 
@@ -173,8 +173,8 @@ Pull Requests Included
 - Stefan van der Walt
 
 
-scikit-image 0.19.0 release notes
-=================================
+scikit-image 0.19.0 (2021-12-03)
+================================
 
 We're happy to announce the release of scikit-image v0.19.0!
 
