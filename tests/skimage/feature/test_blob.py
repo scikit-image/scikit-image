@@ -9,6 +9,8 @@ from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
+from skimage._shared.testing import assert_stacklevel
+from skimage._shared.dtype import numeric_dtype_min_max
 
 
 pytestmark = pytest.mark.filterwarnings(
@@ -17,7 +19,8 @@ pytestmark = pytest.mark.filterwarnings(
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-def test_blob_dog(dtype):
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_dog(dtype, prescale):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
 
@@ -31,8 +34,9 @@ def test_blob_dog(dtype):
     img[xs, ys] = 255
 
     threshold = 2.0
-    if img.dtype.kind != 'f':
-        # account for internal scaling to [0, 1] by img_as_float
+    if img.dtype.kind != 'f' or prescale == "minmax":
+        # Account for internal scaling to [0, 1] by `img_as_float` (legacy)
+        # or min-max scaling
         threshold /= np.ptp(img)
 
     blobs = blob_dog(
@@ -40,6 +44,7 @@ def test_blob_dog(dtype):
         min_sigma=4,
         max_sigma=50,
         threshold=threshold,
+        prescale=prescale,
     )
 
     def radius(x):
@@ -159,6 +164,16 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
     else:
         msg = "zero blobs should be detected, as only blob is 5 px from border"
         assert blobs.shape[0] == 0, msg
+
+
+def test_blob_dog_prescale_minmax_overflow_warning():
+    float_min, float_max = numeric_dtype_min_max(np.float32)
+    img = np.array([float_min, float_max])
+    regex = "Overflow while attempting to rescale"
+    with pytest.warns(RuntimeWarning, match=regex) as record:
+        blobs = blob_dog(img, prescale="minmax")
+    assert_stacklevel(record)
+    assert blobs.shape == (0, 2)
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])

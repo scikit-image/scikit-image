@@ -382,7 +382,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _scale_value_range(image, mode=prescale)
+    image = _scale_value_range(image, mode=prescale, stacklevel=4)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
