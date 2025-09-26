@@ -164,25 +164,21 @@ def _matrix_to_parameter_vector(matrix, model):
     return parameters
 
 
-def _scale_parameters(parameters, model, ndim, scale):
+def _scale_matrix(matrix, scale):
     """
-    Scale the parameter vector or homogeneous matrix.
+    Scale the homogeneous matrix.
 
     Parameters
     ----------
-    parameters : ndarray
-        Vector of parameters or homogeneous matrix.
-    model : {'affine', 'euclidean', 'translation'}
-        Motion model 'affine', 'euclidean', or 'translation'.
-    ndim : int
-        Dimensionality of the image.
+    matrix : ndarray
+        Homogeneous matrix.
     scale : float
         Scaling factor.
 
     Returns
     -------
-    vector : ndarray
-        Vector of scaled parameters as a ndarray.
+    scaled_matrix : ndarray
+        Scaled homogeneous matrix as a ndarray.
 
     Raises
     ------
@@ -191,30 +187,12 @@ def _scale_parameters(parameters, model, ndim, scale):
 
     Note
     ----
-    See _parameter_vector_to_matrix for the indices.
+    This is useful for passing from one pyramid level to the next.
     """
-
-    scaled_parameters = parameters.copy()
-
-    # Homogeneous matrix case
-    if parameters.shape == (ndim + 1, ndim + 1):
-        scaled_parameters[:ndim, -1] *= scale
-    else:
-        # Vector parameter
-        if model.lower() == "translation":
-            scaled_parameters *= scale
-        elif model.lower() == "euclidean":
-            # translation indices are assumed to be the first ndim elements
-            scaled_parameters[:ndim] *= scale
-        elif model.lower() == "affine":
-            # Compute translation indices
-            indices = np.arange((ndim + 1) * (ndim + 1)).reshape(ndim + 1, ndim + 1)[
-                :ndim, -1
-            ]
-            scaled_parameters[indices] *= scale
-        else:
-            raise NotImplementedError(f"Model {model} is not supported")
-    return scaled_parameters
+    ndim = matrix.shape[0] - 1
+    scaled_matrix = matrix.copy()
+    scaled_matrix[:ndim, -1] *= scale
+    return scaled_matrix
 
 
 def solver_affine_lucas_kanade(
@@ -361,6 +339,7 @@ def _studholme_param_cost(
     cost,
     *,
     model="affine",
+    scale=1,
 ):
     """
     Compute the registration cost for given parameters.
@@ -379,6 +358,8 @@ def _studholme_param_cost(
         Cost between registered image and reference image.
     model : {'affine', 'euclidean', 'translation'}
         Motion model: "affine", "translation" or "euclidean".
+    scale: float
+        Scaling of the translation parameters
 
     Returns
     -------
@@ -388,12 +369,12 @@ def _studholme_param_cost(
 
     ndim = reference_image.ndim - 1
 
-    # scale translation to image size
-    scale = np.max(reference_image.shape)
-    parameters = _scale_parameters(parameters, model, ndim, scale)
-
+    # Transform the vector of parameters to a homogenous matrix
     matrix = _parameter_vector_to_matrix(parameters, model, ndim)
 
+    matrix = _scale_matrix(matrix, scale)
+
+    # Transform each channel
     moving_image_warp = np.stack(
         [ndi.affine_transform(plane, matrix) for plane in moving_image]
     )
@@ -404,11 +385,11 @@ def _studholme_param_cost(
 def solver_affine_studholme(
     reference_image,
     moving_image,
+    *,
     weights,
     channel_axis,
     matrix,
     model,
-    *,
     method="Powell",
     options={"maxiter": 30, "disp": False},
     cost=lambda im0, im1, w: -normalized_mutual_information(
@@ -470,11 +451,11 @@ def solver_affine_studholme(
     if matrix is None:
         matrix = np.eye(ndim + 1, dtype=float)
 
-    parameters = _matrix_to_parameter_vector(matrix, model)
-
-    # scale translation to image size
     scale = np.max(reference_image.shape)
-    parameters = _scale_parameters(parameters, model, ndim, 1.0 / scale)
+    matrix = _scale_matrix(matrix, 1 / scale)
+
+    # conver the matrix to a vector of parameters
+    parameters = _matrix_to_parameter_vector(matrix, model)
 
     cost = partial(
         _studholme_param_cost,
@@ -483,14 +464,15 @@ def solver_affine_studholme(
         weights=weights,
         cost=cost,
         model=model,
+        scale=scale,
     )
 
     result = minimize(cost, x0=parameters, method=method, options=options)
 
-    # scale translation to image size
-    param = _scale_parameters(result.x, model, ndim, scale)
+    matrix = _parameter_vector_to_matrix(result.x, model, ndim)
 
-    return _parameter_vector_to_matrix(param, model, ndim)
+    matrix = _scale_matrix(matrix, scale)
+    return matrix
 
 
 def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
@@ -824,8 +806,8 @@ def solver_affine_ecc(
     # The solver does not take into account multiple channels for now
     # Using the luminance (max across channels)
     if channel_axis is not None:
-        reference_image = np.max(reference_image, channel_axis)
-        moving_image = np.max(moving_image, channel_axis)
+        reference_image = np.mean(reference_image, channel_axis)
+        moving_image = np.mean(moving_image, channel_axis)
 
     if matrix is None:
         if len(reference_image.shape) == 2:
@@ -972,7 +954,7 @@ def affine(
     >>> registered = ndi.affine_transform(moving, matrix)
     """
 
-    ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
+    # ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
 
     if channel_axis is not None:
         shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
@@ -1014,9 +996,7 @@ def affine(
     # Rescale the initial matrix if any to the coarsest level
     if matrix is not None:
         first_scale = pow(pyramid_downscale, -max_layer)
-        parameters = _matrix_to_parameter_vector(matrix, model)
-        scaled_parameters = _scale_parameters(parameters, model, ndim, first_scale)
-        matrix = _parameter_vector_to_matrix(scaled_parameters, model, ndim)
+        matrix = _scale_matrix(matrix, first_scale)
 
     # First level
     matrix = solver(
@@ -1030,9 +1010,7 @@ def affine(
 
     # Remaining levels
     for scaled_reference_image, scaled_moving_image, scaled_weights in pyramid[1:]:
-        parameters = _matrix_to_parameter_vector(matrix, model)
-        parameters = _scale_parameters(parameters, model, ndim, pyramid_downscale)
-        matrix = _parameter_vector_to_matrix(parameters, model, ndim)
+        matrix = _scale_matrix(matrix, pyramid_downscale)
         matrix = solver(
             reference_image=scaled_reference_image,
             moving_image=scaled_moving_image,
