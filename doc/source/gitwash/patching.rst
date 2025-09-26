@@ -32,7 +32,8 @@ Overview
    git clone https://github.com/scikit-image/scikit-image.git
    # make a branch for your patching
    cd scikit-image
-   git switch -c the-fix-im-thinking-of
+   git branch the-fix-im-thinking-of
+   git checkout the-fix-im-thinking-of
    # hack, hack, hack
    # Tell git about any new files you've made
    git add somewhere/tests/test_my_bug.py
@@ -66,7 +67,8 @@ In detail
    access to an unmodified copy of the code in the main
    branch::
 
-      git switch -c the-fix-im-thinking-of
+      git branch the-fix-im-thinking-of
+      git checkout the-fix-im-thinking-of
 
 #. Do some edits, and commit them as you go::
 
@@ -103,7 +105,7 @@ In detail
 When you are done, to switch back to the main copy of the
 code, just return to the ``main`` branch::
 
-   git switch main
+   git checkout main
 
 Moving from patching to development
 ===================================
@@ -117,7 +119,7 @@ Fork the `scikit-image`_ repository on github |emdash| :ref:`forking`.
 Then::
 
    # checkout and refresh main branch from main repo
-   git switch main
+   git checkout main
    git pull origin main
    # rename pointer to main repository to 'upstream'
    git remote rename origin upstream
