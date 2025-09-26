@@ -1107,24 +1107,17 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     ----------
     image : ndarray
         The image to scale.
-    mode : {'minmax', 'legacy', 'none'} or tuple[float, float], optional
+    mode : {'minmax', 'none', 'legacy'}, optional
         Controls the rescaling behavior for `image`.
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
             normalization its minimum and maximum values will be 0 and 1
-            respectively. This is a shorthand for
-            ``prescale=(image.min(), image.max())``.
-
-        ``(lower, higher)``
-            Explicit input value range to be scaled to 0 and 1. Normalize
-            `image` such that ``lower`` and ``higher`` are scaled with
-            ``(img - lower) / (higher - lower)`` to 0 and 1 respectively. The
-            resulting output range can be outside [0, 1].
+            respectively.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
-            copy of `image`.
+            copy of `image`. Useful when `image` has already been scaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
@@ -1144,19 +1137,16 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     Examples
     --------
     >>> import numpy as np
-    >>> image = np.array([-10, 100], dtype=np.int8)
+    >>> image = np.array([-10, 45, 100], dtype=np.int8)
 
     >>> _prescale_value_range(image, mode="minmax")
-    array([0.,  1.])
-
-    >>> _prescale_value_range(image, mode=(-100, 100))
-    array([0.45, 1.  ])
+    array([0. , 0.5, 1. ])
 
     >>> _prescale_value_range(image, mode="legacy")
-    array([-0.07874016,  0.78740157])
+    array([-0.07874016,  0.35433071,  0.78740157])
 
     >>> _prescale_value_range(image, mode="none")
-    array([-10,  100], dtype=int8)
+    array([-10, 45, 100], dtype=int8)
     """
     # Early exits
     if mode == "none":
@@ -1167,24 +1157,17 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
 
         return img_as_float(image)
 
-    # Derive `lower` and `higher` from `mode`
-    if mode == "minmax":
-        lower = image.min()
-        higher = image.max()
-    elif isinstance(mode, tuple) and len(mode) == 2:
-        lower, higher = mode
-    else:
-        raise ValueError(f"Unsupported `mode`: {mode}")
-
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
     # unexpected promotion and / or precision problems during normalization
     dtype = _supported_float_type(image.dtype, allow_complex=True)
     out = image.astype(dtype)
-    try:
-        lower, higher = np.array([lower, higher], dtype=dtype)
-    except ValueError as e:
-        msg = f"With `mode={mode}`, could not coerce {(lower, higher)} to {dtype}"
-        raise ValueError(msg) from e
+
+    # Derive `lower` and `higher` from `mode`
+    if mode == "minmax":
+        lower = out.min()
+        higher = out.max()
+    else:
+        raise ValueError(f"Unsupported `mode`: {mode}")
 
     # Deal with unexpected or invalid `lower` and `higher` early
     if np.isnan(lower) or np.isnan(higher):

@@ -296,7 +296,7 @@ def blob_dog(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
-    prescale : {'minmax', 'legacy', 'none'} or tuple[float, float], optional
+    prescale : {'minmax', 'none', 'legacy'}, optional
         Controls the rescaling behavior for `image` which affects the
         internally computed stack of Difference-of-Gaussian (DoG) images. This
         in turn affects the effect of the `threshold` parameter.
@@ -304,18 +304,11 @@ def blob_dog(
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
             normalization its minimum and maximum values will be 0 and 1
-            respectively. This is a shorthand for
-            ``prescale=(image.min(), image.max())``.
-
-        ``(lower, higher)``
-            Explicit input value range to be scaled to 0 and 1. Normalize
-            `image` such that ``lower`` and ``higher`` are scaled with
-            ``(img - lower) / (higher - lower)`` to 0 and 1 respectively. The
-            resulting output range can be outside [0, 1].
+            respectively.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
-            copy of `image`.
+            copy of `image`. Useful when `image` has already been scaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
