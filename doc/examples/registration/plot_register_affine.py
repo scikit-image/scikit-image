@@ -34,7 +34,7 @@ import skimage as ski
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
 
-reference = ski.data.camera()[::4, ::4]
+reference = ski.data.camera()  # [::4, ::4]
 
 # Define a rotation around the center of the image
 r = -0.12  # rotation angle in radians
@@ -129,16 +129,16 @@ def overlay(reference, moving):
 
 _, ax = plt.subplots(2, len(results) + 1)
 
-ax[0, 0].set_title("initial alignment")
+ax[0, 0].set_title("Initial alignment")
 ax[0, 0].imshow(overlay(reference, moving))
 tre_initial = ski.registration.target_registration_error(reference.shape, transform)
-ax[1, 0].set_title(f"TRE (max:{tre_initial.max():.2f}px)")
+ax[1, 0].set_title(f"TRE\n(max:{tre_initial.max():.2f}px)")
 ax[1, 0].imshow(tre_initial)
 
 for k, item in enumerate(results):
-    ax[0, k + 1].set_title(item["test"])
+    ax[0, k + 1].set_title(item["test"].replace("/", "\n"))
     ax[0, k + 1].imshow(overlay(reference, item["registered"]))
-    ax[1, k + 1].set_title(f"TRE (max:{item['tre'].max():.2f}px)")
+    ax[1, k + 1].set_title(f"TRE\n(max:{item['tre'].max():.2f}px)")
     ax[1, k + 1].imshow(item["tre"])
 
 
@@ -190,13 +190,13 @@ _, ax = plt.subplots(2, len(results) + 1)
 ax[0, 0].set_title("Initial alignment")
 ax[0, 0].imshow(overlay(reference, moving))
 ax[1, 0].set_title("Initial alignment")
-ax[1, 0].set_title(f"TRE (max:{tre_initial.max():.2f}px)")
+ax[1, 0].set_title(f"TRE\n(max:{tre_initial.max():.2f}px)")
 ax[1, 0].imshow(tre_initial)
 
 for k, item in enumerate(results):
-    ax[0, k + 1].set_title(item["test"])
+    ax[0, k + 1].set_title(item["test"].replace("/", "\n"))
     ax[0, k + 1].imshow(overlay(reference, item["registered"]))
-    ax[1, k + 1].set_title(f"TRE (max:{item['tre'].max():.2f}px)")
+    ax[1, k + 1].set_title(f"TRE\n(max:{item['tre'].max():.3f}px)")
     ax[1, k + 1].imshow(item["tre"])
 
 for a in ax.ravel():
