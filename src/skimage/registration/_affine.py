@@ -140,15 +140,29 @@ def _matrix_to_parameter_vector(matrix, model):
         if ndim == 2:
             parameters[ndim] = np.arctan2(matrix[1, 0], matrix[0, 0])
         elif ndim == 3:
-            R = matrix[:3, :3]
-            sy = np.sqrt(R[0, 0] ** 2 + R[1, 0] ** 2)
-            if sy < 1e-6:  # not a gimbal lock
-                parameters[ndim] = np.arctan2(R[1, 0], R[0, 0])
-                parameters[ndim + 1] = np.arctan2(-R[2, 0], sy)
-                parameters[ndim + 2] = np.arctan2(R[2, 1], R[2, 2])
+            R = matrix[:3, :3].copy()
+            # orthogonalization
+            U, _, Vt = np.linalg.svd(R)
+            R = U @ Vt
+            # not a reflection
+            if np.linalg.det(R) < 0:
+                U[:, 2] *= -1
+                R = U @ Vt
+            # Extract Euler angles
+            sin_beta = np.clip(R[0, 2], -1.0, 1.0)
+            beta = np.arcsin(sin_beta)
+            cos_beta = np.cos(beta)
+            if np.abs(cos_beta) > 1e-6:
+                alpha = np.arctan2(-R[1, 2], R[2, 2])
+                gamma = np.arctan2(-R[0, 1], R[0, 0])
             else:
-                parameters[ndim] = np.arctan2(R[1, 2], R[1, 1])
-                parameters[ndim + 1] = np.arctan2(-R[2, 0], sy)
+                # Gimbal lock handling
+                alpha = 0.0
+                if sin_beta > 0:
+                    gamma = np.arctan2(R[1, 0], R[1, 1])
+                else:
+                    gamma = np.arctan2(-R[1, 0], R[1, 1])
+            parameters[3:] = np.array([alpha, beta, gamma])
         else:
             raise NotImplementedError("Eulidean motion model implemented only in 2D/3D")
         # Translation along each axis
