@@ -44,7 +44,7 @@ online manual pages for some common commands:
 
 * `git add`_
 * `git branch`_
-* `git switch`_
+* `git checkout`_
 * `git clone`_
 * `git commit`_
 * `git config`_
