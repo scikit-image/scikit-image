@@ -602,7 +602,7 @@ def blob_doh(
     Parameters
     ----------
     image : 2D ndarray
-        Input grayscale image.Blobs can either be light on dark or vice versa.
+        Input grayscale image. Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
         Hessian matrix. Keep this low to detect smaller blobs.
