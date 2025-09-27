@@ -130,9 +130,21 @@ def test_binary_blobs():
     assert_almost_equal(blobs.mean(), 0.25, decimal=1)
     other_realization = data.binary_blobs(length=32, volume_fraction=0.25, n_dim=3)
     assert not np.all(blobs == other_realization)
-    wrap_blobs = data.binary_blobs(length=64, boundary_mode="wrap")
-    assert wrap_blobs.shape == (64, 64)
-    assert wrap_blobs.dtype == bool
+
+
+def test_binary_blobs_boundary():
+    # Assert that `boundary_mode="wrap"` decreases the pixel difference on
+    # opposing borders compared to `boundary_mode="nearest"`
+    blobs_near = data.binary_blobs(length=300, boundary_mode="nearest", rng=3)
+    blobs_wrap = data.binary_blobs(length=300, boundary_mode="wrap", rng=3)
+
+    diff_near_ax0 = blobs_near[0, :] ^ blobs_near[-1, :]
+    diff_wrap_ax0 = blobs_wrap[0, :] ^ blobs_wrap[-1, :]
+    assert diff_wrap_ax0.sum() < diff_near_ax0.sum()
+
+    diff_near_ax1 = blobs_near[:, 0] ^ blobs_near[:, -1]
+    diff_wrap_ax1 = blobs_wrap[:, 0] ^ blobs_wrap[:, -1]
+    assert diff_wrap_ax1.sum() < diff_near_ax1.sum()
 
 
 def test_lfw_subset():
