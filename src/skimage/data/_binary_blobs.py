@@ -31,6 +31,22 @@ def binary_blobs(
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
+    boundary_mode : {'nearest', 'wrap'}, optional
+        The blobs are created by smoothing and then thresholding an
+        intermediate array with seeds. This mode determines which values are
+        filled in when the smoothing kernel overlaps the seed array's boundary.
+
+        'nearest' (`a a a a | a b c d | d d d d`)
+            By default, the seed array is extended by replicating the last
+            boundary value. This will increase the size of blobs whose seed or
+            center lies exactly on the edge.
+
+        'wrap' (`a b c d | a b c d | a b c d`)
+            The seed array is extended by wrapping around to the opposite edge.
+            With this, the resulting array can be tiled (an edge is
+            concatenated to its opposing edge) and blobs will be contigious and
+            have smooth edges accross each tiles boundary.
+
     boundary_mode : str, default "nearest"
         The `mode` parameter passed to the Gaussian filter.
         Use "wrap" for periodic boundary conditions.
@@ -54,8 +70,9 @@ def binary_blobs(
     >>> blobs = data.binary_blobs(length=256, blob_size_fraction=0.05)
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
-
     """
+    if boundary_mode not in {"nearest", "wrap"}:
+        raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
 
     rs = np.random.default_rng(rng)
     shape = tuple([length] * n_dim)
