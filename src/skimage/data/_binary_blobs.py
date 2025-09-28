@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 from .._shared.filters import gaussian
@@ -73,6 +75,21 @@ def binary_blobs(
     """
     if boundary_mode not in {"nearest", "wrap"}:
         raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
+
+    blob_size = blob_size_fraction * length
+    if blob_size < 0.1:
+        clamped_size_fraction = 0.1 / length
+        clamped_blob_size = clamped_size_fraction * length
+        warnings.warn(
+            f"`{blob_size_fraction=}` together with `{length=}` would result in a blob "
+            f"size of {blob_size} pixels. Small blob sizes likely lead to unexpected "
+            f"results! "
+            f"Clamping to `blob_size_fraction={clamped_size_fraction}` and a blob size "
+            f"of {clamped_blob_size} pixels to avoid allocating excessive memory.",
+            category=RuntimeWarning,
+            stacklevel=2,
+        )
+        blob_size_fraction = clamped_size_fraction
 
     rs = np.random.default_rng(rng)
     shape = tuple([length] * n_dim)
