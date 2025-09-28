@@ -443,8 +443,9 @@ def blob_log(
         are given for each axis as a sequence, or as a single number, in
         which case it is equal for all axes.
     num_sigma : int, optional
-        The number of evenly spaced values for standard deviation of the Gaussian kernel to consider
-        on the closed interval ``[min_sigma, max_sigma]``.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
@@ -610,8 +611,9 @@ def blob_doh(
         The maximum standard deviation for Gaussian Kernel used to compute
         Hessian matrix. Keep this high to detect larger blobs.
     num_sigma : int, optional
-        The number of evenly spaced values for standard deviation of the Gaussian kernel to consider
-        on the closed interval ``[min_sigma, max_sigma]``.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
