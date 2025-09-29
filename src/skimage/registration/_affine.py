@@ -84,10 +84,10 @@ def _parameter_vector_to_matrix(parameters, model, ndim):
             c, s = cos(parameters[ndim + k]), sin(parameters[ndim + k])
             rot = np.eye(ndim + 1)
             rot[a[0], a[0]] = c
-            rot[a[0], a[1]] = -s
+            rot[a[0], a[1]] = s
+            rot[a[1], a[0]] = -s
             rot[a[1], a[1]] = c
-            rot[a[1], a[0]] = s
-            matrix = matrix @ rot
+            matrix = matrix @ rot  # tait-byran
         # Translation along each axis
         trans = np.eye(ndim + 1)
         trans[:ndim, -1] = parameters[:ndim].ravel()
@@ -140,28 +140,9 @@ def _matrix_to_parameter_vector(matrix, model):
         if ndim == 2:
             parameters[ndim] = np.arctan2(matrix[1, 0], matrix[0, 0])
         elif ndim == 3:
-            R = matrix[:3, :3].copy()
-            # orthogonalization
-            U, _, Vt = np.linalg.svd(R)
-            R = U @ Vt
-            # not a reflection
-            if np.linalg.det(R) < 0:
-                U[:, 2] *= -1
-                R = U @ Vt
-            # Extract Euler angles
-            sin_beta = np.clip(R[0, 2], -1.0, 1.0)
-            beta = np.arcsin(sin_beta)
-            cos_beta = np.cos(beta)
-            if np.abs(cos_beta) > 1e-6:
-                alpha = np.arctan2(-R[1, 2], R[2, 2])
-                gamma = np.arctan2(-R[0, 1], R[0, 0])
-            else:
-                # Gimbal lock handling
-                alpha = 0.0
-                if sin_beta > 0:
-                    gamma = np.arctan2(R[1, 0], R[1, 1])
-                else:
-                    gamma = np.arctan2(-R[1, 0], R[1, 1])
+            beta = np.arcsin(-matrix[2, 0])
+            alpha = -np.arctan2(matrix[1, 0], matrix[0, 0])
+            gamma = -np.arctan2(matrix[2, 1], matrix[2, 2])
             parameters[3:] = np.array([alpha, beta, gamma])
         else:
             raise NotImplementedError("Eulidean motion model implemented only in 2D/3D")
@@ -305,8 +286,8 @@ def solver_affine_lucas_kanade(
                     [1.0, 0.0, 0.0],
                     [0.0, 1.0, 0.0],
                     [0.0, 0.0, 0.0],
-                    [0.0, 0.0, -1.0],
                     [0.0, 0.0, 1.0],
+                    [0.0, 0.0, -1.0],
                     [0.0, 0.0, 0.0],
                 ],
             )
@@ -510,7 +491,6 @@ def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         Jacobian of the warp wrt the parameters.
     """
 
-
     if np.shape(grad)[0] == 2:
         match motion_type:
             case "translation":
@@ -520,14 +500,15 @@ def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
                 x_grid, y_grid = xy_grid
 
                 return np.stack(
-                [
-                    grad_iw_x * x_grid,
-                    grad_iw_y * x_grid,
-                    grad_iw_x * y_grid,
-                    grad_iw_y * y_grid,
-                    grad_iw_x,
-                    grad_iw_y,
-                ])            
+                    [
+                        grad_iw_x * x_grid,
+                        grad_iw_y * x_grid,
+                        grad_iw_x * y_grid,
+                        grad_iw_y * y_grid,
+                        grad_iw_x,
+                        grad_iw_y,
+                    ]
+                )
             case "euclidean":
                 grad_iw_x, grad_iw_y = grad
                 x_grid, y_grid = xy_grid
@@ -538,7 +519,9 @@ def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
                 hat_x = -(x_grid * h1) - (y_grid * h0)
                 hat_y = (x_grid * h0) - (y_grid * h1)
 
-                return np.stack([grad_iw_x * hat_x + grad_iw_y * hat_y, grad_iw_x, grad_iw_y])
+                return np.stack(
+                    [grad_iw_x * hat_x + grad_iw_y * hat_y, grad_iw_x, grad_iw_y]
+                )
     else:
         match motion_type:
             case "translation":
@@ -561,7 +544,9 @@ def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
                         grad_iw_x,
                         grad_iw_y,
                         grad_iw_z,
-                    ])
+                    ]
+                )
+
 
 def _ecc_update_warping_matrix(map_matrix, update, motion_type="affine"):
     """

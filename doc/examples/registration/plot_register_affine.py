@@ -34,7 +34,7 @@ import skimage as ski
 # .. _homogeneous coordinates: https://en.wikipedia.org/wiki/Homogeneous_coordinates
 
 
-reference = ski.data.camera()  # [::4, ::4]
+reference = ski.data.camera()
 
 # Define a rotation around the center of the image
 r = -0.12  # rotation angle in radians
