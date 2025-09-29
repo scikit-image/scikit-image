@@ -510,119 +510,58 @@ def _ecc_compute_jacobian(grad, xy_grid, warp_matrix, motion_type="affine"):
         Jacobian of the warp wrt the parameters.
     """
 
-    def compute_jacobian_translation(grad):
-        grad_iw_x, grad_iw_y = grad
-        return np.stack([grad_iw_x, grad_iw_y])
-
-    def compute_jacobian_translation_3D(grad):
-        grad_iw_x, grad_iw_y, grad_iw_z = grad
-        return np.stack([grad_iw_x, grad_iw_y, grad_iw_z])
-
-    def compute_jacobian_affine(grad, xy_grid):
-        grad_iw_x, grad_iw_y = grad
-        x_grid, y_grid = xy_grid
-
-        return np.stack(
-            [
-                grad_iw_x * x_grid,
-                grad_iw_y * x_grid,
-                grad_iw_x * y_grid,
-                grad_iw_y * y_grid,
-                grad_iw_x,
-                grad_iw_y,
-            ]
-        )
-
-    def compute_jacobian_affine_3D(grad, xy_grid):
-        grad_iw_x, grad_iw_y, grad_iw_z = grad
-        x_grid, y_grid, z_grid = xy_grid
-
-        return np.stack(
-            [
-                grad_iw_x * x_grid,
-                grad_iw_y * x_grid,
-                grad_iw_z * x_grid,
-                grad_iw_x * y_grid,
-                grad_iw_y * y_grid,
-                grad_iw_z * y_grid,
-                grad_iw_x * z_grid,
-                grad_iw_y * z_grid,
-                grad_iw_z * z_grid,
-                grad_iw_x,
-                grad_iw_y,
-                grad_iw_z,
-            ]
-        )
-
-    def compute_jacobian_euclidean(grad, xy_grid, warp_matrix):
-        grad_iw_x, grad_iw_y = grad
-        x_grid, y_grid = xy_grid
-
-        h0 = warp_matrix[0, 0]
-        h1 = warp_matrix[0, 1]
-
-        hat_x = -(x_grid * h1) - (y_grid * h0)
-        hat_y = (x_grid * h0) - (y_grid * h1)
-
-        return np.stack([grad_iw_x * hat_x + grad_iw_y * hat_y, grad_iw_x, grad_iw_y])
-
-    def compute_jacobian_homography(grad, xy_grid, warp_matrix):
-        # TODO: Lets look at the paper to see if this can be made cleaner using Numpy broadcasting
-        h0_ = warp_matrix[0, 0]
-        h1_ = warp_matrix[1, 0]
-        h2_ = warp_matrix[2, 0]
-        h3_ = warp_matrix[0, 1]
-        h4_ = warp_matrix[1, 1]
-        h5_ = warp_matrix[2, 1]
-        h6_ = warp_matrix[0, 2]
-        h7_ = warp_matrix[1, 2]
-
-        grad_iw_x, grad_iw_y = grad
-        x_grid, y_grid = xy_grid
-
-        den_ = x_grid * h2_ + y_grid * h5_ + 1.0
-
-        grad_iw_x_ = grad_iw_x / den_
-        grad_iw_y_ = grad_iw_y / den_
-
-        hat_x = -x_grid * h0_ - y_grid * h3_ - h6_
-        hat_x = np.divide(hat_x, den_)
-
-        hat_y = -x_grid * h1_ - y_grid * h4_ - h7_
-        hat_y = np.divide(hat_y, den_)
-
-        temp = hat_x * grad_iw_x_ + hat_y * grad_iw_y_
-
-        return np.stack(
-            [
-                grad_iw_x_ * x_grid,
-                grad_iw_y_ * x_grid,
-                temp * x_grid,
-                grad_iw_x_ * y_grid,
-                grad_iw_y_ * y_grid,
-                temp * y_grid,
-                grad_iw_x_,
-                grad_iw_y_,
-            ]
-        )
 
     if np.shape(grad)[0] == 2:
         match motion_type:
             case "translation":
-                return compute_jacobian_translation(grad)
+                return grad
             case "affine":
-                return compute_jacobian_affine(grad, xy_grid)
+                grad_iw_x, grad_iw_y = grad
+                x_grid, y_grid = xy_grid
+
+                return np.stack(
+                [
+                    grad_iw_x * x_grid,
+                    grad_iw_y * x_grid,
+                    grad_iw_x * y_grid,
+                    grad_iw_y * y_grid,
+                    grad_iw_x,
+                    grad_iw_y,
+                ])            
             case "euclidean":
-                return compute_jacobian_euclidean(grad, xy_grid, warp_matrix)
-            case "homography":
-                return compute_jacobian_homography(grad, xy_grid, warp_matrix)
+                grad_iw_x, grad_iw_y = grad
+                x_grid, y_grid = xy_grid
+
+                h0 = warp_matrix[0, 0]
+                h1 = warp_matrix[0, 1]
+
+                hat_x = -(x_grid * h1) - (y_grid * h0)
+                hat_y = (x_grid * h0) - (y_grid * h1)
+
+                return np.stack([grad_iw_x * hat_x + grad_iw_y * hat_y, grad_iw_x, grad_iw_y])
     else:
         match motion_type:
             case "translation":
-                return compute_jacobian_translation_3D(grad)
+                return grad
             case "affine":
-                return compute_jacobian_affine_3D(grad, xy_grid)
+                grad_iw_x, grad_iw_y, grad_iw_z = grad
+                x_grid, y_grid, z_grid = xy_grid
 
+                return np.stack(
+                    [
+                        grad_iw_x * x_grid,
+                        grad_iw_y * x_grid,
+                        grad_iw_z * x_grid,
+                        grad_iw_x * y_grid,
+                        grad_iw_y * y_grid,
+                        grad_iw_z * y_grid,
+                        grad_iw_x * z_grid,
+                        grad_iw_y * z_grid,
+                        grad_iw_z * z_grid,
+                        grad_iw_x,
+                        grad_iw_y,
+                        grad_iw_z,
+                    ])
 
 def _ecc_update_warping_matrix(map_matrix, update, motion_type="affine"):
     """
@@ -643,80 +582,48 @@ def _ecc_update_warping_matrix(map_matrix, update, motion_type="affine"):
         Updated warping matrix.
     """
 
-    def update_warping_matrix_translation(map_matrix, update):
-        map_matrix[0, 2] += update[0]
-        map_matrix[1, 2] += update[1]
-        return map_matrix
-
-    def update_warping_matrix_translation_3D(map_matrix, update):
-        map_matrix[0, 3] += update[0]
-        map_matrix[1, 3] += update[1]
-        map_matrix[2, 3] += update[2]
-        return map_matrix
-
-    def update_warping_matrix_affine(map_matrix, update):
-        map_matrix[0, 0] += update[0]
-        map_matrix[1, 0] += update[1]
-        map_matrix[0, 1] += update[2]
-        map_matrix[1, 1] += update[3]
-        map_matrix[0, 2] += update[4]
-        map_matrix[1, 2] += update[5]
-        return map_matrix
-
-    def update_warping_matrix_euclidean(map_matrix, update):
-        new_theta = update[0]
-        new_theta += np.arcsin(map_matrix[1, 0])
-
-        map_matrix[0, 2] += update[1]
-        map_matrix[1, 2] += update[2]
-        map_matrix[0, 0] = np.cos(new_theta)
-        map_matrix[1, 1] = map_matrix[0, 0]
-        map_matrix[1, 0] = np.sin(new_theta)
-        map_matrix[0, 1] = -map_matrix[1, 0]
-        return map_matrix
-
-    def update_warping_matrix_homography(map_matrix, update):
-        map_matrix[0, 0] += update[0]
-        map_matrix[1, 0] += update[1]
-        map_matrix[2, 0] += update[2]
-        map_matrix[0, 1] += update[3]
-        map_matrix[1, 1] += update[4]
-        map_matrix[2, 1] += update[5]
-        map_matrix[0, 2] += update[6]
-        map_matrix[1, 2] += update[7]
-        return map_matrix
-
-    def update_warping_matrix_affine_3D(map_matrix, update):
-        map_matrix[0, 0] += update[0]
-        map_matrix[1, 0] += update[1]
-        map_matrix[2, 0] += update[2]
-        map_matrix[0, 1] += update[3]
-        map_matrix[1, 1] += update[4]
-        map_matrix[2, 1] += update[5]
-        map_matrix[0, 2] += update[6]
-        map_matrix[1, 2] += update[7]
-        map_matrix[2, 2] += update[8]
-        map_matrix[0, 3] += update[9]
-        map_matrix[1, 3] += update[10]
-        map_matrix[2, 3] += update[11]
-        return map_matrix
-
     if np.shape(map_matrix)[0] == 3:
         match motion_type:
             case "translation":
-                return update_warping_matrix_translation(map_matrix, update)
+                map_matrix[0, 2] += update[0]
+                map_matrix[1, 2] += update[1]
             case "affine":
-                return update_warping_matrix_affine(map_matrix, update)
+                map_matrix[0, 0] += update[0]
+                map_matrix[1, 0] += update[1]
+                map_matrix[0, 1] += update[2]
+                map_matrix[1, 1] += update[3]
+                map_matrix[0, 2] += update[4]
+                map_matrix[1, 2] += update[5]
             case "euclidean":
-                return update_warping_matrix_euclidean(map_matrix, update)
-            case "homography":
-                return update_warping_matrix_homography(map_matrix, update)
+                new_theta = update[0]
+                new_theta += np.arcsin(map_matrix[1, 0])
+
+                map_matrix[0, 2] += update[1]
+                map_matrix[1, 2] += update[2]
+                map_matrix[0, 0] = np.cos(new_theta)
+                map_matrix[1, 1] = map_matrix[0, 0]
+                map_matrix[1, 0] = np.sin(new_theta)
+                map_matrix[0, 1] = -map_matrix[1, 0]
     else:
         match motion_type:
             case "translation":
-                return update_warping_matrix_translation_3D(map_matrix, update)
+                map_matrix[0, 3] += update[0]
+                map_matrix[1, 3] += update[1]
+                map_matrix[2, 3] += update[2]
             case "affine":
-                return update_warping_matrix_affine_3D(map_matrix, update)
+                map_matrix[0, 0] += update[0]
+                map_matrix[1, 0] += update[1]
+                map_matrix[2, 0] += update[2]
+                map_matrix[0, 1] += update[3]
+                map_matrix[1, 1] += update[4]
+                map_matrix[2, 1] += update[5]
+                map_matrix[0, 2] += update[6]
+                map_matrix[1, 2] += update[7]
+                map_matrix[2, 2] += update[8]
+                map_matrix[0, 3] += update[9]
+                map_matrix[1, 3] += update[10]
+                map_matrix[2, 3] += update[11]
+    return map_matrix
 
 
 def _ecc_project_onto_jacobian(jac, mat):
@@ -748,21 +655,6 @@ def _ecc_compute_hessian(jac):
     )  # axes=([1, 2], [1, 2])) if 2D
     # axes=([1, 2, 3], [1, 2, 3]) if 3D
     return hessian
-
-
-def custom_warp(im, mat, motion_type="affine", order=1):
-    if motion_type == 'homography':
-
-        def coord_mapping(pt, mat):
-            pt += (1,)
-            points_unwarping = mat @ np.array(pt).T
-            return tuple(points_unwarping)
-
-        return ndi.geometric_transform(
-            im, coord_mapping, order=order, extra_arguments=(mat,)
-        )
-    else:
-        return ndi.affine_transform(im, mat, order=order)
 
 
 def solver_affine_ecc(
@@ -847,7 +739,7 @@ def solver_affine_ecc(
         if np.abs(rho - last_rho) < tol:
             break
 
-        iw_warped = custom_warp(moving_image, matrix, motion_type=model, order=order)
+        iw_warped = ndi.affine_transform(moving_image, matrix, order=order)
 
         iw_mean = np.mean(iw_warped[iw_warped != 0])
         iw_std = np.std(iw_warped[iw_warped != 0])
@@ -855,7 +747,7 @@ def solver_affine_ecc(
 
         iw_warped_meancorr = iw_warped - iw_mean
         grad_iw_warped = np.array(
-            [custom_warp(g, matrix, motion_type=model, order=order) for g in grad]
+            [ndi.affine_transform(g, matrix, order=order) for g in grad]
         )
 
         jacobian = _ecc_compute_jacobian(grad_iw_warped, mesh, matrix, model)
