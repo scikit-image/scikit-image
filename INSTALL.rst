@@ -231,17 +231,11 @@ After installing miniforge:
 
 .. code-block:: sh
 
-  # Create a conda environment named ``skimage-dev``
-  conda create --name skimage-dev
+  # Create a conda environment with required dependencies
+  conda env create -f environment.yml
 
   # Activate it
   conda activate skimage-dev
-
-  # Install development dependencies
-  conda install -c conda-forge --file requirements/default.txt
-  conda install -c conda-forge --file requirements/test.txt
-  conda install -c conda-forge pre-commit ipython
-  conda install -c conda-forge --file requirements/build.txt
 
   # Install scikit-image in editable mode. In editable mode,
   # scikit-image will be recompiled, as necessary, on import.

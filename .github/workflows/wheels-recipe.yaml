@@ -16,7 +16,7 @@ on:
       CIBW_TEST_COMMAND:
         required: false
         type: string
-        default: "pytest --pyargs skimage"
+        default: "pytest --pyargs skimage {project}/tests"
 
 env:
   CIBW_BUILD_VERBOSITY: 1
@@ -56,7 +56,7 @@ jobs:
         if: endsWith(matrix.cibw_python, 't-*')
         run: |
           NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
-          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage"
+          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage {project}/tests"
           echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
           # Remove once Cython is out that supports free-threaded build
           echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
@@ -253,3 +253,29 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
           path: ./dist/*.whl
+
+  # This job uses cibuildwheel to build wheels for Pyodide, unlike the one
+  # in emscripten.yaml which uses a more traditional workflow and has some
+  # manual setup. The Pyodide version we build against here is largely
+  # controlled by cibuildwheel's at the moment.
+  build_pyodide_wheel:
+    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build and test scikit-image for Pyodide
+        uses: pypa/cibuildwheel@faf86a6ed7efa889faf6996aa23820831055001a # v2.23.3
+        with:
+          output-dir: dist
+        env:
+          # We override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
+          # in favour of Pyodide-related settings.
+          CIBW_PLATFORM: pyodide
+          CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
+          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn pytest-pretty"
+          # Don't use the cache provider plugin, as it doesn't work with Pyodide
+          # right now: https://github.com/pypa/cibuildwheel/issues/1966
+          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"

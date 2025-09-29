@@ -58,6 +58,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
+    'docstub==0.3.0.post0',
 ]
 docs = [
     'sphinx>=8.0',
@@ -85,7 +86,6 @@ docs = [
 optional = [
     'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'astropy>=6.0',
-    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
@@ -99,6 +99,7 @@ test = [
     'pooch>=1.6.0',
     'pytest>=8',
     'pytest-cov>=2.11.0',
+    'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
     'pytest-doctestplus',
@@ -128,7 +129,7 @@ package = 'skimage'
 Build = [
     'spin.cmds.meson.build',
     'spin.cmds.pip.install',
-    'spin.cmds.meson.test',
+    '.spin/cmds.py:test',
     '.spin/cmds.py:sdist',
 ]
 Environments = [
@@ -173,7 +174,7 @@ ignore = [
     'F403',
     'F405',
 ]
-"skimage/_shared/testing.py" = ['F401']
+"src/skimage/_shared/testing.py" = ['F401']
 "doc/examples/**/*.py" = ['E402']
 
 [tool.ruff.lint.pydocstyle]
@@ -181,24 +182,24 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra  --strict-config  --strict-markers"
+addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["skimage", "benchmarks"]
-python_files = ["benchmark_*.py", "test_*.py"]
-python_classes = ["Test*", "*Suite"]
-python_functions = ["time_*", "test_*", "peakmem_*"]
+testpaths = ["tests"]
 filterwarnings = [
     "error",
-    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning:skimage",
+    "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
 ]
-
-[tool.coverage.run]
-omit = ['*/tests/*']
+norecursedirs = ["io/_plugins"]
 
 [tool.changelist]
 ignored_user_logins = [
     "web-flow",
     "pre-commit-ci[bot]"
 ]
+
+
+[tool.docstub.type_prefixes]
+matplotlib = "matplotlib"
+scipy = "scipy"
