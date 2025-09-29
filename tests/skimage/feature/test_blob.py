@@ -13,11 +13,6 @@ from skimage._shared.testing import assert_stacklevel
 from skimage._shared.dtype import numeric_dtype_min_max
 
 
-pytestmark = pytest.mark.filterwarnings(
-    "ignore:.*`threshold_rel` is deprecated:FutureWarning:skimage"
-)
-
-
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('prescale', ["legacy", "minmax"])
 def test_blob_dog(dtype, prescale):
@@ -194,9 +189,8 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
 @pytest.mark.parametrize('log_scale', [False, True])
-def test_blob_log(dtype, threshold_type, log_scale):
+def test_blob_log(dtype, log_scale):
     img = np.ones((256, 256), dtype=dtype)
 
     xs, ys = disk((200, 65), 5)
@@ -211,22 +205,16 @@ def test_blob_log(dtype, threshold_type, log_scale):
     xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
-    if threshold_type == 'absolute':
-        threshold = 1
-        if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
-            threshold /= np.ptp(img)
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
+    threshold = 1
+    if img.dtype.kind != 'f':
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= np.ptp(img)
 
     blobs = blob_log(
         img,
         min_sigma=5,
         max_sigma=20,
         threshold=threshold,
-        threshold_rel=threshold_rel,
         log_scale=log_scale,
     )
 
@@ -354,8 +342,7 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_doh(dtype, threshold_type):
+def test_blob_doh(dtype):
     img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 20)
@@ -370,18 +357,13 @@ def test_blob_doh(dtype, threshold_type):
     xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
-    if threshold_type == 'absolute':
-        # Note: have to either scale up threshold or rescale the image to the
-        #       range [0, 1] internally.
-        threshold = 0.05
-        if img.dtype.kind == 'f':
-            # account for lack of internal scaling to [0, 1] by img_as_float
-            ptp = np.ptp(img)
-            threshold *= ptp**2
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
+    # Note: have to either scale up threshold or rescale the image to the
+    #       range [0, 1] internally.
+    threshold = 0.05
+    if img.dtype.kind == 'f':
+        # account for lack of internal scaling to [0, 1] by img_as_float
+        ptp = np.ptp(img)
+        threshold *= ptp**2
 
     blobs = blob_doh(
         img,
@@ -389,7 +371,6 @@ def test_blob_doh(dtype, threshold_type):
         max_sigma=60,
         num_sigma=10,
         threshold=threshold,
-        threshold_rel=threshold_rel,
     )
 
     def radius(x):
@@ -557,3 +538,12 @@ def test_no_blob():
     im = np.zeros((10, 10))
     blobs = blob_log(im, min_sigma=2, max_sigma=5, num_sigma=4)
     assert len(blobs) == 0
+
+
+@pytest.mark.parametrize("func", [blob_dog, blob_dog, blob_log])
+def test_deprecated_threshold_rel(func):
+    image = np.zeros((10, 10))
+    regex = "Parameter `threshold_rel` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(image, threshold_rel=0.1)
+    assert_stacklevel(record)

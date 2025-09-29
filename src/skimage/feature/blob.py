@@ -223,7 +223,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
-@deprecate_parameter(
+_deprecate_threshold_rel = deprecate_parameter(
     deprecated_name="threshold_rel",
     start_version="0.26",
     stop_version="2.2",
@@ -234,6 +234,9 @@ def _format_exclude_border(img_ndim, exclude_border):
     "together with the desired `prescale` mode instead. "
     "For more details, see the documentation of `{func_name}`.",
 )
+
+
+@_deprecate_threshold_rel
 def blob_dog(
     image,
     min_sigma=1,
@@ -455,6 +458,7 @@ def blob_dog(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@_deprecate_threshold_rel
 def blob_log(
     image,
     min_sigma=1,
@@ -464,7 +468,7 @@ def blob_log(
     overlap=0.5,
     log_scale=False,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
     exclude_border=False,
 ):
     r"""Finds blobs in the given grayscale image.
@@ -492,10 +496,10 @@ def blob_log(
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Laplacian-of-Gaussian (LoG) images. Local maxima in LoG smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -503,12 +507,15 @@ def blob_log(
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(log_space) * threshold_rel``, where ``log_space`` refers to the
-        stack of Laplacian-of-Gaussian (LoG) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.26
+            Starting with version 0.26, `threshold_rel` is deprecated. Since
+            ``max(log_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
+
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -564,6 +571,9 @@ def blob_log(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
     image = img_as_float(image)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
@@ -627,6 +637,7 @@ def blob_log(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@_deprecate_threshold_rel
 def blob_doh(
     image,
     min_sigma=1,
@@ -636,7 +647,7 @@ def blob_doh(
     overlap=0.5,
     log_scale=False,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
 ):
     """Finds blobs in the given grayscale image.
 
@@ -659,10 +670,10 @@ def blob_doh(
         The number of intermediate values of standard deviations to consider
         between `min_sigma` and `max_sigma`.
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Determinant-of-Hessian (DoH) images. Local maxima in DoH smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -670,12 +681,14 @@ def blob_doh(
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(doh_space) * threshold_rel``, where ``doh_space`` refers to the
-        stack of Determinant-of-Hessian (DoH) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.26
+            Starting with version 0.26, `threshold_rel` is deprecated. Since
+            ``max(doh_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
 
     Returns
     -------
@@ -725,6 +738,9 @@ def blob_doh(
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
     check_nD(image, 2)
 
     image = img_as_float(image)
