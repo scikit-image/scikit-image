@@ -1237,13 +1237,13 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     >>> import numpy as np
     >>> image = np.array([-10, 45, 100], dtype=np.int8)
 
-    >>> _scale_value_range(image, mode="minmax")
+    >>> _prescale_value_range(image, mode="minmax")
     array([0. , 0.5, 1. ])
 
-    >>> _scale_value_range(image, mode="legacy")
+    >>> _prescale_value_range(image, mode="legacy")
     array([-0.07874016,  0.35433071,  0.78740157])
 
-    >>> _scale_value_range(image, mode="none")
+    >>> _prescale_value_range(image, mode="none")
     array([-10, 45, 100], dtype=int8)
     """
     # Early exits
