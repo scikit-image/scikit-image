@@ -13,7 +13,6 @@ from .._shared.utils import (
     _prescale_value_range,
 )
 from ..transform import integral_image
-from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
 
@@ -275,7 +274,7 @@ def blob_dog(
         computing the Difference of Gaussians
     threshold : float or None, optional
         An absolute threshold applied to the internally computed stack of
-        Difference-of-Gaussian (DoG). Local maxima in DoG smaller than
+        Difference-of-Gaussian (DoG) images. Local maxima in DoG smaller than
         `threshold` are ignored. Reduce this to detect blobs with lower
         intensities.
     overlap : float, optional
@@ -470,6 +469,7 @@ def blob_log(
     *,
     threshold_rel=DEPRECATED,
     exclude_border=False,
+    prescale="legacy",
 ):
     r"""Finds blobs in the given grayscale image.
 
@@ -525,6 +525,29 @@ def blob_log(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
+    prescale : {'minmax', 'none', 'legacy'}, optional
+        Controls the rescaling behavior for `image` which affects the
+        internally computed stack of Laplacian-of-Gaussian (LoG) images. This
+        in turn affects the effect of the `threshold` parameter.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization its minimum and maximum values will be 0 and 1
+            respectively.
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been scaled.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype, if `image` is of
+            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            more details.
+
+            .. warning::
+                The scaling and the effect of `threshold` will depent on the
+                dtype of `image`. For consistent behavior we recommend
+                ``'minmax'``.
 
     Returns
     -------
@@ -574,7 +597,7 @@ def blob_log(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = img_as_float(image)
+    image = _prescale_value_range(image, mode=prescale, stacklevel=5)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -648,6 +671,7 @@ def blob_doh(
     log_scale=False,
     *,
     threshold_rel=DEPRECATED,
+    prescale="legacy",
 ):
     """Finds blobs in the given grayscale image.
 
@@ -689,6 +713,30 @@ def blob_doh(
             minimum peak intensity, this parameters effect was difficult to
             reason about. Use `threshold` in conjunction with `prescale`
             instead.
+
+    prescale : {'minmax', 'none', 'legacy'}, optional
+        Controls the rescaling behavior for `image` which affects the
+        internally computed stack of Determinant-of-Hessian (DoH) images. This
+        in turn affects the effect of the `threshold` parameter.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization its minimum and maximum values will be 0 and 1
+            respectively.
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been scaled.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype, if `image` is of
+            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            more details.
+
+            .. warning::
+                The scaling and the effect of `threshold` will depent on the
+                dtype of `image`. For consistent behavior we recommend
+                ``'minmax'``.
 
     Returns
     -------
@@ -743,7 +791,7 @@ def blob_doh(
 
     check_nD(image, 2)
 
-    image = img_as_float(image)
+    image = _prescale_value_range(image, mode=prescale, stacklevel=5)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

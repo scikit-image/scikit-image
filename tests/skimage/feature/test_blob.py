@@ -190,7 +190,8 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('log_scale', [False, True])
-def test_blob_log(dtype, log_scale):
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_log(dtype, log_scale, prescale):
     img = np.ones((256, 256), dtype=dtype)
 
     xs, ys = disk((200, 65), 5)
@@ -206,7 +207,7 @@ def test_blob_log(dtype, log_scale):
     img[xs, ys] = 255
 
     threshold = 1
-    if img.dtype.kind != 'f':
+    if img.dtype.kind != 'f' or prescale == "minmax":
         # account for internal scaling to [0, 1] by img_as_float
         threshold /= np.ptp(img)
 
@@ -216,6 +217,7 @@ def test_blob_log(dtype, log_scale):
         max_sigma=20,
         threshold=threshold,
         log_scale=log_scale,
+        prescale=prescale,
     )
 
     def radius(x):
@@ -342,7 +344,8 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
-def test_blob_doh(dtype):
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_doh(dtype, prescale):
     img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 20)
@@ -360,8 +363,9 @@ def test_blob_doh(dtype):
     # Note: have to either scale up threshold or rescale the image to the
     #       range [0, 1] internally.
     threshold = 0.05
-    if img.dtype.kind == 'f':
-        # account for lack of internal scaling to [0, 1] by img_as_float
+    if img.dtype.kind == 'f' and prescale != "minmax":
+        # Account for lack of internal scaling to [0, 1] by `img_as_float` (legacy)
+        # or min-max scaling
         ptp = np.ptp(img)
         threshold *= ptp**2
 
@@ -371,6 +375,7 @@ def test_blob_doh(dtype):
         max_sigma=60,
         num_sigma=10,
         threshold=threshold,
+        prescale=prescale,
     )
 
     def radius(x):
