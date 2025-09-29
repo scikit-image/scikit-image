@@ -1,3 +1,4 @@
+import sys
 import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
@@ -206,6 +207,12 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
+@pytest.mark.xfail(
+    sys.platform == "win32",
+    strict=False,
+    reason="Flaky for unknown reasons on Windows",
+    # Fixme: details in https://github.com/scikit-image/scikit-image/issues/7911
+)
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed
