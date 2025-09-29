@@ -195,8 +195,8 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
 @pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_log(dtype, threshold_type):
-    r2 = math.sqrt(2)
+@pytest.mark.parametrize('log_scale', [False, True])
+def test_blob_log(dtype, threshold_type, log_scale):
     img = np.ones((256, 256), dtype=dtype)
 
     xs, ys = disk((200, 65), 5)
@@ -222,44 +222,20 @@ def test_blob_log(dtype, threshold_type):
         threshold_rel = 0.5
 
     blobs = blob_log(
-        img, min_sigma=5, max_sigma=20, threshold=threshold, threshold_rel=threshold_rel
-    )
-
-    def radius(x):
-        return r2 * x[2]
-
-    s = sorted(blobs, key=radius)
-    thresh = 3
-
-    b = s[0]
-    assert abs(b[0] - 200) <= thresh
-    assert abs(b[1] - 65) <= thresh
-    assert abs(radius(b) - 5) <= thresh
-
-    b = s[1]
-    assert abs(b[0] - 80) <= thresh
-    assert abs(b[1] - 25) <= thresh
-    assert abs(radius(b) - 15) <= thresh
-
-    b = s[2]
-    assert abs(b[0] - 50) <= thresh
-    assert abs(b[1] - 150) <= thresh
-    assert abs(radius(b) - 25) <= thresh
-
-    b = s[3]
-    assert abs(b[0] - 100) <= thresh
-    assert abs(b[1] - 175) <= thresh
-    assert abs(radius(b) - 30) <= thresh
-
-    # Testing log scale
-    blobs = blob_log(
         img,
         min_sigma=5,
         max_sigma=20,
         threshold=threshold,
         threshold_rel=threshold_rel,
-        log_scale=True,
+        log_scale=log_scale,
     )
+
+    def radius(x):
+        r2 = math.sqrt(2)
+        return r2 * x[2]
+
+    s = sorted(blobs, key=radius)
+    thresh = 3
 
     b = s[0]
     assert abs(b[0] - 200) <= thresh
