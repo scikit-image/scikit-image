@@ -35,7 +35,7 @@ def binary_blobs(
         If `rng` is an int, it is used to seed the generator.
     boundary_mode : {'nearest', 'wrap'}, optional
         The blobs are created by smoothing and then thresholding an
-        intermediate array with seeds. This mode determines which values are
+        array consisting of ones at seed positions. This mode determines which values are
         filled in when the smoothing kernel overlaps the seed array's boundary.
 
         'nearest' (`a a a a | a b c d | d d d d`)
