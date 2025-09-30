@@ -567,7 +567,7 @@ class Test_minmax_scale_value_range:
     all_dtypes = int_dtypes + float_dtypes
 
     @pytest.mark.xfail(
-        is_wasm, reason="On WASM, NumPy's floating point behavior seems different?"
+        is_wasm, strict=False, reason="On WASM, NumPy does not report overflow errors"
     )
     @pytest.mark.parametrize("dtype", float_dtypes)
     def test_float_max(self, dtype):

@@ -546,7 +546,7 @@ def test_deprecated_threshold_rel(func):
 
 
 @pytest.mark.xfail(
-    is_wasm, reason="On WASM, NumPy's floating point behavior seems different?"
+    is_wasm, strict=False, reason="On WASM, NumPy does not report overflow errors"
 )
 @pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
 def test_blob_funcs_prescale_minmax_overflow_warning(func):
