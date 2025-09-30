@@ -1,7 +1,9 @@
-import sys
+from packaging.version import parse
 import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
+import scipy as sp
+
 from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
@@ -207,11 +209,16 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
+# Version is 1.16.x or a pre-release like 1.17.0.devX
+IS_SCIPY_1_16_or_1_17dev = parse("1.16.0") <= parse(sp.__version__) < parse("1.17.0")
+
+
 @pytest.mark.xfail(
-    sys.platform == "win32",
+    IS_SCIPY_1_16_or_1_17dev,
     strict=False,
-    reason="Flaky for unknown reasons on Windows",
-    # Fixme: details in https://github.com/scikit-image/scikit-image/issues/7911
+    reason="Flaky with SciPy 1.16.x to 1.17.0.devX",
+    # See https://github.com/scikit-image/scikit-image/issues/7911
+    # and https://github.com/scikit-image/scikit-image/pull/7684
 )
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
