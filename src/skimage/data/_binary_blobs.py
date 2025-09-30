@@ -47,7 +47,7 @@ def binary_blobs(
             The seed array is extended by wrapping around to the opposite edge.
             With this, the resulting array can be tiled (an edge is
             concatenated to its opposing edge) and blobs will be contiguous and
-            have smooth edges accross each tiles boundary.
+            have smooth edges across tile boundaries.
 
     boundary_mode : str, default "nearest"
         The `mode` parameter passed to the Gaussian filter.
