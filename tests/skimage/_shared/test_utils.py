@@ -566,6 +566,9 @@ class Test_minmax_scale_value_range:
     ]
     all_dtypes = int_dtypes + float_dtypes
 
+    @pytest.mark.xfail(
+        is_wasm, reason="On WASM, NumPy's floating point behavior seems different?"
+    )
     @pytest.mark.parametrize("dtype", float_dtypes)
     def test_float_max(self, dtype):
         dtype_min, dtype_max = numeric_dtype_min_max(dtype)
@@ -575,12 +578,9 @@ class Test_minmax_scale_value_range:
         expected_dtype = _supported_float_type(dtype, allow_complex=True)
         expected = np.array([0, 0.25, 0.5, 0.75, 1], dtype=expected_dtype)
 
-        if dtype == np.float16 or is_wasm:
+        if dtype == np.float16:
             # Special case: float16 is always scaled up to float32,
             # thereby avoiding over- & underflow issues and the related warning
-            #
-            # This warning is also missing on Pyodide, not sure why but the
-            # results seem correct.
             result = _minmax_scale_value_range(image)
         else:
             regex = "Overflow while attempting to rescale"
