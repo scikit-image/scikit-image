@@ -209,16 +209,15 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
-# Version is 1.16.x or a pre-release like 1.17.0.devX
-IS_SCIPY_1_16_or_1_17dev = parse("1.16.0") <= parse(sp.__version__) < parse("1.17.0")
+# Version is less than 1.17.0.dev0
+SCIPY_LT_1_17_DEV0 = parse(sp.__version__) < parse("1.17.0.dev0")
 
 
 @pytest.mark.xfail(
-    IS_SCIPY_1_16_or_1_17dev,
+    SCIPY_LT_1_17_DEV0,
     strict=False,
-    reason="Flaky with SciPy 1.16.x to 1.17.0.devX",
-    # See https://github.com/scikit-image/scikit-image/issues/7911
-    # and https://github.com/scikit-image/scikit-image/pull/7684
+    reason="Flaky before SciPy 1.17.0.dev0",
+    # See https://github.com/scikit-image/scikit-image/issues/7911#issuecomment-3353082011
 )
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
