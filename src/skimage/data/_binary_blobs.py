@@ -39,7 +39,7 @@ def binary_blobs(
         filled in when the smoothing kernel overlaps the seed array's boundary.
 
         'nearest' (`a a a a | a b c d | d d d d`)
-            By default, the seed array is extended by replicating the last
+            By default, when applying the Gaussian filter, the seed array is extended by replicating the last
             boundary value. This will increase the size of blobs whose seed or
             center lies exactly on the edge.
 
