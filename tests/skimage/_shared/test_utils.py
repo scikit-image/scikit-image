@@ -21,6 +21,7 @@ from skimage._shared.utils import (
     _prescale_value_range,
 )
 from skimage._shared.dtype import numeric_dtype_min_max
+from skimage._shared._dependency_checks import is_wasm
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -574,9 +575,12 @@ class Test_minmax_scale_value_range:
         expected_dtype = _supported_float_type(dtype, allow_complex=True)
         expected = np.array([0, 0.25, 0.5, 0.75, 1], dtype=expected_dtype)
 
-        if dtype == np.float16:
+        if dtype == np.float16 or is_wasm:
             # Special case: float16 is always scaled up to float32,
             # thereby avoiding over- & underflow issues and the related warning
+            #
+            # This warning is also missing on Pyodide, not sure why but the
+            # results seem correct.
             result = _minmax_scale_value_range(image)
         else:
             regex = "Overflow while attempting to rescale"

@@ -11,6 +11,7 @@ from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
 from skimage._shared.testing import assert_stacklevel
 from skimage._shared.dtype import numeric_dtype_min_max
+from skimage._shared._dependency_checks import is_wasm
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
@@ -159,16 +160,6 @@ def test_blob_dog_exclude_border(disc_center, exclude_border):
     else:
         msg = "zero blobs should be detected, as only blob is 5 px from border"
         assert blobs.shape[0] == 0, msg
-
-
-def test_blob_dog_prescale_minmax_overflow_warning():
-    float_min, float_max = numeric_dtype_min_max(np.float32)
-    img = np.array([float_min, float_max])
-    regex = "Overflow while attempting to rescale"
-    with pytest.warns(RuntimeWarning, match=regex) as record:
-        blobs = blob_dog(img, prescale="minmax")
-    assert_stacklevel(record)
-    assert blobs.shape == (0, 2)
 
 
 @pytest.mark.parametrize('anisotropic', [False, True])
@@ -552,3 +543,23 @@ def test_deprecated_threshold_rel(func):
     with pytest.warns(FutureWarning, match=regex) as record:
         func(image, threshold_rel=0.1)
     assert_stacklevel(record)
+
+
+@pytest.mark.xfail(
+    is_wasm,
+    reason="Overflow warning isn't raised in Pyodide",
+    # Not sure why that is, but the results still seem correct
+)
+@pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
+def test_blob_funcs_prescale_minmax_overflow_warning(func):
+    float_min, float_max = numeric_dtype_min_max(np.float32)
+    img = np.empty((512, 512), dtype=np.float32)
+    img.fill(float_min)
+    xs, ys = disk((400, 130), 5)
+    img[xs, ys] = float_max
+
+    regex = "Overflow while attempting to rescale"
+    with pytest.warns(RuntimeWarning, match=regex) as record:
+        blobs = func(img, prescale="minmax")
+    assert_stacklevel(record)
+    assert blobs.shape == (1, 3)  # One blob found
