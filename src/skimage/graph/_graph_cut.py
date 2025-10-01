@@ -295,7 +295,7 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         # become deterministic. We `.spawn` a new child generator to avoid
         # influencing existing calls to the generator and breaking backwards
         # compatibility that way
-        kw = {"rng": random_generator.spawn(1)[0]} if SCIPY_GE_1_17_0_DEV0 else {}
+        kw = {"rng": rng} if SCIPY_GE_1_17_0_DEV0 else {}
         vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2), **kw)
 
         # Pick second smallest eigenvector.
