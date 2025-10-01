@@ -40,11 +40,11 @@ jobs:
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["x86_64"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.12"
@@ -87,11 +87,11 @@ jobs:
         cibw_manylinux: [manylinux2014]
         cibw_arch: ["aarch64"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.12"
@@ -127,12 +127,12 @@ jobs:
         cibw_arch: ["x86_64", "arm64"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.12"
@@ -145,7 +145,7 @@ jobs:
 
       # Needed to install a specific libomp version later
       - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
+        uses: conda-incubator/setup-miniconda@835234971496cad1653abb28a638a281cf32541f # v3.2.0
         with:
           python-version: "3.12"
           channels: conda-forge
@@ -204,12 +204,12 @@ jobs:
         cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Install Python
         with:
           python-version: "3.12"
@@ -262,12 +262,12 @@ jobs:
     name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@faf86a6ed7efa889faf6996aa23820831055001a # v2.23.3
+        uses: pypa/cibuildwheel@7c619efba910c04005a835b110b057fc28fd6e93 # v3.2.0
         with:
           output-dir: dist
         env:
