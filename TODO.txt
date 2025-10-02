@@ -38,6 +38,10 @@ Other
   see https://github.com/scikit-image/scikit-image/issues/2624
 * Review why test precision needs to be lowered for macOS ARM in
   `test_apply_parallel.py`
+* Once SciPy 1.17.0 is minimal required version, so that the `rng` parameter of
+  `scipy.linalg.eigsh` is available everywhere, remove the compatibility logic in
+  `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
+  `tests/skimage/graph/test_rag.py::test_reproducibility`.
 
 Post numpy 2
 ------------
