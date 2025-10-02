@@ -14,8 +14,8 @@ myst-parser
 intersphinx-registry>=0.2411.14
 ipywidgets
 ipykernel
-plotly>=6.2.0
-kaleido>=1.0.0
+plotly>=6.3.1
+kaleido>=1.1.0
 scikit-learn>=1.2
 sphinx_design>=0.5
 pydata-sphinx-theme>=0.16
