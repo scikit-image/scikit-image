@@ -28,3 +28,5 @@ SCIPY_LT_1_12 = parse(sp.__version__) < parse('1.12')
 # Starting in SciPy v1.12, 'scipy.sparse.linalg.cg' keyword argument `tol` is
 # deprecated in favor of `rtol`.
 SCIPY_CG_TOL_PARAM_NAME = "tol" if SCIPY_LT_1_12 else "rtol"
+
+SCIPY_GE_1_17_0_DEV0 = parse('1.17.0.dev0') <= parse(sp.__version__)

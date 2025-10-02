@@ -2,6 +2,7 @@ import networkx as nx
 import numpy as np
 from scipy.sparse import linalg
 
+from skimage._shared.compat import SCIPY_GE_1_17_0_DEV0
 from . import _ncut, _ncut_cy
 
 
@@ -289,7 +290,11 @@ def _ncut_relabel(rag, thresh, num_cuts, random_generator):
         A = d2 @ (d - w) @ d2
         # Initialize the vector to ensure reproducibility.
         v0 = random_generator.random(A.shape[0])
-        vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2))
+
+        # SciPy 1.17.0.dev0 adds the new `rng` keyword, allowing `eigsh` to
+        # become deterministic
+        rng_kw = {"rng": random_generator} if SCIPY_GE_1_17_0_DEV0 else {}
+        vals, vectors = linalg.eigsh(A, which='SM', v0=v0, k=min(100, m - 2), **rng_kw)
 
         # Pick second smallest eigenvector.
         # Refer Shi & Malik 2001, Section 3.2.3, Page 893
