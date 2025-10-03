@@ -39,7 +39,7 @@ def target_registration_error(shape, matrix):
     return error
 
 
-def shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
+def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     """
     Suffle channel axes and insure format of the image a tuple of image and weight
 
@@ -55,26 +55,26 @@ def shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     new_image: tuple(ndarray)
         A 2-tuple of ndarray with the image and weights
     """
-    
+
     # Create a tuple and broadcast shapes if needed
     if isinstance(image, (list, tuple)):
-        print('image',image[0].shape)
         new_image = np.broadcast_arrays(*image)
     else:
-        print('image', image.shape)
         new_image = (image, np.ones(image.shape))
 
     # Add a channel axes in first axes if needed
     if channel_axis is None:
-        print('add channel')
         new_image = [np.expand_dims(x, 0) for x in new_image]
     elif channel_axis != 0:
         new_image = [np.moveaxis(x, channel_axis, 0) for x in new_image]
-    print('new image', new_image[0].shape)
+
     return new_image
 
 
 class AffineTransform:
+    def __init__(self, matrix):
+        self.params = matrix
+
     def parameter_vector_to_matrix(parameters, ndim):
         matrix = np.eye(ndim + 1, dtype=parameters.dtype)
         matrix[:ndim, -1] = parameters[:ndim].ravel()
@@ -88,7 +88,10 @@ class AffineTransform:
         return parameters
 
 
-class EuclideanTransform:
+class EuclideanTransform(AffineTransform):
+    def __init__(self, matrix):
+        self.params = matrix
+
     def parameter_vector_to_matrix(parameters, ndim):
         matrix = np.eye(ndim + 1)
         # Rotations for each planes
@@ -125,7 +128,10 @@ class EuclideanTransform:
         return parameters
 
 
-class TranslationTransform:
+class TranslationTransform(AffineTransform):
+    def __init__(self, matrix):
+        self.params = matrix
+
     def parameter_vector_to_matrix(parameters, ndim):
         matrix = np.eye(ndim + 1)
         matrix[:ndim, -1] = parameters.ravel()
@@ -228,10 +234,8 @@ def _matrix_to_parameter_vector(matrix, model):
 
     ndim = matrix.shape[0] - 1
 
-    # if model.lower() == "translation":
     if model == TranslationTransform:
         parameters = matrix[:ndim, -1].ravel()
-    # elif model.lower() == "euclidean":
     elif model == EuclideanTransform:
         parameters = np.zeros(ndim + len(list(combinations(range(ndim), 2))))
         # Rotations
@@ -273,8 +277,8 @@ def _scale_matrix(matrix, scale):
     scaled_matrix : ndarray
         Scaled homogeneous matrix as a ndarray.
 
-    Note
-    ----
+    Notes
+    -----
     This is useful for passing from one pyramid level to the next.
     """
     ndim = matrix.shape[0] - 1
@@ -290,12 +294,12 @@ class Solver:
 class StudholmeSolver(Solver):
     def __init__(
         self,
-        model,
-        order,
+        model_class,
+        order=3,
         cost_function=lambda im0, im1, w: -normalized_mutual_information(
-            im0.squeeze(), im1.squeeze(), bins=100, weights=w
+            im0.ravel(), im1.ravel(), bins=100, weights=w.ravel()
         ),
-        minimizer=minimize,
+        minimizer="Powell",
         max_iter=30,
     ):
         """
@@ -312,11 +316,11 @@ class StudholmeSolver(Solver):
 
 
         """
-        self._model_class = model
+        self._model_class = model_class
         self._order = order
-        self.cost_function = cost_function
+        self._cost_function = cost_function
         self._minimize = partial(
-            minimize, method=minimizer, option={"maxiter": max_iter, "disp": False}
+            minimize, method=minimizer, options={"maxiter": max_iter, "disp": False}
         )
 
     def cost(self, parameters, reference_image, moving_image, scale):
@@ -340,9 +344,9 @@ class StudholmeSolver(Solver):
             The value of the cost function.
         """
 
-        ndim = reference_image.ndim - 1
+        ndim = reference_image[0].ndim - 1
 
-        matrix = _parameter_vector_to_matrix(parameters, self.model_class, ndim)
+        matrix = _parameter_vector_to_matrix(parameters, self._model_class, ndim)
 
         matrix = _scale_matrix(matrix, scale)
 
@@ -352,15 +356,18 @@ class StudholmeSolver(Solver):
             for image in moving_image
         ]
 
-        # Compute the weight as the product of the weight
-        weight = reference_image[1] * moving_image_warp[1]
-
-        return self._cost_function(reference_image, moving_image_warp, weight)
+        return self._cost_function(
+            reference_image[0],
+            moving_image_warp[0],
+            reference_image[1] * moving_image_warp[1],
+        )
 
     def estimate_affine(
-        self, reference_image, moving_image, *, channel_axis=None, matrix
+        self, reference_image, moving_image, *, channel_axis=None, matrix=None
     ):
         """
+        Estimate the parameters of an affine transform
+
         Parameters
         ----------
         reference: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
@@ -370,18 +377,25 @@ class StudholmeSolver(Solver):
 
         Returns
         -------
-        ski.transform.AffineTransform
+        tfm: AffineTransform
+            The estimated transform
         """
         print("studholme estimate affine")
-        print(reference_image[0].shape, reference_image[1].shape)
-        ref = shuffle_axes_and_unpack_weights_if_necessary(
-            reference_image, channel_axis
-        )
 
-        mov = shuffle_axes_and_unpack_weights_if_necessary(moving_image, channel_axis)
+        ref, mov = [
+            _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
+            for image in [reference_image, moving_image]
+        ]
+
         ndim = ref[0].ndim - 1
 
-        scale = np.max(reference_image[0].shape)
+        if matrix is None:
+            matrix = np.eye(ndim + 1)
+
+        if isinstance(matrix, AffineTransform):
+            matrix = matrix.params
+
+        scale = 1  # np.max(reference_image[0].shape)
         matrix = _scale_matrix(matrix, 1 / scale)
 
         parameters = _matrix_to_parameter_vector(matrix, self._model_class)
@@ -394,9 +408,10 @@ class StudholmeSolver(Solver):
         )
 
         result = self._minimize(f, x0=parameters)
-        matrix = self._model_class.parameter_vector_to_matrix(result.x, ndim)
+
+        matrix = _parameter_vector_to_matrix(result.x, self._model_class, ndim)
         matrix = _scale_matrix(matrix, scale)
-        matrix = ski.transform.AffineTransform(matrix)
+        matrix = AffineTransform(matrix)
         return matrix
 
 
@@ -984,144 +999,144 @@ def solver_affine_ecc(
     return matrix
 
 
-# def affine(
-#     reference_image,
-#     moving_image,
-#     *,
-#     weights=None,
-#     channel_axis=None,
-#     matrix=None,
-#     model="affine",
-#     solver=solver_affine_lucas_kanade,
-#     pyramid_downscale=2.0,
-#     pyramid_minimum_size=32,
-# ):
-#     """
-#     Coarse-to-fine affine motion estimation between two images.
+def affine(
+    reference_image,
+    moving_image,
+    *,
+    weights=None,
+    channel_axis=None,
+    matrix=None,
+    model="affine",
+    solver=solver_affine_lucas_kanade,
+    pyramid_downscale=2.0,
+    pyramid_minimum_size=32,
+):
+    """
+    Coarse-to-fine affine motion estimation between two images.
 
-#     Parameters
-#     ----------
-#     reference_image : ndarray
-#         The first gray scale image of the sequence.
-#     moving_image : ndarray
-#         The second gray scale image of the sequence.
-#     weights : ndarray | None
-#         The weights array with same shape as reference_image.
-#     channel_axis : int | None
-#         Index of the channel axis.
-#     matrix : ndarray | None
-#         Intial guess for the homogeneous transformation matrix.
-#     model : {'affine', 'euclidean', 'translation'}
-#         Motion model: "translation", "euclidean" or "affine" where euclidean motion
-#         corresponds to rigid motion (rotation and translation) and affine motion can
-#         represent change in scale, shear, rotation and translations.
-#     solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
-#         Affine motion solver can be solver_affine_lucas_kanade or solver_affine_studholme.
-#     pyramid_scale : float
-#         The pyramid downscale factor.
-#     pyramid_minimum_size : int
-#         The minimum size for any dimension of the pyramid levels.
+    Parameters
+    ----------
+    reference_image : ndarray
+        The first gray scale image of the sequence.
+    moving_image : ndarray
+        The second gray scale image of the sequence.
+    weights : ndarray | None
+        The weights array with same shape as reference_image.
+    channel_axis : int | None
+        Index of the channel axis.
+    matrix : ndarray | None
+        Intial guess for the homogeneous transformation matrix.
+    model : {'affine', 'euclidean', 'translation'}
+        Motion model: "translation", "euclidean" or "affine" where euclidean motion
+        corresponds to rigid motion (rotation and translation) and affine motion can
+        represent change in scale, shear, rotation and translations.
+    solver: lambda(reference_image, moving_image, weights, channel_axis, matrix) -> matrix
+        Affine motion solver can be solver_affine_lucas_kanade or solver_affine_studholme.
+    pyramid_scale : float
+        The pyramid downscale factor.
+    pyramid_minimum_size : int
+        The minimum size for any dimension of the pyramid levels.
 
-#     Returns
-#     -------
-#     matrix : ndarray
-#         The transformation matrix.
+    Returns
+    -------
+    matrix : ndarray
+        The transformation matrix.
 
-#     Note
-#     ----
-#     Generate image pyramids and apply the solver at each level passing the
-#     previous affine parameters from the previous estimate.
+    Note
+    ----
+    Generate image pyramids and apply the solver at each level passing the
+    previous affine parameters from the previous estimate.
 
-#     The estimated matrix can be used with func:`scipy.ndimage.affine` to register the moving image
-#     to the reference image.
+    The estimated matrix can be used with func:`scipy.ndimage.affine` to register the moving image
+    to the reference image.
 
-#     Reference
-#     ---------
-#     .. [1] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
-#            The Art of Scientific Python. O’Reilly Media, Inc., 2017.
+    Reference
+    ---------
+    .. [1] J. Nunez-Iglesias, S. van der Walt, and H. Dashnow, Elegant SciPy:
+           The Art of Scientific Python. O’Reilly Media, Inc., 2017.
 
-#     Example
-#     -------
-#     >>> from skimage import data
-#     >>> import numpy as np
-#     >>> from scipy import ndimage as ndi
-#     >>> from skimage.registration import affine
-#     >>> reference = data.camera()
-#     >>> r = -0.12  # radians
-#     >>> c, s = np.cos(r), np.sin(r)
-#     >>> transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
-#     >>> moving = ndi.affine_transform(reference, transform)
-#     >>> matrix = affine(reference, moving)
-#     >>> registered = ndi.affine_transform(moving, matrix)
-#     """
+    Example
+    -------
+    >>> from skimage import data
+    >>> import numpy as np
+    >>> from scipy import ndimage as ndi
+    >>> from skimage.registration import affine
+    >>> reference = data.camera()
+    >>> r = -0.12  # radians
+    >>> c, s = np.cos(r), np.sin(r)
+    >>> transform = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
+    >>> moving = ndi.affine_transform(reference, transform)
+    >>> matrix = affine(reference, moving)
+    >>> registered = ndi.affine_transform(moving, matrix)
+    """
 
-#     # ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
+    # ndim = reference_image.ndim if channel_axis is None else reference_image.ndim - 1
 
-#     if channel_axis is not None:
-#         shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
-#     else:
-#         shape = reference_image.shape
-#         if min(shape) <= 6:
-#             warnings.warn(f"No channel axis specified for shape {shape}")
+    if channel_axis is not None:
+        shape = [d for k, d in enumerate(reference_image.shape) if k != channel_axis]
+    else:
+        shape = reference_image.shape
+        if min(shape) <= 6:
+            warnings.warn(f"No channel axis specified for shape {shape}")
 
-#     # Compute the maximum number of layers
-#     max_layer = int(
-#         math.floor(
-#             math.log(min(shape), pyramid_downscale)
-#             - math.log(pyramid_minimum_size, pyramid_downscale)
-#         )
-#     )
+    # Compute the maximum number of layers
+    max_layer = int(
+        math.floor(
+            math.log(min(shape), pyramid_downscale)
+            - math.log(pyramid_minimum_size, pyramid_downscale)
+        )
+    )
 
-#     # Generate the pyramid
-#     pyramid = list(
-#         zip(
-#             *[
-#                 reversed(
-#                     list(
-#                         pyramid_gaussian(
-#                             x,
-#                             max_layer=max_layer,
-#                             downscale=pyramid_downscale,
-#                             preserve_range=True,
-#                             channel_axis=channel_axis,
-#                         )
-#                         if x is not None
-#                         else [None] * (max_layer + 1)
-#                     )
-#                 )
-#                 for x in [reference_image, moving_image, weights]
-#             ]
-#         )
-#     )
+    # Generate the pyramid
+    pyramid = list(
+        zip(
+            *[
+                reversed(
+                    list(
+                        ski.transform.pyramid_gaussian(
+                            x,
+                            max_layer=max_layer,
+                            downscale=pyramid_downscale,
+                            preserve_range=True,
+                            channel_axis=channel_axis,
+                        )
+                        if x is not None
+                        else [None] * (max_layer + 1)
+                    )
+                )
+                for x in [reference_image, moving_image, weights]
+            ]
+        )
+    )
 
-#     # Rescale the initial matrix if any to the coarsest level
-#     if matrix is not None:
-#         first_scale = pow(pyramid_downscale, -max_layer)
-#         matrix = _scale_matrix(matrix, first_scale)
+    # Rescale the initial matrix if any to the coarsest level
+    if matrix is not None:
+        first_scale = pow(pyramid_downscale, -max_layer)
+        matrix = _scale_matrix(matrix, first_scale)
 
-#     # First level
-#     matrix = solver(
-#         pyramid[0][0],
-#         pyramid[0][1],
-#         weights=pyramid[0][2],
-#         channel_axis=channel_axis,
-#         matrix=matrix,
-#         model=model,
-#     )
+    # First level
+    matrix = solver(
+        pyramid[0][0],
+        pyramid[0][1],
+        weights=pyramid[0][2],
+        channel_axis=channel_axis,
+        matrix=matrix,
+        model=model,
+    )
 
-#     # Remaining levels
-#     for scaled_reference_image, scaled_moving_image, scaled_weights in pyramid[1:]:
-#         matrix = _scale_matrix(matrix, pyramid_downscale)
-#         matrix = solver(
-#             reference_image=scaled_reference_image,
-#             moving_image=scaled_moving_image,
-#             weights=scaled_weights,
-#             channel_axis=channel_axis,
-#             matrix=matrix,
-#             model=model,
-#         )
+    # Remaining levels
+    for scaled_reference_image, scaled_moving_image, scaled_weights in pyramid[1:]:
+        matrix = _scale_matrix(matrix, pyramid_downscale)
+        matrix = solver(
+            reference_image=scaled_reference_image,
+            moving_image=scaled_moving_image,
+            weights=scaled_weights,
+            channel_axis=channel_axis,
+            matrix=matrix,
+            model=model,
+        )
 
-#     return matrix
+    return matrix
 
 
 class GaussianPyramid:
@@ -1189,28 +1204,27 @@ class GaussianPyramid:
 
         Returns
         -------
-        The pyramids as a tuple of list of images from the lower resolution to
-        the full image with the channels in the first axis for both the image
-        and the weights.
+        pyramids: list(list(ndarray))
+            The pyramids as a 2-tuple of list of images from the lower resolution to
+            the full image with the channels in the first axis for both the image
+            and the weights.
 
         Notes
         -----
         If the inpt image is a ndarray, weights will be initialized to ones.
         """
 
-        image = shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
-        print(image[0].shape, image[1].shape)
+        image = _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
+
         # Compute the shape of the image without channel
         shape = image[0][0].shape
-        ml = self.max_layers(shape)
-        print(shape, ml, self.downscale)
         pyramids = [
             list(
                 reversed(
                     list(
                         ski.transform.pyramid_gaussian(
                             x,
-                            max_layer=ml,
+                            max_layer=self.max_layers(shape),
                             downscale=self.downscale,
                             preserve_range=True,
                             channel_axis=0,
@@ -1220,9 +1234,6 @@ class GaussianPyramid:
             )
             for x in image
         ]
-
-        for k in range(len(pyramids[0])):
-            print(f'Level {k}', pyramids[0][k].shape, pyramids[1][k].shape)
 
         return pyramids
 
@@ -1245,8 +1256,8 @@ def estimate_affine(
     moving_image,
     *,
     channel_axis=None,
-    solver=StudholmeSolver(ski.transform.AffineTransform, 3),
-    pyramid=GaussianPyramid(32, 2),
+    solver=StudholmeSolver(AffineTransform, 3),
+    pyramid=GaussianPyramid(2, 32),
     matrix=None,
 ):
     """
@@ -1272,34 +1283,47 @@ def estimate_affine(
     """
 
     ref, mov = [
-        shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
+        _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
         for image in [reference_image, moving_image]
     ]
-    print('ref image shape', ref[0].shape, ref[1].shape)
-    print('mov image shape', mov[0].shape, mov[1].shape)
-    
 
+    # if pyramid is None, we don't use a pyramidal approach
     if pyramid is None:
         pyramid = _NullPyramid()
 
-    ref_pyramid = pyramid.generate(ref, 0)
-    mov_pyramid = pyramid.generate(mov, 0)
-
     # Rescale the initial matrix if any to the coarsest level
     if matrix is not None:
-        matrix = ski.transform.AffineTransform(matrix).params
+        matrix = AffineTransform(matrix).params
         matrix = _scale_matrix(matrix, pyramid.first_scale(ref))
 
-    print('ref pyramid', ref_pyramid[0][0].shape, ref_pyramid[0][1].shape)
+    # Build the pyramids
+    ref_pyramid = pyramid.generate(ref, channel_axis=0)
+    mov_pyramid = pyramid.generate(mov, channel_axis=0)
+    pyramids = list(zip(zip(*ref_pyramid), zip(*mov_pyramid)))
 
+    # Estimate at the coarsest-level
     matrix = solver.estimate_affine(
-        ref_pyramid[0], mov_pyramid[0], matrix=matrix, channel_axis=0
-    )
+        pyramids[0][0],
+        pyramids[0][1],
+        matrix=matrix,
+        channel_axis=0,
+    ).params
 
-    for ref_scale, mov_scale in zip(ref_pyramid[1:], mov_pyramid[1:]):
-        matrix = _scale_matrix(matrix, pyramid._downscale)
-        matrix = solver.estimate_affine(
-            ref_scale, mov_scale, matrix=matrix, channel_axis=0
+    # Refine with the next levels
+    for ref_scale, mov_scale in pyramids:
+        matrix = _scale_matrix(matrix, pyramid.downscale)
+        print(
+            '------',
+            ref_scale[0].shape,
+            ref_scale[1].shape,
+            mov_scale[0].shape,
+            mov_scale[1].shape,
         )
+        matrix = solver.estimate_affine(
+            ref_scale,
+            mov_scale,
+            matrix=matrix,
+            channel_axis=0,
+        ).params
 
-    return ski.transform.AffineTransform(matrix)
+    return AffineTransform(matrix)

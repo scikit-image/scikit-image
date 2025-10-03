@@ -5,15 +5,24 @@ from itertools import combinations
 import math
 
 import numpy as np
+
+# from numpy.testing import assert_allclose
+
 from scipy import ndimage as ndi
 
 from skimage import data
 from skimage.registration import affine
-from skimage._shared.testing import assert_array_equal, assert_array_almost_equal
+from skimage._shared.testing import (
+    assert_array_equal,
+    assert_array_almost_equal,
+)
 from skimage.registration._affine import (
     _parameter_vector_to_matrix,
     _matrix_to_parameter_vector,
     _scale_matrix,
+    AffineTransform,
+    EuclideanTransform,
+    TranslationTransform,
 )
 
 from skimage.registration import (
@@ -24,8 +33,10 @@ from skimage.registration import (
 )
 
 solvers = [solver_affine_lucas_kanade, solver_affine_ecc, solver_affine_studholme]
-models = ["affine", "euclidean", "translation"]
+# models = ["affine", "euclidean", "translation"]
 max_error = 2
+
+models = [AffineTransform, EuclideanTransform, TranslationTransform]
 
 
 # define the datasets used for the tests
@@ -44,45 +55,95 @@ def data_3d():
     return data.cells3d()[:, 1, ::8, ::8]
 
 
-def create_matrix(shape, model, *, ndim):
-    """
-    Create a homogeneous test matrix
+# def create_matrix(shape, model, *, ndim):
+#     """
+#     Create a homogeneous test matrix
+
+#     Parameters
+#     ----------
+#     shape: tuple
+#         shape [D,W,W]
+#     model: str {'translation', 'euclidean' or 'affine'}
+#         Type of model
+#     ndim: int
+#         number of dimensions (2 or 3)
+
+#     Returns
+#     -------
+#     matrix: (ndim+1, ndim+1) ndarray
+#         The homogeneous transformation matrix
+#     """
+#     # Center the transformations
+#     T = np.eye(ndim + 1, dtype=np.float64)
+#     T[:ndim, -1] = np.array(shape) / 2
+
+#     matrix = np.eye(ndim + 1, dtype=np.float64)
+#     if model == TranslationTransform:
+#         matrix[:ndim, -1] += np.random.uniform(-2, 2, size=(ndim))
+#     elif model == EuclideanTransform:
+#         R = np.eye(ndim + 1, dtype=np.float64)
+#         # Rotations for each planes
+#         for k, a in enumerate(combinations(range(ndim), 2)):
+#             r = np.random.uniform(-0.01, 0.01)
+#             c, s = math.cos(r), math.sin(r)
+#             R[a[0], a[0]] = c
+#             R[a[0], a[1]] = -s
+#             R[a[1], a[1]] = c
+#             R[a[1], a[0]] = s
+#             matrix = matrix @ R
+#         matrix[:ndim, -1] += np.random.uniform(-1, 1, size=(ndim))
+#     else:
+#         matrix[:ndim, :] += np.random.uniform(-0.01, 0.01, size=(ndim, ndim + 1))
+
+#     return np.linalg.inv(T) @ matrix @ T
+
+
+def create_matrix(shape, model):
+    """Create a homogeneous test matrix
 
     Parameters
     ----------
-    shape: tuple
-        shape [D,W,W]
-    model: str {'translation', 'euclidean' or 'affine'}
-        Type of model
-    ndim: int
-        number of dimensions (2 or 3)
+    shape:
+        Shape of the reference image.
+    model: {translation,euclidean,affine}
+        Model of affine deformation
 
     Returns
     -------
-    matrix: (ndim+1, ndim+1) ndarray
-        The homogeneous transformation matrix
+    transform: ndarray
+        Affine transformation matrix
     """
+    ndim = len(shape)
     # Center the transformations
     T = np.eye(ndim + 1, dtype=np.float64)
-    T[:ndim, -1] = np.array(shape) / 2
-
+    T[:ndim, -1] = -np.array(shape) / 2
     matrix = np.eye(ndim + 1, dtype=np.float64)
-    if model == "translation":
-        matrix[:ndim, -1] += np.random.uniform(-2, 2, size=(ndim))
-    elif model == "euclidean":
-        R = np.eye(ndim + 1, dtype=np.float64)
+    # translation
+    matrix[:ndim, -1] += np.random.uniform(-2, 2, size=(ndim))
+    if model == EuclideanTransform or model == AffineTransform:
         # Rotations for each planes
-        for k, a in enumerate(combinations(range(ndim), 2)):
-            r = np.random.uniform(-0.01, 0.01)
+        for a in combinations(range(ndim), 2):
+            R = np.eye(ndim + 1, dtype=np.float64)
+            r = np.random.uniform(-np.pi / 10, np.pi / 10)
             c, s = math.cos(r), math.sin(r)
             R[a[0], a[0]] = c
-            R[a[0], a[1]] = -s
+            R[a[1], a[0]] = -s
+            R[a[0], a[1]] = s
             R[a[1], a[1]] = c
-            R[a[1], a[0]] = s
             matrix = matrix @ R
-        matrix[:ndim, -1] += np.random.uniform(-1, 1, size=(ndim))
-    else:
-        matrix[:ndim, :] += np.random.uniform(-0.01, 0.01, size=(ndim, ndim + 1))
+
+    if model == AffineTransform:
+        # Shear for each plane
+        for a in combinations(range(ndim), 2):
+            r = np.random.uniform(-0.1, 0.1)
+            S = np.eye(ndim + 1)
+            S[a[0], a[1]] = r
+            matrix = S @ matrix
+        # Zoom
+        Z = np.eye(ndim + 1)
+        for k in range(ndim):
+            Z[k, k] = np.random.uniform(0.8, 1.2)
+        matrix = Z @ matrix
 
     return np.linalg.inv(T) @ matrix @ T
 
@@ -94,6 +155,59 @@ def test_tre():
         [10, 10], np.array([[1, 0, 1], [0, 1, 0], [0, 0, 1]])
     )
     assert_array_equal(np.ones((10, 10)), tre)
+
+
+def test_shuffle():
+    from skimage.registration._affine import (
+        _shuffle_axes_and_unpack_weights_if_necessary,
+    )
+
+    data = _shuffle_axes_and_unpack_weights_if_necessary(np.zeros((10, 10)), None)
+    assert len(data) == 2
+    assert data[0].shape == (1, 10, 10)
+    assert data[1].shape == (1, 10, 10)
+
+    data = _shuffle_axes_and_unpack_weights_if_necessary(np.zeros((1, 10, 10)), 0)
+    assert len(data) == 2
+    assert data[0].shape == (1, 10, 10)
+    assert data[1].shape == (1, 10, 10)
+
+    data = _shuffle_axes_and_unpack_weights_if_necessary(
+        (np.zeros((1, 10, 10)), np.zeros((1, 10, 10))), 0
+    )
+    assert len(data) == 2
+    assert data[0].shape == (1, 10, 10)
+    assert data[1].shape == (1, 10, 10)
+
+
+def test_gaussian_pyramid():
+    from skimage.registration._affine import GaussianPyramid
+
+    shape = (32, 32)
+    image = np.zeros(shape)
+    g = GaussianPyramid(min_size=8)
+    assert g.max_layers(shape) == 2  # size 16, 8
+    p = g.generate(image, channel_axis=None)
+    assert len(p) == 2  # image and weights
+    assert len(p[0]) == 3  # 3 scales 8, 16, 32
+    # test the shape of the elements of the pyramid
+    for k in range(len(p[0])):
+        n = int(shape[0] / np.pow(2.0, len(p[0]) - k - 1))
+        assert p[0][k].shape == (1, n, n)
+        assert p[1][k].shape == (1, n, n)
+
+
+@pytest.mark.parametrize("ndim", [2, 3])
+@pytest.mark.parametrize("model", models)
+def test_matrix_to_parameters(ndim, model):
+    shape = (512, 512) if ndim == 2 else (512, 512, 512)
+    matrix0 = create_matrix(shape, model)
+    params = _matrix_to_parameter_vector(matrix0, model)
+    matrix1 = _parameter_vector_to_matrix(params, model, ndim)
+    assert np.linalg.norm(matrix0 - matrix1) < 0.1
+
+
+########################################
 
 
 @pytest.mark.parametrize("solver", solvers)
