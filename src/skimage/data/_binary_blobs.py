@@ -45,8 +45,7 @@ def binary_blobs(
 
         'wrap' (`a b c d | a b c d | a b c d`)
             The seed array is extended by wrapping around to the opposite edge.
-            The resulting blob array can be tiled (an edge is
-            concatenated to its opposing edge) and blobs will be contiguous and
+            The resulting blob array can be tiled and blobs will be contiguous and
             have smooth edges across tile boundaries.
 
     boundary_mode : str, default "nearest"
