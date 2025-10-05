@@ -26,7 +26,7 @@ from ._montage import montage
 from ._map_array import map_array
 from ._regular_grid import regular_grid, regular_seeds
 from .apply_parallel import apply_parallel
-from .arraycrop import crop
+from .arraycrop import crop, bounding_box_crop
 from .compare import compare_images
 from .noise import random_noise
 from .shape import view_as_blocks, view_as_windows
@@ -48,6 +48,7 @@ __all__ = [
     'view_as_windows',
     'slice_along_axes',
     'crop',
+    'bounding_box_crop',
     'compare_images',
     'map_array',
     'montage',
