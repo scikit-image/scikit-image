@@ -1,7 +1,7 @@
 import math
 import pickle
-
 import re
+
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
@@ -745,22 +745,27 @@ def test_axis_minor_length():
     length = regionprops(img[::2], spacing=(2, 1))[0].axis_minor_length
     assert_almost_equal(length, target_length, decimal=1)
 
-    # this can produce small value that can be negative due to numerical errors
-    img_negative_lenght = np.array(
-        [[[0,0,0,0,0,1,0,0,0,0],
-          [0,0,0,0,1,1,1,1,0,0],
-          [0,0,0,0,1,1,1,1,1,0],
-          [0,0,1,1,1,1,1,1,1,0],
-          [0,1,1,1,1,1,1,1,1,1],
-          [1,1,1,0,1,1,1,1,1,0],
-          [0,1,1,0,0,1,1,1,0,0],
-          [0,1,1,0,1,1,1,1,0,0],
-          [0,0,1,1,1,1,0,0,0,0]]], dtype=np.uint8)
+    # this input can produce small value that can be negative due to numerical errors
+    img_negative_length = np.array(
+        [
+            [
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+                [0, 1, 1, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            ]
+        ],
+        dtype=np.uint8,
+    )
 
-    length = regionprops(img_negative_lenght)[0].axis_minor_length
-    target_length = 0.
+    length = regionprops(img_negative_length)[0].axis_minor_length
+    target_length = 0.0
     assert_almost_equal(length, target_length)
-
 
 
 def test_moments():
