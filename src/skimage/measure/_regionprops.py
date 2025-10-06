@@ -298,6 +298,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     axis_lengths = []
     for ax in range(2, -1, -1):
         w = sum(v * -1 if i == ax else v for i, v in enumerate(inertia_tensor_eigvals))
+        w = 0 if w < 0 else w
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
 
@@ -623,7 +624,10 @@ class RegionProperties:
         elif self._ndim == 3:
             # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[0]
             ev = self.inertia_tensor_eigvals
-            return sqrt(10 * (ev[0] + ev[1] - ev[2]))
+            length2 = 10 * (ev[0] + ev[1] - ev[2])
+            if length2 <= 0:
+                return 0
+            return sqrt(length2)
         else:
             raise ValueError("axis_major_length only available in 2D and 3D")
 
@@ -635,7 +639,10 @@ class RegionProperties:
         elif self._ndim == 3:
             # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[-1]
             ev = self.inertia_tensor_eigvals
-            return sqrt(10 * (-ev[0] + ev[1] + ev[2]))
+            length2 = 10 * (-ev[0] + ev[1] + ev[2])
+            if length2 <= 0:
+                return 0
+            return sqrt(length2)
         else:
             raise ValueError("axis_minor_length only available in 2D and 3D")
 
