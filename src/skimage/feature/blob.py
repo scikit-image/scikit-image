@@ -241,14 +241,14 @@ def blob_dog(
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
-        The minimum standard deviation for Gaussian kernel. Keep this low to
-        detect smaller blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        Minimum standard deviation for Gaussian kernel. Keep this value low to
+        detect smaller blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     max_sigma : scalar or sequence of scalars, optional
         The maximum standard deviation for Gaussian kernel. Keep this high to
-        detect larger blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        detect larger blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
@@ -433,18 +433,19 @@ def blob_log(
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
-        the minimum standard deviation for Gaussian kernel. Keep this low to
-        detect smaller blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        Minimum standard deviation for Gaussian kernel. Keep this value low to
+        detect smaller blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     max_sigma : scalar or sequence of scalars, optional
         The maximum standard deviation for Gaussian kernel. Keep this high to
-        detect larger blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        detect larger blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     num_sigma : int, optional
-        The number of intermediate values of standard deviations to consider
-        between `min_sigma` and `max_sigma`.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
@@ -602,16 +603,23 @@ def blob_doh(
     Parameters
     ----------
     image : 2D ndarray
-        Input grayscale image.Blobs can either be light on dark or vice versa.
+        Input grayscale image. Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
-        Hessian matrix. Keep this low to detect smaller blobs.
+        Hessian matrix. Keep this value low to detect smaller blobs.
+        The standard deviation of the Gaussian kernel is given either as a
+        sequence for each axis, or as a single number, in which case it is
+        equal for all axes.
     max_sigma : float, optional
         The maximum standard deviation for Gaussian Kernel used to compute
-        Hessian matrix. Keep this high to detect larger blobs.
+        Hessian matrix. Keep this value high to detect larger blobs.
+        The standard deviation of the Gaussian kernel is given either as a
+        sequence for each axis, or as a single number, in which case it is
+        equal for all axes.
     num_sigma : int, optional
-        The number of intermediate values of standard deviations to consider
-        between `min_sigma` and `max_sigma`.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
         The absolute lower bound for scale space maxima. Local maxima smaller
         than `threshold` are ignored. Reduce this to detect blobs with lower
