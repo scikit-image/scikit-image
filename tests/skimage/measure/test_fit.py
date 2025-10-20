@@ -855,7 +855,7 @@ def test_ransac_is_model_valid():
 
     with expected_warnings(["No inliers found"]):
         model, inliers = ransac(
-            np.empty((10, 2)),
+            np.zeros((10, 2), dtype=np.float64),
             LineModelND,
             2,
             np.inf,
