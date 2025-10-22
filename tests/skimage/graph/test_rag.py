@@ -8,6 +8,7 @@ from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
 
+# Version is less than 1.17.0.dev0
 SCIPY_LT_1_17_DEV0 = parse(sp.__version__) < parse("1.17.0.dev0")
 
 
@@ -209,9 +210,6 @@ def test_ncut_stable_subgraph():
     new_labels, _, _ = segmentation.relabel_sequential(new_labels)
 
     assert new_labels.max() == 0
-
-
-# Version is less than 1.17.0.dev0
 
 
 @pytest.mark.xfail(
