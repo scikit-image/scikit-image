@@ -1,4 +1,5 @@
 import numpy as np
+import cython
 import pytest
 from packaging.version import parse
 
@@ -9,13 +10,12 @@ from skimage.util import invert
 
 from skimage._shared.testing import assert_array_equal, TestCase
 
-
-NP_VERSION = parse(np.__version__)
+CYTHON_VERSION = parse(cython.__version__)
 
 pytestmark = pytest.mark.xfail(
-    NP_VERSION.is_devrelease,
-    reason="Temporarily skip for nightly wheels (gh-7903). Unresolved why tests hang "
-    "indefinitely. Use NumPy's nightly as a canary to decide when to skip.",
+    CYTHON_VERSION == parse("3.2.0b1"),
+    reason="Temporarily skip for Cython version 3.2.0b1 (gh-7903). "
+    "Unresolved why tests hang indefinitely.",
     run=False,  # Don't trigger the hanging test
 )
 
