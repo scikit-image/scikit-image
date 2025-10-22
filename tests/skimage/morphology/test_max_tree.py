@@ -1,7 +1,4 @@
 import numpy as np
-import cython
-import pytest
-from packaging.version import parse
 
 from skimage.morphology import max_tree, area_closing, area_opening
 from skimage.morphology import max_tree_local_maxima, diameter_opening
@@ -9,15 +6,6 @@ from skimage.morphology import diameter_closing
 from skimage.util import invert
 
 from skimage._shared.testing import assert_array_equal, TestCase
-
-CYTHON_VERSION = parse(cython.__version__)
-
-pytestmark = pytest.mark.xfail(
-    CYTHON_VERSION == parse("3.2.0b1"),
-    reason="Temporarily skip for Cython version 3.2.0b1 (gh-7903). "
-    "Unresolved why tests hang indefinitely.",
-    run=False,  # Don't trigger the hanging test
-)
 
 
 eps = 1e-12
