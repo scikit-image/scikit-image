@@ -116,7 +116,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'Cython>=3.0.8',
+    'Cython>=3.0.8,!=3.2.*',
     'pythran>=0.16',
     'lazy_loader>=0.4',
     'numpy>=2.0',
