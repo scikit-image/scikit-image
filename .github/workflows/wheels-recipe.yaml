@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   build_linux_wheels:
+    timeout-minutes: 60
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -77,6 +78,7 @@ jobs:
           path: ./dist/*.whl
 
   build_linux_aarch64_wheels:
+    timeout-minutes: 60
     name: Build python ${{ matrix.cibw_python }} aarch64 wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -117,6 +119,7 @@ jobs:
           path: ./dist/*.whl
 
   build_macos_wheels:
+    timeout-minutes: 60
     name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -194,6 +197,7 @@ jobs:
           path: ./dist/*.whl
 
   build_windows_wheels:
+    timeout-minutes: 60
     name: Build ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -259,6 +263,7 @@ jobs:
   # manual setup. The Pyodide version we build against here is largely
   # controlled by cibuildwheel's at the moment.
   build_pyodide_wheel:
+    timeout-minutes: 60
     name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
     runs-on: ubuntu-latest
     steps:
