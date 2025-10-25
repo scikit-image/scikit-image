@@ -1,0 +1,23 @@
+{
+	"name": "scikit-image devcontainer",
+	"build": {
+		"context": "..",
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers-contrib/features/pre-commit:2": {}
+	},
+	"postCreateCommand": "pre-commit install && bash ./.devcontainer/postBuild",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter",
+				"donjayamanne.python-environment-manager"
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "/home/vscode/envs/skimage-dev/bin"
+			}
+		}
+	}
+}
