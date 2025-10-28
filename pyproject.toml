@@ -221,19 +221,19 @@ enable="cpython-freethreading"
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
 test-environment = {PYTHON_GIL=0}
-test-extras = ["test", "optional_non_gil"]
+test-extras = ["test", "optional_free_threaded"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-m*linux_aarch64"
-test-extras = ["test", "optional_non_gil"]
+test-extras = ["test", "optional_free_threaded"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win_arm64"
-test-extras = ["test", "optional_non_gil"]
+test-extras = ["test", "optional_free_threaded"]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux*"
-test-extras = ["test", "optional_non_gil"]
+test-extras = ["test", "optional_free_threaded"]
 # SimpleITK does not support musllinux yet
 
 [tool.cibuildwheel.linux]
