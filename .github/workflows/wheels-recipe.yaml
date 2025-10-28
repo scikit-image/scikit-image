@@ -26,7 +26,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@v3.2.0
+      - uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
       - uses: actions/upload-artifact@v4
@@ -51,7 +51,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@v3.2.0
+      - uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
           CC: clang-cl
@@ -85,7 +85,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@v3.2.0
+      - uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
       - uses: actions/upload-artifact@v4
@@ -102,6 +102,6 @@ jobs:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_PLATFORM: pyodide
