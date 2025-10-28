@@ -245,7 +245,6 @@ archs = ["AMD64"]
 [tool.cibuildwheel.macos]
 test-command = "pytest ./tests"
 before-all = [
-    "set",
     "bash {project}/tools/build_libomp.sh",
 ]
 
