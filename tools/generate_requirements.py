@@ -62,14 +62,14 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
         f.writelines(f"{line}\n" for line in lines)
 
 
-def explode_dependencies(
+def expand_dependencies(
     dep_list: list[str],
     optional_dict: dict[str, list[str]],
     package_name: str = 'scikit-image',
 ) -> list[str]:
     """Explode dependencies with optional extras into a flat list.
 
-    If `package_name[optional_group]` is used as a dependency itself, replace
+    If `scikit-image[optional_group]` is used as a dependency itself, replace
     with the actual dependencies of `optional_group`.
     """
     exploded = []
@@ -77,7 +77,7 @@ def explode_dependencies(
         if dep.startswith(package_name):
             extras = dep.split('[')[1].rstrip(']').split(',')
             exploded.extend(
-                explode_dependencies(
+                expand_dependencies(
                     optional_dict[extras[0]], optional_dict, package_name
                 )
             )
@@ -94,7 +94,7 @@ def main() -> None:
     for key, opt_list in pyproject["project"]["optional-dependencies"].items():
         generate_requirement_file(
             key,
-            explode_dependencies(
+            expand_dependencies(
                 opt_list,
                 pyproject["project"]["optional-dependencies"],
                 package_name='scikit-image',

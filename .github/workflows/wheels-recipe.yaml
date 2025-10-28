@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-            macos-13,
+            macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
@@ -44,7 +44,7 @@ jobs:
       matrix:
         os: [
             windows-latest,
-            # windows-11-arm, # need a separate PR for this, problem with python verison discovery
+            # windows-11-arm, # need a separate PR for this, problem with python version discovery
           ]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
 
@@ -96,7 +96,7 @@ jobs:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-  build_pyodie_wheel:
+  build_pyodide_wheel:
     name: Build python pyodide on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 60
