@@ -47,7 +47,7 @@ build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
     'ninja>=1.11.1.1',
-    'Cython>=3.0.8,!=3.2.*',
+    'Cython>=3.0.8,!=3.2.0b1',
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
@@ -116,7 +116,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'Cython>=3.0.8,!=3.2.*',
+    'Cython>=3.0.8,!=3.2.0b1',
     'pythran>=0.16',
     'lazy_loader>=0.4',
     'numpy>=2.0',
