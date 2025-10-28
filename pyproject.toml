@@ -88,9 +88,9 @@ optional = [
     'SimpleITK; sys_platform != "emscripten"',
     'scikit-learn>=1.2; python_version < "3.14"', # not packaged for Pyodide yet
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
-    'scikit-image[optional_non_gil]'
+    'scikit-image[optional_free_threaded]'
 ]
-optional_non_gil = [
+optional_free_threaded = [
     'astropy>=6.0',
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
