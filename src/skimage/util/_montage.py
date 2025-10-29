@@ -148,8 +148,7 @@ def montage(
 
     # Copy the data to the output array
     for idx_image, image in enumerate(arr_in):
-        idx_sr = idx_image // ntiles_col
-        idx_sc = idx_image % ntiles_col
+        idx_sr, idx_sc = divmod(idx_image, ntiles_col)
         arr_out[slices_row[idx_sr], slices_col[idx_sc], :] = image
 
     if channel_axis is not None:
