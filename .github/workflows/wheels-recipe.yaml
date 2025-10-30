@@ -10,7 +10,7 @@ env:
 
 jobs:
   build_macos_wheel:
-    name: Build python ${{ matrix.build }} ${{ matrix.cibw_arch }}  wheels on ${{ matrix.os }}
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
