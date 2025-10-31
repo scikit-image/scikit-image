@@ -36,7 +36,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_windows_wheel:
-    name: Build python ${{ matrix.build }} ${{ matrix.cibw_arch }}  wheels on ${{ matrix.os }}
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -66,7 +66,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_wheel_linux:
-    name: Build python ${{ matrix.build }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -97,7 +97,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_pyodide_wheel:
-    name: Build python pyodide on ubuntu-latest
+    name: Build pyodide on ubuntu-latest
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
