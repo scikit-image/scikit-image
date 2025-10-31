@@ -1,4 +1,7 @@
-name: Nightly Wheel builder
+name: Nightly wheels
+# Workflow to build nightly wheels and upload to
+# pypi.anaconda.org/scientific-python-nightly-wheels
+
 on:
   workflow_dispatch:
   schedule:
@@ -6,6 +9,9 @@ on:
   push:
     branches:
       - maintenance/**
+  pull_request:
+    paths:
+      - ".github/workflows/nightly-wheel-build.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch
@@ -17,14 +23,8 @@ permissions:
 
 jobs:
   call-workflow-build-wheels:
+    name: Wheels recipe
     uses: ./.github/workflows/wheels-recipe.yaml
-    with:
-      CIBW_ENVIRONMENT: >
-        PIP_PRE=1
-        PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
-      # assert NumPy 2.0 before running tests
-      CIBW_TEST_COMMAND: >
-        pip list --pre --format=freeze | grep -q 'numpy==2' && pytest --pyargs skimage {project}/tests
 
   upload_anaconda:
     permissions:
