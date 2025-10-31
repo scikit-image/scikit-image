@@ -1,4 +1,6 @@
-name: Build and Test Wheels
+name: Wheels recipe
+# Reusable workflow for building scikit-image's wheels
+
 on:
   workflow_call:
 

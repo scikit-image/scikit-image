@@ -1,4 +1,7 @@
-name: Nightly Wheel builder
+name: Nightly wheels
+# Workflow to build nightly wheels and upload to
+# pypi.anaconda.org/scientific-python-nightly-wheels
+
 on:
   workflow_dispatch:
   schedule:

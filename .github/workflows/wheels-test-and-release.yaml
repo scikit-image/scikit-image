@@ -1,4 +1,6 @@
-name: Build Wheels and Release
+name: Release wheels
+# Workflow to build wheels and publish to PyPI if tagged
+
 on:
   push:
     tags:

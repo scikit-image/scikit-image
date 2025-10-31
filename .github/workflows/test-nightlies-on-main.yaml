@@ -1,5 +1,5 @@
-# Workflow to build and test against nightly wheels
-name: Test Nightly
+name: Test nightlies
+# On `main`, test against nightly wheels of upstream.
 
 on:
   push:
