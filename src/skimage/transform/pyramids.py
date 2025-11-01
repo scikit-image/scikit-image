@@ -31,7 +31,7 @@ def _smooth(image, sigma, mode, cval, channel_axis):
 
 def _check_factor(factor):
     if factor <= 1:
-        raise ValueError('scale factor must be greater than 1')
+        raise ValueError("scale factor must be greater than 1")
 
 
 def pyramid_reduce(
@@ -39,7 +39,7 @@ def pyramid_reduce(
     downscale=2,
     sigma=None,
     order=1,
-    mode='reflect',
+    mode="reflect",
     cval=0,
     preserve_range=False,
     *,
@@ -116,7 +116,7 @@ def pyramid_expand(
     upscale=2,
     sigma=None,
     order=1,
-    mode='reflect',
+    mode="reflect",
     cval=0,
     preserve_range=False,
     *,
@@ -193,7 +193,7 @@ def pyramid_gaussian(
     downscale=2,
     sigma=None,
     order=1,
-    mode='reflect',
+    mode="reflect",
     cval=0,
     preserve_range=False,
     *,
@@ -295,7 +295,7 @@ def pyramid_laplacian(
     downscale=2,
     sigma=None,
     order=1,
-    mode='reflect',
+    mode="reflect",
     cval=0,
     preserve_range=False,
     *,
