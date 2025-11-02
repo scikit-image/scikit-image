@@ -158,23 +158,24 @@ jobs:
 
       - name: Build wheels for CPython Mac OS
         run: |
-          # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into
-          # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/
+          # Make sure to use a LLVM OpenMP version binary compatible with the oldest
+          # supported version of the macOS SDK as it will be vendored into
+          # the scikit-image wheels for macos. We use the `llvm-openmp` packages from
+          # https://github.com/conda-forge/openmp-feedstock
           if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
-              export MACOSX_DEPLOYMENT_TARGET=12.3
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
+              export MACOSX_DEPLOYMENT_TARGET="12.3"
+              export CONDA_SUBDIR="osx-arm64"
+              export CONDA_OVERRIDE_OSX="${MACOSX_DEPLOYMENT_TARGET}"
           else
-              export MACOSX_DEPLOYMENT_TARGET=10.14
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-64/llvm-openmp-19.1.7-ha54dae1_0.conda"
+              export MACOSX_DEPLOYMENT_TARGET="10.14"
+              export CONDA_SUBDIR="osx-arm64"
+              export CONDA_OVERRIDE_OSX="${MACOSX_DEPLOYMENT_TARGET}"
           fi
-          echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
 
           # use conda to install llvm-openmp
           # Note that we do NOT activate the conda environment, we just add the
           # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
-          conda create -n build $OPENMP_URL
+          conda create -n build llvm-openmp -yq
           PREFIX="/Users/runner/miniconda3/envs/build"
           export CC=/usr/bin/clang
           export CXX=/usr/bin/clang++
