@@ -208,7 +208,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
             rng=rng,
             amount=kwargs['amount'],
             salt_vs_pepper=1.0,
-            clip=clip,
+            clip=False,
         )
 
     elif mode == 'pepper':
@@ -219,7 +219,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
             rng=rng,
             amount=kwargs['amount'],
             salt_vs_pepper=0.0,
-            clip=clip,
+            clip=False,
         )
 
     elif mode == 's&p':
