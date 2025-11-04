@@ -297,7 +297,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     axis_lengths = []
     for ax in range(2, -1, -1):
         w = sum(v * -1 if i == ax else v for i, v in enumerate(inertia_tensor_eigvals))
-        w = max(0, w) # numerical errors can lead to small negative values
+        w = max(0, w)  # numerical errors can lead to small negative values
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
 
