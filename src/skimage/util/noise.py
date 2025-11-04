@@ -70,7 +70,7 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
     clip : bool, optional
-        If True (default), the output will be clipped after noise applied.
+        If True (default), the output will be clipped after noise is applied.
         This may be needed to maintain the proper image data range.
         If False, clipping is not applied, and the output may extend beyond
         the range [-1, 1].
