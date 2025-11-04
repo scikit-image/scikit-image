@@ -1490,7 +1490,8 @@ def test_extra_properties_table():
 
 
 @pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
-def test_multichannel():
+@pytest.mark.parametrize("prop_name", [*PROPS.keys(), "custom_intensity_median"])
+def test_multichannel(prop_name):
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]
     astro_green = astro[..., 1]
@@ -1504,16 +1505,15 @@ def test_multichannel():
         labels, astro, extra_properties=[custom_intensity_median]
     )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["custom_intensity_median"]:
-        p = region[prop]
-        p_multi = region_multi[prop]
-        if np.shape(p) == np.shape(p_multi):
-            # property does not depend on multiple channels
-            assert_array_equal(p, p_multi)
-        else:
-            # property uses multiple channels, returns props stacked along
-            # final axis
-            assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
+    p = region[prop_name]
+    p_multi = region_multi[prop_name]
+    if np.shape(p) == np.shape(p_multi):
+        # property does not depend on multiple channels
+        assert_array_equal(p, p_multi)
+    else:
+        # property uses multiple channels, returns props stacked along
+        # final axis
+        assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
 
 
 def test_3d_ellipsoid_axis_lengths():
