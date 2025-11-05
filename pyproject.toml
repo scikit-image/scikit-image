@@ -249,4 +249,4 @@ before-all = [
 ]
 
 [tool.cibuildwheel.pyodide]
-test-command = "pytest -svra -p no:cacheprovider --pyargs skimage tests"
+test-command = "pytest --pyargs skimage tests"
