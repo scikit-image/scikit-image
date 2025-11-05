@@ -22,7 +22,7 @@ jobs:
     name: Build scikit-image distribution for Pyodide
     runs-on: ubuntu-24.04
     env:
-      PYODIDE_VERSION: 0.27.3
+      PYODIDE_VERSION: 0.27.5
       # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
       # The appropriate versions can be found in the Pyodide repodata.json
       # "info" field, or in Makefile.envs:
@@ -32,13 +32,13 @@ jobs:
       NODE_VERSION: 20
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.1.1
         with:
           persist-credentials: false
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@2e3e4b15a884dc73a63f962bff250a855150a234 # v5.0.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
@@ -51,32 +51,30 @@ jobs:
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build
+        run: pip install pyodide-build==0.30.0
 
       - name: Build scikit-image for Pyodide
-        run: pyodide build
+        run: |
+          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
+          pyodide build
 
       - name: Set up Node.js
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
         run: |
           # Set up Pyodide virtual environment
-          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
           pyodide venv .venv-pyodide
 
           # Activate the virtual environment and install the built scikit-image wheel
           source .venv-pyodide/bin/activate
           pip install dist/*.whl
-          # Change to a different directory to avoid importing the local scikit-image
-          # package instead of the installed one
-          cd doc
 
           # Install pytest and optional dependencies that are available
-          pip install pytest
-          pip install "astropy" "cloudpickle" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
+          pip install pytest pytest-pretty
+          pip install "astropy" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
           # Don't use the cache provider plugin, as it doesn't work with Pyodide
           # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          $PYTEST -svra -p no:cacheprovider --pyargs skimage
+          $PYTEST -svra -p no:cacheprovider --pyargs skimage ./tests
