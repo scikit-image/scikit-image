@@ -7,7 +7,7 @@ name: Test Emscripten/Pyodide build
 on: [push, pull_request, merge_group]
 
 env:
-  FORCE_COLOR: 3n
+  FORCE_COLOR: 3
   PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
 
 concurrency:
