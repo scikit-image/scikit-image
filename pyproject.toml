@@ -194,8 +194,10 @@ testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
-    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",  # warn by pyamg in ruge_stuben_solver
-    # # Pyodide warning coming via threadpoolctl, remove when https://github.com/joblib/threadpoolctl/pull/201 is released
+    # warn by pyamg in ruge_stuben_solver
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
+    # Pyodide warning coming via threadpoolctl, remove when
+    # https://github.com/joblib/threadpoolctl/pull/201 is released
     "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
 ]
 norecursedirs = ["io/_plugins"]
