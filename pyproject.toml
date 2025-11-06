@@ -86,7 +86,7 @@ docs = [
 ]
 optional = [
     'SimpleITK; sys_platform != "emscripten"',
-    'scikit-learn>=1.2; python_version < "3.14"',
+    'scikit-learn>=1.2',
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
     'scikit-image[optional_free_threaded]'
 ]
