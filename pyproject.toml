@@ -102,7 +102,7 @@ test = [
     'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
-    'pytest>=8',
+    'pytest>=8.3',
     'pytest-cov>=2.11.0',
     'pytest-pretty',
     'pytest-localserver',
