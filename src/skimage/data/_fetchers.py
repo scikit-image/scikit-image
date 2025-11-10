@@ -1128,6 +1128,7 @@ def stereo_motorcycle():
 
     """
     filename = _fetch("data/motorcycle_disp.npz")
+    # np.load of npz file holds onto open file handle.
     with np.load(filename) as data:
         disp = data['arr_0']
     return (_load("data/motorcycle_left.png"), _load("data/motorcycle_right.png"), disp)

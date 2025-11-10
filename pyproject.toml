@@ -30,7 +30,7 @@ dependencies = [
     'scipy>=1.11.4',
     'networkx>=3.0',
     'pillow>=10.1',
-    'imageio>=2.33.1,!=2.35.0',
+    'imageio>=2.33,!=2.35.0',
     'tifffile>=2022.8.12',
     'packaging>=21',
     'lazy-loader>=0.4',
