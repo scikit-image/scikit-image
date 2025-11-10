@@ -86,7 +86,7 @@ docs = [
 ]
 optional = [
     'SimpleITK; sys_platform != "emscripten"',
-    'scikit-learn>=1.2; python_version < "3.14"', # not packaged for Pyodide yet
+    'scikit-learn>=1.2',
     'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
     'scikit-image[optional_free_threaded]'
 ]
@@ -194,7 +194,11 @@ testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
-    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
+    # warn by pyamg in ruge_stuben_solver
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
+    # Pyodide warning coming via threadpoolctl, remove when
+    # https://github.com/joblib/threadpoolctl/pull/201 is released
+    "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
 ]
 norecursedirs = ["io/_plugins"]
 
@@ -249,4 +253,4 @@ before-all = [
 ]
 
 [tool.cibuildwheel.pyodide]
-test-command = "pytest -svra -p no:cacheprovider --pyargs skimage tests"
+test-command = "pytest --pyargs skimage tests"

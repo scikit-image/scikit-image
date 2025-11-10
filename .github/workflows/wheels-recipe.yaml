@@ -112,3 +112,9 @@ jobs:
         uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_PLATFORM: pyodide
+          # only build for newer pyodide_2025_0 ABI and not cp312-pyodide_wasm32 (pyodide_2024_0)
+          CIBW_BUILD: "cp313-pyodide_wasm32"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide-${{ github.job }}
+          path: ./wheelhouse/*.whl
