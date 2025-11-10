@@ -1128,7 +1128,8 @@ def stereo_motorcycle():
 
     """
     filename = _fetch("data/motorcycle_disp.npz")
-    disp = np.load(filename)['arr_0']
+    with np.load(filename) as data:
+        disp = data['arr_0']
     return (_load("data/motorcycle_left.png"), _load("data/motorcycle_right.png"), disp)
 
 
