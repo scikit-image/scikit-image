@@ -50,9 +50,9 @@ def reconstruction_loop(cnp.ndarray[dtype=np_uints, ndim=1,
     image_stride : int
         Stride between seed image and mask image in `aranks`.
     """
-    cdef unsigned int neighbor_rank, current_rank, mask_rank
-    cdef int i, neighbor_idx, current_link, nprev, nnext
-    cdef int nstrides = astrides.shape[0]
+    cdef np_uints neighbor_rank, current_rank, mask_rank
+    cdef np_ints neighbor_idx, current_link, nprev, nnext
+    cdef int i, nstrides = astrides.shape[0]
     cdef np_uints *ranks = <np_uints *>(aranks.data)
     cdef np_ints *prev = <np_ints *>(aprev.data)
     cdef np_ints *next = <np_ints *>(anext.data)
