@@ -1,7 +1,7 @@
 import math
 import pickle
-
 import re
+
 import numpy as np
 import pytest
 import scipy.ndimage as ndi
@@ -744,6 +744,28 @@ def test_axis_minor_length():
     assert abs(length_wo_spacing - target_length) > 0.1
     length = regionprops(img[::2], spacing=(2, 1))[0].axis_minor_length
     assert_almost_equal(length, target_length, decimal=1)
+
+    # this input can produce small value that can be negative due to numerical errors
+    img_negative_length = np.array(
+        [
+            [
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 0, 1, 1, 1, 1, 1, 0],
+                [0, 1, 1, 0, 0, 1, 1, 1, 0, 0],
+                [0, 1, 1, 0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+            ]
+        ],
+        dtype=np.uint8,
+    )
+
+    length = regionprops(img_negative_length)[0].axis_minor_length
+    target_length = 0.0
+    assert_almost_equal(length, target_length)
 
 
 def test_moments():
@@ -1490,7 +1512,8 @@ def test_extra_properties_table():
 
 
 @pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
-def test_multichannel():
+@pytest.mark.parametrize("prop_name", [*PROPS.keys(), "custom_intensity_median"])
+def test_multichannel(prop_name):
     """Test that computing multichannel properties works."""
     astro = data.astronaut()[::4, ::4]
     astro_green = astro[..., 1]
@@ -1504,16 +1527,15 @@ def test_multichannel():
         labels, astro, extra_properties=[custom_intensity_median]
     )[segment_idx]
 
-    for prop in list(PROPS.keys()) + ["custom_intensity_median"]:
-        p = region[prop]
-        p_multi = region_multi[prop]
-        if np.shape(p) == np.shape(p_multi):
-            # property does not depend on multiple channels
-            assert_array_equal(p, p_multi)
-        else:
-            # property uses multiple channels, returns props stacked along
-            # final axis
-            assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
+    p = region[prop_name]
+    p_multi = region_multi[prop_name]
+    if np.shape(p) == np.shape(p_multi):
+        # property does not depend on multiple channels
+        assert_array_equal(p, p_multi)
+    else:
+        # property uses multiple channels, returns props stacked along
+        # final axis
+        assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
 
 
 def test_3d_ellipsoid_axis_lengths():
