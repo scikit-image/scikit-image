@@ -15,6 +15,7 @@ classifiers = [
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
     'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Software Development :: Libraries',
     'Topic :: Scientific/Engineering',
@@ -47,7 +48,7 @@ build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
     'ninja>=1.11.1.1',
-    'Cython>=3.0.8',
+    'Cython>=3.0.8,!=3.2.0b1',
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
@@ -84,22 +85,26 @@ docs = [
     'pytest-doctestplus',
 ]
 optional = [
-    'SimpleITK; sys_platform != "emscripten"',  # not packaged for Pyodide yet
+    'SimpleITK; sys_platform != "emscripten"',
+    'scikit-learn>=1.2',
+    'pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"',  # not packaged for Pyodide yet
+    'scikit-image[optional_free_threaded]'
+]
+optional_free_threaded = [
     'astropy>=6.0',
-    'cloudpickle>=3.0',  # necessary to provide the 'processes' scheduler for dask
     'dask[array]>=2023.2.0',
     'matplotlib>=3.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
-    'pyamg>=5.2; sys_platform != "emscripten"',  # not packaged for Pyodide yet
     'PyWavelets>=1.6',
-    'scikit-learn>=1.2',
 ]
+
 test = [
-    'asv',
+    'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
-    'pooch>=1.6.0',
-    'pytest>=8',
+    'pooch>=1.6.0; sys_platform != "emscripten"',
+    'pytest>=8.3',
     'pytest-cov>=2.11.0',
+    'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
     'pytest-doctestplus',
@@ -116,7 +121,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'Cython>=3.0.8',
+    'Cython>=3.0.8,!=3.2.0b1',
     'pythran>=0.16',
     'lazy_loader>=0.4',
     'numpy>=2.0',
@@ -190,7 +195,11 @@ filterwarnings = [
     "error",
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
-    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning"  # warn by pyamg in ruge_stuben_solver
+    # warn by pyamg in ruge_stuben_solver
+    "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
+    # Pyodide warning coming via threadpoolctl, remove when
+    # https://github.com/joblib/threadpoolctl/pull/201 is released
+    "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
 ]
 norecursedirs = ["io/_plugins"]
 
@@ -204,3 +213,45 @@ ignored_user_logins = [
 [tool.docstub.type_prefixes]
 matplotlib = "matplotlib"
 scipy = "scipy"
+
+[tool.cibuildwheel]
+test-command = "pytest --doctest-plus --pyargs skimage ./tests"
+test-extras = ["test", "optional"]
+test-sources = ["tests", "pyproject.toml"]
+environment = {PIP_PREFER_BINARY=1}
+environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
+build-verbosity = 0
+enable="cpython-freethreading"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp3??t-*"
+test-environment = {PYTHON_GIL=0}
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-m*linux_aarch64"
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-win_arm64"
+test-extras = ["test", "optional_free_threaded"]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux*"
+test-extras = ["test", "optional_free_threaded"]
+# SimpleITK does not support musllinux yet
+
+[tool.cibuildwheel.linux]
+environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]
+
+[tool.cibuildwheel.macos]
+test-command = "pytest ./tests"
+before-all = [
+    "bash {project}/tools/build_libomp.sh",
+]
+
+[tool.cibuildwheel.pyodide]
+test-command = "pytest --pyargs skimage tests"
