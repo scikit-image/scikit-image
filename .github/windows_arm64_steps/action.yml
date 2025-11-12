@@ -1,0 +1,20 @@
+name: Setup build dependencies for Win-ARM64
+description: "Common setup steps for Win-ARM64 CI"
+runs:
+  using: "composite"
+  steps:
+    - name: Install LLVM for Win-ARM64
+      shell: pwsh
+      run: | # zizmor: ignore[github-env]
+        Invoke-WebRequest https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.0/LLVM-21.1.0-woa64.exe -UseBasicParsing -OutFile LLVM-woa64.exe
+        $expectedHash = "3f181aecc83d0eb40fb966ce18b97a3602871dbff83fc91745e7e0fd6661a7f7"
+        $fileHash = (Get-FileHash -Path "LLVM-woa64.exe" -Algorithm SHA256).Hash
+        if ($fileHash -ne $expectedHash) {
+            Write-Error "Checksum verification failed. The downloaded file may be corrupted or tampered with."
+            exit 1
+        }
+        Start-Process -FilePath ".\LLVM-woa64.exe" -ArgumentList "/S" -Wait
+
+        # When reviewing a PR touching the line below, ensure that a
+        # static, known path only is being added to GITHUB_PATH.
+        "C:\Program Files\LLVM\bin" | Out-File -FilePath "$env:GITHUB_PATH" -Encoding utf8 -Append
