@@ -10,5 +10,5 @@ Commit {{ sha }} by @{{ payload.sender.login }} did not pass CI.
 > Don't edit its title or close it until the failure is resolved.
 > Otherwise, a new identical issue will be opened.
 >
-> Instead, consider opening a new issue with a more descriptive title and assign
-> it as a parent issue for this.
+> Instead, consider opening new issue(s) with a more descriptive title and link
+> them to this issue (for example as a parent for this).
