@@ -92,9 +92,11 @@ def test_salt_and_pepper():
 
 
 def test_clipping_application_consistency():
-    """Ensure that clipping is not applied if 'clip' set to False regardless of mode"""
+    """Ensure that clipping is not applied if 'clip' set to False regardless of 'mode' argument"""
 
-    img = np.random.rand(1, 5, 5) * 10  # image array with c,h,w shape semantics
+    img = (
+        np.random.rand(1, 5, 5) * 10 - 5
+    )  # image array with c,h,w shape semantics and range [-5,5]
     # we have float values outside of [-1,1], so we presumably don't want to clip
 
     arr_out_pepper = random_noise(img, mode='pepper', rng=42, clip=False, amount=0.5)
@@ -107,9 +109,17 @@ def test_clipping_application_consistency():
         img, mode='s&p', salt_vs_pepper=1, rng=42, clip=False, amount=0.5
     )
 
-    # clipping has been applied in prior case, but not in latter, despite user-supplied 'clip' arg
+    # check that clipping has been consistently applied
     assert np.all(arr_out_pepper == arr_out_pepper2)
     assert np.all(arr_out_salt == arr_out_salt2)
+
+    # check clipping to range 0->1 didn't happen
+    assert np.max(arr_out_pepper) != 1
+    assert np.min(arr_out_pepper) != 0
+
+    # check clipping to range 0->1 didn't happen
+    assert np.max(arr_out_salt) != 1
+    assert np.min(arr_out_salt) != 0
 
 
 def test_gaussian():
