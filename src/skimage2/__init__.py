@@ -13,7 +13,7 @@ class ExperimentalAPIWarning(UserWarning):
 
 warnings.warn(
     "Importing from the `skimage2` namespace is experimental. "
-    "It's API is under development and considered unstable!",
+    "Its API is under development and considered unstable!",
     category=ExperimentalAPIWarning,
     stacklevel=2,
 )
