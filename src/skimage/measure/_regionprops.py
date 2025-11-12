@@ -1,9 +1,8 @@
 import inspect
 import sys
 from functools import wraps
-from math import atan2
+from math import atan2, sqrt
 from math import pi as PI
-from math import sqrt
 from warnings import warn
 
 import numpy as np
@@ -14,10 +13,10 @@ from . import _moments
 from ._find_contours import find_contours
 from ._marching_cubes_lewiner import marching_cubes
 from ._regionprops_utils import (
+    _normalize_spacing,
     euler_number,
     perimeter,
     perimeter_crofton,
-    _normalize_spacing,
 )
 
 __all__ = ['regionprops', 'euler_number', 'perimeter', 'perimeter_crofton']
@@ -298,6 +297,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
     axis_lengths = []
     for ax in range(2, -1, -1):
         w = sum(v * -1 if i == ax else v for i, v in enumerate(inertia_tensor_eigvals))
+        w = max(0, w)  # numerical errors can lead to small negative values
         axis_lengths.append(sqrt(10 * w))
     return axis_lengths
 
@@ -623,7 +623,8 @@ class RegionProperties:
         elif self._ndim == 3:
             # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[0]
             ev = self.inertia_tensor_eigvals
-            return sqrt(10 * (ev[0] + ev[1] - ev[2]))
+            l2 = 10 * (ev[0] + ev[1] - ev[2])
+            return sqrt(max(0, l2))
         else:
             raise ValueError("axis_major_length only available in 2D and 3D")
 
@@ -635,7 +636,9 @@ class RegionProperties:
         elif self._ndim == 3:
             # equivalent to _inertia_eigvals_to_axes_lengths_3D(ev)[-1]
             ev = self.inertia_tensor_eigvals
-            return sqrt(10 * (-ev[0] + ev[1] + ev[2]))
+            l2 = 10 * (-ev[0] + ev[1] + ev[2])
+            # numerical errors can lead to small negative values
+            return sqrt(max(0, l2))
         else:
             raise ValueError("axis_minor_length only available in 2D and 3D")
 
