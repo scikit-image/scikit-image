@@ -1,4 +1,4 @@
-name: Build Dependencies(Win-ARM64)
+name: Setup build dependencies for Win-ARM64
 description: "Common setup steps for Win-ARM64 CI"
 runs:
   using: "composite"
@@ -15,5 +15,3 @@ runs:
         }
         Start-Process -FilePath ".\LLVM-woa64.exe" -ArgumentList "/S" -Wait
         echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        echo "CC=clang-cl" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        echo "CXX=clang-cl" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
