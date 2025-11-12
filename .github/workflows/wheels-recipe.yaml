@@ -56,6 +56,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Set up LLVM toolchain for Windows ARM64
+        if: matrix.os == 'windows-11-arm'
+        uses: ./.github/windows_arm64_steps
       - uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
