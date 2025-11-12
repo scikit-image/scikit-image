@@ -61,7 +61,7 @@ dependencies:
   - asv
   - numpydoc>=1.7
   - pooch>=1.6.0
-  - pytest>=8
+  - pytest>=8.3
   - pytest-cov>=2.11.0
   - pytest-pretty
   - pytest-localserver
