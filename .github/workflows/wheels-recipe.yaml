@@ -45,10 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [
-            windows-latest,
-            windows-11-arm,
-          ]
+        os: [windows-latest, windows-11-arm]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
 
     steps:
