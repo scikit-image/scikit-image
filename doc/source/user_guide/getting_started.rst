@@ -32,10 +32,17 @@ scikit-image's functions: ::
     107
 
 Of course, it is also possible to load your own images as NumPy arrays
-from image files, using `imageio
-<https://imageio.readthedocs.io/en/stable/>`_ ::
+from image files, using :func:`skimage.io.imread`: ::
 
     >>> import os
+    >>> filename = os.path.join(ski.data_dir, 'moon.png')
+    >>> moon = ski.io.imread(filename)
+
+If you need more control over how images are loaded, you may want to
+consider using one of the many external python libraries that can read
+images to NumPy arrays. For example, `imageio
+<https://imageio.readthedocs.io/en/stable/>`_ : ::
+
     >>> import imageio.v3 as iio3
     >>> filename = os.path.join(ski.data_dir, 'moon.png')
     >>> moon = iio3.imread(filename)
@@ -52,4 +59,4 @@ Use `natsort <https://pypi.org/project/natsort/>`_ to load multiple images ::
     ['01.png', '02.png', '010.png', '0101.png', '0190.png']
     >>> image_list = []
     >>> for filename in list_files:
-    ...   image_list.append(iio3.imread(filename))
+    ...   image_list.append(ski.io.imread(filename))
