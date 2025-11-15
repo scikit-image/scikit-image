@@ -1544,16 +1544,14 @@ def test_multichannel(prop_name):
         # property does not depend on multiple channels
         assert_array_equal(p, p_multi)
     else:
+        atol = 1e-12
         # MacOS Intel Accelerate has higher error in non-contiguous case:
         # https://github.com/scikit-image/scikit-image/issues/7941
-        atol = (
-            1e-11
-            if (
-                is_macos_intel_accelerate()
-                and PROPS[prop_name] == 'moments_weighted_central'
-            )
-            else 1e-12
-        )
+        if (
+            is_macos_intel_accelerate()
+            and PROPS[prop_name] == 'moments_weighted_central'
+        ):
+            atol = 1e-11
         # property uses multiple channels, returns props stacked along
         # final axis
         assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=atol)
