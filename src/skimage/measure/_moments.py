@@ -256,15 +256,21 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     if spacing is None:
         spacing = np.ones(image.ndim, dtype=float_dtype)
     calc = image.astype(float_dtype, copy=False)
+    L = list(range(image.ndim))
+    sum_label = image.ndim
+    order_label = sum_label + 1
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
         powers_of_delta = delta[:, np.newaxis] ** np.arange(
             order + 1, dtype=float_dtype
         )
-        calc = np.rollaxis(calc, dim, image.ndim)
-        # np.dot implementation with einsum.
-        calc = np.einsum(calc, [..., 0], powers_of_delta, [0, 1])
-        calc = np.rollaxis(calc, -1, dim)
+        calc = np.einsum(
+            calc,
+            L[:dim] + [sum_label] + L[dim + 1 :],
+            powers_of_delta,
+            [sum_label, order_label],
+            L[:dim] + [order_label] + L[dim + 1 :],
+        )
     return calc
 
 
