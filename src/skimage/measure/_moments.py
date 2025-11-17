@@ -259,11 +259,10 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     L = list(range(image.ndim))
     sum_label = image.ndim
     order_label = sum_label + 1
+    orders = np.arange(order + 1, dtype=float_dtype)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
-        powers_of_delta = delta[:, np.newaxis] ** np.arange(
-            order + 1, dtype=float_dtype
-        )
+        powers_of_delta = delta[:, np.newaxis] ** orders
         calc = np.einsum(
             calc,
             L[:dim] + [sum_label] + L[dim + 1 :],
