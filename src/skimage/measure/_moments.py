@@ -262,7 +262,8 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
             order + 1, dtype=float_dtype
         )
         calc = np.rollaxis(calc, dim, image.ndim)
-        calc = np.dot(calc, powers_of_delta)
+        # np.dot implementation with einsum.
+        calc = np.einsum(calc, [..., 0], powers_of_delta, [0, 1])
         calc = np.rollaxis(calc, -1, dim)
     return calc
 

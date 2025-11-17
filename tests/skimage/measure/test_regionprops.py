@@ -1,6 +1,5 @@
 import math
 import pickle
-import platform
 import re
 
 import numpy as np
@@ -1512,16 +1511,6 @@ def test_extra_properties_table():
     assert out["bbox_list"][1] == [1] * 1
 
 
-def is_macos_intel_accelerate():
-    if (platform.system(), platform.machine()) != ('Darwin', 'x86_64'):
-        return False
-    try:  # Numpy 1 does not allow 'dicts' parameter.
-        np_config = np.show_config('dicts')
-    except TypeError:  # Assume Accelerate
-        return True
-    return np_config['Build Dependencies']['blas']['name'] == 'accelerate'
-
-
 @pytest.mark.filterwarnings("ignore:`RegionProperties.* is deprecated:FutureWarning")
 @pytest.mark.parametrize("prop_name", [*PROPS.keys(), "custom_intensity_median"])
 def test_multichannel(prop_name):
@@ -1544,16 +1533,9 @@ def test_multichannel(prop_name):
         # property does not depend on multiple channels
         assert_array_equal(p, p_multi)
         return
-    atol = 1e-15
-    # moments_weighted_central can differ in multichannel case due to
-    # differences in np.dot implementation of not-contiguous arrays.
-    if PROPS.get(prop_name) == 'moments_weighted_central':
-        # MacOS Intel Accelerate has higher error in non-contiguous case:
-        # https://github.com/scikit-image/scikit-image/issues/7941
-        atol = 1e-11 if is_macos_intel_accelerate() else 1e-12
     # property uses multiple channels, returns props stacked along
     # final axis
-    assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-15, atol=atol)
+    assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-15, atol=1e-15)
 
 
 def test_3d_ellipsoid_axis_lengths():
