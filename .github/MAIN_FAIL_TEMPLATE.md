@@ -11,4 +11,4 @@ Commit {{ sha }} by @{{ payload.sender.login }} did not pass CI.
 > Otherwise, a new identical issue will be opened.
 >
 > Instead, consider opening new issue(s) with a more descriptive title and link
-> them to this issue (for example as a parent for this).
+> them to this issue.
