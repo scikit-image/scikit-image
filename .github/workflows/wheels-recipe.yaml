@@ -19,8 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-            # macos-15-intel,
-            macos-13,
+            macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
