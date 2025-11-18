@@ -12,17 +12,17 @@ employing the very efficient Hamming distance metric for matching. As such, it
 is preferred for real-time applications.
 
 """
+
 from skimage import data
 from skimage import transform
-from skimage.feature import match_descriptors, ORB, plot_matches
+from skimage.feature import match_descriptors, ORB, plot_matched_features
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
 
 img1 = rgb2gray(data.astronaut())
 img2 = transform.rotate(img1, 180)
-tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
-                                  translation=(0, -200))
+tform = transform.AffineTransform(scale=(1.3, 1.1), rotation=0.5, translation=(0, -200))
 img3 = transform.warp(img1, tform)
 
 descriptor_extractor = ORB(n_keypoints=200)
@@ -46,11 +46,25 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
+plot_matched_features(
+    img1,
+    img2,
+    keypoints0=keypoints1,
+    keypoints1=keypoints2,
+    matches=matches12,
+    ax=ax[0],
+)
 ax[0].axis('off')
 ax[0].set_title("Original Image vs. Transformed Image")
 
-plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
+plot_matched_features(
+    img1,
+    img3,
+    keypoints0=keypoints1,
+    keypoints1=keypoints3,
+    matches=matches13,
+    ax=ax[1],
+)
 ax[1].axis('off')
 ax[1].set_title("Original Image vs. Transformed Image")
 

@@ -35,7 +35,7 @@ def match(feats, ref_feats):
     min_error = np.inf
     min_i = None
     for i in range(ref_feats.shape[0]):
-        error = np.sum((feats - ref_feats[i, :])**2)
+        error = np.sum((feats - ref_feats[i, :]) ** 2)
         if error < min_error:
             min_error = error
             min_i = i
@@ -45,11 +45,12 @@ def match(feats, ref_feats):
 # prepare filter bank kernels
 kernels = []
 for theta in range(4):
-    theta = theta / 4. * np.pi
+    theta = theta / 4.0 * np.pi
     for sigma in (1, 3):
         for frequency in (0.05, 0.25):
-            kernel = np.real(gabor_kernel(frequency, theta=theta,
-                                          sigma_x=sigma, sigma_y=sigma))
+            kernel = np.real(
+                gabor_kernel(frequency, theta=theta, sigma_x=sigma, sigma_y=sigma)
+            )
             kernels.append(kernel)
 
 
@@ -84,14 +85,17 @@ print(image_names[match(feats, ref_feats)])
 def power(image, kernel):
     # Normalize images for better comparison.
     image = (image - image.mean()) / image.std()
-    return np.sqrt(ndi.convolve(image, np.real(kernel), mode='wrap')**2 +
-                   ndi.convolve(image, np.imag(kernel), mode='wrap')**2)
+    return np.sqrt(
+        ndi.convolve(image, np.real(kernel), mode='wrap') ** 2
+        + ndi.convolve(image, np.imag(kernel), mode='wrap') ** 2
+    )
+
 
 # Plot a selection of the filter bank kernels and their responses.
 results = []
 kernel_params = []
 for theta in (0, 1):
-    theta = theta / 4. * np.pi
+    theta = theta / 4.0 * np.pi
     for frequency in (0.1, 0.4):
         kernel = gabor_kernel(frequency, theta=theta)
         params = f"theta={theta * 180 / np.pi},\nfrequency={frequency:.2f}"

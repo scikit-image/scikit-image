@@ -4,16 +4,24 @@ on:
   pull_request:
     types:
       - opened
+      - reopened
       - labeled
       - unlabeled
+      - synchronize
+
+permissions: {}
 
 env:
-  LABELS: ${{ join( github.event.pull_request.labels.*.name, ' ' ) }}
+  LABELS: ${{ toJSON(github.event.pull_request.labels) }}
 
 jobs:
   check-type-label:
     name: ensure type label
     runs-on: ubuntu-latest
     steps:
-      - if: "contains( env.LABELS, 'type: ' ) == false"
-        run: exit 1
+      - name: Ensure single label
+        run: |
+          N=$(echo $LABELS | jq 'map( select (.name | contains("type:"))) | length')
+          if [[ $N != 1 ]]; then
+            exit 1
+          fi

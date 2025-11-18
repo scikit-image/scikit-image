@@ -1,7 +1,7 @@
 """
-===========
-RAG Merging
-===========
+====================================
+Region adjacency graph (RAG) Merging
+====================================
 
 This example constructs a Region Adjacency Graph (RAG) and progressively merges
 regions that are similar in color. Merging two adjacent regions produces
@@ -10,9 +10,10 @@ until no highly similar region pairs remain.
 
 """
 
-from skimage import data, io, segmentation, color
+from skimage import data, segmentation, color
 from skimage import graph
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def _weight_mean_color(graph, src, dst, n):
@@ -55,20 +56,29 @@ def merge_mean_color(graph, src, dst):
     """
     graph.nodes[dst]['total color'] += graph.nodes[src]['total color']
     graph.nodes[dst]['pixel count'] += graph.nodes[src]['pixel count']
-    graph.nodes[dst]['mean color'] = (graph.nodes[dst]['total color'] /
-                                      graph.nodes[dst]['pixel count'])
+    graph.nodes[dst]['mean color'] = (
+        graph.nodes[dst]['total color'] / graph.nodes[dst]['pixel count']
+    )
 
 
 img = data.coffee()
 labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 g = graph.rag_mean_color(img, labels)
 
-labels2 = graph.merge_hierarchical(labels, g, thresh=35, rag_copy=False,
-                                   in_place_merge=True,
-                                   merge_func=merge_mean_color,
-                                   weight_func=_weight_mean_color)
+labels2 = graph.merge_hierarchical(
+    labels,
+    g,
+    thresh=35,
+    rag_copy=False,
+    in_place_merge=True,
+    merge_func=merge_mean_color,
+    weight_func=_weight_mean_color,
+)
 
 out = color.label2rgb(labels2, img, kind='avg', bg_label=0)
 out = segmentation.mark_boundaries(out, labels2, (0, 0, 0))
-io.imshow(out)
-io.show()
+
+fig, ax = plt.subplots()
+ax.imshow(out)
+plt.tight_layout()
+plt.show()

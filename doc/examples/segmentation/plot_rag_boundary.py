@@ -1,7 +1,7 @@
 """
-==========================
-Region Boundary based RAGs
-==========================
+====================================================
+Region Boundary based Region adjacency graphs (RAGs)
+====================================================
 
 Construct a region boundary RAG with the ``rag_boundary`` function. The
 function  :py:func:`skimage.graph.rag_boundary` takes an
@@ -11,8 +11,9 @@ between two regions is the average value of the corresponding pixels in
 ``edge_map`` along their shared boundary.
 
 """
+
 from skimage import graph
-from skimage import data, segmentation, color, filters, io
+from skimage import data, segmentation, color, filters
 from matplotlib import pyplot as plt
 
 
@@ -23,9 +24,13 @@ labels = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 edges = filters.sobel(gimg)
 edges_rgb = color.gray2rgb(edges)
 
+fig, ax = plt.subplots()
+
 g = graph.rag_boundary(labels, edges)
-lc = graph.show_rag(labels, g, edges_rgb, img_cmap=None, edge_cmap='viridis',
-                    edge_width=1.2)
+lc = graph.show_rag(
+    labels, g, edges_rgb, img_cmap=None, ax=ax, edge_cmap='viridis', edge_width=1.2
+)
+
 
 plt.colorbar(lc, fraction=0.03)
-io.show()
+plt.show()

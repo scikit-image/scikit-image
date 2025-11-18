@@ -8,6 +8,7 @@ from skimage.filters.thresholding import threshold_li
 
 class FiltersSuite:
     """Benchmark for filter routines in scikit-image."""
+
     def setup(self):
         self.image = np.random.random((4000, 4000))
         self.image[:2000, :2000] += 1
@@ -19,6 +20,7 @@ class FiltersSuite:
 
 class FiltersSobel3D:
     """Benchmark for 3d sobel filters."""
+
     def setup(self):
         try:
             filters.sobel(np.ones((8, 8, 8)))
@@ -32,8 +34,10 @@ class FiltersSobel3D:
 
 class MultiOtsu:
     """Benchmarks for MultiOtsu threshold."""
+
     param_names = ['classes']
     params = [3, 4, 5]
+
     def setup(self, *args):
         self.image = data.camera()
 
@@ -62,7 +66,6 @@ class MultiOtsu:
 
 class ThresholdSauvolaSuite:
     """Benchmark for transform routines in scikit-image."""
-
 
     def setup(self):
         self.image = np.zeros((2000, 2000), dtype=np.uint8)

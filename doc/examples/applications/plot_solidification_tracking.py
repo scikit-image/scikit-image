@@ -5,7 +5,7 @@ Track solidification of a metallic alloy
 
 In this example, we identify and track the solid-liquid (S-L) interface in a
 nickel-based alloy undergoing solidification. Tracking the solidification over
-time enables the calculatation of the solidification velocity. This is
+time enables the calculation of the solidification velocity. This is
 important to characterize the solidified structure of the sample and will be
 used to inform research into additive manufacturing of metals. The image
 sequence was obtained by the Center for Advanced Non-Ferrous Structural Alloys
@@ -26,10 +26,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.io
 
-from skimage import filters, measure, restoration
-from skimage.data import nickel_solidification
+import skimage as ski
 
-image_sequence = nickel_solidification()
+image_sequence = ski.data.nickel_solidification()
 
 y0, y1, x0, x1 = 0, 180, 100, 330
 
@@ -50,7 +49,7 @@ fig = px.imshow(
     image_sequence,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
@@ -64,14 +63,14 @@ plotly.io.show(fig)
 # ending at the second-to-last frame from the image sequence starting
 # at the second frame.
 
-smoothed = filters.gaussian(image_sequence)
+smoothed = ski.filters.gaussian(image_sequence)
 image_deltas = smoothed[1:, :, :] - smoothed[:-1, :, :]
 
 fig = px.imshow(
     image_deltas,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
@@ -93,7 +92,7 @@ fig = px.imshow(
     clipped,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
@@ -106,13 +105,13 @@ plotly.io.show(fig)
 # noise beyond the interface.
 
 inverted = 1 - clipped
-denoised = restoration.denoise_tv_chambolle(inverted, weight=0.15)
+denoised = ski.restoration.denoise_tv_chambolle(inverted, weight=0.15)
 
 fig = px.imshow(
     denoised,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
@@ -130,14 +129,14 @@ plotly.io.show(fig)
 # method from the ``filters`` submodule of scikit-image (there are other
 # methods that may work better for different applications).
 
-thresh_val = filters.threshold_minimum(denoised)
+thresh_val = ski.filters.threshold_minimum(denoised)
 binarized = denoised > thresh_val
 
 fig = px.imshow(
     binarized,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
@@ -158,9 +157,8 @@ plotly.io.show(fig)
 # To begin with, let us consider the first image delta at this stage of the
 # workflow, ``binarized[0, :, :]``.
 
-labeled_0 = measure.label(binarized[0, :, :])
-props_0 = measure.regionprops_table(
-        labeled_0, properties=('label', 'area', 'bbox'))
+labeled_0 = ski.measure.label(binarized[0, :, :])
+props_0 = ski.measure.regionprops_table(labeled_0, properties=('label', 'area', 'bbox'))
 props_0_df = pd.DataFrame(props_0)
 props_0_df = props_0_df.sort_values('area', ascending=False)
 # Show top five rows
@@ -174,8 +172,7 @@ props_0_df.head()
 largest_region_0 = labeled_0 == props_0_df.iloc[0]['label']
 minr, minc, maxr, maxc = (props_0_df.iloc[0][f'bbox-{i}'] for i in range(4))
 fig = px.imshow(largest_region_0, binary_string=True)
-fig.add_shape(
-        type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
+fig.add_shape(type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
 plotly.io.show(fig)
 
 #####################################################################
@@ -187,8 +184,7 @@ plotly.io.show(fig)
 # in time (0th image) because the interface is moving upward.
 
 fig = px.imshow(image_sequence[0, :, :], binary_string=True)
-fig.add_shape(
-        type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
+fig.add_shape(type='rect', x0=minc, y0=minr, x1=maxc, y1=maxr, line=dict(color='Red'))
 plotly.io.show(fig)
 
 #####################################################################
@@ -201,18 +197,17 @@ largest_region = np.empty_like(binarized)
 bboxes = []
 
 for i in range(binarized.shape[0]):
-    labeled = measure.label(binarized[i, :, :])
-    props = measure.regionprops_table(
-            labeled, properties=('label', 'area', 'bbox'))
+    labeled = ski.measure.label(binarized[i, :, :])
+    props = ski.measure.regionprops_table(labeled, properties=('label', 'area', 'bbox'))
     props_df = pd.DataFrame(props)
     props_df = props_df.sort_values('area', ascending=False)
-    largest_region[i, :, :] = (labeled == props_df.iloc[0]['label'])
+    largest_region[i, :, :] = labeled == props_df.iloc[0]['label']
     bboxes.append([props_df.iloc[0][f'bbox-{i}'] for i in range(4)])
 fig = px.imshow(
     largest_region,
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'time point'}
+    labels={'animation_frame': 'time point'},
 )
 plotly.io.show(fig)
 
