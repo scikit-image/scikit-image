@@ -658,7 +658,7 @@ cdef class Cascade:
             The scale by which searching window is multiplied on each step.
         step_ratio : cnp.float32_t
             The ratio by which the search step in multiplied on each scale
-            of the image. 1 represents the exaustive search and usually is
+            of the image. 1 represents the exhaustive search and usually is
             slow. By setting this parameter to higher values the results will
             be worse but the computation will be much faster. Usually, values
             in the interval [1, 1.5] give good results.
