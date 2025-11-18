@@ -272,6 +272,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
             powers_of_delta,
             [sum_label, order_label],  # Coord, order axis labels.
             L[:dim] + [order_label] + L[dim + 1 :],  # Output axis labels.
+            optimize='greedy',
         )
     return calc
 
