@@ -33,7 +33,7 @@ imshow_expected_warnings = [
     r"Use imageio or a similar package instead|\A\Z",
 ]
 
-# This warning comes from the Python 3.12.1 interpreter powered by Pyodide
+# This warning comes from the Python 3.13.2 interpreter powered by Pyodide
 # and is not relevant to the tests where it is raised.
 if is_wasm:
     imshow_expected_warnings.append(
