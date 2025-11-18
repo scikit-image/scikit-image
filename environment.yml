@@ -14,7 +14,7 @@ dependencies:
   # build
   - meson-python>=0.16
   - ninja>=1.11.1.1
-  - Cython>=3.0.8
+  - Cython>=3.0.8,!=3.2.0b1
   - pythran>=0.16
   - numpy>=2.0
   - spin==0.13
@@ -49,18 +49,19 @@ dependencies:
   - pytest-doctestplus
   # optional
   - SimpleITK
+  - scikit-learn>=1.2
+  - pyamg>=5.2
+  # optional_free_threaded
   - astropy-base>=6.0
   - dask>=2023.2.0
   - matplotlib-base>=3.7
   - pooch>=1.6.0
-  - pyamg>=5.2
   - PyWavelets>=1.6
-  - scikit-learn>=1.2
   # test
   - asv
   - numpydoc>=1.7
   - pooch>=1.6.0
-  - pytest>=8
+  - pytest>=8.3
   - pytest-cov>=2.11.0
   - pytest-pretty
   - pytest-localserver

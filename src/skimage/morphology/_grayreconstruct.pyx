@@ -15,16 +15,14 @@ ctypedef fused np_uints:
 @cython.boundscheck(False)
 @cython.nonecheck(False)
 @cython.wraparound(False)
-def reconstruction_loop(cnp.ndarray[dtype=np_uints, ndim=1,
-                                    negative_indices=False, mode='c'] aranks,
-                        cnp.ndarray[dtype=np_ints, ndim=1,
-                                    negative_indices=False, mode='c'] aprev,
-                        cnp.ndarray[dtype=np_ints, ndim=1,
-                                    negative_indices=False, mode='c'] anext,
-                        cnp.ndarray[dtype=np_ints, ndim=1,
-                                    negative_indices=False, mode='c'] astrides,
-                        Py_ssize_t current_idx,
-                        Py_ssize_t image_stride):
+def reconstruction_loop(
+    np_uints[::1] ranks,
+    np_ints[::1] prev,
+    np_ints[::1] next,
+    np_ints[::1] strides,
+    np_ints current_idx,
+    np_ints image_stride
+):
     """The inner loop for reconstruction.
 
     This algorithm uses the rank-order of pixels. If low intensity pixels have
@@ -39,24 +37,21 @@ def reconstruction_loop(cnp.ndarray[dtype=np_uints, ndim=1,
 
     Parameters
     ----------
-    aranks : array
+    ranks : array
         The rank order of the flattened seed and mask images.
-    aprev, anext: arrays
+    prev, next: arrays
         Indices of previous and next pixels in rank sorted order.
-    astrides : array
+    strides : array
         Strides to neighbors of the current pixel.
     current_idx : int
         Index of highest-ranked pixel used as starting point in loop.
     image_stride : int
         Stride between seed image and mask image in `aranks`.
     """
-    cdef unsigned int neighbor_rank, current_rank, mask_rank
-    cdef int i, neighbor_idx, current_link, nprev, nnext
-    cdef int nstrides = astrides.shape[0]
-    cdef np_uints *ranks = <np_uints *>(aranks.data)
-    cdef np_ints *prev = <np_ints *>(aprev.data)
-    cdef np_ints *next = <np_ints *>(anext.data)
-    cdef np_ints *strides = <np_ints *>(astrides.data)
+    cdef np_uints neighbor_rank, current_rank, mask_rank
+    cdef np_ints i, neighbor_idx, current_link, nprev, nnext, nstrides
+
+    nstrides  = strides.shape[0]
 
     with nogil:
         while current_idx != -1:

@@ -1,281 +1,120 @@
-name: Build and Test Wheels
+name: Wheels recipe
+# Reusable workflow for building scikit-image's wheels
+
 on:
   workflow_call:
-    inputs:
-      CIBW_ENVIRONMENT:
-        required: false
-        type: string
-        default: PIP_PREFER_BINARY=1
-      CIBW_BUILD_FRONTEND:
-        required: false
-        type: string
-      CIBW_TEST_REQUIRES:
-        required: false
-        type: string
-        default: "-r requirements/default.txt -r requirements/test.txt"
-      CIBW_TEST_COMMAND:
-        required: false
-        type: string
-        default: "pytest --pyargs skimage {project}/tests"
-
-env:
-  CIBW_BUILD_VERBOSITY: 1
-  CIBW_TEST_REQUIRES: ${{ inputs.CIBW_TEST_REQUIRES }}
-  CIBW_ENVIRONMENT: ${{ inputs.CIBW_ENVIRONMENT }}
-  CIBW_BUILD_FRONTEND: ${{ inputs.CIBW_BUILD_FRONTEND }}
-  CIBW_TEST_COMMAND: ${{inputs.CIBW_TEST_COMMAND }}
 
 permissions:
   contents: read
 
+env:
+  COLUMNS: 120
+
 jobs:
-  build_linux_wheels:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
+  build_macos_wheel:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*", "cp313t-*"]
-        cibw_manylinux: [manylinux2014]
-        cibw_arch: ["x86_64"]
+        os: [
+            # macos-15-intel,
+            macos-13,
+            macos-latest, # ARM-version of MacOS
+          ]
+        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
-      - name: Setup free-threaded environment
-        if: endsWith(matrix.cibw_python, 't-*')
-        run: |
-          NIGHTLY_PIP_ARGS="--pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --only-binary :all:"
-          TEST_COMMAND="PYTHON_GIL=0 pytest --pyargs skimage {project}/tests"
-          echo "CIBW_ENABLE=cpython-prerelease cpython-freethreading" >> $GITHUB_ENV
-          # Remove once Cython is out that supports free-threaded build
-          echo "CIBW_BUILD_FRONTEND=pip; args: $NIGHTLY_PIP_ARGS" >> $GITHUB_ENV
-          echo "CIBW_TEST_COMMAND=$TEST_COMMAND" >> "$GITHUB_ENV"
-      - name: Build the wheel
-        run: python -m cibuildwheel --output-dir dist
+      - uses: pypa/cibuildwheel@v3.2.1
         env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
-          CIBW_SKIP: "*-musllinux_*"
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
-          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
+          CIBW_BUILD: ${{ matrix.build }}
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
 
-  build_linux_aarch64_wheels:
-    name: Build python ${{ matrix.cibw_python }} aarch64 wheels on ${{ matrix.os }}
+  build_windows_wheel:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
-        cibw_manylinux: [manylinux2014]
-        cibw_arch: ["aarch64"]
+        os: [windows-latest, windows-11-arm]
+        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
-      - name: Build the wheel
-        run: python -m cibuildwheel --output-dir dist
+      - name: Set up LLVM toolchain for Windows ARM64
+        if: matrix.os == 'windows-11-arm'
+        uses: ./.github/windows_arm64_steps
+      - uses: pypa/cibuildwheel@v3.2.1
         env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_SKIP: "*-musllinux_*"
-          # skip aarch64 tests which often exceed the 6 hour time limit
-          CIBW_TEST_SKIP: "*_aarch64"
-          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_ENVIRONMENT_PASS_LINUX: SKIMAGE_LINK_FLAGS
-          SKIMAGE_LINK_FLAGS: "-Wl,--strip-debug"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheels-linux-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
-
-  build_macos_wheels:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-13]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
-        cibw_arch: ["x86_64", "arm64"]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
-
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel
-
-      # Needed to install a specific libomp version later
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@d2e6a045a86077fb6cad6f5adf368e9076ddaa8d # v3.1.0
-        with:
-          python-version: "3.12"
-          channels: conda-forge
-          channel-priority: true
-          miniforge-variant: Miniforge3
-          miniforge-version: latest
-
-      - name: Build wheels for CPython Mac OS
-        run: |
-          # Make sure to use a libomp version binary compatible with the oldest
-          # supported version of the macos SDK as libomp will be vendored into
-          # the scikit-image wheels for macos. The list of binaries are in
-          # https://packages.macports.org/libomp/
-          if [[ "$CIBW_ARCHS_MACOS" == arm64 ]]; then
-              export MACOSX_DEPLOYMENT_TARGET=12.3
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-arm64/llvm-openmp-19.1.7-hdb05f8b_0.conda"
-          else
-              export MACOSX_DEPLOYMENT_TARGET=10.14
-              OPENMP_URL="https://anaconda.org/conda-forge/llvm-openmp/19.1.7/download/osx-64/llvm-openmp-19.1.7-ha54dae1_0.conda"
-          fi
-          echo MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
-
-          # use conda to install llvm-openmp
-          # Note that we do NOT activate the conda environment, we just add the
-          # library install path to CFLAGS/CXXFLAGS/LDFLAGS below.
-          conda create -n build $OPENMP_URL
-          PREFIX="/Users/runner/miniconda3/envs/build"
-          export CC=/usr/bin/clang
-          export CXX=/usr/bin/clang++
-          export CPPFLAGS="$CPPFLAGS -Xpreprocessor -fopenmp"
-          export CFLAGS="$CFLAGS -Wno-implicit-function-declaration -I$PREFIX/include"
-          export CXXFLAGS="$CXXFLAGS -I$PREFIX/include"
-          export LDFLAGS="$LDFLAGS -Wl,-S -Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -lomp"
-
-          python -m cibuildwheel --output-dir dist
-        env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_MACOS: ${{ matrix.cibw_arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-          CIBW_MANYLINUX_I686_IMAGE: manylinux1
-          CIBW_TEST_SKIP: "*-macosx_arm64"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheels-macos-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
-
-  build_windows_wheels:
-    name: Build ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest]
-        cibw_arch: ["AMD64"]
-        cibw_python: ["cp311-*", "cp312-*", "cp313-*"]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: actions/setup-python@v5
-        name: Install Python
-        with:
-          python-version: "3.12"
-          cache: "pip"
-          cache-dependency-path: "requirements/*.txt"
-
-      - name: Install cibuildwheel and add clang-cl to path
-        run: |
-          python -m pip install cibuildwheel
-
-      - name: Build AMD64 Windows wheels for CPython
-        if: matrix.cibw_arch == 'AMD64'
-        # To avoid "LINK : fatal error LNK1158: cannot run 'rc.exe'"
-        # we explicitly add rc.exe to path using the method from:
-        # https://github.com/actions/virtual-environments/issues/294#issuecomment-588090582
-        # with additional -arch=x86 flag to vsdevcmd.bat
-        run: |
-          function Invoke-VSDevEnvironment {
-            $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-              $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
-              $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
-            & "${env:COMSPEC}" /s /c "`"$Command`" -arch=amd64 -no_logo && set" | Foreach-Object {
-                  if ($_ -match '^([^=]+)=(.*)') {
-                      [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-                  }
-              }
-          }
-          Invoke-VSDevEnvironment
-          Get-Command rc.exe | Format-Table -AutoSize
-          python -m cibuildwheel --output-dir dist
-        env:
-          # define CC, CXX so meson will use clang-cl instead of MSVC
+          CIBW_BUILD: ${{ matrix.build }}
           CC: clang-cl
           CXX: clang-cl
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_WINDOWS: ${{ matrix.cibw_arch }}
-          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
           LDFLAGS: "-Wl,-S"
-
+          CIBW_SKIP: "*-win32 cp314t*" # bug in compilation
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-${{ matrix.cibw_arch }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
 
-  # This job uses cibuildwheel to build wheels for Pyodide, unlike the one
-  # in emscripten.yaml which uses a more traditional workflow and has some
-  # manual setup. The Pyodide version we build against here is largely
-  # controlled by cibuildwheel's at the moment.
-  build_pyodide_wheel:
-    name: Build python cp312-* pyodide_wasm32 wheels on ubuntu-latest
-    runs-on: ubuntu-latest
+  build_wheel_linux:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04-arm]
+        build:
+          [
+            "cp31{1,2}*manylinux*",
+            "cp313*manylinux*",
+            "cp314*manylinux*",
+            "cp31{1,2}*musllinux*",
+            "cp313*musllinux*",
+            "cp314*musllinux*",
+          ]
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_pyodide_wheel:
+    name: Build pyodide on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@faf86a6ed7efa889faf6996aa23820831055001a # v2.23.3
-        with:
-          output-dir: dist
+        uses: pypa/cibuildwheel@v3.2.1
         env:
-          # We override CIBW_ENVIRONMENT, CIBW_TEST_REQUIRES, and CIBW_TEST_COMMAND
-          # in favour of Pyodide-related settings.
           CIBW_PLATFORM: pyodide
-          CIBW_ENVIRONMENT_PYODIDE: "" # sdists are not present in Pyodide
-          CIBW_TEST_REQUIRES_PYODIDE: "pytest astropy cloudpickle dask[array] matplotlib PyWavelets scikit-learn pytest-pretty"
-          # Don't use the cache provider plugin, as it doesn't work with Pyodide
-          # right now: https://github.com/pypa/cibuildwheel/issues/1966
-          CIBW_TEST_COMMAND_PYODIDE: "pytest -svra -p no:cacheprovider --pyargs skimage {project}/tests"
+          # only build for newer pyodide_2025_0 ABI and not cp312-pyodide_wasm32 (pyodide_2024_0)
+          CIBW_BUILD: "cp313-pyodide_wasm32"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide-${{ github.job }}
+          path: ./wheelhouse/*.whl
