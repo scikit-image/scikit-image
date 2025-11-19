@@ -40,7 +40,7 @@ from image files, using :func:`skimage.io.imread`: ::
 
 If you need more control over how images are loaded, you may want to
 consider using one of the many external Python libraries that can read
-images to NumPy arrays. For example, `imageio
+images into NumPy arrays. For example, `imageio
 <https://imageio.readthedocs.io/en/stable/>`_ : ::
 
     >>> import imageio.v3 as iio3
