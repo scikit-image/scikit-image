@@ -39,7 +39,7 @@ from image files, using :func:`skimage.io.imread`: ::
     >>> moon = ski.io.imread(filename)
 
 If you need more control over how images are loaded, you may want to
-consider using one of the many external python libraries that can read
+consider using one of the many external Python libraries that can read
 images to NumPy arrays. For example, `imageio
 <https://imageio.readthedocs.io/en/stable/>`_ : ::
 
