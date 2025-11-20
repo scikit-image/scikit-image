@@ -1,7 +1,10 @@
 /* Additional styling for the PyData Sphinx theme. */
 
-/* Avoid "slow" animated scroll when navigating to anchors */
-html {
+/* Avoid "slow" animated scroll when navigating to anchors
+May be removed if this is addressed upstream
+https://github.com/pydata/pydata-sphinx-theme/issues/2260
+*/
+:root {
     scroll-behavior: auto;
 }
 

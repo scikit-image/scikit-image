@@ -70,10 +70,10 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
     clip : bool, optional
-        If True (default), the output will be clipped after noise applied
-        for modes `'speckle'`, `'poisson'`, and `'gaussian'`. This is
-        needed to maintain the proper image data range. If False, clipping
-        is not applied, and the output may extend beyond the range [-1, 1].
+        If True (default), the output will be clipped after noise is applied.
+        This may be needed to maintain the proper image data range.
+        If False, clipping is not applied, and the output may extend beyond
+        the range [-1, 1].
     mean : float, optional
         Mean of random distribution. Used in 'gaussian' and 'speckle'.
         Default : 0.
@@ -203,13 +203,23 @@ def random_noise(image, mode='gaussian', rng=None, clip=True, **kwargs):
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
         out = random_noise(
-            image, mode='s&p', rng=rng, amount=kwargs['amount'], salt_vs_pepper=1.0
+            image,
+            mode='s&p',
+            rng=rng,
+            amount=kwargs['amount'],
+            salt_vs_pepper=1.0,
+            clip=False,
         )
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
         out = random_noise(
-            image, mode='s&p', rng=rng, amount=kwargs['amount'], salt_vs_pepper=0.0
+            image,
+            mode='s&p',
+            rng=rng,
+            amount=kwargs['amount'],
+            salt_vs_pepper=0.0,
+            clip=False,
         )
 
     elif mode == 's&p':
