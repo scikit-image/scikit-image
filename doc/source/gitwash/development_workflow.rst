@@ -78,7 +78,7 @@ what the changes in the branch are for.  For example ``add-ability-to-fly``, or
     git fetch upstream
     # Make new feature branch starting at current trunk
     git branch my-new-feature upstream/main
-	git checkout my-new-feature
+    git checkout my-new-feature
 
 Generally, you will want to keep your feature branches on your public github_
 fork of `scikit-image`_.  To do this, you `git push`_ this new branch up to your
