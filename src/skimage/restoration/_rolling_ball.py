@@ -2,6 +2,34 @@ import numpy as np
 
 from .._shared.utils import _supported_float_type, deprecate_parameter, DEPRECATED
 from ._rolling_ball_cy import apply_kernel, apply_kernel_nan
+from ..transform import rescale, resize
+
+
+def _downscale_rolling_ball_2D(img, radius, workers, nansafe):
+    H, W = img.shape[-2:]
+    planes = img.reshape(-1, H, W)
+
+    down_scale_factor = np.max([np.round(0.5 * (np.sqrt(radius) - 1)), 1])
+    down_scale_img = np.array(
+        [rescale(i, 1 / down_scale_factor, preserve_range=True) for i in planes]
+    )
+    down_scale_background = np.array(
+        [
+            rolling_ball(
+                i,
+                radius=radius / down_scale_factor,
+                kernel=None,
+                nansafe=nansafe,
+                workers=workers,
+                downscale_2D=False,
+            )
+            for i in down_scale_img
+        ]
+    )
+    background = np.array(
+        [resize(i, (H, W), preserve_range=True) for i in down_scale_background]
+    ).reshape(img.shape)
+    return np.minimum(img, background)
 
 
 @deprecate_parameter(
@@ -15,6 +43,7 @@ def rolling_ball(
     nansafe=False,
     num_threads=DEPRECATED,
     workers=None,
+    downscale_2D=False,
 ):
     """Estimate background intensity using the rolling-ball algorithm.
 
@@ -43,6 +72,12 @@ def rolling_ball(
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
+    downscale_2D : bool, optional
+        If ``True``, the input image is converted to 2D slices which are
+        downscaled before applying the rolling ball algorithm and then upscaled
+        back to the original shape for increased speed. In this case the kernel
+        parameter is ignored and only the radius parameter is used to generate
+        a ball kernel.
 
         .. versionadded:: 0.26
             Replaces deprecated parameter `num_threads`.
@@ -69,9 +104,9 @@ def rolling_ball(
     This algorithm's complexity is polynomial in the radius, with degree equal
     to the image dimensionality (a 2D image is N^2, a 3D image is N^3, etc.),
     so it can take a long time as the radius grows beyond 30 or so ([2]_, [3]_).
-    It is an exact N-dimensional calculation; if all you need is an
-    approximation, faster options to consider are top-hat filtering [4]_ or
-    downscaling-then-upscaling to reduce the size of the input processed.
+    If an approximation is acceptable, and you are interested in only computing
+    slice by slice, use the `downscale_2D` parameter for significantly increased
+    speed, or utilize top-hat filtering [4].
 
     References
     ----------
@@ -106,6 +141,11 @@ def rolling_ball(
 
     if kernel is None:
         kernel = ball_kernel(radius, image.ndim)
+        if downscale_2D:
+            background = _downscale_rolling_ball_2D(
+                img, radius, workers, nansafe
+            ).astype(image.dtype, copy=False)
+            return background
 
     kernel = kernel.astype(float_type)
     kernel_shape = np.asarray(kernel.shape)
