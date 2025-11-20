@@ -19,8 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-            # macos-15-intel,
-            macos-13,
+            macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
@@ -45,10 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [
-            windows-latest,
-            # windows-11-arm, # need a separate PR for this, problem with python version discovery
-          ]
+        os: [windows-latest, windows-11-arm]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
 
     steps:
@@ -56,6 +52,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Set up LLVM toolchain for Windows ARM64
+        if: matrix.os == 'windows-11-arm'
+        uses: ./.github/windows_arm64_steps
       - uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.build }}
