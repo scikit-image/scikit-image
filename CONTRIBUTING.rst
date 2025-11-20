@@ -36,22 +36,27 @@ can be contributed to scikit-image.
      <https://github.com/scikit-image/scikit-image>`_ and click the
      "fork" button to create your own copy of the project.
 
+   * `Set up GitHub SSH authentication <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`__.
+
    * Clone (download) the repository with the project source on your local computer::
 
-      git clone https://github.com/your-username/scikit-image.git
+      git clone git@github.com:scikit-image/scikit-image
 
    * Change into the root directory of the cloned repository::
 
       cd scikit-image
 
-   * Add the upstream repository::
+   * Add a remote for your fork:
 
-      git remote add upstream https://github.com/scikit-image/scikit-image.git
+     Let's say your GitHub username is ``codemonkey``::
+
+       git remote add codemonkey git@github.com:codemonkey/scikit-image
+       git fetch codemonkey
 
    * Now, you have remote repositories named:
 
-     - ``upstream``, which refers to the ``scikit-image`` repository, and
-     - ``origin``, which refers to your personal fork.
+     - ``origin``, which refers to the ``scikit-image`` repository, and
+     - ``codemonkey``, which refers to your personal fork.
 
    * Next, :ref:`set up your build environment <build-env-setup>`.
 
@@ -63,10 +68,10 @@ can be contributed to scikit-image.
 
 2. Develop your contribution:
 
-   * Pull the latest changes from upstream::
+   * Pull the latest changes from the project::
 
       git switch main
-      git pull upstream main
+      git pull origin main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
@@ -79,23 +84,34 @@ can be contributed to scikit-image.
 
 3. To submit your contribution:
 
-   * Push your changes back to your fork on GitHub::
+   * Push your changes back to your fork on GitHub:
 
-      git push origin transform-speedups
+     ::
 
-   * Enter your GitHub username and password (repeat contributors or advanced
-     users can remove this step by `connecting to GitHub with SSH
-     <https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_).
+       git push codemonkey transform-speedups
 
-   * Go to GitHub. The new branch will show up with a green "pull request"
-     button -- click it.
+     A message will be displayed with a URL to open in your browser to start a
+     new pull request. Open it and click the green button.
 
-   * If you want, post on the `developer forum
-     <https://discuss.scientific-python.org/c/contributor/skimage>`_ to explain your changes or
-     to ask for review.
+4. To work on someone else's PR:
+
+   ::
+
+     git remote add friend-username git@github.com:friend-username/scikit-image
+     git fetch friend-username
+     git checkout pr-branch-name
+
+   Make changes, commit them, and then push back to the other person's
+   branch:
+
+   ::
+
+     git push friend-username pr-branch-name
 
 For a more detailed discussion, read these :doc:`detailed documents
 <../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
+
+If you get stuck, reach out to us on `Zulip <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
 
@@ -107,18 +123,18 @@ For a more detailed discussion, read these :doc:`detailed documents
      overall code quality benefits.  Therefore, please don't let the review
      discourage you from contributing: its only aim is to improve the quality
      of the project, not to criticize (we are, after all, very grateful for the
-     time you're donating!).
+     time you're putting in!).
 
    * To update your pull request, make your changes on your local repository
      and commit. As soon as those changes are pushed up (to the same branch as
      before) the pull request will update automatically.
 
-   * Continuous integration (CI) services are triggered after each pull request
-     submission to build the package, run unit tests, measure code coverage,
-     and check the coding style (PEP8) of your branch. The tests must pass
-     before your PR can be merged. If CI fails, you can find out why by
-     clicking on the "failed" icon (red cross) and inspecting the build and
-     test logs.
+   * Continuous integration (CI) services are triggered after each
+     pull request submission to build the package, run unit tests, and
+     check the coding style and formatting of your branch. The tests
+     must pass before your PR can be merged. If CI fails, you can find
+     out why by clicking on the "failed" icon (red cross) and
+     inspecting the build and test logs.
 
    * A pull request must be approved by two core team members before merging.
 
@@ -160,40 +176,17 @@ be merged automatically, merge the main branch into yours::
    git fetch upstream main
    git merge upstream/main
 
-If any conflicts occur, they need to be fixed before continuing.  See
-which files are in conflict using::
+If any conflicts occur, they need to be `fixed before continuing
+<https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-using-the-command-line>`__.
 
-   git status
+`We recommend <https://github.com/stefanv/git-tools?tab=readme-ov-file#conflict-diff-display>`__ setting::
 
-Which displays a message like::
+  git config --global merge.conflictstyle zdiff3
 
-   Unmerged paths:
-     (use "git add <file>..." to mark resolution)
+to make conflict markers easier to read.
 
-     both modified:   file_with_conflict.txt
-
-Inside the conflicted file, you'll find sections like these::
-
-   The way the text looks in your branch
-
-Choose one version of the text that should be kept, and delete the
-rest::
-
-   The way the text looks in your branch
-
-Now, add the fixed file::
-
-   git add file_with_conflict.txt
-
-Once you've fixed all merge conflicts, do::
-
-   git commit
-
-.. note::
-
-   Advanced Git users are encouraged to `rebase instead of merge
-   <https://scikit-image.org/docs/dev/gitwash/development_workflow.html#rebasing-on-trunk>`__,
-   but we squash and merge most PRs either way.
+An alternative to merging is to rebase your branch—but we squash and merge all
+PRs anyway, so we don't mind merge commits.
 
 Guidelines
 ----------
@@ -217,12 +210,6 @@ Guidelines
 Stylistic Guidelines
 --------------------
 
-* Set up your editor to remove trailing whitespace.  Follow `PEP08
-  <https://www.python.org/dev/peps/pep-0008/>`__.
-
-* Use numpy data types instead of strings (``np.uint8`` instead of
-  ``"uint8"``).
-
 * Use the following import conventions::
 
    import numpy as np
@@ -233,9 +220,8 @@ Stylistic Guidelines
    sp.ndimage.label(...)
    ski.measure.label(...)
 
-   # only in Cython code
-   cimport numpy as cnp
-   cnp.import_array()
+* Use numpy data types instead of strings (``np.uint8`` instead of
+  ``"uint8"``).
 
 * When documenting array parameters, use ``image : (M, N) ndarray``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
@@ -251,18 +237,18 @@ Stylistic Guidelines
 
    hough(canny(my_image))
 
-* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
-  in C/C++ and Cython code.
-
 * Use relative module imports, i.e. ``from .._shared import xyz`` rather than
   ``from skimage._shared import xyz``.
 
-* Wrap Cython code in a pure Python function, which defines the API. This
-  improves compatibility with code introspection tools, which are often not
-  aware of Cython code.
+* For Cython functions:
 
-* For Cython functions, release the GIL whenever possible, using
-  ``with nogil:``.
+  - Release the GIL whenever possible, using  ``with nogil:``.
+  - Wrap Cython code in a pure Python function, which defines the
+    API. This improves compatibility with code introspection tools,
+    which are often not aware of Cython code.
+
+* Use ``Py_ssize_t`` as data type for all indexing, shape and size variables
+  in C/C++ and Cython code.
 
 Testing
 -------
@@ -278,10 +264,10 @@ Testing requirements are listed in `requirements/test.txt`.
 Run:
 
 - **All tests**: ``spin test``
-- Tests for a **submodule**: ``spin test skimage/morphology``
-- Run tests from a **specific file**: ``spin test skimage/morphology/tests/test_gray.py``
+- Tests for a **submodule**: ``spin test src/skimage/morphology``
+- Run tests from a **specific file**: ``spin test tests/skimage/morphology/tests/test_gray.py``
 - Run **a test inside a file**:
-  ``spin test skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
+  ``spin test tests/skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
 - Run tests **matching** a specific expression:
@@ -355,8 +341,8 @@ Fixing Warnings
 -  Make sure to use pre-sphinxification paths to images (not the
    \_images directory)
 
-Deprecation cycle
------------------
+Deprecation cycle (advanced)
+----------------------------
 
 If the way a function is called has to be changed, a deprecation cycle
 must be followed to warn users.
@@ -523,8 +509,7 @@ Benchmarks
 ----------
 While not mandatory for most pull requests, we ask that performance related
 PRs include a benchmark in order to clearly depict the use-case that is being
-optimized for. A historical view of our snapshots can be found on
-at the following `website <https://pandas.pydata.org/speed/scikit-image/>`_.
+optimized for.
 
 In this section we will review how to setup the benchmarks,
 and three commands ``spin asv -- dev``, ``spin asv -- run`` and
