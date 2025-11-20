@@ -351,7 +351,7 @@ def phase_cross_correlation(
     maxima = np.unravel_index(
         np.argmax(np.abs(cross_correlation)), cross_correlation.shape
     )
-    midpoint = np.array([np.fix(axis_size / 2) for axis_size in shape])
+    midpoint = np.array([np.trunc(axis_size / 2) for axis_size in shape])
 
     float_dtype = image_product.real.dtype
 
@@ -371,7 +371,7 @@ def phase_cross_correlation(
         shift = np.round(shift * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
-        dftshift = np.fix(upsampled_region_size / 2.0)
+        dftshift = np.trunc(upsampled_region_size / 2.0)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shift * upsample_factor
         cross_correlation = _upsampled_dft(
