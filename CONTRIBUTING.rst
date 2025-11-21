@@ -40,27 +40,29 @@ can be contributed to scikit-image.
 
    * Clone (download) the repository with the project source on your local computer::
 
-      git clone git@github.com:scikit-image/scikit-image
+      git clone --origin upstream git@github.com:scikit-image/scikit-image
 
    * Change into the root directory of the cloned repository::
 
       cd scikit-image
 
-   * Add a remote for your fork:
+   * Add your fork as a
+     `remote repository <https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes>`__
+     that you will interact with.
 
-     Let's say your GitHub username is ``codemonkey``::
+     Assuming a GitHub username of `codemonkey`::
 
-       git remote add codemonkey git@github.com:codemonkey/scikit-image
-       git fetch codemonkey
+        git remote add codemonkey git@github.com:codemonkey/scikit-image
+        git fetch codemonkey
 
-   * Now, you have remote repositories named:
+   * You now have two remote repositories:
 
-     - ``origin``, which refers to the ``scikit-image`` repository, and
+     - ``upstream``, which refers to the ``scikit-image`` project repository, and
      - ``codemonkey``, which refers to your personal fork.
 
    * Next, :ref:`set up your build environment <build-env-setup>`.
 
-   * Finally, we recommend that you use a pre-commit hook, which runs code
+   * Finally, we recommend that you use our pre-commit hook, which runs code
      checkers and formatters each time you do a ``git commit``::
 
        pip install pre-commit
@@ -71,7 +73,7 @@ can be contributed to scikit-image.
    * Pull the latest changes from the project::
 
       git switch main
-      git pull origin main
+      git pull upstream main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
@@ -111,9 +113,9 @@ can be contributed to scikit-image.
 For a more detailed discussion, read these :doc:`detailed documents
 <../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
-.. tip:: 
+.. tip::
 
-   If you get stuck, reach out to us on 
+   If you get stuck, reach out to us on
    `our Zulip chat <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
@@ -138,6 +140,11 @@ For a more detailed discussion, read these :doc:`detailed documents
      must pass before your PR can be merged. If CI fails, you can find
      out why by clicking on the "failed" icon (red cross) and
      inspecting the build and test logs.
+
+     .. note:: PR labeling
+
+        CI will always fail on new PRs, until a maintainer adds a
+        suitable category label.
 
    * A pull request must be approved by two core team members before merging.
 
