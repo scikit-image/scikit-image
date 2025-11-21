@@ -90,8 +90,8 @@ can be contributed to scikit-image.
 
        git push codemonkey transform-speedups
 
-     A message will be displayed with a URL to open in your browser to start a
-     new pull request. Open it and click the green button.
+     A message will be displayed with a URL to open in your browser to create a
+     pull request (PR). Open it and click the green button.
 
 4. To work on someone else's PR:
 
@@ -111,7 +111,10 @@ can be contributed to scikit-image.
 For a more detailed discussion, read these :doc:`detailed documents
 <../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
 
-If you get stuck, reach out to us on `Zulip <https://skimage.zulipchat.com/>`__.
+.. tip:: 
+
+   If you get stuck, reach out to us on 
+   `our Zulip chat <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
 
@@ -507,8 +510,8 @@ can be updated.
 
 Benchmarks
 ----------
-While not mandatory for most pull requests, we ask that performance related
-PRs include a benchmark in order to clearly depict the use-case that is being
+While not mandatory for most pull requests, we ask that performance-related
+PRs include a benchmark in order to clearly depict the use case that is being
 optimized for.
 
 In this section we will review how to setup the benchmarks,
