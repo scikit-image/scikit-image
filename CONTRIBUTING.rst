@@ -65,13 +65,13 @@ can be contributed to scikit-image.
 
    * Pull the latest changes from upstream::
 
-      git checkout main
+      git switch main
       git pull upstream main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
 
-      git checkout -b transform-speedups
+      git switch -c transform-speedups
 
    * Commit locally as you progress (with ``git add`` and ``git commit``).
      Please write `good commit messages
@@ -284,8 +284,11 @@ Run:
   ``spin test skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
 - Run tests with **arbitrary ``pytest`` options**:
   ``spin test -- any pytest args you want``.
+- Run tests **matching** a specific expression:
+  ``spin test -- -k threshold``
 - Run all tests and **doctests**:
-  ``spin test -- --doctest-plus skimage``
+  ``spin test --with-doctest``
+
 
 Warnings during testing phase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

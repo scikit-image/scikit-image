@@ -9,6 +9,7 @@ concurrency:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   test_docs_aarch64:
@@ -16,12 +17,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
           allow-prereleases: true
@@ -39,3 +40,13 @@ jobs:
       - name: Build docs / run examples
         run: |
           SPHINXCACHE=${HOME}/.cache/sphinx SPHINXOPTS="-W -j auto" make -C doc html
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "docs build"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

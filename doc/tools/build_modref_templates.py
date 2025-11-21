@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # exclude any appended git hash and date
     installed_version = _version.parse(module.__version__.split('+git')[0])
 
-    source_lines = open('../skimage/__init__.py').readlines()
+    source_lines = open('../src/skimage/__init__.py').readlines()
     version = 'vUndefined'
     for l in source_lines:
         if l.startswith('__version__ = '):

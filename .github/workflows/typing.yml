@@ -1,0 +1,68 @@
+# Workflow to generate and test type annotations
+name: Typing
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previously triggered workflows for the same PR
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Many color libraries just need this variable to be set to any value.
+  # Set it to 3 to support 8-bit color graphics (256 colors per channel)
+  # for libraries that care about the value set.
+  FORCE_COLOR: 3
+  MYPYPATH: ${{ github.workspace }}/stubs
+
+jobs:
+  docstub:
+    name: Test docstub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone scikit-image
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: Install build dependencies
+        env:
+          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install from source
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install docstub
+        run: |
+          pip install docstub==0.3.0.post0
+          docstub --version
+
+      - name: Create stubs with docstub
+        shell: bash
+        run: |
+          echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          (set -o pipefail && \
+           docstub run --verbose --group-errors --allow-errors=626 \
+                       --out-dir ${MYPYPATH}/skimage src/skimage/ \
+           2>&1 | tee -a $GITHUB_STEP_SUMMARY)
+           echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skimage-stubs
+          path: ${MYPYPATH}
