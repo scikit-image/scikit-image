@@ -73,7 +73,8 @@ can be contributed to scikit-image.
    * Pull the latest changes from the project::
 
       git switch main
-      git pull upstream main
+      git fetch upstream main
+      git merge upstream/main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
@@ -100,8 +101,8 @@ can be contributed to scikit-image.
    ::
 
      git remote add friend-username git@github.com:friend-username/scikit-image
-     git fetch friend-username
-     git checkout pr-branch-name
+     git fetch friend-username pr-branch-name
+     git switch pr-branch-name
 
    Make changes, commit them, and then push back to the other person's
    branch:
