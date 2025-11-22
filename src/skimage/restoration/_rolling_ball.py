@@ -21,7 +21,7 @@ def _downscale_rolling_ball_2D(img, radius, workers, nansafe):
                 kernel=None,
                 nansafe=nansafe,
                 workers=workers,
-                downscale_2D=False,
+                downscale='none',
             )
             for i in down_scale_img
         ]
@@ -43,7 +43,7 @@ def rolling_ball(
     nansafe=False,
     num_threads=DEPRECATED,
     workers=None,
-    downscale_2D=False,
+    downscale='none',
 ):
     """Estimate background intensity using the rolling-ball algorithm.
 
@@ -72,12 +72,12 @@ def rolling_ball(
         default value; typically equal to the maximum number of virtual cores.
         Note: This is an upper limit to the number of threads. The exact number
         is determined by the system's OpenMP library.
-    downscale_2D : bool, optional
-        If ``True``, the input image is converted to 2D slices which are
+    downscale : {'none', '2d'}, optional
+        If ``'2d'``, the input image is converted to 2d slices which are
         downscaled before applying the rolling ball algorithm and then upscaled
-        back to the original shape for increased speed. In this case the kernel
-        parameter is ignored and only the radius parameter is used to generate
-        a ball kernel.
+        back to the original shape for significant speed increases with higher
+        radius. In this case the kernel parameter is ignored and only the radius
+        parameter is used to generate a ball kernel.
 
         .. versionadded:: 0.26
             Replaces deprecated parameter `num_threads`.
@@ -141,7 +141,7 @@ def rolling_ball(
 
     if kernel is None:
         kernel = ball_kernel(radius, image.ndim)
-        if downscale_2D:
+        if downscale == '2d' and image.ndim >= 2:
             background = _downscale_rolling_ball_2D(
                 img, radius, workers, nansafe
             ).astype(image.dtype, copy=False)

@@ -24,8 +24,8 @@ def test_ellipsoid_const(dtype):
     assert background.dtype == img.dtype
 
 
-@pytest.mark.parametrize("downscale_2D", [True, False])
-def test_nan_const(downscale_2D):
+@pytest.mark.parametrize("downscale", ['none', '2d'])
+def test_nan_const(downscale):
     img = 123 * np.ones((100, 100), dtype=float)
     img[20, 20] = np.nan
     img[50, 53] = np.nan
@@ -37,29 +37,27 @@ def test_nan_const(downscale_2D):
     expected_img[y + 20, x + 20] = np.nan
     expected_img[y + 50, x + 53] = np.nan
     kernel = ellipsoid_kernel(kernel_shape, 100)
-    background = rolling_ball(
-        img, kernel=kernel, nansafe=True, downscale_2D=downscale_2D
-    )
+    background = rolling_ball(img, kernel=kernel, nansafe=True, downscale=downscale)
     assert np.allclose(img - background, expected_img, equal_nan=True)
 
 
 @pytest.mark.parametrize(
-    "radius, downscale_2D",
+    "radius, downscale",
     [
-        (1, False),
-        (2.5, False),
-        (10.346, False),
-        (50, False),
-        (1, True),
-        (2.5, True),
-        (10.346, True),
-        (50, True),
+        (1, 'none'),
+        (2.5, 'none'),
+        (10.346, 'none'),
+        (50, 'none'),
+        (1, '2d'),
+        (2.5, '2d'),
+        (10.346, '2d'),
+        (50, '2d'),
     ],
 )
-def test_const_image(radius, downscale_2D):
+def test_const_image(radius, downscale):
     # infinite plane light source at top left corner
     img = 23 * np.ones((100, 100), dtype=np.uint8)
-    background = rolling_ball(img, radius=radius, downscale_2D=downscale_2D)
+    background = rolling_ball(img, radius=radius, downscale=downscale)
     assert np.allclose(img - background, np.zeros_like(img))
 
 
@@ -86,19 +84,19 @@ def test_linear_gradient():
 
 
 @pytest.mark.parametrize(
-    "radius, downscale_2D",
+    "radius, downscale",
     [
-        (2, False),
-        (10, False),
-        (12.5, False),
-        (50, False),
-        (2, True),
-        (10, True),
-        (12.5, True),
-        (50, True),
+        (2, 'none'),
+        (10, 'none'),
+        (12.5, 'none'),
+        (50, 'none'),
+        (2, '2d'),
+        (10, '2d'),
+        (12.5, '2d'),
+        (50, '2d'),
     ],
 )
-def test_preserve_peaks(radius, downscale_2D):
+def test_preserve_peaks(radius, downscale):
     x, y = np.meshgrid(range(100), range(100))
     img = 0 * x + 0 * y + 10
     img[10, 10] = 20
@@ -106,7 +104,7 @@ def test_preserve_peaks(radius, downscale_2D):
     img[45, 26] = 156
 
     expected_img = img - 10
-    background = rolling_ball(img, radius=radius, downscale_2D=downscale_2D)
+    background = rolling_ball(img, radius=radius, downscale=downscale)
     assert np.allclose(img - background, expected_img)
 
 
