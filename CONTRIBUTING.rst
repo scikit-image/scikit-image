@@ -73,7 +73,8 @@ can be contributed to scikit-image.
    * Pull the latest changes from the project::
 
       git switch main
-      git pull upstream main
+      git fetch upstream main
+      git merge upstream/main
 
    * Create a branch for the feature you want to work on. Use a sensible name,
      such as 'transform-speedups'::
