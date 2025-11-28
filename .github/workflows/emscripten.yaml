@@ -19,24 +19,23 @@ permissions:
 
 jobs:
   build-wasm-emscripten:
-    name: >-
-      pyodide${{ env.PYODIDE_VERSION }}
-      -py${{ env.PYTHON_VERSION }}
-      -emscr${{ env.EMSCRIPTEN_VERSION }}
+    name: "pyodide${{ matrix.PYODIDE_VERSION }}\
+      -py${{ matrix.PYTHON_VERSION }}\
+      -emscr${{ matrix.EMSCRIPTEN_VERSION }}"
     runs-on: ubuntu-24.04
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
+        # Use `includes:` if you want to specify other combinations!
         # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
         # The appropriate version combinations can be found in the Pyodide repodata.json
         # "info" field, or in Makefile.envs:
         # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-        includes:
-          - PYODIDE_VERSION: 0.29.0
-            PYTHON_VERSION: 3.13
-            EMSCRIPTEN_VERSION: 4.0.9
-            NODE_VERSION: 24
+        PYODIDE_VERSION: ["0.29.0"]
+        PYTHON_VERSION: ["3.13"]
+        EMSCRIPTEN_VERSION: ["4.0.9"]
+        NODE_VERSION: ["24"]
 
     steps:
       - name: Checkout scikit-image
