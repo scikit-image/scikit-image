@@ -2,7 +2,7 @@
 # https://github.com/numpy/numpy/blob/d2d2c25fa81b47810f5cbd85ea6485eb3a3ffec3/.github/workflows/emscripten.yml
 #
 
-name: Test Emscripten/Pyodide build
+name: Test Pyodide
 
 on: [push, pull_request, merge_group]
 
@@ -19,7 +19,10 @@ permissions:
 
 jobs:
   build-wasm-emscripten:
-    name: Build scikit-image distribution for Pyodide
+    name: >-
+      pyodide${{ env.PYODIDE_VERSION }}
+      -py${{ env.PYTHON_VERSION }}
+      -emscr${{ env.EMSCRIPTEN_VERSION }}
     runs-on: ubuntu-24.04
     env:
       PYODIDE_VERSION: 0.29.0
@@ -63,7 +66,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
+      - name: Set up Pyodide test environment
         run: |
           # Set up Pyodide virtual environment
           pyodide venv .venv-pyodide
@@ -75,4 +78,7 @@ jobs:
           # Install pytest and optional dependencies that are available
           pip install pytest pytest-pretty
           pip install "astropy" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
+
+      - name: Test scikit-image
+        run: |
           $PYTEST -svra --pyargs skimage ./tests
