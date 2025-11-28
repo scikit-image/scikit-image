@@ -25,6 +25,14 @@ manipulating arrays::
     misrepresented data, for instance, when the original data points are irregularly
     spaced.
 
+.. note::
+    ``scikit-image`` does not support NumPy masked arrays
+    (`numpy.ma.MaskedArray <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_).
+    Please convert images to plain ndarrays
+    (`numpy.ndarray <https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html>`_)
+    and handle masks separately (for example, using boolean masks as shown below)
+    before calling scikit-image functions.
+
 Retrieving the geometry of the image and the number of pixels::
 
     >>> camera.shape
