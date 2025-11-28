@@ -24,33 +24,38 @@ jobs:
       -py${{ env.PYTHON_VERSION }}
       -emscr${{ env.EMSCRIPTEN_VERSION }}
     runs-on: ubuntu-24.04
-    env:
-      PYODIDE_VERSION: 0.29.0
-      # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
-      # The appropriate versions can be found in the Pyodide repodata.json
-      # "info" field, or in Makefile.envs:
-      # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-      PYTHON_VERSION: 3.13
-      EMSCRIPTEN_VERSION: 4.0.9
-      NODE_VERSION: 24
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
+        # The appropriate version combinations can be found in the Pyodide repodata.json
+        # "info" field, or in Makefile.envs:
+        # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
+        includes:
+          - PYODIDE_VERSION: 0.29.0
+            PYTHON_VERSION: 3.13
+            EMSCRIPTEN_VERSION: 4.0.9
+            NODE_VERSION: 24
+
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.1.1
         with:
           persist-credentials: false
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ matrix.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@2e3e4b15a884dc73a63f962bff250a855150a234 # v5.0.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.PYTHON_VERSION }}
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
       - name: Set up Emscripten toolchain
         uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
-          version: ${{ env.EMSCRIPTEN_VERSION }}
+          version: ${{ matrix.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
@@ -58,13 +63,13 @@ jobs:
 
       - name: Build scikit-image for Pyodide
         run: |
-          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
+          pyodide xbuildenv install ${{ matrix.PYODIDE_VERSION }}
           pyodide build
 
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.NODE_VERSION }}
 
       - name: Set up Pyodide test environment
         run: |
