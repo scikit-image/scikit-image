@@ -96,38 +96,6 @@ can be contributed to scikit-image.
      A message will be displayed with a URL to open in your browser to create a
      pull request (PR). Open it and click the green button.
 
-4. To work on someone else's PR:
-
-   ::
-
-     git remote add friend-username git@github.com:friend-username/scikit-image
-     git fetch friend-username friend-branch-name
-     git switch friend-branch-name
-
-   Create a new branch based on the other person's branch:
-
-   ::
-
-     git switch -c my-branch-name
-
-   Make changes, commit them, and then push this new local branch to your
-   personal fork:
-
-   ::
-
-     git push codemonkey my-branch-name
-
-   This new branch contains the other person's contribution plus your changes.
-   You may create a pull request with it, as described in the previous section.
-
-For a more detailed discussion, read these :doc:`detailed documents
-<../gitwash/index>` on how to use Git with ``scikit-image`` (:ref:`using-git`).
-
-.. tip::
-
-   If you get stuck, reach out to us on
-   `our Zulip chat <https://skimage.zulipchat.com/>`__.
-
 4. Review process:
 
    * Reviewers (the other developers and interested community members) will
