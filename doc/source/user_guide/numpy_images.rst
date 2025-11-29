@@ -26,10 +26,10 @@ manipulating arrays::
       spaced.
     - NumPy masked arrays, 
       `numpy.ma.MaskedArray <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_
-       are not natively supported in ``scikit-image``. Convert images to plain ndarrays
-      `numpy.ndarray <https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html>`_
-      and handle masks separately, using indexing boolean masks as shown in 
-      :ref:`Masking <numpy-images-masking>` masking section before calling scikit-image 
+      are not natively supported in ``scikit-image``. Convert images to plain ndarrays,
+      `numpy.ndarray <https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html>`_,
+      and handle masks separately (for example, index boolean masks as shown in 
+      :ref:`Masking <numpy-images-masking>`) before calling scikit-image 
       functions.
 
 Retrieving the geometry of the image and the number of pixels::
