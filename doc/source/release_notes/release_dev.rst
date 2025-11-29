@@ -73,6 +73,7 @@ Documentation
 - Make call to ``skimage.measure.ransac`` in the gallery example  "Assemble images with simple image stitching" deterministic. This avoids random non-deterministic failures (`#7851 <https://github.com/scikit-image/scikit-image/pull/7851>`_).
 - Improve docstring for Wiener restoration function (`#7523 <https://github.com/scikit-image/scikit-image/pull/7523>`_).
 - Describe custom warning-strategy in migration guide (`#7857 <https://github.com/scikit-image/scikit-image/pull/7857>`_).
+- Normalize spelling of normalize (`#7865 <https://github.com/scikit-image/scikit-image/pull/7865>`_).
 - Restore fast page navigation with in page anchors (`#7899 <https://github.com/scikit-image/scikit-image/pull/7899>`_).
 - In ``skimage.feature``, clarify the description of the parameter ``num_sigma`` in ``blob_log`` and ``blob_doh`` (`#7774 <https://github.com/scikit-image/scikit-image/pull/7774>`_).
 - Use correct CSS selector to override scroll-behavior (`#7928 <https://github.com/scikit-image/scikit-image/pull/7928>`_).
@@ -107,6 +108,7 @@ Infrastructure
 - Note how to deal with automatic CI failure notifications / issues (`#7940 <https://github.com/scikit-image/scikit-image/pull/7940>`_).
 - CI: Add support for building wheels for Windows on ARM (`#7847 <https://github.com/scikit-image/scikit-image/pull/7847>`_).
 - Avoid building on macos-13 (`#7949 <https://github.com/scikit-image/scikit-image/pull/7949>`_).
+- Revert "Refactor names in Pyodide workflow (#7959)" (`#7963 <https://github.com/scikit-image/scikit-image/pull/7963>`_).
 
 Maintenance
 -----------
@@ -146,11 +148,7 @@ to make algorithm clearer, and allow original Hartley algorithm if preferred (`#
 - Bump the Pyodide version for testing to the latest available (0.29) (`#7931 <https://github.com/scikit-image/scikit-image/pull/7931>`_).
 - Fix  ResourceWarning in CI (`#7930 <https://github.com/scikit-image/scikit-image/pull/7930>`_).
 - Switch back to using Cython wheels from PyPI (`#7932 <https://github.com/scikit-image/scikit-image/pull/7932>`_).
-
-Other
------
-
-- Normalize spelling of normalize (`#7865 <https://github.com/scikit-image/scikit-image/pull/7865>`_).
+- Refactor names in Pyodide workflow (`#7959 <https://github.com/scikit-image/scikit-image/pull/7959>`_).
 
 Contributors
 ------------
