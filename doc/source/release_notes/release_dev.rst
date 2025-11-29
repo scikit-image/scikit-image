@@ -12,6 +12,11 @@ New Features
 - Refactor fundamental matrix scaling (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - ``binary_blobs`` now supports a ``mode`` parameter for the Gaussian filter, allowing periodic boundary conditions with ``mode="wrap"`` (`#7909 <https://github.com/scikit-image/scikit-image/pull/7909>`_).
 
+Enhancements
+------------
+
+- In ``skimage.measure``, the ``RegionProperties`` class that is returned by ``regionprops``, now has a formatted string representation (``__repr__``). This representation includes the label of the region and its bounding box (`#7887 <https://github.com/scikit-image/scikit-image/pull/7887>`_).
+
 API Changes
 -----------
 
@@ -27,11 +32,6 @@ API Changes
 - In ``skimage.measure``, add a new class method and constructor ``from_estimate`` for  ``LineModelND``, ``CircleModel``, and ``EllipseModel``. This replaces the old API—the now deprecated ``estimate`` method—which required initalizing a model with undefined parameters before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
 - In ``skimage.transform``, add a new class method and constructor ``from_estimate`` for ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, FundamentalMatrixTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``,  ``ProjectiveTransform``, ``SimilarityTransform``, and ``ThinPlateSplineTransform``. This replaces the old API—the now deprecated ``estimate`` method—which required initializing an undefined transform before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
 - Deprecate use of model constructor calls without arguments (e.g. ``CircleModel()``), leaving an uninitialized instance.  Instead prefer input arguments to define instance (e.g. ``CircleModel(center, radius)``).  This follows on from prior deprecation of the ``estimate`` method, which had implied the need for the no-argument constructor, of form ``cm = CircleMoldel(); cm.estimate(data)``.  Deprecate ``.params`` attributes of models.   Instead set model-specific attributes: ``origin, direction`` for ``LineModelND``; ``center, radius`` for ``CircleModel``, ``center, ax_lens, theta`` for ``EllipseModel``.  Deprecate use of ``params`` arguments to ``predict*`` calls of model objects, because we now ask instead that the user provide initialization equivalent to the ``params`` content in the class construction (i.e. prefer ``cm = CircleModel((2, 3), 4); x = cm.predict_x(t)`` to ``cm = CircleMoldel(); x = cm.predict_x(t, params=(2, 3, 4))``).  Deprecate ``skimage.measure.fit.BaseModel``; after we expire the other ``*Model*`` deprecations, there is no work for an ancestor class to do.  In a small cleanup, we now raise a ``ValueError`` instead of a ``TypeError`` when failing  to pass a value for ``params`` (or passing ``params=None``) to ``predict`` methods of an uninitialized transform (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
-
-Enhancements
-------------
-
-- In ``skimage.measure``, the ``RegionProperties`` class that is returned by ``regionprops``, now has a formatted string representation (``__repr__``). This representation includes the label of the region and its bounding box (`#7887 <https://github.com/scikit-image/scikit-image/pull/7887>`_).
 
 Performance
 -----------
