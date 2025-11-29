@@ -2,6 +2,7 @@ scikit-image 0.26rc0 (2025-11-25)
 =================================
 
 We're happy to announce the release of scikit-image 0.26rc0!
+This feature release deprecates long-standing and confusing aspects of our API in favor of more intuitive and consistent API patterns.
 
 New Features
 ------------
