@@ -7,7 +7,6 @@ New Features
 ------------
 - Add new parameter ``max_step_cost`` to ``skimage.graph.MCP.find_costs`` which allows limiting the maximal stepping cost between points (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
 - Add new property ``intensity_median`` to ``skimage.measure.regionprops`` (`#7745 <https://github.com/scikit-image/scikit-image/pull/7745>`_).
-- Refactor fundamental matrix scaling (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - ``binary_blobs`` now supports a ``mode`` parameter for the Gaussian filter, allowing periodic boundary conditions with ``mode="wrap"`` (`#7909 <https://github.com/scikit-image/scikit-image/pull/7909>`_).
 - Add experimental infrastructure for dispatching to a backend. This API is not stable! (`#7520 <https://github.com/scikit-image/scikit-image/pull/7520>`_)
 
@@ -112,6 +111,8 @@ Infrastructure
 Maintenance
 -----------
 
+- In ``skimage.transform.FundamentalMatrixTransform``, refactor scaling calculation
+to make algorithm clearer, and allow original Hartley algorithm if preferred (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - Bump to Pyodide 0.27.2 stable and install available optional dependencies for WASM tests (`#7646 <https://github.com/scikit-image/scikit-image/pull/7646>`_).
 - Drop Python 3.10 support (`#7673 <https://github.com/scikit-image/scikit-image/pull/7673>`_).
 - Remove outdated TODO (`#7713 <https://github.com/scikit-image/scikit-image/pull/7713>`_).
