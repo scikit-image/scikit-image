@@ -27,6 +27,9 @@ scikit-image (here) by other authors.)
 import numpy as np
 
 
+__doctest_requires__ = {("learn_gmm", "fisher_vector"): ["sklearn"]}
+
+
 class FisherVectorException(Exception):
     pass
 
@@ -80,9 +83,6 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('sklearn')
-
     >>> from skimage.feature import fisher_vector
     >>> rng = np.random.Generator(np.random.PCG64())
     >>> sift_for_images = [rng.standard_normal((10, 128)) for _ in range(10)]
@@ -193,9 +193,6 @@ def fisher_vector(descriptors, gmm, *, improved=False, alpha=0.5):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('sklearn')
-
     >>> from skimage.feature import fisher_vector, learn_gmm
     >>> sift_for_images = [np.random.random((10, 128)) for _ in range(10)]
     >>> num_modes = 16

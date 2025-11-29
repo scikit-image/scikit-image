@@ -15,6 +15,9 @@ from ._draw import (
 )
 
 
+__doctest_requires__ = {("polygon_perimeter", "rectangle_perimeter"): ["matplotlib"]}
+
+
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
@@ -243,9 +246,6 @@ def polygon_perimeter(r, c, shape=None, clip=False):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
@@ -906,9 +906,6 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> import numpy as np
     >>> from skimage.draw import rectangle_perimeter
     >>> img = np.zeros((5, 6), dtype=np.uint8)

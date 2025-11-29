@@ -36,6 +36,9 @@ __all__ = [
 ]
 
 
+__doctest_requires__ = {("try_all_threshold",): ["matpotlib"]}
+
+
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """Returns a figure comparing the outputs of different methods.
 
@@ -137,9 +140,6 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> from skimage.data import text
     >>> fig, ax = try_all_threshold(text(), figsize=(10, 6), verbose=False)
     """
