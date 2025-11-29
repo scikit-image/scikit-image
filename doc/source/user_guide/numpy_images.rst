@@ -14,16 +14,23 @@ manipulating arrays::
     <type 'numpy.ndarray'>
 
 .. note::
-    Labeled array-like data types, such as
-    `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
-    or `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_,
-    are not natively supported in ``scikit-image``. However, data stored in these types
-    can be converted to ``numpy.ndarray`` with certain assumptions
-    (see ``pandas.DataFrame.to_numpy()`` and ``xarray.DataArray.data``). Particularly,
-    these conversions ignore the sampling coordinates (``DataFrame.index``,
-    ``DataFrame.columns``, or ``DataArray.coords``), which may result in
-    misrepresented data, for instance, when the original data points are irregularly
-    spaced.
+
+    - Labeled array-like data types, such as
+      `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_
+      or `xarray.DataArray <https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html>`_,
+      are not natively supported in ``scikit-image``. However, data stored in these types
+      can be converted to ``numpy.ndarray`` with certain assumptions
+      (see ``pandas.DataFrame.to_numpy()`` and ``xarray.DataArray.data``). Particularly,
+      these conversions ignore the sampling coordinates (``DataFrame.index``,
+      ``DataFrame.columns``, or ``DataArray.coords``), which may result in
+      misrepresented data, for instance, when the original data points are irregularly
+      spaced.
+
+    - NumPy masked arrays, 
+      `numpy.ma.MaskedArray <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_
+      are not natively supported in ``scikit-image``. Convert images to plain ``numpy.ndarray``,
+      and handle masks separately (for example, index boolean masks as shown in 
+      :ref:`Masking <numpy-images-masking>`) before calling scikit-image functions.
 
 Retrieving the geometry of the image and the number of pixels::
 
@@ -70,6 +77,8 @@ Slicing::
 
     >>> # Set the first ten lines to "black" (0)
     >>> camera[:10] = 0
+
+.. _numpy-images-masking:
 
 Masking (indexing with masks of booleans)::
 
