@@ -8,6 +8,9 @@ from .. import measure, segmentation, util, color
 from .._shared.version_requirements import require
 
 
+__doctest_requires__ = {("show_rag",): ["matplotlib"]}
+
+
 def _edge_generator_from_csr(csr_array):
     """Yield weighted edge triples for use by NetworkX from a CSR matrix.
 
@@ -506,9 +509,6 @@ def show_rag(
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> from skimage import data, segmentation, graph
     >>> import matplotlib.pyplot as plt
     >>>
