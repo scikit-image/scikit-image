@@ -18,6 +18,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_chan_vese.py',
   '_clear_border.py',
   '_expand_labels.py',
