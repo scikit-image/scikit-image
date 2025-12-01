@@ -27,7 +27,7 @@ manipulating arrays::
 
 .. note::
     `Masked NumPy arrays <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_
-    are not natively supported in ``scikit-image``. Convert images to plain
+    are not natively supported either. Please convert images to plain
     ``numpy.ndarray``, and handle masks separately before calling scikit-image
     functions. For example, use masks to overwrite pixel values explicitly
     :ref:`Masking <numpy-images-masking>`).
