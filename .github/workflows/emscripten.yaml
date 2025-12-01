@@ -85,4 +85,5 @@ jobs:
 
       - name: Test scikit-image
         run: |
+          source .venv-pyodide/bin/activate
           $PYTEST -svra --pyargs skimage ./tests
