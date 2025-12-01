@@ -20,7 +20,7 @@ permissions:
 jobs:
   build-wasm-emscripten:
     name: "pyodide${{ matrix.PYODIDE_VERSION }}\
-      -py${{ matrix.PYTHON_VERSION }}\
+      -cp${{ matrix.PYTHON_VERSION }}\
       -emscr${{ matrix.EMSCRIPTEN_VERSION }}"
     runs-on: ubuntu-24.04
     strategy:
