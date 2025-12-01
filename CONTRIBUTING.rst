@@ -96,6 +96,11 @@ can be contributed to scikit-image.
      A message will be displayed with a URL to open in your browser to create a
      pull request (PR). Open it and click the green button.
 
+.. tip::
+
+   If you get stuck, reach out to us on
+   `our Zulip chat <https://skimage.zulipchat.com/>`__.
+
 4. Review process:
 
    * Reviewers (the other developers and interested community members) will
