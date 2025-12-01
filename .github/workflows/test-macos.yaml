@@ -29,8 +29,8 @@ jobs:
         OPTIONS_NAME: ["default"]
         include:
           - python-version: "3.13"
-            # Also test on ARM version of MacOS
-            os: macos-15
+            # Also test on Intel version of MacOS
+            os: macos-15-intel
             OPTIONAL_DEPS: 1
             OPTIONS_NAME: "default"
     env:
