@@ -272,6 +272,7 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
             powers_of_delta,
             [sum_label, order_label],  # Coord, order axis labels.
             L[:dim] + [order_label] + L[dim + 1 :],  # Output axis labels.
+            optimize='greedy',
         )
     return calc
 
@@ -374,7 +375,7 @@ def moments_hu(nu):
     >>> image[10:12, 10:12] = 1
     >>> mu = moments_central(image)
     >>> nu = moments_normalized(mu)
-    >>> np.round(moments_hu(nu), 4)
+    >>> np.round(moments_hu(nu), 4)  # doctest: +FLOAT_CMP
     array([0.7454, 0.3512, 0.104 , 0.0406, 0.0026, 0.0241, 0.    ])
     """
     dtype = np.float32 if nu.dtype == 'float32' else np.float64
