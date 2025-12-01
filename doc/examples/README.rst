@@ -1,0 +1,1 @@
+- Added quick_sobel_demo.py: A simple script showing Sobel edge detection for beginners.
