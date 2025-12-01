@@ -11,33 +11,32 @@ New Features
 - In ``skimage.transform``, add the ``identity`` class constructor to all geometric transforms. For example, you can now use  ``skimage.transform.PolynomialTransform(dimensionality=2)`` (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
 - Add new property ``intensity_median`` to ``skimage.measure.regionprops`` (`#7745 <https://github.com/scikit-image/scikit-image/pull/7745>`_).
 - ``binary_blobs`` now supports a ``mode`` parameter for the Gaussian filter, allowing periodic boundary conditions with ``mode="wrap"`` (`#7909 <https://github.com/scikit-image/scikit-image/pull/7909>`_).
-- Add experimental infrastructure for dispatching to a backend. This API is not stable! (`#7520 <https://github.com/scikit-image/scikit-image/pull/7520>`_).
+
+API Changes
+-----------
+
+- In ``skimage.morphology``, deprecate ``binary_erosion``, ``binary_dilation``, ``binary_opening``,  and ``binary_closing`` in favor of ``erosion``, ``dilation``, ``opening``, and ``closing``  respectively. The binary versions weren't actually significantly faster than their non-binary counterparts and sometimes significantly slower. In the future, we might add optimizations internally to the remaining (general, non-binary) functions for  when they're used with binary inputs (`#7665 <https://github.com/scikit-image/scikit-image/pull/7665>`_).
+- Deprecate parameter ``max_cumulative_cost`` in ``skimage.graph.MCP.find_costs``  which did nothing (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
+- Deprecate parameter ``max_cost`` in ``skimage.graph.MCP.find_costs``  which previously did nothing. Use the new parameter ``max_step_cost`` instead (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
+- In ``skimage.morphology.remove_small_holes``, deprecate the ``area_threshold`` parameter in favor of the new ``max_size`` parameter to make API and behavior clearer. This new threshold removes holes smaller than **or equal to** its value, while the previous parameter only removed smaller ones (`#7739 <https://github.com/scikit-image/scikit-image/pull/7739>`_).
+- In ``skimage.morphology.remove_small_objects``, deprecate the ``min_size`` parameter in favor of the new ``max_size`` parameter to make API and behavior clearer. This new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones (`#7739 <https://github.com/scikit-image/scikit-image/pull/7739>`_).
+- In ``skimage.transform``, deprecate the use of scalar ``scale``, with ``dimensionality=3``  where this can be passed to a geometric transform contructor. This allows us to generalize the use of the constructors to the case where the parameters must specify the dimensionality, unless you mean to construct an identity transform (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
+- In ``skimage.transform``, turn all input parameters to transform constructors keyword-only (other than ``matrix``). This avoids confusion due to the positional parameter order being different from the order by which they are applied in ``AffineTransform`` (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
+- Deprecate parameter ``num_threads`` in ``skimage.restoration.rolling_ball``;  use ``workers`` instead (`#7302 <https://github.com/scikit-image/scikit-image/pull/7302>`_).
+- Deprecate parameter ``num_workers`` in ``skimage.restoration.cycle_spin``;  use ``workers`` instead (`#7302 <https://github.com/scikit-image/scikit-image/pull/7302>`_).
+- Officially deprecate old properties in ``skimage.measure.regionprops`` and related functions. While we removed the documentation for these some time ago, they where still accessible as keys (via ``__get_item__``) or attributes. Going forward, using deprecated keys or attributes, will emit an appropriate warning (`#7778 <https://github.com/scikit-image/scikit-image/pull/7778>`_).
+- In ``skimage.transform``, add a new class method and constructor ``from_estimate`` for ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``,  ``ProjectiveTransform``, ``SimilarityTransform``, and ``ThinPlateSplineTransform``. This replaces the old API—the now deprecated ``estimate`` method—which required initializing an undefined transform before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
+- In ``skimage.measure``, add a new class method and constructor ``from_estimate`` for  ``LineModelND``, ``CircleModel``, and ``EllipseModel``. This replaces the old API—the now deprecated ``estimate`` method—which required initalizing a model with undefined parameters before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
+- In ``skimage.measure``, deprecate ``.params`` attributes of the models ``CircleModel``, ``EllipseModel``, and ``LineModelND``.  Instead set model-specific attributes:  ``origin, direction`` for ``LineModelND``; ``center, radius`` for ``CircleModel``, ``center, ax_lens, theta`` for ``EllipseModel`` (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
+- Deprecate ``skimage.measure.fit.BaseModel``; after we expire the other ``*Model*`` deprecations, there is no work for an ancestor class to do (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
+- In ``skimage.measure``, deprecate use of model constructor calls without arguments leaving an uninitialized instance (for example ``CircleModel()``). This applies to ``CircleModel``, ``EllipseModel``, and ``LineModelND``. Instead prefer input arguments to define instances (for example ``CircleModel(center, radius)``). This follows on from prior deprecation of the ``estimate`` method, which had implied the need for the no-argument constructor, of form ``cm = CircleMoldel(); cm.estimate(data)`` (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
+- In ``skimage.measure``, deprecate use of ``params`` arguments to ``predict*`` calls of  model objects. This applies to ``CircleModel``, ``EllipseModel``, and ``LineModelND``. We now ask instead that the user provide initialization equivalent to the ``params`` content in the class construction. For example, prefer  ``cm = CircleModel((2, 3), 4); x = cm.predict_x(t)`` to ``cm = CircleMoldel(); x = cm.predict_x(t, params=(2, 3, 4))``) (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
 
 Enhancements
 ------------
 
 - Raise a ``ValueError`` instead of a ``TypeError`` in ``CircleModel``, ``EllipseModel``, and ``LineModelND`` in ``skimage.measure``. This applies when failing  to pass a value for ``params`` (or passing ``params=None``) to ``predict`` methods of an uninitialized transform (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
 - In ``skimage.measure``, the ``RegionProperties`` class that is returned by ``regionprops``, now has a formatted string representation (``__repr__``). This representation includes the label of the region and its bounding box (`#7887 <https://github.com/scikit-image/scikit-image/pull/7887>`_).
-
-API Changes
------------
-
-- In ``skimage.morphology``, deprecate ``binary_erosion``, ``binary_dilation``, ``binary_opening``,  and ``binary_closing`` in favor of ``erosion``, ``dilation``, ``opening``, and ``closing``  respectively. The binary versions weren't actually significantly faster than their non-binary counterparts and sometimes significantly slower. In the future, we might add optimizations internally to the remaining (general, non-binary) functions for  when they're used with binary inputs (`#7665 <https://github.com/scikit-image/scikit-image/pull/7665>`_).
-- Deprecate parameter ``max_cost`` in ``skimage.graph.MCP.find_costs``  which previously did nothing. Use the new parameter ``max_step_cost`` instead (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
-- Deprecate parameter ``max_cumulative_cost`` in ``skimage.graph.MCP.find_costs``  which did nothing (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
-- In ``skimage.morphology.remove_small_holes``, deprecate the ``area_threshold`` parameter in favor of the new ``max_size`` parameter to make API and behavior clearer. This new threshold removes holes smaller than **or equal to** its value, while the previous parameter only removed smaller ones (`#7739 <https://github.com/scikit-image/scikit-image/pull/7739>`_).
-- In ``skimage.morphology.remove_small_objects``, deprecate the ``min_size`` parameter in favor of the new ``max_size`` parameter to make API and behavior clearer. This new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones (`#7739 <https://github.com/scikit-image/scikit-image/pull/7739>`_).
-- In ``skimage.transform``, turn all input parameters to transform constructors keyword-only (other than ``matrix``). This avoids confusion due to the positional parameter order being different from the order by which they are applied in ``AffineTransform`` (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
-- In ``skimage.transform``, deprecate the use of scalar ``scale``, with ``dimensionality=3``  where this can be passed to a geometric transform contructor. This allows us to generalize the use of the constructors to the case where the parameters must specify the dimensionality, unless you mean to construct an identity transform (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
-- Deprecate parameter ``num_workers`` in ``skimage.restoration.cycle_spin``;  use ``workers`` instead (`#7302 <https://github.com/scikit-image/scikit-image/pull/7302>`_).
-- Deprecate parameter ``num_threads`` in ``skimage.restoration.rolling_ball``;  use ``workers`` instead (`#7302 <https://github.com/scikit-image/scikit-image/pull/7302>`_).
-- Officially deprecate old properties in ``skimage.measure.regionprops`` and related functions. While we removed the documentation for these some time ago, they where still accessible as keys (via ``__get_item__``) or attributes. Going forward, using deprecated keys or attributes, will emit an appropriate warning (`#7778 <https://github.com/scikit-image/scikit-image/pull/7778>`_).
-- In ``skimage.measure``, add a new class method and constructor ``from_estimate`` for  ``LineModelND``, ``CircleModel``, and ``EllipseModel``. This replaces the old API—the now deprecated ``estimate`` method—which required initalizing a model with undefined parameters before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
-- In ``skimage.transform``, add a new class method and constructor ``from_estimate`` for ``AffineTransform``, ``EssentialMatrixTransform``, ``EuclideanTransform``, ``FundamentalMatrixTransform``, ``PiecewiseAffineTransform``, ``PolynomialTransform``,  ``ProjectiveTransform``, ``SimilarityTransform``, and ``ThinPlateSplineTransform``. This replaces the old API—the now deprecated ``estimate`` method—which required initializing an undefined transform before calling ``estimate`` (`#7771 <https://github.com/scikit-image/scikit-image/pull/7771>`_).
-- In ``skimage.measure``, deprecate use of model constructor calls without arguments leaving an uninitialized instance (for example ``CircleModel()``). This applies to ``CircleModel``, ``EllipseModel``, and ``LineModelND``. Instead prefer input arguments to define instances (for example ``CircleModel(center, radius)``). This follows on from prior deprecation of the ``estimate`` method, which had implied the need for the no-argument constructor, of form ``cm = CircleMoldel(); cm.estimate(data)`` (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
-- In ``skimage.measure``, deprecate use of ``params`` arguments to ``predict*`` calls of  model objects. This applies to ``CircleModel``, ``EllipseModel``, and ``LineModelND``. We now ask instead that the user provide initialization equivalent to the ``params`` content in the class construction. For example, prefer  ``cm = CircleModel((2, 3), 4); x = cm.predict_x(t)`` to ``cm = CircleMoldel(); x = cm.predict_x(t, params=(2, 3, 4))``) (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
-- Deprecate ``skimage.measure.fit.BaseModel``; after we expire the other ``*Model*`` deprecations, there is no work for an ancestor class to do (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
-- In ``skimage.measure``, deprecate ``.params`` attributes of the models ``CircleModel``, ``EllipseModel``, and ``LineModelND``.  Instead set model-specific attributes:  ``origin, direction`` for ``LineModelND``; ``center, radius`` for ``CircleModel``, ``center, ax_lens, theta`` for ``EllipseModel`` (`#7789 <https://github.com/scikit-image/scikit-image/pull/7789>`_).
 
 Performance
 -----------
@@ -87,10 +86,12 @@ Documentation
 - Avoid doctest error for -0 vs 0 (`#7950 <https://github.com/scikit-image/scikit-image/pull/7950>`_).
 - Update contributing guide to de-emphasize rebasing (`#7953 <https://github.com/scikit-image/scikit-image/pull/7953>`_).
 - Update git commands in contributing guide (`#7956 <https://github.com/scikit-image/scikit-image/pull/7956>`_).
+- Add Linux Foundation Health Score badge to README (`#7907 <https://github.com/scikit-image/scikit-image/pull/7907>`_).
 
 Infrastructure
 --------------
 
+- Add experimental infrastructure for dispatching to a backend (`#7520 <https://github.com/scikit-image/scikit-image/pull/7520>`_).
 - Build conda environment.yml from pyproject.toml (`#7758 <https://github.com/scikit-image/scikit-image/pull/7758>`_).
 - Report failures on main via issue (`#7752 <https://github.com/scikit-image/scikit-image/pull/7752>`_).
 - Make doctest-plus work with spin (`#7786 <https://github.com/scikit-image/scikit-image/pull/7786>`_).
@@ -114,11 +115,13 @@ Infrastructure
 - CI: Add support for building wheels for Windows on ARM (`#7847 <https://github.com/scikit-image/scikit-image/pull/7847>`_).
 - Avoid building on macos-13 (`#7949 <https://github.com/scikit-image/scikit-image/pull/7949>`_).
 - Revert "Refactor names in Pyodide workflow (#7959)" (`#7963 <https://github.com/scikit-image/scikit-image/pull/7963>`_).
+- Avoid uploading unsupported wasm wheels to PyPI (`#7969 <https://github.com/scikit-image/scikit-image/pull/7969>`_).
+- Test on macOS intel in CI again (`#7965 <https://github.com/scikit-image/scikit-image/pull/7965>`_).
+- Wheels: add option to exclude v2 namespace (`#7958 <https://github.com/scikit-image/scikit-image/pull/7958>`_).
 
 Maintenance
 -----------
 
-- In ``skimage.transform.FundamentalMatrixTransform``, refactor scaling calculation to make algorithm clearer, and allow original Hartley algorithm if preferred (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - Bump to Pyodide 0.27.2 stable and install available optional dependencies for WASM tests (`#7646 <https://github.com/scikit-image/scikit-image/pull/7646>`_).
 - Drop Python 3.10 support (`#7673 <https://github.com/scikit-image/scikit-image/pull/7673>`_).
 - Remove outdated TODO (`#7713 <https://github.com/scikit-image/scikit-image/pull/7713>`_).
@@ -133,6 +136,7 @@ Maintenance
 - Address deprecations in Pillow 11.3 (`#7828 <https://github.com/scikit-image/scikit-image/pull/7828>`_).
 - Only report failure on main branch once (`#7839 <https://github.com/scikit-image/scikit-image/pull/7839>`_).
 - Remove superfluous ``mask`` argument in ``_generic_edge_filter`` (`#7827 <https://github.com/scikit-image/scikit-image/pull/7827>`_).
+- In ``skimage.transform.FundamentalMatrixTransform``, refactor scaling calculation to make algorithm clearer, and allow original Hartley algorithm if preferred (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - Skip doctest with random component (`#7854 <https://github.com/scikit-image/scikit-image/pull/7854>`_).
 - Remove MANIFEST.in, that is no longer needed with Meson (`#7855 <https://github.com/scikit-image/scikit-image/pull/7855>`_).
 - Fix simple errors reported by docstub (I) (`#7853 <https://github.com/scikit-image/scikit-image/pull/7853>`_).
@@ -156,12 +160,14 @@ Maintenance
 - moments_hu doctest should ignore tiny differences (`#7944 <https://github.com/scikit-image/scikit-image/pull/7944>`_).
 - Relax constraints of regionprops multichannel test on MacOS with NumPy & "Accelerate" (`#7942 <https://github.com/scikit-image/scikit-image/pull/7942>`_).
 - Refactor names in Pyodide workflow (`#7959 <https://github.com/scikit-image/scikit-image/pull/7959>`_).
+- Use __doctest_requires__ instead of inline importorskip (`#7966 <https://github.com/scikit-image/scikit-image/pull/7966>`_).
 
 Contributors
 ------------
 
-36 authors added to this release (alphabetically):
+38 authors added to this release (alphabetically):
 
+- `@dependabot[bot] <https://github.com/apps/dependabot>`_
 - `@EdytaRz <https://github.com/EdytaRz>`_
 - `@jakirkham <https://github.com/jakirkham>`_
 - `@jdarena66 <https://github.com/jdarena66>`_
@@ -179,6 +185,7 @@ Contributors
 - Jan Eglinger (`@imagejan <https://github.com/imagejan>`_)
 - Jarrod Millman (`@jarrodmillman <https://github.com/jarrodmillman>`_)
 - Jeremy Muhlich (`@jmuhlich <https://github.com/jmuhlich>`_)
+- Jonathan Reimer (`@jonathimer <https://github.com/jonathimer>`_)
 - Jordão Bragantini (`@JoOkuma <https://github.com/JoOkuma>`_)
 - Juan Nunez-Iglesias (`@jni <https://github.com/jni>`_)
 - Kimberly Meechan (`@K-Meech <https://github.com/K-Meech>`_)
@@ -227,4 +234,5 @@ Contributors
 - Tim Head (`@betatim <https://github.com/betatim>`_)
 - Vicent Caselles-Ballester (`@vcasellesb <https://github.com/vcasellesb>`_)
 
-*These lists are in part created automatically, and may not be complete.*
+_These lists are automatically generated, and may not be complete or may contain
+duplicates._
