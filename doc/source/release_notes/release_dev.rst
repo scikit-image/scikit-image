@@ -160,9 +160,8 @@ Maintenance
 Contributors
 ------------
 
-37 authors added to this release (alphabetically):
+36 authors added to this release (alphabetically):
 
-- `@dependabot[bot] <https://github.com/apps/dependabot>`_
 - `@EdytaRz <https://github.com/EdytaRz>`_
 - `@jakirkham <https://github.com/jakirkham>`_
 - `@jdarena66 <https://github.com/jdarena66>`_
@@ -228,5 +227,4 @@ Contributors
 - Tim Head (`@betatim <https://github.com/betatim>`_)
 - Vicent Caselles-Ballester (`@vcasellesb <https://github.com/vcasellesb>`_)
 
-_These lists are automatically generated, and may not be complete or may contain
-duplicates._
+*These lists are in part created automatically, and may not be complete.*
