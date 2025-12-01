@@ -6,11 +6,12 @@ This feature release deprecates long-standing and confusing aspects of our API i
 
 New Features
 ------------
+
 - Add new parameter ``max_step_cost`` to ``skimage.graph.MCP.find_costs`` which allows limiting the maximal stepping cost between points (`#7625 <https://github.com/scikit-image/scikit-image/pull/7625>`_).
 - In ``skimage.transform``, add the ``identity`` class constructor to all geometric transforms. For example, you can now use  ``skimage.transform.PolynomialTransform(dimensionality=2)`` (`#7754 <https://github.com/scikit-image/scikit-image/pull/7754>`_).
 - Add new property ``intensity_median`` to ``skimage.measure.regionprops`` (`#7745 <https://github.com/scikit-image/scikit-image/pull/7745>`_).
 - ``binary_blobs`` now supports a ``mode`` parameter for the Gaussian filter, allowing periodic boundary conditions with ``mode="wrap"`` (`#7909 <https://github.com/scikit-image/scikit-image/pull/7909>`_).
-- Add experimental infrastructure for dispatching to a backend. This API is not stable! (`#7520 <https://github.com/scikit-image/scikit-image/pull/7520>`_)
+- Add experimental infrastructure for dispatching to a backend. This API is not stable! (`#7520 <https://github.com/scikit-image/scikit-image/pull/7520>`_).
 
 Enhancements
 ------------
@@ -48,13 +49,10 @@ Bug Fixes
 
 - Make deconvolution example scientifically sensible (`#7589 <https://github.com/scikit-image/scikit-image/pull/7589>`_).
 - In ``skimage.filters.sobel/scharr/prewitt/farid``, when ``mode="constant"`` is used ensure that ``cval`` has an effect. It didn't previously (`#7826 <https://github.com/scikit-image/scikit-image/pull/7826>`_).
-- Skip doctest with random component (`#7854 <https://github.com/scikit-image/scikit-image/pull/7854>`_).
 - Ensure ``skimage.graph.cut_normalized`` is deterministic when seeded with the  ``rng`` parameter and when SciPy 1.17.0.dev0 or newer is installed. With earlier SciPy versions the internally used function ``scipy.linalg.eigsh`` is not deterministic and can lead to different results (`#7912 <https://github.com/scikit-image/scikit-image/pull/7912>`_).
-- Fix integer overflow in reconstruction cython code (`#7938 <https://github.com/scikit-image/scikit-image/pull/7938>`_).
-- Fix negative axis length due to numerical error (`#7916 <https://github.com/scikit-image/scikit-image/pull/7916>`_).
-- moments_hu doctest should ignore tiny differences (`#7944 <https://github.com/scikit-image/scikit-image/pull/7944>`_).
-- Relax constraints of regionprops multichannel test on MacOS with NumPy & "Accelerate" (`#7942 <https://github.com/scikit-image/scikit-image/pull/7942>`_).
-- In ``random_noise``, ensure that 'clip' argument is handled consistently for various modes (`#7924 <https://github.com/scikit-image/scikit-image/pull/7924>`_).
+- Avoid potential integer overflow in ``skimage.morphology.reconstruction`` (`#7938 <https://github.com/scikit-image/scikit-image/pull/7938>`_).
+- Handle negative axis lengths due to numerical errors in ``axis_major_length`` and  ``axis_minor_length`` properties of ``skimage.measure.regionprops`` (`#7916 <https://github.com/scikit-image/scikit-image/pull/7916>`_).
+- In ``skimage.util.random_noise``, ensure that ``clip`` argument is handled consistently for various modes (`#7924 <https://github.com/scikit-image/scikit-image/pull/7924>`_).
 
 Documentation
 -------------
@@ -120,8 +118,7 @@ Infrastructure
 Maintenance
 -----------
 
-- In ``skimage.transform.FundamentalMatrixTransform``, refactor scaling calculation
-to make algorithm clearer, and allow original Hartley algorithm if preferred (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
+- In ``skimage.transform.FundamentalMatrixTransform``, refactor scaling calculation to make algorithm clearer, and allow original Hartley algorithm if preferred (`#7767 <https://github.com/scikit-image/scikit-image/pull/7767>`_).
 - Bump to Pyodide 0.27.2 stable and install available optional dependencies for WASM tests (`#7646 <https://github.com/scikit-image/scikit-image/pull/7646>`_).
 - Drop Python 3.10 support (`#7673 <https://github.com/scikit-image/scikit-image/pull/7673>`_).
 - Remove outdated TODO (`#7713 <https://github.com/scikit-image/scikit-image/pull/7713>`_).
@@ -136,6 +133,7 @@ to make algorithm clearer, and allow original Hartley algorithm if preferred (`#
 - Address deprecations in Pillow 11.3 (`#7828 <https://github.com/scikit-image/scikit-image/pull/7828>`_).
 - Only report failure on main branch once (`#7839 <https://github.com/scikit-image/scikit-image/pull/7839>`_).
 - Remove superfluous ``mask`` argument in ``_generic_edge_filter`` (`#7827 <https://github.com/scikit-image/scikit-image/pull/7827>`_).
+- Skip doctest with random component (`#7854 <https://github.com/scikit-image/scikit-image/pull/7854>`_).
 - Remove MANIFEST.in, that is no longer needed with Meson (`#7855 <https://github.com/scikit-image/scikit-image/pull/7855>`_).
 - Fix simple errors reported by docstub (I) (`#7853 <https://github.com/scikit-image/scikit-image/pull/7853>`_).
 - Add package version to skimage2 (`#7871 <https://github.com/scikit-image/scikit-image/pull/7871>`_).
@@ -155,6 +153,8 @@ to make algorithm clearer, and allow original Hartley algorithm if preferred (`#
 - Bump the Pyodide version for testing to the latest available (0.29) (`#7931 <https://github.com/scikit-image/scikit-image/pull/7931>`_).
 - Fix  ResourceWarning in CI (`#7930 <https://github.com/scikit-image/scikit-image/pull/7930>`_).
 - Switch back to using Cython wheels from PyPI (`#7932 <https://github.com/scikit-image/scikit-image/pull/7932>`_).
+- moments_hu doctest should ignore tiny differences (`#7944 <https://github.com/scikit-image/scikit-image/pull/7944>`_).
+- Relax constraints of regionprops multichannel test on MacOS with NumPy & "Accelerate" (`#7942 <https://github.com/scikit-image/scikit-image/pull/7942>`_).
 - Refactor names in Pyodide workflow (`#7959 <https://github.com/scikit-image/scikit-image/pull/7959>`_).
 
 Contributors
