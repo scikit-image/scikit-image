@@ -5,6 +5,59 @@ import numpy as np
 from .._shared.filters import gaussian
 
 
+def _binary_blobs_skimage2(
+    shape,
+    *,
+    blob_size_fraction,
+    volume_fraction,
+    rng,
+    boundary_mode,
+):
+    """Generate synthetic binary image with several rounded blob-like objects.
+
+    See wrapper :func:`skimage2.data.binary_blobs` for the full docstring.
+    """
+    if boundary_mode not in {"nearest", "wrap"}:
+        raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
+
+    min_length = min(shape)
+    blob_size = blob_size_fraction * min_length
+    if blob_size < 0.1:
+        clamped_size_fraction = 0.1 / min_length
+        clamped_blob_size = clamped_size_fraction * min_length
+        warnings.warn(
+            f"`{blob_size_fraction=}` together with `{shape=}` would result in a blob "
+            f"size of {blob_size} pixels. Small blob sizes likely lead to unexpected "
+            f"results! "
+            f"Clamping to `blob_size_fraction={clamped_size_fraction}` and a blob size "
+            f"of {clamped_blob_size} pixels to avoid allocating excessive memory.",
+            category=RuntimeWarning,
+            stacklevel=3,
+        )
+        blob_size_fraction = clamped_size_fraction
+
+    rng = np.random.default_rng(rng)
+    mask = np.zeros(shape)
+
+    n_dim = len(shape)
+    n_pts = max(int(1.0 / blob_size_fraction) ** n_dim, 1)
+
+    points = rng.random((n_dim, n_pts))
+    for ax, length in enumerate(shape):
+        points[ax] *= length
+    points = points.astype(int)
+
+    mask[tuple(indices for indices in points)] = 1
+    mask = gaussian(
+        mask,
+        sigma=0.25 * min_length * blob_size_fraction,
+        preserve_range=False,
+        mode=boundary_mode,
+    )
+    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
+    return np.logical_not(mask < threshold)
+
+
 def binary_blobs(
     length=512,
     blob_size_fraction=0.1,
@@ -72,35 +125,10 @@ def binary_blobs(
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
     """
-    if boundary_mode not in {"nearest", "wrap"}:
-        raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
-
-    blob_size = blob_size_fraction * length
-    if blob_size < 0.1:
-        clamped_size_fraction = 0.1 / length
-        clamped_blob_size = clamped_size_fraction * length
-        warnings.warn(
-            f"`{blob_size_fraction=}` together with `{length=}` would result in a blob "
-            f"size of {blob_size} pixels. Small blob sizes likely lead to unexpected "
-            f"results! "
-            f"Clamping to `blob_size_fraction={clamped_size_fraction}` and a blob size "
-            f"of {clamped_blob_size} pixels to avoid allocating excessive memory.",
-            category=RuntimeWarning,
-            stacklevel=2,
-        )
-        blob_size_fraction = clamped_size_fraction
-
-    rs = np.random.default_rng(rng)
-    shape = tuple([length] * n_dim)
-    mask = np.zeros(shape)
-    n_pts = max(int(1.0 / blob_size_fraction) ** n_dim, 1)
-    points = (length * rs.random((n_dim, n_pts))).astype(int)
-    mask[tuple(indices for indices in points)] = 1
-    mask = gaussian(
-        mask,
-        sigma=0.25 * length * blob_size_fraction,
-        preserve_range=False,
-        mode=boundary_mode,
+    return _binary_blobs_skimage2(
+        shape=(length,) * n_dim,
+        blob_size_fraction=blob_size_fraction,
+        volume_fraction=volume_fraction,
+        rng=rng,
+        boundary_mode=boundary_mode,
     )
-    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
-    return np.logical_not(mask < threshold)
