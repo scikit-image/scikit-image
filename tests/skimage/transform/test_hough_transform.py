@@ -55,18 +55,21 @@ def test_probabilistic_hough():
     lines = transform.probabilistic_hough_line(
         img, threshold=10, line_length=10, line_gap=1, theta=theta
     )
-    # sort the lines according to the x-axis
-    sorted_lines = []
-    for ln in lines:
-        ln = list(ln)
-        ln.sort(key=lambda x: x[0])
-        sorted_lines.append(ln)
 
+    sorted_lines = _sort_lines(lines)
     assert [(25, 75), (74, 26)] in sorted_lines
     assert [(25, 25), (74, 74)] in sorted_lines
 
-    # Execute with default theta
+    # Execute with default theta (Smoke test).
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
+
+
+def _sort_lines(lines):
+    # Sort each line by x, y, and sort lines.
+    sorted_lines = []
+    for ln in lines:
+        sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
+    return sorted(sorted_lines)
 
 
 def test_probabilistic_hough_seed():
@@ -90,6 +93,26 @@ def test_probabilistic_hough_bad_input():
     # Expected error, img must be 2D
     with pytest.raises(ValueError):
         transform.probabilistic_hough_line(img)
+
+
+def test_probabilistic_hough_examples():
+    ph = transform.probabilistic_hough_line
+    # Single line in LR (x)
+    img = np.zeros((40, 40))
+    L = 20
+    img[5, 10 : (10 + L)] = 1
+    x_line = [(10, 5), (9 + L, 5)]
+    y_line = [(5, 10), (5, 9 + L)]
+    lines = ph(img, line_length=L - 1)
+    assert _sort_lines(lines) == [x_line]
+    # Line length.
+    assert ph(img, line_length=L) == []
+    # Single line in UD (y)
+    lines = ph(img.T, line_length=L - 1)
+    assert _sort_lines(lines) == [y_line]
+    # Two lines (x, y)
+    lines = ph(img + img.T, line_length=L - 1)
+    assert _sort_lines(lines) == [y_line, x_line]
 
 
 def test_hough_line_peaks():
