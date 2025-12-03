@@ -82,7 +82,7 @@ docs = [
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.16',
     'PyWavelets>=1.6',
-    'pytest-doctestplus',
+    'pytest-doctestplus>=1.6.0',
 ]
 optional = [
     'SimpleITK; sys_platform != "emscripten"',
@@ -107,7 +107,7 @@ test = [
     'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
-    'pytest-doctestplus',
+    'pytest-doctestplus>=1.6.0',
 ]
 
 [project.urls]
@@ -221,6 +221,9 @@ environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
 enable="cpython-freethreading"
+
+[[tool.cibuildwheel.config-settings]]
+setup-args = ["-Dinclude-v2=false"]
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
