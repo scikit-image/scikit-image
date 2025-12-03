@@ -399,8 +399,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     if not line_end:
         raise MemoryError('could not allocate line_end')
     cdef Py_ssize_t max_distance, offset, index
-    cdef cnp.float64_t line_sin, line_cos, a, b
-    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta_idx
+    cdef cnp.float64_t line_sin, line_cos, a, b, rho
+    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta_idx, rho_idx
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16
@@ -518,9 +518,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     px += dx
                     py += dy
 
-            # confirm line length is sufficient
+            # Confirm line length is sufficient.
             good_line = (labs(line_end[3] - line_end[1]) >= line_length or
                          labs(line_end[2] - line_end[0]) >= line_length)
+            if not good_line:
+                continue
 
             # pass 2: walk the line again and reset accumulator and mask
             # Steps 6 and 7 above.
@@ -532,35 +534,33 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if k > 0:
                     dx = -dx
                     dy = -dy
-                while 1:
+                while True:
                     if xflag:
                         x1 = px
                         y1 = py >> shift
                     else:
                         x1 = px >> shift
                         y1 = py
-                    # if non-zero point found, continue the line
-                    if mask[y1, x1]:
-                        if good_line:
-                            accum_idx = round(
-                                (line_cos * x1 + line_sin * y1)) + offset
-                            accum[accum_idx, max_theta_idx] -= 2
-                            mask[y1, x1] = 0
-                    # exit when the point is the line end
+                    if mask[y1, x1]:  # Remaining point at this location.
+                        mask[y1, x1] = 0  # Remove.
+                        for j in range(nthetas):  # Reset accumulator.
+                            rho = ctheta[j] * x1 + stheta[j] * y1
+                            rho_idx = <int>round(rho) + offset
+                            accum[rho_idx, j] -= 1
+                    # Exit when the point is the line end.
                     if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
                         break
                     px += dx
                     py += dy
 
-            # add line to the result (step 8 above).
-            if good_line:
-                lines[nlines, 0, 0] = line_end[0]
-                lines[nlines, 0, 1] = line_end[1]
-                lines[nlines, 1, 0] = line_end[2]
-                lines[nlines, 1, 1] = line_end[3]
-                nlines += 1
-                if nlines >= lines_max:
-                    break
+            # Add line to the result (step 8 above).
+            lines[nlines, 0, 0] = line_end[0]
+            lines[nlines, 0, 1] = line_end[1]
+            lines[nlines, 1, 0] = line_end[2]
+            lines[nlines, 1, 1] = line_end[3]
+            nlines += 1
+            if nlines >= lines_max:
+                break
 
     PyMem_Free(line_end)
     return [((line[0, 0], line[0, 1]), (line[1, 0], line[1, 1]))
