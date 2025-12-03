@@ -56,9 +56,7 @@ def test_probabilistic_hough():
         img, threshold=10, line_length=10, line_gap=1, theta=theta
     )
 
-    sorted_lines = _sort_lines(lines)
-    assert [(25, 75), (74, 26)] in sorted_lines
-    assert [(25, 25), (74, 74)] in sorted_lines
+    assert _sort_lines(lines) == [[(25, 75), (74, 26)][(25, 25), (74, 74)]]
 
     # Execute with default theta (Smoke test).
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
