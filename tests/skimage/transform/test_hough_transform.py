@@ -56,14 +56,14 @@ def test_probabilistic_hough():
         img, threshold=10, line_length=10, line_gap=1, theta=theta
     )
 
-    assert _sort_lines(lines) == [[(25, 75), (74, 26)][(25, 25), (74, 74)]]
+    assert _sort_lines(lines) == [[(25, 25), (74, 74)], [(25, 75), (74, 26)]]
 
     # Execute with default theta (Smoke test).
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
 
 
 def _sort_lines(lines):
-    # Sort each line by x, y, and sort lines.
+    # Sort each line by x, y, sort lines by contents.
     sorted_lines = []
     for ln in lines:
         sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
@@ -103,14 +103,32 @@ def test_probabilistic_hough_examples():
     y_line = [(5, 10), (5, 9 + L)]
     lines = ph(img, line_length=L - 1)
     assert _sort_lines(lines) == [x_line]
-    # Line length.
+    # Line length too short.  Note line length is pixel distance between end
+    # points - line from [0, 0] through [0, 3] is length 3.
     assert ph(img, line_length=L) == []
     # Single line in UD (y)
     lines = ph(img.T, line_length=L - 1)
     assert _sort_lines(lines) == [y_line]
     # Two lines (x, y)
-    lines = ph(img + img.T, line_length=L - 1)
+    both = img + img.T
+    lines = ph(both, line_length=L - 1)
     assert _sort_lines(lines) == [y_line, x_line]
+    # Add diagonal lines.
+    more = both.copy()
+    offset = 15
+    n = 20
+    back_off = offset + n - 1
+    for i in range(n):
+        oi = offset + i
+        more[oi, oi] = 1
+        more[back_off - i, oi] = 1
+    lines = _sort_lines(ph(more, line_length=L - 1))
+    assert lines == [
+        y_line,
+        x_line,
+        [(offset, offset), (back_off, back_off)],
+        [(offset, back_off), (back_off, offset)],
+    ]
 
 
 def test_hough_line_peaks():
