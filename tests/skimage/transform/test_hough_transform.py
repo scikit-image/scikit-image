@@ -122,7 +122,8 @@ def test_probabilistic_hough_examples():
         oi = offset + i
         more[oi, oi] = 1
         more[back_off - i, oi] = 1
-    lines = _sort_lines(ph(more, line_length=L - 1))
+    # Enforce shorter gap
+    lines = _sort_lines(ph(more, line_gap=5, line_length=L - 1))
     diags = [
         [(offset, offset), (back_off, back_off)],
         [(offset, back_off), (back_off, offset)],
@@ -130,7 +131,7 @@ def test_probabilistic_hough_examples():
     assert lines == [y_line, x_line] + diags
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
-    assert _sort_lines(ph(more, line_length=len_diag)) == diags
+    assert _sort_lines(ph(more, line_gap=5, line_length=len_diag)) == diags
 
 
 def test_hough_line_peaks():
