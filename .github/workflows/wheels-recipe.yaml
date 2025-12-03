@@ -61,7 +61,7 @@ jobs:
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
-          CIBW_SKIP: "*-win32 cp314t*" # bug in compilation
+          CIBW_SKIP: "*-win32" # not provide 32 bits wheel
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
