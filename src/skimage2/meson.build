@@ -5,3 +5,4 @@ py3.install_sources(
 )
 
 subdir('data')
+subdir('_shared')
