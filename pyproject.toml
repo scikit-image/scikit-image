@@ -222,7 +222,7 @@ environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
 enable="cpython-freethreading"
 
-[[tool.cibuildwheel.config-settings]]
+[tool.cibuildwheel.config-settings]
 setup-args = "-Dinclude-v2=false"
 
 [[tool.cibuildwheel.overrides]]
