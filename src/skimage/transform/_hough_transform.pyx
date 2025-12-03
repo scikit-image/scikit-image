@@ -399,14 +399,14 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     if not line_end:
         raise MemoryError('could not allocate line_end')
     cdef Py_ssize_t max_distance, rho_idx_offset, index
-    cdef cnp.float64_t line_sin, line_cos, a, b, rho
+    cdef cnp.float64_t line_sin, line_cos, mls, lc, rho, slope
     cdef Py_ssize_t j, k, x, y, px, py, rho_idx, max_theta_idx
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16
     cdef int good_line
     cdef Py_ssize_t nlines = 0
-    cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff
+    cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
     # Assemble n_rhos by n_thetas accumulator array.
@@ -463,31 +463,38 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     max_value = value
                     max_theta_idx = j
             if max_value < threshold:  # Step 4 above.
+                # Note - this pixel should be removed from consideration;
+                # see step 3 above.
                 continue
 
             # From the random point (x, y), walk in opposite directions and
             # find line beginning and end (step 5 above).
             line_sin = stheta[max_theta_idx]
             line_cos = ctheta[max_theta_idx]
-            a = -line_sin
-            b = line_cos
-            x0 = x
-            y0 = y
+            # Rearranging sin theta x + cos theta y = r, slope is -sin theta /
+            # cos theta
+            mls = -line_sin
+            lc = line_cos
+            slope = mls / lc
+            xflag = fabs(slope) > 1
+            x0 = x  # Coordinate shift 16 if abs(slope) > 1 False else x
+            y0 = y  # Coordinate shift 16 if abs(slope) > 1 True else y
             # calculate gradient of walks using fixed point math
-            xflag = fabs(a) > fabs(b)
-            if xflag:
-                if a > 0:
+            if xflag:  # abs(y) increases faster than abs(x).
+                if mls > 0:
                     dx0 = 1
                 else:
                     dx0 = -1
-                dy0 = round(b * (1 << shift) / fabs(a))
+                # y0, dy0 shifted.  Push value into upper bits.
+                dy0 = round(lc * (1 << shift) / fabs(mls))
                 y0 = (y0 << shift) + (1 << (shift - 1))
-            else:
-                if b > 0:
+            else:  # abs(x) increases faster than abs(x).
+                if lc > 0:
                     dy0 = 1
                 else:
                     dy0 = -1
-                dx0 = round(a * (1 << shift) / fabs(b))
+                # x0, dx0 shifted.  Push value into upper bits.
+                dx0 = round(mls * (1 << shift) / fabs(lc))
                 x0 = (x0 << shift) + (1 << (shift - 1))
 
             # pass 1: walk the line, merging lines less than specified gap
@@ -501,10 +508,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if k > 0:  # Walk in opposite direction.
                     dx = -dx
                     dy = -dy
-                while 1:
+                while True:
                     if xflag:
                         x1 = px
-                        y1 = py >> shift
+                        y1 = py >> shift  # Pull value from upper bits.
                     else:
                         x1 = px >> shift
                         y1 = py
@@ -514,8 +521,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     gap += 1
                     if mask[y1, x1]:  # Hit remaining pixel, continue line.
                         gap = 0
-                        line_end[2*k] = x1
-                        line_end[2*k + 1] = y1
+                        line_end[2 * k] = x1
+                        line_end[2 * k + 1] = y1
                     elif gap > line_gap:  # Gap to here too large, end line.
                         break
                     px += dx
@@ -546,12 +553,12 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                         y1 = py
                     if mask[y1, x1]:  # Remaining point at this location.
                         mask[y1, x1] = 0  # Remove.
-                        for j in range(nthetas):  # Reset accumulator.
+                        for j in range(nthetas):  # Remove accumulator votes.
                             rho = ctheta[j] * x1 + stheta[j] * y1
                             rho_idx = <int>round(rho) + rho_idx_offset
                             accum[rho_idx, j] -= 1
                     # Exit when the point is the line end.
-                    if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
+                    if x1 == line_end[2 * k] and y1 == line_end[2 * k + 1]:
                         break
                     px += dx
                     py += dy
