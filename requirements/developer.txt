@@ -3,3 +3,4 @@
 pre-commit
 ipython
 docstub==0.3.0.post0
+asv; sys_platform != "emscripten"

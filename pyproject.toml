@@ -60,6 +60,7 @@ developer = [
     'pre-commit',
     'ipython',
     'docstub==0.3.0.post0',
+    'asv; sys_platform != "emscripten"',
 ]
 docs = [
     'sphinx>=8.0',
@@ -99,7 +100,6 @@ optional_free_threaded = [
 ]
 
 test = [
-    'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
     'pytest>=8.3',
