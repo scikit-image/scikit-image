@@ -942,12 +942,12 @@ _WARP_NOTES = '''Notes
     in the ``skimage2`` namespace, we use the NumPy or "ij" convention, where
     the first and second axis of the image correspond to the first and second
     axis of the array (row, column). Correspondingly, a positive rotation is
-    counter-clockwise. In Scikit-image 1 (the `skimage` namespace`), we used
+    counter-clockwise. In scikit-image 1 (the `skimage` namespace`), we used
     the "xy" convention, where the first axis is columns and the second rows.
     Correspondingly, positive rotation is clockwise.
 
-    Note, therefore, that if you apply a transform using ``warp`` and other
-    functions applying transforms, from ``skimage2``, you will get an opposite
+    Note, therefore, that if you apply a transform using ``warp``, or other
+    functions that apply transforms in ``skimage2``, you will get an opposite
     direction rotation from the same function in the ``skimage.transform``
     module.'''
 
@@ -975,7 +975,7 @@ class ProjectiveTransform(_HMatrixTransform):
        [0            0         1]]
 
     Whether this will appear as a clockwise or counterclockwise rotation will
-    depend on how you apply the transform to the image; see the Notes section.
+    depend on which coordinate convention is used; see the Notes section.
 
     To translate ``x`` by 10 and ``y`` by 20::
 
