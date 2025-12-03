@@ -454,8 +454,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     max_value = value
                     max_theta_idx = j
             if max_value < threshold:  # Step 4 above.
-                # Note - this pixel should be removed from consideration;
-                # see step 3 above.
                 continue
 
             # From the random point (x, y), walk in opposite directions and
