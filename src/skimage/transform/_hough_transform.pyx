@@ -414,6 +414,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     rho_idx_offset = max_distance
     cdef Py_ssize_t nthetas = theta.shape[0]
 
+    cdef cnp.intp_t[:, ::1] line_pixels = np.zeros((max_distance, 2), dtype=np.intp)
+    cdef int n_line_pixels
+
     # compute sine and cosine of angles
     cdef cnp.float64_t[::1] ctheta = np.cos(theta)
     cdef cnp.float64_t[::1] stheta = np.sin(theta)
@@ -434,8 +437,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             x = x_idxs[idx]
             y = y_idxs[idx]
 
-            # If previously eliminated by being detected as part of line
-            # search, skip.
+            # Skip if previously eliminated by detection in earlier line
+            # search.
             if not mask[y, x]:
                 continue
 
@@ -487,6 +490,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
             # pass 1: walk the line, merging lines less than specified gap
             # length (step 5 continued).
+            n_line_pixels = 0
             for k in range(2):
                 gap = 0
                 px = x0
@@ -511,6 +515,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                         gap = 0
                         line_ends[k, 0] = x1
                         line_ends[k, 1] = y1
+                        # Record presence of in-mask pixel on line.
+                        line_pixels[n_line_pixels, 0] = x1
+                        line_pixels[n_line_pixels, 1] = y1
+                        n_line_pixels += 1
                     elif gap > line_gap:  # Gap to here too large, end line.
                         break
                     px += dx
@@ -523,34 +531,18 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             if not good_line:
                 continue
 
-            # pass 2: walk the line again and reset accumulator and mask
-            # Steps 6 and 7 above.
-            for k in range(2):
-                px = x0
-                py = y0
-                dx = dx0
-                dy = dy0
-                if k > 0:
-                    dx = -dx
-                    dy = -dy
-                while True:
-                    if xflag:
-                        x1 = px
-                        y1 = py >> shift
-                    else:
-                        x1 = px >> shift
-                        y1 = py
-                    if mask[y1, x1]:  # Remaining point at this location.
-                        mask[y1, x1] = 0  # Remove.
-                        for j in range(nthetas):  # Remove accumulator votes.
-                            rho = ctheta[j] * x1 + stheta[j] * y1
-                            rho_idx = <int>round(rho) + rho_idx_offset
-                            accum[rho_idx, j] -= 1
-                    # Exit when the point is the line end.
-                    if x1 == line_ends[k, 0] and y1 == line_ends[k, 1]:
-                        break
-                    px += dx
-                    py += dy
+            # Pass 2: reset accumulator and mask for points on line (steps 6
+            # and 7 above).
+            for i in range(n_line_pixels):
+                x1 = line_pixels[i, 0]
+                y1 = line_pixels[i, 1]
+                if not mask[y1, x1]:
+                    continue
+                mask[y1, x1] = 0  # Remove point.
+                for j in range(nthetas):  # Remove accumulator votes.
+                    rho = ctheta[j] * x1 + stheta[j] * y1
+                    rho_idx = <int>round(rho) + rho_idx_offset
+                    accum[rho_idx, j] -= 1
 
             # Add line to the result (step 8 above).
             lines[nlines] = line_ends
