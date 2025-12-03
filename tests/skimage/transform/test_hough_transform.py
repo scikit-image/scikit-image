@@ -124,7 +124,7 @@ def test_probabilistic_hough_examples():
         more[oi, oi] = 1
         more[back_off - i, oi] = 1
     # Enforce shorter gap
-    lines = sl(ph(more, line_gap=5, line_length=L - 1))
+    lines = sl(ph(more, line_gap=2, line_length=L - 1))
     diags = [
         [(offset, offset), (back_off, back_off)],
         [(offset, back_off), (back_off, offset)],
@@ -132,7 +132,7 @@ def test_probabilistic_hough_examples():
     assert lines == [y_line, x_line] + diags
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
-    assert sl(ph(more, line_gap=5, line_length=len_diag)) == diags
+    assert sl(ph(more, line_gap=2, line_length=len_diag)) == diags
     # Check gap behaves as expected.
     assert sl(ph(img, line_gap=0, line_length=L - 1)) == [x_line]
     gappy = img.copy()
