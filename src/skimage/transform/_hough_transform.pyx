@@ -6,7 +6,6 @@
 import numpy as np
 cimport numpy as cnp
 
-from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
@@ -397,7 +396,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t max_distance, rho_idx_offset, idx
     cdef cnp.float64_t line_sin, line_cos, mls, lc, rho, slope
     cdef Py_ssize_t j, k, x, y, px, py, rho_idx, max_theta_idx
-    cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1
+    cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, x_len, y_len
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16
     cdef int good_line
@@ -518,8 +517,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     py += dy
 
             # Confirm line length is sufficient.
-            good_line = (labs(line_ends[1, 1] - line_ends[0, 1]) >= line_length or
-                         labs(line_ends[1, 0] - line_ends[0, 0]) >= line_length)
+            x_len = line_ends[1, 0] - line_ends[0, 0]
+            y_len = line_ends[1, 1] - line_ends[0, 1]
+            good_line = sqrt(x_len * x_len + y_len * y_len) >= line_length
             if not good_line:
                 continue
 
