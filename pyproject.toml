@@ -223,7 +223,7 @@ build-verbosity = 0
 enable="cpython-freethreading"
 
 [[tool.cibuildwheel.config-settings]]
-setup-args = ["-Dinclude-v2=false"]
+setup-args = "-Dinclude-v2=false"
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
