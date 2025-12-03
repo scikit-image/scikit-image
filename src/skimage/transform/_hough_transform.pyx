@@ -398,9 +398,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         <Py_ssize_t *>PyMem_Malloc(4 * sizeof(Py_ssize_t))
     if not line_end:
         raise MemoryError('could not allocate line_end')
-    cdef Py_ssize_t max_distance, offset, index
+    cdef Py_ssize_t max_distance, rho_idx_offset, index
     cdef cnp.float64_t line_sin, line_cos, a, b, rho
-    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta_idx, rho_idx
+    cdef Py_ssize_t j, k, x, y, px, py, rho_idx, max_theta_idx
     cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
     cdef cnp.int64_t value, max_value,
     cdef int shift = 16
@@ -409,11 +409,13 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
-    max_distance = 2 * <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
-                                              img.shape[1] * img.shape[1])))
-    cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance, theta.shape[0]),
+    # Assemble n_rhos by n_thetas accumulator array.
+    max_distance = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
+                                          img.shape[1] * img.shape[1])))
+    cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance * 2,
+                                               theta.shape[0]),
                                               dtype=np.int64)
-    offset = max_distance / 2
+    rho_idx_offset = max_distance
     cdef Py_ssize_t nthetas = theta.shape[0]
 
     # compute sine and cosine of angles
@@ -448,14 +450,15 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 continue
 
             value = 0
-            max_value = threshold - 1  # Max value in accumulator.
-            max_theta_idx = -1
+            max_value = 0  # Max value in accumulator, start value.
+            max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
             # Apply Hough transform on point (step 2 above).
             for j in range(nthetas):
-                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
-                accum[accum_idx, j] += 1
-                value = accum[accum_idx, j]
+                rho = ctheta[j] * x + stheta[j] * y
+                rho_idx = round(rho) + rho_idx_offset
+                accum[rho_idx, j] += 1
+                value = accum[rho_idx, j]
                 if value > max_value:
                     max_value = value
                     max_theta_idx = j
@@ -545,7 +548,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                         mask[y1, x1] = 0  # Remove.
                         for j in range(nthetas):  # Reset accumulator.
                             rho = ctheta[j] * x1 + stheta[j] * y1
-                            rho_idx = <int>round(rho) + offset
+                            rho_idx = <int>round(rho) + rho_idx_offset
                             accum[rho_idx, j] -= 1
                     # Exit when the point is the line end.
                     if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
