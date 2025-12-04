@@ -227,6 +227,7 @@ enable="cpython-freethreading"
 
 [tool.cibuildwheel.config-settings]
 setup-args = "-Dinclude-v2=false"
+# Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
