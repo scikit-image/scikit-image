@@ -60,6 +60,9 @@ developer = [
     'pre-commit',
     'ipython',
     'docstub==0.3.0.post0',
+    'scikit-image[asv]',
+]
+asv = [
     'asv; sys_platform != "emscripten"',
 ]
 docs = [

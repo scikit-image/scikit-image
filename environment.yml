@@ -25,6 +25,7 @@ dependencies:
   - pre-commit
   - ipython
   - docstub==0.3.0.post0
+  # asv
   - asv
   # docs
   - sphinx>=8.0
