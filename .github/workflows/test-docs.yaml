@@ -14,7 +14,7 @@ permissions:
 jobs:
   test_docs_aarch64:
     name: macos-docs
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@v5
@@ -36,6 +36,14 @@ jobs:
       - name: Install doc dependencies
         run: |
           source .github/scripts/setup-docs-env.sh
+
+      - name: Install Chrome for plotly
+        run: |
+          choreo_get_chrome
+
+          sudo apt update
+          # This list obtained from a kaleido error message:
+          sudo apt-get install libnss3 libatk-bridge2.0-0 libcups2 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libxkbcommon0 libpango-1.0-0 libcairo2
 
       - name: Build docs / run examples
         run: |
