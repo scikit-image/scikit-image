@@ -517,9 +517,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     # if non-zero point found, continue the line
                     if mask[y1, x1]:
                         if good_line:
-                            accum_idx = round(
-                                (ctheta[j] * x1 + stheta[j] * y1)) + offset
-                            accum[accum_idx, max_theta] -= 1
+                            # Reset accumulator for all thetas at this point
+                            for j in range(nthetas):
+                                accum_idx = round(
+                                    (ctheta[j] * x1 + stheta[j] * y1)) + offset
+                                accum[accum_idx, j] -= 1
                             mask[y1, x1] = 0
                     # exit when the point is the line end
                     if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
