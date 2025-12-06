@@ -394,12 +394,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         np.zeros((height, width), dtype=np.uint8)
     cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
     cdef Py_ssize_t max_distance, rho_idx_offset, idx
-    cdef cnp.float64_t line_sin, line_cos, mls, lc, rho, slope
-    cdef Py_ssize_t j, k, x, y, px, py, rho_idx, max_theta_idx
-    cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, x_len, y_len
+    cdef cnp.float64_t line_sin, line_cos, rho, slope
+    cdef Py_ssize_t j, k, x, y, x1, y1, px, py, rho_idx, max_theta_idx
+    cdef Py_ssize_t gap, x_len, y_len
     cdef cnp.int64_t value, max_value,
-    cdef int shift = 16
-    cdef int good_line
+    cdef int good_line, x_delta_1, delta, offset, slope_delta
     cdef Py_ssize_t nlines = 0
     cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
@@ -462,71 +461,53 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # find line beginning and end (step 5 above).
             line_sin = stheta[max_theta_idx]
             line_cos = ctheta[max_theta_idx]
-            # Rearranging sin theta x + cos theta y = r, slope is -sin theta /
-            # cos theta
-            mls = -line_sin
-            lc = line_cos
-            slope = mls / lc
-            xflag = fabs(slope) > 1
-            x0 = x  # Coordinate shift 16 if abs(slope) > 1 False else x
-            y0 = y  # Coordinate shift 16 if abs(slope) > 1 True else y
-            # calculate gradient of walks using fixed point math
-            if xflag:  # abs(y) increases faster than abs(x).
-                if mls > 0:
-                    dx0 = 1
-                else:
-                    dx0 = -1
-                # y0, dy0 shifted.  Push value into upper bits.
-                dy0 = round(lc * (1 << shift) / fabs(mls))
-                y0 = (y0 << shift) + (1 << (shift - 1))
-            else:  # abs(x) increases faster than abs(x).
-                if lc > 0:
-                    dy0 = 1
-                else:
-                    dy0 = -1
-                # x0, dx0 shifted.  Push value into upper bits.
-                dx0 = round(mls * (1 << shift) / fabs(lc))
-                x0 = (x0 << shift) + (1 << (shift - 1))
-
-            # pass 1: walk the line, merging lines less than specified gap
+            # Line equation is r = cos theta x + sin theta y.  Rearranging:
+            # y = r / sin theta  - cos theta x / sin theta, and slope
+            # is -cos theta / sin theta.
+            slope = -line_cos / line_sin if line_sin else 99  # Marker value.
+            x_delta_1 = fabs(slope) < 1  # Does x advance in steps of 1?
+            if not x_delta_1:  # abs(line_sin) <= abs(line_cos)
+                slope = line_sin / -line_cos  # y advances in steps of 1.
+            # Pass 1: walk the line, merging lines less than specified gap
             # length (step 5 continued).
-            n_line_pixels = 0
-            for k in range(2):
+            line_pixels[0, 0] = x  # Insert current point into pixel store.
+            line_pixels[0, 1] = y
+            line_ends[:, 0] = x
+            line_ends[:, 1] = y
+            n_line_pixels = 1
+            for k in range(2):  # Forward and backward.
                 gap = 0
-                px = x0
-                py = y0
-                dx = dx0
-                dy = dy0
-                if k > 0:  # Walk in opposite direction.
-                    dx = -dx
-                    dy = -dy
+                px = x
+                py = y
+                delta = -1 if k else 1
+                offset = delta
                 while True:
-                    if xflag:
-                        x1 = px
-                        y1 = py >> shift  # Pull value from upper bits.
+                    slope_delta = round(offset * slope)
+                    if x_delta_1:
+                        px = x + offset
+                        py = y + slope_delta
                     else:
-                        x1 = px >> shift
-                        y1 = py
+                        py = y + offset
+                        px = x + slope_delta
                     # check when line exits image boundary
-                    if x1 < 0 or x1 >= width or y1 < 0 or y1 >= height:
+                    if px < 0 or px >= width or py < 0 or py >= height:
                         break
                     gap += 1
-                    if mask[y1, x1]:  # Hit remaining pixel, continue line.
+                    if mask[py, px]:  # Hit remaining pixel, continue line.
                         gap = 0
-                        line_ends[k, 0] = x1
-                        line_ends[k, 1] = y1
+                        line_ends[k, 0] = px
+                        line_ends[k, 1] = py
                         # Record presence of in-mask pixel on line.
-                        line_pixels[n_line_pixels, 0] = x1
-                        line_pixels[n_line_pixels, 1] = y1
+                        line_pixels[n_line_pixels, 0] = px
+                        line_pixels[n_line_pixels, 1] = py
                         n_line_pixels += 1
                     elif gap > line_gap:  # Gap to here too large, end line.
                         break
-                    px += dx
-                    py += dy
+                    offset += delta
 
             # Confirm line length is sufficient.
-            x_len = line_ends[1, 0] - line_ends[0, 0]
-            y_len = line_ends[1, 1] - line_ends[0, 1]
+            x_len = line_ends[1, 0] - line_ends[0, 0]  # pass 2 x - pass 1 x
+            y_len = line_ends[1, 1] - line_ends[0, 1]  # pass 2 y - pass 1 y
             good_line = sqrt(x_len * x_len + y_len * y_len) >= line_length
             if not good_line:
                 continue
@@ -536,8 +517,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             for i in range(n_line_pixels):
                 x1 = line_pixels[i, 0]
                 y1 = line_pixels[i, 1]
-                if not mask[y1, x1]:
-                    continue
                 mask[y1, x1] = 0  # Remove point.
                 for j in range(nthetas):  # Remove accumulator votes.
                     rho = ctheta[j] * x1 + stheta[j] * y1
