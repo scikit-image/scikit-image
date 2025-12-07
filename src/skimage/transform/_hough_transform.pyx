@@ -6,8 +6,6 @@
 import numpy as np
 cimport numpy as cnp
 
-from cpython.mem cimport PyMem_Malloc, PyMem_Free
-from libc.stdlib cimport labs
 from libc.math cimport fabs, sqrt, ceil, atan2, M_PI
 
 from ..draw import circle_perimeter
@@ -340,7 +338,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold : int
-        Threshold
+        Threshold in the accumulator to detect lines against noise.
     line_length : int
         Minimum accepted length of detected lines.
         Increase the parameter to extract longer lines.
@@ -365,6 +363,28 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     .. [1] C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
            Hough transform for line detection", in IEEE Computer Society
            Conference on Computer Vision and Pattern Recognition, 1999.
+
+    Notes
+    -----
+
+    The algorithm (from [1]_) is the following:
+
+    1. Check the input image, if it is empty then finish.
+    2. Update the accumulator with a single pixel randomly selected from the
+       input image.
+    3. Remove pixel from input image.
+    4. Check if the highest peak in the accumulator that was modified by the
+       new pixel is higher than threshold. If not then goto 1.
+    5. Look along a corridor specified by the peak in the accumulator, and find
+       the longest segment of pixels either continuous or exhibiting a gap not
+       exceeding a given threshold.
+    6. Remove the pixels in the segment from input image.
+    7. Unvote from the accumulator all the pixels from the line that have
+       previously voted.
+    8. If the line segment is longer than the minimum length add it into the
+       output list.
+    9. goto 1.
+
     """
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
@@ -372,27 +392,29 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # compute the bins and allocate the accumulator array
     cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
         np.zeros((height, width), dtype=np.uint8)
-    cdef Py_ssize_t *line_end = \
-        <Py_ssize_t *>PyMem_Malloc(4 * sizeof(Py_ssize_t))
-    if not line_end:
-        raise MemoryError('could not allocate line_end')
-    cdef Py_ssize_t max_distance, offset, index
-    cdef cnp.float64_t a, b
-    cdef Py_ssize_t j, k, x, y, px, py, accum_idx, max_theta
-    cdef Py_ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, count
-    cdef cnp.int64_t value, max_value,
-    cdef int shift = 16
-    cdef int good_line
+    cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
+    cdef Py_ssize_t max_distance, rho_idx_offset, idx
+    cdef cnp.float64_t line_sin, line_cos, rho, slope
+    cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx, p_i
+    cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts, last_pt_i, to_swap
+    cdef cnp.int64_t value, max_value
+    cdef int x_delta_1, delta, offset, slope_delta, ties
     cdef Py_ssize_t nlines = 0
-    cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff
+    cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
                                                 dtype=np.intp)
-    max_distance = 2 * <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
-                                              img.shape[1] * img.shape[1])))
-    cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance, theta.shape[0]),
+    cdef cnp.intp_t[::1] rand_idxs
+    # Assemble n_rhos by n_thetas accumulator array.
+    max_distance = <Py_ssize_t>ceil((sqrt(img.shape[0] * img.shape[0] +
+                                          img.shape[1] * img.shape[1])))
+    cdef cnp.int64_t[:, ::1] accum = np.zeros((max_distance * 2,
+                                               theta.shape[0]),
                                               dtype=np.int64)
-    offset = max_distance / 2
+    rho_idx_offset = max_distance
     cdef Py_ssize_t nthetas = theta.shape[0]
+
+    cdef cnp.intp_t[:, ::1] line_pixels = np.zeros((max_distance, 2), dtype=np.intp)
+    cdef int n_line_pixels
 
     # compute sine and cosine of angles
     cdef cnp.float64_t[::1] ctheta = np.cos(theta)
@@ -405,138 +427,135 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
-    count = len(x_idxs)
-    random_state = np.random.default_rng(rng)
-    random_ = np.arange(count, dtype=np.intp)
-    random_state.shuffle(random_)
-    cdef cnp.intp_t[::1] random = random_
+    n_pts = len(x_idxs)
+    last_pt_i = n_pts - 1
+
+    rng = np.random.default_rng(rng)
+    rand_idxs = np.arange(n_pts, dtype=np.intp)
+    rng.shuffle(rand_idxs)
+
+    to_swap = last_pt_i  # Position of value to swap for point causing tie.
+    p_i = -1  # Current position in rand_idxs, from which to get point.
 
     with nogil:
-        while count > 0:
-            count -= 1
-            # select random non-zero point
-            index = random[count]
-            x = x_idxs[index]
-            y = y_idxs[index]
+        while p_i < last_pt_i:
+            # Select random non-zero point (step 1 above).
+            p_i += 1
+            idx = rand_idxs[p_i]
+            x = x_idxs[idx]
+            y = y_idxs[idx]
 
-            # if previously eliminated, skip
+            # Skip if previously eliminated by detection in earlier line
+            # search.
             if not mask[y, x]:
                 continue
 
             value = 0
-            max_value = threshold - 1
-            max_theta = -1
+            max_value = -1  # Max value in accumulator, start value.
+            max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
-            # apply hough transform on point
+            # Apply Hough transform on point (step 2 above).
+            ties = False
             for j in range(nthetas):
-                accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
-                accum[accum_idx, j] += 1
-                value = accum[accum_idx, j]
+                rho = ctheta[j] * x + stheta[j] * y
+                rho_idx = round(rho) + rho_idx_offset
+                accum[rho_idx, j] += 1
+                value = accum[rho_idx, j]
                 if value > max_value:
                     max_value = value
-                    max_theta = j
-            if max_value < threshold:
+                    max_theta_idx = j
+                    ties = False
+                elif value == max_value:
+                    ties = True
+            if max_value < threshold:  # Step 4 above.
                 continue
 
-            # from the random point walk in opposite directions and find line
-            # beginning and end
-            a = -stheta[max_theta]
-            b = ctheta[max_theta]
-            x0 = x
-            y0 = y
-            # calculate gradient of walks using fixed point math
-            xflag = fabs(a) > fabs(b)
-            if xflag:
-                if a > 0:
-                    dx0 = 1
-                else:
-                    dx0 = -1
-                dy0 = round(b * (1 << shift) / fabs(a))
-                y0 = (y0 << shift) + (1 << (shift - 1))
-            else:
-                if b > 0:
-                    dy0 = 1
-                else:
-                    dy0 = -1
-                dx0 = round(a * (1 << shift) / fabs(b))
-                x0 = (x0 << shift) + (1 << (shift - 1))
+            # to_swap points to current position for alternative point.
+            # If we've reached or overrun the collection of swapped points,
+            # start ignoring ties, and accept the consequences.
+            if ties and p_i < to_swap:
+                rand_idxs[p_i] = rand_idxs[to_swap]
+                rand_idxs[to_swap] = idx
+                to_swap -= 1
+                # Undo accumulator.
+                for j in range(nthetas):
+                    rho = ctheta[j] * x + stheta[j] * y
+                    rho_idx = round(rho) + rho_idx_offset
+                    accum[rho_idx, j] -= 1
+                # Restart with (new) point at this position.
+                p_i -= 1
+                continue
 
-            # pass 1: walk the line, merging lines less than specified gap
-            # length
-            for k in range(2):
+            # From the random point (x, y), walk in opposite directions and
+            # find line beginning and end (step 5 above).
+            line_sin = stheta[max_theta_idx]
+            line_cos = ctheta[max_theta_idx]
+            # Line equation is r = cos theta x + sin theta y.  Rearranging:
+            # y = r / sin theta  - cos theta x / sin theta, and slope
+            # is -cos theta / sin theta.
+            slope = -line_cos / line_sin if line_sin else 99  # Marker value.
+            x_delta_1 = fabs(slope) < 1  # Does x advance in steps of 1?
+            if not x_delta_1:  # abs(line_sin) <= abs(line_cos)
+                slope = line_sin / -line_cos  # y advances in steps of 1.
+            # Pass 1: walk the line, merging lines less than specified gap
+            # length (step 5 continued).
+            line_pixels[0, 0] = x  # Insert current point into pixel store.
+            line_pixels[0, 1] = y
+            line_ends[:, 0] = x
+            line_ends[:, 1] = y
+            n_line_pixels = 1
+            for reverse in range(2):  # Forward and backward.
                 gap = 0
-                px = x0
-                py = y0
-                dx = dx0
-                dy = dy0
-                if k > 0:
-                    dx = -dx
-                    dy = -dy
-                while 1:
-                    if xflag:
-                        x1 = px
-                        y1 = py >> shift
+                px = x
+                py = y
+                delta = -1 if reverse else 1
+                offset = delta
+                while True:
+                    slope_delta = round(offset * slope)
+                    if x_delta_1:
+                        px = x + offset
+                        py = y + slope_delta
                     else:
-                        x1 = px >> shift
-                        y1 = py
+                        py = y + offset
+                        px = x + slope_delta
                     # check when line exits image boundary
-                    if x1 < 0 or x1 >= width or y1 < 0 or y1 >= height:
+                    if px < 0 or px >= width or py < 0 or py >= height:
                         break
                     gap += 1
-                    # if non-zero point found, continue the line
-                    if mask[y1, x1]:
+                    if mask[py, px]:  # Hit remaining pixel, continue line.
                         gap = 0
-                        line_end[2*k] = x1
-                        line_end[2*k + 1] = y1
-                    # if gap to this point was too large, end the line
-                    elif gap > line_gap:
+                        line_ends[reverse, 0] = px
+                        line_ends[reverse, 1] = py
+                        # Record presence of in-mask pixel on line.
+                        line_pixels[n_line_pixels, 0] = px
+                        line_pixels[n_line_pixels, 1] = py
+                        n_line_pixels += 1
+                    elif gap > line_gap:  # Gap to here too large, end line.
                         break
-                    px += dx
-                    py += dy
+                    offset += delta
 
-            # confirm line length is sufficient
-            good_line = (labs(line_end[3] - line_end[1]) >= line_length or
-                         labs(line_end[2] - line_end[0]) >= line_length)
+            # Confirm line length is sufficient.
+            x_len = line_ends[1, 0] - line_ends[0, 0]  # pass 2 x - pass 1 x
+            y_len = line_ends[1, 1] - line_ends[0, 1]  # pass 2 y - pass 1 y
+            if not sqrt(x_len * x_len + y_len * y_len) >= line_length:
+                continue
 
-            # pass 2: walk the line again and reset accumulator and mask
-            for k in range(2):
-                px = x0
-                py = y0
-                dx = dx0
-                dy = dy0
-                if k > 0:
-                    dx = -dx
-                    dy = -dy
-                while 1:
-                    if xflag:
-                        x1 = px
-                        y1 = py >> shift
-                    else:
-                        x1 = px >> shift
-                        y1 = py
-                    # if non-zero point found, continue the line
-                    if mask[y1, x1]:
-                        if good_line:
-                            accum_idx = round(
-                                (ctheta[j] * x1 + stheta[j] * y1)) + offset
-                            accum[accum_idx, max_theta] -= 1
-                            mask[y1, x1] = 0
-                    # exit when the point is the line end
-                    if x1 == line_end[2*k] and y1 == line_end[2*k + 1]:
-                        break
-                    px += dx
-                    py += dy
+            # Pass 2: reset accumulator and mask for points on line (steps 6
+            # and 7 above).
+            for i in range(n_line_pixels):
+                x1 = line_pixels[i, 0]
+                y1 = line_pixels[i, 1]
+                mask[y1, x1] = 0  # Remove point.
+                for j in range(nthetas):  # Remove accumulator votes.
+                    rho = ctheta[j] * x1 + stheta[j] * y1
+                    rho_idx = <int>round(rho) + rho_idx_offset
+                    accum[rho_idx, j] -= 1
 
-            # add line to the result
-            if good_line:
-                lines[nlines, 0, 0] = line_end[0]
-                lines[nlines, 0, 1] = line_end[1]
-                lines[nlines, 1, 0] = line_end[2]
-                lines[nlines, 1, 1] = line_end[3]
-                nlines += 1
-                if nlines >= lines_max:
-                    break
+            # Add line to the result (step 8 above).
+            lines[nlines] = line_ends
+            nlines += 1
+            if nlines >= lines_max:
+                break
 
-    PyMem_Free(line_end)
     return [((line[0, 0], line[0, 1]), (line[1, 0], line[1, 1]))
             for line in lines[:nlines]]

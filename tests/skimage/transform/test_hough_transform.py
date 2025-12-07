@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
-from skimage import data, transform
+from skimage import data, transform, feature
 from skimage._shared.testing import run_in_parallel
 from skimage.draw import circle_perimeter, ellipse_perimeter, line
 
@@ -49,35 +49,36 @@ def test_probabilistic_hough():
         img[100 - i, i] = 100
         img[i, i] = 100
 
-    # decrease default theta sampling because similar orientations may confuse
-    # as mentioned in article of Galambos et al
-    theta = np.linspace(0, np.pi, 45)
     lines = transform.probabilistic_hough_line(
-        img, threshold=10, line_length=10, line_gap=1, theta=theta
+        img, threshold=10, line_length=10, line_gap=1
     )
-    # sort the lines according to the x-axis
+
+    assert _sort_lines(lines) == [[(25, 25), (74, 74)], [(25, 75), (74, 26)]]
+
+    # Execute with default theta (Smoke test).
+    transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
+
+
+def _sort_lines(lines):
+    # Sort each line by x, y, sort lines by contents.
     sorted_lines = []
     for ln in lines:
-        ln = list(ln)
-        ln.sort(key=lambda x: x[0])
-        sorted_lines.append(ln)
-
-    assert [(25, 75), (74, 26)] in sorted_lines
-    assert [(25, 25), (74, 74)] in sorted_lines
-
-    # Execute with default theta
-    transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
+        sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
+    return sorted(sorted_lines)
 
 
 def test_probabilistic_hough_seed():
     # Load image that is likely to give a randomly varying number of lines
     image = data.checkerboard()
-
+    edges = feature.canny(image, 2, 1, 25)
     # Use constant seed to ensure a deterministic output
     lines = transform.probabilistic_hough_line(
-        image, threshold=50, line_length=50, line_gap=1, rng=41537233
+        edges, threshold=50, line_length=50, line_gap=5, rng=41537233
     )
-    assert len(lines) == 56
+    # This is a regression test.  It does not assert
+    # the answer is correct, only that it was the result we got
+    # when running the test on a known version of the code.
+    assert len(lines) == 28
 
 
 def test_probabilistic_hough_bad_input():
@@ -87,6 +88,57 @@ def test_probabilistic_hough_bad_input():
     # Expected error, img must be 2D
     with pytest.raises(ValueError):
         transform.probabilistic_hough_line(img)
+
+
+def test_probabilistic_hough_examples():
+    ph = transform.probabilistic_hough_line
+    sl = _sort_lines
+    # Single line in LR (x)
+    img = np.zeros((40, 40))
+    L = 20
+    img[5, 10 : (10 + L)] = 1
+    x_line = [(10, 5), (9 + L, 5)]
+    y_line = [(5, 10), (5, 9 + L)]
+    lines = ph(img, line_length=L - 1)
+    assert sl(lines) == [x_line]
+    # Line length too short.  Note line length is pixel distance between end
+    # points - line from [0, 0] through [0, 3] is length 3.
+    assert ph(img, line_length=L) == []
+    # Single line in UD (y)
+    lines = ph(img.T, line_length=L - 1)
+    assert sl(lines) == [y_line]
+    # Two lines (x, y)
+    both = img + img.T
+    lines = ph(both, line_length=L - 1)
+    assert sl(lines) == [y_line, x_line]
+    # Add diagonal lines.
+    more = both.copy()
+    offset = 15
+    n = 20
+    back_off = offset + n - 1
+    for i in range(n):
+        oi = offset + i
+        more[oi, oi] = 1
+        more[back_off - i, oi] = 1
+    # Enforce shorter gap
+    lines = sl(ph(more, line_gap=2, line_length=L - 1))
+    diags = [
+        [(offset, offset), (back_off, back_off)],
+        [(offset, back_off), (back_off, offset)],
+    ]
+    assert lines == [y_line, x_line] + diags
+    # Filter by length of diagonals.  Get only the diagonals back.
+    len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
+    assert sl(ph(more, line_gap=2, line_length=len_diag)) == diags
+    # Check gap behaves as expected.
+    assert sl(ph(img, line_gap=0, line_length=L - 1)) == [x_line]
+    gappy = img.copy()
+    gappy[5, 12] = 0
+    assert sl(ph(gappy, line_gap=0, line_length=L - 1)) == []
+    assert sl(ph(gappy, line_gap=1, line_length=L - 1)) == [x_line]
+    gappy[5, 13:15] = 0
+    assert sl(ph(gappy, line_gap=2, line_length=L - 1)) == []
+    assert sl(ph(gappy, line_gap=3, line_length=L - 1)) == [x_line]
 
 
 def test_hough_line_peaks():
