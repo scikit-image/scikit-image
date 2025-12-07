@@ -49,11 +49,8 @@ def test_probabilistic_hough():
         img[100 - i, i] = 100
         img[i, i] = 100
 
-    # decrease default theta sampling because similar orientations may confuse
-    # as mentioned in article of Galambos et al
-    theta = np.linspace(0, np.pi, 45)
     lines = transform.probabilistic_hough_line(
-        img, threshold=10, line_length=10, line_gap=1, theta=theta
+        img, threshold=10, line_length=10, line_gap=1
     )
 
     assert _sort_lines(lines) == [[(25, 25), (74, 74)], [(25, 75), (74, 26)]]
