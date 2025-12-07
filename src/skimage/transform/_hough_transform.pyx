@@ -395,10 +395,10 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef cnp.intp_t[:, ::1] line_ends = np.zeros((2, 2), dtype=np.intp)
     cdef Py_ssize_t max_distance, rho_idx_offset, idx
     cdef cnp.float64_t line_sin, line_cos, rho, slope
-    cdef Py_ssize_t j, k, x, y, x1, y1, px, py, rho_idx, max_theta_idx
-    cdef Py_ssize_t gap, x_len, y_len
-    cdef cnp.int64_t value, max_value,
-    cdef int good_line, x_delta_1, delta, offset, slope_delta
+    cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx, p_i
+    cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts, last_pt_i, to_swap
+    cdef cnp.int64_t value, max_value
+    cdef int x_delta_1, delta, offset, slope_delta, ties
     cdef Py_ssize_t nlines = 0
     cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
@@ -427,12 +427,21 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
+    n_pts = len(x_idxs)
+    last_pt_i = n_pts - 1
+
     rng = np.random.default_rng(rng)
-    rand_idxs = np.arange(len(x_idxs), dtype=np.intp)
+    rand_idxs = np.arange(n_pts, dtype=np.intp)
     rng.shuffle(rand_idxs)
 
+    to_swap = last_pt_i  # Position of value to swap for point causing tie.
+    p_i = -1  # Current position in rand_idxs, from which to get point.
+
     with nogil:
-        for idx in rand_idxs:  # Select random non-zero point (step 1 above).
+        while p_i < last_pt_i:
+            # Select random non-zero point (step 1 above).
+            p_i += 1
+            idx = rand_idxs[p_i]
             x = x_idxs[idx]
             y = y_idxs[idx]
 
@@ -442,10 +451,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 continue
 
             value = 0
-            max_value = 0  # Max value in accumulator, start value.
+            max_value = -1  # Max value in accumulator, start value.
             max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
             # Apply Hough transform on point (step 2 above).
+            ties = False
             for j in range(nthetas):
                 rho = ctheta[j] * x + stheta[j] * y
                 rho_idx = round(rho) + rho_idx_offset
@@ -454,7 +464,26 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if value > max_value:
                     max_value = value
                     max_theta_idx = j
+                    ties = False
+                elif value == max_value:
+                    ties = True
             if max_value < threshold:  # Step 4 above.
+                continue
+
+            # to_swap points to current position for alternative point.
+            # If we've reached or overrun the collection of swapped points,
+            # start ignoring ties, and accept the consequences.
+            if ties and p_i < to_swap:
+                rand_idxs[p_i] = rand_idxs[to_swap]
+                rand_idxs[to_swap] = idx
+                to_swap -= 1
+                # Undo accumulator.
+                for j in range(nthetas):
+                    rho = ctheta[j] * x + stheta[j] * y
+                    rho_idx = round(rho) + rho_idx_offset
+                    accum[rho_idx, j] -= 1
+                # Restart with (new) point at this position.
+                p_i -= 1
                 continue
 
             # From the random point (x, y), walk in opposite directions and
@@ -475,11 +504,11 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             line_ends[:, 0] = x
             line_ends[:, 1] = y
             n_line_pixels = 1
-            for k in range(2):  # Forward and backward.
+            for reverse in range(2):  # Forward and backward.
                 gap = 0
                 px = x
                 py = y
-                delta = -1 if k else 1
+                delta = -1 if reverse else 1
                 offset = delta
                 while True:
                     slope_delta = round(offset * slope)
@@ -495,8 +524,8 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                     gap += 1
                     if mask[py, px]:  # Hit remaining pixel, continue line.
                         gap = 0
-                        line_ends[k, 0] = px
-                        line_ends[k, 1] = py
+                        line_ends[reverse, 0] = px
+                        line_ends[reverse, 1] = py
                         # Record presence of in-mask pixel on line.
                         line_pixels[n_line_pixels, 0] = px
                         line_pixels[n_line_pixels, 1] = py
@@ -508,8 +537,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # Confirm line length is sufficient.
             x_len = line_ends[1, 0] - line_ends[0, 0]  # pass 2 x - pass 1 x
             y_len = line_ends[1, 1] - line_ends[0, 1]  # pass 2 y - pass 1 y
-            good_line = sqrt(x_len * x_len + y_len * y_len) >= line_length
-            if not good_line:
+            if not sqrt(x_len * x_len + y_len * y_len) >= line_length:
                 continue
 
             # Pass 2: reset accumulator and mask for points on line (steps 6
