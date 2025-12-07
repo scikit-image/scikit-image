@@ -25,6 +25,8 @@ dependencies:
   - pre-commit
   - ipython
   - docstub==0.3.0.post0
+  # asv
+  - asv
   # docs
   - sphinx>=8.0
   - sphinx-gallery>=0.18
@@ -58,7 +60,6 @@ dependencies:
   - pooch>=1.6.0
   - PyWavelets>=1.6
   # test
-  - asv
   - numpydoc>=1.7
   - pooch>=1.6.0
   - pytest>=8.3

@@ -60,6 +60,10 @@ developer = [
     'pre-commit',
     'ipython',
     'docstub==0.3.0.post0',
+    'scikit-image[asv]',
+]
+asv = [
+    'asv; sys_platform != "emscripten"',
 ]
 docs = [
     'sphinx>=8.0',
@@ -99,7 +103,6 @@ optional_free_threaded = [
 ]
 
 test = [
-    'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
     'pytest>=8.3',
@@ -222,8 +225,9 @@ environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
 enable="cpython-freethreading"
 
-[[tool.cibuildwheel.config-settings]]
-setup-args = ["-Dinclude-v2=false"]
+[tool.cibuildwheel.config-settings]
+setup-args = "-Dinclude-v2=false"
+# Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
