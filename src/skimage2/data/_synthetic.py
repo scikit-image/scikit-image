@@ -1,6 +1,9 @@
 """Synthetic data generation."""
 
-from skimage.data._binary_blobs import _binary_blobs_sk2_implementation
+import numpy as np
+
+from skimage._shared.filters import gaussian
+from skimage._shared._warnings import warn_external
 
 
 def binary_blobs(
@@ -67,10 +70,41 @@ def binary_blobs(
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = ski.data.binary_blobs(shape=(256, 256), volume_fraction=0.3)
     """
-    return _binary_blobs_sk2_implementation(
-        shape=shape,
-        blob_size_fraction=blob_size_fraction,
-        volume_fraction=volume_fraction,
-        rng=rng,
-        boundary_mode=boundary_mode,
+    if boundary_mode not in {"nearest", "wrap"}:
+        raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
+
+    min_length = min(shape)
+    blob_size = blob_size_fraction * min_length
+    if blob_size < 0.1:
+        clamped_size_fraction = 0.1 / min_length
+        clamped_blob_size = clamped_size_fraction * min_length
+        warn_external(
+            f"`{blob_size_fraction=}` together with `{shape=}` would result in a blob "
+            f"size of {blob_size} pixels. Small blob sizes likely lead to unexpected "
+            f"results! "
+            f"Clamping to `blob_size_fraction={clamped_size_fraction}` and a blob size "
+            f"of {clamped_blob_size} pixels to avoid allocating excessive memory.",
+            category=RuntimeWarning,
+        )
+        blob_size_fraction = clamped_size_fraction
+
+    rng = np.random.default_rng(rng)
+    mask = np.zeros(shape)
+
+    n_dim = len(shape)
+    n_pts = max(int(1.0 / blob_size_fraction) ** n_dim, 1)
+
+    points = rng.random((n_dim, n_pts))
+    for ax, length in enumerate(shape):
+        points[ax] *= length
+    points = points.astype(int)
+
+    mask[tuple(indices for indices in points)] = 1
+    mask = gaussian(
+        mask,
+        sigma=0.25 * min_length * blob_size_fraction,
+        preserve_range=False,
+        mode=boundary_mode,
     )
+    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
+    return np.logical_not(mask < threshold)
