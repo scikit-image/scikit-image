@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 
 from .._shared.filters import gaussian
+from ..util import PendingSkimage2Change
 
 
 def _binary_blobs_sk2_implementation(
@@ -126,6 +127,23 @@ def binary_blobs(
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
     """
+    warnings.warn(
+        "`skimage.data.binary_blobs` is deprecated in favor of "
+        "`skimage2.data.binary_blobs` which has a new signature. "
+        "The parameters `length` and `n_dim` have been replaced with `shape`. "
+        "The default of `boundary_mode` has been changed to 'wrap'. "
+        "To keep behavior the same use:\n"
+        "\n"
+        "    import skimage2 as sk2"
+        "    sk2.data.binary_blobs("
+        "        shape=(length,) * n_dim,"
+        "        boundary_mode=boundary_mode,"
+        "        ..."
+        "    )",
+        stacklevel=2,
+        category=PendingSkimage2Change,
+    )
+
     return _binary_blobs_sk2_implementation(
         shape=(length,) * n_dim,
         blob_size_fraction=blob_size_fraction,
