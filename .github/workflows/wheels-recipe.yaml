@@ -19,8 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-            # macos-15-intel,
-            macos-13,
+            macos-15-intel,
             macos-latest, # ARM-version of MacOS
           ]
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
@@ -62,7 +61,7 @@ jobs:
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
-          CIBW_SKIP: "*-win32 cp314t*" # bug in compilation
+          CIBW_SKIP: "*-win32" # not provide 32 bits wheel
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}

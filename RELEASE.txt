@@ -74,7 +74,7 @@ Example `version number`
 - If this is a release:
 
   - (Only needed if you create a new branch)
-    update the file ``skimage/data/_fetchers.py`` to point the pooch
+    update the file ``src/skimage/data/_fetchers.py`` to point the pooch
     repository to the new branch instead of main during testing.
     Look for the parameter ``version_dev="main",`` for ``pooch.create`` and
     change it to the newly created branch name.
@@ -83,13 +83,13 @@ Example `version number`
     ``doc/source/_static/version_switcher.json`` in order to add the release, move the
     key value pair `"preferred": true` to the most recent stable version, and commit.
 
-      git add skimage/data/_fetchers.py doc/source/_static/docversions.js doc/source/_static/version_switcher.json
+      git add src/skimage/data/_fetchers.py doc/source/_static/docversions.js doc/source/_static/version_switcher.json
 
-- Update ``__version__`` in ``skimage/__init__.py``.
+- Update ``__version__`` in ``src/skimage/__init__.py``.
 
 - Commit changes:
 
-      git add skimage/__init__.py ${NOTES}
+      git add src/skimage/__init__.py ${NOTES}
       git commit -m "Designate ${VERSION} release"
 
 - Tag the release in git:
@@ -118,11 +118,11 @@ Example `version number`
       - close old milestone
       - ensure new milestone exists (perhaps setting due date)
 
-- Update ``__version__`` in ``skimage/__init__.py``.
+- Update ``__version__`` in ``src/skimage/__init__.py``.
 
 - Commit changes:
 
-      git add skimage/__init__.py
+      git add src/skimage/__init__.py
       git commit -m 'Bump version'
       git push origin main
 

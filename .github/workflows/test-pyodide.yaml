@@ -2,7 +2,7 @@
 # https://github.com/numpy/numpy/blob/d2d2c25fa81b47810f5cbd85ea6485eb3a3ffec3/.github/workflows/emscripten.yml
 #
 
-name: Test Emscripten/Pyodide build
+name: Test Pyodide
 
 on: [push, pull_request, merge_group]
 
@@ -19,51 +19,59 @@ permissions:
 
 jobs:
   build-wasm-emscripten:
-    name: Build scikit-image distribution for Pyodide
+    name: "pyodide${{ matrix.PYODIDE_VERSION }}\
+      -cp${{ matrix.PYTHON_VERSION }}\
+      -emscr${{ matrix.EMSCRIPTEN_VERSION }}"
     runs-on: ubuntu-24.04
-    env:
-      PYODIDE_VERSION: 0.29.0
-      # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
-      # The appropriate versions can be found in the Pyodide repodata.json
-      # "info" field, or in Makefile.envs:
-      # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-      PYTHON_VERSION: 3.13
-      EMSCRIPTEN_VERSION: 4.0.9
-      NODE_VERSION: 24
+    strategy:
+      # Ensure that wheel builder finishes even if another one fails
+      fail-fast: false
+      matrix:
+        # Use `includes:` if you want to specify other combinations!
+        # PYTHON_VERSION and EMSCRIPTEN_VERSION are determined by PYODIDE_VERSION.
+        # The appropriate version combinations can be found in the Pyodide repodata.json
+        # "info" field, or in Makefile.envs:
+        # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
+        PYODIDE_VERSION: ["0.29.0"]
+        PYTHON_VERSION: ["3.13"]
+        EMSCRIPTEN_VERSION: ["4.0.9"]
+        NODE_VERSION: ["24"]
+        PYODIDE_BUILD_VERSION: ["0.30.8"]
+
     steps:
       - name: Checkout scikit-image
         uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493 # v4.1.1
         with:
           persist-credentials: false
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ matrix.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@2e3e4b15a884dc73a63f962bff250a855150a234 # v5.0.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.PYTHON_VERSION }}
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
       - name: Set up Emscripten toolchain
         uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
-          version: ${{ env.EMSCRIPTEN_VERSION }}
+          version: ${{ matrix.EMSCRIPTEN_VERSION }}
           actions-cache-folder: emsdk-cache
 
       - name: Install pyodide-build
-        run: pip install pyodide-build==0.30.8
+        run: pip install pyodide-build==${{ matrix.PYODIDE_BUILD_VERSION }}
 
       - name: Build scikit-image for Pyodide
         run: |
-          pyodide xbuildenv install ${{ env.PYODIDE_VERSION }}
+          pyodide xbuildenv install ${{ matrix.PYODIDE_VERSION }}
           pyodide build
 
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.NODE_VERSION }}
 
-      - name: Set up Pyodide virtual environment and test scikit-image for Pyodide
+      - name: Set up Pyodide test environment
         run: |
           # Set up Pyodide virtual environment
           pyodide venv .venv-pyodide
@@ -75,4 +83,8 @@ jobs:
           # Install pytest and optional dependencies that are available
           pip install pytest pytest-pretty
           pip install "astropy" "dask[array]" "matplotlib" "PyWavelets" "scikit-learn"
+
+      - name: Test scikit-image
+        run: |
+          source .venv-pyodide/bin/activate
           $PYTEST -svra --pyargs skimage ./tests
