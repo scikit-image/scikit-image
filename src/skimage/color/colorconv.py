@@ -163,10 +163,7 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     arr = np.asanyarray(arr)
 
     if arr.shape[channel_axis] != 3:
-        msg = (
-            f'the input array must have size 3 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 3 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -228,10 +225,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     channel_axis = channel_axis % arr.ndim
 
     if arr.shape[channel_axis] != 4:
-        msg = (
-            f'the input array must have size 4 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 4 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -247,7 +241,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
             f'values. Got {len(background)} items'
         )
     if np.any(background < 0) or np.any(background > 1):
-        raise ValueError('background RGB values must be floats between ' '0 and 1.')
+        raise ValueError('background RGB values must be floats between 0 and 1.')
     # reshape background for broadcasting along non-channel axes
     background = reshape_nd(background, arr.ndim, channel_axis)
 
@@ -637,6 +631,27 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
 # pp. 291-9, Aug. 2001.
 rgb_from_hed = np.array([[0.65, 0.70, 0.29], [0.07, 0.99, 0.11], [0.27, 0.57, 0.78]])
 hed_from_rgb = linalg.inv(rgb_from_hed)
+
+# Hematoxylin + Eosin + Residual
+# Hematoxylin vector is same as above from Ruifrok & Johnston
+# Eosin vector taken from QuPath source code
+# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
+# "residual" is the cross prodcut of H and E vectors (taken from QuPath)
+# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L305
+# hematoxylin = [0.65, 0.70, 0.29]
+# eosin = [0.2159, 0.8012, 0.5581]
+# residual = np.cross(hematoxylin, eosin) = [ 0.1583, -0.3002,  0.3696]
+# QuPath discussion notes that due to differences in normal HE staining, stain vectors should be calculated for each project independently, and these values are just defaults
+# Thus, these values may not work perfectly in many cases
+
+rgb_from_her = np.array(
+    [
+        [0.65, 0.70, 0.29],
+        [0.2159, 0.8012, 0.5581],
+        [0.1583, -0.3002, 0.3696],
+    ]
+)
+her_from_rgb = linalg.inv(rgb_from_her)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
@@ -1662,6 +1677,101 @@ def hed2rgb(hed, *, channel_axis=-1):
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
     return combine_stains(hed, rgb_from_hed)
+
+
+@channel_as_last_axis()
+def rgb2her(rgb, *, channel_axis=-1):
+    """RGB to Haematoxylin-Eosin (HER) color space conversion.
+    Mirrors QuPath's implementation of color deconvolution for HE images.
+
+    It is important to note that the authors of QuPath do not recommend using these color deconvolved
+    stain channels for quantitative interpretation. The function described here uses default
+    stain vector values for hematoxylin and eosin, whereas in practice, there is high variability in
+    stain colors between different institutions and settings. QuPath recommends recalculating stain vectors for
+    your own specific images, which is not performed by this library.
+
+    Parameters
+    ----------
+    rgb : (..., C=3, ...) array_like
+        The image in RGB format. By default, the final dimension denotes
+        channels.
+    channel_axis : int, optional
+        This parameter indicates which axis of the array corresponds to
+        channels.
+
+    Returns
+    -------
+    out : (..., C=3, ...) ndarray
+        The image in HER format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not at least 2-D with shape (..., C=3, ...).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
+           image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2her, her2rgb
+    >>> img = data.skin()
+    >>> img_hed = rgb2hed(img)
+    """
+    return separate_stains(rgb, hed_from_rgb)
+
+
+@channel_as_last_axis()
+def her2rgb(her, *, channel_axis=-1):
+    """Haematoxylin + Eosin + Residual (HER) to RGB color space conversion.
+    Mirrors QuPath's implementation of color deconvolution for HE images.
+
+    Parameters
+    ----------
+    her : (..., C=3, ...) array_like
+        The image in the HER color space. By default, the final dimension
+        denotes channels.
+    channel_axis : int, optional
+        This parameter indicates which axis of the array corresponds to
+        channels.
+
+    Returns
+    -------
+    out : (..., C=3, ...) ndarray
+        The image in RGB. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `her` is not at least 2-D with shape (..., C=3, ...).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
+           image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2her, her2rgb
+    >>> img = data.skin()
+    >>> img_hed = rgb2hed(img)
+    >>> img_rgb = hed2rgb(img_her)
+    """
+    return combine_stains(her, rgb_from_her)
 
 
 @channel_as_last_axis()

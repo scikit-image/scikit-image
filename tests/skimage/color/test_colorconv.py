@@ -24,6 +24,8 @@ from skimage.color import (
     xyz2rgb,
     rgb2hed,
     hed2rgb,
+    rgb2her,
+    her2rgb,
     separate_stains,
     combine_stains,
     rgb2rgbcie,
@@ -282,6 +284,22 @@ class TestColorconv:
         img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)
         img_out = rgb2hed(
             hed2rgb(img_in, channel_axis=channel_axis), channel_axis=channel_axis
+        )
+        assert_array_almost_equal(img_out, img_in)
+
+    # HED<->RGB roundtrip with ubyte image
+    def test_her_rgb_roundtrip(self):
+        img_in = img_as_ubyte(self.img_stains)
+        img_out = rgb2her(her2rgb(img_in))
+        assert_equal(img_as_ubyte(img_out), img_in)
+
+    # her<->RGB roundtrip with float image
+    @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
+    def test_her_rgb_float_roundtrip(self, channel_axis):
+        img_in = self.img_stains
+        img_in = np.moveaxis(img_in, source=-1, destination=channel_axis)
+        img_out = rgb2her(
+            her2rgb(img_in, channel_axis=channel_axis), channel_axis=channel_axis
         )
         assert_array_almost_equal(img_out, img_in)
 
@@ -991,6 +1009,8 @@ def test_nD_gray_conversion(func, shape):
         xyz2rgb,
         rgb2hed,
         hed2rgb,
+        rgb2her,
+        her2rgb,
         rgb2rgbcie,
         rgbcie2rgb,
         xyz2lab,
