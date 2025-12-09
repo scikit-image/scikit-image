@@ -1,5 +1,5 @@
-scikit-image 0.26.0rc1
-======================
+scikit-image 0.26.0rc1 (2025-12-09)
+===================================
 
 We're happy to announce the release of scikit-image 0.26.0rc1!
 
