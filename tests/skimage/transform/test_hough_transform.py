@@ -141,6 +141,106 @@ def test_probabilistic_hough_examples():
     assert sl(ph(gappy, line_gap=3, line_length=L - 1)) == [x_line]
 
 
+def test_probabilistic_hough_fp_fn():
+    # From C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
+    # Hough transform for line detection", in IEEE Computer Society Conference
+    # on Computer Vision and Pattern Recognition, 1999.
+    #
+    # """
+    # A hundred images containing a fixed number of randomly positioned lines
+    # were syntheticaly generated, the only source of noise being in the
+    # digitisation of the lines themselves. Figure 4 shows a typical image used
+    # in the experiment, the image resolution was 256 both horizontally and
+    # vertically, the lines were hundred pixels long. The number of lines
+    # varied between 2 and 20
+    # """
+    pass
+
+
+def test_gen_lines():
+    shape = (256, 256)
+    line_length = 20
+    lines = gen_lines(shape, 100, line_length, margins=1)
+    # Axes are lines, i-j, start-end
+    assert np.all(lines[:, 0] >= 1)
+    assert np.all(lines[:, 1] <= 254)
+    line_vecs = lines[..., 1] - lines[..., 0]  # Gives lines, i-j distances.
+    lengths = np.sqrt(np.sum(line_vecs**2, axis=1))
+    assert np.all(np.abs(lengths - line_length) < 0.75)
+
+
+def rand_point(shape, margins=0, rng=None):
+    rng = np.random.default_rng(rng)
+    margins = np.array(margins)
+    if np.isscalar(margins):
+        margins = np.ones(len(shape)) * margins
+    x = rng.integers(margins[0], shape[0] - margins[0], endpoint=True)
+    y = rng.integers(margins[1], shape[1] - margins[1], endpoint=True)
+    return x, y
+
+
+def rand_pts(size, lims, rng):
+    return np.stack(
+        (rng.integers(*lims[0], size=size), rng.integers(*lims[1], size=size)), axis=1
+    )
+
+
+def raw_rand_lines(size, lims, line_length, rng):
+    start_points = rand_pts(size, lims, rng)
+    raw_end_points = rand_pts(size, lims, rng)
+    vecs = raw_end_points - start_points
+    uvecs = vecs / np.sqrt(np.sum(vecs**2, axis=1))[:, None]
+    end_points = np.round(start_points + uvecs * line_length)
+    return np.stack((start_points, end_points), axis=2)
+
+
+def good_rand_lines(size, lims, line_length, rng):
+    out = np.zeros((0, 2, 2))
+    st_lims, end_lims = lims.T
+    while len(out) < size:
+        raw_lines = raw_rand_lines(size, lims, line_length, rng)
+        within = np.all(
+            (raw_lines >= st_lims[None, :, None])
+            & (raw_lines <= end_lims[None, :, None]),
+            axis=(1, 2),
+        )
+        out = np.concatenate((out, raw_lines[within]), axis=0)
+    return out[:size]
+
+
+def gen_lines(shape, n_lines, line_length, margins=0, rng=None):
+    rng = np.random.default_rng(rng)
+    margins = np.array(margins)
+    if margins.shape == ():
+        margins = np.ones(len(shape)) * margins
+    # Axes are img axes, min-max
+    lims = np.stack((margins, shape - margins), axis=1)
+    return good_rand_lines(n_lines, lims, line_length, rng)
+
+
+def write_lines(img, lines):
+    lines = lines.astype(int)
+    for L in lines:
+        i_coords, j_coords = line(*L.T.ravel())
+        img[i_coords, j_coords] = 1
+
+
+def pp_lines(lines):
+    # From Galamhos et al 1999: "From the pixels supporting a particular bin,
+    # the longest segment was chosen which had no gaps bigger than 6 pixels
+    # long. The minimum accepted line length was 4 pixels.
+    pass
+
+
+def fp_fn(actuals, detecteds):
+    # From Galamhos et al 1999: "False positives are detected lines that cover
+    # less than 80% of any single ground-truth line in the image. False
+    # negatives are those lines in the model which are covered by less than 80
+    # percent by detected lines, excluding those counted as false positives."
+    for actual in actuals:
+        pass
+
+
 def test_hough_line_peaks():
     img = np.zeros((100, 150), dtype=int)
     rr, cc = line(60, 130, 80, 10)
