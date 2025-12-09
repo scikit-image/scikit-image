@@ -8,7 +8,7 @@ implement--is not highly indicative of perceived similarity. The structural
 similarity index measure (SSIM) aims to address this shortcoming by taking
 texture into account [1]_, [2]_.
 
-The example shows two modifications of an original image, each with the same MSE,
+The example shows two modifications of an image, each with the same MSE,
 but with very different mean structural similarity indices.
 
 .. [1] Zhou Wang; Bovik, A.C.; ,"Mean squared error: Love it or leave it? A new
