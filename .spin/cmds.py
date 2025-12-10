@@ -94,15 +94,17 @@ def sdist(pyproject_build_args):
 def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
 
-    is_editable_install = _is_editable_install_of_same_source("scikit-image")
-
-    if not is_editable_install:
-        # We want to support both editable and out-of-tree installations.
-        # For out-of-tree installations, selecting `src/` as a test path fails.
-        # Pytest doesn't expect the doctests' sources and installation to be
-        # different. Avoid this - even if user specifies it by ignoring `src/`
-        # explicitly if not using an editable install
-        pytest_args = pytest_args + ('--ignore=./src/',)
+    is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
+    if is_out_of_tree_build and "src" in str(pytest_args):
+        click.secho(
+            "WARN: Found 'src' in test arguments and using out-of-tree build. "
+            "For out-of-tree builds, selecting `src/` as a test path fails. "
+            "Pytest doesn't expect test sources and installation to be different. "
+            "Avoid passing `src/` or use an editable install (`spin install`) "
+            "to avoid this.",
+            fg="yellow",
+            bold=True,
+        )
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
