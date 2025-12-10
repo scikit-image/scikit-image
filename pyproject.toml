@@ -203,8 +203,8 @@ addopts = [
 
 # For out-of-tree installations, selecting `src/` as a test path fails.
 # Pytest doesn't expect the doctest's sources and installation to be
-# different. Instead, we use `--pyargs` in the `addopts` field and point
-# pytest at the appropriate packages.
+# different. Instead, we use `--pyargs` in the `addopts` field so that pytest
+# can find docstests by importing.
 testpaths = [
     "skimage",
     "skimage2",
