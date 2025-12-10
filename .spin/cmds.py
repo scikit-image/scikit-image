@@ -97,9 +97,9 @@ def test(*, parent_callback, doctest=False, **kwargs):
     is_editable_install = _is_editable_install_of_same_source("scikit-image")
 
     if not is_editable_install:
-        # We want to support both, editable and out-of-tree installations.
+        # We want to support both editable and out-of-tree installations.
         # For out-of-tree installations, selecting `src/` as a test path fails.
-        # Pytest doesn't expect the doctest's sources and installation to be
+        # Pytest doesn't expect the doctests' sources and installation to be
         # different. Avoid this - even if user specifies it by ignoring `src/`
         # explicitly if not using an editable install
         pytest_args = pytest_args + ('--ignore=./src/',)
