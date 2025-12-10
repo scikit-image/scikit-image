@@ -282,6 +282,14 @@ Examples of running ``spin test``:
 Testing requirements are listed in ``requirements/test.txt``.
 
 
+Warnings during testing phase
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, warnings raised by the test suite result in errors.
+You can switch that behavior off by setting the environment variable
+``SKIMAGE_TEST_STRICT_WARNINGS`` to `0`.
+
+
 Test coverage
 -------------
 
