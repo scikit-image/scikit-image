@@ -1,0 +1,11 @@
+/* Sourced from https://sphinx-gallery.github.io/stable/advanced.html#using-sphinx-gallery-sidebar-components */
+/* These styles help us hide the buttonsa at the bottom, in favour of putting them in the secondary sidebar. */
+.sphx-glr-download-link-note, /* Download link note in header */
+.binder-badge,                /* Binder launch badge in footer */
+.lite-badge,                  /* Lite launch badge in footer */
+.sphx-glr-download-jupyter,   /* Download Jupyter notebook link in footer */
+.sphx-glr-download-python,    /* Download Python script link in footer */
+.sphx-glr-download-zip        /* Download zipped link in footer */
+{
+  display: none;
+}
