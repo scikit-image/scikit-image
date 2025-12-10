@@ -249,32 +249,37 @@ Testing
 The test suite must pass before a pull request can be merged, and
 tests should be added to cover all modifications in behavior.
 
-We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
-framework, with tests located in the various
-``skimage/submodule/tests`` folders.
+Tests are located in the ``tests/`` directory.
+We also test examples in docstrings of our package (located in ``src/``).
 
-Testing requirements are listed in `requirements/test.txt`.
-Run:
+For local development we use ``spin test`` which wraps the
+`pytest testing framework <https://docs.pytest.org/en/latest/>`__.
+Examples of running ``spin test``:
 
-- **All tests**: ``spin test``
-- Tests for a **submodule**: ``spin test src/skimage/morphology``
-- Run tests from a **specific file**: ``spin test tests/skimage/morphology/tests/test_gray.py``
-- Run **a test inside a file**:
-  ``spin test tests/skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
-- Run tests with **arbitrary ``pytest`` options**:
-  ``spin test -- any pytest args you want``.
-- Run tests **matching** a specific expression:
-  ``spin test -- -k threshold``
-- Run all tests and **doctests**:
-  ``spin test --with-doctest``
+.. code-block:: shell
 
+    # All tests
+    spint test
 
-Warnings during testing phase
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    # Tests inside directory(s)
+    spin test -- tests/skimage/morphology
+    spin test -- src/skimage/morphology test/skimage/morphology
 
-By default, warnings raised by the test suite result in errors.
-You can switch that behavior off by setting the environment variable
-``SKIMAGE_TEST_STRICT_WARNINGS`` to `0`.
+    # Tests matching an expression
+    spin test -- -k threshold
+
+    # Combine above with test path to reduce test collection time
+    spin test -- tests/skimage/filters -k threshold
+
+    # Specific test
+    spin test -- tests/skimage/morphology/test_gray.py::test_3d_fallback_black_tophat
+
+.. tip::
+
+    Arguments specified after the ``--`` are forward as
+    `options to pytest <https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags>`__.
+
+Testing requirements are listed in ``requirements/test.txt``.
 
 
 Test coverage
