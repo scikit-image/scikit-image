@@ -1,4 +1,5 @@
 import sys
+import functools
 
 from packaging import version as _version
 
@@ -100,9 +101,6 @@ def require(name, *, version=None):
     module, which instructs pytest-doctestplus to skip this doctest if the
     requirement set by `name` isn't fulfilled.
     """
-    # since version_requirements is in the critical import path, we lazy import
-    # functools
-    import functools
 
     def decorator(obj):
         # Use pytest-doctestplus marker at module level to skip doctest if
