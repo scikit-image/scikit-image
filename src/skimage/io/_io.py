@@ -257,7 +257,7 @@ def imshow_collection(ic, plugin=None, **plugin_args):
         return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 @deprecate_func(
     deprecated_version="0.25",
     removed_version="0.27",

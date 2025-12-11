@@ -8,9 +8,6 @@ from .. import measure, segmentation, util, color
 from .._shared.version_requirements import require
 
 
-__doctest_requires__ = {("show_rag",): ["matplotlib"]}
-
-
 def _edge_generator_from_csr(csr_array):
     """Yield weighted edge triples for use by NetworkX from a CSR matrix.
 
@@ -458,7 +455,7 @@ def rag_boundary(labels, edge_map, connectivity=2):
     return rag
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def show_rag(
     labels,
     rag,

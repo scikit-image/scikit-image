@@ -15,9 +15,6 @@ from ._draw import (
 )
 
 
-__doctest_requires__ = {("polygon_perimeter", "rectangle_perimeter"): ["matplotlib"]}
-
-
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
@@ -216,7 +213,7 @@ def disk(center, radius, *, shape=None):
     return ellipse(r, c, radius, radius, shape)
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def polygon_perimeter(r, c, shape=None, clip=False):
     """Generate polygon perimeter coordinates.
 
@@ -869,7 +866,7 @@ def rectangle(start, end=None, extent=None, shape=None):
     return coords
 
 
-@require("matplotlib", ">=3.3")
+@require("matplotlib", version=">=3.3")
 def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
     """Generate coordinates of pixels that are exactly around a rectangle.
 
