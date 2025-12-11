@@ -1,5 +1,6 @@
 import sys
 import functools
+import inspect
 
 from packaging import version as _version
 
@@ -34,6 +35,7 @@ def get_module_version(module_name):
     return getattr(mod, '__version__', getattr(mod, 'VERSION', None))
 
 
+@functools.cache
 def is_installed(name, version=None):
     """Test if *name* is installed.
 
@@ -103,12 +105,13 @@ def require(name, *, version=None):
     """
 
     def decorator(obj):
-        # Use pytest-doctestplus marker at module level to skip doctest if
-        # module is not present
-        marker = obj.__globals__.get("__doctest_requires__", {})
-        assert obj.__name__ not in marker
-        marker[obj.__name__] = [name]
-        obj.__globals__["__doctest_requires__"] = marker
+        if not is_installed(name, version):
+            # Set pytest-doctestplus marker at module level to skip doctest
+            # if the required module (and version) is not available
+            module = inspect.getmodule(obj)
+            doctest_marker = getattr(module, "__doctest_requires__", {})
+            doctest_marker.setdefault(obj.__name__, []).append(name)
+            setattr(module, "__doctest_requires__", doctest_marker)
 
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):
