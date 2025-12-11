@@ -1,0 +1,6 @@
+option(
+  'include-v2',
+  type: 'boolean',
+  value: true,
+  description: 'Include skimage2 namespace in the built package'
+)
