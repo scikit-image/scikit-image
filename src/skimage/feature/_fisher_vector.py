@@ -29,9 +29,6 @@ import numpy as np
 from .._shared.version_requirements import require
 
 
-__doctest_requires__ = {("learn_gmm", "fisher_vector"): ["sklearn"]}
-
-
 class FisherVectorException(Exception):
     pass
 

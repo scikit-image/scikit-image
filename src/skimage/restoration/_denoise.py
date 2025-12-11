@@ -14,9 +14,6 @@ from .. import color
 from ..color.colorconv import ycbcr_from_rgb
 
 
-__doctest_requires__ = {("denoise_wavelet", "estimate_sigma"): ["pywt"]}
-
-
 def _gaussian_weight(array, sigma_squared, *, dtype=float):
     """Helping function. Define a Gaussian weighting from array and
     sigma_square.

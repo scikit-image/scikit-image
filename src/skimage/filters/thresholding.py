@@ -36,9 +36,6 @@ __all__ = [
 ]
 
 
-__doctest_requires__ = {("try_all_threshold",): ["matpotlib"]}
-
-
 def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
     """Returns a figure comparing the outputs of different methods.
 

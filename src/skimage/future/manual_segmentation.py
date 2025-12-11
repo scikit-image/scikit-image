@@ -179,9 +179,9 @@ def manual_lasso_segmentation(image, alpha=0.4, return_all=False):
     Examples
     --------
     >>> from skimage import data, future
-    >>> import matplotlib.pyplot as plt
+    >>> import matplotlib.pyplot as plt  # doctest: +SKIP
     >>> camera = data.camera()
-    >>> mask = future.manual_lasso_segmentation(camera)
+    >>> mask = future.manual_lasso_segmentation(camera)  # doctest: +SKIP
     >>> fig, ax = plt.subplots()  # doctest: +SKIP
     >>> ax.imshow(mask)           # doctest: +SKIP
     >>> plt.show()                # doctest: +SKIP
