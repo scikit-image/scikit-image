@@ -25,6 +25,8 @@ dependencies:
   - pre-commit
   - ipython
   - docstub==0.3.0.post0
+  # asv
+  - asv
   # docs
   - sphinx>=8.0
   - sphinx-gallery>=0.18
@@ -46,7 +48,7 @@ dependencies:
   - sphinx-design>=0.5
   - pydata-sphinx-theme>=0.16
   - PyWavelets>=1.6
-  - pytest-doctestplus
+  - pytest-doctestplus>=1.6.0
   # optional
   - SimpleITK
   - scikit-learn>=1.2
@@ -58,7 +60,6 @@ dependencies:
   - pooch>=1.6.0
   - PyWavelets>=1.6
   # test
-  - asv
   - numpydoc>=1.7
   - pooch>=1.6.0
   - pytest>=8.3
@@ -66,4 +67,4 @@ dependencies:
   - pytest-pretty
   - pytest-localserver
   - pytest-faulthandler
-  - pytest-doctestplus
+  - pytest-doctestplus>=1.6.0

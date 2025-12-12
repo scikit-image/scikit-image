@@ -11,6 +11,7 @@ on:
     paths:
       - ".github/workflows/wheels-test-and-release.yaml"
       - ".github/workflows/wheels-recipe.yaml"
+      - "pyproject.toml"
 
 concurrency:
   # Cancel previous workflows on the same branch
@@ -61,6 +62,12 @@ jobs:
         with:
           name: Packages
           path: ./dist
+
+      - name: Remove distributions that PyPI doesn't support
+        run: |
+          find ./dist -name '*wasm32.whl' -delete -print
+          echo "::notice::Remaining distributions to upload"
+          ls -Al ./dist
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.
