@@ -38,6 +38,9 @@ for commits, contributor in sorted(commits_per_contributor, key=lambda entry: en
 
     email_names[email].append(name)
 
+# Here, we check for names that have multiple email addresses
+# associated with them.  We alias them to the most commonly used email
+# address.
 log = []
 for name, emails in name_emails.items():
     if len(emails) != 1:
@@ -52,6 +55,11 @@ if log:
         print(line)
 
 
+# Here, we check for the case where multiple commits were made by the
+# same email address, but with varying *names*. In this case, we need
+# to define a canonical name associated with that email address. It's
+# not obvious what a person likes to be called, so we add alternatives
+# in brackets for editing.
 log = []
 for email, names in email_names.items():
     if len(names) != 1:
