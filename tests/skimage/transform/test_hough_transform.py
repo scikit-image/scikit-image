@@ -59,14 +59,6 @@ def test_probabilistic_hough():
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
 
 
-def _sort_lines(lines):
-    # Sort each line by x, y, sort lines by contents.
-    sorted_lines = []
-    for ln in lines:
-        sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
-    return sorted(sorted_lines)
-
-
 def test_probabilistic_hough_seed():
     # Load image that is likely to give a randomly varying number of lines
     image = data.checkerboard()
@@ -90,27 +82,37 @@ def test_probabilistic_hough_bad_input():
         transform.probabilistic_hough_line(img)
 
 
+def _sort_lines(lines):
+    # Sort each line by x, y, sort lines by contents.
+    sorted_lines = []
+    for ln in lines:
+        sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
+    return sorted(sorted_lines)
+
+
+def _sorted_ph(*args, **kwargs):
+    return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
+
+
 def test_probabilistic_hough_examples():
-    ph = transform.probabilistic_hough_line
-    sl = _sort_lines
     # Single line in LR (x)
     img = np.zeros((40, 40))
     L = 20
     img[5, 10 : (10 + L)] = 1
     x_line = [(10, 5), (9 + L, 5)]
     y_line = [(5, 10), (5, 9 + L)]
-    lines = ph(img, line_length=L - 1)
-    assert sl(lines) == [x_line]
+    lines = _sorted_ph(img, line_length=L - 1)
+    assert lines == [x_line]
     # Line length too short.  Note line length is pixel distance between end
     # points - line from [0, 0] through [0, 3] is length 3.
-    assert ph(img, line_length=L) == []
+    assert _sorted_ph(img, line_length=L) == []
     # Single line in UD (y)
-    lines = ph(img.T, line_length=L - 1)
-    assert sl(lines) == [y_line]
+    lines = _sorted_ph(img.T, line_length=L - 1)
+    assert lines == [y_line]
     # Two lines (x, y)
     both = img + img.T
-    lines = ph(both, line_length=L - 1)
-    assert sl(lines) == [y_line, x_line]
+    lines = _sorted_ph(both, line_length=L - 1)
+    assert lines == [y_line, x_line]
     # Add diagonal lines.
     more = both.copy()
     offset = 15
@@ -121,7 +123,7 @@ def test_probabilistic_hough_examples():
         more[oi, oi] = 1
         more[back_off - i, oi] = 1
     # Enforce shorter gap
-    lines = sl(ph(more, line_gap=2, line_length=L - 1))
+    lines = _sorted_ph(more, line_gap=2, line_length=L - 1)
     diags = [
         [(offset, offset), (back_off, back_off)],
         [(offset, back_off), (back_off, offset)],
@@ -129,19 +131,20 @@ def test_probabilistic_hough_examples():
     assert lines == [y_line, x_line] + diags
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
-    assert sl(ph(more, line_gap=2, line_length=len_diag)) == diags
+    assert _sorted_ph(more, line_gap=2, line_length=len_diag) == diags
     # Check gap behaves as expected.
-    assert sl(ph(img, line_gap=0, line_length=L - 1)) == [x_line]
+    assert _sorted_ph(img, line_gap=0, line_length=L - 1) == [x_line]
     gappy = img.copy()
     gappy[5, 12] = 0
-    assert sl(ph(gappy, line_gap=0, line_length=L - 1)) == []
-    assert sl(ph(gappy, line_gap=1, line_length=L - 1)) == [x_line]
+    assert _sorted_ph(gappy, line_gap=0, line_length=L - 1) == []
+    assert _sorted_ph(gappy, line_gap=1, line_length=L - 1) == [x_line]
     gappy[5, 13:15] = 0
-    assert sl(ph(gappy, line_gap=2, line_length=L - 1)) == []
-    assert sl(ph(gappy, line_gap=3, line_length=L - 1)) == [x_line]
+    assert _sorted_ph(gappy, line_gap=2, line_length=L - 1) == []
+    assert _sorted_ph(gappy, line_gap=3, line_length=L - 1) == [x_line]
 
 
-def test_probabilistic_hough_fp_fn():
+@pytest.mark.parametrize('n_lines', range(2, 21, 4))
+def test_probabilistic_hough_recall_precision(n_lines):
     # From C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
     # Hough transform for line detection", in IEEE Computer Society Conference
     # on Computer Vision and Pattern Recognition, 1999.
@@ -154,29 +157,36 @@ def test_probabilistic_hough_fp_fn():
     # vertically, the lines were hundred pixels long. The number of lines
     # varied between 2 and 20
     # """
-    pass
+    rng = np.random.default_rng(1939)
+    shape = (256, 256)
+    lines = _gen_lines(shape, n_lines, 100, margins=1, rng=rng)
+    precision, recall = precision_recall(lines, shape, rng)
+    assert precision >= 0.75
+    assert recall >= 0.75
+
+
+def precision_recall(lines, shape, rng=None):
+    out_img = write_lines(lines, shape)
+    out_lines = transform.probabilistic_hough_line(out_img, 2, line_length=50, rng=rng)
+    detected_img = write_lines(out_lines, shape)
+    out_tf, detected_tf = [img.astype(bool) for img in (out_img, detected_img)]
+    tp = np.sum(detected_tf & out_tf)
+    fp = np.sum(detected_tf & ~out_tf)
+    return tp / (tp + fp), tp / np.sum(out_img)
 
 
 def test_gen_lines():
     shape = (256, 256)
     line_length = 20
-    lines = gen_lines(shape, 100, line_length, margins=1)
-    # Axes are lines, i-j, start-end
-    assert np.all(lines[:, 0] >= 1)
-    assert np.all(lines[:, 1] <= 254)
-    line_vecs = lines[..., 1] - lines[..., 0]  # Gives lines, i-j distances.
+    n_lines = 100
+    # lines, start_end, xy
+    lines = _gen_lines(shape, n_lines, line_length, margins=1)
+    within = (lines[:, :, 0] >= 1) & (lines[:, :, 1] <= 254)
+    # Rounding may push rare points beyond margins.
+    assert np.sum(within) >= (n_lines - 2)
+    line_vecs = lines[:, 1, :] - lines[:, 0, :]  # Gives lines, x-y distances.
     lengths = np.sqrt(np.sum(line_vecs**2, axis=1))
     assert np.all(np.abs(lengths - line_length) < 0.75)
-
-
-def rand_point(shape, margins=0, rng=None):
-    rng = np.random.default_rng(rng)
-    margins = np.array(margins)
-    if np.isscalar(margins):
-        margins = np.ones(len(shape)) * margins
-    x = rng.integers(margins[0], shape[0] - margins[0], endpoint=True)
-    y = rng.integers(margins[1], shape[1] - margins[1], endpoint=True)
-    return x, y
 
 
 def rand_pts(size, lims, rng):
@@ -185,60 +195,55 @@ def rand_pts(size, lims, rng):
     )
 
 
-def raw_rand_lines(size, lims, line_length, rng):
+def _raw_rand_lines(size, lims, line_length, rng):
+    # Output is array (line, start_end, ij)
     start_points = rand_pts(size, lims, rng)
     raw_end_points = rand_pts(size, lims, rng)
     vecs = raw_end_points - start_points
     uvecs = vecs / np.sqrt(np.sum(vecs**2, axis=1))[:, None]
     end_points = np.round(start_points + uvecs * line_length)
-    return np.stack((start_points, end_points), axis=2)
+    return np.stack((start_points, end_points), axis=1)
 
 
-def good_rand_lines(size, lims, line_length, rng):
+def good_rand_lines(size, shape, margins, line_length, rng):
+    # Output is array (line, start_end, ij)
     out = np.zeros((0, 2, 2))
+    lims = _get_lims(shape, margins)
     st_lims, end_lims = lims.T
     while len(out) < size:
-        raw_lines = raw_rand_lines(size, lims, line_length, rng)
+        raw_lines = _raw_rand_lines(size, lims, line_length, rng)
         within = np.all(
-            (raw_lines >= st_lims[None, :, None])
-            & (raw_lines <= end_lims[None, :, None]),
+            (raw_lines >= st_lims[None, None, :])
+            & (raw_lines <= end_lims[None, None, :]),
             axis=(1, 2),
         )
         out = np.concatenate((out, raw_lines[within]), axis=0)
     return out[:size]
 
 
-def gen_lines(shape, n_lines, line_length, margins=0, rng=None):
-    rng = np.random.default_rng(rng)
+def _get_lims(shape, margins):
     margins = np.array(margins)
     if margins.shape == ():
         margins = np.ones(len(shape)) * margins
-    # Axes are img axes, min-max
-    lims = np.stack((margins, shape - margins), axis=1)
-    return good_rand_lines(n_lines, lims, line_length, rng)
+    return np.stack((margins, shape - margins), axis=1)
 
 
-def write_lines(img, lines):
-    lines = lines.astype(int)
-    for L in lines:
-        i_coords, j_coords = line(*L.T.ravel())
+def _gen_lines(shape, n_lines, line_length, margins=0, rng=None):
+    rng = np.random.default_rng(rng)
+    ij_lines = good_rand_lines(n_lines, shape, margins, line_length, rng)
+    # Input is lines, start_end, i_j; convert to lines, start_end, x_y
+    # for compatibility ph output.
+    return np.flip(ij_lines, 2)
+
+
+def write_lines(lines, img):
+    if isinstance(img, (list, tuple)):  # Shape specifier.
+        img = np.zeros(img)
+    for start, end in np.round(lines).astype(int):
+        # Reverse xy to give ij
+        i_coords, j_coords = line(start[1], start[0], end[1], end[0])
         img[i_coords, j_coords] = 1
-
-
-def pp_lines(lines):
-    # From Galamhos et al 1999: "From the pixels supporting a particular bin,
-    # the longest segment was chosen which had no gaps bigger than 6 pixels
-    # long. The minimum accepted line length was 4 pixels.
-    pass
-
-
-def fp_fn(actuals, detecteds):
-    # From Galamhos et al 1999: "False positives are detected lines that cover
-    # less than 80% of any single ground-truth line in the image. False
-    # negatives are those lines in the model which are covered by less than 80
-    # percent by detected lines, excluding those counted as false positives."
-    for actual in actuals:
-        pass
+    return img
 
 
 def test_hough_line_peaks():
