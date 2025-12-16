@@ -76,6 +76,7 @@ jobs:
 
       - name: Run tests
         run: |
+          python -c "import platform; print(platform.platform(terse=True))"
           $PYTEST --showlocals ./tests
 
       - name: Check benchmarks
