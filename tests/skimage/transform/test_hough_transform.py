@@ -159,15 +159,18 @@ def test_probabilistic_hough_recall_precision(n_lines):
     # """
     rng = np.random.default_rng(1939)
     shape = (256, 256)
-    lines = _gen_lines(shape, n_lines, 100, margins=1, rng=rng)
-    precision, recall = precision_recall(lines, shape, rng)
+    line_length = 100
+    lines = _gen_lines(shape, n_lines, line_length, margins=1, rng=rng)
+    precision, recall = precision_recall(lines, shape, line_length // 2, rng)
     assert precision >= 0.75
     assert recall >= 0.75
 
 
-def precision_recall(lines, shape, rng=None):
+def precision_recall(lines, shape, threshold, rng=None):
     out_img = write_lines(lines, shape)
-    out_lines = transform.probabilistic_hough_line(out_img, 2, line_length=50, rng=rng)
+    out_lines = transform.probabilistic_hough_line(
+        out_img, threshold=threshold, line_gap=2, line_length=50, rng=rng
+    )
     detected_img = write_lines(out_lines, shape)
     out_tf, detected_tf = [img.astype(bool) for img in (out_img, detected_img)]
     tp = np.sum(detected_tf & out_tf)
