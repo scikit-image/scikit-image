@@ -135,6 +135,7 @@ dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 @pytest.mark.xfail(
     condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
     reason="Flakiness on macOS (marked until 2026-02-01)",
+    raises=AssertionError,
     strict=False,
 )
 @testing.parametrize("ndim, axis", dim_axis)
