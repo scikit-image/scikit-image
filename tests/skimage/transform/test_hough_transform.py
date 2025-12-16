@@ -203,7 +203,8 @@ def _raw_rand_lines(size, lims, line_length, rng):
     start_points = rand_pts(size, lims, rng)
     raw_end_points = rand_pts(size, lims, rng)
     vecs = raw_end_points - start_points
-    uvecs = vecs / np.sqrt(np.sum(vecs**2, axis=1))[:, None]
+    vlengths = np.sqrt(np.sum(vecs**2, axis=1))[:, None]
+    uvecs = vecs / np.where(vlengths, vlengths, 1e-16)
     end_points = np.round(start_points + uvecs * line_length)
     return np.stack((start_points, end_points), axis=1)
 
