@@ -1,3 +1,6 @@
+import sys
+from datetime import date
+
 import numpy as np
 import pytest
 
@@ -130,8 +133,9 @@ dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
 @pytest.mark.xfail(
-    # condition=???,
-    reason="Unknown flakiness on macOS 15 ARM",
+    condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
+    reason="Flakiness on macOS (marked until 2026-02-01)",
+    strict=False,
 )
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
