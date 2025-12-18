@@ -29,10 +29,9 @@ manipulating arrays::
     `Masked NumPy arrays <https://numpy.org/doc/stable/reference/maskedarray.baseclass.html#numpy.ma.MaskedArray>`_
     are not natively supported either. Please convert images to plain
     ``numpy.ndarray``, and handle masks separately when calling scikit-image
-    functions. Some functions do accept a ``mask`` keyword argument,
-    but in many cases you'll want to post-process the output
-    yourself (for example, by using masks to overwrite pixel values
-    :ref:`Masking <numpy-images-masking>`).
+    functions. Some functions do accept a ``mask`` keyword argument, but in many
+    cases you'll want to handle the masking yourself (for example, by using
+    masks to overwrite pixel values :ref:`Masking <numpy-images-masking>`).
 
 Retrieving the geometry of the image and the number of pixels::
 
