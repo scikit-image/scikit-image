@@ -44,7 +44,17 @@ def test_pyramid_reduce_gray_defaults():
     assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
-def test_pyramid_reduce_nd():
+@pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
+def test_pyramid_reduce_modes(mode):
+    rows, cols = image_gray.shape
+    out1 = pyramids.pyramid_reduce(image_gray, mode=mode)
+    assert_array_equal(out1.shape, (rows / 2, cols / 2))
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+    out2 = pyramids.pyramid_reduce(image_gray, preserve_range=True)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
+
+
+def test_pyramid_reduce_nd(mode):
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8,) * ndim))
         out = pyramids.pyramid_reduce(img, downscale=2, channel_axis=None)
@@ -67,6 +77,13 @@ def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
     out = pyramids.pyramid_expand(image_gray, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2))
+
+
+@pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
+def test_pyramid_expand_modes(mode):
+    rows, cols = image_gray.shape
+    out1 = pyramids.pyramid_expand(image_gray, mode=mode)
+    assert_array_equal(out1.shape, (rows * 2, cols * 2))
 
 
 def test_pyramid_expand_nd():
@@ -105,6 +122,15 @@ def test_build_gaussian_pyramid_gray_defaults():
         assert_array_equal(out.shape, layer_shape)
 
 
+@pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
+def test_build_gaussian_pyramid_gray_modes(mode):
+    rows, cols = image_gray.shape
+    pyramid = pyramids.pyramid_gaussian(image_gray, mode=mode)
+    for layer, out in enumerate(pyramid):
+        layer_shape = (rows / 2**layer, cols / 2**layer)
+        assert_array_equal(out.shape, layer_shape)
+
+
 def test_build_gaussian_pyramid_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8,) * ndim))
@@ -130,6 +156,15 @@ def test_build_laplacian_pyramid_rgb(channel_axis):
 def test_build_laplacian_pyramid_defaults():
     rows, cols = image_gray.shape
     pyramid = pyramids.pyramid_laplacian(image_gray)
+    for layer, out in enumerate(pyramid):
+        layer_shape = (rows / 2**layer, cols / 2**layer)
+        assert_array_equal(out.shape, layer_shape)
+
+
+@pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
+def test_build_laplacian_pyramid_modes(mode):
+    rows, cols = image_gray.shape
+    pyramid = pyramids.pyramid_laplacian(image_gray, mode=mode)
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2**layer, cols / 2**layer)
         assert_array_equal(out.shape, layer_shape)
