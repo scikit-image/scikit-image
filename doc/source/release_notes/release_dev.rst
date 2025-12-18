@@ -1,7 +1,7 @@
-scikit-image 0.26.0rc1 (2025-12-09)
+scikit-image 0.26.0rc2 (2025-12-18)
 ===================================
 
-We're happy to announce the release of scikit-image 0.26.0rc1!
+We're happy to announce the release of scikit-image 0.26.0rc2!
 
 New Features
 ------------
@@ -89,6 +89,7 @@ Documentation
 - Update git commands in contributing guide (`#7956 <https://github.com/scikit-image/scikit-image/pull/7956>`_).
 - Add Linux Foundation Health Score badge to README (`#7907 <https://github.com/scikit-image/scikit-image/pull/7907>`_).
 - Remove contributor docs section on pushing to another contributor's branch (`#7957 <https://github.com/scikit-image/scikit-image/pull/7957>`_).
+- Clarify non-native support for masked array in the documentation (`#7968 <https://github.com/scikit-image/scikit-image/pull/7968>`_).
 
 Infrastructure
 --------------
@@ -165,11 +166,12 @@ Maintenance
 - Relax constraints of regionprops multichannel test on MacOS with NumPy & "Accelerate" (`#7942 <https://github.com/scikit-image/scikit-image/pull/7942>`_).
 - Refactor names in Pyodide workflow (`#7959 <https://github.com/scikit-image/scikit-image/pull/7959>`_).
 - Use __doctest_requires__ instead of inline importorskip (`#7966 <https://github.com/scikit-image/scikit-image/pull/7966>`_).
+- Mark ``test_wrap_around`` as xfail on macOS until 2026-02-01 (`#7985 <https://github.com/scikit-image/scikit-image/pull/7985>`_).
 
 Contributors
 ------------
 
-39 authors added to this release (alphabetically):
+40 authors added to this release (alphabetically):
 
 - `@dependabot[bot] <https://github.com/apps/dependabot>`_
 - `@EdytaRz <https://github.com/EdytaRz>`_
@@ -193,6 +195,7 @@ Contributors
 - Jonathan Reimer (`@jonathimer <https://github.com/jonathimer>`_)
 - Jordão Bragantini (`@JoOkuma <https://github.com/JoOkuma>`_)
 - Juan Nunez-Iglesias (`@jni <https://github.com/jni>`_)
+- Kevin (`@apetizerr <https://github.com/apetizerr>`_)
 - Kimberly Meechan (`@K-Meech <https://github.com/K-Meech>`_)
 - Larry Bradley (`@larrybradley <https://github.com/larrybradley>`_)
 - Lars Grüter (`@lagru <https://github.com/lagru>`_)
