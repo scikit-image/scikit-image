@@ -54,7 +54,7 @@ def test_pyramid_reduce_modes(mode):
     assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
-def test_pyramid_reduce_nd(mode):
+def test_pyramid_reduce_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8,) * ndim))
         out = pyramids.pyramid_reduce(img, downscale=2, channel_axis=None)
