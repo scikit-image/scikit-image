@@ -138,8 +138,14 @@ def test_build_gaussian_pyramid_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    pyramid1 = list(pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis))
-    pyramid2 = list(pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis, preserve_range=True))
+    pyramid1 = list(
+        pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis)
+    )
+    pyramid2 = list(
+        pyramids.pyramid_gaussian(
+            image, downscale=2, channel_axis=channel_axis, preserve_range=True
+        )
+    )
     for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = [rows / 2**layer, cols / 2**layer]
         layer_shape.insert(channel_axis % image.ndim, dim)
@@ -150,8 +156,14 @@ def test_build_gaussian_pyramid_rgb(channel_axis):
 
 def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
-    pyramid1 = list(pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None))
-    pyramid2 = list(pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None, preserve_range=True))
+    pyramid1 = list(
+        pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None)
+    )
+    pyramid2 = list(
+        pyramids.pyramid_gaussian(
+            image_gray, downscale=2, channel_axis=None, preserve_range=True
+        )
+    )
     for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
         assert_array_equal(out1.shape, layer_shape)
@@ -174,7 +186,9 @@ def test_build_gaussian_pyramid_gray_defaults():
 def test_build_gaussian_pyramid_gray_modes(mode):
     rows, cols = image_gray.shape
     pyramid1 = list(pyramids.pyramid_gaussian(image_gray, mode=mode))
-    pyramid2 = list(pyramids.pyramid_gaussian(image_gray, mode=mode, preserve_range=True))
+    pyramid2 = list(
+        pyramids.pyramid_gaussian(image_gray, mode=mode, preserve_range=True)
+    )
     for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
         assert_array_equal(out1.shape, layer_shape)
@@ -187,7 +201,11 @@ def test_build_gaussian_pyramid_nd():
         img = np.random.randn(*((8,) * ndim))
         original_shape = np.asarray(img.shape)
         pyramid1 = list(pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None))
-        pyramid2 = list(pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None, preserve_range=True))
+        pyramid2 = list(
+            pyramids.pyramid_gaussian(
+                img, downscale=2, channel_axis=None, preserve_range=True
+            )
+        )
         for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
             layer_shape = original_shape / 2**layer
             assert_array_equal(out1.shape, layer_shape)
@@ -200,8 +218,14 @@ def test_build_laplacian_pyramid_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    pyramid1 = list(pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis))
-    pyramid2 = list(pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis, preserve_range=True))
+    pyramid1 = list(
+        pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis)
+    )
+    pyramid2 = list(
+        pyramids.pyramid_laplacian(
+            image, downscale=2, channel_axis=channel_axis, preserve_range=True
+        )
+    )
     for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = [rows / 2**layer, cols / 2**layer]
         layer_shape.insert(channel_axis % image.ndim, dim)
@@ -226,7 +250,9 @@ def test_build_laplacian_pyramid_defaults():
 def test_build_laplacian_pyramid_modes(mode):
     rows, cols = image_gray.shape
     pyramid1 = list(pyramids.pyramid_laplacian(image_gray, mode=mode))
-    pyramid2 = list(pyramids.pyramid_laplacian(image_gray, mode=mode, preserve_range=True))
+    pyramid2 = list(
+        pyramids.pyramid_laplacian(image_gray, mode=mode, preserve_range=True)
+    )
     for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
         assert_array_equal(out1.shape, layer_shape)
@@ -239,7 +265,11 @@ def test_build_laplacian_pyramid_nd():
         img = np.random.randn(*(16,) * ndim)
         original_shape = np.asarray(img.shape)
         pyramid1 = list(pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None))
-        pyramid2 = list(pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None, preserve_range=True))
+        pyramid2 = list(
+            pyramids.pyramid_laplacian(
+                img, downscale=2, channel_axis=None, preserve_range=True
+            )
+        )
         for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
             layer_shape = original_shape / 2**layer
             assert_array_equal(out1.shape, layer_shape)
