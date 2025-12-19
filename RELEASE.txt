@@ -13,6 +13,8 @@ access), specifically to:
   - https://github.com/scikit-image/skimage (push new tags, push to `main`).
   - https://github.com/scikit-image/skimage-web (force-push)
 
+It's a good idea to have somebody standing by who can yank releases on
+https://pypi.org/project/scikit-image/ in case something goes wrong.
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
