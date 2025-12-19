@@ -8,6 +8,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 from skimage import data
 from skimage._shared.utils import _supported_float_type
 from skimage.transform import pyramids
+from skimage.metrics import structural_similarity
 
 
 image = data.astronaut()
@@ -92,6 +93,17 @@ def test_pyramid_expand_nd():
         out = pyramids.pyramid_expand(img, upscale=2, channel_axis=None)
         expected_shape = np.asarray(img.shape) * 2
         assert_array_equal(out.shape, expected_shape)
+
+
+@pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
+def test_pyramid_expand_reduce_roundtrip(mode):
+    expanded = pyramids.pyramid_expand(image_gray, mode=mode, preserve_range=True)
+    reconstructed = pyramids.pyramid_reduce(expanded, mode=mode, preserve_range=True)
+    assert reconstructed.shape == image_gray.shape
+    mssim = structural_similarity(
+        reconstructed, image_gray, data_range=np.ptp(image_gray)
+    )
+    assert mssim > 0.95
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
