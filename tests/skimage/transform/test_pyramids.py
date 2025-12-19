@@ -20,9 +20,15 @@ def test_pyramid_reduce_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    out_ = pyramids.pyramid_reduce(image, downscale=2, channel_axis=channel_axis)
-    out = np.moveaxis(out_, channel_axis, -1)
-    assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
+    out1_ = pyramids.pyramid_reduce(image, downscale=2, channel_axis=channel_axis)
+    out1 = np.moveaxis(out1_, channel_axis, -1)
+    assert_array_equal(out1.shape, (rows / 2, cols / 2, dim))
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+    out2_ = pyramids.pyramid_reduce(
+        image, downscale=2, channel_axis=channel_axis, preserve_range=True
+    )
+    out2 = np.moveaxis(out2_, channel_axis, -1)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image), 1.0, decimal=2)
 
 
 def test_pyramid_reduce_gray():
@@ -58,9 +64,14 @@ def test_pyramid_reduce_modes(mode):
 def test_pyramid_reduce_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8,) * ndim))
-        out = pyramids.pyramid_reduce(img, downscale=2, channel_axis=None)
+        out1 = pyramids.pyramid_reduce(img, downscale=2, channel_axis=None)
         expected_shape = np.asarray(img.shape) / 2
-        assert_array_equal(out.shape, expected_shape)
+        assert_array_equal(out1.shape, expected_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        out2 = pyramids.pyramid_reduce(
+            img, downscale=2, channel_axis=None, preserve_range=True
+        )
+        assert_almost_equal(np.ptp(out2) / np.ptp(img), 1.0, decimal=2)
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
@@ -68,16 +79,24 @@ def test_pyramid_expand_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    out = pyramids.pyramid_expand(image, upscale=2, channel_axis=channel_axis)
+    out1 = pyramids.pyramid_expand(image, upscale=2, channel_axis=channel_axis)
     expected_shape = [rows * 2, cols * 2]
     expected_shape.insert(channel_axis % image.ndim, dim)
-    assert_array_equal(out.shape, expected_shape)
+    assert_array_equal(out1.shape, expected_shape)
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+    out2 = pyramids.pyramid_expand(
+        image, upscale=2, channel_axis=channel_axis, preserve_range=True
+    )
+    assert_almost_equal(np.ptp(out2) / np.ptp(image), 1.0, decimal=2)
 
 
 def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
-    out = pyramids.pyramid_expand(image_gray, upscale=2)
-    assert_array_equal(out.shape, (rows * 2, cols * 2))
+    out1 = pyramids.pyramid_expand(image_gray, upscale=2)
+    assert_array_equal(out1.shape, (rows * 2, cols * 2))
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+    out2 = pyramids.pyramid_expand(image_gray, upscale=2, preserve_range=True)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 @pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
@@ -93,9 +112,14 @@ def test_pyramid_expand_modes(mode):
 def test_pyramid_expand_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((4,) * ndim))
-        out = pyramids.pyramid_expand(img, upscale=2, channel_axis=None)
+        out1 = pyramids.pyramid_expand(img, upscale=2, channel_axis=None)
         expected_shape = np.asarray(img.shape) * 2
-        assert_array_equal(out.shape, expected_shape)
+        assert_array_equal(out1.shape, expected_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        out2 = pyramids.pyramid_expand(
+            img, upscale=2, channel_axis=None, preserve_range=True
+        )
+        assert_almost_equal(np.ptp(out2) / np.ptp(img), 1.0, decimal=2)
 
 
 @pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
@@ -114,46 +138,61 @@ def test_build_gaussian_pyramid_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    pyramid = pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis))
+    pyramid2 = list(pyramids.pyramid_gaussian(image, downscale=2, channel_axis=channel_axis, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = [rows / 2**layer, cols / 2**layer]
         layer_shape.insert(channel_axis % image.ndim, dim)
-        assert out.shape == tuple(layer_shape)
+        assert out1.shape == tuple(layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image), 1.0, decimal=2)
 
 
 def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
-    pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None))
+    pyramid2 = list(pyramids.pyramid_gaussian(image_gray, downscale=2, channel_axis=None, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
-        assert_array_equal(out.shape, layer_shape)
+        assert_array_equal(out1.shape, layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 def test_build_gaussian_pyramid_gray_defaults():
     rows, cols = image_gray.shape
-    pyramid = pyramids.pyramid_gaussian(image_gray)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_gaussian(image_gray))
+    pyramid2 = list(pyramids.pyramid_gaussian(image_gray, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
-        assert_array_equal(out.shape, layer_shape)
+        assert_array_equal(out1.shape, layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 @pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
 def test_build_gaussian_pyramid_gray_modes(mode):
     rows, cols = image_gray.shape
-    pyramid = pyramids.pyramid_gaussian(image_gray, mode=mode)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_gaussian(image_gray, mode=mode))
+    pyramid2 = list(pyramids.pyramid_gaussian(image_gray, mode=mode, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
-        assert_array_equal(out.shape, layer_shape)
+        assert_array_equal(out1.shape, layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 def test_build_gaussian_pyramid_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*((8,) * ndim))
         original_shape = np.asarray(img.shape)
-        pyramid = pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None)
-        for layer, out in enumerate(pyramid):
+        pyramid1 = list(pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None))
+        pyramid2 = list(pyramids.pyramid_gaussian(img, downscale=2, channel_axis=None, preserve_range=True))
+        for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
             layer_shape = original_shape / 2**layer
-            assert_array_equal(out.shape, layer_shape)
+            assert_array_equal(out1.shape, layer_shape)
+            assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+            assert_almost_equal(np.ptp(out2) / np.ptp(img), 1.0, decimal=2)
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
@@ -161,38 +200,51 @@ def test_build_laplacian_pyramid_rgb(channel_axis):
     image = data.astronaut()
     rows, cols, dim = image.shape
     image = np.moveaxis(image, source=-1, destination=channel_axis)
-    pyramid = pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis))
+    pyramid2 = list(pyramids.pyramid_laplacian(image, downscale=2, channel_axis=channel_axis, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = [rows / 2**layer, cols / 2**layer]
         layer_shape.insert(channel_axis % image.ndim, dim)
-        assert out.shape == tuple(layer_shape)
+        assert out1.shape == tuple(layer_shape)
+        # PTP for Laplacian is naturally different from Gaussian/Reduce, but consistency checks still apply
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=1)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image), 1.0, decimal=1)
 
 
 def test_build_laplacian_pyramid_defaults():
     rows, cols = image_gray.shape
-    pyramid = pyramids.pyramid_laplacian(image_gray)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_laplacian(image_gray))
+    pyramid2 = list(pyramids.pyramid_laplacian(image_gray, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
-        assert_array_equal(out.shape, layer_shape)
+        assert_array_equal(out1.shape, layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=1)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=1)
 
 
 @pytest.mark.parametrize('mode', ['reflect', 'constant', 'edge', 'symmetric', 'wrap'])
 def test_build_laplacian_pyramid_modes(mode):
     rows, cols = image_gray.shape
-    pyramid = pyramids.pyramid_laplacian(image_gray, mode=mode)
-    for layer, out in enumerate(pyramid):
+    pyramid1 = list(pyramids.pyramid_laplacian(image_gray, mode=mode))
+    pyramid2 = list(pyramids.pyramid_laplacian(image_gray, mode=mode, preserve_range=True))
+    for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
         layer_shape = (rows / 2**layer, cols / 2**layer)
-        assert_array_equal(out.shape, layer_shape)
+        assert_array_equal(out1.shape, layer_shape)
+        assert_almost_equal(np.ptp(out1), 1.0, decimal=1)
+        assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=1)
 
 
 def test_build_laplacian_pyramid_nd():
     for ndim in [1, 2, 3, 4]:
         img = np.random.randn(*(16,) * ndim)
         original_shape = np.asarray(img.shape)
-        pyramid = pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None)
-        for layer, out in enumerate(pyramid):
+        pyramid1 = list(pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None))
+        pyramid2 = list(pyramids.pyramid_laplacian(img, downscale=2, channel_axis=None, preserve_range=True))
+        for layer, (out1, out2) in enumerate(zip(pyramid1, pyramid2, strict=True)):
             layer_shape = original_shape / 2**layer
-            assert_array_equal(out.shape, layer_shape)
+            assert_array_equal(out1.shape, layer_shape)
+            assert_almost_equal(np.ptp(out1), 1.0, decimal=1)
+            assert_almost_equal(np.ptp(out2) / np.ptp(img), 1.0, decimal=1)
 
 
 @pytest.mark.parametrize('channel_axis', [0, 1, 2, -1, -2, -3])
