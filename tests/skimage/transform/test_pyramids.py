@@ -51,7 +51,7 @@ def test_pyramid_reduce_modes(mode):
     out1 = pyramids.pyramid_reduce(image_gray, mode=mode)
     assert_array_equal(out1.shape, (rows / 2, cols / 2))
     assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
-    out2 = pyramids.pyramid_reduce(image_gray, preserve_range=True)
+    out2 = pyramids.pyramid_reduce(image_gray, mode=mode, preserve_range=True)
     assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
@@ -85,6 +85,9 @@ def test_pyramid_expand_modes(mode):
     rows, cols = image_gray.shape
     out1 = pyramids.pyramid_expand(image_gray, mode=mode)
     assert_array_equal(out1.shape, (rows * 2, cols * 2))
+    assert_almost_equal(np.ptp(out1), 1.0, decimal=2)
+    out2 = pyramids.pyramid_expand(image_gray, mode=mode, preserve_range=True)
+    assert_almost_equal(np.ptp(out2) / np.ptp(image_gray), 1.0, decimal=2)
 
 
 def test_pyramid_expand_nd():
