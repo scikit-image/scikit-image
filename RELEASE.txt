@@ -10,7 +10,7 @@ Before you start, make sure you have all the required write
 permissions (if not, you will need to ask an owner to grant you
 access), specifically to:
 
-  - https://github.com/scikit-image/skimage (push new tags, push to `main`).
+  - https://github.com/scikit-image/skimage (push new tags, push to `main`)
   - https://github.com/scikit-image/skimage-web (force-push)
 
 It's a good idea to have somebody standing by who can yank releases on
