@@ -7,7 +7,6 @@ import numpy as np
 
 from .. import draw
 from skimage import morphology
-from .._shared.utils import deprecate_func
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
@@ -199,67 +198,6 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     return footprint
 
 
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangle` instead.",
-)
-def square(width, dtype=np.uint8, *, decomposition=None):
-    """Generates a flat, square-shaped footprint.
-
-    Every pixel along the perimeter has a chessboard distance
-    no greater than radius (radius=floor(width/2)) pixels.
-
-    Parameters
-    ----------
-    width : int
-        The width and height of the square.
-
-    Other Parameters
-    ----------------
-    dtype : data-type, optional
-        The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        give an identical result to a single, larger footprint, but often with
-        better computational performance. See Notes for more details.
-        With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'sequence' or 'separable' is computationally faster may
-        be architecture-dependent.
-
-    Returns
-    -------
-    footprint : ndarray or tuple
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
-        this will be a tuple whose length is equal to the number of unique
-        structuring elements to apply (see Notes for more detail)
-
-    Notes
-    -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
-    For binary morphology, using ``decomposition='sequence'`` or
-    ``decomposition='separable'`` were observed to give better performance than
-    ``decomposition=None``, with the magnitude of the performance increase
-    rapidly increasing with footprint size. For grayscale morphology with
-    square footprints, it is recommended to use ``decomposition=None`` since
-    the internal SciPy functions that are called already have a fast
-    implementation based on separable 1D sliding windows.
-
-    The 'sequence' decomposition mode only supports odd valued `width`. If
-    `width` is even, the sequence used will be identical to the 'separable'
-    mode.
-    """
-    footprint = footprint_rectangle(
-        shape=(width, width), dtype=dtype, decomposition=decomposition
-    )
-    return footprint
-
-
 def _decompose_size(size, kernel_size=3):
     """Determine number of repeated iterations for a `kernel_size` kernel.
 
@@ -271,72 +209,6 @@ def _decompose_size(size, kernel_size=3):
     if kernel_size % 2 != 1:
         raise ValueError("only odd length kernel_size is supported")
     return 1 + (size - kernel_size) // (kernel_size - 1)
-
-
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangle` instead.",
-)
-def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
-    """Generates a flat, rectangular-shaped footprint.
-
-    Every pixel in the rectangle generated for a given width and given height
-    belongs to the neighborhood.
-
-    Parameters
-    ----------
-    nrows : int
-        The number of rows of the rectangle.
-    ncols : int
-        The number of columns of the rectangle.
-
-    Other Parameters
-    ----------------
-    dtype : data-type, optional
-        The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but often with
-        better computational performance. See Notes for more details.
-        With 'separable', this function uses separable 1D footprints for each
-        axis. Whether 'sequence' or 'separable' is computationally faster may
-        be architecture-dependent.
-
-    Returns
-    -------
-    footprint : ndarray or tuple
-        A footprint consisting only of ones, i.e. every pixel belongs to the
-        neighborhood. When `decomposition` is None, this is just a
-        numpy.ndarray. Otherwise, this will be a tuple whose length is equal to
-        the number of unique structuring elements to apply (see Notes for more
-        detail)
-
-    Notes
-    -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
-    For binary morphology, using ``decomposition='sequence'``
-    was observed to give better performance, with the magnitude of the
-    performance increase rapidly increasing with footprint size. For grayscale
-    morphology with rectangular footprints, it is recommended to use
-    ``decomposition=None`` since the internal SciPy functions that are called
-    already have a fast implementation based on separable 1D sliding windows.
-
-    The `sequence` decomposition mode only supports odd valued `nrows` and
-    `ncols`. If either `nrows` or `ncols` is even, the sequence used will be
-    identical to ``decomposition='separable'``.
-
-    - The use of ``width`` and ``height`` has been deprecated in
-      version 0.18.0. Use ``nrows`` and ``ncols`` instead.
-    """
-    footprint = footprint_rectangle(
-        shape=(nrows, ncols), dtype=dtype, decomposition=decomposition
-    )
-    return footprint
 
 
 def diamond(radius, dtype=np.uint8, *, decomposition=None):
@@ -717,64 +589,6 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
         fp = ellipse(width, height, dtype, decomposition=None)
         sequence = _cross_decomposition(fp)
     return sequence
-
-
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Use `skimage.morphology.footprint_rectangle` instead.",
-)
-def cube(width, dtype=np.uint8, *, decomposition=None):
-    """Generates a cube-shaped footprint.
-
-    This is the 3D equivalent of a square.
-    Every pixel along the perimeter has a chessboard distance
-    no greater than radius (radius=floor(width/2)) pixels.
-
-    Parameters
-    ----------
-    width : int
-        The width, height and depth of the cube.
-
-    Other Parameters
-    ----------------
-    dtype : data-type, optional
-        The data type of the footprint.
-    decomposition : {None, 'separable', 'sequence'}, optional
-        If None, a single array is returned. For 'sequence', a tuple of smaller
-        footprints is returned. Applying this series of smaller footprints will
-        given an identical result to a single, larger footprint, but often with
-        better computational performance. See Notes for more details.
-
-    Returns
-    -------
-    footprint : ndarray or tuple
-        The footprint where elements of the neighborhood are 1 and 0 otherwise.
-        When `decomposition` is None, this is just a numpy.ndarray. Otherwise,
-        this will be a tuple whose length is equal to the number of unique
-        structuring elements to apply (see Notes for more detail)
-
-    Notes
-    -----
-    When `decomposition` is not None, each element of the `footprint`
-    tuple is a 2-tuple of the form ``(ndarray, num_iter)`` that specifies a
-    footprint array and the number of iterations it is to be applied.
-
-    For binary morphology, using ``decomposition='sequence'``
-    was observed to give better performance, with the magnitude of the
-    performance increase rapidly increasing with footprint size. For grayscale
-    morphology with square footprints, it is recommended to use
-    ``decomposition=None`` since the internal SciPy functions that are called
-    already have a fast implementation based on separable 1D sliding windows.
-
-    The 'sequence' decomposition mode only supports odd valued `width`. If
-    `width` is even, the sequence used will be identical to the 'separable'
-    mode.
-    """
-    footprint = footprint_rectangle(
-        shape=(width, width, width), dtype=dtype, decomposition=decomposition
-    )
-    return footprint
 
 
 def octahedron(radius, dtype=np.uint8, *, decomposition=None):
