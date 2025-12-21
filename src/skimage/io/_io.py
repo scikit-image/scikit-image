@@ -3,8 +3,7 @@ import warnings
 
 import numpy as np
 
-from .._shared.utils import warn, deprecate_func, deprecate_parameter, DEPRECATED
-from .._shared.version_requirements import require
+from .._shared.utils import warn, deprecate_parameter, DEPRECATED
 from ..exposure import is_low_contrast
 from ..color.colorconv import rgb2gray, rgba2rgb
 from ..io.manage_plugins import call_plugin, _hide_plugin_deprecation_warnings
@@ -13,10 +12,7 @@ from .util import file_or_url_context
 __all__ = [
     'imread',
     'imsave',
-    'imshow',
-    'show',
     'imread_collection',
-    'imshow_collection',
 ]
 
 
@@ -204,83 +200,3 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
 
     with _hide_plugin_deprecation_warnings():
         return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
-
-
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
-)
-def imshow(arr, plugin=None, **plugin_args):
-    """Display an image.
-
-    Parameters
-    ----------
-    arr : ndarray or str
-        Image data or name of image file.
-    plugin : str
-        Name of plugin to use.  By default, the different plugins are
-        tried (starting with imageio) until a suitable candidate is found.
-
-    Other Parameters
-    ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
-
-    """
-    if isinstance(arr, str):
-        arr = call_plugin('imread', arr, plugin=plugin)
-    with _hide_plugin_deprecation_warnings():
-        return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
-
-
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
-)
-def imshow_collection(ic, plugin=None, **plugin_args):
-    """Display a collection of images.
-
-    Parameters
-    ----------
-    ic : :class:`ImageCollection`
-        Collection to display.
-
-    Other Parameters
-    ----------------
-    plugin_args : keywords
-        Passed to the given plugin.
-
-    """
-    with _hide_plugin_deprecation_warnings():
-        return call_plugin('imshow_collection', ic, plugin=plugin, **plugin_args)
-
-
-@require("matplotlib", ">=3.3")
-@deprecate_func(
-    deprecated_version="0.25",
-    removed_version="0.27",
-    hint="Please use `matplotlib`, `napari`, etc. to visualize images.",
-)
-def show():
-    """Display pending images.
-
-    Launch the event loop of the current GUI plugin, and display all
-    pending images, queued via `imshow`. This is required when using
-    `imshow` from non-interactive scripts.
-
-    A call to `show` will block execution of code until all windows
-    have been closed.
-
-    Examples
-    --------
-    >>> import skimage.io as io
-    >>> rng = np.random.default_rng()
-    >>> for i in range(4):
-    ...     ax_im = io.imshow(rng.random((50, 50)))  # doctest: +SKIP
-    >>> io.show() # doctest: +SKIP
-
-    """
-    with _hide_plugin_deprecation_warnings():
-        return call_plugin('_app_show')
