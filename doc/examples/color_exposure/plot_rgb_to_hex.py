@@ -33,19 +33,19 @@ your own specific images, which is not performed by this library.
 """
 
 from skimage import data
-from skimage.color import rgb2her, her2rgb
+from skimage.color import rgb2hex, hex2rgb
 import matplotlib.pyplot as plt
 import numpy as np
 
 # Load HE image of skin histology from skimage.data
 img = data.skin()
 
-img_her = rgb2her(img)
+img_hex = rgb2hex(img)
 # Create an RGB image for each of the stains
-null = np.zeros_like(img_her[:, :, 0])
-img_h = her2rgb(np.stack((img_her[:, :, 0], null, null), axis=-1))
-img_e = her2rgb(np.stack((null, img_her[:, :, 1], null), axis=-1))
-img_r = her2rgb(np.stack((null, null, img_her[:, :, 2]), axis=-1))
+null = np.zeros_like(img_hex[:, :, 0])
+img_h = hex2rgb(np.stack((img_hex[:, :, 0], null, null), axis=-1))
+img_e = hex2rgb(np.stack((null, img_hex[:, :, 1], null), axis=-1))
+img_r = hex2rgb(np.stack((null, null, img_hex[:, :, 2]), axis=-1))
 
 # Display
 fig, axes = plt.subplots(2, 2, figsize=(7, 6), sharex=True, sharey=True)
@@ -76,14 +76,14 @@ from skimage.exposure import rescale_intensity
 
 # Rescale hematoxylin and eosin channels and give them a fluorescence look
 h = rescale_intensity(
-    img_her[:, :, 0],
+    img_hex[:, :, 0],
     out_range=(0, 1),
-    in_range=(0, np.percentile(img_her[:, :, 0], 99)),
+    in_range=(0, np.percentile(img_hex[:, :, 0], 99)),
 )
 e = rescale_intensity(
-    img_her[:, :, 1],
+    img_hex[:, :, 1],
     out_range=(0, 1),
-    in_range=(0, np.percentile(img_her[:, :, 1], 99)),
+    in_range=(0, np.percentile(img_hex[:, :, 1], 99)),
 )
 
 # Cast the two channels into an RGB image, as the blue and green channels

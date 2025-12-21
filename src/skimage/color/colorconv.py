@@ -618,8 +618,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
         return np.asarray(_illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(
-            f'Unknown illuminant/observer combination '
-            f'(`{illuminant}`, `{observer}`)'
+            f'Unknown illuminant/observer combination (`{illuminant}`, `{observer}`)'
         )
 
 
@@ -632,7 +631,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
 rgb_from_hed = np.array([[0.65, 0.70, 0.29], [0.07, 0.99, 0.11], [0.27, 0.57, 0.78]])
 hed_from_rgb = linalg.inv(rgb_from_hed)
 
-# Hematoxylin + Eosin + Residual
+# Hematoxylin + Eosin
 # Hematoxylin vector is same as above from Ruifrok & Johnston
 # Eosin vector taken from QuPath source code
 # https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
@@ -644,14 +643,9 @@ hed_from_rgb = linalg.inv(rgb_from_hed)
 # QuPath discussion notes that due to differences in normal HE staining, stain vectors should be calculated for each project independently, and these values are just defaults
 # Thus, these values may not work perfectly in many cases
 
-rgb_from_her = np.array(
-    [
-        [0.65, 0.70, 0.29],
-        [0.2159, 0.8012, 0.5581],
-        [0.1583, -0.3002, 0.3696],
-    ]
-)
-her_from_rgb = linalg.inv(rgb_from_her)
+rgb_from_hex = np.array([[0.65, 0.70, 0.29], [0.2159, 0.8012, 0.5581], [0.0, 0.0, 0.0]])
+rgb_from_hex[2, :] = np.cross(rgb_from_hex[0, :], rgb_from_hex[1, :])
+hex_from_rgb = linalg.inv(rgb_from_hex)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
@@ -1680,10 +1674,11 @@ def hed2rgb(hed, *, channel_axis=-1):
 
 
 @channel_as_last_axis()
-def rgb2her(rgb, *, channel_axis=-1):
-    """RGB to Haematoxylin-Eosin (HER) color space conversion.
-    Mirrors QuPath's implementation of color deconvolution for HE images.
+def rgb2hex(rgb, *, channel_axis=-1):
+    """RGB to Hematoxylin + Eosin (HEX) color space conversion.
+    X represents the residual channel.
 
+    Eosin stain vector taken from QuPath. See discussion[3].
     It is important to note that the authors of QuPath do not recommend using these color deconvolved
     stain channels for quantitative interpretation. The function described here uses default
     stain vector values for hematoxylin and eosin, whereas in practice, there is high variability in
@@ -1702,7 +1697,7 @@ def rgb2her(rgb, *, channel_axis=-1):
     Returns
     -------
     out : (..., C=3, ...) ndarray
-        The image in HER format. Same dimensions as input.
+        The image in HEX format. Same dimensions as input.
 
     Raises
     ------
@@ -1719,25 +1714,27 @@ def rgb2her(rgb, *, channel_axis=-1):
     .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
            image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
 
+    .. [3] https://github.com/scikit-image/scikit-image/pull/7983
+
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import rgb2her, her2rgb
+    >>> from skimage.color import rgb2hex, hex2rgb
     >>> img = data.skin()
-    >>> img_hed = rgb2hed(img)
+    >>> img_hex = rgb2hex(img)
     """
-    return separate_stains(rgb, hed_from_rgb)
+    return separate_stains(rgb, hex_from_rgb)
 
 
 @channel_as_last_axis()
-def her2rgb(her, *, channel_axis=-1):
-    """Haematoxylin + Eosin + Residual (HER) to RGB color space conversion.
-    Mirrors QuPath's implementation of color deconvolution for HE images.
+def hex2rgb(hex, *, channel_axis=-1):
+    """Hematoxylin + Eosin (HEX) to RGB color space conversion.
+    X represents the residual channel.
 
     Parameters
     ----------
-    her : (..., C=3, ...) array_like
-        The image in the HER color space. By default, the final dimension
+    hex : (..., C=3, ...) array_like
+        The image in the HEX color space. By default, the final dimension
         denotes channels.
     channel_axis : int, optional
         This parameter indicates which axis of the array corresponds to
@@ -1751,7 +1748,7 @@ def her2rgb(her, *, channel_axis=-1):
     Raises
     ------
     ValueError
-        If `her` is not at least 2-D with shape (..., C=3, ...).
+        If `hex` is not at least 2-D with shape (..., C=3, ...).
 
     References
     ----------
@@ -1766,12 +1763,12 @@ def her2rgb(her, *, channel_axis=-1):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import rgb2her, her2rgb
+    >>> from skimage.color import rgb2hex, hex2rgb
     >>> img = data.skin()
-    >>> img_hed = rgb2hed(img)
-    >>> img_rgb = hed2rgb(img_her)
+    >>> img_hex = rgb2hex(img)
+    >>> img_rgb = hex2rgb(img_hex)
     """
-    return combine_stains(her, rgb_from_her)
+    return combine_stains(hex, rgb_from_hex)
 
 
 @channel_as_last_axis()
@@ -1808,6 +1805,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     respective colorspace:
 
     * ``hed_from_rgb``: Hematoxylin + Eosin + DAB
+    * ``hex_from_rgb``: Hematoxylin + Eosin
     * ``hdx_from_rgb``: Hematoxylin + DAB
     * ``fgx_from_rgb``: Feulgen + Light Green
     * ``bex_from_rgb``: Giemsa stain : Methyl Blue + Eosin
@@ -1884,6 +1882,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     respective colorspace:
 
     * ``rgb_from_hed``: Hematoxylin + Eosin + DAB
+    * ``rgb_from_hex``: Hematoxylin + Eosin
     * ``rgb_from_hdx``: Hematoxylin + DAB
     * ``rgb_from_fgx``: Feulgen + Light Green
     * ``rgb_from_bex``: Giemsa stain : Methyl Blue + Eosin
