@@ -163,10 +163,7 @@ def _prepare_colorarray(arr, force_copy=False, *, channel_axis=-1):
     arr = np.asanyarray(arr)
 
     if arr.shape[channel_axis] != 3:
-        msg = (
-            f'the input array must have size 3 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 3 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -228,10 +225,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
     channel_axis = channel_axis % arr.ndim
 
     if arr.shape[channel_axis] != 4:
-        msg = (
-            f'the input array must have size 4 along `channel_axis`, '
-            f'got {arr.shape}'
-        )
+        msg = f'the input array must have size 4 along `channel_axis`, got {arr.shape}'
         raise ValueError(msg)
 
     float_dtype = _supported_float_type(arr.dtype)
@@ -247,7 +241,7 @@ def rgba2rgb(rgba, background=(1, 1, 1), *, channel_axis=-1):
             f'values. Got {len(background)} items'
         )
     if np.any(background < 0) or np.any(background > 1):
-        raise ValueError('background RGB values must be floats between ' '0 and 1.')
+        raise ValueError('background RGB values must be floats between 0 and 1.')
     # reshape background for broadcasting along non-channel axes
     background = reshape_nd(background, arr.ndim, channel_axis)
 
@@ -624,8 +618,7 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
         return np.asarray(_illuminants[illuminant][observer], dtype=dtype)
     except KeyError:
         raise ValueError(
-            f'Unknown illuminant/observer combination '
-            f'(`{illuminant}`, `{observer}`)'
+            f'Unknown illuminant/observer combination (`{illuminant}`, `{observer}`)'
         )
 
 
@@ -637,6 +630,22 @@ def xyz_tristimulus_values(*, illuminant, observer, dtype=float):
 # pp. 291-9, Aug. 2001.
 rgb_from_hed = np.array([[0.65, 0.70, 0.29], [0.07, 0.99, 0.11], [0.27, 0.57, 0.78]])
 hed_from_rgb = linalg.inv(rgb_from_hed)
+
+# Hematoxylin + Eosin
+# Hematoxylin vector is same as above from Ruifrok & Johnston
+# Eosin vector taken from QuPath source code
+# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L89
+# "residual" is the cross prodcut of H and E vectors (taken from QuPath)
+# https://github.com/qupath/qupath/blob/main/qupath-core/src/main/java/qupath/lib/color/StainVector.java#L305
+# hematoxylin = [0.65, 0.70, 0.29]
+# eosin = [0.2159, 0.8012, 0.5581]
+# residual = np.cross(hematoxylin, eosin) = [ 0.1583, -0.3002,  0.3696]
+# QuPath discussion notes that due to differences in normal HE staining, stain vectors should be calculated for each project independently, and these values are just defaults
+# Thus, these values may not work perfectly in many cases
+
+rgb_from_hex = np.array([[0.65, 0.70, 0.29], [0.2159, 0.8012, 0.5581], [0.0, 0.0, 0.0]])
+rgb_from_hex[2, :] = np.cross(rgb_from_hex[0, :], rgb_from_hex[1, :])
+hex_from_rgb = linalg.inv(rgb_from_hex)
 
 # Following matrices are adapted form the Java code written by G.Landini.
 # The original code is available at:
@@ -1665,6 +1674,104 @@ def hed2rgb(hed, *, channel_axis=-1):
 
 
 @channel_as_last_axis()
+def rgb2hex(rgb, *, channel_axis=-1):
+    """RGB to Hematoxylin + Eosin (HEX) color space conversion.
+    X represents the residual channel.
+
+    Eosin stain vector taken from QuPath. See discussion[3].
+    It is important to note that the authors of QuPath do not recommend using these color deconvolved
+    stain channels for quantitative interpretation. The function described here uses default
+    stain vector values for hematoxylin and eosin, whereas in practice, there is high variability in
+    stain colors between different institutions and settings. QuPath recommends recalculating stain vectors for
+    your own specific images, which is not performed by this library.
+
+    Parameters
+    ----------
+    rgb : (..., C=3, ...) array_like
+        The image in RGB format. By default, the final dimension denotes
+        channels.
+    channel_axis : int, optional
+        This parameter indicates which axis of the array corresponds to
+        channels.
+
+    Returns
+    -------
+    out : (..., C=3, ...) ndarray
+        The image in HEX format. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not at least 2-D with shape (..., C=3, ...).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
+           image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
+
+    .. [3] https://github.com/scikit-image/scikit-image/pull/7983
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2hex, hex2rgb
+    >>> img = data.skin()
+    >>> img_hex = rgb2hex(img)
+    """
+    return separate_stains(rgb, hex_from_rgb)
+
+
+@channel_as_last_axis()
+def hex2rgb(hex, *, channel_axis=-1):
+    """Hematoxylin + Eosin (HEX) to RGB color space conversion.
+    X represents the residual channel.
+
+    Parameters
+    ----------
+    hex : (..., C=3, ...) array_like
+        The image in the HEX color space. By default, the final dimension
+        denotes channels.
+    channel_axis : int, optional
+        This parameter indicates which axis of the array corresponds to
+        channels.
+
+    Returns
+    -------
+    out : (..., C=3, ...) ndarray
+        The image in RGB. Same dimensions as input.
+
+    Raises
+    ------
+    ValueError
+        If `hex` is not at least 2-D with shape (..., C=3, ...).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    .. [2] Bankhead, P. et al. QuPath: Open source software for digital pathology
+           image analysis. Scientific Reports (2017). https://doi.org/10.1038/s41598-017-17204-5
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2hex, hex2rgb
+    >>> img = data.skin()
+    >>> img_hex = rgb2hex(img)
+    >>> img_rgb = hex2rgb(img_hex)
+    """
+    return combine_stains(hex, rgb_from_hex)
+
+
+@channel_as_last_axis()
 def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     """RGB to stain color space conversion.
 
@@ -1698,6 +1805,7 @@ def separate_stains(rgb, conv_matrix, *, channel_axis=-1):
     respective colorspace:
 
     * ``hed_from_rgb``: Hematoxylin + Eosin + DAB
+    * ``hex_from_rgb``: Hematoxylin + Eosin
     * ``hdx_from_rgb``: Hematoxylin + DAB
     * ``fgx_from_rgb``: Feulgen + Light Green
     * ``bex_from_rgb``: Giemsa stain : Methyl Blue + Eosin
@@ -1774,6 +1882,7 @@ def combine_stains(stains, conv_matrix, *, channel_axis=-1):
     respective colorspace:
 
     * ``rgb_from_hed``: Hematoxylin + Eosin + DAB
+    * ``rgb_from_hex``: Hematoxylin + Eosin
     * ``rgb_from_hdx``: Hematoxylin + DAB
     * ``rgb_from_fgx``: Feulgen + Light Green
     * ``rgb_from_bex``: Giemsa stain : Methyl Blue + Eosin
