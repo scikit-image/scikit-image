@@ -1,4 +1,6 @@
 import sys
+import functools
+import inspect
 
 from packaging import version as _version
 
@@ -33,6 +35,7 @@ def get_module_version(module_name):
     return getattr(mod, '__version__', getattr(mod, 'VERSION', None))
 
 
+@functools.cache
 def is_installed(name, version=None):
     """Test if *name* is installed.
 
@@ -75,7 +78,7 @@ def is_installed(name, version=None):
         return _check_version(actver, version, symb)
 
 
-def require(name, version=None):
+def require(name, *, version=None):
     """Return decorator that forces a requirement for a function or class.
 
     Parameters
@@ -93,21 +96,36 @@ def require(name, version=None):
     func : function
         A decorator that raises an ImportError if a function is run
         in the absence of the input dependency.
+
+    Notes
+    -----
+    This also adds a `__doctest_requires__` marker to the decorated objects
+    module, which instructs pytest-doctestplus to skip this doctest if the
+    requirement set by `name` isn't fulfilled.
     """
-    # since version_requirements is in the critical import path, we lazy import
-    # functools
-    import functools
 
     def decorator(obj):
+        if not is_installed(name, version):
+            # Set pytest-doctestplus marker at module level to skip doctest
+            # if the required module (and version) is not available
+            module = inspect.getmodule(obj)
+            doctest_marker = getattr(module, "__doctest_requires__", {})
+            doctest_marker.setdefault(obj.__name__, []).append(name)
+            setattr(module, "__doctest_requires__", doctest_marker)
+
         @functools.wraps(obj)
         def func_wrapped(*args, **kwargs):
             if is_installed(name, version):
                 return obj(*args, **kwargs)
             else:
-                msg = f'"{obj}" in "{obj.__module__}" requires "{name}'
+                requirement = name
                 if version is not None:
-                    msg += f" {version}"
-                raise ImportError(msg + '"')
+                    requirement += f" {version}"
+                msg = (
+                    f'`{obj.__qualname__}` in `{obj.__module__}` requires '
+                    f'`{requirement}`. Please ensure it is installed.'
+                )
+                raise ImportError(msg)
 
         return func_wrapped
 
