@@ -42,6 +42,9 @@ Other
   `scipy.linalg.eigsh` is available everywhere, remove the compatibility logic in
   `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
   `tests/skimage/graph/test_rag.py::test_reproducibility`.
+* Once Python 3.12 is minimal required version, remove or simplify
+  `skimage._shared._warnings::warn_external` to only use `skip_file_prefixes`.
+  Remove corresponding license code in LICENSE.txt (if possible).
 
 Post numpy 2
 ------------
