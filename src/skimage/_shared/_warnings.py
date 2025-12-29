@@ -4,7 +4,6 @@ import warnings
 import re
 import functools
 import os
-import itertools
 from pathlib import Path
 
 __all__ = ['all_warnings', 'expected_warnings', 'warn', 'warn_external']
@@ -170,7 +169,9 @@ def warn_external(message, category=None):
         )
     else:
         frame = sys._getframe()
-        for stacklevel in itertools.count(1):
+        # Finite counter in case of error in break logic
+        counter = range(1, sys.getrecursionlimit() + 1)
+        for stacklevel in counter:
             if frame is None:
                 # when called in embedded context may hit frame is None
                 kwargs['stacklevel'] = stacklevel
