@@ -1341,8 +1341,8 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
 
 def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
-    """Return two threshold values based on a modifed Otsu's method for circular
-    input data (e.g. hue values).
+    """Return two threshold values based on a modified Otsu's method for circular
+    input data (e.g. hue values) as described in [1]_.
 
     Either image or hist must be provided. If hist is provided, the image is ignored.
 
@@ -1353,14 +1353,13 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
     nbins : int, optional
         Number of bins used to calculate histogram. Only even values are accepted.
         This value is ignored if a histogram is provided. Default is 256.
-    value_range : 2-tuple of floats
+    val_range : 2-tuple of floats
         The lower and upper range of the input image or histogram
         (e.g. (0, 1) for normalized data; (0, 2π) for typical hue data).
     hist : array, optional
         Histogram from which to determine the thresholds. The histogram values
         are expected to be equidistantly spread over the value range. If no hist
         provided, this function will compute it from the image.
-
 
     Returns
     -------
@@ -1370,7 +1369,7 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
 
     References
     ----------
-    .. [1] Wikipedia, https://en.wikipedia.org/wiki/Otsu's_Method
+    .. [2] Preprint PDF, https://users.cs.cf.ac.uk/Yukun.Lai/papers/thresholdingTIP.pdf
 
     Examples
     --------
