@@ -195,7 +195,7 @@ addopts = [
     "--strict-config",
     "--strict-markers",
     "--maxfail=5",
-    # Necessary for doctest collection with for editable installations
+    # Necessary for doctest collection with editable installations
     "--import-mode=importlib",
     # See comment on `testpaths`
     "--pyargs",
