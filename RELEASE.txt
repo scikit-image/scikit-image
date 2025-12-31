@@ -10,9 +10,11 @@ Before you start, make sure you have all the required write
 permissions (if not, you will need to ask an owner to grant you
 access), specifically to:
 
-  - https://pypi.org/project/scikit-image/
-  - https://github.com/scikit-image/skimage-web
+  - https://github.com/scikit-image/skimage (push new tags, push to `main`)
+  - https://github.com/scikit-image/skimage-web (force-push)
 
+It's a good idea to have somebody standing by who can yank releases on
+https://pypi.org/project/scikit-image/ in case something goes wrong.
 
 - Check ``TODO.txt`` for any outstanding tasks.
 
@@ -113,7 +115,7 @@ Example `version number`
       - paste contents (or upload) of ${VERSION}.md in the `Describe this release section`
       - if pre-release check the box labelled `Set as a pre-release`
 
-- Update https://github.com/scikit-image/scikit-image/milestones:
+- If a release, update https://github.com/scikit-image/scikit-image/milestones:
 
       - close old milestone
       - ensure new milestone exists (perhaps setting due date)
