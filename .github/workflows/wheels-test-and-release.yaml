@@ -32,7 +32,7 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       attestations: write # for GitHub attestations
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: hynek/build-and-inspect-python-package@v2
@@ -49,14 +49,14 @@ jobs:
     permissions:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         id: download
         with:
           pattern: wheels-*
           merge-multiple: true
           path: ./dist
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         id: download-sdist
         with:
           name: Packages
