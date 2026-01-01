@@ -1375,12 +1375,12 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
     --------
     >>> from skimage.data import astronaut
     >>> from skimage.color import rgb2hsv
+    >>> from skimage.filters import threshold_circular_otsu
     >>> image = astronaut()
     >>> hue = rgb2hsv(image)[..., 0]
     >>> thresh = threshold_circular_otsu(image=hue, val_range=(0, 1))
     >>> mask = (hue < thresh[0]) | (hue > thresh[1])
-    >>> image[mask] = [1, 0, 0]
-    >>> image[~mask] = [0, 0, 1]
+    >>> image_th = np.where(mask[..., np.newaxis], (1, 0, 0), (0, 0, 1))
 
     Notes
     -----
