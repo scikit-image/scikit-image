@@ -97,7 +97,7 @@ def _preprocess_input(
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     out_dtype : data-type, optional
@@ -212,7 +212,7 @@ def _handle_input_3D(
         The neighborhood expressed as a 3-D array of 1's and 0's.
     out : 3-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     out_dtype : data-type, optional
@@ -453,7 +453,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -515,7 +515,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -577,7 +577,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -639,7 +639,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -710,7 +710,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -774,7 +774,7 @@ def geometric_mean(
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -843,7 +843,7 @@ def subtract_mean(
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -922,7 +922,7 @@ def median(
         full square of size 3 is used.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -991,7 +991,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1064,7 +1064,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1132,7 +1132,7 @@ def enhance_contrast(
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1197,7 +1197,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1266,7 +1266,7 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1335,7 +1335,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1403,7 +1403,7 @@ def noise_filter(
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1494,7 +1494,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1562,7 +1562,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
         The neighborhood expressed as an ndarray of 1's and 0's.
     out : ([P,] M, N) array (same dtype as input)
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y, shift_z : int
@@ -1632,7 +1632,7 @@ def windowed_histogram(
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array (integer or float), optional
         If None, a new array is allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
@@ -1699,9 +1699,9 @@ def majority(
         Image array (uint8, uint16 array).
     footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (integer or float), optional
+    out : ndarray of dtype int or float, optional
         If None, a new array will be allocated.
-    mask : ndarray (integer or float), optional
+    mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int, optional
