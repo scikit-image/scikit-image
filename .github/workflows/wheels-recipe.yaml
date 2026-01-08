@@ -25,14 +25,14 @@ jobs:
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@v3.2.1
+      - uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -48,21 +48,21 @@ jobs:
         build: ["cp31{1,2}*", "cp313*", "cp314*"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
       - name: Set up LLVM toolchain for Windows ARM64
         if: matrix.os == 'windows-11-arm'
         uses: ./.github/windows_arm64_steps
-      - uses: pypa/cibuildwheel@v3.2.1
+      - uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
           CC: clang-cl
           CXX: clang-cl
           LDFLAGS: "-Wl,-S"
           CIBW_SKIP: "*-win32" # not provide 32 bits wheel
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -86,14 +86,14 @@ jobs:
           ]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: pypa/cibuildwheel@v3.2.1
+      - uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -103,17 +103,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Build and test scikit-image for Pyodide
-        uses: pypa/cibuildwheel@v3.2.1
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_PLATFORM: pyodide
           # only build for newer pyodide_2025_0 ABI and not cp312-pyodide_wasm32 (pyodide_2024_0)
           CIBW_BUILD: "cp313-pyodide_wasm32"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-pyodide-${{ github.job }}
           path: ./wheelhouse/*.whl
