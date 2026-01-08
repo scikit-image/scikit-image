@@ -46,10 +46,6 @@ def binary_blobs(
             replicating the last boundary value. This will increase the size of
             blobs whose seed or center lies exactly on the edge.
 
-    boundary_mode : str, default "nearest"
-        The `mode` parameter passed to the Gaussian filter.
-        Use "wrap" for periodic boundary conditions.
-
     Returns
     -------
     blobs : ndarray of bools
