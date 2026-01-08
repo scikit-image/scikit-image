@@ -48,10 +48,6 @@ def binary_blobs(
             The resulting blob array can be tiled and blobs will be contiguous and
             have smooth edges across tile boundaries.
 
-    boundary_mode : str, default "nearest"
-        The `mode` parameter passed to the Gaussian filter.
-        Use "wrap" for periodic boundary conditions.
-
     Returns
     -------
     blobs : ndarray of bools
