@@ -447,7 +447,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -509,7 +509,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -571,7 +571,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -633,7 +633,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -704,7 +704,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -768,7 +768,7 @@ def geometric_mean(
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -837,7 +837,7 @@ def subtract_mean(
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -915,7 +915,7 @@ def median(
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's. If None, a
@@ -985,7 +985,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1058,7 +1058,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1126,7 +1126,7 @@ def enhance_contrast(
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1191,7 +1191,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1260,7 +1260,7 @@ def sum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1329,7 +1329,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1397,7 +1397,7 @@ def noise_filter(
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1488,7 +1488,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
@@ -1556,7 +1556,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 
     Parameters
     ----------
-    image : ([P,] M, N) ndarray (uint8, uint16)
+    image : ndarray of shape ([P,] M, N) and dtype uint8 or uint16
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
