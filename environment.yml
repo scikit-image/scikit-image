@@ -24,7 +24,7 @@ dependencies:
   # developer
   - pre-commit
   - ipython
-  - docstub==0.3.0.post0
+  - docstub>=0.6.0,<0.7.0
   # asv
   - asv
   # docs
