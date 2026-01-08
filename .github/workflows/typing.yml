@@ -49,7 +49,7 @@ jobs:
 
       - name: Install docstub
         run: |
-          pip install docstub==0.3.0.post0
+          pip install docstub~=0.6.0
           docstub --version
 
       - name: Create stubs with docstub
@@ -57,7 +57,7 @@ jobs:
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors --allow-errors=626 \
+           docstub run --verbose --group-errors --allow-errors=1114 \
                        --out-dir ${MYPYPATH}/skimage src/skimage/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
