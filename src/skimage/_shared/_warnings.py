@@ -152,12 +152,7 @@ def expected_warnings(matching):
 
 def warn_external(message, category=None):
     """
-    `warnings.warn` wrapper that sets *stacklevel* to "outside scikit-image".
-
-    The original emitter of the warning can be obtained by patching this
-    function back to `warnings.warn`, i.e. ``_api.warn_external =
-    warnings.warn`` (or ``functools.partial(warnings.warn, stacklevel=2)``,
-    etc.).
+    Emit warning that points to public API boundary of scikit-image.
     """
     kwargs = {}
     if sys.version_info[:2] >= (3, 12):
