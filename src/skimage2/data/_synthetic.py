@@ -57,18 +57,18 @@ def binary_blobs(
 
     Examples
     --------
-    >>> import skimage2 as ski
-    >>> ski.data.binary_blobs(shape=(5, 5), blob_size_fraction=0.2)  # doctest: +SKIP
+    >>> import skimage2 as sk2
+    >>> sk2.data.binary_blobs(shape=(5, 5), blob_size_fraction=0.2)  # doctest: +SKIP
     array([[ True, False,  True,  True,  True],
            [ True,  True,  True, False,  True],
            [False,  True, False,  True,  True],
            [ True, False, False,  True,  True],
            [ True, False, False, False,  True]])
-    >>> blobs = ski.data.binary_blobs(shape=(256, 256), blob_size_fraction=0.1)
+    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), blob_size_fraction=0.1)
     >>> # Finer structures
-    >>> blobs = ski.data.binary_blobs(shape=(256, 256), blob_size_fraction=0.05)
+    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), blob_size_fraction=0.05)
     >>> # Blobs cover a smaller volume fraction of the image
-    >>> blobs = ski.data.binary_blobs(shape=(256, 256), volume_fraction=0.3)
+    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), volume_fraction=0.3)
     """
     if boundary_mode not in {"nearest", "wrap"}:
         raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
