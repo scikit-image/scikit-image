@@ -1622,15 +1622,15 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
 def windowed_histogram(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, n_bins=None
 ):
-    """Normalized sliding window histogram
+    """Compute normalized sliding window histogram.
 
     Parameters
     ----------
-    image : 2-D array (integer or float)
+    image : ndarray of shape (H, W) and dtype (int or float)
         Input image.
-    footprint : 2-D array (integer or float)
+    footprint : ndarray of dtype (int or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array (integer or float), optional
+    out : ndarray of shape (H, W, N) and dtype (int or float), optional
         If None, a new array is allocated.
     mask : ndarray of dtype (int or float), optional
         Mask array that defines (>0) area of the image included in the local
@@ -1639,18 +1639,17 @@ def windowed_histogram(
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
     n_bins : int or None
-        The number of histogram bins. Will default to ``image.max() + 1``
+        The number of histogram bins. Defaults to ``image.max() + 1``
         if None is passed.
 
     Returns
     -------
-    out : 3-D array (float)
-        Array of dimensions (H,W,N), where (H,W) are the dimensions of the
-        input image and N is n_bins or ``image.max() + 1`` if no value is
-        provided as a parameter. Effectively, each pixel is a N-D feature
+    out : ndarray of shape (H, W, N) and dtype float
+        `N` is `n_bins` or ``image.max() + 1`` if no value is passed to
+        `n_bins`. Effectively, each pixel is a N-D feature
         vector that is the histogram. The sum of the elements in the feature
-        vector will be 1, unless no pixels in the window were covered by both
-        footprint and mask, in which case all elements will be 0.
+        vector is 1, unless no pixels in the window were covered by both
+        `footprint` and `mask`, in which case all elements are 0.
 
     Examples
     --------
