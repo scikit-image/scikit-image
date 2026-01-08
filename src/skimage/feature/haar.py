@@ -288,7 +288,7 @@ def draw_haar_like_feature(
 
     Returns
     -------
-    features : (M, N), ndarray
+    features : (M, N) ndarray
         An image in which the different features will be added.
 
     Examples

@@ -166,7 +166,7 @@ def gabor(
 
     Returns
     -------
-    real, imag : arrays
+    real, imag : array
         Filtered images using the real and imaginary parts of the Gabor filter
         kernel. Images are of the same dimensions as the input one.
 
