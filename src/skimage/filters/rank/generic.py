@@ -451,7 +451,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -513,7 +513,7 @@ def equalize(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -575,7 +575,7 @@ def gradient(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -637,7 +637,7 @@ def maximum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -708,7 +708,7 @@ def mean(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -772,7 +772,7 @@ def geometric_mean(
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -841,7 +841,7 @@ def subtract_mean(
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -920,7 +920,7 @@ def median(
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's. If None, a
         full square of size 3 is used.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -989,7 +989,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1000,7 +1000,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as `image`
         Output image.
 
     See also
@@ -1062,7 +1062,7 @@ def modal(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1130,7 +1130,7 @@ def enhance_contrast(
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1195,7 +1195,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1333,7 +1333,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1401,7 +1401,7 @@ def noise_filter(
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1492,7 +1492,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1560,7 +1560,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array, same dtype as input `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
