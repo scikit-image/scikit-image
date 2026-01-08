@@ -84,7 +84,7 @@ License: BSD-3-Clause
 
 Function: skimage/_shared/_warnings.py:warn_external
 Copyright: 2012-2025 Matplotlib Development Team
-License: Python Software Foundation License for Matplotlib versions 1.3.0 and later
+License: PSF-2.0
 
 License: BSD-2-Clause
 
@@ -156,7 +156,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-License: Python Software Foundation License for Matplotlib versions 1.3.0 and later
+License: PSF-2.0
 
 1. This LICENSE AGREEMENT is between the Matplotlib Development Team
 ("MDT"), and the Individual or Organization ("Licensee") accessing and
