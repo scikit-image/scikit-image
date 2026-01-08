@@ -50,15 +50,15 @@ The optional parameters `length` and `n_dim` are replaced with the new required 
 This allows generating non-square outputs.
 The default of `boundary_mode` is changed from `'nearest'` to `'wrap'`.
 
-To keep the behavior use
+To keep the old behavior from `skimage` (v1.x) use
 
 ```python
 import skimage2 as sk2
-sk2.data.binary_blobs(shape=(length,) * n_dim, boundary_mode=boundary_mode)
+sk2.data.binary_blobs(shape=(length,) * n_dim, boundary_mode='nearest')
 ```
 
-with `length`, `n_dim` and `boundary_mode` containing values passed to the old signature.
-Other parameters behave as before.
+with `length` and `n_dim` containing values used with the old signature.
+Other parameters -- including the parameter `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
 ## Deprecations prior to skimage2
 

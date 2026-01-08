@@ -77,12 +77,12 @@ def binary_blobs(
         "`skimage2.data.binary_blobs` which has a new signature. "
         "The parameters `length` and `n_dim` have been replaced with `shape`. "
         "The default of `boundary_mode` has been changed to 'wrap'. "
-        "To keep behavior the same use:\n"
+        "To keep the old behavior from `skimage` (v1.x) use:\n"
         "\n"
         "    import skimage2 as sk2"
         "    sk2.data.binary_blobs("
         "        shape=(length,) * n_dim,"
-        "        boundary_mode=boundary_mode,"
+        "        boundary_mode='nearest',"
         "        ..."
         "    )",
         stacklevel=2,
