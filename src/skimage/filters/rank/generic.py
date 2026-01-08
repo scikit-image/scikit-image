@@ -1195,7 +1195,7 @@ def pop(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0):
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array (same dtype as input)
+    out : ([P,] M, N) array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1333,7 +1333,7 @@ def threshold(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array (same dtype as input)
+    out : ([P,] M, N) array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1401,7 +1401,7 @@ def noise_filter(
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array (same dtype as input)
+    out : ([P,] M, N) array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1492,7 +1492,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array (same dtype as input)
+    out : ([P,] M, N) array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
@@ -1503,7 +1503,7 @@ def entropy(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ([P,] M, N) ndarray (float)
+    out : ndarray of shape ([P,] M, N) and dtype float
         Output image.
 
     References
@@ -1560,7 +1560,7 @@ def otsu(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z=0)
         Input image.
     footprint : ndarray
         The neighborhood expressed as an ndarray of 1's and 0's.
-    out : ([P,] M, N) array (same dtype as input)
+    out : ([P,] M, N) array, same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray of dtype int or float, optional
         Mask array that defines (>0) area of the image included in the local
