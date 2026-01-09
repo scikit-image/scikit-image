@@ -57,7 +57,7 @@ def quickshift(
 
     Returns
     -------
-    segment_mask : (M, N) ndarray
+    segment_mask : ndarray of shape (M, N) and dtype int
         Integer mask indicating segment labels.
 
     Notes
