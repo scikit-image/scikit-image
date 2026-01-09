@@ -1694,11 +1694,11 @@ def majority(
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8, uint16 array).
+    image : ndarray of dtype (uint8 or uint16)
+        Image array.
     footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray of dtype (int or float), optional
+    out : ndarray, same dtype as input `image`, optional
         If None, a new array will be allocated.
     mask : ndarray of dtype (int or float), optional
         Mask array that defines (>0) area of the image included in the local
@@ -1709,7 +1709,7 @@ def majority(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray, same dtype as input `image`
         Output image.
 
     Examples
