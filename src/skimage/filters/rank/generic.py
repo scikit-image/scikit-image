@@ -1000,7 +1000,7 @@ def minimum(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift_z
 
     Returns
     -------
-    out : ndarray of shape ([P,] M, N), same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         Output image.
 
     See also
