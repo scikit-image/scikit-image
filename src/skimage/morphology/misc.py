@@ -67,7 +67,7 @@ def _check_dtype_supported(ar):
     "its value, while the previous parameter only removed smaller ones.",
 )
 def remove_small_objects(
-    ar, min_size=DEPRECATED, connectivity=1, *, max_size=64, out=None
+    ar, min_size=DEPRECATED, connectivity=1, *, max_size=63, out=None
 ):
     """Remove objects smaller than the specified size.
 
@@ -167,12 +167,12 @@ def remove_small_objects(
             "Did you mean to use a boolean array?"
         )
 
-    if min_size is not DEPRECATED:
-        # Exclusive threshold is deprecated behavior
-        too_small = component_sizes < min_size
-    else:
-        # New behavior uses inclusive threshold
-        too_small = component_sizes <= max_size
+    if min_size is deprecate_parameter.DEPRECATED_GOT_VALUE:
+        # Old parameter with exclusive threshold (< instead of <=) was used and
+        # forwarded to `max_size`, correct for this
+        max_size -= 1
+
+    too_small = component_sizes <= max_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
 

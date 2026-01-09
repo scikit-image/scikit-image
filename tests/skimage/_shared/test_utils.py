@@ -15,6 +15,7 @@ from skimage._shared.utils import (
     deprecate_func,
     deprecate_parameter,
     DEPRECATED,
+    DEPRECATED_GOT_VALUE,
     FailedEstimationAccessError,
     FailedEstimation,
 )
@@ -356,7 +357,7 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match=match):
             assert _func_replace_params(1, 2) == (
                 1,
-                DEPRECATED,
+                DEPRECATED_GOT_VALUE,
                 DEPRECATED,
                 None,
                 2,
@@ -366,8 +367,8 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match=match) as records:
             assert _func_replace_params(1, 2, 3) == (
                 1,
-                DEPRECATED,
-                DEPRECATED,
+                DEPRECATED_GOT_VALUE,
+                DEPRECATED_GOT_VALUE,
                 3,
                 2,
                 None,
@@ -379,7 +380,7 @@ class Test_deprecate_parameter:
         with pytest.warns(FutureWarning, match=match):
             assert _func_replace_params(1, old0=2) == (
                 1,
-                DEPRECATED,
+                DEPRECATED_GOT_VALUE,
                 DEPRECATED,
                 None,
                 2,
@@ -390,7 +391,7 @@ class Test_deprecate_parameter:
             assert _func_replace_params(1, old1=3) == (
                 1,
                 DEPRECATED,
-                DEPRECATED,
+                DEPRECATED_GOT_VALUE,
                 3,
                 None,
                 None,
