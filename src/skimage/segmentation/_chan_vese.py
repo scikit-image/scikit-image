@@ -200,7 +200,7 @@ def chan_vese(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Grayscale image to be segmented.
     mu : float, optional
         'edge length' weight parameter. Higher `mu` values will

@@ -419,7 +419,7 @@ def perimeter(image, neighborhood=4):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Binary input image.
     neighborhood : 4 or 8, optional
         Neighborhood connectivity for border pixel determination. It is used to
@@ -486,7 +486,7 @@ def perimeter_crofton(image, directions=4):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image. If image is not binary, all values greater than zero
         are considered as the object.
     directions : 2 or 4, optional

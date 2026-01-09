@@ -152,7 +152,7 @@ def unsupervised_wiener(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         The input degraded image.
     psf : ndarray
         The impulse response (input image's space) or the transfer
@@ -196,7 +196,7 @@ def unsupervised_wiener(
 
     Returns
     -------
-    x_postmean : (M, N) ndarray
+    x_postmean : ndarray of shape (M, N)
         The deconvolved image (the posterior mean).
     chains : dict
         The keys ``noise`` and ``prior`` contain the chain list of

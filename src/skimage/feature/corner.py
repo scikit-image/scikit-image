@@ -548,7 +548,7 @@ def shape_index(image, sigma=1, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used for
@@ -613,7 +613,7 @@ def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
         How to handle values outside the image borders.
@@ -670,7 +670,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     method : {'k', 'eps'}, optional
         Method to compute the response image from the auto-correlation matrix.
@@ -746,7 +746,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -809,7 +809,7 @@ def corner_foerstner(image, sigma=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
@@ -882,7 +882,7 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     n : int, optional
         Minimum number of consecutive pixels out of 16 pixels on the circle
@@ -954,7 +954,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     corners : (K, 2) ndarray
         Corner coordinates `(row, col)`.
@@ -1144,7 +1144,7 @@ def corner_peaks(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     min_distance : int, optional
         The minimal allowed distance separating peaks.
@@ -1246,7 +1246,7 @@ def corner_moravec(image, window_size=1):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     window_size : int, optional
         Window size.

@@ -128,7 +128,7 @@ def hough_ellipse(image, threshold=4, accuracy=1, min_size=4, max_size=None):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image with nonzero values representing edges.
     threshold : int, optional
         Accumulator threshold value. A lower value will return more ellipses.
@@ -195,7 +195,7 @@ def hough_line(image, theta=None):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image with nonzero values representing edges.
     theta : ndarray of double, shape (K,), optional
         Angles at which to compute the transform, in radians.

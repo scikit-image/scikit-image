@@ -41,7 +41,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20, *, channel_axis=-1):
 
     Returns
     -------
-    segment_mask : (M, N) ndarray
+    segment_mask : ndarray of shape (M, N)
         Integer mask indicating segment labels.
 
     References
