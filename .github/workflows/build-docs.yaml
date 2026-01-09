@@ -27,7 +27,8 @@ jobs:
           cache-dependency-path: "requirements/*.txt"
       - name: Install dependencies
         run: |
-          sudo apt install optipng
+          sudo apt-get update
+          sudo apt-get install optipng chromium-browser
           python -m pip install --upgrade pip
           python -m pip install -r requirements/build.txt
           python -m pip install -r requirements/default.txt
