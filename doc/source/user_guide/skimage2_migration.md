@@ -43,6 +43,23 @@ The new API may, for the same function call, return different results—e.g., be
 By importing functionality from `skimage2`, you explicitly opt in to the new behavior.
 :::
 
+### `skimage.data.binary_blobs`
+
+This function is replaced by `skimage2.data.binary_blobs` with a new signature.
+The optional parameters `length` and `n_dim` are replaced with the new required parameter `shape`.
+This allows generating non-square outputs.
+The default of `boundary_mode` is changed from `'nearest'` to `'wrap'`.
+
+To keep the old behavior from `skimage` (v1.x) use
+
+```python
+import skimage2 as sk2
+sk2.data.binary_blobs(shape=(length,) * n_dim, boundary_mode='nearest')
+```
+
+with `length` and `n_dim` containing values used with the old signature.
+Other parameters -- including the parameter `boundary_mode` if you already set it explicitly -- can be left unchanged.
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
