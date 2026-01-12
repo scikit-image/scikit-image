@@ -3,6 +3,7 @@ import sys
 
 import click
 import spin
+from spin.cmds.meson import _is_editable_install_of_same_source
 
 
 @click.option(
@@ -83,33 +84,26 @@ def sdist(pyproject_build_args):
     spin.util.run(["tools/check_sdist.py", sdist])
 
 
-@click.option(
-    "--doctest/--no-doctest",
-    default=True,
-    help="Run doctests with doctest-plus "
-    "(sets `--import-mode=importlib` unless specified explicitly)",
-)
+@click.option("--doctest/--no-doctest", default=True, help="Whether to run doctests.")
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
-    if not pytest_args:
-        pytest_args = ('./tests',)
+
+    is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
+    if is_out_of_tree_build and "src" in str(pytest_args):
+        click.secho(
+            "WARN: Found 'src' in test arguments and using out-of-tree build. "
+            "For out-of-tree builds, selecting `src/` as a test path fails. "
+            "Pytest doesn't expect test sources and installation to be different. "
+            "Avoid passing `src/` or use an editable install (`spin install`) "
+            "to avoid this.",
+            fg="yellow",
+            bold=True,
+        )
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
-        if '--pyargs' not in pytest_args:
-            pytest_args = (
-                '--pyargs',
-                'skimage',
-            ) + pytest_args
-
-    # `--import-mode="importlib"` is necessary to collect doctests
-    # for editable installs.
-    if any('--doctest' in arg for arg in pytest_args) and not any(
-        '--import-mode' in arg for arg in pytest_args
-    ):
-        pytest_args = ('--import-mode=importlib',) + pytest_args
 
     kwargs["pytest_args"] = pytest_args
     parent_callback(**kwargs)
