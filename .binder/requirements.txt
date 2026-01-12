@@ -9,3 +9,4 @@ dask[array]>=2023.2.0
 pandas>=2.0
 seaborn>=0.11
 sphinx-gallery
+plotly
