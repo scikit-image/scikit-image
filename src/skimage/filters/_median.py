@@ -21,7 +21,7 @@ def median(
         with the same number of dimension than ``image``.
         If None, ``footprint`` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.)
-    out : ndarray, (same dtype as image), optional
+    out : ndarray, same dtype as input `image`, optional
         If None, a new array is allocated.
     mode : {'reflect', 'constant', 'nearest', 'mirror','‘wrap'}, optional
         The mode parameter determines how the array borders are handled, where
@@ -48,7 +48,7 @@ def median(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray, same dtype as input `image`
         Output image.
 
     See also
