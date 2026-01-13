@@ -304,7 +304,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
             mode='reflect',
         )
 
-        # Eq. 10:  sigmas.shape = (n_octaves, n_scales + 3).
+        # Eq. 10:  sigmas.reshape((n_octaves, n_scales + 3), copy=False).
         # The three extra scales are:
         #    One for the differences needed for DoG and two auxiliary
         #    images (one at either end) for peak_local_max with exclude
@@ -317,7 +317,7 @@ class SIFT(FeatureDetector, DescriptorExtractor):
         self.scalespace_sigmas = sigmas
 
         # Eq. 7: Gaussian smoothing depends on difference with previous sigma
-        #        gaussian_sigmas.shape = (n_octaves, n_scales + 2)
+        #        gaussian_sigmas.reshape((n_octaves, n_scales + 2), copy=False)
         var_diff = np.diff(sigmas * sigmas, axis=1)
         gaussian_sigmas = np.sqrt(var_diff) / self.deltas[:, np.newaxis]
 
