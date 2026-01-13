@@ -49,7 +49,7 @@ jobs:
 
       - name: Install docstub
         run: |
-          pip install docstub==0.3.0.post0
+          pip install docstub~=0.6.0
           docstub --version
 
       - name: Create stubs with docstub
