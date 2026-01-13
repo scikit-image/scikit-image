@@ -137,7 +137,7 @@ def haar_like_feature(
     Notes
     -----
     When extracting those features in parallel, be aware that the choice of the
-    backend (i.e. multiprocessing vs threading) will have an impact on the
+    backend (i.e., multiprocessing vs threading) will have an impact on the
     performance. The rule of thumb is as follows: use multiprocessing when
     extracting features for all possible ROI in an image; use threading when
     extracting the feature at specific location for a limited number of ROIs.

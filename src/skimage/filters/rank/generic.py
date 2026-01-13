@@ -462,7 +462,7 @@ def autolevel(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, shift
 
     Returns
     -------
-    out : ([P,] M, N) ndarray, same dtype as `image`
+    out : ndarray of shape ([P,] M, N), same dtype as input `image`
         Output image.
 
     Examples
@@ -1694,8 +1694,8 @@ def majority(
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8, uint16 array).
+    image : ndarray of dtype (uint8 or uint16)
+        Image array.
     footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of dtype (int or float), optional
@@ -1709,7 +1709,7 @@ def majority(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray, same dtype as input `image`
         Output image.
 
     Examples
