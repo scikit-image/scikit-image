@@ -127,7 +127,7 @@ def haar_like_feature(
 
     Returns
     -------
-    haar_features : ndarray of shape (n_features,) and dtype int
+    haar_features : ndarray of shape (n_features,) and dtype (int or float)
         Resulting Haar-like features. Each value is equal to the subtraction of
         sums of the positive and negative rectangles. The data type depends of
         the data type of `int_image`: `int` when the data type of `int_image`
