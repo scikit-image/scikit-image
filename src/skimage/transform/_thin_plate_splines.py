@@ -108,7 +108,7 @@ class ThinPlateSplineTransform:
 
         Returns
         -------
-        transformed_coords: array of shape (N, D)
+        transformed_coords: ndarray of shape (N, D)
             Destination coordinates.
         """
         if self._spline_mappings is None:

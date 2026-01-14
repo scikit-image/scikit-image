@@ -548,7 +548,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Returns
         -------
-        coords : array of shape (N, 3)
+        coords : ndarray of shape (N, 3)
             Epipolar lines in the destination image.
 
         """
@@ -578,13 +578,13 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Returns
         -------
-        F_normalized : array of shape (3, 3)
+        F_normalized : ndarray of shape (3, 3)
             The normalized solution to the homogeneous system. If the system
             is not well-conditioned, this matrix contains NaNs.
-        src_matrix : array of shape (3, 3)
+        src_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized source
             coordinates.
-        dst_matrix : array of shape (3, 3)
+        dst_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized destination
             coordinates.
 
@@ -2449,7 +2449,7 @@ class PolynomialTransform(_GeometricTransform):
 
         Returns
         -------
-        coords : array of shape (N, 2)
+        coords : ndarray of shape (N, 2)
             Transformed coordinates.
 
         """
@@ -2685,7 +2685,7 @@ def matrix_transform(coords, matrix):
 
     Returns
     -------
-    coords : array of shape (N, 2)
+    coords : ndarray of shape (N, 2)
         Transformed coordinates.
 
     """
