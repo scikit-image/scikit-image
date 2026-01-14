@@ -52,13 +52,23 @@ jobs:
           pip install docstub~=0.6.0
           docstub --version
 
-      - name: Create stubs with docstub
+      - name: Create skimage-stubs with docstub
         shell: bash
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
            docstub run --verbose --group-errors --allow-errors=1038 \
                        --out-dir ${MYPYPATH}/skimage src/skimage/ \
+           2>&1 | tee -a $GITHUB_STEP_SUMMARY)
+           echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create skimage2-stubs with docstub
+        shell: bash
+        run: |
+          echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          (set -o pipefail && \
+           docstub run --verbose --group-errors \
+                       --out-dir ${MYPYPATH}/skimage2 src/skimage2/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
