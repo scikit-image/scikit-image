@@ -267,7 +267,7 @@ class _GeometricTransform(ABC):
 
         Returns
         -------
-        coords : array of shape (N, 2)
+        coords : ndarray of shape (N, 2)
             Destination coordinates.
 
         """
