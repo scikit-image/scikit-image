@@ -1,0 +1,79 @@
+name: Run tests identified via dependency analysis
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test_skimage_autodetect:
+    name: macos-auto-cp${{ matrix.python-version }}
+    runs-on: macos-13
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: true
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        OPTIONAL_DEPS: [1]
+
+    env:
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
+      CPPFLAGS: "-Xpreprocessor -fopenmp"
+      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include"
+      CXXFLAGS: "-I/usr/local/opt/libomp/include"
+      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -lomp"
+
+    if: "!(github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main')"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: OSX configuration
+        run: |
+          # OpenMP is not present on macOS by default
+          brew install libomp
+
+      - name: Install build & test dependencies
+        env:
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+        run: |
+          source .github/scripts/setup-build-env.sh
+          source .github/scripts/setup-test-env.sh
+
+      - name: Build skimage
+        run: |
+          spin build
+
+      - name: "Run tests: modified modules"
+        run: |
+          git branch main origin/main
+          pip uninstall -y SimpleITK  # Causes np.lookfor test to fail 🤔
+
+          spin test --test-modified -- --config-file ${{ github.workspace }}/pyproject.toml
+
+      - name: "Run tests: modified module importers"
+        run: |
+          TEST_CMD="spin test --test-modified-importers -- --config-file ${{ github.workspace }}/pyproject.toml"
+          if ! $TEST_CMD; then
+            echo
+            echo "!!! Tests failed. This is **unexpected**, since the"
+            echo "!!! modified modules tests above passed."
+            echo "!!! You should find out what went wrong, and then update"
+            echo "!!! those modified module test suites to be more complete."
+            echo
+            exit 1
+          fi
