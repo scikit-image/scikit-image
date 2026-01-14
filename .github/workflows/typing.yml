@@ -63,7 +63,7 @@ jobs:
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       # Not needed yet, since we don't run mypy.stubtest or similar
-      # which wants to import scikit-image
+      # which would require importing scikit-image.
       #
       #      - name: Install build dependencies
       #        env:
