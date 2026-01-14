@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Clone scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -75,7 +75,7 @@ jobs:
       #        run: |
       #          pip install -v --no-build-isolation .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: skimage-stubs
           path: ${MYPYPATH}
