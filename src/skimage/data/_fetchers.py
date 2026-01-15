@@ -394,7 +394,7 @@ def eagle():
 
     Returns
     -------
-    eagle : (2019, 1826) uint8 ndarray
+    eagle : ndarray of shape (2019, 1826) and dtype uint8
         Eagle image.
     """
     return _load("data/eagle.png")
@@ -603,7 +603,7 @@ def text():
 
     Returns
     -------
-    text : (172, 448) uint8 ndarray
+    text : ndarray of shape (172, 448) and dtype uint8
         Text image.
     """
 
@@ -619,7 +619,7 @@ def checkerboard():
 
     Returns
     -------
-    checkerboard : (200, 200) uint8 ndarray
+    checkerboard : ndarray of shape (200, 200) and dtype uint8
         Checkerboard image.
     """
     return _load("data/chessboard_GRAY.png")
@@ -659,7 +659,7 @@ def human_mitosis():
 
     Returns
     -------
-    human_mitosis: (512, 512) uint8 ndarray
+    human_mitosis : ndarray of shape (512, 512) and dtype uint8
         Data of human cells undergoing mitosis taken during the preparation
         of the manuscript in [1]_.
 
@@ -758,7 +758,7 @@ def kidney():
 
     Returns
     -------
-    kidney : (16, 512, 512, 3) uint16 ndarray
+    kidney : ndarray of shape (16, 512, 512, 3) and dtype uint16
         Kidney 3D multichannel image.
     """
     return _load("data/kidney.tif")
@@ -793,7 +793,7 @@ def logo():
 
     Returns
     -------
-    logo : (500, 500, 4) uint8 ndarray
+    logo : ndarray of shape (500, 500, 4) and dtype uint8
         Logo image.
     """
     return _load("data/logo.png")
@@ -813,7 +813,7 @@ def microaneurysms():
 
     Returns
     -------
-    microaneurysms : (102, 102) uint8 ndarray
+    microaneurysms : ndarray of shape (102, 102) and dtype uint8
         Retina image with lesions.
 
     References
