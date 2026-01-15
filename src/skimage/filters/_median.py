@@ -37,7 +37,7 @@ def median(
         .. versionadded:: 0.15
            `cval` was added in 0.15 is used when ``behavior='ndimage'``.
     behavior : {'ndimage', 'rank'}, optional
-        Either to use the old behavior (i.e., <v0.15) or the new behavior.
+        Either to use the old (i.e., scikit-image < 0.15) or the new behavior.
         The old behavior will call :func:`skimage.filters.rank.median`.
         The new behavior will call :func:`scipy.ndimage.median_filter`.
         Default is 'ndimage'.
