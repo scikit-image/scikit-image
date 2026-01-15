@@ -36,7 +36,7 @@ def _generate_rectangle_mask(point, image, shape, random):
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : 2-D array
+    indices : ndarray of dtype int
         A mask of indices that the shape fills.
 
     """
@@ -93,7 +93,7 @@ def _generate_circle_mask(point, image, shape, random):
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : 2-D array
+    indices : ndarray of dtype int
         A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
@@ -156,7 +156,7 @@ def _generate_triangle_mask(point, image, shape, random):
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : 2-D array
+    indices : ndarray of dtype int
         A mask of indices that the shape fills.
 
     """
@@ -215,7 +215,7 @@ def _generate_ellipse_mask(point, image, shape, random):
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : 2-D array
+    indices : ndarray of dtype int
         A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:

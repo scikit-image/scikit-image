@@ -47,7 +47,7 @@ jobs:
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
           (set -o pipefail && \
-           docstub run --verbose --group-errors --allow-errors=1038 \
+           docstub run --verbose --group-errors --allow-errors=989 \
                        --out-dir ${MYPYPATH}/skimage src/skimage/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
