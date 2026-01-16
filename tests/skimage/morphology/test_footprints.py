@@ -246,7 +246,7 @@ def test_pad_footprint(as_sequence, pad_end):
     assert_equal(expected_res, actual_res)
 
 
-class Test_footprint_rectangule:
+class Test_footprint_rectangle:
     @pytest.mark.parametrize("i", [0, 1, 2, 3, 4])
     @pytest.mark.parametrize("j", [0, 1, 2, 3, 4])
     def test_rectangle(self, i, j):
