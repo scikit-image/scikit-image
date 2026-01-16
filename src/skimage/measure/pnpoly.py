@@ -48,9 +48,9 @@ def points_in_poly(points, verts):
 
     Parameters
     ----------
-    points : (K, 2) array
+    points : array_like of shape (K, 2)
         Input points, ``(x, y)``.
-    verts : (L, 2) array
+    verts : array_like of shape (L, 2)
         Vertices of the polygon, sorted either clockwise or anti-clockwise.
         The first point may (but does not need to be) duplicated.
 
@@ -60,7 +60,7 @@ def points_in_poly(points, verts):
 
     Returns
     -------
-    mask : (K,) array of bool
+    mask : ndarray of shape (K,) and dtype bool
         True if corresponding point is inside the polygon.
 
     """
