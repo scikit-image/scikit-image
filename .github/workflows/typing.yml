@@ -37,22 +37,12 @@ jobs:
           cache: "pip"
           cache-dependency-path: "requirements/*.txt"
 
-      - name: Install build dependencies
-        env:
-          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
-        run: |
-          source .github/scripts/setup-build-env.sh
-
-      - name: Build and install from source
-        run: |
-          pip install -v --no-build-isolation .
-
       - name: Install docstub
         run: |
           pip install docstub~=0.6.0
           docstub --version
 
-      - name: Create stubs with docstub
+      - name: Create skimage-stubs with docstub
         shell: bash
         run: |
           echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
@@ -61,6 +51,29 @@ jobs:
                        --out-dir ${MYPYPATH}/skimage src/skimage/ \
            2>&1 | tee -a $GITHUB_STEP_SUMMARY)
            echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create skimage2-stubs with docstub
+        shell: bash
+        run: |
+          echo -e "## docstub output\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+          (set -o pipefail && \
+           docstub run --verbose --group-errors \
+                       --out-dir ${MYPYPATH}/skimage2 src/skimage2/ \
+           2>&1 | tee -a $GITHUB_STEP_SUMMARY)
+           echo -e "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      # Not needed yet, since we don't run mypy.stubtest or similar
+      # which would require importing scikit-image.
+      #
+      #      - name: Install build dependencies
+      #        env:
+      #          PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
+      #        run: |
+      #          source .github/scripts/setup-build-env.sh
+      #
+      #      - name: Build and install from source
+      #        run: |
+      #          pip install -v --no-build-isolation .
 
       - uses: actions/upload-artifact@v4
         with:
