@@ -1694,11 +1694,11 @@ def majority(
 
     Parameters
     ----------
-    image : ndarray of dtype (uint8 or uint16)
+    image : ndarray of dtype (int or float)
         Image array.
     footprint : 2-D array (integer or float)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray, same dtype as input `image`, optional
+    out : ndarray of dtype int, optional
         If None, a new array will be allocated.
     mask : ndarray of dtype (int or float), optional
         Mask array that defines (>0) area of the image included in the local
@@ -1709,20 +1709,18 @@ def majority(
 
     Returns
     -------
-    out : ndarray, same dtype as input `image`
+    out : ndarray of dtype int, optional
         Output image.
 
     Examples
     --------
-    >>> from skimage import data
-    >>> from skimage.filters.rank import majority
-    >>> from skimage.morphology import disk, ball
     >>> import numpy as np
-    >>> img = data.camera()
+    >>> import skimage as ski
+    >>> img = ski.data.camera()
     >>> rng = np.random.default_rng()
-    >>> volume = rng.integers(0, 255, size=(10,10,10), dtype=np.uint8)
-    >>> maj_img = majority(img, disk(5))
-    >>> maj_img_vol = majority(volume, ball(5))
+    >>> volume = rng.integers(0, 255, size=(10, 10, 10), dtype=np.uint8)
+    >>> maj_img = ski.filters.rank.majority(img, ski.morphology.disk(5))
+    >>> maj_img_vol = ski.filters.rank.majority(volume, ski.morphology.ball(5))
 
     """
 

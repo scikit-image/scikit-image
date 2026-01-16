@@ -262,12 +262,12 @@ class _GeometricTransform(ABC):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : ndarray of shape (N, 2)
             Destination coordinates.
 
         """
@@ -543,12 +543,12 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 3) array
+        coords : ndarray of shape (N, 3)
             Epipolar lines in the destination image.
 
         """
@@ -571,20 +571,20 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        F_normalized : (3, 3) array
+        F_normalized : ndarray of shape (3, 3)
             The normalized solution to the homogeneous system. If the system
             is not well-conditioned, this matrix contains NaNs.
-        src_matrix : (3, 3) array
+        src_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized source
             coordinates.
-        dst_matrix : (3, 3) array
+        dst_matrix : ndarray of shape (3, 3)
             The transformation matrix to obtain the normalized destination
             coordinates.
 
@@ -626,9 +626,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -707,9 +707,9 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -866,9 +866,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -920,9 +920,9 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -1125,11 +1125,11 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
@@ -1308,11 +1308,11 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
@@ -1995,9 +1995,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -2056,9 +2056,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
 
         Returns
@@ -2372,13 +2372,13 @@ class PolynomialTransform(_GeometricTransform):
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Destination coordinates.
         order : int, optional
             Polynomial order (number of coefficients is order + 1).
-        weights : (N,) array_like, optional
+        weights : array_like of shape (N,), optional
             Relative weight values for each pair of points.
 
         Returns
@@ -2444,12 +2444,12 @@ class PolynomialTransform(_GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, 2) array_like
-            source coordinates
+        coords : array_like of shape (N, 2)
+            Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : ndarray of shape (N, 2)
             Transformed coordinates.
 
         """
@@ -2678,14 +2678,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : (N, 2) array_like
+    coords : array_like of shape (N, 2)
         x, y coordinates to transform
-    matrix : (3, 3) array_like
+    matrix : array_like of shape (3, 3)
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : (N, 2) array
+    coords : ndarray of shape (N, 2)
         Transformed coordinates.
 
     """
