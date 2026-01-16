@@ -77,7 +77,7 @@ def autolevel_percentile(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N) and dtype int
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
     footprint : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
