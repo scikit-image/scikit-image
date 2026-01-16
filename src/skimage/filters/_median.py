@@ -21,8 +21,10 @@ def median(
         with the same number of dimensions as `image`.
         If None, `footprint` will be a N-D array with 3 elements for each
         dimension (e.g., vector, square, cube, etc.).
-    out : ndarray, same dtype as input `image`, optional
-        If None, a new array is allocated.
+    out : ndarray, optional
+        If None, a new array is allocated. For ``behavior='ndimage'``,
+        dtype matches input. For ``behavior='rank'``, dtype follows
+        :func:`skimage.filters.rank.median`.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         `cval` is the value when `mode` is equal to 'constant'.
@@ -49,8 +51,9 @@ def median(
 
     Returns
     -------
-    out : ndarray, same dtype as input `image`
-        Output image.
+    out : ndarray
+        Output image. For ``behavior='ndimage'``, dtype matches input. For
+        ``behavior='rank'``, dtype follows :func:`skimage.filters.rank.median`.
 
     See also
     --------
