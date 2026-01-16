@@ -23,7 +23,7 @@ def median(
         dimension (e.g., vector, square, cube, etc.).
     out : ndarray, same dtype as input `image`, optional
         If None, a new array is allocated.
-    mode : {'reflect', 'constant', 'nearest', 'mirror','‘wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         `cval` is the value when `mode` is equal to 'constant'.
         Default is 'nearest'.

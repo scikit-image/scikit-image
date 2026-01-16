@@ -189,11 +189,11 @@ def manders_overlap_coeff(image0, image1, mask=None):
         Image of channel A. All pixel values should be non-negative.
     image1 : ndarray of shape (M, N)
         Image of channel B. All pixel values should be non-negative.
-        Must have same dimensions as `image0`
+        Must have same dimensions as `image0`.
     mask : (M, N) ndarray of dtype bool, optional
         Only `image0` and `image1` pixel values within this region of interest
         mask are included in the calculation.
-        Must have ♣same dimensions as `image0`.
+        Must have same dimensions as `image0`.
 
     Returns
     -------
