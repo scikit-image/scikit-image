@@ -33,11 +33,11 @@ def _generate_rectangle_mask(point, image, shape, random):
 
     Returns
     -------
+    indices : tuple
+        A mask of indices that the shape fills.
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : ndarray of dtype int
-        A mask of indices that the shape fills.
 
     """
     available_width = min(image[1] - point[1], shape[1]) - shape[0]
@@ -90,11 +90,11 @@ def _generate_circle_mask(point, image, shape, random):
 
     Returns
     -------
+    indices : tuple
+        A mask of indices that the shape fills.
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : ndarray of dtype int
-        A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('size must be > 1 for circles')
@@ -153,11 +153,11 @@ def _generate_triangle_mask(point, image, shape, random):
 
     Returns
     -------
+    indices : tuple
+        A mask of indices that the shape fills.
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : ndarray of dtype int
-        A mask of indices that the shape fills.
 
     """
     if shape[0] == 1 or shape[1] == 1:
@@ -212,11 +212,11 @@ def _generate_ellipse_mask(point, image, shape, random):
 
     Returns
     -------
+    indices : tuple
+        A mask of indices that the shape fills.
     label : tuple
         A (category, ((r0, r1), (c0, c1))) tuple specifying the category and
         bounding box coordinates of the shape.
-    indices : ndarray of dtype int
-        A mask of indices that the shape fills.
     """
     if shape[0] == 1 or shape[1] == 1:
         raise ValueError('size must be > 1 for ellipses')
