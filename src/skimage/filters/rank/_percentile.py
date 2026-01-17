@@ -79,7 +79,7 @@ def autolevel_percentile(
     ----------
     image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
@@ -169,7 +169,7 @@ def mean_percentile(
     ----------
     image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of shape (M, N) and dtype int
         If None, a new array is allocated.
@@ -214,7 +214,7 @@ def subtract_mean_percentile(
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
@@ -263,7 +263,7 @@ def enhance_contrast_percentile(
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
@@ -309,7 +309,7 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
@@ -356,7 +356,7 @@ def pop_percentile(
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
@@ -404,7 +404,7 @@ def sum_percentile(
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
@@ -452,7 +452,7 @@ def threshold_percentile(
     ----------
     image : 2-D array (uint8, uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : 2-D array, same dtype as input `image`
         If None, a new array is allocated.
