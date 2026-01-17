@@ -124,7 +124,7 @@ def gradient_percentile(
     ----------
     image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : ndarray
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of shape (M, N) and dtype int
         If None, a new array is allocated.
