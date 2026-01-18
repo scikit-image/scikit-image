@@ -285,14 +285,14 @@ class _GeometricTransform(ABC):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : ndarray of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array
+        dst : ndarray of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for coordinate.
 
         """
@@ -674,14 +674,14 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Parameters
         ----------
-        src : (N, 2) array
+        src : ndarray of shape (N, 2)
             Source coordinates.
-        dst : (N, 2) array
+        dst : ndarray of shape (N, 2)
             Destination coordinates.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Sampson distance.
 
         """
@@ -1709,12 +1709,12 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Parameters
         ----------
-        coords : (N, D) array_like
+        coords : array_like of shape (N, D)
             Source coordinates.
 
         Returns
         -------
-        coords : (N, 2) array
+        coords : array of shape (N, 2)
             Transformed coordinates.
 
         """
@@ -1774,9 +1774,9 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Parameters
         ----------
-        src : (N, D) array_like
+        src : array_like of shape (N, D)
             Source coordinates.
-        dst : (N, D) array_like
+        dst : array_like of shape (N, D)
             Destination coordinates.
 
         Returns
@@ -1794,14 +1794,14 @@ def _euler_rotation_matrix(angles, degrees=False):
 
     Parameters
     ----------
-    angles : array of float, shape (3,)
+    angles : array of shape (3,) and dtype float
         The transformation angles in radians.
     degrees : bool, optional
         If True, then the given angles are assumed to be in degrees. Default is False.
 
     Returns
     -------
-    R : array of float, shape (3, 3)
+    R : array of shape (3, 3) and dtype float
         The Euler rotation matrix.
 
     """
@@ -1862,7 +1862,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Attributes
     ----------
-    params : (D+1, D+1) array
+    params : ndarray of shape (D+1, D+1)
         Homogeneous transformation matrix.
 
     Examples
@@ -2101,7 +2101,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Parameters
     ----------
-    matrix : (dim+1, dim+1) array_like, optional
+    matrix : array_like of shape (dim+1, dim+1), optional
         Homogeneous transformation matrix.
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
@@ -2109,7 +2109,7 @@ class SimilarityTransform(EuclideanTransform):
         Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : (dim,) array_like, optional
+    translation : array_like of shape (dim,), optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
     dimensionality : int, optional
         The dimensionality of the transform, corresponding to ``dim`` above.
@@ -2118,7 +2118,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Attributes
     ----------
-    params : (dim+1, dim+1) array
+    params : ndarray of shape (dim+1, dim+1)
         Homogeneous transformation matrix.
 
     Examples
@@ -2266,7 +2266,7 @@ class PolynomialTransform(_GeometricTransform):
 
     Parameters
     ----------
-    params : (2, N) array_like, optional
+    params : array_like of shape (2, N), optional
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
     dimensionality : int, optional
@@ -2274,7 +2274,7 @@ class PolynomialTransform(_GeometricTransform):
 
     Attributes
     ----------
-    params : (2, N) array
+    params : ndarray of shape (2, N)
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
