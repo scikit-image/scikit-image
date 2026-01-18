@@ -5,6 +5,7 @@ import pytest
 from numpy.testing import (
     assert_allclose,
     assert_almost_equal,
+    assert_array_almost_equal,
     assert_array_equal,
     assert_equal,
 )
@@ -24,6 +25,7 @@ from skimage.filters._multiotsu import (
 from skimage.filters.thresholding import (
     _cross_entropy,
     _mean_std,
+    threshold_circular_otsu,
     threshold_isodata,
     threshold_li,
     threshold_local,
@@ -282,6 +284,23 @@ class TestSimpleImage:
         thres = threshold_sauvola(self.image, window_size=(3, 5), k=0.2, r=128)
         out = self.image > thres
         assert_array_equal(ref, out)
+
+    @pytest.mark.parametrize("nbins", range(1, 11))
+    @pytest.mark.parametrize("offset", [-10, 0, 5.55])
+    def test_threshold_circular_otsu(self, nbins, offset):
+        val_range = (offset, 7 + offset)
+        stride = (val_range[1] - val_range[0]) / nbins
+        if nbins % 2 == 0 and nbins >= 4:
+            t = np.asarray(
+                threshold_circular_otsu(self.image + offset, nbins, val_range=val_range)
+            )
+            correct_t = (
+                {4: 2.62, 6: 2.92, 8: 3.06, 10: 2.45}[nbins] + offset - 0.5 * stride
+            )
+            assert_array_almost_equal((correct_t, correct_t + 3.5), t, decimal=2)
+        else:
+            with pytest.raises(ValueError):
+                threshold_circular_otsu(self.image, nbins, val_range=val_range)
 
 
 def test_otsu_camera_image():
@@ -821,3 +840,45 @@ def test_multiotsu_hist_parameter():
             thresh_img = threshold_multiotsu(img, classes)
             thresh_sk_hist = threshold_multiotsu(classes=classes, hist=sk_hist)
             assert np.allclose(thresh_img, thresh_sk_hist)
+
+
+@pytest.mark.parametrize("range_min", [-17.17, 0, 0.5])
+@pytest.mark.parametrize("range_max", [0.6, 9, 99, 1_000])
+def test_threshold_circular_otsu_flat_image(range_min, range_max):
+    img = np.full((2, 3), 1.23)
+    t = threshold_circular_otsu(img, val_range=(range_min, range_max))
+    # any value for the two thresholds is acceptable
+    # for a flat image as long as they differ by half its value range
+    assert abs(t[1] - t[0] - 0.5 * (range_max - range_min)) < 1e-6
+
+
+@pytest.mark.parametrize("roll_frac", [0.00, 0.01, 0.2, 0.5, 0.8])
+@pytest.mark.parametrize("nbins", [6, 60, 600])
+def test_threshold_circular_otsu(nbins, roll_frac):
+    val_range = (-10 / 3, 20 / 3)
+    roll = math.ceil(nbins * roll_frac)
+    stride = (val_range[1] - val_range[0]) / nbins
+    x = np.linspace(
+        val_range[0] + 0.5 * stride,
+        val_range[1] - 0.5 * stride,
+        nbins,
+        endpoint=True,
+        dtype=np.float32,
+    )
+    h = np.sin(0.4 * x + 0.3) ** 2
+    h = np.roll(h, roll)
+
+    t = threshold_circular_otsu(nbins=nbins, val_range=[-10 / 3, 20 / 3], hist=h)
+
+    correct_t = (
+        x[({6: 2, 60: 17, 600: 167}[nbins] + roll) % (nbins // 2)] - 0.5 * stride
+    )
+    assert_array_almost_equal((correct_t, correct_t + 5), t, decimal=2)
+
+
+def test_threshold_circular_otsu_warnings():
+    with expected_warnings(["RGB image"]):
+        threshold_circular_otsu(np.zeros((3,) * 3), val_range=(0, 1))
+
+    with expected_warnings(["ignored"]):
+        threshold_circular_otsu(np.arange(10), val_range=(0, 1), hist=np.ones(6))
