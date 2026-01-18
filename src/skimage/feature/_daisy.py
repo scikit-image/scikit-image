@@ -97,7 +97,7 @@ def daisy(
             ``Q = ceil((N - radius*2) / step)``
             ``R = (rings * histograms + 1) * orientations``
 
-    descs_img : ndarray of shape (M, N, 3), only if visualize==True
+    descs_img : ndarray of shape (M, N, 3), only if visualize=True
         Visualization of the DAISY descriptors.
 
     References

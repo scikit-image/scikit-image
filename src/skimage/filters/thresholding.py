@@ -1202,7 +1202,7 @@ def apply_hysteresis_threshold(image, low, high):
     Returns
     -------
     thresholded : array of dtype bool and shape (M[, ...])
-        Array in which ``True`` indicates the locations where ``image``
+        Array in which ``True`` indicates the locations where `image`
         was above the hysteresis threshold.
 
     Examples

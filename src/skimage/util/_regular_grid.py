@@ -12,7 +12,7 @@ def regular_grid(ar_shape, n_points):
 
     Parameters
     ----------
-    ar_shape : array-like of dtype int
+    ar_shape : array_like of dtype int
         The shape of the space embedding the grid. ``len(ar_shape)`` is the
         number of dimensions.
     n_points : int

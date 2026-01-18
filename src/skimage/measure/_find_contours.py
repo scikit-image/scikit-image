@@ -18,7 +18,7 @@ def find_contours(
 
     Parameters
     ----------
-    image : ndarray shape (M, N) and dtype float
+    image : ndarray of shape (M, N) and dtype float
         Input image in which to find contours.
     level : float, optional
         Value along which to find contours in the array. By default, the level
