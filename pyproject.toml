@@ -204,6 +204,8 @@ filterwarnings = [
     "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
     # Warning caused by matplotlib 3.7.0 because it uses deprecated API of pyparsing 3.3.1
     "ignore:.*(parseString|resetCache|enablePackrat).*:DeprecationWarning:matplotlib",
+    # tifffile (v2025.12.20) uses deprecated NumPy API
+    "ignore:Setting the shape on a NumPy array:DeprecationWarning:tifffile",
 ]
 norecursedirs = ["io/_plugins"]
 
