@@ -24,9 +24,9 @@ def _check_coords_in_hull(gridcoords, hull_equations, tolerance):
 
     Parameters
     ----------
-    gridcoords : (M, N) ndarray
+    gridcoords : ndarray of shape (M, N)
         Coordinates of ``N`` points in ``M`` dimensions.
-    hull_equations : (M, N) ndarray
+    hull_equations : ndarray of shape (M, N)
         Hyperplane equations of the facets of the convex hull.
     tolerance : float
         Tolerance when determining whether a point is inside the hull. Due
@@ -178,7 +178,7 @@ def convex_hull_object(image, *, connectivity=2):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Binary input image.
     connectivity : {1, 2}, int, optional
         Determines the neighbors of each pixel. Adjacent elements

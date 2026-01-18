@@ -26,7 +26,7 @@ def _hog_channel_gradient(channel):
 
     Parameters
     ----------
-    channel : (M, N) ndarray
+    channel : ndarray of shape (M, N)
         Grayscale image or one of image channel.
 
     Returns

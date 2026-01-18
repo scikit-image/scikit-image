@@ -44,7 +44,7 @@ def _try_all(image, methods=None, figsize=None, num_cols=2, verbose=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     methods : dict, optional
         Names and associated functions.
@@ -114,7 +114,7 @@ def try_all_threshold(image, figsize=(8, 5), verbose=True):
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Input image.
     figsize : tuple, optional
         Figure size (in inches).
