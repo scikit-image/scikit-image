@@ -59,7 +59,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     Attributes
     ----------
-    keypoints : (N, 2) ndarray of shape (N, 2)
+    keypoints : ndarray of shape (N, 2)
         Keypoint coordinates as ``(row, col)``.
     scales : ndarray of shape (N,)
         Corresponding scales.
