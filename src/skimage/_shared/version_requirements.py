@@ -129,7 +129,7 @@ def get_module(module_name, version=None):
 
     Returns
     -------
-    mod : module or None
+    mod : ModuleType or None
         Module if *module_name* is installed matching the optional version
         or None otherwise.
     """

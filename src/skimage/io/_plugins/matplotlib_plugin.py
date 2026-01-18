@@ -144,7 +144,7 @@ def imshow(image, ax=None, show_cbar=None, **kwargs):
         The axis to use for the image, defaults to plt.gca().
     show_cbar : bool, optional
         Whether to show the colorbar (used to override default behavior).
-    **kwargs : Keyword arguments
+    **kwargs : Any
         These are passed directly to `matplotlib.pyplot.imshow`.
 
     Returns

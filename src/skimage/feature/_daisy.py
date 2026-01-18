@@ -53,7 +53,7 @@ def daisy(
         Number of histograms sampled per ring.
     orientations : int, optional
         Number of orientations (bins) per histogram.
-    normalization : [ 'l1' | 'l2' | 'daisy' | 'off' ], optional
+    normalization : {'l1', 'l2', 'daisy', 'off'}, optional
         How to normalize the descriptors
 
           * 'l1': L1-normalization of each descriptor.
@@ -71,7 +71,7 @@ def daisy(
 
             ``rings = len(sigmas) - 1``
 
-    ring_radii : 1D array of int, optional
+    ring_radii : ndarray of shape (N,) and dtype int, optional
         Radius (in pixels) for each ring. Specifying ring_radii overrides the
         following two parameters.
 
@@ -97,7 +97,7 @@ def daisy(
             ``Q = ceil((N - radius*2) / step)``
             ``R = (rings * histograms + 1) * orientations``
 
-    descs_img : (M, N, 3) array (only if visualize==True)
+    descs_img : ndarray of shape (M, N, 3), only if visualize=True
         Visualization of the DAISY descriptors.
 
     References

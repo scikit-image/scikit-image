@@ -215,8 +215,13 @@ ignored_user_logins = [
 
 
 [tool.docstub.type_prefixes]
+warnings = "warnings"
 matplotlib = "matplotlib"
 scipy = "scipy"
+dask = "dask"
+
+[tool.docstub.type_nicknames]
+dtype-like = "np.typing.DTypeLike"
 
 [tool.cibuildwheel]
 test-command = "pytest --doctest-plus --pyargs skimage ./tests"

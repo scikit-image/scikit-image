@@ -79,7 +79,7 @@ def apply_parallel(
     ----------
     function : function
         Function to be mapped which takes an array as an argument.
-    array : numpy array or dask array
+    array : ndarray or dask.array.Array
         Array which the function will be applied to.
     chunks : int, tuple, or tuple of tuples, optional
         A single integer is interpreted as the length of one side of a square
@@ -103,8 +103,8 @@ def apply_parallel(
         Tuple of arguments to be passed to the function.
     extra_keywords : dictionary, optional
         Dictionary of keyword arguments to be passed to the function.
-    dtype : data-type or None, optional
-        The data-type of the `function` output. If None, Dask will attempt to
+    dtype : dtype-like, optional
+        The data type of the `function` output. If None, Dask will attempt to
         infer this by calling the function on data of shape ``(1,) * ndim``.
         For functions expecting RGB or multichannel data this may be
         problematic. In such cases, the user should manually specify this dtype
@@ -124,7 +124,7 @@ def apply_parallel(
 
     Returns
     -------
-    out : ndarray or dask Array
+    out : ndarray or dask.array.Array
         Returns the result of the applying the operation.
         Type is dependent on the ``compute`` argument.
 

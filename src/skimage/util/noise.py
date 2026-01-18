@@ -18,7 +18,7 @@ def _bernoulli(p, shape, *, rng):
     ----------
     p : float
         The probability that any given trial returns `True`.
-    shape : int or tuple of ints
+    shape : int or tuple of (int, ...)
         The shape of the ndarray to return.
     rng : `numpy.random.Generator`
         ``Generator`` instance, typically obtained via `np.random.default_rng()`.

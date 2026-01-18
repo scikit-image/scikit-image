@@ -19,9 +19,9 @@ def match_descriptors(
 
     Parameters
     ----------
-    descriptors1 : (M, P) array
+    descriptors1 : ndarray of shape (M, P)
         Descriptors of size P about M keypoints in the first image.
-    descriptors2 : (N, P) array
+    descriptors2 : ndarray of shape (N, P)
         Descriptors of size P about N keypoints in the second image.
     metric : {'euclidean', 'cityblock', 'minkowski', 'hamming', ...} , optional
         The metric to compute the distance between two descriptors. See

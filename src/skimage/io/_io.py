@@ -117,7 +117,7 @@ def imread_collection(
 
     Returns
     -------
-    ic : :class:`ImageCollection`
+    ic : :class:`~.ImageCollection`
         Collection of images.
 
     Other Parameters
@@ -160,7 +160,7 @@ def imsave(fname, arr, plugin=DEPRECATED, *, check_contrast=True, **plugin_args)
     ----------
     fname : str or pathlib.Path
         Target filename.
-    arr : ndarray of shape (M,N) or (M,N,3) or (M,N,4)
+    arr : ndarray of shape (M, N[, C]), with C=3 or C=4
         Image data.
     check_contrast : bool, optional
         Check for low contrast and print warning (default: True).

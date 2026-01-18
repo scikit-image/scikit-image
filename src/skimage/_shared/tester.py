@@ -29,7 +29,7 @@ class PytestTester:
 
     Parameters
     ----------
-    module_name : module name
+    module_name : str
         The name of the module to test.
 
     """
@@ -68,7 +68,7 @@ class PytestTester:
         durations : int, optional
             If < 0, do nothing, If 0, report time of all tests, if > 0,
             report the time of the slowest `timer` tests. Default is -1.
-        tests : test or list of tests
+        tests : Sequence of str
             Tests to be executed with pytest '--pyargs'
 
         Returns
