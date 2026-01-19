@@ -59,7 +59,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub>=0.6.0,<0.7.0',
+    'docstub==0.7.0rc0',
     'scikit-image[asv]',
 ]
 asv = [
