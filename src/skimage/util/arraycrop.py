@@ -14,7 +14,7 @@ def crop(ar, crop_width, copy=False, order='K'):
 
     Parameters
     ----------
-    ar : array-like, of rank N
+    ar : array_like, of rank N
         Input array.
     crop_width : int or Sequence
         Number of values to remove from the edges of each axis.

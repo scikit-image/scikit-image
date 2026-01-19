@@ -301,7 +301,7 @@ def _validate_image_histogram(image, hist, nbins=None, normalize=False):
     -------
     counts : 1D array of float
         Each element is the number of pixels falling in each intensity bin.
-    bin_centers : ndarray of shape (N,)
+    bin_centers : ndarray of shape (n,)
         Each element is the value corresponding to the center of each intensity
         bin.
 
@@ -1201,7 +1201,7 @@ def apply_hysteresis_threshold(image, low, high):
 
     Returns
     -------
-    thresholded : array of dtype bool and shape (M[, ...])
+    thresholded : ndarray of dtype bool and shape (M[, ...])
         Array in which ``True`` indicates the locations where `image`
         was above the hysteresis threshold.
 
