@@ -65,7 +65,7 @@ def alphanumeric_key(s):
 
     Returns
     -------
-    k : a list of strings and ints
+    k : list of (str or int)
 
     Examples
     --------
@@ -292,7 +292,7 @@ class ImageCollection:
 
         Returns
         -------
-        img : ndarray or :class:`skimage.io.ImageCollection`
+        img : ndarray or :class:`~.ImageCollection`
             The `n`-th image in the collection, or a new ImageCollection with
             the selected images.
         """
