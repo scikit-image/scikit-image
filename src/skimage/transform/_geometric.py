@@ -1845,7 +1845,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : (D+1, D+1) array_like, optional
+    matrix : array_like of shape (K, K), with K=D+1 (D being the dimensionality), optional
         Homogeneous transformation matrix.
     rotation : float or sequence of float, optional
         Rotation angle, clockwise, in radians. If given as a vector, it is
@@ -1862,7 +1862,7 @@ class EuclideanTransform(ProjectiveTransform):
 
     Attributes
     ----------
-    params : ndarray of shape (D+1, D+1)
+    params : ndarray of shape (K, K), with K=D+1 (D being the dimensionality)
         Homogeneous transformation matrix.
 
     Examples
@@ -2101,7 +2101,7 @@ class SimilarityTransform(EuclideanTransform):
 
     Parameters
     ----------
-    matrix : array_like of shape (dim+1, dim+1), optional
+    matrix : array_like of shape (K, K), with K=D+1 (D being the dimensionality), optional
         Homogeneous transformation matrix.
     scale : float, optional
         Scale factor. Implemented only for 2D and 3D.
@@ -2109,16 +2109,16 @@ class SimilarityTransform(EuclideanTransform):
         Rotation angle, clockwise, as radians.
         Implemented only for 2D and 3D. For 3D, this is given in ZYX Euler
         angles.
-    translation : array_like of shape (dim,), optional
+    translation : array_like of shape (D,), optional
         x, y[, z] translation parameters. Implemented only for 2D and 3D.
     dimensionality : int, optional
-        The dimensionality of the transform, corresponding to ``dim`` above.
+        The dimensionality of the transform, corresponding to ``D`` above.
         Ignored if `matrix` is not None, and set to ``matrix.shape[0] - 1``.
         Otherwise, must be one of 2 or 3.
 
     Attributes
     ----------
-    params : ndarray of shape (dim+1, dim+1)
+    params : ndarray of shape (K, K), with K=D+1 (D being the dimensionality)
         Homogeneous transformation matrix.
 
     Examples
