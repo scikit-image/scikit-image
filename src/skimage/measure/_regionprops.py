@@ -200,7 +200,7 @@ def _infer_regionprop_dtype(func, *, intensity, ndim):
 
     Returns
     -------
-    dtype : NumPy data type
+    dtype : np.dtype
         The data type of the returned property.
     """
     mask_1 = np.ones((1,) * ndim, dtype=bool)
@@ -264,7 +264,7 @@ def _inertia_eigvals_to_axes_lengths_3D(inertia_tensor_eigvals):
 
     Parameters
     ----------
-    inertia_tensor_eigvals : sequence of float
+    inertia_tensor_eigvals : Sequence of float
         A sequence of 3 floating point eigenvalues, sorted in descending order.
 
     Returns
@@ -461,8 +461,9 @@ class RegionProperties:
         """
         Returns
         -------
-        A tuple of the bounding box's start coordinates for each dimension,
-        followed by the end coordinates for each dimension.
+        bbox : tuple of (int, ...)
+            A tuple of the bounding box's start coordinates for each dimension,
+            followed by the end coordinates for each dimension.
         """
         return tuple(
             [self.slice[i].start for i in range(self._ndim)]
@@ -842,7 +843,7 @@ def _props_to_dict(regions, properties=('label', 'bbox'), separator='-'):
 
     Parameters
     ----------
-    regions : (K,) list
+    regions : list of RegionProperties
         List of RegionProperties objects as returned by :func:`regionprops`.
     properties : tuple or list of str, optional
         Properties that will be included in the resulting dictionary

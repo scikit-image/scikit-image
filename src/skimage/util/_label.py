@@ -15,8 +15,8 @@ def label_points(coords, output_shape):
 
     Returns
     -------
-    labels: ndarray
-        A mask of zeroes containing unique integer labels at the `coords`
+    labels : ndarray of dtype int
+        A mask of zeroes containing unique integer labels at the `coords`.
 
     Examples
     --------

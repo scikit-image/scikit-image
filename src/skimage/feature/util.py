@@ -64,9 +64,9 @@ def plot_matched_features(
         First image.
     image1 : (N, M [, 3]) array
         Second image.
-    keypoints0 : (K1, 2) array
+    keypoints0 : ndarray of shape (K1, 2)
         First keypoint coordinates as ``(row, col)``.
-    keypoints1 : (K2, 2) array
+    keypoints1 : ndarray of shape (K2, 2)
         Second keypoint coordinates as ``(row, col)``.
     matches : (Q, 2) array
         Indices of corresponding matches in first and second sets of
