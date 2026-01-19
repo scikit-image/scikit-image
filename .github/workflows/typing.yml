@@ -39,7 +39,7 @@ jobs:
 
       - name: Install docstub
         run: |
-          pip install docstub~=0.6.0
+          pip install docstub~=0.7.0rc0
           docstub --version
 
       - name: Create skimage-stubs with docstub
