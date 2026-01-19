@@ -17,7 +17,7 @@ def imread(fname):
 
     Parameters
     ----------
-    fname : string
+    fname : str
         Image file name, e.g. ``test.fits``.
 
     Returns
@@ -65,7 +65,7 @@ def imread_collection(load_pattern, conserve_memory=True):
 
     Returns
     -------
-    ic : ImageCollection
+    ic : :cls:`~.ImageCollection`
         Collection of images.
 
     """

@@ -223,6 +223,9 @@ dask = "dask"
 [tool.docstub.type_nicknames]
 dtype-like = "np.typing.DTypeLike"
 
+[tool.docstub.types]
+Path = "pathlib.Path"
+
 [tool.cibuildwheel]
 test-command = "pytest --doctest-plus --pyargs skimage ./tests"
 test-extras = ["test", "optional"]

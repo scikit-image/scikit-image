@@ -12,7 +12,7 @@ def window(window_type, shape, warp_kwargs=None):
 
     Parameters
     ----------
-    window_type : string, float, or tuple
+    window_type : str, float, or tuple
         The type of window to be created. Any window type supported by
         ``scipy.signal.get_window`` is allowed here. See notes below for a
         current list, or the SciPy documentation for the version of SciPy

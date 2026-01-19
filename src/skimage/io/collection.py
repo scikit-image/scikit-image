@@ -25,7 +25,7 @@ def concatenate_images(ic):
 
     Parameters
     ----------
-    ic : an iterable of images
+    ic : Iterable of ndarray
         The images to be concatenated.
 
     Returns
@@ -61,7 +61,7 @@ def alphanumeric_key(s):
 
     Parameters
     ----------
-    s : string
+    s : str
 
     Returns
     -------

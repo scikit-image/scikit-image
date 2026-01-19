@@ -55,7 +55,7 @@ def learn_gmm(descriptors, *, n_modes=32, gm_args=None):
 
     Parameters
     ----------
-    descriptors : np.ndarray (N, M) or list [(N1, M), (N2, M), ...]
+    descriptors : ndarray of shape (N, M) or list of (tuple[int, int])
         List of NumPy arrays, or a single NumPy array, of the descriptors
         used to estimate the GMM. The reason a list of NumPy arrays is
         permissible is because often when using a Fisher vector encoding,

@@ -28,7 +28,7 @@ def _pad(data, shape):
     ----------
     data : 2-d ndarray
         Input data
-    shape : (2,) tuple
+    shape : tuple of (int, int)
 
     """
     out = np.zeros(shape, dtype=data.dtype)
@@ -224,7 +224,7 @@ def wiener(
     ----------
     data : ndarray of shape (M, N)
         Input data.
-    K : float or (M, N) ndarray
+    K : float or ndarray of shape (M, N)
         Ratio between power spectrum of noise and undegraded
         image.
     impulse_response : callable `f(r, c, **filter_params)`

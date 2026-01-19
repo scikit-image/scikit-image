@@ -8,7 +8,7 @@ def polygon2mask(image_shape, polygon):
 
     Parameters
     ----------
-    image_shape : tuple of size 2
+    image_shape : tuple of (int, int)
         The shape of the mask.
     polygon : array_like of shape (N, 2)
         The polygon coordinates, where N is the number of points.

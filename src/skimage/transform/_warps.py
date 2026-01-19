@@ -651,7 +651,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
         of coordinates and each element is a ``(row, col)`` pair.
     shape : tuple
         Shape of output image ``(rows, cols[, bands])``.
-    dtype : np.dtype or string
+    dtype : dtype-like
         dtype for return value (sane choices: float32 or float64).
 
     Returns

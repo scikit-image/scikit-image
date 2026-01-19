@@ -98,7 +98,7 @@ def _get_display_range(image):
     -------
     lo, hi : same type as immin, immax
         The display range to be used for the input image.
-    cmap : string
+    cmap : str
         The name of the colormap to use.
     """
     ip = _get_image_properties(image)

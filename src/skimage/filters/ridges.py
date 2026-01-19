@@ -215,7 +215,7 @@ def frangi(
         Frangi correction constant that adjusts the filter's
         sensitivity to areas of high variance/texture/structure.
 
-        .. versionchanged:: 0.20
+        .. versionchanged:: 0.18
             The default, None, uses half of the maximum Hessian norm.
 
     black_ridges : bool, optional
