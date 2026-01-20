@@ -335,7 +335,7 @@ def order_angles_golden_ratio(theta):
     Yields
     -------
     indices : np.intp
-        Indices into ``theta`` such that ``theta[indices]`` gives the
+        Indices into `theta` such that ``theta[indices]`` gives the
         approximate golden ratio ordering of the projections. In total,
         ``len(theta)`` indices are yielded.
         All non-negative integers < ``len(theta)`` are yielded exactly once.
