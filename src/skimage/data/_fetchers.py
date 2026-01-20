@@ -1197,7 +1197,7 @@ def nickel_solidification():
 
     Returns
     -------
-    nickel_solidification : ndarray of shap (11, 384, 512) and dtype uint16
+    nickel_solidification : ndarray of shape (11, 384, 512) and dtype uint16
 
     Notes
     -----
