@@ -214,6 +214,13 @@ ignored_user_logins = [
 ]
 
 
+[tool.docstub]
+ignore_files = [
+    # deprecated, to be removed before v0.27
+    "io/_plugins",
+    "io/manage_plugins.py",
+]
+
 [tool.docstub.type_prefixes]
 warnings = "warnings"
 matplotlib = "matplotlib"
