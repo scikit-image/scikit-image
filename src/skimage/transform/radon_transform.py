@@ -333,7 +333,7 @@ def order_angles_golden_ratio(theta):
         Projection angles in degrees. Duplicate angles are not allowed.
 
     Yields
-    -------
+    ------
     indices : np.intp
         Indices into `theta` such that ``theta[indices]`` gives the
         approximate golden ratio ordering of the projections. In total,
