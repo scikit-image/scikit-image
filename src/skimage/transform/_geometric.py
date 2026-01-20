@@ -340,7 +340,7 @@ class _GeometricTransform(ABC):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -633,7 +633,7 @@ class FundamentalMatrixTransform(_HMatrixTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -873,7 +873,7 @@ class EssentialMatrixTransform(FundamentalMatrixTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -1134,7 +1134,7 @@ class ProjectiveTransform(_HMatrixTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -1652,7 +1652,7 @@ class PiecewiseAffineTransform(_GeometricTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -2002,7 +2002,7 @@ class EuclideanTransform(ProjectiveTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -2383,7 +2383,7 @@ class PolynomialTransform(_GeometricTransform):
 
         Returns
         -------
-        tf : Self or :cls:`~.FailedEstimation`
+        tf : Self or :class:`~.FailedEstimation`
             An instance of the transformation if the estimation succeeded.
             Otherwise, we return a special ``FailedEstimation`` object to
             signal a failed estimation. Testing the truth value of the failed
@@ -2600,7 +2600,7 @@ def estimate_transform(ttype, src, dst, *args, **kwargs):
 
     Returns
     -------
-    tf : :class:`_GeometricTransform` or ``FailedEstimation``
+    tf : :class:`_GeometricTransform` or :class:`FailedEstimation`
         An instance of the requested transformation if the estimation
         Otherwise, we return a special ``FailedEstimation`` object to signal a
         failed estimation. Testing the truth value of the failed estimation
