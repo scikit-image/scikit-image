@@ -3,7 +3,7 @@ reviews:
   review_status: false
   review_details: false
   high_level_summary: false
-  estimate_code_review_effort: false
+  estimate_code_review_effort: true
   labeling_instructions:
     - label: ":scroll: type: API"
       instructions: >-
