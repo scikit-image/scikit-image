@@ -1,0 +1,37 @@
+reviews:
+  profile: "chill" # "assertive" — more nitpicky
+  review_status: false
+  review_details: false
+  high_level_summary: false
+  estimate_code_review_effort: false
+  labeling_instructions:
+    - label: "📜 type: API"
+      instructions: >-
+        For backward-incompatible changes to the API and deprecations.
+    - label: "👶 type: New feature"
+      instructions: >-
+        For new features that previously did not exist.
+    - label: "🔧 type: Maintenance"
+      instructions: >-
+        For internal code changes and cleanups.
+    - label: "🩹 type: Bug fix"
+      instructions: >-
+        For bug fixes.
+    - label: "📄 type: Documentation"
+      instructions: >-
+        For changes dedicated to documentation (i.e., not as part of a new feature)
+    - label: "🤖 type: Infrastructure"
+      instructions: >-
+        Fixes to CI and other infrastructure.
+    - label: "⏩ type: Enhancement"
+      instructions: >-
+        Improvements made to an existing feature.
+    - label: "📈 type: Performance"
+      instructions: >-
+        For changes intended to improve performance.
+  auto_apply_labels: true
+  in_progress_fortune: false
+  poem: false
+  auto_review:
+    base_branches:
+      - main
