@@ -330,14 +330,14 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        x : (n, 1) array
+        x : ndarray of shape (n, 1)
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
 
         Returns
         -------
-        data : (n, m) array
+        data : ndarray of shape (n, m)
             Predicted coordinates.
 
         Other parameters

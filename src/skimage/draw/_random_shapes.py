@@ -273,7 +273,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
         Number of colors to generate.
     num_channels : int
         Number of elements representing color.
-    intensity_range : {tuple of tuples of ints, tuple of ints}, optional
+    intensity_range : tuple of (int or tuple[int, ...], ...), optional
         The range of values to sample pixel values from. For grayscale images
         the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and
@@ -344,7 +344,7 @@ def random_shapes(
         Number of channels in the generated image. If 1, generate monochrome
         images, else color images with multiple channels. Ignored if
         ``multichannel`` is set to False.
-    shape : {rectangle, circle, triangle, ellipse, None} str, optional
+    shape : {"rectangle", "circle", "triangle", "ellipse", None}, optional
         The name of the shape to generate or `None` to pick random ones.
     intensity_range : {tuple of tuples of uint8, tuple of uint8}, optional
         The range of values to sample pixel values from. For grayscale
@@ -372,7 +372,7 @@ def random_shapes(
 
     Returns
     -------
-    image : uint8 array
+    image : ndarray of dtype uint8
         An image with the fitted shapes.
     labels : list
         A list of labels, one per shape in the image. Each label is a

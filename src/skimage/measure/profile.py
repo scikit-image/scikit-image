@@ -31,7 +31,7 @@ def profile_line(
         contrast to standard numpy indexing.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
-    order : int in {0, 1, 2, 3, 4, 5}, optional
+    order : {0, 1, 2, 3, 4, 5}, optional
         The order of the spline interpolation, default is 0 if
         image.dtype is bool and 1 otherwise. The order has to be in
         the range 0-5. See `skimage.transform.warp` for detail.
