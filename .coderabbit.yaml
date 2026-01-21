@@ -5,28 +5,28 @@ reviews:
   high_level_summary: false
   estimate_code_review_effort: false
   labeling_instructions:
-    - label: "📜 type: API"
+    - label: ":scroll: type: API"
       instructions: >-
         For backward-incompatible changes to the API and deprecations.
-    - label: "👶 type: New feature"
+    - label: ":baby: type: New feature"
       instructions: >-
         For new features that previously did not exist.
-    - label: "🔧 type: Maintenance"
+    - label: ":wrench: type: Maintenance"
       instructions: >-
-        For internal code changes and cleanups.
-    - label: "🩹 type: Bug fix"
+        For internal code changes and cleanups. Mutually exclusive with Infrastructure.
+    - label: ":adhesive_bandage: type: Bug fix"
       instructions: >-
         For bug fixes.
-    - label: "📄 type: Documentation"
+    - label: ":page_facing_up: type: Documentation"
       instructions: >-
         For changes dedicated to documentation (i.e., not as part of a new feature)
-    - label: "🤖 type: Infrastructure"
+    - label: ":robot: type: Infrastructure"
       instructions: >-
-        Fixes to CI and other infrastructure.
-    - label: "⏩ type: Enhancement"
+        Fixes to CI and other infrastructure. Mutually exclusive with Maintenance.
+    - label: ":fast_forward: type: Enhancement"
       instructions: >-
         Improvements made to an existing feature.
-    - label: "📈 type: Performance"
+    - label: ":chart_with_upwards_trend: type: Performance"
       instructions: >-
         For changes intended to improve performance.
   auto_apply_labels: true
