@@ -37,6 +37,10 @@ reviews:
   auto_review:
     base_branches:
       - main
+  pre_merge_checks:
+    title:
+      requirements: >-
+        Title should be concise and descriptive, ideally under 80 characters, and not end on `.`
 
 chat:
   auto_reply: false
