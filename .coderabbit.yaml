@@ -42,6 +42,6 @@ chat:
 
 knowledge_base:
   code_guidelines:
-    file_patterns:
+    filePatterns:
       - CONTRIBUTING.rst
       - doc/source/development/core_developer.rst
