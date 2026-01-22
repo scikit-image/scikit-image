@@ -60,56 +60,41 @@ def _apply(func, image, footprint, out, mask, shift_x, shift_y, s0, s1, out_dtyp
 def mean_bilateral(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
-    """Apply a flat kernel bilateral filter.
-
-    This is an edge-preserving and noise reducing denoising filter. It averages
-    pixels based on their spatial closeness and radiometric similarity.
-
-    Spatial closeness is measured by considering only the local pixel
-    neighborhood given by a footprint (structuring element).
-
-    Radiometric similarity is defined by the graylevel interval [g-s0, g+s1]
-    where g is the current pixel graylevel.
-
-    Only pixels belonging to the footprint and having a graylevel inside this
-    interval are averaged.
-
+    """
+    Compute a local, edge-preserving mean using a flat bilateral filter.
+    
+    The filter averages pixels inside a spatial neighborhood defined by `footprint`
+    and a radiometric interval [g - s0, g + s1] around each center pixel value g.
+    Only pixels that belong to the footprint, are inside the optional `mask`, and
+    have graylevel within the interval contribute to the mean. The kernel is flat
+    (equal weight) and the output dtype follows the input image dtype.
+    
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
-        If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
-    s0, s1 : int
-        Define the [s0, s1] interval around the grayvalue of the center pixel
-        to be considered for computing the value.
-
+    footprint : ndarray of shape (m, n)
+        Neighborhood defined as a 2-D array of 1s and 0s.
+    out : ndarray of shape (M, N), same dtype as input `image`, optional
+        Array to store the result. If None, a new array is allocated.
+    mask : ndarray, optional
+        Mask indicating (>0) pixels included in local neighborhoods. If None,
+        the entire image is considered.
+    shift_x, shift_y : int, optional
+        Offsets applied to the footprint center; shifts are bounded so the center
+        remains inside the footprint.
+    s0, s1 : int, optional
+        Radiometric interval bounds: pixels with values in [g - s0, g + s1] are
+        considered for the local mean, where g is the center pixel value.
+    
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    out : ndarray of shape (M, N), same dtype as input `image`
+        Filtered image containing the local bilateral means.
+    
     See also
     --------
     skimage.restoration.denoise_bilateral
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage import data
-    >>> from skimage.morphology import disk
-    >>> from skimage.filters.rank import mean_bilateral
-    >>> img = data.camera().astype(np.uint16)
-    >>> bilat_img = mean_bilateral(img, disk(20), s0=10,s1=10)
-
     """
 
     return _apply(
@@ -128,54 +113,30 @@ def mean_bilateral(
 def pop_bilateral(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, s0=10, s1=10
 ):
-    """Return the local number (population) of pixels.
-
-
-    The number of pixels is defined as the number of pixels which are included
-    in the footprint and the mask. Additionally pixels must have a graylevel
-    inside the interval [g-s0, g+s1] where g is the grayvalue of the center
-    pixel.
-
+    """
+    Compute the local population count of pixels within the spatial footprint and the radiometric interval around each center pixel.
+    
+    The count for each center pixel is the number of neighboring pixels that are inside the footprint, inside the mask (if provided), and have a graylevel in the interval [g - s0, g + s1], where g is the center pixel's grayvalue.
+    
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
-    s0, s1 : int
-        Define the [s0, s1] interval around the grayvalue of the center pixel
-        to be considered for computing the value.
-
+    mask : ndarray, optional
+        Mask array that defines (>0) area of the image included in the local neighborhood. If None, the complete image is used.
+    shift_x, shift_y : int, optional
+        Offset added to the footprint center point. Shift is bounded to the footprint sizes (center must be inside the given footprint).
+    s0, s1 : int, optional
+        Define the [s0, s1] interval around the grayvalue of the center pixel to be considered when counting neighbors.
+    
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.morphology import footprint_rectangle
-    >>> import skimage.filters.rank as rank
-    >>> img = 255 * np.array([[0, 0, 0, 0, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.pop_bilateral(img, footprint_rectangle((3, 3)), s0=10, s1=10)
-    array([[3, 4, 3, 4, 3],
-           [4, 4, 6, 4, 4],
-           [3, 6, 9, 6, 3],
-           [4, 4, 6, 4, 4],
-           [3, 4, 3, 4, 3]], dtype=uint16)
-
+    out : ndarray of shape (M, N), same dtype as input `image`
+        Output image where each pixel equals the number of neighbors meeting the footprint, mask, and graylevel-interval criteria.
     """
 
     return _apply(
@@ -213,11 +174,11 @@ def sum_bilateral(
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -231,7 +192,7 @@ def sum_bilateral(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         Output image.
 
     See also

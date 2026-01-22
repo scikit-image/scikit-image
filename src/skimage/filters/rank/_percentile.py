@@ -206,33 +206,30 @@ def mean_percentile(
 def subtract_mean_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
-    """Return image subtracted from its local mean.
-
-    Only grayvalues between percentiles [p0, p1] are considered in the filter.
-
-    Parameters
-    ----------
-    image : 2-D array (uint8, uint16)
-        Input image.
-    footprint : ndarray of shape (m, n)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
-        If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
-    p0, p1 : float, optional, in interval [0, 1]
-        Define the [p0, p1] percentile interval to be considered for computing
-        the value.
-
-    Returns
-    -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    """
+    Subtract the local mean (computed within the specified percentile window) from each pixel.
+    
+    Only grayvalues between percentiles [p0, p1] are considered when computing the local mean.
+    
+    Parameters:
+        image (ndarray of shape (M, N) and dtype (uint8 or uint16)):
+            Input image.
+        footprint (ndarray of shape (m, n)):
+            Neighborhood as a 2-D array of 1's and 0's.
+        out (ndarray of shape (M, N), same dtype as input `image`, optional):
+            Array to store the result. If None, a new array is allocated.
+        mask (ndarray, optional):
+            Mask (>0) defining pixels included in local neighborhoods. If None, the full image is used.
+        shift_x (int), shift_y (int), optional:
+            Offsets added to the footprint center; shifts are bounded so the center remains inside the footprint.
+        p0 (float, optional):
+            Lower percentile in [0, 1] for the percentile window.
+        p1 (float, optional):
+            Upper percentile in [0, 1] for the percentile window.
+    
+    Returns:
+        out (ndarray of shape (M, N), same dtype as input `image`):
+            Image with the local mean (within [p0, p1]) subtracted from each pixel.
     """
 
     return _apply(
@@ -261,11 +258,11 @@ def enhance_contrast_percentile(
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -279,7 +276,7 @@ def enhance_contrast_percentile(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         Output image.
 
     """
@@ -298,35 +295,33 @@ def enhance_contrast_percentile(
 
 
 def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0):
-    """Return local percentile of an image.
-
-    Returns the value of the p0 lower percentile of the local grayvalue
-    distribution.
-
-    Only grayvalues between percentiles [p0, p1] are considered in the filter.
-
-    Parameters
-    ----------
-    image : 2-D array (uint8, uint16)
-        Input image.
-    footprint : ndarray of shape (m, n)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
-        If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
-    p0 : float, optional, in interval [0, 1]
-        Set the percentile value.
-
-    Returns
-    -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    """
+    Compute the local p0 lower percentile value for each pixel.
+    
+    The filter computes, for every image location, the p0 lower percentile of grayvalues
+    within the neighborhood defined by `footprint`. Only grayvalues within the percentile
+    window [p0, 1) are considered.
+    
+    Parameters:
+        image (ndarray of shape (M, N) and dtype (uint8 or uint16)):
+            Input image.
+        footprint (ndarray of shape (m, n)):
+            Neighborhood expressed as a 2-D array of 1's and 0's.
+        out (ndarray of shape (M, N), same dtype as input `image`, optional):
+            Destination array to store the result. If None, a new array is allocated.
+        mask (ndarray, optional):
+            Mask that defines (>0) pixels included in the local neighborhood. If None,
+            the entire image is used.
+        shift_x (int, optional):
+            Horizontal offset added to the footprint center; bounded to footprint size.
+        shift_y (int, optional):
+            Vertical offset added to the footprint center; bounded to footprint size.
+        p0 (float, optional, in interval [0, 1]):
+            Lower percentile to compute.
+    
+    Returns:
+        out (ndarray of shape (M, N), same dtype as input `image`):
+            Array of local p0 lower percentile values for each pixel.
     """
 
     return _apply(
@@ -345,36 +340,30 @@ def percentile(image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 def pop_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
-    """Return the local number (population) of pixels.
-
-    The number of pixels is defined as the number of pixels which are included
-    in the footprint and the mask.
-
-    Only grayvalues between percentiles [p0, p1] are considered in the filter.
-
-    Parameters
-    ----------
-    image : 2-D array (uint8, uint16)
-        Input image.
-    footprint : ndarray of shape (m, n)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
-        If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
-    p0, p1 : float, optional, in interval [0, 1]
-        Define the [p0, p1] percentile interval to be considered for computing
-        the value.
-
-    Returns
-    -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    """
+    Compute the local count of pixels within the footprint and optional mask whose values lie between the p0 and p1 percentiles.
+    
+    Only pixels included by the footprint and (if provided) the mask are considered; among those, only grayvalues within the percentile interval [p0, p1] contribute to the count.
+    
+    Parameters:
+        image (ndarray of shape (M, N) and dtype (uint8 or uint16)):
+            Input image.
+        footprint (ndarray of shape (m, n)):
+            Neighborhood expressed as a 2-D array of 1's and 0's.
+        out (ndarray of shape (M, N), same dtype as input `image`, optional):
+            Destination array for the result. If None, a new array is allocated.
+        mask (ndarray, optional):
+            Mask array that defines (>0) area of the image included in the local neighborhood. If None, the complete image is used.
+        shift_x (int, optional):
+            Horizontal offset added to the footprint center; bounded so the center stays inside the footprint.
+        shift_y (int, optional):
+            Vertical offset added to the footprint center; bounded so the center stays inside the footprint.
+        p0, p1 (float, optional, in interval [0, 1]):
+            Lower and upper percentile bounds defining the inclusive interval of grayvalues considered.
+    
+    Returns:
+        out (ndarray of shape (M, N), same dtype as input `image`):
+            Per-pixel local population count of values within the specified percentile interval.
     """
 
     return _apply(
@@ -393,36 +382,34 @@ def pop_percentile(
 def sum_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0, p1=1
 ):
-    """Return the local sum of pixels.
-
+    """
+    Compute the local sum of pixels within the given percentile interval.
+    
     Only grayvalues between percentiles [p0, p1] are considered in the filter.
-
-    Note that the sum may overflow depending on the data type of the input
-    array.
-
+    Note that the sum may overflow depending on the dtype of the input array.
+    
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
     footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
-    mask : ndarray
+    mask : ndarray, optional
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
+    shift_x, shift_y : int, optional
         Offset added to the footprint center point. Shift is bounded to the
         footprint sizes (center must be inside the given footprint).
     p0, p1 : float, optional, in interval [0, 1]
         Define the [p0, p1] percentile interval to be considered for computing
         the value.
-
+    
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    out : ndarray of shape (M, N), same dtype as input `image`
+        Output image containing the local sums.
     """
 
     return _apply(
@@ -441,35 +428,33 @@ def sum_percentile(
 def threshold_percentile(
     image, footprint, out=None, mask=None, shift_x=0, shift_y=0, p0=0
 ):
-    """Local threshold of an image.
-
-    The resulting binary mask is True if the grayvalue of the center pixel is
-    greater than the local mean.
-
-    Only grayvalues between percentiles [p0, p1] are considered in the filter.
-
+    """
+    Compute a local binary mask indicating whether each center pixel exceeds the local mean
+    computed within a percentile-restricted neighborhood.
+    
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
     footprint : ndarray of shape (m, n)
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
-        If None, a new array is allocated.
-    mask : ndarray
-        Mask array that defines (>0) area of the image included in the local
-        neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : int
-        Offset added to the footprint center point. Shift is bounded to the
-        footprint sizes (center must be inside the given footprint).
+        Neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray of shape (M, N), dtype bool, optional
+        Destination array for the result. If None, a new boolean array is allocated.
+    mask : ndarray, optional
+        Mask array that defines (>0) area of the image included in the local neighborhood.
+        If None, the complete image is used.
+    shift_x, shift_y : int, optional
+        Offset added to the footprint center point; bounded to footprint sizes.
     p0 : float, optional, in interval [0, 1]
-        Set the percentile value.
-
+        Lower percentile defining the percentile window [p0, 1] used to restrict values
+        considered when computing the local mean.
+    
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
-        Output image.
-
+    out : ndarray of shape (M, N), dtype bool
+        Local binary mask: `True` if the center pixel value is greater than the local mean
+        computed over the neighborhood considering only pixels within percentiles [p0, 1],
+        `False` otherwise.
     """
 
     return _apply(
