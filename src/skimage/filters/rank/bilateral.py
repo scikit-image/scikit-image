@@ -76,11 +76,11 @@ def mean_bilateral(
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -94,7 +94,7 @@ def mean_bilateral(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         Output image.
 
     See also
@@ -138,11 +138,11 @@ def pop_bilateral(
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -156,7 +156,7 @@ def pop_bilateral(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         Output image.
 
     Examples
@@ -213,11 +213,11 @@ def sum_bilateral(
 
     Parameters
     ----------
-    image : 2-D array (uint8, uint16)
+    image : ndarray of shape (M, N) and dtype (uint8 or uint16)
         Input image.
-    footprint : 2-D array
+    footprint : ndarray of shape (m, n)
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
@@ -231,7 +231,7 @@ def sum_bilateral(
 
     Returns
     -------
-    out : 2-D array, same dtype as input `image`
+    out : ndarray of shape (M, N), same dtype as input `image`
         Output image.
 
     See also
