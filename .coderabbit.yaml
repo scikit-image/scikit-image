@@ -33,6 +33,7 @@ reviews:
   auto_apply_labels: true
   in_progress_fortune: false
   poem: false
+  enable_prompt_for_ai_agents: false
   auto_review:
     base_branches:
       - main
