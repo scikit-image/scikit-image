@@ -26,7 +26,7 @@ reviews:
         Fixes to CI and other infrastructure. Mutually exclusive.
     - label: ":fast_forward: type: Enhancement"
       instructions: >-
-        Improvements made to an existing feature.
+        Improvements made to an existing feature. Mutually exclusive.
     - label: ":chart_with_upwards_trend: type: Performance"
       instructions: >-
         For changes intended to improve performance. Mutually exclusive.
