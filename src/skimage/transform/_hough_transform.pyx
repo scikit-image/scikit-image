@@ -385,6 +385,17 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
        output list.
     9. goto 1.
 
+    The code for this function started as a port of the OpenCV `hough.cpp`_
+    file, copyright::
+
+      2000 Intel Corporation, all rights reserved.
+      2013 OpenCV Foundation, all rights reserved.
+      2014, Itseez, Inc, all rights reserved.
+      Third party copyrights are property of their respective owners.
+
+    and released under a BSD-3-Clause license.
+
+    .. _hough.cpp: https://github.com/opencv/opencv/blob/4.x/modules/imgproc/src/hough.cpp#L490
     """
     cdef Py_ssize_t height = img.shape[0]
     cdef Py_ssize_t width = img.shape[1]
