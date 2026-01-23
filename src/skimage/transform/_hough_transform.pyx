@@ -330,7 +330,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              rng=None):
+                              rng=None, char tie_jump=True):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -351,6 +351,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
+    tie_jump : {True, False}
+        If True, attempt to mitigate effect of ties in accumulator by pushing
+        points generating ties to end of point list.
 
     Returns
     -------
@@ -484,7 +487,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # to_swap points to current position for alternative point.
             # If we've reached or overrun the collection of swapped points,
             # start ignoring ties, and accept the consequences.
-            if ties and p_i < to_swap:
+            if tie_jump and ties and p_i < to_swap:
                 rand_idxs[p_i] = rand_idxs[to_swap]
                 rand_idxs[to_swap] = idx
                 to_swap -= 1
