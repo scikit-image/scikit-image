@@ -77,7 +77,7 @@ def expected_warnings(matching):
 
     Parameters
     ----------
-    matching : None or a list of strings or compiled regexes
+    matching : list of str or re.Pattern or None
         Regexes for the desired warning to catch
         If matching is None, this behaves as a no-op.
 

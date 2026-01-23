@@ -195,7 +195,7 @@ def manders_overlap_coeff(image0, image1, mask=None):
 
     Returns
     -------
-    moc: float
+    moc : float
         Manders' Overlap Coefficient of pixel intensities between the two
         images.
 
