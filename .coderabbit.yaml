@@ -49,4 +49,4 @@ knowledge_base:
   code_guidelines:
     filePatterns:
       - CONTRIBUTING.rst
-      - doc/source/development/core_developer.rst
+      - doc/source/development/core_developer.md
