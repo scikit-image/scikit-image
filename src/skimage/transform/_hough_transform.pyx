@@ -479,7 +479,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # Line equation is r = cos theta x + sin theta y.  Rearranging:
             # y = r / sin theta  - cos theta x / sin theta, and slope
             # is -cos theta / sin theta.
-            slope = -line_cos / line_sin if line_sin else 99  # Marker value.
+            # If line_sin is 0, set to marker value of 99, otherwise value
+            # will be between -1 and 1.
+            slope = -line_cos / line_sin if line_sin else 99
             x_delta_1 = fabs(slope) < 1  # Does x advance in steps of 1?
             if not x_delta_1:  # abs(line_sin) <= abs(line_cos)
                 slope = line_sin / -line_cos  # y advances in steps of 1.
@@ -523,7 +525,7 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             # Confirm line length is sufficient.
             x_len = line_ends[1, 0] - line_ends[0, 0]  # pass 2 x - pass 1 x
             y_len = line_ends[1, 1] - line_ends[0, 1]  # pass 2 y - pass 1 y
-            if not sqrt(x_len * x_len + y_len * y_len) >= line_length:
+            if sqrt(x_len * x_len + y_len * y_len) < line_length:
                 continue
 
             # Pass 2: reset accumulator and mask for points on line (steps 6

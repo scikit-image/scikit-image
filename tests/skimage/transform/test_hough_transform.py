@@ -99,9 +99,9 @@ def _check_seeded_lines(seed, size, expected, img, **kwargs):
     # to identification of part-lines (where the identified line is close to,
     # but not exactly matching the real line).
     seed_gen = np.random.default_rng(seed)
-    for seed in seed_gen.integers(np.iinfo(int).max, size=size):
+    for rng_seed in seed_gen.integers(np.iinfo(int).max, size=size):
         # Enforce shorter gap
-        assert _sorted_ph(img, rng=seed, **kwargs) == expected
+        assert _sorted_ph(img, rng=rng_seed, **kwargs) == expected
 
 
 def test_probabilistic_hough_examples():
