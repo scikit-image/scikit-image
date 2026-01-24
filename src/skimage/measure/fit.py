@@ -330,14 +330,14 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        x : (n, 1) array
+        x : ndarray of shape (n, 1)
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
 
         Returns
         -------
-        data : (n, m) array
+        data : ndarray of shape (n, m)
             Predicted coordinates.
 
         Other parameters
@@ -568,7 +568,7 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -636,12 +636,12 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for each data point.
 
         """
@@ -692,7 +692,7 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -723,9 +723,9 @@ class EllipseModel(_BaseModel):
 
     Parameters
     ----------
-    center : array-like, shape (2,)
+    center : array_like of shape (2,)
         Coordinates of ellipse center.
-    axis_lengths : array-like, shape (2,)
+    axis_lengths : array_like of shape (2,)
         Length of first axis and length of second axis.  Call these ``a`` and
         ``b``.
     theta : float
@@ -781,9 +781,9 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        center : array-like, shape (2,)
+        center : array_like of shape (2,)
             Coordinates of ellipse center.
-        axis_lengths : array-like, shape (2,)
+        axis_lengths : array_like of shape (2,)
             Length of first axis and length of second axis.  Call these ``a``
             and ``b``.
         theta : float
@@ -823,7 +823,7 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -970,12 +970,12 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for each data point.
 
         """
@@ -1039,7 +1039,7 @@ class EllipseModel(_BaseModel):
 
         Returns
         -------
-        xy : (..., 2) array
+        xy : ndarray of shape (..., 2)
             Predicted x- and y-coordinates.
 
         Other parameters
@@ -1069,7 +1069,7 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -1276,7 +1276,7 @@ def ransac(
     -------
     model : object
         Best model with largest consensus set.
-    inliers : (N,) array
+    inliers : ndarray of shape (N,)
         Boolean mask of inliers classified as ``True``.
 
     References

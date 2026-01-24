@@ -12,7 +12,7 @@ def regular_grid(ar_shape, n_points):
 
     Parameters
     ----------
-    ar_shape : array-like of ints
+    ar_shape : array_like of dtype int
         The shape of the space embedding the grid. ``len(ar_shape)`` is the
         number of dimensions.
     n_points : int
@@ -20,7 +20,7 @@ def regular_grid(ar_shape, n_points):
 
     Returns
     -------
-    slices : tuple of slice objects
+    slices : tuple of (slice, ...)
         A slice along each dimension of `ar_shape`, such that the intersection
         of all the slices give the coordinates of regularly spaced points.
 
@@ -89,7 +89,7 @@ def regular_seeds(ar_shape, n_points, dtype=int):
         The shape of the desired output image.
     n_points : int
         The desired number of nonzero points.
-    dtype : numpy data type, optional
+    dtype : dtype-like, optional
         The desired data type of the output.
 
     Returns

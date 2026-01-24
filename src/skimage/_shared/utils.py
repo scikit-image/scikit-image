@@ -205,11 +205,23 @@ class PatchClassRepr(type):
 
 
 class DEPRECATED(metaclass=PatchClassRepr):
-    """Signal value to help with deprecating parameters that use None.
+    """Signal that a deprecated parameter has not been set.
 
-    This is a proxy object, used to signal that a parameter has not been set.
     This is useful if ``None`` is already used for a different purpose or just
     to highlight a deprecated parameter in the signature.
+
+    This is a sentinel and not meant to be initialized.
+    """
+
+
+class DEPRECATED_GOT_VALUE(metaclass=PatchClassRepr):
+    """Signal that a value was passed to a deprecated parameter.
+
+    Used by :class:`deprecate_parameter` to replace values that were passed to
+    deprecated parameters. This allows further handling of the deprecated case
+    inside the decorated function.
+
+    This is a sentinel and not meant to be initialized.
     """
 
 
@@ -228,9 +240,13 @@ class deprecate_parameter:
     template : str, optional
         If given, this message template is used instead of the default one.
     new_name : str, optional
-        If given, the default message will recommend the new parameter name and an
-        error will be raised if the user uses both old and new names for the
-        same parameter.
+        The name of a new parameter replacing the deprecated one. If given:
+        - The default message will recommend the new parameter name.
+        - Values passed to `deprecated_name` are replaced with
+          :class:`DEPRECATED_GOT_VALUE`, and the replaced value is passed to
+          `new_name` instead.
+        - An error will be raised if the user uses both `deprecated_name` and
+          `new_name`.
     modify_docstring : bool, optional
         If the wrapped function has a docstring, add the deprecated parameters
         to the "Other Parameters" section.
@@ -267,6 +283,7 @@ class deprecate_parameter:
     """
 
     DEPRECATED = DEPRECATED  # Make signal value accessible for convenience
+    DEPRECATED_GOT_VALUE = DEPRECATED_GOT_VALUE
 
     remove_parameter_template = (
         "Parameter `{deprecated_name}` is deprecated since version "
@@ -341,21 +358,20 @@ class deprecate_parameter:
             deprecated_value = DEPRECATED
             new_value = DEPRECATED
 
-            # Extract value of deprecated parameter
+            # Extract value of deprecated parameter and overwrite with
+            # DEPRECATED_GOT_VALUE if replacement exists
             if len(args) > deprecated_idx:
                 deprecated_value = args[deprecated_idx]
-                # Overwrite old with DEPRECATED if replacement exists
                 if self.new_name is not None:
                     args = (
                         args[:deprecated_idx]
-                        + (DEPRECATED,)
+                        + (DEPRECATED_GOT_VALUE,)
                         + args[deprecated_idx + 1 :]
                     )
             if self.deprecated_name in kwargs.keys():
                 deprecated_value = kwargs[self.deprecated_name]
-                # Overwrite old with DEPRECATED if replacement exists
                 if self.new_name is not None:
-                    kwargs[self.deprecated_name] = DEPRECATED
+                    kwargs[self.deprecated_name] = DEPRECATED_GOT_VALUE
 
             # Extract value of new parameter (if present)
             if new_idx is not False and len(args) > new_idx:

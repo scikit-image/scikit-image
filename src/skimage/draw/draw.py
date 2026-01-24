@@ -15,17 +15,20 @@ from ._draw import (
 )
 
 
+__doctest_requires__ = {("polygon_perimeter", "rectangle_perimeter"): ["matplotlib"]}
+
+
 def _ellipse_in_shape(shape, center, radii, rotation=0.0):
     """Generate coordinates of points within ellipse bounded by shape.
 
     Parameters
     ----------
-    shape :  iterable of ints
+    shape : Iterable of int(s)
         Shape of the input image.  Must be at least length 2. Only the first
         two values are used to determine the extent of the input image.
-    center : iterable of floats
+    center : Iterable of float(s)
         (row, column) position of center inside the given shape.
-    radii : iterable of floats
+    radii : Iterable of float(s)
         Size of two half axes (for row and column)
     rotation : float, optional
         Rotation of the ellipse defined by the above, in radians
@@ -243,9 +246,6 @@ def polygon_perimeter(r, c, shape=None, clip=False):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> from skimage.draw import polygon_perimeter
     >>> img = np.zeros((10, 10), dtype=np.uint8)
     >>> rr, cc = polygon_perimeter([5, -1, 5, 10],
@@ -303,13 +303,13 @@ def set_color(image, coords, color, alpha=1):
 
     Parameters
     ----------
-    image : (M, N, C) ndarray
+    image : ndarray of shape (M, N, C)
         Image
-    coords : tuple of ((K,) ndarray, (K,) ndarray)
+    coords : tuple of (ndarray of shape (K,), ...)
         Row and column coordinates of pixels to be colored.
-    color : (C,) ndarray
+    color : ndarray of shape (C,)
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (K,) ndarray
+    alpha : np.number or ndarray of dtype np.number and shape (K,)
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 
@@ -906,9 +906,6 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
 
     Examples
     --------
-    .. testsetup::
-        >>> import pytest; _ = pytest.importorskip('matplotlib')
-
     >>> import numpy as np
     >>> from skimage.draw import rectangle_perimeter
     >>> img = np.zeros((5, 6), dtype=np.uint8)
@@ -947,7 +944,7 @@ def _rectangle_slice(start, end=None, extent=None):
 
     Returns
     -------
-    (top_left, bottom_right)
+    slice : tuple of (int, int), corresponding to (top_left, bottom_right)
         The slice you would need to select the region in the rectangle defined
         by the parameters.
         Select it like:

@@ -1532,10 +1532,10 @@ def test_multichannel(prop_name):
     if np.shape(p) == np.shape(p_multi):
         # property does not depend on multiple channels
         assert_array_equal(p, p_multi)
-    else:
-        # property uses multiple channels, returns props stacked along
-        # final axis
-        assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-12, atol=1e-12)
+        return
+    # property uses multiple channels, returns props stacked along
+    # final axis
+    assert_allclose(p, np.asarray(p_multi)[..., 1], rtol=1e-15, atol=1e-15)
 
 
 def test_3d_ellipsoid_axis_lengths():

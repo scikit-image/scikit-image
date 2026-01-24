@@ -69,7 +69,7 @@ class BRIEF(DescriptorExtractor):
         index ``(i, j)`` either being ``True`` or ``False`` representing
         the outcome of the intensity comparison for i-th keypoint on j-th
         decision pixel-pair. It is ``Q == np.sum(mask)``.
-    mask : (N,) array of dtype bool
+    mask : array of shape (N,) and dtype bool
         Mask indicating whether a keypoint has been filtered out
         (``False``) or is described in the `descriptors` array (``True``).
 
@@ -160,9 +160,9 @@ class BRIEF(DescriptorExtractor):
 
         Parameters
         ----------
-        image : 2D array
+        image : ndarray of shape (K, L)
             Input image.
-        keypoints : (N, 2) array
+        keypoints : ndarray of shape (N, 2)
             Keypoint coordinates as ``(row, col)``.
 
         """

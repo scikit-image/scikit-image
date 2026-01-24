@@ -258,16 +258,16 @@ def sobel_h(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Sobel edge map.
 
     Notes
@@ -288,16 +288,16 @@ def sobel_v(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Sobel edge map.
 
     Notes
@@ -380,16 +380,16 @@ def scharr_h(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Scharr edge map.
 
     Notes
@@ -415,16 +415,16 @@ def scharr_v(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Scharr edge map.
 
     Notes
@@ -508,16 +508,16 @@ def prewitt_h(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Prewitt edge map.
 
     Notes
@@ -538,16 +538,16 @@ def prewitt_v(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Prewitt edge map.
 
     Notes
@@ -568,16 +568,16 @@ def roberts(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Roberts' Cross edge map.
 
     See also
@@ -609,16 +609,16 @@ def roberts_pos_diag(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Robert's edge map.
 
     Notes
@@ -647,16 +647,16 @@ def roberts_neg_diag(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Robert's edge map.
 
     Notes
@@ -790,16 +790,16 @@ def farid_h(image, *, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Farid edge map.
 
     Notes
@@ -830,16 +830,16 @@ def farid_v(image, *, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Image to process.
-    mask : 2-D array, optional
+    mask : ndarray of shape (M, N), optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
 
     Returns
     -------
-    output : 2-D array
+    output : ndarray of shape (M, N) and dtype float
         The Farid edge map.
 
     Notes

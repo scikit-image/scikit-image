@@ -86,7 +86,7 @@ def erosion(
         If None, use a cross-shaped footprint (connectivity=1). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
-    out : ndarrays, optional
+    out : ndarray, optional
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     mode : str, optional

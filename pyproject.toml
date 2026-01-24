@@ -59,7 +59,11 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub==0.3.0.post0',
+    'docstub==0.7.0rc0',
+    'scikit-image[asv]',
+]
+asv = [
+    'asv; sys_platform != "emscripten"',
 ]
 docs = [
     'sphinx>=8.0',
@@ -82,7 +86,7 @@ docs = [
     'sphinx_design>=0.5',
     'pydata-sphinx-theme>=0.16',
     'PyWavelets>=1.6',
-    'pytest-doctestplus',
+    'pytest-doctestplus>=1.6.0',
 ]
 optional = [
     'SimpleITK; sys_platform != "emscripten"',
@@ -99,7 +103,6 @@ optional_free_threaded = [
 ]
 
 test = [
-    'asv; sys_platform != "emscripten"',
     'numpydoc>=1.7',
     'pooch>=1.6.0; sys_platform != "emscripten"',
     'pytest>=8.3',
@@ -107,7 +110,7 @@ test = [
     'pytest-pretty',
     'pytest-localserver',
     'pytest-faulthandler',
-    'pytest-doctestplus',
+    'pytest-doctestplus>=1.6.0',
 ]
 
 [project.urls]
@@ -200,6 +203,8 @@ filterwarnings = [
     # Pyodide warning coming via threadpoolctl, remove when
     # https://github.com/joblib/threadpoolctl/pull/201 is released
     "ignore:.*JsProxy\\.as_object_map.*:RuntimeWarning",
+    # Warning caused by matplotlib 3.7.0 because it uses deprecated API of pyparsing 3.3.1
+    "ignore:.*(parseString|resetCache|enablePackrat).*:DeprecationWarning:matplotlib",
 ]
 norecursedirs = ["io/_plugins"]
 
@@ -210,9 +215,24 @@ ignored_user_logins = [
 ]
 
 
+[tool.docstub]
+ignore_files = [
+    # deprecated, to be removed before v0.27
+    "io/_plugins",
+    "io/manage_plugins.py",
+]
+
 [tool.docstub.type_prefixes]
+warnings = "warnings"
 matplotlib = "matplotlib"
 scipy = "scipy"
+dask = "dask"
+
+[tool.docstub.type_nicknames]
+dtype-like = "np.typing.DTypeLike"
+
+[tool.docstub.types]
+Path = "pathlib.Path"
 
 [tool.cibuildwheel]
 test-command = "pytest --doctest-plus --pyargs skimage ./tests"
@@ -222,6 +242,10 @@ environment = {PIP_PREFER_BINARY=1}
 environment-pass = ["SKIMAGE_LINK_FLAGS", "PIP_EXTRA_INDEX_URL", "COLUMNS"]
 build-verbosity = 0
 enable="cpython-freethreading"
+
+[tool.cibuildwheel.config-settings]
+setup-args = "-Dinclude-v2=false"
+# Could be overwritten using CIBW_CONFIG_SETTINGS environment variable
 
 [[tool.cibuildwheel.overrides]]
 select = "cp3??t-*"
@@ -245,7 +269,7 @@ test-extras = ["test", "optional_free_threaded"]
 environment = {PIP_PREFER_BINARY=1, SKIMAGE_LINK_FLAGS="-Wl,--strip-debug"}
 
 [tool.cibuildwheel.windows]
-archs = ["AMD64"]
+archs = ["auto"]
 
 [tool.cibuildwheel.macos]
 test-command = "pytest ./tests"
