@@ -9,7 +9,7 @@ from skimage._shared._warnings import warn_external
 def binary_blobs(
     shape,
     *,
-    blob_size=5,
+    blob_size,
     volume_fraction=0.5,
     rng=None,
     boundary_mode='wrap',
@@ -20,7 +20,7 @@ def binary_blobs(
     ----------
     shape : tuple of int(s)
         Shape of the output image.
-    blob_size : float, optional
+    blob_size : float
         Typical linear size of blob in pixels.
         Values smaller than 1 may lead to unexpected results.
     volume_fraction : float, default 0.5
@@ -64,7 +64,9 @@ def binary_blobs(
     >>> # Finer structures
     >>> blobs = sk2.data.binary_blobs(shape=(256, 256), blob_size=13)
     >>> # Blobs cover a smaller volume fraction of the image
-    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), volume_fraction=0.3)
+    >>> blobs = sk2.data.binary_blobs(
+    ...     shape=(256, 256), blob_size=25, volume_fraction=0.3
+    ... )
     """
     if boundary_mode not in {"nearest", "wrap"}:
         raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")

@@ -47,7 +47,7 @@ By importing functionality from `skimage2`, you explicitly opt in to the new beh
 
 This function is replaced by `skimage2.data.binary_blobs` with a new signature.
 The optional parameters `length` and `n_dim` are replaced with the new required parameter `shape` which allows generating non-square outputs.
-The parameter `blob_size_fraction` was replaced with the more intuitive `blob_size` whose behavior is independent of the generated array size.
+`blob_size_fraction` was replaced with the required parameter `blob_size`, whose behavior is independent of the generated array size.
 The default of `boundary_mode` is changed from `'nearest'` to `'wrap'`.
 
 To keep the old behavior from `skimage` (v1.x) use
