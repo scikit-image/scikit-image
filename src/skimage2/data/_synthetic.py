@@ -18,7 +18,7 @@ def binary_blobs(
 
     Parameters
     ----------
-    shape : tuple of int(s)
+    shape : tuple of (int, ...)
         Shape of the output image.
     blob_size : float
         Typical linear size of blob in pixels.
@@ -26,7 +26,7 @@ def binary_blobs(
     volume_fraction : float, default 0.5
         Fraction of image pixels covered by the blobs (where the output is 1).
         Should be in [0, 1].
-    rng : {`numpy.random.Generator`, int}, optional
+    rng : int or :class:`numpy.random.Generator`, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
@@ -48,7 +48,7 @@ def binary_blobs(
 
     Returns
     -------
-    blobs : ndarray of bools
+    blobs : ndarray of dtype bool
         Output binary image
 
     Examples
