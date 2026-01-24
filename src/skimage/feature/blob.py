@@ -641,7 +641,7 @@ def blob_doh(
 
     Returns
     -------
-    A : (n, 3) ndarray
+    A : ndarray of shape (n, 3)
         A 2d array with each row representing 3 values, ``(y,x,sigma)``
         where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
         standard deviation of the Gaussian kernel of the Hessian Matrix whose

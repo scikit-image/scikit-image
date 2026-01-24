@@ -32,9 +32,9 @@ class DescriptorExtractor:
 
         Parameters
         ----------
-        image : 2D array
+        image : ndarray of shape (K, L)
             Input image.
-        keypoints : (N, 2) array
+        keypoints : ndarray of shape (N, 2)
             Keypoint locations as ``(row, col)``.
 
         """
@@ -64,9 +64,9 @@ def plot_matched_features(
         First image.
     image1 : (N, M [, 3]) array
         Second image.
-    keypoints0 : (K1, 2) array
+    keypoints0 : ndarray of shape (K1, 2)
         First keypoint coordinates as ``(row, col)``.
-    keypoints1 : (K2, 2) array
+    keypoints1 : ndarray of shape (K2, 2)
         Second keypoint coordinates as ``(row, col)``.
     matches : (Q, 2) array
         Indices of corresponding matches in first and second sets of
@@ -204,16 +204,16 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
 
     Parameters
     ----------
-    image_shape : (2,) array_like
+    image_shape : array_like of shape (2,)
         Shape of the image as ``(rows, cols)``.
-    keypoints : (N, 2) array
+    keypoints : ndarray of shape (N, 2)
         Keypoint coordinates as ``(rows, cols)``.
     distance : int
         Image border distance.
 
     Returns
     -------
-    mask : (N,) bool array
+    mask : ndarray of shape (N,) and dtype bool
         Mask indicating if pixels are within the image (``True``) or in the
         border region of the image (``False``).
 

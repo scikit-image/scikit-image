@@ -59,7 +59,7 @@ data = ['pooch>=1.6.0']
 developer = [
     'pre-commit',
     'ipython',
-    'docstub==0.3.0.post0',
+    'docstub==0.7.0rc0',
     'scikit-image[asv]',
 ]
 asv = [
@@ -215,9 +215,24 @@ ignored_user_logins = [
 ]
 
 
+[tool.docstub]
+ignore_files = [
+    # deprecated, to be removed before v0.27
+    "io/_plugins",
+    "io/manage_plugins.py",
+]
+
 [tool.docstub.type_prefixes]
+warnings = "warnings"
 matplotlib = "matplotlib"
 scipy = "scipy"
+dask = "dask"
+
+[tool.docstub.type_nicknames]
+dtype-like = "np.typing.DTypeLike"
+
+[tool.docstub.types]
+Path = "pathlib.Path"
 
 [tool.cibuildwheel]
 test-command = "pytest --doctest-plus --pyargs skimage ./tests"

@@ -23,12 +23,12 @@ def _ellipse_in_shape(shape, center, radii, rotation=0.0):
 
     Parameters
     ----------
-    shape :  iterable of ints
+    shape : Iterable of int(s)
         Shape of the input image.  Must be at least length 2. Only the first
         two values are used to determine the extent of the input image.
-    center : iterable of floats
+    center : Iterable of float(s)
         (row, column) position of center inside the given shape.
-    radii : iterable of floats
+    radii : Iterable of float(s)
         Size of two half axes (for row and column)
     rotation : float, optional
         Rotation of the ellipse defined by the above, in radians
@@ -303,13 +303,13 @@ def set_color(image, coords, color, alpha=1):
 
     Parameters
     ----------
-    image : (M, N, C) ndarray
+    image : ndarray of shape (M, N, C)
         Image
-    coords : tuple of ((K,) ndarray, (K,) ndarray)
+    coords : tuple of (ndarray of shape (K,), ...)
         Row and column coordinates of pixels to be colored.
-    color : (C,) ndarray
+    color : ndarray of shape (C,)
         Color to be assigned to coordinates in the image.
-    alpha : scalar or (K,) ndarray
+    alpha : np.number or ndarray of dtype np.number and shape (K,)
         Alpha values used to blend color with image.  0 is transparent,
         1 is opaque.
 
@@ -944,7 +944,7 @@ def _rectangle_slice(start, end=None, extent=None):
 
     Returns
     -------
-    (top_left, bottom_right)
+    slice : tuple of (int, int), corresponding to (top_left, bottom_right)
         The slice you would need to select the region in the rectangle defined
         by the parameters.
         Select it like:

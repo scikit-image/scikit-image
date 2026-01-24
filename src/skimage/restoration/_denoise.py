@@ -673,7 +673,7 @@ def _wavelet_threshold(
         Input data to be denoised. `image` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-    wavelet : string
+    wavelet : str
         The type of wavelet to perform. Can be any of the options
         pywt.wavelist outputs. For example, this may be any of ``{db1, db2,
         db3, db4, haar}``.
