@@ -49,11 +49,10 @@ def test_probabilistic_hough():
         img[100 - i, i] = 100
         img[i, i] = 100
 
-    lines = transform.probabilistic_hough_line(
-        img, threshold=10, line_length=10, line_gap=1
-    )
-
-    assert _sort_lines(lines) == [[(25, 25), (74, 74)], [(25, 75), (74, 26)]]
+    _check_seeded_lines(1964, 50,
+                        [[(25, 25), (74, 74)], [(25, 75), (74, 26)]],
+                        img,
+                        threshold=10, line_gap=1, line_length=10)
 
     # Execute with default theta (Smoke test).
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
@@ -94,6 +93,17 @@ def _sorted_ph(*args, **kwargs):
     return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
 
 
+def _check_seeded_lines(seed, size, expected, img, **kwargs):
+    # Seed because of occasional errors from shorter lines. These happen
+    # because of the random order of point selection that sometimes leads
+    # to identification of part-lines (where the identified line is close to,
+    # but not exactly matching the real line).
+    seed_gen = np.random.default_rng(seed)
+    for seed in seed_gen.integers(np.iinfo(int).max, size=size):
+        # Enforce shorter gap
+        assert _sorted_ph(img, rng=seed, **kwargs) == expected
+
+
 def test_probabilistic_hough_examples():
     # Single line in LR (x)
     img = np.zeros((40, 40))
@@ -122,13 +132,12 @@ def test_probabilistic_hough_examples():
         oi = offset + i
         more[oi, oi] = 1
         more[back_off - i, oi] = 1
-    # Enforce shorter gap
-    lines = _sorted_ph(more, line_gap=2, line_length=L - 1)
     diags = [
         [(offset, offset), (back_off, back_off)],
         [(offset, back_off), (back_off, offset)],
     ]
-    assert lines == [y_line, x_line] + diags
+    _check_seeded_lines(1964, 10, [y_line, x_line] + diags, more,
+                        line_gap=2, line_length=L - 1)
     # Filter by length of diagonals.  Get only the diagonals back.
     len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
     assert _sorted_ph(more, line_gap=2, line_length=len_diag) == diags
@@ -163,6 +172,23 @@ def test_probabilistic_hough_recall_precision(n_lines):
     lines = _gen_lines(shape, n_lines, line_length, margins=1, rng=rng)
     precision, recall = precision_recall(lines, shape, line_length // 2, rng)
     assert precision >= 0.75
+    assert recall >= 0.75
+
+
+def test_probabilistic_hough_scores():
+    # Test a specific shape, line_length, n_lines with many iterations.
+    shape = (256, 256)
+    line_length = 100
+    n_lines = 20
+    rng = np.random.default_rng(1966)
+    lines = _gen_lines(shape, n_lines, line_length, margins=1, rng=rng)
+    n_iters = 1000
+    results = np.zeros((n_iters, 2))
+    for i in range(n_iters):
+        results[i, :] = precision_recall(lines, shape, line_length // 2,
+                                         rng=rng)
+    precision, recall = np.mean(results, axis=0)
+    assert precision >= 0.92
     assert recall >= 0.75
 
 
