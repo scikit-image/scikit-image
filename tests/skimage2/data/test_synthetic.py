@@ -34,11 +34,28 @@ class Test_binary_blobs:
         diff_wrap_ax1 = blobs_wrap[:, 0] ^ blobs_wrap[:, -1]
         assert diff_wrap_ax1.sum() < diff_near_ax1.sum()
 
-    def test_small_blob_size(self):
-        # A very small `blob_size_fraction` in relation to `length` will allocate
-        # excessive memory and likely leads to unexpected results. Check that this
-        # is gracefully handled
-        regex = r".* Clamping to `blob_size=0.1`"
+    @pytest.mark.parametrize("blob_size", [0.9, 0.4, 0.3, 0.1])
+    @pytest.mark.parametrize("volume_fraction", [0.9, 0.1])
+    def test_small_blob_size(self, blob_size, volume_fraction):
+        regex = r"Requested `blob_size` .* is smaller than 1"
+        with pytest.warns(RuntimeWarning, match=regex) as record:
+            result = binary_blobs(
+                shape=(100, 100),
+                rng=3,
+                blob_size=blob_size,
+                volume_fraction=volume_fraction,
+            )
+        assert_stacklevel(record, offset=-6)
+        if blob_size >= 0.4:
+            assert not np.all(result == 1)  # Features still exist
+        else:
+            np.testing.assert_equal(result, 1)
+
+    @pytest.mark.filterwarnings("ignore:Requested `blob_size` .* is smaller than 1")
+    def test_blob_size_clamping(self):
+        # A very small `blob_size` will allocate excessive memory
+        # Check that this is gracefully handled
+        regex = r"Clamping to `blob_size=0.1`"
         with pytest.warns(RuntimeWarning, match=regex) as record:
             result = binary_blobs(shape=(100, 100), rng=3, blob_size=0.09)
         assert_stacklevel(record)

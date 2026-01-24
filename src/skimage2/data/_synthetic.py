@@ -21,7 +21,8 @@ def binary_blobs(
     shape : tuple of int(s)
         Shape of the output image.
     blob_size : float, optional
-        Typical linear size of blob in pixels. Should not be smaller than 0.1.
+        Typical linear size of blob in pixels.
+        Values smaller than 1 may lead to unexpected results.
     volume_fraction : float, default 0.5
         Fraction of image pixels covered by the blobs (where the output is 1).
         Should be in [0, 1].
@@ -70,12 +71,17 @@ def binary_blobs(
 
     min_length = min(shape)
     blob_size_fraction = blob_size / min_length
+
+    if blob_size < 1:
+        warn_external(
+            f"Requested `blob_size` ({blob_size}) is smaller than 1. "
+            f"Small blob sizes may lead to unexpected results!",
+            category=RuntimeWarning,
+        )
     if blob_size < 0.1:
         blob_size_fraction = 0.1 / min_length
         warn_external(
-            f"Requested `blob_size` ({blob_size}) is smaller than 1. "
-            f"Small blob sizes likely lead to unexpected results! "
-            f"Clamping to `blob_size=0.1` to avoid allocating excessive memory.",
+            "Clamping to `blob_size=0.1` to avoid allocating excessive memory.",
             category=RuntimeWarning,
         )
 
