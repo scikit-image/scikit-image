@@ -46,18 +46,23 @@ By importing functionality from `skimage2`, you explicitly opt in to the new beh
 ### `skimage.data.binary_blobs`
 
 This function is replaced by `skimage2.data.binary_blobs` with a new signature.
-The optional parameters `length` and `n_dim` are replaced with the new required parameter `shape`.
-This allows generating non-square outputs.
+The optional parameters `length` and `n_dim` are replaced with the new required parameter `shape` which allows generating non-square outputs.
+The parameter `blob_size_fraction` was replaced with the more intuitive `blob_size` whose behavior is independent of the generated array size.
 The default of `boundary_mode` is changed from `'nearest'` to `'wrap'`.
 
 To keep the old behavior from `skimage` (v1.x) use
 
 ```python
 import skimage2 as sk2
-sk2.data.binary_blobs(shape=(length,) * n_dim, boundary_mode='nearest')
+
+sk2.data.binary_blobs(
+    shape=(length,) * n_dim,
+    blob_size=blob_size_fraction * length,
+    boundary_mode='nearest'
+)
 ```
 
-with `length` and `n_dim` containing values used with the old signature.
+with `length`, `n_dim` and `blob_size_fraction` containing values used with the old signature.
 Other parameters -- including the parameter `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
 ## Deprecations prior to skimage2

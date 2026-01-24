@@ -38,8 +38,8 @@ class Test_binary_blobs:
         # A very small `blob_size_fraction` in relation to `length` will allocate
         # excessive memory and likely leads to unexpected results. Check that this
         # is gracefully handled
-        regex = ".* Clamping to .* blob size of 0.1 pixels"
+        regex = r".* Clamping to `blob_size=0.1`"
         with pytest.warns(RuntimeWarning, match=regex) as record:
-            result = binary_blobs(shape=(100, 100), rng=3, blob_size_fraction=0.0009)
+            result = binary_blobs(shape=(100, 100), rng=3, blob_size=0.09)
         assert_stacklevel(record)
         np.testing.assert_equal(result, 1)

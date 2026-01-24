@@ -156,7 +156,7 @@ def test_binary_blobs_small_blob_size():
     # A very small `blob_size_fraction` in relation to `length` will allocate
     # excessive memory and likely leads to unexpected results. Check that this
     # is gracefully handled
-    regex = ".* Clamping to .* blob size of 0.1 pixels"
+    regex = r".* Clamping to `blob_size=0.1`"
     with pytest.warns(RuntimeWarning, match=regex) as record:
         result = data.binary_blobs(100, rng=3, blob_size_fraction=0.0009)
     assert_stacklevel(record)

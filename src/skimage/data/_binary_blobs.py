@@ -72,21 +72,24 @@ def binary_blobs(
         "`skimage.data.binary_blobs` is deprecated in favor of "
         "`skimage2.data.binary_blobs` which has a new signature. "
         "The parameters `length` and `n_dim` have been replaced with `shape`. "
+        "`blob_size_fraction` was changed to `blob_size`."
         "The default of `boundary_mode` has been changed to 'wrap'. "
         "To keep the old behavior from `skimage` (v1.x) use:\n"
         "\n"
         "    import skimage2 as sk2"
         "    sk2.data.binary_blobs("
         "        shape=(length,) * n_dim,"
+        "        blob_size=blob_size_fraction * length"
         "        boundary_mode='nearest',"
         "        ..."
         "    )",
         stacklevel=2,
         category=PendingSkimage2Change,
     )
+    blob_size = blob_size_fraction * length
     return ski2.data.binary_blobs(
         shape=(length,) * n_dim,
-        blob_size_fraction=blob_size_fraction,
+        blob_size=blob_size,
         volume_fraction=volume_fraction,
         rng=rng,
         boundary_mode=boundary_mode,
