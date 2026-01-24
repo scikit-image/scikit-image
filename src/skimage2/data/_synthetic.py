@@ -33,7 +33,7 @@ def binary_blobs(
     boundary_mode : {'wrap', 'nearest'}, optional
         The blobs are created by smoothing and then thresholding an
         array consisting of ones at seed positions. This mode determines which
-        values are  filled in when the smoothing kernel overlaps the seed
+        values are filled in when the smoothing kernel overlaps the seed
         array's boundary.
 
         'wrap' (`a b c d | a b c d | a b c d`)
