@@ -330,7 +330,7 @@ def _hough_line(cnp.ndarray img,
 def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                               Py_ssize_t line_length, Py_ssize_t line_gap,
                               cnp.ndarray[ndim=1, dtype=cnp.float64_t] theta,
-                              rng=None, char tie_mean=True):
+                              rng=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
@@ -351,9 +351,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
-    tie_mean : {True, False}
-        If True, attempt to mitigate effect of ties in accumulator by taking
-        mean over tied theta values.
 
     Returns
     -------
@@ -410,11 +407,9 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
     cdef Py_ssize_t max_distance, rho_idx_offset, idx
     cdef cnp.float64_t line_sin, line_cos, rho, slope
     cdef Py_ssize_t j, x, y, x1, y1, px, py, rho_idx, max_theta_idx
-    cdef Py_ssize_t max_rho_idx, last_theta_idx
     cdef Py_ssize_t reverse, gap, x_len, y_len, n_pts
     cdef cnp.int64_t value, max_value
     cdef int x_delta_1, delta, offset, slope_delta
-    cdef char tie_search
     cdef Py_ssize_t nlines = 0
     cdef Py_ssize_t lines_max = 2 ** 15  # maximum line number cutoff.
     cdef cnp.intp_t[:, :, ::1] lines = np.zeros((lines_max, 2, 2),
@@ -466,7 +461,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
             max_theta_idx = -1  # Index into {c,s}theta arrays, start value.
 
             # Apply Hough transform on point (step 2 above).
-            tie_search = False
             for j in range(nthetas):
                 rho = ctheta[j] * x + stheta[j] * y
                 rho_idx = round(rho) + rho_idx_offset
@@ -475,16 +469,6 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
                 if value > max_value:
                     max_value = value
                     max_theta_idx = j
-                    if tie_mean:
-                        last_theta_idx = j
-                        max_rho_idx = rho_idx
-                        tie_search = True
-                elif tie_search:
-                    if value == max_value and rho_idx == max_rho_idx:
-                        last_theta_idx += 1  # tie search continues.
-                    else:  # Tie search finished, take mean of theta indices.
-                        max_theta_idx = (max_theta_idx + last_theta_idx) / 2
-                        tie_search = False
             if max_value < threshold:  # Step 4 above.
                 continue
 
