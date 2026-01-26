@@ -5,8 +5,9 @@ import pytest
 from numpy.testing import assert_array_almost_equal, assert_array_equal, assert_equal
 from scipy import ndimage as ndi
 
-from skimage._shared._warnings import expected_warnings
+from skimage._shared.testing import assert_stacklevel
 from skimage.feature import peak
+from skimage.util import PendingSkimage2Change
 
 
 np.random.seed(21)
@@ -452,6 +453,9 @@ class TestPeakLocalMax:
             peak.peak_local_max(image, min_distance=5, threshold_rel=0).tolist()
         ) == [[5, 5, 5, 5], [15, 15, 15, 15]]
 
+    @pytest.mark.xfail(
+        reason="waiting for warn_external added by gh-7976", run=True, strict=True
+    )
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
 
@@ -462,8 +466,9 @@ class TestPeakLocalMax:
         assert_array_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        with expected_warnings(["When min_distance < 1"]):
+        with pytest.warns(RuntimeWarning, match=r"When min_distance < 1") as record:
             assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
+        assert_stacklevel(record)
 
     def test_peak_at_border(self):
         image = np.full((10, 10), -2)
@@ -561,6 +566,20 @@ def test_input_values_with_labels():
     _ = peak.peak_local_max(img, labels=labels)
 
     assert_array_equal(img, img_before)
+
+
+@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
+def test_peak_local_max_skimage2_warning():
+    image = np.zeros((5, 5), dtype=np.uint8)
+    image[1:3, 1:3] = 10
+    regex = (
+        r"`skimage.feature.peak_local_max` is deprecated in favor of "
+        r"`skimage2.feature.peak_local_max`"
+    )
+    with pytest.warns(PendingSkimage2Change, match=regex) as record:
+        peaks = peak.peak_local_max(image, min_distance=1)
+    assert_stacklevel(record)
+    assert len(peaks) == 4
 
 
 class TestProminentPeaks:
