@@ -125,7 +125,7 @@ def cross_correlate_masked(
         'same':
             The output is the same size as `arr1`, centered with respect
             to the `‘full’` output. Boundary effects are less prominent.
-    axes : tuple of ints, optional
+    axes : tuple of (int, ...), optional
         Axes along which to compute the cross-correlation.
     overlap_ratio : float, optional
         Minimum allowed overlap ratio between images. The correlation for

@@ -20,4 +20,4 @@ scikit-learn>=1.2
 sphinx_design>=0.5
 pydata-sphinx-theme>=0.16
 PyWavelets>=1.6
-pytest-doctestplus
+pytest-doctestplus>=1.6.0

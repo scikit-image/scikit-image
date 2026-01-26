@@ -352,7 +352,7 @@ def random_walker(
     beta : float, optional
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : string, available options {'cg', 'cg_j', 'cg_mg', 'bf'}
+    mode : {'cg', 'cg_j', 'cg_mg', 'bf'}, optional
         Mode for solving the linear system in the random walker algorithm.
 
         - 'bf' (brute force): an LU factorization of the Laplacian is

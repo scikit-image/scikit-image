@@ -28,7 +28,7 @@ def _pad(data, shape):
     ----------
     data : 2-d ndarray
         Input data
-    shape : (2,) tuple
+    shape : tuple of (int, int)
 
     """
     out = np.zeros(shape, dtype=data.dtype)
@@ -120,7 +120,7 @@ class LPIFilter2D:
 
         Parameters
         ----------
-        data : (M, N) ndarray
+        data : ndarray of shape (M, N)
 
         """
         check_nD(data, 2, 'data')
@@ -137,7 +137,7 @@ def filter_forward(
 
     Parameters
     ----------
-    data : (M, N) ndarray
+    data : ndarray of shape (M, N)
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
@@ -177,7 +177,7 @@ def filter_inverse(
 
     Parameters
     ----------
-    data : (M, N) ndarray
+    data : ndarray of shape (M, N)
         Input data.
     impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See :class:`~.LPIFilter2D`. This is a required
@@ -222,9 +222,9 @@ def wiener(
 
     Parameters
     ----------
-    data : (M, N) ndarray
+    data : ndarray of shape (M, N)
         Input data.
-    K : float or (M, N) ndarray
+    K : float or ndarray of shape (M, N)
         Ratio between power spectrum of noise and undegraded
         image.
     impulse_response : callable `f(r, c, **filter_params)`

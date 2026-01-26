@@ -15,7 +15,7 @@ class ThinPlateSplineTransform:
 
     Attributes
     ----------
-    src : (N, 2) array_like
+    src : array_like of shape (N, 2)
         Coordinates of control points in source image.
 
     References
@@ -103,13 +103,13 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        coords : (N, 2) array_like
+        coords : array_like of shape (N, 2)
             x, y coordinates to transform
 
         Returns
         -------
-        transformed_coords: (N, D) array
-            Destination coordinates
+        transformed_coords: ndarray of shape (N, D)
+            Destination coordinates.
         """
         if self._spline_mappings is None:
             msg = (
@@ -138,9 +138,9 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Control points at source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Control points at destination coordinates.
 
         Returns
@@ -234,9 +234,9 @@ class ThinPlateSplineTransform:
 
         Parameters
         ----------
-        src : (N, 2) array_like
+        src : array_like of shape (N, 2)
             Control points at source coordinates.
-        dst : (N, 2) array_like
+        dst : array_like of shape (N, 2)
             Control points at destination coordinates.
 
         Returns

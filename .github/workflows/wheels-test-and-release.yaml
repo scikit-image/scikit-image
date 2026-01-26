@@ -1,10 +1,16 @@
-name: Build Wheels and Release
+name: Release wheels
+# Workflow to build wheels and publish to PyPI if tagged
+
 on:
   push:
     tags:
       - v*
     branches:
       - maintenance/**
+  pull_request:
+    paths:
+      - ".github/workflows/wheels-test-and-release.yaml"
+      - ".github/workflows/wheels-recipe.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch
@@ -16,30 +22,33 @@ permissions:
 
 jobs:
   call-workflow-build-wheels:
+    name: Wheels recipe
     uses: ./.github/workflows/wheels-recipe.yaml
 
-  deploy:
-    name: Release
-    needs: call-workflow-build-wheels
-    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+  build_sdist:
+    name: Build source distribution
     runs-on: ubuntu-latest
-    environment: release
     permissions:
-      contents: write # for softprops/action-gh-release to create GitHub release
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
       attestations: write # for GitHub attestations
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0
           persist-credentials: false
-
-      - uses: actions/setup-python@v6
-        name: Install Python
+      - uses: hynek/build-and-inspect-python-package@v2
         with:
-          python-version: "3.12"
-          # Important! No caching for wheel build to avoid cache poisoning
+          attest-build-provenance-github: ${{ github.event_name == 'push' && 'true' || 'false' }}
+          skip-wheel: "true"
 
+  deploy:
+    name: Release
+    needs: [call-workflow-build-wheels, build_sdist]
+    if: github.repository_owner == 'scikit-image' && startsWith(github.ref, 'refs/tags/v') && always()
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
       - uses: actions/download-artifact@v5
         id: download
         with:
@@ -47,34 +56,17 @@ jobs:
           merge-multiple: true
           path: ./dist
 
-      - name: Install sdist build dependencies
-        run: |
-          source .github/scripts/setup-build-env.sh
-
-      - name: Build the source distribution
-        run: |
-          SK_VERSION=$(git describe --tags)
-          spin sdist -- --no-isolation --skip-dependency-check
-          ls -la ${{ github.workspace }}/dist
-
-      - name: Generate artifact attestation for sdist and wheels
-        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+      - uses: actions/download-artifact@v5
+        id: download-sdist
         with:
-          subject-path: "dist/scikit_image-*"
+          name: Packages
+          path: ./dist
 
-      - name: Verify the distribution
-        run: pipx run twine check --strict dist/*
-
-      # Ensure that a compromised twine couldn't have altered the distributions
-      - name: Verify artifact attestation
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
+      - name: Remove distributions that PyPI doesn't support
         run: |
-          for artifact in dist/*; do
-              echo "# ${artifact}"
-              gh attestation verify "${artifact}" --repo ${{ github.repository }}
-          done
+          find ./dist -name '*wasm32.whl' -delete -print
+          echo "::notice::Remaining distributions to upload"
+          ls -Al ./dist
 
       # We prefer to release wheels before source because otherwise there is a
       # small window during which users who pip install scikit-image will require compilation.

@@ -175,9 +175,9 @@ class CENSURE(FeatureDetector):
 
     Attributes
     ----------
-    keypoints : (N, 2) array
+    keypoints : ndarray of shape (N, 2)
         Keypoint coordinates as ``(row, col)``.
-    scales : (N,) array
+    scales : ndarray of shape (N,)
         Corresponding scales.
 
     References
