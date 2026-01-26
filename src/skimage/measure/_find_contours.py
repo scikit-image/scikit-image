@@ -18,7 +18,7 @@ def find_contours(
 
     Parameters
     ----------
-    image : (M, N) ndarray of double
+    image : ndarray of shape (M, N) and dtype float
         Input image in which to find contours.
     level : float, optional
         Value along which to find contours in the array. By default, the level
@@ -36,14 +36,14 @@ def find_contours(
          contours will wind counter-clockwise around elements below the
          iso-value. Alternately, this means that low-valued elements are always
          on the left of the contour. (See below for details.)
-    mask : (M, N) ndarray of bool or None
+    mask : ndarray of shape (M, N) and dtype bool
         A boolean mask, True where we want to draw contours.
         Note that NaN values are always excluded from the considered region
         (``mask`` is set to ``False`` wherever ``array`` is ``NaN``).
 
     Returns
     -------
-    contours : list of (K, 2) ndarrays
+    contours : list of (ndarray of shape (K, 2))
         Each contour is a ndarray of ``(row, column)`` coordinates along the contour.
 
     See Also

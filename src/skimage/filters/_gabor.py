@@ -138,20 +138,20 @@ def gabor(
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray of shape (M, N)
         Input image.
     frequency : float
         Spatial frequency of the harmonic function. Specified in pixels.
     theta : float, optional
         Orientation in radians. If 0, the harmonic is in the x-direction.
     bandwidth : float, optional
-        The bandwidth captured by the filter. For fixed bandwidth, ``sigma_x``
-        and ``sigma_y`` will decrease with increasing frequency. This value is
-        ignored if ``sigma_x`` and ``sigma_y`` are set by the user.
+        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
+        and `sigma_y` will decrease with increasing frequency. This value is
+        ignored if `sigma_x` and `sigma_y` are set by the user.
     sigma_x, sigma_y : float, optional
         Standard deviation in x- and y-directions. These directions apply to
-        the kernel *before* rotation. If `theta = pi/2`, then the kernel is
-        rotated 90 degrees so that ``sigma_x`` controls the *vertical*
+        the kernel *before* rotation. If ``theta = pi/2``, then the kernel is
+        rotated 90 degrees so that `sigma_x` controls the *vertical*
         direction.
     n_stds : scalar, optional
         The linear size of the kernel is n_stds (3 by default) standard
@@ -166,9 +166,9 @@ def gabor(
 
     Returns
     -------
-    real, imag : arrays
+    real, imag : ndarray of shape (M, N)
         Filtered images using the real and imaginary parts of the Gabor filter
-        kernel. Images are of the same dimensions as the input one.
+        kernel.
 
     References
     ----------

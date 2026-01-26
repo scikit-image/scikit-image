@@ -141,7 +141,7 @@ def _get_fourier_filter(size, filter_name):
 
     Returns
     -------
-    fourier_filter: ndarray
+    fourier_filter : ndarray
         The computed Fourier filter.
 
     References
@@ -329,15 +329,15 @@ def order_angles_golden_ratio(theta):
 
     Parameters
     ----------
-    theta : array of floats, shape (M,)
+    theta : ndarray of dtype float and shape (M,)
         Projection angles in degrees. Duplicate angles are not allowed.
 
-    Returns
-    -------
-    indices_generator : generator yielding unsigned integers
-        The returned generator yields indices into ``theta`` such that
-        ``theta[indices]`` gives the approximate golden ratio ordering
-        of the projections. In total, ``len(theta)`` indices are yielded.
+    Yields
+    ------
+    indices : np.intp
+        Indices into `theta` such that ``theta[indices]`` gives the
+        approximate golden ratio ordering of the projections. In total,
+        ``len(theta)`` indices are yielded.
         All non-negative integers < ``len(theta)`` are yielded exactly once.
 
     Notes
@@ -413,7 +413,7 @@ def iradon_sart(
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
-    clip : length-2 sequence of floats, optional
+    clip : tuple of (float, float), optional
         Force all values in the reconstructed tomogram to lie in the range
         ``[clip[0], clip[1]]``
     relaxation : float, optional

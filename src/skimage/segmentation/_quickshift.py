@@ -26,7 +26,7 @@ def quickshift(
 
     Parameters
     ----------
-    image : (M, N, C) ndarray
+    image : ndarray of shape (M, N, C)
         Input image. The axis corresponding to color channels can be specified
         via the `channel_axis` argument.
     ratio : float, optional, between 0 and 1
@@ -57,7 +57,7 @@ def quickshift(
 
     Returns
     -------
-    segment_mask : (M, N) ndarray
+    segment_mask : ndarray of shape (M, N) and dtype int
         Integer mask indicating segment labels.
 
     Notes

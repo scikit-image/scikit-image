@@ -1,9 +1,15 @@
+from packaging.version import parse
 import pytest
 from numpy.testing import assert_array_equal
 import numpy as np
+import scipy as sp
+
 from skimage import graph
 from skimage import segmentation, data
 from skimage._shared import testing
+
+# Version is less than 1.17.0.dev0
+SCIPY_LT_1_17_DEV0 = parse(sp.__version__) < parse("1.17.0.dev0")
 
 
 def max_edge(g, src, dst, n):
@@ -206,6 +212,12 @@ def test_ncut_stable_subgraph():
     assert new_labels.max() == 0
 
 
+@pytest.mark.xfail(
+    SCIPY_LT_1_17_DEV0,
+    strict=False,
+    reason="Flaky before SciPy 1.17.0.dev0",
+    # See https://github.com/scikit-image/scikit-image/issues/7911#issuecomment-3353082011
+)
 def test_reproducibility():
     """ensure cut_normalized returns the same output for the same input,
     when specifying random seed

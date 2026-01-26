@@ -4,6 +4,7 @@
 [![Stackoverflow](https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg)](https://stackoverflow.com/questions/tagged/scikit-image)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://skimage.zulipchat.com)
 [![Scientific Python Ecosystem Coordination](https://img.shields.io/badge/SPEC-0,1,4,6,7,8-green?labelColor=%23004811&color=%235CA038)](https://scientific-python.org/specs/)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=scikit-image-scikit-image)](https://insights.linuxfoundation.org/project/scikit-image-scikit-image)
 
 - **Website (including documentation):** [https://scikit-image.org/](https://scikit-image.org)
 - **Documentation:** [https://scikit-image.org/docs/stable/](https://scikit-image.org/docs/stable/)

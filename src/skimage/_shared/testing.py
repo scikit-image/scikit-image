@@ -282,7 +282,7 @@ def assert_stacklevel(warnings, *, offset=-1):
 
     Parameters
     ----------
-    warnings : collections.abc.Iterable[warning.WarningMessage]
+    warnings : Iterable[warnings.WarningMessage]
         Warnings that were captured by `pytest.warns`.
     offset : int, optional
         Offset from the line this function is called to the line were the
