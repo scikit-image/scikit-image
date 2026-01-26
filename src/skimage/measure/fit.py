@@ -1271,8 +1271,8 @@ def ransac(
         If `rng` is an int, it is used to seed the generator.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
-    model_kwargs : dictionary, optional
-        The dict of keyword arguments passed to `from_estimate` of `model_class`.
+    model_kwargs : dict of {str: Any}, optional
+        The dict of keyword arguments passed to ``from_estimate`` of `model_class`.
 
 
     Returns
