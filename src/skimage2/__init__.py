@@ -1,10 +1,22 @@
 """skimage2 namespace"""
 
-__all__ = [
-    "__version__",
-    "data",
-]
+import warnings
+
+import lazy_loader as _lazy
 
 from skimage import __version__
 
-from . import data
+
+class ExperimentalAPIWarning(UserWarning):
+    """Mark unstable API that's intentionally not published (yet)."""
+
+
+warnings.warn(
+    "Importing from the `skimage2` namespace is experimental. "
+    "Its API is under development and considered unstable!",
+    category=ExperimentalAPIWarning,
+    stacklevel=2,
+)
+
+
+__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
