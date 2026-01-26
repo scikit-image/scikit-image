@@ -12,6 +12,6 @@ def test_import_skimage2_warning():
     assert len(record) == 1
     assert record[0].category == skimage2.ExperimentalAPIWarning
     # `importlib.reload` adds a stacklevel, so we actually want the warning to
-    # be raised in importlib and not in this file (compare OS-Path agnostic)
+    # be raised in importlib and not in this file (compare OS-agnostic paths)
     warning_path = Path(record[0].filename)
     assert warning_path.parts[-2:] == ("importlib", "__init__.py")
