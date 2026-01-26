@@ -14,4 +14,4 @@ def test_import_skimage2_warning():
     # `importlib.reload` adds a stacklevel, so we actually want the warning to
     # be raised in importlib and not in this file (compare OS-Path agnostic)
     warning_path = Path(record[0].filename)
-    assert warning_path.full_match("**/importlib/__init__.py"), warning_path
+    assert warning_path.parts[-2:] == ("importlib", "__init__.py")
