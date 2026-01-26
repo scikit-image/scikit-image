@@ -1,0 +1,626 @@
+---
+jupyter:
+  jupytext:
+    notebook_metadata_filter: all,-language_info
+    split_at_heading: true
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.16.6
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+# Scikit-Image Coordinate Conventions Demo
+
+This notebook demonstrates the coordinate conventions (XY vs IJ) used across various scikit-image modules.
+
+- **XY Convention**: (x, y) = (col, row). Used in `transform`, `measure.fit`, and some `feature` modules.
+- **IJ Convention**: (row, col) = (y, x). Used in `measure.regionprops`, `feature.blob`, `feature.peak`, etc.
+
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage.feature import (blob_dog, blob_log, blob_doh,
+                             multiblock_lbp,
+                             plot_matched_features,
+                             structure_tensor, hessian_matrix,
+                             peak_local_max,
+                             corner_peaks,
+                             corner_subpix,
+                             corner_orientations,
+                            )
+
+from skimage.filters import gaussian
+from skimage.filters.rank import mean
+from skimage.measure import (CircleModel, EllipseModel, LineModelND,
+                             regionprops)
+from skimage.morphology import disk, octagon
+from skimage.transform import (hough_line, hough_line_peaks, probabilistic_hough_line,
+                               integral_image, warp, swirl, rotate, warp_coords)
+```
+
+## Feature Corner (XY Convention)
+
+
+```{python}
+# 1. Structure Tensor with order='xy'
+# Create an image varying only in X (columns)
+# Image size (row, col) = (50, 100)
+rows, cols = 50, 100
+y, x = np.mgrid[:rows, :cols]
+img_x_gradient = x.astype(float)
+
+# Compute structure tensor with order='xy'
+# Expect Axx to be non-zero, Ayy to be zero.
+# If it were 'rc', the first element would be Arr (row-derivative), which should be zero.
+Axx, Axy, Ayy = structure_tensor(img_x_gradient, sigma=1, order='xy')
+
+fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+axes[0].imshow(img_x_gradient, cmap='gray')
+axes[0].set_title('Input: X-Gradient')
+axes[1].imshow(Axx, cmap='gray')
+axes[1].set_title('Axx (Should be high)')
+axes[2].imshow(Ayy, cmap='gray')
+axes[2].set_title('Ayy (Should be 0)')
+axes[3].text(0.1, 0.5, f"Mean Axx: {Axx.mean():.2f}\nMean Ayy: {Ayy.mean():.2f}")
+axes[3].axis('off')
+plt.suptitle("structure_tensor(order='xy')")
+
+# 2. Hessian Matrix with order='xy'
+# Create an image with curvature in Y (rows)
+# I = y^2
+img_y_curvature = y.astype(float) ** 2
+
+# Compute Hessian with order='xy'
+# Hxx corresponds to d2I/dx2 (should be 0)
+# Hyy corresponds to d2I/dy2 (should be constant 2)
+# Hxy corresponds to d2I/dxdy (should be 0)
+Hxx, Hxy, Hyy = hessian_matrix(img_y_curvature, sigma=1, order='xy')
+
+fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+axes[0].imshow(img_y_curvature, cmap='gray')
+axes[0].set_title('Input: Y-Curvature (y^2)')
+axes[1].imshow(Hxx, cmap='gray')
+axes[1].set_title('Hxx (Should be 0)')
+axes[2].imshow(Hyy, cmap='gray')
+axes[2].set_title('Hyy (Should be > 0)')
+axes[3].text(0.1, 0.5, f"Mean Hxx: {Hxx.mean():.2f}\nMean Hyy: {Hyy.mean():.2f}")
+axes[3].axis('off')
+plt.suptitle("hessian_matrix(order='xy')");
+```
+
+## Filters Rank (XY Convention)
+
+
+```{python}
+# Test Rank Filters (mean) with shift_x, shift_y
+# Create an impulse image
+rows, cols = 51, 51
+image = np.zeros((rows, cols), dtype=np.uint8)
+# Center impulse
+image[rows // 2, cols // 2] = 255
+
+# Use a larger disk to allow for larger shifts.
+# disk(5) has shape (11, 11). Center at (5, 5).
+# If we shift by 5, center becomes (5, 10) or (10, 5) which is within bounds [0, 10].
+footprint = disk(5)
+shift_amt = 5
+
+# Apply mean filter with shift_x = 5 (positive x is right)
+# shift_x adds to the column coordinate of the center.
+# If center is shifted +5 (right), the filter "looks" 5 pixels to the right.
+# So the output at (r, c) sees (r, c+5).
+# The impulse at (25, 25) will be seen by (25, 20).
+# So the feature should shift LEFT (to col 20).
+out_x = mean(image, footprint, shift_x=shift_amt, shift_y=0)
+
+# Shift_y = 5.
+# Feature should shift UP (to row 20).
+out_y = mean(image, footprint, shift_x=0, shift_y=shift_amt)
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+axes[0].imshow(image, cmap='gray')
+axes[0].set_title('Input Impulse (25, 25)')
+axes[0].axvline(25, color='r', alpha=0.5)
+axes[0].axhline(25, color='r', alpha=0.5)
+
+axes[1].imshow(out_x, cmap='gray')
+axes[1].set_title(f'shift_x={shift_amt}\n(Object shifts LEFT)')
+axes[1].axvline(25 - shift_amt, color='r', alpha=0.5)
+
+axes[2].imshow(out_y, cmap='gray')
+axes[2].set_title(f'shift_y={shift_amt}\n(Object shifts UP)')
+axes[2].axhline(25 - shift_amt, color='r', alpha=0.5)
+
+plt.suptitle("rank.mean(shift_x, shift_y)");
+```
+
+## Transform Warps (XY Convention)
+
+
+```{python}
+# 1. Warp with inverse_map (xy convention)
+# We want to shift the image by +20 in x (right) and +10 in y (down).
+# The inverse map takes (col, row) and returns the source coordinate.
+# If destination is (c, r), source is (c-20, r-10).
+# So shift_func((c, r)) -> (c-20, r-10).
+# This confirms inputs are x, y.
+
+rows, cols = 100, 100
+image = np.zeros((rows, cols))
+image[40:60, 40:60] = 1
+
+
+def shift_xy(xy):
+    # xy is shape (N, 2), columns are x, y
+    return xy - np.array([20, 10])
+
+
+warped = warp(image, shift_xy)
+# Original at (40,40). Warped should be at (60, 50).
+# Because at dest=(60,50), source=(40,40) which is 1.
+
+fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+axes[0].imshow(image, cmap='gray')
+axes[0].set_title('Original')
+axes[1].imshow(warped, cmap='gray')
+axes[1].set_title('Warped (shift_xy)\nx=+20 (right), y=+10 (down)')
+axes[1].plot(60, 50, 'rx')  # Expected center
+
+# 2. Swirl (center=(x, y))
+# We will swirl around a point that is NOT the center of the image to distinguish x/y.
+# Center at x=80, y=20 (col 80, row 20).
+swirled = swirl(image, center=(80, 20), strength=10, radius=30)
+axes[2].imshow(swirled, cmap='gray')
+axes[2].set_title('Swirl center=(80, 20)\n(col=80, row=20)')
+axes[2].plot(80, 20, 'rx')
+
+# 3. Rotate (center=(x, y))
+# Rotate around x=80, y=20.
+rotated = rotate(image, angle=45, center=(80, 20))
+axes[3].imshow(rotated, cmap='gray')
+axes[3].set_title('Rotate center=(80, 20)\n(col=80, row=20)')
+axes[3].plot(80, 20, 'rx')
+
+plt.suptitle("transform (warp, swirl, rotate) - XY convention")
+
+# 4. warp_coords (xy convention)
+# warp_coords generates coordinates (row, col) but the map function receives (col, row) if we follow xy convention?
+# Let's check.
+# warp_coords(coord_map, shape)
+# "coord_map : callable. A function that takes (col, row) coordinates..."
+
+
+def check_input_convention(xy):
+    # xy shape (N, 2).
+    # If we pass shape (10, 10), we expect input range 0..9.
+    # If we return xy, we get identity.
+    return xy
+
+
+coords = warp_coords(check_input_convention, (10, 10))
+# coords shape is (2, 10, 10).
+# coords[0] is row coordinates? coords[1] is col coordinates?
+# Docstring says "Returns: coords : (ndim, rows, cols) array"
+# But the *map* function received (col, row).
+# We can't easily verify the *input* to the map without a print or assertion inside the map.
+# But we verified 'warp' uses (col, row) for the map, and warp uses warp_coords.
+# So this is covered by the 'warp' test implicitly.
+```
+
+## Transform Hough (XY Convention)
+
+
+```{python}
+# Create image with a vertical line at x=20 (col 20)
+# and a horizontal line at y=40 (row 40).
+rows, cols = 60, 60
+image = np.zeros((rows, cols), dtype=np.uint8)
+image[:, 20] = 1  # Vertical line at x=20
+image[40, :] = 1  # Horizontal line at y=40
+
+# 1. Standard Hough
+h, theta, d = hough_line(image)
+# hough_line returns (H, theta, distances)
+# We can find peaks.
+_, angles, dists = hough_line_peaks(h, theta, d)
+
+# Theta = 0 corresponds to vertical line (normal is horizontal).
+# Distance should be x=20.
+# Theta = pi/2 corresponds to horizontal line (normal is vertical).
+# Distance should be y=40.
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+axes[0].imshow(image, cmap='gray')
+axes[0].set_title('Input: Lines at x=20, y=40')
+
+axes[1].imshow(
+    np.log(1 + h),
+    extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]), d[-1], d[0]],
+    cmap='gray',
+    aspect=1 / 1.5,
+)
+axes[1].set_title('Hough Transform')
+axes[1].set_xlabel('Angles (degrees)')
+axes[1].set_ylabel('Distance (pixels)')
+
+# Annotate peaks
+for angle, dist in zip(angles, dists):
+    deg = np.rad2deg(angle)
+    axes[1].plot(deg, dist, 'ro')
+    axes[1].text(deg, dist, f"{deg:.0f}°, {dist:.0f}px")
+
+# 2. Probabilistic Hough
+# Returns lines as ((x0, y0), (x1, y1))
+lines = probabilistic_hough_line(image, threshold=10, line_length=5, line_gap=3)
+
+axes[2].imshow(image, cmap='gray')
+axes[2].set_title('Probabilistic Hough Lines')
+for line in lines:
+    p0, p1 = line
+    # p0 is (x, y)
+    axes[2].plot((p0[0], p1[0]), (p0[1], p1[1]), 'r-')
+    axes[2].plot(p0[0], p0[1], 'g.')
+    axes[2].plot(p1[0], p1[1], 'g.')
+
+plt.suptitle("Hough Transform (XY convention)");
+```
+
+## Measure Fit (XY Convention)
+
+
+```{python}
+# 1. Circle Model
+# Create data points on a circle at (x, y) = (30, 20) with radius 10.
+t = np.linspace(0, 2 * np.pi, 50)
+xc, yc = 30, 20
+r = 10
+x = xc + r * np.cos(t)
+y = yc + r * np.sin(t)
+data = np.column_stack([x, y])
+
+model = CircleModel()
+model.estimate(data)
+
+# params: xc, yc, r
+est_xc, est_yc, est_r = model.params
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Plot for Circle
+axes[0].plot(x, y, 'b.', label='Data')
+# Draw estimated circle
+circ_t = np.linspace(0, 2 * np.pi, 100)
+circ_x = est_xc + est_r * np.cos(circ_t)
+circ_y = est_yc + est_r * np.sin(circ_t)
+axes[0].plot(circ_x, circ_y, 'r-', label='Fit')
+axes[0].set_title(
+    f"CircleModel\nEst center=({est_xc:.1f}, {est_yc:.1f})\nTrue center=(30, 20)"
+)
+axes[0].set_aspect('equal')
+axes[0].invert_yaxis()  # Match image coords
+axes[0].legend()
+
+# 2. Ellipse Model
+# Create data points on an ellipse at (x, y) = (40, 30)
+xe, ye = 40, 30
+a, b = 15, 8
+theta = np.deg2rad(30)
+t = np.linspace(0, 2 * np.pi, 50)
+x_ell = xe + a * np.cos(t) * np.cos(theta) - b * np.sin(t) * np.sin(theta)
+y_ell = ye + a * np.cos(t) * np.sin(theta) + b * np.sin(t) * np.cos(theta)
+data_ell = np.column_stack([x_ell, y_ell])
+
+model_ell = EllipseModel()
+model_ell.estimate(data_ell)
+est_xe, est_ye, est_a, est_b, est_theta = model_ell.params
+
+# Plot for Ellipse
+axes[1].plot(x_ell, y_ell, 'b.', label='Data')
+ell_x, ell_y = model_ell.predict_xy(
+    np.linspace(0, 2 * np.pi, 100), params=model_ell.params
+).T
+axes[1].plot(ell_x, ell_y, 'r-', label='Fit')
+axes[1].set_title(
+    f"EllipseModel\nEst center=({est_xe:.1f}, {est_ye:.1f})\nTrue center=(40, 30)"
+)
+axes[1].set_aspect('equal')
+axes[1].invert_yaxis()
+axes[1].legend()
+
+# 3. LineModelND
+# Create data points on a line y = x + 10.
+# Points (0, 10), (50, 60).
+xl = np.linspace(0, 50, 20)
+yl = xl + 10
+data_line = np.column_stack([xl, yl])
+
+model_line = LineModelND()
+model_line.estimate(data_line)
+# predict_y(x)
+pred_y = model_line.predict_y(xl)
+
+axes[2].plot(xl, yl, 'b.', label='Data')
+axes[2].plot(xl, pred_y, 'r-', label='Fit')
+axes[2].set_title("LineModelND\ny = x + 10")
+axes[2].set_aspect('equal')
+axes[2].invert_yaxis()
+axes[2].legend()
+
+plt.suptitle("Measure Fit Models (XY convention)");
+```
+
+## Measure Regionprops (IJ Convention)
+
+
+```{python}
+# Test Regionprops (IJ convention)
+# Create a labeled image with a rectangle.
+# Rows: 10..30 (height 20), Cols: 50..80 (width 30).
+# Center should be Row=20, Col=65.
+# In XY, this is y=20, x=65.
+# But numpy indexing is [row, col].
+
+rows, cols = 100, 100
+image = np.zeros((rows, cols), dtype=int)
+image[10:30, 50:80] = 1  # Label 1
+
+props = regionprops(image)[0]
+centroid = props.centroid  # (row, col)
+bbox = props.bbox  # (min_row, min_col, max_row, max_col)
+coords = props.coords  # (N, 2) -> (row, col)
+
+print(f"Centroid: {centroid}")
+print(f"BBox: {bbox}")
+
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.imshow(image, cmap='gray')
+ax.set_title(f"RegionProps (IJ)\nCentroid: {centroid} (row, col)\nBBox: {bbox}")
+
+# Plot centroid. Note scatter takes (x, y) = (col, row).
+# So we must flip centroid for plotting.
+ax.scatter([centroid[1]], [centroid[0]], c='r', label='Centroid (col, row)')
+
+# Plot Bbox
+minr, minc, maxr, maxc = bbox
+rect = plt.Rectangle(
+    (minc, minr),
+    maxc - minc,
+    maxr - minr,
+    fill=False,
+    edgecolor='blue',
+    linewidth=2,
+    label='BBox',
+)
+ax.add_patch(rect)
+
+# Plot first few coords to verify
+# coords are (row, col). Plot as (col, row)
+ax.plot(coords[:10, 1], coords[:10, 0], 'g.', markersize=2, label='Coords (sample)')
+
+ax.legend();
+```
+
+## Feature Blob (IJ Convention)
+
+
+```{python}
+# Test Blob Detection (IJ convention)
+# Create blobs at known (row, col) locations.
+# Blob 1: Row=20, Col=80.
+# Blob 2: Row=70, Col=30.
+rows, cols = 100, 100
+image = np.zeros((rows, cols))
+# Make them bright enough to be detected after smoothing
+image[20, 80] = 10
+image[70, 30] = 10
+
+# Blur to make them blobs
+# sigma=2
+image = gaussian(image, sigma=2)
+# Peak value will be roughly 10 * 1/(2*pi*2^2) ~ 10/25 ~ 0.4.
+
+# Detect
+# threshold should be low enough. Default is 0.5?
+blobs_dog = blob_dog(image, min_sigma=1, max_sigma=5, threshold=0.1)
+blobs_log = blob_log(image, min_sigma=1, max_sigma=5, threshold=0.1)
+blobs_doh = blob_doh(image, min_sigma=1, max_sigma=5, threshold=0.01)
+
+# All return (row, col, sigma)
+print("DoG:", blobs_dog)
+
+fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+axes[0].imshow(image, cmap='gray')
+axes[0].set_title('Input: Blobs at (r=20,c=80), (r=70,c=30)')
+
+
+def plot_blobs(ax, blobs, title):
+    ax.imshow(image, cmap='gray')
+    ax.set_title(title)
+    if len(blobs) > 0:
+        for blob in blobs:
+            r, c, sigma = blob
+            # Circle takes (x, y) = (col, row)
+            circ = plt.Circle((c, r), sigma * np.sqrt(2), color='r', fill=False)
+            ax.add_patch(circ)
+            ax.text(c, r, f"r={r:.0f},c={c:.0f}", color='yellow', fontsize=8)
+    else:
+        ax.text(cols // 2, rows // 2, "No blobs found", color='red', ha='center')
+
+
+plot_blobs(axes[1], blobs_dog, 'Blob DoG (r, c, sigma)')
+plot_blobs(axes[2], blobs_log, 'Blob LoG (r, c, sigma)')
+plot_blobs(axes[3], blobs_doh, 'Blob DoH (r, c, sigma)')
+
+plt.suptitle("Blob Detection (IJ convention)");
+```
+
+## Feature Peaks (IJ Convention)
+
+
+```{python}
+# Test Peaks (IJ convention)
+# Create peaks at (row=20, col=80) and (row=70, col=30)
+rows, cols = 100, 100
+image = np.zeros((rows, cols))
+image[20, 80] = 1
+image[70, 30] = 1
+
+# 1. Peak Local Max
+# Returns (row, col)
+peaks = peak_local_max(image, min_distance=1)
+print("Peaks:", peaks)
+
+fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+axes[0].imshow(image, cmap='gray')
+axes[0].set_title('Input: Peaks at (20, 80), (70, 30)')
+axes[0].plot(peaks[:, 1], peaks[:, 0], 'rx', label='peak_local_max')  # Plot col, row
+axes[0].legend()
+
+# 2. Corner Peaks
+# Use corner_harris to generate a corner response, but here we just use the image
+# as a response map for simplicity since corner_peaks just finds peaks in a 2D array.
+c_peaks = corner_peaks(image, min_distance=1)
+axes[1].imshow(image, cmap='gray')
+axes[1].set_title('corner_peaks (r, c)')
+axes[1].plot(c_peaks[:, 1], c_peaks[:, 0], 'gx', label='corner_peaks')  # Plot col, row
+axes[1].legend()
+
+# 3. Corner Subpix
+# Needs corners as input.
+# Let's shift the peak slightly off-grid by blurring
+
+image_sub = gaussian(image, sigma=1)
+# Subpix refines (row, col)
+subpix = corner_subpix(image_sub, c_peaks, window_size=5)
+axes[2].imshow(image_sub, cmap='gray')
+axes[2].set_title('corner_subpix (r, c)')
+axes[2].plot(subpix[:, 1], subpix[:, 0], 'mx', label='subpix')
+axes[2].legend()
+axes[2].text(0, 10, f"Subpix 1: {subpix[0]}")
+
+# 4. Corner Orientations
+# corner_orientations(image, corners, mask)
+# Returns orientations.
+# We need an image with some structure to have orientation.
+# Let's make a corner at (50, 50).
+img_corner = np.zeros((100, 100))
+img_corner[50:, 50:] = 1  # Bottom-right quadrant filled.
+# Corner at (50, 50).
+# Gradient points diagonal?
+
+corners_ori = np.array([[50, 50]])
+mask_ori = octagon(5, 2)
+# orientations computed.
+orientations = corner_orientations(img_corner, corners_ori, mask_ori)
+# Orientation is angle of vector from corner to centroid of intensity in mask.
+# Centroid of intensity is in bottom-right.
+# So vector points +r, +c.
+# In IJ: +row is down, +col is right.
+# Centroid is positive row, positive col.
+# Angle should be around +45 degrees (pi/4) if 0 is right?
+# Wait, angle is usually atan2(y, x).
+# If IJ is used as (y, x), then atan2(row, col).
+# Let's check.
+print(f"Orientation: {np.rad2deg(orientations[0])} deg")
+
+axes[3].imshow(img_corner, cmap='gray')
+axes[3].set_title(
+    f'corner_orientations\nAngle: {np.rad2deg(np.ravel(orientations)[0]):.1f} deg'
+)
+axes[3].plot(50, 50, 'ro')
+# Plot arrow
+angle = np.ravel(orientations)[0]
+# If angle is standard math angle (CCW from x), then dx=cos(a), dy=sin(a).
+# But y is row (down).
+axes[3].arrow(50, 50, 20 * np.cos(angle), 20 * np.sin(angle), color='y', head_width=2)
+
+plt.suptitle("Peak/Corner Detection (IJ convention)");
+```
+
+## Feature Plot Matches (IJ Convention)
+
+
+```{python}
+# Test Plot Matched Features (IJ convention)
+# This function PLOTS. It takes keypoints as (row, col).
+# Internally it plots scatter(col, row).
+
+rows, cols = 100, 100
+img1 = np.zeros((rows, cols))
+img2 = np.zeros((rows, cols))
+
+# Create keypoints.
+# Keypoint 1: (row=20, col=80) in img1
+# Keypoint 2: (row=20, col=80) in img2
+kp1 = np.array([[20, 80]])
+kp2 = np.array([[20, 80]])
+matches = np.array([[0, 0]])
+
+fig, ax = plt.subplots(figsize=(10, 5))
+plot_matched_features(
+    img1, img2, keypoints0=kp1, keypoints1=kp2, matches=matches, ax=ax
+)
+
+# If it uses (row, col), the point should appear at y=20.
+# If it treated input as (x, y), it would appear at y=80.
+ax.set_title(
+    "plot_matched_features (Input: [20, 80])\nShould be at y=20 (row), x=80 (col)"
+)
+ax.axhline(20, color='r', linestyle='--', label='y=20')
+ax.legend();
+```
+
+## Feature Texture (IJ Convention)
+
+
+```{python}
+# Test Multiblock LBP (IJ convention)
+# We want to confirm r is row (y) and c is col (x).
+
+rows, cols = 50, 50
+image = np.full((rows, cols), 10, dtype=np.uint8)
+
+# Set up a pattern
+# Center block area for query (r=10, c=0): r=20..30, c=10..20. Value 20.
+image[20:30, 10:20] = 20
+# Top-Center block area: r=10..20, c=10..20. Value 30.
+image[10:20, 10:20] = 30
+
+int_img = integral_image(image)
+
+# Query at r=10, c=0 (width=10, height=10).
+# If r is row, center is at r=20, c=10. This matches our value 20.
+# Top-center is at r=10, c=10. Matches 30.
+# 30 >= 20 -> True.
+# Others 10 >= 20 -> False.
+# Result should be power of 2 (single bit set).
+
+lbp_r_row = multiblock_lbp(int_img, r=10, c=0, width=10, height=10)
+
+# If r was col (x), then r=10 means x=10 -> c=10.
+# c=0 means y=0 -> r=0.
+# So query would be at r=0, c=10.
+# Grid r=0..30, c=10..40.
+# Center r=10..20, c=20..30. (Value 10).
+# Top-Center r=0..10, c=20..30. (Value 10).
+# Left-Center r=10..20, c=10..20. (Value 30).
+# So Center=10. Left-Center=30.
+# 30 >= 10 -> True.
+# Others 10 >= 10 -> True.
+# Result would be 255 (all ones).
+
+print(f"LBP(r=10, c=0): {lbp_r_row}")
+
+fig, ax = plt.subplots()
+ax.imshow(image, cmap='gray')
+ax.set_title(
+    f"Multiblock LBP Check\nBackground=10, Center=20, Top=30\nQuery(r=10, c=0)\nResult {lbp_r_row} (Expected single bit)\nIf swapped, expected 255"
+)
+```
