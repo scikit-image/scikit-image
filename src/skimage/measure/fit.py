@@ -33,7 +33,7 @@ class RansacModelProtocol(Protocol):
     """Protocol for `ransac` model class."""
 
     @classmethod
-    def from_estimate(cls, *data): ...
+    def from_estimate(cls, *data, **kwargs): ...
 
     def residuals(self, *data): ...
 
@@ -1219,7 +1219,7 @@ def ransac(
         * Either:
 
           * ``from_estimate`` class method returning transform instance, as in
-            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform = model_class.from_estimate(*data, **kwargs)``; the resulting
             ``tform`` should be truthy (``bool(tform) == True``) where
             estimation succeeded, or falsey (``bool(tform) == False``) where it
             failed;  OR
