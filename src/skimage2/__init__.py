@@ -8,7 +8,7 @@ import lazy_loader as _lazy
 
 
 class ExperimentalAPIWarning(UserWarning):
-    """Marks unstable API that isn't intentionally published (yet)."""
+    """Mark unstable API that's intentionally not published (yet)."""
 
 
 warnings.warn(
