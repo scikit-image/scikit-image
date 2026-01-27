@@ -1138,6 +1138,11 @@ def _minmax_scale_value_range(image, *, stacklevel=2):
         Prescaling an `image` that contains NaN or inifinity is not supported
         for now. In those cases, replace the unsupported values manually.
 
+    See Also
+    --------
+    _prescale_value_range
+        Scale the value range of `image` according to the selected `mode`.
+
     Examples
     --------
     >>> import numpy as np
@@ -1247,6 +1252,12 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
         Prescaling an `image` with ``mode='minmax'` that contains NaN or
         inifinity is not supported for now. In those cases, replace the
         unsupported values manually.
+
+    See Also
+    --------
+    _minmax_scale_value_range
+        Min-max scale `image` to the value range [0, 1]. Internally used in
+        this function.
 
     Examples
     --------
