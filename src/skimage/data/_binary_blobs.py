@@ -1,8 +1,8 @@
 import warnings
 
-import numpy as np
+import skimage2 as ski2
 
-from .._shared.filters import gaussian
+from ..util import PendingSkimage2Change
 
 
 def binary_blobs(
@@ -48,10 +48,6 @@ def binary_blobs(
             The resulting blob array can be tiled and blobs will be contiguous and
             have smooth edges across tile boundaries.
 
-    boundary_mode : str, default "nearest"
-        The `mode` parameter passed to the Gaussian filter.
-        Use "wrap" for periodic boundary conditions.
-
     Returns
     -------
     blobs : ndarray of bools
@@ -72,35 +68,29 @@ def binary_blobs(
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
     """
-    if boundary_mode not in {"nearest", "wrap"}:
-        raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
-
-    blob_size = blob_size_fraction * length
-    if blob_size < 0.1:
-        clamped_size_fraction = 0.1 / length
-        clamped_blob_size = clamped_size_fraction * length
-        warnings.warn(
-            f"`{blob_size_fraction=}` together with `{length=}` would result in a blob "
-            f"size of {blob_size} pixels. Small blob sizes likely lead to unexpected "
-            f"results! "
-            f"Clamping to `blob_size_fraction={clamped_size_fraction}` and a blob size "
-            f"of {clamped_blob_size} pixels to avoid allocating excessive memory.",
-            category=RuntimeWarning,
-            stacklevel=2,
-        )
-        blob_size_fraction = clamped_size_fraction
-
-    rs = np.random.default_rng(rng)
-    shape = tuple([length] * n_dim)
-    mask = np.zeros(shape)
-    n_pts = max(int(1.0 / blob_size_fraction) ** n_dim, 1)
-    points = (length * rs.random((n_dim, n_pts))).astype(int)
-    mask[tuple(indices for indices in points)] = 1
-    mask = gaussian(
-        mask,
-        sigma=0.25 * length * blob_size_fraction,
-        preserve_range=False,
-        mode=boundary_mode,
+    warnings.warn(
+        "`skimage.data.binary_blobs` is deprecated in favor of "
+        "`skimage2.data.binary_blobs` which has a new signature. "
+        "The parameters `length` and `n_dim` have been replaced with `shape`. "
+        "`blob_size_fraction` was changed to `blob_size`. "
+        "The default of `boundary_mode` has been changed to 'wrap'. "
+        "To keep the old behavior from `skimage` (v1.x) use:\n"
+        "\n"
+        "    import skimage2 as sk2\n"
+        "    sk2.data.binary_blobs(\n"
+        "        shape=(length,) * n_dim,\n"
+        "        blob_size=blob_size_fraction * length\n"
+        "        boundary_mode='nearest',\n"
+        "        ...\n"
+        "    )",
+        stacklevel=2,
+        category=PendingSkimage2Change,
     )
-    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
-    return np.logical_not(mask < threshold)
+    blob_size = blob_size_fraction * length
+    return ski2.data.binary_blobs(
+        shape=(length,) * n_dim,
+        blob_size=blob_size,
+        volume_fraction=volume_fraction,
+        rng=rng,
+        boundary_mode=boundary_mode,
+    )
