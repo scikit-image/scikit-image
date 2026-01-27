@@ -162,10 +162,10 @@ First phase: Building `skimage2`
 
 Afterward, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
 It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
-This namespace should be included in releases on on PyPI or elsewhere early to facilitate testing downstream.
+This namespace should be included in releases on PyPI or elsewhere early to facilitate testing downstream.
 
 With the new namespace available, we will start building the new API inside it.
-This process orient itself around the following principles:
+This process orients itself around the following principles:
 
 Only one implementation
   If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
