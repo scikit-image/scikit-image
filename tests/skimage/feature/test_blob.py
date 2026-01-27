@@ -77,6 +77,7 @@ def test_blob_dog_3d(dtype):
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
+    im3 = im3.astype(dtype)
 
     blobs = blob_dog(
         im3,
@@ -536,7 +537,7 @@ def test_no_blob():
     assert len(blobs) == 0
 
 
-@pytest.mark.parametrize("func", [blob_dog, blob_dog, blob_log])
+@pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
 def test_deprecated_threshold_rel(func):
     image = np.zeros((10, 10))
     regex = "Parameter `threshold_rel` is deprecated"
