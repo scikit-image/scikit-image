@@ -230,8 +230,8 @@ _deprecate_threshold_rel = deprecate_parameter(
     template="Parameter `{deprecated_name}` is deprecated since version "
     "{deprecated_version} and will be removed in {changed_version} (or "
     "later). To avoid this warning, please use the parameters `threshold` "
-    "together with the desired `prescale` mode instead. "
-    "For more details, see the documentation of `{func_name}`.",
+    "together with the desired `prescale` mode instead ('minmax' is "
+    "recommended). For more details, see the documentation of `{func_name}`.",
 )
 
 
