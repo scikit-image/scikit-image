@@ -38,7 +38,7 @@ involves the following steps:
   alongside the existing ``skimage`` namespace during a transition period.
 - The new API will be implemented in ``skimage2`` and will initially be marked as
   unstable and experimental. The old API in ``skimage`` will continue working.
-- Eventually, when the new API in ``skimage2`` is complete, the old namespace
+- When the new API in ``skimage2`` is complete, the old namespace
   ``skimage`` will be deprecated and eventually removed.
 
 See the :ref:`skip4_implementation` section for a more detailed description of
@@ -263,7 +263,7 @@ A new package name
 ..................
 
 Since the import name is changing, it would be possible to also change the package name from ``scikit-image`` to ``skimage2`` for example.
-This was proposed in a previous versoin of this SKIP.
+This was proposed in a previous version of this SKIP.
 It shares many of the same strengths as the current proposal – chiefly – the new ``skimage2`` namespace.
 This option also requires informing users about the new package.
 Similarly to the suggestion here, we could raise a warning when the old package is imported.
