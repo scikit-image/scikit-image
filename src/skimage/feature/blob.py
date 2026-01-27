@@ -318,7 +318,7 @@ def blob_dog(
             more details.
 
             .. warning::
-                The scaling and the effect of `threshold` will depent on the
+                The scaling and the effect of `threshold` will depend on the
                 dtype of `image`. For consistent behavior we recommend
                 ``'minmax'``.
 
@@ -546,7 +546,7 @@ def blob_log(
             more details.
 
             .. warning::
-                The scaling and the effect of `threshold` will depent on the
+                The scaling and the effect of `threshold` will depend on the
                 dtype of `image`. For consistent behavior we recommend
                 ``'minmax'``.
 
@@ -742,7 +742,7 @@ def blob_doh(
             more details.
 
             .. warning::
-                The scaling and the effect of `threshold` will depent on the
+                The scaling and the effect of `threshold` will depend on the
                 dtype of `image`. For consistent behavior we recommend
                 ``'minmax'``.
 
