@@ -63,6 +63,10 @@ def pyramid_reduce(
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
+
+        Note: The mode values follow the `numpy.pad` convention and are internally
+        mapped to the corresponding `scipy.ndimage` boundary modes.
+
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
@@ -140,6 +144,10 @@ def pyramid_expand(
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
+
+        Note: The mode values follow the `numpy.pad` convention and are internally
+        mapped to the corresponding `scipy.ndimage` boundary modes.
+
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
@@ -199,15 +207,14 @@ def pyramid_gaussian(
     *,
     channel_axis=None,
 ):
-    """Yield images of the Gaussian pyramid formed by the input image.
+    """Yield successive layers of the Gaussian pyramid constructed from the
+    input image.
 
-    Recursively applies the `pyramid_reduce` function to the image, and yields
-    the downscaled images.
-
-    Note that the first image of the pyramid will be the original, unscaled
-    image. The total number of images is `max_layer + 1`. In case all layers
-    are computed, the last image is either a one-pixel image or the image where
-    the reduction does not change its shape.
+    This function recursively applies `pyramid_reduce` to generate each
+    subsequent layer of the pyramid. The first yielded image is always the
+    original, unscaled input. The number of layers is `max_layer + 1`, unless
+    reduction stops earlier because further downscaling does not change the
+    image shape.
 
     Parameters
     ----------
@@ -228,6 +235,10 @@ def pyramid_gaussian(
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
+
+        Note: The mode values follow the `numpy.pad` convention and are internally
+        mapped to the corresponding `scipy.ndimage` boundary modes.
+
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
@@ -333,6 +344,10 @@ def pyramid_laplacian(
     mode : {'reflect', 'constant', 'edge', 'symmetric', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
+
+        Note: The mode values follow the `numpy.pad` convention and are internally
+        mapped to the corresponding `scipy.ndimage` boundary modes.
+
     cval : float, optional
         Value to fill past edges of input if mode is 'constant'.
     preserve_range : bool, optional
