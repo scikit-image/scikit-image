@@ -224,8 +224,8 @@ def _format_exclude_border(img_ndim, exclude_border):
 
 _deprecate_threshold_rel = deprecate_parameter(
     deprecated_name="threshold_rel",
-    start_version="0.26",
-    stop_version="2.2",
+    start_version="0.27",
+    stop_version="0.29",
     modify_docstring=False,
     template="Parameter `{deprecated_name}` is deprecated since version "
     "{deprecated_version} and will be removed in {changed_version} (or "
@@ -282,8 +282,8 @@ def blob_dog(
         fraction greater than `threshold`, the smaller blob is eliminated.
     threshold_rel : DEPRECATED
 
-        .. deprecated:: 0.26
-            Starting with version 0.26, `threshold_rel` is deprecated. Since
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
             ``max(dog_space) * threshold_rel`` was used to calculate the
             minimum peak intensity, this parameters effect was difficult to
             reason about. Use `threshold` in conjunction with `prescale`
@@ -510,8 +510,8 @@ def blob_log(
         interpolation is used.
     threshold_rel : DEPRECATED
 
-        .. deprecated:: 0.26
-            Starting with version 0.26, `threshold_rel` is deprecated. Since
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
             ``max(log_space) * threshold_rel`` was used to calculate the
             minimum peak intensity, this parameters effect was difficult to
             reason about. Use `threshold` in conjunction with `prescale`
@@ -715,8 +715,8 @@ def blob_doh(
         interpolation is used.
     threshold_rel : DEPRECATED
 
-        .. deprecated:: 0.26
-            Starting with version 0.26, `threshold_rel` is deprecated. Since
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
             ``max(doh_space) * threshold_rel`` was used to calculate the
             minimum peak intensity, this parameters effect was difficult to
             reason about. Use `threshold` in conjunction with `prescale`

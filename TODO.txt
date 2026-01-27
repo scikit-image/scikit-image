@@ -24,6 +24,10 @@ Version 0.27
   - Remove `doc/source/user_guide/plugins.rst`
 * Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
 
+Version 0.29
+------------
+* Complete deprecation of `threshold_rel` in `skimage.feature.blob_*` functions
+
 Other
 -----
 * Once NumPy 1.25.0 is minimal required version:
