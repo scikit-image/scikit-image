@@ -77,7 +77,7 @@ def _offset_edge_map(shape, offsets):
           [0, 0, 2, 1]], dtype=int8)
 
     """
-    indices = np.indices(shape)  # indices.shape = (n,)+shape
+    indices = np.indices(shape)  # indices.reshape((n,) + shape, copy=False)
 
     #get the distance from each index to the upper or lower edge in each dim
     pos_edges = (shape - indices.T).T
