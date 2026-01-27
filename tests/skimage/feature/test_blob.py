@@ -9,11 +9,14 @@ from skimage.draw import disk
 from skimage.draw.draw3d import ellipsoid
 from skimage.feature import blob_dog, blob_doh, blob_log
 from skimage.feature.blob import _blob_overlap
+from skimage._shared.testing import assert_stacklevel
+from skimage._shared.dtype import numeric_dtype_min_max
+from skimage._shared._dependency_checks import is_wasm
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_dog(dtype, threshold_type):
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_dog(dtype, prescale):
     r2 = math.sqrt(2)
     img = np.ones((512, 512), dtype=dtype)
 
@@ -26,22 +29,18 @@ def test_blob_dog(dtype, threshold_type):
     xs, ys = disk((200, 350), 45)
     img[xs, ys] = 255
 
-    if threshold_type == 'absolute':
-        threshold = 2.0
-        if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
-            threshold /= np.ptp(img)
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
+    threshold = 2.0
+    if img.dtype.kind != 'f' or prescale == "minmax":
+        # Account for internal scaling to [0, 1] by `img_as_float` (legacy)
+        # or min-max scaling
+        threshold /= np.ptp(img)
 
     blobs = blob_dog(
         img,
         min_sigma=4,
         max_sigma=50,
         threshold=threshold,
-        threshold_rel=threshold_rel,
+        prescale=prescale,
     )
 
     def radius(x):
@@ -72,28 +71,20 @@ def test_blob_dog(dtype, threshold_type):
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_dog_3d(dtype, threshold_type):
+def test_blob_dog_3d(dtype):
     # Testing 3D
     r = 10
     pad = 10
     im3 = ellipsoid(r, r, r)
     im3 = np.pad(im3, pad, mode='constant')
-
-    if threshold_type == 'absolute':
-        threshold = 0.001
-        threshold_rel = 0
-    elif threshold_type == 'relative':
-        threshold = 0
-        threshold_rel = 0.5
+    im3 = im3.astype(dtype)
 
     blobs = blob_dog(
         im3,
         min_sigma=3,
         max_sigma=10,
         sigma_ratio=1.2,
-        threshold=threshold,
-        threshold_rel=threshold_rel,
+        threshold=0.001,
     )
     b = blobs[0]
 
@@ -105,28 +96,19 @@ def test_blob_dog_3d(dtype, threshold_type):
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_dog_3d_anisotropic(dtype, threshold_type):
+def test_blob_dog_3d_anisotropic(dtype):
     # Testing 3D anisotropic
     r = 10
     pad = 10
     im3 = ellipsoid(r / 2, r, r)
     im3 = np.pad(im3, pad, mode='constant')
 
-    if threshold_type == 'absolute':
-        threshold = 0.001
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
-
     blobs = blob_dog(
         im3.astype(dtype, copy=False),
         min_sigma=[1.5, 3, 3],
         max_sigma=[5, 10, 10],
         sigma_ratio=1.2,
-        threshold=threshold,
-        threshold_rel=threshold_rel,
+        threshold=0.001,
     )
     b = blobs[0]
 
@@ -199,9 +181,9 @@ def test_nd_blob_no_peaks_shape(function_name, ndim, anisotropic):
 
 
 @pytest.mark.parametrize('dtype', [np.uint8, np.float16, np.float32, np.float64])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_log(dtype, threshold_type):
-    r2 = math.sqrt(2)
+@pytest.mark.parametrize('log_scale', [False, True])
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_log(dtype, log_scale, prescale):
     img = np.ones((256, 256), dtype=dtype)
 
     xs, ys = disk((200, 65), 5)
@@ -216,55 +198,26 @@ def test_blob_log(dtype, threshold_type):
     xs, ys = disk((100, 175), 30)
     img[xs, ys] = 255
 
-    if threshold_type == 'absolute':
-        threshold = 1
-        if img.dtype.kind != 'f':
-            # account for internal scaling to [0, 1] by img_as_float
-            threshold /= np.ptp(img)
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
+    threshold = 1
+    if img.dtype.kind != 'f' or prescale == "minmax":
+        # account for internal scaling to [0, 1] by img_as_float
+        threshold /= np.ptp(img)
 
-    blobs = blob_log(
-        img, min_sigma=5, max_sigma=20, threshold=threshold, threshold_rel=threshold_rel
-    )
-
-    def radius(x):
-        return r2 * x[2]
-
-    s = sorted(blobs, key=radius)
-    thresh = 3
-
-    b = s[0]
-    assert abs(b[0] - 200) <= thresh
-    assert abs(b[1] - 65) <= thresh
-    assert abs(radius(b) - 5) <= thresh
-
-    b = s[1]
-    assert abs(b[0] - 80) <= thresh
-    assert abs(b[1] - 25) <= thresh
-    assert abs(radius(b) - 15) <= thresh
-
-    b = s[2]
-    assert abs(b[0] - 50) <= thresh
-    assert abs(b[1] - 150) <= thresh
-    assert abs(radius(b) - 25) <= thresh
-
-    b = s[3]
-    assert abs(b[0] - 100) <= thresh
-    assert abs(b[1] - 175) <= thresh
-    assert abs(radius(b) - 30) <= thresh
-
-    # Testing log scale
     blobs = blob_log(
         img,
         min_sigma=5,
         max_sigma=20,
         threshold=threshold,
-        threshold_rel=threshold_rel,
-        log_scale=True,
+        log_scale=log_scale,
+        prescale=prescale,
     )
+
+    def radius(x):
+        r2 = math.sqrt(2)
+        return r2 * x[2]
+
+    s = sorted(blobs, key=radius)
+    thresh = 3
 
     b = s[0]
     assert abs(b[0] - 200) <= thresh
@@ -383,8 +336,8 @@ def test_blob_log_exclude_border(disc_center, exclude_border):
 
 
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32])
-@pytest.mark.parametrize('threshold_type', ['absolute', 'relative'])
-def test_blob_doh(dtype, threshold_type):
+@pytest.mark.parametrize('prescale', ["legacy", "minmax"])
+def test_blob_doh(dtype, prescale):
     img = np.ones((512, 512), dtype=dtype)
 
     xs, ys = disk((400, 130), 20)
@@ -399,18 +352,14 @@ def test_blob_doh(dtype, threshold_type):
     xs, ys = disk((200, 350), 50)
     img[xs, ys] = 255
 
-    if threshold_type == 'absolute':
-        # Note: have to either scale up threshold or rescale the image to the
-        #       range [0, 1] internally.
-        threshold = 0.05
-        if img.dtype.kind == 'f':
-            # account for lack of internal scaling to [0, 1] by img_as_float
-            ptp = np.ptp(img)
-            threshold *= ptp**2
-        threshold_rel = None
-    elif threshold_type == 'relative':
-        threshold = None
-        threshold_rel = 0.5
+    # Note: have to either scale up threshold or rescale the image to the
+    #       range [0, 1] internally.
+    threshold = 0.05
+    if img.dtype.kind == 'f' and prescale != "minmax":
+        # Account for lack of internal scaling to [0, 1] by `img_as_float` (legacy)
+        # or min-max scaling
+        ptp = np.ptp(img)
+        threshold *= ptp**2
 
     blobs = blob_doh(
         img,
@@ -418,7 +367,7 @@ def test_blob_doh(dtype, threshold_type):
         max_sigma=60,
         num_sigma=10,
         threshold=threshold,
-        threshold_rel=threshold_rel,
+        prescale=prescale,
     )
 
     def radius(x):
@@ -586,3 +535,30 @@ def test_no_blob():
     im = np.zeros((10, 10))
     blobs = blob_log(im, min_sigma=2, max_sigma=5, num_sigma=4)
     assert len(blobs) == 0
+
+
+@pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
+def test_deprecated_threshold_rel(func):
+    image = np.zeros((10, 10))
+    regex = "Parameter `threshold_rel` is deprecated"
+    with pytest.warns(FutureWarning, match=regex) as record:
+        func(image, threshold_rel=0.1)
+    assert_stacklevel(record)
+
+
+@pytest.mark.xfail(
+    is_wasm, strict=False, reason="On WASM, NumPy does not report overflow errors"
+)
+@pytest.mark.parametrize("func", [blob_dog, blob_doh, blob_log])
+def test_blob_funcs_prescale_minmax_overflow_warning(func):
+    float_min, float_max = numeric_dtype_min_max(np.float32)
+    img = np.empty((512, 512), dtype=np.float32)
+    img.fill(float_min)
+    xs, ys = disk((400, 130), 5)
+    img[xs, ys] = float_max
+
+    regex = "Overflow while attempting to rescale"
+    with pytest.warns(RuntimeWarning, match=regex) as record:
+        blobs = func(img, prescale="minmax")
+    assert_stacklevel(record)
+    assert blobs.shape == (1, 3)  # One blob found
