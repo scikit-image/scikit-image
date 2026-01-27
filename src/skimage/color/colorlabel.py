@@ -119,7 +119,7 @@ def label2rgb(
         values between [0, 1].
     image_alpha : float [0, 1], optional
         Opacity of the image.
-    kind : string, one of {'overlay', 'avg'}
+    kind : {'overlay', 'avg'}, optional
         The kind of color image desired. 'overlay' cycles over defined colors
         and overlays the colored labels over the original image. 'avg' replaces
         each labeled segment with its average color, for a stained-class or

@@ -26,7 +26,7 @@ def _hog_channel_gradient(channel):
 
     Parameters
     ----------
-    channel : (M, N) ndarray
+    channel : ndarray of shape (M, N)
         Grayscale image or one of image channel.
 
     Returns
@@ -78,7 +78,7 @@ def hog(
         Size (in pixels) of a cell.
     cells_per_block : 2-tuple (int, int), optional
         Number of cells in each block.
-    block_norm : str {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, optional
+    block_norm : {'L1', 'L1-sqrt', 'L2', 'L2-Hys'}, optional
         Block normalization method:
 
         ``L1``

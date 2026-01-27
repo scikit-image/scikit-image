@@ -41,7 +41,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
         ``Ic > Ip + threshold``. Also stands for the n in ``FAST-n`` corner
         detector.
     fast_threshold : float, optional
-        The ``threshold`` parameter in ``feature.corner_fast``. Threshold used
+        The `threshold` parameter in ``feature.corner_fast``. Threshold used
         to decide whether the pixels on the circle are brighter, darker or
         similar w.r.t. the test pixel. Decrease the threshold when more
         corners are desired and vice-versa.
@@ -59,15 +59,15 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     Attributes
     ----------
-    keypoints : (N, 2) array
+    keypoints : ndarray of shape (N, 2)
         Keypoint coordinates as ``(row, col)``.
-    scales : (N,) array
+    scales : ndarray of shape (N,)
         Corresponding scales.
-    orientations : (N,) array
+    orientations : ndarray of shape (N,)
         Corresponding orientations in radians.
-    responses : (N,) array
+    responses : ndarray of shape (N,)
         Corresponding Harris corner responses.
-    descriptors : (Q, `descriptor_size`) array of dtype bool
+    descriptors : ndarray of shape (Q, `descriptor_size`) and dtype bool
         2D array of binary descriptors of size `descriptor_size` for Q
         keypoints after filtering out border keypoints with value at an
         index ``(i, j)`` either being ``True`` or ``False`` representing
@@ -246,13 +246,13 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         Parameters
         ----------
-        image : 2D array
+        image : ndarray of shape (K, L)
             Input image.
-        keypoints : (N, 2) array
+        keypoints : ndarray of shape (N, 2)
             Keypoint coordinates as ``(row, col)``.
-        scales : (N,) array
+        scales : ndarray of shape (N,)
             Corresponding scales.
-        orientations : (N,) array
+        orientations : ndarray of shape (N,)
             Corresponding orientations in radians.
 
         """

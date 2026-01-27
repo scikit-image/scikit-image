@@ -52,7 +52,7 @@ def unsharp_mask(
 
     Returns
     -------
-    output : (M[, ...][, C]) ndarray of float
+    output : ndarray of dtype float and shape (M[, ...][, C])
         Image with unsharp mask applied.
 
     Notes

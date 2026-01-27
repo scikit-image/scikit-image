@@ -110,7 +110,7 @@ def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):
     shape : tuple[int, ...]
         The length of the footprint in each dimension. The length of the
         sequence determines the number of dimensions of the footprint.
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -217,7 +217,7 @@ def square(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -293,7 +293,7 @@ def rectangle(nrows, ncols, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -353,7 +353,7 @@ def diamond(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -519,7 +519,7 @@ def disk(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     strict_radius : bool, optional
         If False, extend the radius by 0.5. This allows the circle to expand
@@ -664,7 +664,7 @@ def ellipse(width, height, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'crosses'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -738,7 +738,7 @@ def cube(width, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'separable', 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -792,7 +792,7 @@ def octahedron(radius, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -852,7 +852,7 @@ def ball(radius, dtype=np.uint8, *, strict_radius=True, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     strict_radius : bool, optional
         If False, extend the radius by 0.5. This allows the circle to expand
@@ -929,7 +929,7 @@ def octagon(m, n, dtype=np.uint8, *, decomposition=None):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
     decomposition : {None, 'sequence'}, optional
         If None, a single array is returned. For 'sequence', a tuple of smaller
@@ -1011,7 +1011,7 @@ def star(a, dtype=np.uint8):
 
     Other Parameters
     ----------------
-    dtype : data-type, optional
+    dtype : dtype-like, optional
         The data type of the footprint.
 
     Returns

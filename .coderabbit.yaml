@@ -1,0 +1,52 @@
+reviews:
+  profile: "chill" # "assertive" — more nitpicky
+  review_status: false
+  review_details: false
+  high_level_summary: false
+  request_changes_workflow: false
+  estimate_code_review_effort: true
+  labeling_instructions:
+    - label: ":scroll: type: API"
+      instructions: >-
+        For backward-incompatible changes to the API and deprecations. Mutually exclusive.
+    - label: ":baby: type: New feature"
+      instructions: >-
+        For new features that previously did not exist. Mutually exclusive.
+    - label: ":wrench: type: Maintenance"
+      instructions: >-
+        For internal code changes and cleanups. Mutually exclusive.
+    - label: ":adhesive_bandage: type: Bug fix"
+      instructions: >-
+        For bug fixes. Mutually exclusive.
+    - label: ":page_facing_up: type: Documentation"
+      instructions: >-
+        For changes dedicated to documentation (i.e., not as part of a new feature). Mutually exclusive.
+    - label: ":robot: type: Infrastructure"
+      instructions: >-
+        Fixes to CI and other infrastructure. Mutually exclusive.
+    - label: ":fast_forward: type: Enhancement"
+      instructions: >-
+        Improvements made to an existing feature. Mutually exclusive.
+    - label: ":chart_with_upwards_trend: type: Performance"
+      instructions: >-
+        For changes intended to improve performance. Mutually exclusive.
+  auto_apply_labels: true
+  in_progress_fortune: false
+  poem: false
+  enable_prompt_for_ai_agents: false
+  auto_review:
+    base_branches:
+      - main
+  pre_merge_checks:
+    title:
+      requirements: >-
+        Title should be concise and descriptive, ideally under 80 characters, and not end on `.`
+
+chat:
+  auto_reply: false
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - CONTRIBUTING.rst
+      - doc/source/development/core_developer.md
