@@ -162,20 +162,30 @@ First phase: Building `skimage2`
 
 Afterward, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
 It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
-This namespace will not be included in `final releases <https://packaging.python.org/en/latest/specifications/version-specifiers/#final-releases>`_ (versioned 1.x) on PyPI and elsewhere but may already be included in our nightly releases.
-Before the end of this phase, ``skimage2`` should be made available in `pre-releases <https://packaging.python.org/en/latest/specifications/version-specifiers/#pre-releases>`_ (2.0.0rcN or similar).
+This namespace should be included in releases on on PyPI or elsewhere early to facilitate testing downstream.
 
 With the new namespace available, we will start building the new API inside it.
-It will – where possible – wrap the implementation existing in the ``skimage`` namespace but will have its own independent test suite.
+This process orient itself around the following principles:
 
-While ``skimage2`` will be a new API, we will try to keep the differences from the old API reasonably small to make the eventual transition easier for users.
-As a general rule, it should always be possible to achieve the current behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
-There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
+Only one implementation
+  If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
+  The implementation can live either inside the old or new namespace depending on what is more opportune.
 
-We will record the pathway for migrating from the old to the new API in detail in a migration guide.
-Additionally, deprecation warnings will be implemented for each API change.
-These warnings should be ignored by default and should not be shown to users yet.
-Users would have no means to act on these warnings because the ``skimage2`` namespace is not available yet.
+Independent test suite
+  Each API should have its own independent test suite.
+
+Small API difference
+  Keep the differences between the old and new API small to make the eventual transition easier for users.
+  Prefer conventional deprecations in the ``skimage`` namespace if possible.
+
+Backwards compatible
+  It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
+  There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
+
+Migration guide
+  We will record the pathway for migrating from the old to the new API in detail in a migration guide.
+  Additionally, deprecation warnings will be added to the old API.
+  Initially, these warnings will be silent by default and not be shown to users.
 
 During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
 
