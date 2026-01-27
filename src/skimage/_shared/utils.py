@@ -1135,7 +1135,7 @@ def _minmax_scale_value_range(image, *, stacklevel=2):
     Raises
     ------
     ValueError
-        Prescaling an `image` that contains NaN or inifinity is not supported
+        Prescaling an `image` that contains NaN or infinity is not supported
         for now. In those cases, replace the unsupported values manually.
 
     See Also
@@ -1233,7 +1233,7 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
-            floating dtype, it is left alone. See :ref:`.img_as_float` for
+            floating dtype, it is left alone. See :func:`.img_as_float` for
             more details.
 
     stacklevel : int, optional
@@ -1250,7 +1250,7 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
     ------
     ValueError
         Prescaling an `image` with ``mode='minmax'` that contains NaN or
-        inifinity is not supported for now. In those cases, replace the
+        infinity is not supported for now. In those cases, replace the
         unsupported values manually.
 
     See Also
