@@ -82,6 +82,12 @@ File: skimage/transform/_thin_plate_splines.py
 Copyright: 2007 Zachary Pincus
 License: BSD-3-Clause
 
+File: skimage/transform/_hough_transform.pyx
+Copyright: 2000 Intel Corporation, all rights reserved.
+           2013 OpenCV Foundation, all rights reserved.
+           2014, Itseez, Inc, all rights reserved.
+License: BSD-3-Clause
+
 License: BSD-2-Clause
 
 Redistribution and use in source and binary forms, with or without

@@ -49,23 +49,12 @@ def test_probabilistic_hough():
         img[100 - i, i] = 100
         img[i, i] = 100
 
-    # decrease default theta sampling because similar orientations may confuse
-    # as mentioned in article of Galambos et al
-    theta = np.linspace(0, np.pi, 45)
-    lines = transform.probabilistic_hough_line(
-        img, threshold=10, line_length=10, line_gap=1, theta=theta
-    )
-    # sort the lines according to the x-axis
-    sorted_lines = []
-    for ln in lines:
-        ln = list(ln)
-        ln.sort(key=lambda x: x[0])
-        sorted_lines.append(ln)
+    _check_seeded_lines(1964, 50,
+                        [[(25, 25), (74, 74)], [(25, 75), (74, 26)]],
+                        img,
+                        threshold=10, line_gap=1, line_length=10)
 
-    assert [(25, 75), (74, 26)] in sorted_lines
-    assert [(25, 25), (74, 74)] in sorted_lines
-
-    # Execute with default theta
+    # Execute with default theta (Smoke test).
     transform.probabilistic_hough_line(img, line_length=10, line_gap=3)
 
 
@@ -90,6 +79,201 @@ def test_probabilistic_hough_bad_input():
     # Expected error, img must be 2D
     with pytest.raises(ValueError):
         transform.probabilistic_hough_line(img)
+
+
+def _sort_lines(lines):
+    # Sort each line by x, y, sort lines by contents.
+    sorted_lines = []
+    for ln in lines:
+        sorted_lines.append(sorted(ln, key=lambda x: (x[0], x[1])))
+    return sorted(sorted_lines)
+
+
+def _sorted_ph(*args, **kwargs):
+    return _sort_lines(transform.probabilistic_hough_line(*args, **kwargs))
+
+
+def _check_seeded_lines(seed, size, expected, img, **kwargs):
+    # Seed because of occasional errors from shorter lines. These happen
+    # because of the random order of point selection that sometimes leads
+    # to identification of part-lines (where the identified line is close to,
+    # but not exactly matching the real line).
+    seed_gen = np.random.default_rng(seed)
+    for rng_seed in seed_gen.integers(np.iinfo(int).max, size=size):
+        # Enforce shorter gap
+        assert _sorted_ph(img, rng=rng_seed, **kwargs) == expected
+
+
+def test_probabilistic_hough_examples():
+    # Single line in LR (x)
+    img = np.zeros((40, 40))
+    L = 20
+    img[5, 10 : (10 + L)] = 1
+    x_line = [(10, 5), (9 + L, 5)]
+    y_line = [(5, 10), (5, 9 + L)]
+    lines = _sorted_ph(img, line_length=L - 1)
+    assert lines == [x_line]
+    # Line length too short.  Note line length is pixel distance between end
+    # points - line from [0, 0] through [0, 3] is length 3.
+    assert _sorted_ph(img, line_length=L) == []
+    # Single line in UD (y)
+    lines = _sorted_ph(img.T, line_length=L - 1)
+    assert lines == [y_line]
+    # Two lines (x, y)
+    both = img + img.T
+    lines = _sorted_ph(both, line_length=L - 1)
+    assert lines == [y_line, x_line]
+    # Add diagonal lines.
+    more = both.copy()
+    offset = 15
+    n = 20
+    back_off = offset + n - 1
+    for i in range(n):
+        oi = offset + i
+        more[oi, oi] = 1
+        more[back_off - i, oi] = 1
+    diags = [
+        [(offset, offset), (back_off, back_off)],
+        [(offset, back_off), (back_off, offset)],
+    ]
+    _check_seeded_lines(1964, 10, [y_line, x_line] + diags, more,
+                        line_gap=2, line_length=L - 1)
+    # Filter by length of diagonals.  Get only the diagonals back.
+    len_diag = int(np.floor(np.sqrt(2 * (n - 1) ** 2)))
+    assert _sorted_ph(more, line_gap=2, line_length=len_diag) == diags
+    # Check gap behaves as expected.
+    assert _sorted_ph(img, line_gap=0, line_length=L - 1) == [x_line]
+    gappy = img.copy()
+    gappy[5, 12] = 0
+    assert _sorted_ph(gappy, line_gap=0, line_length=L - 1) == []
+    assert _sorted_ph(gappy, line_gap=1, line_length=L - 1) == [x_line]
+    gappy[5, 13:15] = 0
+    assert _sorted_ph(gappy, line_gap=2, line_length=L - 1) == []
+    assert _sorted_ph(gappy, line_gap=3, line_length=L - 1) == [x_line]
+
+
+@pytest.mark.parametrize('n_lines', range(2, 21, 4))
+def test_probabilistic_hough_recall_precision(n_lines):
+    # From C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
+    # Hough transform for line detection", in IEEE Computer Society Conference
+    # on Computer Vision and Pattern Recognition, 1999.
+    #
+    # """
+    # A hundred images containing a fixed number of randomly positioned lines
+    # were syntheticaly generated, the only source of noise being in the
+    # digitisation of the lines themselves. Figure 4 shows a typical image used
+    # in the experiment, the image resolution was 256 both horizontally and
+    # vertically, the lines were hundred pixels long. The number of lines
+    # varied between 2 and 20
+    # """
+    rng = np.random.default_rng(1939)
+    shape = (256, 256)
+    line_length = 100
+    lines = _gen_lines(shape, n_lines, line_length, margins=1, rng=rng)
+    precision, recall = precision_recall(lines, shape, line_length // 2, rng)
+    assert precision >= 0.75
+    assert recall >= 0.75
+
+
+def test_probabilistic_hough_scores():
+    # Test a specific shape, line_length, n_lines with many iterations.
+    shape = (256, 256)
+    line_length = 100
+    n_lines = 20
+    rng = np.random.default_rng(1966)
+    lines = _gen_lines(shape, n_lines, line_length, margins=1, rng=rng)
+    n_iters = 1000
+    results = np.zeros((n_iters, 2))
+    for i in range(n_iters):
+        results[i, :] = precision_recall(lines, shape, line_length // 2,
+                                         rng=rng)
+    precision, recall = np.mean(results, axis=0)
+    assert precision >= 0.92
+    assert recall >= 0.75
+
+
+def precision_recall(lines, shape, threshold, rng=None):
+    out_img = write_lines(lines, shape)
+    out_lines = transform.probabilistic_hough_line(
+        out_img, threshold=threshold, line_gap=2, line_length=50, rng=rng
+    )
+    detected_img = write_lines(out_lines, shape)
+    out_tf, detected_tf = [img.astype(bool) for img in (out_img, detected_img)]
+    tp = np.sum(detected_tf & out_tf)
+    fp = np.sum(detected_tf & ~out_tf)
+    return tp / (tp + fp), tp / np.sum(out_img)
+
+
+def test_gen_lines():
+    shape = (256, 256)
+    line_length = 20
+    n_lines = 100
+    # lines, start_end, xy
+    lines = _gen_lines(shape, n_lines, line_length, margins=1)
+    within = (lines[:, :, 0] >= 1) & (lines[:, :, 1] <= 254)
+    # Rounding may push rare points beyond margins.
+    assert np.sum(within) >= (n_lines - 2)
+    line_vecs = lines[:, 1, :] - lines[:, 0, :]  # Gives lines, x-y distances.
+    lengths = np.sqrt(np.sum(line_vecs**2, axis=1))
+    assert np.all(np.abs(lengths - line_length) < 0.75)
+
+
+def rand_pts(size, lims, rng):
+    return np.stack(
+        (rng.integers(*lims[0], size=size), rng.integers(*lims[1], size=size)), axis=1
+    )
+
+
+def _raw_rand_lines(size, lims, line_length, rng):
+    # Output is array (line, start_end, ij)
+    start_points = rand_pts(size, lims, rng)
+    raw_end_points = rand_pts(size, lims, rng)
+    vecs = raw_end_points - start_points
+    vlengths = np.sqrt(np.sum(vecs**2, axis=1))[:, None]
+    uvecs = vecs / np.where(vlengths, vlengths, 1e-16)
+    end_points = np.round(start_points + uvecs * line_length)
+    return np.stack((start_points, end_points), axis=1)
+
+
+def good_rand_lines(size, shape, margins, line_length, rng):
+    # Output is array (line, start_end, ij)
+    out = np.zeros((0, 2, 2))
+    lims = _get_lims(shape, margins)
+    st_lims, end_lims = lims.T
+    while len(out) < size:
+        raw_lines = _raw_rand_lines(size, lims, line_length, rng)
+        within = np.all(
+            (raw_lines >= st_lims[None, None, :])
+            & (raw_lines <= end_lims[None, None, :]),
+            axis=(1, 2),
+        )
+        out = np.concatenate((out, raw_lines[within]), axis=0)
+    return out[:size]
+
+
+def _get_lims(shape, margins):
+    margins = np.array(margins)
+    if margins.shape == ():
+        margins = np.ones(len(shape)) * margins
+    return np.stack((margins, shape - margins), axis=1)
+
+
+def _gen_lines(shape, n_lines, line_length, margins=0, rng=None):
+    rng = np.random.default_rng(rng)
+    ij_lines = good_rand_lines(n_lines, shape, margins, line_length, rng)
+    # Input is lines, start_end, i_j; convert to lines, start_end, x_y
+    # for compatibility ph output.
+    return np.flip(ij_lines, 2)
+
+
+def write_lines(lines, img):
+    if isinstance(img, (list, tuple)):  # Shape specifier.
+        img = np.zeros(img)
+    for start, end in np.round(lines).astype(int):
+        # Reverse xy to give ij
+        i_coords, j_coords = line(start[1], start[0], end[1], end[0])
+        img[i_coords, j_coords] = 1
+    return img
 
 
 def test_hough_line_peaks():
