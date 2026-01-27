@@ -193,9 +193,11 @@ During this phase, new (additional) features can still be introduced into the ol
 Second phase: Transitioning to `skimage2`
 .........................................
 
-Once we consider the API in ``skimage2`` complete and stable, it will be included in a "final release" versioned 2.0.0.
-From now on importing ``skimage2`` is encouraged, and no warnings will be raised.
-Instead, we will mark the API in ``skimage`` as deprecated by making deprecation messages from the first phase visible.
+Once we consider the API in ``skimage2`` complete and stable, will publish it in a full release versioned 2.0.0.
+Starting with that version, importing ``skimage2`` is encouraged, and no warnings will be raised.
+Instead, we will mark the API in ``skimage`` as deprecated and make deprecation messages from the first phase visible.
+
+**TODO** Should we kick off deprecations all at once? Should we complete deprecations (removing old API) all at once?
 
 On completion of each of these deprecations, we will remove the internal implementation from the old ``skimage`` namespace and move them to the ``skimage2`` namespace.
 This can happen over one or multiple releases.
@@ -213,6 +215,7 @@ Supporting these cases might be impossible or might require prohibitive developm
 Therefore, users and downstream libraries must always have other means of completing the transition manually, e.g., with the help of conventional deprecation warnings.
 
 If this tool is successfully implemented, it will be included at the start of the second phase as an `entry point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ alongside ``skimage2``.
+
 
 Backward compatibility
 ----------------------
