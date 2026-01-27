@@ -48,7 +48,7 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         id: download
         with:
           pattern: wheels-*
@@ -56,7 +56,7 @@ jobs:
           path: ./dist
 
       - name: Upload wheel
-        uses: scientific-python/upload-nightly-action@b36e8c0c10dbcfd2e05bf95f17ef8c14fd708dbf # 0.6.2
+        uses: scientific-python/upload-nightly-action@5748273c71e2d8d3a61f3a11a16421c8954f9ecf # 0.6.3
         with:
           artifacts_path: dist
           anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}
