@@ -1,0 +1,16 @@
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "quarterly"
+    cooldown:
+      default-days: 14
+    labels:
+      - ":robot: type: Infrastructure"
+    groups:
+      actions:
+        patterns:
+          - "*"
