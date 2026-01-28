@@ -259,11 +259,11 @@ Examples of running ``spin test``:
 .. code-block:: shell
 
     # All tests
-    spint test
+    spin test
 
     # Tests inside directory(s)
     spin test -- tests/skimage/morphology
-    spin test -- src/skimage/morphology test/skimage/morphology
+    spin test -- src/skimage/morphology tests/skimage/morphology
 
     # Tests matching an expression
     spin test -- -k threshold
@@ -276,7 +276,7 @@ Examples of running ``spin test``:
 
 .. tip::
 
-    Arguments specified after the ``--`` are forward as
+    Arguments specified after the ``--`` are forwarded as
     `options to pytest <https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags>`__.
 
 Testing requirements are listed in ``requirements/test.txt``.
