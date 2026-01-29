@@ -180,7 +180,7 @@ Small API difference
 Backwards compatible
   It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
   There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
-  In those case, we will try to provide helper functions instead.
+  In those cases, we will try to provide helper functions instead.
 
 Migration guide
   We will record the pathway for migrating from the old to the new API in detail in a migration guide.
