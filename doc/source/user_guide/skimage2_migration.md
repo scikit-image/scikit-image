@@ -53,9 +53,9 @@ The default of value `boundary_mode` is changed from `'nearest'` to `'wrap'`.
 To keep the old (`skimage`, v1.x) behavior use
 
 ```python
-import skimage2 as sk2
+import skimage2 as ski2
 
-sk2.data.binary_blobs(
+ski2.data.binary_blobs(
     shape=(length,) * n_dim,
     blob_size=blob_size_fraction * length,
     boundary_mode='nearest',

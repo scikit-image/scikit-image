@@ -53,18 +53,18 @@ def binary_blobs(
 
     Examples
     --------
-    >>> import skimage2 as sk2
-    >>> sk2.data.binary_blobs(shape=(5, 5), blob_size=1)  # doctest: +SKIP
+    >>> import skimage2 as ski2
+    >>> ski2.data.binary_blobs(shape=(5, 5), blob_size=1)  # doctest: +SKIP
     array([[ True, False,  True,  True,  True],
            [ True,  True,  True, False,  True],
            [False,  True, False,  True,  True],
            [ True, False, False,  True,  True],
            [ True, False, False, False,  True]])
-    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), blob_size=25)
+    >>> blobs = ski2.data.binary_blobs(shape=(256, 256), blob_size=25)
     >>> # Finer structures
-    >>> blobs = sk2.data.binary_blobs(shape=(256, 256), blob_size=13)
+    >>> blobs = ski2.data.binary_blobs(shape=(256, 256), blob_size=13)
     >>> # Blobs cover a smaller volume fraction of the image
-    >>> blobs = sk2.data.binary_blobs(
+    >>> blobs = ski2.data.binary_blobs(
     ...     shape=(256, 256), blob_size=25, volume_fraction=0.3
     ... )
     """
