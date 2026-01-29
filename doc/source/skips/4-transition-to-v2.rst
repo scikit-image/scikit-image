@@ -206,7 +206,7 @@ Once we consider the API in ``skimage2`` complete and stable, we will publish it
 Starting with that version, importing ``skimage2`` is encouraged and won't raise warnings.
 
 Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
-This warning will coax users to transition to ``skimage2`` and link to the migration guide.
+This warning will encourage users to transition to ``skimage2`` and link to the migration guide.
 
 Not earlier than 1 year after the release of 2.0.0, we will begin to successively remove parts of the deprecated API from ``skimage``.
 Implementations and internal code that still live in ``skimage`` will be moved to ``skimage2``.
