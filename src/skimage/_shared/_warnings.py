@@ -150,12 +150,19 @@ def expected_warnings(matching):
             raise ValueError(msg)
 
 
-def warn_external(message, category=None):
+def warn_external(message, *, category=None):
     """Emit warning that points to where users first call public API.
 
     Consider the call stack, there's a frame in use code that calls a public
     skimage function/class. This function will ensure that the warning points
     to that call site.
+
+    Parameters
+    ----------
+    message : str
+        Warning message.
+    category : type[Warning]
+        The class used in the warning.
     """
     kwargs = {}
     if sys.version_info[:2] >= (3, 12):
