@@ -6,7 +6,7 @@ from skimage2.data import binary_blobs
 from skimage._shared.testing import assert_stacklevel
 
 
-SEED = 20260129  # Pin randomness of tests
+SEED = 3  # Pin randomness of tests
 
 
 class Test_binary_blobs:
@@ -25,7 +25,7 @@ class Test_binary_blobs:
         assert_almost_equal(blobs.mean(), 0.25, decimal=1)
 
         other_realization = binary_blobs(
-            shape=(32, 32, 32), blob_size=3, volume_fraction=0.25, rng=SEED
+            shape=(32, 32, 32), blob_size=3, volume_fraction=0.25, rng=SEED + 1
         )
         assert not np.all(blobs == other_realization)
 
