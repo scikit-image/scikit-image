@@ -765,9 +765,12 @@ def _update_from_estimate_docstring(cls):
 
     inherited_class_name = inherited_cmeth.__qualname__.split('.')[-2]
 
-    from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
-        inherited_class_name, cls.__name__
-    )
+    if inherited_cmeth.__doc__ is not None:
+        from_estimate.__doc__ = inherited_cmeth.__doc__.replace(
+            inherited_class_name, cls.__name__
+        )
+    else:
+        from_estimate.__doc__ = None
     from_estimate.__signature__ = inspect.signature(inherited_cmeth)
 
     cls.from_estimate = classmethod(from_estimate)
