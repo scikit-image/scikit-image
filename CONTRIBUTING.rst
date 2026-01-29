@@ -39,13 +39,15 @@ PR Checklist
 AI Policy
 ---------
 We are a small developer team, and we enjoy reviewing and discussing code written by other humans.
-If, despite our strong preference, you decide to use AI to make a PR, please:
+We recognize that LLMs may be useful for some rote maintenance tasks,
+but overall prefer for contributions to be hand-written.
+If you do use AI to make a PR, we ask that you:
 
-1. indicate *how* you used it in the PR description;
-2. make sure you *fully understand* all the changes so we can ask you
-   about them; and
-3. be prepared to argue that the code does not breach any copyright or license terms
-   (yes, we take those seriously!).
+1. indicate the tool used, as well as how, in the PR description;
+2. make sure you *carefully review* and *fully understand* all
+   proposed changes so we may have a conversation about them; and
+3. be careful not to breach any copyright or license terms (yes, we
+   take those seriously!).
 
 Development process
 -------------------
