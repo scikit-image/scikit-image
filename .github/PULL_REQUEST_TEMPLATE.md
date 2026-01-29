@@ -1,6 +1,11 @@
-<!-- Please see the Contribution Guide: https://scikit-image.org/docs/dev/development/contribute.html -->
-<!-- For newcomers: this document has a checklist of what we expect in a PR. -->
-<!-- Also please note our AI policy: https://scikit-image.org/docs/dev/development/contribute.html#ai-policy -->
+<!-- 
+Please see the Contribution Guide:
+https://scikit-image.org/docs/dev/development/contribute.html 
+For newcomers: this document has a checklist of what we expect in a PR.
+
+Also please note our AI policy:
+https://scikit-image.org/docs/dev/development/contribute.html#ai-policy
+-->
 
 <!-- ... PR description goes here ... -->
 
