@@ -225,7 +225,7 @@ Once the ``skimage`` namespace is empty, it will be removed.
 Code translation helper
 .......................
 
-Before switching to the second phase, we will look into implementing a code translation tool to help users automate the transition to ``skimage2``.
+While unclear that we will have time to do so, we would like to explore the viability of building a code translation tool, to help users automate the transition to ``skimage2``.
 This should alleviate the cost and work involved for switching – especially in cases that can be easily automated.
 
 Still, this tool might not support more ambiguous or complex updates of our API, or all the complex ways in which users might use our library.
