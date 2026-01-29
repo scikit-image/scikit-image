@@ -74,6 +74,8 @@ def binary_blobs(
     min_length = min(shape)
     blob_size_fraction = blob_size / min_length
 
+    if blob_size <= 0:
+        raise ValueError(f"`blob_size` must be > 0, got {blob_size=}")
     if blob_size < 1:
         warn_external(
             f"Requested `blob_size` ({blob_size}) is smaller than 1. "
