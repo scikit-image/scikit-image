@@ -19,21 +19,19 @@ SKIP 4 — Transitioning to scikit-image 2.0
 Abstract
 --------
 
-scikit-image is preparing to release version 1.0. This :ref:`was seen
 scikit-image is working towards a 2.0 release. This :ref:`is an opportunity
 <skip_3_transition_v1>` to clean up the API, and make long-outstanding
 backward incompatible changes. Some of these changes involve changing return
-values without changing function signatures, which cannot be done
-without adding an otherwise useless keyword argument (such as
-``new_return_style=True``) whose default value changes over several releases.
-Even that procedure still results in backward incompatible changes, but made over a longer
-time period.
+values without changing function signatures, which cannot be done without adding
+an otherwise useless keyword argument (such as ``new_return_style=True``) whose
+default value would need to change over several releases. That procedure would
+still result in backward incompatible changes, but made over a longer time period.
 
 Despite being in beta and in a 0.x series of releases, scikit-image is used
 extremely broadly, and any backwards incompatible changes are likely to be
 disruptive. Given the rejection of :ref:`SKIP-3 <skip_3_transition_v1>`, this
-document proposes an alternative pathway towards cleaning and modernizing our API. The new pathway
-involves the following steps:
+document proposes an alternative pathway towards cleaning and modernizing our API.
+The new pathway involves the following steps:
 
 - Introduce a new namespace ``skimage2`` that will be included in the package
   alongside the existing ``skimage`` namespace during a transition period.
