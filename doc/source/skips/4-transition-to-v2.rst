@@ -192,7 +192,7 @@ Local deprecation warnings
   Specific deprecation warnings will be added to the old API.
   These warnings will be silent (subclass of `PendingDeprecationWarning`_) and not be shown to users by default.
 
-  For example, ``skimage.data.binary_blobs`` may emit a ``PendingSkimage2Change`` warning that advises users to use ``skimage2.data.binary_blobs`` instead and how to do so.
+  For example, ``skimage.data.binary_blobs`` may emit a :class:`.PendingSkimage2Change` warning that advises users to use ``skimage2.data.binary_blobs`` instead and how to adapt to a new signature.
 
 During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
 
