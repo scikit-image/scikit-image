@@ -44,8 +44,8 @@ If, despite our strong preference, you decide to use AI to make a PR, please:
 1. indicate *how* you used it in the PR description;
 2. make sure you *fully understand* all the changes so we can ask you
    about them; and
-3. be prepared to argue that the code does not breach any copyright
-   (yes, we take copyright seriously!).
+3. be prepared to argue that the code does not breach any copyright or license terms
+   (yes, we take those seriously!).
 
 Development process
 -------------------
