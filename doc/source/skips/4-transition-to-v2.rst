@@ -14,7 +14,7 @@ SKIP 4 — Transitioning to scikit-image 2.0
 :Created: 2025-08-16
 :Resolved: <null>
 :Resolution: <null>
-:Version effective: None
+:Version effective: None (likely, 1.0.0)
 
 Abstract
 --------
@@ -39,7 +39,7 @@ involves the following steps:
 - The new API will be implemented in ``skimage2`` and will initially be marked as
   unstable and experimental. The old API in ``skimage`` will continue working.
 - When the new API in ``skimage2`` is complete, the old namespace
-  ``skimage`` will be deprecated and eventually removed.
+  ``skimage`` will be successively deprecated and eventually removed.
 
 See the :ref:`skip4_implementation` section for a more detailed description of
 the changes and steps involved.
@@ -184,25 +184,41 @@ Backwards compatible
 
 Migration guide
   We will record the pathway for migrating from the old to the new API in detail in a migration guide.
-  Additionally, deprecation warnings will be added to the old API.
-  Initially, these warnings will be silent by default and not be shown to users.
+  Each API difference will be documented.
+
+.. _sk2-local-warning:
+
+Local deprecation warnings
+  Specific deprecation warnings will be added to the old API.
+  These warnings will be silent (subclass of `PendingDeprecationWarning`_) and not be shown to users by default.
+
+  For example, ``skimage.data.binary_blobs`` may emit a ``PendingSkimage2Change`` warning that advises users to use ``skimage2.data.binary_blobs`` instead and how to do so.
 
 During this phase, new (additional) features can still be introduced into the old ``skimage`` namespace, not only in the new one.
+
+.. _PendingDeprecationWarning: https://docs.python.org/3/library/exceptions.html#PendingDeprecationWarning
 
 
 Second phase: Transitioning to `skimage2`
 .........................................
 
 Once we consider the API in ``skimage2`` complete and stable, will publish it in a full release versioned 2.0.0.
-Starting with that version, importing ``skimage2`` is encouraged, and no warnings will be raised.
-Instead, we will mark the API in ``skimage`` as deprecated and make deprecation messages from the first phase visible.
+Starting with that version, importing ``skimage2`` is encouraged and won't raise warnings.
 
-**TODO** Should we kick off deprecations all at once? Should we complete deprecations (removing old API) all at once?
+Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
+This warning will coax users to transition to ``skimage2`` and link to the migration guide.
 
-On completion of each of these deprecations, we will remove the internal implementation from the old ``skimage`` namespace and move them to the ``skimage2`` namespace.
-This can happen over one or multiple releases.
+Not earlier than 1 year after the release of 2.0.0, we will begin to successively remove parts of the deprecated API from ``skimage``.
+Implementations and internal code that still live in ``skimage`` will be moved to ``skimage2``.
+This process can and should be spread over multiple releases.
+
+Before completely removing parts of the API, relevant :ref:`warnings from the first phase <sk2-local-warning>` should be made visible to users.
+They should be visible for 2 releases before API is actually removed (or whatever our existing `deprecation policy <dep_pol>`_ recommends).
+This helps users who want to transition slowly.
 
 Once the ``skimage`` namespace is empty, it will be removed.
+
+.. _dep_pol: https://scikit-image.org/docs/dev/development/contribute.html#deprecation-cycle
 
 
 Code translation helper
@@ -210,11 +226,14 @@ Code translation helper
 
 Before switching to the second phase, we will look into implementing a code translation tool to help users automate the transition to ``skimage2``.
 This should alleviate the cost and work involved for switching – especially in cases that can be easily automated.
+
 Still, this tool might not support more ambiguous or complex updates of our API, or all the complex ways in which users might use our library.
 Supporting these cases might be impossible or might require prohibitive development effort.
 Therefore, users and downstream libraries must always have other means of completing the transition manually, e.g., with the help of conventional deprecation warnings.
 
-If this tool is successfully implemented, it will be included at the start of the second phase as an `entry point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ alongside ``skimage2``.
+If this tool is successfully implemented, it will be included at the start of the second phase as an `entry point`_ alongside ``skimage2``.
+
+.. _entry point: https://packaging.python.org/en/latest/specifications/entry-points/
 
 
 Backward compatibility
@@ -329,9 +348,11 @@ This SKIP is the result of many evolving discussions among the core team, with f
 - `A pragmatic pathway towards skimage2 <https://discuss.scientific-python.org/t/a-pragmatic-pathway-towards-skimage2/530>`_
 - Many discussions happened in `issues and pull requests tagged as "Path to skimage2" <https://github.com/scikit-image/scikit-image/pulls?q=label%3A%22%3Ahiking_boot%3A+Path+to+skimage2%22+>`_.
 
+
 Resolution
 ----------
 
+Pending.
 
 
 References and Footnotes
