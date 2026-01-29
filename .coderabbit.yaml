@@ -8,28 +8,39 @@ reviews:
   labeling_instructions:
     - label: ":scroll: type: API"
       instructions: >-
-        For backward-incompatible changes to the API and deprecations. Mutually exclusive.
+        For backward-incompatible changes to the API and deprecations.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":baby: type: New feature"
       instructions: >-
-        For new features that previously did not exist. Mutually exclusive.
+        For new features that previously did not exist.
+        New features for tooling, infrastructure and such shouldn't use this label.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":wrench: type: Maintenance"
       instructions: >-
-        For internal code changes and cleanups. Mutually exclusive.
+        For internal code changes and cleanups.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":adhesive_bandage: type: Bug fix"
       instructions: >-
-        For bug fixes. Mutually exclusive.
+        For bug fixes that apply to user facing API.
+        Fixes for tooling, infrastructure and such shouldn't use this label.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":page_facing_up: type: Documentation"
       instructions: >-
-        For changes dedicated to documentation (i.e., not as part of a new feature). Mutually exclusive.
+        For changes dedicated to documentation (i.e., not as part of a new feature).
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":robot: type: Infrastructure"
       instructions: >-
-        Fixes to CI and other infrastructure. Mutually exclusive.
+        Fixes to CI and other infrastructure.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":fast_forward: type: Enhancement"
       instructions: >-
-        Improvements made to an existing feature. Mutually exclusive.
+        Improvements made to an existing feature.
+        Improvements for tooling, infrastructure and such shouldn't use this label.
+        Only apply this if no other label with "type:" is already assigned.
     - label: ":chart_with_upwards_trend: type: Performance"
       instructions: >-
-        For changes intended to improve performance. Mutually exclusive.
+        For changes intended to improve performance.
+        Only apply this if no other label with "type:" is already assigned.
   auto_apply_labels: true
   in_progress_fortune: false
   poem: false
