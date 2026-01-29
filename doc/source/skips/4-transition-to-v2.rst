@@ -202,7 +202,7 @@ During this phase, new (additional) features can still be introduced into the ol
 Second phase: Transitioning to `skimage2`
 .........................................
 
-Once we consider the API in ``skimage2`` complete and stable, will publish it in a full release versioned 2.0.0.
+Once we consider the API in ``skimage2`` complete and stable, we will publish it in a full release versioned 2.0.0.
 Starting with that version, importing ``skimage2`` is encouraged and won't raise warnings.
 
 Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
