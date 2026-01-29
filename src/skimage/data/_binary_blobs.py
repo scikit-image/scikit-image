@@ -27,31 +27,32 @@ def binary_blobs(
     n_dim : int, optional
         Number of dimensions of output image.
     volume_fraction : float, default 0.5
-        Fraction of image pixels covered by the blobs (where the output is 1).
-        Should be in [0, 1].
+        Fraction of image pixels covered by the blobs. Higher value lead to
+        a larger fraction of pixels being part of blobs. Should be in [0, 1].
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
         If `rng` is an int, it is used to seed the generator.
     boundary_mode : {'nearest', 'wrap'}, optional
-        The blobs are created by smoothing and then thresholding an
-        array consisting of ones at seed positions. This mode determines which values are
-        filled in when the smoothing kernel overlaps the seed array's boundary.
+        The blobs are created by smoothing and then thresholding an array
+        consisting of ones at seed positions. This mode determines which
+        values are filled in when the smoothing kernel overlaps the seed array's
+        boundary.
 
         'nearest' (`a a a a | a b c d | d d d d`)
-            By default, when applying the Gaussian filter, the seed array is extended by replicating the last
-            boundary value. This will increase the size of blobs whose seed or
-            center lies exactly on the edge.
+            By default, when applying the Gaussian filter, the seed array is
+            extended by replicating the last boundary value. This will increase
+            the size of blobs whose seed or center lies exactly on the edge.
 
         'wrap' (`a b c d | a b c d | a b c d`)
             The seed array is extended by wrapping around to the opposite edge.
-            The resulting blob array can be tiled and blobs will be contiguous and
-            have smooth edges across tile boundaries.
+            The resulting blob array can be tiled and blobs will be contiguous
+            and have smooth edges across tile boundaries.
 
     Returns
     -------
     blobs : ndarray of bools
-        Output binary image
+        Output binary image.
 
     Examples
     --------
@@ -72,14 +73,14 @@ def binary_blobs(
         "`skimage.data.binary_blobs` is deprecated in favor of "
         "`skimage2.data.binary_blobs` which has a new signature. "
         "The parameters `length` and `n_dim` have been replaced with `shape`. "
-        "`blob_size_fraction` was changed to `blob_size`. "
+        "`blob_size_fraction` has been changed to `blob_size`. "
         "The default of `boundary_mode` has been changed to 'wrap'. "
-        "To keep the old behavior from `skimage` (v1.x) use:\n"
+        "To keep the old (`skimage`, v1.x) behavior use:\n"
         "\n"
         "    import skimage2 as sk2\n"
         "    sk2.data.binary_blobs(\n"
         "        shape=(length,) * n_dim,\n"
-        "        blob_size=blob_size_fraction * length\n"
+        "        blob_size=blob_size_fraction * length,\n"
         "        boundary_mode='nearest',\n"
         "        ...\n"
         "    )",

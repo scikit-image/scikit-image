@@ -43,7 +43,7 @@ Other
 
 Post Python 3.11
 ----------------
-* Remove or simplify `skimage._shared._warnings::warn_external` to only use
+* Remove or simplify `skimage._shared._warnings::warn_external` to use only
   `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
 
 Post numpy 2

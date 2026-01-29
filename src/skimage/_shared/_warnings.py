@@ -151,8 +151,11 @@ def expected_warnings(matching):
 
 
 def warn_external(message, category=None):
-    """
-    Emit warning that points to public API boundary of scikit-image.
+    """Emit warning that points to where users first call public API.
+
+    Consider the call stack, there's a frame in use code that calls a public
+    skimage function/class. This function will ensure that the warning points
+    to that call site.
     """
     kwargs = {}
     if sys.version_info[:2] >= (3, 12):

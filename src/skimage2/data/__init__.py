@@ -1,6 +1,6 @@
 """Example images and datasets.
 
-A curated set of general purpose and scientific images used in tests, examples,
+A curated set of general-purpose and scientific images used in tests, examples,
 and documentation. Also includes functionality to generate synthetic data.
 """
 

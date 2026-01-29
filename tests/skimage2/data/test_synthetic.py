@@ -59,8 +59,8 @@ class Test_binary_blobs:
 
     @pytest.mark.filterwarnings("ignore:Requested `blob_size` .* is smaller than 1")
     def test_blob_size_clamping(self):
-        # A very small `blob_size` will allocate excessive memory
-        # Check that this is gracefully handled
+        # A very small `blob_size` will allocate excessive memory.
+        # Check that this is gracefully handled.
         regex = r"Clamping to `blob_size=0.1`"
         with pytest.warns(RuntimeWarning, match=regex) as record:
             result = binary_blobs(shape=(100, 100), rng=3, blob_size=0.09)

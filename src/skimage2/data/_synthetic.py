@@ -14,7 +14,7 @@ def binary_blobs(
     rng=None,
     boundary_mode='wrap',
 ):
-    """Generate synthetic binary image with several rounded blob-like objects.
+    """Generate synthetic binary image containing blob-like objects.
 
     Parameters
     ----------
@@ -24,8 +24,8 @@ def binary_blobs(
         Typical linear size of blob in pixels.
         Values smaller than 1 may lead to unexpected results.
     volume_fraction : float, default 0.5
-        Fraction of image pixels covered by the blobs (where the output is 1).
-        Should be in [0, 1].
+        Fraction of image pixels covered by the blobs. Higher value lead to
+        a larger fraction of pixels being part of blobs. Should be in [0, 1].
     rng : int or :class:`numpy.random.Generator`, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
@@ -39,7 +39,7 @@ def binary_blobs(
         'wrap' (`a b c d | a b c d | a b c d`)
             By default, the seed array is extended by wrapping around to the
             opposite edge. The resulting blob array can be tiled and blobs will
-            be contiguous and  have smooth edges across tile boundaries.
+            be contiguous and have smooth edges across tile boundaries.
 
         'nearest' (`a a a a | a b c d | d d d d`)
             When applying the Gaussian filter, the seed array is extended by
@@ -49,7 +49,7 @@ def binary_blobs(
     Returns
     -------
     blobs : ndarray of dtype bool
-        Output binary image
+        Output binary image.
 
     Examples
     --------
@@ -98,12 +98,13 @@ def binary_blobs(
         points[ax] *= length
     points = points.astype(int)
 
-    mask[tuple(indices for indices in points)] = 1
+    mask[tuple(points)] = 1
     mask = gaussian(
         mask,
         sigma=0.25 * min_length * blob_size_fraction,
         preserve_range=False,
         mode=boundary_mode,
     )
-    threshold = np.percentile(mask, 100 * (1 - volume_fraction))
-    return np.logical_not(mask < threshold)
+    threshold = np.quantile(mask, 1 - volume_fraction)
+    blobs = mask >= threshold
+    return blobs
