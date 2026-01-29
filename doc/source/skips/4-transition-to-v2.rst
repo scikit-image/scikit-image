@@ -14,7 +14,7 @@ SKIP 4 — Transitioning to scikit-image 2.0
 :Created: 2025-08-16
 :Resolved: <null>
 :Resolution: <null>
-:Version effective: None (likely, 1.0.0)
+:Version effective: None
 
 Abstract
 --------
@@ -168,7 +168,7 @@ This process orients itself around the following principles:
 
 Only one implementation
   If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
-  The implementation can live either inside the old or new namespace depending on what is more opportune.
+  The implementation can live in either namespace depending on what is more opportune – preferably it should live in ``skimage2``.
 
 Independent test suite
   Each API should have its own independent test suite.
@@ -180,6 +180,7 @@ Small API difference
 Backwards compatible
   It should be possible to achieve the old behavior of the ``skimage`` API by some call or set of calls with the ``skimage2`` API.
   There may be some situations where we have to break this general rule, but an argument should be made for the relevant change that breaks this rule.
+  In those case, we will try to provide helper functions instead.
 
 Migration guide
   We will record the pathway for migrating from the old to the new API in detail in a migration guide.
