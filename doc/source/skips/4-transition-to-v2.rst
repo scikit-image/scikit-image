@@ -206,7 +206,8 @@ Once we consider the API in ``skimage2`` complete and stable, we will publish it
 Starting with that version, importing ``skimage2`` is encouraged and won't raise warnings.
 
 Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
-This warning will encourage users to transition to ``skimage2`` and link to the migration guide.
+This warning will encourage users to transition to ``skimage2``.
+It should link to the migration guide and should explain how to enable :ref:`more specific warnings <sk2-local-warning>`.
 
 Not earlier than 1 year after the release of 2.0.0, we will begin to successively remove parts of the deprecated API from ``skimage``.
 Implementations and internal code that still live in ``skimage`` will be moved to ``skimage2``.
@@ -347,6 +348,7 @@ This SKIP is the result of many evolving discussions among the core team, with f
   See the "Resolution" section of that document for further background on the motivation for this SKIP.
 - `A pragmatic pathway towards skimage2 <https://discuss.scientific-python.org/t/a-pragmatic-pathway-towards-skimage2/530>`_
 - Many discussions happened in `issues and pull requests tagged as "Path to skimage2" <https://github.com/scikit-image/scikit-image/pulls?q=label%3A%22%3Ahiking_boot%3A+Path+to+skimage2%22+>`_.
+- The `meeting notes from the Sprint in Vienna <https://github.com/scikit-image/skimage-archive/blob/05e98d46b5d12466dcde84487fb75d710adb08b7/sprints/2025-08_sprint_notes_Vienna.md>`_ captures part of the extensive discussion that informed this SKIP.
 
 
 Resolution
