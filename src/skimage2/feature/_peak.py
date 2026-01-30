@@ -194,7 +194,7 @@ def peak_local_max(
 
     Examples
     --------
-    >>> import skimage2 as sk2
+    >>> import skimage2 as ski2
     >>> img1 = np.zeros((7, 7))
     >>> img1[3, 4] = 1
     >>> img1[3, 2] = 1.5
@@ -207,17 +207,17 @@ def peak_local_max(
            [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
            [0. , 0. , 0. , 0. , 0. , 0. , 0. ]])
 
-    >>> sk2.feature.peak_local_max(img1, min_distance=1)
+    >>> ski2.feature.peak_local_max(img1, min_distance=1)
     array([[3, 2],
            [3, 4]])
 
-    >>> sk2.feature.peak_local_max(img1, min_distance=2)
+    >>> ski2.feature.peak_local_max(img1, min_distance=2)
     array([[3, 2]])
 
     >>> img2 = np.zeros((20, 20, 20))
     >>> img2[10, 10, 10] = 1
     >>> img2[15, 15, 15] = 1
-    >>> peak_idx = sk2.feature.peak_local_max(img2, exclude_border=0)
+    >>> peak_idx = ski2.feature.peak_local_max(img2, exclude_border=0)
     >>> peak_idx
     array([[10, 10, 10],
            [15, 15, 15]])
@@ -227,7 +227,6 @@ def peak_local_max(
     >>> np.argwhere(peak_mask)
     array([[10, 10, 10],
            [15, 15, 15]])
-
     """
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
