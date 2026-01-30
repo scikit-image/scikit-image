@@ -4,8 +4,9 @@ import warnings
 import re
 import functools
 import os
+from pathlib import Path
 
-__all__ = ['all_warnings', 'expected_warnings', 'warn']
+__all__ = ['all_warnings', 'expected_warnings', 'warn', 'warn_external']
 
 
 # A version of `warnings.warn` with a default stacklevel of 2.
@@ -147,3 +148,48 @@ def expected_warnings(matching):
             newline = "\n"
             msg = f"No warning raised matching:{newline}{newline.join(remaining)}"
             raise ValueError(msg)
+
+
+def warn_external(message, *, category=None):
+    """Emit warning that points to where user first called public API.
+
+    Consider the call stack, there's a frame in user code that calls a public
+    skimage function/class. This function will ensure that the warning points
+    to that call site.
+
+    Parameters
+    ----------
+    message : str
+        Warning message.
+    category : type[Warning]
+        The class used in the warning.
+    """
+    kwargs = {}
+    if sys.version_info[:2] >= (3, 12):
+        # Go to Python's `site-packages` or `lib` from an editable install.
+        basedir = Path(__file__).parents[2]
+        kwargs['skip_file_prefixes'] = (
+            str(basedir / 'skimage'),
+            str(basedir / 'skimage2'),
+        )
+    else:
+        frame = sys._getframe()
+        # finite counter in case of error in break logic
+        counter = range(1, sys.getrecursionlimit() + 1)
+        for stacklevel in counter:
+            if frame is None:
+                # when called in embedded context may hit frame is None
+                kwargs['stacklevel'] = stacklevel
+                break
+            in_skimage_namespace = re.match(
+                r"\Askimage(2)?(\Z|\.)",
+                # Work around sphinx-gallery not setting __name__.
+                frame.f_globals.get("__name__", ""),
+            )
+            if not in_skimage_namespace:
+                kwargs['stacklevel'] = stacklevel
+                break
+            frame = frame.f_back
+        # preemptively break reference cycle between locals and the frame
+        del frame
+    warnings.warn(message, category, **kwargs)
