@@ -229,13 +229,14 @@ class Test_peak_local_max:
         result[tuple(peak_idx.T)] = True
         assert_equal(result, nd_image.astype(bool))
 
-    def test_empty(self):
-        image = np.zeros((10, 20))
-        labels = np.zeros((10, 20), int)
+    @pytest.mark.parametrize("ndim", [1, 2, 3, 4])
+    def test_empty(self, ndim):
+        image = np.zeros((10,) * ndim)
+        labels = np.zeros_like(image, dtype=int)
         result = peak_local_max(
             image,
             labels=labels,
-            footprint=np.ones((3, 3), bool),
+            footprint=np.ones((3,) * ndim, dtype=bool),
             min_distance=1,
             threshold_rel=0,
             exclude_border=False,

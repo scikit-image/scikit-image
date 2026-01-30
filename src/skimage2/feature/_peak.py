@@ -176,8 +176,9 @@ def peak_local_max(
 
     Returns
     -------
-    output : ndarray
-        The coordinates of the peaks.
+    output : ndarray of shape (N, D)
+        The coordinates of the peaks. ``N`` denotes the number of peaks and
+        ``D`` corresponds to the number of dimensions in `image`.
 
     Notes
     -----
@@ -294,7 +295,7 @@ def peak_local_max(
         if labels_peak_coord:
             coordinates = np.vstack(labels_peak_coord)
         else:
-            coordinates = np.empty((0, 2), dtype=int)
+            coordinates = np.empty((0, image.ndim), dtype=int)
 
         if len(coordinates) > num_peaks:
             out = np.zeros_like(image, dtype=bool)
