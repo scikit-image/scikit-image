@@ -25,6 +25,30 @@ shy, the team is very friendly!
 .. contents::
    :local:
 
+
+PR Checklist
+------------
+
+- Concise, descriptive title
+- `Docstrings for all functions <https://github.com/numpy/numpydoc/blob/main/doc/example.py>`_
+- `Unit tests <https://scikit-image.org/docs/dev/development/contribute.html#testing>`_
+- For new features, a gallery example in `./doc/examples`
+- Tools declaration: in case tools other than a text editor were used
+  in creating the PR
+
+AI Policy
+---------
+We are a small developer team, and we enjoy reviewing and discussing code written by other humans.
+We recognize that LLMs may be useful for some rote maintenance tasks,
+but overall prefer for contributions to be hand-written.
+If you do use AI to make a PR, we ask that you:
+
+1. indicate the tool used, as well as how, in the PR description;
+2. make sure you *carefully review* and *fully understand* all
+   proposed changes so we may have a conversation about them; and
+3. be careful not to breach any copyright or license terms (yes, we
+   take those seriously!).
+
 Development process
 -------------------
 The following is a brief overview about how changes to source code and documentation
