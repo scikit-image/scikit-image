@@ -23,8 +23,8 @@ def binary_blobs(
     blob_size : float
         Typical linear size of blob in pixels.
         Values smaller than 1 may lead to unexpected results.
-    volume_fraction : float, default 0.5
-        Fraction of image pixels covered by the blobs. Should be in [0, 1].
+    volume_fraction : float, in interval [0, 1], optional
+        Fraction of image pixels covered by the blobs.
     rng : int or :class:`numpy.random.Generator`, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
