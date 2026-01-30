@@ -1,9 +1,7 @@
-# TODO replace with `warn_external`, waiting for gh-7976
-from warnings import warn
-
 import numpy as np
 import scipy.ndimage as ndi
 
+from skimage._shared._warnings import warn_external
 from skimage._shared.coord import ensure_spacing
 
 
@@ -231,11 +229,10 @@ def peak_local_max(
 
     """
     if (footprint is None or footprint.size == 1) and min_distance < 1:
-        warn(
+        warn_external(
             "When min_distance < 1, peak_local_max acts as finding "
             "image > max(threshold_abs, threshold_rel * max(image)).",
-            RuntimeWarning,
-            stacklevel=2,
+            category=RuntimeWarning,
         )
 
     border_width = _get_excluded_border_width(image, min_distance, exclude_border)

@@ -453,9 +453,6 @@ class TestPeakLocalMax:
             peak.peak_local_max(image, min_distance=5, threshold_rel=0).tolist()
         ) == [[5, 5, 5, 5], [15, 15, 15, 15]]
 
-    @pytest.mark.xfail(
-        reason="waiting for warn_external added by gh-7976", run=True, strict=True
-    )
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
 
