@@ -384,7 +384,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _prescale_value_range(image, mode=prescale, stacklevel=5)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -598,7 +598,7 @@ def blob_log(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _prescale_value_range(image, mode=prescale, stacklevel=5)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -799,7 +799,7 @@ def blob_doh(
 
     check_nD(image, 2)
 
-    image = _prescale_value_range(image, mode=prescale, stacklevel=5)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

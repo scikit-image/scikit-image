@@ -585,8 +585,9 @@ class Test_minmax_scale_value_range:
             result = _minmax_scale_value_range(image)
         else:
             regex = "Overflow while attempting to rescale"
-            with pytest.warns(RuntimeWarning, match=regex):
+            with pytest.warns(RuntimeWarning, match=regex) as record:
                 result = _minmax_scale_value_range(image)
+            testing.assert_stacklevel(record)
 
         assert image is not result
         assert result.dtype == expected_dtype
@@ -608,8 +609,9 @@ class Test_minmax_scale_value_range:
         expected_dtype = _supported_float_type(dtype, allow_complex=True)
         expected = np.array([0, 0], dtype=expected_dtype)
 
-        with pytest.warns(RuntimeWarning, match="`image` is uniform"):
+        with pytest.warns(RuntimeWarning, match="`image` is uniform") as record:
             result = _minmax_scale_value_range(image)
+        testing.assert_stacklevel(record)
         assert image is not result
         assert result.dtype == expected_dtype
         np.testing.assert_equal(result, expected)
@@ -617,8 +619,9 @@ class Test_minmax_scale_value_range:
     @pytest.mark.parametrize("dtype", float_dtypes)
     def test_nan(self, dtype):
         image = np.array([np.nan, -1, 0, 1], dtype=dtype)
-        with pytest.raises(ValueError, match="`image` contains NaN"):
+        with pytest.raises(ValueError, match="`image` contains NaN") as record:
             _minmax_scale_value_range(image)
+        testing.assert_stacklevel(record)
 
     @pytest.mark.parametrize("dtype", float_dtypes)
     @pytest.mark.filterwarnings(
@@ -626,8 +629,9 @@ class Test_minmax_scale_value_range:
     )
     def test_inf(self, dtype):
         image = np.array([-np.inf, -1, 0, 1, np.inf], dtype=dtype)
-        with pytest.raises(ValueError, match="`image` contains inf"):
+        with pytest.raises(ValueError, match="`image` contains inf") as record:
             _minmax_scale_value_range(image)
+        testing.assert_stacklevel(record)
 
 
 class Test_prescale_value_range:

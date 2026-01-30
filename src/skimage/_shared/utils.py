@@ -6,7 +6,8 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from ._warnings import all_warnings, warn
+from ._warnings import all_warnings, warn, warn_external
+
 
 __all__ = [
     'deprecate_func',
@@ -1116,16 +1117,13 @@ def as_binary_ndarray(array, *, variable_name):
     return np.asarray(array, dtype=bool)
 
 
-def _minmax_scale_value_range(image, *, stacklevel=2):
+def _minmax_scale_value_range(image):
     """Min-max scale `image` to the value range [0, 1].
 
     Parameters
     ----------
     image : ndarray
         The image to scale.
-    stacklevel : int, optional
-        Set the correct stacklevel for warnings that may be raised during
-        normalization.
 
     Returns
     -------
@@ -1177,7 +1175,7 @@ def _minmax_scale_value_range(image, *, stacklevel=2):
 
     if lower == higher:
         msg = "`image` is uniform, returning uniform array of 0"
-        warnings.warn(msg, category=RuntimeWarning, stacklevel=stacklevel)
+        warn_external(msg, category=RuntimeWarning)
         out = np.zeros_like(out)
         return out
     assert lower < higher
@@ -1189,12 +1187,11 @@ def _minmax_scale_value_range(image, *, stacklevel=2):
             out -= lower
         except FloatingPointError as e:
             if "overflow" in e.args[0]:
-                warnings.warn(
+                warn_external(
                     "Overflow while attempting to rescale. This could be due to "
                     "`image` containing unexpectedly large values. Dividing by 2 "
                     "before scaling to avoid overflow.",
                     category=RuntimeWarning,
-                    stacklevel=stacklevel,
                 )
                 out /= 2
                 lower /= 2
@@ -1209,7 +1206,7 @@ def _minmax_scale_value_range(image, *, stacklevel=2):
     return out
 
 
-def _prescale_value_range(image, *, mode, stacklevel=3):
+def _prescale_value_range(image, *, mode):
     """Scale the value range of `image` according to the selected `mode`.
 
     For now, this private function handles prescaling for public API that
@@ -1235,10 +1232,6 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
             Normalize only if `image` has an integer dtype, if `image` is of
             floating dtype, it is left alone. See :func:`.img_as_float` for
             more details.
-
-    stacklevel : int, optional
-        Set the correct stacklevel for warnings that may be raised during
-        normalization.
 
     Returns
     -------
@@ -1282,6 +1275,6 @@ def _prescale_value_range(image, *, mode, stacklevel=3):
 
         return img_as_float(image)
     if mode == "minmax":
-        return _minmax_scale_value_range(image, stacklevel=stacklevel)
+        return _minmax_scale_value_range(image)
     else:
         raise ValueError("unsupported mode")
