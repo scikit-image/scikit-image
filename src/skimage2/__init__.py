@@ -1,10 +1,10 @@
 """skimage2 namespace"""
 
-from skimage import __version__
-
 import warnings
 
 import lazy_loader as _lazy
+
+from skimage import __version__
 
 
 class ExperimentalAPIWarning(UserWarning):
@@ -17,5 +17,6 @@ warnings.warn(
     category=ExperimentalAPIWarning,
     stacklevel=2,
 )
+
 
 __getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
