@@ -151,9 +151,9 @@ def expected_warnings(matching):
 
 
 def warn_external(message, *, category=None):
-    """Emit warning that points to where users first call public API.
+    """Emit warning that points to where user first called public API.
 
-    Consider the call stack, there's a frame in use code that calls a public
+    Consider the call stack, there's a frame in user code that calls a public
     skimage function/class. This function will ensure that the warning points
     to that call site.
 
@@ -174,7 +174,7 @@ def warn_external(message, *, category=None):
         )
     else:
         frame = sys._getframe()
-        # Finite counter in case of error in break logic
+        # finite counter in case of error in break logic
         counter = range(1, sys.getrecursionlimit() + 1)
         for stacklevel in counter:
             if frame is None:

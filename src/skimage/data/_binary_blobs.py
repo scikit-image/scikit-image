@@ -27,8 +27,7 @@ def binary_blobs(
     n_dim : int, optional
         Number of dimensions of output image.
     volume_fraction : float, default 0.5
-        Fraction of image pixels covered by the blobs. Higher value lead to
-        a larger fraction of pixels being part of blobs. Should be in [0, 1].
+        Fraction of image pixels covered by the blobs. Should be in [0, 1].
     rng : {`numpy.random.Generator`, int}, optional
         Pseudo-random number generator.
         By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).

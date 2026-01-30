@@ -31,7 +31,7 @@ class Test_binary_blobs:
 
     def test_boundary(self):
         # Assert that `boundary_mode="wrap"` decreases the pixel difference on
-        # opposing borders compared to `boundary_mode="nearest"`
+        # opposing borders compared to `boundary_mode="nearest"`.
         blobs_near = binary_blobs(
             shape=(300, 300), blob_size=30, boundary_mode="nearest", rng=SEED
         )
