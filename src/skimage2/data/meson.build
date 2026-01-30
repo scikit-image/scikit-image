@@ -6,6 +6,6 @@ python_sources = [
 
 py3.install_sources(
   python_sources,
-  pure: false,             # Will be installed next to binaries
+  pure: false,             # Will be installed next to binaries.
   subdir: 'skimage2/data'  # Folder relative to site-packages to install to
 )
