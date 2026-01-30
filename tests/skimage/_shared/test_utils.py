@@ -619,9 +619,8 @@ class Test_minmax_scale_value_range:
     @pytest.mark.parametrize("dtype", float_dtypes)
     def test_nan(self, dtype):
         image = np.array([np.nan, -1, 0, 1], dtype=dtype)
-        with pytest.raises(ValueError, match="`image` contains NaN") as record:
+        with pytest.raises(ValueError, match="`image` contains NaN"):
             _minmax_scale_value_range(image)
-        testing.assert_stacklevel(record)
 
     @pytest.mark.parametrize("dtype", float_dtypes)
     @pytest.mark.filterwarnings(
@@ -629,9 +628,8 @@ class Test_minmax_scale_value_range:
     )
     def test_inf(self, dtype):
         image = np.array([-np.inf, -1, 0, 1, np.inf], dtype=dtype)
-        with pytest.raises(ValueError, match="`image` contains inf") as record:
+        with pytest.raises(ValueError, match="`image` contains inf"):
             _minmax_scale_value_range(image)
-        testing.assert_stacklevel(record)
 
 
 class Test_prescale_value_range:
