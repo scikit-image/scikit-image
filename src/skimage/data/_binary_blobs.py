@@ -71,7 +71,7 @@ def binary_blobs(
     warnings.warn(
         "`skimage.data.binary_blobs` is deprecated in favor of "
         "`skimage2.data.binary_blobs` which has a new signature. "
-        "The parameters `length` and `n_dim` have been replaced with `shape`. "
+        "Parameters `length` and `n_dim` have been replaced with `shape`. "
         "`blob_size_fraction` has been changed to `blob_size`. "
         "The default of `boundary_mode` has been changed to 'wrap'. "
         "To keep the old (`skimage`, v1.x) behavior use:\n"
