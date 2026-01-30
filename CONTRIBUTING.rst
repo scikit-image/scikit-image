@@ -30,8 +30,8 @@ PR Checklist
 ------------
 
 - Concise, descriptive title
-- [Docstrings for all functions](https://github.com/numpy/numpydoc/blob/main/doc/example.py)
-- [Unit tests](https://scikit-image.org/docs/dev/development/contribute.html#testing)
+- `Docstrings for all functions <https://github.com/numpy/numpydoc/blob/main/doc/example.py>`_
+- `Unit tests <https://scikit-image.org/docs/dev/development/contribute.html#testing>`_
 - For new features, a gallery example in `./doc/examples`
 - Tools declaration: in case tools other than a text editor were used
   in creating the PR
