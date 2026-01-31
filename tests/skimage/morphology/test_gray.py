@@ -4,7 +4,6 @@ from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 from skimage import color, data, transform
-from skimage._shared._warnings import expected_warnings
 from skimage._shared.testing import fetch
 from skimage.morphology import gray, footprints, footprint_rectangle
 from skimage.util import img_as_uint, img_as_ubyte
@@ -234,13 +233,9 @@ def test_3d_fallback_white_tophat():
     image[3, 2:5, 2:5] = 1
     image[4, 3:5, 3:5] = 1
 
-    with expected_warnings([r'operator.*deprecated|\A\Z']):
-        new_image = gray.white_tophat(image)
+    new_image = gray.white_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
-    with expected_warnings([r'operator.*deprecated|\A\Z']):
-        image_expected = ndi.white_tophat(
-            image.view(dtype=np.uint8), footprint=footprint
-        )
+    image_expected = ndi.white_tophat(image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
 
 
@@ -250,13 +245,9 @@ def test_3d_fallback_black_tophat():
     image[3, 2:5, 2:5] = 0
     image[4, 3:5, 3:5] = 0
 
-    with expected_warnings([r'operator.*deprecated|\A\Z']):
-        new_image = gray.black_tophat(image)
+    new_image = gray.black_tophat(image)
     footprint = ndi.generate_binary_structure(3, 1)
-    with expected_warnings([r'operator.*deprecated|\A\Z']):
-        image_expected = ndi.black_tophat(
-            image.view(dtype=np.uint8), footprint=footprint
-        )
+    image_expected = ndi.black_tophat(image.view(dtype=np.uint8), footprint=footprint)
     assert_array_equal(new_image, image_expected)
 
 
