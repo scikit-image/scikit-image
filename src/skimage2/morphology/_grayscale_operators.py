@@ -1,5 +1,7 @@
 """Grayscale morphological operations."""
 
+from typing import Final
+
 import numpy as np
 from scipy import ndimage as ndi
 
@@ -11,25 +13,64 @@ from skimage.morphology.footprints import (
 from skimage.morphology.misc import default_footprint
 
 
-def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
-    """Helper to call `gray_func` for each footprint in a sequence.
+def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
+    """Helper to call `gray_func` on a decomposed footprint.
 
     `gray_func` is a morphology function that accepts `footprint`, `output`,
-    `mode` and `cval` keyword arguments (e.g. `scipy.ndimage.grey_erosion`).
+    `mode` and `cval` keyword arguments ().
+
+    Parameters
+    ----------
+    operator : Callable
+        Morphological operator.
+    image : ndarray
+        The image to apply the operator to.
+    footprints : tuple
+        Decomposed footprint.
+    out : ndarray
+        The array to store the result in.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'max', 'min', 'ignore'}
+        Determine handling of array borders.
+    cval : scalar
+        Value to fill past edges of input if `mode` is 'constant'.
+
+    Returns
+    -------
+    out : ndarray
+        Processed `image`. Same as `out` parameter.
     """
     fp, num_iter = footprints[0]
-    gray_func(image, footprint=fp, output=out, mode=mode, cval=cval)
+    operator(image, footprint=fp, output=out, mode=mode, cval=cval)
     for _ in range(1, num_iter):
-        gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
+        # Note: out.copy() because the computation cannot be in-place!
+        operator(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     for fp, num_iter in footprints[1:]:
         # Note: out.copy() because the computation cannot be in-place!
         for _ in range(num_iter):
-            gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
+            operator(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
     return out
 
 
 def _min_max_to_constant_mode(dtype, mode, cval):
-    """Replace 'max' and 'min' with appropriate 'cval' and 'constant' mode."""
+    """Replace 'max' and 'min' with appropriate 'cval' and 'constant' mode.
+
+    Parameters
+    ----------
+    dtype : dtype-like
+        The dtype to choose an appropriate `cval` from.
+        Ignored if `mode` is not `'min'` or `''max''`.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'max', 'min', 'ignore'}
+        Determine handling of array borders.
+    cval : scalar
+        Value to fill past edges of input if `mode` is 'constant'.
+
+    Returns
+    -------
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'ignore'}
+        Potentially replaced mode. Only 'min'` or `''max''` are replaced.
+    cval : scalar
+        The chosen constant value to fill with.
+    """
     if mode == "max":
         mode = "constant"
         if np.issubdtype(dtype, bool):
@@ -49,7 +90,7 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     return mode, cval
 
 
-_SUPPORTED_MODES = {
+_SUPPORTED_MODES: Final = {
     "reflect",
     "constant",
     "nearest",
@@ -92,12 +133,9 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    eroded : array, same shape as `image`
+    eroded : ndarray, same shape and dtype as `image`
         The result of the morphological erosion.
 
     Notes
@@ -152,8 +190,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
 
-    out = _iterate_gray_func(
-        gray_func=ndi.grey_erosion,
+    out = _apply_decomposed(
+        operator=ndi.grey_erosion,
         image=image,
         footprints=footprint,
         out=out,
@@ -195,12 +233,9 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    dilated : uint8 array, same shape and type as `image`
+    dilated : ndarray, same shape and dtype as `image`
         The result of the morphological dilation.
 
     Notes
@@ -258,8 +293,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
 
-    out = _iterate_gray_func(
-        gray_func=ndi.grey_dilation,
+    out = _apply_decomposed(
+        operator=ndi.grey_dilation,
         image=image,
         footprints=footprint,
         out=out,
@@ -302,12 +337,9 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    opening : array, same shape and type as `image`
+    opening : ndarray, same shape and dtype as `image`
         The result of the morphological opening.
 
     Notes
@@ -379,12 +411,9 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    closing : array, same shape and type as `image`
+    closing : ndarray, same shape and dtype as `image`
         The result of the morphological closing.
 
     Notes
@@ -452,12 +481,9 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    out : array, same shape and type as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological white top hat.
 
     Notes
@@ -545,12 +571,9 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
 
-        .. versionadded:: 0.23
-            `mode` and `cval` were added in 0.23.
-
     Returns
     -------
-    out : array, same shape and type as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological black top hat.
 
     Notes
