@@ -190,7 +190,15 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
+addopts = [
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "--maxfail=5",
+    # skimage/skimage2 duplicates test module names,
+    # only *importlib* supports non-unique test module names
+    "--import-mode=importlib",
+]
 log_cli_level = "INFO"
 xfail_strict = true
 testpaths = ["tests"]
