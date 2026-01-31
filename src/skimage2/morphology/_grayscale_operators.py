@@ -1,15 +1,52 @@
-"""
-Grayscale morphological operations
-"""
+"""Grayscale morphological operations."""
 
-import warnings
-from .misc import default_footprint
-from ..util import PendingSkimage2Change
+import numpy as np
+from scipy import ndimage as ndi
 
-import skimage2 as ski2
+from skimage.morphology.footprints import (
+    _footprint_is_sequence,
+    mirror_footprint,
+    pad_footprint,
+)
+from skimage.morphology.misc import default_footprint
 
 
-__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
+def _iterate_gray_func(gray_func, image, footprints, out, mode, cval):
+    """Helper to call `gray_func` for each footprint in a sequence.
+
+    `gray_func` is a morphology function that accepts `footprint`, `output`,
+    `mode` and `cval` keyword arguments (e.g. `scipy.ndimage.grey_erosion`).
+    """
+    fp, num_iter = footprints[0]
+    gray_func(image, footprint=fp, output=out, mode=mode, cval=cval)
+    for _ in range(1, num_iter):
+        gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
+    for fp, num_iter in footprints[1:]:
+        # Note: out.copy() because the computation cannot be in-place!
+        for _ in range(num_iter):
+            gray_func(out.copy(), footprint=fp, output=out, mode=mode, cval=cval)
+    return out
+
+
+def _min_max_to_constant_mode(dtype, mode, cval):
+    """Replace 'max' and 'min' with appropriate 'cval' and 'constant' mode."""
+    if mode == "max":
+        mode = "constant"
+        if np.issubdtype(dtype, bool):
+            cval = True
+        elif np.issubdtype(dtype, np.integer):
+            cval = np.iinfo(dtype).max
+        else:
+            cval = np.inf
+    elif mode == "min":
+        mode = "constant"
+        if np.issubdtype(dtype, bool):
+            cval = False
+        elif np.issubdtype(dtype, np.integer):
+            cval = np.iinfo(dtype).min
+        else:
+            cval = -np.inf
+    return mode, cval
 
 
 _SUPPORTED_MODES = {
@@ -24,24 +61,8 @@ _SUPPORTED_MODES = {
 }
 
 
-_PENDING_SKIMAGE2_MESSAGE = """\
-`skimage.morphology.{name}` is deprecated in favor of
-`skimage2.morphology.{name}` which sets the default of parameter
-`mode` to 'ignore'.
-
-To preserve the old (`skimage`, v1.x) behavior, set that parameter explicitly.
-"""
-
-
 @default_footprint
-def erosion(
-    image,
-    footprint=None,
-    out=None,
-    *,
-    mode="reflect",
-    cval=0.0,
-):
+def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -118,26 +139,32 @@ def erosion(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=erosion.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.erosion(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
+    if out is None:
+        out = np.empty_like(image)
+
+    if mode not in _SUPPORTED_MODES:
+        raise ValueError(f"unsupported mode, got {mode!r}")
+    if mode == "ignore":
+        mode = "max"
+    mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
+
+    footprint = pad_footprint(footprint, pad_end=False)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
+
+    out = _iterate_gray_func(
+        gray_func=ndi.grey_erosion,
+        image=image,
+        footprints=footprint,
+        out=out,
+        mode=mode,
+        cval=cval,
     )
     return out
 
 
 @default_footprint
-def dilation(
-    image,
-    footprint=None,
-    out=None,
-    *,
-    mode="reflect",
-    cval=0.0,
-):
+def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation sets the value of a pixel to the maximum over all
@@ -215,19 +242,35 @@ def dilation(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=dilation.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.dilation(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
+    if out is None:
+        out = np.empty_like(image)
+
+    if mode not in _SUPPORTED_MODES:
+        raise ValueError(f"unsupported mode, got {mode!r}")
+    if mode == "ignore":
+        mode = "min"
+    mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
+
+    footprint = pad_footprint(footprint, pad_end=False)
+    # Note that `ndi.grey_dilation` mirrors the footprint and this
+    # additional inversion should be removed in skimage2, see gh-6676.
+    footprint = mirror_footprint(footprint)
+    if not _footprint_is_sequence(footprint):
+        footprint = [(footprint, 1)]
+
+    out = _iterate_gray_func(
+        gray_func=ndi.grey_dilation,
+        image=image,
+        footprints=footprint,
+        out=out,
+        mode=mode,
+        cval=cval,
     )
     return out
 
 
 @default_footprint
-def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
@@ -297,19 +340,14 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=opening.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.opening(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
-    )
+    footprint = pad_footprint(footprint, pad_end=False)
+    eroded = erosion(image, footprint, mode=mode, cval=cval)
+    out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
@@ -379,19 +417,14 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=closing.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.closing(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
-    )
+    footprint = pad_footprint(footprint, pad_end=False)
+    dilated = dilation(image, footprint, mode=mode, cval=cval)
+    out = erosion(dilated, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
     return out
 
 
 @default_footprint
-def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -463,21 +496,27 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 1, 5, 1, 0],
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
-
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=white_tophat.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.white_tophat(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
-    )
+    if out is image:
+        # We need a temporary image
+        opened = opening(image, footprint, mode=mode, cval=cval)
+        if np.issubdtype(opened.dtype, bool):
+            np.logical_xor(out, opened, out=out)
+        else:
+            out -= opened
+        return out
+
+    # Else write intermediate result into output image
+    out = opening(image, footprint, out=out, mode=mode, cval=cval)
+    if np.issubdtype(out.dtype, bool):
+        np.logical_xor(image, out, out=out)
+    else:
+        np.subtract(image, out, out=out)
     return out
 
 
 @default_footprint
-def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
+def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -552,12 +591,18 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=black_tophat.__name__),
-        category=PendingSkimage2Change,
-        stacklevel=3,
-    )
-    out = ski2.morphology.black_tophat(
-        image, footprint=footprint, out=out, mode=mode, cval=cval
-    )
+    if out is image:
+        # We need a temporary image
+        closed = closing(image, footprint, mode=mode, cval=cval)
+        if np.issubdtype(closed.dtype, bool):
+            np.logical_xor(closed, out, out=out)
+        else:
+            np.subtract(closed, out, out=out)
+        return out
+
+    out = closing(image, footprint, out=out, mode=mode, cval=cval)
+    if np.issubdtype(out.dtype, np.bool_):
+        np.logical_xor(out, image, out=out)
+    else:
+        out -= image
     return out
