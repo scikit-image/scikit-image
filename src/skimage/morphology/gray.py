@@ -29,7 +29,7 @@ _PENDING_SKIMAGE2_MESSAGE = """\
 `skimage2.morphology.{name}` which sets the default of parameter
 `mode` to 'ignore'.
 
-To preserve the old (`skimage`, v1.x) behavior, set that parameter explicitly.
+To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
 """
 
 

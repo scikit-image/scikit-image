@@ -17,7 +17,7 @@ def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
     """Helper to call `gray_func` on a decomposed footprint.
 
     `operator` is a morphology function that accepts `footprint`, `output`,
-    `mode` and `cval` keyword arguments ().
+    `mode`, and `cval` keyword arguments.
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     ----------
     dtype : dtype-like
         The dtype to choose an appropriate `cval` from.
-        Ignored if `mode` is not `'min'` or `'max'`.
+        Ignored if `mode` is not 'min' or 'max'.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'max', 'min', 'ignore'}
         Determine handling of array borders.
     cval : scalar
@@ -67,7 +67,7 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     Returns
     -------
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'ignore'}
-        Potentially replaced mode. Only 'min'` or `'max'` are replaced.
+        Potentially replaced mode. Only 'min' or 'max' are replaced.
     cval : scalar
         The chosen constant value to fill with.
     """
@@ -113,15 +113,15 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -144,14 +144,14 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     lower algorithm complexity makes the :func:`skimage.filters.rank.minimum`
     function more efficient for larger images and footprints.
 
-    The footprint can also be a provided as a sequence of 2-tuples where the
+    The footprint can also be provided as a sequence of 2-tuples where the
     first element of each 2-tuple is a footprint ndarray and the second element
     is an integer describing the number of times it should be iterated. For
-    example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
+    example, ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    computational cost. Most of the built-in footprints such as
+    :func:`skimage.morphology.disk` provide an option to generate automatically
     a footprint sequence of this type.
 
     For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
