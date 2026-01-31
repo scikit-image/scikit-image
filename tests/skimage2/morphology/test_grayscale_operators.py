@@ -77,23 +77,29 @@ class TestMorphology:
         img = data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = gray.closing(img, footprint=footprint)
-        assert not np.all(result_default >= img)
-
+        # Default mode="ignore" is extensive
+        result = gray.closing(img, footprint=footprint)
+        assert np.all(result >= img)
         result = gray.closing(img, footprint=footprint, mode="ignore")
         assert np.all(result >= img)
+
+        # mode="reflect" (v1.x default) is not extensive
+        result_default = gray.closing(img, footprint=footprint, mode="reflect")
+        assert not np.all(result_default >= img)
 
     def test_gray_opening_anti_extensive(self):
         img = data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
-        # Default mode="reflect" is not extensive for backwards-compatibility
-        result_default = gray.opening(img, footprint=footprint)
-        assert not np.all(result_default <= img)
-
+        # Default mode="ignore" is anti-extensive
+        result_ignore = gray.opening(img, footprint=footprint)
+        assert np.all(result_ignore <= img)
         result_ignore = gray.opening(img, footprint=footprint, mode="ignore")
         assert np.all(result_ignore <= img)
+
+        # mode="reflect" (v1.x default) is not anti-extensive
+        result_default = gray.opening(img, footprint=footprint, mode="reflect")
+        assert not np.all(result_default <= img)
 
     @pytest.mark.parametrize("func", gray_morphology_funcs)
     @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
