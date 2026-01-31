@@ -2,9 +2,9 @@
 Grayscale morphological operations
 """
 
-import warnings
 from .misc import default_footprint
 from ..util import PendingSkimage2Change
+from .._shared._warnings import warn_external
 
 import skimage2 as ski2
 
@@ -118,10 +118,9 @@ def erosion(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=erosion.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.erosion(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -215,10 +214,9 @@ def dilation(
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=dilation.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.dilation(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -297,10 +295,9 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=opening.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.opening(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -379,10 +376,9 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=closing.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.closing(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -465,10 +461,9 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=white_tophat.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.white_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval
@@ -552,10 +547,9 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    warnings.warn(
+    warn_external(
         _PENDING_SKIMAGE2_MESSAGE.format(name=black_tophat.__name__),
         category=PendingSkimage2Change,
-        stacklevel=3,
     )
     out = ski2.morphology.black_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval
