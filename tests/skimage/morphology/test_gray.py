@@ -115,7 +115,7 @@ class TestEccentricStructuringElements:
         self.footprints = [
             footprint_rectangle((2, 2)),
             footprint_rectangle((2, 1)),
-            footprint_rectangle((2, 1)),
+            footprint_rectangle((1, 2)),
         ]
 
     def test_dilate_erode_symmetry(self):
