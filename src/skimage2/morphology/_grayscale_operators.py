@@ -128,7 +128,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         'max', 'min', or 'ignore'.
         If 'max' or 'ignore', pixels outside the image domain are assumed
         to be the maximum for the image's dtype, which causes them to not
-        influence the result. Default is 'reflect'.
+        influence the result. Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
@@ -228,7 +228,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         'max', 'min', or 'ignore'.
         If 'min' or 'ignore', pixels outside the image domain are assumed
         to be the maximum for the image's dtype, which causes them to not
-        influence the result. Default is 'reflect'.
+        influence the result. Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
@@ -332,7 +332,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         If 'ignore', pixels outside the image domain are assumed
         to be the maximum for the image's dtype in the erosion, and minimum
         in the dilation, which causes them to not influence the result.
-        Default is 'reflect'.
+        Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
@@ -406,7 +406,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         If 'ignore', pixels outside the image domain are assumed
         to be the maximum for the image's dtype in the erosion, and minimum
         in the dilation, which causes them to not influence the result.
-        Default is 'reflect'.
+        Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
@@ -476,7 +476,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
         'max', 'min', or 'ignore'. See :func:`skimage.morphology.opening`.
-        Default is 'reflect'.
+        Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
@@ -566,7 +566,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
         'max', 'min', or 'ignore'. See :func:`skimage.morphology.closing`.
-        Default is 'reflect'.
+        Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0.
