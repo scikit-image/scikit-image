@@ -25,7 +25,7 @@ def cell3d_image():
     return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
-gray_morphology_funcs = (
+gray_operators = (
     gray.erosion,
     gray.dilation,
     gray.opening,
@@ -62,7 +62,7 @@ class TestMorphology:
         output = {}
         for n in range(1, 4):
             for strel in footprints_2D:
-                for func in gray_morphology_funcs:
+                for func in gray_operators:
                     key = f'{strel.__name__}_{n}_{func.__name__}'
                     output[key] = func(image, strel(n))
 
@@ -101,13 +101,13 @@ class TestMorphology:
         result_default = gray.opening(img, footprint=footprint, mode="reflect")
         assert not np.all(result_default <= img)
 
-    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("func", gray_operators)
     @pytest.mark.parametrize("mode", gray._SUPPORTED_MODES)
     def test_supported_mode(self, func, mode):
         img = np.ones((10, 10))
         func(img, mode=mode)
 
-    @pytest.mark.parametrize("func", gray_morphology_funcs)
+    @pytest.mark.parametrize("func", gray_operators)
     @pytest.mark.parametrize("mode", ["", "symmetric", 3, None])
     def test_unsupported_mode(self, func, mode):
         img = np.ones((10, 10))
@@ -171,18 +171,8 @@ class TestEccentricStructuringElements:
             assert np.all(tophat == 0)
 
 
-gray_functions = [
-    gray.erosion,
-    gray.dilation,
-    gray.opening,
-    gray.closing,
-    gray.white_tophat,
-    gray.black_tophat,
-]
-
-
-@pytest.mark.parametrize("function", gray_functions)
-def test_default_footprint(function):
+@pytest.mark.parametrize("func", gray_operators)
+def test_default_footprint(func):
     strel = footprints.diamond(radius=1)
     image = np.array(
         [
@@ -202,8 +192,8 @@ def test_default_footprint(function):
         ],
         np.uint8,
     )
-    im_expected = function(image, strel)
-    im_test = function(image)
+    im_expected = func(image, strel)
+    im_test = func(image)
     assert_array_equal(im_expected, im_test)
 
 
@@ -220,18 +210,15 @@ def test_3d_fallback_default_footprint():
     assert_array_equal(opened, image_expected)
 
 
-gray_3d_fallback_functions = [gray.closing, gray.opening]
-
-
-@pytest.mark.parametrize("function", gray_3d_fallback_functions)
-def test_3d_fallback_cube_footprint(function):
+@pytest.mark.parametrize("func", [gray.closing, gray.opening])
+def test_3d_fallback_cube_footprint(func):
     # 3x3x3 cube inside a 7x7x7 image:
     image = np.zeros((7, 7, 7), bool)
     image[2:-2, 2:-2, 2:-2] = 1
 
     cube = np.ones((3, 3, 3), dtype=np.uint8)
 
-    new_image = function(image, cube)
+    new_image = func(image, cube)
     assert_array_equal(new_image, image)
 
 
@@ -382,56 +369,45 @@ def test_1d_erosion():
     assert_array_equal(eroded, expected)
 
 
-@pytest.mark.parametrize(
-    "function",
-    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
-)
+@pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("nrows", [3, 7, 11])
 @pytest.mark.parametrize("ncols", [3, 7, 11])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_rectangle_decomposition(cam_image, function, nrows, ncols, decomposition):
+def test_rectangle_decomposition(cam_image, func, nrows, ncols, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle((nrows, ncols), decomposition=None)
     footprint = footprint_rectangle((nrows, ncols), decomposition=decomposition)
-    func = getattr(gray, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
 
 
-@pytest.mark.parametrize(
-    "function",
-    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
-)
+@pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("radius", (2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-def test_diamond_decomposition(cam_image, function, radius, decomposition):
+def test_diamond_decomposition(cam_image, func, radius, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprints.diamond(radius, decomposition=None)
     footprint = footprints.diamond(radius, decomposition=decomposition)
-    func = getattr(gray, function)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
 
 
-@pytest.mark.parametrize(
-    "function",
-    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
-)
+@pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("m", (0, 1, 3, 5))
 @pytest.mark.parametrize("n", (0, 1, 2, 3))
 @pytest.mark.parametrize("decomposition", ['sequence'])
 @pytest.mark.filterwarnings(
     "ignore:.*falling back to decomposition='separable':UserWarning"
 )
-def test_octagon_decomposition(cam_image, function, m, n, decomposition):
+def test_octagon_decomposition(cam_image, func, m, n, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
@@ -442,45 +418,36 @@ def test_octagon_decomposition(cam_image, function, m, n, decomposition):
     else:
         footprint_ndarray = footprints.octagon(m, n, decomposition=None)
         footprint = footprints.octagon(m, n, decomposition=decomposition)
-        func = getattr(gray, function)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
 
 
-@pytest.mark.parametrize(
-    "function",
-    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
-)
+@pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("shape", [(5, 5, 5), (5, 5, 7)])
 @pytest.mark.parametrize("decomposition", ['separable', 'sequence'])
-def test_cube_decomposition(cell3d_image, function, shape, decomposition):
+def test_cube_decomposition(cell3d_image, func, shape, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprint_rectangle(shape, decomposition=None)
     footprint = footprint_rectangle(shape, decomposition=decomposition)
-    func = getattr(gray, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
 
 
-@pytest.mark.parametrize(
-    "function",
-    ["erosion", "dilation", "closing", "opening", "white_tophat", "black_tophat"],
-)
+@pytest.mark.parametrize("func", gray_operators)
 @pytest.mark.parametrize("radius", (3,))
 @pytest.mark.parametrize("decomposition", ['sequence'])
-def test_octahedron_decomposition(cell3d_image, function, radius, decomposition):
+def test_octahedron_decomposition(cell3d_image, func, radius, decomposition):
     """Validate footprint decomposition for various shapes.
 
     comparison is made to the case without decomposition.
     """
     footprint_ndarray = footprints.octahedron(radius, decomposition=None)
     footprint = footprints.octahedron(radius, decomposition=decomposition)
-    func = getattr(gray, function)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
