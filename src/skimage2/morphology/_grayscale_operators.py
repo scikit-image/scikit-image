@@ -16,7 +16,7 @@ from skimage.morphology.misc import default_footprint
 def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
     """Helper to call `gray_func` on a decomposed footprint.
 
-    `gray_func` is a morphology function that accepts `footprint`, `output`,
+    `operator` is a morphology function that accepts `footprint`, `output`,
     `mode` and `cval` keyword arguments ().
 
     Parameters
@@ -58,7 +58,7 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     ----------
     dtype : dtype-like
         The dtype to choose an appropriate `cval` from.
-        Ignored if `mode` is not `'min'` or `''max''`.
+        Ignored if `mode` is not `'min'` or `'max'`.
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'max', 'min', 'ignore'}
         Determine handling of array borders.
     cval : scalar
@@ -67,7 +67,7 @@ def _min_max_to_constant_mode(dtype, mode, cval):
     Returns
     -------
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap', 'ignore'}
-        Potentially replaced mode. Only 'min'` or `''max''` are replaced.
+        Potentially replaced mode. Only 'min'` or `'max'` are replaced.
     cval : scalar
         The chosen constant value to fill with.
     """
