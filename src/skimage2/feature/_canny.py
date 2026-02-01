@@ -222,7 +222,7 @@ def canny(
         high_threshold /= dtype_max
 
     if high_threshold < low_threshold:
-        raise ValueError("low_threshold should be lower then high_threshold")
+        raise ValueError("low_threshold should be lower than high_threshold")
 
     # Image filtering
     smoothed, eroded_mask = _preprocess(image, mask, sigma, mode, cval)
