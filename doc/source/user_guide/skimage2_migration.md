@@ -11,7 +11,7 @@ Alongside skimage2, we will release version 1.0.0. Versions 1.x will be using th
 Versions 1.1.x will throw a `FutureWarning` upon import, as a means to notify users that
 they should either upgrade to skimage2 or pin to version 1.0.x.
 
-We have undertaken this to make some long-outstanding, backward-incomptible changes to the scikit-image API.
+We have undertaken this to make some long-outstanding, backward-incompatible changes to the scikit-image API.
 Most changes were difficult or impossible to make using deprecations alone.
 To honor the Hinsen principle (that is, never change results silently unless to fix a bug), we introduce a new package, which gives users an explicit way of upgrading.
 Users also have the option to use the two versions side-by-side while they do so.
@@ -127,6 +127,21 @@ To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
 
 TODO: Update doctests in `src/skimage2/morphology/_grayscale_operators.py` to
 import `footprint_rectangle` from skimage2 once available.
+
+## `skimage.feature.canny`
+
+This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from `constant` to `nearest`.
+
+To keep the old (`skimage`, v1.x) behavior, use
+
+```python
+import skimage2 as ski2
+
+ski2.feature.canny(
+    image,
+    mode='constant',
+)
+```
 
 ## Deprecations prior to skimage2
 
