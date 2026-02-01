@@ -26,7 +26,7 @@ def _preprocess(image, mask, sigma, mode, cval):
         Image to be smoothed.
     mask : array
         Mask with 1's for significant pixels, 0's for masked pixels.
-    sigma : scalar or sequence of scalars
+    sigma : scalar or Sequence of float
         Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
@@ -115,7 +115,7 @@ def canny(
 
     Parameters
     ----------
-    image : 2D array
+    image : ndarray of shape (M, N)
         Grayscale input image to detect edges on; can be of any dtype.
     sigma : float, optional
         Standard deviation of the Gaussian filter.
@@ -141,7 +141,7 @@ def canny(
 
     Returns
     -------
-    output : 2D array (image)
+    output : ndarray of shape (M, N)
         The binary edge map.
 
     See also
