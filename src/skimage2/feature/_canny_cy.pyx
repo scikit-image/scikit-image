@@ -8,7 +8,7 @@ cimport numpy as cnp
 
 from libc.math cimport fabs
 
-from .._shared.fused_numerics cimport np_floats
+from skimage._shared.fused_numerics cimport np_floats
 
 
 cpdef _nonmaximum_suppression_bilinear(
