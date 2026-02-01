@@ -108,7 +108,7 @@ def canny(
     mask=None,
     use_quantiles=False,
     *,
-    mode='constant',
+    mode='nearest',
     cval=0.0,
 ):
     """Edge filter an image using the Canny algorithm.
