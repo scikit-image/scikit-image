@@ -1266,8 +1266,8 @@ def _prescale_value_range(image, *, mode):
     >>> _prescale_value_range(image, mode="none")
     array([-10, 45, 100], dtype=int8)
     """
-    # Early exits
     if mode == "none":
+        # Exit early
         return image.copy()
     if mode == "legacy":
         # Avoid circular import
