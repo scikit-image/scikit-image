@@ -299,14 +299,15 @@ def blob_dog(
         If zero or False, peaks are identified regardless of their
         distance from the border.
     prescale : {'minmax', 'none', 'legacy'}, optional
-        Controls the rescaling behavior for `image` which affects the
-        internally computed stack of Difference-of-Gaussian (DoG) images. This
-        in turn affects the effect of the `threshold` parameter.
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Difference-of-Gaussian (DoG) images, and therefore also the choice of
+        `threshold`.
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization its minimum and maximum values will be 0 and 1
-            respectively.
+            normalization, the resulting array's minimum and maximum values will
+            be 0 and 1 respectively. It will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
@@ -527,14 +528,15 @@ def blob_log(
         If zero or False, peaks are identified regardless of their
         distance from the border.
     prescale : {'minmax', 'none', 'legacy'}, optional
-        Controls the rescaling behavior for `image` which affects the
-        internally computed stack of Laplacian-of-Gaussian (LoG) images. This
-        in turn affects the effect of the `threshold` parameter.
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Laplacian-of-Gaussian (LoG) images, and therefore also the choice of
+        `threshold`.
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization its minimum and maximum values will be 0 and 1
-            respectively.
+            normalization, the resulting array's minimum and maximum values will
+            be 0 and 1 respectively. It will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
@@ -723,14 +725,15 @@ def blob_doh(
             instead.
 
     prescale : {'minmax', 'none', 'legacy'}, optional
-        Controls the rescaling behavior for `image` which affects the
-        internally computed stack of Determinant-of-Hessian (DoH) images. This
-        in turn affects the effect of the `threshold` parameter.
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Determinant-of-Hessian (DoH) images, and therefore also the choice of
+        `threshold`.
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization its minimum and maximum values will be 0 and 1
-            respectively.
+            normalization, the resulting array's minimum and maximum values will
+            be 0 and 1 respectively. It will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a

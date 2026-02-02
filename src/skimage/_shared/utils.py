@@ -1128,7 +1128,8 @@ def _minmax_scale_value_range(image):
     Returns
     -------
     rescaled_image : ndarray
-        Rescaled image, of same shape as input `image` but with a floating dtype.
+        Rescaled image, of same shape as input `image` but with a
+        floating dtype (according to :func:`_supported_float_type`).
 
     Raises
     ------
@@ -1221,8 +1222,9 @@ def _prescale_value_range(image, *, mode):
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization its minimum and maximum values will be 0 and 1
-            respectively.
+            normalization, the resulting array's minimum and maximum values will
+            be 0 and 1 respectively. It will have a floating dtype (according
+            to :func:`_supported_float_type`).
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
