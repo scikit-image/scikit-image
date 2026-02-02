@@ -1123,17 +1123,17 @@ def _minmax_scale_value_range(image):
     Parameters
     ----------
     image : ndarray
-        The image to scale.
+        Input image.
 
     Returns
     -------
-    scaled_image : ndarray
-        The rescaled `image` of the same shape but with a floating dtype.
+    rescaled_image : ndarray
+        Rescaled image, of same shape as input `image` but with a floating dtype.
 
     Raises
     ------
     ValueError
-        Prescaling an `image` that contains NaN or infinity is not supported
+        Rescaling an image that contains NaN or infinity is not supported
         for now. In those cases, replace the unsupported values manually.
 
     See Also
