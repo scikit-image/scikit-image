@@ -1151,7 +1151,7 @@ def _minmax_scale_value_range(image):
     """
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
     # unexpected promotion and / or precision problems during normalization
-    dtype = _supported_float_type(image.dtype, allow_complex=True)
+    dtype = _supported_float_type(image.dtype, allow_complex=False)
     out = image.astype(dtype)
 
     lower = out.min()
