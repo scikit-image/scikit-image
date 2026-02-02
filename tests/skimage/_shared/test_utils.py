@@ -19,7 +19,7 @@ from skimage._shared.utils import (
     FailedEstimationAccessError,
     FailedEstimation,
     _minmax_scale_value_range,
-    _prescale_value_range,
+    _rescale_value_range,
 )
 from skimage._shared.dtype import numeric_dtype_min_max
 from skimage._shared._dependency_checks import is_wasm
@@ -638,7 +638,7 @@ class Test_prescale_value_range:
         dtype_min, dtype_max = numeric_dtype_min_max(dtype)
         image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
 
-        result = _prescale_value_range(image, mode="none")
+        result = _rescale_value_range(image, mode="none")
         assert result is not image
         assert result.dtype == dtype
         np.testing.assert_equal(result, image)

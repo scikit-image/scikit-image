@@ -1118,7 +1118,7 @@ def as_binary_ndarray(array, *, variable_name):
 
 
 def _minmax_scale_value_range(image):
-    """Min-max scale `image` to the value range [0, 1].
+    """Rescale `image` to the value range [0, 1].
 
     Parameters
     ----------
@@ -1139,8 +1139,8 @@ def _minmax_scale_value_range(image):
 
     See Also
     --------
-    _prescale_value_range
-        Scale the value range of `image` according to the selected `mode`.
+    _rescale_value_range
+        Rescale the value range of `image` according to the selected `mode`.
 
     Examples
     --------
@@ -1207,10 +1207,10 @@ def _minmax_scale_value_range(image):
     return out
 
 
-def _prescale_value_range(image, *, mode):
-    """Scale the value range of `image` according to the selected `mode`.
+def _rescale_value_range(image, *, mode):
+    """Rescale the value range of `image` according to the selected `mode`.
 
-    For now, this private function handles prescaling for public API that
+    For now, this private function handles *prescaling* for public API that
     needs a value range to be known and well-defined.
 
     Parameters
@@ -1227,8 +1227,8 @@ def _prescale_value_range(image, *, mode):
             to :func:`_supported_float_type`).
 
         ``'none'``
-            Don't prescale the value range of `image` at all and return a
-            copy of `image`. Useful when `image` has already been scaled.
+            Don't Rescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
@@ -1237,7 +1237,7 @@ def _prescale_value_range(image, *, mode):
 
     Returns
     -------
-    scaled_image : ndarray
+    rescaled_image : ndarray
         The rescaled `image` of the same shape but possibly with a different
         dtype.
 
@@ -1251,7 +1251,7 @@ def _prescale_value_range(image, *, mode):
     See Also
     --------
     _minmax_scale_value_range
-        Min-max scale `image` to the value range [0, 1]. Internally used in
+        Rescale `image` to the value range [0, 1]. Internally used in
         this function.
 
     Examples
@@ -1259,13 +1259,13 @@ def _prescale_value_range(image, *, mode):
     >>> import numpy as np
     >>> image = np.array([-10, 45, 100], dtype=np.int8)
 
-    >>> _prescale_value_range(image, mode="minmax")
+    >>> _rescale_value_range(image, mode="minmax")
     array([0. , 0.5, 1. ])
 
-    >>> _prescale_value_range(image, mode="legacy")
+    >>> _rescale_value_range(image, mode="legacy")
     array([-0.07874016,  0.35433071,  0.78740157])
 
-    >>> _prescale_value_range(image, mode="none")
+    >>> _rescale_value_range(image, mode="none")
     array([-10, 45, 100], dtype=int8)
     """
     if mode == "none":

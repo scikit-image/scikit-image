@@ -10,7 +10,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
     deprecate_parameter,
-    _prescale_value_range,
+    _rescale_value_range,
 )
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
@@ -311,7 +311,7 @@ def blob_dog(
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
-            copy of `image`. Useful when `image` has already been scaled.
+            copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
@@ -319,7 +319,7 @@ def blob_dog(
             more details.
 
             .. warning::
-                The scaling and the effect of `threshold` will depend on the
+                The rescaling and the effect of `threshold` will depend on the
                 dtype of `image`. For consistent behavior we recommend
                 ``'minmax'``.
 
@@ -385,7 +385,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _prescale_value_range(image, mode=prescale)
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -540,7 +540,7 @@ def blob_log(
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
-            copy of `image`. Useful when `image` has already been scaled.
+            copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
@@ -600,7 +600,7 @@ def blob_log(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _prescale_value_range(image, mode=prescale)
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -737,7 +737,7 @@ def blob_doh(
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
-            copy of `image`. Useful when `image` has already been scaled.
+            copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
             Normalize only if `image` has an integer dtype, if `image` is of
@@ -802,7 +802,7 @@ def blob_doh(
 
     check_nD(image, 2)
 
-    image = _prescale_value_range(image, mode=prescale)
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
