@@ -23,6 +23,7 @@ from skimage._shared.utils import (
 )
 from skimage._shared.dtype import numeric_dtype_min_max
 from skimage._shared._dependency_checks import is_wasm
+from skimage.util import img_as_float
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -632,7 +633,7 @@ class Test_minmax_scale_value_range:
             _minmax_scale_value_range(image)
 
 
-class Test_prescale_value_range:
+class Test_rescale_value_range:
     @pytest.mark.parametrize("dtype", Test_minmax_scale_value_range.all_dtypes)
     def test_mode_none(self, dtype):
         dtype_min, dtype_max = numeric_dtype_min_max(dtype)
@@ -642,3 +643,30 @@ class Test_prescale_value_range:
         assert result is not image
         assert result.dtype == dtype
         np.testing.assert_equal(result, image)
+
+    @pytest.mark.parametrize("dtype", Test_minmax_scale_value_range.all_dtypes)
+    def test_mode_legacy(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+        expected = img_as_float(image)
+
+        result = _rescale_value_range(image, mode="legacy")
+        np.testing.assert_equal(result, expected)
+        assert result.dtype == expected.dtype
+
+    @pytest.mark.filterwarnings("ignore:Overflow while attempting to rescale")
+    @pytest.mark.parametrize("dtype", Test_minmax_scale_value_range.all_dtypes)
+    def test_mode_minmax(self, dtype):
+        dtype_min, dtype_max = numeric_dtype_min_max(dtype)
+        image = np.array([dtype_min, 0, dtype_max], dtype=dtype)
+        expected = _minmax_scale_value_range(image)
+
+        result = _rescale_value_range(image, mode="minmax")
+        np.testing.assert_equal(result, expected)
+        assert result.dtype == expected.dtype
+
+    @pytest.mark.parametrize("mode", ["dtype", False, ""])
+    def test_mode_unsupported(self, mode):
+        image = np.array([-100, 0, 200], dtype=float)
+        with pytest.raises(ValueError, match="unsupported mode"):
+            _rescale_value_range(image, mode=mode)
