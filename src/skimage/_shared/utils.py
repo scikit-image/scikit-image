@@ -1198,8 +1198,8 @@ def _minmax_scale_value_range(image):
             if "overflow" in e.args[0]:
                 warn_external(
                     "Overflow while attempting to rescale. This could be due to "
-                    "`image` containing unexpectedly large values. Attempting to"
-                    "divide by 2 before rescaling to avoid overflow.",
+                    "`image` containing unexpectedly large values. Dividing all"
+                    "values by 2 before rescaling to avoid overflow.",
                     category=RuntimeWarning,
                 )
                 out /= 2
