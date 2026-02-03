@@ -1251,7 +1251,7 @@ def _rescale_value_range(image, *, mode):
     Raises
     ------
     ValueError
-        Rescaling an `image` with ``mode='minmax'` that contains NaN or
+        Rescaling an `image` with `mode='minmax'` that contains NaN or
         infinity is not supported for now. In those cases, consider replacing
         the unsupported values manually.
 
