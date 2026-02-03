@@ -1120,6 +1120,9 @@ def as_binary_ndarray(array, *, variable_name):
 def _minmax_scale_value_range(image):
     """Rescale `image` to the value range [0, 1].
 
+    Rescaling values between [0, 1], or *min-max normalization* [1]_,
+    is a simple method to ensure that data is inside a range.
+
     Parameters
     ----------
     image : ndarray
@@ -1141,6 +1144,10 @@ def _minmax_scale_value_range(image):
     --------
     _rescale_value_range
         Rescale the value range of `image` according to the selected `mode`.
+
+    References
+    ----------
+    .. [1]: https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
 
     Examples
     --------
