@@ -1138,7 +1138,8 @@ def _minmax_scale_value_range(image):
     ------
     ValueError
         Rescaling an image that contains NaN or infinity is not supported
-        for now. In those cases, replace the unsupported values manually.
+        for now. In those cases, In those cases, consider replacing the
+        unsupported values manually.
 
     See Also
     --------
@@ -1168,21 +1169,21 @@ def _minmax_scale_value_range(image):
     if np.isnan(lower) or np.isnan(higher):
         msg = (
             "`image` contains NaN. "
-            "Min-max scaling with NaN is not supported. "
-            "Replace NaNs manually before scaling."
+            "Min-max normalization with NaN is not supported. "
+            "Replace NaNs manually before rescaling."
         )
         raise ValueError(msg)
 
     if np.isinf(lower) or np.isinf(higher):
         msg = (
             "`image` contains inf. "
-            "Min-max scaling with inf is not supported. "
-            "Replace inf manually before scaling."
+            "Min-max normalization with inf is not supported. "
+            "Replace inf manually before rescaling."
         )
         raise ValueError(msg)
 
     if lower == higher:
-        msg = "`image` is uniform, returning uniform array of 0"
+        msg = "`image` is uniform, returning uniform array of 0's"
         warn_external(msg, category=RuntimeWarning)
         out = np.zeros_like(out)
         return out
@@ -1223,7 +1224,7 @@ def _rescale_value_range(image, *, mode):
     Parameters
     ----------
     image : ndarray
-        The image to scale.
+        Image to rescale.
     mode : {'minmax', 'none', 'legacy'}, optional
         Controls the rescaling behavior for `image`.
 
@@ -1251,9 +1252,9 @@ def _rescale_value_range(image, *, mode):
     Raises
     ------
     ValueError
-        Prescaling an `image` with ``mode='minmax'` that contains NaN or
-        infinity is not supported for now. In those cases, replace the
-        unsupported values manually.
+        Rescaling an `image` with ``mode='minmax'` that contains NaN or
+        infinity is not supported for now. In those cases, consider replacing
+        the unsupported values manually.
 
     See Also
     --------
