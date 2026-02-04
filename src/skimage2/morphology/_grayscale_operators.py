@@ -142,7 +142,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the
-    lower algorithm complexity makes the :func:`skimage.filters.rank.minimum`
+    lower algorithm complexity makes the :func:`skimage2.filters.rank.minimum`
     function more efficient for larger images and footprints.
 
     The footprint can also be provided as a sequence of 2-tuples where the
@@ -152,13 +152,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the built-in footprints such as
-    :func:`skimage.morphology.disk` provide an option to generate automatically
+    :func:`skimage2.morphology.disk` provide an option to generate automatically
     a footprint sequence of this type.
-
-    For even-sized footprints, :func:`skimage.morphology.binary_erosion` and
-    this function produce an output that differs: one is shifted by one pixel
-    compared to the other. :func:`skimage.morphology.pad_footprint` is available
-    to account for this.
 
     Examples
     --------
@@ -242,7 +237,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Notes
     -----
     For ``uint8`` (and ``uint16`` up to a certain bit-depth) data, the lower
-    algorithm complexity makes the :func:`skimage.filters.rank.maximum`
+    algorithm complexity makes the :func:`skimage2.filters.rank.maximum`
     function more efficient for larger images and footprints.
 
     The footprint can also be a provided as a sequence of 2-tuples where the
@@ -252,13 +247,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
-
-    For non-symmetric footprints, :func:`skimage.morphology.binary_dilation`
-    and :func:`skimage.morphology.dilation` produce an output that differs:
-    `binary_dilation` mirrors the footprint, whereas `dilation` does not.
-    :func:`skimage.morphology.mirror_footprint` is available to correct for this.
 
     Examples
     --------
@@ -352,7 +342,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
 
     Examples
@@ -426,7 +416,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
 
     Examples
@@ -476,7 +466,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
-        'max', 'min', or 'ignore'. See :func:`skimage.morphology.opening`.
+        'max', 'min', or 'ignore'. See :func:`skimage2.morphology.opening`.
         Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
@@ -496,7 +486,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
 
     See Also
@@ -566,7 +556,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
-        'max', 'min', or 'ignore'. See :func:`skimage.morphology.closing`.
+        'max', 'min', or 'ignore'. See :func:`skimage2.morphology.closing`.
         Default is 'ignore'.
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
@@ -586,7 +576,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
-    :func:`skimage.morphology.disk` provide an option to automatically generate
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
 
     See Also
