@@ -209,7 +209,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
@@ -307,7 +307,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
@@ -381,7 +381,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
@@ -454,7 +454,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
@@ -544,7 +544,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (connectivity=1). The footprint
