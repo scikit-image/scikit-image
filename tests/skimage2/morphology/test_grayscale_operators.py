@@ -3,26 +3,21 @@ import pytest
 from scipy import ndimage as ndi
 from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
-from skimage import color, data, transform
+import skimage as ski
+from skimage.morphology import footprint_rectangle
 from skimage._shared.testing import fetch
-from skimage.morphology import footprints, footprint_rectangle
-from skimage.util import img_as_uint, img_as_ubyte
 
 import skimage2.morphology._grayscale_operators as gray
 
 
 @pytest.fixture
 def cam_image():
-    from skimage import data
-
-    return np.ascontiguousarray(data.camera()[64:112, 64:96])
+    return np.ascontiguousarray(ski.data.camera()[64:112, 64:96])
 
 
 @pytest.fixture
 def cell3d_image():
-    from skimage import data
-
-    return np.ascontiguousarray(data.cells3d()[30:48, 0, 20:36, 20:32])
+    return np.ascontiguousarray(ski.data.cells3d()[30:48, 0, 20:36, 20:32])
 
 
 gray_operators = (
@@ -50,14 +45,14 @@ class TestMorphology:
 
         footprints_2D = (
             square,
-            footprints.diamond,
-            footprints.disk,
-            footprints.star,
+            ski.morphology.diamond,
+            ski.morphology.disk,
+            ski.morphology.star,
         )
 
-        image = img_as_ubyte(
-            transform.downscale_local_mean(color.rgb2gray(data.coffee()), (20, 20))
-        )
+        image = ski.color.rgb2gray(ski.data.coffee())
+        image = ski.transform.downscale_local_mean(image, (20, 20))
+        image = ski.util.img_as_ubyte(image)
 
         output = {}
         for n in range(1, 4):
@@ -74,7 +69,7 @@ class TestMorphology:
         assert_equal(expected, calculated)
 
     def test_gray_closing_extensive(self):
-        img = data.coins()
+        img = ski.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="ignore" is extensive
@@ -88,7 +83,7 @@ class TestMorphology:
         assert not np.all(result_default >= img)
 
     def test_gray_opening_anti_extensive(self):
-        img = data.coins()
+        img = ski.data.coins()
         footprint = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
 
         # Default mode="ignore" is anti-extensive
@@ -173,7 +168,7 @@ class TestEccentricStructuringElements:
 
 @pytest.mark.parametrize("func", gray_operators)
 def test_default_footprint(func):
-    strel = footprints.diamond(radius=1)
+    strel = ski.morphology.diamond(radius=1)
     image = np.array(
         [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -324,7 +319,7 @@ def test_float():
 
 def test_uint16():
     im16, eroded16, dilated16, opened16, closed16 = map(
-        img_as_uint, [im, eroded, dilated, opened, closed]
+        ski.util.img_as_uint, [im, eroded, dilated, opened, closed]
     )
     assert_allclose(gray.erosion(im16), eroded16)
     assert_allclose(gray.dilation(im16), dilated16)
@@ -393,8 +388,8 @@ def test_diamond_decomposition(cam_image, func, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.diamond(radius, decomposition=None)
-    footprint = footprints.diamond(radius, decomposition=decomposition)
+    footprint_ndarray = ski.morphology.diamond(radius, decomposition=None)
+    footprint = ski.morphology.diamond(radius, decomposition=decomposition)
     expected = func(cam_image, footprint=footprint_ndarray)
     out = func(cam_image, footprint=footprint)
     assert_array_equal(expected, out)
@@ -414,10 +409,10 @@ def test_octagon_decomposition(cam_image, func, m, n, decomposition):
     """
     if m == 0 and n == 0:
         with pytest.raises(ValueError):
-            footprints.octagon(m, n, decomposition=decomposition)
+            ski.morphology.octagon(m, n, decomposition=decomposition)
     else:
-        footprint_ndarray = footprints.octagon(m, n, decomposition=None)
-        footprint = footprints.octagon(m, n, decomposition=decomposition)
+        footprint_ndarray = ski.morphology.octagon(m, n, decomposition=None)
+        footprint = ski.morphology.octagon(m, n, decomposition=decomposition)
         expected = func(cam_image, footprint=footprint_ndarray)
         out = func(cam_image, footprint=footprint)
         assert_array_equal(expected, out)
@@ -446,8 +441,8 @@ def test_octahedron_decomposition(cell3d_image, func, radius, decomposition):
 
     comparison is made to the case without decomposition.
     """
-    footprint_ndarray = footprints.octahedron(radius, decomposition=None)
-    footprint = footprints.octahedron(radius, decomposition=decomposition)
+    footprint_ndarray = ski.morphology.octahedron(radius, decomposition=None)
+    footprint = ski.morphology.octahedron(radius, decomposition=decomposition)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
