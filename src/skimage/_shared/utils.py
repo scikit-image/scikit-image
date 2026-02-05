@@ -1234,7 +1234,7 @@ def _rescale_value_range(image, *, mode):
             to :func:`_supported_float_type`).
 
         ``'none'``
-            Don't Rescale the value range of `image` at all and return a
+            Don't rescale the value range of `image` at all and return a
             copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
