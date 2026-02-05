@@ -10,7 +10,7 @@ from skimage._shared.testing import assert_stacklevel
 from skimage2.feature import peak_local_max
 
 
-class Test_peak_local_max:
+class TestPeakLocalMax:
     def test_trivial_case(self):
         trivial = np.zeros((25, 25))
         peak_indices = peak_local_max(trivial, min_distance=1)
