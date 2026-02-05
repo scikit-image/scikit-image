@@ -134,9 +134,9 @@ def peak_local_max(
         "distance by default (`p_norm=2`). "
         "To keep the old behavior from `skimage` (v1.x) use:\n"
         "\n"
-        "    import skimage2 as sk2\n"
-        "    sk2.feature.peak_local_max(\n"
-        "       ...,\n"
+        "    import skimage2 as ski2\n"
+        "    ski2.feature.peak_local_max(\n"
+        "        ...,\n"
         "        p_norm=p_norm\n"
         "    )",
         stacklevel=2,
