@@ -543,7 +543,7 @@ def blob_log(
             copy of `image`. Useful when `image` has already been rescaled.
 
         ``'legacy'``
-            Normalize only if `image` has an integer dtype, if `image` is of
+            Normalize only if `image` has an integer dtype. If `image` is of
             floating dtype, it is left alone. See :func:`.img_as_float` for
             more details.
 
