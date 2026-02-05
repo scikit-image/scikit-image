@@ -195,13 +195,25 @@ addopts = [
     "--strict-config",
     "--strict-markers",
     "--maxfail=5",
-    # skimage/skimage2 duplicates test module names,
-    # only *importlib* supports non-unique test module names
+    # Necessary for doctest collection with editable installations and
+    # non-unique test module names (skimage/skimage2 duplicates those)
     "--import-mode=importlib",
+    # See comment on `testpaths`
+    "--pyargs",
 ]
+
+# For out-of-tree installations, selecting `src/` as a test path fails.
+# Pytest doesn't expect the doctest's sources and installation to be
+# different. Instead, we use `--pyargs` in the `addopts` field so that pytest
+# can find docstests by importing.
+testpaths = [
+    "skimage",
+    "skimage2",
+    "./tests/",
+]
+
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
