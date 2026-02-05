@@ -463,7 +463,8 @@ class TestPeakLocalMax:
         assert_array_equal(peak.peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        with pytest.warns(RuntimeWarning, match=r"When min_distance < 1") as record:
+        regex = r"min_distance.* is smaller than 1"
+        with pytest.warns(RuntimeWarning, match=regex) as record:
             assert len(peak.peak_local_max(image, min_distance=0)) == image.size - 1
         assert_stacklevel(record)
 
