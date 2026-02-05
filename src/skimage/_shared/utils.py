@@ -1229,9 +1229,8 @@ def _rescale_value_range(image, *, mode):
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization, the resulting array's minimum and maximum values will
-            be 0 and 1 respectively. It will have a floating dtype (according
-            to :func:`_supported_float_type`).
+            normalization, `rescaled_image` will have a floating dtype
+            (according to :func:`_supported_float_type`).
 
         ``'none'``
             Don't rescale the value range of `image` at all and return a

@@ -306,8 +306,7 @@ def blob_dog(
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization, the resulting array's minimum and maximum values will
-            be 0 and 1 respectively. It will have a floating dtype.
+            normalization, the resulting array will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
@@ -535,8 +534,7 @@ def blob_log(
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization, the resulting array's minimum and maximum values will
-            be 0 and 1 respectively. It will have a floating dtype.
+            normalization, the resulting array will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
@@ -732,8 +730,7 @@ def blob_doh(
 
         ``'minmax'``
             Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization, the resulting array's minimum and maximum values will
-            be 0 and 1 respectively. It will have a floating dtype.
+            normalization, the resulting array will have a floating dtype.
 
         ``'none'``
             Don't prescale the value range of `image` at all and return a
