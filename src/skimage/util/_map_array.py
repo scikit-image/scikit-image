@@ -58,7 +58,7 @@ def map_array(input_arr, input_vals, output_vals, out=None):
         )
     try:
         out_view = out.view()
-        np.reshape(out_view, (-1,), copy=False)
+        out_view = np.reshape(out_view, (-1,), copy=False)
     except AttributeError:  # if out strides are not compatible with 0-copy
         raise ValueError(
             'If out array is provided, it should be either contiguous '
