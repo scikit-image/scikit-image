@@ -33,6 +33,7 @@ __all__ = [
     'threshold_triangle',
     'apply_hysteresis_threshold',
     'threshold_multiotsu',
+    'threshold_circular_otsu',
 ]
 
 
@@ -1337,3 +1338,129 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     thresh = bin_centers[thresh_idx]
 
     return thresh
+
+
+def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
+    """Return two threshold values based on a modified Otsu's method for circular
+    input data (e.g. hue values) as described in [1]_.
+
+    Either image or hist must be provided. If hist is provided, the image is ignored.
+
+    Parameters
+    ----------
+    image : (M, N[, ...]) ndarray, optional
+        Grayscale input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. Only even values are accepted.
+        This value is ignored if a histogram is provided. Default is 256.
+    val_range : 2-tuple of floats
+        The lower and upper range of the input image or histogram
+        (e.g. (0, 1) for normalized data; (0, 2π) for typical hue data).
+    hist : array, optional
+        Histogram from which to determine the thresholds. The histogram values
+        are expected to be equidistantly spread over the value range. If no hist
+        provided, this function will compute it from the image.
+
+    Returns
+    -------
+    threshold : 2-tuple of floats
+        Two threshold values which split the circular histogram into two classes.
+        It is guaranteed that `t[0] + 0.5 * (val_range[1] - val_range[0]) = t[1]` and
+        that both thresholds are located at histogram bin edges (_not_ centers).
+
+    References
+    ----------
+    .. [1] Preprint PDF, https://users.cs.cf.ac.uk/Yukun.Lai/papers/thresholdingTIP.pdf
+
+    Examples
+    --------
+    >>> from skimage.data import astronaut
+    >>> from skimage.color import rgb2hsv
+    >>> from skimage.filters import threshold_circular_otsu
+    >>> image = astronaut()
+    >>> hue = rgb2hsv(image)[..., 0]
+    >>> thresh = threshold_circular_otsu(image=hue, val_range=(0, 1))
+    >>> mask = (hue < thresh[0]) | (hue > thresh[1])
+    >>> image_th = np.where(mask[..., np.newaxis], (1, 0, 0), (0, 0, 1))
+
+    Notes
+    -----
+    The input image must be grayscale.
+    """
+
+    if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
+        warn(
+            "threshold_circular_otsu is expected to work correctly only for "
+            f"grayscale images; image shape {image.shape} looks like "
+            "that of an RGB image."
+        )
+
+    if hist is None:
+        count, _ = np.histogram(image, bins=nbins, range=val_range)
+        h = count.astype(np.float32, copy=False)
+    else:
+        if image is not None:
+            warn("Both image and hist were provided; the image will be ignored.")
+        nbins = len(hist)
+        h = hist
+
+    stride = (val_range[1] - val_range[0]) / nbins
+    x = np.linspace(
+        val_range[0] + 0.5 * stride,
+        val_range[1] - 0.5 * stride,
+        nbins,
+        dtype=np.float32,
+    )
+
+    if nbins < 4:
+        raise ValueError("At least four histogram bins are required.")
+    if nbins % 2 != 0:
+        raise ValueError("Number of histogram bins must be even.")
+
+    lx = len(x)
+    lx2 = lx // 2
+
+    xe = np.tile(x, 2)
+    xe[lx:] += val_range[1] - val_range[0]
+    he = np.tile(h, 2)
+
+    def init(x, h) -> tuple[float, float, float]:
+        omega = h.sum()
+        if omega < 1e-6:
+            return 0.0, 0.0, 0.0
+        mean = (x * h).sum()
+        return omega, mean, (np.square(x - mean / omega) * h).sum()
+
+    def update(
+        ia: int, ie: int, omega: float, mean: float
+    ) -> tuple[float, float, float]:
+        omega += he[ie] - he[ia]
+        mean += xe[ie] * he[ie] - xe[ia] * he[ia]
+        ia += 1
+        ie += 1
+        if omega < 1e-6:
+            return 0.0, 0.0, 0.0
+        else:
+            return (
+                omega,
+                mean,
+                (np.square(xe[ia:ie] - mean / omega) * he[ia:ie]).sum(),
+            )
+
+    omega_1, mean_1, sigma_1 = init(xe[:lx2], he[:lx2])
+    omega_2, mean_2, sigma_2 = init(xe[lx2:lx], he[lx2:lx])
+
+    sigma_min = sigma_1 + sigma_2
+    i_min = 0
+
+    for i in range(lx2 - 1):
+        omega_1, mean_1, sigma_1 = update(i, i + lx2, omega_1, mean_1)
+        omega_2, mean_2, sigma_2 = update(i + lx2, i + lx, omega_2, mean_2)
+        sigma = sigma_1 + sigma_2
+
+        if sigma < sigma_min:
+            sigma_min = sigma
+            i_min = i + 1
+
+    th = x[i_min] - 0.5 * stride
+    return th, th + 0.5 * (val_range[1] - val_range[0])
