@@ -4,7 +4,7 @@ sphinx>=8.0
 sphinx-gallery[parallel]>=0.18
 numpydoc>=1.7
 sphinx-copybutton
-matplotlib>=3.7
+matplotlib>=3.10
 dask[array]>=2023.2.0
 pandas>=2.0
 seaborn>=0.11
@@ -19,5 +19,5 @@ kaleido==0.2.1
 scikit-learn>=1.2
 sphinx_design>=0.5
 pydata-sphinx-theme>=0.16
-PyWavelets>=1.6
+PyWavelets>=1.7
 pytest-doctestplus>=1.6.0
