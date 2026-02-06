@@ -4,7 +4,7 @@ channels:
 dependencies:
   # base
   - numpy>=2.1
-  - scipy>=1.11.4
+  - scipy>=1.13
   - networkx>=3.0
   - pillow>=10.1
   - imageio>=2.33,!=2.35.0
