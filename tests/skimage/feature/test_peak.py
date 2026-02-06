@@ -507,7 +507,7 @@ class TestPeakLocalMax:
         )
         assert len(peaks) == 1
 
-        # With p_norm=2 (Euclidian distance), peaks are 7.07 apart
+        # With p_norm=2 (Euclidean distance), peaks are 7.07 apart
         peaks = peak.peak_local_max(image, min_distance=7, p_norm=2, exclude_border=0)
         assert len(peaks) == 2
         peaks = peak.peak_local_max(image, min_distance=8, p_norm=2, exclude_border=0)
