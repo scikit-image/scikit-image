@@ -8,7 +8,7 @@ dependencies:
   - networkx>=3.0
   - pillow>=10.1
   - imageio>=2.33,!=2.35.0
-  - tifffile>=2022.8.12
+  - tifffile>=2025.1.10
   - packaging>=21
   - lazy-loader>=0.4
   # build
@@ -37,7 +37,7 @@ dependencies:
   - pandas>=2.0
   - seaborn>=0.11
   - pooch>=1.6
-  - tifffile>=2022.8.12
+  - tifffile>=2025.1.10
   - myst-parser
   - intersphinx-registry>=0.2411.14
   - ipywidgets
