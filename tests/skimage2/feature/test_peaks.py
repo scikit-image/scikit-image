@@ -35,7 +35,7 @@ class TestPeakLocalMax:
         image = np.zeros((5, 5), dtype=np.uint8)
         image[1, 1] = 10
         image[3, 3] = 20
-        peaks = peak_local_max(image, min_distance=1, threshold=0.5, prescale="minmax")
+        peaks = peak_local_max(image, min_distance=1, threshold_rel=0.5)
         assert len(peaks) == 1
         assert_almost_equal(peaks, [(3, 3)])
 
@@ -43,7 +43,7 @@ class TestPeakLocalMax:
         image = np.zeros((5, 5), dtype=np.uint8)
         image[1, 1] = 10
         image[3, 3] = 20
-        peaks = peak_local_max(image, min_distance=1, threshold=10)
+        peaks = peak_local_max(image, min_distance=1, threshold_abs=10)
         assert len(peaks) == 1
         assert_almost_equal(peaks, [(3, 3)])
 
@@ -77,12 +77,16 @@ class TestPeakLocalMax:
         image[1, 5] = 12
         image[3, 5] = 8
         image[5, 3] = 7
-        assert len(peak_local_max(image, min_distance=1, threshold=0)) == 5
-        peaks_limited = peak_local_max(image, min_distance=1, threshold=0, num_peaks=2)
+        assert len(peak_local_max(image, min_distance=1, threshold_abs=0)) == 5
+        peaks_limited = peak_local_max(
+            image, min_distance=1, threshold_abs=0, num_peaks=2
+        )
         assert len(peaks_limited) == 2
         assert (1, 3) in peaks_limited
         assert (1, 5) in peaks_limited
-        peaks_limited = peak_local_max(image, min_distance=1, threshold=0, num_peaks=4)
+        peaks_limited = peak_local_max(
+            image, min_distance=1, threshold_abs=0, num_peaks=4
+        )
         assert len(peaks_limited) == 4
         assert (1, 3) in peaks_limited
         assert (1, 5) in peaks_limited
@@ -98,11 +102,11 @@ class TestPeakLocalMax:
         image[3, 5] = 8
         image[5, 3] = 7
         peaks_limited = peak_local_max(
-            image, min_distance=1, threshold=0, labels=labels
+            image, min_distance=1, threshold_abs=0, labels=labels
         )
         assert len(peaks_limited) == 5
         peaks_limited = peak_local_max(
-            image, min_distance=1, threshold=0, labels=labels, num_peaks=2
+            image, min_distance=1, threshold_abs=0, labels=labels, num_peaks=2
         )
         assert len(peaks_limited) == 2
 
@@ -115,7 +119,7 @@ class TestPeakLocalMax:
             image,
             labels=labels,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             num_peaks=np.inf,
             num_peaks_per_label=2,
         )
@@ -124,7 +128,7 @@ class TestPeakLocalMax:
             image,
             labels=labels,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             num_peaks=np.inf,
             num_peaks_per_label=1,
         )
@@ -133,7 +137,7 @@ class TestPeakLocalMax:
             image,
             labels=labels,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             num_peaks=2,
             num_peaks_per_label=2,
         )
@@ -165,7 +169,7 @@ class TestPeakLocalMax:
             image,
             labels=labels,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             footprint=footprint,
             exclude_border=False,
         )
@@ -191,7 +195,7 @@ class TestPeakLocalMax:
             image,
             labels=labels,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             footprint=footprint,
             exclude_border=False,
         )
@@ -234,7 +238,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3,) * ndim, dtype=bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert result.shape == (0, image.ndim)
@@ -245,7 +249,7 @@ class TestPeakLocalMax:
             image,
             footprint=np.ones((3, 3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert result.shape == (0, image.ndim)
@@ -260,7 +264,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         result = np.zeros_like(image, dtype=bool)
@@ -278,7 +282,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert_equal(result, expected)
@@ -295,12 +299,12 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert_equal(result, expected)
         result = peak_local_max(
-            image, labels=labels, min_distance=1, threshold=0, exclude_border=False
+            image, labels=labels, min_distance=1, threshold_rel=0, exclude_border=False
         )
         assert_equal(result, expected)
 
@@ -316,7 +320,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert_equal(result, expected)
@@ -334,7 +338,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert_equal(result, expected)
@@ -352,7 +356,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=np.ones((3, 3), bool),
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
             exclude_border=False,
         )
         assert_equal(result, expected)
@@ -375,6 +379,7 @@ class TestPeakLocalMax:
             labels=labels,
             footprint=footprint,
             min_distance=1,
+            threshold_rel=0,
             exclude_border=False,
         )
         result = np.zeros_like(image, dtype=bool)
@@ -392,14 +397,15 @@ class TestPeakLocalMax:
             labels=np.ones((10, 20), int),
             footprint=footprint,
             min_distance=1,
-            threshold=0,
+            threshold_rel=0,
+            threshold_abs=-1,
             exclude_border=False,
         )
         result = np.zeros_like(image, dtype=bool)
         result[tuple(peak_idx.T)] = True
         assert np.all(result)
         peak_idx = peak_local_max(
-            image, footprint=footprint, threshold=-1, exclude_border=False
+            image, footprint=footprint, threshold_abs=-1, exclude_border=False
         )
         result = np.zeros_like(image, dtype=bool)
         result[tuple(peak_idx.T)] = True
@@ -410,40 +416,40 @@ class TestPeakLocalMax:
         image[15, 15, 15] = 1
         image[5, 5, 5] = 1
         assert_equal(
-            peak_local_max(image, min_distance=10, threshold=0), [[15, 15, 15]]
+            peak_local_max(image, min_distance=10, threshold_rel=0), [[15, 15, 15]]
         )
-        assert_equal(peak_local_max(image, min_distance=6, threshold=0), [[15, 15, 15]])
+        assert_equal(
+            peak_local_max(image, min_distance=6, threshold_rel=0), [[15, 15, 15]]
+        )
         assert sorted(
             peak_local_max(
-                image, min_distance=10, threshold=0, exclude_border=False
+                image, min_distance=10, threshold_rel=0, exclude_border=False
             ).tolist()
         ) == [[5, 5, 5], [15, 15, 15]]
-        assert sorted(peak_local_max(image, min_distance=5, threshold=0).tolist()) == [
-            [5, 5, 5],
-            [15, 15, 15],
-        ]
+        assert sorted(
+            peak_local_max(image, min_distance=5, threshold_rel=0).tolist()
+        ) == [[5, 5, 5], [15, 15, 15]]
 
     def test_4D(self):
         image = np.zeros((30, 30, 30, 30))
         image[15, 15, 15, 15] = 1
         image[5, 5, 5, 5] = 1
         assert_equal(
-            peak_local_max(image, min_distance=10, threshold=0),
+            peak_local_max(image, min_distance=10, threshold_rel=0),
             [[15, 15, 15, 15]],
         )
         assert_equal(
-            peak_local_max(image, min_distance=6, threshold=0),
+            peak_local_max(image, min_distance=6, threshold_rel=0),
             [[15, 15, 15, 15]],
         )
         assert sorted(
             peak_local_max(
-                image, min_distance=10, threshold=0, exclude_border=False
+                image, min_distance=10, threshold_rel=0, exclude_border=False
             ).tolist()
         ) == [[5, 5, 5, 5], [15, 15, 15, 15]]
-        assert sorted(peak_local_max(image, min_distance=5, threshold=0).tolist()) == [
-            [5, 5, 5, 5],
-            [15, 15, 15, 15],
-        ]
+        assert sorted(
+            peak_local_max(image, min_distance=5, threshold_rel=0).tolist()
+        ) == [[5, 5, 5, 5], [15, 15, 15, 15]]
 
     def test_threshold_rel_default(self):
         image = np.ones((5, 5))
@@ -455,8 +461,7 @@ class TestPeakLocalMax:
         assert_equal(peak_local_max(image), [[2, 2]])
 
         image[2, 2] = 0
-        regex = r"min_distance.* is smaller than 1"
-        with pytest.warns(RuntimeWarning, match=regex) as record:
+        with pytest.warns(RuntimeWarning, match=r"When min_distance < 1") as record:
             assert len(peak_local_max(image, min_distance=0)) == image.size - 1
         assert_stacklevel(record)
 

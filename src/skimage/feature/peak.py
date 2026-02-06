@@ -9,19 +9,6 @@ from ..util import PendingSkimage2Change
 import skimage2 as ski2
 
 
-def _get_threshold(image, threshold_abs, threshold_rel):
-    """Return the threshold value according to an absolute and a relative
-    value.
-
-    """
-    threshold = threshold_abs if threshold_abs is not None else image.min()
-
-    if threshold_rel is not None:
-        threshold = max(threshold, threshold_rel * image.max())
-
-    return threshold
-
-
 def peak_local_max(
     image,
     min_distance=1,
@@ -156,19 +143,17 @@ def peak_local_max(
         category=PendingSkimage2Change,
     )
 
-    threshold = _get_threshold(image, threshold_abs, threshold_rel)
-
     coordinates = ski2.feature.peak_local_max(
         image,
         min_distance=min_distance,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
         num_peaks=num_peaks,
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
         p_norm=p_norm,
-        prescale="none",
     )
     return coordinates
 

@@ -3,7 +3,6 @@ import scipy.ndimage as ndi
 
 from skimage._shared._warnings import warn_external
 from skimage._shared.coord import ensure_spacing
-from skimage._shared.utils import _rescale_value_range
 
 
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
@@ -68,6 +67,19 @@ def _exclude_border(label, border_width):
     return label
 
 
+def _get_threshold(image, threshold_abs, threshold_rel):
+    """Return the threshold value according to an absolute and a relative
+    value.
+
+    """
+    threshold = threshold_abs if threshold_abs is not None else image.min()
+
+    if threshold_rel is not None:
+        threshold = max(threshold, threshold_rel * image.max())
+
+    return threshold
+
+
 def _get_excluded_border_width(image, min_distance, exclude_border):
     """Return border_width values relative to a min_distance if requested."""
 
@@ -105,19 +117,22 @@ def peak_local_max(
     image,
     *,
     min_distance=1,
-    threshold=None,
+    threshold_abs=None,
+    threshold_rel=None,
     exclude_border=True,
     num_peaks=np.inf,
     footprint=None,
     labels=None,
     num_peaks_per_label=np.inf,
     p_norm=2.0,
-    prescale="none",
 ):
     """Find peaks in an image as coordinate list.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
+
+    If both `threshold_abs` and `threshold_rel` are provided, the maximum
+    of the two is chosen as the minimum intensity threshold of peaks.
 
     Parameters
     ----------
@@ -126,9 +141,12 @@ def peak_local_max(
     min_distance : int, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
-    threshold : float, optional
+    threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
+    threshold_rel : float, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
     exclude_border : int or tuple of (int, ...) or bool, optional
         If positive integer, `exclude_border` excludes peaks from within
         `exclude_border`-pixels of the border of the image.
@@ -155,29 +173,6 @@ def peak_local_max(
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
         Euclidean distance.
-    prescale : {'minmax', 'none', 'legacy'}, optional
-        Method for rescaling (normalizing) `image` before processing.
-        Note that rescaling impacts the ranges of the internally computed
-        Laplacian-of-Gaussian (LoG) images, and therefore also the choice of
-        `threshold`.
-
-        ``'minmax'``
-            Normalize `image` between 0 and 1 regardless of dtype. After
-            normalization, the resulting array will have a floating dtype.
-
-        ``'none'``
-            Don't prescale the value range of `image` at all and return a
-            copy of `image`. Useful when `image` has already been rescaled.
-
-        ``'legacy'``
-            Normalize only if `image` has an integer dtype. If `image` is of
-            floating dtype, it is left alone. See :func:`.img_as_float` for
-            more details.
-
-            .. warning::
-                The scaling and the effect of `threshold` will depend on the
-                dtype of `image`. For consistent behavior we recommend
-                ``'minmax'``.
 
     Returns
     -------
@@ -233,19 +228,16 @@ def peak_local_max(
     array([[10, 10, 10],
            [15, 15, 15]])
     """
-    image = _rescale_value_range(image, mode=prescale)
-
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
-            f"{min_distance=} is smaller than 1, it will have no filtering "
-            f"effect on the number of peaks",
+            "When min_distance < 1, peak_local_max acts as finding "
+            "image > max(threshold_abs, threshold_rel * max(image)).",
             category=RuntimeWarning,
         )
 
     border_width = _get_excluded_border_width(image, min_distance, exclude_border)
 
-    if threshold is None:
-        threshold = image.min()
+    threshold = _get_threshold(image, threshold_abs, threshold_rel)
 
     if footprint is None:
         size = 2 * min_distance + 1
