@@ -68,7 +68,7 @@ Other parameters -- including `boundary_mode` if you already set it explicitly -
 ### `skimage.feature.peak_local_max`
 
 This function is replaced by `skimage2.feature.peak_local_max` which now uses the Euclidean distance by default (`p_norm=2`).
-Every parameter but the first one – `image` – have been turned into keyword-only parameters.
+All parameters other than the first (`image`) are now keyword-only.
 
 To keep the old behavior from `skimage` (v1.x) use:
 
