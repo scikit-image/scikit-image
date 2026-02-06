@@ -65,6 +65,25 @@ ski2.data.binary_blobs(
 with `length`, `n_dim`, and `blob_size_fraction` containing values used with the old signature.
 Other parameters -- including `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
+### `skimage.feature.peak_local_max`
+
+This function is replaced by `skimage2.feature.peak_local_max` which now uses the Euclidean distance by default (`p_norm=2`).
+Every parameter but the first one – `image` – have been turned into keyword-only parameters.
+
+To keep the old behavior from `skimage` (v1.x) use:
+
+```python
+import skimage2 as ski2
+
+ski2.feature.peak_local_max(
+    ...,
+    p_norm=p_norm,
+)
+```
+
+where `p_norm` is given the old value.
+Other parameters can be left unchanged.
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
