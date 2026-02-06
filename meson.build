@@ -3,14 +3,14 @@ project(
   'c', 'cpp', 'cython',
   # Note that the git commit hash cannot be added dynamically here
   # That only happens when importing from a git repository.
-  # See `skimage/__init__.py`
-  version: run_command('skimage/_build_utils/version.py', check: true).stdout().strip(),
+  # See `src/skimage/__init__.py`
+  version: run_command('src/skimage/_build_utils/version.py', check: true).stdout().strip(),
   license: 'BSD-3',
-  meson_version: '>= 1.1.0',
+  meson_version: '>= 1.5.0',
   default_options: [
     'buildtype=debugoptimized',
-    'c_std=c99',
-    'cpp_std=c++14',
+    'c_std=c17',
+    'cpp_std=c++17',
   ],
 )
 
@@ -19,8 +19,8 @@ cpp = meson.get_compiler('cpp')
 
 # Check compiler is recent enough (see "Toolchain Roadmap" for details)
 if cc.get_id() == 'gcc'
-  if not cc.version().version_compare('>=8.0')
-    error('scikit-image requires GCC >= 8.0')
+  if not cc.version().version_compare('>=9.1')
+    error('scikit-image requires GCC >= 9.1')
   endif
 elif cc.get_id() == 'msvc'
   if not cc.version().version_compare('>=19.20')
@@ -47,7 +47,7 @@ endif
 # use a linker script to avoid exporting those symbols (this is in addition to
 # Meson using `-fvisibility=hidden` for C and `-fvisibility-inlines-hidden` for
 # C++ code. See gh-15996 for details.
-_linker_script = meson.project_source_root() / 'skimage/_build_utils/link-version-pyinit.map'
+_linker_script = meson.project_source_root() / 'src/skimage/_build_utils/link-version-pyinit.map'
 version_link_args = ['-Wl,--version-script=' + _linker_script]
 # Note that FreeBSD only accepts version scripts when -shared is passed,
 # hence we need to pass that to `cc.links` explicitly (flag is already
@@ -58,8 +58,8 @@ endif
 
 cython = find_program('cython')
 pythran = find_program('pythran')
-tempita = files('skimage/_build_utils/tempita.py')
-copier = find_program(['cp', 'skimage/_build_utils/copyfiles.py'])
+tempita = files('src/skimage/_build_utils/tempita.py')
+copier = find_program(['cp', 'src/skimage/_build_utils/copyfiles.py'])
 
 # https://mesonbuild.com/Python-module.html
 py_mod = import('python')
@@ -68,4 +68,4 @@ py_mod = import('python')
 py3 = py_mod.find_installation()
 py3_dep = py3.dependency()
 
-subdir('skimage')
+subdir('src')

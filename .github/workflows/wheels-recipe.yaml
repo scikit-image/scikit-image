@@ -1,0 +1,119 @@
+name: Wheels recipe
+# Reusable workflow for building scikit-image's wheels
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  COLUMNS: 120
+
+jobs:
+  build_macos_wheel:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+            macos-15-intel,
+            macos-latest, # ARM-version of MacOS
+          ]
+        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_windows_wheel:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-11-arm]
+        build: ["cp31{1,2}*", "cp313*", "cp314*"]
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up LLVM toolchain for Windows ARM64
+        if: matrix.os == 'windows-11-arm'
+        uses: ./.github/windows_arm64_steps
+      - uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+          CC: clang-cl
+          CXX: clang-cl
+          LDFLAGS: "-Wl,-S"
+          CIBW_SKIP: "*-win32" # not provide 32 bits wheel
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_wheel_linux:
+    name: Build ${{ matrix.build }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04-arm]
+        build:
+          [
+            "cp31{1,2}*manylinux*",
+            "cp313*manylinux*",
+            "cp314*manylinux*",
+            "cp31{1,2}*musllinux*",
+            "cp313*musllinux*",
+            "cp314*musllinux*",
+          ]
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.arch }}-${{ github.job }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_pyodide_wheel:
+    name: Build pyodide on ubuntu-latest
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Build and test scikit-image for Pyodide
+        uses: pypa/cibuildwheel@v3.2.1
+        env:
+          CIBW_PLATFORM: pyodide
+          # only build for newer pyodide_2025_0 ABI and not cp312-pyodide_wasm32 (pyodide_2024_0)
+          CIBW_BUILD: "cp313-pyodide_wasm32"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-pyodide-${{ github.job }}
+          path: ./wheelhouse/*.whl

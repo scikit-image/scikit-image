@@ -47,7 +47,7 @@ class ApiDocWriter:
         package_name : string
             Name of the top-level package. *package_name* must be the
             name of an importable package.
-        rst_extension : string, optional
+        rst_extension : str, optional
             Extension for reST files, default '.rst'.
         package_skip_patterns : None or sequence of {strings, regexps}
             Sequence of strings giving URIs of packages to be excluded
@@ -92,6 +92,18 @@ class ApiDocWriter:
         self._package_name = package_name
         root_module = self._import(package_name)
         self.root_path = root_module.__path__[-1]
+
+        if not os.path.isdir(self.root_path):
+            # __path__ might point to editable loader, try falling back to __file__
+            self.root_path = os.path.dirname(root_module.__file__)
+
+        if not os.path.isdir(self.root_path):
+            msg = (
+                f"could not determine a valid directory for {root_module!r}, "
+                f"'{self.root_path}' is not a directory"
+            )
+            raise NotADirectoryError(msg)
+
         self.written_modules = None
 
     package_name = property(
@@ -298,7 +310,7 @@ class ApiDocWriter:
             ad += "------------\n\n"
             # must NOT exclude from index to keep cross-refs working
             ad += '\n.. autofunction:: ' + f + '\n\n'
-            ad += f'    .. minigallery:: {f}\n\n'
+            ad += f'    .. minigallery:: {uri}.{f}\n\n'
         for c in classes:
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -310,7 +322,7 @@ class ApiDocWriter:
                 '\n'
                 '  .. automethod:: __init__\n\n'
             )
-            ad += f'    .. minigallery:: {c}\n\n'
+            ad += f'    .. minigallery:: {uri}.{c}\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -428,7 +440,7 @@ class ApiDocWriter:
         ----------
         outdir : string
             Directory to which to write generated index file.
-        froot : string, optional
+        froot : str, optional
             Root (filename without extension) of filename to write to
             Defaults to 'gen'. We add ``self.rst_extension``.
         relative_to : string
