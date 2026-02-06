@@ -210,7 +210,7 @@ def _marching_cubes_lewiner(
     normals = np.fliplr(normals)
 
     # Finishing touches to output
-    faces = faces.reshape((-1, 3), copy=False)
+    np.reshape(faces, (-1, 3), copy=False)
     if gradient_direction == 'descent':
         # MC implementation is right-handed, but gradient_direction is
         # left-handed
@@ -234,7 +234,7 @@ def _to_array(args):
     shape, text = args
     byts = base64.decodebytes(text.encode('utf-8'))
     ar = np.frombuffer(byts, dtype='int8')
-    ar = ar.reshape(shape, copy=False)
+    np.reshape(ar, shape, copy=False)
     return ar
 
 

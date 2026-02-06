@@ -109,7 +109,7 @@ def pil_to_ndarray(image, dtype=None, img_num=None):
             if 'S' in image.mode:
                 dtype = dtype.replace('u', 'i')
             frame = np.frombuffer(frame.tobytes(), dtype)
-            frame = frame.reshape(shape[::-1], copy=False)
+            np.reshape(frame, shape[::-1], copy=False)
 
         else:
             frame = np.array(frame, dtype=dtype)
