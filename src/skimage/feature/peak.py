@@ -1,10 +1,9 @@
-from warnings import warn
-
 import numpy as np
 import scipy.ndimage as ndi
 
 from .. import measure
 from ..util import PendingSkimage2Change
+from .._shared._warnings import warn_external
 
 import skimage2 as ski2
 
@@ -132,7 +131,7 @@ def peak_local_max(
            [15, 15, 15]])
 
     """
-    warn(
+    warn_external(
         "`skimage.feature.peak_local_max` is deprecated in favor of "
         "`skimage2.feature.peak_local_max` which now uses the Euclidean "
         "distance by default (`p_norm=2`). "
@@ -143,7 +142,6 @@ def peak_local_max(
         "        ...,\n"
         "        p_norm=p_norm\n"
         "    )",
-        stacklevel=2,
         category=PendingSkimage2Change,
     )
 
