@@ -876,7 +876,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
     elif counter == max_num_iter - 1:
-        raise RuntimeError('Maximum iteration reached for histogram' 'smoothing')
+        raise RuntimeError('Maximum iteration reached for histogramsmoothing')
 
     # Find the lowest point between the maxima
     threshold_idx = np.argmin(smooth_hist[maximum_idxs[0] : maximum_idxs[1] + 1])
@@ -1370,7 +1370,10 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
 
     References
     ----------
-    .. [1] Preprint PDF, https://users.cs.cf.ac.uk/Yukun.Lai/papers/thresholdingTIP.pdf
+    .. [1] Yu-Kun Lai and Paul L. Rosin, Efficient circular thresholding. IEEE
+           Transactions on Image Processing 23(3), pp. 992-1001, 2014. DOI:
+           10.1109/TIP.2013.2297014 (PDF
+           https://yukunlai.github.io/papers/thresholdingTIP.pdf)
 
     Examples
     --------

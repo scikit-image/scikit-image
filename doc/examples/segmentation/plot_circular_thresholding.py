@@ -5,16 +5,19 @@ Circular Thresholding
 
 Circular thresholding is a special case of thresholding for circular signals
 (e.g. hue values) to create a binary image from a grayscale image [1]_. The
-implementation is based on the method proposed by Yu-Kun Lai and Paul L. Rosin [2]_
-([preprint PDF](https://users.cs.cf.ac.uk/Yukun.Lai/papers/thresholdingTIP.pdf)).
+implementation is based on the method proposed by Yu-Kun Lai and Paul L. Rosin [2]_.
 
 
 .. [1] https://en.wikipedia.org/wiki/Circular_thresholding
-.. [2] https://ieeexplore.ieee.org/document/6698338
+.. [2] Yu-Kun Lai and Paul L. Rosin, Efficient circular thresholding. IEEE
+       Transactions on Image Processing 23(3), pp. 992-1001, 2014. DOI:
+       10.1109/TIP.2013.2297014 (PDF
+       https://yukunlai.github.io/papers/thresholdingTIP.pdf)
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 from skimage.color.colorconv import hsv2rgb
 from skimage.filters import threshold_circular_otsu, threshold_otsu
 
