@@ -232,13 +232,14 @@ class TestPeakLocalMax:
         result[tuple(peak_idx.T)] = True
         assert_array_equal(result, nd_image.astype(bool))
 
-    def test_empty(self):
-        image = np.zeros((10, 20))
-        labels = np.zeros((10, 20), int)
+    @pytest.mark.parametrize("ndim", [1, 2, 3, 4])
+    def test_empty(self, ndim):
+        image = np.zeros((10,) * ndim)
+        labels = np.zeros_like(image, dtype=int)
         result = peak.peak_local_max(
             image,
             labels=labels,
-            footprint=np.ones((3, 3), bool),
+            footprint=np.ones((3,) * ndim, dtype=bool),
             min_distance=1,
             threshold_rel=0,
             exclude_border=False,
@@ -479,6 +480,44 @@ class TestPeakLocalMax:
         assert len(peaks) == 2
         assert [2, 4] in peaks
         assert [3, 0] in peaks
+
+    def test_p_norm_default(self):
+        image = np.zeros((10, 10))
+        image[2, 2] = 1
+        image[7, 7] = 1
+
+        # With default (p_norm=np.inf, Chebyshev distance), peaks are 5 apart
+        peaks = peak.peak_local_max(image, min_distance=5, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=6, exclude_border=0)
+        assert len(peaks) == 1
+
+    def test_p_norm(self):
+        image = np.zeros((10, 10))
+        image[2, 2] = 1
+        image[7, 7] = 1
+
+        # With p_norm=inf (Chebyshev distance), peaks are 5 apart
+        peaks = peak.peak_local_max(
+            image, min_distance=5, p_norm=np.inf, exclude_border=0
+        )
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(
+            image, min_distance=6, p_norm=np.inf, exclude_border=0
+        )
+        assert len(peaks) == 1
+
+        # With p_norm=2 (Euclidian distance), peaks are 7.07 apart
+        peaks = peak.peak_local_max(image, min_distance=7, p_norm=2, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=8, p_norm=2, exclude_border=0)
+        assert len(peaks) == 1
+
+        # With p_norm=1 (Manhattan distance), peaks are 10 apart
+        peaks = peak.peak_local_max(image, min_distance=10, p_norm=1, exclude_border=0)
+        assert len(peaks) == 2
+        peaks = peak.peak_local_max(image, min_distance=11, p_norm=1, exclude_border=0)
+        assert len(peaks) == 1
 
 
 @pytest.mark.parametrize(
