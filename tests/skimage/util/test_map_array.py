@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 import pytest
 from skimage.util._map_array import map_array, ArrayMap
@@ -37,6 +39,36 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
     assert result.dtype == dtype_out
     if out_array:
         assert out is result
+
+
+@pytest.mark.parametrize(
+    "input_arrs_writeable", itertools.product([True, False], repeat=3)
+)
+def test_map_array_read_only(input_arrs_writeable):
+    """Check that input arrays can be read-only, but output_arr must not be.
+
+    See https://github.com/scikit-image/scikit-image/issues/6378.
+    """
+    input_arr = np.array([0, 2, 0, 3, 4, 5, 0], dtype=np.uint8)
+    input_vals = np.array([1, 2, 3, 4, 6], dtype=input_arr.dtype)
+    output_vals = np.array([6, 7, 8, 9, 10], dtype=np.uint8)
+    out = np.full(input_arr.shape, dtype=output_vals.dtype)
+    for arr, writeable in zip(
+        [input_arr, input_vals, output_vals], input_arrs_writeable, strict=True
+    ):
+        arr.flags.writeable = writeable
+
+    # this should run without error
+    _ = map_array(
+        input_arr=input_arr, input_vals=input_vals, output_vals=output_vals, out=out
+    )
+
+    # but when out is read-only, it should fail
+    out.flags.writeable = False
+    with pytest.raises(ValueError, match="read-only"):
+        _ = map_array(
+            input_arr=input_arr, input_vals=input_vals, output_vals=output_vals, out=out
+        )
 
 
 def test_map_array_incorrect_output_shape():
