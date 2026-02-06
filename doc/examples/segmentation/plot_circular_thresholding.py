@@ -18,7 +18,7 @@ implementation is based on the method proposed by Yu-Kun Lai and Paul L. Rosin [
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage.color.colorconv import hsv2rgb
+from skimage.color import hsv2rgb
 from skimage.filters import threshold_circular_otsu, threshold_otsu
 
 #########################################################################
@@ -27,20 +27,21 @@ from skimage.filters import threshold_circular_otsu, threshold_otsu
 # slightly shifts from one row to the next (left column).
 # The two red lines in the histograms of the center column show the two
 # threshold values of the circular Otsu method; the dashed blue line
-# shows the threshold of the normal Otsu algorithm which has often
-# cannot correctly separate the disc from the background.
+# shows the threshold of the normal Otsu algorithm which often does not
+# correctly separate the disc from the background.
 # The right column shows the binary masks obtained with thresholds of the
 # circular Otsu algorithm.
 
 mask = np.fromfunction(lambda r, c: (r - 32) ** 2 + (c - 32) ** 2 < 300, (65, 65))
+rng = np.random.default_rng(42)
 
-fig, ax = plt.subplots(5, 3, figsize=(10, 10))
+fig, ax = plt.subplots(5, 3, figsize=(8, 10))
 for i in range(5):
     img_hsv = np.ones((*mask.shape, 3), dtype=np.float32)
     hue = img_hsv[..., 0]
     hue[...] = np.where(mask, 0.8, 0.9)
     hue += 0.05 * i
-    hue += np.random.normal(0, 0.03, mask.shape)
+    hue += rng.normal(0, 0.03, mask.shape).astype(np.float32)
     hue %= 1.0
     img_rgb = hsv2rgb(img_hsv)
 

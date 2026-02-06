@@ -876,7 +876,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
     if len(maximum_idxs) != 2:
         raise RuntimeError('Unable to find two maxima in histogram')
     elif counter == max_num_iter - 1:
-        raise RuntimeError('Maximum iteration reached for histogramsmoothing')
+        raise RuntimeError('Maximum iteration reached for histogram' 'smoothing')
 
     # Find the lowest point between the maxima
     threshold_idx = np.argmin(smooth_hist[maximum_idxs[0] : maximum_idxs[1] + 1])
@@ -1358,8 +1358,9 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
         (e.g. (0, 1) for normalized data; (0, 2π) for typical hue data).
     hist : array, optional
         Histogram from which to determine the thresholds. The histogram values
-        are expected to be equidistantly spread over the value range. If no hist
-        provided, this function will compute it from the image.
+        are expected to be equidistantly spread over the value range. The length
+        of the histogram array must be even and at least 4. If no hist provided,
+        this function will compute it from the image.
 
     Returns
     -------
@@ -1368,11 +1369,15 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
         It is guaranteed that `t[0] + 0.5 * (val_range[1] - val_range[0]) = t[1]` and
         that both thresholds are located at histogram bin edges (_not_ centers).
 
+    Notes
+    -----
+    The input image must be grayscale.
+
     References
     ----------
-    .. [1] Yu-Kun Lai and Paul L. Rosin, Efficient circular thresholding. IEEE
-           Transactions on Image Processing 23(3), pp. 992-1001, 2014. DOI:
-           10.1109/TIP.2013.2297014 (PDF
+    .. [1] Yu-Kun Lai and Paul L. Rosin, "Efficient circular thresholding",
+           IEEE Transactions on Image Processing, 23(3), pp. 992-1001, 2014.
+           :DOI:`10.1109/TIP.2013.2297014` (PDF
            https://yukunlai.github.io/papers/thresholdingTIP.pdf)
 
     Examples
@@ -1384,12 +1389,11 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
     >>> hue = rgb2hsv(image)[..., 0]
     >>> thresh = threshold_circular_otsu(image=hue, val_range=(0, 1))
     >>> mask = (hue < thresh[0]) | (hue > thresh[1])
-    >>> image_th = np.where(mask[..., np.newaxis], (1, 0, 0), (0, 0, 1))
-
-    Notes
-    -----
-    The input image must be grayscale.
+    >>> image_th = np.where(mask[..., np.newaxis], (255, 0, 0), (0, 0, 255))
     """
+
+    if len(val_range) != 2 or val_range[0] >= val_range[1]:
+        raise ValueError("`val_range` must be a 2-tuple (low, high) with low < high.")
 
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         warn(
@@ -1399,13 +1403,25 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
         )
 
     if hist is None:
+        if image is None:
+            raise ValueError("Either image or hist must be provided.")
         count, _ = np.histogram(image, bins=nbins, range=val_range)
         h = count.astype(np.float32, copy=False)
     else:
         if image is not None:
             warn("Both image and hist were provided; the image will be ignored.")
+        if isinstance(hist, (tuple, list)):
+            raise TypeError(
+                "`hist` must be a 1-D array of counts. A tuple of (counts, bin_centers) "
+                "is not accepted."
+            )
         nbins = len(hist)
-        h = hist
+        h = np.asarray(hist, dtype=np.float32)
+
+    if nbins < 4:
+        raise ValueError("At least four histogram bins are required.")
+    if nbins % 2 != 0:
+        raise ValueError("Number of histogram bins must be even.")
 
     stride = (val_range[1] - val_range[0]) / nbins
     x = np.linspace(
@@ -1414,11 +1430,6 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
         nbins,
         dtype=np.float32,
     )
-
-    if nbins < 4:
-        raise ValueError("At least four histogram bins are required.")
-    if nbins % 2 != 0:
-        raise ValueError("Number of histogram bins must be even.")
 
     lx = len(x)
     lx2 = lx // 2
@@ -1430,7 +1441,7 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
     def init(x, h) -> tuple[float, float, float]:
         omega = h.sum()
         if omega < 1e-6:
-            return 0.0, 0.0, 0.0
+            return np.float32(0.0), np.float32(0.0), np.float32(0.0)
         mean = (x * h).sum()
         return omega, mean, (np.square(x - mean / omega) * h).sum()
 
@@ -1442,7 +1453,7 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
         ia += 1
         ie += 1
         if omega < 1e-6:
-            return 0.0, 0.0, 0.0
+            return np.float32(0.0), np.float32(0.0), np.float32(0.0)
         else:
             return (
                 omega,
