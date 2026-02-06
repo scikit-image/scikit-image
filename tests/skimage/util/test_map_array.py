@@ -52,7 +52,7 @@ def test_map_array_read_only(input_arrs_writeable):
     input_arr = np.array([0, 2, 0, 3, 4, 5, 0], dtype=np.uint8)
     input_vals = np.array([1, 2, 3, 4, 6], dtype=input_arr.dtype)
     output_vals = np.array([6, 7, 8, 9, 10], dtype=np.uint8)
-    out = np.full(input_arr.shape, dtype=output_vals.dtype)
+    out = np.full(input_arr.shape, 11, dtype=output_vals.dtype)
     for arr, writeable in zip(
         [input_arr, input_vals, output_vals], input_arrs_writeable, strict=True
     ):
