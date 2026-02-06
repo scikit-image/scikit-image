@@ -71,7 +71,7 @@ docs = [
     'numpydoc>=1.7',
     'sphinx-copybutton',
     'matplotlib>=3.10',
-    'dask[array]>=2023.2.0',
+    'dask[array]>=2025.1.0',
     'pandas>=2.0',
     'seaborn>=0.11',
     'pooch>=1.6',
@@ -96,7 +96,7 @@ optional = [
 ]
 optional_free_threaded = [
     'astropy>=6.1',
-    'dask[array]>=2023.2.0',
+    'dask[array]>=2025.1.0',
     'matplotlib>=3.10',
     'pooch>=1.6.0; sys_platform != "emscripten"',  # requires stack switching with alternative pytest runner
     'PyWavelets>=1.7',

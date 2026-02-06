@@ -33,7 +33,7 @@ dependencies:
   - numpydoc>=1.7
   - sphinx-copybutton
   - matplotlib-base>=3.10
-  - dask>=2023.2.0
+  - dask>=2025.1.0
   - pandas>=2.0
   - seaborn>=0.11
   - pooch>=1.6
@@ -55,7 +55,7 @@ dependencies:
   - pyamg>=5.2
   # optional_free_threaded
   - astropy-base>=6.1
-  - dask>=2023.2.0
+  - dask>=2025.1.0
   - matplotlib-base>=3.10
   - pooch>=1.6.0
   - PyWavelets>=1.7

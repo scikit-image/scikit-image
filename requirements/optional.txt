@@ -4,7 +4,7 @@ SimpleITK; sys_platform != "emscripten"
 scikit-learn>=1.6
 pyamg>=5.2; sys_platform != "emscripten" and python_version < "3.14"
 astropy>=6.1
-dask[array]>=2023.2.0
+dask[array]>=2025.1.0
 matplotlib>=3.10
 pooch>=1.6.0; sys_platform != "emscripten"
 PyWavelets>=1.7
