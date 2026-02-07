@@ -119,7 +119,7 @@ def peak_local_max(
     min_distance=1,
     threshold_abs=None,
     threshold_rel=None,
-    exclude_border=True,
+    exclude_border=0,
     num_peaks=np.inf,
     footprint=None,
     labels=None,
@@ -147,15 +147,13 @@ def peak_local_max(
     threshold_rel : float, optional
         Minimum intensity of peaks, calculated as
         ``max(image) * threshold_rel``.
-    exclude_border : int or tuple of (int, ...) or bool, optional
+    exclude_border : int or tuple of (int, ...), optional
         Control peak detection close to the border of `image`.
 
-        ``True``
-            Exclude peaks that are within `min_distance` of the border.
-        ``False`` or ``0``
+        ``0``
             Distance to border has no effect, all peaks are identified.
         positive integer
-            Exclude peaks that are within this distance of the border.
+            Exclude peaks that are within this distance  of the border.
         tuple of positive integers
             Same as for a single integer but with different distances for each
             respective dimension.
