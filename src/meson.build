@@ -1,11 +1,3 @@
-include_v2 = get_option('include-v2')
-
-subdir('skimage')
-
-if include_v2
-  subdir('skimage2')
-endif
-
 # Platform detection
 is_windows = host_machine.system() == 'windows'
 is_mingw = is_windows and cc.get_id() == 'gcc'
@@ -24,7 +16,7 @@ if is_windows
     # Manual add of MS_WIN64 macro when not using MSVC.
     # https://bugs.python.org/issue28267
     bitness = run_command(
-      '_build_utils/gcc_build_bitness.py',
+      'skimage2/_build_utils/gcc_build_bitness.py',
       check: true
     ).stdout().strip()
     if bitness == '64'
@@ -120,7 +112,7 @@ else
   use_math_defines = []
 endif
 
-cython_cli = find_program('_build_utils/cythoner.py')
+cython_cli = find_program('skimage2/_build_utils/cythoner.py')
 cy = meson.get_compiler('cython')
 
 cython_args = ['@INPUT@', '@OUTPUT@']
@@ -146,3 +138,12 @@ c_undefined_ok = ['-Wno-maybe-uninitialized']
 _cpp_Wno_cpp = cpp.get_supported_arguments('-Wno-cpp')
 cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
+
+# call `subdir` after defining the cython constants
+include_v2 = get_option('include-v2')
+
+subdir('skimage')
+
+if include_v2
+  subdir('skimage2')
+endif
