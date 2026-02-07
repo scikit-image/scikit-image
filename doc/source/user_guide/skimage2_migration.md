@@ -128,7 +128,7 @@ To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
 TODO: Update doctests in `src/skimage2/morphology/_grayscale_operators.py` to
 import `footprint_rectangle` from skimage2 once available.
 
-## `skimage.feature.canny`
+### `skimage.feature.canny`
 
 This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from `constant` to `nearest`.
 
