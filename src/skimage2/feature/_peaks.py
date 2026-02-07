@@ -197,38 +197,30 @@ def peak_local_max(
     Examples
     --------
     >>> import skimage2 as ski2
-    >>> img1 = np.zeros((7, 7))
-    >>> img1[3, 4] = 1
-    >>> img1[3, 2] = 1.5
-    >>> img1
-    array([[0. , 0. , 0. , 0. , 0. , 0. , 0. ],
-           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
-           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
-           [0. , 0. , 1.5, 0. , 1. , 0. , 0. ],
-           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
-           [0. , 0. , 0. , 0. , 0. , 0. , 0. ],
-           [0. , 0. , 0. , 0. , 0. , 0. , 0. ]])
+    >>> image = np.array(
+    ...     [[1, 0, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 1, 0, 0],
+    ...      [0, 0, 3, 0, 2, 0, 0],
+    ...      [0, 0, 2, 0, 0, 0, 0],
+    ...      [0, 0, 0, 0, 0, 0, 0]]
+    ... )
 
-    >>> ski2.feature.peak_local_max(img1, min_distance=1)
+    Find all peaks
+    >>> ski2.feature.peak_local_max(image)
+    array([[3, 2],
+           [3, 4],
+           [0, 0]])
+
+    Ensure peaks are at least 2 pixels apart
+    >>> ski2.feature.peak_local_max(image, min_distance=2)
+    array([[3, 2],
+           [0, 0]])
+
+    Ignore peaks on the image border
+    >>> ski2.feature.peak_local_max(image, exclude_border=2)
     array([[3, 2],
            [3, 4]])
-
-    >>> ski2.feature.peak_local_max(img1, min_distance=2)
-    array([[3, 2]])
-
-    >>> img2 = np.zeros((20, 20, 20))
-    >>> img2[10, 10, 10] = 1
-    >>> img2[15, 15, 15] = 1
-    >>> peak_idx = ski2.feature.peak_local_max(img2, exclude_border=0)
-    >>> peak_idx
-    array([[10, 10, 10],
-           [15, 15, 15]])
-
-    >>> peak_mask = np.zeros_like(img2, dtype=bool)
-    >>> peak_mask[tuple(peak_idx.T)] = True
-    >>> np.argwhere(peak_mask)
-    array([[10, 10, 10],
-           [15, 15, 15]])
     """
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
