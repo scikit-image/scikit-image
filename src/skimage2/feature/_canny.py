@@ -125,14 +125,14 @@ def canny(
     high_threshold : float, optional
         Upper bound for hysteresis thresholding (linking edges).
         If None, high_threshold is set to 20% of dtype's max.
-    mask : array, dtype=bool, optional
+    mask : ndarray of dtype bool, optional
         Mask to limit the application of Canny to a certain area.
     use_quantiles : bool, optional
         If ``True`` then treat low_threshold and high_threshold as
         quantiles of the edge magnitude image, rather than absolute
         edge magnitude values. If ``True`` then the thresholds must be
         in the range [0, 1].
-    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The ``mode`` parameter determines how the array borders are
         handled during Gaussian filtering, where ``cval`` is the value when
         mode is equal to 'constant'.
@@ -146,7 +146,7 @@ def canny(
 
     See also
     --------
-    skimage.filters.sobel
+    skimage2.filters.sobel
 
     Notes
     -----
