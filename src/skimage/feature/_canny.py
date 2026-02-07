@@ -43,8 +43,8 @@ def canny(
         edge magnitude values. If ``True`` then the thresholds must be
         in the range [0, 1].
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are
-        handled during Gaussian filtering, where ``cval`` is the value when
+        The `mode` parameter determines how the array borders are
+        handled during Gaussian filtering, where `cval` is the value when
         mode is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if `mode` is 'constant'.
@@ -90,17 +90,17 @@ def canny(
 
     Examples
     --------
-    >>> from skimage import feature
     >>> import numpy as np
+    >>> import skimage as ski
     >>> rng = np.random.default_rng()
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
     >>> im += 0.2 * rng.random(im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
-    >>> edges1 = feature.canny(im)
+    >>> edges1 = ski.feature.canny(im)
     >>> # Increase the smoothing for better results
-    >>> edges2 = feature.canny(im, sigma=3)
+    >>> edges2 = ski.feature.canny(im, sigma=3)
 
     """
 
