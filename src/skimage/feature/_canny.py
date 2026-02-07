@@ -111,8 +111,8 @@ def canny(
         "\n"
         "    import skimage2 as ski2\n"
         "    ski2.feature.canny(\n"
-        "        image,"
-        "        mode='constant',"
+        "        image,\n"
+        "        mode='constant',\n"
         "        ...\n"
         "    )",
         stacklevel=2,
