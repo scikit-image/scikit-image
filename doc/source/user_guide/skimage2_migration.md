@@ -65,7 +65,7 @@ ski2.data.binary_blobs(
 with `length`, `n_dim`, and `blob_size_fraction` containing values used with the old signature.
 Other parameters -- including `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
-## `skimage.feature.canny`
+### `skimage.feature.canny`
 
 This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from `constant` to `nearest`.
 
