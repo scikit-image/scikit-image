@@ -609,7 +609,7 @@ def test_peak_local_max_skimage2_warning():
     image = np.zeros((5, 5), dtype=np.uint8)
     image[1:3, 1:3] = 10
     regex = (
-        r"`skimage.feature.peak_local_max` is deprecated in favor of "
+        r"`skimage.feature.peak_local_max` is deprecated in favor of\n"
         r"`skimage2.feature.peak_local_max`"
     )
     with pytest.warns(PendingSkimage2Change, match=regex) as record:

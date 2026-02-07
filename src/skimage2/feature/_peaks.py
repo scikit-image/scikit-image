@@ -80,17 +80,15 @@ def _get_threshold(image, threshold_abs, threshold_rel):
     return threshold
 
 
-def _get_excluded_border_width(image, min_distance, exclude_border):
+def _validate_exclude_border(exclude_border, *, ndim):
     """Return border_width values relative to a min_distance if requested."""
 
-    if isinstance(exclude_border, bool):
-        border_width = (min_distance if exclude_border else 0,) * image.ndim
-    elif isinstance(exclude_border, int):
+    if isinstance(exclude_border, int):
         if exclude_border < 0:
             raise ValueError("`exclude_border` cannot be a negative value")
-        border_width = (exclude_border,) * image.ndim
+        border_width = (exclude_border,) * ndim
     elif isinstance(exclude_border, tuple):
-        if len(exclude_border) != image.ndim:
+        if len(exclude_border) != ndim:
             raise ValueError(
                 "`exclude_border` should have the same length as the "
                 "dimensionality of the image."
@@ -106,7 +104,7 @@ def _get_excluded_border_width(image, min_distance, exclude_border):
         border_width = exclude_border
     else:
         raise TypeError(
-            "`exclude_border` must be bool, int, or tuple with the same "
+            "`exclude_border` must be int or tuple with the same "
             "length as the dimensionality of the image."
         )
 
@@ -229,7 +227,7 @@ def peak_local_max(
             category=RuntimeWarning,
         )
 
-    border_width = _get_excluded_border_width(image, min_distance, exclude_border)
+    border_width = _validate_exclude_border(exclude_border, ndim=image.ndim)
 
     threshold = _get_threshold(image, threshold_abs, threshold_rel)
 

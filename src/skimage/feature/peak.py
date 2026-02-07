@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import numpy as np
 import scipy.ndimage as ndi
 
@@ -132,18 +134,36 @@ def peak_local_max(
 
     """
     warn_external(
-        "`skimage.feature.peak_local_max` is deprecated in favor of "
-        "`skimage2.feature.peak_local_max` which now uses the Euclidean "
-        "distance by default (`p_norm=2`). "
-        "To keep the old behavior from `skimage` (v1.x) use:\n"
-        "\n"
-        "    import skimage2 as ski2\n"
-        "    ski2.feature.peak_local_max(\n"
-        "        ...,\n"
-        "        p_norm=p_norm\n"
-        "    )",
+        dedent("""\
+        `skimage.feature.peak_local_max` is deprecated in favor of
+        `skimage2.feature.peak_local_max` with new behavior:
+
+            * `p_norm` defaults to 2 (Euclidean distance),
+              was `np.inf` (Chebyshev distance)
+            * `exclude_border` defaults to 0, was `True`
+            * `exclude_border` no longer accepts `False` and `True`,
+               pass 0 instead of `False`, or `min_distance` instead of `True`
+            * Parameters after `image` are keyword-only
+
+        To keep the old behavior from `skimage` (v1.x) use:
+
+            import skimage2 as ski2
+
+            ski2.feature.peak_local_max(
+                ...,
+                exclude_border=new_exclude_border,
+                p_norm=old_p_norm,
+            )
+
+        where `old_p_norm` is the old default or given value.
+        """),
         category=PendingSkimage2Change,
     )
+
+    if exclude_border is False:
+        exclude_border = 0
+    elif exclude_border is True:
+        exclude_border = min_distance
 
     coordinates = ski2.feature.peak_local_max(
         image,

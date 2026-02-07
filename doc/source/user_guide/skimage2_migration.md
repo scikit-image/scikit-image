@@ -67,21 +67,25 @@ Other parameters -- including `boundary_mode` if you already set it explicitly -
 
 ### `skimage.feature.peak_local_max`
 
-This function is replaced by `skimage2.feature.peak_local_max` which now uses the Euclidean distance by default (`p_norm=2`).
-All parameters other than the first (`image`) are now keyword-only.
+This function is replaced by `skimage2.feature.peak_local_max` with new behavior:
+
+- `p_norm` defaults to 2 (Euclidean distance), was `np.inf` (Chebyshev distance)
+- `exclude_border` defaults to 0, was `True`
+- `exclude_border` no longer accepts `False` and `True`, pass 0 instead of `False`, or `min_distance` instead of `True`
+- Parameters after `image` are keyword-only
 
 To keep the old behavior from `skimage` (v1.x) use:
 
-```python
-import skimage2 as ski2
+    import skimage2 as ski2
 
-ski2.feature.peak_local_max(
-    ...,
-    p_norm=p_norm,
-)
-```
+    ski2.feature.peak_local_max(
+        ...,
+        exclude_border=new_exclude_border,
+        p_norm=old_p_norm,
+    )
 
-where `p_norm` is given the old value.
+where `old_p_norm` is the old default or given value.
+`new_exclude_border` should be derived from the old default or given value according to the advice above.
 Other parameters can be left unchanged.
 
 ## Deprecations prior to skimage2
