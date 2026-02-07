@@ -15,33 +15,30 @@ from ._canny_cy import _nonmaximum_suppression_bilinear
 
 
 def _preprocess(image, mask, sigma, mode, cval):
-    """Generate a smoothed image and an eroded mask.
-
-    The image is smoothed using a gaussian filter ignoring masked
-    pixels and the mask is eroded.
+    """Smooth an image with a Gaussian filter and erode its mask.
 
     Parameters
     ----------
     image : array
         Image to be smoothed.
     mask : array
-        Mask with 1's for significant pixels, 0's for masked pixels.
+        Mask of same shape as `image`.
     sigma : scalar or Sequence of float
         Standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
     mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
-        The ``mode`` parameter determines how the array borders are
-        handled, where ``cval`` is the value when mode is equal to
+        The `mode` parameter determines how the array borders are
+        handled, where `cval` is the value when mode is equal to
         'constant'.
     cval : float, optional
-        Value to fill past edges of input if `mode` is 'constant'.
+        Value to fill past edges of input `image` if `mode` is 'constant'.
 
     Returns
     -------
     smoothed_image : ndarray
-        The smoothed array
+        The smoothed image.
     eroded_mask : ndarray
         The eroded mask.
 
@@ -133,11 +130,11 @@ def canny(
         edge magnitude values. If ``True`` then the thresholds must be
         in the range [0, 1].
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are
-        handled during Gaussian filtering, where ``cval`` is the value when
+        The `mode` parameter determines how the array borders are
+        handled during Gaussian filtering, where `cval` is the value when
         mode is equal to 'constant'.
     cval : float, optional
-        Value to fill past edges of input if `mode` is 'constant'.
+        Value to fill past edges of input `image` if `mode` is 'constant'.
 
     Returns
     -------
