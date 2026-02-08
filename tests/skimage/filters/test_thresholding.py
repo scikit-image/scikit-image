@@ -10,6 +10,10 @@ from numpy.testing import (
     assert_equal,
 )
 from scipy import ndimage as ndi
+from skimage.filters._multiotsu import (
+    _get_multiotsu_thresh_indices,
+    _get_multiotsu_thresh_indices_lut,
+)
 
 from skimage import data, util
 from skimage._shared._dependency_checks import has_mpl
@@ -18,10 +22,6 @@ from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.draw import disk
 from skimage.exposure import histogram
-from skimage.filters._multiotsu import (
-    _get_multiotsu_thresh_indices,
-    _get_multiotsu_thresh_indices_lut,
-)
 from skimage.filters.thresholding import (
     _cross_entropy,
     _mean_std,
@@ -884,3 +884,20 @@ def test_threshold_circular_otsu_warnings():
 
     with expected_warnings(["ignored"]):
         threshold_circular_otsu(np.arange(10), val_range=(0, 1), hist=np.ones(6))
+
+
+def test_threshold_circular_otsu_invalid_val_range():
+    with pytest.raises(ValueError, match="val_range"):
+        threshold_circular_otsu(np.zeros(10), val_range=(1, 0))
+    with pytest.raises(ValueError, match="val_range"):
+        threshold_circular_otsu(np.zeros(10), val_range=(1, 1))
+
+
+def test_threshold_circular_otsu_hist_as_tuple():
+    with pytest.raises(TypeError, match="1-D array"):
+        threshold_circular_otsu(val_range=(0, 1), hist=(np.ones(6), np.arange(6)))
+
+
+def test_threshold_circular_otsu_no_input():
+    with pytest.raises(ValueError, match="Either image or hist"):
+        threshold_circular_otsu(val_range=(0, 1))
