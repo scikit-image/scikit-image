@@ -292,7 +292,9 @@ class TestSimpleImage:
         stride = (val_range[1] - val_range[0]) / nbins
         if nbins % 2 == 0 and nbins >= 4:
             t = np.asarray(
-                threshold_circular_otsu(self.image + offset, nbins, val_range=val_range)
+                threshold_circular_otsu(
+                    self.image + offset, nbins=nbins, val_range=val_range
+                )
             )
             correct_t = (
                 {4: 2.62, 6: 2.92, 8: 3.06, 10: 2.45}[nbins] + offset - 0.5 * stride
@@ -300,7 +302,7 @@ class TestSimpleImage:
             assert_array_almost_equal((correct_t, correct_t + 3.5), t, decimal=2)
         else:
             with pytest.raises(ValueError):
-                threshold_circular_otsu(self.image, nbins, val_range=val_range)
+                threshold_circular_otsu(self.image, nbins=nbins, val_range=val_range)
 
 
 def test_otsu_camera_image():

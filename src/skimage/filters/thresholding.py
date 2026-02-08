@@ -1340,8 +1340,10 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     return thresh
 
 
-def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
-    """Return two threshold values based on a modified Otsu's method for circular
+def threshold_circular_otsu(image=None, *, nbins=256, val_range, hist=None):
+    """Apply a modified Otsu's method for circular input data.
+
+    Return two threshold values based on a modified Otsu's method for circular
     input data (e.g. hue values) as described in [1]_.
 
     Either image or hist must be provided. If hist is provided, the image is ignored.
@@ -1366,8 +1368,9 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
     -------
     threshold : 2-tuple of floats
         Two threshold values which split the circular histogram into two classes.
-        It is guaranteed that `t[0] + 0.5 * (val_range[1] - val_range[0]) = t[1]` and
-        that both thresholds are located at histogram bin edges (_not_ centers).
+        It is guaranteed for the returned thresholding tuple `t` that
+        `t[0] + 0.5 * (val_range[1] - val_range[0]) = t[1]` and that both thresholds
+        are located at histogram bin edges (_not_ centers).
 
     Notes
     -----
@@ -1382,12 +1385,10 @@ def threshold_circular_otsu(image=None, nbins=256, *, val_range, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import astronaut
-    >>> from skimage.color import rgb2hsv
-    >>> from skimage.filters import threshold_circular_otsu
-    >>> image = astronaut()
-    >>> hue = rgb2hsv(image)[..., 0]
-    >>> thresh = threshold_circular_otsu(image=hue, val_range=(0, 1))
+    >>> import skimage as ski
+    >>> image = ski.data.astronaut()
+    >>> hue = ski.color.rgb2hsv(image)[..., 0]
+    >>> thresh = ski.filters.threshold_circular_otsu(image=hue, val_range=(0, 1))
     >>> mask = (hue < thresh[0]) | (hue > thresh[1])
     >>> image_th = np.where(mask[..., np.newaxis], (255, 0, 0), (0, 0, 255))
     """

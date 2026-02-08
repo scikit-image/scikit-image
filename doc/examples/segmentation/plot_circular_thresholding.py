@@ -18,8 +18,7 @@ implementation is based on the method proposed by Yu-Kun Lai and Paul L. Rosin [
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage.color import hsv2rgb
-from skimage.filters import threshold_circular_otsu, threshold_otsu
+import skimage as ski
 
 #########################################################################
 # In this example, the task is to separate the disc in the foreground
@@ -32,7 +31,8 @@ from skimage.filters import threshold_circular_otsu, threshold_otsu
 # The right column shows the binary masks obtained with thresholds of the
 # circular Otsu algorithm.
 
-mask = np.fromfunction(lambda r, c: (r - 32) ** 2 + (c - 32) ** 2 < 300, (65, 65))
+r, c = np.ogrid[:65, :65]
+mask = (r - 32) ** 2 + (c - 32) ** 2 < 300
 rng = np.random.default_rng(42)
 
 fig, ax = plt.subplots(5, 3, figsize=(8, 10))
@@ -43,18 +43,18 @@ for i in range(5):
     hue += 0.05 * i
     hue += rng.normal(0, 0.03, mask.shape).astype(np.float32)
     hue %= 1.0
-    img_rgb = hsv2rgb(img_hsv)
+    img_rgb = ski.color.hsv2rgb(img_hsv)
 
     ax[i, 0].imshow(img_rgb)
     ax[i, 0].axis("off")
 
     c, x = np.histogram(hue, 256, (0, 1))
-    t = threshold_circular_otsu(hue, val_range=(0, 1))
+    t = ski.filters.threshold_circular_otsu(hue, val_range=(0, 1))
     # equivalent:
-    # t = threshold_circular_otsu(val_range=(0, 1), hist=c)
+    # t = ski.filters.threshold_circular_otsu(val_range=(0, 1), hist=c)
     for v in t:
         ax[i, 1].axvline(v, c="#f00", lw=2)
-    ax[i, 1].axvline(threshold_otsu(hue), c="#00f", ls="dashed", lw=2)
+    ax[i, 1].axvline(ski.filters.threshold_otsu(hue), c="#00f", ls="dashed", lw=2)
     ax[i, 1].plot(0.5 * (x[1:] + x[:-1]), c, color="#000")
 
     ax[i, 2].imshow((hue < t[0]) | (hue > t[1]), cmap="gray")
