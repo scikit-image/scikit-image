@@ -41,27 +41,29 @@ def test_map_array_simple(dtype_in, dtype_out, out_array):
         assert out is result
 
 
-@pytest.mark.parametrize(
-    "input_arrs_writeable", itertools.product([True, False], repeat=3)
-)
-def test_map_array_read_only(input_arrs_writeable):
+@pytest.mark.parametrize("writeable_flags", itertools.product([True, False], repeat=3))
+@pytest.mark.parametrize("dtype", _map_array_dtypes_in)
+def test_map_array_read_only(writeable_flags, dtype):
     """Check that input arrays can be read-only, but output_arr must not be.
 
     See https://github.com/scikit-image/scikit-image/issues/6378.
     """
-    input_arr = np.array([0, 2, 0, 3, 4, 5, 0], dtype=np.uint8)
-    input_vals = np.array([1, 2, 3, 4, 6], dtype=input_arr.dtype)
-    output_vals = np.array([6, 7, 8, 9, 10], dtype=np.uint8)
-    out = np.full(input_arr.shape, 11, dtype=output_vals.dtype)
+    input_arr = np.array([0, 2, 0, 3, 4, 5, 0], dtype=dtype)
+    input_vals = np.array([1, 2, 3, 4, 6], dtype=dtype)
+    output_vals = np.array([6, 7, 8, 9, 10], dtype=dtype)
+    out = np.full(input_arr.shape, 11, dtype=dtype)
+    desired = np.array([0, 7, 0, 8, 9, 0, 0], dtype=dtype)
+
     for arr, writeable in zip(
-        [input_arr, input_vals, output_vals], input_arrs_writeable, strict=True
+        [input_arr, input_vals, output_vals], writeable_flags, strict=True
     ):
         arr.flags.writeable = writeable
 
     # this should run without error
-    _ = map_array(
+    result = map_array(
         input_arr=input_arr, input_vals=input_vals, output_vals=output_vals, out=out
     )
+    np.testing.assert_array_equal(result, desired)
 
     # but when out is read-only, it should fail
     out.flags.writeable = False
