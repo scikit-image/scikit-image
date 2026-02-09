@@ -62,7 +62,7 @@ def peak_local_max(
             Same as for a single integer but with different distances for each
             respective dimension.
 
-        The value of `p_norm` has no impact this border distance.
+        The value of `p_norm` has no impact on this border distance.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.

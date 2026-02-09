@@ -146,7 +146,7 @@ def peak_local_max(
         ``0``
             Distance to border has no effect, all peaks are identified.
         positive integer
-            Exclude peaks that are within this distance  of the border.
+            Exclude peaks that are within this distance of the border.
         tuple of positive integers
             Same as for a single integer but with different distances for each
             respective dimension.
