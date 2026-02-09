@@ -76,13 +76,15 @@ This function is replaced by `skimage2.feature.peak_local_max` with new behavior
 
 To keep the old behavior from `skimage` (v1.x) use:
 
-    import skimage2 as ski2
+```python
+import skimage2 as ski2
 
-    ski2.feature.peak_local_max(
-        ...,
-        exclude_border=new_exclude_border,
-        p_norm=old_p_norm,
-    )
+ski2.feature.peak_local_max(
+    ...,
+    exclude_border=new_exclude_border,
+    p_norm=old_p_norm,
+)
+```
 
 where `old_p_norm` is the old default or given value.
 `new_exclude_border` should be derived from the old value according to the advice above.
