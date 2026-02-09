@@ -85,7 +85,7 @@ To keep the old behavior from `skimage` (v1.x) use:
     )
 
 where `old_p_norm` is the old default or given value.
-`new_exclude_border` should be derived from the old default or given value according to the advice above.
+`new_exclude_border` should be derived from the old value according to the advice above.
 Other parameters can be left unchanged.
 
 ## Deprecations prior to skimage2
