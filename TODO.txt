@@ -27,6 +27,8 @@ Version 0.27
 Version 0.29
 ------------
 * Complete deprecation of `threshold_rel` in `skimage.feature.blob_*` functions
+* Complete deprecation of `threshold_abs` and `threshold_rel` in
+  `skimage.feature.peak_local_max`. Remove `skimage.feature.peak._get_threshold`.
 
 Other
 -----

@@ -62,19 +62,6 @@ def _exclude_border(label, border_width):
     return label
 
 
-def _get_threshold(image, threshold_abs, threshold_rel):
-    """Return the threshold value according to an absolute and a relative
-    value.
-
-    """
-    threshold = threshold_abs if threshold_abs is not None else image.min()
-
-    if threshold_rel is not None:
-        threshold = max(threshold, threshold_rel * image.max())
-
-    return threshold
-
-
 def _validate_exclude_border(exclude_border, *, ndim):
     """Return border_width values relative to a min_distance if requested."""
 
@@ -110,8 +97,7 @@ def peak_local_max(
     image,
     *,
     min_distance=1,
-    threshold_abs=None,
-    threshold_rel=None,
+    threshold=None,
     exclude_border=0,
     num_peaks=None,
     footprint=None,
@@ -134,12 +120,9 @@ def peak_local_max(
     min_distance : int, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`. See also `p_norm`.
-    threshold_abs : float, optional
-        Minimum intensity of peaks. By default, the absolute threshold is
-        the minimum intensity of the image.
-    threshold_rel : float, optional
-        Minimum intensity of peaks, calculated as
-        ``max(image) * threshold_rel``.
+    threshold : float, optional
+        Minimum intensity of peaks. By default, the threshold is the minimum
+        intensity of the image.
     exclude_border : int or tuple of (int, ...), optional
         Control peak detection close to the border of `image`.
 
@@ -225,7 +208,8 @@ def peak_local_max(
 
     border_width = _validate_exclude_border(exclude_border, ndim=image.ndim)
 
-    threshold = _get_threshold(image, threshold_abs, threshold_rel)
+    if threshold is None:
+        threshold = image.min()
 
     if footprint is None:
         size = 2 * min_distance + 1
