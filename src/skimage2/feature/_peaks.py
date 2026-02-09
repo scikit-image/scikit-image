@@ -16,17 +16,12 @@ def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     idx_maxsort = np.argsort(-intensities, kind="stable")
     coord = np.transpose(coord)[idx_maxsort]
 
-    if np.isfinite(num_peaks):
-        max_out = int(num_peaks)
-    else:
-        max_out = None
-
     if min_distance > 1:
         coord = ensure_spacing(
-            coord, spacing=min_distance, p_norm=p_norm, max_out=max_out
+            coord, spacing=min_distance, p_norm=p_norm, max_out=num_peaks
         )
 
-    if len(coord) > num_peaks:
+    if num_peaks is not None and len(coord) > num_peaks:
         coord = coord[:num_peaks]
 
     return coord
@@ -118,10 +113,10 @@ def peak_local_max(
     threshold_abs=None,
     threshold_rel=None,
     exclude_border=0,
-    num_peaks=np.inf,
+    num_peaks=None,
     footprint=None,
     labels=None,
-    num_peaks_per_label=np.inf,
+    num_peaks_per_label=None,
     p_norm=2.0,
 ):
     """Find peaks in an image as coordinate list.
@@ -158,16 +153,17 @@ def peak_local_max(
 
         The value of `p_norm` has no impact on this border distance.
     num_peaks : int, optional
-        Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
-        return `num_peaks` peaks based on highest peak intensity.
+        If given, maximum number of allowed peaks. When the number of peaks
+        exceeds `num_peaks`, return `num_peaks` peaks based on highest peak
+        intensity.
     footprint : ndarray of dtype bool, optional
         If provided, the binary mask ``footprint == 1`` represents the local region within which
         to search for peaks at every point in `image`.
     labels : ndarray of dtype int, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero labels are reserved for background.
-    num_peaks_per_label : float, optional
-        Maximum number of peaks for each label.
+    num_peaks_per_label : int, optional
+        If given, maximum number of peaks for each label.
     p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
@@ -288,7 +284,7 @@ def peak_local_max(
         else:
             coordinates = np.empty((0, image.ndim), dtype=int)
 
-        if len(coordinates) > num_peaks:
+        if num_peaks is not None and len(coordinates) > num_peaks:
             out = np.zeros_like(image, dtype=bool)
             out[tuple(coordinates.T)] = True
             coordinates = _get_high_intensity_peaks(

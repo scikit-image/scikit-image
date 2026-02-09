@@ -36,3 +36,7 @@ class TestPeakLocalMax:
         # exclude_border=2
         result = peak_local_max(image, min_distance=2, exclude_border=2)
         assert_equal(result, expected_exclude2)
+
+    def test_num_peak_float_error(self):
+        image = np.zeros((10, 10))
+        peak_local_max(image, num_peaks=1.5)

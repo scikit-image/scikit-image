@@ -1201,6 +1201,8 @@ def corner_peaks(
     """
     if np.isinf(num_peaks):
         num_peaks = None
+    if np.isinf(num_peaks_per_label):
+        num_peaks_per_label = None
 
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
@@ -1209,7 +1211,7 @@ def corner_peaks(
         threshold_abs=threshold_abs,
         threshold_rel=threshold_rel,
         exclude_border=exclude_border,
-        num_peaks=np.inf,
+        num_peaks=None,  # Limiting to `num_peaks` is done in this function
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,

@@ -123,7 +123,6 @@ class TestPeakLocalMax:
             labels=labels,
             min_distance=1,
             threshold_rel=0,
-            num_peaks=np.inf,
             num_peaks_per_label=2,
         )
         assert len(result) == 8
@@ -132,7 +131,6 @@ class TestPeakLocalMax:
             labels=labels,
             min_distance=1,
             threshold_rel=0,
-            num_peaks=np.inf,
             num_peaks_per_label=1,
         )
         assert len(result) == 4
@@ -518,6 +516,19 @@ class TestPeakLocalMax:
         assert len(peaks) == 2
         peaks = peak.peak_local_max(image, min_distance=11, p_norm=1, exclude_border=0)
         assert len(peaks) == 1
+
+    def test_num_peaks_deprecated_inf(self):
+        image = np.zeros((10, 10))
+
+        with pytest.warns(FutureWarning, match=r".*use `num_peaks=None`") as record:
+            peak.peak_local_max(image, num_peaks=np.inf)
+        assert_stacklevel(record)
+
+        with pytest.warns(
+            FutureWarning, match=r".*use `num_peaks_per_label=None`"
+        ) as record:
+            peak.peak_local_max(image, num_peaks_per_label=np.inf)
+        assert_stacklevel(record)
 
 
 @pytest.mark.parametrize(

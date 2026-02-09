@@ -16,10 +16,10 @@ def peak_local_max(
     threshold_abs=None,
     threshold_rel=None,
     exclude_border=True,
-    num_peaks=np.inf,
+    num_peaks=None,
     footprint=None,
     labels=None,
-    num_peaks_per_label=np.inf,
+    num_peaks_per_label=None,
     p_norm=np.inf,
 ):
     """Find peaks in an image as coordinate list.
@@ -159,6 +159,22 @@ def peak_local_max(
         """),
         category=PendingSkimage2Change,
     )
+
+    # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
+    if num_peaks is not None and np.isinf(num_peaks):
+        num_peaks = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks` is deprecated in version 0.27, "
+            "use `num_peaks=None` instead",
+            category=FutureWarning,
+        )
+    if num_peaks_per_label is not None and np.isinf(num_peaks_per_label):
+        num_peaks_per_label = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks_per_label` is deprecated in version 0.27, "
+            "use `num_peaks_per_label=None` instead",
+            category=FutureWarning,
+        )
 
     if exclude_border is False:
         exclude_border = 0
