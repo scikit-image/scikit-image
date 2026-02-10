@@ -6,52 +6,21 @@ import scipy.ndimage as ndi
 from .. import measure
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
-from .._shared.utils import deprecate_parameter, DEPRECATED
 
 import skimage2 as ski2
 
 
-def _get_threshold(image, threshold_abs, threshold_rel):
-    """Return the threshold value according to an absolute and a relative
-    value.
-
-    """
-    threshold = threshold_abs if threshold_abs is not None else image.min()
-
-    if threshold_rel is not None:
-        threshold = max(threshold, threshold_rel * image.max())
-
-    return threshold
-
-
-@deprecate_parameter(
-    "threshold_rel",
-    start_version="0.27",
-    stop_version="0.29",
-    template="Parameter `{deprecated_name}` is deprecated since version "
-    "{deprecated_version} and will be removed in {changed_version} (or later). "
-    "To avoid this warning, use `threshold=image.max() * threshold_rel` instead. "
-    "For more details, see the documentation of `{func_name}`.",
-)
-@deprecate_parameter(
-    "threshold_abs",
-    new_name="threshold",
-    start_version="0.27",
-    stop_version="0.29",
-)
 def peak_local_max(
     image,
     min_distance=1,
-    threshold_abs=DEPRECATED,
-    threshold_rel=DEPRECATED,
+    threshold_abs=None,
+    threshold_rel=None,
     exclude_border=True,
     num_peaks=None,
     footprint=None,
     labels=None,
     num_peaks_per_label=None,
     p_norm=np.inf,
-    *,
-    threshold=None,
 ):
     """Find peaks in an image as coordinate list.
 
@@ -74,16 +43,12 @@ def peak_local_max(
     min_distance : int, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
-    threshold_abs : DEPRECATED
-
-        .. deprecated:: 0.27
-            Use `threshold` instead.
-
-    threshold_rel : DEPRECATED
-
-        .. deprecated:: 0.27
-             Use `threshold=image.max() * threshold_rel` instead.
-
+    threshold_abs : float or None, optional
+        Minimum intensity of peaks. By default, the absolute threshold is
+        the minimum intensity of the image.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
     exclude_border : int, tuple of ints, or bool, optional
         Control peak detection close to the border of `image`.
 
@@ -114,9 +79,6 @@ def peak_local_max(
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
         Euclidean distance.  See also :func:`numpy.linalg.norm`.
-    threshold : float, optional
-        Minimum intensity of peaks. By default, the absolute threshold is
-        the minimum intensity of the image.
 
     Returns
     -------
@@ -214,11 +176,6 @@ def peak_local_max(
             category=FutureWarning,
         )
 
-    assert threshold_abs in (DEPRECATED, deprecate_parameter.DEPRECATED_GOT_VALUE)
-    if threshold_rel is not DEPRECATED:
-        # Maintain backwards-compatible behavior of `threshold_rel` during deprecation
-        threshold = _get_threshold(image, threshold, threshold_rel)
-
     if exclude_border is False:
         exclude_border = 0
     elif exclude_border is True:
@@ -227,7 +184,8 @@ def peak_local_max(
     coordinates = ski2.feature.peak_local_max(
         image,
         min_distance=min_distance,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
         num_peaks=num_peaks,
         footprint=footprint,

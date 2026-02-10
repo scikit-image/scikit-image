@@ -14,7 +14,7 @@ from .._shared.utils import (
 )
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
-from .peak import peak_local_max, _get_threshold
+from .peak import peak_local_max
 
 # This basic blob detection algorithm is based on:
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
@@ -381,9 +381,8 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    if threshold_rel is not DEPRECATED:
-        # Maintain backwards-compatible behavior of `threshold_rel` during deprecation
-        threshold = _get_threshold(image, threshold, threshold_rel)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
 
     image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
@@ -429,7 +428,8 @@ def blob_dog(
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
         dog_image_cube,
-        threshold=threshold,
+        threshold_abs=threshold,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
         footprint=np.ones((3,) * (image.ndim + 1)),
     )
@@ -595,9 +595,8 @@ def blob_log(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    if threshold_rel is not DEPRECATED:
-        # Maintain backwards-compatible behavior of `threshold_rel` during deprecation
-        threshold = _get_threshold(image, threshold, threshold_rel)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
 
     image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
@@ -633,7 +632,8 @@ def blob_log(
     exclude_border = _format_exclude_border(image.ndim, exclude_border)
     local_maxima = peak_local_max(
         image_cube,
-        threshold=threshold,
+        threshold_abs=threshold,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
         footprint=np.ones((3,) * (image.ndim + 1)),
     )
@@ -794,9 +794,8 @@ def blob_doh(
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
-    if threshold_rel is not DEPRECATED:
-        # Maintain backwards-compatible behavior of `threshold_rel` during deprecation
-        threshold = _get_threshold(image, threshold, threshold_rel)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
 
     check_nD(image, 2)
 
@@ -818,7 +817,8 @@ def blob_doh(
 
     local_maxima = peak_local_max(
         image_cube,
-        threshold=threshold,
+        threshold_abs=threshold,
+        threshold_rel=threshold_rel,
         exclude_border=False,
         footprint=np.ones((3,) * image_cube.ndim),
     )

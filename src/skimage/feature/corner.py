@@ -12,7 +12,7 @@ from ..transform import integral_image
 from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
-from .peak import peak_local_max, _get_threshold
+from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
 
 
@@ -1204,14 +1204,12 @@ def corner_peaks(
     if np.isinf(num_peaks_per_label):
         num_peaks_per_label = None
 
-    # Maintain backwards-compatible behavior of `threshold_rel` during deprecation
-    threshold = _get_threshold(image, threshold_abs, threshold_rel)
-
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
         image,
         min_distance=min_distance,
-        threshold=threshold,
+        threshold_abs=threshold_abs,
+        threshold_rel=threshold_rel,
         exclude_border=exclude_border,
         num_peaks=None,  # Limiting to `num_peaks` is done in this function
         footprint=footprint,
