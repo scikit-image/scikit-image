@@ -157,8 +157,9 @@ def peak_local_max(
         exceeds `num_peaks`, return `num_peaks` peaks based on highest peak
         intensity.
     footprint : ndarray of dtype bool, optional
-        If provided, the binary mask ``footprint == 1`` represents the local region within which
-        to search for peaks at every point in `image`.
+        Binary mask that determines the neighborhood (where ``True``) in which
+        a peak must be a local maximum (see *Notes*). If not given, defaults to
+        an array of ones of size ``floor(2 * min_distance + 1)``.
     labels : ndarray of dtype int, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero labels are reserved for background.
