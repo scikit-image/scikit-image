@@ -113,7 +113,7 @@ def peak_local_max(
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
+        Euclidean distance.  See also :func:`numpy.linalg.norm`.
     threshold : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
