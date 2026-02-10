@@ -40,7 +40,7 @@ def peak_local_max(
     ----------
     image : ndarray
         Input image.
-    min_distance : int, optional
+    min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
     threshold_abs : float or None, optional
@@ -53,7 +53,7 @@ def peak_local_max(
         Control peak detection close to the border of `image`.
 
         ``True``
-            Exclude peaks that are within `min_distance` of the border.
+            Exclude peaks that are within ``floor(min_distance)`` of the border.
         ``False`` or ``0``
             Distance to border has no effect, all peaks are identified.
         positive integer
@@ -179,7 +179,7 @@ def peak_local_max(
     if exclude_border is False:
         exclude_border = 0
     elif exclude_border is True:
-        exclude_border = min_distance
+        exclude_border = int(np.floor(min_distance))
 
     coordinates = ski2.feature.peak_local_max(
         image,

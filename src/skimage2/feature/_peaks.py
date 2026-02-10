@@ -131,7 +131,7 @@ def peak_local_max(
     ----------
     image : ndarray
         Input image.
-    min_distance : int, optional
+    min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`. See also `p_norm`.
     threshold_abs : float, optional
@@ -229,6 +229,7 @@ def peak_local_max(
 
     if footprint is None:
         size = 2 * min_distance + 1
+        size = int(np.floor(size))
         footprint = np.ones((size,) * image.ndim, dtype=bool)
     else:
         footprint = np.asarray(footprint)

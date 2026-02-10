@@ -530,6 +530,17 @@ class TestPeakLocalMax:
             peak.peak_local_max(image, num_peaks_per_label=np.inf)
         assert_stacklevel(record)
 
+    def test_min_distance_float(self):
+        # Peaks with a Euclidean distance of ~2.828
+        image = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 1]])
+        image = np.pad(image, 2)
+
+        peaks = peak.peak_local_max(image, min_distance=2.82, p_norm=2)
+        assert_equal(peaks, [[2, 2], [4, 4]])
+
+        peaks = peak.peak_local_max(image, min_distance=2.83, p_norm=2)
+        assert_equal(peaks, [[2, 2]])
+
 
 @pytest.mark.parametrize(
     ["indices"],
