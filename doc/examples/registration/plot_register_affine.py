@@ -44,162 +44,54 @@ R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 T = np.array(
     [[1, 0, -reference.shape[0] / 2], [0, 1, -reference.shape[1] / 2], [0, 0, 1]]
 )
-transform = np.linalg.inv(T) @ R @ T
-moving = ndi.affine_transform(reference, transform)
+matrix = np.linalg.inv(T) @ R @ T
+
+moving = ndi.affine_transform(reference, matrix)
 
 ###############################################################################
-# Next, we are going to see how ``ski.registration.affine`` can recover that
-# transformation starting from only the two images. It does this initially on a
+# Next, we are going to see how ``ski.registration.estimate_affine`` can recover
+# that transformation starting from only the two images. It does this initially on a
 # much blurrier and smaller version of the two images, then progressively
 # refines the alignment with sharper, full-resolution versions. This is called
-# a Gaussian pyramid. This function can take two different solvers for estimating
+# a Gaussian pyramid. This function can take different solvers for estimating
 # the transformation at each pyramid level.
-# ``ski.registration.affine``
+# Solvers are LucasKanadeAffineSolver, StudholmeAffineSolver and ECCAffineSolver
+# Each solver take a model as first parameter which can be TranslationTransform,
+# EuclideanTransform or AffineTransform
 
+model_class = ski.registration.EuclideanTransform
+solver = ski.registration.LucasKanadeAffineSolver(model_class)
+transform = ski.registration.estimate_affine(reference, moving, solver=solver)
 
-import time
+################################################################################
+# To align the moving image, we use ``ndi.affine_transform``
 
-
-solvers = [
-    ski.registration.solver_affine_lucas_kanade,
-    ski.registration.solver_affine_ecc,
-    ski.registration.solver_affine_studholme,
-]
-
-results = []
-for solver in solvers:
-    start_time = time.time()
-    matrix = ski.registration.affine(reference, moving, solver=solver)
-    stop_time = time.time()
-    results.append(
-        {
-            "test": "Affine / " + solver.__name__.replace("solver_affine_", ""),
-            "elapsed time": stop_time - start_time,
-            "matrix": matrix,
-        }
-    )
+registered = ndi.affine_transform(moving, transform.params)
 
 
 ###############################################################################
-# Once we have the matrix, it's easy to transform the target image to match
-# the reference using :func:`scipy.ndimage.affine_transform`:
+# Becauser we know the original transform, we can also compute the target
+# registration error map:
 
-for item in results:
-    item["registered"] = ndi.affine_transform(moving, item["matrix"])
-
-###############################################################################
-# We can also compute a registration error map:
-
-for item in results:
-    item["tre"] = ski.registration.target_registration_error(
-        reference.shape, item["matrix"] @ transform
-    )
+tre = ski.registration.target_registration_error(
+    reference.shape, transform.params @ matrix
+)
 
 ###############################################################################
-# Let's look at the results. First, we make a helper function to overlay two
-# grayscale images as magenta (reference) and green (target):
+# Let's have a look at the results. We display here images pairs as
+# magenta-green color images.
 
-
-def overlay(reference, moving):
-    """Overlay two grayscale images as magenta and green channels.
-
-    Parameters
-    ----------
-    reference: np.ndarray
-        The reference image with shape (H,W).
-    moving: np.ndarray
-        The moving image with shape (H,W).
-
-    Returns
-    -------
-    image_overlay: np.ndarray
-        The RGB image as a (H,W,C) array.
-
-    Note
-    ----
-    The images must have the same shape.
-    """
-    image_overlay = np.stack((reference, moving, reference), -1)
-    return image_overlay
-
-
-###############################################################################
-# Now we can look at the alignment. The reference image is in magenta, while the
-# target image is in green. Regions of perfect overlap become white
-
-_, ax = plt.subplots(2, len(results) + 1)
-
-ax[0, 0].set_title("Initial alignment")
-ax[0, 0].imshow(overlay(reference, moving))
-tre_initial = ski.registration.target_registration_error(reference.shape, transform)
-ax[1, 0].set_title(f"TRE\n(max:{tre_initial.max():.2f}px)")
-ax[1, 0].imshow(tre_initial)
-
-for k, item in enumerate(results):
-    ax[0, k + 1].set_title(item["test"].replace("/", "\n"))
-    ax[0, k + 1].imshow(overlay(reference, item["registered"]))
-    ax[1, k + 1].set_title(f"TRE\n(max:{item['tre'].max():.2f}px)")
-    ax[1, k + 1].imshow(item["tre"])
-
-
-for a in ax.ravel():
-    a.set_axis_off()
-
-plt.show()
-
-
-###############################################################################
-# If we know that our transform is a *rigid* transform, also known as a
-# Euclidean transform, we can reduce the number of free parameters in the model.
-#
-for solver in solvers:
-    start_time = time.time()
-    matrix = ski.registration.affine(
-        reference, moving, solver=solver, model="euclidean"
-    )
-    stop_time = time.time()
-    results.append(
-        {
-            "test": "Euclidean / " + solver.__name__.replace("solver_affine_", ""),
-            "elapsed time": stop_time - start_time,
-            "matrix": matrix,
-            "registered": ndi.affine_transform(moving, matrix),
-            "tre": ski.registration.target_registration_error(
-                reference.shape, matrix @ transform
-            ),
-        }
-    )
-
-
-print("Original matrix:")
-print(np.linalg.inv(transform))
-
-for item in results:
-    print(
-        f"{item['test']} in {item['elapsed time']:.2f} seconds,"
-        f" TRE max:{item['tre'].max():.2f}/mean:{item['tre'].mean():.2f} pixels."
-    )
-    print(item["matrix"])
-
-###############################################################################
-# Now we can look at the alignment. The reference image is in magenta, while the
-# target image is in green. Regions of perfect overlap have are in grayscale:
-
-_, ax = plt.subplots(2, len(results) + 1)
-
-ax[0, 0].set_title("Initial alignment")
-ax[0, 0].imshow(overlay(reference, moving))
-ax[1, 0].set_title("Initial alignment")
-ax[1, 0].set_title(f"TRE\n(max:{tre_initial.max():.2f}px)")
-ax[1, 0].imshow(tre_initial)
-
-for k, item in enumerate(results):
-    ax[0, k + 1].set_title(item["test"].replace("/", "\n"))
-    ax[0, k + 1].imshow(overlay(reference, item["registered"]))
-    ax[1, k + 1].set_title(f"TRE\n(max:{item['tre'].max():.3f}px)")
-    ax[1, k + 1].imshow(item["tre"])
-
-for a in ax.ravel():
-    a.set_axis_off()
-
+plt.subplot(131)
+plt.imshow(np.stack((reference, moving, reference), -1))
+plt.axis('off')
+plt.title('Before registation')
+plt.subplot(132)
+plt.imshow(np.stack((reference, registered, reference), -1))
+plt.axis('off')
+plt.title('After registation')
+plt.subplot(133)
+im = plt.imshow(tre)
+plt.axis('off')
+plt.title('TRE')
+plt.tight_layout()
 plt.show()

@@ -140,6 +140,18 @@ def test_gaussian_pyramid():
         assert p[1][k].shape == (1, n, n)
 
 
+def test_no_pyramid():
+    from skimage.registration._affine import _NullPyramid
+
+    shape = (32, 32)
+    image = np.zeros(shape)
+    n = _NullPyramid()
+    assert n.max_layers(shape) == 1
+    p = n.generate(image, channel_axis=None)
+    assert len(p) == 2
+    assert len(p[0]) == 1
+
+
 @pytest.mark.parametrize("ndim", [2, 3])
 @pytest.mark.parametrize("solver", solvers)
 @pytest.mark.parametrize("model", models)
@@ -154,7 +166,8 @@ def test_matrix_to_parameters(ndim, solver, model):
     )
     matrix1 = s._parameter_vector_to_matrix(params, ndim)
     assert matrix1.shape == (len(shape) + 1, len(shape) + 1)
-    assert np.max(matrix0 - matrix1) < 0.001
+    max_abs_error = np.max(np.abs(matrix0 - matrix1))
+    assert max_abs_error < 0.001
 
 
 @pytest.mark.parametrize("solver", solvers)
@@ -163,12 +176,15 @@ def test_register_affine_dtype(data_2d_grayscale, solver, dtype):
     reference = data_2d_grayscale
     forward = create_matrix(reference.shape, ski.registration.TranslationTransform)
     moving = ndi.affine_transform(reference, forward)
-    matrix = ski.registration.estimate_affine(
+    tfm = ski.registration.estimate_affine(
         reference.astype(dtype),
         moving.astype(dtype),
         solver=solver(ski.registration.TranslationTransform),
     )
-    tre = ski.registration.target_registration_error(reference.shape, matrix @ forward)
+    assert tfm.params.shape == (3, 3)
+    tre = ski.registration.target_registration_error(
+        reference.shape, tfm.params @ forward
+    )
     assert (
         tre.max() < max_error
     ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
@@ -178,31 +194,72 @@ def test_register_affine_dtype(data_2d_grayscale, solver, dtype):
 @pytest.mark.parametrize("model", models)
 def test_register_affine_model(data_2d_grayscale, solver, model):
     reference = data_2d_grayscale
-    forward = create_matrix(reference.shape, model, ndim=2)
+    forward = create_matrix(reference.shape, model)
     moving = ndi.affine_transform(reference, forward)
-    matrix = ski.registration.estimate_affine(reference, moving, solver=solver(model))
-    tre = ski.registration.target_registration_error(reference.shape, matrix @ forward)
+    tfm = ski.registration.estimate_affine(reference, moving, solver=solver(model))
+    assert tfm.params.shape == (3, 3)
+    tre = ski.registration.target_registration_error(
+        reference.shape, tfm.params @ forward
+    )
+    tre_max = tre.max()
+    assert tre_max < max_error, f"TRE ({tre_max:.2f}) is more than {max_error} pixels."
+
+
+@pytest.mark.parametrize("solver", solvers)
+@pytest.mark.parametrize("model", models)
+def test_register_affine_init(data_2d_grayscale, solver, model):
+    reference = data_2d_grayscale
+    forward = create_matrix(reference.shape, model)
+    backward = np.linalg.inv(forward)
+    moving = ndi.affine_transform(reference, forward)
+    tfm = ski.registration.estimate_affine(
+        reference, moving, solver=solver(model), matrix=backward
+    )
+    assert tfm.params.shape == (3, 3)
+    tre = ski.registration.target_registration_error(
+        reference.shape, tfm.params @ forward
+    )
+    tre_max = tre.max()
+    assert tre_max < max_error, f"TRE ({tre_max:.2f}) is more than {max_error} pixels."
+
+
+@pytest.mark.parametrize("solver", solvers)
+def test_register_affine_multichannel(data_2d_rgb, solver):
+    reference = data_2d_rgb
+    model = ski.registration.TranslationTransform
+    shape = [reference.shape[0], reference.shape[1]]
+    # forward = create_matrix(shape, model)
+    forward = np.array([[1, 0, 4], [0, 1, 0], [0, 0, 1]])
+    moving = np.empty_like(reference)
+    for ch in range(reference.shape[-1]):
+        ndi.affine_transform(reference[..., ch], forward, output=moving[..., ch])
+    tfm = ski.registration.estimate_affine(
+        reference, moving, solver=solver(model), channel_axis=2
+    )
+    tre = ski.registration.target_registration_error(shape, tfm.params @ forward)
+    tre_max = tre.max()
     assert (
-        tre.max() < max_error
+        tre_max < max_error
+    ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
+
+
+@pytest.mark.parametrize("solver", solvers)
+def test_3d(data_3d, solver):
+    reference = data_3d
+    model = ski.registration.TranslationTransform
+    forward = np.array([[1, 0, 0, 4], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    moving = ndi.affine_transform(reference, forward)
+    tfm = ski.registration.estimate_affine(reference, moving, solver=solver(model))
+    tre = ski.registration.target_registration_error(
+        reference.shape, tfm.params @ forward
+    )
+    tre_max = tre.max()
+    assert (
+        tre_max < max_error
     ), f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
 
 
 ########################################
-
-
-# @pytest.mark.parametrize("solver", solvers)
-# def test_register_affine_multichannel(data_2d_rgb, solver):
-#     reference = data_2d_rgb
-#     shp = [reference.shape[0], reference.shape[1]]
-#     forward = create_matrix(shp, "affine", ndim=2)
-#     moving = np.empty_like(reference)
-#     for ch in range(reference.shape[-1]):
-#         ndi.affine_transform(reference[..., ch], forward, output=moving[..., ch])
-#     matrix = affine(reference, moving, channel_axis=2, solver=solver)
-#     tre = target_registration_error(shp, matrix @ forward)
-#     assert tre.max() < max_error, (
-#         f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
-#     )
 
 
 # @pytest.mark.parametrize("model", models)
@@ -237,33 +294,6 @@ def test_register_affine_model(data_2d_grayscale, solver, model):
 #     scaled = _scale_matrix(matrix, scale)
 #     assert_array_almost_equal(scale * matrix[:ndim, -1], scaled[:ndim, -1], 3)
 #     assert_array_almost_equal(matrix[:ndim, :ndim], scaled[:ndim, :ndim], 3)
-
-
-# @pytest.mark.parametrize("solver", solvers)
-# @pytest.mark.parametrize("model", models)
-# def test_inital_parameters(data_2d_grayscale, solver, model):
-#     ndim = 2
-#     reference = data_2d_grayscale
-#     forward = create_matrix(reference.shape, model, ndim=ndim)
-#     moving = ndi.affine_transform(reference, forward)
-#     initial_guess = np.linalg.inv(forward)
-#     matrix = affine(reference, moving, model=model, matrix=initial_guess, solver=solver)
-#     tre = target_registration_error(reference.shape, matrix @ forward)
-#     assert tre.max() < max_error, (
-#         f"TRE ({tre.max():.2f}) is more than {max_error} pixels. {matrix.ravel()}"
-#     )
-
-
-# @pytest.mark.parametrize("solver", solvers)
-# def test_3d(data_3d, solver):
-#     reference = data_3d
-#     forward = create_matrix(reference.shape, "affine", ndim=3)
-#     moving = ndi.affine_transform(reference, forward)
-#     matrix = affine(reference, moving, solver=solver)
-#     tre = target_registration_error(reference.shape, matrix @ forward)
-#     assert tre.max() < max_error, (
-#         f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
-#     )
 
 
 # @pytest.mark.parametrize("solver", solvers)
