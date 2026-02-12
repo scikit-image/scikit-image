@@ -125,16 +125,16 @@ def test_shuffle():
 
 
 def test_gaussian_pyramid():
-    shape = (32, 32)
+    shape = (1, 32, 32)
     image = np.zeros(shape)
     g = ski.registration.GaussianPyramid(min_size=8)
     assert g.max_layers(shape) == 2  # size 16, 8
-    p = g.generate(image, channel_axis=None)
+    p = g.generate(image, channel_axis=0)
     assert len(p) == 2  # image and weights
     assert len(p[0]) == 3  # 3 scales 8, 16, 32
     # test the shape of the elements of the pyramid
     for k in range(len(p[0])):
-        n = int(shape[0] / np.pow(2.0, len(p[0]) - k - 1))
+        n = int(shape[1] / np.pow(2.0, len(p[0]) - k - 1))
         assert p[0][k].shape == (1, n, n)
         assert p[1][k].shape == (1, n, n)
 

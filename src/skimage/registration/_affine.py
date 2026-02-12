@@ -1,6 +1,7 @@
 """Affine registration"""
 
 import warnings
+from abc import ABC, abstractmethod
 from functools import partial
 from itertools import combinations, combinations_with_replacement, product
 import math
@@ -57,7 +58,7 @@ def target_registration_error(shape, matrix):
 
 def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     """
-    Suffle channel axes and insure format of the image a tuple of image and weight
+    Shuffle channel axes and ensure format of the image a tuple of image and weight
 
     Parameters
     ----------
@@ -87,8 +88,20 @@ def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     return new_image
 
 
-class AffineSolver:
+class _AffineSolver(ABC):
+    """Abstract base class for affine registration solvers"""
+
     def __init__(self, model_class, order=3):
+        """Initialize the solver with a model and an interpolation order
+
+        Parameters
+        ----------
+        model_class: AffineTransform
+            The affine transform class
+        order: int
+            The interpolation order used in `scipy.ndimage.affine_tranform`
+
+        """
         self._model_class = model_class
         self._order = order
 
@@ -196,7 +209,7 @@ class AffineSolver:
                 parameters[3:] = np.array([alpha, beta, gamma])
             else:
                 raise NotImplementedError(
-                    "Eulidean motion model implemented only in 2D/3D"
+                    "Euclidean motion model implemented only in 2D/3D"
                 )
             # Translation along each axis
             parameters[:ndim] = (
@@ -235,8 +248,32 @@ class AffineSolver:
         scaled_matrix[:ndim, -1] *= scale
         return scaled_matrix
 
+    @abstractmethod
+    def estimate_affine(
+        self, reference_image, moving_image, *, channel_axis=None, matrix=None
+    ):
+        """
+        Estimate the parameters of an affine transform
 
-class StudholmeAffineSolver(AffineSolver):
+        Parameters
+        ----------
+        reference: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Reference image and weights
+        moving: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Moving image and weights
+        channel_axis: int
+            Index of the channel axis
+        matrix: ski.transform.Transform or ndarray
+            Initial homogeneous transformation matrix.
+
+        Returns
+        -------
+        tfm: AffineTransform
+            The estimated transform
+        """
+
+
+class StudholmeAffineSolver(_AffineSolver):
     def __init__(
         self,
         model_class,
@@ -248,12 +285,7 @@ class StudholmeAffineSolver(AffineSolver):
         max_iter=100,
         max_trial=10,
         min_trial=4,
-        options={
-            "maxfev": 10000,
-            "disp": False,
-            "xtol": 1e-6,
-            "ftol": 1e-3,
-        },
+        options=None,
     ):
         """
         Solver minimizing the cost function using a derivative free minimizer.
@@ -282,7 +314,14 @@ class StudholmeAffineSolver(AffineSolver):
         self.minimizer_str = minimizer
         self.max_trial = max_trial
         self.min_trial = min_trial
-        self.options = options
+        if options is None:
+            options = {
+                "maxfev": 10000,
+                "disp": False,
+                "xtol": 1e-6,
+                "ftol": 1e-3,
+            }
+        self.options = options.copy()
         self.options["maxiter"] = max_iter
 
     def _center_and_normalize(self, matrix, shape):
@@ -442,13 +481,11 @@ class StudholmeAffineSolver(AffineSolver):
                 if result.fun < fvalmin:
                     fvalmin, x = result.fun, result.x
 
-                # print(f"{trial}:ok  -> {result.fun} {result.fun <= fvalmin}")
                 # stop after a few successful run
                 if trial == self.min_trial - 1 and fvalmin != np.inf:
                     break
-            except Exception as _:
+            except (ValueError, np.linalg.LinAlgError):
                 x = parameters
-                # print(f"{trial}:fail")
             x0 = np.random.normal(x, 0.001)
 
         matrix = self._parameter_vector_to_matrix(x, ndim)
@@ -458,7 +495,7 @@ class StudholmeAffineSolver(AffineSolver):
         return matrix
 
 
-class LucasKanadeAffineSolver(AffineSolver):
+class LucasKanadeAffineSolver(_AffineSolver):
     """
     Lucas and Kanade affine solver.
 
@@ -601,7 +638,7 @@ class LucasKanadeAffineSolver(AffineSolver):
         return AffineTransform(matrix)
 
 
-class ECCAffineSolver(AffineSolver):
+class ECCAffineSolver(_AffineSolver):
     """
     Enhanced Correlation Coefficent affine solver
 
@@ -859,35 +896,35 @@ class ECCAffineSolver(AffineSolver):
 
         # The solver does not take into account multiple channels for now
         # Using the luminance (max across channels)
-        reference_image = np.mean(ref[0], 0)
-        moving_image = np.mean(mov[0], 0)
+        reference_gray = np.max(ref[0], 0)
+        moving_gray = np.max(mov[0], 0)
 
         if matrix is None:
-            if len(reference_image.shape) == 2:
+            if len(reference_gray.shape) == 2:
                 matrix = np.eye(3)
             else:
                 matrix = np.eye(4)
 
         mesh = np.meshgrid(
-            *[np.arange(x, dtype=np.float32) for x in reference_image.shape],
+            *[np.arange(x, dtype=np.float32) for x in reference_gray.shape],
             indexing="ij",
         )
 
-        grad = np.gradient(moving_image)
+        grad = np.gradient(moving_gray)
         rho = -1
         last_rho = -self._tol
 
-        ir_mean = np.mean(reference_image)
-        ir_std = np.std(reference_image)
-        ir_meancorr = reference_image - ir_mean
+        ir_mean = np.mean(reference_gray)
+        ir_std = np.std(reference_gray)
+        ir_meancorr = reference_gray - ir_mean
 
-        ir_norm = np.sqrt(np.sum(np.prod(reference_image.shape)) * ir_std**2)
+        ir_norm = np.sqrt(np.prod(reference_gray.shape) * ir_std**2)
 
         for _ in range(self._max_iter):
             if np.abs(rho - last_rho) < self._tol:
                 break
 
-            iw_warped = ndi.affine_transform(moving_image, matrix, order=self._order)
+            iw_warped = ndi.affine_transform(moving_gray, matrix, order=self._order)
 
             iw_mean = np.mean(iw_warped[iw_warped != 0])
             iw_std = np.std(iw_warped[iw_warped != 0])
@@ -1119,9 +1156,9 @@ def estimate_affine(
     Parameters
     ----------
     reference_image: ndarray[C,P,N,M] or tuple(ndarray[C,P,N,M], ndarray[C,P,N,M])
-        The reference image with .
+        The reference image or reference image and weight tuple.
     moving_image: ndarray[C,P,N,M] or tuple(ndarray[C,P,N,M], ndarray[C,P,N,M])
-        The moving image to register.
+        The moving image to register or moving image and weight tuple.
     solver: Solver
         An affine registration solver
     pyramid: Pyramid or None
@@ -1129,15 +1166,15 @@ def estimate_affine(
     matrix: ndarray or Transform
         The initial transform.
 
-    Returns
+
     -------
     transform : ski.transform.AffineTransform
         The estimated affine transform
 
     Note
     ----
-    The affine transform matrix is compatible with the convension of scipy.ndimage.affine_transform
-    and uses the row, columns conventions.
+    The affine transform matrix is compatible with the convention of scipy.ndimage.affine_transform
+    and uses for example the row, columns order in 2D.
     """
 
     ref, mov = [
@@ -1152,7 +1189,10 @@ def estimate_affine(
     # Build the pyramids
     ref_pyramid = pyramid.generate(ref, channel_axis=0)
     mov_pyramid = pyramid.generate(mov, channel_axis=0)
-    pyramids = list(zip(zip(*ref_pyramid), zip(*mov_pyramid)))
+
+    pyramids = list(
+        zip(zip(*ref_pyramid, strict=True), zip(*mov_pyramid, strict=True), strict=True)
+    )
 
     # Rescale the initial matrix if any to the coarsest level
     if matrix is not None:
