@@ -121,7 +121,7 @@ def peak_local_max(
 ):
     """Find peaks in an image as coordinate list.
 
-    Peaks are the local maxima in a region of `2 * min_distance + 1`
+    Peaks are the local maxima in a region of ``floor(2 * min_distance + 1)``
     (i.e. peaks are separated by at least `min_distance`).
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum

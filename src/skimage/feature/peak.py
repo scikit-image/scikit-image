@@ -24,7 +24,7 @@ def peak_local_max(
 ):
     """Find peaks in an image as coordinate list.
 
-    Peaks are the local maxima in a region of `2 * min_distance + 1`
+    Peaks are the local maxima in a region of ``floor(2 * min_distance + 1)``
     (i.e. peaks are separated by at least `min_distance`).
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
@@ -75,7 +75,7 @@ def peak_local_max(
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
-    p_norm : float
+    p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
