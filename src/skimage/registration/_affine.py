@@ -8,6 +8,7 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
+from scipy import stats
 
 from skimage.metrics import normalized_mutual_information
 import skimage as ski
@@ -242,10 +243,18 @@ class StudholmeAffineSolver(AffineSolver):
         model_class,
         order=3,
         cost_function=lambda im0, im1, w: -normalized_mutual_information(
-            im0, im1, bins=100, weights=w
+            im0, im1, bins=30, weights=w
         ),
         minimizer="Powell",
-        max_iter=30,
+        max_iter=100,
+        max_trial=10,
+        min_trial=4,
+        options={
+            "maxfev": 10000,
+            "disp": False,
+            "xtol": 1e-6,
+            "ftol": 1e-3,
+        },
     ):
         """
         Solver minimizing the cost function using a derivative free minimizer.
@@ -260,13 +269,68 @@ class StudholmeAffineSolver(AffineSolver):
             Cost function to minimize
         minimizer: str
             Name of the minimizer
-        max_iter:
-            Number of iteration
+        max_iter: int
+            Maximum number of iteration
+        max_trial: int
+            Maximum number of trials
+        min_trial: int
+            Minimum number of trials
+        options: dict
+            Dictionnary of options passed to `scipy.minimize`
         """
         super().__init__(model_class=model_class, order=order)
         self._cost_function = cost_function
-        self.max_iter = max_iter
         self.minimizer_str = minimizer
+        self.max_trial = max_trial
+        self.min_trial = min_trial
+        self.options = options
+        self.options["maxiter"] = max_iter
+
+    def _center_and_normalize(self, matrix, shape):
+        """
+        Center and normalize the matrix
+
+        Parameters
+        ----------
+        matrix: ndarray
+            The homogenenous matrix
+        shape: shape
+            The shape of the image (incuding channels)
+
+        Returns
+        -------
+        matrix: ndarray
+            The homogenenous matrix centered and scaled
+        """
+        ndim = len(shape) - 1
+        v = np.array(shape[1:], dtype=np.float64) / 2
+        new_matrix = matrix.copy().astype(np.float64)
+        new_matrix[:ndim, -1] -= v
+        new_matrix[:ndim, -1] /= v
+        return new_matrix
+
+    def _invert_center_and_normalize(self, matrix, shape):
+        """
+        Decenter and denormalize the matrix
+
+        Parameters
+        ----------
+        matrix: ndarray
+            The homogenenous matrix
+        shape: shape
+            The shape of the image (incuding channels)
+
+        Returns
+        -------
+        matrix: ndarray
+            The homogenenous matrix centered and scaled
+        """
+        ndim = len(shape) - 1
+        v = np.array(shape[1:], dtype=np.float64) / 2
+        new_matrix = matrix.copy().astype(np.float64)
+        new_matrix[:ndim, -1] *= v
+        new_matrix[:ndim, -1] += v
+        return new_matrix
 
     def cost(self, parameters, reference_image, moving_image):
         """
@@ -275,9 +339,9 @@ class StudholmeAffineSolver(AffineSolver):
         Parameters
         ----------
         reference_image: tuple(ndarray)
-            The reference image.
+            The reference image and weights as a tuple.
         moving_image: tuple(ndarray)
-            The moving image to register.
+            The moving image and weights to register.
         parameters: ndarray
             Vector of parameters.
 
@@ -286,10 +350,14 @@ class StudholmeAffineSolver(AffineSolver):
         cost: float
             The value of the cost function.
         """
-
         ndim = reference_image[0].ndim - 1
-
+        # print(parameters)
         matrix = self._parameter_vector_to_matrix(parameters, ndim)
+        matrix = self._invert_center_and_normalize(matrix, reference_image[0].shape)
+        matrix[-1, :] = 0
+        matrix[-1, -1] = 1
+
+        # print(matrix)
 
         # Transform each channel of the image and weights
         moving_image_warp = [
@@ -301,14 +369,14 @@ class StudholmeAffineSolver(AffineSolver):
         weights = reference_image[1] * moving_image_warp[1]
 
         # Weights can become very small leading to NaNs
-        if weights.max() < 1e-6:
-            return 0
+        if weights.mean() < 0.25:
+            raise ValueError("Error")
 
         # Compute the cost
         f = self._cost_function(reference_image[0], moving_image_warp[0], weights)
 
         if np.isnan(f):
-            return 0
+            raise ValueError("Error")
         return f
 
     def estimate_affine(
@@ -347,6 +415,7 @@ class StudholmeAffineSolver(AffineSolver):
         if isinstance(matrix, AffineTransform):
             matrix = matrix.params
 
+        matrix = self._center_and_normalize(matrix, ref[0].shape)
         parameters = self._matrix_to_parameter_vector(matrix)
 
         f = partial(
@@ -355,35 +424,36 @@ class StudholmeAffineSolver(AffineSolver):
             moving_image=mov,
         )
 
-        # Compute a vector of direction (scale it properly)
+        options = self.options.copy()
+        fvalmin = f(parameters)
+        x = parameters
+        x0 = x
+        for trial in range(self.max_trial):
+            options["direc"] = 0.1 * stats.ortho_group.rvs(dim=len(parameters))
+            try:
+                # Minimize the cost function
+                result = minimize(
+                    f,
+                    x0=x0,
+                    method=self.minimizer_str,
+                    options=options,
+                )
 
-        if self._model_class == TranslationTransform:
-            d = 0.5 * np.eye(len(parameters))
-        elif self._model_class == EuclideanTransform:
-            if ndim == 2:
-                d = np.diag([1, 1, 0.01])
-            elif ndim == 3:
-                d = np.diag([1, 1, 0.1, 0.1, 0.1])
-            else:
-                d = 0.5 * np.eye(len(parameters))
-        elif self._model_class == AffineTransform:
-            if ndim == 2:
-                d = np.diag([0.1, 0.1, 1, 0.1, 0.1, 1])
-            elif ndim == 3:
-                d = np.diag([0.1, 0.1, 0.1, 1, 0.1, 0.1, 0.1, 1, 0.1, 0.1, 0.1, 1])
-            else:
-                d = 0.5 * np.eye(len(parameters))
-        else:
-            raise NotImplementedError(f"Model {self._model_class} is not supported")
+                # If cost less than minimum cost, update
+                if result.fun < fvalmin:
+                    fvalmin, x = result.fun, result.x
 
-        result = minimize(
-            f,
-            x0=parameters,
-            method=self.minimizer_str,
-            options={"maxiter": self.max_iter, "disp": False, "direc": d},
-        )
+                # print(f"{trial}:ok  -> {result.fun} {result.fun <= fvalmin}")
+                # stop after a few successful run
+                if trial == self.min_trial - 1 and fvalmin != np.inf:
+                    break
+            except Exception as _:
+                x = parameters
+                # print(f"{trial}:fail")
+            x0 = np.random.normal(x, 0.001)
 
-        matrix = self._parameter_vector_to_matrix(result.x, ndim)
+        matrix = self._parameter_vector_to_matrix(x, ndim)
+        matrix = self._invert_center_and_normalize(matrix, ref[0].shape)
 
         matrix = AffineTransform(matrix)
         return matrix
