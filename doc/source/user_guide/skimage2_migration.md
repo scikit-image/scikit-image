@@ -65,6 +65,15 @@ ski2.data.binary_blobs(
 with `length`, `n_dim`, and `blob_size_fraction` containing values used with the old signature.
 Other parameters -- including `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
+### Grayscale morphological operators
+
+Functions `skimage.morphology.{operator}` are replaced by
+`skimage2.morphology.{operator}` where {operator} is in this list:
+[`erosion`, `dilation`, `opening`, `closing`, `white_tophat`, `black_tophat`].
+The new functions use 'ignore' as the default value for parameter `mode` (as
+opposed to 'reflect' in v1.x).
+To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
