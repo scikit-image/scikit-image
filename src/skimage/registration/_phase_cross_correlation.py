@@ -35,12 +35,12 @@ def _upsampled_dft(data, upsampled_region_size, upsample_factor=1, axis_offsets=
     ----------
     data : array
         The input data array (DFT of original data) to upsample.
-    upsampled_region_size : integer or tuple of integers, optional
+    upsampled_region_size : int or tuple of (int, ...), optional
         The size of the region to be sampled.  If one integer is provided, it
         is duplicated up to the dimensionality of ``data``.
-    upsample_factor : integer, optional
+    upsample_factor : int, optional
         The upsampling factor.  Defaults to 1.
-    axis_offsets : tuple of integers, optional
+    axis_offsets : tuple of (int, ...), optional
         The offsets of the region to be sampled.  Defaults to None (uses
         image center)
 
@@ -232,7 +232,7 @@ def phase_cross_correlation(
         ``upsample_factor == 20`` means the images will be registered
         within 1/20th of a pixel. Default is 1 (no upsampling).
         Not used if any of ``reference_mask`` or ``moving_mask`` is not None.
-    space : string, one of "real" or "fourier", optional
+    space : {"real", "fourier"}, optional
         Defines how the algorithm interprets input data. "real" means
         data will be FFT'd to compute the correlation, while "fourier"
         data will bypass FFT of input data. Case insensitive. Not
@@ -351,7 +351,7 @@ def phase_cross_correlation(
     maxima = np.unravel_index(
         np.argmax(np.abs(cross_correlation)), cross_correlation.shape
     )
-    midpoint = np.array([np.fix(axis_size / 2) for axis_size in shape])
+    midpoint = np.array([np.trunc(axis_size / 2) for axis_size in shape])
 
     float_dtype = image_product.real.dtype
 
@@ -371,7 +371,7 @@ def phase_cross_correlation(
         shift = np.round(shift * upsample_factor) / upsample_factor
         upsampled_region_size = np.ceil(upsample_factor * 1.5)
         # Center of output array at dftshift + 1
-        dftshift = np.fix(upsampled_region_size / 2.0)
+        dftshift = np.trunc(upsampled_region_size / 2.0)
         # Matrix multiply DFT around the current shift estimate
         sample_region_offset = dftshift - shift * upsample_factor
         cross_correlation = _upsampled_dft(

@@ -329,7 +329,7 @@ def local_binary_pattern(image, P, R, method='default'):
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : str {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
+    method : {'default', 'ror', 'uniform', 'nri_uniform', 'var'}, optional
         Method to determine the pattern:
 
         ``default``

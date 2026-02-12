@@ -33,7 +33,7 @@ class RansacModelProtocol(Protocol):
     """Protocol for `ransac` model class."""
 
     @classmethod
-    def from_estimate(cls, *data): ...
+    def from_estimate(cls, *data, **kwargs): ...
 
     def residuals(self, *data): ...
 
@@ -330,14 +330,14 @@ class LineModelND(_BaseModel):
 
         Parameters
         ----------
-        x : (n, 1) array
+        x : ndarray of shape (n, 1)
             Coordinates along an axis.
         axis : int
             Axis orthogonal to the hyperplane intersecting the line.
 
         Returns
         -------
-        data : (n, m) array
+        data : ndarray of shape (n, m)
             Predicted coordinates.
 
         Other parameters
@@ -568,7 +568,7 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -636,12 +636,12 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for each data point.
 
         """
@@ -692,7 +692,7 @@ class CircleModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -723,9 +723,9 @@ class EllipseModel(_BaseModel):
 
     Parameters
     ----------
-    center : array-like, shape (2,)
+    center : array_like of shape (2,)
         Coordinates of ellipse center.
-    axis_lengths : array-like, shape (2,)
+    axis_lengths : array_like of shape (2,)
         Length of first axis and length of second axis.  Call these ``a`` and
         ``b``.
     theta : float
@@ -781,9 +781,9 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        center : array-like, shape (2,)
+        center : array_like of shape (2,)
             Coordinates of ellipse center.
-        axis_lengths : array-like, shape (2,)
+        axis_lengths : array_like of shape (2,)
             Length of first axis and length of second axis.  Call these ``a``
             and ``b``.
         theta : float
@@ -823,7 +823,7 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -970,12 +970,12 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
-        residuals : (N,) array
+        residuals : ndarray of shape (N,)
             Residual for each data point.
 
         """
@@ -1039,7 +1039,7 @@ class EllipseModel(_BaseModel):
 
         Returns
         -------
-        xy : (..., 2) array
+        xy : ndarray of shape (..., 2)
             Predicted x- and y-coordinates.
 
         Other parameters
@@ -1069,7 +1069,7 @@ class EllipseModel(_BaseModel):
 
         Parameters
         ----------
-        data : (N, 2) array
+        data : ndarray of shape (N, 2)
             N points with ``(x, y)`` coordinates, respectively.
 
         Returns
@@ -1175,6 +1175,7 @@ def ransac(
     stop_probability=1,
     rng=None,
     initial_inliers=None,
+    model_kwargs=None,
 ):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
@@ -1218,7 +1219,7 @@ def ransac(
         * Either:
 
           * ``from_estimate`` class method returning transform instance, as in
-            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform = model_class.from_estimate(*data, **kwargs)``; the resulting
             ``tform`` should be truthy (``bool(tform) == True``) where
             estimation succeeded, or falsey (``bool(tform) == False``) where it
             failed;  OR
@@ -1270,13 +1271,15 @@ def ransac(
         If `rng` is an int, it is used to seed the generator.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
+    model_kwargs : dict of {str: Any}, optional
+        The dict of keyword arguments passed to ``from_estimate`` of `model_class`.
 
 
     Returns
     -------
     model : object
         Best model with largest consensus set.
-    inliers : (N,) array
+    inliers : ndarray of shape (N,)
         Boolean mask of inliers classified as ``True``.
 
     References
@@ -1368,6 +1371,8 @@ def ransac(
             True,  True,  True,  True,  True])
 
     """
+    if model_kwargs is None:
+        model_kwargs = {}
 
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
@@ -1437,7 +1442,7 @@ def ransac(
         if validate_data and not is_data_valid(*samples):
             continue
 
-        model = model_class.from_estimate(*samples)
+        model = model_class.from_estimate(*samples, **model_kwargs)
         # backwards compatibility
         if not model:
             continue
@@ -1481,7 +1486,7 @@ def ransac(
     if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        model = model_class.from_estimate(*data_inliers)
+        model = model_class.from_estimate(*data_inliers, **model_kwargs)
         if validate_model and not is_model_valid(model, *data_inliers):
             warn("Estimated model is not valid. Try increasing max_trials.")
     else:

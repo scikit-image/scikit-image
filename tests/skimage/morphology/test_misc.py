@@ -122,15 +122,24 @@ def test_negative_input():
 
 def test_remove_small_objects_deprecated_min_size():
     expected = np.array([[0, 0, 0, 0, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], dtype=bool)
+    zeros = np.zeros_like(expected)
 
-    # This is fine
-    observed = remove_small_objects(test_object_image, max_size=3)
+    # New max_size=6 filters all objects without warning
+    observed = remove_small_objects(test_object_image, max_size=6)
+    assert_array_equal(observed, zeros)
+    # New max_size=5 leaves on object of size 6 without warning
+    observed = remove_small_objects(test_object_image, max_size=5)
     assert_array_equal(observed, expected)
 
-    # Using area_threshold= warns
+    # Deprecated min_size=7 warns and filters all objects
     regex = "Parameter `min_size` is deprecated"
     with pytest.warns(FutureWarning, match=regex) as record:
-        observed = remove_small_objects(test_object_image, min_size=5)
+        observed = remove_small_objects(test_object_image, min_size=7)
+    assert_stacklevel(record)
+    assert_array_equal(observed, zeros)
+    # Deprecated min_size=6 warns leaves on object of size 6
+    with pytest.warns(FutureWarning, match=regex) as record:
+        observed = remove_small_objects(test_object_image, min_size=6)
     assert_stacklevel(record)
     assert_array_equal(observed, expected)
 

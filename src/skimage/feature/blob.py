@@ -5,9 +5,14 @@ import scipy.ndimage as ndi
 from scipy import spatial
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, check_nD
+from .._shared.utils import (
+    _supported_float_type,
+    check_nD,
+    DEPRECATED,
+    deprecate_parameter,
+    _rescale_value_range,
+)
 from ..transform import integral_image
-from ..util import img_as_float
 from ._hessian_det_appx import _hessian_matrix_det
 from .peak import peak_local_max
 
@@ -204,8 +209,7 @@ def _format_exclude_border(img_ndim, exclude_border):
         for exclude in exclude_border:
             if not isinstance(exclude, int):
                 raise ValueError(
-                    "exclude border, when expressed as a tuple, must only "
-                    "contain ints."
+                    "exclude border, when expressed as a tuple, must only contain ints."
                 )
         return exclude_border + (0,)
     elif isinstance(exclude_border, int):
@@ -218,6 +222,20 @@ def _format_exclude_border(img_ndim, exclude_border):
         raise ValueError(f'Unsupported value ({exclude_border}) for exclude_border')
 
 
+_deprecate_threshold_rel = deprecate_parameter(
+    deprecated_name="threshold_rel",
+    start_version="0.27",
+    stop_version="0.29",
+    modify_docstring=False,
+    template="Parameter `{deprecated_name}` is deprecated since version "
+    "{deprecated_version} and will be removed in {changed_version} (or "
+    "later). To avoid this warning, please use the parameters `threshold` "
+    "together with the desired `prescale` mode instead ('minmax' is "
+    "recommended). For more details, see the documentation of `{func_name}`.",
+)
+
+
+@_deprecate_threshold_rel
 def blob_dog(
     image,
     min_sigma=1,
@@ -226,8 +244,9 @@ def blob_dog(
     threshold=0.5,
     overlap=0.5,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
     exclude_border=False,
+    prescale="legacy",
 ):
     r"""Finds blobs in the given grayscale image.
 
@@ -241,32 +260,35 @@ def blob_dog(
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
-        The minimum standard deviation for Gaussian kernel. Keep this low to
-        detect smaller blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        Minimum standard deviation for Gaussian kernel. Keep this value low to
+        detect smaller blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     max_sigma : scalar or sequence of scalars, optional
         The maximum standard deviation for Gaussian kernel. Keep this high to
-        detect larger blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        detect larger blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Difference-of-Gaussian (DoG) images. Local maxima in DoG smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(dog_space) * threshold_rel``, where ``dog_space`` refers to the
-        stack of Difference-of-Gaussian (DoG) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
+            ``max(dog_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
+
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -276,6 +298,29 @@ def blob_dog(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
+    prescale : {'minmax', 'none', 'legacy'}, optional
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Difference-of-Gaussian (DoG) images, and therefore also the choice of
+        `threshold`.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization, the resulting array will have a floating dtype.
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been rescaled.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype. If `image` is of
+            floating dtype, it is left alone. See :func:`.img_as_float` for
+            more details.
+
+            .. warning::
+                The rescaling and the effect of `threshold` will depend on the
+                dtype of `image`. For consistent behavior we recommend
+                ``'minmax'``.
 
     Returns
     -------
@@ -336,7 +381,10 @@ def blob_dog(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -409,6 +457,7 @@ def blob_dog(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@_deprecate_threshold_rel
 def blob_log(
     image,
     min_sigma=1,
@@ -418,8 +467,9 @@ def blob_log(
     overlap=0.5,
     log_scale=False,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
     exclude_border=False,
+    prescale="legacy",
 ):
     r"""Finds blobs in the given grayscale image.
 
@@ -433,23 +483,24 @@ def blob_log(
         Input grayscale image, blobs are assumed to be light on dark
         background (white on black).
     min_sigma : scalar or sequence of scalars, optional
-        the minimum standard deviation for Gaussian kernel. Keep this low to
-        detect smaller blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        Minimum standard deviation for Gaussian kernel. Keep this value low to
+        detect smaller blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     max_sigma : scalar or sequence of scalars, optional
         The maximum standard deviation for Gaussian kernel. Keep this high to
-        detect larger blobs. The standard deviations of the Gaussian filter
-        are given for each axis as a sequence, or as a single number, in
+        detect larger blobs. The standard deviation of the Gaussian kernel
+        is given either as a sequence for each axis, or as a single number, in
         which case it is equal for all axes.
     num_sigma : int, optional
-        The number of intermediate values of standard deviations to consider
-        between `min_sigma` and `max_sigma`.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Laplacian-of-Gaussian (LoG) images. Local maxima in LoG smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -457,12 +508,15 @@ def blob_log(
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(log_space) * threshold_rel``, where ``log_space`` refers to the
-        stack of Laplacian-of-Gaussian (LoG) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
+            ``max(log_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
+
     exclude_border : tuple of ints, int, or False, optional
         If tuple of ints, the length of the tuple must match the input array's
         dimensionality.  Each element of the tuple will exclude peaks from
@@ -472,6 +526,29 @@ def blob_log(
         `exclude_border`-pixels of the border of the image.
         If zero or False, peaks are identified regardless of their
         distance from the border.
+    prescale : {'minmax', 'none', 'legacy'}, optional
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Laplacian-of-Gaussian (LoG) images, and therefore also the choice of
+        `threshold`.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization, the resulting array will have a floating dtype.
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been rescaled.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype. If `image` is of
+            floating dtype, it is left alone. See :func:`.img_as_float` for
+            more details.
+
+            .. warning::
+                The scaling and the effect of `threshold` will depend on the
+                dtype of `image`. For consistent behavior we recommend
+                ``'minmax'``.
 
     Returns
     -------
@@ -518,7 +595,10 @@ def blob_log(
     The radius of each blob is approximately :math:`\sqrt{2}\sigma` for
     a 2-D image and :math:`\sqrt{3}\sigma` for a 3-D image.
     """
-    image = img_as_float(image)
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -581,6 +661,7 @@ def blob_log(
     return _prune_blobs(lm, overlap, sigma_dim=sigma_dim)
 
 
+@_deprecate_threshold_rel
 def blob_doh(
     image,
     min_sigma=1,
@@ -590,7 +671,8 @@ def blob_doh(
     overlap=0.5,
     log_scale=False,
     *,
-    threshold_rel=None,
+    threshold_rel=DEPRECATED,
+    prescale="legacy",
 ):
     """Finds blobs in the given grayscale image.
 
@@ -602,21 +684,28 @@ def blob_doh(
     Parameters
     ----------
     image : 2D ndarray
-        Input grayscale image.Blobs can either be light on dark or vice versa.
+        Input grayscale image. Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
-        Hessian matrix. Keep this low to detect smaller blobs.
+        Hessian matrix. Keep this value low to detect smaller blobs.
+        The standard deviation of the Gaussian kernel is given either as a
+        sequence for each axis, or as a single number, in which case it is
+        equal for all axes.
     max_sigma : float, optional
         The maximum standard deviation for Gaussian Kernel used to compute
-        Hessian matrix. Keep this high to detect larger blobs.
+        Hessian matrix. Keep this value high to detect larger blobs.
+        The standard deviation of the Gaussian kernel is given either as a
+        sequence for each axis, or as a single number, in which case it is
+        equal for all axes.
     num_sigma : int, optional
-        The number of intermediate values of standard deviations to consider
-        between `min_sigma` and `max_sigma`.
+        The number of evenly spaced values for standard deviation of the
+        Gaussian kernel to consider on the closed interval
+        ``[min_sigma, max_sigma]``.
     threshold : float or None, optional
-        The absolute lower bound for scale space maxima. Local maxima smaller
-        than `threshold` are ignored. Reduce this to detect blobs with lower
-        intensities. If `threshold_rel` is also specified, whichever threshold
-        is larger will be used. If None, `threshold_rel` is used instead.
+        An absolute threshold applied to the internally computed stack of
+        Determinant-of-Hessian (DoH) images. Local maxima in DoH smaller than
+        `threshold` are ignored. Reduce this to detect blobs with lower
+        intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `threshold`, the smaller blob is eliminated.
@@ -624,16 +713,42 @@ def blob_doh(
         If set intermediate values of standard deviations are interpolated
         using a logarithmic scale to the base `10`. If not, linear
         interpolation is used.
-    threshold_rel : float or None, optional
-        Minimum intensity of peaks, calculated as
-        ``max(doh_space) * threshold_rel``, where ``doh_space`` refers to the
-        stack of Determinant-of-Hessian (DoH) images computed internally. This
-        should have a value between 0 and 1. If None, `threshold` is used
-        instead.
+    threshold_rel : DEPRECATED
+
+        .. deprecated:: 0.27
+            Starting with version 0.27, `threshold_rel` is deprecated. Since
+            ``max(doh_space) * threshold_rel`` was used to calculate the
+            minimum peak intensity, this parameters effect was difficult to
+            reason about. Use `threshold` in conjunction with `prescale`
+            instead.
+
+    prescale : {'minmax', 'none', 'legacy'}, optional
+        Method for rescaling (normalizing) `image` before processing.
+        Note that rescaling impacts the ranges of the internally computed
+        Determinant-of-Hessian (DoH) images, and therefore also the choice of
+        `threshold`.
+
+        ``'minmax'``
+            Normalize `image` between 0 and 1 regardless of dtype. After
+            normalization, the resulting array will have a floating dtype.
+
+        ``'none'``
+            Don't prescale the value range of `image` at all and return a
+            copy of `image`. Useful when `image` has already been rescaled.
+
+        ``'legacy'``
+            Normalize only if `image` has an integer dtype. If `image` is of
+            floating dtype, it is left alone. See :func:`.img_as_float` for
+            more details.
+
+            .. warning::
+                The scaling and the effect of `threshold` will depend on the
+                dtype of `image`. For consistent behavior we recommend
+                ``'minmax'``.
 
     Returns
     -------
-    A : (n, 3) ndarray
+    A : ndarray of shape (n, 3)
         A 2d array with each row representing 3 values, ``(y,x,sigma)``
         where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
         standard deviation of the Gaussian kernel of the Hessian Matrix whose
@@ -679,9 +794,12 @@ def blob_doh(
     this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
+    if threshold_rel is DEPRECATED:
+        threshold_rel = None
+
     check_nD(image, 2)
 
-    image = img_as_float(image)
+    image = _rescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 

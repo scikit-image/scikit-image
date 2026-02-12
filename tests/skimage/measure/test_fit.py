@@ -15,7 +15,7 @@ from skimage._shared.testing import (
 )
 from skimage.measure import CircleModel, EllipseModel, LineModelND, ransac
 from skimage.measure.fit import _dynamic_max_trials, add_from_estimate
-from skimage.transform import AffineTransform
+from skimage.transform import AffineTransform, PolynomialTransform
 
 MODEL_CLASSES = CircleModel, EllipseModel, LineModelND
 
@@ -853,9 +853,9 @@ def test_ransac_is_model_valid():
     def is_model_valid(model, data):
         return False
 
-    with expected_warnings(["No inliers found"]):
+    with pytest.warns(UserWarning, match="No inliers found"):
         model, inliers = ransac(
-            np.empty((10, 2)),
+            np.zeros((10, 2), dtype=np.float64),
             LineModelND,
             2,
             np.inf,
@@ -977,13 +977,13 @@ def test_ransac_sample_duplicates():
     # Create dataset with four unique points. Force 10 iterations
     # and check that there are no duplicated data points.
     data = np.arange(4)
-    with expected_warnings(["No inliers found"]):
+    with pytest.warns(UserWarning, match="No inliers found"):
         ransac(data, DummyModel, min_samples=3, residual_threshold=0.0, max_trials=10)
 
 
 def test_ransac_with_no_final_inliers():
     data = np.random.rand(5, 2)
-    with expected_warnings(['No inliers found. Model not fitted']):
+    with pytest.warns(UserWarning, match='No inliers found. Model not fitted'):
         model, inliers = ransac(
             data,
             model_class=LineModelND,
@@ -1005,7 +1005,7 @@ def test_ransac_non_valid_best_model():
 
     rng = np.random.RandomState(1)
     data = np.linspace([0, 0, 0], [0.3, 0, 1], 1000) + rng.rand(1000, 3) - 0.5
-    with expected_warnings(["Estimated model is not valid"]):
+    with pytest.warns(UserWarning, match="Estimated model is not valid"):
         ransac(
             data,
             LineModelND,
@@ -1015,6 +1015,32 @@ def test_ransac_non_valid_best_model():
             rng=0,
             is_model_valid=is_model_valid,
         )
+
+
+def test_ransac_model_kwargs():
+    n_points = 100
+
+    # Source points (grid-like pattern)
+    x = np.random.uniform(-2, 2, n_points)
+    y = np.random.uniform(-2, 2, n_points)
+    src = np.column_stack([x, y])
+
+    # Apply a polynomial transformation (quadratic)
+    dst_x = x + 0.3 * x**2 - 0.2 * y**2 + 0.1 * x * y
+    dst_y = y + 0.2 * x**2 + 0.1 * y**2 - 0.15 * x * y
+    dst = np.column_stack([dst_x, dst_y])
+
+    for order in [2, 3, 4]:
+        model, inliers = ransac(
+            (src, dst),
+            PolynomialTransform,
+            min_samples=100,
+            residual_threshold=1.0,
+            max_trials=1000,
+            model_kwargs={'order': order},
+        )
+        assert model.params.shape == (2, (order + 1) * (order + 2) // 2)
+        assert all(inliers)
 
 
 @pytest.mark.parametrize('tf_class', MODEL_CLASSES)

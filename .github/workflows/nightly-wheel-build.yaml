@@ -1,4 +1,7 @@
-name: Nightly Wheel builder
+name: Nightly wheels
+# Workflow to build nightly wheels and upload to
+# pypi.anaconda.org/scientific-python-nightly-wheels
+
 on:
   workflow_dispatch:
   schedule:
@@ -6,6 +9,9 @@ on:
   push:
     branches:
       - maintenance/**
+  pull_request:
+    paths:
+      - ".github/workflows/nightly-wheel-build.yaml"
 
 concurrency:
   # Cancel previous workflows on the same branch
@@ -17,14 +23,22 @@ permissions:
 
 jobs:
   call-workflow-build-wheels:
+    name: Wheels recipe
     uses: ./.github/workflows/wheels-recipe.yaml
-    with:
-      CIBW_ENVIRONMENT: >
-        PIP_PRE=1
-        PIP_EXTRA_INDEX_URL="https://pypi.anaconda.org/scientific-python-nightly-wheels/simple"
-      # assert NumPy 2.0 before running tests
-      CIBW_TEST_COMMAND: >
-        pip list --pre --format=freeze | grep -q 'numpy==2' && pytest --pyargs skimage {project}/tests
+
+  run-on-failure:
+    needs: call-workflow-build-wheels
+    runs-on: ubuntu-latest
+    if: ${{ failure() && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: "Job has failed: reporting"
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly build & test"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true
 
   upload_anaconda:
     permissions:
@@ -34,7 +48,7 @@ jobs:
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         id: download
         with:
           pattern: wheels-*
@@ -42,7 +56,17 @@ jobs:
           path: ./dist
 
       - name: Upload wheel
-        uses: scientific-python/upload-nightly-action@82396a2ed4269ba06c6b2988bb4fd568ef3c3d6b # 0.6.1
+        uses: scientific-python/upload-nightly-action@b36e8c0c10dbcfd2e05bf95f17ef8c14fd708dbf # 0.6.2
         with:
           artifacts_path: dist
           anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "nightly wheel upload"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

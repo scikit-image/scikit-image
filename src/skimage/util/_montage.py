@@ -41,7 +41,7 @@ def montage(
     ----------
     arr_in : ndarray, shape (K, M, N[, C])
         An array representing an ensemble of `K` images of equal shape.
-    fill : float or array-like of floats or 'mean', optional
+    fill : float or array_like of dtype float or Literal['mean'], optional
         Value to fill the padding areas and/or the extra tiles in
         the output array. Has to be `float` for single channel collections.
         For multichannel collections has to be an array-like of shape of
@@ -62,8 +62,9 @@ def montage(
 
     Returns
     -------
-    arr_out : (K*(M+p)+p, K*(N+p)+p[, C]) ndarray
+    arr_out : ndarray of shape (W, Q)
         Output array with input images glued together (including padding `p`).
+        The shape ``(W, Q)`` is calculated as ``(K*(M+p)+p, Q=K*(N+p)+p[, C])``.
 
     Examples
     --------
@@ -148,8 +149,7 @@ def montage(
 
     # Copy the data to the output array
     for idx_image, image in enumerate(arr_in):
-        idx_sr = idx_image // ntiles_col
-        idx_sc = idx_image % ntiles_col
+        idx_sr, idx_sc = divmod(idx_image, ntiles_col)
         arr_out[slices_row[idx_sr], slices_col[idx_sc], :] = image
 
     if channel_axis is not None:

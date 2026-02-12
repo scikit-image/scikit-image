@@ -53,7 +53,7 @@ def find_boundaries(label_img, connectivity=1, mode='thick', background=0):
     label_img : array of int or bool
         An array in which different regions are labeled with either different
         integers or boolean values.
-    connectivity : int in {1, ..., `label_img.ndim`}, optional
+    connectivity : int, in {1, ..., `label_img.ndim`}, optional
         A pixel is considered a boundary pixel if any of its neighbors
         has a different label. `connectivity` controls which pixels are
         considered neighbors. A connectivity of 1 (default) means
@@ -194,9 +194,9 @@ def mark_boundaries(
 
     Parameters
     ----------
-    image : (M, N[, 3]) array
+    image : ndarray of shape (M, N[, 3])
         Grayscale or RGB image.
-    label_img : (M, N) array of int
+    label_img : ndarray of shape (M, N) and dtype int
         Label array where regions are marked by different integer values.
     color : length-3 sequence, optional
         RGB color of boundaries in the output image.
@@ -211,7 +211,7 @@ def mark_boundaries(
 
     Returns
     -------
-    marked : (M, N, 3) array of float
+    marked : ndarray of shape (M, N, 3) and dtype float
         An image in which the boundaries between labels are
         superimposed on the original image.
 
