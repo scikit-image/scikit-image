@@ -107,8 +107,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion shrinks bright regions and enlarges dark regions.
-    It sets a pixel at (i, j) to the minimum over all pixels in the neighborhood
-    centered at (i, j). The values where the footprint is 1 define this
+    It sets a pixel at ``(i, j)`` to the minimum over all pixels in the neighborhood
+    centered at ``(i, j)``. The values where the footprint is 1 define this
     neighborhood.
 
     Parameters
@@ -117,7 +117,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
@@ -152,7 +152,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the built-in footprints such as
-    :func:`skimage2.morphology.disk` provide an option to generate automatically
+    :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type.
 
     Examples
@@ -202,8 +202,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation enlarges bright regions and shrinks dark regions.
-    It sets a pixel at (i, j) to the maximum over all pixels in the neighborhood
-    centered at (i, j). The values where the footprint is 1 define this
+    It sets a pixel at ``(i, j)`` to the maximum over all pixels in the neighborhood
+    centered at ``(i, j)``. The values where the footprint is 1 define this
     neighborhood.
 
     Parameters
@@ -212,7 +212,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
@@ -300,7 +300,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological opening of an image.
 
     The morphological opening of an image is defined as an erosion followed by
-    a dilation. Opening can remove small bright spots (i.e. "salt") and connect
+    a dilation. Opening can remove small bright spots (i.e., "salt") and connect
     small dark cracks. This tends to "open" up (dark) gaps between (bright)
     features.
 
@@ -310,7 +310,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
@@ -374,7 +374,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological closing of an image.
 
     The morphological closing of an image is defined as a dilation followed by
-    an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
+    an erosion. Closing can remove small dark spots (i.e., "pepper") and connect
     small bright cracks. This tends to "close" up (dark) gaps between (bright)
     features.
 
@@ -384,7 +384,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
@@ -457,7 +457,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
@@ -547,7 +547,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (connectivity=1). The footprint
+        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
