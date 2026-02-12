@@ -14,6 +14,21 @@ from skimage.metrics import normalized_mutual_information
 import skimage as ski
 
 
+class AffineTransform:
+    """Temporary"""
+
+    def __init__(self, matrix):
+        self.params = matrix
+
+
+class EuclideanTransform(AffineTransform):
+    """Temporary"""
+
+
+class TranslationTransform(AffineTransform):
+    """Temporary"""
+
+
 def target_registration_error(shape, matrix):
     """
     Compute the displacement norm of the transform at each pixel.
@@ -72,24 +87,6 @@ def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
     return new_image
 
 
-class AffineTransform:
-    """Temporary"""
-
-    def __init__(self, matrix):
-        self.params = matrix
-
-
-class EuclideanTransform(AffineTransform):
-    """Temporary"""
-
-    def __init__(self, matrix):
-        self.params = matrix
-
-
-class TranslationTransform(AffineTransform):
-    """Temporary"""
-
-
 class AffineSolver:
     def __init__(self, model_class, order=3):
         self._model_class = model_class
@@ -122,6 +119,8 @@ class AffineSolver:
         - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D,
         - euclidean : [dy,dx,theta] in 2D or [dz,dy,dx,alpha,beta,gamma] in 3D,
         - affine: the top of the homogeneous matrix minus identity.
+
+        The solver might want to specialize this method.
         """
 
         # Test if the parameter is actually a homogeneous matrix already
@@ -604,7 +603,7 @@ class LucasKanadeAffineSolver(AffineSolver):
 
 class ECCAffineSolver(AffineSolver):
     """
-    Enhance Correlation Coefficent affine solver
+    Enhanced Correlation Coefficent affine solver
 
     Reference
     ---------
@@ -994,7 +993,7 @@ class GaussianPyramid:
         scale: float
             The smallest scaling factor.
         """
-        scale = pow(self.downscale, -self.max_layers(shape) - 1)
+        scale = math.pow(self.downscale, -self.max_layers(shape) - 1)
         return scale
 
     def generate(self, image, channel_axis=0):
@@ -1134,6 +1133,11 @@ def estimate_affine(
     -------
     transform : ski.transform.AffineTransform
         The estimated affine transform
+
+    Note
+    ----
+    The affine transform matrix is compatible with the convension of scipy.ndimage.affine_transform
+    and uses the row, columns conventions.
     """
 
     ref, mov = [
