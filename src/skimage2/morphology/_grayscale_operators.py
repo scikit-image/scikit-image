@@ -216,8 +216,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -314,8 +314,8 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
-        The array to store the result of the morphology. If None
-        is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -389,7 +389,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
-        a new array will be allocated.
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -461,8 +461,8 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
-        The array to store the result of the morphology. If None
-        is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
@@ -551,8 +551,8 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         can also be provided as a sequence of smaller footprints as described
         in the notes below.
     out : ndarray, optional
-        The array to store the result of the morphology. If None
-        is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        a new array is allocated.
     mode : str, optional
         The `mode` parameter determines how the array borders are handled.
         Valid modes are: 'reflect', 'constant', 'nearest', 'mirror', 'wrap',
