@@ -139,24 +139,24 @@ def peak_local_max(
         `skimage.feature.peak_local_max` is deprecated in favor of
         `skimage2.feature.peak_local_max` with new behavior:
 
-            * `p_norm` defaults to 2 (Euclidean distance),
-              was `np.inf` (Chebyshev distance)
-            * `exclude_border` defaults to 0, was `True`
-            * `exclude_border` no longer accepts `False` and `True`,
-               pass 0 instead of `False`, or `min_distance` instead of `True`
-            * Parameters after `image` are keyword-only
+        * Parameter `p_norm` defaults to 2 (Euclidean distance),
+          was `numpy.inf` (Chebyshev distance)
+        * Parameter `exclude_border` defaults to 0, was `True`
+        * Parameter `exclude_border` no longer accepts `False` and `True`,
+          pass 0 instead of `False`, or `min_distance` instead of `True`
+        * Parameters after `image` are keyword-only
 
-        To keep the old behavior from `skimage` (v1.x) use:
+        To keep the old behavior when switching to `skimage2`, update your call
+        according to the following cases:
 
-            import skimage2 as ski2
+        * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+        * `exclude_border=True`, same as above
+        * `exclude_border=False`, use `exclude_border=0`
+        * `exclude_border=<int>`, no change necessary
+        * `p_norm` not passed, use `p_norm=numpy.inf`
+        * `p_norm=<float>, no change necessary
 
-            ski2.feature.peak_local_max(
-                ...,
-                exclude_border=new_exclude_border,
-                p_norm=old_p_norm,
-            )
-
-        where `old_p_norm` is the old default or given value.
+        Other keyword parameters can be left unchanged.
         """),
         category=PendingSkimage2Change,
     )
