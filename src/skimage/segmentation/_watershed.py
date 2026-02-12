@@ -19,6 +19,7 @@ import numpy as np
 from scipy import ndimage as ndi
 
 from . import _watershed_cy
+from ..morphology import flood, flood_fill  # noqa: F401
 from ..morphology.extrema import local_minima
 from ..morphology._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import crop, regular_seeds

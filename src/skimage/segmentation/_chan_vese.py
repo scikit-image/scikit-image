@@ -200,7 +200,7 @@ def chan_vese(
 
     Parameters
     ----------
-    image : (M, N) ndarray
+    image : ndarray of shape (M, N)
         Grayscale image to be segmented.
     mu : float, optional
         'edge length' weight parameter. Higher `mu` values will
@@ -260,11 +260,11 @@ def chan_vese(
 
     Returns
     -------
-    segmentation : (M, N) ndarray, bool
+    segmentation : ndarray of shape (M, N) and dtype bool
         Segmentation produced by the algorithm.
-    phi : (M, N) ndarray of floats
+    phi : ndarray of shape (M, N) and dtype float
         Final level set computed by the algorithm.
-    energies : list of floats
+    energies : list of float(s)
         Shows the evolution of the 'energy' for each step of the
         algorithm. This should allow to check whether the algorithm
         converged.

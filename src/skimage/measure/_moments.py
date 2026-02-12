@@ -256,14 +256,24 @@ def moments_central(image, center=None, order=3, *, spacing=None, **kwargs):
     if spacing is None:
         spacing = np.ones(image.ndim, dtype=float_dtype)
     calc = image.astype(float_dtype, copy=False)
+    L = list(range(image.ndim))  # Starting axis labels for einsum.
+    sum_label = image.ndim  # Label for axes over which to do dot product.
+    order_label = sum_label + 1  # Label for output coord / order axis.
+    orders = np.arange(order + 1, dtype=float_dtype)
     for dim, dim_length in enumerate(image.shape):
         delta = np.arange(dim_length, dtype=float_dtype) * spacing[dim] - center[dim]
-        powers_of_delta = delta[:, np.newaxis] ** np.arange(
-            order + 1, dtype=float_dtype
+        powers_of_delta = delta[:, np.newaxis] ** orders
+        # Take dot product over `dim` axis of image, and coord axis of
+        # powers_of_delta.  Label axes to dot product with `sum_label`.  Put
+        # resulting order dimension at position of the `dim` axis.
+        calc = np.einsum(
+            calc,
+            L[:dim] + [sum_label] + L[dim + 1 :],  # Input axis labels.
+            powers_of_delta,
+            [sum_label, order_label],  # Coord, order axis labels.
+            L[:dim] + [order_label] + L[dim + 1 :],  # Output axis labels.
+            optimize='greedy',
         )
-        calc = np.rollaxis(calc, dim, image.ndim)
-        calc = np.dot(calc, powers_of_delta)
-        calc = np.rollaxis(calc, -1, dim)
     return calc
 
 
@@ -365,9 +375,8 @@ def moments_hu(nu):
     >>> image[10:12, 10:12] = 1
     >>> mu = moments_central(image)
     >>> nu = moments_normalized(mu)
-    >>> moments_hu(nu)
-    array([0.74537037, 0.35116598, 0.10404918, 0.04064421, 0.00264312,
-           0.02408546, 0.        ])
+    >>> np.round(moments_hu(nu), 4)  # doctest: +FLOAT_CMP
+    array([0.7454, 0.3512, 0.104 , 0.0406, 0.0026, 0.0241, 0.    ])
     """
     dtype = np.float32 if nu.dtype == 'float32' else np.float64
     return _moments_cy.moments_hu(nu.astype(dtype, copy=False))

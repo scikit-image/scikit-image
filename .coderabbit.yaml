@@ -1,0 +1,63 @@
+reviews:
+  profile: "chill" # "assertive" — more nitpicky
+  review_status: false
+  review_details: false
+  high_level_summary: false
+  request_changes_workflow: false
+  estimate_code_review_effort: true
+  labeling_instructions:
+    - label: ":scroll: type: API"
+      instructions: >-
+        For backward-incompatible changes to the API and deprecations.
+        Only apply if no "type:" label is already assigned.
+    - label: ":baby: type: New feature"
+      instructions: >-
+        For new features that previously did not exist.
+        New features for tooling, infrastructure and such shouldn't use this label.
+        Only apply if no "type:" label is already assigned.
+    - label: ":wrench: type: Maintenance"
+      instructions: >-
+        For internal code changes and cleanups.
+        Only apply if no "type:" label is already assigned.
+    - label: ":adhesive_bandage: type: Bug fix"
+      instructions: >-
+        For bug fixes that apply to user facing API.
+        Fixes for tooling, infrastructure and such shouldn't use this label.
+        Only apply if no "type:" label is already assigned.
+    - label: ":page_facing_up: type: Documentation"
+      instructions: >-
+        For changes dedicated to documentation (i.e., not as part of a new feature).
+        Only apply if no "type:" label is already assigned.
+    - label: ":robot: type: Infrastructure"
+      instructions: >-
+        Fixes to CI and other infrastructure.
+        Only apply if no "type:" label is already assigned.
+    - label: ":fast_forward: type: Enhancement"
+      instructions: >-
+        Improvements made to an existing feature.
+        Improvements for tooling, infrastructure and such shouldn't use this label.
+        Only apply if no "type:" label is already assigned.
+    - label: ":chart_with_upwards_trend: type: Performance"
+      instructions: >-
+        For changes intended to improve performance.
+        Only apply if no "type:" label is already assigned.
+  auto_apply_labels: true
+  in_progress_fortune: false
+  poem: false
+  enable_prompt_for_ai_agents: false
+  auto_review:
+    base_branches:
+      - main
+  pre_merge_checks:
+    title:
+      requirements: >-
+        Title should be concise and descriptive, ideally under 80 characters, and not end on `.`
+
+chat:
+  auto_reply: false
+
+knowledge_base:
+  code_guidelines:
+    filePatterns:
+      - CONTRIBUTING.rst
+      - doc/source/development/core_developer.md

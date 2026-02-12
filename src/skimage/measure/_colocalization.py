@@ -17,9 +17,9 @@ def pearson_corr_coeff(image0, image1, mask=None):
 
     Parameters
     ----------
-    image0 : (M, N) ndarray
+    image0 : ndarray of shape (M, N)
         Image of channel A.
-    image1 : (M, N) ndarray
+    image1 : ndarray of shape (M, N)
         Image of channel 2 to be correlated with channel B.
         Must have same dimensions as `image0`.
     mask : (M, N) ndarray of dtype bool, optional
@@ -102,7 +102,7 @@ def manders_coloc_coeff(image0, image1_mask, mask=None):
 
     Parameters
     ----------
-    image0 : (M, N) ndarray
+    image0 : ndarray of shape (M, N)
         Input image (first channel). All pixel values should be non-negative.
     image1_mask : (M, N) ndarray of dtype bool
         Binary image giving the regions of interest in the second channel.
@@ -185,19 +185,17 @@ def manders_overlap_coeff(image0, image1, mask=None):
 
     Parameters
     ----------
-    image0 : (M, N) ndarray
+    image0 : ndarray of shape (M, N)
         Image of channel A. All pixel values should be non-negative.
-    image1 : (M, N) ndarray
+    image1 : ndarray of shape (M, N)
         Image of channel B. All pixel values should be non-negative.
-        Must have same dimensions as `image0`
-    mask : (M, N) ndarray of dtype bool, optional
+    mask : ndarray of shape (M, N) and dtype bool, optional
         Only `image0` and `image1` pixel values within this region of interest
         mask are included in the calculation.
-        Must have ♣same dimensions as `image0`.
 
     Returns
     -------
-    moc: float
+    moc : float
         Manders' Overlap Coefficient of pixel intensities between the two
         images.
 

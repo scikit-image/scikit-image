@@ -8,7 +8,7 @@ def slice_along_axes(image, slices, axes=None, copy=False):
     ----------
     image : ndarray
         Input image.
-    slices : list of 2-tuple (a, b) where a < b.
+    slices : list of (tuple[int, int])
         For each axis in `axes`, a corresponding 2-tuple
         ``(min_val, max_val)`` to slice with (as with Python slices,
         ``max_val`` is non-inclusive).
