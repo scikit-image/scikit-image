@@ -112,7 +112,7 @@ def peak_local_max(
     min_distance=1,
     threshold_abs=None,
     threshold_rel=None,
-    exclude_border=0,
+    exclude_border=1,
     num_peaks=None,
     footprint=None,
     labels=None,
@@ -141,7 +141,8 @@ def peak_local_max(
         Minimum intensity of peaks, calculated as
         ``max(image) * threshold_rel``.
     exclude_border : int or tuple of (int, ...), optional
-        Control peak detection close to the border of `image`.
+        Control peak detection close to the border of `image`. By default,
+        only peaks exactly on the border are excluded.
 
         ``0``
             Distance to border has no effect, all peaks are identified.
@@ -204,23 +205,22 @@ def peak_local_max(
     Find all peaks
     >>> ski2.feature.peak_local_max(image)
     array([[3, 2],
-           [3, 4],
-           [0, 0]])
+           [3, 4]])
 
     Ensure peaks are at least 2 pixels apart
     >>> ski2.feature.peak_local_max(image, min_distance=2)
-    array([[3, 2],
-           [0, 0]])
+    array([[3, 2]])
 
-    Ignore peaks on the image border
-    >>> ski2.feature.peak_local_max(image, exclude_border=2)
+    Allow peaks on the image border
+    >>> ski2.feature.peak_local_max(image, exclude_border=0)
     array([[3, 2],
-           [3, 4]])
+           [3, 4],
+           [0, 0]])
     """
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
-            "When min_distance < 1, peak_local_max acts as finding "
-            "image > max(threshold_abs, threshold_rel * max(image)).",
+            "When `min_distance < 1`, `peak_local_max` acts as finding "
+            "`image > max(threshold_abs, threshold_rel * max(image))`.",
             category=RuntimeWarning,
         )
 

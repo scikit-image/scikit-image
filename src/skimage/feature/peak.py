@@ -141,7 +141,7 @@ def peak_local_max(
 
         * Parameter `p_norm` defaults to 2 (Euclidean distance),
           was `numpy.inf` (Chebyshev distance)
-        * Parameter `exclude_border` defaults to 0, was `True`
+        * Parameter `exclude_border` defaults to 1, was `True`
         * Parameter `exclude_border` no longer accepts `False` and `True`,
           pass 0 instead of `False`, or `min_distance` instead of `True`
         * Parameters after `image` are keyword-only

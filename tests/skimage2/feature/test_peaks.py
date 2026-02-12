@@ -22,20 +22,15 @@ class TestPeakLocalMax:
         image[3, 0, 0] = 1
         image[2, 2, 2] = 1
 
-        expected_full = np.array([[0, 0, 1], [2, 2, 2], [3, 0, 0]], dtype=int)
-        expected_exclude2 = np.array([[2, 2, 2]], dtype=int)
-
         # exclude_border=0
         result = peak_local_max(image, min_distance=2, exclude_border=0)
-        assert_equal(result, expected_full)
+        assert_equal(result, [[0, 0, 1], [2, 2, 2], [3, 0, 0]])
 
-        # Default behavior (exclude_border=0) should be the same
+        # Default behavior (exclude_border=1) should be the same
         result = peak_local_max(image, min_distance=2)
-        assert_equal(result, expected_full)
-
-        # exclude_border=2
-        result = peak_local_max(image, min_distance=2, exclude_border=2)
-        assert_equal(result, expected_exclude2)
+        assert_equal(result, [[2, 2, 2]])
+        result = peak_local_max(image, min_distance=2, exclude_border=1)
+        assert_equal(result, [[2, 2, 2]])
 
     def test_num_peak_float_error(self):
         image = np.zeros((10, 10))
