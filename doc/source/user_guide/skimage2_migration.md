@@ -74,6 +74,9 @@ The new functions use 'ignore' as the default value for parameter `mode` (as
 opposed to 'reflect' in v1.x).
 To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
 
+TODO: Update doctests in `src/skimage2/morphology/_grayscale_operators.py` to
+import `footprint_rectangle` from skimage2 once available.
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
