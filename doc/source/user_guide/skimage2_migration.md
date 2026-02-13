@@ -65,6 +65,57 @@ ski2.data.binary_blobs(
 with `length`, `n_dim`, and `blob_size_fraction` containing values used with the old signature.
 Other parameters -- including `boundary_mode` if you already set it explicitly -- can be left unchanged.
 
+### `skimage.feature.peak_local_max`
+
+This function is replaced by `skimage2.feature.peak_local_max` with new behavior:
+
+- Parameter `p_norm` defaults to 2 (Euclidean distance), was `numpy.inf` (Chebyshev distance)
+- Parameter `exclude_border` defaults to 1, was `True`
+- Parameter `exclude_border` no longer accepts `False` and `True`, pass 0 instead of `False`, or `min_distance` instead of `True`
+- Parameters after `image` are keyword-only
+
+To keep the old behavior when switching to `skimage2`, update your call according to the following cases:
+
+:::{list-table}
+:header-rows: 1
+
+- - In `skimage`
+  - In `skimage2`
+
+- - `exclude_border` not passed (default)
+  - Assign it the same value as `min_distance` which may be its default value `1`.
+
+- - `exclude_border=True`
+  - Same as above in the default case.
+
+- - `exclude_border=False`
+  - Use `min_distance=0`.
+
+- - `exclude_border=<int>`
+  - No change necessary.
+
+- - `p_norm` not passed (default)
+  - Pass the previous default explicitly with `p_norm=numpy.inf`.
+
+- - `p_norm=<float>`
+  - No change necessary.
+
+:::
+
+Other keyword parameters can be left unchanged.
+
+Examples:
+
+```python
+ski.morphology.peak_local_max(image)
+ski2.morphology.peak_local_max(image, exclude_border=1, p_norm=np.inf)
+
+ski.morphology.peak_local_max(image, min_distance=10)
+ski2.morphology.peak_local_max(
+    image, min_distance=10, exclude_border=10, p_norm=np.inf
+)
+```
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
