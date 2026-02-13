@@ -6,4 +6,5 @@ py3.install_sources(
 )
 
 subdir('data')
+subdir('feature')
 subdir('morphology')

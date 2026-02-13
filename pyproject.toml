@@ -195,7 +195,8 @@ addopts = [
     "--strict-config",
     "--strict-markers",
     "--maxfail=5",
-    # Necessary for doctest collection with editable installations
+    # Necessary for doctest collection with editable installations and
+    # non-unique test module names (skimage/skimage2 duplicates those)
     "--import-mode=importlib",
     # See comment on `testpaths`
     "--pyargs",
