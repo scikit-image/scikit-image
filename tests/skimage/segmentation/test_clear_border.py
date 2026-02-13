@@ -181,7 +181,6 @@ def test_clear_border_non_binary_out_3d():
 
 
 def test_clear_border_mask_shape_mismatch():
-
     labels = np.zeros((10, 10), dtype=int)
     mask = np.ones((5, 5), dtype=bool)
 
