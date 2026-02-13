@@ -185,6 +185,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     footprint = pad_footprint(footprint, pad_end=False)
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
+    elif len(footprint) == 0:
+        raise ValueError("footprint sequence must be non-empty")
 
     out = _apply_decomposed(
         operator=ndi.grey_erosion,
@@ -283,6 +285,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     footprint = mirror_footprint(footprint)
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
+    elif len(footprint) == 0:
+        raise ValueError("footprint sequence must be non-empty")
 
     out = _apply_decomposed(
         operator=ndi.grey_dilation,
