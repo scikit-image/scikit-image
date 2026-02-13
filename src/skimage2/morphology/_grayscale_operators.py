@@ -136,7 +136,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     Returns
     -------
-    eroded : ndarray, same shape and dtype as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological erosion.
 
     Notes
@@ -231,7 +231,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     Returns
     -------
-    dilated : ndarray, same shape and dtype as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological dilation.
 
     Notes
@@ -330,7 +330,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     Returns
     -------
-    opening : ndarray, same shape and dtype as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological opening.
 
     Notes
@@ -404,7 +404,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     Returns
     -------
-    closing : ndarray, same shape and dtype as `image`
+    out : ndarray, same shape and dtype as `image`
         The result of the morphological closing.
 
     Notes
