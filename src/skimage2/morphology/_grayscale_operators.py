@@ -153,7 +153,10 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
+
 
     Examples
     --------
@@ -250,7 +253,9 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
 
     Examples
     --------
@@ -347,7 +352,9 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
 
     Examples
     --------
@@ -421,7 +428,9 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
 
     Examples
     --------
@@ -491,7 +500,9 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
 
     See Also
     --------
@@ -581,7 +592,9 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
     computational cost. Most of the builtin footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
-    a footprint sequence of this type.
+    a footprint sequence of this type. Refer to the example
+    :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
+    for more insights.
 
     See Also
     --------
