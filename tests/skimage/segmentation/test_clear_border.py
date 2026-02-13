@@ -185,5 +185,5 @@ def test_clear_border_mask_shape_mismatch():
     labels = np.zeros((10, 10), dtype=int)
     mask = np.ones((5, 5), dtype=bool) 
     
-    with pytest.raises(ValueError, match="labels and mask should have same shape"):
+    with pytest.raises(ValueError, match="labels and mask should have the same shape"):
         clear_border(labels, mask=mask)
