@@ -3,6 +3,7 @@ import sys
 
 import click
 import spin
+from spin.cmds.meson import _is_editable_install_of_same_source
 
 
 @click.option(
@@ -83,33 +84,29 @@ def sdist(pyproject_build_args):
     spin.util.run(["tools/check_sdist.py", sdist])
 
 
-@click.option(
-    "--doctest/--no-doctest",
-    default=True,
-    help="Run doctests with doctest-plus "
-    "(sets `--import-mode=importlib` unless specified explicitly)",
-)
+_SRC_IN_TEST_ARGS_WARNING_MESSAGE = """\
+WARNING: Found 'src' in test arguments and using out-of-tree build.
+For out-of-tree builds, selecting `src/` as a doctest path may fail because
+Pytest doesn't expect source and installation to live in different places.
+Use an editable install (`spin install`) which supports this or avoid passing
+`src/`. For example:
+    spin test -- src/skimage/io  # NO!
+    spin test -- skimage.io      # YES!
+"""
+
+
+@click.option("--doctest/--no-doctest", default=True, help="Whether to run doctests.")
 @spin.util.extend_command(spin.cmds.meson.test)
 def test(*, parent_callback, doctest=False, **kwargs):
     pytest_args = kwargs.get('pytest_args', ())
-    if not pytest_args:
-        pytest_args = ('./tests',)
+
+    is_out_of_tree_build = not _is_editable_install_of_same_source("scikit-image")
+    if is_out_of_tree_build and "src" in str(pytest_args):
+        click.secho(_SRC_IN_TEST_ARGS_WARNING_MESSAGE, fg="yellow", bold=True)
 
     if doctest:
         if '--doctest-plus' not in pytest_args:
             pytest_args = ('--doctest-plus',) + pytest_args
-        if '--pyargs' not in pytest_args:
-            pytest_args = (
-                '--pyargs',
-                'skimage',
-            ) + pytest_args
-
-    # `--import-mode="importlib"` is necessary to collect doctests
-    # for editable installs.
-    if any('--doctest' in arg for arg in pytest_args) and not any(
-        '--import-mode' in arg for arg in pytest_args
-    ):
-        pytest_args = ('--import-mode=importlib',) + pytest_args
 
     kwargs["pytest_args"] = pytest_args
     parent_callback(**kwargs)

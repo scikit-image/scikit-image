@@ -48,7 +48,7 @@ build = [
     # Also update [build-system] -> requires
     'meson-python>=0.16',
     'ninja>=1.11.1.1',
-    'Cython>=3.0.8,!=3.2.0b1',
+    'Cython>=3.0.10,!=3.2.0b1',
     'pythran>=0.16',
     'numpy>=2.0',
     # Developer UI
@@ -124,7 +124,7 @@ tracker = 'https://github.com/scikit-image/scikit-image/issues'
 build-backend = 'mesonpy'
 requires = [
     'meson-python>=0.16',
-    'Cython>=3.0.8,!=3.2.0b1',
+    'Cython>=3.0.10,!=3.2.0b1',
     'pythran>=0.16',
     'lazy_loader>=0.4',
     'numpy>=2.0',
@@ -190,10 +190,29 @@ convention = 'numpy'
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = ["-ra", "--strict-config", "--strict-markers", "--maxfail=5"]
+addopts = [
+    "-ra",
+    "--strict-config",
+    "--strict-markers",
+    "--maxfail=5",
+    # Necessary for doctest collection with editable installations
+    "--import-mode=importlib",
+    # See comment on `testpaths`
+    "--pyargs",
+]
+
+# For out-of-tree installations, selecting `src/` as a test path fails.
+# Pytest doesn't expect the doctest's sources and installation to be
+# different. Instead, we use `--pyargs` in the `addopts` field so that pytest
+# can find docstests by importing.
+testpaths = [
+    "skimage",
+    "skimage2",
+    "./tests/",
+]
+
 log_cli_level = "INFO"
 xfail_strict = true
-testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
