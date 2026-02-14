@@ -28,7 +28,7 @@ fi
 
 # Combine requirement files for a more robust pip solve
 # installing successively may update previously constrained dependencies
-REQUIREMENT_FILES="-r requirements/default.txt -r requirements/test.txt"
+REQUIREMENT_FILES="-r requirements/default.txt -r requirements/test.txt -r requirements/asv.txt"
 if [[ "${OPTIONAL_DEPS}" == "1" ]]; then
     REQUIREMENT_FILES="${REQUIREMENT_FILES} -r requirements/optional.txt"
 fi

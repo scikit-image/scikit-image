@@ -27,7 +27,7 @@ filterwarnings(
 project = "skimage"
 copyright = f"2013-{date.today().year}, the scikit-image team"
 
-with open("../../skimage/__init__.py") as f:
+with open("../../src/skimage/__init__.py") as f:
     setup_lines = f.readlines()
 version = "vUndefined"
 for l in setup_lines:
@@ -347,19 +347,21 @@ def linkcode_resolve(domain, info):
     fn = os.path.relpath(fn, start=os.path.dirname(skimage.__file__))
 
     if "dev" in skimage.__version__:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"main/skimage/{fn}{linespec}"
-        )
+        git_ref = "main"
     else:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"v{skimage.__version__}/skimage/{fn}{linespec}"
-        )
+        git_ref = f"v{skimage.__version__}"
+    src_url = (
+        f"https://github.com/scikit-image/scikit-image/blob/"
+        f"{git_ref}/src/skimage/{fn}{linespec}"
+    )
+
+    return src_url
 
 
 # -- MyST --------------------------------------------------------------------
 myst_enable_extensions = [
     # Enable fieldlist to allow for Field Lists like in rST (e.g., :orphan:)
     "fieldlist",
+    # Enable fencing directives with `:::`
+    "colon_fence",
 ]

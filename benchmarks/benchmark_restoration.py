@@ -221,11 +221,11 @@ class RollingBall:
 
     time_rollingball_ndim.setup = _skip_slow
 
-    def time_rollingball_threads(self, threads):
-        restoration.rolling_ball(data.coins(), radius=100, num_threads=threads)
+    def time_rollingball_parallel(self, workers):
+        restoration.rolling_ball(data.coins(), radius=100, workers=workers)
 
-    time_rollingball_threads.params = (0, 2, 4, 8)
-    time_rollingball_threads.param_names = ["threads"]
+    time_rollingball_parallel.params = (0, 2, 4, 8)
+    time_rollingball_parallel.param_names = ["workers"]
 
 
 class Inpaint:

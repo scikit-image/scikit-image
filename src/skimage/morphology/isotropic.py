@@ -69,6 +69,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
            [0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
     """
+
     if image.dtype != np.bool_:
         raise TypeError(
             f"Input 'image' must be a binary image (bool dtype), got {image.dtype}"
@@ -140,6 +141,7 @@ def isotropic_dilation(image, radius, out=None, spacing=None):
            [0, 1, 1, 1, 1],
            [0, 0, 1, 1, 0]], dtype=uint8)
     """
+
     if image.dtype != np.bool_:
         raise TypeError(
             f"Input 'image' must be a binary image (bool dtype), got {image.dtype}"
