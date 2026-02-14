@@ -54,7 +54,7 @@ def canny(
     output : ndarray of shape (M, N)
         The binary edge map.
 
-    See also
+    See Also
     --------
     skimage.filters.sobel
 
