@@ -99,12 +99,12 @@ def _preprocess(image, mask, sigma, mode, cval):
 
 def canny(
     image,
+    *,
     sigma=1.0,
     low_threshold=None,
     high_threshold=None,
     mask=None,
     use_quantiles=False,
-    *,
     mode='nearest',
     cval=0.0,
 ):
