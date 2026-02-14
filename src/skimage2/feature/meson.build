@@ -17,6 +17,7 @@ python_sources = [
   '__init__.py',
   '__init__.pyi',
   '_canny.py',
+  '_peaks.py',
 ]
 
 py3.install_sources(
