@@ -75,10 +75,12 @@ To keep the old (`skimage`, v1.x) behavior, use
 import skimage2 as ski2
 
 ski2.feature.canny(
-    image,
+    ...,
     mode='constant',
 )
 ```
+
+Other parameters can be left unchanged.
 
 ### `skimage.feature.peak_local_max`
 

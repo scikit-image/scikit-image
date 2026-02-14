@@ -5,9 +5,9 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
 """
 
-import warnings
 import skimage2 as ski2
 from ..util import PendingSkimage2Change
+from .._shared._warnings import warn_external
 
 
 def canny(
@@ -56,7 +56,7 @@ def canny(
 
     See also
     --------
-    skimage2.filters.sobel
+    skimage.filters.sobel
 
     Notes
     -----
@@ -103,19 +103,16 @@ def canny(
     >>> edges2 = ski.feature.canny(im, sigma=3)
 
     """
-
-    warnings.warn(
+    warn_external(
         "`skimage.feature.canny` is deprecated in favor of `skimage2.feature.canny`. "
-        "The default of the optional parameter `mode` has been changed from `constant` to `nearest`. "
-        "To keep the old (`skimage`, v1.x) behavior, use:\n"
-        "\n"
+        "The default of the optional parameter `mode` has been changed from `constant` "
+        "to `nearest`. To keep the old (`skimage`, v1.x) behavior, use:\n\n"
         "    import skimage2 as ski2\n"
         "    ski2.feature.canny(\n"
-        "        image,\n"
+        "        ...,\n"
         "        mode='constant',\n"
-        "        ...\n"
-        "    )",
-        stacklevel=2,
+        "    )\n\n"
+        "Other parameters can be left unchanged.",
         category=PendingSkimage2Change,
     )
 
