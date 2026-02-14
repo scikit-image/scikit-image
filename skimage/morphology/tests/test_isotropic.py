@@ -74,8 +74,7 @@ def test_footprint_overflow():
 def test_out_argument():
     for func in (isotropic.isotropic_erosion, isotropic.isotropic_dilation):
         radius = 3
-        img_arr = np.ones((10, 10))
-        img = img_arr.astype(np.bool)
+        img = np.ones((10, 10), dtype=np.bool)
         out = np.zeros_like(img)
         out_saved = out.copy()
         func(img, radius, out=out)
@@ -92,6 +91,6 @@ def test_out_argument():
         isotropic.isotropic_opening,
     ],
 )
-def test_isotrophic_errors(func):
-    with pytest.raises(TypeError, match="Input image must be a binary image"):
+def test_isotropic_errors(func):
+    with pytest.raises(TypeError, match="dtype of 'image' must be boolean"):
         func(img, radius=2)
