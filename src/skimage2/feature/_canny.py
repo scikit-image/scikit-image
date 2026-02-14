@@ -149,7 +149,7 @@ def canny(
     -----
     The steps of the algorithm are as follows:
 
-    * Smooth the image using a Gaussian with ``sigma`` width.
+    * Smooth the image using a Gaussian with width `sigma`.
 
     * Apply the horizontal and vertical Sobel operators to get the gradients
       within the image. The edge strength is the norm of the gradient.
