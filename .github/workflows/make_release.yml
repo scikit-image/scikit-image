@@ -1,0 +1,66 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.repository == 'scikit-image/scikit-image'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build Distribution
+        run: |
+          pip install wheel
+          python setup.py sdist bdist_wheel
+      - name: Find Release Notes
+        id: release_notes
+        run: |
+          TAG="${GITHUB_REF/refs\/tags\/v/}"  # clean tag
+          VER="${TAG/rc*/}"  # remove pre-release identifier
+          RELEASE_NOTES="$(cat docs/release/release_${VER//./_}.rst)"
+          # https://github.community/t5/GitHub-Actions/set-output-Truncates-Multiline-Strings/m-p/38372/highlight/true#M3322
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}" 
+          # https://help.github.com/en/actions/reference/workflow-commands-for-github-actions
+          echo "::set-env name=tag::$TAG"
+          echo "::set-output name=contents::$RELEASE_NOTES"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.tag }}
+          body: ${{ steps.release_notes.outputs.contents }}
+          draft: false
+          prerelease: ${{ contains(github.ref, 'rc') }}
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/scikit-image-${{ env.tag }}.tar.gz
+          asset_name: scikit-image-${{ env.tag }}.tar.gz
+          asset_content_type: application/gzip
+      - name: Publish PyPI Package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
