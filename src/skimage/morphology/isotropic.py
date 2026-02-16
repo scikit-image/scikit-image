@@ -60,7 +60,7 @@ def isotropic_erosion(image, radius, out=None, spacing=None):
     ...                   [0, 1, 1, 1, 0],
     ...                   [0, 1, 1, 1, 0],
     ...                   [0, 1, 1, 1, 0],
-    ...                   [0, 0, 0, 0, 0]], dtype=bool)
+    ...                   [0, 0, 0, 0, 0]], dtype=np.bool)
     >>> result = ski.morphology.isotropic_erosion(image, radius=1)
     >>> result.view(np.uint8)
     array([[0, 0, 0, 0, 0],
