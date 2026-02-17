@@ -94,10 +94,10 @@ psnr_ref = metrics.peak_signal_noise_ratio(ref_img, img_list[0])
 #
 # Reference points are detected over all images in the list.
 
-min_dist = 5.1
+min_dist = 5
 corner_list = [
     feature.peak_local_max(
-        feature.corner_harris(img), threshold_rel=0.001, min_distance=min_dist
+        feature.corner_harris(img), threshold_rel=0.001, min_distance=min_dist + 0.1
     )
     for img in img_list
 ]
