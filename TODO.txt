@@ -27,6 +27,7 @@ Version 0.27
 Version 0.29
 ------------
 * Complete deprecation of `threshold_rel` in `skimage.feature.blob_*` functions
+* Complete deprecation of `skimage.feature.corner_peaks`
 
 Other
 -----

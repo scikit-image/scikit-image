@@ -614,7 +614,8 @@ def test_subpix_border():
     img = np.zeros((50, 50))
     img[1:25, 1:25] = 255
     img[25:-1, 25:-1] = 255
-    corner = corner_peaks(corner_harris(img), threshold_rel=0)
+    eps = np.finfo(float).eps
+    corner = peak_local_max(corner_harris(img), min_distance=1 + eps, threshold_rel=0)
     subpix = corner_subpix(img, corner, window_size=11)
     ref = np.array(
         [
@@ -670,6 +671,31 @@ def test_corner_peaks():
         response, exclude_border=False, min_distance=1, indices=False
     )
     assert np.sum(corners) == 5
+
+
+def test_corner_peaks_deprecation_advice():
+    response = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 1, 1, 1, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    # `corner_peaks` only finds edges because `min_distance >= 1` is filtered
+    corners = corner_peaks(response, exclude_border=False, min_distance=1)
+    assert_equal(corners, [[1, 1], [1, 3], [3, 1], [3, 3]])
+
+    # `peak_local_max` doesn't filter anything
+    # because only `min_distance > 1` is filtered
+    peaks = peak_local_max(response, exclude_border=False, min_distance=1)
+    assert_equal(peaks, np.array(np.nonzero(response)).T)
+
+    # `min_distance > 1 + eps` recoveres original behavior of `corner_peaks`
+    eps = np.finfo(float).eps
+    peaks = peak_local_max(response, exclude_border=False, min_distance=1 + eps)
+    assert_equal(peaks, [[1, 1], [1, 3], [3, 1], [3, 3]])
 
 
 def test_blank_image_nans():
@@ -742,7 +768,10 @@ def test_corner_fast_astronaut():
             [223, 375],
         ]
     )
-    actual = corner_peaks(corner_fast(img, 12, 0.3), min_distance=10, threshold_rel=0)
+    eps = np.finfo(float).eps
+    actual = peak_local_max(
+        corner_fast(img, 12, 0.3), min_distance=10 + eps, threshold_rel=0
+    )
     assert_array_equal(actual, expected)
 
 
@@ -761,8 +790,12 @@ def test_corner_orientations_even_shape_error():
 @run_in_parallel()
 def test_corner_orientations_astronaut():
     img = rgb2gray(data.astronaut())
-    corners = corner_peaks(
-        corner_fast(img, 11, 0.35), min_distance=10, threshold_abs=0, threshold_rel=0.1
+    eps = np.finfo(float).eps
+    corners = peak_local_max(
+        corner_fast(img, 11, 0.35),
+        min_distance=10 + eps,
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     expected = np.array(
         [
@@ -812,7 +845,10 @@ def test_corner_orientations_astronaut():
 def test_corner_orientations_square(dtype):
     square = np.zeros((12, 12), dtype=dtype)
     square[3:9, 3:9] = 1
-    corners = corner_peaks(corner_fast(square, 9), min_distance=1, threshold_rel=0)
+    eps = np.finfo(float).eps
+    corners = peak_local_max(
+        corner_fast(square, 9), min_distance=1 + eps, threshold_rel=0
+    )
     actual_orientations = corner_orientations(square, corners, octagon(3, 2))
     assert actual_orientations.dtype == _supported_float_type(dtype)
     actual_orientations_degrees = np.rad2deg(actual_orientations)
