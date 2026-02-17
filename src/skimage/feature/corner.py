@@ -1133,7 +1133,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     `>= min_distance` (equal or greater than), `peak_local_max` uses
     `> min_distance` (greater than). To reproduce the exact behavior, use:
 
-        new_distance = old_distance + np.finfo(float).eps
+        new_distance = np.nextafter(old_distance, np.inf)
         coords = peak_local_max(image, min_distance=new_distance, ...)
 
     If you used `indices=False`, you can derive the boolean peak mask from
@@ -1168,7 +1168,7 @@ def corner_peaks(
         :func:`.peak_local_max` uses ``> min_distance`` (greater than). To
         reproduce the exact behavior, use::
 
-            new_distance = old_distance + np.finfo(float).eps
+            new_distance = np.nextafter(old_distance, np.inf)
             coords = peak_local_max(image, min_distance=new_distance, ...)
 
         If you used ``indices=False``, you can derive the boolean peak mask from

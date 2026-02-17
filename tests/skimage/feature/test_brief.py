@@ -23,7 +23,10 @@ def test_normal_mode(dtype):
     img = data.coins().astype(dtype)
 
     keypoints = peak_local_max(
-        corner_harris(img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
@@ -53,7 +56,10 @@ def test_uniform_mode(dtype):
     img = data.coins().astype(dtype)
 
     keypoints = peak_local_max(
-        corner_harris(img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)

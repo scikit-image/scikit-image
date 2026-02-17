@@ -40,13 +40,19 @@ def test_binary_descriptors_rotation_crosscheck_false():
     extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = peak_local_max(
-        corner_harris(img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
     keypoints2 = peak_local_max(
-        corner_harris(rotated_img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(rotated_img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
@@ -136,13 +142,19 @@ def test_binary_descriptors_rotation_crosscheck_true():
     extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = peak_local_max(
-        corner_harris(img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     extractor.extract(img, keypoints1)
     descriptors1 = extractor.descriptors
 
     keypoints2 = peak_local_max(
-        corner_harris(rotated_img), min_distance=5.1, threshold_abs=0, threshold_rel=0.1
+        corner_harris(rotated_img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
