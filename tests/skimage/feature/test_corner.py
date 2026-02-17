@@ -692,7 +692,7 @@ def test_corner_peaks_deprecation_advice():
     peaks = peak_local_max(response, exclude_border=False, min_distance=1)
     assert_equal(peaks, np.array(np.nonzero(response)).T)
 
-    # `min_distance > 1 + eps` recoveres original behavior of `corner_peaks`
+    # `min_distance > 1 + eps` recovers original behavior of `corner_peaks`
     eps = np.finfo(float).eps
     peaks = peak_local_max(response, exclude_border=False, min_distance=1 + eps)
     assert_equal(peaks, [[1, 1], [1, 3], [3, 1], [3, 3]])
