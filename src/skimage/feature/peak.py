@@ -94,10 +94,6 @@ def peak_local_max(
     of the dilated and original images, this function returns the coordinates
     of the peaks where the dilated image equals the original image.
 
-    See also
-    --------
-    skimage.feature.corner_peaks
-
     Examples
     --------
     >>> img1 = np.zeros((7, 7))
