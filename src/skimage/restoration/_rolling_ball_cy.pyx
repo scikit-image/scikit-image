@@ -112,7 +112,7 @@ def apply_kernel_nan(DTYPE_FLOAT[::1] img not None,
     -------
     out_data : ndarray
         The array passed into ``out``, reshaped to
-        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        ``out_data.reshape(img_shape, copy=False)`` (possibly a view) and filled with the
         estimated background intensity.
 
     See Also
@@ -196,7 +196,7 @@ def apply_kernel(DTYPE_FLOAT[::1] img not None,
     -------
     out_data : ndarray
         The array passed into ``out``, reshaped to
-        ``out_data.shape = img_shape`` (possibly a view) and filled with the
+        ``out_data.reshape(img_shape, copy=False)`` (possibly a view) and filled with the
         estimated background intensity.
 
     See Also
