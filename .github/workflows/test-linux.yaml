@@ -131,7 +131,6 @@ jobs:
         run: |
           asv check -v -E existing
 
-
   report-failures:
     runs-on: ubuntu-latest
     needs: [test_skimage_linux, test_skimage_linux_free_threaded]
