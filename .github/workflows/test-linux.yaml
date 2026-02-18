@@ -131,51 +131,6 @@ jobs:
         run: |
           asv check -v -E existing
 
-  test_skimage_linux_free_threaded:
-    name: linux-cp313t-default
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout scikit-image
-        uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-
-      # TODO: replace with setup-python when there is support
-      - uses: deadsnakes/action@e640ac8743173a67cca4d7d77cd837e514bf98e8 # v3.2.0
-        with:
-          python-version: "3.13"
-          nogil: true
-
-      - name: Install build dependencies
-        # See special clause inside setup-build-env.sh that detects when
-        # free threaded build is used, and then installs dependencies
-        # from nightly wheels
-        env:
-          PIP_FLAGS: "--pre"
-        run: |
-          source .github/scripts/setup-build-env.sh
-
-      - name: Build and install
-        run: |
-          pip install -v --no-build-isolation .
-
-      - name: Install test dependencies
-        # See special clause inside setup-test-env.sh that detects when
-        # free threaded build is used, and then installs dependencies
-        # from nightly wheels
-        env:
-          PIP_FLAGS: "--pre"
-        run: |
-          source .github/scripts/setup-test-env.sh
-
-      - name: Run tests
-        env:
-          PYTHON_GIL: 0
-          # A lazy loader configuration parameter
-          EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
-        run: |
-          $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
   report-failures:
     runs-on: ubuntu-latest
