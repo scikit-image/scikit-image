@@ -8,11 +8,13 @@ Version 0.28
   - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
   - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
 * Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
+* Remove all traces of deprecated parameter `num_threads` in
+  `skimage.restoration.rolling_ball`.
+* Remove all traces of deprecated parameter `num_workers` in
+  `skimage.restoration.cycle_spin`.
 
 Version 0.27
 ------------
-* Remove deprecated `skimage.io.imshow`,
-  `skimage.io.imshow_collection`, `skimage.io.show`. Remove related plugins.
 * Complete deprecation of plugin infrastructure by doing the following:
   - Replace calls to `call_plugin` with functions from the imageio plugin
   - Remove `skimage/io/_plugins`
@@ -21,6 +23,10 @@ Version 0.27
   - Remove related tests, imports, etc.
   - Remove `doc/source/user_guide/plugins.rst`
 * Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
+
+Version 0.29
+------------
+* Complete deprecation of `threshold_rel` in `skimage.feature.blob_*` functions
 
 Other
 -----
@@ -32,6 +38,17 @@ Other
 * Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
 * Finalize ``skimage.future.manual_segmentation`` API,
   see https://github.com/scikit-image/scikit-image/issues/2624
+* Review why test precision needs to be lowered for macOS ARM in
+  `test_apply_parallel.py`
+* Once SciPy 1.17.0 is minimal required version, so that the `rng` parameter of
+  `scipy.linalg.eigsh` is available everywhere, remove the compatibility logic in
+  `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
+  `tests/skimage/graph/test_rag.py::test_reproducibility`.
+
+Post Python 3.11
+----------------
+* Remove or simplify `skimage._shared._warnings::warn_external` to use only
+  `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
 
 Post numpy 2
 ------------
@@ -47,7 +64,55 @@ Post numpy 2
 - Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
 - scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.
 - Remove `np2` check in `skimage/feature/brief.py`.
+- Consider using `numpy.testing.assert_equal()` with `strict=True` everywhere.
 
 Version 2.0
 -----------
+- In `skimage.morphology.remove_small_objects`, complete the deprecation of
+  `min_size` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.morphology.remove_small_holes`, complete the deprecation of
+  `area_threshold` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.measure.regionprops` complete deprecation of old property names.
+  Remove `PROPS` dict, related logic and warnings.
+
 See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
+
+Version 2.2
+-----------
+- In `skimage.measure.fit` remove the deprecated `estimate` method and simplify
+  the internals that where providing backwards-compatibility with this API.
+  This affects the classes `LineModelND`, `CircleModel`, and `EllipseModel`.
+- In `skimage.measure._geometric` and `skimage.measure._thin_plate_splines`,
+  remove the deprecated `estimate` method and simplify the internals that where
+  providing backwards-compatibility with this API.
+  This affects the classes `AffineTransform`, `EssentialMatrixTransform`,
+  `EuclideanTransform`, `FundamentalMatrixTransform`,
+  `PiecewiseAffineTransform`, `PolynomialTransform`, `ProjectiveTransform`,
+  `SimilarityTransform`, and `ThinPlateSplineTransform`
+
+- Complete deprecation of:
+  * `params` argument to `predict_*` methods of `LineModelND`, `CircleModel`
+    and `EllipseModel` from `skimage.measure.fit`.
+  * Ability to create uninitialized models of the same classes, by passing no
+    input arguments to constructor.
+
+  The procedure is:
+
+  * Move `_estimate` code into `from_estimate` (this as part of expiring
+    deprecation of `estimate` methods).
+  * Delete deprecated `BaseModel`, and `_BaseModel` class for supporting deprecations.
+  * Delete `_deprecate_no_args` (class decorator to deprecate no-argument call
+    to class constructor).
+  * Delete `_deprecate_model_params` (method decorator to deprecate `params`
+    argument to `predict_*` methods).
+  * Remove `params` arguments (and parsing) to `predict_*` methods.
+  * Delete `_params2init_values` methods (these were for processing deprecated `params` arguments).
+  * Delete `params` properties of models.
+  * Move `_check_init_values` into `_args_init` (these were for checking *both*
+    deprecated `params` arguments, *and* `__init__` arguments; after expiry,
+    the code only needs to check `__init__` arguments).
+  * Rename `_arg_init` methods to `__init__`.
+  * Remove tests for `params` arguments, and no-args initialization.  These
+    will become apparent when running the test suite after making the changes above.

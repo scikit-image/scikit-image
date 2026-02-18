@@ -84,8 +84,7 @@ dst = np.array([[ 0,   0], [100,   0], [200,  0], [200, 100], [200, 200], [100, 
 # Estimate the TPS transformation from these points and then warp the image.
 # We switch `src` and `dst` here because `skimage.transform.warp` requires the
 # inverse transformation!
-tps = ski.transform.ThinPlateSplineTransform()
-tps.estimate(dst, src)
+tps = ski.transform.ThinPlateSplineTransform.from_estimate(dst, src)
 warped = ski.transform.warp(image, tps)
 
 
