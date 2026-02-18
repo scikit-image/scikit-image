@@ -22,7 +22,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.13", "3.14"]
+        python-version: ["3.11", "3.13", "3.14", "3.14t"]
 
         # Dependency options for setup-test-env.sh
         MINIMUM_REQUIREMENTS: [0]
