@@ -38,6 +38,8 @@ def _footprint_is_sequence(footprint):
         )
 
     if isinstance(footprint, Sequence):
+        if len(footprint) == 0:
+            raise ValueError("footprint sequence is a empty")
         if not all(_validate_sequence_element(t) for t in footprint):
             raise ValueError(
                 "All elements of footprint sequence must be a 2-tuple where "
