@@ -15,7 +15,8 @@ __all__ = [
 
 def _as_floats(image0, image1):
     """
-    Promote im1, im2 to nearest appropriate floating point precision.
+    Promote image0, image1 to nearest appropriate floating-point precision.
+
     """
     float_type = _supported_float_type((image0.dtype, image1.dtype))
     image0 = np.asarray(image0, dtype=float_type)
@@ -190,6 +191,7 @@ def _pad_to(arr, shape):
     --------
     >>> _pad_to(np.ones((1, 1), dtype=int), (1, 3))
     array([[1, 0, 0]])
+
     """
     if not all(s >= i for s, i in zip(shape, arr.shape)):
         raise ValueError(
@@ -200,7 +202,7 @@ def _pad_to(arr, shape):
     return np.pad(arr, pad_width=padding, mode='constant', constant_values=0)
 
 
-def normalized_mutual_information(image0, image1, *, bins=100):
+def normalized_mutual_information(image0, image1, *, bins=100, weights=None):
     r"""Compute the normalized mutual information (NMI).
 
     The normalized mutual information of :math:`A` and :math:`B` is given by:
@@ -224,6 +226,8 @@ def normalized_mutual_information(image0, image1, *, bins=100):
         of dimensions.
     bins : int or sequence of int, optional
         The number of bins along each axis of the joint histogram.
+    weights : ndarray, optional
+        Weights used in the computation of the histogram.
 
     Returns
     -------
@@ -262,11 +266,20 @@ def normalized_mutual_information(image0, image1, *, bins=100):
     else:
         padded0, padded1 = image0, image1
 
-    hist, bin_edges = np.histogramdd(
+    if weights is not None:
+        if weights.shape != padded0.shape:
+            max_shape = np.maximum(image0.shape, image1.shape)
+            padded_weights = _pad_to(weights, max_shape)
+        else:
+            padded_weights = weights
+        weights = np.reshape(padded_weights, -1)
+
+    hist = np.histogramdd(
         [np.reshape(padded0, -1), np.reshape(padded1, -1)],
         bins=bins,
         density=True,
-    )
+        weights=weights,
+    )[0]
 
     H0 = entropy(np.sum(hist, axis=0))
     H1 = entropy(np.sum(hist, axis=1))
