@@ -5,6 +5,7 @@ Grayscale morphological operations
 from .misc import default_footprint
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
+from .footprints import mirror_footprint, pad_footprint
 
 import skimage2 as ski2
 
@@ -30,6 +31,25 @@ _PENDING_SKIMAGE2_MESSAGE = """\
 for parameter `mode` to 'ignore' (was 'reflect').
 
 To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
+If you set it explicitly before, the behavior is unchanged.
+"""
+
+# dilation needs a more specific warning
+_PENDING_SKIMAGE2_MESSAGE_DILATION = """\
+`skimage.morphology.dilation` is deprecated in favor of
+`skimage2.morphology.dilation` which changes the default value for parameter
+`mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
+(inverts its order in each dimension) which aligns its behavior with
+`scipy.ndimage.grey_dilation`.
+
+To keep the old (`skimage`, v1.x) behavior:
+- Set `mode='reflect` explicitly. If you set it explicitly before,
+  the behavior is unchanged.
+- If you use an asymmetric `footprint`, modify it like this before passing it
+  to `skimage2.morphology.dilation`:
+
+      footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+      footprint = ski2.morphology.mirror_footprint(footprint)
 """
 
 
@@ -215,9 +235,21 @@ def dilation(
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=dilation.__name__),
+        _PENDING_SKIMAGE2_MESSAGE_DILATION,
         category=PendingSkimage2Change,
     )
+
+    # Inside `scipy.ndimage.grey_dilation` the footprint is inverted.
+    # `skimage` accidentally undoes this by inverting again.
+    # However, in SciPy this inversion is intentional so that the composition
+    # of erosion and dilation lead to a correct closing and opening.
+    # We need to *pad* before mirroring so that even dimension are padded
+    # on the correct side.
+    # In `skimage2.morphology.dilation` we drop the mirroring and align with
+    # SciPy.
+    footprint = pad_footprint(footprint, pad_end=False)
+    footprint = mirror_footprint(footprint)
+
     out = ski2.morphology.dilation(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
