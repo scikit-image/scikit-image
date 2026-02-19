@@ -27,7 +27,7 @@ _SUPPORTED_MODES = {
 _PENDING_SKIMAGE2_MESSAGE = """\
 `skimage.morphology.{name}` is deprecated in favor of
 `skimage2.morphology.{name}`, which changes the default value
-for parameter `mode` from 'reflect' to 'ignore'.
+for parameter `mode` to 'ignore' (was 'reflect').
 
 To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
 """

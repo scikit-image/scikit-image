@@ -22,7 +22,8 @@ def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
     Parameters
     ----------
     operator : Callable
-        Morphological operator.
+        Morphological operator with the signature
+        ``f(image, *, footprint, output, mode, cval) -> image``.
     image : ndarray
         The image to apply the operator to.
     footprints : tuple
@@ -107,9 +108,9 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion shrinks bright regions and enlarges dark regions.
-    It sets a pixel at ``(i, j)`` to the minimum over all pixels in the neighborhood
-    centered at ``(i, j)``. The values where the footprint is 1 define this
-    neighborhood.
+    It sets a pixel at ``(i, j)`` to the minimum over all pixels in the
+    neighborhood centered at ``(i, j)``. The values where the footprint is 1
+    define this neighborhood.
 
     Parameters
     ----------
@@ -117,9 +118,9 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -156,7 +157,6 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
-
 
     Examples
     --------
@@ -207,9 +207,9 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation enlarges bright regions and shrinks dark regions.
-    It sets a pixel at ``(i, j)`` to the maximum over all pixels in the neighborhood
-    centered at ``(i, j)``. The values where the footprint is 1 define this
-    neighborhood.
+    It sets a pixel at ``(i, j)`` to the maximum over all pixels in the
+    neighborhood centered at ``(i, j)``. The values where the footprint is 1
+    define this neighborhood.
 
     Parameters
     ----------
@@ -217,9 +217,9 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -251,7 +251,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
@@ -319,9 +319,9 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -350,7 +350,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
@@ -395,9 +395,9 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -426,7 +426,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
@@ -470,9 +470,9 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -498,7 +498,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
@@ -562,9 +562,9 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -590,7 +590,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
