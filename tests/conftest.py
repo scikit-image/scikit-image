@@ -13,10 +13,7 @@ from _pytest.pathlib import bestrelpath
 
 
 FREE_THREADED_BUILD = bool(sysconfig.get_config_var("Py_GIL_DISABLED"))
-GIL_ENABLED_AT_START = True
-
-if FREE_THREADED_BUILD:
-    GIL_ENABLED_AT_START = sys._is_gil_enabled()
+GIL_ENABLED_AT_START = getattr(sys, "_is_gil_enabled", lambda: True)()
 
 
 class SKTerminalReporter(CustomTerminalReporter):
