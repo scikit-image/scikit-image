@@ -931,6 +931,16 @@ def rectangle_perimeter(start, end=None, extent=None, shape=None, clip=False):
            [0, 0, 1, 1, 1]], dtype=uint8)
 
     """
+
+    def _has_nan(x):
+        if x is None:
+            return False
+        arr = np.asarray(x, dtype=float)
+        return np.isnan(arr).any()
+
+    if _has_nan(start) or _has_nan(end) or _has_nan(extent):
+        raise ValueError("start/end/extent must not contain NaN values")
+
     top_left, bottom_right = _rectangle_slice(start=start, end=end, extent=extent)
 
     top_left -= 1
