@@ -2,7 +2,6 @@ pyx_files = [
   ['corner_cy', cython_gen],
   ['censure_cy', cython_gen],
   ['orb_cy', cython_gen],
-  ['_canny_cy', cython_gen],
   ['_texture', cython_gen],
   ['_hoghistogram', cython_gen],
   ['_sift', cython_gen],
