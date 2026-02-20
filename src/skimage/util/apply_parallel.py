@@ -77,7 +77,7 @@ def apply_parallel(
 
     Parameters
     ----------
-    function : function
+    function : Callable
         Function to be mapped which takes an array as an argument.
     array : ndarray or dask.array.Array
         Array which the function will be applied to.
@@ -123,20 +123,20 @@ def apply_parallel(
         If ``None`` (default), compute based on array type provided
         (eagerly for NumPy Arrays and lazily for Dask Arrays).
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If None, the image is assumed to be a grayscale (single-channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
     Returns
     -------
     out : ndarray or dask.array.Array
-        Returns the result of the applying the operation.
-        Type is dependent on the ``compute`` argument.
+        Returns the result of applying the operation.
+        Dtype is dependent on the ``compute`` argument.
 
     Notes
     -----
     Numpy edge modes 'symmetric', 'wrap', and 'edge' are converted to the
-    equivalent ``dask`` boundary modes 'reflect', 'periodic' and 'nearest',
+    equivalent ``dask`` boundary modes 'reflect', 'periodic', and 'nearest',
     respectively.
     Setting ``compute=False`` can be useful for chaining later operations.
     For example region selection to preview a result or storing large data
@@ -197,7 +197,7 @@ def apply_parallel(
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
-            # depth is zero along channel_axis
+            # depth is zero along channel axis
             depth = [depth] * (array.ndim - 1)
         depth = list(depth)
         if len(depth) == array.ndim - 1:
