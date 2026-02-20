@@ -130,8 +130,9 @@ def apply_parallel(
     Returns
     -------
     out : ndarray or dask.array.Array
-        Returns the result of applying the operation.
-        Dtype is dependent on the ``compute`` argument.
+        Returns the result of applying the operation. The return type
+        (ndarray or dask.array.Array) is determined by the ``compute``
+        argument.
 
     Notes
     -----
