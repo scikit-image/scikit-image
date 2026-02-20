@@ -331,5 +331,6 @@ def assert_stacklevel(warnings, *, offset=-1):
             f"  Expected: {expected}\n"
             f"  Actual: {actual}\n"
             f"  {warning.category.__name__}: {warning.message}"
+            f"{multi_note}"
         )
         assert actual == expected, msg
