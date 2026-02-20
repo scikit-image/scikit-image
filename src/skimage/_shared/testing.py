@@ -316,6 +316,14 @@ def assert_stacklevel(warnings, *, offset=-1):
     line_number = frame.f_lineno + offset
     filename = frame.f_code.co_filename
     expected = f"{filename}:{line_number}"
+    warnings = list(warnings)
+    num_warnings = len(warnings)
+    multi_note = (
+        f"\nNote: {num_warnings} warnings were captured in total."
+        " Unexpected extra warnings may cause wrong stacklevel failures."
+        if num_warnings > 1
+        else ""
+    )
     for warning in warnings:
         actual = f"{warning.filename}:{warning.lineno}"
         msg = (
