@@ -14,24 +14,23 @@ with a spline interpolation of order 3 rescaling of the original `astronaut`
 image.
 
 """
+
 import numpy as np
 from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
-from skimage import data
-from skimage import color
-from skimage.util import view_as_blocks
+import skimage as ski
 
 
 # get astronaut from skimage.data in grayscale
-l = color.rgb2gray(data.astronaut())
+l = ski.color.rgb2gray(ski.data.astronaut())
 
 # size of blocks
 block_shape = (4, 4)
 
 # see astronaut as a matrix of blocks (of shape block_shape)
-view = view_as_blocks(l, block_shape)
+view = ski.util.view_as_blocks(l, block_shape)
 
 # collapse the last two dimensions in one
 flatten_view = view.reshape(view.shape[0], view.shape[1], -1)
@@ -48,8 +47,7 @@ ax = axes.ravel()
 
 l_resized = ndi.zoom(l, 2, order=3)
 ax[0].set_title("Original rescaled with\n spline interpolation (order=3)")
-ax[0].imshow(l_resized, extent=(-0.5, 128.5, 128.5, -0.5),
-             cmap=cm.Greys_r)
+ax[0].imshow(l_resized, extent=(-0.5, 128.5, 128.5, -0.5), cmap=cm.Greys_r)
 
 ax[1].set_title("Block view with\n local mean pooling")
 ax[1].imshow(mean_view, cmap=cm.Greys_r)

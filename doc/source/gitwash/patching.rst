@@ -29,7 +29,7 @@ Overview
    git config --global user.email you@yourdomain.example.com
    git config --global user.name "Your Name Comes Here"
    # get the repository if you don't have it
-   git clone git://github.com/scikit-image/scikit-image.git
+   git clone https://github.com/scikit-image/scikit-image.git
    # make a branch for your patching
    cd scikit-image
    git branch the-fix-im-thinking-of
@@ -45,7 +45,7 @@ Overview
    git format-patch -M -C main
 
 Then, send the generated patch files to the `scikit-image
-mailing list`_ |emdash| where we will thank you warmly.
+developer forum`_ |emdash| where we will thank you warmly.
 
 In detail
 ---------
@@ -59,7 +59,7 @@ In detail
 #. If you don't already have one, clone a copy of the
    `scikit-image`_ repository::
 
-      git clone git://github.com/scikit-image/scikit-image.git
+      git clone https://github.com/scikit-image/scikit-image.git
       cd scikit-image
 
 #. Make a 'feature branch'.  This will be where you work on
@@ -100,7 +100,7 @@ In detail
       0001-BF-added-tests-for-Funny-bug.patch
       0002-BF-added-fix-for-Funny-bug.patch
 
-   Send these files to the `scikit-image mailing list`_.
+   Send these files to the `scikit-image developer forum`_.
 
 When you are done, to switch back to the main copy of the
 code, just return to the ``main`` branch::

@@ -3,7 +3,10 @@
 Explore 3D images (of cells)
 ============================
 
-This tutorial is an introduction to three-dimensional image processing. Images
+This tutorial is an introduction to three-dimensional image processing.
+For a quick intro to 3D datasets, please refer to
+:ref:`sphx_glr_auto_examples_data_plot_3d.py`.
+Images
 are represented as `numpy` arrays. A single-channel, or grayscale, image is a
 2D matrix of pixel intensities of shape ``(n_row, n_col)``, where ``n_row``
 (resp. ``n_col``) denotes the number of `rows` (resp. `columns`). We can
@@ -43,15 +46,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
 
-from skimage import exposure, io, util
-from skimage.data import cells3d
+import plotly
+import plotly.express as px
+import skimage as ski
 
 
 #####################################################################
 # Load and display 3D images
 # ==========================
 
-data = util.img_as_float(cells3d()[:, 1, :, :])  # grab just the nuclei
+data = ski.util.img_as_float(ski.data.cells3d()[:, 1, :, :])  # grab just the nuclei
 
 print(f'shape: {data.shape}')
 print(f'dtype: {data.dtype}')
@@ -71,22 +75,25 @@ print(f'rescaled spacing: {rescaled_spacing} (after downsampling)\n')
 print(f'normalized spacing: {spacing}\n')
 
 #####################################################################
-# Let us try and visualize the (3D) image with `io.imshow`.
+# Let us try and visualize our 3D image. Unfortunately, many image viewers,
+# such as matplotlib's `imshow`, are only capable of displaying 2D data. We
+# can see that they raise an error when we try to view 3D data:
 
 try:
-    io.imshow(data, cmap="gray")
+    fig, ax = plt.subplots()
+    ax.imshow(data, cmap='gray')
 except TypeError as e:
     print(str(e))
 
 #####################################################################
-# The `io.imshow` function can only display grayscale and RGB(A) 2D images.
+# The `imshow` function can only display grayscale and RGB(A) 2D images.
 # We can thus use it to visualize 2D planes. By fixing one axis, we can
 # observe three different views of the image.
 
 
 def show_plane(ax, plane, cmap="gray", title=None):
     ax.imshow(plane, cmap=cmap)
-    ax.axis("off")
+    ax.set_axis_off()
 
     if title:
         ax.set_title(title)
@@ -101,20 +108,15 @@ show_plane(c, data[:, :, n_col // 2], title=f'Column = {n_col // 2}')
 
 #####################################################################
 # As hinted before, a three-dimensional image can be viewed as a series of
-# two-dimensional planes. Let us write a helper function, `display`, to
-# display 30 planes of our data. By default, every other plane is displayed.
+# two-dimensional planes. Let us write a helper function, `display`, to create
+# a montage of several planes. By default, every other plane is displayed.
 
 
-def display(im3d, cmap="gray", step=2):
-    _, axes = plt.subplots(nrows=5, ncols=6, figsize=(16, 14))
-
-    vmin = im3d.min()
-    vmax = im3d.max()
-
-    for ax, image in zip(axes.flatten(), im3d[::step]):
-        ax.imshow(image, cmap=cmap, vmin=vmin, vmax=vmax)
-        ax.set_xticks([])
-        ax.set_yticks([])
+def display(im3d, cmap='gray', step=2):
+    data_montage = ski.util.montage(im3d[::step], padding_width=4, fill=np.nan)
+    _, ax = plt.subplots(figsize=(16, 14))
+    ax.imshow(data_montage, cmap=cmap)
+    ax.set_axis_off()
 
 
 display(data)
@@ -124,22 +126,28 @@ display(data)
 # Jupyter widgets. Let the user select which slice to display and show the
 # position of this slice in the 3D dataset.
 # Note that you cannot see the Jupyter widget at work in a static HTML page,
-# as is the case in the scikit-image gallery. For the following piece of
-# code to work, you need a Jupyter kernel running either locally or in the
-# cloud: see the bottom of this page to either download the Jupyter notebook
-# and run it on your computer, or open it directly in Binder.
+# as is the case in the online version of this example. For the following
+# piece of code to work, you need a Jupyter kernel running either locally or
+# in the cloud: see the bottom of this page to either download the Jupyter
+# notebook and run it on your computer, or open it directly in Binder. On top
+# of an active kernel, you need a web browser: running the code in pure Python
+# will not work either.
 
 
 def slice_in_3D(ax, i):
     # From https://stackoverflow.com/questions/44881885/python-draw-3d-cube
-    Z = np.array([[0, 0, 0],
-                  [1, 0, 0],
-                  [1, 1, 0],
-                  [0, 1, 0],
-                  [0, 0, 1],
-                  [1, 0, 1],
-                  [1, 1, 1],
-                  [0, 1, 1]])
+    Z = np.array(
+        [
+            [0, 0, 0],
+            [1, 0, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 1, 1],
+        ]
+    )
 
     Z = Z * data.shape
     r = [-1, 1]
@@ -149,38 +157,29 @@ def slice_in_3D(ax, i):
     ax.scatter3D(Z[:, 0], Z[:, 1], Z[:, 2])
 
     # List sides' polygons of figure
-    verts = [[Z[0], Z[1], Z[2], Z[3]],
-             [Z[4], Z[5], Z[6], Z[7]],
-             [Z[0], Z[1], Z[5], Z[4]],
-             [Z[2], Z[3], Z[7], Z[6]],
-             [Z[1], Z[2], Z[6], Z[5]],
-             [Z[4], Z[7], Z[3], Z[0]],
-             [Z[2], Z[3], Z[7], Z[6]]]
+    verts = [
+        [Z[0], Z[1], Z[2], Z[3]],
+        [Z[4], Z[5], Z[6], Z[7]],
+        [Z[0], Z[1], Z[5], Z[4]],
+        [Z[2], Z[3], Z[7], Z[6]],
+        [Z[1], Z[2], Z[6], Z[5]],
+        [Z[4], Z[7], Z[3], Z[0]],
+        [Z[2], Z[3], Z[7], Z[6]],
+    ]
 
     # Plot sides
     ax.add_collection3d(
         Poly3DCollection(
-            verts,
-            facecolors=(0, 1, 1, 0.25),
-            linewidths=1,
-            edgecolors="darkblue"
+            verts, facecolors=(0, 1, 1, 0.25), linewidths=1, edgecolors="darkblue"
         )
     )
 
-    verts = np.array([[[0, 0, 0],
-                       [0, 0, 1],
-                       [0, 1, 1],
-                       [0, 1, 0]]])
+    verts = np.array([[[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0]]])
     verts = verts * (60, 256, 256)
     verts += [i, 0, 0]
 
     ax.add_collection3d(
-        Poly3DCollection(
-            verts,
-            facecolors="magenta",
-            linewidths=1,
-            edgecolors="black"
-        )
+        Poly3DCollection(verts, facecolors="magenta", linewidths=1, edgecolors="black")
     )
 
     ax.set_xlabel("plane")
@@ -189,13 +188,13 @@ def slice_in_3D(ax, i):
     ax.set_zlabel("col")
 
     # Autoscale plot axes
-    scaling = np.array([getattr(ax,
-                                f'get_{dim}lim')() for dim in "xyz"])
-    ax.auto_scale_xyz(* [[np.min(scaling), np.max(scaling)]] * 3)
+    scaling = np.array([getattr(ax, f'get_{dim}lim')() for dim in "xyz"])
+    ax.auto_scale_xyz(*[[np.min(scaling), np.max(scaling)]] * 3)
 
 
 def explore_slices(data, cmap="gray"):
     from ipywidgets import interact
+
     N = len(data)
 
     @interact(plane=(0, N - 1))
@@ -212,7 +211,7 @@ def explore_slices(data, cmap="gray"):
     return display_slice
 
 
-explore_slices(data);
+explore_slices(data)
 
 #####################################################################
 # Adjust exposure
@@ -241,10 +240,10 @@ def plot_hist(ax, data, title=None):
 
 
 gamma_low_val = 0.5
-gamma_low = exposure.adjust_gamma(data, gamma=gamma_low_val)
+gamma_low = ski.exposure.adjust_gamma(data, gamma=gamma_low_val)
 
 gamma_high_val = 1.5
-gamma_high = exposure.adjust_gamma(data, gamma=gamma_high_val)
+gamma_high = ski.exposure.adjust_gamma(data, gamma=gamma_high_val)
 
 _, ((a, b, c), (d, e, f)) = plt.subplots(nrows=2, ncols=3, figsize=(12, 8))
 
@@ -265,7 +264,7 @@ plot_hist(f, gamma_high)
 # areas. One downside of this approach is that it may enhance background
 # noise.
 
-equalized_data = exposure.equalize_hist(data)
+equalized_data = ski.exposure.equalize_hist(data)
 
 display(equalized_data)
 
@@ -273,7 +272,7 @@ display(equalized_data)
 # As before, if we have a Jupyter kernel running, we can explore the above
 # slices interactively.
 
-explore_slices(equalized_data);
+explore_slices(equalized_data)
 
 #####################################################################
 # Let us now plot the image histogram before and after histogram equalization.
@@ -284,11 +283,11 @@ _, ((a, b), (c, d)) = plt.subplots(nrows=2, ncols=2, figsize=(16, 8))
 plot_hist(a, data, title="Original histogram")
 plot_hist(b, equalized_data, title="Equalized histogram")
 
-cdf, bins = exposure.cumulative_distribution(data.ravel())
+cdf, bins = ski.exposure.cumulative_distribution(data.ravel())
 c.plot(bins, cdf, "r")
 c.set_title("Original CDF")
 
-cdf, bins = exposure.cumulative_distribution(equalized_data.ravel())
+cdf, bins = ski.exposure.cumulative_distribution(equalized_data.ravel())
 d.plot(bins, cdf, "r")
 d.set_title("Histogram equalization CDF")
 
@@ -301,10 +300,23 @@ d.set_title("Histogram equalization CDF")
 
 vmin, vmax = np.percentile(data, q=(0.5, 99.5))
 
-clipped_data = exposure.rescale_intensity(
-    data,
-    in_range=(vmin, vmax),
-    out_range=np.float32
+clipped_data = ski.exposure.rescale_intensity(
+    data, in_range=(vmin, vmax), out_range=np.float32
 )
 
 display(clipped_data)
+
+#####################################################################
+# Alternatively, we can explore these planes (slices) interactively using
+# `Plotly Express <https://plotly.com/python/sliders/>`_.
+# Note that this works in a static HTML page!
+
+fig = px.imshow(data, animation_frame=0, binary_string=True)
+fig.update_xaxes(showticklabels=False)
+fig.update_yaxes(showticklabels=False)
+fig.update_layout(autosize=False, width=500, height=500, coloraxis_showscale=False)
+# Drop animation buttons
+fig['layout'].pop('updatemenus')
+plotly.io.show(fig)
+
+plt.show()

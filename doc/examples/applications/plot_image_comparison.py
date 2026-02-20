@@ -4,26 +4,26 @@ Visual image comparison
 =======================
 
 Image comparison is particularly useful when performing image processing tasks
-such as exposure manipulations, filtering, and restauration.
+such as exposure manipulations, filtering, and restoration.
 
 This example shows how to easily compare two images with various approaches.
 
 """
+
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
-from skimage import data, transform, exposure
-from skimage.util import compare_images
+import skimage as ski
 
 
-img1 = data.coins()
-img1_equalized = exposure.equalize_hist(img1)
-img2 = transform.rotate(img1, 2)
+img1 = ski.data.coins()
+img1_equalized = ski.exposure.equalize_hist(img1)
+img2 = ski.transform.rotate(img1, 2)
 
 
-comp_equalized = compare_images(img1, img1_equalized, method='checkerboard')
-diff_rotated = compare_images(img1, img2, method='diff')
-blend_rotated = compare_images(img1, img2, method='blend')
+comp_equalized = ski.util.compare_images(img1, img1_equalized, method='checkerboard')
+diff_rotated = ski.util.compare_images(img1, img2, method='diff')
+blend_rotated = ski.util.compare_images(img1, img2, method='blend')
 
 
 ######################################################################
@@ -46,10 +46,12 @@ ax1.imshow(img1_equalized, cmap='gray')
 ax1.set_title('Equalized')
 ax2.imshow(comp_equalized, cmap='gray')
 ax2.set_title('Checkerboard comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
 
 ######################################################################
 # Diff
@@ -70,10 +72,12 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(diff_rotated, cmap='gray')
 ax2.set_title('Diff comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
 
 ######################################################################
 # Blend
@@ -94,7 +98,10 @@ ax1.imshow(img2, cmap='gray')
 ax1.set_title('Rotated')
 ax2.imshow(blend_rotated, cmap='gray')
 ax2.set_title('Blend comparison')
+
 for a in (ax0, ax1, ax2):
-    a.axis('off')
-plt.tight_layout()
-plt.plot()
+    a.set_axis_off()
+
+fig.tight_layout()
+
+plt.show()

@@ -6,30 +6,52 @@ from pathlib import Path
 import tarfile
 
 parser = ArgumentParser(description='Check a created sdist')
-parser.add_argument('sdist_name', type=str, nargs=1,
-                    help='The name of the sdist file to check')
+parser.add_argument(
+    'sdist_name', type=str, nargs=1, help='The name of the sdist file to check'
+)
 args = parser.parse_args()
 sdist_name = args.sdist_name[0]
 
 with tarfile.open(sdist_name) as tar:
     members = tar.getmembers()
 
-# The very first item contains the name of the archive
-top_parent = Path(members[0].name)
 
-filenames = ['./' + str(Path(m.name).relative_to(top_parent))
-             for m in members[1:]]
+# The very first item contains the name of the archive
+top_parent = Path(members[0].name).parts[0]
+
+filenames = ['./' + str(Path(m.name).relative_to(top_parent)) for m in members[1:]]
 
 ignore_exts = ['.pyc', '.so', '.o', '#', '~', '.gitignore', '.o.d']
-ignore_dirs = ['./build', './dist', './tools', './doc', './viewer_examples',
-               './downloads', './scikit_image.egg-info', './benchmarks']
-ignore_files = ['./TODO.md', './README.md', './MANIFEST',
-                './CODE_OF_CONDUCT.md',
-                './.gitignore', './.travis.yml', './.gitmodules',
-                './.mailmap', './.coveragerc', './azure-pipelines.yml',
-                './.appveyor.yml', './.pep8speaks.yml', './asv.conf.json',
-                './.codecov.yml',
-                './skimage/filters/rank/README.rst']
+ignore_dirs = [
+    './build',
+    './dist',
+    './tools',
+    './doc',
+    './downloads',
+    './scikit_image.egg-info',
+    './benchmarks',
+    './emsdk',
+]
+ignore_files = [
+    './TODO.md',
+    './README.md',
+    './MANIFEST',
+    './CODE_OF_CONDUCT.md',
+    './SECURITY.md',
+    './.gitignore',
+    './.gitattributes',
+    './.git-blame-ignore-revs',
+    './.travis.yml',
+    './.gitmodules',
+    './.mailmap',
+    './.coveragerc',
+    './azure-pipelines.yml',
+    './.appveyor.yml',
+    './.pep8speaks.yml',
+    './asv.conf.json',
+    './.codecov.yml',
+    './.pre-commit-config.yaml',
+]
 
 # These docstring artifacts are hard to avoid without adding noise to the
 # docstrings. They typically show up if you run the whole test suite in the
@@ -44,7 +66,6 @@ for root, dirs, files in os.walk('./'):
         if root.startswith(d):
             break
     else:
-
         if root.startswith('./.'):
             continue
 
@@ -63,7 +84,7 @@ if missing:
     for m in missing:
         print('  ', m)
 
-    print('\nPlease update MANIFEST.in')
+    print('\nPlease update .gitattributes')
 
     sys.exit(1)
 else:

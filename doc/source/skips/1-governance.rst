@@ -12,12 +12,14 @@ SKIP 1 — scikit-image governance and decision-making
 :Author: Mark Harfouche
 :Author: Lars Grüter
 :Author: Egor Panfilov
+:Author: Marianne Corvellec
 :Status: Final
 :Type: Process
 :Created: 2019-07-02
 :Resolved: 2019-09-25
 :Resolution: https://github.com/scikit-image/scikit-image/pull/4182
 :skimage-Version: 0.16
+:Revised: 2024-06-09
 
 Abstract
 ========
@@ -53,7 +55,7 @@ project in concrete ways, such as:
   `tutorials <https://github.com/scikit-image/skimage-tutorials>`_ via a
   GitHub pull request;
 - discussing the design of the library, website, or tutorials on the
-  `mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_,
+  `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_,
   in the
   `project chat room <https://skimage.zulipchat.com/>`_, or in existing issues and pull
   requests; or
@@ -65,7 +67,7 @@ all are encouraged to do so. By contributing to the project, community members
 can directly help to shape its future.
 
 Contributors are encouraged to read the
-:doc:`contributing guide <../contribute>`.
+:doc:`contributing guide <../development/contribute>`.
 
 Core developers
 ---------------
@@ -107,9 +109,9 @@ van der Walt, Juan Nunez-Iglesias, Emmanuelle Gouillart, Josh Warner, and
 Zachary Pincus. The SC membership is revisited every January. SC members who do
 not actively engage with the SC duties are expected to resign. New members are
 added by nomination by a core developer. Nominees should have demonstrated
-long-term, continued commitment to the project and its :doc:`values <../values>`. A
-nomination will result in discussion that cannot take more than a month and
-then admission to the SC by consensus.
+long-term, continued commitment to the project and its
+:doc:`values <../about/values>`. A nomination will result in discussion that
+cannot take more than a month and then admission to the SC by consensus.
 
 The scikit-image steering council may be contacted at
 `skimage-steering@groups.io <mailto:skimage-steering@groups.io>`__.
@@ -120,12 +122,12 @@ Decision Making Process
 Decisions about the future of the project are made through discussion with all
 members of the community. All non-sensitive project management discussion takes
 place on the project
-`mailing list <https://mail.python.org/mailman3/lists/scikit-image.python.org>`_
+`developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_
 and the `issue tracker <https://github.com/scikit-image/scikit-image/issues>`_.
 Occasionally, sensitive discussion may occur on a private list.
 
 Decisions should be made in accordance with the :doc:`mission, vision and
-values <../values>` of the scikit-image project.
+values <../about/values>` of the scikit-image project.
 
 Scikit-image uses a “consensus seeking” process for making decisions. The group
 tries to find a resolution that has no open objections among core developers.
@@ -145,19 +147,21 @@ are made according to the following rules:
   sentence (but no change of the scikit-image.org landing page or the “about”
   page), require approval by a core developer *and* no disagreement or requested
   changes by a core developer on the issue or pull request page (lazy
-  consensus). Core developers are expected to give “reasonable time” to others
-  to give their opinion on the pull request if they’re not confident others
-  would agree.
+  consensus). Core developers are expected to wait one or two days for others to give
+  their opinion if they’re not confident that others would agree.
 
-- **Code changes and major documentation changes** require agreement by *two*
-  core developers *and* no disagreement or requested changes by a core developer
-  on the issue or pull-request page (lazy consensus).
+- **Code and major documentation changes, and changes to the API** require agreement by
+  *two* core developers *and* no disagreement or requested changes by a core developer
+  on the issue or pull request page (lazy consensus). In the case of disagreement or
+  requested changes, core developers are expected to wait at least 5 days for others to
+  give their opinion if they’re not confident that others would agree.
 
-- **Changes to the API principles** require a :ref:`skip` and follow the
-  decision-making process outlined above.
+- **Changes to the API principles** require a :ref:`SKIP <skip>` and follow the
+  decision-making process outlined above. But, in this case, the objection period
+  should be one month.
 
 - **Changes to this governance model or our mission, vision, and values**
-  require a :ref:`skip` and follow the decision-making process outlined above,
+  require a :ref:`SKIP <skip>` and follow the decision-making process outlined above,
   *unless* there is unanimous agreement from core developers on the change.
 
 If an objection is raised on a lazy consensus, the proposer can appeal to the

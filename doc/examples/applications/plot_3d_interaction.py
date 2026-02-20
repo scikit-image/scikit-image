@@ -4,7 +4,7 @@ Interact with 3D images (of kidney tissue)
 ==========================================
 
 In this tutorial, we explore interactively a biomedical image which has three
-spatial dimensions and three colour dimensions (channels).
+spatial dimensions and three color dimensions (channels).
 For a general introduction to 3D image processing, please refer to
 :ref:`sphx_glr_auto_examples_applications_plot_3d_image_processing.py`.
 The data we use here correspond to kidney tissue which was
@@ -17,11 +17,10 @@ imaged with confocal fluorescence microscopy (more details at [1]_ under
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import ndimage as ndi
 
 import plotly
 import plotly.express as px
-from skimage import data
+import skimage as ski
 
 
 #####################################################################
@@ -29,7 +28,7 @@ from skimage import data
 # ==========
 # This biomedical image is available through `scikit-image`'s data registry.
 
-data = data.kidney()
+data = ski.data.kidney()
 
 #####################################################################
 # The returned dataset is a 3D multichannel image:
@@ -54,13 +53,13 @@ ax.imshow(data[n_plane // 2])
 
 #####################################################################
 # According to the warning message, the range of values is unexpected. The
-# image rendering is clearly not satisfactory colour-wise.
+# image rendering is clearly not satisfactory color-wise.
 
 vmin, vmax = data.min(), data.max()
 print(f'range: ({vmin}, {vmax})')
 
 #####################################################################
-# We turn to `plotly`'s implementation of the `imshow` function, for it
+# We turn to Plotly's implementation of the :func:`plotly.express.imshow` function, for it
 # supports `value ranges
 # <https://plotly.com/python/imshow/#defining-the-data-range-covered-by-the-color-range-with-zmin-and-zmax>`_
 # beyond ``(0.0, 1.0)`` for floats and ``(0, 255)`` for integers.
@@ -81,15 +80,12 @@ plotly.io.show(fig)
 # image is used:
 
 fig = px.imshow(
-    data[n_plane // 2],
-    facet_col=2,
-    binary_string=True,
-    labels={'facet_col': 'channel'}
+    data[n_plane // 2], facet_col=2, binary_string=True, labels={'facet_col': 'channel'}
 )
 plotly.io.show(fig)
 
 #####################################################################
-# What is the range of values for each colour channel?
+# What is the range of values for each color channel?
 # We check by taking the min and max across all non-channel
 # axes.
 
@@ -103,9 +99,7 @@ print(f'range for channel 2: ({vmin_2}, {vmax_2})')
 # Let us be very specific and pass value ranges on a per-channel basis:
 
 fig = px.imshow(
-    data[n_plane // 2],
-    zmin=[vmin_0, vmin_1, vmin_2],
-    zmax=[vmax_0, vmax_1, vmax_2]
+    data[n_plane // 2], zmin=[vmin_0, vmin_1, vmin_2], zmax=[vmax_0, vmax_1, vmax_2]
 )
 plotly.io.show(fig)
 
@@ -125,7 +119,7 @@ fig = px.imshow(
     zmax=[vmax_0, vmax_1, vmax_2],
     animation_frame=0,
     binary_string=True,
-    labels={'animation_frame': 'plane'}
+    labels={'animation_frame': 'plane'},
 )
 plotly.io.show(fig)
 
@@ -138,7 +132,7 @@ fig = px.imshow(
     animation_frame=0,
     facet_col=3,
     binary_string=True,
-    labels={'facet_col': 'channel', 'animation_frame': 'plane'}
+    labels={'facet_col': 'channel', 'animation_frame': 'plane'},
 )
 plotly.io.show(fig)
 

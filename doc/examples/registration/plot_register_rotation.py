@@ -60,11 +60,11 @@ ax[3].set_title("Polar-Transformed Rotated")
 ax[3].imshow(rotated_polar)
 plt.show()
 
-shifts, error, phasediff = phase_cross_correlation(image_polar, rotated_polar)
-print(f'Expected value for counterclockwise rotation in degrees: '
-      f'{angle}')
-print(f'Recovered value for counterclockwise rotation: '
-      f'{shifts[0]}')
+shifts, error, phasediff = phase_cross_correlation(
+    image_polar, rotated_polar, normalization=None
+)
+print(f'Expected value for counterclockwise rotation in degrees: ' f'{angle}')
+print(f'Recovered value for counterclockwise rotation: ' f'{shifts[0]}')
 
 ######################################################################
 # Recover rotation and scaling differences with log-polar transform
@@ -83,10 +83,8 @@ image = data.retina()
 image = img_as_float(image)
 rotated = rotate(image, angle)
 rescaled = rescale(rotated, scale, channel_axis=-1)
-image_polar = warp_polar(image, radius=radius,
-                         scaling='log', channel_axis=-1)
-rescaled_polar = warp_polar(rescaled, radius=radius,
-                            scaling='log', channel_axis=-1)
+image_polar = warp_polar(image, radius=radius, scaling='log', channel_axis=-1)
+rescaled_polar = warp_polar(rescaled, radius=radius, scaling='log', channel_axis=-1)
 
 fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
@@ -101,8 +99,9 @@ ax[3].imshow(rescaled_polar)
 plt.show()
 
 # setting `upsample_factor` can increase precision
-shifts, error, phasediff = phase_cross_correlation(image_polar, rescaled_polar,
-                                                   upsample_factor=20)
+shifts, error, phasediff = phase_cross_correlation(
+    image_polar, rescaled_polar, upsample_factor=20, normalization=None
+)
 shiftr, shiftc = shifts[:2]
 
 # Calculate scale factor from translation
@@ -132,7 +131,7 @@ print(f'Recovered value for scaling difference: {shift_scale}')
 
 from skimage.color import rgb2gray
 from skimage.filters import window, difference_of_gaussians
-from scipy.fftpack import fft2, fftshift
+from scipy.fft import fft2, fftshift
 
 angle = 24
 scale = 1.4
@@ -150,8 +149,9 @@ rts_image = rescaled[:sizer, :sizec]
 radius = 705
 warped_image = warp_polar(image, radius=radius, scaling="log")
 warped_rts = warp_polar(rts_image, radius=radius, scaling="log")
-shifts, error, phasediff = phase_cross_correlation(warped_image, warped_rts,
-                                                   upsample_factor=20)
+shifts, error, phasediff = phase_cross_correlation(
+    warped_image, warped_rts, upsample_factor=20, normalization=None
+)
 shiftr, shiftc = shifts[:2]
 klog = radius / np.log(radius)
 shift_scale = 1 / (np.exp(shiftc / klog))
@@ -200,16 +200,18 @@ rts_fs = np.abs(fftshift(fft2(rts_wimage)))
 # Create log-polar transformed FFT mag images and register
 shape = image_fs.shape
 radius = shape[0] // 8  # only take lower frequencies
-warped_image_fs = warp_polar(image_fs, radius=radius, output_shape=shape,
-                             scaling='log', order=0)
-warped_rts_fs = warp_polar(rts_fs, radius=radius, output_shape=shape,
-                           scaling='log', order=0)
+warped_image_fs = warp_polar(
+    image_fs, radius=radius, output_shape=shape, scaling='log', order=0
+)
+warped_rts_fs = warp_polar(
+    rts_fs, radius=radius, output_shape=shape, scaling='log', order=0
+)
 
-warped_image_fs = warped_image_fs[:shape[0] // 2, :]  # only use half of FFT
-warped_rts_fs = warped_rts_fs[:shape[0] // 2, :]
-shifts, error, phasediff = phase_cross_correlation(warped_image_fs,
-                                                   warped_rts_fs,
-                                                   upsample_factor=10)
+warped_image_fs = warped_image_fs[: shape[0] // 2, :]  # only use half of FFT
+warped_rts_fs = warped_rts_fs[: shape[0] // 2, :]
+shifts, error, phasediff = phase_cross_correlation(
+    warped_image_fs, warped_rts_fs, upsample_factor=10, normalization=None
+)
 
 # Use translation parameters to calculate rotation and scaling parameters
 shiftr, shiftc = shifts[:2]
@@ -221,13 +223,19 @@ fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 ax = axes.ravel()
 ax[0].set_title("Original Image FFT\n(magnitude; zoomed)")
 center = np.array(shape) // 2
-ax[0].imshow(image_fs[center[0] - radius:center[0] + radius,
-                      center[1] - radius:center[1] + radius],
-             cmap='magma')
+ax[0].imshow(
+    image_fs[
+        center[0] - radius : center[0] + radius, center[1] - radius : center[1] + radius
+    ],
+    cmap='magma',
+)
 ax[1].set_title("Modified Image FFT\n(magnitude; zoomed)")
-ax[1].imshow(rts_fs[center[0] - radius:center[0] + radius,
-                    center[1] - radius:center[1] + radius],
-             cmap='magma')
+ax[1].imshow(
+    rts_fs[
+        center[0] - radius : center[0] + radius, center[1] - radius : center[1] + radius
+    ],
+    cmap='magma',
+)
 ax[2].set_title("Log-Polar-Transformed\nOriginal FFT")
 ax[2].imshow(warped_image_fs, cmap='magma')
 ax[3].set_title("Log-Polar-Transformed\nModified FFT")

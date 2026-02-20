@@ -14,14 +14,13 @@ References
 """
 
 from skimage import data, segmentation, color
-from skimage.future import graph
+from skimage import graph
 from matplotlib import pyplot as plt
 
 
 img = data.coffee()
 
-labels1 = segmentation.slic(img, compactness=30, n_segments=400,
-                            start_label=1)
+labels1 = segmentation.slic(img, compactness=30, n_segments=400, start_label=1)
 out1 = color.label2rgb(labels1, img, kind='avg', bg_label=0)
 
 g = graph.rag_mean_color(img, labels1, mode='similarity')

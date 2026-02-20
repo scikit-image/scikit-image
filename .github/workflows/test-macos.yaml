@@ -1,0 +1,93 @@
+name: Test macOS
+
+on: [push, pull_request, merge_group]
+
+concurrency:
+  # Cancel previous workflows of the same PR, but only for PRs
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  PYTEST: "pytest --config-file ${{ github.workspace }}/pyproject.toml"
+
+jobs:
+  test_skimage_macos:
+    name: ${{ matrix.os }}-cp${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+        os: [macos-latest]
+        OPTIONAL_DEPS: [1]
+        OPTIONS_NAME: ["default"]
+        include:
+          - python-version: "3.13"
+            # Also test on Intel version of MacOS
+            os: macos-15-intel
+            OPTIONAL_DEPS: 1
+            OPTIONS_NAME: "default"
+    env:
+      CC: /usr/bin/clang
+      CXX: /usr/bin/clang++
+      CPPFLAGS: "-Xpreprocessor -fopenmp"
+      CFLAGS: "-Wno-implicit-function-declaration -I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      CXXFLAGS: "-I/usr/local/opt/libomp/include -I/opt/homebrew/opt/libomp/include"
+      LDFLAGS: "-Wl,-rpath,/usr/local/opt/libomp/lib -L/usr/local/opt/libomp/lib -L/opt/homebrew/opt/libomp/lib -lomp"
+
+    steps:
+      - name: Checkout scikit-image
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version}}
+          allow-prereleases: true
+          cache: "pip"
+          cache-dependency-path: "requirements/*.txt"
+
+      - name: OSX configuration
+        run: |
+          # OpenMP is not present on macOS by default
+          brew install libomp
+
+      - name: Install build dependencies
+        run: |
+          source .github/scripts/setup-build-env.sh
+
+      - name: Build and install
+        run: |
+          pip install -v --no-build-isolation .
+
+      - name: Install test dependencies
+        env:
+          OPTIONAL_DEPS: ${{ matrix.OPTIONAL_DEPS }}
+        run: |
+          source .github/scripts/setup-test-env.sh
+
+      - name: Run tests
+        run: |
+          $PYTEST --showlocals ./tests
+
+      - name: Check benchmarks
+        run: |
+          asv check -v -E existing
+
+      - name: "Job has failed: reporting"
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_TYPE: "macos tests"
+        with:
+          filename: .github/MAIN_FAIL_TEMPLATE.md
+          update_existing: true

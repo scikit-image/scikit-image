@@ -1,68 +1,118 @@
-Remember to list any API changes below in `doc/source/api_changes.txt`.
+Please include necessary information to complete each entry. The
+release manager should be able to step through this file without
+external references.
 
-Version 0.17
+Version 0.28
 ------------
+* Complete deprecation of `skimage.morphology.binary_*` functions.
+  - Remove reference to `skimage.morphology.binary_erosion` in docstring for `skimage.morphology.erosion`.
+  - Remove reference to `skimage.morphology.binary_dilation` in docstring for `skimage.morphology.dilation`.
+* Remove `skimage/graph/_mcp.pyx::MCP::find_costs` parameter `max_cumulative_cost` and `max_cost`
+* Remove all traces of deprecated parameter `num_threads` in
+  `skimage.restoration.rolling_ball`.
+* Remove all traces of deprecated parameter `num_workers` in
+  `skimage.restoration.cycle_spin`.
 
-* Update RELEASE.txt regarding Azure Pipelines after making changes to
-  scikit-image-wheels repo.
-* Finalize ``skimage.future.graph`` API.
-* Finalize ``skimage.future.manual_segmentation`` API.
-
-Version 0.20
+Version 0.27
 ------------
+* Complete deprecation of plugin infrastructure by doing the following:
+  - Replace calls to `call_plugin` with functions from the imageio plugin
+  - Remove `skimage/io/_plugins`
+  - Remove `skimage/io/manage_plugins.py`
+  - Remove `skimage/io/__init__.py::__getattr__`
+  - Remove related tests, imports, etc.
+  - Remove `doc/source/user_guide/plugins.rst`
+* Complete deprecation of `square`, `rectangle` and `cube` in `skimage.morphology`.
 
-* In ``skimage/feature/peak.py``, remove the `indices` argument and
-  the decorator `remove_arg`.
-* In ``skimage.measure._find_contours.py``, remove the `deprecate_kwarg`
-  decorator from `find_contours`.
-* In ``skimage/feature/corner.py``, change `order` default to 'rc' in
-  `structure_tensor`.
-* In ``skimage/feature/corner.py``, remove the `structure_tensor_eigvals`
-  function.
-* Remove deprecated qt plugins, i.e. `qt_plugin.py`, `qt_plugin.ini` and
-  `skivi.py` in `skimage/io/_plugins`.
-* Remove enrirely the folder skimage/scripts containing skivi app.
-  Remove `scripts` related lines in MANIFEST.in, .codecov.yml, appveyor.yml,
-  setup.py
-* Remove viewer app in `skimage/viewer` and remove `./viewer_examples/`.
-  Remove `viewer_examples` occurences in `tools/check_sdist.py`
-
-Version 1.0
------------
-
-* consider removing the argument `coordinates` in
-  `skimage.segmentation.active_contour`, which has not effect.
-* In ``skimage/morphology/misc.py`` remove the deprecated parameter
-  ``in_place`` in remove_small_holes(), remove_small_objects() and
-  clear_border(), and update the tests.
-* Remove the deprecation warning for `input` kwarg of the `label`
-  function in `skimage/measure/_label.py`
-* Change the warning about poorly conditioned data to a ValueError within
-  `skimage.measure.CircleModel.estimate` and update the tests in `test_circle_model_insufficient_data` accordingly.
-
-Other (2022)
+Version 0.29
 ------------
-* Remove conditional import of ``scipy.fft`` in ``skimage._shared.fft`` and
-  `skimage.registration._phase_cross_correlation.py` once the minimum supported
-  version of ``scipy`` reaches 1.4.
-* Remove unneeded `deconv_type` and astype call in `weiner` and
-  `unsupervised_wiener` in `skimage.restoration.deconvolution` once the minimum
-  supported version of ``scipy`` reaches 1.4.
-* Remove two unneeded astype calls in `butterworth` once the minimum supported
-  version of ``scipy`` reaches 1.4.
-* Remove pillow version related warning for CVE when pillow > 8.1.2 in
-  `skimage/io/_plugins/pil_plugin.py` and `skimage/io/collection.py`.
-
-Other (2023)
-------------
-* When ``scipy`` is set to >= 1.6.0, remove legacy (i.e. non-zoom) code paths in
-  ``skimage.transform.resize``.
-* When ``scipy`` is set to >= 1.6.0, remove SciPy version checks from
-  ``skimage._shared.utils._fix_ndimage_mode``
+* Complete deprecation of `threshold_rel` in `skimage.feature.blob_*` functions
 
 Other
 -----
-* Check whether imread wheels are available, then re-enable testing imread
-  on macOS. See https://github.com/scikit-image/scikit-image/pull/3898
-* When sphinx-gallery>=0.9.0, remove the thumbnail_size in
-  doc/source/conf.py as the default value will be comparable (#4801).
+* Once NumPy 1.25.0 is minimal required version:
+    * Remove optional test for a NaN-related deprecation warning from numpy.clip in
+      skimage/exposure/tests/test_exposure.py::test_rescale_nan_warning
+* Delete FREE_THREADED_BUILD block in `.github/scripts/setup-*-env.sh` once free-threaded
+  wheels of Cython are available on PyPi.
+* Update `central_pixel` once `sp.sparse.csgraph` supports the array interface (scipy >= 1.15)
+* Finalize ``skimage.future.manual_segmentation`` API,
+  see https://github.com/scikit-image/scikit-image/issues/2624
+* Review why test precision needs to be lowered for macOS ARM in
+  `test_apply_parallel.py`
+* Once SciPy 1.17.0 is minimal required version, so that the `rng` parameter of
+  `scipy.linalg.eigsh` is available everywhere, remove the compatibility logic in
+  `skimage/graph/_graph_cut.py::_ncut_relabel` and the `xfail` mark in
+  `tests/skimage/graph/test_rag.py::test_reproducibility`.
+
+Post Python 3.11
+----------------
+* Remove or simplify `skimage._shared._warnings::warn_external` to use only
+  `skip_file_prefixes`. Remove corresponding license code in LICENSE.txt (if possible).
+
+Post numpy 2
+------------
+- Remove try except blocks following comment starting
+  `# TODO: when minimum numpy`
+  in `skimage/color/colorconv.py`, `skimage/color/tests/test_colorconv.py`,
+  `skimage/measure/_blur_effect.py`, and `skimage/util/tests/test_montage.py`
+- Remove `handle_np2` from `skimage/conftest.py`
+- Once matplotlib doesn't constrain to numpy<2.0 via contourpy (or 2.0 is
+  minimal required version): consider re-adding matplotlib to the test
+  dependencies. Also remove temporary assert for NumPy 2.0 in
+  `nightly_wheel_build.yml`.
+- Remove references to `numpy.bool8` once NumPy 2.0 is minimal required version.
+- scipy>=1.12: remove SCIPY_CG_TOL_PARAM_NAME in `_shared.compat.py`.
+- Remove `np2` check in `skimage/feature/brief.py`.
+- Consider using `numpy.testing.assert_equal()` with `strict=True` everywhere.
+
+Version 2.0
+-----------
+- In `skimage.morphology.remove_small_objects`, complete the deprecation of
+  `min_size` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.morphology.remove_small_holes`, complete the deprecation of
+  `area_threshold` and re-order the argument `connectivity` after the
+  keyword-only parameter `max_size`.
+- In `skimage.measure.regionprops` complete deprecation of old property names.
+  Remove `PROPS` dict, related logic and warnings.
+
+See https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2
+
+Version 2.2
+-----------
+- In `skimage.measure.fit` remove the deprecated `estimate` method and simplify
+  the internals that where providing backwards-compatibility with this API.
+  This affects the classes `LineModelND`, `CircleModel`, and `EllipseModel`.
+- In `skimage.measure._geometric` and `skimage.measure._thin_plate_splines`,
+  remove the deprecated `estimate` method and simplify the internals that where
+  providing backwards-compatibility with this API.
+  This affects the classes `AffineTransform`, `EssentialMatrixTransform`,
+  `EuclideanTransform`, `FundamentalMatrixTransform`,
+  `PiecewiseAffineTransform`, `PolynomialTransform`, `ProjectiveTransform`,
+  `SimilarityTransform`, and `ThinPlateSplineTransform`
+
+- Complete deprecation of:
+  * `params` argument to `predict_*` methods of `LineModelND`, `CircleModel`
+    and `EllipseModel` from `skimage.measure.fit`.
+  * Ability to create uninitialized models of the same classes, by passing no
+    input arguments to constructor.
+
+  The procedure is:
+
+  * Move `_estimate` code into `from_estimate` (this as part of expiring
+    deprecation of `estimate` methods).
+  * Delete deprecated `BaseModel`, and `_BaseModel` class for supporting deprecations.
+  * Delete `_deprecate_no_args` (class decorator to deprecate no-argument call
+    to class constructor).
+  * Delete `_deprecate_model_params` (method decorator to deprecate `params`
+    argument to `predict_*` methods).
+  * Remove `params` arguments (and parsing) to `predict_*` methods.
+  * Delete `_params2init_values` methods (these were for processing deprecated `params` arguments).
+  * Delete `params` properties of models.
+  * Move `_check_init_values` into `_args_init` (these were for checking *both*
+    deprecated `params` arguments, *and* `__init__` arguments; after expiry,
+    the code only needs to check `__init__` arguments).
+  * Rename `_arg_init` methods to `__init__`.
+  * Remove tests for `params` arguments, and no-args initialization.  These
+    will become apparent when running the test suite after making the changes above.

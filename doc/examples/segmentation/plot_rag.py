@@ -1,11 +1,11 @@
 """
-=======================
-Region Adjacency Graphs
-=======================
+==============================
+Region Adjacency Graphs (RAGs)
+==============================
 
 This example demonstrates the use of the `merge_nodes` function of a Region
-Adjacency Graph (RAG). The `RAG` class represents a undirected weighted graph
-which inherits from `networkx.graph` class. When a new node is formed by
+Adjacency Graph (RAG). The `RAG` class represents an undirected weighted graph
+which inherits from :obj:`networkx.Graph` class. When a new node is formed by
 merging two nodes, the edge weight of all the edges incident on the resulting
 node can be updated by a user defined function `weight_func`.
 
@@ -14,7 +14,8 @@ The example below also shows how to use a custom function to select the larger
 weight instead.
 
 """
-from skimage.future.graph import rag
+
+import skimage as ski
 import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np
@@ -59,7 +60,7 @@ def display(g, title):
     nx.draw_networkx_edge_labels(g, pos, font_size=20)
 
 
-g = rag.RAG()
+g = ski.graph.RAG()
 g.add_edge(1, 2, weight=10)
 g.add_edge(2, 3, weight=20)
 g.add_edge(3, 4, weight=30)

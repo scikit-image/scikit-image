@@ -115,7 +115,7 @@ correctly, in sync with scikit-image.
 Related Work
 ------------
 
-`pandas` released 1.0.0 in January 2020, including many backwards-incompatible
+``pandas`` released 1.0.0 in January 2020, including many backwards-incompatible
 API changes [3]_. `scipy` released version 1.0 in 2017, but, given its stage of
 maturity and position at the base of the scientific Python ecosystem, opted not
 to make major breaking changes [4]_. However, SciPy has adopted a policy of
@@ -211,8 +211,8 @@ In early July 2021, the core team held a series of meetings to discuss this
 approach. The minutes of this meeting are in the scikit-image meeting notes
 repository [9]_.
 
-Ongoing discussion will happen on the image.sc forum [10]_, the scikit-image
-mailing list [11]_, and GitHub meta-issue [7]_. Specific links to relevant
+Ongoing discussion will happen on the user forum [10]_, the
+developer forum [11]_, and GitHub discussion [7]_. Specific links to relevant
 posts will be added to this document before acceptance.
 
 Resolution
@@ -285,14 +285,14 @@ license [1]_, as in `Copyright`, below, with attribution encouraged with CC0+BY
    https://creativecommons.org/publicdomain/zero/1.0/
 .. [2] https://dancohen.org/2013/11/26/cc0-by/
 .. [3] https://pandas.pydata.org/pandas-docs/stable/whatsnew/v1.0.0.html#backwards-incompatible-api-changes
-.. [4] https://docs.scipy.org/doc/scipy/reference/release.1.0.0.html
+.. [4] https://docs.scipy.org/doc/scipy/release.1.0.0.html
 .. [5] https://github.com/scipy/scipy/pull/12862
 .. [6] https://semver.org/
 .. [7] https://github.com/scikit-image/scikit-image/issues/5439
 .. [8] https://github.com/scikit-image/scikit-image/milestones/1.0
 .. [9] https://github.com/scikit-image/meeting-notes/blob/main/2021/july-api-meetings.md
 .. [10] https://forum.image.sc/tag/scikit-image
-.. [11] https://mail.python.org/mailman3/lists/scikit-image.python.org/
+.. [11] https://discuss.scientific-python.org/c/contributor/skimage
 .. [12] https://mail.python.org/archives/list/scikit-image@python.org/thread/DSV6PEYVJ4RZRUWWV5SBNF7FFRERTSCF/
 .. [13] https://mail.python.org/archives/list/scikit-image@python.org/message/UYARUQM5LBWXIAWBAPNHIQIDRKUUDTEK/
 .. [14] https://mail.python.org/archives/list/scikit-image@python.org/message/63ZGG7DY5SWVM62XASHMCPFAG6KPJCMT/

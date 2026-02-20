@@ -1,4 +1,3 @@
-
 r"""
 ===================================
 Using window functions with images
@@ -24,7 +23,7 @@ visible in the plot of the frequency component of the FFT.
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.fftpack import fft2, fftshift
+from scipy.fft import fft2, fftshift
 from skimage import img_as_float
 from skimage.color import rgb2gray
 from skimage.data import astronaut

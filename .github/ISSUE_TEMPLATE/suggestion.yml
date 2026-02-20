@@ -1,0 +1,29 @@
+name: Suggest a feature
+description: Suggest a new feature, behavior or improvement to scikit-image.
+title: "<Comprehensive title summarizing your suggestion>"
+labels: [":pray: Feature request"]
+
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for your suggestion!
+        Before creating a new issue, please check the
+        [issue tracker](https://github.com/scikit-image/scikit-image/issues?q=label%3A%22%3Apray%3A+Feature+request%22)
+        for similar issues or reach out on our
+        [developer discussion forum](https://discuss.scientific-python.org/c/contributor/skimage)
+        if your are unsure whether this is a good fit for scikit-image.
+
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: "Description:"
+      description: >
+        Describe your suggestion with all necessary detail.
+        What kind of behavior would you like to see?
+        How would someone benefit from this?
+        Are you considering working on this suggestion yourself?
+        Great! Please let us know.
+      placeholder: |
+        Your suggestion...

@@ -1,20 +1,21 @@
 #!/usr/bin/env python
-"""Script to auto-generate our API docs.
-"""
-# stdlib imports
-import os, sys
+"""Script to auto-generate our API docs."""
+
+import sys
+
+from packaging import version as _version
 
 # local imports
 from apigen import ApiDocWriter
 
-# version comparison
-from distutils.version import LooseVersion as V
 
-#*****************************************************************************
+# *****************************************************************************
+
 
 def abort(error):
-    print('*WARNING* API documentation not generated: %s' % error)
+    print(f'*WARNING* API documentation not generated: {error}')
     exit()
+
 
 if __name__ == '__main__':
     package = 'skimage'
@@ -25,7 +26,7 @@ if __name__ == '__main__':
 
     try:
         __import__(package)
-    except ImportError as e:
+    except ImportError:
         abort("Can not import skimage")
 
     module = sys.modules[package]
@@ -35,13 +36,14 @@ if __name__ == '__main__':
     # are not (re)generated. This avoids automatic generation of documentation
     # for older or newer versions if such versions are installed on the system.
 
-    installed_version = V(module.__version__)
+    # exclude any appended git hash and date
+    installed_version = _version.parse(module.__version__.split('+git')[0])
 
-    source_lines = open('../skimage/__init__.py').readlines()
+    source_lines = open('../src/skimage/__init__.py').readlines()
     version = 'vUndefined'
     for l in source_lines:
-        if l.startswith('__version__'):
-            source_version = V(l.split("'")[1])
+        if l.startswith('__version__ = '):
+            source_version = _version.parse(l.split("'")[1])
             break
 
     if source_version != installed_version:
@@ -53,8 +55,15 @@ if __name__ == '__main__':
         r'\.fixes$',
         r'\.externals$',
         r'filter$',
-        r'viewer.viewers$',  # all functions already imported to viewer
     ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
-    print('%d files written' % len(docwriter.written_modules))
+
+    if len(docwriter.written_modules) <= 1:
+        msg = (
+            f"expected more modules, only wrote files for: "
+            f"{docwriter.written_modules!r}"
+        )
+        raise RuntimeWarning(msg)
+    else:
+        print(f'{len(docwriter.written_modules)} files written')

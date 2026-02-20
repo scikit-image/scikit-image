@@ -14,7 +14,7 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(SPHINXCACHE) $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST            = build
 
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages release_notes
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash release_notes
 
 all: html
 
@@ -45,21 +45,11 @@ api:
 	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
-release_notes:
-	@echo "Copying release notes"
-	@tail -n +4 release/release_$$(\
-		ls release/release_*.*.* \
-			| sed s:release/release_:: \
-			| sort -nrt. -k1,1 -k2,2 \
-			| head -n 1) \
-		> release/_release_notes_for_docs.rst
 
-html: api release_notes
+html: api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
-	cp -r source/plots $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
-	$(PYTHON) source/random_gallery.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(DEST)/dirhtml
@@ -128,9 +118,6 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(DEST)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in build/doctest/output.txt."
-
-gh-pages:
-	$(PYTHON) gh-pages.py
 
 gitwash:
 	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
