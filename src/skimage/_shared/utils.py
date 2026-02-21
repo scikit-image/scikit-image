@@ -611,8 +611,21 @@ class channel_as_last_axis:
             if len(channel_axis) > 1:
                 raise ValueError("only a single channel axis is currently supported")
 
-            if channel_axis == (-1,) or channel_axis == -1:
-                return func(*args, **kwargs)
+            axis = channel_axis[0]
+            # Get reference array to determine ndim
+            if self.arg_positions:
+                ref_arg = next(arg for pos, arg in enumerate(args) if pos in self.arg_positions)
+            else:
+                ref_arg = args[0]
+            ndim = ref_arg.ndim
+            # Normalize negative axis
+            if axis < 0:
+                axis += ndim
+            if axis < 0 or axis >= ndim:
+                raise ValueError(
+                     f"channel_axis={axis} is out of bounds for array of dimension {ndim}"
+                )
+            channel_axis = (axis,)
 
             if self.arg_positions:
                 new_args = []
