@@ -181,3 +181,26 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     cat_ycbcr = np.moveaxis(cat_ycbcr, channel_axis, -1)
 
     assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
+
+
+def test_apply_parallel_default_mode():
+    """Test that apply_parallel does not add boundary padding by default."""
+    x = np.arange(16).reshape((4, 4))
+
+    def func(arr):
+        return arr + arr.size
+
+    chunks = (2, 2)
+    depth = 1
+    # import dask.array as da
+    # d = da.from_array(x, chunks=(2, 2))
+    # map_overlap_res = d.map_overlap(func, depth=1, boundary=None).compute()
+    map_overlap_res = np.array(
+        [[9, 10, 11, 12], [13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]]
+    )
+    defa = apply_parallel(func, x, chunks=chunks, depth=depth)
+    assert_array_almost_equal(defa, map_overlap_res)
+    none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
+    assert_array_almost_equal(none_c, map_overlap_res)
+    none = apply_parallel(func, x, chunks=chunks, depth=depth, mode='none')
+    assert_array_almost_equal(none, map_overlap_res)
