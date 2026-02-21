@@ -9,8 +9,9 @@ jobs:
       - run:
           name: Install apt packages
           command: |
+            sudo rm /usr/bin/google-chrome
             sudo apt-get update
-            sudo apt-get install ccache
+            sudo apt-get install ccache chromium-browser
       - run:
           name: Concatenate requirement files
           command: cat requirements/*.txt > requirements/all_requirements
