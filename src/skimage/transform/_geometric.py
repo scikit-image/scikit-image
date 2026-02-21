@@ -80,6 +80,8 @@ def _calc_center_normalize(points, scaling='rms'):
            (1997): 580-593.
 
     """
+    # deal with array_like points
+    points = np.asarray(points)
     n, d = points.shape
     scaling = scaling.lower()
     matrix = np.eye(d + 1)
@@ -1150,9 +1152,7 @@ class ProjectiveTransform(_HMatrixTransform):
         return super().from_estimate(src, dst, weights)
 
     def _estimate(self, src, dst, weights=None):
-        src = np.asarray(src)
-        dst = np.asarray(dst)
-        n, d = src.shape
+        n, d = np.array(src).shape
         fail_matrix = np.full((d + 1, d + 1), np.nan)
 
         src_matrix, src = _center_and_normalize_points(src)
