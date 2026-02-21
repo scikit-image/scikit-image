@@ -582,14 +582,12 @@ class channel_as_last_axis:
         multichannel array and False otherwise. This decorator does not
         currently support the general case of functions with multiple outputs
         where some or all are multichannel.
-    Raises
+    Raise
     ------
     ValueError
         If no channel array can be found in positional or keyword arguments
-        when ``channel_axis`` is not ``None``.
-    ValueError
-        If ``channel_axis`` is out of bounds for the inferred array
-        dimensionality.
+        when ``channel_axis`` is not ``None``, or if ``channel_axis`` is
+        out of bounds for the inferred array dimensionality.
 
     """
 
@@ -643,11 +641,11 @@ class channel_as_last_axis:
                 )
                 raise ValueError(msg)
             ndim = ref_arg.ndim
-            
+
             # Normalize negative axis
             if axis < 0:
                 axis += ndim
-            
+
             if axis < 0 or axis >= ndim:
                 msg = (
                     f"channel_axis={orig_axis} is out of bounds "
