@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from .._shared.filters import gaussian
-from .._shared.utils import convert_to_float
+from .._shared.utils import convert_to_float, _to_ndimage_mode
 from ._warps import resize
 
 
@@ -18,11 +18,13 @@ def _smooth(image, sigma, mode, cval, channel_axis):
         sigma = (sigma,) * (image.ndim - 1)
     else:
         channel_axis = None
+
+    ndi_mode = _to_ndimage_mode(mode)
     gaussian(
         image,
         sigma=sigma,
         out=smoothed,
-        mode=mode,
+        mode=ndi_mode,
         cval=cval,
         channel_axis=channel_axis,
     )
