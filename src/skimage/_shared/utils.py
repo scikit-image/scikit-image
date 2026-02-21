@@ -612,19 +612,36 @@ class channel_as_last_axis:
                 raise ValueError("only a single channel axis is currently supported")
 
             axis = channel_axis[0]
+            orig_axis = axis
             # Get reference array to determine ndim
+            ref_arg = None
             if self.arg_positions:
-                ref_arg = next(arg for pos, arg in enumerate(args) if pos in self.arg_positions)
-            else:
+                ref_arg = next(
+                    (arg for pos, arg in enumerate(args) if pos in self.arg_positions),
+                    None,
+                )
+            if ref_arg is None and self.kwarg_names:
+                name = next(iter(self.kwarg_names))
+                ref_arg = kwargs.get(name)
+
+            if ref_arg is None and args:
                 ref_arg = args[0]
+
+            if ref_arg is None:
+                raise ValueError(
+                    "channel_as_last_axis: could not determine array ndim; "
+                    "no channel array found in args or kwargs."
+                )
             ndim = ref_arg.ndim
+            
             # Normalize negative axis
             if axis < 0:
                 axis += ndim
+            
             if axis < 0 or axis >= ndim:
-                raise ValueError(
-                     f"channel_axis={axis} is out of bounds for array of dimension {ndim}"
-                )
+                 raise ValueError(
+                     f"channel_axis={orig_axis} is out of bounds for array of dimension {ndim}"
+                 )
             channel_axis = (axis,)
 
             if self.arg_positions:
