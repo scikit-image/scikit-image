@@ -16,6 +16,8 @@ from packaging.version import parse
 from plotly.io._sg_scraper import plotly_sg_scraper
 from sphinx_gallery.sorting import ExplicitOrder
 from sphinx_gallery.utils import _has_optipng
+from sphinx_gallery.notebook import add_code_cell, add_markdown_cell
+
 
 filterwarnings(
     "ignore", message="Matplotlib is currently using agg", category=UserWarning
@@ -51,6 +53,9 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    # Important: keep jupyterlite_sphinx after sphinx_gallery
+    # to avoid missing notebook files in the gallery
+    "jupyterlite_sphinx",
     "doi_role",
     "numpydoc",
     "sphinx_design",
@@ -93,6 +98,104 @@ else:
 
 pio.renderers.default = "sphinx_gallery_png"
 
+
+def notebook_modification_function(notebook_content, notebook_filename):
+    notebook_content_str = str(notebook_content)
+
+    message_class = "warning"
+    message = (
+        "Running the scikit-image examples in JupyterLite is experimental and you may"
+        " encounter some unexpected behaviour.\n\nThe main difference is that imports"
+        " can take a lot longer than usual, for example the first `import skimage`"
+        " statement can take roughly 10-20s.\n\nIf you notice problems, feel free to"
+        " [open an issue](https://github.com/scikit-image/scikit-image/issues/new/choose)."
+    )
+
+    jupyterlite_warning_header = "\n".join(
+        [
+            f"<div class='alert alert-{message_class}'>",
+            "",
+            "# JupyterLite warning",
+            "",
+            f"{message}",
+            "</div>",
+        ]
+    )
+
+    dummy_notebook_content = {"cells": []}
+    add_markdown_cell(dummy_notebook_content, jupyterlite_warning_header)
+
+    # Add a code cell to install the nightly WASM wheel for scikit-image that
+    # will be fetched from Anaconda.org, only for the dev docs.
+
+    # Work around https://github.com/jupyterlite/pyodide-kernel/issues/166
+    # and https://github.com/pyodide/micropip/issues/223 by installing the
+    # dependencies first, and then scikit-image from Anaconda.org.
+    skimage_install_lines = ["# JupyterLite-specific code"]
+    skimage_pip_installation = (
+        [
+            "import piplite\n"
+            "await piplite.install(\n"
+            "    ['numpy', 'scipy', 'networkx', 'pillow', 'imageio', 'tifffile', 'packaging', 'lazy-loader']\n"
+            ")\n"
+            "await piplite.install(\n"
+            f"    'scikit-image=={version}',\n"
+            "    index_urls='https://pypi.anaconda.org/scientific-python-nightly-wheels/simple',\n"
+            ")",
+        ]
+        if "dev" in version
+        else ["%pip install scikit-image\n\n"]
+    )
+    skimage_install_lines.extend(skimage_pip_installation)
+    add_code_cell(dummy_notebook_content, "\n".join(skimage_install_lines))
+
+    # Extra code lines, dynamically added based on the notebooks' contents.
+    extra_code_lines = []
+    if "plotly" in notebook_content_str:
+        extra_code_lines.append("%pip install plotly")
+    if "matplotlib" in notebook_content_str:
+        extra_code_lines.append("%pip install matplotlib")
+    if "pandas" in notebook_content_str:
+        extra_code_lines.append("%pip install pandas")
+    if "sklearn" in notebook_content_str:
+        extra_code_lines.append("%pip install scikit-learn")
+    if "networkx" in notebook_content_str:
+        extra_code_lines.append("%pip install networkx")
+    if "pywt" in notebook_content_str:
+        extra_code_lines.append("%pip install PyWavelets")
+    if (
+        "from skimage import data" in notebook_content_str
+        or "skimage.data" in notebook_content_str
+        or "ski.data" in notebook_content_str
+        # TODO: regex seems to make the notebook_modification_function hang
+        # up here, enable this later
+        # or re.search(
+        #     r'from\s+skimage\s+import\s+(?:[^,\n]+,\s*)*data(?:\s*,|$)',
+        #     notebook_content_str,
+        # )
+    ):
+        extra_code_lines.extend(
+            [
+                # lzma needs to be imported so that %pip install pooch works
+                "import lzma",
+                # pooch depends on requests and need to be installed before
+                # pyodide_http.patch_all() is called
+                "%pip install pooch",
+                "import pooch",
+                "%pip install pyodide-http",
+                "import pyodide_http",
+                "pyodide_http.patch_all()",
+            ]
+        )
+
+    if extra_code_lines:
+        add_code_cell(dummy_notebook_content, "\n".join(extra_code_lines))
+
+    notebook_content["cells"] = (
+        dummy_notebook_content["cells"] + notebook_content["cells"]
+    )
+
+
 sphinx_gallery_conf = {
     "doc_module": ("skimage",),
     "examples_dirs": "../examples",
@@ -131,8 +234,15 @@ sphinx_gallery_conf = {
     #   Temporarily disabled because plotly scraper isn't parallel-safe
     #   (see https://github.com/plotly/plotly.py/issues/4959)!
     # "parallel": True,
+    # Interactive documentation via jupyterlite-sphinx utilities
+    "jupyterlite": {
+        # Use the Lab interface instead of the Notebook interface, until
+        # https://github.com/sphinx-gallery/sphinx-gallery/pull/1417 makes
+        # it to a release
+        "use_jupyter_lab": True,
+        "notebook_modification_function": notebook_modification_function,
+    },
 }
-
 
 if _has_optipng():
     # This option requires optipng to compress images
@@ -153,6 +263,9 @@ html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
 html_logo = "_static/logo.png"
 
+# Note: we don't include sphinx_gallery_hide_links.css here because we
+# add it dynamically for the gallery pages via hide_sg_links() below.
+# Debugging
 html_css_files = ['theme_overrides.css']
 
 html_theme_options = {
@@ -186,6 +299,8 @@ html_theme_options = {
         "version_match": "dev" if "dev" in version else version,
     },
     "show_version_warning_banner": True,
+    # Secondary sidebar
+    "secondary_sidebar_items": ["page-toc", "sg_download_links", "sg_launcher_links"],
     # Footer
     "footer_start": ["copyright"],
     "footer_end": ["sphinx-version", "theme-version"],
@@ -365,3 +480,27 @@ myst_enable_extensions = [
     # Enable fencing directives with `:::`
     "colon_fence",
 ]
+
+# -- Interactive documentation via jupyterlite-sphinx ------------------------
+
+## Disable the global "Try it!" button for now, because there's no reliable
+## way to keep scikit-image updated within it. However, it is enabled for the
+## Sphinx-Gallery examples. This can be re-enabled at a later stage.
+# global_enable_try_examples = True
+# try_examples_global_button_text = "Try it!"
+# try_examples_global_warning_text = (
+#     "Interactive examples for scikit-image are experimental and may not always work "
+#     "as expected. If you encounter any issues, please report them on the [scikit-image "
+#     "issue tracker](https://github.com/scikit-image/scikit-image/issues/new)."
+# )
+jupyterlite_silence = False  # temporary, for debugging
+jupyterlite_overrides = "overrides.json"
+
+
+def hide_sg_links(app, pagename, templatename, context, doctree):
+    if pagename.startswith("auto_examples/"):
+        app.add_css_file("sphinx_gallery_hide_links.css")
+
+
+def setup(app):
+    app.connect("html-page-context", hide_sg_links)

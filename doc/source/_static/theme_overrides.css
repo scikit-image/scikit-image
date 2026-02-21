@@ -25,3 +25,40 @@ div.highlight a {
 .bd-footer .footer-items__end, .bd-footer .footer-items__start {
   flex-direction: row;
 }
+
+/* Buttons for JupyterLite-enabled interactive examples */
+.try_examples_button {
+  color: white;
+  background-color: var(--pst-color-info);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 0.25rem;
+  margin-top: 3px; /* better alignment under admonitions */
+  margin-bottom: 5px !important; /* fix uneven button sizes under admonitions */
+  box-shadow: 0 2px 5px rgba(108, 108, 108, 0.2);
+  font-weight: bold;
+  font-size: small;
+}
+
+/* Use more acccessible colours for text in dark mode */
+[data-theme="dark"] .try_examples_button {
+  color: black;
+}
+
+.try_examples_button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.try_examples_button_container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Better gaps for examples buttons under admonitions */
+.try_examples_outer_iframe {
+  margin-top: 0.4em;
+}

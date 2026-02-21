@@ -77,6 +77,12 @@ docs = [
     'pooch>=1.6',
     'tifffile>=2022.8.12',
     'myst-parser',
+    # Pyodide kernel 0.5.2 comes with Pyodide 0.27.2; see
+    # https://pyodide.org/en/0.27.2/usage/packages-in-pyodide.html and
+    # https://jupyterlite-pyodide-kernel.readthedocs.io/en/stable/#with-pyodide
+    # for information on updating
+    'jupyterlite-sphinx>=0.18.0',
+    'jupyterlite-pyodide-kernel==0.5.2',
     'intersphinx-registry>=0.2411.14',
     'ipywidgets',
     'ipykernel',  # needed until https://github.com/jupyter-widgets/ipywidgets/issues/3731 is resolved
