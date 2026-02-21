@@ -106,7 +106,7 @@ def apply_parallel(
         chunk-wise basis).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
-    extra_keywords : dictionary, optional
+    extra_keywords : dict[str, Any], optional
         Dictionary of keyword arguments to be passed to the function.
     dtype : dtype-like, optional
         The data type of the `function` output. If None, Dask will attempt to
