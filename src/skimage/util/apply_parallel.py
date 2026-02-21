@@ -20,7 +20,7 @@ def _get_chunks(shape, ncpu):
     >>> _get_chunks((2, 4), 2)
     ((1, 1), (4,))
     """
-    # since apply_parallel is in the critical import path, we lazy import
+    # Since apply_parallel is in the critical import path, we lazy import
     # math just when we need it.
     from math import ceil
 
@@ -130,8 +130,8 @@ def apply_parallel(
     Returns
     -------
     out : ndarray or dask.array.Array
-        Returns the result of applying the operation. The return type
-        (ndarray or dask.array.Array) is determined by the ``compute``
+        Returns the result of applying the function. The return type
+        (ndarray or dask.array.Array) is determined by the `compute`
         argument.
 
     Notes
@@ -142,8 +142,8 @@ def apply_parallel(
 
     """
     try:
-        # Importing dask takes time. since apply_parallel is on the
-        # minimum import path of skimage, we lazy attempt to import dask
+        # Importing dask takes time. Since apply_parallel is in the
+        # critical import path, we lazy import dask just when we need it.
         import dask.array as da
     except ImportError:
         raise RuntimeError(
@@ -162,7 +162,7 @@ def apply_parallel(
     if chunks is None:
         shape = array.shape
         try:
-            # since apply_parallel is in the critical import path, we lazy
+            # Since apply_parallel is in the critical import path, we lazy
             # import multiprocessing just when we need it.
             from multiprocessing import cpu_count
 
