@@ -1,2 +1,0 @@
-[pytest11]
-pretty = pytest_pretty
