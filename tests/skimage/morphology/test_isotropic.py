@@ -81,13 +81,13 @@ def test_footprint_overflow():
     ],
 )
 def test_out_argument(func):
-        radius = 3
-        img = np.ones((10, 10), dtype=np.bool_)
-        out = np.zeros_like(img)
-        out_saved = out.copy()
-        func(img, radius, out=out)
-        assert np.any(out != out_saved)
-        assert_array_equal(out, func(img, radius))
+    radius = 3
+    img = np.ones((10, 10), dtype=np.bool_)
+    out = np.zeros_like(img)
+    out_saved = out.copy()
+    func(img, radius, out=out)
+    assert np.any(out != out_saved)
+    assert_array_equal(out, func(img, radius))
 
 
 @pytest.mark.parametrize(
