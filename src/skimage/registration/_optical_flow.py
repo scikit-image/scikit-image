@@ -61,7 +61,7 @@ def _tvl1(
     dtype = reference_image.dtype
     grid = np.meshgrid(
         *[np.arange(n, dtype=dtype) for n in reference_image.shape],
-        indexing='ij',
+        indexing="ij",
         sparse=True,
     )
 
@@ -101,7 +101,7 @@ def _tvl1(
             )
 
         image1_warp = warp(
-            moving_image, _get_warp_points(grid, flow_current), mode='edge'
+            moving_image, _get_warp_points(grid, flow_current), mode="edge"
         )
         grad = np.array(np.gradient(image1_warp))
         NI = (grad * grad).sum(0)
@@ -299,9 +299,9 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
 
     if gaussian:
         sigma = ndim * (size / 4,)
-        filter_func = partial(gaussian_filter, sigma=sigma, mode='mirror')
+        filter_func = partial(gaussian_filter, sigma=sigma, mode="mirror")
     else:
-        filter_func = partial(ndi.uniform_filter, size=ndim * (size,), mode='mirror')
+        filter_func = partial(ndi.uniform_filter, size=ndim * (size,), mode="mirror")
 
     flow = flow0
     # For each pixel location (i, j), the optical flow X = flow[:, i, j]
@@ -312,7 +312,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
 
     grid = np.meshgrid(
         *[np.arange(n, dtype=dtype) for n in reference_image.shape],
-        indexing='ij',
+        indexing="ij",
         sparse=True,
     )
 
@@ -321,7 +321,7 @@ def _ilk(reference_image, moving_image, flow0, radius, num_warp, gaussian, prefi
             flow = ndi.median_filter(flow, (1,) + ndim * (3,))
 
         moving_image_warp = warp(
-            moving_image, _get_warp_points(grid, flow), mode='edge'
+            moving_image, _get_warp_points(grid, flow), mode="edge"
         )
         grad = np.stack(np.gradient(moving_image_warp), axis=0)
         error_image = (grad * flow).sum(axis=0) + reference_image - moving_image_warp
