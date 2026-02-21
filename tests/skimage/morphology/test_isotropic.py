@@ -71,8 +71,16 @@ def test_footprint_overflow():
     assert_array_equal(isotropic_res, binary_res)
 
 
-def test_out_argument():
-    for func in (isotropic.isotropic_erosion, isotropic.isotropic_dilation):
+@pytest.mark.parametrize(
+    "func",
+    [
+        isotropic.isotropic_erosion,
+        isotropic.isotropic_dilation,
+        isotropic.isotropic_closing,
+        isotropic.isotropic_opening,
+    ],
+)
+def test_out_argument(func):
         radius = 3
         img = np.ones((10, 10), dtype=np.bool_)
         out = np.zeros_like(img)
