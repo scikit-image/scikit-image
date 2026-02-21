@@ -175,7 +175,7 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 
     assert_array_almost_equal(
-        cat_ycbcr_expected, cat_ycbcr, decimal=IMG_COMPARE_PRECISION
+        cat_ycbcr, cat_ycbcr_expected, decimal=IMG_COMPARE_PRECISION
     )
 
 
@@ -217,7 +217,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     # move channels of output back to the last dimension
     cat_ycbcr = np.moveaxis(cat_ycbcr, channel_axis, -1)
 
-    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
+    assert_array_almost_equal(cat_ycbcr, cat_ycbcr_expected)
 
 
 def test_apply_parallel_default_mode():
