@@ -582,7 +582,7 @@ class channel_as_last_axis:
         multichannel array and False otherwise. This decorator does not
         currently support the general case of functions with multiple outputs
         where some or all are multichannel.
-    Raise
+    Raises
     ------
     ValueError
         If no channel array can be found in positional or keyword arguments
