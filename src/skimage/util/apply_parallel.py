@@ -101,9 +101,8 @@ def apply_parallel(
         If `mode` is set to 'wrap' or 'periodic', the array will be extended by
         an outer boundary of size `depth` using periodic padding. This
         temporary boundary is used during computation, but is not retained in
-        the final output. For all other modes, no explicit boundary padding is
-        needed (scikit-image functions can handle the boundary condition on a
-        chunk-wise basis).
+        the final output. Other possible boundary modes are those supported by
+        :func:`dask.array.overlap.map_overlap` (see Notes below).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dict[str, Any], optional
@@ -136,6 +135,9 @@ def apply_parallel(
 
     Notes
     -----
+    NumPy boundary modes 'symmetric', 'wrap', and 'edge' are converted to the
+    equivalent Dask boundary modes 'reflect', 'periodic', and 'nearest',
+    respectively ('none' is equivalent to None).
     Setting ``compute=False`` can be useful for chaining later operations.
     For example region selection to preview a result or storing large data
     to disk instead of loading in memory.
@@ -185,6 +187,10 @@ def apply_parallel(
 
     if mode in ['wrap', 'periodic']:
         boundary = 'periodic'
+    elif mode in ['edge', 'nearest']:
+        boundary = 'nearest'
+    elif mode in ['symmetric', 'reflect']:
+        boundary = 'reflect'
     else:
         boundary = 'none'
 
