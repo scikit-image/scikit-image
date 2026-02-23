@@ -662,7 +662,7 @@ class deprecate_func:
         here. The outermost decorator should have stacklevel 2, the next inner
         one stacklevel 3, etc.
     prepend_docstring : bool, optional
-        By default, prepend the deprecation message to the docstring. Be warned
+        By default, prepend the deprecation message to the docstring. Beware
         that this may lead to formatting/rendering problems with Sphinx.
 
     Examples
