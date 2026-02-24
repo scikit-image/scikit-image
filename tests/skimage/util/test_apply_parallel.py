@@ -17,6 +17,8 @@ IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
 # on macOS arm64 the result is slightly different from other platforms,
 # so we need to lower the decimal precision
 
+x = np.arange(16).reshape((4, 4))  # array
+
 
 def test_apply_parallel():
     # data
@@ -119,8 +121,43 @@ def test_apply_parallel_nearest():
     result = apply_parallel(
         wrapped, a, chunks=(6, 6), depth={0: 5, 1: 5}, mode='nearest'
     )
-
     assert_array_almost_equal(result, expected)
+
+    # Test that NumPy mode 'edge' gets converted to the Dask boundary value
+    # 'nearest'.
+    def func(arr):
+        return arr + arr.size
+
+    chunks = (2, 2)
+    depth = 1
+    # import dask.array as da
+    # d = da.from_array(x, chunks=(2, 2))
+    # map_overlap_res = d.map_overlap(func, depth=1, boundary='nearest').compute()
+    map_overlap_res = np.array(
+        [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
+    )
+    edge = apply_parallel(func, x, chunks=chunks, depth=depth, mode='edge')
+    assert_array_almost_equal(edge, map_overlap_res)
+
+
+def test_apply_parallel_symmetric():
+    """Test that NumPy mode 'symmetric' gets converted to the Dask boundary
+    value 'reflect'.
+    """
+
+    def func(arr):
+        return arr + arr.size
+
+    chunks = (2, 2)
+    depth = 1
+    # import dask.array as da
+    # d = da.from_array(x, chunks=(2, 2))
+    # map_overlap_res = d.map_overlap(func, depth=1, boundary='reflect').compute()
+    map_overlap_res = np.array(
+        [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
+    )
+    symm = apply_parallel(func, x, chunks=chunks, depth=depth, mode='symmetric')
+    assert_array_almost_equal(symm, map_overlap_res)
 
 
 @pytest.mark.parametrize('dtype', (np.float32, np.float64))
@@ -138,7 +175,7 @@ def test_apply_parallel_rgb(depth, chunks, dtype):
     assert_equal(cat_ycbcr.dtype, cat.dtype)
 
     assert_array_almost_equal(
-        cat_ycbcr_expected, cat_ycbcr, decimal=IMG_COMPARE_PRECISION
+        cat_ycbcr, cat_ycbcr_expected, decimal=IMG_COMPARE_PRECISION
     )
 
 
@@ -180,4 +217,26 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
     # move channels of output back to the last dimension
     cat_ycbcr = np.moveaxis(cat_ycbcr, channel_axis, -1)
 
-    assert_array_almost_equal(cat_ycbcr_expected, cat_ycbcr)
+    assert_array_almost_equal(cat_ycbcr, cat_ycbcr_expected)
+
+
+def test_apply_parallel_default_mode():
+    """Test that apply_parallel does not add boundary padding by default."""
+
+    def func(arr):
+        return arr + arr.size
+
+    chunks = (2, 2)
+    depth = 1
+    # import dask.array as da
+    # d = da.from_array(x, chunks=(2, 2))
+    # map_overlap_res = d.map_overlap(func, depth=1, boundary=None).compute()
+    map_overlap_res = np.array(
+        [[9, 10, 11, 12], [13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]]
+    )
+    defa = apply_parallel(func, x, chunks=chunks, depth=depth)
+    assert_array_almost_equal(defa, map_overlap_res)
+    none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
+    assert_array_almost_equal(none_c, map_overlap_res)
+    none = apply_parallel(func, x, chunks=chunks, depth=depth, mode='none')
+    assert_array_almost_equal(none, map_overlap_res)

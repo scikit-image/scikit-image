@@ -20,7 +20,7 @@ def _get_chunks(shape, ncpu):
     >>> _get_chunks((2, 4), 2)
     ((1, 1), (4,))
     """
-    # since apply_parallel is in the critical import path, we lazy import
+    # Since apply_parallel is in the critical import path, we lazy import
     # math just when we need it.
     from math import ceil
 
@@ -77,7 +77,7 @@ def apply_parallel(
 
     Parameters
     ----------
-    function : function
+    function : Callable
         Function to be mapped which takes an array as an argument.
     array : ndarray or dask.array.Array
         Array which the function will be applied to.
@@ -97,11 +97,15 @@ def apply_parallel(
         different depth per array axis. Defaults to zero. When `channel_axis`
         is not None, and a tuple of length ``ndim - 1`` is provided, a depth of
         0 will be used along the channel axis.
-    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
-        Type of external boundary padding.
+    mode : str, optional
+        If `mode` is set to 'wrap' or 'periodic', the array will be extended by
+        an outer boundary of size `depth` using periodic padding. This
+        temporary boundary is used during computation, but is not retained in
+        the final output. Other possible boundary modes are those supported by
+        :func:`dask.array.overlap.map_overlap` (see Notes below).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
-    extra_keywords : dictionary, optional
+    extra_keywords : dict[str, Any], optional
         Dictionary of keyword arguments to be passed to the function.
     dtype : dtype-like, optional
         The data type of the `function` output. If None, Dask will attempt to
@@ -118,29 +122,30 @@ def apply_parallel(
         If ``None`` (default), compute based on array type provided
         (eagerly for NumPy Arrays and lazily for Dask Arrays).
     channel_axis : int or None, optional
-        If None, the image is assumed to be a grayscale (single channel) image.
+        If None, the image is assumed to be a grayscale (single-channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
 
     Returns
     -------
     out : ndarray or dask.array.Array
-        Returns the result of the applying the operation.
-        Type is dependent on the ``compute`` argument.
+        Returns the result of applying the function. The return type
+        (ndarray or dask.array.Array) is determined by the `compute`
+        argument.
 
     Notes
     -----
-    Numpy edge modes 'symmetric', 'wrap', and 'edge' are converted to the
-    equivalent ``dask`` boundary modes 'reflect', 'periodic' and 'nearest',
-    respectively.
+    NumPy boundary modes 'symmetric', 'wrap', and 'edge' are converted to the
+    equivalent Dask boundary modes 'reflect', 'periodic', and 'nearest',
+    respectively ('none' is equivalent to None).
     Setting ``compute=False`` can be useful for chaining later operations.
     For example region selection to preview a result or storing large data
     to disk instead of loading in memory.
 
     """
     try:
-        # Importing dask takes time. since apply_parallel is on the
-        # minimum import path of skimage, we lazy attempt to import dask
+        # Importing dask takes time. Since apply_parallel is in the
+        # critical import path, we lazy import dask just when we need it.
         import dask.array as da
     except ImportError:
         raise RuntimeError(
@@ -159,7 +164,7 @@ def apply_parallel(
     if chunks is None:
         shape = array.shape
         try:
-            # since apply_parallel is in the critical import path, we lazy
+            # Since apply_parallel is in the critical import path, we lazy
             # import multiprocessing just when we need it.
             from multiprocessing import cpu_count
 
@@ -180,21 +185,18 @@ def apply_parallel(
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
 
-    if mode == 'wrap':
-        mode = 'periodic'
-    elif mode == 'symmetric':
-        mode = 'reflect'
-    elif mode == 'edge':
-        mode = 'nearest'
-    elif mode is None:
-        # default value for Dask.
-        # Note: that for dask >= 2022.03 it will change to 'none' so we set it
-        #       here for consistent behavior across Dask versions.
-        mode = 'reflect'
+    if mode in ['wrap', 'periodic']:
+        boundary = 'periodic'
+    elif mode in ['edge', 'nearest']:
+        boundary = 'nearest'
+    elif mode in ['symmetric', 'reflect']:
+        boundary = 'reflect'
+    else:
+        boundary = 'none'
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
-            # depth is zero along channel_axis
+            # depth is zero along channel axis
             depth = [depth] * (array.ndim - 1)
         depth = list(depth)
         if len(depth) == array.ndim - 1:
@@ -206,7 +208,7 @@ def apply_parallel(
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
+    res = darr.map_overlap(wrapped_func, depth, boundary=boundary, dtype=dtype)
     if compute:
         res = res.compute()
 
