@@ -43,13 +43,13 @@ def peak_local_max(
     min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float or None, optional
+    threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
-    threshold_rel : float or None, optional
+    threshold_rel : float, optional
         Minimum intensity of peaks, calculated as
         ``max(image) * threshold_rel``.
-    exclude_border : int, tuple of ints, or bool, optional
+    exclude_border : int or tuple of int(s) or bool, optional
         Control peak detection close to the border of `image`.
 
         ``True``
@@ -71,11 +71,11 @@ def peak_local_max(
             Passing ``numpy.inf`` is deprecated,
             use the equivalent ``None`` instead.
 
-    footprint : ndarray of bools, optional
+    footprint : ndarray of dtype bool, optional
         Binary mask that determines the neighborhood (where ``True``) in which
         a peak must be a local maximum (see *Notes*). If not given, defaults to
         an array of ones of size ``floor(2 * min_distance + 1)``.
-    labels : ndarray of ints, optional
+    labels : ndarray of dtype int, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
@@ -93,7 +93,7 @@ def peak_local_max(
 
     Returns
     -------
-    output : ndarray
+    output : ndarray of dtype int
         The coordinates of the peaks.
 
     Notes
