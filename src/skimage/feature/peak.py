@@ -160,7 +160,7 @@ def peak_local_max(
         * `exclude_border=False`, use `exclude_border=0`
         * `exclude_border=<int>`, no change necessary
         * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>, no change necessary
+        * `p_norm=<float>`, no change necessary
 
         Other keyword parameters can be left unchanged.
         """),

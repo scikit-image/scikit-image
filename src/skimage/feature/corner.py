@@ -1269,7 +1269,7 @@ def corner_peaks(
         * `exclude_border=False`, use `exclude_border=0`
         * `exclude_border=<int>`, no change necessary
         * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>, no change necessary
+        * `p_norm=<float>`, no change necessary
 
         If you used `indices=False`, you can derive the boolean peak mask from
         ``coords`` with:
