@@ -219,7 +219,6 @@ filterwarnings = [
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore::skimage.util.PendingSkimage2Change",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
-    "ignore:`corner_peaks` is deprecated:FutureWarning",
     # warn by pyamg in ruge_stuben_solver
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
     # Pyodide warning coming via threadpoolctl, remove when
