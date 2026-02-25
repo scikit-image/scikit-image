@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data, draw, img_as_float
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import run_in_parallel
+from skimage._shared.testing import run_in_parallel, assert_stacklevel
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (
@@ -26,6 +26,7 @@ from skimage.feature import (
     structure_tensor_eigenvalues,
 )
 from skimage.morphology import footprint_rectangle, octagon
+from skimage.util import PendingSkimage2Change
 
 
 @pytest.fixture
@@ -672,6 +673,13 @@ def test_corner_peaks():
         response, exclude_border=False, min_distance=1, indices=False
     )
     assert np.sum(corners) == 5
+
+
+def test_corner_peaks_pending_skimage2_warning():
+    response = np.zeros((10, 10))
+    with pytest.warns(PendingSkimage2Change) as record:
+        corner_peaks(response)
+    assert_stacklevel(record)
 
 
 def test_corner_peaks_deprecation_advice():

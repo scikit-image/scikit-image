@@ -8,9 +8,9 @@ from scipy import ndimage as ndi
 from scipy import spatial, stats
 
 from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, safe_as_int, warn, deprecate_func
+from .._shared.utils import _supported_float_type, safe_as_int, warn_external
 from ..transform import integral_image
-from ..util import img_as_float
+from ..util import img_as_float, PendingSkimage2Change
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
 from .peak import peak_local_max
@@ -311,12 +311,11 @@ def hessian_matrix(
 
     if use_gaussian_derivatives is None:
         use_gaussian_derivatives = False
-        warn(
+        warn_external(
             "use_gaussian_derivatives currently defaults to False, but will "
             "change to True in a future version. Please specify this "
             "argument explicitly to maintain the current behavior",
             category=FutureWarning,
-            stacklevel=2,
         )
 
     if use_gaussian_derivatives:
@@ -1124,26 +1123,6 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     return corners_subpix
 
 
-@deprecate_func(
-    deprecated_version="0.27",
-    removed_version="0.29",
-    hint=dedent("""\
-    Use `skimage.feature.peak_local_max` instead. Note that the comparison
-    behavior is different between both functions. `corner_peaks` uses
-    `>= min_distance` (equal or greater than), `peak_local_max` uses
-    `> min_distance` (greater than). To reproduce the exact behavior, use:
-
-        new_distance = np.nextafter(old_distance, np.inf)
-        coords = peak_local_max(image, min_distance=new_distance, ...)
-
-    If you used `indices=False`, you can derive the boolean peak mask from
-    ``coords`` with:
-
-        peaks = np.zeros_like(image, dtype=bool)
-        peaks[tuple(coords.T)] = True
-    """),
-    prepend_docstring=False,
-)
 def corner_peaks(
     image,
     min_distance=1,
@@ -1159,23 +1138,6 @@ def corner_peaks(
     p_norm=np.inf,
 ):
     """Find peaks in corner measure response image.
-
-    .. deprecated:: 0.27
-
-        Use :func:`skimage.feature.peak_local_max` instead. Note that the
-        comparison behavior is different between both functions.
-        :func:`.corner_peaks` uses ``>= min_distance`` (equal or greater than),
-        :func:`.peak_local_max` uses ``> min_distance`` (greater than). To
-        reproduce the exact behavior, use::
-
-            new_distance = np.nextafter(old_distance, np.inf)
-            coords = peak_local_max(image, min_distance=new_distance, ...)
-
-        If you used ``indices=False``, you can derive the boolean peak mask from
-        `coords` with::
-
-            peaks = np.zeros_like(image, dtype=bool)
-            peaks[tuple(coords.T)] = True
 
     This differs from `skimage.feature.peak_local_max` in that it suppresses
     multiple connected peaks with the same accumulator value.
@@ -1237,6 +1199,46 @@ def corner_peaks(
     array([[2, 2]])
 
     """
+    warn_external(
+        dedent("""\
+        `skimage.feature.corner_peaks` is deprecated in favor of
+        `skimage2.feature.peak_local_max` with new behavior:
+
+        * Peaks are removed when `> min_distance`
+          (`corner_peaks` used `>= min_distance`)
+        * Parameter `p_norm` defaults to 2 (Euclidean distance),
+          was `numpy.inf` (Chebyshev distance)
+        * Parameter `exclude_border` defaults to 1, was `True`
+        * Parameter `exclude_border` no longer accepts `False` and `True`,
+          pass 0 instead of `False`, or `min_distance` instead of `True`
+        * Parameters after `image` are keyword-only
+        * Parameter `indices` is removed.
+
+        To keep the old behavior when switching to `skimage2`, use
+
+            new_min_distance = np.nextafter(old_min_distance, np.inf)
+            coords = peak_local_max(image, min_distance=new_min_distance, ...)
+
+        Regarding `exclude_border` and `p_norm` update according to the following
+        cases:
+
+        * `exclude_border` not passed, use `exclude_border=old_min_distance`
+        * `exclude_border=True`, same as above
+        * `exclude_border=False`, use `exclude_border=0`
+        * `exclude_border=<int>`, no change necessary
+        * `p_norm` not passed, use `p_norm=numpy.inf`
+        * `p_norm=<float>, no change necessary
+
+        If you used `indices=False`, you can derive the boolean peak mask from
+        ``coords`` with:
+
+            peaks = np.zeros_like(image, dtype=bool)
+            peaks[tuple(coords.T)] = True
+
+        Other keyword parameters can be left unchanged.
+        """),
+        category=PendingSkimage2Change,
+    )
     if np.isinf(num_peaks):
         num_peaks = None
     if np.isinf(num_peaks_per_label):
