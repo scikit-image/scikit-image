@@ -157,10 +157,17 @@ class TestEccentricStructuringElements:
         ]
 
     def test_dilate_erode_symmetry(self):
-        for s in self.footprints:
-            c = gray.erosion(self.black_pixel, s)
-            d = gray.dilation(self.white_pixel, s)
-            assert np.all(c == (255 - d))
+        for footprint in self.footprints:
+            eroded = gray.erosion(self.black_pixel, footprint=footprint)
+
+            # Dilation mirrors footprint internally so that closing is extensive
+            # and opening anti-extensive. To receive a symmetric result, we need
+            # to use an asymmetric footprint. Also pad to odd-size before
+            # mirroring so that correct side is padded with 0.
+            asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
+            dilated = gray.dilation(self.white_pixel, footprint=asym_footprint)
+
+            assert np.all(eroded == (255 - dilated))
 
     def test_open_black_pixel(self):
         for s in self.footprints:
