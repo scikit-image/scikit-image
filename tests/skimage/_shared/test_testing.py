@@ -18,6 +18,7 @@ from skimage._shared._warnings import expected_warnings
 from warnings import warn
 
 
+@pytest.mark.thread_unsafe(reason="doctests are not thread-safe")
 def test_skipper():
     def f():
         pass
@@ -82,6 +83,7 @@ def test_skipper():
         doctest_skip_parser(c)
 
 
+@pytest.mark.thread_unsafe(reason="test is explicitly multithreaded")
 @pytest.mark.skipif(is_wasm, reason="Cannot start threads in WASM")
 def test_run_in_parallel():
     state = []
@@ -108,6 +110,7 @@ def test_run_in_parallel():
     assert len(state) == 6
 
 
+@pytest.mark.thread_unsafe(reason="test is already parallel")
 @pytest.mark.skipif(is_wasm, reason="Cannot run parallel code in WASM")
 def test_parallel_warning():
     @run_in_parallel()

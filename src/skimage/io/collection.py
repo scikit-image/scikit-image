@@ -3,6 +3,7 @@
 import os
 from glob import glob
 import re
+import threading
 from collections.abc import Sequence
 from copy import copy
 
@@ -244,6 +245,7 @@ class ImageCollection:
 
         self.load_func_kwargs = load_func_kwargs
         self.data = np.empty(memory_slots, dtype=object)
+        self.data_lock = threading.Lock()
 
     @property
     def files(self):
@@ -304,28 +306,31 @@ class ImageCollection:
 
         if isinstance(n, int):
             n = self._check_imgnum(n)
-            idx = n % len(self.data)
+            with self.data_lock:
+                idx = n % len(self.data)
 
-            if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
-                kwargs = self.load_func_kwargs
-                if self._frame_index:
-                    fname, img_num = self._frame_index[n]
-                    if img_num is not None:
-                        kwargs['img_num'] = img_num
-                    try:
-                        self.data[idx] = self.load_func(fname, **kwargs)
-                    # Account for functions that do not accept an img_num kwarg
-                    except TypeError as e:
-                        if "unexpected keyword argument 'img_num'" in str(e):
-                            del kwargs['img_num']
+                if (self.conserve_memory and n != self._cached) or (
+                    self.data[idx] is None
+                ):
+                    kwargs = self.load_func_kwargs
+                    if self._frame_index:
+                        fname, img_num = self._frame_index[n]
+                        if img_num is not None:
+                            kwargs['img_num'] = img_num
+                        try:
                             self.data[idx] = self.load_func(fname, **kwargs)
-                        else:
-                            raise
-                else:
-                    self.data[idx] = self.load_func(self.files[n], **kwargs)
-                self._cached = n
+                        # Account for functions that do not accept an img_num kwarg
+                        except TypeError as e:
+                            if "unexpected keyword argument 'img_num'" in str(e):
+                                del kwargs['img_num']
+                                self.data[idx] = self.load_func(fname, **kwargs)
+                            else:
+                                raise
+                    else:
+                        self.data[idx] = self.load_func(self.files[n], **kwargs)
+                    self._cached = n
 
-            return self.data[idx]
+                return self.data[idx]
         else:
             # A slice object was provided, so create a new ImageCollection
             # object. Any loaded image data in the original ImageCollection
@@ -342,14 +347,15 @@ class ImageCollection:
 
             new_ic._numframes = len(fidx)
 
-            if self.conserve_memory:
-                if self._cached in fidx:
-                    new_ic._cached = fidx.index(self._cached)
-                    new_ic.data = np.copy(self.data)
+            with self.data_lock:
+                if self.conserve_memory:
+                    if self._cached in fidx:
+                        new_ic._cached = fidx.index(self._cached)
+                        new_ic.data = np.copy(self.data)
+                    else:
+                        new_ic.data = np.empty(1, dtype=object)
                 else:
-                    new_ic.data = np.empty(1, dtype=object)
-            else:
-                new_ic.data = self.data[fidx]
+                    new_ic.data = self.data[fidx]
             return new_ic
 
     def _check_imgnum(self, n):
@@ -383,7 +389,8 @@ class ImageCollection:
             entire cache is erased.
 
         """
-        self.data = np.empty_like(self.data)
+        with self.data_lock:
+            self.data = np.empty_like(self.data)
 
     def concatenate(self):
         """Concatenate all images in the collection into an array.
