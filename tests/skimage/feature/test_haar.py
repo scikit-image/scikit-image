@@ -1,4 +1,4 @@
-from random import shuffle
+from random import sample
 
 import pytest
 
@@ -81,17 +81,18 @@ def test_haar_like_feature_list():
         'type-3-x',
         'type-3-y',
         'type-4',
-        ['type-2-y', 'type-3-x', 'type-4'],
+        ('type-2-y', 'type-3-x', 'type-4'),
     ],
 )
 def test_haar_like_feature_precomputed(feature_type):
     img = np.ones((5, 5), dtype=np.int8)
     img_ii = integral_image(img)
-    if isinstance(feature_type, list):
-        feature_type = list(feature_type)
+    if isinstance(feature_type, tuple):
         # shuffle the index of the feature to be sure that we are output
         # the features in the same order
-        shuffle(feature_type)
+        # x = random.sample(x, k=len(x)) is equivalent to random.shuffle(x)
+        # but doesn't require x to be mutable
+        feature_type = sample(feature_type, k=len(feature_type))
         feat_coord, feat_type = zip(
             *[haar_like_feature_coord(5, 5, feat_t) for feat_t in feature_type]
         )
