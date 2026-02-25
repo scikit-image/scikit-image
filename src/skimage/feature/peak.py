@@ -66,6 +66,11 @@ def peak_local_max(
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
     footprint : ndarray of bools, optional
         Binary mask that determines the neighborhood (where ``True``) in which
         a peak must be a local maximum (see *Notes*). If not given, defaults to
@@ -75,6 +80,11 @@ def peak_local_max(
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
     p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.

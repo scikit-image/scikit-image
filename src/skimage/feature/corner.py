@@ -1130,11 +1130,11 @@ def corner_peaks(
     threshold_rel=None,
     exclude_border=True,
     indices=True,
-    num_peaks=np.inf,
+    num_peaks=None,
     footprint=None,
     labels=None,
     *,
-    num_peaks_per_label=np.inf,
+    num_peaks_per_label=None,
     p_norm=np.inf,
 ):
     """Find peaks in corner measure response image.
@@ -1144,17 +1144,62 @@ def corner_peaks(
 
     Parameters
     ----------
-    image : ndarray of shape (M, N)
+    image : ndarray
         Input image.
-    min_distance : int, optional
-        The minimal allowed distance separating peaks.
-    * : *
-        See :py:meth:`skimage.feature.peak_local_max`.
-    p_norm : float
+    min_distance : float, optional
+        The minimal allowed distance separating peaks. To find the
+        maximum number of peaks, use `min_distance=1`.
+    threshold_abs : float or None, optional
+        Minimum intensity of peaks. By default, the absolute threshold is
+        the minimum intensity of the image.
+    threshold_rel : float or None, optional
+        Minimum intensity of peaks, calculated as
+        ``max(image) * threshold_rel``.
+    indices : bool, default
+        If ``True`` (default), return the coordinates of found peaks.
+        If ``False``, return boolean array shaped like `image`, with peaks
+        represented by ``True``.
+    exclude_border : int, tuple of ints, or bool, optional
+        Control peak detection close to the border of `image`.
+
+        ``True``
+            Exclude peaks that are within ``floor(min_distance)`` of the border.
+        ``False`` or ``0``
+            Distance to border has no effect, all peaks are identified.
+        positive integer
+            Exclude peaks, that are within this given distance of the border.
+        tuple of positive integers
+            Same as for a single integer but with different distances for each
+            respective dimension.
+
+        The value of `p_norm` has no impact on this border distance.
+    num_peaks : int, optional
+        Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
+        return `num_peaks` peaks based on highest peak intensity.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
+    footprint : ndarray of bools, optional
+        Binary mask that determines the neighborhood (where ``True``) in which
+        a peak must be a local maximum (see *Notes*). If not given, defaults to
+        an array of ones of size ``floor(2 * min_distance + 1)``.
+    labels : ndarray of ints, optional
+        If provided, each unique region `labels == value` represents a unique
+        region to search for peaks. Zero is reserved for background.
+    num_peaks_per_label : int, optional
+        Maximum number of peaks for each label.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
+    p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
+        Euclidean distance.  See also :func:`numpy.linalg.norm`.
 
     Returns
     -------
@@ -1170,11 +1215,6 @@ def corner_peaks(
 
     Notes
     -----
-    .. versionchanged:: 0.18
-        The default value of `threshold_rel` has changed to None, which
-        corresponds to letting `skimage.feature.peak_local_max` decide on the
-        default. This is equivalent to `threshold_rel=0`.
-
     The `num_peaks` limit is applied before suppression of connected peaks.
     To limit the number of peaks after suppression, set `num_peaks=np.inf` and
     post-process the output of this function.
@@ -1239,10 +1279,22 @@ def corner_peaks(
         """),
         category=PendingSkimage2Change,
     )
-    if np.isinf(num_peaks):
+
+    # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
+    if num_peaks is not None and np.isinf(num_peaks):
         num_peaks = None
-    if np.isinf(num_peaks_per_label):
+        warn_external(
+            "Passing `np.inf` to `num_peaks` is deprecated in version 0.27, "
+            "use `num_peaks=None` instead",
+            category=FutureWarning,
+        )
+    if num_peaks_per_label is not None and np.isinf(num_peaks_per_label):
         num_peaks_per_label = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks_per_label` is deprecated in version 0.27, "
+            "use `num_peaks_per_label=None` instead",
+            category=FutureWarning,
+        )
 
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
