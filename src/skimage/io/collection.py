@@ -309,7 +309,9 @@ class ImageCollection:
             with self.data_lock:
                 idx = n % len(self.data)
 
-                if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
+                if (self.conserve_memory and n != self._cached) or (
+                    self.data[idx] is None
+                ):
                     kwargs = self.load_func_kwargs
                     if self._frame_index:
                         fname, img_num = self._frame_index[n]

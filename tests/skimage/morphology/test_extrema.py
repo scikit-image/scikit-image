@@ -4,7 +4,6 @@ import unittest
 import pytest
 import numpy as np
 from numpy.testing import assert_equal
-import pytest
 from pytest import raises, warns
 
 from skimage.morphology import extrema
