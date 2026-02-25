@@ -5,10 +5,15 @@ from time import perf_counter
 from datetime import timedelta
 import os
 import sys
+import sysconfig
 from pytest_pretty import CustomTerminalReporter
 
 from _pytest.terminal import TerminalReporter
 from _pytest.pathlib import bestrelpath
+
+
+FREE_THREADED_BUILD = bool(sysconfig.get_config_var("Py_GIL_DISABLED"))
+GIL_ENABLED_AT_START = getattr(sys, "_is_gil_enabled", lambda: True)()
 
 
 class SKTerminalReporter(CustomTerminalReporter):
@@ -59,3 +64,17 @@ def pytest_configure(config: pytest.Config) -> None:
         custom_reporter._session = standard_reporter._session
     config.pluginmanager.unregister(standard_reporter)
     config.pluginmanager.register(custom_reporter, 'terminalreporter')
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    if FREE_THREADED_BUILD and not GIL_ENABLED_AT_START and sys._is_gil_enabled():
+        tr = terminalreporter
+        tr.ensure_newline()
+        tr.section("GIL re-enabled", sep="=", red=True, bold=True)
+        tr.line("The GIL was re-enabled at runtime during the tests.")
+        tr.line("This can happen with no test failures if the RuntimeWarning")
+        tr.line("raised by Python when this happens is filtered by a test.")
+        tr.line("")
+        tr.line("Please ensure all new C and C++ extensions declare support")
+        tr.line("for running without the GIL.")
+        pytest.exit("GIL re-enabled during tests", returncode=1)

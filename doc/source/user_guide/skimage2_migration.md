@@ -146,6 +146,18 @@ peaks[tuple(coords.T)] = True
 Regarding the parameters `exclude_border` and `p_norm` which are passed to `skimage.feature.peak_local_max`, refer to the [advice for that function](#ski2-peak-local-max-advice).
 Other keyword parameters can be left unchanged.
 
+### Grayscale morphological operators
+
+Functions `skimage.morphology.{operator}` are replaced by
+`skimage2.morphology.{operator}` where {operator} is in this list:
+[`erosion`, `dilation`, `opening`, `closing`, `white_tophat`, `black_tophat`].
+The new functions use 'ignore' as the default value for parameter `mode` (as
+opposed to 'reflect' in v1.x).
+To keep the old (`skimage`, v1.x) behavior, set this parameter explicitly.
+
+TODO: Update doctests in `src/skimage2/morphology/_grayscale_operators.py` to
+import `footprint_rectangle` from skimage2 once available.
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
