@@ -1257,7 +1257,9 @@ def corner_peaks(
         To keep the old behavior when switching to `skimage2`, use
 
             new_min_distance = np.nextafter(old_min_distance, np.inf)
-            coords = peak_local_max(image, min_distance=new_min_distance, ...)
+            coords = ski2.feature.peak_local_max(
+                image, min_distance=new_min_distance, ...
+            )
 
         Regarding `exclude_border` and `p_norm` update according to the following
         cases:
@@ -1272,6 +1274,7 @@ def corner_peaks(
         If you used `indices=False`, you can derive the boolean peak mask from
         ``coords`` with:
 
+            coords = ski2.feature.peak_local_max(...)
             peaks = np.zeros_like(image, dtype=bool)
             peaks[tuple(coords.T)] = True
 

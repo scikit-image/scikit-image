@@ -108,11 +108,11 @@ Other keyword parameters can be left unchanged.
 Examples:
 
 ```python
-ski.morphology.peak_local_max(image)
-ski2.morphology.peak_local_max(image, exclude_border=1, p_norm=np.inf)
+ski.feature.peak_local_max(image)
+ski2.feature.peak_local_max(image, exclude_border=1, p_norm=np.inf)
 
-ski.morphology.peak_local_max(image, min_distance=10)
-ski2.morphology.peak_local_max(
+ski.feature.peak_local_max(image, min_distance=10)
+ski2.feature.peak_local_max(
     image, min_distance=10, exclude_border=10, p_norm=np.inf
 )
 ```
@@ -132,13 +132,13 @@ To keep the old behavior when switching to `skimage2`, use
 
 ```python
 new_min_distance = np.nextafter(old_min_distance, np.inf)
-coords = ski2.morphology.peak_local_max(image, min_distance=new_min_distance, ...)
+coords = ski2.feature.peak_local_max(image, min_distance=new_min_distance, ...)
 ```
 
 If you used `indices=False`, you can derive the boolean peak mask from `coords` with:
 
 ```python
-coords = ski2.morphology.peak_local_max(...)
+coords = ski2.feature.peak_local_max(...)
 peaks = np.zeros_like(image, dtype=bool)
 peaks[tuple(coords.T)] = True
 ```
