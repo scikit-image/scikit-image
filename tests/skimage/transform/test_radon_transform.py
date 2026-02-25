@@ -277,7 +277,6 @@ def _random_circle(shape):
     return image
 
 
-@pytest.mark.thread_unsafe
 def test_radon_circle():
     a = np.ones((10, 10))
     with expected_warnings(['reconstruction circle']):
@@ -488,7 +487,6 @@ def test_radon_dtype():
     assert radon(img32).dtype == img32.dtype
 
 
-@pytest.mark.thread_unsafe
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_iradon_sart_dtype(dtype):
     sinogram = np.zeros((16, 1), dtype=int)

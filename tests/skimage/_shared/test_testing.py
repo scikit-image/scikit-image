@@ -127,7 +127,6 @@ def test_parallel_warning():
     change_state_warns_passes()
 
 
-@pytest.mark.thread_unsafe
 def test_expected_warnings_noop():
     # This will ensure the line beolow it behaves like a no-op
     with expected_warnings(['Expected warnings test']):

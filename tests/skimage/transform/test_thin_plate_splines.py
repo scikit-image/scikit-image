@@ -67,7 +67,6 @@ class TestThinPlateSplineTransform:
                 tps.estimate(src, not_2d)
         assert tps.src is None
 
-    @pytest.mark.thread_unsafe
     def test_rotate(self):
         image = ski.data.astronaut()
         desired = ski.transform.rotate(image, angle=90)

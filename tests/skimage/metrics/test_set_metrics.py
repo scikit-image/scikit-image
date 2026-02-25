@@ -6,7 +6,6 @@ from scipy.spatial import distance
 from skimage.metrics import hausdorff_distance, hausdorff_pair
 
 
-@pytest.mark.thread_unsafe
 def test_hausdorff_empty():
     empty = np.zeros((0, 2), dtype=bool)
     non_empty = np.zeros((3, 2), dtype=bool)

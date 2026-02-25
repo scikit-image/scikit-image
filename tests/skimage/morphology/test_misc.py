@@ -60,7 +60,6 @@ def test_in_place():
     )
 
 
-@pytest.mark.thread_unsafe
 @pytest.mark.parametrize("in_dtype", [bool, int, np.int32])
 @pytest.mark.parametrize("out_dtype", [bool, int, np.int32])
 def test_out(in_dtype, out_dtype):
@@ -103,7 +102,6 @@ def test_uint_image():
     assert_array_equal(observed, expected)
 
 
-@pytest.mark.thread_unsafe
 def test_single_label_warning():
     image = np.array([[0, 0, 0, 1, 0], [1, 1, 1, 0, 0], [1, 1, 1, 0, 0]], int)
     with expected_warnings(['use a boolean array?']):
@@ -263,7 +261,6 @@ def test_non_bool_out():
         remove_small_holes(image, max_size=2, out=expected_out)
 
 
-@pytest.mark.thread_unsafe
 def test_labeled_image_holes():
     labeled_holes_image = np.array(
         [
@@ -296,7 +293,6 @@ def test_labeled_image_holes():
     assert_array_equal(observed, expected)
 
 
-@pytest.mark.thread_unsafe
 def test_uint_image_holes():
     labeled_holes_image = np.array(
         [
@@ -329,7 +325,6 @@ def test_uint_image_holes():
     assert_array_equal(observed, expected)
 
 
-@pytest.mark.thread_unsafe
 def test_label_warning_holes():
     labeled_holes_image = np.array(
         [

@@ -30,7 +30,6 @@ from skimage.io._plugins.pil_plugin import (
 
 
 plugin_deprecation_warning = r"use `imageio` or other I/O packages directly|\A\Z"
-pytestmark = pytest.mark.thread_unsafe
 
 
 @pytest.fixture(autouse=True)
@@ -162,7 +161,6 @@ def test_imread_truncated_jpg():
         imread(fetch('data/truncated.jpg'))
 
 
-@pytest.mark.thread_unsafe
 def test_jpg_quality_arg():
     chessboard = np.load(fetch('data/chessboard_GRAY_U8.npy'))
     with temporary_file(suffix='.jpg') as jpg:
@@ -228,7 +226,6 @@ def test_imsave_incorrect_dimension():
                 imsave(fname, np.zeros((2, 3, 2)), check_contrast=False)
 
 
-@pytest.mark.thread_unsafe
 def test_imsave_filelike():
     shape = (2, 2)
     image = np.zeros(shape)
@@ -245,7 +242,6 @@ def test_imsave_filelike():
     assert_allclose(out, image)
 
 
-@pytest.mark.thread_unsafe
 def test_imsave_boolean_input():
     shape = (2, 2)
     image = np.eye(*shape, dtype=bool)
@@ -270,7 +266,6 @@ def test_imexport_imimport():
     assert_equal(out.shape, shape)
 
 
-@pytest.mark.thread_unsafe
 def test_all_color():
     with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
         color_check('pil')
@@ -278,7 +273,6 @@ def test_all_color():
         color_check('pil', 'bmp')
 
 
-@pytest.mark.thread_unsafe
 def test_all_mono():
     with expected_warnings(['.* is a boolean image', plugin_deprecation_warning]):
         mono_check('pil')

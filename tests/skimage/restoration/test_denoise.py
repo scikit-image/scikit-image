@@ -356,7 +356,6 @@ def test_denoise_bilateral_3d_grayscale():
         restoration.denoise_bilateral(img, channel_axis=None)
 
 
-@pytest.mark.thread_unsafe
 def test_denoise_bilateral_3d_multichannel():
     img = np.ones((50, 50, 50))
     with expected_warnings(["grayscale"]):

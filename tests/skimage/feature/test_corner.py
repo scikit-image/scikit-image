@@ -162,7 +162,7 @@ def test_structure_tensor_sigma(ndim):
 
 
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
-def test_hessian_matrix(dtype, num_parallel_threads):
+def test_hessian_matrix(dtype):
     square = np.zeros((5, 5), dtype=dtype)
     square[2, 2] = 4
     Hrr, Hrc, Hcc = hessian_matrix(
@@ -210,11 +210,10 @@ def test_hessian_matrix(dtype, num_parallel_threads):
         ),
     )
 
-    if num_parallel_threads == 1:
-        with expected_warnings(["use_gaussian_derivatives currently defaults"]):
-            # FutureWarning warning when use_gaussian_derivatives is not
-            # specified.
-            hessian_matrix(square, sigma=0.1, order='rc')
+    with expected_warnings(["use_gaussian_derivatives currently defaults"]):
+        # FutureWarning warning when use_gaussian_derivatives is not
+        # specified.
+        hessian_matrix(square, sigma=0.1, order='rc')
 
 
 @pytest.mark.parametrize('use_gaussian_derivatives', [False, True])
@@ -699,7 +698,6 @@ def test_corner_fast_image_unsupported_error():
         corner_fast(img)
 
 
-@pytest.mark.thread_unsafe
 @run_in_parallel()
 def test_corner_fast_astronaut():
     img = rgb2gray(data.astronaut())

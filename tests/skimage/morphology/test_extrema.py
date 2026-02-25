@@ -197,7 +197,6 @@ class TestExtrema:
             error = diff(expected_result, out)
             assert error < eps
 
-    @pytest.mark.thread_unsafe
     def test_h_maxima_float_h(self):
         """specific tests for h-maxima float h parameter"""
         data = np.array(
@@ -277,7 +276,6 @@ class TestExtrema:
             error = diff(expected_result, out)
             assert error < eps
 
-    @pytest.mark.thread_unsafe
     def test_h_minima_float_h(self):
         """specific tests for h-minima float h parameter"""
         data = np.array(
