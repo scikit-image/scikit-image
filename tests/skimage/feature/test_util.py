@@ -52,6 +52,7 @@ def test_mask_border_keypoints():
     )
 
 
+@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",
@@ -154,6 +155,7 @@ def test_plot_matched_features(shapes):
     plt.close()
 
 
+@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
@@ -190,6 +192,7 @@ def test_plot_matched_features_color_error(matches_color):
         )
 
 
+@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 def test_plot_matched_features_matplotlib_color_error():
     # Error is raised from matplotlib itself if we pass a sequence of correct length

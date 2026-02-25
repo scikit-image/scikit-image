@@ -12,7 +12,7 @@ import os
 import pytest
 
 
-@pytest.mark.thread_unsafe
+@pytest.mark.thread_unsafe(reason="worker threads would share a download directory")
 def test_download_all_with_pooch():
     # jni first wrote this test with the intention of
     # fully deleting the files in the data_dir,

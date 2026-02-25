@@ -106,7 +106,7 @@ class TestRank:
         self.refs = ref_data
         self.refs_3d = ref_data_3d
 
-    @pytest.mark.thread_unsafe
+    @pytest.mark.thread_unsafe(reason="test is already explicitly multithreaded")
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize('filter', all_rank_filters)
     def test_rank_filter(self, filter, outdt):
@@ -157,7 +157,7 @@ class TestRank:
         with pytest.raises(ValueError):
             getattr(rank, filter)(self.image.astype(np.uint8), footprint_sequence)
 
-    @pytest.mark.thread_unsafe
+    @pytest.mark.thread_unsafe(reason="test is already explicitly multithreaded")
     @pytest.mark.parametrize('outdt', [None, np.float32, np.float64])
     @pytest.mark.parametrize('filter', _3d_rank_filters)
     def test_rank_filters_3D(self, filter, outdt):
