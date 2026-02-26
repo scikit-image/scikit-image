@@ -75,6 +75,7 @@ __all__ = [
     "segmentation",
     "transform",
     "util",
+    'PendingSkimage2Change',
 ]
 
 
@@ -146,3 +147,20 @@ if 'dev' in __version__:
 from skimage._shared.tester import PytestTester as _PytestTester
 
 test = _PytestTester(__name__)
+
+
+class PendingSkimage2Change(PendingDeprecationWarning):
+    """A warning about API usage that will silently change or break in skimage2.
+
+    As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
+    shown by default. But it can be enabled with a warnings filter to prepare
+    for code changes related to skimage2 early on:
+
+    .. code-block:: python
+
+        import warnings
+        import skimage as ski
+        warnings.filterwarnings(
+            action="default", category=skimage.PendingSkimage2Change
+        )
+    """

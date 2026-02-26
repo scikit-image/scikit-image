@@ -60,22 +60,4 @@ __all__ = [
     'label_points',
     'lookfor',
     'FailedEstimationAccessError',
-    'PendingSkimage2Change',
 ]
-
-
-class PendingSkimage2Change(PendingDeprecationWarning):
-    """A warning about API usage that will silently change or break in skimage2.
-
-    As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
-    shown by default. But it can be enabled with a warnings filter to prepare
-    for code changes related to skimage2 early on:
-
-    .. code-block:: python
-
-        import warnings
-        import skimage as ski
-        warnings.filterwarnings(
-            action="default", category=ski.util.PendingSkimage2Change
-        )
-    """
