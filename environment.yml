@@ -32,6 +32,7 @@ dependencies:
   - sphinx-gallery>=0.18
   - numpydoc>=1.7
   - sphinx-copybutton
+  - sphinx-togglebutton
   - matplotlib-base>=3.7
   - dask>=2023.2.0
   - pandas>=2.0
