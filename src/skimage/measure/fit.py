@@ -904,6 +904,16 @@ class EllipseModel(_BaseModel):
         # from this equation [eqn. 28]
         eig_vals, eig_vecs = np.linalg.eig(M)
 
+        # https://github.com/scikit-image/scikit-image/issues/7013
+        if np.any(eig_vals.imag != 0) or np.any(eig_vecs.imag != 0):
+            raise TypeError(
+                "Non-real eigvalues/eigvec are not currently supported. Please "
+                "report the reproducer to "
+                "https://github.com/scikit-image/scikit-image/issues/7013"
+            )
+        eig_vals = eig_vals.real
+        eig_vecs = eig_vecs.real
+
         # eigenvector must meet constraint 4ac - b^2 to be valid.
         cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) - np.power(
             eig_vecs[1, :], 2
