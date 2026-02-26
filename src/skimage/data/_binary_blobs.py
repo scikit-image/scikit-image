@@ -2,7 +2,7 @@ import warnings
 
 import skimage2 as ski2
 
-from skimage import PendingSkimage2Change
+from .. import PendingSkimage2Change
 
 
 def binary_blobs(

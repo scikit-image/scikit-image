@@ -48,13 +48,6 @@ util
 
 __version__ = '0.26.1rc0.dev0'
 
-
-class PendingSkimage2Change(PendingDeprecationWarning):
-    """Warning for upcoming skimage2 behavior changes."""
-
-    pass
-
-
 import lazy_loader as _lazy
 
 __getattr__, *_ = _lazy.attach_stub(__name__, __file__)
@@ -153,3 +146,9 @@ if 'dev' in __version__:
 from skimage._shared.tester import PytestTester as _PytestTester
 
 test = _PytestTester(__name__)
+
+
+class PendingSkimage2Change(PendingDeprecationWarning):
+    """Warning for upcoming skimage2 behavior changes."""
+
+    pass

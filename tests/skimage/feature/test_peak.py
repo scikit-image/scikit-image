@@ -7,7 +7,7 @@ from scipy import ndimage as ndi
 
 from skimage._shared.testing import assert_stacklevel
 from skimage.feature import peak
-from skimage import PendingSkimage2Change
+from .. import PendingSkimage2Change
 
 
 np.random.seed(21)
