@@ -1,17 +1,19 @@
 """Filters used across multiple skimage submodules.
 
-These were defined here to avoid circular imports.
+These are defined here to avoid circular imports.
 
 The unit tests remain under skimage/filters/tests/
 """
 
-from textwrap import dedent
+from collections.abc import Iterable
 
-from ..util import PendingSkimage2Change
-from .._shared._warnings import warn_external
-from .._shared.utils import _rescale_value_range
+import numpy as np
+from scipy import ndimage as ndi
 
-import skimage2 as ski2
+from skimage._shared.utils import (
+    _supported_float_type,
+    convert_to_float,
+)
 
 
 def gaussian(
@@ -20,12 +22,11 @@ def gaussian(
     *,
     mode='nearest',
     cval=0,
-    preserve_range=False,
     truncate=4.0,
     channel_axis=None,
     out=None,
 ):
-    """Multi-dimensional Gaussian filter.
+    """Filter with Multi-dimensional Gaussian kernel.
 
     Parameters
     ----------
@@ -57,14 +58,8 @@ def gaussian(
         If None, the image is assumed to be a grayscale (single channel) image.
         Otherwise, this parameter indicates which axis of the array corresponds
         to channels.
-
-        .. versionadded:: 0.19
-           `channel_axis` was added in 0.19.
     out : ndarray, optional
         If given, the filtered image will be stored in this array.
-
-        .. versionadded:: 0.23
-            `out` was added in 0.23.
 
     Returns
     -------
@@ -91,22 +86,23 @@ def gaussian(
     Examples
     --------
     >>> import skimage as ski
+    >>> import skimage2 as ski2
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
     >>> a
     array([[0., 0., 0.],
            [0., 1., 0.],
            [0., 0., 0.]])
-    >>> ski.filters.gaussian(a, sigma=0.4)  # mild smoothing
+    >>> ski2.filters.gaussian(a, sigma=0.4)  # mild smoothing
     array([[0.00163116, 0.03712502, 0.00163116],
            [0.03712502, 0.84496158, 0.03712502],
            [0.00163116, 0.03712502, 0.00163116]])
-    >>> ski.filters.gaussian(a, sigma=1)  # more smoothing
+    >>> ski2.filters.gaussian(a, sigma=1)  # more smoothing
     array([[0.05855018, 0.09653293, 0.05855018],
            [0.09653293, 0.15915589, 0.09653293],
            [0.05855018, 0.09653293, 0.05855018]])
     >>> # Several modes are possible for handling boundaries
-    >>> ski.filters.gaussian(a, sigma=1, mode='reflect')
+    >>> ski2.filters.gaussian(a, sigma=1, mode='reflect')
     array([[0.08767308, 0.12075024, 0.08767308],
            [0.12075024, 0.16630671, 0.12075024],
            [0.08767308, 0.12075024, 0.08767308]])
@@ -115,34 +111,20 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    # TODO update once _rescale_value_range is available in `skimage2`
-    warn_external(
-        dedent("""\
-        `skimage.feature.gaussian` is deprecated in favor of
-        `skimage2.feature.gaussian` with new behavior:
-
-        * Parameter `preserve_range` was removed
-        * The value range of `image` is now always preserved
-
-        To keep the old behavior of `preserve_range=False` after switching to
-        `skimage2`, preprocess `image`:
-
-            ski2.util._rescale_value_range(image, mode='legacy')
-            ski2.feature.gaussian(image, ...)
-
-        Other keyword parameters can be left unchanged.
-        """),
-        category=PendingSkimage2Change,
+    if np.any(np.asarray(sigma) < 0.0):
+        raise ValueError("Sigma values less than zero are not valid")
+    if channel_axis is not None:
+        # do not filter across channels
+        if not isinstance(sigma, Iterable):
+            sigma = [sigma] * (image.ndim - 1)
+        if len(sigma) == image.ndim - 1:
+            sigma = list(sigma)
+            sigma.insert(channel_axis % image.ndim, 0)
+    image = convert_to_float(image, preserve_range=True)
+    float_dtype = _supported_float_type(image.dtype)
+    image = image.astype(float_dtype, copy=False)
+    if (out is not None) and (not np.issubdtype(out.dtype, np.floating)):
+        raise ValueError(f"dtype of `out` must be float; got {out.dtype!r}.")
+    return ndi.gaussian_filter(
+        image, sigma, output=out, mode=mode, cval=cval, truncate=truncate
     )
-    if not preserve_range:
-        image = _rescale_value_range(image, mode="legacy")
-    filtered_image = ski2.filters.gaussian(
-        image,
-        sigma=sigma,
-        mode=mode,
-        cval=cval,
-        truncate=truncate,
-        channel_axis=channel_axis,
-        out=out,
-    )
-    return filtered_image
