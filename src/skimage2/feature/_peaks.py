@@ -41,7 +41,9 @@ def _batched_ensure_spacing(coord_batch, spacing, p_norm, max_out):
             dist = distance.cdist(
                 [coord_batch[idx]], coord_batch[candidates], "minkowski", p=p_norm
             ).reshape(-1)
-            candidates = [c for c, d in zip(candidates, dist) if d < spacing]
+            candidates = [
+                c for c, d in zip(candidates, dist, strict=True) if d < spacing
+            ]
 
             # candidates.remove(keep)
             rejected_peaks_indices.update(candidates)
@@ -82,7 +84,7 @@ def _ensure_spacing(
         Euclidean distance. See also :func:`numpy.linalg.norm`.
     max_out : int, optional
         If not None, only the first ``max_out`` candidates are returned.
-    min_split_size : int, optional
+    min_split_size : int or None, optional
         Minimum split size used to process ``coords`` by batch to save
         memory. If None, the memory saving strategy is not applied.
     max_split_size : int, optional
@@ -118,6 +120,9 @@ def _ensure_spacing(
         if min_split_size is None:
             batch_list = [coords]
         else:
+            if not 0 < min_split_size < max_split_size:
+                msg = "expected `0 < min_split_size < max_split_size`"
+                raise ValueError(msg)
             coord_count = len(coords)
             split_idx = [min_split_size]
             split_size = min_split_size
