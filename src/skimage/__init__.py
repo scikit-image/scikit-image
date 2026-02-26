@@ -75,7 +75,7 @@ __all__ = [
     "segmentation",
     "transform",
     "util",
-    'PendingSkimage2Change',
+    "PendingSkimage2Change",
 ]
 
 
