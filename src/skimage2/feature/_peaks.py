@@ -5,35 +5,33 @@ from scipy.spatial import cKDTree, distance
 from skimage._shared._warnings import warn_external
 
 
-def _batched_ensure_spacing(coord, spacing, p_norm, max_out):
-    """Returns a subset of coord where a minimum spacing is guaranteed.
+def _batched_ensure_spacing(coord_batch, spacing, p_norm, max_out):
+    """Ensure minimum spacing in a single batch.
 
     Parameters
     ----------
-    coord : ndarray
-        The coordinates of the considered points.
+    coord_batch : ndarray
+        A batch of the coordinates of the considered points.
     spacing : float
-        the maximum allowed spacing between the points.
+        The minimal allowed distance separating points in `coords`. To find the
+        maximum number of peaks, use `spacing=1`. See also `p_norm`.
     p_norm : float
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
+        Euclidean distance. See also :func:`numpy.linalg.norm`.
     max_out : int
-        If not None, at most the first ``max_out`` candidates are
-        returned.
+        If not None, only the first ``max_out`` candidates are returned.
 
     Returns
     -------
     output : ndarray
         A subset of coord where a minimum spacing is guaranteed.
-
     """
-
     # Use KDtree to find the peaks that are too close to each other
-    tree = cKDTree(coord)
+    tree = cKDTree(coord_batch)
 
-    indices = tree.query_ball_point(coord, r=spacing, p=p_norm)
+    indices = tree.query_ball_point(coord_batch, r=spacing, p=p_norm)
     rejected_peaks_indices = set()
     naccepted = 0
     for idx, candidates in enumerate(indices):
@@ -41,7 +39,7 @@ def _batched_ensure_spacing(coord, spacing, p_norm, max_out):
             # keep current point and the points at exactly spacing from it
             candidates.remove(idx)
             dist = distance.cdist(
-                [coord[idx]], coord[candidates], "minkowski", p=p_norm
+                [coord_batch[idx]], coord_batch[candidates], "minkowski", p=p_norm
             ).reshape(-1)
             candidates = [c for c, d in zip(candidates, dist) if d < spacing]
 
@@ -52,7 +50,7 @@ def _batched_ensure_spacing(coord, spacing, p_norm, max_out):
                 break
 
     # Remove the peaks that are too close to each other
-    output = np.delete(coord, tuple(rejected_peaks_indices), axis=0)
+    output = np.delete(coord_batch, tuple(rejected_peaks_indices), axis=0)
     if max_out is not None:
         output = output[:max_out]
 
@@ -104,7 +102,6 @@ def _ensure_spacing(
 
     Examples
     --------
-    >>> import skimage2 as ski2
     >>> coords = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
     >>> _ensure_spacing(coords, spacing=3)
     array([[0, 0],

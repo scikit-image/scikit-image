@@ -50,7 +50,7 @@ def test_ensure_spacing_nD(ndim, size):
 def test_ensure_spacing_batch_processing(p, size):
     coord = np.random.randn(100, 2)
 
-    # --- Consider the average distance btween the point as spacing
+    # --- Consider the average distance between the point as spacing
     spacing = np.median(pdist(coord, metric=minkowski, p=p))
 
     expected = _ensure_spacing(coord, spacing=spacing, p_norm=p)
@@ -86,7 +86,7 @@ def test_ensure_spacing_max_batch_size():
 def test_ensure_spacing_p_norm(p, size):
     coord = np.random.randn(100, 2)
 
-    # --- Consider the average distance btween the point as spacing
+    # --- Consider the average distance between the point as spacing
     spacing = np.median(pdist(coord, metric=minkowski, p=p))
     out = _ensure_spacing(coord, spacing=spacing, p_norm=p, min_split_size=size)
 
