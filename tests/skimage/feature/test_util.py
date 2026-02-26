@@ -1,3 +1,5 @@
+import io
+
 import numpy as np
 import pytest
 
@@ -52,7 +54,6 @@ def test_mask_border_keypoints():
     )
 
 
-@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize(
     "shapes",
@@ -67,12 +68,10 @@ def test_mask_border_keypoints():
     ],
 )
 def test_plot_matched_features(shapes):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    fig, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     rng = np.random.default_rng(202410101501)
     keypoints0 = 10 * rng.random((10, 2))
@@ -152,19 +151,17 @@ def test_plot_matched_features(shapes):
         matches=matches,
         alignment='vertical',
     )
-    plt.close()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
 
 
-@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 @pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    _, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
@@ -192,18 +189,15 @@ def test_plot_matched_features_color_error(matches_color):
         )
 
 
-@pytest.mark.thread_unsafe(reason="Pyplot is not thread-safe")
 @pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
 def test_plot_matched_features_matplotlib_color_error():
     # Error is raised from matplotlib itself if we pass a sequence of correct length
     # but with values that aren't colors
 
-    from matplotlib import pyplot as plt
-    from matplotlib import use
+    from matplotlib.figure import Figure
 
-    use('Agg')
-
-    _, ax = plt.subplots()
+    fig = Figure()
+    ax = fig.subplots()
 
     keypoints0 = 10 * np.random.rand(10, 2)
     keypoints1 = 10 * np.random.rand(10, 2)
