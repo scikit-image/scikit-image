@@ -7,7 +7,7 @@ from scipy import ndimage as ndi
 
 from skimage._shared.testing import assert_stacklevel
 from skimage.feature import peak
-from skimage.util import PendingSkimage2Change
+from skimage import PendingSkimage2Change
 
 
 np.random.seed(21)
@@ -626,7 +626,7 @@ def test_input_values_with_labels():
     assert_array_equal(img, img_before)
 
 
-@pytest.mark.filterwarnings("default::skimage.util.PendingSkimage2Change")
+@pytest.mark.filterwarnings("default::skimage.PendingSkimage2Change")
 def test_peak_local_max_skimage2_warning():
     image = np.zeros((5, 5), dtype=np.uint8)
     image[1:3, 1:3] = 10

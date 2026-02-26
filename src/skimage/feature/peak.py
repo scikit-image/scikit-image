@@ -4,7 +4,7 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from .. import measure
-from ..util import PendingSkimage2Change
+from .. import PendingSkimage2Change
 from .._shared._warnings import warn_external
 
 import skimage2 as ski2
