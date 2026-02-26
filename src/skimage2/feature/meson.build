@@ -1,7 +1,6 @@
 python_sources = [
   '__init__.py',
   '__init__.pyi',
-  '_coordinates.py',
   '_peaks.py',
 ]
 
