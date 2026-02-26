@@ -3,13 +3,13 @@ channels:
   - conda-forge
 dependencies:
   # base
-  - numpy>=1.24
-  - scipy>=1.11.4
+  - numpy>=2.1
+  - scipy>=1.13
   - networkx>=3.0
   - pillow>=10.1
   - imageio>=2.33,!=2.35.0
-  - tifffile>=2022.8.12
-  - packaging>=21
+  - tifffile>=2025.1.10
+  - packaging>=24
   - lazy-loader>=0.4
   # build
   - meson-python>=0.16
@@ -32,33 +32,33 @@ dependencies:
   - sphinx-gallery>=0.18
   - numpydoc>=1.7
   - sphinx-copybutton
-  - matplotlib-base>=3.7
-  - dask>=2023.2.0
+  - matplotlib-base>=3.10
+  - dask>=2025.1.0
   - pandas>=2.0
   - seaborn>=0.11
   - pooch>=1.6
-  - tifffile>=2022.8.12
+  - tifffile>=2025.1.10
   - myst-parser
   - intersphinx-registry>=0.2411.14
   - ipywidgets
   - ipykernel
   - plotly>=5.20
   - python-kaleido==0.2.1
-  - scikit-learn>=1.2
+  - scikit-learn>=1.6
   - sphinx-design>=0.5
   - pydata-sphinx-theme>=0.16
-  - PyWavelets>=1.6
+  - PyWavelets>=1.7
   - pytest-doctestplus>=1.6.0
   # optional
   - SimpleITK
-  - scikit-learn>=1.2
+  - scikit-learn>=1.6
   - pyamg>=5.2
   # optional_free_threaded
-  - astropy-base>=6.0
-  - dask>=2023.2.0
-  - matplotlib-base>=3.7
+  - astropy-base>=6.1
+  - dask>=2025.1.0
+  - matplotlib-base>=3.10
   - pooch>=1.6.0
-  - PyWavelets>=1.6
+  - PyWavelets>=1.7
   # test
   - numpydoc>=1.7
   - pooch>=1.6.0
