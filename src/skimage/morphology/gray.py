@@ -44,7 +44,7 @@ _PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
 `scipy.ndimage.grey_{name}`.
 
 To keep the old (`skimage`, v1.x) behavior:
-- Set `mode='reflect` explicitly. If you set it explicitly before,
+- Set `mode='reflect'` explicitly. If you set it explicitly before,
   the behavior is unchanged.
 - If you use an asymmetric `footprint`, modify it like this before passing it
   to `skimage2.morphology.{name}`:

@@ -131,7 +131,7 @@ are deprecated in favor of counterparts in `skimage2.morphology` with new behavi
 
 - All functions now default to `mode='ignore'` (was `mode='reflect'`).
 - Additionally, `skimage.morphology.dilation`, `skimage.morphology.closing`, and `skimage.morphology.black_tophat` now also mirror the footprint (invert its order in each dimension).
-  This is does only impact behavior for asymmetric/eccentric footprints.
+  This does only impacts behavior for asymmetric/eccentric footprints.
 
 :::{admonition} Background for changes
 :class: note dropdown
@@ -139,15 +139,15 @@ are deprecated in favor of counterparts in `skimage2.morphology` with new behavi
 The new behavior ensures that `closing` and `opening` (the composition of `erosion` and `dilation`) behave _extensive_ and _anti-extensive_ by default.
 It also aligns the behavior for asymmetric/eccentric footprints with SciPy's `scipy.ndimage.grey_*` functions.
 
-Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046,) and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
+Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046) and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
 :::
 
 To keep the old (`skimage`, v1.x) behavior:
 
-- Set `mode='reflect` explicitly.
+- Set `mode='reflect'` explicitly.
   If you set it explicitly before, the behavior is unchanged.
 
-- If you use an asymmetric `footprint` with `dilation`, `erosion` or `black_tophat`, modify it like this before passing it to the `skimage2.morphology` counterpart:
+- If you use an asymmetric `footprint` with `dilation`, `closing` or `black_tophat`, modify it like this before passing it to the `skimage2.morphology` counterpart:
   ```python
   footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
   footprint = ski2.morphology.mirror_footprint(footprint)
