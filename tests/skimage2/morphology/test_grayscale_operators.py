@@ -50,7 +50,7 @@ class TestMorphology:
         ],
     )
     def test_reproduce_skimage_data_not_mirrored(self, footprint_args, size, func):
-        # Test that `erosion`, `opening` and `white_tophat` can
+        # Test that `erosion`, `opening`, and `white_tophat` can
         # reproduce data in `gray_morph_output.npz`
         image = ski.color.rgb2gray(ski.data.coffee())
         image = ski.transform.downscale_local_mean(image, (20, 20))
@@ -84,7 +84,7 @@ class TestMorphology:
         ],
     )
     def test_reproduce_skimage_data_mirrored(self, footprint_args, size, func):
-        # Test that `dilation`, `closing` and `black_tophat` can
+        # Test that `dilation`, `closing`, and `black_tophat` can
         # reproduce data in `gray_morph_output.npz`
         image = ski.color.rgb2gray(ski.data.coffee())
         image = ski.transform.downscale_local_mean(image, (20, 20))

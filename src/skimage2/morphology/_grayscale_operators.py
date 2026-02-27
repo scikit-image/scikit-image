@@ -157,7 +157,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
@@ -259,7 +259,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
@@ -358,7 +358,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
@@ -437,7 +437,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
@@ -516,7 +516,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     References
@@ -611,7 +611,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    If `footprint` contains even sized dimensions, they are padded with zeros to
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
     an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     References
