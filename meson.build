@@ -23,10 +23,13 @@ if cc.get_id() == 'gcc'
     error('scikit-image requires GCC >= 9.1')
   endif
 elif cc.get_id() == 'msvc'
-  if not cc.version().version_compare('>=19.20')
-    error('scikit-image requires at least vc142 (default with Visual Studio 2019) ' + \
-          'when building with MSVC')
-  endif
+  error('''
+    MSVC cannot compile scikit-image with Pythran on Windows.
+
+    Please reconfigure using clang-cl:
+    meson setup build --native-file=clang-cl.ini
+  ''')
+
 endif
 
 _global_c_args = cc.get_supported_arguments(
