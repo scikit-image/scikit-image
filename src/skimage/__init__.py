@@ -83,22 +83,6 @@ def __dir__():
     return __all__.copy()
 
 
-class PendingSkimage2Change(PendingDeprecationWarning):
-    """A warning about API usage that will silently change or break in skimage2.
-
-    As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
-    shown by default. But it can be enabled with a warnings filter to prepare
-    for code changes related to skimage2 early on:
-
-    .. code-block:: python
-
-        import warnings
-        import skimage as ski
-        warnings.filterwarnings(
-            action="default", category=ski.PendingSkimage2Change
-        )
-    """
-
 # Logic for checking for improper install and importing while in the source
 # tree when package has not been installed inplace.
 # Code adapted from scikit-learn's __check_build module.

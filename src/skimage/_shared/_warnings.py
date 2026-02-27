@@ -6,7 +6,30 @@ import functools
 import os
 from pathlib import Path
 
-__all__ = ['all_warnings', 'expected_warnings', 'warn', 'warn_external']
+__all__ = [
+    'all_warnings',
+    'expected_warnings',
+    'warn',
+    'warn_external',
+    'PendingSkimage2Change',
+]
+
+
+class PendingSkimage2Change(PendingDeprecationWarning):
+    """A warning about API usage that will silently change or break in skimage2.
+
+    As a subclass of :class:`PendingDeprecationWarning`, this warning isn't
+    shown by default. But it can be enabled with a warnings filter to prepare
+    for code changes related to skimage2 early on:
+
+    .. code-block:: python
+
+        import warnings
+        import skimage as ski
+        warnings.filterwarnings(
+            action="default", category=ski.PendingSkimage2Change
+        )
+    """
 
 
 # A version of `warnings.warn` with a default stacklevel of 2.

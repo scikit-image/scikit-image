@@ -1,8 +1,6 @@
-import warnings
-
 import skimage2 as ski2
 
-from .. import PendingSkimage2Change
+from .._shared._warnings import warn_external, PendingSkimage2Change
 
 
 def binary_blobs(
@@ -68,7 +66,7 @@ def binary_blobs(
     >>> # Blobs cover a smaller volume fraction of the image
     >>> blobs = data.binary_blobs(length=256, volume_fraction=0.3)
     """
-    warnings.warn(
+    warn_external(
         "`skimage.data.binary_blobs` is deprecated in favor of "
         "`skimage2.data.binary_blobs` which has a new signature. "
         "Parameters `length` and `n_dim` have been replaced with `shape`. "
@@ -83,7 +81,6 @@ def binary_blobs(
         "        boundary_mode='nearest',\n"
         "        ...\n"
         "    )",
-        stacklevel=2,
         category=PendingSkimage2Change,
     )
     blob_size = blob_size_fraction * length

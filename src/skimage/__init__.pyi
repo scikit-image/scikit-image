@@ -16,6 +16,7 @@ _submodules = [
     'segmentation',
     'transform',
     'util',
+    'PendingSkimage2Change',
 ]
 
 __all__ = _submodules + ['__version__']  # noqa: F822
@@ -53,3 +54,4 @@ from .util.dtype import (
 )
 from .util.lookfor import lookfor
 from .data import data_dir
+from ._shared._warnings import PendingSkimage2Change
