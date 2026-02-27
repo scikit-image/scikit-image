@@ -38,13 +38,26 @@ PR Checklist
 
 AI Policy
 ---------
-We are a small developer team, and we enjoy reviewing and discussing code written by other humans.
-We recognize that LLMs may be useful for some rote maintenance tasks,
-but overall prefer for contributions to be hand-written.
-If you do use AI to make a PR, we ask that you:
+scikit-image requires that PR authors illustrate a thorough
+understanding of any changes they propose. We typically assess this
+from the PR description and subsequent conversations.
+
+It may make sense to apply AI for some mechanical tasks, but our
+policy is consistent across all tools: the usage of anything other
+than a basic text editor must be declared (e.g., if you use sed, post
+the script used).
+
+While we commit to engage in good faith with PRs that have explicit
+tool declarations, we will similarly close PRs that we suspect failed
+to do so. We ask that you respect this preference of our small
+development team, who have to be careful about not introducing
+unnecessary complexity into the project—for which AI contributions
+require additional vetting.
+
+If you do use AI to make a PR, we require that you:
 
 1. indicate the tool used, as well as how, in the PR description;
-2. make sure you *carefully review* and *fully understand* all
+2. make sure that you *carefully review* and *fully understand* all
    proposed changes so we may have a conversation about them; and
 3. be careful not to breach any copyright or license terms (yes, we
    take those seriously!).
