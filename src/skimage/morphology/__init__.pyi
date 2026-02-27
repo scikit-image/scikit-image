@@ -22,7 +22,7 @@ from .footprints import (
     square,
     star,
 )
-from ..measure._label import label
+from ._lazy_reexport import label
 from ._skeletonize import medial_axis, skeletonize, thin
 from .convex_hull import convex_hull_image, convex_hull_object
 from .grayreconstruct import reconstruction
