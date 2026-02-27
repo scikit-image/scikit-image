@@ -13,17 +13,17 @@ from skimage2.feature import peak_local_max
 @pytest.mark.parametrize("size", [30, 50, None])
 def test_ensure_spacing_trivial(p, size):
     # --- Empty input
-    assert _ensure_spacing([], p_norm=p) == []
+    assert_equal(_ensure_spacing([], p_norm=p), [])
 
     # --- A unique point
     coord = np.random.randn(1, 2)
-    assert np.array_equal(coord, _ensure_spacing(coord, p_norm=p, min_split_size=size))
+    assert_equal(coord, _ensure_spacing(coord, p_norm=p, min_split_size=size))
 
     # --- Verified spacing
     coord = np.random.randn(100, 2)
 
     # --- 0 spacing
-    assert np.array_equal(
+    assert_equal(
         coord, _ensure_spacing(coord, spacing=0, p_norm=p, min_split_size=size)
     )
 
@@ -32,7 +32,7 @@ def test_ensure_spacing_trivial(p, size):
 
     out = _ensure_spacing(coord, spacing=spacing, p_norm=p, min_split_size=size)
 
-    assert np.array_equal(coord, out)
+    assert_equal(coord, out)
 
 
 @pytest.mark.parametrize("ndim", [1, 2, 3, 4, 5])
@@ -42,7 +42,7 @@ def test_ensure_spacing_nD(ndim, size):
 
     expected = np.ones((1, ndim))
 
-    assert np.array_equal(_ensure_spacing(coord, min_split_size=size), expected)
+    assert_equal(_ensure_spacing(coord, min_split_size=size), expected)
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
@@ -55,7 +55,7 @@ def test_ensure_spacing_batch_processing(p, size):
 
     expected = _ensure_spacing(coord, spacing=spacing, p_norm=p)
 
-    assert np.array_equal(
+    assert_equal(
         _ensure_spacing(coord, spacing=spacing, p_norm=p, min_split_size=size), expected
     )
 
