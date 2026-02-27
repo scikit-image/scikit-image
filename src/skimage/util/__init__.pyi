@@ -29,7 +29,6 @@ from .unique import unique_rows
 from .lookfor import lookfor
 from ._lazy_reexport import FailedEstimationAccessError
 
-
 __all__ = [
     'img_as_float32',
     'img_as_float64',

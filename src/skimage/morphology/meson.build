@@ -42,6 +42,7 @@ python_sources = [
   '_flood_fill.py',
   '_skeletonize.py',
   '_util.py',
+  '_lazy_reexport.py',
   'binary.py',
   'convex_hull.py',
   'extrema.py',
