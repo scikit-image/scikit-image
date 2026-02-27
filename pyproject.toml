@@ -217,7 +217,7 @@ xfail_strict = true
 filterwarnings = [
     "error",
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
-    "ignore::skimage.PendingSkimage2Change",
+    "ignore::PendingDeprecationWarning",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     # warn by pyamg in ruge_stuben_solver
     "ignore:Implicit conversion of A to CSR:scipy.sparse.SparseEfficiencyWarning",
