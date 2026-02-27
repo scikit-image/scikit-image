@@ -700,7 +700,7 @@ def test_corner_peaks_deprecation_path():
     assert_equal(peaks, np.array(np.nonzero(response)).T)
 
     # `min_distance > np.nextafter(1, np.inf)` recovers original behavior
-    # of`corner_peaks`
+    # of `corner_peaks`
     peaks = peak_local_max(
         response, exclude_border=False, min_distance=np.nextafter(1, np.inf)
     )
