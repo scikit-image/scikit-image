@@ -5,6 +5,7 @@ Grayscale morphological operations
 from .misc import default_footprint
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
+from .footprints import mirror_footprint, pad_footprint
 
 import skimage2 as ski2
 
@@ -24,13 +25,75 @@ _SUPPORTED_MODES = {
 }
 
 
-_PENDING_SKIMAGE2_MESSAGE = """\
+_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
 `skimage.morphology.{name}` is deprecated in favor of
 `skimage2.morphology.{name}`, which changes the default value
-for parameter `mode` from 'reflect' to 'ignore'.
+for parameter `mode` to 'ignore' (was 'reflect').
 
 To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
+If you set it explicitly before, the behavior is unchanged.
 """
+
+# `dilation`, `closing`, `black_tophat` need a more specific warning.
+# See `_patch_footprint_mirroring`
+_PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
+`skimage.morphology.{name}` is deprecated in favor of
+`skimage2.morphology.{name}` which changes the default value for parameter
+`mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
+(inverts its order in each dimension) which aligns its behavior with
+`scipy.ndimage.grey_{name}`.
+
+To keep the old (`skimage`, v1.x) behavior:
+- Set `mode='reflect'` explicitly. If you set it explicitly before,
+  the behavior is unchanged.
+- If you use an asymmetric `footprint`, modify it like this before passing it
+  to `skimage2.morphology.{name}`:
+
+      footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+      footprint = ski2.morphology.mirror_footprint(footprint)
+"""
+
+
+def _patch_footprint_mirroring(footprint):
+    """Mirror asymmetric footprints before dispatching to `skimage2`.
+
+    This function ensures backwards compatibility when asymmetric footprints
+    are passed to `skimage.morphology.dilation`, `skimage.morphology.closing`
+    and `skimage.morphology.black_tophat`. See _Notes_ for details.
+
+    Parameters
+    ----------
+    footprint : ndarray or tuple, optional
+
+    Returns
+    -------
+    patched_footprint : ndarray or tuple
+
+    Notes
+    -----
+    Inside `scipy.ndimage.grey_dilation` the footprint is inverted/mirrored.
+    This inversion is intentional so that the composition of erosion and
+    dilation lead to a correct closing and opening.
+
+    `skimage.morphology.dilation` accidentally undoes this by mirroring
+     the footprint, before passing it to `scipy.ndimage.grey_dilation`.
+
+    `skimage.morphology.closing` and `skimage.morphology.black_tophat` then
+    mirror/invert again to correct for this.
+
+    In `skimage2` we drop all mirroring and align with SciPy. This function
+    documents this procedure and ensures the wrappers around `skimage2` keep the
+    old behavior for `skimage.morphology.dilation`, `skimage.morphology.closing`
+    and `skimage.morphology.black_tophat`.
+
+    `skimage.morphology.erosion`, `skimage.morphology.opening` and
+    `skimage.morphology.white_tophat` _aren't_ affected.
+    """
+    # We need to *pad* before mirroring so that even dimension are padded
+    # on the correct side.
+    footprint = pad_footprint(footprint, pad_end=False)
+    footprint = mirror_footprint(footprint)
+    return footprint
 
 
 @default_footprint
@@ -119,9 +182,10 @@ def erosion(
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=erosion.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=erosion.__name__),
         category=PendingSkimage2Change,
     )
+    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.erosion(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
@@ -215,9 +279,10 @@ def dilation(
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=dilation.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=dilation.__name__),
         category=PendingSkimage2Change,
     )
+    footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.dilation(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
@@ -296,9 +361,10 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=opening.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=opening.__name__),
         category=PendingSkimage2Change,
     )
+    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.opening(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
@@ -377,9 +443,10 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=closing.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=closing.__name__),
         category=PendingSkimage2Change,
     )
+    footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.closing(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
@@ -462,9 +529,10 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=white_tophat.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR.format(name=white_tophat.__name__),
         category=PendingSkimage2Change,
     )
+    # Note: No need to patch `footprint` here, see `_patch_footprint_mirroring`
     out = ski2.morphology.white_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )
@@ -548,9 +616,10 @@ def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
 
     """
     warn_external(
-        _PENDING_SKIMAGE2_MESSAGE.format(name=black_tophat.__name__),
+        _PENDING_SKIMAGE2_TEMPLATE_MIRROR.format(name=black_tophat.__name__),
         category=PendingSkimage2Change,
     )
+    footprint = _patch_footprint_mirroring(footprint)
     out = ski2.morphology.black_tophat(
         image, footprint=footprint, out=out, mode=mode, cval=cval
     )

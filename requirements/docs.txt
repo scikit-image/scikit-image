@@ -4,6 +4,7 @@ sphinx>=8.0
 sphinx-gallery[parallel]>=0.18
 numpydoc>=1.7
 sphinx-copybutton
+sphinx-togglebutton
 matplotlib>=3.7
 dask[array]>=2023.2.0
 pandas>=2.0

@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 from scipy import ndimage as ndi
-from numpy.testing import assert_allclose, assert_array_equal, assert_equal
+from numpy.testing import assert_allclose, assert_array_equal
 
 import skimage as ski
-from skimage.morphology import footprint_rectangle
+from skimage.morphology import footprint_rectangle, mirror_footprint, pad_footprint
 from skimage._shared.testing import fetch
 
 import skimage2.morphology._grayscale_operators as gray
@@ -31,42 +31,77 @@ gray_operators = (
 
 
 class TestMorphology:
-    # These expected outputs were generated with skimage v0.22.0 + PR #6695
-    # using:
-    #
-    #   from skimage.morphology.tests.test_gray import TestMorphology
-    #   import numpy as np
-    #   output = TestMorphology()._build_expected_output()
-    #   np.savez_compressed('gray_morph_output.npz', **output)
-
-    def _build_expected_output(self):
-        def square(n):
-            return footprint_rectangle((n, n))
-
-        footprints_2D = (
-            square,
-            ski.morphology.diamond,
-            ski.morphology.disk,
-            ski.morphology.star,
-        )
-
+    @pytest.mark.parametrize(
+        "footprint_args",
+        [
+            ("square", lambda n: footprint_rectangle((n, n))),
+            ("diamond", ski.morphology.diamond),
+            ("disk", ski.morphology.disk),
+            ("star", ski.morphology.star),
+        ],
+    )
+    @pytest.mark.parametrize("size", list(range(1, 4)))
+    @pytest.mark.parametrize(
+        "func",
+        [
+            gray.erosion,
+            gray.opening,
+            gray.white_tophat,
+        ],
+    )
+    def test_reproduce_skimage_data_not_mirrored(self, footprint_args, size, func):
+        # Test that `erosion`, `opening`, and `white_tophat` can
+        # reproduce data in `gray_morph_output.npz`
         image = ski.color.rgb2gray(ski.data.coffee())
         image = ski.transform.downscale_local_mean(image, (20, 20))
         image = ski.util.img_as_ubyte(image)
 
-        output = {}
-        for n in range(1, 4):
-            for strel in footprints_2D:
-                for func in gray_operators:
-                    key = f'{strel.__name__}_{n}_{func.__name__}'
-                    output[key] = func(image, strel(n))
+        footprint_name, footprint_func = footprint_args
+        key = f'{footprint_name}_{size}_{func.__name__}'
+        data = dict(np.load(fetch('data/gray_morph_output.npz')))
+        expected = data[key]
+        footprint = footprint_func(size)
 
-        return output
+        result = func(image, footprint, mode="reflect")
+        np.testing.assert_equal(result, expected)
 
-    def test_gray_morphology(self):
-        expected = dict(np.load(fetch('data/gray_morph_output.npz')))
-        calculated = self._build_expected_output()
-        assert_equal(expected, calculated)
+    @pytest.mark.parametrize(
+        "footprint_args",
+        [
+            ("square", lambda n: footprint_rectangle((n, n))),
+            ("diamond", ski.morphology.diamond),
+            ("disk", ski.morphology.disk),
+            ("star", ski.morphology.star),
+        ],
+    )
+    @pytest.mark.parametrize("size", list(range(1, 4)))
+    @pytest.mark.parametrize(
+        "func",
+        [
+            gray.dilation,
+            gray.closing,
+            gray.black_tophat,
+        ],
+    )
+    def test_reproduce_skimage_data_mirrored(self, footprint_args, size, func):
+        # Test that `dilation`, `closing`, and `black_tophat` can
+        # reproduce data in `gray_morph_output.npz`
+        image = ski.color.rgb2gray(ski.data.coffee())
+        image = ski.transform.downscale_local_mean(image, (20, 20))
+        image = ski.util.img_as_ubyte(image)
+
+        footprint_name, footprint_func = footprint_args
+        key = f'{footprint_name}_{size}_{func.__name__}'
+        data = dict(np.load(fetch('data/gray_morph_output.npz')))
+        expected = data[key]
+        footprint = footprint_func(size)
+
+        # Difference to the test above (`test_reproduce_skimage_data_not_mirrored`)
+        footprint = pad_footprint(footprint, pad_end=False)
+        footprint = mirror_footprint(footprint)
+
+        result = func(image, footprint, mode="reflect")
+        np.testing.assert_equal(result, expected)
 
     def test_gray_closing_extensive(self):
         img = ski.data.coins()
@@ -122,10 +157,17 @@ class TestEccentricStructuringElements:
         ]
 
     def test_dilate_erode_symmetry(self):
-        for s in self.footprints:
-            c = gray.erosion(self.black_pixel, s)
-            d = gray.dilation(self.white_pixel, s)
-            assert np.all(c == (255 - d))
+        for footprint in self.footprints:
+            eroded = gray.erosion(self.black_pixel, footprint=footprint)
+
+            # Dilation mirrors footprint internally so that closing is extensive
+            # and opening anti-extensive. To receive a symmetric result, we need
+            # to use an asymmetric footprint. Also pad to odd-size before
+            # mirroring so that correct side is padded with 0.
+            asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
+            dilated = gray.dilation(self.white_pixel, footprint=asym_footprint)
+
+            assert np.all(eroded == (255 - dilated))
 
     def test_open_black_pixel(self):
         for s in self.footprints:
