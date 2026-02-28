@@ -28,7 +28,7 @@ Run the following [warnings filter](https://docs.python.org/3/library/warnings.h
 ```python
 import warnings
 import skimage as ski
-warnings.filterwarnings(action="default", category=ski.util.PendingSkimage2Change)
+warnings.filterwarnings(action="default", category=ski.PendingSkimage2Change)
 ```
 
 This will raise a warning in code that needs to be modified to continue functioning with the new, skimage2 API.

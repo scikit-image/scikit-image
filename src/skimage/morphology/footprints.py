@@ -6,7 +6,6 @@ from numbers import Integral
 import numpy as np
 
 from .. import draw
-from skimage import morphology
 from .._shared.utils import deprecate_func
 
 
@@ -92,10 +91,12 @@ def footprint_from_sequence(footprints):
     """
 
     # Create a single pixel image of sufficient size and apply binary dilation.
+    from .gray import dilation
+
     shape = _shape_from_sequence(footprints)
     imag = np.zeros(shape, dtype=bool)
     imag[tuple(s // 2 for s in shape)] = 1
-    return morphology.dilation(imag, footprints)
+    return dilation(imag, footprints)
 
 
 def footprint_rectangle(shape, *, dtype=np.uint8, decomposition=None):

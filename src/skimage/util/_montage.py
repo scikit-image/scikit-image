@@ -1,7 +1,6 @@
 import numpy as np
 
 from .._shared import utils
-from .. import exposure
 
 __all__ = ['montage']
 
@@ -117,6 +116,8 @@ def montage(
 
     # Rescale intensity if necessary
     if rescale_intensity:
+        from .. import exposure
+
         for i in range(n_images):
             arr_in[i] = exposure.rescale_intensity(arr_in[i])
 

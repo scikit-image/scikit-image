@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..feature.util import (
+from .util import (
     FeatureDetector,
     DescriptorExtractor,
     _mask_border_keypoints,
