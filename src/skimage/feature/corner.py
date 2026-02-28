@@ -1167,7 +1167,7 @@ def corner_peaks(
         ``False`` or ``0``
             Distance to border has no effect, all peaks are identified.
         positive integer
-            Exclude peaks, that are within this given distance of the border.
+            Exclude peaks that are within this given distance of the border.
         tuple of positive integers
             Same as for a single integer but with different distances for each
             respective dimension.
@@ -1261,7 +1261,7 @@ def corner_peaks(
                 image, min_distance=new_min_distance, ...
             )
 
-        Regarding `exclude_border` and `p_norm` update according to the following
+        Regarding `exclude_border` and `p_norm`, update according to the following
         cases:
 
         * `exclude_border` not passed, use `exclude_border=old_min_distance`
@@ -1288,14 +1288,14 @@ def corner_peaks(
         num_peaks = None
         warn_external(
             "Passing `np.inf` to `num_peaks` is deprecated in version 0.27, "
-            "use `num_peaks=None` instead",
+            "use `num_peaks=None` instead.",
             category=FutureWarning,
         )
     if num_peaks_per_label is not None and np.isinf(num_peaks_per_label):
         num_peaks_per_label = None
         warn_external(
             "Passing `np.inf` to `num_peaks_per_label` is deprecated in version 0.27, "
-            "use `num_peaks_per_label=None` instead",
+            "use `num_peaks_per_label=None` instead.",
             category=FutureWarning,
         )
 
