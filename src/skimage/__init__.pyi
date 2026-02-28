@@ -16,7 +16,6 @@ _submodules = [
     'segmentation',
     'transform',
     'util',
-    'PendingSkimage2Change',
 ]
 
 __all__ = _submodules + ['__version__']  # noqa: F822
