@@ -78,6 +78,7 @@ To keep the old behavior when switching to `skimage2`, update your call accordin
 
 :::{list-table}
 :header-rows: 1
+:name: ski2-peak-local-max-advice
 
 - - In `skimage`
   - In `skimage2`
@@ -107,14 +108,43 @@ Other keyword parameters can be left unchanged.
 Examples:
 
 ```python
-ski.morphology.peak_local_max(image)
-ski2.morphology.peak_local_max(image, exclude_border=1, p_norm=np.inf)
+ski.feature.peak_local_max(image)
+ski2.feature.peak_local_max(image, exclude_border=1, p_norm=np.inf)
 
-ski.morphology.peak_local_max(image, min_distance=10)
-ski2.morphology.peak_local_max(
+ski.feature.peak_local_max(image, min_distance=10)
+ski2.feature.peak_local_max(
     image, min_distance=10, exclude_border=10, p_norm=np.inf
 )
 ```
+
+### `skimage.feature.corner_peaks`
+
+`skimage.feature.corner_peaks` is deprecated in favor of `skimage2.feature.peak_local_max` with new behavior:
+
+- Peaks are removed when `> min_distance` (`corner_peaks` used `>= min_distance`)
+- Parameter `p_norm` defaults to 2 (Euclidean distance), was `numpy.inf` (Chebyshev distance)
+- Parameter `exclude_border` defaults to 1, was `True`
+- Parameter `exclude_border` no longer accepts `False` and `True`, pass 0 instead of `False`, or `min_distance` instead of `True`
+- Parameters after `image` are keyword-only
+- Parameter `indices` is removed.
+
+To keep the old behavior when switching to `skimage2`, use
+
+```python
+new_min_distance = np.nextafter(old_min_distance, np.inf)
+coords = ski2.feature.peak_local_max(image, min_distance=new_min_distance, ...)
+```
+
+If you used `indices=False`, you can derive the boolean peak mask from `coords` with:
+
+```python
+coords = ski2.feature.peak_local_max(...)
+peaks = np.zeros_like(image, dtype=bool)
+peaks[tuple(coords.T)] = True
+```
+
+Regarding the parameters `exclude_border` and `p_norm` which are passed to `skimage.feature.peak_local_max`, refer to the [advice for that function](#ski2-peak-local-max-advice).
+Other keyword parameters can be left unchanged.
 
 ### Grayscale morphological operators
 

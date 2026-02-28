@@ -5,7 +5,7 @@ import numpy as np
 
 from skimage._shared.testing import assert_array_equal
 from skimage import data
-from skimage.feature import BRIEF, corner_peaks, corner_harris
+from skimage.feature import BRIEF, peak_local_max, corner_harris
 from skimage._shared import testing
 
 
@@ -22,8 +22,11 @@ def test_normal_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for normal mode."""
     img = data.coins().astype(dtype)
 
-    keypoints = corner_peaks(
-        corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1
+    keypoints = peak_local_max(
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
@@ -52,8 +55,11 @@ def test_uniform_mode(dtype):
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
     img = data.coins().astype(dtype)
 
-    keypoints = corner_peaks(
-        corner_harris(img), min_distance=5, threshold_abs=0, threshold_rel=0.1
+    keypoints = peak_local_max(
+        corner_harris(img),
+        min_distance=np.nextafter(5, np.inf),
+        threshold_abs=0,
+        threshold_rel=0.1,
     )
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform', rng=1)

@@ -4,7 +4,7 @@ from numpy.testing import assert_almost_equal, assert_array_equal, assert_equal
 
 from skimage import data, draw, img_as_float
 from skimage._shared._warnings import expected_warnings
-from skimage._shared.testing import run_in_parallel
+from skimage._shared.testing import run_in_parallel, assert_stacklevel
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.feature import (
@@ -26,6 +26,7 @@ from skimage.feature import (
     structure_tensor_eigenvalues,
 )
 from skimage.morphology import footprint_rectangle, octagon
+from skimage.util import PendingSkimage2Change
 
 
 @pytest.fixture
@@ -670,6 +671,52 @@ def test_corner_peaks():
         response, exclude_border=False, min_distance=1, indices=False
     )
     assert np.sum(corners) == 5
+
+
+def test_corner_peaks_pending_skimage2_warning():
+    response = np.zeros((10, 10))
+    with pytest.warns(PendingSkimage2Change) as record:
+        corner_peaks(response)
+    assert_stacklevel(record)
+
+
+def test_corner_peaks_deprecation_path():
+    response = np.array(
+        [
+            [0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 1, 1, 1, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0],
+        ]
+    )
+    # `corner_peaks` only finds edges because `min_distance >= 1` is filtered
+    corners = corner_peaks(response, exclude_border=False, min_distance=1)
+    assert_equal(corners, [[1, 1], [1, 3], [3, 1], [3, 3]])
+
+    # `peak_local_max` doesn't filter anything
+    # because only `min_distance > 1` is filtered
+    peaks = peak_local_max(response, exclude_border=False, min_distance=1)
+    assert_equal(peaks, np.array(np.nonzero(response)).T)
+
+    # `min_distance > np.nextafter(1, np.inf)` recovers original behavior
+    # of `corner_peaks`
+    peaks = peak_local_max(
+        response, exclude_border=False, min_distance=np.nextafter(1, np.inf)
+    )
+    assert_equal(peaks, [[1, 1], [1, 3], [3, 1], [3, 3]])
+
+
+def test_corner_peaks_num_peaks_deprecated_inf():
+    image = np.zeros((10, 10))
+    with pytest.warns(FutureWarning, match=r".*use `num_peaks=None`") as record:
+        corner_peaks(image, num_peaks=np.inf)
+    assert_stacklevel(record)
+    with pytest.warns(
+        FutureWarning, match=r".*use `num_peaks_per_label=None`"
+    ) as record:
+        corner_peaks(image, num_peaks_per_label=np.inf)
+    assert_stacklevel(record)
 
 
 def test_blank_image_nans():

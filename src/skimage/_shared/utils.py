@@ -661,6 +661,9 @@ class deprecate_func:
         decorating a closure, in which case you can set the stacklevel manually
         here. The outermost decorator should have stacklevel 2, the next inner
         one stacklevel 3, etc.
+    prepend_docstring : bool, optional
+        By default, prepend the deprecation message to the docstring. Beware
+        that this may lead to formatting/rendering problems with Sphinx.
 
     Examples
     --------
@@ -679,12 +682,19 @@ class deprecate_func:
     """
 
     def __init__(
-        self, *, deprecated_version, removed_version=None, hint=None, stacklevel=None
+        self,
+        *,
+        deprecated_version,
+        removed_version=None,
+        hint=None,
+        stacklevel=None,
+        prepend_docstring=True,
     ):
         self.deprecated_version = deprecated_version
         self.removed_version = removed_version
         self.hint = hint
         self.stacklevel = stacklevel
+        self.prepend_docstring = prepend_docstring
 
     def __call__(self, func):
         message = (
@@ -706,12 +716,13 @@ class deprecate_func:
             warnings.warn(message, category=FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
 
-        # modify docstring to display deprecation warning
-        doc = f'**Deprecated:** {message}'
-        if wrapped.__doc__ is None:
-            wrapped.__doc__ = doc
-        else:
-            wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
+        if self.prepend_docstring is True:
+            # modify docstring to display deprecation warning
+            doc = f'**Deprecated:** {message}'
+            if wrapped.__doc__ is None:
+                wrapped.__doc__ = doc
+            else:
+                wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
 
         return wrapped
 
