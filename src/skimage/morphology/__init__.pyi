@@ -29,7 +29,7 @@ from .grayreconstruct import reconstruction
 from .misc import remove_small_holes, remove_small_objects, remove_objects_by_distance
 from .extrema import h_maxima, h_minima, local_minima, local_maxima
 from ._flood_fill import flood, flood_fill
-from .max_tree import (
+from ._max_tree import (
     area_opening,
     area_closing,
     diameter_closing,

@@ -11,7 +11,7 @@ extensions = [
   '_extrema_cy',
   '_flood_fill_cy',
   '_grayreconstruct',
-  '_max_tree',
+  '_max_tree_cy',
   '_misc_cy',
   '_skeletonize_various_cy'
 ]
@@ -50,7 +50,7 @@ python_sources = [
   'gray.py',
   'grayreconstruct.py',
   'isotropic.py',
-  'max_tree.py',
+  '_max_tree.py',
   'misc.py',
 ]
 
