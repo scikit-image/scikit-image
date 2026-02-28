@@ -51,5 +51,6 @@ from .util.dtype import (
     img_as_ubyte,
     img_as_bool,
 )
-from .util.lookfor import lookfor
+from .util import lookfor
 from .data import data_dir
+from ._shared._warnings import PendingSkimage2Change

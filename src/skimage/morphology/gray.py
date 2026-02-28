@@ -3,8 +3,7 @@ Grayscale morphological operations
 """
 
 from .misc import default_footprint
-from ..util import PendingSkimage2Change
-from .._shared._warnings import warn_external
+from .._shared._warnings import warn_external, PendingSkimage2Change
 
 import skimage2 as ski2
 

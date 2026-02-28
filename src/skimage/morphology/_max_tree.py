@@ -42,7 +42,7 @@ import numpy as np
 from ._util import _validate_connectivity, _offsets_to_raveled_neighbors
 from ..util import invert
 
-from . import _max_tree
+from . import _max_tree_cy
 
 unsigned_int_types = [np.uint8, np.uint16, np.uint32, np.uint64]
 signed_int_types = [np.int8, np.int16, np.int32, np.int64]
@@ -134,7 +134,7 @@ def max_tree(image, connectivity=1):
     tree_traverser = np.argsort(image.ravel(), kind="stable").astype(np.int64)
 
     # call of cython function.
-    _max_tree._max_tree(
+    _max_tree_cy._max_tree(
         image.ravel(),
         mask.ravel().astype(np.uint8),
         flat_neighborhood,
@@ -249,9 +249,9 @@ def area_opening(
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    area = _max_tree._compute_area(image.ravel(), parent.ravel(), tree_traverser)
+    area = _max_tree_cy._compute_area(image.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(
+    _max_tree_cy._direct_filter(
         image.ravel(),
         output.ravel(),
         parent.ravel(),
@@ -346,14 +346,14 @@ def diameter_opening(
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    diam = _max_tree._compute_extension(
+    diam = _max_tree_cy._compute_extension(
         image.ravel(),
         np.array(image.shape, dtype=np.int32),
         parent.ravel(),
         tree_traverser,
     )
 
-    _max_tree._direct_filter(
+    _max_tree_cy._direct_filter(
         image.ravel(),
         output.ravel(),
         parent.ravel(),
@@ -477,9 +477,9 @@ def area_closing(
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    area = _max_tree._compute_area(image_inv.ravel(), parent.ravel(), tree_traverser)
+    area = _max_tree_cy._compute_area(image_inv.ravel(), parent.ravel(), tree_traverser)
 
-    _max_tree._direct_filter(
+    _max_tree_cy._direct_filter(
         image_inv.ravel(),
         output.ravel(),
         parent.ravel(),
@@ -590,14 +590,14 @@ def diameter_closing(
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image_inv, connectivity)
 
-    diam = _max_tree._compute_extension(
+    diam = _max_tree_cy._compute_extension(
         image_inv.ravel(),
         np.array(image_inv.shape, dtype=np.int32),
         parent.ravel(),
         tree_traverser,
     )
 
-    _max_tree._direct_filter(
+    _max_tree_cy._direct_filter(
         image_inv.ravel(),
         output.ravel(),
         parent.ravel(),
@@ -693,7 +693,7 @@ def max_tree_local_maxima(image, connectivity=1, parent=None, tree_traverser=Non
     if parent is None or tree_traverser is None:
         parent, tree_traverser = max_tree(image, connectivity)
 
-    _max_tree._max_tree_local_maxima(
+    _max_tree_cy._max_tree_local_maxima(
         image.ravel(), output.ravel(), parent.ravel(), tree_traverser
     )
 

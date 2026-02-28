@@ -15,6 +15,7 @@ endforeach
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_backends.py',
   '_invert.py',
   '_label.py',
@@ -22,6 +23,7 @@ python_sources = [
   '_montage.py',
   '_regular_grid.py',
   '_slice_along_axes.py',
+  '_lazy_reexport.py',
   'apply_parallel.py',
   'arraycrop.py',
   'compare.py',

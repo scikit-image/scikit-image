@@ -11,7 +11,7 @@ extensions = [
   '_extrema_cy',
   '_flood_fill_cy',
   '_grayreconstruct',
-  '_max_tree',
+  '_max_tree_cy',
   '_misc_cy',
   '_skeletonize_various_cy'
 ]
@@ -38,9 +38,11 @@ py3.extension_module('_skeletonize_lee_cy',
 
 python_sources = [
   '__init__.py',
+  '__init__.pyi',
   '_flood_fill.py',
   '_skeletonize.py',
   '_util.py',
+  '_lazy_reexport.py',
   'binary.py',
   'convex_hull.py',
   'extrema.py',
@@ -48,7 +50,7 @@ python_sources = [
   'gray.py',
   'grayreconstruct.py',
   'isotropic.py',
-  'max_tree.py',
+  '_max_tree.py',
   'misc.py',
 ]
 
