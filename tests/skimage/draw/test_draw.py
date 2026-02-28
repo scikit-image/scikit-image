@@ -1259,3 +1259,21 @@ def test_rectangle_perimiter_clip_bottom_left():
     rr, cc = rectangle_perimeter(start, end=end, shape=img.shape, clip=False)
     img[rr, cc] = 1
     assert_array_equal(img, expected)
+
+
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+def test_rectangle_perimeter_nan_start_raises():
+    with pytest.raises(ValueError, match="NaN"):
+        rectangle_perimeter(start=(np.nan, 1), end=(5, 5))
+
+
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+def test_rectangle_perimeter_nan_end_raises():
+    with pytest.raises(ValueError, match="NaN"):
+        rectangle_perimeter(start=(1, 1), end=(np.nan, 5))
+
+
+@pytest.mark.skipif(not has_mpl, reason="matplotlib not installed")
+def test_rectangle_perimeter_nan_extent_raises():
+    with pytest.raises(ValueError, match="NaN"):
+        rectangle_perimeter(start=(1, 1), extent=(np.nan, 5))
