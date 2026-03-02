@@ -10,7 +10,7 @@ from .._shared.utils import (
     check_nD,
     DEPRECATED,
     deprecate_parameter,
-    _rescale_value_range,
+    _prescale_value_range,
 )
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
@@ -384,7 +384,7 @@ def blob_dog(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -598,7 +598,7 @@ def blob_log(
     if threshold_rel is DEPRECATED:
         threshold_rel = None
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
@@ -799,7 +799,7 @@ def blob_doh(
 
     check_nD(image, 2)
 
-    image = _rescale_value_range(image, mode=prescale)
+    image = _prescale_value_range(image, mode=prescale)
     float_dtype = _supported_float_type(image.dtype)
     image = image.astype(float_dtype, copy=False)
 
