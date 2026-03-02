@@ -513,7 +513,7 @@ def jerman(
         lambda_rho = np.ones_like(lambda3) * tau_threshold
 
         # Set to zero where lambda3 <= 0 (not vessel-like)
-        lambda_rho[lambda3 <= 0] = 0
+        lambda_rho[lambda3 <= eigval_tol] = 0
         # Set to lambda3 where lambda3 > tau * max(lambda3)
         lambda_rho[lambda3 > tau_threshold] = lambda3[lambda3 > tau_threshold]
 
