@@ -518,7 +518,7 @@ def jerman(
         lambda_rho[lambda3 > tau_threshold] = lambda3[lambda3 > tau_threshold]
 
         # Compute the main response term
-        # V = λ₂² × (λ_ρ - λ₂) × 27 / (λ₂ + λ_ρ)³ (eq. 14)
+        # V = lambda2**2 * (lambda_rho - lambda2) * 27 / (lambda2 + lambda_rho)**3 (eq. 14)
         numerator = lambda2**2 * (lambda_rho - lambda2) * 27
         denominator = (lambda2 + lambda_rho) ** 3
         vals = numerator / denominator  # eq. 14
