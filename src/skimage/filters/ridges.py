@@ -514,7 +514,7 @@ def jerman(
 
         # Set to zero where lambda3 <= 0 (not vessel-like)
         lambda_rho[lambda3 <= 0] = 0
-        # Set to lambda3 lambda3 > tau * max(lambda3)
+        # Set to lambda3 where lambda3 > tau * max(lambda3)
         lambda_rho[lambda3 > tau_threshold] = lambda3[lambda3 > tau_threshold]
 
         # Compute the main response term
