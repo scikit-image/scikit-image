@@ -419,7 +419,7 @@ def jerman(
     Filter an image with the Jerman vesselness filter.
 
     This filter can be used to detect continuous ridges, e.g. vessels,
-    wrinkles, rivers. It is based on the eigenvectors of the Hessian
+    wrinkles, rivers. It is based on the eigenvalues of the Hessian
     to compute the similarity of an image region to vessels, according
     to the method described in [1]_.
 
