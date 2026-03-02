@@ -62,6 +62,7 @@ def meijering(
     sato
     frangi
     hessian
+    jerman
 
     References
     ----------
@@ -143,6 +144,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
     meijering
     frangi
     hessian
+    jerman
 
     References
     ----------
@@ -257,6 +259,7 @@ def frangi(
     meijering
     sato
     hessian
+    jerman
 
     References
     ----------
@@ -387,6 +390,7 @@ def hessian(
     meijering
     sato
     frangi
+    jerman
 
     References
     ----------
