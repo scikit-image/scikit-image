@@ -428,8 +428,7 @@ def jerman(
     image : (M, N[, P]) ndarray
         Array with input image data.
     sigmas : iterable of floats, optional
-        Sigmas used as scales of filter, i.e.,
-        np.arange(scale_range[0], scale_range[1], scale_step)
+        Sigmas used as scales of filter.
     tau : float, optional
         Threshold parameter that controls response uniformity.
         Range: 0.5 to 1.0. Lower tau -> more uniform response.
