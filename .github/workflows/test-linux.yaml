@@ -138,6 +138,9 @@ jobs:
     permissions:
       issues: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: "Job has failed: reporting"
         uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:
