@@ -460,7 +460,11 @@ def jerman(
 
     Notes
     -----
-    Written based on the MATLAB implementation by Tim Jerman [2]_.
+    This function was written based on the MATLAB implementation by Tim Jerman [2]_,
+    following the below copyrights:
+
+        Copyright (c) 2009, Dirk-Jan Kroon. Copyright (c) 2017, Tim Jerman.
+        BSD 3-Clause License.
 
 
     References
@@ -469,7 +473,8 @@ def jerman(
            Enhancement of vascular structures in 3D and 2D angiographic
            images. IEEE Transactions on Medical Imaging, 35(9), 2107-2118.
            :DOI:`10.1109/TMI.2016.2550102`
-    .. [2] https://github.com/timjerman/JermanEnhancementFilter
+    .. [2] Original MATLAB implementation
+           https://github.com/timjerman/JermanEnhancementFilter
 
 
     Examples
