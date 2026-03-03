@@ -32,6 +32,7 @@ jobs:
     if: ${{ failure() && github.ref == 'refs/heads/main' }}
     permissions:
       issues: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -48,6 +49,7 @@ jobs:
   upload_anaconda:
     permissions:
       contents: write # for softprops/action-gh-release to create GitHub release
+      issues: write # for error reporting
     name: Release
     needs: call-workflow-build-wheels
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
