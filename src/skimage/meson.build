@@ -128,10 +128,13 @@ py3.install_sources(
 cython_cli = find_program('_build_utils/cythoner.py')
 cy = meson.get_compiler('cython')
 
-cython_args = ['@INPUT@', '@OUTPUT@']
+cython_codegen_args = ['@INPUT@', '@OUTPUT@']
+
+if cy.version().version_compare('>=3.1.0')
+  cython_codegen_args += ['-Xfreethreading_compatible=True']
+endif
 
 if get_option('generate-shared-utility')
-  cython_args += ['-Xfreethreading_compatible=True']
   cython_program = find_program(cython.cmd_array()[0])
   cython_shared_src = custom_target(
     install: false,
@@ -144,24 +147,20 @@ if get_option('generate-shared-utility')
   py3.extension_module('_cyutility',
     cython_shared_src,
     subdir: 'skimage',
-    cython_args: cython_args,
+    cython_args: cython_codegen_args,
     install: true,
   )
 
-  cython_args += ['--shared=skimage._cyutility']
+  cython_codegen_args += ['--shared=skimage._cyutility']
 endif
 
-cython_cpp_args = cython_args + ['--cplus']
-
 cython_gen = generator(cython_cli,
-  arguments : cython_args,
+  arguments : cython_codegen_args,
   output : '@BASENAME@.c')
 
 cython_gen_cpp = generator(cython_cli,
-  arguments : ['@INPUT@', '@OUTPUT@', '--cplus'],
+  arguments : cython_codegen_args + ['--cplus'],
   output : '@BASENAME@.cpp')
-
-c_undefined_ok = ['-Wno-maybe-uninitialized']
 
 # Suppress warning for deprecated Numpy API.
 # (Suppress warning messages emitted by #warning directives).

@@ -1,118 +1,13 @@
-from warnings import warn
+from textwrap import dedent
 
 import numpy as np
 import scipy.ndimage as ndi
 
 from .. import measure
-from .._shared.coord import ensure_spacing
+from ..util import PendingSkimage2Change
+from .._shared._warnings import warn_external
 
-
-def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
-    """
-    Return the highest intensity peak coordinates.
-    """
-    # get coordinates of peaks
-    coord = np.nonzero(mask)
-    intensities = image[coord]
-    # Highest peak first
-    idx_maxsort = np.argsort(-intensities, kind="stable")
-    coord = np.transpose(coord)[idx_maxsort]
-
-    if np.isfinite(num_peaks):
-        max_out = int(num_peaks)
-    else:
-        max_out = None
-
-    if min_distance > 1:
-        coord = ensure_spacing(
-            coord, spacing=min_distance, p_norm=p_norm, max_out=max_out
-        )
-
-    if len(coord) > num_peaks:
-        coord = coord[:num_peaks]
-
-    return coord
-
-
-def _get_peak_mask(image, footprint, threshold, mask=None):
-    """
-    Return the mask containing all peak candidates above thresholds.
-    """
-    if footprint.size == 1 or image.size == 1:
-        return image > threshold
-
-    image_max = ndi.maximum_filter(image, footprint=footprint, mode='nearest')
-
-    out = image == image_max
-
-    # no peak for a trivial image
-    image_is_trivial = np.all(out) if mask is None else np.all(out[mask])
-    if image_is_trivial:
-        out[:] = False
-        if mask is not None:
-            # isolated pixels in masked area are returned as peaks
-            isolated_px = np.logical_xor(mask, ndi.binary_opening(mask))
-            out[isolated_px] = True
-
-    out &= image > threshold
-    return out
-
-
-def _exclude_border(label, border_width):
-    """Set label border values to 0."""
-    # zero out label borders
-    for i, width in enumerate(border_width):
-        if width == 0:
-            continue
-        label[(slice(None),) * i + (slice(None, width),)] = 0
-        label[(slice(None),) * i + (slice(-width, None),)] = 0
-    return label
-
-
-def _get_threshold(image, threshold_abs, threshold_rel):
-    """Return the threshold value according to an absolute and a relative
-    value.
-
-    """
-    threshold = threshold_abs if threshold_abs is not None else image.min()
-
-    if threshold_rel is not None:
-        threshold = max(threshold, threshold_rel * image.max())
-
-    return threshold
-
-
-def _get_excluded_border_width(image, min_distance, exclude_border):
-    """Return border_width values relative to a min_distance if requested."""
-
-    if isinstance(exclude_border, bool):
-        border_width = (min_distance if exclude_border else 0,) * image.ndim
-    elif isinstance(exclude_border, int):
-        if exclude_border < 0:
-            raise ValueError("`exclude_border` cannot be a negative value")
-        border_width = (exclude_border,) * image.ndim
-    elif isinstance(exclude_border, tuple):
-        if len(exclude_border) != image.ndim:
-            raise ValueError(
-                "`exclude_border` should have the same length as the "
-                "dimensionality of the image."
-            )
-        for exclude in exclude_border:
-            if not isinstance(exclude, int):
-                raise ValueError(
-                    "`exclude_border`, when expressed as a tuple, must only "
-                    "contain ints."
-                )
-            if exclude < 0:
-                raise ValueError("`exclude_border` can not be a negative value")
-        border_width = exclude_border
-    else:
-        raise TypeError(
-            "`exclude_border` must be bool, int, or tuple with the same "
-            "length as the dimensionality of the image."
-        )
-
-    return border_width
+import skimage2 as ski2
 
 
 def peak_local_max(
@@ -121,15 +16,15 @@ def peak_local_max(
     threshold_abs=None,
     threshold_rel=None,
     exclude_border=True,
-    num_peaks=np.inf,
+    num_peaks=None,
     footprint=None,
     labels=None,
-    num_peaks_per_label=np.inf,
+    num_peaks_per_label=None,
     p_norm=np.inf,
 ):
     """Find peaks in an image as coordinate list.
 
-    Peaks are the local maxima in a region of `2 * min_distance + 1`
+    Peaks are the local maxima in a region of ``floor(2 * min_distance + 1)``
     (i.e. peaks are separated by at least `min_distance`).
 
     If both `threshold_abs` and `threshold_rel` are provided, the maximum
@@ -145,7 +40,7 @@ def peak_local_max(
     ----------
     image : ndarray
         Input image.
-    min_distance : int, optional
+    min_distance : float, optional
         The minimal allowed distance separating peaks. To find the
         maximum number of peaks, use `min_distance=1`.
     threshold_abs : float or None, optional
@@ -155,31 +50,36 @@ def peak_local_max(
         Minimum intensity of peaks, calculated as
         ``max(image) * threshold_rel``.
     exclude_border : int, tuple of ints, or bool, optional
-        If positive integer, `exclude_border` excludes peaks from within
-        `exclude_border`-pixels of the border of the image.
-        If tuple of non-negative ints, the length of the tuple must match the
-        input array's dimensionality.  Each element of the tuple will exclude
-        peaks from within `exclude_border`-pixels of the border of the image
-        along that dimension.
-        If True, takes the `min_distance` parameter as value.
-        If zero or False, peaks are identified regardless of their distance
-        from the border.
+        Control peak detection close to the border of `image`.
+
+        ``True``
+            Exclude peaks that are within ``floor(min_distance)`` of the border.
+        ``False`` or ``0``
+            Distance to border has no effect, all peaks are identified.
+        positive integer
+            Exclude peaks, that are within this given distance of the border.
+        tuple of positive integers
+            Same as for a single integer but with different distances for each
+            respective dimension.
+
+        The value of `p_norm` has no impact on this border distance.
     num_peaks : int, optional
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` peaks based on highest peak intensity.
     footprint : ndarray of bools, optional
-        If provided, `footprint == 1` represents the local region within which
-        to search for peaks at every point in `image`.
+        Binary mask that determines the neighborhood (where ``True``) in which
+        a peak must be a local maximum (see *Notes*). If not given, defaults to
+        an array of ones of size ``floor(2 * min_distance + 1)``.
     labels : ndarray of ints, optional
         If provided, each unique region `labels == value` represents a unique
         region to search for peaks. Zero is reserved for background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
-    p_norm : float
+    p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
         ``inf`` corresponds to the Chebyshev distance and 2 to the
-        Euclidean distance.
+        Euclidean distance.  See also :func:`numpy.linalg.norm`.
 
     Returns
     -------
@@ -234,82 +134,66 @@ def peak_local_max(
            [15, 15, 15]])
 
     """
-    if (footprint is None or footprint.size == 1) and min_distance < 1:
-        warn(
-            "When min_distance < 1, peak_local_max acts as finding "
-            "image > max(threshold_abs, threshold_rel * max(image)).",
-            RuntimeWarning,
-            stacklevel=2,
+    warn_external(
+        dedent("""\
+        `skimage.feature.peak_local_max` is deprecated in favor of
+        `skimage2.feature.peak_local_max` with new behavior:
+
+        * Parameter `p_norm` defaults to 2 (Euclidean distance),
+          was `numpy.inf` (Chebyshev distance)
+        * Parameter `exclude_border` defaults to 1, was `True`
+        * Parameter `exclude_border` no longer accepts `False` and `True`,
+          pass 0 instead of `False`, or `min_distance` instead of `True`
+        * Parameters after `image` are keyword-only
+
+        To keep the old behavior when switching to `skimage2`, update your call
+        according to the following cases:
+
+        * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+        * `exclude_border=True`, same as above
+        * `exclude_border=False`, use `exclude_border=0`
+        * `exclude_border=<int>`, no change necessary
+        * `p_norm` not passed, use `p_norm=numpy.inf`
+        * `p_norm=<float>, no change necessary
+
+        Other keyword parameters can be left unchanged.
+        """),
+        category=PendingSkimage2Change,
+    )
+
+    # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
+    if num_peaks is not None and np.isinf(num_peaks):
+        num_peaks = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks` is deprecated in version 0.27, "
+            "use `num_peaks=None` instead",
+            category=FutureWarning,
+        )
+    if num_peaks_per_label is not None and np.isinf(num_peaks_per_label):
+        num_peaks_per_label = None
+        warn_external(
+            "Passing `np.inf` to `num_peaks_per_label` is deprecated in version 0.27, "
+            "use `num_peaks_per_label=None` instead",
+            category=FutureWarning,
         )
 
-    border_width = _get_excluded_border_width(image, min_distance, exclude_border)
+    if exclude_border is False:
+        exclude_border = 0
+    elif exclude_border is True:
+        exclude_border = int(np.floor(min_distance))
 
-    threshold = _get_threshold(image, threshold_abs, threshold_rel)
-
-    if footprint is None:
-        size = 2 * min_distance + 1
-        footprint = np.ones((size,) * image.ndim, dtype=bool)
-    else:
-        footprint = np.asarray(footprint)
-
-    if labels is None:
-        # Non maximum filter
-        mask = _get_peak_mask(image, footprint, threshold)
-
-        mask = _exclude_border(mask, border_width)
-
-        # Select highest intensities (num_peaks)
-        coordinates = _get_high_intensity_peaks(
-            image, mask, num_peaks, min_distance, p_norm
-        )
-
-    else:
-        _labels = _exclude_border(labels.astype(int, casting="safe"), border_width)
-
-        if np.issubdtype(image.dtype, np.floating):
-            bg_val = np.finfo(image.dtype).min
-        else:
-            bg_val = np.iinfo(image.dtype).min
-
-        # For each label, extract a smaller image enclosing the object of
-        # interest, identify num_peaks_per_label peaks
-        labels_peak_coord = []
-
-        for label_idx, roi in enumerate(ndi.find_objects(_labels)):
-            if roi is None:
-                continue
-
-            # Get roi mask
-            label_mask = labels[roi] == label_idx + 1
-            # Extract image roi
-            img_object = image[roi].copy()
-            # Ensure masked values don't affect roi's local peaks
-            img_object[np.logical_not(label_mask)] = bg_val
-
-            mask = _get_peak_mask(img_object, footprint, threshold, label_mask)
-
-            coordinates = _get_high_intensity_peaks(
-                img_object, mask, num_peaks_per_label, min_distance, p_norm
-            )
-
-            # transform coordinates in global image indices space
-            for idx, s in enumerate(roi):
-                coordinates[:, idx] += s.start
-
-            labels_peak_coord.append(coordinates)
-
-        if labels_peak_coord:
-            coordinates = np.vstack(labels_peak_coord)
-        else:
-            coordinates = np.empty((0, 2), dtype=int)
-
-        if len(coordinates) > num_peaks:
-            out = np.zeros_like(image, dtype=bool)
-            out[tuple(coordinates.T)] = True
-            coordinates = _get_high_intensity_peaks(
-                image, out, num_peaks, min_distance, p_norm
-            )
-
+    coordinates = ski2.feature.peak_local_max(
+        image,
+        min_distance=min_distance,
+        threshold_abs=threshold_abs,
+        threshold_rel=threshold_rel,
+        exclude_border=exclude_border,
+        num_peaks=num_peaks,
+        footprint=footprint,
+        labels=labels,
+        num_peaks_per_label=num_peaks_per_label,
+        p_norm=p_norm,
+    )
     return coordinates
 
 
