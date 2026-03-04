@@ -143,7 +143,7 @@ peaks = np.zeros_like(image, dtype=bool)
 peaks[tuple(coords.T)] = True
 ```
 
-Regarding the parameters `exclude_border` and `p_norm` which are passed to `skimage.feature.peak_local_max`, refer to the [advice for that function](#ski2-peak-local-max-advice).
+Regarding the parameters `exclude_border` and `p_norm` which are passed to `peak_local_max`, refer to the [advice for that function](#ski2-peak-local-max-advice).
 Other keyword parameters can be left unchanged.
 
 ### Grayscale morphological operators

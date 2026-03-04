@@ -149,21 +149,26 @@ def peak_local_max(
         positive integer
             Exclude peaks that are within this distance of the border.
         tuple of positive integers
-            Same as for a single integer but with different distances for each
-            respective dimension.
+            Same as for a single integer but with possibly different distances
+            along each axis.
 
         The value of `p_norm` has no impact on this border distance.
     num_peaks : int, optional
-        If given, maximum number of allowed peaks. When the number of peaks
-        exceeds `num_peaks`, return `num_peaks` peaks based on highest peak
-        intensity.
+        Maximum number of peaks. When the number of found peaks exceeds it,
+        drop peaks with the lowest intensity until the limit is satisfied.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
     footprint : ndarray of dtype bool, optional
-        Binary mask that determines the neighborhood (where ``True``) in which
+        Mask that determines the neighborhood (where ``True``) in which
         a peak must be a local maximum (see *Notes*). If not given, defaults to
-        an array of ones of size ``floor(2 * min_distance + 1)``.
+        an array of ``True`` of size ``floor(2 * min_distance + 1)`` along each
+        axis.
     labels : ndarray of dtype int, optional
-        If provided, each unique region `labels == value` represents a unique
-        region to search for peaks. Zero labels are reserved for background.
+        If provided, defines unique regions (`labels == region_label`) to
+        search for peaks. Zero is reserved for the background.
     num_peaks_per_label : int, optional
         If given, maximum number of peaks for each label.
     p_norm : float, optional

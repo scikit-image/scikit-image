@@ -690,12 +690,13 @@ def test_corner_peaks_deprecation_path():
             [0, 0, 0, 0, 0],
         ]
     )
-    # `corner_peaks` only finds edges because `min_distance >= 1` is filtered
+    # `corner_peaks` finds peaks only at the corners
+    # because `min_distance >= 1` must be true
     corners = corner_peaks(response, exclude_border=False, min_distance=1)
     assert_equal(corners, [[1, 1], [1, 3], [3, 1], [3, 3]])
 
-    # `peak_local_max` doesn't filter anything
-    # because only `min_distance > 1` is filtered
+    # `peak_local_max` doesn't filter out anything
+    # because only `min_distance > 1` must be true
     peaks = peak_local_max(response, exclude_border=False, min_distance=1)
     assert_equal(peaks, np.array(np.nonzero(response)).T)
 

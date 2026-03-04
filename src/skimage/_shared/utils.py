@@ -716,7 +716,7 @@ class deprecate_func:
             warnings.warn(message, category=FutureWarning, stacklevel=stacklevel)
             return func(*args, **kwargs)
 
-        if self.prepend_docstring is True:
+        if self.prepend_docstring:
             # modify docstring to display deprecation warning
             doc = f'**Deprecated:** {message}'
             if wrapped.__doc__ is None:
