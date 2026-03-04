@@ -1203,6 +1203,7 @@ def corner_peaks(
     if np.isinf(num_peaks_per_label):
         num_peaks_per_label = None
 
+    # Avoid circular import
     from .peak import peak_local_max
 
     # Get the coordinates of the detected peaks
