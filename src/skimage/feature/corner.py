@@ -1302,9 +1302,6 @@ def corner_peaks(
     # Avoid circular import
     from .peak import peak_local_max
 
-    # Avoid circular import
-    from .peak import peak_local_max
-
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
         image,
