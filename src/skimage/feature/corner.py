@@ -13,7 +13,6 @@ from ..transform import integral_image
 from ..util import img_as_float, PendingSkimage2Change
 from ._hessian_det_appx import _hessian_matrix_det
 from .corner_cy import _corner_fast, _corner_moravec, _corner_orientations
-from .peak import peak_local_max
 from .util import _prepare_grayscale_input_2D, _prepare_grayscale_input_nD
 
 
@@ -1298,6 +1297,9 @@ def corner_peaks(
             "use `num_peaks_per_label=None` instead.",
             category=FutureWarning,
         )
+
+    # Avoid circular import
+    from .peak import peak_local_max
 
     # Get the coordinates of the detected peaks
     coords = peak_local_max(
