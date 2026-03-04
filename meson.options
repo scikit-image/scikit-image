@@ -4,3 +4,10 @@ option(
   value: true,
   description: 'Include skimage2 namespace in the built package'
 )
+
+option(
+  'generate-shared-utility',
+  type: 'boolean',
+  value: 'false',
+  description: 'Generate shared Cython utility module reducing overall binary size'
+)

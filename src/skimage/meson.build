@@ -127,12 +127,12 @@ py3.install_sources(
 
 cython_cli = find_program('_build_utils/cythoner.py')
 cy = meson.get_compiler('cython')
-cython_program = find_program(cython.cmd_array()[0])
 
 cython_args = ['@INPUT@', '@OUTPUT@']
-if cy.version().version_compare('>=3.1.0')
-  cython_args += ['-Xfreethreading_compatible=True']
 
+if get_option('generate-shared-utility')
+  cython_args += ['-Xfreethreading_compatible=True']
+  cython_program = find_program(cython.cmd_array()[0])
   cython_shared_src = custom_target(
     install: false,
     output: '_cyutility.c',
@@ -141,7 +141,6 @@ if cy.version().version_compare('>=3.1.0')
       '--generate-shared=' + meson.current_build_dir()/'_cyutility.c'
     ],
   )
-
   py3.extension_module('_cyutility',
     cython_shared_src,
     subdir: 'skimage',
