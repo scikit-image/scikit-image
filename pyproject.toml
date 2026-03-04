@@ -299,5 +299,5 @@ before-all = [
     "bash {project}/tools/build_libomp.sh",
 ]
 
-[tool.cibuildwheel.pyoide]
+[tool.cibuildwheel.pyodide]
 test-command = "pytest --pyargs skimage tests"
