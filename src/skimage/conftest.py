@@ -22,7 +22,6 @@ def pytest_configure(config):
         )
 
 
-
 @pytest.fixture(autouse=True)
 def handle_np2():
     # TODO: remove when we require numpy >= 2
