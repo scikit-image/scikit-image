@@ -128,22 +128,19 @@ py3.install_sources(
 cython_cli = find_program('_build_utils/cythoner.py')
 cy = meson.get_compiler('cython')
 
-cython_args = ['@INPUT@', '@OUTPUT@']
+cython_codegen_args = ['@INPUT@', '@OUTPUT@']
+
 if cy.version().version_compare('>=3.1.0')
-  cython_args += ['-Xfreethreading_compatible=True']
+  cython_codegen_args += ['-Xfreethreading_compatible=True']
 endif
 
-cython_cpp_args = cython_args + ['--cplus']
-
 cython_gen = generator(cython_cli,
-  arguments : cython_args,
+  arguments : cython_codegen_args,
   output : '@BASENAME@.c')
 
 cython_gen_cpp = generator(cython_cli,
-  arguments : ['@INPUT@', '@OUTPUT@', '--cplus'],
+  arguments : cython_codegen_args + ['--cplus'],
   output : '@BASENAME@.cpp')
-
-c_undefined_ok = ['-Wno-maybe-uninitialized']
 
 # Suppress warning for deprecated Numpy API.
 # (Suppress warning messages emitted by #warning directives).
