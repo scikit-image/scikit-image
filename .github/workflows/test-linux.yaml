@@ -121,7 +121,7 @@ jobs:
           pip install --dry-run --ignore-installed $(ls requirements/*.txt | sed 's/^/-r /')
 
       - name: Run tests
-        if: ${{ matrix.python-version != "3.14t" }}
+        if: ${{ matrix.python-version != '3.14t' }}
         env:
           # A lazy loader configuration parameter
           EAGER_IMPORT: ${{ matrix.EAGER_IMPORT }}
@@ -129,7 +129,7 @@ jobs:
           $PYTEST --doctest-plus --showlocals --pyargs skimage ./tests
 
       - name: Run multithreaded tests (3.14t only)
-        if: ${{ matrix.python-version == "3.14t" }}
+        if: ${{ matrix.python-version == '3.14t' }}
         run: |
           pip install pytest-run-parallel
           $PYTEST --showlocals --pyargs skimage --parallel-threads=4 ./tests
