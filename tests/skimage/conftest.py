@@ -6,6 +6,7 @@ from pathlib import Path
 def test_root_dir():
     return Path(__file__).absolute().parent
 
+
 try:
     import pytest_run_parallel  # noqa:F401
 
