@@ -1,25 +1,16 @@
 """
 This conftest is required to set the numpy print options
-to legacy mode for doctests
+to legacy mode for doctests, and to define a `thread_unsafe` pytest marker.
 """
-
-try:
-    import pytest_run_parallel  # noqa:F401
-
-    PARALLEL_RUN_AVAILABLE = True
-except Exception:
-    PARALLEL_RUN_AVAILABLE = False
-
 
 import pytest
 
 
 def pytest_configure(config):
-    if not PARALLEL_RUN_AVAILABLE:
-        config.addinivalue_line(
-            "markers",
-            "thread_unsafe: mark the test function as single-threaded",
-        )
+    config.addinivalue_line(
+        "markers",
+        "thread_unsafe: mark the test function as single-threaded",
+    )
 
 
 @pytest.fixture(autouse=True)
