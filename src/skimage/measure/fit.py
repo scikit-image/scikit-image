@@ -906,7 +906,12 @@ class EllipseModel(_BaseModel):
 
         # https://github.com/scikit-image/scikit-image/issues/7013
         if not (np.all(np.isreal(eig_vals)) and np.all(np.isreal(eig_vecs))):
-            raise ValueError("Expected real eigenvalues and -vectors")
+            raise ValueError(
+                "Uh oh! We expected real eigenvalues and -vectors. "
+                "We've had one report of this issue in the past, but couldn't reproduce it. "
+                "Please help us fix it by sharing your input data at\n\n"
+                "  https://github.com/scikit-image/scikit-image/issues/7013\n"
+            )
         eig_vals = eig_vals.real
         eig_vecs = eig_vecs.real
 
