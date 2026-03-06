@@ -905,12 +905,8 @@ class EllipseModel(_BaseModel):
         eig_vals, eig_vecs = np.linalg.eig(M)
 
         # https://github.com/scikit-image/scikit-image/issues/7013
-        if np.any(eig_vals.imag != 0) or np.any(eig_vecs.imag != 0):
-            raise TypeError(
-                "Non-real eigvalues/eigvec are not currently supported. Please "
-                "report the reproducer to "
-                "https://github.com/scikit-image/scikit-image/issues/7013"
-            )
+        if not (np.all(np.isreal(eig_vals)) and np.all(np.isreal(eig_vecs))):
+            raise ValueError("Expected real eigenvalues and -vectors")
         eig_vals = eig_vals.real
         eig_vecs = eig_vecs.real
 
