@@ -132,7 +132,7 @@ jobs:
         if: ${{ matrix.python-version == '3.14t' }}
         run: |
           pip install pytest-run-parallel
-          $PYTEST --showlocals --pyargs skimage --parallel-threads=4 ./tests
+          $PYTEST --doctest-plus --showlocals --pyargs skimage --parallel-threads=4 ./tests
 
       - name: Check benchmarks
         run: |
