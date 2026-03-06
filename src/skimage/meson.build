@@ -134,7 +134,7 @@ if cy.version().version_compare('>=3.1.0')
   cython_codegen_args += ['-Xfreethreading_compatible=True']
 endif
 
-if get_option('generate-shared-utility')
+if get_option('shared-cython-utility')
   cython_program = find_program(cython.cmd_array()[0])
   cython_shared_src = custom_target(
     install: false,

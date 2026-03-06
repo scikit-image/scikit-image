@@ -1,5 +1,5 @@
 option(
-  'generate-shared-utility',
+  'shared-cython-utility',
   type: 'boolean',
   value: false,
   description: 'Generate shared Cython utility module reducing overall binary size'
