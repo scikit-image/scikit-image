@@ -213,6 +213,10 @@ testpaths = [
     "./tests/",
 ]
 
+markers = [
+  "thread_unsafe: mark the test function as single-threaded"
+]
+
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
