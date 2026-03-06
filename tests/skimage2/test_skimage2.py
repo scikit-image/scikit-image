@@ -5,6 +5,7 @@ from pathlib import Path
 import skimage2
 
 
+@pytest.mark.thread_unsafe(reason="importlib.reload is not thread-safe")
 def test_import_skimage2_warning():
     regex = "Importing from the `skimage2` namespace is experimental"
     with pytest.warns(UserWarning, match=regex) as record:
