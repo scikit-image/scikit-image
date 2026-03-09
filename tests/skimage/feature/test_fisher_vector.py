@@ -72,9 +72,7 @@ def test_gmm_wrong_covariance_type():
     """
     rng = np.random.RandomState(1964030178)
     with pytest.raises(FisherVectorException):
-        learn_gmm(
-            rng.random((10, 10)), n_modes=2, gm_args={'covariance_type': 'full'}
-        )
+        learn_gmm(rng.random((10, 10)), n_modes=2, gm_args={'covariance_type': 'full'})
 
 
 def test_gmm_correct_covariance_type():

@@ -715,7 +715,7 @@ def test_mean_std_3d(window_size, mean_kernel, seed):
     [
         (threshold_local, 1049675590),
         (threshold_niblack, 3775716978),
-        (threshold_sauvola, 2105970747)
+        (threshold_sauvola, 2105970747),
     ],
 )
 @pytest.mark.parametrize("dtype", [np.uint8, np.int16, np.float16, np.float32])

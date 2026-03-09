@@ -115,9 +115,7 @@ def test_sobel_h_zeros():
 def test_sobel_h_mask():
     """Horizontal Sobel on a masked array should be zero."""
     rng = np.random.RandomState(265215147)
-    result = filters.sobel_h(
-        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
-    )
+    result = filters.sobel_h(rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool))
     assert np.all(result == 0)
 
 
@@ -148,9 +146,7 @@ def test_sobel_v_zeros():
 def test_sobel_v_mask():
     """Vertical Sobel on a masked array should be zero."""
     rng = np.random.RandomState(2053674326)
-    result = filters.sobel_v(
-        rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool)
-    )
+    result = filters.sobel_v(rng.uniform(size=(10, 10)), np.zeros((10, 10), dtype=bool))
     assert_allclose(result, 0)
 
 

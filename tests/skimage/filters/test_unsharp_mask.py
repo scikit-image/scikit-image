@@ -62,15 +62,18 @@ def test_unsharp_masking_output_type_and_shape(
 
 
 @pytest.mark.parametrize(
-    "shape,multichannel,seed", [
+    "shape,multichannel,seed",
+    [
         ((32, 32), False, 239302397),
         ((15, 15, 2), True, 2870300792),
-        ((17, 19, 3), True, 3028283166)
-    ]
+        ((17, 19, 3), True, 3028283166),
+    ],
 )
 @pytest.mark.parametrize("radius", [(0.0, 0.0), (1.0, 1.0), (2.0, 1.5)])
 @pytest.mark.parametrize("preserve", [False, True])
-def test_unsharp_masking_with_different_radii(radius, shape, multichannel, seed, preserve):
+def test_unsharp_masking_with_different_radii(
+    radius, shape, multichannel, seed, preserve
+):
     amount = 1.0
     dtype = np.float64
     array = (np.random.RandomState(seed).random(shape) * 96).astype(dtype)
@@ -96,7 +99,9 @@ def test_unsharp_masking_with_different_radii(radius, shape, multichannel, seed,
 )
 @pytest.mark.parametrize("offset", [-5, 0, 5])
 @pytest.mark.parametrize("preserve", [False, True])
-def test_unsharp_masking_with_different_ranges(shape, offset, channel_axis, preserve, seed):
+def test_unsharp_masking_with_different_ranges(
+    shape, offset, channel_axis, preserve, seed
+):
     radius = 2.0
     amount = 1.0
     dtype = np.int16
@@ -115,11 +120,12 @@ def test_unsharp_masking_with_different_ranges(shape, offset, channel_axis, pres
 
 
 @pytest.mark.parametrize(
-    "shape,channel_axis,seed", [
+    "shape,channel_axis,seed",
+    [
         ((16, 16), None, 3606780155),
         ((15, 15, 2), -1, 3779868710),
-        ((13, 17, 3), -1, 2857193517)
-    ]
+        ((13, 17, 3), -1, 2857193517),
+    ],
 )
 @pytest.mark.parametrize("offset", [-5, 0, 5])
 @pytest.mark.parametrize("preserve", [False, True])
@@ -144,11 +150,12 @@ def test_unsharp_masking_with_different_ranges_deprecated(
 
 
 @pytest.mark.parametrize(
-    "shape,channel_axis,seed", [
+    "shape,channel_axis,seed",
+    [
         ((16, 16), None, 3378941598),
         ((15, 15, 2), -1, 2524096514),
-        ((13, 17, 3), -1, 1078129855)
-    ]
+        ((13, 17, 3), -1, 1078129855),
+    ],
 )
 @pytest.mark.parametrize("preserve", [False, True])
 @pytest.mark.parametrize("dtype", [np.uint8, np.float16, np.float32, np.float64])
