@@ -132,8 +132,10 @@ def peak_local_max(
     image : ndarray
         Input image.
     min_distance : float, optional
-        The minimal allowed distance separating peaks. To find the
-        maximum number of peaks, use `min_distance=1`. See also `p_norm`.
+        The minimal allowed distance separating peaks. Peaks whose distance
+        from each other is less than this value (`< min_distance`) are removed.
+        `min_distance=1` will preserve all peaks, even direct neighbors.
+        See also `p_norm` which defines how the distance is calculated.
     threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
