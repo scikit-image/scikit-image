@@ -443,10 +443,10 @@ def jerman(
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
     mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
-        How to handle values outside the image borders.
+        How to handle values outside the image borders. Default is 'reflect'.
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
+        the image boundaries. Default is 0.
 
     Returns
     -------
