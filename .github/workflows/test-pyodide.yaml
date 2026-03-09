@@ -32,11 +32,11 @@ jobs:
         # The appropriate version combinations can be found in the Pyodide repodata.json
         # "info" field, or in Makefile.envs:
         # https://github.com/pyodide/pyodide/blob/main/Makefile.envs#L2
-        PYODIDE_VERSION: ["0.29.0"]
+        PYODIDE_VERSION: ["0.29.3"]
         PYTHON_VERSION: ["3.13"]
         EMSCRIPTEN_VERSION: ["4.0.9"]
         NODE_VERSION: ["24"]
-        PYODIDE_BUILD_VERSION: ["0.30.8"]
+        PYODIDE_BUILD_VERSION: ["0.33.0"]
 
     steps:
       - name: Checkout scikit-image
