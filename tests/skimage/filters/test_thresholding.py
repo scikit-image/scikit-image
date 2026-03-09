@@ -11,7 +11,7 @@ from numpy.testing import (
 from scipy import ndimage as ndi
 
 from skimage import data, util
-from skimage._shared._dependency_checks import has_mpl
+from ...dependency_checks import has_mpl
 from skimage._shared._warnings import expected_warnings
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
