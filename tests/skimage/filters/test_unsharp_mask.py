@@ -155,3 +155,30 @@ def test_unsharp_masking_dtypes(shape, channel_axis, preserve, dtype):
             assert np.any(output >= 0)
     assert output.dtype == _supported_float_type(dtype)
     assert output.shape == shape
+
+
+def test_unsharp_mask_channel_axis_negative():
+    """Test that channel_axis=-1 works correctly for RGB images.
+
+    Regression test for https://github.com/scikit-image/scikit-image/issues/7264
+    """
+    # Create a simple RGB image with non-zero values
+    rgb_image = np.random.rand(32, 32, 3).astype(np.float32)
+
+    # Apply unsharp mask with channel_axis=-1
+    result = unsharp_mask(rgb_image, channel_axis=-1)
+
+    # Verify the result is not all zeros (the bug caused black output)
+    assert not np.all(result == 0), "Output should not be all zeros"
+
+    # Verify output has values in expected range
+    assert np.any(result > 0), "Output should have positive values"
+    assert result.min() >= 0, "Output should be non-negative for non-negative input"
+    assert result.max() <= 1, "Output should be at most 1 for normalized input"
+
+    # Also test with uint8 image (the common case from the issue)
+    rgb_uint8 = (rgb_image * 255).astype(np.uint8)
+    result_uint8 = unsharp_mask(rgb_uint8, channel_axis=-1)
+
+    assert not np.all(result_uint8 == 0), "Output should not be all zeros for uint8 input"
+    assert np.any(result_uint8 > 0), "Output should have positive values for uint8 input"
