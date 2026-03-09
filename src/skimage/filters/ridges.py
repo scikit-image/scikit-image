@@ -434,9 +434,11 @@ def jerman(
     sigmas : iterable of floats, optional
         Sigmas used as scales of filter.
     tau : float, optional
-        Threshold parameter that controls response uniformity.
-        Range: 0.5 to 1.0. Lower tau -> more uniform response.
-        Default is 0.75.
+        Threshold parameter that controls the tradeoff between undersired enhancement of
+        non-vascular structures and the uniformity of vacular structures' enhancement.
+        This is usually set to a value between 0.5 and 1.
+        Lower tau -> more uniform response. Higher tau -> less undesired enhancement of
+        non-vascular structures. Default is 0.75.
     black_ridges : bool, optional
         When True (the default), the filter detects black ridges; when
         False, it detects white ridges.
