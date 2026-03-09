@@ -460,12 +460,7 @@ def jerman(
 
     Notes
     -----
-    This function was written based on the MATLAB implementation by Tim Jerman [2]_,
-    following the below copyrights:
-
-        Copyright (c) 2009, Dirk-Jan Kroon. Copyright (c) 2017, Tim Jerman.
-        BSD 3-Clause License.
-
+    This function was written based on the MATLAB implementation by Tim Jerman [2]_.
 
     References
     ----------
