@@ -99,6 +99,7 @@ def test_independent_rng():
     img = np.zeros((100, 100), dtype=int)
     keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
 
+    # extractor.rng is also a default_rng
     rng = np.random.default_rng()
     extractor = BRIEF(patch_size=41, rng=rng)
 

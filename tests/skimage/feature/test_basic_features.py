@@ -9,7 +9,7 @@ from skimage.feature import multiscale_basic_features
 def test_multiscale_basic_features_gray(edges, texture):
     img = np.zeros((20, 20))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    img += 0.05 * np.random.RandomState(111910892).randn(*img.shape)
     features = multiscale_basic_features(img, edges=edges, texture=texture)
 
     n_sigmas = 6
@@ -25,7 +25,7 @@ def test_multiscale_basic_features_gray(edges, texture):
 def test_multiscale_basic_features_rgb(edges, texture):
     img = np.zeros((20, 20, 3))
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    img += 0.05 * np.random.RandomState(3626599927).randn(*img.shape)
     features = multiscale_basic_features(
         img, edges=edges, texture=texture, channel_axis=-1
     )
@@ -46,7 +46,7 @@ def test_multiscale_basic_features_channel_axis(channel_axis):
     shape = tuple(np.insert(shape_spatial, channel_axis % (ndim + 1), num_channels))
     img = np.zeros(shape)
     img[:10] = 1
-    img += 0.05 * np.random.randn(*img.shape)
+    img += 0.05 * np.random.RandomState(477513695).randn(*img.shape)
     n_sigmas = 2
 
     # features for all channels are concatenated along the last axis

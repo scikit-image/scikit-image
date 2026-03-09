@@ -605,7 +605,8 @@ def test_adjust_gamma_one():
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_adjust_gamma_zero(dtype):
     """White image should be returned for gamma equal to zero"""
-    image = np.random.uniform(0, 255, (8, 8)).astype(dtype, copy=False)
+    rng = np.random.RandomState(1569391274)
+    image = rng.uniform(0, 255, (8, 8)).astype(dtype, copy=False)
     result = exposure.adjust_gamma(image, 0)
     dtype = image.dtype.type
     assert_array_equal(result, dtype_range[dtype][1])

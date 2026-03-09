@@ -73,11 +73,11 @@ def test_plot_matched_features(shapes):
 
     fig, ax = plt.subplots()
 
-    rng = np.random.default_rng(202410101501)
+    rng = np.random.RandomState(2423194815)
     keypoints0 = 10 * rng.random((10, 2))
     keypoints1 = 10 * rng.random((10, 2))
-    idxs0 = rng.integers(10, size=10)
-    idxs1 = rng.integers(10, size=10)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
 
     shape0, shape1 = shapes
@@ -119,7 +119,7 @@ def test_plot_matched_features(shapes):
         matches_color='r',
     )
     # Pass colors as random list of color strings
-    rng = np.random.default_rng(202409281822)
+    rng = np.random.RandomState(1123037303)
     random_matches_color = [
         rng.choice(['C0', '#abc', 'aquamarine']) for _ in range(len(matches))
     ]
@@ -164,10 +164,12 @@ def test_plot_matched_features_color_error(matches_color):
 
     _, ax = plt.subplots()
 
-    keypoints0 = 10 * np.random.rand(10, 2)
-    keypoints1 = 10 * np.random.rand(10, 2)
-    idxs0 = np.random.randint(10, size=10)
-    idxs1 = np.random.randint(10, size=10)
+    rng = np.random.RandomState(3832133755)
+
+    keypoints0 = 10 * rng.rand(10, 2)
+    keypoints1 = 10 * rng.rand(10, 2)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
     assert len(matches_color) != len(matches)
 
@@ -202,10 +204,12 @@ def test_plot_matched_features_matplotlib_color_error():
 
     _, ax = plt.subplots()
 
-    keypoints0 = 10 * np.random.rand(10, 2)
-    keypoints1 = 10 * np.random.rand(10, 2)
-    idxs0 = np.random.randint(10, size=10)
-    idxs1 = np.random.randint(10, size=10)
+    rng = np.random.RandomState(3533696481)
+
+    keypoints0 = 10 * rng.rand(10, 2)
+    keypoints1 = 10 * rng.rand(10, 2)
+    idxs0 = rng.randint(10, size=10)
+    idxs1 = rng.randint(10, size=10)
     matches = np.column_stack((idxs0, idxs1))
 
     img0 = np.zeros((10, 10))

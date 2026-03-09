@@ -182,10 +182,11 @@ class TestRank:
         check()
 
     def test_random_sizes(self):
+        rng = np.random.RandomState(3684644617)
         # make sure the size is not a problem
 
         elem = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]], dtype=np.uint8)
-        for m, n in np.random.randint(1, 101, size=(10, 2)):
+        for m, n in rng.randint(1, 101, size=(10, 2)):
             mask = np.ones((m, n), dtype=np.uint8)
 
             image8 = np.ones((m, n), dtype=np.uint8)
@@ -284,7 +285,8 @@ class TestRank:
     def test_compare_with_gray_dilation(self):
         # compare the result of maximum filter with dilate
 
-        image = (np.random.rand(100, 100) * 256).astype(np.uint8)
+        rng = np.random.RandomState(3634262411)
+        image = (rng.rand(100, 100) * 256).astype(np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
 
@@ -297,7 +299,8 @@ class TestRank:
     def test_compare_with_gray_erosion(self):
         # compare the result of maximum filter with erode
 
-        image = (np.random.rand(100, 100) * 256).astype(np.uint8)
+        rng = np.random.RandomState(2253373026)
+        image = (rng.rand(100, 100) * 256).astype(np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
 
@@ -403,7 +406,8 @@ class TestRank:
         # rank filters are not supposed to filter inplace
 
         footprint = disk(20)
-        image = (np.random.rand(500, 500) * 256).astype(np.uint8)
+        rng = np.random.RandomState(595130246)
+        image = (rng.rand(500, 500) * 256).astype(np.uint8)
         out = image
         with pytest.raises(NotImplementedError):
             rank.mean(image, footprint, out=out)
@@ -460,8 +464,8 @@ class TestRank:
 
     def test_compare_ubyte_vs_float_3d(self):
         # Create signed int8 volume that and convert it to uint8
-        np.random.seed(0)
-        volume_uint = np.random.randint(0, high=256, size=(10, 20, 30), dtype=np.uint8)
+        rng = np.random.RandomState(1893473653)
+        volume_uint = rng.randint(0, high=256, size=(10, 20, 30), dtype=np.uint8)
         volume_float = img_as_float(volume_uint)
 
         methods_3d = [
@@ -531,8 +535,8 @@ class TestRank:
         # of dynamic) should be identical
 
         # Create signed int8 volume that and convert it to uint8
-        np.random.seed(0)
-        volume_s = np.random.randint(0, high=127, size=(10, 20, 30), dtype=np.int8)
+        rng = np.random.RandomState(254583548)
+        volume_s = rng.randint(0, high=127, size=(10, 20, 30), dtype=np.int8)
         volume_u = img_as_ubyte(volume_s)
         assert_equal(volume_u, img_as_ubyte(volume_s))
 
@@ -588,8 +592,8 @@ class TestRank:
         image16 = image8.astype(np.uint16)
         assert_equal(image8, image16)
 
-        np.random.seed(0)
-        volume8 = np.random.randint(128, high=256, size=(10, 10, 10), dtype=np.uint8)
+        rng = np.random.RandomState(1745566171)
+        volume8 = rng.randint(128, high=256, size=(10, 10, 10), dtype=np.uint8)
         volume16 = volume8.astype(np.uint16)
 
         methods_3d = [
@@ -1085,7 +1089,8 @@ class TestRank:
         assert_equal(expected, rank.majority(img, elem))
 
     def test_output_same_dtype(self):
-        image = (np.random.rand(100, 100) * 256).astype(np.uint8)
+        rng = np.random.RandomState(1150025555)
+        image = (rng.rand(100, 100) * 256).astype(np.uint8)
         out = np.empty_like(image)
         mask = np.ones(image.shape, dtype=np.uint8)
         elem = np.ones((3, 3), dtype=np.uint8)
@@ -1093,7 +1098,8 @@ class TestRank:
         assert_equal(image.dtype, out.dtype)
 
     def test_input_boolean_dtype(self):
-        image = (np.random.rand(100, 100) * 256).astype(bool)
+        rng = np.random.RandomState(4071747060)
+        image = (rng.rand(100, 100) * 256).astype(bool)
         elem = np.ones((3, 3), dtype=bool)
         with pytest.raises(ValueError):
             rank.maximum(image=image, footprint=elem)

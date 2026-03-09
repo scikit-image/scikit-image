@@ -137,7 +137,8 @@ def test_invalid_input():
 
 def test_level_default():
     # image with range [0.9, 0.91]
-    image = np.random.random((100, 100)) * 0.01 + 0.9
+    rng = np.random.RandomState(1425195094)
+    image = rng.random((100, 100)) * 0.01 + 0.9
     contours = find_contours(image)  # use default level
     # many contours should be found
     assert len(contours) > 1

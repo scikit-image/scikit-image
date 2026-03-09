@@ -28,14 +28,14 @@ def test_salt():
 
 
 def test_salt_p1():
-    image = np.random.rand(2, 3)
+    image = np.random.RandomState(759110961).rand(2, 3)
     noisy = random_noise(image, mode='salt', amount=1)
     assert_array_equal(noisy, [[1, 1, 1], [1, 1, 1]])
 
 
 def test_singleton_dim():
     """Ensure images where size of a given dimension is 1 work correctly."""
-    image = np.random.rand(1, 1000)
+    image = np.random.RandomState(2127175158).rand(1, 1000)
     noisy = random_noise(image, mode='salt', amount=0.1, rng=42)
     tolerance = 5e-2
     assert abs(np.average(noisy == 1) - 0.1) <= tolerance
@@ -95,7 +95,7 @@ def test_clipping_application_consistency():
     """Ensure that clipping is not applied if 'clip' set to False regardless of 'mode' argument"""
 
     img = (
-        np.random.rand(1, 5, 5) * 10 - 5
+        np.random.RandomState(941657958).rand(1, 5, 5) * 10 - 5
     )  # image array with c,h,w shape semantics and range [-5,5]
     # we have float values outside of [-1,1], so we presumably don't want to clip
 
@@ -124,10 +124,11 @@ def test_clipping_application_consistency():
 
 def test_gaussian():
     data = np.zeros((128, 128)) + 0.5
-    data_gaussian = random_noise(data, rng=42, var=0.01)
+    seed = 3168047116
+    data_gaussian = random_noise(data, rng=seed, var=0.01)
     assert 0.008 < data_gaussian.var() < 0.012
 
-    data_gaussian = random_noise(data, rng=42, mean=0.3, var=0.015)
+    data_gaussian = random_noise(data, rng=seed, mean=0.3, var=0.015)
     assert 0.28 < data_gaussian.mean() - 0.5 < 0.32
     assert 0.012 < data_gaussian.var() < 0.018
 
@@ -159,23 +160,26 @@ def test_localvar():
 
 
 def test_speckle():
-    seed = 42
+    seed = 415685353
     data = np.zeros((128, 128)) + 0.1
 
+    # random_noise uses default_rng internally
     rng = np.random.default_rng(seed)
     noise = rng.normal(0.1, 0.02**0.5, (128, 128))
     expected = np.clip(data + data * noise, 0, 1)
 
-    data_speckle = random_noise(data, mode='speckle', rng=42, mean=0.1, var=0.02)
+    data_speckle = random_noise(data, mode='speckle', rng=seed, mean=0.1, var=0.02)
     assert_allclose(expected, data_speckle)
 
 
 def test_poisson():
     data = camera()  # 512x512 grayscale uint8
-    rng = np.random.default_rng(42)
+    seed = 460037662
+    # random_noise uses default_rng internally
+    rng = np.random.default_rng(seed)
 
-    cam_noisy = random_noise(data, mode='poisson', rng=42)
-    cam_noisy2 = random_noise(data, mode='poisson', rng=42, clip=False)
+    cam_noisy = random_noise(data, mode='poisson', rng=seed)
+    cam_noisy2 = random_noise(data, mode='poisson', rng=seed, clip=False)
 
     expected = rng.poisson(img_as_float(data) * 256) / 256.0
     assert_allclose(cam_noisy, np.clip(expected, 0.0, 1.0))
@@ -185,16 +189,17 @@ def test_poisson():
 def test_clip_poisson():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    rng = np.random.RandomState(4266430063)
 
     # Signed and unsigned, clipped
-    cam_poisson = random_noise(data, mode='poisson', rng=42, clip=True)
-    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=42, clip=True)
+    cam_poisson = random_noise(data, mode='poisson', rng=rng, clip=True)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=rng, clip=True)
     assert (cam_poisson.max() == 1.0) and (cam_poisson.min() == 0.0)
     assert (cam_poisson2.max() == 1.0) and (cam_poisson2.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_poisson = random_noise(data, mode='poisson', rng=42, clip=False)
-    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=42, clip=False)
+    cam_poisson = random_noise(data, mode='poisson', rng=rng, clip=False)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=rng, clip=False)
     assert (cam_poisson.max() > 1.15) and (cam_poisson.min() == 0.0)
     assert (cam_poisson2.max() > 1.3) and (cam_poisson2.min() == -1.0)
 
@@ -202,16 +207,17 @@ def test_clip_poisson():
 def test_clip_gaussian():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    rng = np.random.RandomState(2169416880)
 
     # Signed and unsigned, clipped
-    cam_gauss = random_noise(data, mode='gaussian', rng=42, clip=True)
-    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=42, clip=True)
+    cam_gauss = random_noise(data, mode='gaussian', rng=rng, clip=True)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=rng, clip=True)
     assert (cam_gauss.max() == 1.0) and (cam_gauss.min() == 0.0)
     assert (cam_gauss2.max() == 1.0) and (cam_gauss2.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_gauss = random_noise(data, mode='gaussian', rng=42, clip=False)
-    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=42, clip=False)
+    cam_gauss = random_noise(data, mode='gaussian', rng=rng, clip=False)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=rng, clip=False)
     assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.35)
     assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.219)
 
@@ -219,16 +225,17 @@ def test_clip_gaussian():
 def test_clip_speckle():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
+    rng = np.random.RandomState(3408637964)
 
     # Signed and unsigned, clipped
-    cam_speckle = random_noise(data, mode='speckle', rng=42, clip=True)
-    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=42, clip=True)
+    cam_speckle = random_noise(data, mode='speckle', rng=rng, clip=True)
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=rng, clip=True)
     assert (cam_speckle.max() == 1.0) and (cam_speckle.min() == 0.0)
     assert (cam_speckle_sig.max() == 1.0) and (cam_speckle_sig.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_speckle = random_noise(data, mode='speckle', rng=42, clip=False)
-    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=42, clip=False)
+    cam_speckle = random_noise(data, mode='speckle', rng=rng, clip=False)
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=rng, clip=False)
     assert (cam_speckle.max() > 1.219) and (cam_speckle.min() == 0.0)
     assert (cam_speckle_sig.max() > 1.219) and (cam_speckle_sig.min() < -1.219)
 

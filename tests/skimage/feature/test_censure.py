@@ -8,13 +8,13 @@ from skimage.transform import rescale
 
 
 img = moon()
-np.random.seed(0)
 
 
 def test_censure_on_rectangular_images():
     """Censure feature detector should work on 2D image of any shape."""
-    rect_image = np.random.rand(300, 200)
-    square_image = np.random.rand(200, 200)
+    rng = np.random.RandomState(1727908739)
+    rect_image = rng.rand(300, 200)
+    square_image = rng.rand(200, 200)
     CENSURE().detect(square_image)
     CENSURE().detect(rect_image)
 

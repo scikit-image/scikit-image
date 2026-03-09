@@ -150,7 +150,8 @@ class TestSkeletonize:
     @pytest.mark.parametrize("method", ["zhang", "lee"])
     def test_input_float_conv(self, method):
         # Check that the floats are correctly handled. Also check non-contiguous input
-        image = np.random.random((16, 16))[::2, ::2]
+        rng = np.random.RandomState(3127858794)
+        image = rng.random((16, 16))[::2, ::2]
         image[image < 0.5] = 0.0
 
         original = image.copy()
