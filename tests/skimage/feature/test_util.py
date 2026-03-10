@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from ...dependency_checks import has_mpl
+from ...dependency_checks import uses_matplotlib
 from skimage.feature.util import (
     FeatureDetector,
     DescriptorExtractor,
@@ -52,7 +52,7 @@ def test_mask_border_keypoints():
     )
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 @pytest.mark.parametrize(
     "shapes",
     [
@@ -154,7 +154,7 @@ def test_plot_matched_features(shapes):
     plt.close()
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 @pytest.mark.parametrize("matches_color", ([], ["C0"], ["C0", "C1"], np.arange(30)))
 def test_plot_matched_features_color_error(matches_color):
     from matplotlib import pyplot as plt
@@ -190,7 +190,7 @@ def test_plot_matched_features_color_error(matches_color):
         )
 
 
-@pytest.mark.skipif(not has_mpl, reason="Matplotlib not installed")
+@uses_matplotlib
 def test_plot_matched_features_matplotlib_color_error():
     # Error is raised from matplotlib itself if we pass a sequence of correct length
     # but with values that aren't colors
