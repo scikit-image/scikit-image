@@ -57,20 +57,19 @@ def target_registration_error(shape, matrix):
 
 
 def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
-    """
-    Shuffle channel axes and ensure format of the image a tuple of image and weight
+    """Shuffle channel axis and return a tuple of image and weights.
 
     Parameters
     ----------
-    image: ndarray or tuple(ndarray)
-        The input image or tuple with image and weights
-    channel_axis: int
+    image : ndarray or tuple of ndarray
+        The input image or a tuple of the input image and weights.
+    channel_axis : int
         The index of the channel axis.
 
     Returns
     -------
-    new_image: tuple(ndarray)
-        A 2-tuple of ndarray with the image and weights
+    new_image : tuple of ndarray
+        A 2-tuple of the image and weights.
     """
 
     # Create a tuple and broadcast shapes if needed
@@ -89,17 +88,17 @@ def _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis):
 
 
 class _AffineSolver(ABC):
-    """Abstract base class for affine registration solvers"""
+    """Abstract base class for affine registration solvers."""
 
     def __init__(self, model_class, order=3):
-        """Initialize the solver with a model and an interpolation order
+        """Initialize the solver with a model and an interpolation order.
 
         Parameters
         ----------
-        model_class: AffineTransform
-            The affine transform class
-        order: int
-            The interpolation order used in `scipy.ndimage.affine_tranform`
+        model_class : AffineTransform
+            The affine transform class.
+        order : int
+            The interpolation order used in :func:`scipy.ndimage.affine_tranform`.
 
         """
         self._model_class = model_class
@@ -112,7 +111,7 @@ class _AffineSolver(ABC):
         Parameters
         ----------
         parameters : ndarray
-            Vector of parameters (see note).
+            Vector of parameters (see *Notes*).
         ndim : int
             Image dimensionality.
 
@@ -126,8 +125,8 @@ class _AffineSolver(ABC):
         NotImplementedError
             For unsupported motion models.
 
-        Note
-        ----
+        Notes
+        -----
         The parameters are:
         - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D,
         - euclidean : [dy,dx,theta] in 2D or [dz,dy,dx,alpha,beta,gamma] in 3D,
@@ -178,15 +177,15 @@ class _AffineSolver(ABC):
         Returns
         -------
         parameters : ndarray
-            Vector of parameters (see note).
+            Vector of parameters (see *Notes*).
 
         Raises
         ------
         NotImplementedError
             For unsupported motion models.
 
-        Note
-        ----
+        Notes
+        -----
         The parameters are:
         - translation : [dy,dx] in 2D or [dz,dy,dx] in 3D,
         - euclidean : [dy,dx,angle] in 2D or [dz,dy,dx,yaw,pitch,roll] in 3D,
@@ -257,19 +256,19 @@ class _AffineSolver(ABC):
 
         Parameters
         ----------
-        reference: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
-            Reference image and weights
-        moving: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Reference image and weights.
+        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
             Moving image and weights
-        channel_axis: int
+        channel_axis : int
             Index of the channel axis
-        matrix: ski.transform.Transform or ndarray
+        matrix : ski.transform.Transform or ndarray
             Initial homogeneous transformation matrix.
 
         Returns
         -------
-        tfm: AffineTransform
-            The estimated transform
+        tfm : AffineTransform
+            The estimated transform.
         """
 
 
@@ -292,22 +291,22 @@ class StudholmeAffineSolver(_AffineSolver):
 
         Parameters
         ----------
-        model: ski.transform.Transform class
-            Sub class of ski.transform.Transform
-        order: int
+        model : ski.transform.Transform
+            Subclass of ski.transform.Transform.
+        order : int
             Order of the sline interpolation.
-        cost_function:
-            Cost function to minimize
-        minimizer: str
-            Name of the minimizer
-        max_iter: int
-            Maximum number of iteration
-        max_trial: int
-            Maximum number of trials
-        min_trial: int
-            Minimum number of trials
-        options: dict
-            Dictionnary of options passed to `scipy.minimize`
+        cost_function : Callable
+            Cost function to minimize.
+        minimizer : str
+            Name of the minimizer.
+        max_iter : int
+            Maximum number of iterations.
+        max_trial : int
+            Maximum number of trials.
+        min_trial : int
+            Minimum number of trials.
+        options : dict
+            Dictionnary of options passed to :func:`scipy.minimize`.
         """
         super().__init__(model_class=model_class, order=order)
         self._cost_function = cost_function
@@ -326,19 +325,19 @@ class StudholmeAffineSolver(_AffineSolver):
 
     def _center_and_normalize(self, matrix, shape):
         """
-        Center and normalize the matrix
+        Center and normalize the matrix.
 
         Parameters
         ----------
-        matrix: ndarray
-            The homogenenous matrix
-        shape: shape
-            The shape of the image (incuding channels)
+        matrix : ndarray
+            The homogenenous matrix.
+        shape : tuple
+            The shape of the image (including channels).
 
         Returns
         -------
-        matrix: ndarray
-            The homogenenous matrix centered and scaled
+        matrix : ndarray
+            The homogenenous matrix centered and scaled.
         """
         ndim = len(shape) - 1
         v = np.array(shape[1:], dtype=np.float64) / 2
@@ -348,20 +347,19 @@ class StudholmeAffineSolver(_AffineSolver):
         return new_matrix
 
     def _invert_center_and_normalize(self, matrix, shape):
-        """
-        Decenter and denormalize the matrix
+        """Decenter and denormalize the matrix.
 
         Parameters
         ----------
-        matrix: ndarray
-            The homogenenous matrix
-        shape: shape
-            The shape of the image (incuding channels)
+        matrix : ndarray
+            The homogenenous matrix.
+        shape : tuple
+            The shape of the image (including channels).
 
         Returns
         -------
-        matrix: ndarray
-            The homogenenous matrix centered and scaled
+        matrix : ndarray
+            The homogenenous matrix decentered and denormalized.
         """
         ndim = len(shape) - 1
         v = np.array(shape[1:], dtype=np.float64) / 2
@@ -371,21 +369,20 @@ class StudholmeAffineSolver(_AffineSolver):
         return new_matrix
 
     def cost(self, parameters, reference_image, moving_image):
-        """
-        Compute the cost function for the given image pair and parameters.
+        """Compute the cost function for the given image pair and parameters.
 
         Parameters
         ----------
-        reference_image: tuple(ndarray)
+        reference_image : tuple of ndarray
             The reference image and weights as a tuple.
-        moving_image: tuple(ndarray)
+        moving_image : tuple of ndarray
             The moving image and weights to register.
-        parameters: ndarray
+        parameters : ndarray
             Vector of parameters.
 
         Returns
         -------
-        cost: float
+        cost : float
             The value of the cost function.
         """
         ndim = reference_image[0].ndim - 1
@@ -420,24 +417,23 @@ class StudholmeAffineSolver(_AffineSolver):
     def estimate_affine(
         self, reference_image, moving_image, *, channel_axis=None, matrix=None
     ):
-        """
-        Estimate the parameters of an affine transform
+        """Estimate the parameters of an affine transform.
 
         Parameters
         ----------
-        reference: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
-            Reference image and weights
-        moving: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
-            Moving image and weights
-        channel_axis: int
-            Index of the channel axis
-        matrix: ski.transform.Transform or ndarray
+        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Reference image and weights.
+        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Moving image and weights.
+        channel_axis : int
+            Index of the channel axis.
+        matrix : ski.transform.Transform or ndarray
             Initial homogeneous transformation matrix.
 
         Returns
         -------
-        tfm: AffineTransform
-            The estimated transform
+        tfm : AffineTransform
+            The estimated transform.
         """
 
         ref, mov = [
@@ -496,8 +492,7 @@ class StudholmeAffineSolver(_AffineSolver):
 
 
 class LucasKanadeAffineSolver(_AffineSolver):
-    """
-    Lucas and Kanade affine solver.
+    """Lucas and Kanade affine solver.
 
     Reference
     ---------
@@ -505,18 +500,17 @@ class LucasKanadeAffineSolver(_AffineSolver):
     """
 
     def __init__(self, model_class, order=3, max_iter=200, tol=1e-6):
-        """
-        Initialize the solver.
+        """Initialize the solver.
 
         Parameters
         ----------
-        model_class: ski.transform.Transform class
+        model_class : ski.transform.Transform class
             Sub class of ski.transform.Transform
-        order: int
+        order : int
             Order of the spline interpolation.
-        max_iter: int
+        max_iter : int
             Maximum number of iterations.
-        tol: float
+        tol : float
             Tolerance of the norm of the update vector.
         """
         super().__init__(model_class=model_class, order=order)
@@ -526,18 +520,17 @@ class LucasKanadeAffineSolver(_AffineSolver):
     def estimate_affine(
         self, reference_image, moving_image, *, channel_axis=None, matrix=None
     ):
-        """
-        Estimate the parameters of an affine transform
+        """Estimate the parameters of an affine transform.
 
         Parameters
         ----------
-        reference: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
-            Reference image and weights
-        moving: ndarray[P,N,M] or tuple(ndarray[P,N,M], ndarray[P,N,M])
-            Moving image and weights
-        channel_axis: int
+        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Reference image and weights.
+        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+            Moving image and weights.
+        channel_axis : int
             Index of the channel axis.
-        matrix: ski.transform.Transform or ndarray
+        matrix : ski.transform.Transform or ndarray
             Initial homogeneous transformation matrix.
         """
         ref, mov = [
@@ -639,8 +632,7 @@ class LucasKanadeAffineSolver(_AffineSolver):
 
 
 class ECCAffineSolver(_AffineSolver):
-    """
-    Enhanced Correlation Coefficent affine solver
+    """Enhanced Correlation Coefficent affine solver.
 
     Reference
     ---------
@@ -651,18 +643,17 @@ class ECCAffineSolver(_AffineSolver):
     """
 
     def __init__(self, model_class, order=3, max_iter=200, tol=1e-6):
-        """
-        Initialize the solver.
+        """Initialize the solver.
 
         Parameters
         ----------
-        model_class: ski.transform.Transform class
+        model_class : ski.transform.Transform class
             Sub class of ski.transform.Transform
-        order: int
+        order : int
             Order of the spline interpolation.
-        max_iter: int
+        max_iter : int
             Maximum number of iterations.
-        tol: float
+        tol : float
             Tolerance of the norm of the update vector.
         """
         super().__init__(model_class=model_class, order=order)
@@ -675,8 +666,7 @@ class ECCAffineSolver(_AffineSolver):
         xy_grid,
         warp_matrix,
     ):
-        """
-        Compute the Jacobian of the warp wrt the parameters.
+        """Compute the Jacobian of the warp wrt the parameters.
 
         Parameters
         ----------
