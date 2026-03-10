@@ -7,7 +7,8 @@ from ..feature.util import (
     _prepare_grayscale_input_2D,
 )
 
-from .corner import corner_fast, corner_orientations, peak_local_max, corner_harris
+from .corner import corner_fast, corner_orientations, corner_harris
+from .peak import peak_local_max
 from ..transform import pyramid_gaussian
 from .._shared.utils import check_nD
 from .._shared.compat import NP_COPY_IF_NEEDED
