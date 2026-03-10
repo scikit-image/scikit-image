@@ -171,7 +171,7 @@ def test_offsets():
 @parametrize("shape", [(100, 100), (5, 8, 13, 17)] * 5)
 def test_crashing(shape):
     # want random data but at least use per-test RNGs
-    seed = np.random.randint(2**32 - 1)
+    seed = np.random.randint(2**32 - 1, dtype=np.int64)
     _test_random(shape, seed)
 
 
