@@ -74,6 +74,8 @@ HMAT_TFORMS_ND = (
     SimilarityTransform,
 )
 
+MODULE_RNG = np.random.RandomState(3122886800)
+
 
 def test_estimate_transform():
     for tform in ('euclidean', 'similarity', 'affine', 'projective', 'polynomial'):
@@ -954,7 +956,7 @@ def test_union_differing_types():
 @pytest.mark.parametrize(
     "tform",
     [
-        ProjectiveTransform(matrix=np.random.rand(3, 3)),
+        ProjectiveTransform(matrix=MODULE_RNG.rand(3, 3)),
         AffineTransform(scale=(0.1, 0.1), rotation=0.3),
         EuclideanTransform(rotation=0.9, translation=(5, 5)),
         SimilarityTransform(scale=0.1, rotation=0.9),

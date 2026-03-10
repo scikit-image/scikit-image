@@ -72,6 +72,6 @@ def test_median_error_ndim():
     ],
 )
 def test_median(size, behavior, seed):
-    rng = np.random.RandomState()
+    rng = np.random.RandomState(seed)
     img = rng.randint(0, 10, size=size, dtype=np.uint8)
     median(img, behavior=behavior)

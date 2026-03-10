@@ -709,8 +709,9 @@ def test_ransac_shape():
     data0[outliers[2], :] = (-100, -10)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=1)
-    ransac(data0, CircleModel, 3, 5, rng=1)
+    seed = 4201799844
+    model_est, inliers = ransac(data0, CircleModel, 3, 5, rng=seed)
+    ransac(data0, CircleModel, 3, 5, rng=seed)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.center, model_est.center)
@@ -1022,6 +1023,7 @@ def test_ransac_non_valid_best_model():
 
 def test_ransac_model_kwargs():
     n_points = 100
+    seed = 1152243585
     rng = np.random.RandomState(1152243585)
 
     # Source points (grid-like pattern)
@@ -1042,6 +1044,7 @@ def test_ransac_model_kwargs():
             residual_threshold=1.0,
             max_trials=1000,
             model_kwargs={'order': order},
+            rng=seed,
         )
         assert model.params.shape == (2, (order + 1) * (order + 2) // 2)
         assert all(inliers)

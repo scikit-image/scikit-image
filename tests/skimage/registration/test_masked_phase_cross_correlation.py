@@ -41,7 +41,7 @@ def test_masked_registration_vs_phase_cross_correlation():
 def test_masked_registration_random_masks():
     """masked_register_translation should be able to register translations
     between images even with random masks."""
-    # See random number generator for reproducible results
+    # Seed random number generator for reproducible results
     rng = np.random.RandomState(674032722)
 
     reference_image = camera()
@@ -81,7 +81,7 @@ def test_masked_registration_random_masks_non_equal_sizes():
     """masked_register_translation should be able to register
     translations between images that are not the same size even
     with random masks."""
-    # See random number generator for reproducible results
+    # Seed random number generator for reproducible results
     rng = np.random.RandomState(133887294)
 
     reference_image = camera()
@@ -181,7 +181,7 @@ def test_cross_correlate_masked_test_against_mismatched_dimensions():
 
 def test_cross_correlate_masked_output_range():
     """Masked normalized cross-correlation should return between 1 and -1."""
-    # See random number generator for reproducible results
+    # Seed random number generator for reproducible results
     rng = np.random.RandomState(17856738)
 
     # Array dimensions must match along non-transformation axes, in
@@ -228,7 +228,7 @@ def test_cross_correlate_masked_side_effects():
 def test_cross_correlate_masked_over_axes():
     """Masked normalized cross-correlation over axes should be
     equivalent to a loop over non-transform axes."""
-    # See random number generator for reproducible results
+    # Seed random number generator for reproducible results
     rng = np.random.RandomState(3519036960)
 
     arr1 = rng.random((8, 8, 5))
@@ -257,7 +257,7 @@ def test_cross_correlate_masked_over_axes():
 def test_cross_correlate_masked_autocorrelation_trivial_masks():
     """Masked normalized cross-correlation between identical arrays
     should reduce to an autocorrelation even with random masks."""
-    # See random number generator for reproducible results
+    # Seed random number generator for reproducible results
     rng = np.random.RandomState(3555640249)
 
     arr1 = camera()

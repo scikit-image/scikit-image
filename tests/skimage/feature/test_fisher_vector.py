@@ -72,7 +72,8 @@ def test_gmm_wrong_covariance_type():
     """
     rng = np.random.RandomState(1964030178)
     with pytest.raises(FisherVectorException):
-        learn_gmm(rng.random((10, 10)), n_modes=2, gm_args={'covariance_type': 'full'})
+        learn_gmm(rng.random((10, 10)), n_modes=2,
+                  gm_args={'covariance_type': 'full', 'random_state': rng})
 
 
 def test_gmm_correct_covariance_type():
@@ -81,7 +82,9 @@ def test_gmm_correct_covariance_type():
     """
     rng = np.random.RandomState(4004179303)
     gmm = learn_gmm(
-        rng.random((10, 10)), n_modes=2, gm_args={'covariance_type': 'diag'}
+        rng.random((10, 10)),
+        n_modes=2,
+        gm_args={'covariance_type': 'diag', 'random_state': rng}
     )
 
     assert gmm.means_ is not None
@@ -101,7 +104,8 @@ def test_gmm_e2e():
     variances after estimation is successful/complete.
     """
     rng = np.random.RandomState(369568302)
-    gmm = learn_gmm(rng.random((100, 64)), n_modes=5)
+    gm_args = {'random_state': rng}
+    gmm = learn_gmm(rng.random((100, 64)), n_modes=5, gm_args=gm_args)
 
     assert gmm.means_ is not None
     assert gmm.covariances_ is not None
@@ -157,9 +161,11 @@ def test_fv_e2e():
 
     rng = np.random.RandomState(3729309840)
 
+    gm_args = {'random_state': rng}
+
     descriptors = [rng.random((rng.randint(5, 30), dim)) for _ in range(10)]
 
-    gmm = learn_gmm(descriptors, n_modes=num_modes)
+    gmm = learn_gmm(descriptors, n_modes=num_modes, gm_args=gm_args)
 
     fisher_vec = fisher_vector(descriptors[0], gmm)
 
@@ -184,9 +190,11 @@ def test_fv_e2e_improved():
 
     rng = np.random.RandomState(3534280266)
 
+    gm_args = {'random_state': rng}
+
     descriptors = [rng.random((rng.randint(5, 30), dim)) for _ in range(10)]
 
-    gmm = learn_gmm(descriptors, n_modes=num_modes)
+    gmm = learn_gmm(descriptors, n_modes=num_modes, gm_args=gm_args)
 
     fisher_vec = fisher_vector(descriptors[0], gmm, improved=True)
 

@@ -93,14 +93,14 @@ def test_1d_input_raises_error(func):
 
 class TestRank:
     def setup_method(self):
-        np.random.seed(0)
         # This image is used along with @run_in_parallel
         # to ensure that the same seed is used for each thread.
-        self.image = np.random.rand(25, 25)
-        np.random.seed(0)
-        self.volume = np.random.rand(10, 10, 10)
+        # The test results are sentive to the seed used here.
+        rng = np.random.RandomState(0)
+        self.image = rng.rand(25, 25)
+        rng.seed(0)
+        self.volume = rng.rand(10, 10, 10)
         # Set again the seed for the other tests.
-        np.random.seed(0)
         self.footprint = morphology.disk(1)
         self.footprint_3d = morphology.ball(1)
         self.refs = ref_data

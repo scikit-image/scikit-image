@@ -5,8 +5,8 @@ from numpy.testing import assert_allclose, assert_equal
 from skimage.transform import integral_image, integrate
 
 
-module_rng = np.random.RandomState(1444596450)
-x = (np.random.rand(50, 50) * 255).astype(np.uint8)
+MODULE_RNG = np.random.RandomState(1444596450)
+x = (MODULE_RNG.rand(50, 50) * 255).astype(np.uint8)
 s = integral_image(x)
 
 

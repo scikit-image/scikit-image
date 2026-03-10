@@ -265,11 +265,11 @@ you can use the following command-line helper to generate seeds:
 
    python -c "import random; print(random.randint(0, 2**32-1))"
 
-And in your test, create an random number generator like so:
+And in your test, create a random number generator like so:
 
 .. code-block:: python
 
-   def my_test():
+   def test_something():
        # hard-code a seed randomly generated while writing the test
        rng = np.random.RandomState(2376609660)
 

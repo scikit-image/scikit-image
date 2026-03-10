@@ -12,10 +12,10 @@ from skimage.metrics import (
 
 
 # test results depend on this seed
-module_rng = np.random.RandomState(5)
+MODULE_RNG = np.random.RandomState(5)
 cam = data.camera()
 sigma = 20.0
-cam_noisy = np.clip(cam + sigma * module_rng.randn(*cam.shape), 0, 255)
+cam_noisy = np.clip(cam + sigma * MODULE_RNG.randn(*cam.shape), 0, 255)
 cam_noisy = cam_noisy.astype(cam.dtype)
 
 
