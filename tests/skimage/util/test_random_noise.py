@@ -189,17 +189,17 @@ def test_poisson():
 def test_clip_poisson():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
-    rng = np.random.RandomState(4266430063)
+    seed = 4266430063
 
     # Signed and unsigned, clipped
-    cam_poisson = random_noise(data, mode='poisson', rng=rng, clip=True)
-    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=rng, clip=True)
+    cam_poisson = random_noise(data, mode='poisson', rng=seed, clip=True)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=seed, clip=True)
     assert (cam_poisson.max() == 1.0) and (cam_poisson.min() == 0.0)
     assert (cam_poisson2.max() == 1.0) and (cam_poisson2.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_poisson = random_noise(data, mode='poisson', rng=rng, clip=False)
-    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=rng, clip=False)
+    cam_poisson = random_noise(data, mode='poisson', rng=seed, clip=False)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', rng=seed, clip=False)
     assert (cam_poisson.max() > 1.15) and (cam_poisson.min() == 0.0)
     assert (cam_poisson2.max() > 1.3) and (cam_poisson2.min() == -1.0)
 
@@ -207,17 +207,17 @@ def test_clip_poisson():
 def test_clip_gaussian():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
-    rng = np.random.RandomState(2169416880)
+    seed = 2169416880
 
     # Signed and unsigned, clipped
-    cam_gauss = random_noise(data, mode='gaussian', rng=rng, clip=True)
-    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=rng, clip=True)
+    cam_gauss = random_noise(data, mode='gaussian', rng=seed, clip=True)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=seed, clip=True)
     assert (cam_gauss.max() == 1.0) and (cam_gauss.min() == 0.0)
     assert (cam_gauss2.max() == 1.0) and (cam_gauss2.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_gauss = random_noise(data, mode='gaussian', rng=rng, clip=False)
-    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=rng, clip=False)
+    cam_gauss = random_noise(data, mode='gaussian', rng=seed, clip=False)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', rng=seed, clip=False)
     assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.35)
     assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.219)
 
@@ -225,17 +225,17 @@ def test_clip_gaussian():
 def test_clip_speckle():
     data = camera()  # 512x512 grayscale uint8
     data_signed = img_as_float(data) * 2.0 - 1.0  # Same image, on range [-1, 1]
-    rng = np.random.RandomState(3408637964)
+    seed = 3408637964
 
     # Signed and unsigned, clipped
-    cam_speckle = random_noise(data, mode='speckle', rng=rng, clip=True)
-    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=rng, clip=True)
+    cam_speckle = random_noise(data, mode='speckle', rng=seed, clip=True)
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=seed, clip=True)
     assert (cam_speckle.max() == 1.0) and (cam_speckle.min() == 0.0)
     assert (cam_speckle_sig.max() == 1.0) and (cam_speckle_sig.min() == -1.0)
 
     # Signed and unsigned, unclipped
-    cam_speckle = random_noise(data, mode='speckle', rng=rng, clip=False)
-    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=rng, clip=False)
+    cam_speckle = random_noise(data, mode='speckle', rng=seed, clip=False)
+    cam_speckle_sig = random_noise(data_signed, mode='speckle', rng=seed, clip=False)
     assert (cam_speckle.max() > 1.219) and (cam_speckle.min() == 0.0)
     assert (cam_speckle_sig.max() > 1.219) and (cam_speckle_sig.min() < -1.219)
 

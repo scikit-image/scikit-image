@@ -721,7 +721,8 @@ def test_ransac_shape():
 
 @pytest.fixture
 def ransac_params():
-    rng = np.random.RandomState(12373240)
+    seed = 12373240
+    rng = np.random.RandomState(seed)
 
     # generate original data without noise
     src = 100 * rng.random((50, 2))
@@ -733,13 +734,13 @@ def ransac_params():
     dst[outliers[0]] = (10000, 10000)
     dst[outliers[1]] = (-100, 100)
     dst[outliers[2]] = (50, 50)
-    return src, dst, model, outliers, rng
+    return src, dst, model, outliers, rng, seed
 
 
 def test_ransac_geometric(ransac_params):
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=rng)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20, rng=seed)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0.params, model_est.params)
@@ -748,7 +749,7 @@ def test_ransac_geometric(ransac_params):
 
 def test_custom_estimate_warning(ransac_params):
     # Test that custom estimate class raises warning.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class C:
         """Custom class"""
@@ -774,7 +775,7 @@ def test_custom_estimate_warning(ransac_params):
         "warning."
     )
     with pytest.warns(FutureWarning, match=msg) as record:
-        model_est, inliers = ransac((src, dst), C, 2, 20, rng=rng)
+        model_est, inliers = ransac((src, dst), C, 2, 20, rng=seed)
     assert_stacklevel(record)
     assert len(record) == 1
 
@@ -793,7 +794,7 @@ def test_custom_estimate_warning(ransac_params):
 
 def test_ransac_model_class_protocol(ransac_params):
     # Test custom classes that don't match protocol.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class D:
         """Class without `residuals` method."""
@@ -803,7 +804,7 @@ def test_ransac_model_class_protocol(ransac_params):
             return cls()
 
     with pytest.raises(TypeError, match='`model_class` '):
-        ransac((src, dst), D, 2, 20, rng=rng)
+        ransac((src, dst), D, 2, 20, rng=seed)
 
     class E:
         """Class without `from_estimate` or `estimate`"""
@@ -812,12 +813,12 @@ def test_ransac_model_class_protocol(ransac_params):
             return data
 
     with pytest.raises(TypeError, match='Class .* must have `from_estimate` '):
-        ransac((src, dst), E, 2, 20, rng=rng)
+        ransac((src, dst), E, 2, 20, rng=seed)
 
 
 def test_custom_from_estimate_classmethod(ransac_params):
     # Test assertion that custom class `from_estimate` is class method.
-    src, dst, model0, outliers, rng = ransac_params
+    src, dst, model0, outliers, rng, seed = ransac_params
 
     class F:
         """Class without `from_estimate` or `estimate`"""
@@ -829,7 +830,7 @@ def test_custom_from_estimate_classmethod(ransac_params):
             return data
 
     with pytest.raises(TypeError, match='`from_estimate` must be a class method'):
-        ransac((src, dst), F, 2, 20, rng=rng)
+        ransac((src, dst), F, 2, 20, rng=seed)
 
 
 def test_ransac_is_data_valid():
