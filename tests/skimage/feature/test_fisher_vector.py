@@ -72,8 +72,11 @@ def test_gmm_wrong_covariance_type():
     """
     rng = np.random.RandomState(1964030178)
     with pytest.raises(FisherVectorException):
-        learn_gmm(rng.random((10, 10)), n_modes=2,
-                  gm_args={'covariance_type': 'full', 'random_state': rng})
+        learn_gmm(
+            rng.random((10, 10)),
+            n_modes=2,
+            gm_args={'covariance_type': 'full', 'random_state': rng},
+        )
 
 
 def test_gmm_correct_covariance_type():
@@ -84,7 +87,7 @@ def test_gmm_correct_covariance_type():
     gmm = learn_gmm(
         rng.random((10, 10)),
         n_modes=2,
-        gm_args={'covariance_type': 'diag', 'random_state': rng}
+        gm_args={'covariance_type': 'diag', 'random_state': rng},
     )
 
     assert gmm.means_ is not None
