@@ -130,14 +130,14 @@ The functions
 are deprecated in favor of counterparts in `skimage2.morphology` with new behavior:
 
 - All functions now default to `mode='ignore'` (was `mode='reflect'`).
-- Additionally, `skimage.morphology.dilation`, `skimage.morphology.closing`, and `skimage.morphology.black_tophat` now also mirror the footprint (invert its order in each dimension).
+- Additionally, `skimage2.morphology.dilation`, `skimage2.morphology.closing`, and `skimage2.morphology.black_tophat` now also mirror the footprint (invert its order in each dimension).
   Note this only impacts behavior for asymmetric/eccentric footprints.
 
 :::{admonition} Background for changes
 :class: note dropdown
 
 The new behavior ensures that `closing` and `opening` (the composition of `erosion` and `dilation`) behave _extensive_ and _anti-extensive_ by default.
-It also aligns the behavior for asymmetric/eccentric footprints with SciPy's `scipy.ndimage.grey_*` functions.
+This change also aligns the behavior for asymmetric/eccentric footprints with SciPy's `scipy.ndimage.grey_*` functions.
 
 Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046), and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
 :::

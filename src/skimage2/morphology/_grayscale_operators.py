@@ -21,8 +21,8 @@ def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
     Parameters
     ----------
     operator : Callable
-        Morphological operator with the signature
-        ``f(image, *, footprint, output, mode, cval) -> image``.
+        Morphological operator with signature
+        ``f(image, *, footprint, out, mode, cval) -> image``.
     image : ndarray
         The image to apply the operator to.
     footprints : tuple

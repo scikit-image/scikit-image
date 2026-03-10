@@ -161,9 +161,9 @@ class TestEccentricStructuringElements:
             eroded = gray.erosion(self.black_pixel, footprint=footprint)
 
             # Dilation mirrors footprint internally so that closing is extensive
-            # and opening anti-extensive. To receive a symmetric result, we need
-            # to use an asymmetric footprint. Also pad to odd-size before
-            # mirroring so that correct side is padded with 0.
+            # and opening anti-extensive. To get a symmetric result, we need to
+            # use an asymmetric footprint. Also pad to odd-size before mirroring
+            # so that correct side is padded with 0.
             asym_footprint = mirror_footprint(pad_footprint(footprint, pad_end=False))
             dilated = gray.dilation(self.white_pixel, footprint=asym_footprint)
 

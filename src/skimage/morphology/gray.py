@@ -40,8 +40,8 @@ _PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
 `skimage.morphology.{name}` is deprecated in favor of
 `skimage2.morphology.{name}` which changes the default value for parameter
 `mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
-(inverts its order in each dimension) which aligns its behavior with
-`scipy.ndimage.grey_{name}`.
+(inverts its order in each dimension) which aligns its behavior with SciPy's
+conventions.
 
 To keep the old (`skimage`, v1.x) behavior:
 - Set `mode='reflect'` explicitly. If you set it explicitly before,
@@ -73,7 +73,7 @@ def _patch_footprint_mirroring(footprint):
     -----
     Inside `scipy.ndimage.grey_dilation` the footprint is inverted/mirrored.
     This inversion is intentional so that the composition of erosion and
-    dilation lead to a correct closing and opening.
+    dilation leads to a correct closing and opening.
 
     `skimage.morphology.dilation` accidentally undoes this by mirroring
      the footprint, before passing it to `scipy.ndimage.grey_dilation`.
