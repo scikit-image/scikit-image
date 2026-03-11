@@ -73,7 +73,7 @@ jobs:
             OPTIONS_NAME: "install-from-sdist"
           - platform_id: manylinux_x86_64
             python-version: "3.12"
-            SHARED_CYTHON_UTILITY: 1
+            BUILD_PIP_FLAGS: "--config-settings=setup-args='-Dshared-cython-utility=true'"
             OPTIONS_NAME: "shared-cython-utility"
 
     steps:
@@ -98,17 +98,12 @@ jobs:
           source .github/scripts/setup-build-env.sh
 
       - name: Build and install from source
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 && matrix.SHARED_CYTHON_UTILITY != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
         run: |
-          pip install -v --no-build-isolation .
-
-      - name: Build and install with cython shared utility
-        if: ${{ matrix.SHARED_CYTHON_UTILITY == 1 }}
-        run: |
-          pip install -v --no-build-isolation . --config-settings=setup-args="-Dshared-cython-utility=true"
+          pip install -v --no-build-isolation . ${{ matrix.BUILD_PIP_FLAGS }}
 
       - name: Build and install from sdist
-        if: ${{ matrix.INSTALL_FROM_SDIST == 1 && matrix.SHARED_CYTHON_UTILITY != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST == 1}}
         run: |
           pip install build
           python -m build --sdist .
