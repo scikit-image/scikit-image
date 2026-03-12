@@ -7,6 +7,7 @@ import importlib
 from pathlib import Path
 
 import skimage2
+from skimage._shared._dependency_checks import is_wasm
 
 
 def test_import_skimage2_warning():
@@ -21,6 +22,7 @@ def test_import_skimage2_warning():
     assert warning_path.parts[-2:] == ("importlib", "__init__.py")
 
 
+@pytest.mark.skipif(is_wasm, reason="emscripten does not support processes")
 def test_no_eager_skimage_import():
     """Test that importing `skimage2` doesn't import `skimage` eagerly."""
 
