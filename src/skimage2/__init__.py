@@ -4,8 +4,6 @@ import warnings
 
 import lazy_loader as _lazy
 
-from skimage import __version__
-
 
 class ExperimentalAPIWarning(UserWarning):
     """Mark unstable API that's intentionally not published (yet)."""
@@ -19,4 +17,14 @@ warnings.warn(
 )
 
 
-__getattr__, _, __all__ = _lazy.attach_stub(__name__, __file__)
+_stub_getattr, _, __all__ = _lazy.attach_stub(__name__, __file__)
+
+
+def __getattr__(name):
+    if name == "__version__":
+        # TODO Undo inlined imports once ported
+        from skimage import __version__
+
+        return __version__
+
+    return _stub_getattr(name)

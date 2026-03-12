@@ -2,6 +2,7 @@ python_sources = [
   '__init__.py',
   '__init__.pyi',
   '_grayscale_operators.py',
+  '_footprints.py',
 ]
 
 py3.install_sources(

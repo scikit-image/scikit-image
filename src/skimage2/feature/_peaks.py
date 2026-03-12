@@ -1,14 +1,14 @@
 import numpy as np
 import scipy.ndimage as ndi
 
-from skimage._shared._warnings import warn_external
-from skimage._shared.coord import ensure_spacing
-
 
 def _get_high_intensity_peaks(image, mask, num_peaks, min_distance, p_norm):
     """
     Return the highest intensity peak coordinates.
     """
+    # TODO Undo inlined imports once ported
+    from skimage._shared.coord import ensure_spacing
+
     # get coordinates of peaks
     coord = np.nonzero(mask)
     intensities = image[coord]
@@ -220,6 +220,9 @@ def peak_local_max(
            [3, 4],
            [0, 0]])
     """
+    # TODO Undo inlined imports once ported
+    from skimage._shared._warnings import warn_external
+
     if (footprint is None or footprint.size == 1) and min_distance < 1:
         warn_external(
             "When `min_distance < 1`, `peak_local_max` acts as finding "
