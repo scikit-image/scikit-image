@@ -10,7 +10,7 @@ from skimage.morphology.footprints import (
     mirror_footprint,
     pad_footprint,
 )
-from skimage.morphology.misc import default_footprint
+from ._footprints import _default_footprint
 
 
 def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
@@ -102,7 +102,7 @@ _SUPPORTED_MODES: Final = {
 }
 
 
-@default_footprint
+@_default_footprint
 def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
@@ -202,7 +202,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
@@ -304,7 +304,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological opening of an image.
 
@@ -380,7 +380,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological closing of an image.
 
@@ -456,7 +456,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return white top hat of an image.
 
@@ -547,7 +547,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return black top hat of an image.
 
