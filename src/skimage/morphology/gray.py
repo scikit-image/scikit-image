@@ -2,7 +2,8 @@
 Grayscale morphological operations
 """
 
-from .misc import default_footprint
+from skimage2.morphology._footprints import _default_footprint
+
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
 
@@ -33,7 +34,7 @@ To keep the old (`skimage`, v1.x) behavior, set that parameter explicitly.
 """
 
 
-@default_footprint
+@_default_footprint
 def erosion(
     image,
     footprint=None,
@@ -128,7 +129,7 @@ def erosion(
     return out
 
 
-@default_footprint
+@_default_footprint
 def dilation(
     image,
     footprint=None,
@@ -224,7 +225,7 @@ def dilation(
     return out
 
 
-@default_footprint
+@_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
 
@@ -305,7 +306,7 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
 
@@ -386,7 +387,7 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return white top hat of an image.
 
@@ -471,7 +472,7 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@default_footprint
+@_default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return black top hat of an image.
 
