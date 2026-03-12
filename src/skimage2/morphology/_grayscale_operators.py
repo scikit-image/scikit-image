@@ -5,11 +5,6 @@ from typing import Final
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage.morphology.footprints import (
-    _footprint_is_sequence,
-    mirror_footprint,
-    pad_footprint,
-)
 from ._footprints import _default_footprint
 
 
@@ -176,6 +171,9 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    # TODO Undo inlined imports once ported
+    from skimage.morphology.footprints import _footprint_is_sequence, pad_footprint
+
     if out is None:
         out = np.empty_like(image)
 
@@ -275,6 +273,13 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    # TODO Undo inlined imports once ported
+    from skimage.morphology.footprints import (
+        _footprint_is_sequence,
+        mirror_footprint,
+        pad_footprint,
+    )
+
     if out is None:
         out = np.empty_like(image)
 
@@ -374,6 +379,9 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    # TODO Undo inlined imports once ported
+    from skimage.morphology.footprints import mirror_footprint, pad_footprint
+
     footprint = pad_footprint(footprint, pad_end=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
     out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
@@ -450,6 +458,9 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
+    # TODO Undo inlined imports once ported
+    from skimage.morphology.footprints import mirror_footprint, pad_footprint
+
     footprint = pad_footprint(footprint, pad_end=False)
     dilated = dilation(image, footprint, mode=mode, cval=cval)
     out = erosion(dilated, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
