@@ -10,13 +10,13 @@ def _default_footprint(func):
 
     Parameters
     ----------
-    func : function
+    func : Callable
         A morphology function such as erosion, dilation, opening, closing,
         white_tophat, or black_tophat.
 
     Returns
     -------
-    func_out : function
+    func_out : Callable
         The function, using a default footprint of same dimension
         as the input image with connectivity 1.
 
