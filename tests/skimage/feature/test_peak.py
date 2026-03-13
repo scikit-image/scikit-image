@@ -552,7 +552,7 @@ class TestPeakLocalMax:
 
         peaks = peak.peak_local_max(
             image,
-            min_distance=2.1,
+            min_distance=np.nextafter(2, np.inf),
             exclude_border=0,
             footprint=footprint,
             p_norm=2,

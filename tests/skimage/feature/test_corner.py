@@ -722,6 +722,25 @@ def test_corner_peaks_num_peaks_deprecated_inf():
     assert_stacklevel(record)
 
 
+def test_corner_peaks_min_distance_remove_order():
+    # 4 peaks with a distance of 2 in increasing order. Candidates around
+    # the highest peak 4 are removed first, which is 3. So 3 isn't there
+    # anymore to remove 2. 2 survives and removes 1.
+    image = np.array([[1, 0, 2, 0, 0], [0, 0, 0, 0, 0], [0, 0, 3, 0, 4]])
+
+    # Ensure default footprint doesn't remove peaks early
+    footprint = np.ones((3, 3), dtype=bool)
+
+    peaks = corner_peaks(
+        image,
+        min_distance=2,
+        exclude_border=0,
+        footprint=footprint,
+        p_norm=2,
+    )
+    assert_equal(peaks, [[2, 4], [0, 2]])
+
+
 def test_blank_image_nans():
     """Some of the corner detectors had a weakness in terms of returning
     NaN when presented with regions of constant intensity. This should

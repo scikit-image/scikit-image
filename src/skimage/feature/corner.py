@@ -1314,6 +1314,7 @@ def corner_peaks(
         footprint=footprint,
         labels=labels,
         num_peaks_per_label=num_peaks_per_label,
+        p_norm=p_norm,
     )
 
     if len(coords):
