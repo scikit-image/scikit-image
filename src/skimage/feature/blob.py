@@ -324,15 +324,20 @@ def blob_dog(
 
     Returns
     -------
-    A : (n, image.ndim + sigma) ndarray
-        A 2d array with each row representing 2 coordinate values for a 2D
-        image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
-        When a single sigma is passed, outputs are:
-        ``(r, c, sigma)`` or ``(p, r, c, sigma)`` where ``(r, c)`` or
-        ``(p, r, c)`` are coordinates of the blob and ``sigma`` is the standard
-        deviation of the Gaussian kernel which detected the blob. When an
-        anisotropic gaussian is used (sigmas per dimension), the detected sigma
-        is returned for each dimension.
+    A : (n, image.ndim + k) ndarray
+        A 2D array where each row represents a detected blob.
+        The first ``image.ndim`` entries are the spatial coordinates of the blob
+        (e.g., ``(r, c)`` in 2D or ``(p, r, c)`` in 3D).
+
+        The remaining ``k`` entries correspond to the standard deviation(s)
+        (``sigma``) of the Gaussian kernel that detected the blob.
+
+        If an isotropic (scalar) sigma is used, then ``k = 1`` and the output
+        shape is ``(n, image.ndim + 1)``.
+
+        If anisotropic sigmas are used (one per spatial dimension), then
+        ``k = image.ndim`` and the output shape is
+        ``(n, image.ndim + image.ndim)``.
 
     See also
     --------
@@ -552,15 +557,21 @@ def blob_log(
 
     Returns
     -------
-    A : (n, image.ndim + sigma) ndarray
-        A 2d array with each row representing 2 coordinate values for a 2D
-        image, or 3 coordinate values for a 3D image, plus the sigma(s) used.
-        When a single sigma is passed, outputs are:
-        ``(r, c, sigma)`` or ``(p, r, c, sigma)`` where ``(r, c)`` or
-        ``(p, r, c)`` are coordinates of the blob and ``sigma`` is the standard
-        deviation of the Gaussian kernel which detected the blob. When an
-        anisotropic gaussian is used (sigmas per dimension), the detected sigma
-        is returned for each dimension.
+    A : (n, image.ndim + k) ndarray
+        A 2D array where each row represents a detected blob.
+
+        The first ``image.ndim`` entries are the spatial coordinates of the blob
+        (e.g., ``(r, c)`` in 2D or ``(p, r, c)`` in 3D).
+
+        The remaining ``k`` entries correspond to the standard deviation(s)
+        (``sigma``) of the Gaussian kernel that detected the blob.
+
+        If an isotropic (scalar) sigma is used, then ``k = 1`` and the output
+        shape is ``(n, image.ndim + 1)``.
+
+        If anisotropic sigmas are used (one per spatial dimension), then
+        ``k = image.ndim`` and the output shape is
+        ``(n, image.ndim + image.ndim)``.
 
     References
     ----------
