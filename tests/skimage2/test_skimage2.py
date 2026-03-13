@@ -10,6 +10,7 @@ import skimage2
 from skimage._shared._dependency_checks import is_wasm
 
 
+@pytest.mark.thread_unsafe(reason="importlib.reload is not thread-safe")
 def test_import_skimage2_warning():
     regex = "Importing from the `skimage2` namespace is experimental"
     with pytest.warns(UserWarning, match=regex) as record:

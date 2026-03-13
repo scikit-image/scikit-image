@@ -268,8 +268,8 @@ def test_reconstruct_with_wrong_angles():
 
 def _random_circle(shape):
     # Synthetic random data, zero outside reconstruction circle
-    np.random.seed(98312871)
-    image = np.random.rand(*shape)
+    rng = np.random.RandomState(98312871)
+    image = rng.rand(*shape)
     c0, c1 = np.ogrid[0 : shape[0], 0 : shape[1]]
     r = np.sqrt((c0 - shape[0] // 2) ** 2 + (c1 - shape[1] // 2) ** 2)
     radius = min(shape) // 2

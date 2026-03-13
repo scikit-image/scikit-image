@@ -397,6 +397,7 @@ def test_hessian_matrix_eigvals_3d(im3d, dtype):
     assert np.max(response0) > 0
 
 
+@pytest.mark.thread_unsafe(reason="test is explicitly multithreaded")
 @run_in_parallel()
 def test_hessian_matrix_det():
     image = np.zeros((5, 5))

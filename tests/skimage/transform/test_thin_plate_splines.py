@@ -70,7 +70,6 @@ class TestThinPlateSplineTransform:
     def test_rotate(self):
         image = ski.data.astronaut()
         desired = ski.transform.rotate(image, angle=90)
-
         src = np.array([[0, 0], [0, 511], [511, 511], [511, 0]])
         dst = np.array([[511, 0], [0, 0], [0, 511], [511, 511]])
         tps = self.tform_class.from_estimate(src, dst)
