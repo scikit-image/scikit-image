@@ -1251,7 +1251,8 @@ def corner_peaks(
           was `numpy.inf` (Chebyshev distance)
         * Parameter `exclude_border` defaults to 1, was `True`
         * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`, or `min_distance` instead of `True`
+          pass 0 instead of `False`,
+          or the value of `min_distance` instead of `True`
         * Parameters after `image` are keyword-only
         * Parameter `indices` is removed.
 
@@ -1272,8 +1273,7 @@ def corner_peaks(
         * `p_norm` not passed, use `p_norm=numpy.inf`
         * `p_norm=<float>`, no change necessary
 
-        If you used `indices=False`, you can derive the boolean peak mask from
-        ``coords`` with:
+        If you used `indices=False` to return boolean mask of peaks, you can derive it from `coords` with:
 
             coords = ski2.feature.peak_local_max(...)
             peaks = np.zeros_like(image, dtype=bool)

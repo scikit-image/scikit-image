@@ -152,7 +152,8 @@ def peak_local_max(
           was `numpy.inf` (Chebyshev distance)
         * Parameter `exclude_border` defaults to 1, was `True`
         * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`, or `min_distance` instead of `True`
+          pass 0 instead of `False`,
+          or the value of `min_distance` instead of `True`
         * Parameters after `image` are keyword-only
 
         To keep the old behavior when switching to `skimage2`, update your call

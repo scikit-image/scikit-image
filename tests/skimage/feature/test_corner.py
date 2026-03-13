@@ -707,7 +707,7 @@ def test_corner_peaks_deprecation_path():
     peaks = peak_local_max(
         response, exclude_border=False, min_distance=np.nextafter(1, np.inf)
     )
-    assert_equal(peaks, [[1, 1], [1, 3], [3, 1], [3, 3]])
+    assert_equal(peaks, corners)
 
 
 def test_corner_peaks_num_peaks_deprecated_inf():
