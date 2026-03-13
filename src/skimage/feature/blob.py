@@ -4,13 +4,14 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
+from skimage2.util._value_rescaling import _prescale_value_range
+
 from .._shared.filters import gaussian
 from .._shared.utils import (
     _supported_float_type,
     check_nD,
     DEPRECATED,
     deprecate_parameter,
-    _prescale_value_range,
 )
 from ..transform import integral_image
 from ._hessian_det_appx import _hessian_matrix_det
