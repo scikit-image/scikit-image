@@ -5,7 +5,7 @@ from skimage._shared.utils import _supported_float_type
 from skimage._shared._warnings import warn_external
 
 
-def minmax_rescale(image):
+def rescale_minmax(image):
     """Rescale `image` to the value range [0, 1].
 
     Rescaling values between [0, 1], or *min-max normalization* [1]_,
@@ -32,8 +32,8 @@ def minmax_rescale(image):
 
     See Also
     --------
-    legacy_rescale
-        Rescale value range based on dtype (legacy `skimage` behavior)
+    rescale_legacy
+        Rescale value range based on dtype (legacy `skimage` behavior).
 
     References
     ----------
@@ -43,7 +43,7 @@ def minmax_rescale(image):
     --------
     >>> import numpy as np
     >>> image = np.array([-10, 45, 100], dtype=np.int8)
-    >>> minmax_rescale(image)
+    >>> rescale_minmax(image)
     array([0. , 0.5, 1. ])
     """
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
@@ -104,7 +104,7 @@ def minmax_rescale(image):
     return out
 
 
-def legacy_rescale(image):
+def rescale_legacy(image):
     """Rescale value range based on dtype (legacy `skimage` behavior).
 
     Parameters
@@ -123,19 +123,15 @@ def legacy_rescale(image):
 
     See Also
     --------
-    legacy_rescale
-        Rescale value range based on dtype-based (legacy `skimage` behavior)
-
-    References
-    ----------
-    .. [1]: https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)
+    rescale_minmax
+        Rescale `image` to the value range [0, 1].
 
     Examples
     --------
     >>> import numpy as np
-    >>> image = np.array([-10, 45, 100], dtype=np.int8)
-    >>> minmax_rescale(image)
-    array([0. , 0.5, 1. ])
+    >>> image = np.array([0, 127, 255], dtype=np.uint8)
+    >>> rescale_legacy(image)
+    array([0.        , 0.49803922, 1.        ])
     """
     out = ski.util.img_as_float(image)
     return out
@@ -181,12 +177,6 @@ def _prescale_value_range(image, *, mode):
         infinity is not supported for now. In those cases, consider replacing
         the unsupported values manually.
 
-    See Also
-    --------
-    _minmax_scale_value_range
-        Rescale `image` to the value range [0, 1]. Internally used in
-        this function.
-
     Examples
     --------
     >>> import numpy as np
@@ -207,6 +197,6 @@ def _prescale_value_range(image, *, mode):
     if mode == "legacy":
         return ski.util.img_as_float(image)
     if mode == "minmax":
-        return minmax_rescale(image)
+        return rescale_minmax(image)
     else:
         raise ValueError("unsupported mode")

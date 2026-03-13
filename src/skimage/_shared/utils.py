@@ -1162,15 +1162,15 @@ def _prescale_value_range(image, *, mode):
     >>> import numpy as np
     >>> image = np.array([-10, 45, 100], dtype=np.int8)
 
-    >>> _prescale_value_range(image, mode="minmax")
+    >>> _prescale(image, mode="minmax")
     array([0. , 0.5, 1. ])
 
-    >>> _prescale_value_range(image, mode="legacy")
+    >>> _prescale(image, mode="legacy")
     array([-0.07874016,  0.35433071,  0.78740157])
 
-    >>> _prescale_value_range(image, mode="none")
+    >>> _prescale(image, mode="none")
     array([-10, 45, 100], dtype=int8)
     """
-    from skimage2.util._value_rescaling import _prescale_value_range
+    from skimage2.util._value_rescaling import _prescale
 
-    return _prescale_value_range(image, mode=mode)
+    return _prescale(image, mode=mode)
