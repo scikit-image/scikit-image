@@ -217,6 +217,8 @@ log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
     "error",
+    # pytest raises a warning when running with PYOPTIMIZE=2
+    "ignore:assertions not in test modules or plugins:pytest.PytestConfigWarning",
     "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore::skimage.util.PendingSkimage2Change",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
