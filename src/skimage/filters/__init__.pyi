@@ -36,6 +36,7 @@ __all__ = [
     "sobel",
     "sobel_h",
     "sobel_v",
+    "threshold_circular_otsu",
     "threshold_isodata",
     "threshold_li",
     "threshold_local",
@@ -94,6 +95,7 @@ from .ridges import (
 )
 from .thresholding import (
     apply_hysteresis_threshold,
+    threshold_circular_otsu,
     threshold_isodata,
     threshold_li,
     threshold_local,
