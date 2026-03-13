@@ -27,8 +27,8 @@ def rescale_minmax(image):
     Raises
     ------
     ValueError
-        Rescaling an image that contains NaN or infinity is not supported for
-        now. In those cases, consider replacing the unsupported values manually.
+        NaN and infinity values are not supported.
+        Replace such values before rescaling.
 
     See Also
     --------
