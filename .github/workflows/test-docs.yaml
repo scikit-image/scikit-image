@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout scikit-image
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
