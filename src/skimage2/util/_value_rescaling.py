@@ -195,7 +195,7 @@ def _prescale_value_range(image, *, mode):
         # Exit early
         return image.copy()
     if mode == "legacy":
-        return ski.util.img_as_float(image)
+        return rescale_legacy(image)
     if mode == "minmax":
         return rescale_minmax(image)
     else:
