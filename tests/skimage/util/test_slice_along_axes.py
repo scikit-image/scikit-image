@@ -4,28 +4,29 @@ import pytest
 from skimage.util import slice_along_axes
 
 
-rng = np.random.default_rng()
-
-
 def test_2d_crop_0():
+    rng = np.random.RandomState(1561468935)
     data = rng.random((50, 50))
     out = slice_along_axes(data, [(0, 25)])
     np.testing.assert_array_equal(out, data[:25, :])
 
 
 def test_2d_crop_1():
+    rng = np.random.RandomState(519127872)
     data = rng.random((50, 50))
     out = slice_along_axes(data, [(0, 25), (0, 10)])
     np.testing.assert_array_equal(out, data[:25, :10])
 
 
 def test_2d_crop_2():
+    rng = np.random.RandomState(1239741995)
     data = rng.random((50, 50))
     out = slice_along_axes(data, [(0, 25), (0, 30)], axes=[1, 0])
     np.testing.assert_array_equal(out, data[:30, :25])
 
 
 def test_2d_negative():
+    rng = np.random.RandomState(78880634)
     data = rng.random((50, 50))
     out = slice_along_axes(data, [(5, -5), (6, -6)])
     np.testing.assert_array_equal(out, data[5:-5, 6:-6])
@@ -40,6 +41,7 @@ def test_copy():
 
 
 def test_nd_crop():
+    rng = np.random.RandomState(2392534812)
     data = rng.random((50, 50, 50))
     out = slice_along_axes(data, [(0, 25)], axes=[2])
     np.testing.assert_array_equal(out, data[:, :, :25])

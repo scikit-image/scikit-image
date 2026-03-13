@@ -5,8 +5,8 @@ from numpy.testing import assert_allclose, assert_equal
 from skimage.transform import integral_image, integrate
 
 
-np.random.seed(0)
-x = (np.random.rand(50, 50) * 255).astype(np.uint8)
+MODULE_RNG = np.random.RandomState(1444596450)
+x = (MODULE_RNG.rand(50, 50) * 255).astype(np.uint8)
 s = integral_image(x)
 
 
@@ -15,7 +15,7 @@ s = integral_image(x)
 )
 @pytest.mark.parametrize('dtype_as_kwarg', [False, True])
 def test_integral_image_validity(dtype, dtype_as_kwarg):
-    rstate = np.random.default_rng(1234)
+    rstate = np.random.RandomState(1415794085)
     dtype_kwarg = dtype if dtype_as_kwarg else None
     y = (rstate.random((20, 20)) * 255).astype(dtype)
     out = integral_image(y, dtype=dtype_kwarg)

@@ -34,6 +34,7 @@ def test_wiener(dtype, ndim, test_root_dir):
     precomputed result in 2d case.
     """
 
+    # fails with other seeds?
     rng = np.random.RandomState(0)
     psf = np.ones([5] * ndim, dtype=dtype) / 5**ndim
 
@@ -147,13 +148,14 @@ def test_image_shape():
 @pytest.mark.parametrize('ndim', [1, 2, 3])
 def test_richardson_lucy(ndim, test_root_dir):
     psf = np.ones([5] * ndim, dtype=float) / 5**ndim
+    # fails with different seeds?
+    rng = np.random.RandomState(0)
     if ndim != 2:
-        test_img = np.random.randint(0, 100, [30] * ndim)
+        test_img = rng.randint(0, 100, [30] * ndim)
     else:
         test_img = util.img_as_float(camera())
     data = convolve(test_img, psf, 'same')
 
-    rng = np.random.RandomState(0)
     data += 0.1 * data.std() * rng.standard_normal(data.shape)
     deconvolved = restoration.richardson_lucy(data, psf, num_iter=5)
 

@@ -397,7 +397,8 @@ class TestColorconv:
         assert_equal(g.shape, (1, 1))
 
     def test_rgb2gray_contiguous(self):
-        x = np.random.rand(10, 10, 3)
+        rng = np.random.RandomState(3303781891)
+        x = rng.rand(10, 10, 3)
         assert rgb2gray(x).flags["C_CONTIGUOUS"]
         assert rgb2gray(x[:5, :5]).flags["C_CONTIGUOUS"]
 
@@ -411,7 +412,8 @@ class TestColorconv:
             rgb2gray(np.empty((5, 5)))
 
     def test_rgb2gray_dtype(self):
-        img = np.random.rand(10, 10, 3).astype('float64')
+        rng = np.random.RandomState(3091499684)
+        img = rng.rand(10, 10, 3).astype('float64')
         img32 = img.astype('float32')
 
         assert rgb2gray(img).dtype == img.dtype
@@ -859,7 +861,8 @@ def test_gray2rgb():
 
 
 def test_gray2rgb_rgb():
-    x = np.random.rand(5, 5, 4)
+    rng = np.random.RandomState(3564265650)
+    x = rng.rand(5, 5, 4)
     y = gray2rgb(x)
     assert y.shape == (x.shape + (3,))
     for i in range(3):
@@ -870,7 +873,8 @@ def test_gray2rgb_rgb():
 @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgba(shape, channel_axis):
     # nD case
-    img = np.random.random(shape)
+    rng = np.random.RandomState(144170579)
+    img = rng.random(shape)
     rgba = gray2rgba(img, channel_axis=channel_axis)
     assert rgba.ndim == img.ndim + 1
 
@@ -893,7 +897,8 @@ def test_gray2rgba(shape, channel_axis):
 @pytest.mark.parametrize("channel_axis", [0, 1, -1, -2])
 def test_gray2rgb_channel_axis(shape, channel_axis):
     # nD case
-    img = np.random.random(shape)
+    rng = np.random.RandomState(1497347430)
+    img = rng.random(shape)
     rgb = gray2rgb(img, channel_axis=channel_axis)
     assert rgb.ndim == img.ndim + 1
 
@@ -906,7 +911,8 @@ def test_gray2rgb_channel_axis(shape, channel_axis):
 
 
 def test_gray2rgba_dtype():
-    img_f64 = np.random.random((5, 5))
+    rng = np.random.RandomState(1905446730)
+    img_f64 = rng.random((5, 5))
     img_f32 = img_f64.astype('float32')
     img_u8 = img_as_ubyte(img_f64)
     img_int = img_u8.astype(int)
@@ -916,7 +922,8 @@ def test_gray2rgba_dtype():
 
 
 def test_gray2rgba_alpha():
-    img = np.random.random((5, 5))
+    rng = np.random.RandomState(2932260772)
+    img = rng.random((5, 5))
     img_u8 = img_as_ubyte(img)
 
     # Default
@@ -934,7 +941,7 @@ def test_gray2rgba_alpha():
     assert_equal(rgba[..., 3], alpha)
 
     # Array
-    alpha = np.random.random((5, 5))
+    alpha = rng.random((5, 5))
     rgba = gray2rgba(img, alpha)
 
     assert_equal(rgba[..., :3], gray2rgb(img))
@@ -947,7 +954,7 @@ def test_gray2rgba_alpha():
         assert_equal(rgba[..., :3], gray2rgb(img_u8))
 
     # Invalid shape
-    alpha = np.random.random((5, 5, 1))
+    alpha = rng.random((5, 5, 1))
     expected_err_msg = "alpha.shape must match image.shape"
 
     with pytest.raises(ValueError) as err:
@@ -976,7 +983,8 @@ def test_gray2rgba_alpha_fail_cast(alpha, dtype):
     "shape", ([(3,), (2, 3), (4, 5, 3), (5, 4, 5, 3), (4, 5, 4, 5, 3)])
 )
 def test_nD_gray_conversion(func, shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(1405555033)
+    img = rng.rand(*shape)
     out = func(img)
     common_ndim = min(out.ndim, len(shape))
     assert out.shape[:common_ndim] == shape[:common_ndim]
@@ -1019,7 +1027,8 @@ def test_nD_gray_conversion(func, shape):
     "shape", ([(3,), (2, 3), (4, 5, 3), (5, 4, 5, 3), (4, 5, 4, 5, 3)])
 )
 def test_nD_color_conversion(func, shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(2613468644)
+    img = rng.rand(*shape)
     out = func(img)
 
     assert out.shape == img.shape
@@ -1029,7 +1038,8 @@ def test_nD_color_conversion(func, shape):
     "shape", ([(4,), (2, 4), (4, 5, 4), (5, 4, 5, 4), (4, 5, 4, 5, 4)])
 )
 def test_rgba2rgb_nD(shape):
-    img = np.random.rand(*shape)
+    rng = np.random.RandomState(444548061)
+    img = rng.rand(*shape)
     out = rgba2rgb(img)
 
     expected_shape = shape[:-1] + (3,)

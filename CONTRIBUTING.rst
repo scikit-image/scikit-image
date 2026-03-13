@@ -252,6 +252,30 @@ tests should be added to cover all modifications in behavior.
 Tests are located in the ``tests/`` directory.
 We also test examples in docstrings of our package (located in ``src/``).
 
+Prefer creating local ``np.random.RandomState`` instances rather than using the
+global NumPy RNG or ``np.random.default_rng``. The ``RandomState`` class is
+specifically intended for use in test code and the random number streams it
+generates are guaranteed not to change.
+
+Prefer using randomly generated but fixed RNG seeds. The
+``np.random.RandomState`` generator requires seeds between 0 and 2**32-1, so
+you can use the following command-line helper to generate seeds:
+
+.. code-block:: bash
+
+   python -c "import random; print(random.randint(0, 2**32-1))"
+
+And in your test, create a random number generator like so:
+
+.. code-block:: python
+
+   def test_something():
+       # hard-code a seed randomly generated while writing the test
+       rng = np.random.RandomState(2376609660)
+
+If you are comparing with known answers or if your test result otherwise
+depends on a specific RNG seed, add a comment to that effect.
+
 For local development we use ``spin test`` which wraps the
 `pytest testing framework <https://docs.pytest.org/en/latest/>`__.
 Examples of running ``spin test``:
