@@ -6,7 +6,7 @@ from skimage import img_as_float
 from skimage._shared.utils import _supported_float_type
 from skimage.color import rgb2gray
 from skimage.data import camera, retina
-from skimage.filters import frangi, hessian, meijering, sato
+from skimage.filters import frangi, hessian, jerman, meijering, sato
 from skimage.util import crop, invert
 
 
@@ -22,6 +22,9 @@ def test_2d_null_matrix():
 
     assert_equal(sato(a_black, black_ridges=True, mode='reflect'), zeros)
     assert_equal(sato(a_white, black_ridges=False, mode='reflect'), zeros)
+
+    assert_equal(jerman(a_black, black_ridges=True, mode='reflect'), zeros)
+    assert_equal(jerman(a_white, black_ridges=False, mode='reflect'), zeros)
 
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
@@ -45,6 +48,9 @@ def test_3d_null_matrix():
     assert_equal(sato(a_black, black_ridges=True, mode='reflect'), zeros)
     assert_equal(sato(a_white, black_ridges=False, mode='reflect'), zeros)
 
+    assert_equal(jerman(a_black, black_ridges=True, mode='reflect'), zeros)
+    assert_equal(jerman(a_white, black_ridges=False, mode='reflect'), zeros)
+
     assert_allclose(frangi(a_black, black_ridges=True), zeros, atol=1e-3)
     assert_allclose(frangi(a_white, black_ridges=False), zeros, atol=1e-3)
 
@@ -65,6 +71,13 @@ def test_2d_energy_decrease():
     )
     assert_array_less(
         sato(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
+    )
+
+    assert_array_less(
+        jerman(a_black, black_ridges=True, mode='reflect').std(), a_black.std()
+    )
+    assert_array_less(
+        jerman(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
     )
 
     assert_array_less(frangi(a_black, black_ridges=True).std(), a_black.std())
@@ -91,6 +104,13 @@ def test_3d_energy_decrease():
     )
     assert_array_less(
         sato(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
+    )
+
+    assert_array_less(
+        jerman(a_black, black_ridges=True, mode='reflect').std(), a_black.std()
+    )
+    assert_array_less(
+        jerman(a_white, black_ridges=False, mode='reflect').std(), a_white.std()
     )
 
     assert_array_less(frangi(a_black, black_ridges=True).std(), a_black.std())
@@ -127,6 +147,17 @@ def test_2d_linearity():
     assert_allclose(
         sato(1 * a_white, black_ridges=False, mode='reflect'),
         sato(10 * a_white, black_ridges=False, mode='reflect'),
+        atol=1e-3,
+    )
+
+    assert_allclose(
+        jerman(1 * a_black, black_ridges=True, mode='reflect'),
+        jerman(10 * a_black, black_ridges=True, mode='reflect'),
+        atol=1e-3,
+    )
+    assert_allclose(
+        jerman(1 * a_white, black_ridges=False, mode='reflect'),
+        jerman(10 * a_white, black_ridges=False, mode='reflect'),
         atol=1e-3,
     )
 
@@ -182,6 +213,17 @@ def test_3d_linearity():
     )
 
     assert_allclose(
+        jerman(1 * a_black, black_ridges=True, mode='reflect'),
+        jerman(10 * a_black, black_ridges=True, mode='reflect'),
+        atol=1e-3,
+    )
+    assert_allclose(
+        jerman(1 * a_white, black_ridges=False, mode='reflect'),
+        jerman(10 * a_white, black_ridges=False, mode='reflect'),
+        atol=1e-3,
+    )
+
+    assert_allclose(
         frangi(1 * a_black, black_ridges=True),
         frangi(10 * a_black, black_ridges=True),
         atol=1e-3,
@@ -221,6 +263,11 @@ def test_2d_cropped_camera_image():
     )
 
     assert_allclose(
+        jerman(a_black, black_ridges=True, mode='reflect'),
+        jerman(a_white, black_ridges=False, mode='reflect'),
+    )
+
+    assert_allclose(
         frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
     )
 
@@ -232,7 +279,7 @@ def test_2d_cropped_camera_image():
     )
 
 
-@pytest.mark.parametrize('func', [meijering, sato, frangi, hessian])
+@pytest.mark.parametrize('func', [meijering, sato, jerman, frangi, hessian])
 @pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
 def test_ridge_output_dtype(func, dtype):
     img = img_as_float(camera()).astype(dtype, copy=False)
@@ -257,6 +304,11 @@ def test_3d_cropped_camera_image():
     )
 
     assert_allclose(
+        jerman(a_black, black_ridges=True, mode='reflect'),
+        jerman(a_white, black_ridges=False, mode='reflect'),
+    )
+
+    assert_allclose(
         frangi(a_black, black_ridges=True), frangi(a_white, black_ridges=False)
     )
 
@@ -269,7 +321,8 @@ def test_3d_cropped_camera_image():
 
 
 @pytest.mark.parametrize(
-    'func, tol', [(frangi, 1e-2), (meijering, 1e-2), (sato, 2e-3), (hessian, 2e-2)]
+    'func, tol',
+    [(frangi, 1e-2), (meijering, 1e-2), (sato, 2e-3), (jerman, 2e-2), (hessian, 2e-2)],
 )
 def test_border_management(func, tol):
     img = rgb2gray(retina()[300:500, 700:900])
