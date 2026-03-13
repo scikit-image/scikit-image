@@ -1,6 +1,6 @@
 import numpy as np
 from skimage.segmentation import clear_border
-
+import pytest
 from skimage._shared.testing import assert_array_equal, assert_
 
 
@@ -178,3 +178,11 @@ def test_clear_border_non_binary_out_3d():
 
     assert_array_equal(result, expected)
     assert_array_equal(out, result)
+
+
+def test_clear_border_mask_shape_mismatch():
+    labels = np.zeros((10, 10), dtype=int)
+    mask = np.ones((5, 5), dtype=bool)
+
+    with pytest.raises(ValueError, match="labels and mask should have the same shape"):
+        clear_border(labels, mask=mask)
