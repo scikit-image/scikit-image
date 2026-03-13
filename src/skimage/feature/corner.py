@@ -1146,9 +1146,9 @@ def corner_peaks(
     image : ndarray
         Input image.
     min_distance : float, optional
-        The minimal allowed distance separating peaks. Peaks whose distance
-        from each other is less or equal than this value (`<= min_distance`) are
-        removed. `min_distance=1` will preserve all peaks but direct neighbors.
+        The minimum required distance between peaks. If a peak is *less than or
+        equal to* `min_distance` from one with a larger intensity, it is removed.
+        `min_distance=1` will preserve all peaks but direct neighbors.
         See also `p_norm` which defines how the distance is calculated.
     threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
