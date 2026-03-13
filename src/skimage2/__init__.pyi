@@ -1,4 +1,5 @@
 _submodules = [
+    "_shared",
     "data",
     "feature",
     "morphology",
@@ -7,6 +8,7 @@ _submodules = [
 __all__ = _submodules + ["__version__", "ExperimentalAPIWarning"]  # noqa: F822
 
 from . import (
+    _shared,
     data,
     feature,
     morphology,

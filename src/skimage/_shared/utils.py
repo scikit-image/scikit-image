@@ -960,6 +960,17 @@ def convert_to_float(image, preserve_range):
     image : ndarray
         Transformed version of the input.
 
+    Examples
+    --------
+    >>> image = np.array([-10, 20], dtype=np.int8)
+    >>> convert_to_float(image, preserve_range=False)
+    array([-0.07874016,  0.15748031])
+
+    >>> convert_to_float(image.astype(float), preserve_range=False)
+    array([-10.,  20.])
+
+    >>> convert_to_float(image.astype(np.float16), preserve_range=False)
+    array([-10.,  20.], dtype=float32)
     """
     if image.dtype == np.float16:
         return image.astype(np.float32)
