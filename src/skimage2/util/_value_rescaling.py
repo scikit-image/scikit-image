@@ -15,8 +15,6 @@ def rescale_minmax(image):
     ----------
     image : ndarray
         Input image.
-    out : ndarray, optional
-        If given, the rescaled image will be stored in this array.
 
     Returns
     -------
@@ -111,9 +109,6 @@ def rescale_legacy(image):
     ----------
     image : ndarray
         Input image.
-    force_copy : bool, optional
-        Force a copy of the data, irrespective of its current dtype.
-        Otherwise, data is copied as necessary.
 
     Returns
     -------
