@@ -186,11 +186,11 @@ def threshold_local(
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     block_size : int or Sequence of int
         Odd size of pixel neighborhood which is used to calculate the
-        threshold value (e.g. 3, 5, 7, ..., 21, ...).
+        threshold value (e.g., 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighborhood in
         weighted mean image.
@@ -219,7 +219,7 @@ def threshold_local(
 
     Returns
     -------
-    threshold : (M, N[, ...]) ndarray
+    threshold : ndarray of shape (M, N[, ...])
         Threshold image. All pixels in the input image higher than the
         corresponding pixel in the threshold image are considered foreground.
 
@@ -231,11 +231,11 @@ def threshold_local(
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()[:50, :50]
-    >>> binary_image1 = image > threshold_local(image, 15, 'mean')
+    >>> import skimage as ski
+    >>> image = ski.data.camera()[:50, :50]
+    >>> binary_image1 = image > ski.filters.threshold_local(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
-    >>> binary_image2 = image > threshold_local(image, 15, 'generic',
+    >>> binary_image2 = image > ski.filters.threshold_local(image, 15, 'generic',
     ...                                         param=func)
 
     """
@@ -364,9 +364,9 @@ def threshold_otsu(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_otsu(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_otsu(image)
     >>> binary = image <= thresh
 
     Notes
@@ -414,7 +414,7 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -443,9 +443,9 @@ def threshold_yen(image=None, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_yen(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_yen(image)
     >>> binary = image <= thresh
     """
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
@@ -488,7 +488,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -503,7 +503,7 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Returns
     -------
-    threshold : float or int or array
+    threshold : float or int or ndarray
         Threshold value(s).
 
     References
@@ -522,9 +522,9 @@ def threshold_isodata(image=None, nbins=256, return_all=False, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import coins
-    >>> image = coins()
-    >>> thresh = threshold_isodata(image)
+    >>> import skimage as ski
+    >>> image = ski.data.coins()
+    >>> thresh = ski.filters.threshold_isodata(image)
     >>> binary = image > thresh
     """
     counts, bin_centers = _validate_image_histogram(image, hist, nbins)
@@ -644,7 +644,7 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     tolerance : float, optional
         Finish the computation when the change in the threshold in an iteration
@@ -686,9 +686,9 @@ def threshold_li(image, *, tolerance=None, initial_guess=None, iter_callback=Non
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_li(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_li(image)
     >>> binary = image > thresh
     """
     # Remove nan:
@@ -804,7 +804,7 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray, optional
+    image : ndarray of shape (M, N[, ...]), optional
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -839,9 +839,9 @@ def threshold_minimum(image=None, nbins=256, max_num_iter=10000, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_minimum(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_minimum(image)
     >>> binary = image > thresh
     """
 
@@ -888,7 +888,7 @@ def threshold_mean(image):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
 
     Returns
@@ -906,9 +906,9 @@ def threshold_mean(image):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_mean(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_mean(image)
     >>> binary = image > thresh
     """
     return np.mean(image)
@@ -919,7 +919,7 @@ def threshold_triangle(image, nbins=256):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
@@ -942,9 +942,9 @@ def threshold_triangle(image, nbins=256):
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> image = camera()
-    >>> thresh = threshold_triangle(image)
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresh = ski.filters.threshold_triangle(image)
     >>> binary = image > thresh
     """
     # nbins is ignored for integer arrays
@@ -1003,7 +1003,7 @@ def _mean_std(image, w):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     w : int, or iterable of int
         Window size specified as a single odd integer (3, 5, 7, …),
@@ -1012,9 +1012,9 @@ def _mean_std(image, w):
 
     Returns
     -------
-    m : ndarray of float, same shape as ``image``
+    m : ndarray of dtype float and shape (M, N[, ...])
         Local mean of the image.
-    s : ndarray of float, same shape as ``image``
+    s : ndarray of dtype float and shape (M, N[, ...])
         Local standard deviation of the image.
 
     References
@@ -1075,18 +1075,18 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
-        integers (e.g. ``(1, 5, 5)``).
+        integers (e.g., ``(1, 5, 5)``).
     k : float, optional
         Value of parameter k in threshold formula.
 
     Returns
     -------
-    threshold : (M, N[, ...]) ndarray
+    threshold : ndarray of shape (M, N[, ...])
         Threshold mask. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
@@ -1097,10 +1097,10 @@ def threshold_niblack(image, window_size=15, k=0.2):
     The Bradley threshold is a particular case of the Niblack
     one, being equivalent to
 
-    >>> from skimage import data
-    >>> image = data.page()
+    >>> import skimage as ski
+    >>> image = ski.data.page()
     >>> q = 1
-    >>> threshold_image = threshold_niblack(image, k=0) * q
+    >>> threshold_image = ski.filters.threshold_niblack(image, k=0) * q
 
     for some value ``q``. By default, Bradley and Roth use ``q=1``.
 
@@ -1115,9 +1115,9 @@ def threshold_niblack(image, window_size=15, k=0.2):
 
     Examples
     --------
-    >>> from skimage import data
-    >>> image = data.page()
-    >>> threshold_image = threshold_niblack(image, window_size=7, k=0.1)
+    >>> import skimage as ski
+    >>> image = ski.data.page()
+    >>> threshold_image = ski.filters.threshold_niblack(image, window_size=7, k=0.1)
     """
     m, s = _mean_std(image, window_size)
     return m - k * s
@@ -1140,12 +1140,12 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray
+    image : ndarray of shape (M, N[, ...])
         Grayscale input image.
     window_size : int, or iterable of int, optional
         Window size specified as a single odd integer (3, 5, 7, …),
         or an iterable of length ``image.ndim`` containing only odd
-        integers (e.g. ``(1, 5, 5)``).
+        integers (e.g., ``(1, 5, 5)``).
     k : float, optional
         Value of the positive parameter k.
     r : float, optional
@@ -1154,7 +1154,7 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Returns
     -------
-    threshold : (M, N[, ...]) ndarray
+    threshold : ndarray of shape (M, N[, ...])
         Threshold mask. All pixels with an intensity higher than
         this value are assumed to be foreground.
 
@@ -1171,9 +1171,9 @@ def threshold_sauvola(image, window_size=15, k=0.2, r=None):
 
     Examples
     --------
-    >>> from skimage import data
-    >>> image = data.page()
-    >>> t_sauvola = threshold_sauvola(image, window_size=15, k=0.2)
+    >>> import skimage as ski
+    >>> image = ski.data.page()
+    >>> t_sauvola = ski.filters.threshold_sauvola(image, window_size=15, k=0.2)
     >>> binary_image = image > t_sauvola
     """
     if r is None:
@@ -1192,11 +1192,11 @@ def apply_hysteresis_threshold(image, low, high):
 
     Parameters
     ----------
-    image : (M[, ...]) ndarray
+    image : ndarray of shape (M[, ...])
         Grayscale input image.
-    low : float, or array of same shape as ``image``
+    low : float or ndarray of shape (M[, ...])
         Lower threshold.
-    high : float, or array of same shape as ``image``
+    high : float or ndarray of shape (M[, ...])
         Higher threshold.
 
     Returns
@@ -1207,8 +1207,10 @@ def apply_hysteresis_threshold(image, low, high):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> import skimage as ski
     >>> image = np.array([1, 2, 3, 2, 1, 2, 1, 3, 2])
-    >>> apply_hysteresis_threshold(image, 1.5, 2.5).astype(int)
+    >>> ski.filters.apply_hysteresis_threshold(image, 1.5, 2.5).astype(int)
     array([0, 1, 1, 1, 0, 0, 0, 1, 1])
 
     References
@@ -1243,7 +1245,7 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Parameters
     ----------
-    image : (M, N[, ...]) ndarray, optional
+    image : ndarray of shape (M, N[, ...]), optional
         Grayscale input image.
     classes : int, optional
         Number of classes to be thresholded, i.e. the number of resulting
@@ -1258,13 +1260,13 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Returns
     -------
-    thresh : array
+    thresh : ndarray
         Array containing the threshold values for the desired classes.
 
     Raises
     ------
     ValueError
-         If ``image`` contains less grayscale value then the desired
+         If `image` contains less grayscale value then the desired
          number of classes.
 
     Notes
@@ -1274,10 +1276,10 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
     is the number of histogram bins and :math:`C` is the number of
     classes desired.
 
-    If no hist is given, this function will make use of
-    `skimage.exposure.histogram`, which behaves differently than
-    `np.histogram`. While both allowed, use the former for consistent
-    behaviour.
+    If no `hist` is given, this function will make use of
+    :func:`skimage.exposure.histogram`, which behaves differently than
+    :func:`np.histogram`. While both are allowed, use the former for consistent
+    behavior.
 
     The input image must be grayscale.
 
@@ -1294,12 +1296,12 @@ def threshold_multiotsu(image=None, classes=3, nbins=256, *, hist=None):
 
     Examples
     --------
-    >>> from skimage.color import label2rgb
-    >>> from skimage import data
-    >>> image = data.camera()
-    >>> thresholds = threshold_multiotsu(image)
+    >>> import numpy as np
+    >>> import skimage as ski
+    >>> image = ski.data.camera()
+    >>> thresholds = ski.filters.threshold_multiotsu(image)
     >>> regions = np.digitize(image, bins=thresholds)
-    >>> regions_colorized = label2rgb(regions)
+    >>> regions_colorized = ski.color.label2rgb(regions)
     """
     if image is not None and image.ndim > 2 and image.shape[-1] in (3, 4):
         warn(
