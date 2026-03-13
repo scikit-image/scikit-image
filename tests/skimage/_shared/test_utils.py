@@ -192,6 +192,74 @@ def test_decorated_channel_axis_shape(channel_axis):
         assert size == x.shape[channel_axis]
 
 
+def test_channel_axis_options():
+    # Verify options to channel_axis
+    def range_arr(*shape):
+        return np.reshape(np.arange(np.prod(shape)), shape)
+
+    def soa(arr, axis=-1):
+        ax_first = np.moveaxis(arr, axis, 0)
+        slices = (slice(None),) + (0,) * (arr.ndim - 1)
+        return np.sum(ax_first[slices])
+
+    x = range_arr(3, 4, 5)
+    y = range_arr(5, 6, 7)
+    z = range_arr(8, 9, 10)
+
+    def func(x, y, z=0, channel_axis=-1):
+        return soa(x), soa(y), z if np.isscalar(z) else soa(z)
+
+    assert func(x, y, channel_axis=-1) == (soa(x), soa(y), 0)
+    assert func(x, y, channel_axis=0) == (soa(x), soa(y), 0)  # No effect.
+    assert func(x, y, z, channel_axis=-1) == (soa(x), soa(y), soa(z))
+    assert func(x, y, z, channel_axis=0) == (soa(x), soa(y), soa(z))  # No effect.
+
+    dfunc = channel_as_last_axis(multichannel_output=False)(func)
+    assert dfunc(x, y, channel_axis=-1) == (soa(x), soa(y), 0)
+    assert dfunc(x, y, channel_axis=0) == (soa(x, 0), soa(y), 0)
+    assert dfunc(x, y, z, channel_axis=-1) == (soa(x), soa(y), soa(z))
+    assert dfunc(x, y, z, channel_axis=0) == (soa(x, 0), soa(y), soa(z))
+
+    df = channel_as_last_axis(
+        channel_arg_positions=(0, 1, 2), multichannel_output=False
+    )(func)
+    assert df(x, y, channel_axis=-1) == (soa(x), soa(y), 0)
+    assert df(x, y, channel_axis=0) == (soa(x, 0), soa(y, 0), 0)
+    assert df(x, y, z, channel_axis=-1) == (soa(x), soa(y), soa(z))
+    assert df(x, y, z, channel_axis=0) == (soa(x, 0), soa(y, 0), soa(z, 0))
+    df = channel_as_last_axis(
+        channel_kwarg_names=('x', 'y'), multichannel_output=False
+    )(func)
+    assert df(x=x, y=y, channel_axis=-1) == (soa(x), soa(y), 0)
+    assert df(x=x, y=y, channel_axis=0) == (soa(x, 0), soa(y, 0), 0)
+    assert df(x=x, y=y, z=z, channel_axis=-1) == (soa(x), soa(y), soa(z))
+    assert df(x=x, y=y, z=z, channel_axis=0) == (soa(x, 0), soa(y, 0), soa(z))
+
+    # On 2D arrays.
+    x_d, y_d = (arr[:, :, 0] for arr in (x, y))
+    assert dfunc(x_d, y, channel_axis=-1) == (soa(x_d), soa(y), 0)
+    assert dfunc(x_d, y, channel_axis=0) == (soa(x_d, 0), soa(y), 0)
+    dfunc_2d = channel_as_last_axis(
+        multichannel_output=False,
+        check3d=True,
+    )(func)
+    assert dfunc_2d(x_d, y, channel_axis=-1) == (soa(x_d), soa(y), 0)
+    with pytest.raises(ValueError, match='channel_axis must be None or -1'):
+        dfunc_2d(x_d, y, channel_axis=0)
+    assert dfunc_2d(x, y_d, channel_axis=-1) == (soa(x), soa(y_d), 0)
+    # No check except for initial image.
+    assert dfunc_2d(x, y_d, channel_axis=0) == (soa(x_d, 0), soa(y_d), 0)
+    # Check first and second input.
+    dfunc_2d_y = channel_as_last_axis(
+        channel_arg_positions=(0, 1),
+        multichannel_output=False,
+        check3d=True,
+    )(func)
+    assert dfunc_2d_y(x, y_d, channel_axis=-1) == (soa(x), soa(y_d), 0)
+    with pytest.raises(ValueError, match='channel_axis must be None or -1'):
+        dfunc_2d_y(x, y_d, channel_axis=0)
+
+
 @deprecate_func(
     deprecated_version="x", removed_version="y", hint="You are on your own."
 )
