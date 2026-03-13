@@ -21,7 +21,7 @@ def marching_cubes(
 
     In contrast with Lorensen et al. approach [2]_, Lewiner et
     al. algorithm is faster, resolves ambiguities, and guarantees
-    topologically correct results. Therefore, this algorithm generally
+    topologically correct results. Therefore, this algorithm generally is
     a better choice.
 
     Parameters
