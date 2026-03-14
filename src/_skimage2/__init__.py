@@ -16,7 +16,7 @@ class ExperimentalAPIWarning(UserWarning):
 _stub_getattr, _, _stub_all = _lazy.attach_stub(__name__, __file__)
 
 
-# `lazy_loder.attach_stub` is ignoring the stub's `__all__`, so patch it here
+# `lazy_loader.attach_stub` is ignoring the stub's `__all__`, so patch it here
 __all__ = _stub_all + ["__version__", "ExperimentalAPIWarning"]
 
 

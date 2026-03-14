@@ -52,7 +52,8 @@ def test_no_eager_skimage_import(namespace):
     assert namespace in imported_modules
     # `EAGER_IMPORT=true` should have triggered lazy import of submodules
     assert len(imported_modules) > 1
-    # `skimage` should *not* be in triggered imports
+    # `skimage` should *not* be in triggered imports.
+    # `skimage2` and `_skimage2` (imported by the first) are acceptable here.
     for module in imported_modules:
         top_module, *_ = module.partition(".")
         assert top_module != "skimage"
