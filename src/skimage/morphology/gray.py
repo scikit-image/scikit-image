@@ -73,8 +73,9 @@ def _patch_footprint_mirroring(footprint):
     Notes
     -----
     Inside `scipy.ndimage.grey_dilation` the footprint is inverted/mirrored.
-    This inversion is intentional so that the composition of erosion and
-    dilation leads to a correct closing and opening.
+    This inversion is intentional so that `closing` and `opening` (the
+    compositions of `erosion` and `dilation`) are *extensive* and
+    *anti-extensive*.
 
     `skimage.morphology.dilation` accidentally undoes this by mirroring
      the footprint, before passing it to `scipy.ndimage.grey_dilation`.
