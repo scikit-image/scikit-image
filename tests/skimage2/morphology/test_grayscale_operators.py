@@ -145,7 +145,7 @@ class TestMorphology:
             func(img, mode=mode)
 
 
-class TestEccentricStructuringElements:
+class TestAsymmetricFootprints:
     def setup_class(self):
         self.black_pixel = 255 * np.ones((6, 6), dtype=np.uint8)
         self.black_pixel[2, 2] = 0

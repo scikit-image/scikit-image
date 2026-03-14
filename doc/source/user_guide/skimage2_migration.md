@@ -131,13 +131,13 @@ The new counterparts behave differently in the following ways:
 
 - All functions now default to `mode='ignore'` (was `mode='reflect'`).
 - Additionally, `skimage2.morphology.dilation`, `skimage2.morphology.closing`, and `skimage2.morphology.black_tophat` now also mirror the footprint (invert its order in each dimension).
-  Note this only impacts behavior for asymmetric/eccentric footprints.
+  Note this only impacts behavior for asymmetric footprints.
 
 :::{admonition} Background for changes
 :class: note dropdown
 
 The new behavior ensures that, with default parameters, `closing` and `opening` are [_extensive_ and _anti-extensive_](https://en.wikipedia.org/wiki/Mathematical_morphology#Properties_of_the_basic_operators) respectively.
-This change also aligns the behavior for asymmetric/eccentric footprints with SciPy's `scipy.ndimage.grey_*` functions.
+This change also aligns the behavior for asymmetric footprints with SciPy's `scipy.ndimage.grey_*` functions.
 
 Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046), and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
 :::
@@ -156,12 +156,12 @@ To keep the old (`skimage`, v1.x) behavior:
 For example:
 
 ```python
-ski.morphology.dilation(image, footprint=eccentric)
+ski.morphology.dilation(image, footprint=asymmetric)
 
 # Replace above with
-eccentric = ski2.morphology.pad_footprint(eccentric, pad_end=False)
-eccentric = ski2.morphology.mirror_footprint(eccentric)
-ski2.morphology.dilation(image, footprint=eccentric, mode="reflect")
+asymmetric = ski2.morphology.pad_footprint(asymmetric, pad_end=False)
+asymmetric = ski2.morphology.mirror_footprint(asymmetric)
+ski2.morphology.dilation(image, footprint=asymmetric, mode="reflect")
 ```
 
 ## Deprecations prior to skimage2
