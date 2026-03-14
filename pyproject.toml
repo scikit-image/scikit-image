@@ -209,7 +209,7 @@ addopts = [
 # can find docstests by importing.
 testpaths = [
     "skimage",
-    "skimage2",
+    "_skimage2",  # Exclude `skimage2` and its raised `ExperimentalAPIWarning`
     "./tests/",
 ]
 
@@ -217,7 +217,6 @@ log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
     "error",
-    "ignore:Importing from the `skimage2` namespace is experimental:UserWarning",
     "ignore::skimage.util.PendingSkimage2Change",
     "ignore:.*use `imageio` or other I/O packages directly.*:FutureWarning",
     # warn by pyamg in ruge_stuben_solver

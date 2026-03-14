@@ -2,12 +2,12 @@
 Grayscale morphological operations
 """
 
-from skimage2.morphology._footprints import _default_footprint
+from _skimage2.morphology._footprints import _default_footprint
 
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
 
-import skimage2 as ski2
+import _skimage2 as ski2
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']

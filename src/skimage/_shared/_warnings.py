@@ -171,6 +171,7 @@ def warn_external(message, *, category=None):
         kwargs['skip_file_prefixes'] = (
             str(basedir / 'skimage'),
             str(basedir / 'skimage2'),
+            str(basedir / '_skimage2'),
         )
     else:
         frame = sys._getframe()
