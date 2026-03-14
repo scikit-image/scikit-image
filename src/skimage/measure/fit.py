@@ -158,7 +158,9 @@ def _deprecate_model_params(func):
         stop_version=_PARAMS_DEP_STOP,
         modify_docstring=False,
     )(func)
-    func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
+    # Need `if` for PYTHONOPTIMIZE=2, where docstrings are missing
+    if func.__doc__:
+        func.__doc__ = func.__doc__.replace('{{ start_version }}', _PARAMS_DEP_START)
     return func
 
 
