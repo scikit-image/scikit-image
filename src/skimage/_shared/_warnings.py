@@ -183,7 +183,7 @@ def warn_external(message, *, category=None):
                 kwargs['stacklevel'] = stacklevel
                 break
             in_skimage_namespace = re.match(
-                r"\Askimage(2)?(\Z|\.)",
+                r"\A_?skimage(2)?(\Z|\.)",
                 # Work around sphinx-gallery not setting __name__.
                 frame.f_globals.get("__name__", ""),
             )
