@@ -103,9 +103,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion shrinks bright regions and enlarges dark regions.
-    It sets a pixel at ``(i, j)`` to the minimum over all pixels in the
-    neighborhood centered at ``(i, j)``. The values where the footprint is 1
-    define this neighborhood.
+    It assigns each pixel the minimum of the *active neighborhood* of that pixel.
+    The values where `footprint` is 1 define this *active neighborhood*.
 
     Parameters
     ----------
@@ -208,9 +207,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation enlarges bright regions and shrinks dark regions.
-    It sets a pixel at ``(i, j)`` to the maximum over all pixels in the
-    neighborhood centered at ``(i, j)``. The values where the footprint is 1
-    define this neighborhood.
+    It assigns each pixel the maximum of the *active neighborhood* of that pixel.
+    The values where `footprint` is 1 define this *active neighborhood*.
 
     Parameters
     ----------
