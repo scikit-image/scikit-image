@@ -1050,7 +1050,7 @@ def mirror_footprint(footprint):
 
     """
     warn_external(
-        "`skimage.morphology.mirror_footprint` is deprecated in favor of"
+        "`skimage.morphology.mirror_footprint` is deprecated in favor of "
         "`skimage2.morphology.mirror_footprint` with identical behavior.",
         category=PendingSkimage2Change,
     )
@@ -1085,7 +1085,7 @@ def pad_footprint(footprint, *, pad_end=True):
 
     """
     warn_external(
-        "`skimage.morphology.pad_footprint` is deprecated in favor of"
+        "`skimage.morphology.pad_footprint` is deprecated in favor of "
         "`skimage2.morphology.pad_footprint` with identical behavior.",
         category=PendingSkimage2Change,
     )
