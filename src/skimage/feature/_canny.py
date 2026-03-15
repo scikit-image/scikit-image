@@ -106,7 +106,8 @@ def canny(
     warn_external(
         "`skimage.feature.canny` is deprecated in favor of `skimage2.feature.canny`. "
         "The default of the optional parameter `mode` has been changed from 'constant' "
-        "to 'nearest'. To keep the old (`skimage`, v1.x) behavior, use:\n\n"
+        "to 'nearest'. If you set this parameter explicitly, you only need to update the import. "
+        "Otherwise, to keep the old (`skimage`, v1.x) behavior, use:\n\n"
         "    import skimage2 as ski2\n"
         "    ski2.feature.canny(\n"
         "        ...,\n"
