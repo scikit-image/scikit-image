@@ -6,10 +6,7 @@ from skimage._shared._warnings import warn_external
 
 
 def rescale_minmax(image):
-    """Rescale `image` to the value range [0, 1].
-
-    Rescaling values between [0, 1], or *min-max normalization* [1]_,
-    is a simple method to ensure that data is inside a range.
+    """Min-max normalize image values to the range [0, 1].
 
     Parameters
     ----------
