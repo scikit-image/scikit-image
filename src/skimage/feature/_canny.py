@@ -45,7 +45,7 @@ def canny(
     mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The `mode` parameter determines how the array borders are
         handled during Gaussian filtering, where `cval` is the value when
-        mode is equal to 'constant'.
+        `mode` is equal to 'constant'.
     cval : float, optional
         Value to fill past edges of input if `mode` is 'constant'.
 
@@ -105,8 +105,8 @@ def canny(
     """
     warn_external(
         "`skimage.feature.canny` is deprecated in favor of `skimage2.feature.canny`. "
-        "The default of the optional parameter `mode` has been changed from `constant` "
-        "to `nearest`. To keep the old (`skimage`, v1.x) behavior, use:\n\n"
+        "The default of the optional parameter `mode` has been changed from 'constant' "
+        "to 'nearest'. To keep the old (`skimage`, v1.x) behavior, use:\n\n"
         "    import skimage2 as ski2\n"
         "    ski2.feature.canny(\n"
         "        ...,\n"

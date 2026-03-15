@@ -130,7 +130,7 @@ import `footprint_rectangle` from skimage2 once available.
 
 ### `skimage.feature.canny`
 
-This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from `constant` to `nearest`.
+This function is replaced by `skimage2.feature.canny` with a new default for the optional parameter `mode` which changes from 'constant' to 'nearest'.
 
 To keep the old (`skimage`, v1.x) behavior, use
 

@@ -28,9 +28,9 @@ def _preprocess(image, mask, sigma, mode, cval):
         deviations of the Gaussian filter are given for each axis as a
         sequence, or as a single number, in which case it is equal for
         all axes.
-    mode : str, {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}
         The `mode` parameter determines how the array borders are
-        handled, where `cval` is the value when mode is equal to
+        handled, where `cval` is the value when `mode` is equal to
         'constant'.
     cval : float, optional
         Value to fill past edges of input `image` if `mode` is 'constant'.
@@ -45,11 +45,11 @@ def _preprocess(image, mask, sigma, mode, cval):
     Notes
     -----
     This function calculates the fractional contribution of masked pixels
-    by applying the function to the mask (which gets you the fraction of
+    by applying the smoothing to the mask (which gets you the fraction of
     the pixel data that's due to significant points). We then mask the image
-    and apply the function. The resulting values will be lower by the
-    bleed-over fraction, so you can recalibrate by dividing by the function
-    on the mask to recover the effect of smoothing from just the significant
+    and apply the smoothing. The resulting values will be lowered by the
+    bleed-over fraction, so you can recalibrate by dividing by the smoothed
+    out mask to recover the effect of smoothing from just the significant
     pixels.
     """
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval, preserve_range=False)
@@ -78,18 +78,18 @@ def _preprocess(image, mask, sigma, mode, cval):
 
     if compute_bleedover:
         # Compute the fractional contribution of masked pixels by applying
-        # the function to the mask (which gets you the fraction of the
-        # pixel data that's due to significant points)
+        # the smoothing to the mask (which gets you the fraction of the
+        # pixel data that's due to significant points).
         bleed_over = (
             gaussian(mask.astype(float_type, copy=False), **gaussian_kwargs)
             + np.finfo(float_type).eps
         )
 
-    # Smooth the masked image
+    # Smooth out the masked image.
     smoothed_image = gaussian(masked_image, **gaussian_kwargs)
 
     # Lower the result by the bleed-over fraction, so you can
-    # recalibrate by dividing by the function on the mask to recover
+    # recalibrate by dividing by the smoothed out mask to recover
     # the effect of smoothing from just the significant pixels.
     if compute_bleedover:
         smoothed_image /= bleed_over
