@@ -8,9 +8,6 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
 import numpy as np
 import scipy.ndimage as ndi
 
-from skimage.util.dtype import dtype_limits
-from skimage._shared.filters import gaussian
-from skimage._shared.utils import _supported_float_type, check_nD
 from ._canny_cy import _nonmaximum_suppression_bilinear
 
 
@@ -52,6 +49,10 @@ def _preprocess(image, mask, sigma, mode, cval):
     out mask to recover the effect of smoothing from just the significant
     pixels.
     """
+    # TODO Undo inlined imports once ported
+    from skimage._shared.filters import gaussian
+    from skimage._shared.utils import _supported_float_type
+
     gaussian_kwargs = dict(sigma=sigma, mode=mode, cval=cval, preserve_range=False)
     compute_bleedover = mode == 'constant' or mask is not None
     float_type = _supported_float_type(image.dtype)
@@ -190,6 +191,9 @@ def canny(
     >>> edges2 = ski2.feature.canny(im, sigma=3)
 
     """
+    # TODO Undo inlined imports once ported
+    from skimage.util.dtype import dtype_limits
+    from skimage._shared.utils import check_nD
 
     # Regarding masks, any point touching a masked point will have a gradient
     # that is "infected" by the masked point, so it's enough to erode the
