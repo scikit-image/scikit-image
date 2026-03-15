@@ -1,9 +1,5 @@
 import numpy as np
 
-import skimage as ski
-from skimage._shared.utils import _supported_float_type
-from skimage._shared._warnings import warn_external
-
 
 def rescale_minmax(image):
     """Min-max normalize image values to the range [0, 1].
@@ -41,6 +37,10 @@ def rescale_minmax(image):
     >>> rescale_minmax(image)
     array([0. , 0.5, 1. ])
     """
+    # TODO Undo inlined imports once ported
+    from skimage._shared.utils import _supported_float_type
+    from skimage._shared._warnings import warn_external
+
     # Prepare `out` array, `lower` and `higher` with exact dtype to avoid
     # unexpected promotion and / or precision problems during normalization
     dtype = _supported_float_type(image.dtype, allow_complex=False)
@@ -125,7 +125,10 @@ def rescale_legacy(image):
     >>> rescale_legacy(image)
     array([0.        , 0.49803922, 1.        ])
     """
-    out = ski.util.img_as_float(image)
+    # TODO Undo inlined imports once ported
+    from skimage.util.dtype import img_as_float
+
+    out = img_as_float(image)
     return out
 
 
