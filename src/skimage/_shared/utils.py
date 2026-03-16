@@ -714,6 +714,9 @@ class deprecate_func:
         else:
             # Insert after first line
             short, _, remaining = wrapped.__doc__.partition("\n\n")
+            if sys.version_info[:2] < (3, 13):
+                # Reproduce unstripped docstrings prior to Python 3.13
+                note = textwrap.indent(note, prefix="    ")
             new_doc = f"{short}\n\n{note}\n\n{remaining}"
             wrapped.__doc__ = new_doc
 
