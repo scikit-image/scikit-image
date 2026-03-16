@@ -19,7 +19,4 @@ def test_default_mode_is_nearest(mode, should_match):
     image = rng.random((64, 64))
     result_default = feature.canny(image)
     result_other = feature.canny(image, mode=mode)
-    if should_match:
-        np.testing.assert_array_equal(result_default, result_other)
-    else:
-        assert not np.array_equal(result_default, result_other)
+    assert np.array_equal(result_default, result_other) == should_match
