@@ -47,13 +47,13 @@ These are non-binding general guidelines but arguments should be made for except
 
 ## Documentation
 
-- All code should be documented, to the same `standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`\_ as NumPy and SciPy.
+- All code should be documented, to the same [standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>) as NumPy and SciPy.
 
 - For new functionality, always add an example to the gallery.
 
 - Refer to array dimensions as _i, j, k_, not as _x, y, z_ or _(plane,) row, column_.
   Exceptions can be made where the concept of a plane, rows or columns is intrinsic to the algorithm.
-  See :ref:`Coordinate conventions <numpy-images-coordinate-conventions>` in the user guide for more information.
+  See {ref}`Coordinate conventions <numpy-images-coordinate-conventions>` in the user guide for more information.
 
 - When documenting array parameters, use `image : ndarray of shape (M, N)` and then refer to `M` and `N` in the docstring, if necessary.
 
