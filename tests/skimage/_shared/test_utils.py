@@ -1,6 +1,7 @@
 import re
 import sys
 import warnings
+from textwrap import dedent
 
 import numpy as np
 import pytest
@@ -213,6 +214,17 @@ def test_deprecate_func():
         "`_deprecated_func` is deprecated since version x and will be removed in "
         "version y. You are on your own."
     )
+
+    assert _deprecated_func.__doc__ == dedent("""\
+    Dummy function used in `test_deprecate_func`.
+
+    .. deprecated:: x
+       `_deprecated_func` is deprecated since version x and will be removed
+       in version y. You are on your own.
+
+    The decorated function must be outside the test function, otherwise it
+    seems that the warning does not point at the calling location.
+    """)
 
 
 @deprecate_parameter("old1", start_version="0.10", stop_version="0.12")
