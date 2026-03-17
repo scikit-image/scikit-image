@@ -184,7 +184,7 @@ Import hierarchy
 
 Test coverage of both APIs
   Each API, especially the differences, should be covered by independent tests.
-  Behavior that is identical between both APIs may be covered by only on test suite, ideally covering the wrapping API.
+  Behavior that is identical between both APIs may be covered by only one test suite, ideally covering the wrapping API.
 
 Small API difference
   Keep the differences between the old and new API small to make the eventual transition easier for users.
@@ -225,7 +225,7 @@ It should link to the migration guide and should explain how to enable :ref:`mor
    At this stage ``skimage2`` should no longer need to import from ``skimage`` to avoid triggering this new warning.
    If this isn't the case, ``skimage`` needs to be split into a public and a private Python package that ``skimage2`` can (lazily) import from without triggering the new deprecation warning.
 
-This state we will published in a full release versioned 2.0.0.
+This state will be published in a full release versioned 2.0.0.
 
 From now on importing ``skimage2`` is encouraged.
 Development of new features should only happen in ``skimage2``.
