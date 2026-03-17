@@ -178,7 +178,7 @@ def canny(
 
     Examples
     --------
-    >>> import skimage2 as ski2
+    >>> import _skimage2 as ski2
     >>> import numpy as np
     >>> rng = np.random.default_rng()
     >>> # Generate noisy image of a square

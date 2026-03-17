@@ -9,7 +9,7 @@ foreach pyx_file: pyx_files
     cpp_args: cython_cpp_args,
     dependencies: [np_dep],
     install: true,
-    subdir: 'skimage2/feature'
+    subdir: '_skimage2/feature'
   )
 endforeach
 
@@ -23,5 +23,5 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage2/feature'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/feature'  # Folder relative to site-packages to install to
 )

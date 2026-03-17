@@ -1,6 +1,6 @@
 import warnings
 
-import skimage2 as ski2
+import _skimage2 as ski2
 
 from ..util import PendingSkimage2Change
 

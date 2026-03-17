@@ -16,7 +16,7 @@ if is_windows
     # Manual add of MS_WIN64 macro when not using MSVC.
     # https://bugs.python.org/issue28267
     bitness = run_command(
-      'skimage2/_build_utils/gcc_build_bitness.py',
+      '_skimage2/_build_utils/gcc_build_bitness.py',
       check: true
     ).stdout().strip()
     if bitness == '64'
@@ -112,7 +112,7 @@ else
   use_math_defines = []
 endif
 
-cython_cli = find_program('skimage2/_build_utils/cythoner.py')
+cython_cli = find_program('_skimage2/_build_utils/cythoner.py')
 cy = meson.get_compiler('cython')
 
 cython_codegen_args = ['@INPUT@', '@OUTPUT@']
@@ -138,4 +138,5 @@ cython_cpp_args = cython_c_args
 
 # call `subdir` after defining the cython constants
 subdir('skimage')
+subdir('_skimage2')
 subdir('skimage2')

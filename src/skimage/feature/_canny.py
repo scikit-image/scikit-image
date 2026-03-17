@@ -5,7 +5,7 @@ Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
 """
 
-import skimage2 as ski2
+import _skimage2 as ski2
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
 
