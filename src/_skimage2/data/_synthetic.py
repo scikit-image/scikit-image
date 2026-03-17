@@ -49,7 +49,7 @@ def binary_blobs(
 
     Examples
     --------
-    >>> import skimage2 as ski2
+    >>> import _skimage2 as ski2
     >>> ski2.data.binary_blobs(shape=(5, 5), blob_size=1)  # doctest: +SKIP
     array([[ True, False,  True,  True,  True],
            [ True,  True,  True, False,  True],
