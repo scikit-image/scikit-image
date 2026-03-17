@@ -71,6 +71,7 @@ docs = [
     'sphinx-gallery[parallel]>=0.18',
     'numpydoc>=1.7',
     'sphinx-copybutton',
+    'sphinx-togglebutton',
     'matplotlib>=3.10',
     'dask[array]>=2025.1.0',
     'pandas>=2.0',
