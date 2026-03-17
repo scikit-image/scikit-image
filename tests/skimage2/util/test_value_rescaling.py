@@ -7,7 +7,7 @@ from skimage._shared.testing import assert_stacklevel
 from skimage._shared.utils import _supported_float_type
 from skimage._shared.dtype import numeric_dtype_min_max
 
-from skimage2.util._value_rescaling import rescale_minmax, _prescale_value_range
+from _skimage2.util._value_rescaling import rescale_minmax, _prescale_value_range
 
 
 class TestRescaleMinmax:

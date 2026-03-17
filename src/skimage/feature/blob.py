@@ -4,7 +4,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy import spatial
 
-from skimage2.util._value_rescaling import _prescale_value_range
+from _skimage2.util._value_rescaling import _prescale_value_range
 
 from .._shared.filters import gaussian
 from .._shared.utils import (

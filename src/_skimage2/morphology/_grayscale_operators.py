@@ -17,7 +17,8 @@ def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
     Parameters
     ----------
     operator : Callable
-        Morphological operator.
+        Morphological operator with signature
+        ``f(image, *, footprint, out, mode, cval) -> image``.
     image : ndarray
         The image to apply the operator to.
     footprints : tuple
@@ -102,9 +103,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological erosion of an image.
 
     Morphological erosion shrinks bright regions and enlarges dark regions.
-    It sets a pixel at ``(i, j)`` to the minimum over all pixels in the neighborhood
-    centered at ``(i, j)``. The values where the footprint is 1 define this
-    neighborhood.
+    It assigns each pixel the minimum of the *active neighborhood* of that pixel.
+    The values where `footprint` is 1 define this *active neighborhood*.
 
     Parameters
     ----------
@@ -112,9 +112,9 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -152,6 +152,8 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
     --------
@@ -205,9 +207,8 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     """Return grayscale morphological dilation of an image.
 
     Morphological dilation enlarges bright regions and shrinks dark regions.
-    It sets a pixel at ``(i, j)`` to the maximum over all pixels in the neighborhood
-    centered at ``(i, j)``. The values where the footprint is 1 define this
-    neighborhood.
+    It assigns each pixel the maximum of the *active neighborhood* of that pixel.
+    The values where `footprint` is 1 define this *active neighborhood*.
 
     Parameters
     ----------
@@ -215,9 +216,9 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -249,11 +250,14 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
+
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
     --------
@@ -276,7 +280,6 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     # TODO Undo inlined imports once ported
     from skimage.morphology.footprints import (
         _footprint_is_sequence,
-        mirror_footprint,
         pad_footprint,
     )
 
@@ -290,9 +293,6 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
 
     footprint = pad_footprint(footprint, pad_end=False)
-    # Note that `ndi.grey_dilation` mirrors the footprint and this
-    # additional inversion should be removed in skimage2, see gh-6676.
-    footprint = mirror_footprint(footprint)
     if not _footprint_is_sequence(footprint):
         footprint = [(footprint, 1)]
     elif len(footprint) == 0:
@@ -324,9 +324,9 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -355,11 +355,14 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
+
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
     --------
@@ -380,11 +383,11 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     """
     # TODO Undo inlined imports once ported
-    from skimage.morphology.footprints import mirror_footprint, pad_footprint
+    from skimage.morphology.footprints import pad_footprint
 
     footprint = pad_footprint(footprint, pad_end=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
-    out = dilation(eroded, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
+    out = dilation(eroded, footprint, out=out, mode=mode, cval=cval)
     return out
 
 
@@ -403,9 +406,9 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -434,11 +437,14 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
+
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     Examples
     --------
@@ -459,11 +465,11 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
 
     """
     # TODO Undo inlined imports once ported
-    from skimage.morphology.footprints import mirror_footprint, pad_footprint
+    from skimage.morphology.footprints import pad_footprint
 
     footprint = pad_footprint(footprint, pad_end=False)
     dilated = dilation(image, footprint, mode=mode, cval=cval)
-    out = erosion(dilated, mirror_footprint(footprint), out=out, mode=mode, cval=cval)
+    out = erosion(dilated, footprint, out=out, mode=mode, cval=cval)
     return out
 
 
@@ -481,9 +487,9 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -501,6 +507,10 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     out : ndarray, same shape and dtype as `image`
         The result of the morphological white top hat.
 
+    See Also
+    --------
+    skimage2.morphology.black_tophat
+
     Notes
     -----
     The footprint can also be a provided as a sequence of 2-tuples where the
@@ -509,15 +519,14 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    See Also
-    --------
-    black_tophat
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     References
     ----------
@@ -573,9 +582,9 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
         Input image.
     footprint : ndarray or tuple, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
-        If None, use a cross-shaped footprint (so-called 1-connectivity). The footprint
-        can also be provided as a sequence of smaller footprints as described
-        in the notes below.
+        If None, use a cross-shaped footprint (so-called *1-connectivity*).
+        The footprint can also be provided as a sequence of smaller footprints
+        as described in the notes below. See _Notes_ for more.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -593,6 +602,10 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     out : ndarray, same shape and dtype as `image`
         The result of the morphological black top hat.
 
+    See Also
+    --------
+    skimage2.morphology.white_tophat
+
     Notes
     -----
     The footprint can also be a provided as a sequence of 2-tuples where the
@@ -601,15 +614,14 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     example ``footprint=[(np.ones((9, 1)), 1), (np.ones((1, 9)), 1)]``
     would apply a 9x1 footprint followed by a 1x9 footprint resulting in a net
     effect that is the same as ``footprint=np.ones((9, 9))``, but with lower
-    computational cost. Most of the builtin footprints such as
+    computational cost. Most of the built-in footprints such as
     :func:`skimage2.morphology.disk` provide an option to automatically generate
     a footprint sequence of this type. Refer to the example
     :ref:`sphx_glr_download_auto_examples_numpy_operations_plot_footprint_decompositions.py`
     for more insights.
 
-    See Also
-    --------
-    white_tophat
+    If `footprint` contains even-sized dimensions, they are padded with zeros to
+    an odd size at the front (at index 0) with :func:`pad_footprint`.
 
     References
     ----------

@@ -4,8 +4,3 @@ py3.install_sources(
   pure: false,
   subdir: 'skimage2'
 )
-
-subdir('data')
-subdir('feature')
-subdir('morphology')
-subdir('util')

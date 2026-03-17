@@ -5,8 +5,8 @@ import numpy as np
 from numpy.testing import assert_equal
 from scipy.spatial.distance import pdist, minkowski
 
-from skimage2.feature._peaks import _ensure_spacing
-from skimage2.feature import peak_local_max
+from _skimage2.feature._peaks import _ensure_spacing
+from _skimage2.feature import peak_local_max
 
 
 @pytest.mark.parametrize("p", [1, 2, np.inf])
