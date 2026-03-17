@@ -330,7 +330,7 @@ def peak_local_max(
 
     Examples
     --------
-    >>> import skimage2 as ski2
+    >>> import _skimage2 as ski2
     >>> image = np.array(
     ...     [[1, 0, 0, 0, 0, 0, 0],
     ...      [0, 0, 0, 0, 0, 0, 0],

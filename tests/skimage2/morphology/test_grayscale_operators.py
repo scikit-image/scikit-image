@@ -7,7 +7,7 @@ import skimage as ski
 from skimage.morphology import footprint_rectangle, mirror_footprint, pad_footprint
 from skimage._shared.testing import fetch
 
-import skimage2.morphology._grayscale_operators as gray
+import _skimage2.morphology._grayscale_operators as gray
 
 
 @pytest.fixture
