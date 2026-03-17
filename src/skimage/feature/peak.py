@@ -7,7 +7,7 @@ from .. import measure
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
 
-import skimage2 as ski2
+import _skimage2 as ski2
 
 
 def peak_local_max(

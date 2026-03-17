@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage2.morphology._footprints import (
+from _skimage2.morphology._footprints import (
     _default_footprint,
     _footprint_is_sequence,
     pad_footprint,

@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 
-from skimage2.morphology._footprints import (
+from _skimage2.morphology._footprints import (
     _footprint_is_sequence,
     mirror_footprint as sk2_mirror_footprint,
     pad_footprint as sk2_pad_footprint,
