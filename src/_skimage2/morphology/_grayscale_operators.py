@@ -173,7 +173,7 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.morphology.footprints import _footprint_is_sequence, pad_footprint
 
     if out is None:
@@ -277,7 +277,7 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.morphology.footprints import (
         _footprint_is_sequence,
         pad_footprint,
@@ -382,7 +382,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.morphology.footprints import pad_footprint
 
     footprint = pad_footprint(footprint, pad_end=False)
@@ -464,7 +464,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.morphology.footprints import pad_footprint
 
     footprint = pad_footprint(footprint, pad_end=False)

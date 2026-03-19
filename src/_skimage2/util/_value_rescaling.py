@@ -38,7 +38,7 @@ def rescale_minmax(image):
     >>> rescale_minmax(image)
     array([0. , 0.5, 1. ])
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage._shared.utils import _supported_float_type
     from skimage._shared._warnings import warn_external
 
@@ -143,7 +143,7 @@ def rescale_legacy(image):
     >>> rescale_legacy(np.array([0, 127, 255], dtype=float))
     array([  0., 127., 255.])
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.util.dtype import img_as_float
 
     out = img_as_float(image)
@@ -202,7 +202,7 @@ def _prescale_value_range(image, *, mode):
     array([-0.07874016,  0.35433071,  0.78740157])
 
     >>> _prescale_value_range(image, mode="none")
-    array([-10, 45, 100], dtype=int8)
+    array([-10,  45, 100], dtype=int8)
     """
     if mode == "none":
         # Exit early
