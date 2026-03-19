@@ -174,7 +174,7 @@ def canny(
            Pattern Analysis and Machine Intelligence, 8:679-714, 1986
            :DOI:`10.1109/TPAMI.1986.4767851`
     .. [2] William Green's Canny tutorial
-           https://en.wikipedia.org/wiki/Canny_edge_detector
+           https://web.archive.org/web/20110224083140/http://www.pages.drexel.edu/~weg22/can_tut.html
 
     Examples
     --------
