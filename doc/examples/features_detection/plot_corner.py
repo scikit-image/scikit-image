@@ -14,7 +14,7 @@ subpixel position of corners ([1]_, [2]_).
 from matplotlib import pyplot as plt
 
 from skimage import data
-from skimage.feature import corner_harris, corner_subpix, corner_peaks
+from skimage.feature import corner_harris, corner_subpix, peak_local_max
 from skimage.transform import warp, AffineTransform
 from skimage.draw import ellipse
 
@@ -28,7 +28,7 @@ image[rr, cc] = 1
 image[30:80, 200:250] = 1
 image[80:130, 250:300] = 1
 
-coords = corner_peaks(corner_harris(image), min_distance=5, threshold_rel=0.02)
+coords = peak_local_max(corner_harris(image), min_distance=5.1, threshold_rel=0.02)
 coords_subpix = corner_subpix(image, coords, window_size=13)
 
 fig, ax = plt.subplots()

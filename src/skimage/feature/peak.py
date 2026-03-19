@@ -41,15 +41,17 @@ def peak_local_max(
     image : ndarray
         Input image.
     min_distance : float, optional
-        The minimal allowed distance separating peaks. To find the
-        maximum number of peaks, use `min_distance=1`.
-    threshold_abs : float or None, optional
+        The minimum required distance between peaks. If a peak is *less than*
+        `min_distance` from one with a larger intensity, it is removed.
+        `min_distance=1` will preserve all peaks, even direct neighbors.
+        See also `p_norm` which defines how the distance is calculated.
+    threshold_abs : float, optional
         Minimum intensity of peaks. By default, the absolute threshold is
         the minimum intensity of the image.
-    threshold_rel : float or None, optional
+    threshold_rel : float, optional
         Minimum intensity of peaks, calculated as
         ``max(image) * threshold_rel``.
-    exclude_border : int, tuple of ints, or bool, optional
+    exclude_border : int or tuple of int(s) or bool, optional
         Control peak detection close to the border of `image`.
 
         ``True``
@@ -59,22 +61,35 @@ def peak_local_max(
         positive integer
             Exclude peaks, that are within this given distance of the border.
         tuple of positive integers
-            Same as for a single integer but with different distances for each
-            respective dimension.
+            Same as for a single integer, but specified for each axis.
+            E.g., for a 2D image, ``(5, 10)`` would reject peaks within 5 pixels
+            of the border in the first dimension, and within 10 pixels in the
+            second dimension.
 
         The value of `p_norm` has no impact on this border distance.
     num_peaks : int, optional
-        Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
-        return `num_peaks` peaks based on highest peak intensity.
-    footprint : ndarray of bools, optional
-        Binary mask that determines the neighborhood (where ``True``) in which
+        Maximum number of peaks. When the number of found peaks exceeds it,
+        drop peaks with the lowest intensity until the limit is satisfied.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated, use ``None`` instead
+            (equivalent behavior).
+
+    footprint : ndarray of dtype bool, optional
+        Mask that determines the neighborhood (where ``True``) in which
         a peak must be a local maximum (see *Notes*). If not given, defaults to
-        an array of ones of size ``floor(2 * min_distance + 1)``.
-    labels : ndarray of ints, optional
-        If provided, each unique region `labels == value` represents a unique
-        region to search for peaks. Zero is reserved for background.
+        an array of ``True`` of size ``floor(2 * min_distance + 1)`` along each
+        axis.
+    labels : ndarray of dtype int, optional
+        If provided, defines unique regions (``labels == region_label``) to
+        search for peaks. Zero is reserved for the background.
     num_peaks_per_label : int, optional
         Maximum number of peaks for each label.
+
+        .. deprecated:: 0.27
+            Passing ``numpy.inf`` is deprecated,
+            use the equivalent ``None`` instead.
+
     p_norm : float, optional
         Which Minkowski p-norm to use. Should be in the range [1, inf].
         A finite large p may cause a ValueError if overflow can occur.
@@ -83,7 +98,7 @@ def peak_local_max(
 
     Returns
     -------
-    output : ndarray
+    output : ndarray of dtype int
         The coordinates of the peaks.
 
     Notes
@@ -93,10 +108,6 @@ def peak_local_max(
     local maxima. This operation dilates the original image. After comparison
     of the dilated and original images, this function returns the coordinates
     of the peaks where the dilated image equals the original image.
-
-    See also
-    --------
-    skimage.feature.corner_peaks
 
     Examples
     --------
@@ -143,7 +154,8 @@ def peak_local_max(
           was `numpy.inf` (Chebyshev distance)
         * Parameter `exclude_border` defaults to 1, was `True`
         * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`, or `min_distance` instead of `True`
+          pass 0 instead of `False`,
+          or the value of `min_distance` instead of `True`
         * Parameters after `image` are keyword-only
 
         To keep the old behavior when switching to `skimage2`, update your call
@@ -154,7 +166,7 @@ def peak_local_max(
         * `exclude_border=False`, use `exclude_border=0`
         * `exclude_border=<int>`, no change necessary
         * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>, no change necessary
+        * `p_norm=<float>`, no change necessary
 
         Other keyword parameters can be left unchanged.
         """),
