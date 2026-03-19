@@ -58,19 +58,19 @@ def median(
     Notes
     -----
     The `behavior` parameter determines which implementation is used:
-
-    - "ndimage" (default): uses `scipy.ndimage.median_filter`, supports all data types and applies padding modes (e.g., reflect, constant) to handle image boundaries.
-
-    - "rank": uses `skimage.filters.rank.median`, requires integer dtype images and truncates the footprint at image borders.
-
-    These two implementations differ significantly in how they handle image boundaries and data types.
-
-    This may lead to different results.
-
-    .. warning::
-       The "rank" behavior may produce different results compared to "ndimage",
-       especially near image edges and when using non-integer images.
-
+    
+    - ``ndimage`` (default): uses `scipy.ndimage.median_filter`,
+      supports all data types and applies padding modes (e.g.,
+      reflect, constant) to handle image boundaries.
+  
+    - ``rank``: uses `skimage.filters.rank.median`, requires
+      unsigned integer images and truncates the footprint at
+      image borders.
+  
+    .. note::
+       The "rank" behavior may produce different results compared
+       to "ndimage", especially near image edges.
+       
     See also
     --------
     skimage.filters.rank.median : Rank-based implementation of the median
