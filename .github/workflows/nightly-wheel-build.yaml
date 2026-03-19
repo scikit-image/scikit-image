@@ -30,7 +30,13 @@ jobs:
     needs: call-workflow-build-wheels
     runs-on: ubuntu-latest
     if: ${{ failure() && github.ref == 'refs/heads/main' }}
+    permissions:
+      issues: write
+      contents: read
     steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: "Job has failed: reporting"
         uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
         env:
@@ -43,6 +49,7 @@ jobs:
   upload_anaconda:
     permissions:
       contents: write # for softprops/action-gh-release to create GitHub release
+      issues: write # for error reporting
     name: Release
     needs: call-workflow-build-wheels
     if: github.repository_owner == 'scikit-image' && github.ref == 'refs/heads/main'
@@ -61,6 +68,10 @@ jobs:
           artifacts_path: dist
           anaconda_nightly_upload_token: ${{secrets.UPLOAD_TOKEN}}
 
+      - uses: actions/checkout@v6
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        with:
+          persist-credentials: false
       - name: "Job has failed: reporting"
         if: ${{ failure() && github.ref == 'refs/heads/main' }}
         uses: JasonEtco/create-an-issue@1b14a70e4d8dc185e5cc76d3bec9eab20257b2c5 # v2.9.2
