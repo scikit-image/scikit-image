@@ -1,8 +1,4 @@
-import sys
-from datetime import date
-
 import numpy as np
-import pytest
 
 from skimage.restoration import unwrap_phase
 
@@ -132,12 +128,6 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@pytest.mark.xfail(
-    condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
-    reason="Flakiness on macOS (gh-7964, xfail expires 2026-02-01)",
-    raises=AssertionError,
-    strict=False,
-)
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
