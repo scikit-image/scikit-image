@@ -71,6 +71,10 @@ jobs:
             python-version: "3.12"
             INSTALL_FROM_SDIST: 1
             OPTIONS_NAME: "install-from-sdist"
+          - platform_id: manylinux_x86_64
+            python-version: "3.12"
+            BUILD_PIP_FLAGS: "--config-settings=setup-args='-Dshared-cython-utility=true'"
+            OPTIONS_NAME: "shared-cython-utility"
 
     steps:
       - name: Checkout scikit-image
@@ -87,7 +91,7 @@ jobs:
           cache-dependency-path: "requirements/*.txt"
 
       - name: Install build dependencies
-        if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST != 1}}
         env:
           PIP_FLAGS: ${{ matrix.PIP_FLAGS }}
         run: |
@@ -96,10 +100,10 @@ jobs:
       - name: Build and install from source
         if: ${{ matrix.INSTALL_FROM_SDIST != 1 }}
         run: |
-          pip install -v --no-build-isolation .
+          pip install -v --no-build-isolation . ${{ matrix.BUILD_PIP_FLAGS }}
 
       - name: Build and install from sdist
-        if: ${{ matrix.INSTALL_FROM_SDIST == 1 }}
+        if: ${{ matrix.INSTALL_FROM_SDIST == 1}}
         run: |
           pip install build
           python -m build --sdist .
