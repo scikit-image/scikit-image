@@ -35,7 +35,7 @@ def _default_footprint(func):
 
 
 def _footprint_is_sequence(footprint):
-    """Check whether a footprint a (decomposed) sequence of smaller footprints.
+    """Check whether a footprint is a (decomposed) sequence of smaller footprints.
 
     Parameters
     ----------
@@ -89,10 +89,13 @@ def _footprint_is_sequence(footprint):
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
 
+    Can mirror decomposed footprints which consist of a sequence of footprints
+    and their repetitions.
+
     Parameters
     ----------
     footprint : ndarray or tuple
-        The input footprint or sequence of footprints
+        The input footprint or a sequence of footprints.
 
     Returns
     -------
