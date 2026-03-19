@@ -166,6 +166,29 @@ def test_mask():
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
+def test_rng():
+    # Use a (100, 1) image with wrap_around: all pixel reliabilities come from
+    # rand() (no interior pixels), so the result is sensitive to the seed.
+    ramp = np.linspace(0, 12 * np.pi, 100)
+    ramp[-1] = ramp[0]
+    image_wrapped = np.angle(np.exp(1j * ramp.reshape(100, 1)))
+
+    def unwrap(rng):
+        with expected_warnings(['length 1 dimension']):
+            return unwrap_phase(image_wrapped, wrap_around=[True, False], rng=rng)
+
+    for seed in range(50):
+        assert_(np.allclose(unwrap(seed), unwrap(seed)))
+        assert_(
+            np.allclose(
+                unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
+            )
+        )
+    # For `None` the behavior is not deterministic, so it does not make sense to check
+    # for equality. At least call it to see that `None` is an accepted value.
+    unwrap(None)
+
+
 def test_invalid_input():
     with testing.raises(ValueError):
         unwrap_phase(np.zeros([]))
