@@ -26,7 +26,7 @@ def __dir__():
 
 def __getattr__(name):
     if name == "__version__":
-        # TODO Undo inlined imports once ported
+        # TODO Undo inlined imports once available in _skimage2 namespace
         from skimage import __version__
 
         return __version__
