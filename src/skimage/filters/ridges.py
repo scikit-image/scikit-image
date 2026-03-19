@@ -8,6 +8,8 @@ image intensities to detect tube-like structures where the intensity changes
 perpendicular but not along the structure.
 """
 
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Literal
 from warnings import warn
 
 import numpy as np
@@ -15,6 +17,9 @@ from scipy import linalg
 
 from .._shared.utils import _supported_float_type, check_nD
 from ..feature.corner import hessian_matrix, hessian_matrix_eigvals
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
 
 
 def meijering(
@@ -58,6 +63,7 @@ def meijering(
     sato
     frangi
     hessian
+    jerman
 
     References
     ----------
@@ -137,6 +143,7 @@ def sato(image, sigmas=range(1, 10, 2), black_ridges=True, mode='reflect', cval=
     meijering
     frangi
     hessian
+    jerman
 
     References
     ----------
@@ -249,6 +256,7 @@ def frangi(
     meijering
     sato
     hessian
+    jerman
 
     References
     ----------
@@ -376,6 +384,7 @@ def hessian(
     meijering
     sato
     frangi
+    jerman
 
     References
     ----------
@@ -399,4 +408,133 @@ def hessian(
     )
 
     filtered[filtered <= 0] = 1
+    return filtered
+
+
+def jerman(
+    image: "npt.NDArray",
+    sigmas: Iterable[float] = range(1, 10, 2),
+    tau: float = 0.75,
+    black_ridges: bool = True,
+    mode: Literal['constant', 'reflect', 'wrap', 'nearest', 'mirror'] = "reflect",
+    cval: float = 0,
+) -> "npt.NDArray":
+    """
+    Filter an image with the Jerman vesselness filter.
+
+    This filter can be used to detect continuous ridges, e.g. vessels,
+    wrinkles, rivers. It is based on the eigenvalues of the Hessian
+    to compute the similarity of an image region to vessels, according
+    to the method described in [1]_.
+
+    Parameters
+    ----------
+    image : (M, N[, P]) ndarray
+        Array with input image data.
+    sigmas : iterable of floats, optional
+        Sigmas used as scales of filter.
+    tau : float, optional
+        Threshold parameter that controls the tradeoff between undersired enhancement of
+        non-vascular structures and the uniformity of vacular structures' enhancement.
+        This is usually set to a value between 0.5 and 1.
+        Lower tau -> more uniform response. Higher tau -> less undesired enhancement of
+        non-vascular structures. Default is 0.75.
+    black_ridges : bool, optional
+        When True (the default), the filter detects black ridges; when
+        False, it detects white ridges.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders. Default is 'reflect'.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries. Default is 0.
+
+    Returns
+    -------
+    out : (M, N[, P]) ndarray
+        Filtered image (maximum of pixels across all scales).
+
+    See also
+    --------
+    meijering : Meijering filter for ridge detection
+    sato : Sato filter for ridge detection
+    frangi : Frangi filter for ridge detection
+    hessian : Hybrid Hessian filter for ridge detection
+
+    Notes
+    -----
+    This function was written based on the MATLAB implementation by Tim Jerman [2]_.
+
+    References
+    ----------
+    .. [1] Jerman, T., Pernuš, F., Likar, B., & Špiclin, Ž. (2016).
+           Enhancement of vascular structures in 3D and 2D angiographic
+           images. IEEE Transactions on Medical Imaging, 35(9), 2107-2118.
+           :DOI:`10.1109/TMI.2016.2550102`
+    .. [2] Original MATLAB implementation
+           https://github.com/timjerman/JermanEnhancementFilter
+
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.filters import jerman
+    >>> img = data.retina()
+    >>> filtered = jerman(img[:, :, 1], sigmas=range(1, 8))
+    """
+    check_nD(image, [2, 3])  # Check image dimensions.
+    image = image.astype(_supported_float_type(image.dtype), copy=False)
+    if not black_ridges:  # Normalize to black ridges.
+        image = -image
+
+    # Initialize output with zeros
+    filtered = np.zeros_like(image)
+
+    eigval_tol = 1e-10  # Tolerance to avoid division by zero and numerical instability
+    # Process each scale
+    for sigma in sigmas:
+        eigvals = hessian_matrix_eigvals(
+            hessian_matrix(
+                image, sigma, mode=mode, cval=cval, use_gaussian_derivatives=True
+            )
+        )
+
+        # Sort eigenvalues by magnitude.
+        # |lambda_i| <= |lambda_{i+1}| for i = 1..ndim-1
+        eigvals = np.take_along_axis(eigvals, abs(eigvals).argsort(0), 0)
+
+        if image.ndim == 2:
+            # 2D: Use only lambda2 (largest absolute eigenvalue)
+            (lambda2,) = np.maximum(eigvals[1:], eigval_tol)
+            lambda3 = lambda2.copy()
+        else:  # ndim == 3
+            # 3D: Use lambda2 and lambda3 (two largest absolute eigenvalues)
+            lambda2, lambda3 = np.maximum(eigvals[1:], eigval_tol)
+
+        # tau threshold and lambda_rho computed from eq. 13
+        tau_threshold = tau * lambda3.max()
+        lambda_rho = np.ones_like(lambda3) * tau_threshold
+
+        # Set to zero where lambda3 <= 0 (not vessel-like)
+        lambda_rho[lambda3 <= eigval_tol] = 0
+        # Set to lambda3 where lambda3 > tau * max(lambda3)
+        lambda_rho[lambda3 > tau_threshold] = lambda3[lambda3 > tau_threshold]
+
+        # Compute the main response term
+        # V = lambda2**2 * (lambda_rho - lambda2) * 27 / (lambda2 + lambda_rho)**3 (eq. 14)
+        numerator = lambda2**2 * (lambda_rho - lambda2) * 27
+        denominator = (lambda2 + lambda_rho) ** 3
+        vals = numerator / denominator  # eq. 14
+
+        # Different cases implied by eq. 15
+        # Case 1: Strong tubular structures -> V = 1
+        strong_tubular = (lambda2 >= lambda_rho / 2) & (lambda_rho > eigval_tol)
+        vals[strong_tubular] = 1
+
+        # Case 2: Not vessel-like -> V = 0
+        not_vessel = (lambda2 <= eigval_tol) | (lambda_rho <= eigval_tol)
+        vals[not_vessel] = 0
+
+        # Take maximum across scales
+        filtered = np.maximum(filtered, vals)
+
     return filtered
