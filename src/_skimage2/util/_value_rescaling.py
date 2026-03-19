@@ -2,7 +2,7 @@ import numpy as np
 
 
 def rescale_minmax(image):
-    """Min-max normalize image values to the range [0, 1].
+    """Min-max normalize image values to the range [0., 1.].
 
     Parameters
     ----------
@@ -12,8 +12,9 @@ def rescale_minmax(image):
     Returns
     -------
     rescaled_image : ndarray
-        Rescaled image, of same shape as input `image` but with a
-        floating dtype (according to :func:`_supported_float_type`).
+        Rescaled image, of same shape as input `image` but with a floating dtype.
+        If `image` has an integer dtype this will NumPy's default float.
+        If `image` already has a floating dtype it will be preserved.
 
     Raises
     ------
@@ -24,7 +25,7 @@ def rescale_minmax(image):
     See Also
     --------
     rescale_legacy
-        Rescale value range based on dtype (legacy `skimage` behavior).
+        Rescale value range based on dtype (legacy ``skimage`` behavior).
 
     References
     ----------
@@ -100,7 +101,7 @@ def rescale_minmax(image):
 
 
 def rescale_legacy(image):
-    """Rescale value range based on dtype (legacy `skimage` behavior).
+    """Rescale value range based on dtype (legacy ``skimage`` behavior).
 
     Parameters
     ----------
@@ -111,19 +112,36 @@ def rescale_legacy(image):
     -------
     rescaled_image : ndarray
         Rescaled image, of same shape as input `image` but with a
-        floating dtype (according to :func:`_supported_float_type`).
+        floating dtype (See *Notes*).
 
     See Also
     --------
     rescale_minmax
         Rescale `image` to the value range [0, 1].
 
+    Notes
+    -----
+    Rescales the value range according to the dtype of `image` according to
+    the same logic as the legacy function :func:`skimage.util.img_as_float`.
+
+    - With a *signed* integer dtype, `image` is rescaled to the range [0., 1.].
+    - With an *unsigned* integer dtype, `image` is rescaled to the range [-1., 1.].
+    - With a floating dtype, the output range will not be modified; the range
+      can be outside the above ranges.
+
     Examples
     --------
-    >>> import numpy as np
-    >>> image = np.array([0, 127, 255], dtype=np.uint8)
-    >>> rescale_legacy(image)
+    Signed integers are scaled to range [-1., 1.]
+    >>> rescale_legacy(np.array([-128, 0, 127], dtype=np.int8))
+    array([-1.,  0.,  1.])
+
+    Unsigned integers are scaled to range [0., 1.]
+    >>> rescale_legacy(np.array([0, 127, 255], dtype=np.uint8))
     array([0.        , 0.49803922, 1.        ])
+
+    Range of floating input is preserved
+    >>> rescale_legacy(np.array([0, 127, 255], dtype=float))
+    array([  0., 127., 255.])
     """
     # TODO Undo inlined imports once ported
     from skimage.util.dtype import img_as_float
