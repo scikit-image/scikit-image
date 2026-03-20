@@ -7,6 +7,10 @@ import pytest
 
 from skimage._shared import testing
 from skimage._shared.utils import (
+    DEPRECATED,
+    DEPRECATED_GOT_VALUE,
+    FailedEstimation,
+    FailedEstimationAccessError,
     _supported_float_type,
     _validate_interpolation_order,
     change_default_value,
@@ -14,11 +18,8 @@ from skimage._shared.utils import (
     check_nD,
     deprecate_func,
     deprecate_parameter,
-    DEPRECATED,
-    DEPRECATED_GOT_VALUE,
-    FailedEstimationAccessError,
-    FailedEstimation,
 )
+from skimage.transform import ProjectiveTransform
 
 complex_dtypes = [np.complex64, np.complex128]
 if hasattr(np, 'complex256'):
@@ -539,3 +540,18 @@ def test_failed_estimation():
     )
     with pytest.raises(FailedEstimationAccessError, match=regex):
         fe.params
+
+
+def test_from_estimate_docstring_none_branch(monkeypatch):
+    # Simulate `python -OO`
+    monkeypatch.setattr(
+        ProjectiveTransform.from_estimate.__func__,
+        "__doc__",
+        None,
+        raising=False,
+    )
+
+    class Child(ProjectiveTransform):
+        pass
+
+    assert Child.from_estimate.__doc__ is None
