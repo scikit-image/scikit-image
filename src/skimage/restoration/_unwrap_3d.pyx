@@ -31,7 +31,7 @@ def unwrap_3d(cnp.float64_t[:, :, ::1] image,
         int wrap_around_z
 
     # convert from python types to C types so we can release the GIL
-    use_seed = seed is None
+    use_seed = seed is not None
     cseed = 0 if seed is None else seed
     wrap_around_z, wrap_around_y, wrap_around_x = wrap_around
 

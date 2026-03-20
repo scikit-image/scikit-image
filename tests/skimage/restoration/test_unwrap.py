@@ -1,8 +1,4 @@
-import sys
-from datetime import date
-
 import numpy as np
-import pytest
 
 from skimage.restoration import unwrap_phase
 
@@ -132,12 +128,6 @@ def check_wrap_around(ndim, axis):
 dim_axis = [(ndim, axis) for ndim in (2, 3) for axis in range(ndim)]
 
 
-@pytest.mark.xfail(
-    condition=sys.platform == "darwin" and date.today() < date(2026, 2, 1),
-    reason="Flakiness on macOS (gh-7964, xfail expires 2026-02-01)",
-    raises=AssertionError,
-    strict=False,
-)
 @testing.parametrize("ndim, axis", dim_axis)
 def test_wrap_around(ndim, axis):
     check_wrap_around(ndim, axis)
@@ -174,6 +164,29 @@ def test_mask():
             # remove phase shift
             image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]
         assert_array_almost_equal_nulp(image_unwrapped_3d[:, :, -1], image[i, -1])
+
+
+def test_rng():
+    # Use a (100, 1) image with wrap_around: all pixel reliabilities come from
+    # rand() (no interior pixels), so the result is sensitive to the seed.
+    ramp = np.linspace(0, 12 * np.pi, 100)
+    ramp[-1] = ramp[0]
+    image_wrapped = np.angle(np.exp(1j * ramp.reshape(100, 1)))
+
+    def unwrap(rng):
+        with expected_warnings(['length 1 dimension']):
+            return unwrap_phase(image_wrapped, wrap_around=[True, False], rng=rng)
+
+    for seed in range(50):
+        assert_(np.allclose(unwrap(seed), unwrap(seed)))
+        assert_(
+            np.allclose(
+                unwrap(np.random.default_rng(seed)), unwrap(np.random.default_rng(seed))
+            )
+        )
+    # For `None` the behavior is not deterministic, so it does not make sense to check
+    # for equality. At least call it to see that `None` is an accepted value.
+    unwrap(None)
 
 
 def test_invalid_input():

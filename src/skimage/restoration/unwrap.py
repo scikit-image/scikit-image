@@ -28,12 +28,11 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
     rng : {`numpy.random.Generator`, int}, optional
-        Pseudo-random number generator.
-        By default, a PCG64 generator is used (see :func:`numpy.random.default_rng`).
-        If `rng` is an int, it is used to seed the generator.
-
-        Unwrapping relies on a random initialization. This sets the
-        PRNG to use to achieve deterministic behavior.
+        Seed for the random number generator used during unwrapping.
+        If an int, it is used directly as the seed. If a
+        `numpy.random.Generator`, a seed is drawn from it. If `None`,
+        unwrapping relies on a random initialization and results may vary
+        between runs.
 
     Returns
     -------
@@ -95,6 +94,13 @@ def unwrap_phase(image, wrap_around=False, rng=None):
             'algorithm'
         )
 
+    if isinstance(rng, np.random.Generator):
+        seed = int(rng.integers(np.iinfo(np.uint32).max, endpoint=True))
+    elif rng is None:
+        seed = None
+    else:
+        seed = int(rng)
+
     if np.ma.isMaskedArray(image):
         mask = np.require(np.ma.getmaskarray(image), np.uint8, ['C'])
     else:
@@ -106,9 +112,9 @@ def unwrap_phase(image, wrap_around=False, rng=None):
     if image.ndim == 1:
         unwrap_1d(image_not_masked, image_unwrapped)
     elif image.ndim == 2:
-        unwrap_2d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
+        unwrap_2d(image_not_masked, mask, image_unwrapped, wrap_around, seed)
     elif image.ndim == 3:
-        unwrap_3d(image_not_masked, mask, image_unwrapped, wrap_around, rng)
+        unwrap_3d(image_not_masked, mask, image_unwrapped, wrap_around, seed)
 
     if np.ma.isMaskedArray(image):
         return np.ma.array(image_unwrapped, mask=mask, fill_value=image.fill_value)
