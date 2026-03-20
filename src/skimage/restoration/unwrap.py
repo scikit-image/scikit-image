@@ -95,7 +95,7 @@ def unwrap_phase(image, wrap_around=False, rng=None):
         )
 
     if isinstance(rng, np.random.Generator):
-        seed = int(rng.integers(np.iinfo(np.uint32).max))
+        seed = int(rng.integers(np.iinfo(np.uint32).max, endpoint=True))
     elif rng is None:
         seed = None
     else:
