@@ -154,24 +154,39 @@ imported as ``psycopg2``). Further afield, R's ggplot is used as ``ggplot2``.
 Implementation
 --------------
 
-As a first execution step of this SKIP, scikit-image 1.0 will be released, celebrating the maturity of the project.
+This section documents concrete implementation details, and will be updated as we progress with the v2 implementation.
 
 First phase: Building `skimage2`
 ................................
 
-Afterward, a new empty ``skimage2`` namespace will be created in our repository alongside the ``skimage`` namespace.
-It will be marked as experimental – importing it will warn that content in ``skimage2`` is still unstable.
-This namespace should be included in releases on PyPI or elsewhere early to facilitate testing downstream.
+Two new namespaces and Python packages, ``src/_skimage2`` and ``src/skimage2``, will be created alongside ``src/skimage``.
 
-With the new namespace available, we will start building the new API inside it.
+``_skimage2``
+  will be the temporary namespace, where we build up the new API.
+
+``skimage2``
+  is a lightweight wrapper around ``_skimage2``.
+  It exposes the API for early testing and warns the user on import that 
+  ``skimage2`` is still unstable.
+
+With the new namespaces available, we will start building the new API while preserving the existing one.
 This process orients itself around the following principles:
 
 Only one implementation
   If possible, only one implementation should exist, and one API should be a *simple* wrapper around the other.
-  The implementation can live in either namespace depending on what is more opportune – preferably it should live in ``skimage2``.
+  Implementations should preferably live in ``_skimage2``.
 
-Independent test suite
-  Each API should have its own independent test suite.
+Import hierarchy
+  ``skimage`` and ``skimage2`` may only import from ``_skimage2``, and ``_skimage2`` should be self-contained.
+  This import hierarchy avoids circular imports as well as triggering the *experimental* warning.
+  Exceptions (for example, importing from `skimage` in `_skimage`) are temporary and should be realized using inlined imports.
+  This allows reusing code in ``skimage`` from ``_skimage2``, that has not (yet) been ported.
+
+Test coverage of both APIs
+  The `skimage` test suite should be duplicated for `_skimage2` functions.
+  The tests should be adjusted to verify new behavior.
+  To counteract the slowdown due to test duplication, we will soon select tests
+  using dependency analysis (see `#7749 <https://github.com/scikit-image/scikit-image/pull/7749>`__).
 
 Small API difference
   Keep the differences between the old and new API small to make the eventual transition easier for users.
@@ -202,16 +217,25 @@ During this phase, new (additional) features can still be introduced into the ol
 Second phase: Transitioning to `skimage2`
 .........................................
 
-Once we consider the API in ``skimage2`` complete and stable, we will publish it in a full release versioned 2.0.0.
-Starting with that version, importing ``skimage2`` is encouraged and won't raise warnings.
+Once we consider the API in ``skimage2`` complete and stable, ``src/_skimage2`` will be merged into ``src/skimage2`` and the *experimental* warning will be removed.
 
 Instead, we will mark the API in ``skimage`` as deprecated with a single top-level warning that is raised on import.
 This warning will encourage users to transition to ``skimage2``.
 It should link to the migration guide and should explain how to enable :ref:`more specific warnings <sk2-local-warning>`.
 
-Not earlier than 1 year after the release of 2.0.0, we will begin to successively remove parts of the deprecated API from ``skimage``.
+.. note::
+   At this stage ``skimage2`` should no longer need to import from ``skimage`` to avoid triggering this new warning.
+   If this isn't the case, ``skimage`` needs to be split into a public and a private Python package that ``skimage2`` can (lazily) import from without triggering the new deprecation warning.
+
+This state will be published in a full release as ``scikit-image==2.0.0``.
+
+From that point onward, importing ``skimage2`` is encouraged.
+Development of new features should only happen in ``skimage2``.
+Bugs in ``skimage`` may still be addressed and will be included in releases with version >= 2.0.0.
+If we see fit, bug fixes may be backported to a maintenance branch and made available as releases with versions <2.0.0.
+
+No earlier than two years after the release of 2.0.0, we may start removing ``skimage`` – gradually in parts, or as a whole.
 Implementations and internal code that still live in ``skimage`` will be moved to ``skimage2``.
-This process can and should be spread over multiple releases.
 
 Before completely removing parts of the API, relevant :ref:`warnings from the first phase <sk2-local-warning>` should be made visible to users.
 They should be visible for 2 releases before API is actually removed (or whatever our existing `deprecation policy <dep_pol>`_ recommends).
