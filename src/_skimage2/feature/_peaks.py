@@ -352,7 +352,7 @@ def peak_local_max(
            [3, 4],
            [0, 0]])
     """
-    # TODO Undo inlined imports once ported
+    # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage._shared._warnings import warn_external
 
     if (footprint is None or footprint.size == 1) and min_distance < 1:
