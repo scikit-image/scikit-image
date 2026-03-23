@@ -1,4 +1,4 @@
-"""Feature detection and extraction, for example, texture analysis, corners, etc."""
+"""Sharpening, edge finding, filters, thresholding, etc."""
 
 import lazy_loader as _lazy
 

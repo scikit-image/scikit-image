@@ -1,10 +1,3 @@
-"""Filters used across multiple skimage submodules.
-
-These are defined here to avoid circular imports.
-
-The unit tests remain under skimage/filters/tests/
-"""
-
 from collections.abc import Iterable
 
 import numpy as np
@@ -38,15 +31,7 @@ def gaussian(
         'constant'. Default is 'nearest'.
     cval : scalar, optional
         Value to fill past edges of input if ``mode`` is 'constant'. Default
-        is 0.0
-    preserve_range : bool, optional
-        If True, keep the original range of values. Otherwise, the input
-        ``image`` is converted according to the conventions of ``img_as_float``
-        (Normalized first to values [-1.0 ; 1.0] or [0 ; 1.0] depending on
-        dtype of input)
-
-        For more information, see:
-        https://scikit-image.org/docs/dev/user_guide/data_types.html
+        is 0.0.
     truncate : float, optional
         Truncate the filter at this many standard deviations.
     channel_axis : int or None, optional
@@ -103,7 +88,7 @@ def gaussian(
            [0.08767308, 0.12075024, 0.08767308]])
     >>> # For RGB images, each is filtered separately
     >>> image = ski.data.astronaut()
-    >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
+    >>> filtered_img = ski2.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
     # TODO Undo inlined imports once available in _skimage2 namespace
