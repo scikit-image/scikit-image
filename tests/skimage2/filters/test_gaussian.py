@@ -30,9 +30,7 @@ def test_gaussian_null_sigma():
 def test_gaussian_default_sigma():
     a = np.zeros((3, 3))
     a[1, 1] = 1.0
-    assert_equal(
-        gaussian(a), gaussian(a, sigma=1)
-    )
+    assert_equal(gaussian(a), gaussian(a, sigma=1))
 
 
 @pytest.mark.parametrize(
@@ -55,15 +53,11 @@ def test_gaussian_multichannel(channel_axis):
     a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
     a = np.moveaxis(a, -1, channel_axis)
-    gaussian_rgb_a = gaussian(
-        a, sigma=1, mode='reflect', channel_axis=channel_axis
-    )
+    gaussian_rgb_a = gaussian(a, sigma=1, mode='reflect', channel_axis=channel_axis)
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
     spatial_axes = tuple([ax for ax in range(a.ndim) if ax != channel_axis % a.ndim])
-    assert_allclose(
-        a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes)
-    )
+    assert_allclose(a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes))
 
     if channel_axis % a.ndim == 2:
         # Check that the mean value is conserved in each channel
@@ -75,9 +69,7 @@ def test_gaussian_multichannel(channel_axis):
     gaussian_rgb_a = gaussian(
         a, sigma=[1, 2], mode='reflect', channel_axis=channel_axis
     )
-    assert_allclose(
-        a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes)
-    )
+    assert_allclose(a.mean(axis=spatial_axes), gaussian_rgb_a.mean(axis=spatial_axes))
 
 
 def test_gaussian_migration_advice():
