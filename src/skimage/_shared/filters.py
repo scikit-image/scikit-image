@@ -115,11 +115,10 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
-    # TODO update once _rescale_value_range is available in `skimage2`
     warn_external(
         dedent("""\
-        `skimage.feature.gaussian` is deprecated in favor of
-        `skimage2.feature.gaussian` with new behavior:
+        `skimage.filters.gaussian` is deprecated in favor of
+        `skimage2.filters.gaussian` with new behavior:
 
         * Parameter `preserve_range` was removed
         * The value range of `image` is now always preserved
@@ -127,8 +126,8 @@ def gaussian(
         To keep the old behavior of `preserve_range=False` after switching to
         `skimage2`, preprocess `image`:
 
-            ski2.util._rescale_value_range(image, mode='legacy')
-            ski2.feature.gaussian(image, ...)
+            image = skimage2.util.rescale_legacy(image)
+            skimage2.filters.gaussian(image, ...)
 
         Other keyword parameters can be left unchanged.
         """),
