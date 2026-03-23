@@ -10,11 +10,6 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from skimage._shared.utils import (
-    _supported_float_type,
-    convert_to_float,
-)
-
 
 def gaussian(
     image,
@@ -86,7 +81,7 @@ def gaussian(
     Examples
     --------
     >>> import skimage as ski
-    >>> import skimage2 as ski2
+    >>> import _skimage2 as ski2
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
     >>> a
@@ -111,6 +106,9 @@ def gaussian(
     >>> filtered_img = ski.filters.gaussian(image, sigma=1, channel_axis=-1)
 
     """
+    # TODO Undo inlined imports once available in _skimage2 namespace
+    from skimage._shared.utils import _supported_float_type, convert_to_float
+
     if np.any(np.asarray(sigma) < 0.0):
         raise ValueError("Sigma values less than zero are not valid")
     if channel_axis is not None:

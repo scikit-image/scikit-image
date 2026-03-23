@@ -9,9 +9,8 @@ from textwrap import dedent
 
 from ..util import PendingSkimage2Change
 from .._shared._warnings import warn_external
-from .._shared.utils import _rescale_value_range
 
-import skimage2 as ski2
+import _skimage2 as ski2
 
 
 def gaussian(
@@ -135,7 +134,7 @@ def gaussian(
         category=PendingSkimage2Change,
     )
     if not preserve_range:
-        image = _rescale_value_range(image, mode="legacy")
+        image = ski2.util.rescale_legacy(image)
     filtered_image = ski2.filters.gaussian(
         image,
         sigma=sigma,

@@ -58,6 +58,10 @@ def generate_environment_yml(req_sections: dict[str, list[str]]) -> None:
 
             lines.append(f"  - {dep}")
 
+            # Strip duplicates
+            if re.split('[>=]', lines[-2])[0] == re.split('[>=]', lines[-1])[0]:
+                lines = lines[:-1]
+
     with open("environment.yml", "w") as f:
         f.writelines(f"{line}\n" for line in lines)
 
