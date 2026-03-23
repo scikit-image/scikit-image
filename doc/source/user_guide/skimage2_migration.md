@@ -116,6 +116,25 @@ ski2.morphology.peak_local_max(
 )
 ```
 
+### `skimage.filters.gaussian`
+
+`skimage.filters.gaussian` is deprecated in favor of `skimage2.filters.gaussian` with new behavior:
+
+* Parameter `preserve_range` was removed
+* The value range of `image` is now always preserved
+
+To keep the old (`skimage`, v1.x) behavior of `preserve_range=False` after switching to `skimage2`, preprocess `image`:
+
+```python
+skimage.filters.gaussian(image, ...)
+
+# Becomes
+image = skimage2.util.rescale_legacy(image)
+skimage2.filters.gaussian(image, ...)
+```
+      
+Other keyword parameters can be left unchanged.
+
 ### Grayscale morphological operators in `skimage.morphology`
 
 The following functions are deprecated in favor of counterparts in `skimage2.morphology`:
