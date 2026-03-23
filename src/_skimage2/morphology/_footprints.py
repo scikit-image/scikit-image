@@ -87,7 +87,7 @@ def _footprint_is_sequence(footprint):
 
 
 def mirror_footprint(footprint):
-    """Mirror each dimension in the footprint.
+    """Mirror each dimension in the (decomposed) footprint.
 
     Can mirror decomposed footprints which consist of a sequence of footprints
     and their repetitions.
@@ -101,6 +101,11 @@ def mirror_footprint(footprint):
     -------
     inverted : ndarray or tuple
         The footprint, mirrored along each dimension.
+
+    See Also
+    --------
+    pad_footprint
+        Pad the (decomposed) footprint to an odd size along each dimension.
 
     Examples
     --------
@@ -120,7 +125,7 @@ def mirror_footprint(footprint):
 
 
 def pad_footprint(footprint, *, pad_end=True):
-    """Pad the footprint to an odd size along each dimension.
+    """Pad the (decomposed) footprint to an odd size along each dimension.
 
     Parameters
     ----------
@@ -134,6 +139,11 @@ def pad_footprint(footprint, *, pad_end=True):
     -------
     padded : ndarray or tuple
         The footprint, padded to an odd size along each dimension.
+
+    See Also
+    --------
+    mirror_footprint
+        Mirror each dimension in the (decomposed) footprint.
 
     Examples
     --------
