@@ -89,6 +89,7 @@ def gaussian(
 
     Examples
     --------
+    >>> import numpy as np
     >>> import skimage as ski
     >>> a = np.zeros((3, 3))
     >>> a[1, 1] = 1
