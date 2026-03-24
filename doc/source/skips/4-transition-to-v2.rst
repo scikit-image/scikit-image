@@ -178,17 +178,15 @@ Only one implementation
 
 Import hierarchy
   ``skimage`` and ``skimage2`` may only import from ``_skimage2``, and ``_skimage2`` should be self-contained.
-  This import hierarchy avoids circular imports as well as triggering the *experimental* warning.
-  Exceptions (for example, importing from `skimage` in `_skimage`) are temporary and should be realized using inlined imports.
-  This allows reusing code in ``skimage`` from ``_skimage2``, that has not (yet) been ported.
+  Exceptions (for example, importing from ``skimage`` in ``_skimage2``) are temporary and should be realized using inlined imports.
 
 Test coverage of both APIs
-  The `skimage` test suite should be duplicated for `_skimage2` functions.
+  The ``skimage`` test suite should be duplicated for ``_skimage2`` functions.
   The tests should be adjusted to verify new behavior.
   To counteract the slowdown due to test duplication, we will soon select tests
   using dependency analysis (see `#7749 <https://github.com/scikit-image/scikit-image/pull/7749>`__).
 
-Small API difference
+Minimize API difference
   Keep the differences between the old and new API small to make the eventual transition easier for users.
   Prefer conventional deprecations in the ``skimage`` namespace if possible.
 
@@ -273,6 +271,33 @@ porting ``skimage`` code to ``skimage2`` will be a straightforward process
 and we will publish a user guide for making the transition by the time of
 the ``skimage2`` release. Users will be notified about these resources - among
 other things - by a warning in scikit-image 1.1.
+
+
+Rationale
+---------
+
+Rationale for design decisions described in the previous section.
+See *Alternatives* for why certain solutions where rejected.
+
+Why so many namespaces?
+.......................
+
+Having additional namespaces significantly simplifies the gradual porting process during the first implementation phase.
+The new API v2 can be gradually fleshed out in its own independent namespace and made available for testing to the community.
+
+Separating ``_skimage2`` and ``skimage2`` simplifies the requirement that users are warned about the experimental status of the API v2.
+Ported implementations that live in ``_skimage2`` can be reused by wrappers in ``skimage`` without triggering the import warning in ``skimage2``.
+
+An alternative would have been to raise this warning not on import of ``skimage2`` but when any of its attributes is used with a custom ``__getattr__``.
+However, we preferred to trigger this warning as early as possible.
+
+Why restrict imports between namespaces?
+........................................
+
+Ported implementations in ``_skimage2`` may rely on functionality in ``skimage2`` that hasn't been ported yet.
+At the same time, wrappers in ``skimage`` may import from ``_skimage2``.
+An explicit import hierarchy avoids circular imports errors.
+
 
 Alternatives
 ------------
