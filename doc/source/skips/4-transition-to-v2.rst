@@ -166,10 +166,10 @@ Two new namespaces and Python packages, ``src/_skimage2`` and ``src/skimage2``, 
 
 ``skimage2``
   is a lightweight wrapper around ``_skimage2``.
-  It exposes the API for early testing and warns the user on import that 
+  It exposes the API for early testing and warns the user on import that
   ``skimage2`` is still unstable.
 
-With the new namespaces available, we will start building the new API while preserving the existing one.
+With the new namespaces available, we will start building the new API while preserving the existing ``skimage`` namespace and functionality.
 This process orients itself around the following principles:
 
 Only one implementation
