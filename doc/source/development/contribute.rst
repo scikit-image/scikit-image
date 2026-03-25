@@ -198,9 +198,11 @@ It is a good idea to work on these from the start as this helps identifying issu
 
 * No changes are ever merged without review and approval by two core team members.
   There are two exceptions to this rule.
-    - First, pull requests which affect only the documentation require review and approval by only one core team  member in most cases.
-      If the maintainer feels the changes are large or likely to be controversial, two reviews should still be encouraged.
-    - The second case is that of minor fixes which restore CI to a working state, because these should be merged fairly quickly.
+
+  - First, pull requests which affect only the documentation require review and approval by only one core team  member in most cases.
+    If the maintainer feels the changes are large or likely to be controversial, two reviews should still be encouraged.
+  - The second case is that of minor fixes which restore CI to a working state, because these should be merged fairly quickly.
+
   Reach out on the `developer forum <https://discuss.scientific-python.org/c/contributor/skimage>`_ if you get no response to your pull request.
 
 You can find more details and guidelines in our :doc:`style_guide` if you are interested.

@@ -7,6 +7,7 @@ Below you will find resources about the development of scikit-image.
     :maxdepth: 1
 
     contribute
+    style_guide
     ../gitwash/index
     core_developer
     ../skips/index
