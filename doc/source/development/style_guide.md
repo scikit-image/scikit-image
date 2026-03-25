@@ -47,7 +47,7 @@ These are non-binding general guidelines but arguments should be made for except
 
 ## Documentation
 
-- All code should be documented, to the same [standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>) as NumPy and SciPy.
+- All code should be documented, to the same [standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) as NumPy and SciPy.
 
 - For new functionality, always add an example to the gallery.
 
