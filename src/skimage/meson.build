@@ -149,7 +149,6 @@ _cpp_Wno_cpp = cpp.get_supported_arguments('-Wno-cpp')
 cython_c_args += [_cpp_Wno_cpp, use_math_defines]
 cython_cpp_args = cython_c_args
 
-subdir('_shared')
 subdir('_vendored')
 subdir('color')
 subdir('data')
