@@ -1221,7 +1221,7 @@ def corner_peaks(
     Notes
     -----
     The `num_peaks` limit is applied before suppression of connected peaks.
-    To limit the number of peaks after suppression, set `num_peaks=np.inf` and
+    To limit the number of peaks after suppression, set ``num_peaks=None`` and
     post-process the output of this function.
 
     Examples
