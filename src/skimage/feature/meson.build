@@ -15,7 +15,7 @@ foreach pyx_file: pyx_files
     pyx_file[1].process(pyx_file[0] + '.pyx'),
     c_args: cython_c_args,
     cpp_args: cython_cpp_args,
-    include_directories: ['../_shared'],
+    include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
     subdir: 'skimage/feature'

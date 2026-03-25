@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..util.dtype import dtype_range, dtype_limits
-from .._shared import utils
+from _skimage2._shared import utils
 
 
 __all__ = [

@@ -3,13 +3,13 @@ import pytest
 import numpy as np
 import skimage.graph.mcp as mcp
 
-from skimage._shared.testing import (
+from _skimage2._shared.testing import (
     assert_array_equal,
     assert_almost_equal,
     parametrize,
     assert_stacklevel,
 )
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared._warnings import expected_warnings
 
 
 np.random.seed(0)

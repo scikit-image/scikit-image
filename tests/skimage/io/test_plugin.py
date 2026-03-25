@@ -2,10 +2,10 @@ from contextlib import contextmanager
 import numpy as np
 import pytest
 
-from skimage._shared._dependency_checks import has_mpl
+from _skimage2._shared._dependency_checks import has_mpl
 from skimage import io
 from skimage.io import manage_plugins
-from skimage._shared.testing import fetch, assert_stacklevel
+from _skimage2._shared.testing import fetch, assert_stacklevel
 
 
 priority_plugin = 'pil'

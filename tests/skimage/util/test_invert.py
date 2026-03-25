@@ -3,7 +3,7 @@ from skimage import dtype_limits
 from skimage.util.dtype import dtype_range
 from skimage.util import invert
 
-from skimage._shared.testing import assert_array_equal
+from _skimage2._shared.testing import assert_array_equal
 
 
 def test_invert_bool():

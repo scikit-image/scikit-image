@@ -7,7 +7,7 @@ import numpy as np
 
 from .. import draw
 from skimage import morphology
-from .._shared.utils import deprecate_func
+from _skimage2._shared.utils import deprecate_func
 
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the

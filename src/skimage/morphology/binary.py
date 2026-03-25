@@ -10,7 +10,7 @@ from scipy import ndimage as ndi
 from _skimage2.morphology._footprints import _default_footprint
 
 from .footprints import _footprint_is_sequence, pad_footprint
-from .._shared.utils import deprecate_func
+from _skimage2._shared.utils import deprecate_func
 
 
 def _iterate_binary_func(binary_func, image, footprint, out, border_value):

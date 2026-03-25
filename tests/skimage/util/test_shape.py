@@ -1,7 +1,7 @@
 import numpy as np
 
-from skimage._shared import testing
-from skimage._shared.testing import assert_equal
+from _skimage2._shared import testing
+from _skimage2._shared.testing import assert_equal
 from skimage.util.shape import view_as_blocks, view_as_windows
 
 
