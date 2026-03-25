@@ -59,7 +59,7 @@ These are non-binding general guidelines but arguments should be made for except
 
 ## Import conventions
 
-- Use the following import conventions:
+- In examples and user-facing documentation, prefer the following import conventions:
 
   ```python
   import numpy as np
@@ -73,8 +73,8 @@ These are non-binding general guidelines but arguments should be made for except
   ski2.measure.label(...)
   ```
 
-- Use relative module imports like `from .._shared import xyz` rather than
-  `from skimage._shared import xyz`.
+- Internally, prefer relative module imports like `from .._shared import xyz` rather than
+  `from skimage._shared import xyz` to reuse code from other subpackages and modules.
 
 ## Cython and compiled code
 
