@@ -582,6 +582,9 @@ class channel_as_last_axis:
         multichannel array and False otherwise. This decorator does not
         currently support the general case of functions with multiple outputs
         where some or all are multichannel.
+    check3d : bool, optional
+        A boolean that should be True if the decorator should check that arrays
+        to which we are applying `channel_axis` values are at least 3D.
 
     """
 
@@ -590,10 +593,12 @@ class channel_as_last_axis:
         channel_arg_positions=(0,),
         channel_kwarg_names=(),
         multichannel_output=True,
+        check3d=False,
     ):
         self.arg_positions = set(channel_arg_positions)
         self.kwarg_names = set(channel_kwarg_names)
         self.multichannel_output = multichannel_output
+        self.check3d = check3d
 
     def __call__(self, func):
         @functools.wraps(func)
@@ -618,9 +623,13 @@ class channel_as_last_axis:
                 new_args = []
                 for pos, arg in enumerate(args):
                     if pos in self.arg_positions:
-                        new_args.append(np.moveaxis(arg, channel_axis[0], -1))
-                    else:
-                        new_args.append(arg)
+                        arg = np.asanyarray(arg)
+                        if self.check3d and arg.ndim < 3:
+                            raise ValueError(
+                                'channel_axis must be None or -1 for 2D images'
+                            )
+                        arg = np.moveaxis(arg, channel_axis[0], -1)
+                    new_args.append(arg)
                 new_args = tuple(new_args)
             else:
                 new_args = args
