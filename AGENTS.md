@@ -15,6 +15,7 @@ tool used. For example:
 content or the exact command applied.
 
 If no automated tools were used beyond a standard editor, write:
+
 > No automated tools used.
 
 This section is required regardless of how large or small the change is.
