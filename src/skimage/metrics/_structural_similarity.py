@@ -117,21 +117,21 @@ def structural_similarity(
     warn_external(
         dedent("""\
         `skimage.metrics.structural_similarity` is deprecated in favor of
-        `skimage2.metrics.structural_similarity` which has a new signature. 
+        `skimage2.metrics.structural_similarity` which has a new signature.
         The parameter `data_range` is now a required parameter.
-        
+
         If you didn't provide `data_range` explicitly before and relied on its
         default behavior, you can keep the old (`skimage`, v1.x) behavior with:
-        
+
             import numpy as np
             import skimage2 as ski2
             data_range = np.iinfo(im1.dtype).max) - np.iinfo(im1.dtype).min
             ski2.metrics.structural_similarity(
                 im1, img2, data_range=data_range, ...
             )
-        
+
         For floating dtypes, setting `data_range` was already required in
-        `skimage`/v1.x.   
+        `skimage`/v1.x.
         """),
         category=PendingSkimage2Change,
     )

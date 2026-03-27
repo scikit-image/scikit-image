@@ -180,7 +180,8 @@ def test_structural_similarity_multichannel_chelsea():
     # multichannel result should be mean of the individual channel results
     mssim = structural_similarity(Xc, Yc, data_range=255, channel_axis=-1)
     mssim_sep = [
-        structural_similarity(Yc[..., c], Xc[..., c], data_range=255) for c in range(Xc.shape[-1])
+        structural_similarity(Yc[..., c], Xc[..., c], data_range=255)
+        for c in range(Xc.shape[-1])
     ]
     assert_almost_equal(mssim, np.mean(mssim_sep))
 
