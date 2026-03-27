@@ -51,8 +51,9 @@ References
 import numpy as np
 from scipy import ndimage as ndi
 
+from _skimage2.morphology._footprints import _footprint_is_sequence
+
 from ..._shared.utils import check_nD, warn
-from ...morphology.footprints import _footprint_is_sequence
 from ...util import img_as_ubyte
 from . import generic_cy
 

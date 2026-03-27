@@ -58,6 +58,8 @@ extensions = [
     "myst_parser",
     "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
+    # Add “toggle button” elements to sections
+    "sphinx_togglebutton",
 ]
 
 autosummary_generate = True
