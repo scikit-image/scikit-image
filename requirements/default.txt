@@ -8,4 +8,4 @@ pillow>=10.1
 imageio>=2.33,!=2.35.0
 tifffile>=2025.1.10
 packaging>=24
-lazy-loader>=0.4
+lazy-loader>=0.5
