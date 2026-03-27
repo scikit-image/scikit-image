@@ -582,6 +582,12 @@ class channel_as_last_axis:
         multichannel array and False otherwise. This decorator does not
         currently support the general case of functions with multiple outputs
         where some or all are multichannel.
+    Raises
+    ------
+    ValueError
+        If no channel array can be found in positional or keyword arguments
+        when ``channel_axis`` is not ``None``, or if ``channel_axis`` is
+        out of bounds for the inferred array dimensionality.
 
     """
 
@@ -611,8 +617,42 @@ class channel_as_last_axis:
             if len(channel_axis) > 1:
                 raise ValueError("only a single channel axis is currently supported")
 
-            if channel_axis == (-1,) or channel_axis == -1:
-                return func(*args, **kwargs)
+            axis = channel_axis[0]
+            orig_axis = axis
+            # Get reference array to determine ndim
+            ref_arg = None
+            if self.arg_positions:
+                ref_arg = next(
+                    (arg for pos, arg in enumerate(args) if pos in self.arg_positions),
+                    None,
+                )
+            if ref_arg is None and self.kwarg_names:
+                for name in self.kwarg_names:
+                    ref_arg = kwargs.get(name)
+                    if ref_arg is not None:
+                        break
+            if ref_arg is None and args:
+                ref_arg = args[0]
+
+            if ref_arg is None:
+                msg = (
+                    "channel_as_last_axis: could not determine array ndim; "
+                    "no channel array found in args or kwargs."
+                )
+                raise ValueError(msg)
+            ndim = ref_arg.ndim
+
+            # Normalize negative axis
+            if axis < 0:
+                axis += ndim
+
+            if axis < 0 or axis >= ndim:
+                msg = (
+                    f"channel_axis={orig_axis} is out of bounds "
+                    f"for array of dimension {ndim}"
+                )
+                raise ValueError(msg)
+            channel_axis = (axis,)
 
             if self.arg_positions:
                 new_args = []
