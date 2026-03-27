@@ -38,7 +38,7 @@ There are two potential approaches to this problem.
 
 One implementation we will call "big-bang". Here we move all the current
 `skimage` implementations, that will have versions in Skimage2, into the
-`_skimage` namespace. We import the `_skimage2` implementations back into the
+`_skimage2` namespace. We import the `_skimage2` implementations back into the
 `skimage` namespace, while preserving the current `skimage` wrappers for
 already ported code.
 
@@ -47,7 +47,7 @@ We also copy all tests from `tests/skimage` to `tests/_skimage2`
 For more details in the procedure, see the [detailed description
 section](detailed-description) below.
 
-This leaves us with a complete `_skimage` namespace, but where we have yet to
+This leaves us with a complete `_skimage2` namespace, but where we have yet to
 complete the API and other changes in that namespace.
 
 After this, all Skimage2 changes take place in the `src/_skimage2` and
