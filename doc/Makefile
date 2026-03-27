@@ -47,9 +47,6 @@ api:
 
 
 html: api html-only
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
-	@echo
-	@echo "Build finished. The HTML pages are in build/html."
 
 html-only:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
