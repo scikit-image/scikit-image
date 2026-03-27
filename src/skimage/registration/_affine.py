@@ -256,9 +256,9 @@ class _AffineSolver(ABC):
 
         Parameters
         ----------
-        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        reference : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Reference image and weights.
-        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        moving : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Moving image and weights
         channel_axis : int
             Index of the channel axis
@@ -421,9 +421,9 @@ class StudholmeAffineSolver(_AffineSolver):
 
         Parameters
         ----------
-        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        reference : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Reference image and weights.
-        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        moving : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Moving image and weights.
         channel_axis : int
             Index of the channel axis.
@@ -504,7 +504,7 @@ class LucasKanadeAffineSolver(_AffineSolver):
 
         Parameters
         ----------
-        model_class : ski.transform.Transform class
+        model_class : ski.transform.Transform
             Sub class of ski.transform.Transform
         order : int
             Order of the spline interpolation.
@@ -524,9 +524,9 @@ class LucasKanadeAffineSolver(_AffineSolver):
 
         Parameters
         ----------
-        reference : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        reference : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Reference image and weights.
-        moving : ndarray of shape (P, M, N) or tuple(ndarray[P,N,M], ndarray[P,N,M])
+        moving : ndarray of shape (P, M, N) or tuple[ndarray of shape (P, M, N), ndarray of shape (P, M, N)]
             Moving image and weights.
         channel_axis : int
             Index of the channel axis.
@@ -647,7 +647,7 @@ class ECCAffineSolver(_AffineSolver):
 
         Parameters
         ----------
-        model_class : ski.transform.Transform class
+        model_class : ski.transform.Transform
             Sub class of ski.transform.Transform
         order : int
             Order of the spline interpolation.
@@ -668,6 +668,8 @@ class ECCAffineSolver(_AffineSolver):
     ):
         """Compute the Jacobian of the warp wrt the parameters.
 
+        TODO remove refrences to x,y,z?
+
         Parameters
         ----------
         grad : ndarray
@@ -681,8 +683,6 @@ class ECCAffineSolver(_AffineSolver):
         -------
         jac : ndarray
             Jacobian of the warp wrt the parameters.
-
-        TODO: remove refrences to x,y,z?
         """
 
         if np.shape(grad)[0] == 2:
@@ -742,6 +742,8 @@ class ECCAffineSolver(_AffineSolver):
         """
         Update the warping matrix with the update vector.
 
+        TODO use parameter_vector_to_matrix instead?
+
         Parameters
         ----------
         map_matrix : ndarray
@@ -755,8 +757,6 @@ class ECCAffineSolver(_AffineSolver):
         -------
         map_matrix : ndarray
             Updated warping matrix.
-
-        TODO: use parameter_vector_to_matrix instead?
         """
 
         if np.shape(map_matrix)[0] == 3:
@@ -977,9 +977,9 @@ class GaussianPyramid:
 
         Parameters
         ----------
-        downscale: float
+        downscale : float
             Downsampling factor between successive scales.
-        min_size: int
+        min_size : int
             Minimum size of the image in the pyramid.
         """
         self._min_size = min_size
@@ -991,13 +991,13 @@ class GaussianPyramid:
 
         Parameters
         ----------
-        shape:
+        shape : tuple
             The image shape (including channel in axes 0).
 
         Returns
         -------
-        n: int
-            number of layers
+        n : int
+            Number of layers.
         """
         return int(
             math.floor(
@@ -1012,12 +1012,12 @@ class GaussianPyramid:
 
         Parameters
         ----------
-        shape: shape
+        shape : tuple
             The image shape (including channel in axes 0).
 
         Returns
         -------
-        scale: float
+        scale : float
             The smallest scaling factor.
         """
         scale = math.pow(self.downscale, -self.max_layers(shape) - 1)
@@ -1028,14 +1028,14 @@ class GaussianPyramid:
 
         Parameters
         ----------
-        image: ndarray or tuple(ndarray)
+        image : ndarray or tuple[ndarray]
             Original image or tuple with image and weights
-        channel_axis: int
+        channel_axis : int
             Index of the axes corresponding to the channel.
 
         Returns
         -------
-        pyramids: list(list(ndarray))
+        pyramids : list[list[ndarray]]
             The pyramids as a 2-tuple of list of images from the lower resolution to
             the full image with the channels in the first axis for both the image
             and the weights.
@@ -1082,11 +1082,11 @@ class _NullPyramid:
 
         Parameters
         ----------
-        shape:
+        shape :
 
         Returns
         -------
-        n: int
+        n : int
             number of layers
         """
         return 1
@@ -1096,12 +1096,12 @@ class _NullPyramid:
 
         Parameters
         ----------
-        shape: ndarray
+        shape : tuple
             The image shape.
 
         Returns
         -------
-        scale: float
+        scale : float
             The smallest scaling factor.
         """
         return 1
@@ -1111,14 +1111,14 @@ class _NullPyramid:
 
         Parameters
         ----------
-        image: ndarray or tuple(ndarray)
+        image : ndarray or tuple[ndarray]
             Original image or tuple with image and weights
-        channel_axis: int
+        channel_axis : int
             Index of the axes corresponding to the channel.
 
         Returns
         -------
-        pyramids: list(list(ndarray))
+        pyramids : list[list[ndarray]]
             The pyramids as a 2-tuple of list of images from the lower resolution to
             the full image with the channels in the first axis for both the image
             and the weights.
@@ -1145,15 +1145,15 @@ def estimate_affine(
 
     Parameters
     ----------
-    reference_image: ndarray[C,P,N,M] or tuple(ndarray[C,P,N,M], ndarray[C,P,N,M])
+    reference_image : ndarray of shape (C, P, M, N) or tuple[ndarray of shape (C, P, M, N), ndarray of shape (C, P, M, N)]
         The reference image or reference image and weight tuple.
-    moving_image: ndarray[C,P,N,M] or tuple(ndarray[C,P,N,M], ndarray[C,P,N,M])
+    moving_image : ndarray of shape (C, P, M, N) or tuple[ndarray of shape (C, P, M, N), ndarray of shape (C, P, M, N)]
         The moving image to register or moving image and weight tuple.
-    solver: Solver
+    solver : Solver
         An affine registration solver
-    pyramid: Pyramid or None
+    pyramid : Pyramid or None
         A pyramid generator. If using None, no pyramid is used.
-    matrix: ndarray or Transform
+    matrix : ndarray or ski.transform.Transform
         The initial transform.
 
 
@@ -1163,7 +1163,7 @@ def estimate_affine(
 
     Note
     ----
-    The affine transform matrix is compatible with the convention of scipy.ndimage.affine_transform
+    The affine transform matrix is compatible with the convention of :func:`scipy.ndimage.affine_transform`
     and uses for example the row, columns order in 2D.
     """
 
