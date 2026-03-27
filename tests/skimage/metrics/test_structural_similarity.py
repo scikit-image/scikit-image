@@ -5,6 +5,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 from skimage import data
 from skimage._shared.utils import _supported_float_type
 from skimage.metrics import structural_similarity
+from skimage.util.dtype import _integer_types
 
 np.random.seed(5)
 cam = data.camera()
@@ -225,13 +226,20 @@ def test_ssim_warns_about_data_range():
         # is getting a warning about avoiding mistakes.
         assert mssim_uint16 > 0.99
 
-    with pytest.warns(UserWarning, match='Setting data_range based on im1.dtype'):
+    regex = (
+        r'Inputs have mismatched dtypes'
+        # Warning is raised twice, in wrapper with this optional bit and in
+        # _skimage2 implmentation without this bit:
+        r'(\. Setting data_range based on im1\.dtype\.)?'
+    )
+    with pytest.warns(UserWarning, match=regex):
         _ = structural_similarity(cam, cam_noisy.astype(np.int32))
 
-    # no warning when user supplies data_range
-    mssim_mixed = structural_similarity(
-        cam, cam_noisy.astype(np.float32), data_range=255
-    )
+    # Warn too when user supplies data_range
+    with pytest.warns(UserWarning, match='Inputs have mismatched dtypes'):
+        mssim_mixed = structural_similarity(
+            cam, cam_noisy.astype(np.float32), data_range=255
+        )
 
     assert_almost_equal(mssim, mssim_mixed)
 
@@ -249,11 +257,32 @@ def test_structural_similarity_small_image(dtype):
         structural_similarity(X, X)
 
 
-@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64])
+@pytest.mark.parametrize('dtype', [np.float16, np.float32, np.float64, float])
 def test_structural_similarity_errors_on_float_without_data_range(dtype):
     X = np.zeros((64, 64), dtype=dtype)
     with pytest.raises(ValueError):
         structural_similarity(X, X)
+
+
+@pytest.mark.parametrize('dtype', _integer_types)
+def test_structural_similarity_estimate_data_range(dtype):
+    im1 = np.linspace(np.iinfo(dtype).min, np.iinfo(dtype).max, num=121)
+    with np.errstate(invalid="ignore"):
+        im1 = im1.astype(dtype, casting="unsafe")
+    im1 = im1.reshape((11, 11))
+    im2 = im1 // 2
+
+    data_range = np.iinfo(dtype).max - np.iinfo(dtype).min
+    result_explicit = structural_similarity(im1, im2, data_range=data_range)
+
+    if dtype == np.uint8:
+        # For some reason, warnings are explicitly skipped for `np.uint8`
+        result_estimated = structural_similarity(im1, im2)
+    else:
+        with pytest.warns(UserWarning, match="Setting data_range based on im1.dtype"):
+            result_estimated = structural_similarity(im1, im2)
+
+    assert result_explicit == result_estimated
 
 
 def test_invalid_input():
