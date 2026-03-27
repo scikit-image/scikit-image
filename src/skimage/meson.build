@@ -134,6 +134,26 @@ if cy.version().version_compare('>=3.1.0')
   cython_codegen_args += ['-Xfreethreading_compatible=True']
 endif
 
+if get_option('shared-cython-utility')
+  cython_program = find_program(cython.cmd_array()[0])
+  cython_shared_src = custom_target(
+    install: false,
+    output: '_cyutility.c',
+    command: [
+      cython_program, '-3', '--fast-fail', '-Xfreethreading_compatible=True',
+      '--generate-shared=' + meson.current_build_dir()/'_cyutility.c'
+    ],
+  )
+  py3.extension_module('_cyutility',
+    cython_shared_src,
+    subdir: 'skimage',
+    cython_args: cython_codegen_args,
+    install: true,
+  )
+
+  cython_codegen_args += ['--shared=skimage._cyutility']
+endif
+
 cython_gen = generator(cython_cli,
   arguments : cython_codegen_args,
   output : '@BASENAME@.c')
