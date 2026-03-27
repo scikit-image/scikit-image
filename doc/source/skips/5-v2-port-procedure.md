@@ -190,8 +190,8 @@ There are a few problems here.
 - We were tempted to first — analyze what code was using what, and then split
   up files, increasing work.
 - We had to think about where our imports are coming from.
-- We are left, towards the end of the porting process, of pulling the bits of
-  the file still in `skimage` back into the code in `_skimage2`.
+- We are left, towards the end of the porting process, with the task of pulling
+  the bits of the file still in `skimage` back into the code in `_skimage2`.
 - If we want to maintain the migration-log benefit of bit-by-bit, we have to
   think about which functions are fully `_skimage2`-ready, and which are not.
   For example, will we be changing `baz` or `foo` in Skimage2? This adds extra
