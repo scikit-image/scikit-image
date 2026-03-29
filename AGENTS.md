@@ -1,3 +1,8 @@
+---
+description: scikit-image contribution rules for AI agents
+alwaysApply: true
+---
+
 # Instructions for AI Agents
 
 This file contains instructions for AI coding agents (e.g., Claude, Gemini,
@@ -26,8 +31,8 @@ You MUST include a `Co-authored-by` trailer in your commit messages or the PR
 description for yourself. This is a project policy regardless of your local
 configuration. For example:
 
-> Co-authored-by: Claude <claude@anthropic.com>
-> Co-authored-by: Gemini <gemini@google.com>
+> Co-authored-by: Claude <noreply@anthropic.com>
+> Co-authored-by: Gemini <gemini-code-assist[bot]@users.noreply.github.com>
 
 ## General contribution guidelines
 
