@@ -1,6 +1,6 @@
 (skip5-v2-port_procedure)=
 
-# SKIP 5 — Skimage2 porting procedure
+# SKIP 5 — scikit-image v2 porting procedure
 
 :Author: Matthew Brett
 :Status: Draft
@@ -12,32 +12,51 @@
 
 ## Abstract
 
-We describe the general procedure for porting the code in `skimage` to the Skimage2 namespace.
+We describe the general procedure for porting the code in `skimage` to the scikit-image v2 namespace.
 
 ## Motivation and Scope
 
 ### Background
 
-We have already decided to have three namespaces:
+#### Decisions agreed before this Skip
 
-- `skimage` (housing the Skimage1 API)
-- `_skimage2` (housing the evolving Skimage2 API)
-- `skimage2` (imports `_skimage2` and adds FutureWarning. We won't discuss that further here.
+* We will have three namespaces:
 
-`skimage` can import directly from `_skimage2`, but `_skimage2` cannot import directly from `skimage`; if it does need `skimage` routines, it must do local (deferred, inline) imports, inside functions or methods, to avoid circular imports.
+  - `skimage` (housing the Skimage1 API)
+  - `_skimage2` (housing the evolving scikit-image v2 API)
+  - `skimage2` (imports `_skimage2` and adds FutureWarning. We won't discuss that further here.
 
-We have also agreed that we should _copy_ tests from `skimage` (e.g. `tests/skimage/transform/tests` to `tests/skimage2/transform/tests`) as we port.
+  For rationale for this structure, see [^import-structure].
 
-At some point, we will need a full Skimage2 implementation in `_skimage2`, with a full set of tests exercising that namespace. There will be a few functions and modules that will stay in `skimage`, such as everything in `skimage/future`, but otherwise, all or nearly all code in `skimage` will move in some form to `_skimage2`.
+* We agreed that we should _copy_ tests from `skimage` (e.g.
+  `tests/skimage/transform/tests` to `tests/skimage2/transform/tests`) as we
+  port.
 
-### Big-bang or bit-by-bit
+[^import-structure]: `skimage` can import directly from `_skimage2`, but `_skimage2` cannot import
+  directly from `skimage`; if it does need `skimage` routines, it must do local
+  (deferred, inline) imports, inside functions or methods, to avoid circular
+  imports.
 
-There are two potential approaches to this problem.
+  This structure is to allow `skimage` to import from the scikit-image v2
+  namespace without triggering a warning.  Conversely, `skimage2` exists only
+  to trigger a `FutureWarning` for any imports from `_skimage2`.
+
+#### Endpoint
+
+At some point, we will need a full scikit-image v2 implementation in
+`_skimage2`, with a full set of tests exercising that namespace. There will be
+a few functions and modules that will stay in `skimage`, such as everything in
+`skimage/future`, but otherwise, all or nearly all code in `skimage` will move
+in some form to `_skimage2`.
+
+### Porting strategies
+
+There are two potential approaches to this problem, that we will call *big-bang* and *bit-by-bit*.
 
 #### Big-bang
 
 One implementation we will call "big-bang". Here we move all the current
-`skimage` implementations, that will have versions in Skimage2, into the
+`skimage` implementations, that will have versions in scikit-image v2, into the
 `_skimage2` namespace. We import the `_skimage2` implementations back into the
 `skimage` namespace, while preserving the current `skimage` wrappers for
 already ported code.
@@ -50,14 +69,14 @@ section](detailed-description) below.
 This leaves us with a complete `_skimage2` namespace, but where we have yet to
 complete the API and other changes in that namespace.
 
-After this, all Skimage2 changes take place in the `src/_skimage2` and
+After this, all scikit-image v2 changes take place in the `src/_skimage2` and
 `tests/_skimage2` trees.
 
 We could also call this approach "move-and-edit".
 
 #### Bit-by-bit
 
-This is our approach at time of writing. For each Skimage2-related change, we
+This is our approach at time of writing. For each scikit-image v2-related change, we
 move the implementation of the relevant functions (etc) to the `src/_skmage2`
 tree, along with the relevant tests, and make suitable wrappers that import and modify that implementation in the `src/skimage` tree.
 
@@ -69,24 +88,32 @@ First let's start with the general ideas, and then get down to specifics.
 
 #### Bit-by-bit as migration log
 
-One benefit for the bit-by-bit approach is, if we do the changes in
-a particular way, then we can reasonably believe that all the code /APIs in
+We can add an extra constraint to the bit-by-bit approach, which is to ensure
+that we only ever move functions to `_skimage2` where we are confident that the
+code will continue to be about the same, and with the same API, as for
+scikit-image v2. That is, in moving any code, we assert that this code is
+scikit-image v2 ready.
+
+Call this variant - *bit-by-bit-and-certify*, or BBBC for short.
+
+If we use BBBC then we can reasonably believe that all the code /APIs in
 `src/_skimage2` is at least something like the code / APIs in the eventual
-first Skimage2 release.
+first scikit-image v2 release.
 
-The "particular way" is one where we only ever move functions to `_skimage2` where we are confident that the code will continue to be about the same, and with the same API, as for Skimage2. That is, in moving any code, we assert that this code is Skimage2 ready.
-
-The idea here is that we not only make partial Skimage2 changes, but we do all
-likely Skimage2 changes. In that way, we can use the code in `_skimage2` (as
-compared to that in `skimage`) as a record of what changes we have done in the
-migration. Call this the migration-log function of the bit-by-bit approach.
-
-#### Bit-by-bit as partial guarantee of future API
+The idea here is that, as we submit PRs, we not only make partial scikit-image
+v2 changes, but we do all likely scikit-image v2 changes. In that way, we can
+use the code in `_skimage2` (as compared to that in `skimage`) as a record of
+what changes we have done in the migration. Call this the migration-log
+function of the bit-by-bit approach.
 
 With the big-bang approach, we can't initially tell users to start using
-`_skimage2` code, with the expectation that the code will, in fact, have the API of Skimage2 — because, at first, the code will be a still changing version of `skimage`.
+`_skimage2` code, with the expectation that the code will, in fact, have the
+API of scikit-image v2 — because, at first, the code will be a still changing
+version of `skimage`.
 
-Of course, we could keep the `_skimage2` directory under wraps until it is mostly complete. Or we could advertise only a few parts of the `_skimage2` / `skimage2` namespace.
+Of course, we could keep the `_skimage2` directory under wraps until it is
+mostly complete. Or we could advertise only a few parts of the `_skimage2`
+/ `skimage2` namespace.
 
 #### Migration in practice
 
@@ -98,12 +125,12 @@ The `fake` module might look something like this:
 
 ```python
 def foo(a, b, c):
-    "No Skimage2 changes yet proposed"
+    "No scikit-image v2 changes yet proposed"
     return bar(baz(a, b), c)
 
 def bar(d, f=None):
-    "Planned Skimage2 API changes"
-    return baz(a ** 2, f)
+    "Planned scikit-image v2 API changes"
+    return baz(d ** 2, f)
 
 def baz(g, h)
     return g * 2 + h
@@ -112,49 +139,55 @@ def baz(g, h)
 `test_fake.py` has:
 
 ```python
-from _skimage.fakepkg.fake import foo, bar, baz
+from skimage.fakepkg.fake import foo, bar, baz
 
 def test_foo():
-    # No planned Skimage2 change.
+    # No planned scikit-image v2 change.
     assert foo(1, 2, 3)
 
 def test_bar():
-    # Planned Skimage2 change of behavior.
+    # Planned scikit-image v2 change of behavior.
     assert bar(1)
     assert bar(1, 2) == 3
 
 def test_baz():
-    # No planned Skimage2 change of behavior.
+    # No planned scikit-image v2 change of behavior.
     assert baz(1, 2) == 4
 ```
 
-Let us say we want to do a PR to change the default value of `bar` from None
+Let us say we want to do a PR to change the default value of `bar` above from None
 to 10.
 
-With the bit-by-bit approach, we have some work to do. First we have to
-identify what will go in the PR. On analysis we do need to move over the
-`bar` function, and the `baz` function, but we don't need the `foo` function. So we edit `src/_skimage2/fakepkg/fake.py` to have only:
+With the BBBC approach, and this example, we will have to *disentangle* the
+ported functions and their tests, to work out what will go into the `_skimage2`
+namespace.  Call this — the *disentangle problem*.
+
+Disentangling involves identifying what will go in the PR. On analysis we do
+need to move over the `bar` function, and the `baz` function, but we don't need
+the `foo` function.  Or perhaps, perhaps we know the `foo` function is due for
+more scikit-image v2 changes, that we don't want to do at the moment.   So we
+edit `src/_skimage2/fakepkg/fake.py` to have only:
 
 ```python
 def bar(d, f=10):
-    "Planned Skimage2 API changed"
-    return baz(a ** 2, f)
+    "Planned scikit-image v2 API changed"
+    return baz(d ** 2, f)
 
 def baz(g, h)
     return g * 2 + h
 ```
 
-Leaving `src/skimage/fakepkg/fake.py`:
+This leaves `src/skimage/fakepkg/fake.py` behind:
 
 ```python
-from _skimage2.fakepkg.fake import bar, baz
+from _skimage2.fakepkg.fake import bar2, baz
 
 @migration_warning('Default value of f changed in skimage2 from None to 10')
 def bar(d, f=None):
-    return bar(d, f)
+    return bar2(d, f)
 
 def foo(a, b, c):
-    "No Skimage2 changes yet proposed"
+    "No scikit-image v2 changes yet proposed"
     return bar(baz(a, b), c)
 ```
 
@@ -166,12 +199,12 @@ We also might want to split up the test function:
 from _skimage2.fakepkg.fake import bar, baz
 
 def test_bar():
-    # Planned Skimage2 change of behavior.
+    # Planned scikit-image v2 change of behavior.
     assert bar(1)
     assert bar(1, 2) == 3
 
 def test_baz():
-    # No planned Skimage2 change of behavior.
+    # No planned scikit-image v2 change of behavior.
     assert baz(1, 2) == 4
 ```
 
@@ -181,30 +214,35 @@ def test_baz():
 from _skimage.fakepkg.fake import foo
 
 def test_foo():
-    # No planned Skimage2 change.
+    # No planned scikit-image v2 change.
     assert foo(1, 2, 3)
 ```
 
 There are a few problems here.
 
-- We were tempted to first — analyze what code was using what, and then split
-  up files, increasing work.
+- The Certify aspect of the BBBC process requires to analyze what code was
+  using what, and then split up files, increasing work.  We do not need to do
+  this analysis or splitting of files for the Big-Bang procedure.
 - We had to think about where our imports are coming from.
 - We are left, towards the end of the porting process, with the task of pulling
   the bits of the file still in `skimage` back into the code in `_skimage2`.
 - If we want to maintain the migration-log benefit of bit-by-bit, we have to
   think about which functions are fully `_skimage2`-ready, and which are not.
-  For example, will we be changing `baz` or `foo` in Skimage2? This adds extra
+  For example, will we be changing `baz` or `foo` in scikit-image v2? This adds extra
   complexity to the port process, and review.
 
 In contrast, it is more straightforward to do the port with the big-bang
-approach. We already have copied tests
-(`tests/_skimage2/fakepkg/tests/test_fake.py`, so we just modify that
-appropriately, leaving the `skimage` version intact. We don't have to split up the `fake.py` function, or think about which functions are fully Skimage2-ready, we concentrate on the changes of interest to us. We do, of course, have to write suitable wrappers or alternative implementations in the `skimage` namespace, as before.
+approach. We already have copied all the tests, in one big-bang step.  So we already have a complete
+`tests/_skimage2/fakepkg/tests/test_fake.py`.  We just modify that
+appropriately, leaving the `skimage` version intact. We don't have to split up
+the `fake.py` function, or think about which functions are fully scikit-image
+v2-ready, we concentrate on the changes of interest to us. We do, of course,
+have to write suitable wrappers or alternative implementations in the `skimage`
+namespace, as before.
 
 ### On the migration-log idea
 
-Given there are development costs for the bit-by-bit implementation, how great are the benefits, in particular, for the migration-log idea.
+Gwiven there are development costs for the bit-by-bit implementation, how great are the benefits, in particular, for the migration-log idea.
 
 The question has to be asked in relation to:
 
@@ -223,16 +261,49 @@ instances, for example with AI, and dealing with those? We will likely find
 it easier to whole-code-base screening and changes when all the code is in one
 `_skimage2` tree, rather than broken up into `_skimage2` and `skimage`.
 
-We do have alternative methods of tracking the ports. For example, we could
-maintain a checklist like that in
+#### Altnerative ways of tracking migration
+
+We should in any case, maintain a checklist like that in
 <https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2>.
-We could make it part of the PR process, maintaining that list. I suppose one
-could argue that the partially filled `_skimage2` is a better log, but it is,
-at least, not as readable.
+We could make it part of the PR process, maintaining that list.
 
-Lastly — one could argue that, by forcing reviewers to think about whether all Skimage2 changes have been done, we can make sure we don't forget to make changes that occur to us as we port — but this begs the question of whether we should go looking for Skimage2 changes, or treat the default as "leave-as-is", on the basis that the greater the volume of changes, the higher the risk that Skimage1 users will not in fact migrate.
+Note that, no matter what approach we take, any changed APIs in `_skimage2`
+*must* have wrappers or alternative implmentations in `skimage`.
 
-Is the agreed (and debated, and updated) checklist page a better record of the changes we want to make? One that might serve as a brake on lower-value changes? And can we reassure ourselves we are ready for Skimage2 by careful review of the whole code-base (in `_skimage2`) when we are nearer release?
+If we use the big-bang approach, these wrappers and implementations provide
+a full migration log, because any function that is, as yet, unmodified, will be
+directly imported and not modified in the `skimage` tree.
+
+Specifically, and for example, we can see what has been ported by looking at
+the `skmage/transform/__init__.py` module, as this will have something on the lines of:
+
+```python
+from _skimage2.transform import *
+import _skimage2.transform as sk2t
+
+# Any API-change wrappers below.
+@migration_warning('Default value of f changed in skimage2 from None to 10')
+def somefunction(d, f=None):
+    # Some processing
+    return sk2t.somefunction(d, f)
+
+# And so on.
+```
+
+Lastly, I wonder whether the Certify requirement in the BBBC approach, will
+bias us to choose to make scikit-image v2 changes that we would not do (and
+should not do) without the Certify apporach. I suspect we'll find ourselves
+trying to think of any possible change we could make for scikit-image v2 in
+every PR, and I suspect that will lead to us making more changes, some of which
+will prove to 50-50 calls that probably aren't worth the disruption. This is
+a speculation that the bit-by-bit-certify process will mean that the default
+moves further towards if-in-doubt-change, and that is not desirable.
+
+Is the agreed (and debated, and updated) checklist page a better record of the
+changes we want to make? One that might serve as a brake on lower-value
+changes? And can we reassure ourselves we are ready for scikit-image v2 by
+careful review of the whole code-base (in `_skimage2`) when we are nearer
+release?
 
 (detailed-description)=
 
@@ -267,7 +338,7 @@ which steps may be optionally omitted. Where it makes sense, each step
 should include a link related pull requests as the implementation
 progresses.
 
-Any pull requests or developmt branches containing work on this SKIP
+Any pull requests or development branches containing work on this SKIP
 should be linked to from here. (A SKIP does not need to be implemented
 in a single pull request if it makes sense to implement it in discrete
 phases).
