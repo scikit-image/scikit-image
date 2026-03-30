@@ -77,12 +77,12 @@ We could also call this approach "move-and-edit".
 #### Bit-by-bit
 
 This is our approach at time of writing. For each scikit-image v2-related change, we
-move the implementation of the relevant functions (etc) to the `src/_skmage2`
+move the implementation of the relevant functions (etc) to the `src/_skimage2`
 tree, along with the relevant tests, and make suitable wrappers that import and modify that implementation in the `src/skimage` tree.
 
 Thus the `_skimage2` namespace fills up gradually, as we do the migration of the API and other code.
 
-### Benefits and disbenefits from the approaches
+### Benefits and disadvantages of the two approaches
 
 First let's start with the general ideas, and then get down to specifics.
 
