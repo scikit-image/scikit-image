@@ -8,14 +8,12 @@ from skimage._shared.utils import _supported_float_type
 from skimage.exposure import histogram_matching
 
 
-RNG = np.random.RandomState(2687310482)
-
-
 @pytest.mark.parametrize(
     'array, template, expected_array',
     [
         (np.arange(10), np.arange(100), np.arange(9, 100, 10)),
         (
+            # np.random.RandomState(2687310482).rand(4)
             np.array([0.63712094, 0.68164102, 0.94217479, 0.0021863]),
             np.ones(3),
             np.ones(4),
