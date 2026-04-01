@@ -68,7 +68,8 @@ def test_ensure_spacing_max_batch_size():
 
     https://github.com/scikit-image/scikit-image/pull/6035#discussion_r751518691
     """
-    coords = np.random.randint(low=0, high=1848, size=(40000, 2))
+    rng = np.random.RandomState(4215035982)
+    coords = rng.randint(low=0, high=1848, size=(40000, 2))
     tstart = time.time()
     _ensure_spacing(coords, spacing=100, min_split_size=50, max_split_size=2000)
     dur1 = time.time() - tstart
