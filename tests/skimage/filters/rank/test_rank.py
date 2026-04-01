@@ -100,7 +100,6 @@ class TestRank:
         self.image = rng.rand(25, 25)
         rng.seed(0)
         self.volume = rng.rand(10, 10, 10)
-        # Set again the seed for the other tests.
         self.footprint = morphology.disk(1)
         self.footprint_3d = morphology.ball(1)
         self.refs = ref_data
