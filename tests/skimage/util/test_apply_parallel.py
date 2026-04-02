@@ -18,6 +18,12 @@ IMG_COMPARE_PRECISION = 4 if IS_MACOS_ARM else 6
 # so we need to lower the decimal precision
 
 x = np.arange(16).reshape((4, 4))  # array
+map_overlap_def = np.array(
+    [[9, 10, 11, 12], [13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]]
+)
+map_overlap_ref = np.array(
+    [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
+)
 
 
 def test_apply_parallel():
@@ -132,12 +138,9 @@ def test_apply_parallel_nearest():
     depth = 1
     # import dask.array as da
     # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=1, boundary='nearest').compute()
-    map_overlap_res = np.array(
-        [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
-    )
+    # map_overlap_ref = d.map_overlap(func, depth=1, boundary='nearest').compute()
     edge = apply_parallel(func, x, chunks=chunks, depth=depth, mode='edge')
-    assert_array_almost_equal(edge, map_overlap_res)
+    assert_array_almost_equal(edge, map_overlap_ref)
 
 
 def test_apply_parallel_symmetric():
@@ -152,12 +155,9 @@ def test_apply_parallel_symmetric():
     depth = 1
     # import dask.array as da
     # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=1, boundary='reflect').compute()
-    map_overlap_res = np.array(
-        [[16, 17, 18, 19], [20, 21, 22, 23], [24, 25, 26, 27], [28, 29, 30, 31]]
-    )
+    # map_overlap_ref = d.map_overlap(func, depth=1, boundary='reflect').compute()
     symm = apply_parallel(func, x, chunks=chunks, depth=depth, mode='symmetric')
-    assert_array_almost_equal(symm, map_overlap_res)
+    assert_array_almost_equal(symm, map_overlap_ref)
 
 
 @pytest.mark.parametrize('dtype', (np.float32, np.float64))
@@ -221,7 +221,7 @@ def test_apply_parallel_rgb_channel_axis(depth, chunks, channel_axis):
 
 
 def test_apply_parallel_default_mode():
-    """Test that apply_parallel does not add boundary padding by default."""
+    """Test that apply_parallel applies 'reflect' boundary padding by default."""
 
     def func(arr):
         return arr + arr.size
@@ -230,13 +230,10 @@ def test_apply_parallel_default_mode():
     depth = 1
     # import dask.array as da
     # d = da.from_array(x, chunks=(2, 2))
-    # map_overlap_res = d.map_overlap(func, depth=1, boundary=None).compute()
-    map_overlap_res = np.array(
-        [[9, 10, 11, 12], [13, 14, 15, 16], [17, 18, 19, 20], [21, 22, 23, 24]]
-    )
+    # map_overlap_def = d.map_overlap(func, depth=1).compute()
     defa = apply_parallel(func, x, chunks=chunks, depth=depth)
-    assert_array_almost_equal(defa, map_overlap_res)
+    assert_array_almost_equal(defa, map_overlap_ref)
     none_c = apply_parallel(func, x, chunks=chunks, depth=depth, mode=None)
-    assert_array_almost_equal(none_c, map_overlap_res)
+    assert_array_almost_equal(none_c, map_overlap_ref)
     none = apply_parallel(func, x, chunks=chunks, depth=depth, mode='none')
-    assert_array_almost_equal(none, map_overlap_res)
+    assert_array_almost_equal(none, map_overlap_def)
