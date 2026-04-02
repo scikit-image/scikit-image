@@ -54,14 +54,12 @@ moving = ndi.affine_transform(reference, matrix)
 # much blurrier and smaller version of the two images, then progressively
 # refines the alignment with sharper, full-resolution versions. This is called
 # a Gaussian pyramid. This function can take different solvers for estimating
-# the transformation at each pyramid level.
-# Solvers are LucasKanadeAffineSolver, StudholmeAffineSolver and ECCAffineSolver
-# Each solver take a model as first parameter which can be TranslationTransform,
-# EuclideanTransform or AffineTransform
+# the transformation at each pyramid level. Solvers are "lukas-kanade", "studholme" and "ecc"
 
-model_class = ski.registration.EuclideanTransform
-solver = ski.registration.LucasKanadeAffineSolver(model_class)
-transform = ski.registration.estimate_affine(reference, moving, solver=solver)
+
+transform = ski.registration.estimate_affine(
+    reference, moving, transform_type="affine", solver="lukas-kanade"
+)
 
 ################################################################################
 # To align the moving image, we use ``ndi.affine_transform``

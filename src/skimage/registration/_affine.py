@@ -2,6 +2,7 @@
 
 import warnings
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, fields
 from functools import partial
 from itertools import combinations, combinations_with_replacement, product
 import math
@@ -12,6 +13,8 @@ from scipy.optimize import minimize
 
 from skimage.metrics import normalized_mutual_information
 import skimage as ski
+
+from enum import StrEnum
 
 
 class AffineTransform:
@@ -276,8 +279,8 @@ class StudholmeAffineSolver(_AffineSolver):
         self,
         model_class,
         order=3,
-        cost_function=lambda im0, im1, w: -normalized_mutual_information(
-            im0, im1, bins=32, weights=w
+        cost_function=lambda im0, im1, w: (
+            -normalized_mutual_information(im0, im1, bins=32, weights=w)
         ),
         minimizer="Powell",
         max_iter=100,
@@ -1132,13 +1135,89 @@ class _NullPyramid:
         return ([image[0]], [image[1]])
 
 
+class AffineTransformType(StrEnum):
+    AFFINE = "affine"
+    EUCLIDEAN = "euclidean"
+    TRANSLATION = "translation"
+
+
+TRANSFORM_REGISTRY = {
+    AffineTransformType.AFFINE: AffineTransform,
+    AffineTransformType.EUCLIDEAN: EuclideanTransform,
+    AffineTransformType.TRANSLATION: TranslationTransform,
+}
+
+
+class AffineSolverType(StrEnum):
+    STUDHOLME = "studholme"
+    LUCASKANADE = "lukas-kanade"
+    ECC = "ecc"
+
+
+@dataclass
+class AffineSolverConfig(ABC):
+    """Base configuration for affine solvers."""
+
+    type: AffineSolverType
+
+    def solver_kwargs(self) -> dict:
+        """Return the fields of the configuration class as a dictionary"""
+        base_fields = {f.name for f in fields(AffineSolverConfig)}
+        return {
+            f.name: getattr(self, f.name)
+            for f in fields(self)
+            if f.name not in base_fields
+        }
+
+
+@dataclass
+class StudholmeAffineSolverConfig(AffineSolverConfig):
+    """Configuration for affine Studholme solver."""
+
+    type: AffineSolverType = AffineSolverType.STUDHOLME
+    order: int = 3
+
+
+@dataclass
+class LucasKanadeAffineSolverConfig(AffineSolverConfig):
+    """Configuration for affine Lucas and Kanade solver."""
+
+    type: AffineSolverType = AffineSolverType.LUCASKANADE
+    order: int = 3
+    max_iter: int = 200
+    tol: float = 1e-6
+
+
+@dataclass
+class ECCAffineSolverConfig(AffineSolverConfig):
+    """Configuration for affine ECC solver."""
+
+    type: AffineSolverType = AffineSolverType.ECC
+    order: int = 3
+    max_iter: int = 200
+    tol: float = 1e-6
+
+
+SOLVER_REGISTRY = {
+    AffineSolverType.STUDHOLME: (StudholmeAffineSolver, StudholmeAffineSolverConfig),
+    AffineSolverType.LUCASKANADE: (
+        LucasKanadeAffineSolver,
+        LucasKanadeAffineSolverConfig,
+    ),
+    AffineSolverType.ECC: (ECCAffineSolver, ECCAffineSolverConfig),
+}
+
+_GAUSSIAN_PYRAMID = object()
+
+
 def estimate_affine(
     reference_image,
     moving_image,
     *,
     channel_axis=None,
-    solver=StudholmeAffineSolver(AffineTransform, 3),
-    pyramid=GaussianPyramid(2, 32),
+    transform_type="affine",
+    solver_config="lukas-kanade",
+    pyramid=_GAUSSIAN_PYRAMID,
     matrix=None,
 ):
     """
@@ -1150,14 +1229,16 @@ def estimate_affine(
         The reference image or reference image and weight tuple.
     moving_image : ndarray of shape (C, P, M, N) or tuple[ndarray of shape (C, P, M, N), ndarray of shape (C, P, M, N)]
         The moving image to register or moving image and weight tuple.
-    solver : Solver
-        An affine registration solver
+    transform_type: AffineTransformType | str
+        The type of affine transform as an enum or a string "affine", "euclidean" or "translation"
+    solver_config: AffineSolverConfig | str
+        The configuration of the solver or it name as a string "studholme", "lukas-kanade", "ecc"
     pyramid : Pyramid or None
-        A pyramid generator. If using None, no pyramid is used.
+        A pyramid generator. If ``None``, no pyramid is used. By default, a Gaussian pyramid with 2 levels and a sigma of 32 is used.
     matrix : ndarray or ski.transform.Transform
         The initial transform.
 
-
+    Returns
     -------
     transform : ski.transform.AffineTransform
         The estimated affine transform
@@ -1168,13 +1249,37 @@ def estimate_affine(
     and uses for example the row, columns order in 2D.
     """
 
+    # Configure the transform type
+    if transform_type not in TRANSFORM_REGISTRY:
+        raise ValueError(
+            f"Invalid transform_type '{transform_type}'. "
+            f"Must be one of {[e.value for e in AffineTransformType]}."
+        )
+    model_class = TRANSFORM_REGISTRY[transform_type]
+
+    # Configure the solver using the class and the configuration
+    if isinstance(solver_config, AffineSolverConfig):
+        solver_class, _ = SOLVER_REGISTRY[solver_config.type]
+        solver = solver_class(model_class, **solver_config.solver_kwargs())
+    else:
+        if solver_config not in SOLVER_REGISTRY:
+            raise ValueError(
+                f"Invalid solver '{solver_config}'. "
+                f"Must be one of {[e.value for e in AffineSolverType]}."
+            )
+        solver_class, config_class = SOLVER_REGISTRY[solver_config]
+        solver = solver_class(model_class, **config_class().solver_kwargs())
+
+    # Create pairs of image and weights
     ref, mov = [
         _shuffle_axes_and_unpack_weights_if_necessary(image, channel_axis)
         for image in [reference_image, moving_image]
     ]
 
     # if pyramid is None, we don't use a pyramidal approach
-    if pyramid is None:
+    if pyramid is _GAUSSIAN_PYRAMID:
+        pyramid = GaussianPyramid(2, 32)
+    elif pyramid is None:
         pyramid = _NullPyramid()
 
     # Build the pyramids
