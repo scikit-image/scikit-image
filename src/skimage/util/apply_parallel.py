@@ -97,12 +97,8 @@ def apply_parallel(
         different depth per array axis. Defaults to zero. When `channel_axis`
         is not None, and a tuple of length ``ndim - 1`` is provided, a depth of
         0 will be used along the channel axis.
-    mode : str, optional
-        If `mode` is set to 'wrap' or 'periodic', the array will be extended by
-        an outer boundary of size `depth` using periodic padding. This
-        temporary boundary is used during computation, but is not retained in
-        the final output. Other possible boundary modes are those supported by
-        :func:`dask.array.overlap.map_overlap` (see Notes below).
+    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
+        Type of external boundary padding. See *Notes* below.
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dict[str, Any], optional
@@ -137,7 +133,7 @@ def apply_parallel(
     -----
     NumPy boundary modes 'symmetric', 'wrap', and 'edge' are converted to the
     equivalent Dask boundary modes 'reflect', 'periodic', and 'nearest',
-    respectively ('none' is equivalent to None).
+    respectively. Pass 'none' (as a string) to ensure no padding is applied.
     Setting ``compute=False`` can be useful for chaining later operations.
     For example region selection to preview a result or storing large data
     to disk instead of loading in memory.
@@ -185,14 +181,14 @@ def apply_parallel(
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
 
-    if mode in ['wrap', 'periodic']:
-        boundary = 'periodic'
-    elif mode in ['edge', 'nearest']:
-        boundary = 'nearest'
-    elif mode in ['symmetric', 'reflect']:
-        boundary = 'reflect'
-    else:
-        boundary = 'none'
+    if mode == 'wrap':
+        mode = 'periodic'
+    elif mode == 'symmetric':
+        mode = 'reflect'
+    elif mode == 'edge':
+        mode = 'nearest'
+    elif mode is None:
+        mode = 'reflect'  # default value for dask < 2022.03
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
@@ -208,7 +204,7 @@ def apply_parallel(
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=boundary, dtype=dtype)
+    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
     if compute:
         res = res.compute()
 
