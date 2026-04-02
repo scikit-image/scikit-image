@@ -9,7 +9,6 @@ import math
 import numpy as np
 from scipy import ndimage as ndi
 from scipy.optimize import minimize
-from scipy import stats
 
 from skimage.metrics import normalized_mutual_information
 import skimage as ski
@@ -279,7 +278,7 @@ class StudholmeAffineSolver(_AffineSolver):
         model_class,
         order=3,
         cost_function=lambda im0, im1, w: -normalized_mutual_information(
-            im0, im1, bins=30, weights=w
+            im0, im1, bins=32, weights=w
         ),
         minimizer="Powell",
         max_iter=100,
@@ -316,10 +315,11 @@ class StudholmeAffineSolver(_AffineSolver):
         self.min_trial = min_trial
         if options is None:
             options = {
-                "maxfev": 10000,
+                # "maxfev": 10000,
                 "disp": False,
-                "xtol": 1e-6,
-                "ftol": 1e-3,
+                # "xtol": 1e-6,
+                # "ftol": 1e-4,
+                "gtol": 1e-4,
             }
         self.options = options.copy()
         self.options["maxiter"] = max_iter
@@ -467,12 +467,13 @@ class StudholmeAffineSolver(_AffineSolver):
         x = parameters
         x0 = x
         for trial in range(self.max_trial):
-            options["direc"] = 0.1 * stats.ortho_group.rvs(dim=len(parameters))
+            # options["direc"] = 0.1 * stats.ortho_group.rvs(dim=len(parameters))
             try:
                 # Minimize the cost function
                 result = minimize(
                     f,
                     x0=x0,
+                    jac=True,
                     method=self.minimizer_str,
                     options=options,
                 )
@@ -484,7 +485,7 @@ class StudholmeAffineSolver(_AffineSolver):
                 # stop after a few successful run
                 if trial == self.min_trial - 1 and fvalmin != np.inf:
                     break
-            except (ValueError, np.linalg.LinAlgError):
+            except (ValueError, np.linalg.LinAlgError, RuntimeWarning):
                 x = parameters
             x0 = np.random.normal(x, 0.001)
 
@@ -1208,7 +1209,7 @@ def estimate_affine(
     ).params
 
     # Refine with the next levels
-    for ref_scale, mov_scale in pyramids:
+    for ref_scale, mov_scale in pyramids[1:]:
         matrix = solver._scale_matrix(matrix, pyramid.downscale)
         matrix = solver.estimate_affine(
             ref_scale,

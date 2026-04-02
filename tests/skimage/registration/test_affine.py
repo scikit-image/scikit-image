@@ -54,13 +54,14 @@ def create_matrix(shape, model):
     transform: ndarray
         Affine transformation matrix
     """
+    rng = np.random.default_rng(42)
     ndim = len(shape)
     # Center the transformations
     T = np.eye(ndim + 1, dtype=np.float64)
     T[:ndim, -1] = -np.array(shape) / 2
     matrix = np.eye(ndim + 1, dtype=np.float64)
     # translation
-    matrix[:ndim, -1] += np.random.uniform(-2, 2, size=(ndim))
+    matrix[:ndim, -1] += rng.uniform(-2, 2, size=(ndim))
     if (
         model == ski.registration.EuclideanTransform
         or model == ski.registration.AffineTransform
@@ -79,14 +80,14 @@ def create_matrix(shape, model):
     if model == ski.registration.AffineTransform:
         # Shear for each plane
         for a in combinations(range(ndim), 2):
-            r = np.random.uniform(-0.01, 0.01)
+            r = rng.uniform(-0.01, 0.01)
             S = np.eye(ndim + 1)
             S[a[0], a[1]] = r
             matrix = S @ matrix
         # Zoom
         Z = np.eye(ndim + 1)
         for k in range(ndim):
-            Z[k, k] = np.random.uniform(0.9, 1.1)
+            Z[k, k] = r = rng.uniform(0.9, 1.1)
         matrix = Z @ matrix
 
     return np.linalg.inv(T) @ matrix @ T
@@ -262,10 +263,10 @@ def test_3d(data_3d, solver):
 def test_register_weight(data_2d_grayscale, solver):
     model = ski.registration.TranslationTransform
     reference = data_2d_grayscale
-    weight_reference = reference > 128
+    weight_reference = reference > 16
     forward = create_matrix(reference.shape, model)
     moving = ndi.affine_transform(reference, forward)
-    weight_moving = moving > 128
+    weight_moving = moving > 16
     tfm = ski.registration.estimate_affine(
         (reference, weight_reference), (moving, weight_moving), solver=solver(model)
     )
@@ -277,28 +278,21 @@ def test_register_weight(data_2d_grayscale, solver):
     assert tre_max < max_error, f"TRE ({tre_max:.2f}) is more than {max_error} pixels."
 
 
-########################################
-
-# @pytest.mark.parametrize("solver", solvers)
-# def test_nomotion(data_2d_grayscale, solver):
-#     fixed = data_2d_grayscale
-#     matrix = affine(fixed, fixed, solver=solver)
-#     tre = target_registration_error(fixed.shape, matrix)
-#     assert tre.max() < max_error, (
-#         f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
-#     )
+@pytest.mark.parametrize("model", models)
+def test_center_and_normalize(model):
+    shape = [1, 128, 128]
+    solver = ski.registration.StudholmeAffineSolver(model)
+    mat_a = create_matrix(shape, model)
+    mat_b = solver._center_and_normalize(mat_a, shape)
+    mat_c = solver._invert_center_and_normalize(mat_b, shape)
+    assert np.abs(mat_a - mat_c).max() < 1e-6
 
 
-# @pytest.mark.parametrize("solver", solvers)
-# def test_weights(data_2d_grayscale, solver):
-#     reference = data_2d_grayscale
-#     forward = create_matrix(reference.shape, "translation", ndim=2)
-#     weights = ndi.median_filter(reference, 15) < 128
-#     moving = ndi.affine_transform(reference, forward)
-#     matrix = affine(
-#         reference, moving, weights=weights, model="translation", solver=solver
-#     )
-#     tre = target_registration_error(reference.shape, matrix @ forward)
-#     assert tre.max() < max_error, (
-#         f"TRE ({tre.max():.2f}) is more than {max_error} pixels."
-#     )
+@pytest.mark.parametrize("solver", solvers)
+@pytest.mark.parametrize("model", models)
+def test_no_motion(data_2d_grayscale, solver, model):
+    reference = data_2d_grayscale
+    tfm = ski.registration.estimate_affine(reference, reference, solver=solver(model))
+    tre = ski.registration.target_registration_error(reference.shape, tfm.params)
+    tre_max = tre.max()
+    assert tre_max < max_error, f"TRE ({tre_max:.2f}) is more than {max_error} pixels."
