@@ -164,6 +164,18 @@ asymmetric = ski2.morphology.mirror_footprint(asymmetric)
 ski2.morphology.dilation(image, footprint=asymmetric, mode="reflect")
 ```
 
+### `skimage.util.apply_parallel`
+
+This function is replaced by `skimage2.util.apply_parallel` with a new
+behavior for the `mode` parameter.
+
+In the old (skimage, v1.x) implementation, symmetric padding is applied by
+default. To avoid any boundary padding from being used, you should call:
+
+```python
+ski.util.apply_parallel(..., mode='none')
+```
+
 ## Deprecations prior to skimage2
 
 We have already introduced a number of changes and deprecations to our API.
