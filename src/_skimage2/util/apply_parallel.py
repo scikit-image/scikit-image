@@ -97,10 +97,10 @@ def apply_parallel(
         different depth per array axis. Defaults to zero. When `channel_axis`
         is not None, and a tuple of length ``ndim - 1`` is provided, a depth of
         0 will be used along the channel axis.
-    mode : {'reflect', 'symmetric', 'periodic', 'wrap', 'nearest', 'edge'}, optional
+    mode : str or tuple or dict or list, optional
         The type of external boundary padding, if any (none by default).
-        Possible boundary modes are currently a subset of what
-        :func:`dask.array.overlap.map_overlap` supports (see *Notes* below).
+        Possible boundary modes are currently those supported by
+        :func:`dask.array.overlap.map_overlap` (see also *Notes* below).
     extra_arguments : tuple, optional
         Tuple of arguments to be passed to the function.
     extra_keywords : dict[str, Any], optional
@@ -147,7 +147,7 @@ def apply_parallel(
         import dask.array as da
     except ImportError:
         raise RuntimeError(
-            "Could not import 'dask'.  Please install " "using 'pip install dask'"
+            "Could not import 'dask'. Please install using 'pip install dask'"
         )
 
     if extra_keywords is None:
@@ -183,18 +183,13 @@ def apply_parallel(
         chunks.insert(channel_axis, array.shape[channel_axis])
         chunks = tuple(chunks)
 
-    if mode is not None:
-        if mode in ['wrap', 'periodic']:
-            mode = 'periodic'
-        elif mode in ['edge', 'nearest']:
-            mode = 'nearest'
-        elif mode in ['symmetric', 'reflect']:
-            mode = 'reflect'
-        else:
-            if isinstance(mode, str):
-                raise ValueError("This 'mode' value is not supported.")
-            else:
-                raise TypeError("Please pass 'mode' as a string.")
+    boundary = mode
+    if mode == 'symmetric':
+        boundary = 'reflect'
+    elif mode == 'wrap':
+        boundary = 'periodic'
+    elif mode == 'edge':
+        boundary = 'nearest'
 
     if channel_axis is not None:
         if numpy.isscalar(depth):
@@ -210,7 +205,7 @@ def apply_parallel(
 
     darr = _ensure_dask_array(array, chunks=chunks)
 
-    res = darr.map_overlap(wrapped_func, depth, boundary=mode, dtype=dtype)
+    res = darr.map_overlap(wrapped_func, depth, boundary=boundary, dtype=dtype)
     if compute:
         res = res.compute()
 
