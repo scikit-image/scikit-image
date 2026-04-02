@@ -58,7 +58,7 @@ moving = ndi.affine_transform(reference, matrix)
 
 
 transform = ski.registration.estimate_affine(
-    reference, moving, transform_type="affine", solver="lukas-kanade"
+    reference, moving, transform_type="affine", solver_config="lukas-kanade"
 )
 
 ################################################################################
