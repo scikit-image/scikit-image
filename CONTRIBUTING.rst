@@ -216,7 +216,7 @@ Stylistic Guidelines
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
 
-* When documenting array parameters, use ``image : (M, N) ndarray``
+* When documenting array parameters, use ``image : ndarray of shape (M, N)``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
 
 * Refer to array dimensions as (plane), row, column, not as x, y, z. See
@@ -502,12 +502,12 @@ to perform the above procedure.
 
 Adding Data
 -----------
-While code is hosted on `github <https://github.com/scikit-image/>`_,
-example datasets are on `gitlab <https://gitlab.com/scikit-image/data>`_.
+While code is hosted on `GitHub <https://github.com/scikit-image/>`_,
+example datasets are on `GitLab <https://gitlab.com/scikit-image/data>`_.
 These are fetched with `pooch <https://github.com/fatiando/pooch>`_
-when accessing `skimage.data.*`.
+when accessing ``skimage.data.*``.
 
-New datasets are submitted on gitlab and, once merged, the data
+New datasets are submitted on GitLab and, once merged, the data
 registry ``skimage/data/_registry.py`` in the main GitHub repository
 can be updated.
 

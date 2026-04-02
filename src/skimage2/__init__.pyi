@@ -1,7 +1,3 @@
-_submodules = [
-    "data",
-]
-
-__all__ = _submodules + ["__version__", "ExperimentalAPIWarning"]  # noqa: F822
-
-from . import data
+# Re-export _skimage2 for type checkers
+from _skimage2 import *
+from _skimage2 import __all__ as __all__
