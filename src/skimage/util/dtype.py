@@ -231,9 +231,11 @@ def _convert(image, dtype, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Notes
     -----
@@ -379,7 +381,8 @@ def _convert(image, dtype, force_copy=False, uniform=False):
                 image, 2.0 / (imax_in - imin_in + 1), dtype=computation_type
             )
             image = np.add(image, 1.0 / (imax_in - imin_in + 1), dtype=computation_type)
-            np.maximum(image, -1.0, out=image)
+            # Values cannot reach -1.0 in the uniform path
+            # as the minimum is (-1 + 1/N), no clamping needed
 
         return np.asarray(image, dtype_out)
 
@@ -450,9 +453,11 @@ def img_as_float32(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -481,9 +486,11 @@ def img_as_float64(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -515,9 +522,11 @@ def img_as_float(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -546,9 +555,11 @@ def img_as_uint(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -575,9 +586,11 @@ def img_as_int(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
@@ -605,9 +618,11 @@ def img_as_ubyte(image, force_copy=False, uniform=False):
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool, optional
         Uniformly quantize the floating point range to the integer range.
-        By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimizes back and forth
-        conversion errors.
+        When converting from an integer range to a floating point range
+        each integer is mapped to the center of its corresponding bin.
+        This makes matched round-trips, while True in both directions,
+        preserve bin identity. By default (uniform=False), the non-uniform
+        scaling is used, which minimizes single-conversion error.
 
     Returns
     -------
