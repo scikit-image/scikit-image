@@ -37,8 +37,6 @@ class FootprintDecomp:
     plan_col : ndarray of bool, shape (max_row_depth, max_col_depth)
         Build schedule for the sparse table; ``True`` means expand in the
         column direction at depth level ``(row_depth, col_depth)``.
-    iterations : int
-        Number of times the operation is applied.
     """
 
     rows: int
@@ -46,7 +44,6 @@ class FootprintDecomp:
     dyadic_rects: list
     plan_row: np.ndarray
     plan_col: np.ndarray
-    iterations: int
 
 
 # ---------------------------------------------------------------------------
@@ -426,7 +423,6 @@ def _morph_op(
     plan_row: np.ndarray,
     plan_col: np.ndarray,
     anchor: Tuple[int, int],
-    iterations: int,
     mode: str,
     cval: float,
 ) -> np.ndarray:
@@ -451,8 +447,6 @@ def _morph_op(
         Build plan from :func:`_plan_st_build`.
     anchor : (int, int)
         ``(row, col)`` position of the footprint origin in the image.
-    iterations : int
-        Number of times the operation is applied.
     mode : str
         Border padding mode (scipy convention).
     cval : float
@@ -463,7 +457,7 @@ def _morph_op(
     ndarray
         Morphological operation result, same shape and dtype as ``image``.
     """
-    if iterations == 0 or rows * cols == 1:
+    if rows * cols == 1:
         return image.copy()
 
     anchor_row, anchor_col = anchor
@@ -474,31 +468,28 @@ def _morph_op(
 
     pad_mode = _SCIPY_TO_NUMPY_PAD_MODE.get(mode, mode)
 
-    src = image
     dst = np.empty_like(image)
 
-    for _ in range(iterations):
-        if pad_mode == "constant":
-            expanded = np.pad(
-                src,
-                ((pad_top, pad_bottom), (pad_left, pad_right)),
-                mode="constant",
-                constant_values=cval,
-            )
-        else:
-            expanded = np.pad(
-                src,
-                ((pad_top, pad_bottom), (pad_left, pad_right)),
-                mode=pad_mode,
-            )
-
-        dst[:] = neutral
-        _apply_morph_dfs(
-            ufunc, expanded, dst,
-            dyadic_rects, plan_row, plan_col,
-            0, 0,
+    if pad_mode == "constant":
+        expanded = np.pad(
+            image,
+            ((pad_top, pad_bottom), (pad_left, pad_right)),
+            mode="constant",
+            constant_values=cval,
         )
-        src = dst
+    else:
+        expanded = np.pad(
+            image,
+            ((pad_top, pad_bottom), (pad_left, pad_right)),
+            mode=pad_mode,
+        )
+
+    dst[:] = neutral
+    _apply_morph_dfs(
+        ufunc, expanded, dst,
+        dyadic_rects, plan_row, plan_col,
+        0, 0,
+    )
 
     return dst
 
@@ -532,10 +523,7 @@ def _neutral_cval(dtype: np.dtype, op: str) -> float:
 # ---------------------------------------------------------------------------
 
 
-def decomp_footprint(
-    footprint: np.ndarray,
-    iterations: int = 1,
-) -> FootprintDecomp:
+def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
     """Decompose a morphological footprint for sparse table operations.
 
     Pre-computes the dyadic rectangle cover and build plan for ``footprint``
@@ -547,8 +535,6 @@ def decomp_footprint(
     ----------
     footprint : ndarray of bool or uint8, shape (M, N)
         The structuring element.  Nonzero values indicate active cells.
-    iterations : int, optional
-        Number of times erosion/dilation is applied. Default is 1.
 
     Returns
     -------
@@ -557,11 +543,9 @@ def decomp_footprint(
     """
     fp = np.asarray(footprint, dtype=np.uint8)
 
-    # Handle empty footprint (match OpenCV behaviour)
+    # Handle empty footprint
     if fp.size == 0:
-        size = 1 + iterations * 2
-        fp = np.ones((size, size), dtype=np.uint8)
-        iterations = 1
+        fp = np.ones((1, 1), dtype=np.uint8)
 
     # Ensure at least one nonzero element
     if not np.any(fp):
@@ -580,7 +564,6 @@ def decomp_footprint(
         dyadic_rects=dyadic_rects,
         plan_row=plan_row,
         plan_col=plan_col,
-        iterations=iterations,
     )
 
 
@@ -622,7 +605,7 @@ def erode(
         np.minimum, neutral, image,
         decomp.rows, decomp.cols,
         decomp.dyadic_rects, decomp.plan_row, decomp.plan_col,
-        anchor, decomp.iterations, mode, cval,
+        anchor, mode, cval,
     )
 
 
@@ -667,5 +650,5 @@ def dilate(
         np.maximum, neutral, image,
         decomp.rows, decomp.cols,
         mirrored_rects, decomp.plan_row, decomp.plan_col,
-        anchor, decomp.iterations, mode, cval,
+        anchor, mode, cval,
     )

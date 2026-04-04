@@ -66,16 +66,6 @@ class TestMathProperties:
     """Mathematical properties of erosion and dilation."""
 
     @pytest.mark.parametrize("fp_shape", [(3, 3), (5, 5)])
-    def test_iterations(self, image, fp_shape):
-        fp = np.ones(fp_shape, dtype=np.uint8)
-        decomp1 = decomp_footprint(fp, iterations=1)
-        decomp2 = decomp_footprint(fp, iterations=2)
-
-        once_twice = erode(erode(image, decomp1), decomp1)
-        two_iter = erode(image, decomp2)
-        assert_array_equal(once_twice, two_iter)
-
-    @pytest.mark.parametrize("fp_shape", [(3, 3), (5, 5)])
     def test_dilation_erosion_duality(self, image, fp_shape):
         """dilate(img, fp) == 255 - erode(255 - img, fp) for uint8.
 
@@ -107,12 +97,6 @@ class TestDecompFootprint:
         fp = np.zeros((3, 3), dtype=np.uint8)
         decomp = decomp_footprint(fp)
         assert isinstance(decomp, FootprintDecomp)
-
-    def test_iterations_default(self):
-        """Default iterations is 1."""
-        fp = np.ones((3, 3), dtype=np.uint8)
-        decomp = decomp_footprint(fp)
-        assert decomp.iterations == 1
 
     def test_dyadic_rects_structure(self):
         """dyadic_rects is a max_row_depth × max_col_depth nested list."""
