@@ -244,6 +244,39 @@ def test_img_as_ubyte_supports_npulonglong():
     assert result.dtype == np.uint8
 
 
+def test_convert_uniform_round_trip_uint8():
+    """Check that with uniform=True round-trip through uint8 preserves bin centers."""
+    image = np.linspace(0, 1, 256, dtype=np.float64)
+    as_int = _convert(image, np.uint8, uniform=True)
+    back = _convert(as_int, np.float64, uniform=True)
+    # Each value should land at the center of its bin
+    expected = (np.arange(256) + 0.5) / 256
+    np.testing.assert_allclose(back, expected)
+
+
+def test_convert_uniform_int_to_float_differs():
+    """Test that uniform=True produces different results than uniform=False."""
+    image = np.array([0, 127, 255], dtype=np.uint8)
+    result_default = _convert(image, np.float64, uniform=False)
+    result_uniform = _convert(image, np.float64, uniform=True)
+    assert not np.array_equal(result_default, result_uniform)
+
+
+def test_convert_uniform_signed_clamps_to_negative_one():
+    """Check that no value falls below -1.0 with uniform=True."""
+    image = np.array([np.iinfo(np.int16).min], dtype=np.int16)
+    result = _convert(image, np.float64, uniform=True)
+    assert result[0] >= -1.0
+
+
+def test_convert_uniform_signed_min_is_bin_center():
+    """Test that the most negative int maps to center of lowest bin."""
+    image = np.array([np.iinfo(np.int16).min], dtype=np.int16)
+    result = _convert(image, np.float64, uniform=True)
+    expected = -1.0 + 1.0 / 65536
+    np.testing.assert_allclose(result[0], expected)
+
+
 class Test_numeric_dtype_min_max:
     @pytest.mark.parametrize("dtype", numeric_types)
     def test_all_numeric_types(self, dtype):

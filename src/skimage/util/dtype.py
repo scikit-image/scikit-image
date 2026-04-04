@@ -346,25 +346,40 @@ def _convert(image, dtype, force_copy=False, uniform=False):
             itemsize_in, dtype_out, np.float32, np.float64
         )
 
-        if kind_in == 'u':
-            # using np.divide or np.multiply doesn't copy the data
-            # until the computation time
-            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
-            # DirectX uses this conversion also for signed ints
-            # if imin_in:
-            #     np.maximum(image, -1.0, out=image)
-        elif kind_in == 'i':
-            # From DirectX conversions:
-            # The most negative value maps to -1.0f
-            # Every other value is converted to a float (call it c)
-            # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
+        if not uniform:
+            if kind_in == 'u':
+                # using np.divide or np.multiply doesn't copy the data
+                # until the computation time
+                image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
+                # DirectX uses this conversion also for signed ints
+                # if imin_in:
+                #     np.maximum(image, -1.0, out=image)
+            elif kind_in == 'i':
+                # From DirectX conversions:
+                # The most negative value maps to -1.0f
+                # Every other value is converted to a float (call it c)
+                # and then result = c * (1.0f / (2⁽ⁿ⁻¹⁾-1)).
 
-            image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
-            np.maximum(image, -1.0, out=image)
+                image = np.multiply(image, 1.0 / imax_in, dtype=computation_type)
+                np.maximum(image, -1.0, out=image)
 
+            else:
+                image = np.add(image, 0.5, dtype=computation_type)
+                image *= 2 / (imax_in - imin_in)
+        elif kind_in == 'u':
+            # uniform uses imax_in + 1 as the size of an "integer bin"
+            # so we expand the bin, and then shift the resulting float values
+            # to the center of said bins, by using half of the size of a bin
+            image = np.multiply(image, 1 / (imax_in + 1), dtype=computation_type)
+            image = np.add(image, 0.5 / (imax_in + 1), dtype=computation_type)
         else:
-            image = np.add(image, 0.5, dtype=computation_type)
-            image *= 2 / (imax_in - imin_in)
+            # Same uniform bin logic as unsigned, but over the range
+            # [imin_in, imax_in] which spans (imax_in - imin_in + 1) values
+            image = np.multiply(
+                image, 2.0 / (imax_in - imin_in + 1), dtype=computation_type
+            )
+            image = np.add(image, 1.0 / (imax_in - imin_in + 1), dtype=computation_type)
+            np.maximum(image, -1.0, out=image)
 
         return np.asarray(image, dtype_out)
 
