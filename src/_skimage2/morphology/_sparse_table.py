@@ -1,11 +1,12 @@
 """Sparse table morphology for efficient grayscale morphological operations.
 
-This module ports the sparse table algorithm from OpenCV's ximgproc module
-(sparse_table_morphology.cpp) to Python/NumPy.
+This module implements the sparse table algorithm described in an
+unpublished contribution to OpenCV's ximgproc module, ported to
+Python/NumPy.
 """
 
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -31,18 +32,18 @@ class FootprintDecomp:
         origins for dyadic rectangles of height ``2**row_depth`` and width
         ``2**col_depth`` that together cover the footprint at that depth level.
     plan_row : ndarray of bool, shape (max_row_depth, max_col_depth)
-        ``plan_row[rd, cd]`` is ``True`` when ``st[rd+1][cd]`` should be
-        computed from ``st[rd][cd]`` (expand in the row direction).
+        Build schedule for the sparse table; ``True`` means expand in the
+        row direction at depth level ``(row_depth, col_depth)``.
     plan_col : ndarray of bool, shape (max_row_depth, max_col_depth)
-        ``plan_col[rd, cd]`` is ``True`` when ``st[rd][cd+1]`` should be
-        computed from ``st[rd][cd]`` (expand in the column direction).
+        Build schedule for the sparse table; ``True`` means expand in the
+        column direction at depth level ``(row_depth, col_depth)``.
     iterations : int
         Number of times the operation is applied.
     """
 
     rows: int
     cols: int
-    dyadic_rects: List[List[List[Tuple[int, int]]]]
+    dyadic_rects: list
     plan_row: np.ndarray
     plan_col: np.ndarray
     iterations: int
@@ -63,11 +64,7 @@ def _log2(n: int) -> int:
 
 
 def _max_run_length_row(footprint: np.ndarray) -> int:
-    """Maximum consecutive run of nonzero values in any single column.
-
-    Scanning each column top-to-bottom gives the longest contiguous span of
-    active cells in the row direction, which determines ``max_row_depth``.
-    """
+    """Maximum consecutive run of nonzero values in any single column."""
     max_len = 0
     for c in range(footprint.shape[1]):
         cnt = 0
@@ -82,11 +79,7 @@ def _max_run_length_row(footprint: np.ndarray) -> int:
 
 
 def _max_run_length_col(footprint: np.ndarray) -> int:
-    """Maximum consecutive run of nonzero values in any single row.
-
-    Scanning each row left-to-right gives the longest contiguous span of
-    active cells in the column direction, which determines ``max_col_depth``.
-    """
+    """Maximum consecutive run of nonzero values in any single row."""
     max_len = 0
     for r in range(footprint.shape[0]):
         cnt = 0
@@ -102,7 +95,7 @@ def _max_run_length_col(footprint: np.ndarray) -> int:
 
 def _find_dyadic_rect_origins(
     st_node: np.ndarray, row_depth: int, col_depth: int
-) -> List[Tuple[int, int]]:
+) -> list:
     """Find top-left origins of dyadic rectangles covering ``st_node``.
 
     A dyadic rectangle at depth ``(row_depth, col_depth)`` has height
@@ -119,7 +112,7 @@ def _find_dyadic_rect_origins(
     Returns
     -------
     list of (int, int)
-        ``(row, col)`` top-left origins of the selected dyadic rectangles.
+        Top-left origins of selected dyadic rectangles at this depth level.
     """
     row_ofst = 1 << row_depth
     col_ofst = 1 << col_depth
@@ -165,15 +158,11 @@ def _find_dyadic_rect_origins(
 
 def _gen_dyadic_cover(
     footprint: np.ndarray, max_row_depth: int, max_col_depth: int
-) -> List[List[List[Tuple[int, int]]]]:
+) -> list:
     """Generate dyadic rectangle covers for all depth combinations.
 
     For each ``(row_depth, col_depth)`` pair, computes the set of dyadic
     rectangle origins whose union covers the footprint's active cells.
-
-    The algorithm progressively collapses the footprint via element-wise
-    minimum (building up the sparse table structure) to identify which
-    positions still have active cells at each depth level.
 
     Parameters
     ----------
@@ -183,14 +172,16 @@ def _gen_dyadic_cover(
     Returns
     -------
     dyadic_rects : list of list of list of (int, int)
-        ``dyadic_rects[row_depth][col_depth]`` → ``[(row, col), ...]``
+        Top-left origins of dyadic rectangles grouped by depth level.
+        At depth ``(row_depth, col_depth)``, each rectangle has height
+        ``2**row_depth`` and width ``2**col_depth``.
     """
-    dyadic_rects: List[List[List[Tuple[int, int]]]] = []
+    dyadic_rects: list = []
     st_node_cache = footprint.astype(np.uint8, copy=True)
 
     for row_depth in range(max_row_depth):
         st_node = st_node_cache.copy()
-        row_rects: List[List[Tuple[int, int]]] = []
+        row_rects: list = []
         dyadic_rects.append(row_rects)
 
         for col_depth in range(max_col_depth):
@@ -238,11 +229,11 @@ def _solve_rsap_greedy(initial_map: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
     Returns
     -------
     plan_row : ndarray of bool, same shape as ``initial_map``
-        ``plan_row[rd, cd]`` is ``True`` when ``st[rd+1][cd]`` is computed
-        from ``st[rd][cd]`` (row direction edge).
+        Build schedule for the sparse table; ``True`` means expand in the
+        row direction at depth level ``(row_depth, col_depth)``.
     plan_col : ndarray of bool, same shape as ``initial_map``
-        ``plan_col[rd, cd]`` is ``True`` when ``st[rd][cd+1]`` is computed
-        from ``st[rd][cd]`` (column direction edge).
+        Build schedule for the sparse table; ``True`` means expand in the
+        column direction at depth level ``(row_depth, col_depth)``.
     """
     # pos: list of (col, row) in the depth-index space
     pos = [
@@ -289,7 +280,7 @@ def _solve_rsap_greedy(initial_map: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
 
 
 def _plan_st_build(
-    dyadic_rects: List[List[List[Tuple[int, int]]]],
+    dyadic_rects: list,
     max_row_depth: int,
     max_col_depth: int,
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -319,8 +310,8 @@ def _plan_st_build(
 
 
 def _mirror_dyadic_rects(
-    dyadic_rects: List[List[List[Tuple[int, int]]]], rows: int, cols: int
-) -> List[List[List[Tuple[int, int]]]]:
+    dyadic_rects: list, rows: int, cols: int
+) -> list:
     """Mirror dyadic rect origins for a 180-degree footprint rotation.
 
     For a dyadic rectangle of height ``2**row_depth`` and width
@@ -340,10 +331,10 @@ def _mirror_dyadic_rects(
     list of list of list of (int, int)
         Mirrored dyadic rect origins with the same nested structure.
     """
-    mirrored: List[List[List[Tuple[int, int]]]] = []
+    mirrored: list = []
     for row_depth, row_rects in enumerate(dyadic_rects):
         h = 1 << row_depth
-        mirrored_row: List[List[Tuple[int, int]]] = []
+        mirrored_row: list = []
         for col_depth, origins in enumerate(row_rects):
             w = 1 << col_depth
             mirrored_row.append(
@@ -351,63 +342,6 @@ def _mirror_dyadic_rects(
             )
         mirrored.append(mirrored_row)
     return mirrored
-
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
-
-def decomp_footprint(
-    footprint: np.ndarray,
-    iterations: int = 1,
-) -> FootprintDecomp:
-    """Decompose a morphological footprint for sparse table operations.
-
-    Pre-computes the dyadic rectangle cover and build plan for ``footprint``
-    so that :func:`erode` and :func:`dilate` can apply the morphological
-    operation efficiently, especially when the same footprint is reused across
-    many images.
-
-    Parameters
-    ----------
-    footprint : ndarray of bool or uint8, shape (M, N)
-        The structuring element.  Nonzero values indicate active cells.
-    iterations : int, optional
-        Number of times erosion/dilation is applied. Default is 1.
-
-    Returns
-    -------
-    FootprintDecomp
-        Pre-computed decomposition.
-    """
-    fp = np.asarray(footprint, dtype=np.uint8)
-
-    # Handle empty footprint (match OpenCV behaviour)
-    if fp.size == 0:
-        size = 1 + iterations * 2
-        fp = np.ones((size, size), dtype=np.uint8)
-        iterations = 1
-
-    # Ensure at least one nonzero element
-    if not np.any(fp):
-        fp = fp.copy()
-        fp[0, 0] = 1
-
-    max_row_depth = _log2(_max_run_length_row(fp)) + 1
-    max_col_depth = _log2(_max_run_length_col(fp)) + 1
-
-    dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
-    plan_row, plan_col = _plan_st_build(dyadic_rects, max_row_depth, max_col_depth)
-
-    return FootprintDecomp(
-        rows=fp.shape[0],
-        cols=fp.shape[1],
-        dyadic_rects=dyadic_rects,
-        plan_row=plan_row,
-        plan_col=plan_col,
-        iterations=iterations,
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -419,7 +353,7 @@ def _apply_morph_dfs(
     ufunc,
     st: np.ndarray,
     dst: np.ndarray,
-    dyadic_rects: List[List[List[Tuple[int, int]]]],
+    dyadic_rects: list,
     plan_row: np.ndarray,
     plan_col: np.ndarray,
     row_depth: int,
@@ -484,11 +418,11 @@ _SCIPY_TO_NUMPY_PAD_MODE = {
 
 def _morph_op(
     ufunc,
-    nil,
+    neutral,
     image: np.ndarray,
     rows: int,
     cols: int,
-    dyadic_rects: List[List[List[Tuple[int, int]]]],
+    dyadic_rects: list,
     plan_row: np.ndarray,
     plan_col: np.ndarray,
     anchor: Tuple[int, int],
@@ -496,7 +430,39 @@ def _morph_op(
     mode: str,
     cval: float,
 ) -> np.ndarray:
-    """Core morphological operation using a pre-computed sparse table decomposition."""
+    """Core morphological operation using a pre-computed sparse table decomposition.
+
+    Pads the image, initializes the output with the neutral element, then
+    calls :func:`_apply_morph_dfs` to accumulate results from dyadic rectangles.
+
+    Parameters
+    ----------
+    ufunc : numpy ufunc
+        ``np.minimum`` for erosion, ``np.maximum`` for dilation.
+    neutral : scalar
+        Neutral element for ``ufunc`` (max dtype value for min, min for max).
+    image : ndarray
+        Input image.
+    rows, cols : int
+        Footprint shape.
+    dyadic_rects : list
+        Pre-computed rectangle origins from :func:`_gen_dyadic_cover`.
+    plan_row, plan_col : ndarray of bool
+        Build plan from :func:`_plan_st_build`.
+    anchor : (int, int)
+        ``(row, col)`` position of the footprint origin in the image.
+    iterations : int
+        Number of times the operation is applied.
+    mode : str
+        Border padding mode (scipy convention).
+    cval : float
+        Constant border value when ``mode='constant'``.
+
+    Returns
+    -------
+    ndarray
+        Morphological operation result, same shape and dtype as ``image``.
+    """
     if iterations == 0 or rows * cols == 1:
         return image.copy()
 
@@ -526,7 +492,7 @@ def _morph_op(
                 mode=pad_mode,
             )
 
-        dst[:] = nil
+        dst[:] = neutral
         _apply_morph_dfs(
             ufunc, expanded, dst,
             dyadic_rects, plan_row, plan_col,
@@ -538,13 +504,84 @@ def _morph_op(
 
 
 def _neutral_cval(dtype: np.dtype, op: str) -> float:
-    """Return the neutral constant-border value for the given dtype and operation."""
+    """Return the neutral element for the given dtype and morphological operation.
+
+    Parameters
+    ----------
+    dtype : numpy dtype
+        Image dtype.
+    op : {'min', 'max'}
+        ``'min'`` for erosion, ``'max'`` for dilation.
+
+    Returns
+    -------
+    float
+        Maximum dtype value for ``'min'`` (erosion), minimum for ``'max'``
+        (dilation), so border pixels do not influence the result.
+    """
     if np.issubdtype(dtype, np.integer):
         info = np.iinfo(dtype)
         return info.max if op == "min" else info.min
     else:
         maxval = np.finfo(dtype).max
         return maxval if op == "min" else -maxval
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def decomp_footprint(
+    footprint: np.ndarray,
+    iterations: int = 1,
+) -> FootprintDecomp:
+    """Decompose a morphological footprint for sparse table operations.
+
+    Pre-computes the dyadic rectangle cover and build plan for ``footprint``
+    so that :func:`erode` and :func:`dilate` can apply the morphological
+    operation efficiently, especially when the same footprint is reused across
+    many images.
+
+    Parameters
+    ----------
+    footprint : ndarray of bool or uint8, shape (M, N)
+        The structuring element.  Nonzero values indicate active cells.
+    iterations : int, optional
+        Number of times erosion/dilation is applied. Default is 1.
+
+    Returns
+    -------
+    FootprintDecomp
+        Pre-computed decomposition.
+    """
+    fp = np.asarray(footprint, dtype=np.uint8)
+
+    # Handle empty footprint (match OpenCV behaviour)
+    if fp.size == 0:
+        size = 1 + iterations * 2
+        fp = np.ones((size, size), dtype=np.uint8)
+        iterations = 1
+
+    # Ensure at least one nonzero element
+    if not np.any(fp):
+        fp = fp.copy()
+        fp[0, 0] = 1
+
+    max_row_depth = _log2(_max_run_length_row(fp)) + 1
+    max_col_depth = _log2(_max_run_length_col(fp)) + 1
+
+    dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
+    plan_row, plan_col = _plan_st_build(dyadic_rects, max_row_depth, max_col_depth)
+
+    return FootprintDecomp(
+        rows=fp.shape[0],
+        cols=fp.shape[1],
+        dyadic_rects=dyadic_rects,
+        plan_row=plan_row,
+        plan_col=plan_col,
+        iterations=iterations,
+    )
 
 
 def erode(
@@ -575,14 +612,14 @@ def erode(
     ndarray
         Eroded image, same shape and dtype as ``image``.
     """
-    nil = _neutral_cval(image.dtype, "min")
+    neutral = _neutral_cval(image.dtype, "min")
     if cval is None:
-        cval = nil
+        cval = neutral
     # Erosion anchor: center of footprint.
     # Change here when explicit anchor support is added.
     anchor = (decomp.rows // 2, decomp.cols // 2)
     return _morph_op(
-        np.minimum, nil, image,
+        np.minimum, neutral, image,
         decomp.rows, decomp.cols,
         decomp.dyadic_rects, decomp.plan_row, decomp.plan_col,
         anchor, decomp.iterations, mode, cval,
@@ -617,9 +654,9 @@ def dilate(
     ndarray
         Dilated image, same shape and dtype as ``image``.
     """
-    nil = _neutral_cval(image.dtype, "max")
+    neutral = _neutral_cval(image.dtype, "max")
     if cval is None:
-        cval = nil
+        cval = neutral
     mirrored_rects = _mirror_dyadic_rects(
         decomp.dyadic_rects, decomp.rows, decomp.cols
     )
@@ -627,7 +664,7 @@ def dilate(
     # Change here when explicit anchor support is added.
     anchor = (decomp.rows - 1 - decomp.rows // 2, decomp.cols - 1 - decomp.cols // 2)
     return _morph_op(
-        np.maximum, nil, image,
+        np.maximum, neutral, image,
         decomp.rows, decomp.cols,
         mirrored_rects, decomp.plan_row, decomp.plan_col,
         anchor, decomp.iterations, mode, cval,
