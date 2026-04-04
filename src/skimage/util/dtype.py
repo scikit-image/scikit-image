@@ -439,7 +439,7 @@ if _convert.__doc__ is not None:
     )
 
 
-def img_as_float32(image, force_copy=False):
+def img_as_float32(image, force_copy=False, uniform=False):
     """Convert an image to single-precision (32-bit) floating point format.
 
     Parameters
@@ -448,6 +448,11 @@ def img_as_float32(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -462,10 +467,10 @@ def img_as_float32(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float32, force_copy)
+    return _convert(image, np.float32, force_copy, uniform)
 
 
-def img_as_float64(image, force_copy=False):
+def img_as_float64(image, force_copy=False, uniform=False):
     """Convert an image to double-precision (64-bit) floating point format.
 
     Parameters
@@ -474,6 +479,11 @@ def img_as_float64(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -488,10 +498,10 @@ def img_as_float64(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.float64, force_copy)
+    return _convert(image, np.float64, force_copy, uniform)
 
 
-def img_as_float(image, force_copy=False):
+def img_as_float(image, force_copy=False, uniform=False):
     """Convert an image to floating point format.
 
     This function is similar to `img_as_float64`, but will not convert
@@ -503,6 +513,11 @@ def img_as_float(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -517,10 +532,10 @@ def img_as_float(image, force_copy=False):
     and can be outside the ranges [0.0, 1.0] or [-1.0, 1.0].
 
     """
-    return _convert(image, np.floating, force_copy)
+    return _convert(image, np.floating, force_copy, uniform)
 
 
-def img_as_uint(image, force_copy=False):
+def img_as_uint(image, force_copy=False, uniform=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
@@ -529,6 +544,11 @@ def img_as_uint(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -541,10 +561,10 @@ def img_as_uint(image, force_copy=False):
     Positive values are scaled between 0 and 65535.
 
     """
-    return _convert(image, np.uint16, force_copy)
+    return _convert(image, np.uint16, force_copy, uniform)
 
 
-def img_as_int(image, force_copy=False):
+def img_as_int(image, force_copy=False, uniform=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
@@ -553,6 +573,11 @@ def img_as_int(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -566,10 +591,10 @@ def img_as_int(image, force_copy=False):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.int16, force_copy)
+    return _convert(image, np.int16, force_copy, uniform)
 
 
-def img_as_ubyte(image, force_copy=False):
+def img_as_ubyte(image, force_copy=False, uniform=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
@@ -578,6 +603,11 @@ def img_as_ubyte(image, force_copy=False):
         Input image.
     force_copy : bool, optional
         Force a copy of the data, irrespective of its current dtype.
+    uniform : bool, optional
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimizes back and forth
+        conversion errors.
 
     Returns
     -------
@@ -590,7 +620,7 @@ def img_as_ubyte(image, force_copy=False):
     Positive values are scaled between 0 and 255.
 
     """
-    return _convert(image, np.uint8, force_copy)
+    return _convert(image, np.uint8, force_copy, uniform)
 
 
 def img_as_bool(image, force_copy=False):

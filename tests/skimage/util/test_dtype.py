@@ -277,6 +277,16 @@ def test_convert_uniform_signed_min_is_bin_center():
     np.testing.assert_allclose(result[0], expected)
 
 
+def test_img_as_float_uniform_passthrough():
+    """Check that img_as_float with uniform=True matches _convert."""
+    from skimage.util import img_as_float
+
+    image = np.array([0, 128, 255], dtype=np.uint8)
+    result_func = img_as_float(image, uniform=True)
+    result_direct = _convert(image, np.float64, uniform=True)
+    np.testing.assert_array_equal(result_func, result_direct)
+
+
 class Test_numeric_dtype_min_max:
     @pytest.mark.parametrize("dtype", numeric_types)
     def test_all_numeric_types(self, dtype):
