@@ -7,6 +7,7 @@ from ._grayscale_operators import (
     white_tophat,
     black_tophat,
 )
+from ._sparse_table import FootprintDecomp, decomp_footprint
 
 __all__ = [
     "erosion",
@@ -17,4 +18,6 @@ __all__ = [
     "black_tophat",
     "mirror_footprint",
     "pad_footprint",
+    "FootprintDecomp",
+    "decomp_footprint",
 ]

@@ -3,6 +3,7 @@ python_sources = [
   '__init__.pyi',
   '_grayscale_operators.py',
   '_footprints.py',
+  '_sparse_table.py',
 ]
 
 py3.install_sources(
