@@ -36,8 +36,6 @@ class FootprintDecomp:
     plan_col : ndarray of bool, shape (max_row_depth, max_col_depth)
         ``plan_col[rd, cd]`` is ``True`` when ``st[rd][cd+1]`` should be
         computed from ``st[rd][cd]`` (expand in the column direction).
-    anchor : (int, int)
-        Anchor position ``(row, col)`` within the footprint.
     iterations : int
         Number of times the operation is applied.
     """
@@ -47,7 +45,6 @@ class FootprintDecomp:
     dyadic_rects: List[List[List[Tuple[int, int]]]]
     plan_row: np.ndarray
     plan_col: np.ndarray
-    anchor: Tuple[int, int]
     iterations: int
 
 
@@ -321,6 +318,41 @@ def _plan_st_build(
     return _solve_rsap_greedy(st_map)
 
 
+def _mirror_dyadic_rects(
+    dyadic_rects: List[List[List[Tuple[int, int]]]], rows: int, cols: int
+) -> List[List[List[Tuple[int, int]]]]:
+    """Mirror dyadic rect origins for a 180-degree footprint rotation.
+
+    For a dyadic rectangle of height ``2**row_depth`` and width
+    ``2**col_depth`` with top-left origin ``(r, c)`` in a footprint of shape
+    ``(rows, cols)``, the mirrored origin is
+    ``(rows - 2**row_depth - r, cols - 2**col_depth - c)``.
+
+    Parameters
+    ----------
+    dyadic_rects : list of list of list of (int, int)
+        Output of :func:`_gen_dyadic_cover`.
+    rows, cols : int
+        Shape of the footprint.
+
+    Returns
+    -------
+    list of list of list of (int, int)
+        Mirrored dyadic rect origins with the same nested structure.
+    """
+    mirrored: List[List[List[Tuple[int, int]]]] = []
+    for row_depth, row_rects in enumerate(dyadic_rects):
+        h = 1 << row_depth
+        mirrored_row: List[List[Tuple[int, int]]] = []
+        for col_depth, origins in enumerate(row_rects):
+            w = 1 << col_depth
+            mirrored_row.append(
+                [(rows - h - r, cols - w - c) for r, c in origins]
+            )
+        mirrored.append(mirrored_row)
+    return mirrored
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -328,7 +360,6 @@ def _plan_st_build(
 
 def decomp_footprint(
     footprint: np.ndarray,
-    anchor: Tuple[int, int] | None = None,
     iterations: int = 1,
 ) -> FootprintDecomp:
     """Decompose a morphological footprint for sparse table operations.
@@ -342,9 +373,6 @@ def decomp_footprint(
     ----------
     footprint : ndarray of bool or uint8, shape (M, N)
         The structuring element.  Nonzero values indicate active cells.
-    anchor : (int, int) or None, optional
-        Anchor position ``(row, col)`` within the footprint.
-        ``None`` (default) places the anchor at the footprint center.
     iterations : int, optional
         Number of times erosion/dilation is applied. Default is 1.
 
@@ -359,7 +387,6 @@ def decomp_footprint(
     if fp.size == 0:
         size = 1 + iterations * 2
         fp = np.ones((size, size), dtype=np.uint8)
-        anchor = (iterations, iterations)
         iterations = 1
 
     # Ensure at least one nonzero element
@@ -373,16 +400,12 @@ def decomp_footprint(
     dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
     plan_row, plan_col = _plan_st_build(dyadic_rects, max_row_depth, max_col_depth)
 
-    if anchor is None:
-        anchor = (fp.shape[0] // 2, fp.shape[1] // 2)
-
     return FootprintDecomp(
         rows=fp.shape[0],
         cols=fp.shape[1],
         dyadic_rects=dyadic_rects,
         plan_row=plan_row,
         plan_col=plan_col,
-        anchor=anchor,
         iterations=iterations,
     )
 
@@ -449,29 +472,47 @@ def _apply_morph_dfs(
         )
 
 
+# scipy/skimage2 mode names → numpy.pad mode names
+_SCIPY_TO_NUMPY_PAD_MODE = {
+    "constant": "constant",
+    "reflect": "symmetric",
+    "mirror": "reflect",
+    "nearest": "edge",
+    "wrap": "wrap",
+}
+
+
 def _morph_op(
     ufunc,
     nil,
     image: np.ndarray,
-    decomp: FootprintDecomp,
+    rows: int,
+    cols: int,
+    dyadic_rects: List[List[List[Tuple[int, int]]]],
+    plan_row: np.ndarray,
+    plan_col: np.ndarray,
+    anchor: Tuple[int, int],
+    iterations: int,
     mode: str,
     cval: float,
 ) -> np.ndarray:
-    """Core morphological operation using a pre-computed :class:`FootprintDecomp`."""
-    if decomp.iterations == 0 or decomp.rows * decomp.cols == 1:
+    """Core morphological operation using a pre-computed sparse table decomposition."""
+    if iterations == 0 or rows * cols == 1:
         return image.copy()
 
-    anchor_row, anchor_col = decomp.anchor
+    anchor_row, anchor_col = anchor
     pad_top = anchor_row
-    pad_bottom = decomp.rows - 1 - anchor_row
+    pad_bottom = rows - 1 - anchor_row
     pad_left = anchor_col
-    pad_right = decomp.cols - 1 - anchor_col
+    pad_right = cols - 1 - anchor_col
+
+    pad_mode = _SCIPY_TO_NUMPY_PAD_MODE.get(mode, mode)
 
     src = image
     dst = np.empty_like(image)
 
-    for _ in range(decomp.iterations):
-        if mode == "constant":
+    for _ in range(iterations):
+        if pad_mode == "constant":
             expanded = np.pad(
                 src,
                 ((pad_top, pad_bottom), (pad_left, pad_right)),
@@ -482,13 +523,13 @@ def _morph_op(
             expanded = np.pad(
                 src,
                 ((pad_top, pad_bottom), (pad_left, pad_right)),
-                mode=mode,
+                mode=pad_mode,
             )
 
         dst[:] = nil
         _apply_morph_dfs(
             ufunc, expanded, dst,
-            decomp.dyadic_rects, decomp.plan_row, decomp.plan_col,
+            dyadic_rects, plan_row, plan_col,
             0, 0,
         )
         src = dst
@@ -537,7 +578,15 @@ def erode(
     nil = _neutral_cval(image.dtype, "min")
     if cval is None:
         cval = nil
-    return _morph_op(np.minimum, nil, image, decomp, mode, cval)
+    # Erosion anchor: center of footprint.
+    # Change here when explicit anchor support is added.
+    anchor = (decomp.rows // 2, decomp.cols // 2)
+    return _morph_op(
+        np.minimum, nil, image,
+        decomp.rows, decomp.cols,
+        decomp.dyadic_rects, decomp.plan_row, decomp.plan_col,
+        anchor, decomp.iterations, mode, cval,
+    )
 
 
 def dilate(
@@ -571,4 +620,15 @@ def dilate(
     nil = _neutral_cval(image.dtype, "max")
     if cval is None:
         cval = nil
-    return _morph_op(np.maximum, nil, image, decomp, mode, cval)
+    mirrored_rects = _mirror_dyadic_rects(
+        decomp.dyadic_rects, decomp.rows, decomp.cols
+    )
+    # Dilation anchor: mirrored center (differs from erosion for even-size fp).
+    # Change here when explicit anchor support is added.
+    anchor = (decomp.rows - 1 - decomp.rows // 2, decomp.cols - 1 - decomp.cols // 2)
+    return _morph_op(
+        np.maximum, nil, image,
+        decomp.rows, decomp.cols,
+        mirrored_rects, decomp.plan_row, decomp.plan_col,
+        anchor, decomp.iterations, mode, cval,
+    )
