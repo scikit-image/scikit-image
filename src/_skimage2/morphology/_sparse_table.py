@@ -53,41 +53,45 @@ class FootprintDecomp:
 
 def _log2(n: int) -> int:
     """Integer floor-log2; returns -1 for n == 0."""
-    ans = -1
-    while n > 0:
-        n //= 2
-        ans += 1
-    return ans
+    return n.bit_length() - 1
 
 
 def _max_run_length_row(footprint: np.ndarray) -> int:
     """Maximum consecutive run of nonzero values in any single column."""
-    max_len = 0
-    for c in range(footprint.shape[1]):
-        cnt = 0
-        for r in range(footprint.shape[0]):
-            if footprint[r, c] == 0:
-                max_len = max(max_len, cnt)
-                cnt = 0
-            else:
-                cnt += 1
-        max_len = max(max_len, cnt)
-    return max_len
+    if footprint.size == 0:
+        return 0
+    fp = (footprint != 0).astype(np.int8)
+    # Pad sentinel rows so boundary runs are detected by np.diff
+    padded = np.zeros((fp.shape[0] + 2, fp.shape[1]), dtype=np.int8)
+    padded[1:-1] = fp
+    diff = np.diff(padded, axis=0)          # shape (rows+1, cols)
+    starts_r, starts_c = np.nonzero(diff == 1)
+    ends_r, ends_c = np.nonzero(diff == -1)
+    if starts_r.size == 0:
+        return 0
+    # Sort by column then row so starts pair with their matching ends
+    order_s = np.lexsort((starts_r, starts_c))
+    order_e = np.lexsort((ends_r, ends_c))
+    return int((ends_r[order_e] - starts_r[order_s]).max())
 
 
 def _max_run_length_col(footprint: np.ndarray) -> int:
     """Maximum consecutive run of nonzero values in any single row."""
-    max_len = 0
-    for r in range(footprint.shape[0]):
-        cnt = 0
-        for c in range(footprint.shape[1]):
-            if footprint[r, c] == 0:
-                max_len = max(max_len, cnt)
-                cnt = 0
-            else:
-                cnt += 1
-        max_len = max(max_len, cnt)
-    return max_len
+    if footprint.size == 0:
+        return 0
+    fp = (footprint != 0).astype(np.int8)
+    # Pad sentinel cols so boundary runs are detected by np.diff
+    padded = np.zeros((fp.shape[0], fp.shape[1] + 2), dtype=np.int8)
+    padded[:, 1:-1] = fp
+    diff = np.diff(padded, axis=1)          # shape (rows, cols+1)
+    starts_r, starts_c = np.nonzero(diff == 1)
+    ends_r, ends_c = np.nonzero(diff == -1)
+    if starts_r.size == 0:
+        return 0
+    # Sort by row then col so starts pair with their matching ends
+    order_s = np.lexsort((starts_c, starts_r))
+    order_e = np.lexsort((ends_c, ends_r))
+    return int((ends_c[order_e] - starts_c[order_s]).max())
 
 
 def _find_dyadic_rect_origins(
@@ -113,44 +117,84 @@ def _find_dyadic_rect_origins(
     """
     row_ofst = 1 << row_depth
     col_ofst = 1 << col_depth
-    origins = []
     n_rows, n_cols = st_node.shape
 
-    for row in range(n_rows):
-        for col in range(n_cols):
-            if st_node[row, col] == 0:
-                continue
+    active = st_node != 0  # (n_rows, n_cols) bool
 
-            # Skip interior cells (surrounded on both sides in either axis)
-            if (
-                col > 0
-                and st_node[row, col - 1] == 1
-                and col + 1 < n_cols
-                and st_node[row, col + 1] == 1
-            ):
-                continue
-            if (
-                row > 0
-                and st_node[row - 1, col] == 1
-                and row + 1 < n_rows
-                and st_node[row + 1, col] == 1
-            ):
-                continue
+    # Cells surrounded on both sides in the column direction
+    col_surrounded = np.zeros((n_rows, n_cols), dtype=bool)
+    if n_cols >= 3:
+        col_surrounded[:, 1:-1] = active[:, :-2] & active[:, 2:]
 
-            # Skip if a cell at distance 2**depth is also active
-            # (a larger rectangle already covers this one)
-            if col + col_ofst < n_cols and st_node[row, col + col_ofst] == 1:
-                continue
-            if col - col_ofst >= 0 and st_node[row, col - col_ofst] == 1:
-                continue
-            if row + row_ofst < n_rows and st_node[row + row_ofst, col] == 1:
-                continue
-            if row - row_ofst >= 0 and st_node[row - row_ofst, col] == 1:
-                continue
+    # Cells surrounded on both sides in the row direction
+    row_surrounded = np.zeros((n_rows, n_cols), dtype=bool)
+    if n_rows >= 3:
+        row_surrounded[1:-1, :] = active[:-2, :] & active[2:, :]
 
-            origins.append((row, col))
+    interior = col_surrounded | row_surrounded
 
-    return origins
+    # Cells whose col-offset or row-offset neighbor is active
+    # (a larger rectangle already covers them)
+    has_right = np.zeros((n_rows, n_cols), dtype=bool)
+    has_left = np.zeros((n_rows, n_cols), dtype=bool)
+    if col_ofst < n_cols:
+        has_right[:, :n_cols - col_ofst] = active[:, col_ofst:]
+        has_left[:, col_ofst:] = active[:, :n_cols - col_ofst]
+
+    has_down = np.zeros((n_rows, n_cols), dtype=bool)
+    has_up = np.zeros((n_rows, n_cols), dtype=bool)
+    if row_ofst < n_rows:
+        has_down[:n_rows - row_ofst, :] = active[row_ofst:, :]
+        has_up[row_ofst:, :] = active[:n_rows - row_ofst, :]
+
+    selected = active & ~interior & ~(has_right | has_left | has_down | has_up)
+    rows_idx, cols_idx = np.nonzero(selected)
+    return list(zip(rows_idx.tolist(), cols_idx.tolist()))
+
+
+def _decomp_rect_footprint(
+    rows: int, cols: int, max_row_depth: int, max_col_depth: int
+) -> list:
+    """Compute dyadic_rects analytically for a full rectangular footprint.
+
+    For a full rectangle, ``_find_dyadic_rect_origins`` returns non-empty
+    origins at exactly one depth level ``(rd*, cd*)`` where
+    ``rd* = floor(log2(rows))`` and ``cd* = floor(log2(cols))``.
+    This avoids the ``O(R * C * log^2)`` cost of :func:`_gen_dyadic_cover`.
+
+    Parameters
+    ----------
+    rows, cols : int
+        Shape of the footprint (both must be >= 1).
+    max_row_depth, max_col_depth : int
+        Depth limits (``floor(log2(rows)) + 1`` and ``floor(log2(cols)) + 1``).
+
+    Returns
+    -------
+    list of list of list of (int, int)
+        Same structure as :func:`_gen_dyadic_cover`.
+    """
+    rd_star = max_row_depth - 1   # floor(log2(rows))
+    cd_star = max_col_depth - 1   # floor(log2(cols))
+
+    # st_node shape at (rd*, cd*): (rows - 2**rd* + 1, cols - 2**cd* + 1)
+    n_rows = rows - (1 << rd_star) + 1
+    n_cols = cols - (1 << cd_star) + 1
+
+    # Origins: corners of the (n_rows × n_cols) grid at depth (rd*, cd*)
+    origins: list = [(0, 0)]
+    if n_cols > 1:
+        origins.append((0, n_cols - 1))
+    if n_rows > 1:
+        origins.append((n_rows - 1, 0))
+    if n_rows > 1 and n_cols > 1:
+        origins.append((n_rows - 1, n_cols - 1))
+
+    return [
+        [origins if (rd == rd_star and cd == cd_star) else []
+         for cd in range(max_col_depth)]
+        for rd in range(max_row_depth)
+    ]
 
 
 def _gen_dyadic_cover(
@@ -555,7 +599,15 @@ def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
     max_row_depth = _log2(_max_run_length_row(fp)) + 1
     max_col_depth = _log2(_max_run_length_col(fp)) + 1
 
-    dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
+    if fp.all():
+        # Fast path: full rectangle — compute dyadic_rects analytically in O(log^2)
+        # instead of the O(R * C * log^2) _gen_dyadic_cover loop.
+        dyadic_rects = _decomp_rect_footprint(
+            fp.shape[0], fp.shape[1], max_row_depth, max_col_depth
+        )
+    else:
+        dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
+
     plan_row, plan_col = _plan_st_build(dyadic_rects, max_row_depth, max_col_depth)
 
     return FootprintDecomp(
