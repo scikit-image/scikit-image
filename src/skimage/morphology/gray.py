@@ -33,15 +33,16 @@ To keep the old (`skimage`, v1.x) behavior, set `mode='reflect'` explicitly.
 If you set it explicitly before, the behavior is unchanged.
 
 <!-- cond-start: doc -->
->>> import numpy as np
->>>
->>> import skimage as ski1
->>> import skimage2 as ski2
->>>
->>> image = ski1.data.camera()
->>> res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
->>> res2 = ski2.morphology.%(qual)s(image, mode='reflect')
->>> assert np.all(res1 == res2)
+```python
+import numpy as np
+
+import skimage as ski1
+import skimage2 as ski2
+
+image = ski1.data.camera()
+res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
+res2 = ski2.morphology.%(qual)s(image, mode='reflect')
+assert np.all(res1 == res2)
 ```
 
 <!--- cond-end -->
@@ -86,19 +87,20 @@ To keep the old (`skimage`, v1.x) behavior:
 
 For example:
 
->>> import numpy as np
->>>
->>> import skimage as ski1
->>> import skimage2 as ski2
->>>
->>> image = ski1.data.camera()
->>> asym_foot = np.zeros((4, 4))
->>> asym_foot[2:, 2:] = 1
->>> res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
->>> pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
->>> mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
->>> res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
->>> assert np.all(res1 == res2)
+```python
+import numpy as np
+
+import skimage as ski1
+import skimage2 as ski2
+
+image = ski1.data.camera()
+asym_foot = np.zeros((4, 4))
+asym_foot[2:, 2:] = 1
+res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
+pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
+mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
+res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
+assert np.all(res1 == res2)
 ```
 
 <!--- cond-end -->
