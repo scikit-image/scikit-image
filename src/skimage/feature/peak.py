@@ -10,6 +10,80 @@ from .._shared._warnings import warn_external
 import _skimage2 as ski2
 
 
+@ski2.util.ski2_migration_dec("""\
+`%(ski1qual)s` is deprecated in favor of
+`%(ski2qual)s` with new behavior:
+
+* Parameter `p_norm` defaults to 2 (Euclidean distance),
+  was `numpy.inf` (Chebyshev distance)
+* Parameter `exclude_border` defaults to 1, was `True`
+* Parameter `exclude_border` no longer accepts `False` and `True`,
+  pass 0 instead of `False`, or `min_distance` instead of `True`
+* Parameters after `image` are keyword-only
+
+To keep the old behavior when switching to `skimage2`, update your call
+according to the following cases:
+
+<!--- cond-start: warning -->
+* `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
+* `exclude_border=True`, same as above
+* `exclude_border=False`, use `exclude_border=0`
+* `exclude_border=<int>`, no change necessary
+* `p_norm` not passed, use `p_norm=numpy.inf`
+* `p_norm=<float>, --> no change necessary
+<!--- cond-end -->
+
+<!--- cond-start: doc -->
+:::{list-table}
+:header-rows: 1
+
+- - In `skimage`
+  - In `skimage2`
+
+- - `exclude_border` not passed (default)
+  - Assign it the same value as `min_distance` which may be its default value `1`.
+
+- - `exclude_border=True`
+  - Same as above in the default case.
+
+- - `exclude_border=False`
+  - Use `min_distance=0`.
+
+- - `exclude_border=<int>`
+  - No change necessary.
+
+- - `p_norm` not passed (default)
+  - Pass the previous default explicitly with `p_norm=numpy.inf`.
+
+- - `p_norm=<float>`
+  - No change necessary.
+
+:::
+
+Other keyword parameters can be left unchanged.
+
+## Examples
+
+```python
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>> img = ski1.data.camera()
+>>> res1 = ski1.morphology.peak_local_max(image)
+>>> res2 = ski2.morphology.peak_local_max(image,
+...                                       exclude_border=1,
+...                                       p_norm=np.inf)
+assert np.all(res1 == res2)
+
+>>> res1 = ski1.morphology.peak_local_max(image, min_distance=10)
+>>> res2 = ski2.morphology.peak_local_max(image,
+...                                       image,
+...                                       min_distance=10,
+...                                       exclude_border=10,
+...                                       p_norm=np.inf
+assert np.all(res1 == res2)
+
+<!--- cond-end -->
+""", 'skimage.feature.peak_local_max')
 def peak_local_max(
     image,
     min_distance=1,
@@ -134,33 +208,6 @@ def peak_local_max(
            [15, 15, 15]])
 
     """
-    warn_external(
-        dedent("""\
-        `skimage.feature.peak_local_max` is deprecated in favor of
-        `skimage2.feature.peak_local_max` with new behavior:
-
-        * Parameter `p_norm` defaults to 2 (Euclidean distance),
-          was `numpy.inf` (Chebyshev distance)
-        * Parameter `exclude_border` defaults to 1, was `True`
-        * Parameter `exclude_border` no longer accepts `False` and `True`,
-          pass 0 instead of `False`, or `min_distance` instead of `True`
-        * Parameters after `image` are keyword-only
-
-        To keep the old behavior when switching to `skimage2`, update your call
-        according to the following cases:
-
-        * `exclude_border` not passed, use `exclude_border=<value_of_min_distance>`
-        * `exclude_border=True`, same as above
-        * `exclude_border=False`, use `exclude_border=0`
-        * `exclude_border=<int>`, no change necessary
-        * `p_norm` not passed, use `p_norm=numpy.inf`
-        * `p_norm=<float>, no change necessary
-
-        Other keyword parameters can be left unchanged.
-        """),
-        category=PendingSkimage2Change,
-    )
-
     # Deprecate passing `np.inf` to `num_peaks` and `num_peaks_per_label`
     if num_peaks is not None and np.isinf(num_peaks):
         num_peaks = None
