@@ -15,6 +15,7 @@ from .._shared.utils import deprecate_func
 from .._shared._warnings import warn_external
 from ..util import PendingSkimage2Change
 
+import _skimage2 as ski2
 
 # Precomputed ball and disk decompositions were saved as 2D arrays where the
 # radius of the desired decomposition is used to index into the first axis of
@@ -1025,6 +1026,9 @@ def star(a, dtype=np.uint8):
     return footprint.astype(dtype)
 
 
+@ski2.util.ski2_migration_dec('''\
+`%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
+''', 'skimage.morphology.mirror_footprint')
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
 
@@ -1049,14 +1053,12 @@ def mirror_footprint(footprint):
            [0, 0, 0]], dtype=uint8)
 
     """
-    warn_external(
-        "`skimage.morphology.mirror_footprint` is deprecated in favor of "
-        "`skimage2.morphology.mirror_footprint` with identical behavior.",
-        category=PendingSkimage2Change,
-    )
     return sk2_mirror_footprint(footprint)
 
 
+@ski2.util.ski2_migration_dec('''\
+`%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
+''', 'skimage.morphology.pad_footprint')
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.
 
@@ -1084,9 +1086,4 @@ def pad_footprint(footprint, *, pad_end=True):
            [1, 1, 0]], dtype=uint8)
 
     """
-    warn_external(
-        "`skimage.morphology.pad_footprint` is deprecated in favor of "
-        "`skimage2.morphology.pad_footprint` with identical behavior.",
-        category=PendingSkimage2Change,
-    )
     return sk2_pad_footprint(footprint, pad_end=pad_end)
