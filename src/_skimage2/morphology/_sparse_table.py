@@ -5,6 +5,7 @@ unpublished contribution to OpenCV's ximgproc module, ported to
 Python/NumPy.
 """
 
+import functools
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -573,39 +574,30 @@ def _neutral_cval(dtype: np.dtype, op: str) -> float:
         return maxval if op == "min" else -maxval
 
 
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
+@functools.lru_cache(maxsize=32)
+def _decomp_footprint_cached(
+    fp_bytes: bytes, shape: tuple, dtype: np.dtype
+) -> FootprintDecomp:
+    """Cached core of :func:`decomp_footprint`.
 
-
-def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
-    """Decompose a morphological footprint for sparse table operations.
-
-    Pre-computes the dyadic rectangle cover and build plan for ``footprint``
-    so that :func:`erode` and :func:`dilate` can apply the morphological
-    operation efficiently, especially when the same footprint is reused across
-    many images.
+    Parameters are the normalized (immutable) representation of a footprint
+    so that identical footprints share the same ``FootprintDecomp`` object.
 
     Parameters
     ----------
-    footprint : ndarray of bool or uint8, shape (M, N)
-        The structuring element.  Nonzero values indicate active cells.
+    fp_bytes : bytes
+        Raw bytes of the uint8 footprint array.
+    shape : tuple of int
+        Shape ``(rows, cols)`` of the footprint.
+    dtype : numpy dtype
+        Always ``np.dtype('uint8')``; kept as part of the key for clarity.
 
     Returns
     -------
     FootprintDecomp
-        Pre-computed decomposition.
+        Pre-computed decomposition.  Do not mutate the returned object.
     """
-    fp = np.asarray(footprint, dtype=np.uint8)
-
-    # Handle empty footprint
-    if fp.size == 0:
-        fp = np.ones((1, 1), dtype=np.uint8)
-
-    # Ensure at least one nonzero element
-    if not np.any(fp):
-        fp = fp.copy()
-        fp[0, 0] = 1
+    fp = np.frombuffer(fp_bytes, dtype=dtype).reshape(shape)
 
     max_row_depth = _log2(_max_run_length_row(fp)) + 1
     max_col_depth = _log2(_max_run_length_col(fp)) + 1
@@ -619,7 +611,9 @@ def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
     else:
         dyadic_rects = _gen_dyadic_cover(fp, max_row_depth, max_col_depth)
 
-    plan_row, plan_col = _plan_st_build(dyadic_rects, max_row_depth, max_col_depth)
+    plan_row, plan_col, max_stack_depth = _plan_st_build(
+        dyadic_rects, max_row_depth, max_col_depth
+    )
 
     return FootprintDecomp(
         rows=fp.shape[0],
@@ -627,7 +621,48 @@ def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
         dyadic_rects=dyadic_rects,
         plan_row=plan_row,
         plan_col=plan_col,
+        max_stack_depth=max_stack_depth,
     )
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
+    """Decompose a morphological footprint for sparse table operations.
+
+    Pre-computes the dyadic rectangle cover and build plan for ``footprint``
+    so that :func:`erode` and :func:`dilate` can apply the morphological
+    operation efficiently, especially when the same footprint is reused across
+    many images.
+
+    Results are cached (up to 32 distinct footprints) so repeated calls with
+    the same footprint are essentially free.
+
+    Parameters
+    ----------
+    footprint : ndarray of bool or uint8, shape (M, N)
+        The structuring element.  Nonzero values indicate active cells.
+
+    Returns
+    -------
+    FootprintDecomp
+        Pre-computed decomposition.  Do not mutate the returned object.
+    """
+    fp = np.asarray(footprint, dtype=np.uint8)
+
+    # Handle empty footprint
+    if fp.size == 0:
+        fp = np.ones((1, 1), dtype=np.uint8)
+
+    # Ensure at least one nonzero element
+    if not np.any(fp):
+        fp = fp.copy()
+        fp[0, 0] = 1
+
+    return _decomp_footprint_cached(fp.tobytes(), fp.shape, fp.dtype)
 
 
 def erode(
