@@ -1,7 +1,8 @@
 """Utilities for migration from ``skimage`` to ``skimage2``"""
 
-import re
 from functools import wraps
+import re
+from textwrap import dedent
 
 _HEADINGS = ('Summary', 'Examples', 'Background')
 
@@ -30,7 +31,7 @@ class Skimage2Migration:
 
         def decorator(func):
             func_params = self._get_func_params(func, ski2qual)
-            filled = migration_doc % func_params
+            filled = dedent(migration_doc % func_params)
             parts = self._parse_migration_doc(filled)
             self.migration_messages[func_params['ski1qual']] = parts
 
@@ -40,7 +41,8 @@ class Skimage2Migration:
                 from skimage.util import PendingSkimage2Change
 
                 if self.warn:
-                    warn_external(parts['Summary'], category=PendingSkimage2Change)
+                    warn_external(parts['Summary'],
+                                  category=PendingSkimage2Change)
                 return func(*args, **kwargs)
 
             return decorated

@@ -1,5 +1,7 @@
 """Test migration module"""
 
+from textwrap import indent
+
 from _skimage2.util.migration import Skimage2Migration
 
 import pytest
@@ -49,16 +51,27 @@ def func(a, b):
 
 _func_ski1qual = f'{func.__module__}.{func.__qualname__}'
 example_filled = example_doc % dict(ski1qual=_func_ski1qual, ski2qual=_func_ski1qual)
+parsed_eg_doc = Skimage2Migration()._parse_migration_doc(example_filled)
 
 
 def test_decoration_interpolation():
-    migration_dec = Skimage2Migration()
-    parsed_eg_doc = migration_dec._parse_migration_doc(example_filled)
+    migration_dec = Skimage2Migration(warn=True)
     dfunc = migration_dec(example_doc)(func)
 
     assert migration_dec.migration_messages == {
         f'{func.__module__}.{func.__qualname__}': parsed_eg_doc
     }
+
+    from skimage.util import PendingSkimage2Change
+
+    with pytest.warns(PendingSkimage2Change, match=parsed_eg_doc['Summary']):
+        assert dfunc(2, 4) == 8
+
+
+def test_dedent():
+    # Test text dedented.
+    migration_dec = Skimage2Migration(warn=True)
+    dfunc = migration_dec(indent(example_doc, '    '))(func)
 
     from skimage.util import PendingSkimage2Change
 
