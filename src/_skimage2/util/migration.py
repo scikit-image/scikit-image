@@ -90,7 +90,7 @@ class Skimage2Migration:
 
     def _replacer(self, context, match):
         doc_types = [t.strip() for t in match.group(1).split(',')]
-        return '' if context not in doc_types else match.group(2)
+        return '' if context not in doc_types else match.group(2).strip()
 
     def _parse_migration_doc(self, doc):
         """Parse Markdown migration string to give warning and doc fragment
