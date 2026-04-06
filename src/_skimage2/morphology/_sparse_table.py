@@ -37,6 +37,11 @@ class FootprintDecomp:
     plan_col : ndarray of bool, shape (max_row_depth, max_col_depth)
         Build schedule for the sparse table; ``True`` means expand in the
         column direction at depth level ``(row_depth, col_depth)``.
+    max_stack_depth : ndarray of int, shape (max_row_depth, max_col_depth)
+        Strahler number of each node: the minimum stack depth needed to DFS
+        all leaves from that node when the lighter subtree is visited first.
+        Used by :func:`_morph_op` to decide which child to push first (LIFO),
+        minimising peak stack depth.
     """
 
     rows: int
@@ -44,6 +49,7 @@ class FootprintDecomp:
     dyadic_rects: list
     plan_row: np.ndarray
     plan_col: np.ndarray
+    max_stack_depth: np.ndarray
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +281,10 @@ def _solve_rsap_greedy(initial_map: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
     plan_col : ndarray of bool, same shape as ``initial_map``
         Build schedule for the sparse table; ``True`` means expand in the
         column direction at depth level ``(row_depth, col_depth)``.
+    max_stack_depth : ndarray of int32, same shape as ``initial_map``
+        Strahler number of each node: the minimum stack depth required to
+        DFS all leaves from that node when the lighter subtree is always
+        visited first.
     """
     # pos: list of (col, row) in the depth-index space
     pos = [
@@ -317,7 +327,24 @@ def _solve_rsap_greedy(initial_map: np.ndarray) -> Tuple[np.ndarray, np.ndarray]
         pos[max_j] = pos[-1]
         pos.pop()
 
-    return plan_row, plan_col
+    # Compute Strahler numbers bottom-up.
+    R, C = initial_map.shape
+    max_stack_depth = np.ones((R, C), dtype=np.int32)
+    for r in range(R - 1, -1, -1):
+        for c in range(C - 1, -1, -1):
+            pr = plan_row[r, c]
+            pc = plan_col[r, c]
+            if pr and pc:
+                a = max_stack_depth[r + 1, c]
+                b = max_stack_depth[r, c + 1]
+                max_stack_depth[r, c] = max(a, b) if a != b else a + 1
+            elif pr:
+                max_stack_depth[r, c] = max_stack_depth[r + 1, c]
+            elif pc:
+                max_stack_depth[r, c] = max_stack_depth[r, c + 1]
+            # else: leaf → stays 1
+
+    return plan_row, plan_col, max_stack_depth
 
 
 def _plan_st_build(
@@ -340,6 +367,9 @@ def _plan_st_build(
     -------
     plan_row, plan_col : ndarray of bool
         See :func:`_solve_rsap_greedy`.
+    max_stack_depth : ndarray of int32
+        See :func:`_solve_rsap_greedy`.  Used to order DFS traversal so the
+        shallower subtree is processed first, minimising peak stack depth.
     """
     st_map = np.zeros((max_row_depth, max_col_depth), dtype=np.uint8)
     for rd in range(max_row_depth):
@@ -390,63 +420,6 @@ def _mirror_dyadic_rects(
 # ---------------------------------------------------------------------------
 
 
-def _apply_morph_dfs(
-    ufunc,
-    st: np.ndarray,
-    dst: np.ndarray,
-    dyadic_rects: list,
-    plan_row: np.ndarray,
-    plan_col: np.ndarray,
-    row_depth: int,
-    col_depth: int,
-) -> None:
-    """Apply morphological operation via sparse table DFS traversal.
-
-    Parameters
-    ----------
-    ufunc : numpy ufunc
-        ``np.minimum`` for erosion, ``np.maximum`` for dilation.
-    st : ndarray
-        Current sparse table node (expanded source image).
-    dst : ndarray
-        Destination image updated in-place.
-    dyadic_rects : list
-        Pre-computed rectangle origins from :func:`_gen_dyadic_cover`.
-    plan_row, plan_col : ndarray of bool
-        Build plan from :func:`_plan_st_build`.
-    row_depth, col_depth : int
-        Current depth indices.
-    """
-    h, w = dst.shape
-
-    # Apply all dyadic rectangles at the current depth level
-    for row, col in dyadic_rects[row_depth][col_depth]:
-        roi = st[row : row + h, col : col + w]
-        ufunc(dst, roi, out=dst)
-
-    if plan_col[row_depth, col_depth]:
-        # Expand in the column direction: create a narrower sparse table node.
-        # st2 is a new array; the original st is unchanged so the row branch
-        # below still sees the full-width st.
-        ofs = 1 << col_depth
-        st2 = ufunc(st[:, :-ofs], st[:, ofs:])
-        _apply_morph_dfs(
-            ufunc, st2, dst, dyadic_rects, plan_row, plan_col,
-            row_depth, col_depth + 1,
-        )
-
-    if plan_row[row_depth, col_depth]:
-        # Expand in the row direction: rebind local st to a shorter array.
-        # Rebinding a local name in Python does not affect the caller's
-        # reference, so this is safe even though st is passed by reference.
-        ofs = 1 << row_depth
-        st = ufunc(st[:-ofs, :], st[ofs:, :])
-        _apply_morph_dfs(
-            ufunc, st, dst, dyadic_rects, plan_row, plan_col,
-            row_depth + 1, col_depth,
-        )
-
-
 # scipy/skimage2 mode names → numpy.pad mode names
 _SCIPY_TO_NUMPY_PAD_MODE = {
     "constant": "constant",
@@ -466,6 +439,7 @@ def _morph_op(
     dyadic_rects: list,
     plan_row: np.ndarray,
     plan_col: np.ndarray,
+    max_stack_depth: np.ndarray,
     anchor: Tuple[int, int],
     mode: str,
     cval: float,
@@ -473,7 +447,7 @@ def _morph_op(
     """Core morphological operation using a pre-computed sparse table decomposition.
 
     Pads the image, initializes the output with the neutral element, then
-    calls :func:`_apply_morph_dfs` to accumulate results from dyadic rectangles.
+    traverses the sparse table DFS to accumulate results from dyadic rectangles.
 
     Parameters
     ----------
@@ -529,11 +503,48 @@ def _morph_op(
         )
 
     dst[:] = neutral
-    _apply_morph_dfs(
-        ufunc, expanded, dst,
-        dyadic_rects, plan_row, plan_col,
-        0, 0,
-    )
+    h, w = dst.shape
+
+    # DFS over the sparse table build plan.
+    stack = [(expanded, 0, 0)]
+    del expanded
+
+    while stack:
+        st, rd, cd = stack.pop()
+
+        for row, col in dyadic_rects[rd][cd]:
+            ufunc(dst, st[row : row + h, col : col + w], out=dst)
+
+        has_row = plan_row[rd, cd]
+        has_col = plan_col[rd, cd]
+
+        if has_row and has_col:
+            ofs_r = 1 << rd
+            ofs_c = 1 << cd
+            # The heavier subtree (by Strahler number) is pushed first so
+            # the lighter one is processed first, minimising peak stack depth.
+            if max_stack_depth[rd + 1, cd] >= max_stack_depth[rd, cd + 1]:
+                row_st = ufunc(st[:-ofs_r, :], st[ofs_r:, :])
+                # NOTE: numpy ufunc allocates an internal buffer for overlapping slices
+                #       (unavoidable peak memory cost)
+                ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])
+                stack.append((row_st, rd + 1, cd))
+                stack.append((st[:, :-ofs_c], rd, cd + 1))
+            else:
+                col_st = ufunc(st[:, :-ofs_c], st[:, ofs_c:])
+                ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
+                stack.append((col_st, rd, cd + 1))
+                stack.append((st[:-ofs_r, :], rd + 1, cd))
+        elif has_row:
+            ofs_r = 1 << rd
+            ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
+            stack.append((st[:-ofs_r, :], rd + 1, cd))
+        elif has_col:
+            ofs_c = 1 << cd
+            ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])  # see above
+            stack.append((st[:, :-ofs_c], rd, cd + 1))
+
+        del st
 
     return dst
 
@@ -656,7 +667,7 @@ def erode(
     return _morph_op(
         np.minimum, neutral, image,
         decomp.rows, decomp.cols,
-        decomp.dyadic_rects, decomp.plan_row, decomp.plan_col,
+        decomp.dyadic_rects, decomp.plan_row, decomp.plan_col, decomp.max_stack_depth,
         anchor, mode, cval,
     )
 
@@ -701,6 +712,6 @@ def dilate(
     return _morph_op(
         np.maximum, neutral, image,
         decomp.rows, decomp.cols,
-        mirrored_rects, decomp.plan_row, decomp.plan_col,
+        mirrored_rects, decomp.plan_row, decomp.plan_col, decomp.max_stack_depth,
         anchor, mode, cval,
     )
