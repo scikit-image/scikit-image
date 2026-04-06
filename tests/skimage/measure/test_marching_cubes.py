@@ -175,6 +175,52 @@ def test_masked_marching_cubes_empty():
         _ = marching_cubes(ellipsoid_scalar, 0, mask=mask)
 
 
+@pytest.mark.parametrize(
+    "mydata",
+    [
+        # face > 0, A < 0  (original reproducer)
+        np.array(
+            [[[13, -1], [-1, -7]], [[-1, 1], [7, -7]], [[15, -9], [-3, -1]]],
+            dtype=int,
+        ),
+        # face > 0, A > 0
+        np.array(
+            [[[0, -8], [9, -1]], [[1, -1], [-1, 1]], [[-6, -8], [14, -13]]],
+            dtype=int,
+        ),
+        # face < 0, A > 0
+        np.array(
+            [
+                [[9, -1, 7], [10, -15, -2], [13, -8, 3]],
+                [[-1, 2, -5], [4, 8, 7], [9, -8, -11]],
+                [[1, -11, 3], [-4, 6, -2], [1, 13, 3]],
+            ],
+            dtype=int,
+        ),
+        # face < 0, A < 0
+        np.array(
+            [
+                [[-5, -8, 6], [-11, 3, 0], [9, -2, -8]],
+                [[-4, -12, 8], [-11, 6, -4], [1, -3, 3]],
+                [[7, 2, 1], [5, -2, 12], [-13, 13, -8]],
+            ],
+            dtype=int,
+        ),
+    ],
+)
+def test_no_duplicate_faces(mydata):
+    # Regression test for https://github.com/scikit-image/scikit-image/issues/8109
+    # Integer data where A*C - B*D = 0 triggered a degenerate fallback in test_face()
+    # that caused adjacent cubes to both generate triangles on a shared face.
+    # Covers all (sign(face), sign(A)) combinations for the degenerate case.
+    _, faces, _, _ = marching_cubes(mydata, level=0)
+    sorted_faces = np.sort(faces, axis=1)
+    unique_faces = np.unique(sorted_faces, axis=0)
+    assert len(unique_faces) == len(
+        faces
+    ), f"Duplicate faces found: {len(faces)} total, {len(unique_faces)} unique"
+
+
 def test_masked_marching_cubes_all_true():
     ellipsoid_scalar = ellipsoid(6, 10, 16, levelset=True)
     mask = np.ones_like(ellipsoid_scalar, dtype=bool)
