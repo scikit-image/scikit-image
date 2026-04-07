@@ -10,6 +10,9 @@ from ._footprints import (
     _footprint_is_sequence,
     pad_footprint,
 )
+from ._sparse_table import FootprintDecomp
+from ._sparse_table import erode as _st_erode
+from ._sparse_table import dilate as _st_dilate
 
 
 def _apply_decomposed(*, operator, image, footprints, out, mode, cval):
@@ -177,14 +180,21 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-
     if mode not in _SUPPORTED_MODES:
         raise ValueError(f"unsupported mode, got {mode!r}")
     if mode == "ignore":
         mode = "max"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
+
+    if isinstance(footprint, FootprintDecomp):
+        result = _st_erode(image, footprint, mode=mode, cval=cval)
+        if out is not None:
+            out[:] = result
+            return out
+        return result
+
+    if out is None:
+        out = np.empty_like(image)
 
     footprint = pad_footprint(footprint, pad_end=False)
     if not _footprint_is_sequence(footprint):
@@ -278,14 +288,21 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    if out is None:
-        out = np.empty_like(image)
-
     if mode not in _SUPPORTED_MODES:
         raise ValueError(f"unsupported mode, got {mode!r}")
     if mode == "ignore":
         mode = "min"
     mode, cval = _min_max_to_constant_mode(image.dtype, mode, cval)
+
+    if isinstance(footprint, FootprintDecomp):
+        result = _st_dilate(image, footprint, mode=mode, cval=cval)
+        if out is not None:
+            out[:] = result
+            return out
+        return result
+
+    if out is None:
+        out = np.empty_like(image)
 
     footprint = pad_footprint(footprint, pad_end=False)
     if not _footprint_is_sequence(footprint):
@@ -377,7 +394,8 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = pad_footprint(footprint, pad_end=False)
+    if not isinstance(footprint, FootprintDecomp):
+        footprint = pad_footprint(footprint, pad_end=False)
     eroded = erosion(image, footprint, mode=mode, cval=cval)
     out = dilation(eroded, footprint, out=out, mode=mode, cval=cval)
     return out
@@ -456,7 +474,8 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
            [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    footprint = pad_footprint(footprint, pad_end=False)
+    if not isinstance(footprint, FootprintDecomp):
+        footprint = pad_footprint(footprint, pad_end=False)
     dilated = dilation(image, footprint, mode=mode, cval=cval)
     out = erosion(dilated, footprint, out=out, mode=mode, cval=cval)
     return out
