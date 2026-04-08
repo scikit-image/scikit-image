@@ -2,13 +2,30 @@
 
 from functools import wraps, partial
 import re
-from textwrap import dedent
+from textwrap import dedent, indent
 
-_PARTS_RE = re.compile(r'''\
-<!--+\s*cond-start\s*:\s*([a-z,]+)\s*--+>\s*$
-(.*?)\s*\n
-<!--+\s*cond-end\s*--+>\s*$''',
-                       flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
+_PARTS_RE = re.compile(
+    r'''
+    ^[ \t]*<!--+\ *cond-start\ *:\ *([a-z,]+)\ *--+>\ *\n
+    (?P<content>.*?)\n
+    [ \t]*<!--+\ *cond-end\ *--+>\ *(\n|$)
+    ''',
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
+
+# Replace Python block start-end markers.
+_PYTHON_RE = re.compile(
+    r'''
+    ^(?P<indent>[ \t]*)
+    (?P<ticks>```+)\ *
+    (?P<ocurl>{)?  # Opening curlies
+    \ *[Pp]ython\ *
+    (?(ocurl)})  # Match only if opening curlies found
+    \ *\n
+    (?P<content>.*?)\n
+    (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
+    ''',
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
+
 
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
 
@@ -88,15 +105,23 @@ class Skimage2Migration:
         )
         return dict(qual=qualname, mod=modname, ski1qual=ski1qual, ski2qual=ski2qual)
 
-    def _replacer(self, context, match):
+    def _pyblock_rep(self, match):
+        return indent(match.group('content') + '\n', '  ')
+
+    def _context_rep(self, context, match):
         doc_types = [t.strip() for t in match.group(1).split(',')]
-        return '' if context not in doc_types else match.group(2).strip()
+        return ('' if context not in doc_types
+                else match.group('content') + '\n')
 
     def _parse_migration_doc(self, doc):
         """Parse Markdown migration string to give warning and doc fragment
         """
-        return (_PARTS_RE.sub(partial(self._replacer, 'warning'), doc),
-                _PARTS_RE.sub(partial(self._replacer, 'doc'), doc))
+        return (
+            _PYTHON_RE.sub(
+                self._pyblock_rep,
+                _PARTS_RE.sub(partial(self._context_rep, 'warning'), doc)
+            ).strip(),
+            _PARTS_RE.sub(partial(self._context_rep, 'doc'), doc).strip())
 
 
 # Change warn=True when skimage2 namespace is ready.

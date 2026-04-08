@@ -8,36 +8,81 @@ from _skimage2.util.migration import Skimage2Migration, ski2_migration_dec
 
 import pytest
 
-example_doc = """\
+EXAMPLE_INPUT = """\
 Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
 
 <!--- cond-start: warning -->
 Only in warning
+
+```{python}
+print('foo')
+```
 <!--- cond-end -->
+
+  ```python
+  a = 1
+  a
+  ```
 
 <!--- cond-start: doc -->
 Only in doc
+
 ## Examples
 
->>> import skimage as ski1
->>> import _skimage2 as ski2
->>> res1 = ski1.somemod.somefunc(10, 11)
->>> res2 = ski2.somemod.somefunc(10, 11)
->>> assert res1 == res2
+```{python}
+import skimage as ski1
+import _skimage2 as ski2
+res1 = ski1.somemod.somefunc(10, 11)
+res2 = ski2.somemod.somefunc(10, 11)
+assert res1 == res2
+```
 
 Some background on the changes.
 <!--- cond-end -->
 """
 
+EXAMPLE_WARN = """\
+Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
+
+Only in warning
+
+  print('foo')
+
+    a = 1
+    a
+""".strip()
+
+EXAMPLE_DOC = """\
+Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
+
+
+  ```python
+  a = 1
+  a
+  ```
+
+Only in doc
+
+## Examples
+
+```{python}
+import skimage as ski1
+import _skimage2 as ski2
+res1 = ski1.somemod.somefunc(10, 11)
+res2 = ski2.somemod.somefunc(10, 11)
+assert res1 == res2
+```
+
+Some background on the changes.
+""".strip()
+
 
 def test_parsing():
     migration_dec = Skimage2Migration()
 
-    warn_msg, doc = migration_dec._parse_migration_doc(example_doc)
-    assert 'Only in warning' in warn_msg
-    assert 'Only in warning' not in doc
-    assert 'Only in doc' in doc
-    assert 'Only in doc' not in warn_msg
+    warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
+    assert warn_msg == EXAMPLE_WARN
+    assert doc == EXAMPLE_DOC
 
 
 def func(a, b):
@@ -45,29 +90,32 @@ def func(a, b):
 
 
 func_ski1qual = f'{func.__module__}.{func.__qualname__}'
-example_filled = example_doc % dict(ski1qual=func_ski1qual,
-                                    ski2qual=func_ski1qual)
+example_filled = EXAMPLE_INPUT % dict(ski1qual=func_ski1qual,
+                                      ski2qual=func_ski1qual)
 warn_msg, doc = Skimage2Migration()._parse_migration_doc(example_filled)
 
 
 def test_decoration_interpolation():
     migration_dec = Skimage2Migration(warn=True)
-    dfunc = migration_dec(example_doc)(func)
+    dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
     docs = migration_dec.migration_docs
     assert docs == {func_ski1qual: doc}
 
     from skimage.util import PendingSkimage2Change
 
-    with pytest.warns(PendingSkimage2Change, match=warn_msg):
+    with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
 
+    assert len(record) == 1
+    assert record[0].message.args[0] == warn_msg
+
     # Specify canonical location.
-    migration_dec(example_doc, 'skimage.bar.baz')(func)
+    migration_dec(EXAMPLE_INPUT, 'skimage.bar.baz')(func)
     assert docs['skimage.bar.baz'].startswith(
         'Replace all calls to `skimage.bar.baz` with `skimage2.bar.baz`.')
     # And skimage2 location.
-    migration_dec(example_doc,
+    migration_dec(EXAMPLE_INPUT,
                   'skimage.bar.boo',
                   'skimage2.bun.biz')(func)
     assert docs['skimage.bar.boo'].startswith(
@@ -77,15 +125,17 @@ def test_decoration_interpolation():
 def test_dedent():
     # Test text dedented.
     migration_dec = Skimage2Migration(warn=True)
-    dfunc = migration_dec(indent(example_doc, '    '))(func)
+    dfunc = migration_dec(indent(EXAMPLE_INPUT, '    '))(func)
 
     from skimage.util import PendingSkimage2Change
 
     # Warning and doc nevertheless stays the same.
     assert migration_dec.migration_docs == {func_ski1qual: doc}
-    with pytest.warns(PendingSkimage2Change, match=warn_msg):
+    with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
 
+    assert len(record) == 1
+    assert record[0].message.args[0] == warn_msg
 
 def test_peak_local_max(monkeypatch):
 
