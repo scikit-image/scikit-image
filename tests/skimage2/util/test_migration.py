@@ -95,11 +95,13 @@ def func(a, b):
 
 
 _func_ski1qual = f'{func.__module__}.{func.__qualname__}'
+_anchor = _func_ski1qual.replace('.', '-').replace('_', '-')
 warn_msg, doc = (Skimage2Migration(MIGRATION_URL)
                  ._filled_docs(EXAMPLE_INPUT,
                                dict(ski1qual=_func_ski1qual,
                                     ski2qual=_func_ski1qual,
-                                    migration_url=MIGRATION_URL)))
+                                    migration_url=MIGRATION_URL,
+                                    ski1qual_anchor=_anchor)))
 
 
 def test_decoration_interpolation():
