@@ -9,10 +9,8 @@ from _skimage2.morphology._footprints import (
     pad_footprint as sk2_pad_footprint,
 )
 from _skimage2._shared.utils import deprecate_func
-from _skimage2._shared._warnings import warn_external
 
 from .. import draw, morphology
-from ..util import PendingSkimage2Change
 
 import _skimage2 as ski2
 
