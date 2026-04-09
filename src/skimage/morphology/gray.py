@@ -236,7 +236,7 @@ def erosion(
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
+@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
                               'skimage.morphology.dilation')
 @_default_footprint
 def dilation(
