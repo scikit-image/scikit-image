@@ -51,7 +51,7 @@ Only in warning
     a = 1
     a
 
-See %(migration_url)s#%(ski1qual)s
+See %(migration_url)s#%(ski1qual_anchor)s
 """.strip()
 
 EXAMPLE_DOC = """\
