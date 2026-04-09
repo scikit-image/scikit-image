@@ -7,6 +7,7 @@ from _skimage2.morphology._footprints import _default_footprint
 from .footprints import mirror_footprint, pad_footprint
 
 import _skimage2 as ski2
+from _skimage2.util.migration import ski2_migration_dec
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
@@ -56,17 +57,6 @@ _PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
 `mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
 (inverts its order in each dimension), which aligns its behavior with SciPy's
 conventions.
-
-<!--- cond-start: doc -->
-:::{admonition} Background for changes
-:class: note dropdown
-
-The new behavior ensures that, with default parameters, `closing` and `opening` are [_extensive_ and _anti-extensive_](https://en.wikipedia.org/wiki/Mathematical_morphology#Properties_of_the_basic_operators) respectively.
-This change also aligns the behavior for asymmetric footprints with SciPy's `scipy.ndimage.grey_*` functions.
-
-Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [gh-6676](https://github.com/scikit-image/scikit-image/issues/6676), [gh-8046](https://github.com/scikit-image/scikit-image/pull/8046), and [gh-8060](https://github.com/scikit-image/scikit-image/pull/8060) for more details.
-:::
-<!--- cond-end -->
 
 To keep the old (`skimage`, v1.x) behavior:
 - Set `mode='reflect'` explicitly. If you set it explicitly before,
@@ -143,7 +133,7 @@ def _patch_footprint_mirroring(footprint):
     return footprint
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
                               'skimage.morphology.erosion')
 @_default_footprint
 def erosion(
@@ -236,7 +226,7 @@ def erosion(
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
                               'skimage.morphology.dilation')
 @_default_footprint
 def dilation(
@@ -331,7 +321,7 @@ def dilation(
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
                               'skimage.morphology.opening')
 @_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -410,7 +400,7 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
                               'skimage.morphology.closing')
 @_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -490,7 +480,7 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
                               'skimage.morphology.white_tophat')
 @_default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
@@ -573,7 +563,7 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2.util.ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
                               'skimage.morphology.black_tophat')
 @_default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
