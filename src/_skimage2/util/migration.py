@@ -6,7 +6,9 @@ from textwrap import dedent, indent
 
 
 # URL to migration page.
-MIGRATION_URL = 'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html'
+MIGRATION_URL = (
+    'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html'
+)
 
 
 # Identify sections specific to warning or doc.
@@ -16,7 +18,8 @@ _PARTS_RE = re.compile(
     (?P<content>.*?)\n
     [ \t]*<!--+\ *cond-end\ *--+>\ *(\n|$)
     ''',
-    flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
+)
 
 
 # Regex to find Python blocks within start-end markers.
@@ -31,7 +34,8 @@ _PYTHON_RE = re.compile(
     (?P<content>.*?)\n  # Code between start-end markers.
     (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
     ''',
-    flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
+)
 
 
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
@@ -71,13 +75,13 @@ class Skimage2Migration:
         return (s % params for s in (w_str, m_str))
 
     def _parse_migration_doc(self, doc):
-        """Parse Markdown migration string to give warning and doc fragment
-        """
-        warn_rep, doc_rep = (partial(self._context_rep, ctx)
-                             for ctx in ('warning', 'doc'))
-        warn_msg = dedent(_PYTHON_RE.sub(
-            self._pyblock_rep,
-            _PARTS_RE.sub(warn_rep, doc))).strip()
+        """Parse Markdown migration string to give warning and doc fragment"""
+        warn_rep, doc_rep = (
+            partial(self._context_rep, ctx) for ctx in ('warning', 'doc')
+        )
+        warn_msg = dedent(
+            _PYTHON_RE.sub(self._pyblock_rep, _PARTS_RE.sub(warn_rep, doc))
+        ).strip()
         if warn_msg:
             warn_msg += '\n\nSee %(migration_url)s#%(ski1qual_anchor)s'
         return warn_msg, dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
@@ -89,24 +93,23 @@ class Skimage2Migration:
         qualname, modname = func.__qualname__, func.__module__
         ski1qual = f'{modname}.{qualname}' if ski1qual is None else ski1qual
         ski2qual = (
-            _SKI1PREFIX_RE.sub(r'skimage2.', ski1qual) if ski2qual is None
-            else ski2qual
+            _SKI1PREFIX_RE.sub(r'skimage2.', ski1qual) if ski2qual is None else ski2qual
         )
-        return dict(qual=qualname,
-                    mod=modname,
-                    ski1qual=ski1qual,
-                    ski1qual_anchor=self._for_anchor(ski1qual),
-                    ski2qual=ski2qual,
-                    migration_url=self.migration_url)
+        return dict(
+            qual=qualname,
+            mod=modname,
+            ski1qual=ski1qual,
+            ski1qual_anchor=self._for_anchor(ski1qual),
+            ski2qual=ski2qual,
+            migration_url=self.migration_url,
+        )
 
     def _pyblock_rep(self, match):
         return indent(match.group('content') + '\n', '  ')
 
     def _context_rep(self, context, match):
         doc_types = [t.strip() for t in match.group(1).split(',')]
-        return ('' if context not in doc_types
-                else match.group('content') + '\n')
-
+        return '' if context not in doc_types else match.group('content') + '\n'
 
     def __call__(self, migration_doc, ski1qual=None, ski2qual=None):
         """Use `migration_doc` to specify warning and migration doc section

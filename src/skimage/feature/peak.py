@@ -7,7 +7,8 @@ from .._shared._warnings import warn_external
 import _skimage2 as ski2
 
 
-@ski2.util.ski2_migration_dec("""\
+@ski2.util.ski2_migration_dec(
+    """\
 `%(ski1qual)s` is deprecated in favor of
 `%(ski2qual)s` with new behavior:
 
@@ -77,7 +78,9 @@ assert np.all(res1 == res2)
 ```
 
 <!--- cond-end -->
-""", 'skimage.feature.peak_local_max')
+""",
+    'skimage.feature.peak_local_max',
+)
 def peak_local_max(
     image,
     min_distance=1,

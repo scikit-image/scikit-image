@@ -96,12 +96,15 @@ def func(a, b):
 
 _func_ski1qual = f'{func.__module__}.{func.__qualname__}'
 _anchor = _func_ski1qual.replace('.', '-').replace('_', '-')
-warn_msg, doc = (Skimage2Migration(MIGRATION_URL)
-                 ._filled_docs(EXAMPLE_INPUT,
-                               dict(ski1qual=_func_ski1qual,
-                                    ski2qual=_func_ski1qual,
-                                    migration_url=MIGRATION_URL,
-                                    ski1qual_anchor=_anchor)))
+warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
+    EXAMPLE_INPUT,
+    dict(
+        ski1qual=_func_ski1qual,
+        ski2qual=_func_ski1qual,
+        migration_url=MIGRATION_URL,
+        ski1qual_anchor=_anchor,
+    ),
+)
 
 
 def test_decoration_interpolation():
@@ -122,13 +125,13 @@ def test_decoration_interpolation():
     # Specify canonical location.
     migration_dec(EXAMPLE_INPUT, 'skimage.bar.baz')(func)
     assert docs['skimage.bar.baz'].startswith(
-        'Replace all calls to `skimage.bar.baz` with `skimage2.bar.baz`.')
+        'Replace all calls to `skimage.bar.baz` with `skimage2.bar.baz`.'
+    )
     # And skimage2 location.
-    migration_dec(EXAMPLE_INPUT,
-                  'skimage.bar.boo',
-                  'skimage2.bun.biz')(func)
+    migration_dec(EXAMPLE_INPUT, 'skimage.bar.boo', 'skimage2.bun.biz')(func)
     assert docs['skimage.bar.boo'].startswith(
-        'Replace all calls to `skimage.bar.boo` with `skimage2.bun.biz`.')
+        'Replace all calls to `skimage.bar.boo` with `skimage2.bun.biz`.'
+    )
 
 
 def test_dedent():
@@ -146,8 +149,8 @@ def test_dedent():
     assert len(record) == 1
     assert record[0].message.args[0] == warn_msg
 
-def test_peak_local_max():
 
+def test_peak_local_max():
     from skimage.feature import peak_local_max
     from skimage.util import PendingSkimage2Change
 
@@ -155,7 +158,8 @@ def test_peak_local_max():
 
     img = np.zeros((10, 10))
 
-    with pytest.warns(PendingSkimage2Change,
-                      match=('`skimage.feature.peak_local_max` '
-                             'is deprecated in favor of')):
+    with pytest.warns(
+        PendingSkimage2Change,
+        match=('`skimage.feature.peak_local_max` ' 'is deprecated in favor of'),
+    ):
         peak_local_max(img)

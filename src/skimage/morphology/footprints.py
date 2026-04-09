@@ -1024,11 +1024,14 @@ def star(a, dtype=np.uint8):
     return footprint.astype(dtype)
 
 
-@ski2.util.ski2_migration_dec('''\
+@ski2.util.ski2_migration_dec(
+    '''\
 <!--- cond-start: warning -->
 `%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
 <!--- cond-end -->
-''', 'skimage.morphology.mirror_footprint')
+''',
+    'skimage.morphology.mirror_footprint',
+)
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
 
@@ -1056,11 +1059,14 @@ def mirror_footprint(footprint):
     return sk2_mirror_footprint(footprint)
 
 
-@ski2.util.ski2_migration_dec('''\
+@ski2.util.ski2_migration_dec(
+    '''\
 <!--- cond-start: warning -->
 `%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
 <!--- cond-end -->
-''', 'skimage.morphology.pad_footprint')
+''',
+    'skimage.morphology.pad_footprint',
+)
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.
 

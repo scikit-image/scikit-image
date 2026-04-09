@@ -31,7 +31,8 @@ ski2_migration_dec.migration_docs['gray_funcs'] = (
     'opening',
     'closing',
     'white_tophat',
-    'black_tophat')
+    'black_tophat',
+)
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
 `skimage.morphology.%(qual)s` is deprecated in favor of
@@ -142,8 +143,7 @@ def _patch_footprint_mirroring(footprint):
     return footprint
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
-                              'skimage.morphology.erosion')
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.erosion')
 @_default_footprint
 def erosion(
     image,
@@ -235,8 +235,7 @@ def erosion(
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
-                              'skimage.morphology.dilation')
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.dilation')
 @_default_footprint
 def dilation(
     image,
@@ -330,8 +329,7 @@ def dilation(
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
-                              'skimage.morphology.opening')
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.opening')
 @_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
@@ -409,8 +407,7 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
-                              'skimage.morphology.closing')
+@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.closing')
 @_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
@@ -489,8 +486,9 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR,
-                              'skimage.morphology.white_tophat')
+@ski2_migration_dec(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.white_tophat'
+)
 @_default_footprint
 def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return white top hat of an image.
@@ -572,8 +570,9 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR,
-                              'skimage.morphology.black_tophat')
+@ski2_migration_dec(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.black_tophat'
+)
 @_default_footprint
 def black_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return black top hat of an image.

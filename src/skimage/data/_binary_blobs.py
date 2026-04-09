@@ -1,6 +1,8 @@
 import _skimage2 as ski2
 
-@ski2.util.ski2_migration_dec(r"""
+
+@ski2.util.ski2_migration_dec(
+    r"""
 `skimage.data.binary_blobs` is deprecated in favor of
 `skimage2.data.binary_blobs` which has a new signature. Parameters `length`
 and `n_dim` have been replaced with a new parameter `shape`. Optional
@@ -26,7 +28,9 @@ res2 = ski2.data.binary_blobs(shape=(length,) * n_dim,
                               rng=default_rng(1939))
 assert np.all(res1 == res2)
 ```
-""", 'skimage.data.binary_blobs')
+""",
+    'skimage.data.binary_blobs',
+)
 def binary_blobs(
     length=512,
     blob_size_fraction=0.1,
