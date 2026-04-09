@@ -61,6 +61,8 @@ according to the following cases:
 Other keyword parameters can be left unchanged.
 
 ```python
+import numpy as np
+
 import skimage as ski1
 import skimage2 as ski2
 image = ski1.data.camera()
