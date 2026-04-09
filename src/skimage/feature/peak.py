@@ -29,7 +29,6 @@ according to the following cases:
 * `p_norm` not passed, use `p_norm=numpy.inf`
 * `p_norm=<float>, --> no change necessary
 <!--- cond-end -->
-
 <!--- cond-start: doc -->
 :::{list-table}
 :header-rows: 1
@@ -58,8 +57,6 @@ according to the following cases:
 :::
 
 Other keyword parameters can be left unchanged.
-
-## Examples
 
 ```python
 import skimage as ski1

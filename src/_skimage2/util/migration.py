@@ -4,6 +4,12 @@ from functools import wraps, partial
 import re
 from textwrap import dedent, indent
 
+
+# URL to migration page.
+MIGRATION_URL = 'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html',
+
+
+# Identify sections specific to warning or doc.
 _PARTS_RE = re.compile(
     r'''
     ^[ \t]*<!--+\ *cond-start\ *:\ *([a-z,]+)\ *--+>\ *\n
@@ -12,16 +18,17 @@ _PARTS_RE = re.compile(
     ''',
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
 
-# Replace Python block start-end markers.
+
+# Regex to find Python blocks within start-end markers.
 _PYTHON_RE = re.compile(
     r'''
     ^(?P<indent>[ \t]*)
     (?P<ticks>```+)\ *
-    (?P<ocurl>{)?  # Opening curlies
+    (?P<ocurl>{)?  # Optional opening curlies
     \ *[Pp]ython\ *
-    (?(ocurl)})  # Match only if opening curlies found
+    (?(ocurl)})  # Match close curlies only if opening curlies found
     \ *\n
-    (?P<content>.*?)\n
+    (?P<content>.*?)\n  # Code between start-end markers.
     (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
     ''',
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE)
@@ -55,9 +62,47 @@ class Skimage2Migration:
     deprecated in favor of ``%(ski2qual)s``.
     """
 
-    def __init__(self, warn=True):
-        self.warn = warn
+    def __init__(self, migration_url):
+        self.migration_url = migration_url
         self.migration_docs = {}
+
+    def _filled_docs(self, migration_doc, params):
+        w_str, m_str = self._parse_migration_doc(migration_doc)
+        return (s % params for s in (w_str, m_str))
+
+    def _parse_migration_doc(self, doc):
+        """Parse Markdown migration string to give warning and doc fragment
+        """
+        warn_rep, doc_rep = (partial(self._context_rep, ctx)
+                             for ctx in ('warning', 'doc'))
+        warn_msg = dedent(_PYTHON_RE.sub(
+            self._pyblock_rep,
+            _PARTS_RE.sub(warn_rep, doc))).strip()
+        if warn_msg:
+            warn_msg += '\n\nSee %(migration_url)s#%(ski1qual)s'
+        return warn_msg, dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
+
+    def _get_func_params(self, func, ski1qual=None, ski2qual=None):
+        qualname, modname = func.__qualname__, func.__module__
+        ski1qual = f'{modname}.{qualname}' if ski1qual is None else ski1qual
+        ski2qual = (
+            _SKI1PREFIX_RE.sub(r'skimage2.', ski1qual) if ski2qual is None
+            else ski2qual
+        )
+        return dict(qual=qualname,
+                    mod=modname,
+                    ski1qual=ski1qual,
+                    ski2qual=ski2qual,
+                    migration_url=self.migration_url)
+
+    def _pyblock_rep(self, match):
+        return indent(match.group('content') + '\n', '  ')
+
+    def _context_rep(self, context, match):
+        doc_types = [t.strip() for t in match.group(1).split(',')]
+        return ('' if context not in doc_types
+                else match.group('content') + '\n')
+
 
     def __call__(self, migration_doc, ski1qual=None, ski2qual=None):
         """Use `migration_doc` to specify warning and migration doc section
@@ -79,50 +124,21 @@ class Skimage2Migration:
 
         def decorator(func):
             func_params = self._get_func_params(func, ski1qual, ski2qual)
-            filled = dedent(migration_doc % func_params)
-            warn_msg, doc = self._parse_migration_doc(filled)
-            self.migration_docs[func_params['ski1qual']] = doc
+            warn_msg, doc = self._filled_docs(migration_doc, func_params)
+            if doc:
+                self.migration_docs[func_params['ski1qual']] = doc
 
             @wraps(func)
             def decorated(*args, **kwargs):
                 from skimage._shared._warnings import warn_external
                 from skimage.util import PendingSkimage2Change
 
-                if self.warn:
-                    warn_external(warn_msg, category=PendingSkimage2Change)
+                warn_external(warn_msg, category=PendingSkimage2Change)
                 return func(*args, **kwargs)
 
             return decorated
 
         return decorator
 
-    def _get_func_params(self, func, ski1qual=None, ski2qual=None):
-        qualname, modname = func.__qualname__, func.__module__
-        ski1qual = f'{modname}.{qualname}' if ski1qual is None else ski1qual
-        ski2qual = (
-            _SKI1PREFIX_RE.sub(r'skimage2.', ski1qual) if ski2qual is None
-            else ski2qual
-        )
-        return dict(qual=qualname, mod=modname, ski1qual=ski1qual, ski2qual=ski2qual)
 
-    def _pyblock_rep(self, match):
-        return indent(match.group('content') + '\n', '  ')
-
-    def _context_rep(self, context, match):
-        doc_types = [t.strip() for t in match.group(1).split(',')]
-        return ('' if context not in doc_types
-                else match.group('content') + '\n')
-
-    def _parse_migration_doc(self, doc):
-        """Parse Markdown migration string to give warning and doc fragment
-        """
-        return (
-            _PYTHON_RE.sub(
-                self._pyblock_rep,
-                _PARTS_RE.sub(partial(self._context_rep, 'warning'), doc)
-            ).strip(),
-            _PARTS_RE.sub(partial(self._context_rep, 'doc'), doc).strip())
-
-
-# Change warn=True when skimage2 namespace is ready.
-ski2_migration_dec = Skimage2Migration(warn=False)
+ski2_migration_dec = Skimage2Migration(MIGRATION_URL)

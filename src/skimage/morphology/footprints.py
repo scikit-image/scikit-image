@@ -12,8 +12,6 @@ from _skimage2.morphology._footprints import (
 from .. import draw
 from skimage import morphology
 from .._shared.utils import deprecate_func
-from .._shared._warnings import warn_external
-from ..util import PendingSkimage2Change
 
 import _skimage2 as ski2
 
@@ -1027,7 +1025,9 @@ def star(a, dtype=np.uint8):
 
 
 @ski2.util.ski2_migration_dec('''\
+<!--- cond-start: warning -->
 `%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
+<!--- cond-end -->
 ''', 'skimage.morphology.mirror_footprint')
 def mirror_footprint(footprint):
     """Mirror each dimension in the footprint.
@@ -1057,7 +1057,9 @@ def mirror_footprint(footprint):
 
 
 @ski2.util.ski2_migration_dec('''\
+<!--- cond-start: warning -->
 `%(ski1qual)s` is deprecated in favor of `%(ski2qual)s` with identical behavior
+<!--- cond-end -->
 ''', 'skimage.morphology.pad_footprint')
 def pad_footprint(footprint, *, pad_end=True):
     """Pad the footprint to an odd size along each dimension.

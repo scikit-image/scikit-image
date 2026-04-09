@@ -50,6 +50,8 @@ Only in warning
 
     a = 1
     a
+
+See %(migration_url)s#%(ski1qual)s
 """.strip()
 
 EXAMPLE_DOC = """\
@@ -77,8 +79,11 @@ Some background on the changes.
 """.strip()
 
 
+MIGRATION_URL = 'https://some.site/doc/migration.html'
+
+
 def test_parsing():
-    migration_dec = Skimage2Migration()
+    migration_dec = Skimage2Migration(MIGRATION_URL)
 
     warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
     assert warn_msg == EXAMPLE_WARN
@@ -89,18 +94,20 @@ def func(a, b):
     return a * b
 
 
-func_ski1qual = f'{func.__module__}.{func.__qualname__}'
-example_filled = EXAMPLE_INPUT % dict(ski1qual=func_ski1qual,
-                                      ski2qual=func_ski1qual)
-warn_msg, doc = Skimage2Migration()._parse_migration_doc(example_filled)
+_func_ski1qual = f'{func.__module__}.{func.__qualname__}'
+warn_msg, doc = (Skimage2Migration(MIGRATION_URL)
+                 ._filled_docs(EXAMPLE_INPUT,
+                               dict(ski1qual=_func_ski1qual,
+                                    ski2qual=_func_ski1qual,
+                                    migration_url=MIGRATION_URL)))
 
 
 def test_decoration_interpolation():
-    migration_dec = Skimage2Migration(warn=True)
+    migration_dec = Skimage2Migration(MIGRATION_URL)
     dfunc = migration_dec(EXAMPLE_INPUT)(func)
 
     docs = migration_dec.migration_docs
-    assert docs == {func_ski1qual: doc}
+    assert docs == {_func_ski1qual: doc}
 
     from skimage.util import PendingSkimage2Change
 
@@ -124,20 +131,20 @@ def test_decoration_interpolation():
 
 def test_dedent():
     # Test text dedented.
-    migration_dec = Skimage2Migration(warn=True)
+    migration_dec = Skimage2Migration(MIGRATION_URL)
     dfunc = migration_dec(indent(EXAMPLE_INPUT, '    '))(func)
 
     from skimage.util import PendingSkimage2Change
 
     # Warning and doc nevertheless stays the same.
-    assert migration_dec.migration_docs == {func_ski1qual: doc}
+    assert migration_dec.migration_docs == {_func_ski1qual: doc}
     with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
 
     assert len(record) == 1
     assert record[0].message.args[0] == warn_msg
 
-def test_peak_local_max(monkeypatch):
+def test_peak_local_max():
 
     from skimage.feature import peak_local_max
     from skimage.util import PendingSkimage2Change
@@ -146,7 +153,6 @@ def test_peak_local_max(monkeypatch):
 
     img = np.zeros((10, 10))
 
-    monkeypatch.setattr(ski2_migration_dec, 'warn', True)
     with pytest.warns(PendingSkimage2Change,
                       match=('`skimage.feature.peak_local_max` '
                              'is deprecated in favor of')):

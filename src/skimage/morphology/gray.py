@@ -24,6 +24,14 @@ _SUPPORTED_MODES = {
     "ignore",
 }
 
+# For migration doc build.
+ski2_migration_dec.migration_docs['gray_funcs'] = (
+    'erosion',
+    'dilation',
+    'opening',
+    'closing',
+    'white_tophat',
+    'black_tophat')
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
 `skimage.morphology.%(qual)s` is deprecated in favor of
@@ -68,6 +76,7 @@ To keep the old (`skimage`, v1.x) behavior:
   footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
   footprint = ski2.morphology.mirror_footprint(footprint)
   ```
+
 <!--- cond-start: doc -->
 For example:
 

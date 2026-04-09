@@ -51,7 +51,7 @@ migration-doc:
 	$(PYTHON) tools/build_migration.py $(MIGRATION_TPL)
 	@echo "Build migration template...done."
 
-html: api
+html: migration-doc api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
