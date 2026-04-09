@@ -6,7 +6,7 @@ from textwrap import dedent, indent
 
 
 # URL to migration page.
-MIGRATION_URL = 'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html',
+MIGRATION_URL = 'https://scikit-image.org/docs/stable/user_guide/skimage2_migration.html'
 
 
 # Identify sections specific to warning or doc.
@@ -79,8 +79,11 @@ class Skimage2Migration:
             self._pyblock_rep,
             _PARTS_RE.sub(warn_rep, doc))).strip()
         if warn_msg:
-            warn_msg += '\n\nSee %(migration_url)s#%(ski1qual)s'
+            warn_msg += '\n\nSee %(migration_url)s#%(ski1qual_anchor)s'
         return warn_msg, dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
+
+    def _for_anchor(self, name):
+        return name.replace('.', '-').replace('_', '-')
 
     def _get_func_params(self, func, ski1qual=None, ski2qual=None):
         qualname, modname = func.__qualname__, func.__module__
@@ -92,6 +95,7 @@ class Skimage2Migration:
         return dict(qual=qualname,
                     mod=modname,
                     ski1qual=ski1qual,
+                    ski1qual_anchor=self._for_anchor(ski1qual),
                     ski2qual=ski2qual,
                     migration_url=self.migration_url)
 

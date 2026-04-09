@@ -43,17 +43,17 @@ The new API may, for the same function call, return different results—e.g., be
 By importing functionality from `skimage2`, you explicitly opt in to the new behavior.
 :::
 
-(skimage.data.binary_blobs)=
+{% macro func_heading(name, prefix='###') -%}
+({{ name | replace('.', '-') | replace('_', '-')}})=
 
-### `skimage.data.binary_blobs`
+{{ prefix }} `{{ name }}`
 
-{{ d['skimage.data.binary_blobs'] }}
+{{ d[name] }}
+{%- endmacro %}
 
-(skimage.feature.peak_local_max)=
+{{ func_heading('skimage.data.binary_blobs') }}
 
-### `skimage.feature.peak_local_max`
-
-{{ d['skimage.feature.peak_local_max'] }}
+{{ func_heading('skimage.feature.peak_local_max') }}
 
 ### Grayscale morphological operators in `skimage.morphology`
 
@@ -79,11 +79,7 @@ Refer to [gh-6665](https://github.com/scikit-image/scikit-image/issues/6665), [g
 :::
 
 {% for func_name in d['gray_funcs'] %}
-(skimage.morphology.{{ func_name }})=
-
-#### `skimage.morphology.{{ func_name }}`
-
-{{ d['skimage.morphology.' ~ func_name ] }}
+{{ func_heading('skimage.morphology.' ~ func_name, '####') }}
 {% endfor %}
 
 ## Deprecations prior to skimage2
