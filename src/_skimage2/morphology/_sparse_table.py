@@ -505,6 +505,10 @@ def _morph_op(
 
     dst[:] = neutral
     h, w = dst.shape
+    # Range trimming is only valid when padding is constant with the neutral
+    # element: in other modes the padded border contains real pixel values,
+    # not neutral, so we must not skip those columns/rows.
+    _trim_ok = pad_mode == "constant" and cval == neutral
 
     # DFS over the sparse table build plan.
     stack = [(expanded, 0, 0)]
@@ -528,21 +532,41 @@ def _morph_op(
                 row_st = ufunc(st[:-ofs_r, :], st[ofs_r:, :])
                 # NOTE: numpy ufunc allocates an internal buffer for overlapping slices
                 #       (unavoidable peak memory cost)
-                ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])
+                if _trim_ok:
+                    _rl = max(0, anchor_row - ofs_r + 1)
+                    _rh = min(st.shape[0], anchor_row + h)
+                    ufunc(st[_rl:_rh, :-ofs_c], st[_rl:_rh, ofs_c:], out=st[_rl:_rh, :-ofs_c])
+                else:
+                    ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])
                 stack.append((row_st, rd + 1, cd))
                 stack.append((st[:, :-ofs_c], rd, cd + 1))
             else:
                 col_st = ufunc(st[:, :-ofs_c], st[:, ofs_c:])
-                ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
+                if _trim_ok:
+                    _cl = max(0, anchor_col - ofs_c + 1)
+                    _ch = min(st.shape[1], anchor_col + w)
+                    ufunc(st[:-ofs_r, _cl:_ch], st[ofs_r:, _cl:_ch], out=st[:-ofs_r, _cl:_ch])
+                else:
+                    ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
                 stack.append((col_st, rd, cd + 1))
                 stack.append((st[:-ofs_r, :], rd + 1, cd))
         elif has_row:
             ofs_r = 1 << rd
-            ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
+            if _trim_ok:
+                _cl = max(0, anchor_col - (1 << cd) + 1)
+                _ch = min(st.shape[1], anchor_col + w)
+                ufunc(st[:-ofs_r, _cl:_ch], st[ofs_r:, _cl:_ch], out=st[:-ofs_r, _cl:_ch])
+            else:
+                ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
             stack.append((st[:-ofs_r, :], rd + 1, cd))
         elif has_col:
             ofs_c = 1 << cd
-            ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])  # see above
+            if _trim_ok:
+                _rl = max(0, anchor_row - (1 << rd) + 1)
+                _rh = min(st.shape[0], anchor_row + h)
+                ufunc(st[_rl:_rh, :-ofs_c], st[_rl:_rh, ofs_c:], out=st[_rl:_rh, :-ofs_c])
+            else:
+                ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])  # see above
             stack.append((st[:, :-ofs_c], rd, cd + 1))
 
         del st
