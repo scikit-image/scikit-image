@@ -3,7 +3,6 @@ Grayscale morphological operations
 """
 
 from _skimage2.morphology._footprints import _default_footprint
-
 from .footprints import mirror_footprint, pad_footprint
 
 import _skimage2 as ski2

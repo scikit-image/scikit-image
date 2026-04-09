@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.measure import shannon_entropy
 
-from skimage._shared.testing import assert_almost_equal
+from _skimage2._shared.testing import assert_almost_equal
 
 
 def test_shannon_ones():

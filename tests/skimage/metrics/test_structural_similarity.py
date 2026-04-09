@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
 from skimage import data
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.metrics import structural_similarity
 
 np.random.seed(5)

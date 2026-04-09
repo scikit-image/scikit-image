@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage import data, transform, feature
-from skimage._shared.testing import run_in_parallel
+from _skimage2._shared.testing import run_in_parallel
 from skimage.draw import circle_perimeter, ellipse_perimeter, line
 
 

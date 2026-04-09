@@ -7,7 +7,7 @@
 
 cimport numpy as cnp
 
-from .._shared.fused_numerics cimport np_anyint
+from _skimage2._shared.fused_numerics cimport np_anyint
 
 
 def _remove_objects_by_distance(

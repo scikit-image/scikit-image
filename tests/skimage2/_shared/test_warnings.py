@@ -1,5 +1,5 @@
 import os
-from skimage._shared._warnings import expected_warnings
+from _skimage2._shared._warnings import expected_warnings
 import pytest
 
 

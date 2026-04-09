@@ -4,8 +4,8 @@ import numpy as np
 from skimage import io
 from skimage.io import imread, imsave, use_plugin, reset_plugins
 
-from skimage._shared import testing
-from skimage._shared.testing import (
+from _skimage2._shared import testing
+from _skimage2._shared.testing import (
     TestCase,
     assert_array_equal,
     assert_array_almost_equal,
