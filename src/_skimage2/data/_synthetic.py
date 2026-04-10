@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from _skimage2._shared._warnings import warn_external
+
 from ..filters._gaussian import gaussian
 
 
@@ -66,9 +68,6 @@ def binary_blobs(
     ...     shape=(256, 256), blob_size=25, volume_fraction=0.3
     ... )
     """
-    # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage._shared._warnings import warn_external
-
     if boundary_mode not in {"nearest", "wrap"}:
         raise ValueError(f"unsupported `boundary_mode`: {boundary_mode!r}")
 

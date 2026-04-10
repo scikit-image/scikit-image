@@ -3,7 +3,7 @@ py3.extension_module('transform',
   c_args: cython_c_args,
   dependencies: [np_dep],
   install: true,
-  subdir: 'skimage/_shared'
+  subdir: '_skimage2/_shared'
 )
 
 py3.extension_module('fast_exp',
@@ -11,7 +11,7 @@ py3.extension_module('fast_exp',
   c_args: cython_c_args,
   dependencies: [np_dep],
   install: true,
-  subdir: 'skimage/_shared'
+  subdir: '_skimage2/_shared'
 )
 
 py3.extension_module('geometry',
@@ -19,7 +19,7 @@ py3.extension_module('geometry',
   c_args: cython_c_args,
   dependencies: [np_dep],
   install: true,
-  subdir: 'skimage/_shared'
+  subdir: '_skimage2/_shared'
 )
 
 py3.extension_module('interpolation',
@@ -27,7 +27,7 @@ py3.extension_module('interpolation',
   c_args: cython_c_args,
   dependencies: [np_dep],
   install: true,
-  subdir: 'skimage/_shared'
+  subdir: '_skimage2/_shared'
 )
 
 python_sources = [
@@ -38,7 +38,6 @@ python_sources = [
   '_warnings.py',
   'compat.py',
   'dtype.py',
-  'filters.py',
   'tester.py',
   'testing.py',
   'utils.py',
@@ -49,5 +48,5 @@ python_sources = [
 py3.install_sources(
   python_sources,
   pure: false,             # Will be installed next to binaries
-  subdir: 'skimage/_shared'  # Folder relative to site-packages to install to
+  subdir: '_skimage2/_shared'  # Folder relative to site-packages to install to
 )

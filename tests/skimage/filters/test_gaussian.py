@@ -2,8 +2,9 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
 
-from skimage._shared.utils import _supported_float_type
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.utils import _supported_float_type
+from _skimage2._shared.testing import assert_stacklevel
+
 from skimage.filters import difference_of_gaussians, gaussian
 from skimage.util import PendingSkimage2Change
 

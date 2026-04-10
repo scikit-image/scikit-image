@@ -30,7 +30,7 @@ from skimage.transform._geometric import (
 )
 from skimage import data
 
-from skimage._shared.utils import FailedEstimationAccessError
+from _skimage2._shared.utils import FailedEstimationAccessError
 
 SRC = np.array(
     [

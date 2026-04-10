@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_equal
 
 from skimage import data, filters, img_as_float
-from skimage._shared.testing import run_in_parallel
+from _skimage2._shared.testing import run_in_parallel
 from skimage.segmentation import slic
 
 

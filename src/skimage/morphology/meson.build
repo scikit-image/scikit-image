@@ -20,7 +20,7 @@ foreach ext: extensions
   py3.extension_module(ext,
     cython_gen.process(ext + '.pyx'),
     c_args: cython_c_args,
-    include_directories: ['../_shared'],
+    include_directories: ['../../_skimage2/_shared'],
     dependencies: [np_dep],
     install: true,
     subdir: 'skimage/morphology'
@@ -30,7 +30,7 @@ endforeach
 py3.extension_module('_skeletonize_lee_cy',
   cython_gen_cpp.process(_skeletonize_lee_cy),
   cpp_args: cython_cpp_args,
-  include_directories: ['../_shared'],
+  include_directories: ['../../_skimage2/_shared'],
   dependencies: [np_dep],
   install: true,
   subdir: 'skimage/morphology'
