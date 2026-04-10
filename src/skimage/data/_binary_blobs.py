@@ -13,7 +13,7 @@ default value of `boundary_mode` has been changed from `'nearest'` to
 
 To keep the old (`skimage`, v1.x) behavior, use:
 
-```python
+```{code-block} python
 import numpy as np
 from numpy.random import default_rng
 

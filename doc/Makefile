@@ -48,7 +48,7 @@ api:
 	@echo "Build API docs...done."
 
 migration-doc:
-	$(PYTHON) tools/build_migration.py $(MIGRATION_TPL)
+	$(PYTHON) tools/build_migration.py $(MIGRATION_TPL) --doctest
 	@echo "Build migration template...done."
 
 html: migration-doc api

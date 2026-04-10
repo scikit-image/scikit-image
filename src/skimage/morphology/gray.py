@@ -42,7 +42,7 @@ To keep the old (`skimage`, v1.x) behavior, set `mode='reflect'` explicitly.
 If you set it explicitly before, the behavior is unchanged.
 
 <!-- cond-start: doc -->
-```python
+```{code-block} python
 import numpy as np
 
 import skimage as ski1
@@ -80,7 +80,7 @@ To keep the old (`skimage`, v1.x) behavior:
 <!--- cond-start: doc -->
 For example:
 
-```python
+```{code-block} python
 import numpy as np
 
 import skimage as ski1

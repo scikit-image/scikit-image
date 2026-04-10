@@ -59,7 +59,7 @@ according to the following cases:
 
 Other keyword parameters can be left unchanged.
 
-```python
+```{code-block} python
 import numpy as np
 
 import skimage as ski1
