@@ -317,7 +317,7 @@ checks, we will miss necessary changes for `skimage2`.
 This does seem like it could be a problem, but what kind of problems can we predict?
 
 It seems to me there are two different sorts of porting problems.  These are
-*inconsistencies* and *missed opportunity*.
+*inconsistencies* and *missed opportunities*.
 
 1. We make some policy change, such as shifting to enforce `ij` ordering for
    coordinates, but we miss this change in a `skimage2` function, making
@@ -340,12 +340,24 @@ of while we were doing the port (it's a new change) and b) have also forgotten t
 That brings us back to *inconsistencies*.  These are considerably more
 serious, and we should be careful to avoid them.  The question is, are per-PR
 checks for all relevant changes the correct way to avoid inconsistencies?
-Again, returning to the coordinate system changes — there are many such changes.  It would not be practical to enforce the rule that any PR must implement all possible related changes — for example — all changes to `ij` interpretation.   To do so would be to condemn us to very large PRs that are difficult to review.   If we do not have that rule, that reduces of the value of the per-PR checks for every possible `skimage2` change.   It seems to me that the more practical route is confirming that the changes in any give PR do implement some part of the route to the new API, and note the remaining parts (as discovered and elaborated during the PR) in the porting list.
+Again, returning to the coordinate system changes — there are many such
+changes.  It would not be practical to enforce the rule that any PR must
+implement all possible related changes — for example — all changes to `ij`
+interpretation.   To do so would be to condemn us to very large PRs that are
+difficult to review.   If we do not have that rule, that reduces of the value
+of the per-PR checks for every possible `skimage2` change.   It seems to me
+that the more practical route is confirming that the changes in any given PR
+do implement some part of the route to the new API, and note the remaining
+parts (as discovered and elaborated during the PR) in the porting list.
 
 I (MB) would therefore argue that the more practical route to avoid
 inconsistent behavior is to do regular (perhaps per PR) review and updating of
 the porting list, rather than attempting to enforce full implementation in
-each PR.  And that, if we do enforce full review for any possible `skimage2` in each PR, that will have the effect of slowing us down, and making it more difficult to iterate through the changes.
+each PR.  We then, of course, go back through the codebase, towards the end of
+the migration, to confirm and sign off relevant changes in the porting list.
+On the other hand, if we do enforce full review for any possible `skimage2` in
+each PR, that will have the effect of slowing us down, and making it more
+difficult to iterate through the changes.
 
 (detailed-description)=
 
