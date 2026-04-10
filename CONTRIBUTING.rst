@@ -231,7 +231,7 @@ Stylistic Guidelines
    hough(canny(my_image))
 
 * Use relative module imports, i.e. ``from .._shared import xyz`` rather than
-  ``from skimage._shared import xyz``.
+  ``from _skimage2._shared import xyz``.
 
 * For Cython functions:
 
@@ -496,8 +496,8 @@ Deprecating Keywords and Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When removing keywords or entire functions, the
-``skimage._shared.utils.deprecate_parameter`` and
-``skimage._shared.utils.deprecate_func`` utility functions can be used
+``_skimage2._shared.utils.deprecate_parameter`` and
+``_skimage2._shared.utils.deprecate_func`` utility functions can be used
 to perform the above procedure.
 
 Adding Data

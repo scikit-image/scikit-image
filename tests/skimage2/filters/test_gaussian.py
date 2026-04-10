@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_equal, assert_allclose
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 import _skimage2 as ski2
 from _skimage2.filters import gaussian
 
