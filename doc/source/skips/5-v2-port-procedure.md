@@ -263,14 +263,14 @@ instances, for example with AI, and dealing with those? We will likely find
 it easier to whole-code-base screening and changes when all the code is in one
 `_skimage2` tree, rather than broken up into `_skimage2` and `skimage`.
 
-#### Altnerative ways of tracking migration
+#### Alternative ways of tracking migration
 
 We should in any case, maintain a checklist like that in
 <https://github.com/scikit-image/scikit-image/wiki/API-changes-for-skimage2>.
 We could make it part of the PR process, maintaining that list.
 
 Note that, no matter what approach we take, any changed APIs in `_skimage2`
-*must* have wrappers or alternative implmentations in `skimage`.
+*must* have wrappers or alternative implementations in `skimage`.
 
 If we use the big-bang approach, these wrappers and implementations provide
 a full migration log, because any function that is, as yet, unmodified, will be
@@ -294,7 +294,7 @@ def somefunction(d, f=None):
 
 Lastly, I wonder whether the Certify requirement in the BBBC approach, will
 bias us to choose to make scikit-image v2 changes that we would not do (and
-should not do) without the Certify apporach. I suspect we'll find ourselves
+should not do) without the Certify approach. I suspect we'll find ourselves
 trying to think of any possible change we could make for scikit-image v2 in
 every PR, and I suspect that will lead to us making more changes, some of which
 will prove to 50-50 calls that probably aren't worth the disruption. This is
