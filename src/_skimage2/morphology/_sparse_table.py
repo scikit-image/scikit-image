@@ -674,6 +674,28 @@ def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
     -------
     FootprintDecomp
         Pre-computed decomposition.  Do not mutate the returned object.
+
+    Examples
+    --------
+    Pre-compute a decomposition and reuse it across many images:
+
+    >>> import numpy as np
+    >>> from skimage2.morphology import decomp_footprint, erosion
+    >>> fp = np.array([[0, 1, 0],
+    ...                [1, 1, 1],
+    ...                [0, 1, 0]], dtype=np.uint8)
+    >>> decomp = decomp_footprint(fp)
+    >>> img = np.array([[0, 0, 0, 0, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> erosion(img, decomp)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
     """
     fp = np.asarray(footprint, dtype=np.uint8)
 

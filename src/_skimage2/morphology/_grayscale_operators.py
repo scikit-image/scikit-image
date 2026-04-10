@@ -117,11 +117,14 @@ def erosion(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
+        To use the sparse table backend for efficient repeated operations,
+        pass a :class:`~skimage2.morphology.FootprintDecomp` object created
+        with :func:`~skimage2.morphology.decomp_footprint`.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
@@ -225,11 +228,14 @@ def dilation(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
         as described in the notes below. See _Notes_ for more.
+        To use the sparse table backend for efficient repeated operations,
+        pass a :class:`~skimage2.morphology.FootprintDecomp` object created
+        with :func:`~skimage2.morphology.decomp_footprint`.
     out : ndarray, optional
         The array to store the result of the morphology. If None,
         a new array is allocated.
