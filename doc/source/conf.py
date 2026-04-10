@@ -58,6 +58,8 @@ extensions = [
     "myst_parser",
     "pytest_doctestplus.sphinx.doctestplus",
     "skimage_extensions",
+    # Add “toggle button” elements to sections
+    "sphinx_togglebutton",
 ]
 
 autosummary_generate = True
@@ -347,15 +349,15 @@ def linkcode_resolve(domain, info):
     fn = os.path.relpath(fn, start=os.path.dirname(skimage.__file__))
 
     if "dev" in skimage.__version__:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"main/skimage/{fn}{linespec}"
-        )
+        git_ref = "main"
     else:
-        return (
-            "https://github.com/scikit-image/scikit-image/blob/"
-            f"v{skimage.__version__}/skimage/{fn}{linespec}"
-        )
+        git_ref = f"v{skimage.__version__}"
+    src_url = (
+        f"https://github.com/scikit-image/scikit-image/blob/"
+        f"{git_ref}/src/skimage/{fn}{linespec}"
+    )
+
+    return src_url
 
 
 # -- MyST --------------------------------------------------------------------

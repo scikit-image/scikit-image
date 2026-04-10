@@ -216,7 +216,7 @@ Stylistic Guidelines
 * Use numpy data types instead of strings (``np.uint8`` instead of
   ``"uint8"``).
 
-* When documenting array parameters, use ``image : (M, N) ndarray``
+* When documenting array parameters, use ``image : ndarray of shape (M, N)``
   and then refer to ``M`` and ``N`` in the docstring, if necessary.
 
 * Refer to array dimensions as (plane), row, column, not as x, y, z. See
@@ -249,24 +249,37 @@ Testing
 The test suite must pass before a pull request can be merged, and
 tests should be added to cover all modifications in behavior.
 
-We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
-framework, with tests located in the various
-``skimage/submodule/tests`` folders.
+Tests are located in the ``tests/`` directory.
+We also test examples in docstrings of our package (located in ``src/``).
 
-Testing requirements are listed in `requirements/test.txt`.
-Run:
+For local development we use ``spin test`` which wraps the
+`pytest testing framework <https://docs.pytest.org/en/latest/>`__.
+Examples of running ``spin test``:
 
-- **All tests**: ``spin test``
-- Tests for a **submodule**: ``spin test src/skimage/morphology``
-- Run tests from a **specific file**: ``spin test tests/skimage/morphology/tests/test_gray.py``
-- Run **a test inside a file**:
-  ``spin test tests/skimage/morphology/tests/test_gray.py::test_3d_fallback_black_tophat``
-- Run tests with **arbitrary ``pytest`` options**:
-  ``spin test -- any pytest args you want``.
-- Run tests **matching** a specific expression:
-  ``spin test -- -k threshold``
-- Run all tests and **doctests**:
-  ``spin test --with-doctest``
+.. code-block:: shell
+
+    # All tests
+    spin test
+
+    # Tests inside directory(s)
+    spin test -- tests/skimage/morphology
+    spin test -- src/skimage/morphology tests/skimage/morphology
+
+    # Tests matching an expression
+    spin test -- -k threshold
+
+    # Combine above with test path to reduce test collection time
+    spin test -- tests/skimage/filters -k threshold
+
+    # Specific test
+    spin test -- tests/skimage/morphology/test_gray.py::test_3d_fallback_black_tophat
+
+.. tip::
+
+    Arguments specified after the ``--`` are forwarded as
+    `options to pytest <https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags>`__.
+
+Testing requirements are listed in ``requirements/test.txt``.
 
 
 Warnings during testing phase
@@ -489,12 +502,12 @@ to perform the above procedure.
 
 Adding Data
 -----------
-While code is hosted on `github <https://github.com/scikit-image/>`_,
-example datasets are on `gitlab <https://gitlab.com/scikit-image/data>`_.
+While code is hosted on `GitHub <https://github.com/scikit-image/>`_,
+example datasets are on `GitLab <https://gitlab.com/scikit-image/data>`_.
 These are fetched with `pooch <https://github.com/fatiando/pooch>`_
-when accessing `skimage.data.*`.
+when accessing ``skimage.data.*``.
 
-New datasets are submitted on gitlab and, once merged, the data
+New datasets are submitted on GitLab and, once merged, the data
 registry ``skimage/data/_registry.py`` in the main GitHub repository
 can be updated.
 

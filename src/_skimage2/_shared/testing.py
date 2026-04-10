@@ -3,17 +3,17 @@ Testing utilities.
 """
 
 import os
-import platform
+import platform  # noqa: F401
 import re
 import struct
-import sys
+import sys  # noqa: F401
 import functools
 import inspect
 from tempfile import NamedTemporaryFile
 
-import numpy as np
+import numpy as np  # noqa: F401
 from numpy import testing
-from numpy.testing import (
+from numpy.testing import (  # noqa: F401
     TestCase,
     assert_,
     assert_warns,
@@ -27,9 +27,6 @@ from numpy.testing import (
     assert_array_less,
 )
 
-from .. import data, io
-from ..data._fetchers import _fetch
-from ..util import img_as_uint, img_as_float, img_as_int, img_as_ubyte
 from ._warnings import expected_warnings
 from ._dependency_checks import is_wasm
 
@@ -113,6 +110,9 @@ def doctest_skip_parser(func):
 
 def roundtrip(image, plugin, suffix):
     """Save and read an image using a specified plugin"""
+    # TODO Undo inlined imports once available in _skimage2 namespace
+    from skimage import io
+
     if '.' not in suffix:
         suffix = '.' + suffix
     with NamedTemporaryFile(suffix=suffix, delete=False) as temp_file:
@@ -132,6 +132,10 @@ def color_check(plugin, fmt='png'):
     All major input types should be handled as ubytes and read
     back correctly.
     """
+    # TODO Undo inlined imports once available in _skimage2 namespace
+    from skimage import data
+    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
+
     img = img_as_ubyte(data.chelsea())
     r1 = roundtrip(img, plugin, fmt)
     testing.assert_allclose(img, r1)
@@ -163,6 +167,8 @@ def mono_check(plugin, fmt='png'):
 
     All major input types should be handled.
     """
+    from skimage import data
+    from skimage.util import img_as_ubyte, img_as_float, img_as_int, img_as_uint
 
     img = img_as_ubyte(data.moon())
     r1 = roundtrip(img, plugin, fmt)
@@ -212,6 +218,8 @@ def fetch(data_filename, prefix=None):
         Path of the local file, possibly pointing to a remote location.
 
     """
+    from skimage.data._fetchers import _fetch
+
     try:
         return _fetch(data_filename, prefix=prefix)
     except (ConnectionError, ModuleNotFoundError):

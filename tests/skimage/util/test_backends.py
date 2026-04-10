@@ -70,11 +70,11 @@ def fake_backends(monkeypatch):
         return {
             "fake2": {
                 "implementation": BackendEntryPoint2(),
-                "info": _backends.BackendInformation(["test_backends:foo"]),
+                "info": _backends.BackendInformation([f"{__name__}:foo"]),
             },
             "fake1": {
                 "implementation": BackendEntryPoint1(),
-                "info": _backends.BackendInformation(["test_backends:foo"]),
+                "info": _backends.BackendInformation([f"{__name__}:foo"]),
             },
         }
 

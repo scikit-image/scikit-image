@@ -8,7 +8,7 @@ import numpy as np
 cimport numpy as cnp
 
 from ..util import regular_grid
-from .._shared.fused_numerics cimport np_floats
+from _skimage2._shared.fused_numerics cimport np_floats
 
 cnp.import_array()
 

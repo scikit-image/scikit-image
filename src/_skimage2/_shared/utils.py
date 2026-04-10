@@ -8,6 +8,7 @@ import numpy as np
 
 from ._warnings import all_warnings, warn
 
+
 __all__ = [
     'deprecate_func',
     'get_bound_method_class',
@@ -267,7 +268,7 @@ class deprecate_parameter:
 
     Examples
     --------
-    >>> from skimage._shared.utils import deprecate_parameter, DEPRECATED
+    >>> from _skimage2._shared.utils import deprecate_parameter, DEPRECATED
     >>> @deprecate_parameter(
     ...     "b", new_name="c", start_version="0.1", stop_version="0.3"
     ... )
@@ -968,7 +969,8 @@ def convert_to_float(image, preserve_range):
         if image.dtype.char not in 'df':
             image = image.astype(float)
     else:
-        from ..util.dtype import img_as_float
+        # Avoid circular import
+        from skimage.util.dtype import img_as_float
 
         image = img_as_float(image)
     return image

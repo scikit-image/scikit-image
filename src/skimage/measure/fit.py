@@ -7,7 +7,7 @@ import numpy as np
 from numpy.linalg import inv
 from scipy import optimize, spatial
 
-from .._shared.utils import (
+from _skimage2._shared.utils import (
     _deprecate_estimate,
     FailedEstimation,
     deprecate_parameter,
@@ -33,7 +33,7 @@ class RansacModelProtocol(Protocol):
     """Protocol for `ransac` model class."""
 
     @classmethod
-    def from_estimate(cls, *data): ...
+    def from_estimate(cls, *data, **kwargs): ...
 
     def residuals(self, *data): ...
 
@@ -904,6 +904,17 @@ class EllipseModel(_BaseModel):
         # from this equation [eqn. 28]
         eig_vals, eig_vecs = np.linalg.eig(M)
 
+        # https://github.com/scikit-image/scikit-image/issues/7013
+        if not (np.all(np.isreal(eig_vals)) and np.all(np.isreal(eig_vecs))):
+            raise ValueError(
+                "Uh oh! We expected real eigenvalues and -vectors. "
+                "We've had one report of this issue in the past, but couldn't reproduce it. "
+                "Please help us fix it by sharing your input data at\n\n"
+                "  https://github.com/scikit-image/scikit-image/issues/7013\n"
+            )
+        eig_vals = eig_vals.real
+        eig_vecs = eig_vecs.real
+
         # eigenvector must meet constraint 4ac - b^2 to be valid.
         cond = 4 * np.multiply(eig_vecs[0, :], eig_vecs[2, :]) - np.power(
             eig_vecs[1, :], 2
@@ -1175,6 +1186,7 @@ def ransac(
     stop_probability=1,
     rng=None,
     initial_inliers=None,
+    model_kwargs=None,
 ):
     """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
@@ -1218,7 +1230,7 @@ def ransac(
         * Either:
 
           * ``from_estimate`` class method returning transform instance, as in
-            ``tform = model_class.from_estimate(*data)``; the resulting
+            ``tform = model_class.from_estimate(*data, **kwargs)``; the resulting
             ``tform`` should be truthy (``bool(tform) == True``) where
             estimation succeeded, or falsey (``bool(tform) == False``) where it
             failed;  OR
@@ -1270,6 +1282,8 @@ def ransac(
         If `rng` is an int, it is used to seed the generator.
     initial_inliers : array-like of bool, shape (N,), optional
         Initial samples selection for model estimation
+    model_kwargs : dict of {str: Any}, optional
+        The dict of keyword arguments passed to ``from_estimate`` of `model_class`.
 
 
     Returns
@@ -1368,6 +1382,8 @@ def ransac(
             True,  True,  True,  True,  True])
 
     """
+    if model_kwargs is None:
+        model_kwargs = {}
 
     best_inlier_num = 0
     best_inlier_residuals_sum = np.inf
@@ -1437,7 +1453,7 @@ def ransac(
         if validate_data and not is_data_valid(*samples):
             continue
 
-        model = model_class.from_estimate(*samples)
+        model = model_class.from_estimate(*samples, **model_kwargs)
         # backwards compatibility
         if not model:
             continue
@@ -1481,7 +1497,7 @@ def ransac(
     if any(best_inliers):
         # select inliers for each data array
         data_inliers = [d[best_inliers] for d in data]
-        model = model_class.from_estimate(*data_inliers)
+        model = model_class.from_estimate(*data_inliers, **model_kwargs)
         if validate_model and not is_model_valid(model, *data_inliers):
             warn("Estimated model is not valid. Try increasing max_trials.")
     else:
