@@ -82,16 +82,21 @@ Some background on the changes.
 MIGRATION_URL = 'https://some.site/doc/migration.html'
 
 
-def test_parsing():
-    migration_dec = Skimage2Migration(MIGRATION_URL)
+def func(a, b):
+    return a * b
 
+
+@pytest.fixture
+def md_dfunc():
+    migration_dec = Skimage2Migration(MIGRATION_URL)
+    return migration_dec, migration_dec(EXAMPLE_INPUT)(func)
+
+
+def test_parsing(md_dfunc):
+    migration_dec, _ = md_dfunc
     warn_msg, doc = migration_dec._parse_migration_doc(EXAMPLE_INPUT)
     assert warn_msg == EXAMPLE_WARN
     assert doc == EXAMPLE_DOC
-
-
-def func(a, b):
-    return a * b
 
 
 _func_ski1qual = f'{func.__module__}.{func.__qualname__}'
@@ -107,9 +112,8 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 )
 
 
-def test_decoration_interpolation():
-    migration_dec = Skimage2Migration(MIGRATION_URL)
-    dfunc = migration_dec(EXAMPLE_INPUT)(func)
+def test_decoration_interpolation(md_dfunc):
+    migration_dec, dfunc = md_dfunc
 
     docs = migration_dec.migration_docs
     assert docs == {_func_ski1qual: doc}
@@ -134,10 +138,9 @@ def test_decoration_interpolation():
     )
 
 
-def test_dedent():
+def test_dedent(md_dfunc):
     # Test text dedented.
-    migration_dec = Skimage2Migration(MIGRATION_URL)
-    dfunc = migration_dec(indent(EXAMPLE_INPUT, '    '))(func)
+    migration_dec, dfunc = md_dfunc
 
     from skimage.util import PendingSkimage2Change
 
