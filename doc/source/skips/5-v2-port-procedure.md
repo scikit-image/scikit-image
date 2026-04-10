@@ -242,7 +242,9 @@ namespace, as before.
 
 ### On the migration-log idea
 
-Gwiven there are development costs for the bit-by-bit implementation, how great are the benefits, in particular, for the migration-log idea.
+See also the section on [missing stuff to port](missing-portables).
+
+Given there are development costs for the bit-by-bit implementation, how great are the benefits, in particular, for the migration-log idea.
 
 The question has to be asked in relation to:
 
@@ -304,6 +306,46 @@ changes we want to make? One that might serve as a brake on lower-value
 changes? And can we reassure ourselves we are ready for scikit-image v2 by
 careful review of the whole code-base (in `_skimage2`) when we are nearer
 release?
+
+(missing-portables)=
+
+### Missing stuff to port
+
+This section is trying to unpack the worry that, without careful and frequent
+checks, we will miss necessary changes for `skimage2`.
+
+This does seem like it could be a problem, but what kind of problems can we predict?
+
+It seems to me there are two different sorts of porting problems.  These are
+*inconsistencies* and *missed opportunity*.
+
+1. We make some policy change, such as shifting to enforce `ij` ordering for
+   coordinates, but we miss this change in a `skimage2` function, making
+   `skimage2` *inconsistent* (missed change leading to inconsistency).
+2. With the benefit of hindsight, we might have preferred to make a change in
+   behavior for `skimage2`, but we forgot to make that change.  Call this
+   a *missed opportunity*.
+
+Bear in mind that we already have a list of proposed changes.  Assume (in the
+big-bang process) that it is part of a process of a PR that the author
+confirms that they have checked this list, and, if their PR relates to the
+listed changes, they have noted the progress / completion / remaining changes
+in this list.  Assume too that we specify that, before signing off on the
+`skimage2` namespace, we formally review and sign off on any remaining changes
+in this list.
+
+This means that any *missed opportunity* will be something that a) we thought
+of while we were doing the port (it's a new change) and b) have also forgotten to add to the list.   At least some, maybe most of these changes will be of relatively less importance that the big changes we've identified.   At worst, we have to wait for another longish deprecation cycle to make those changes, and at least, in the meantime, we've made our users' lives a bit easier by reducing the number of edits to their code to update.   Thus, it seems to me *missed opportunities* are a relatively minor concern.
+
+That brings us back to *inconsistencies*.  These are considerably more
+serious, and we should be careful to avoid them.  The question is, are per-PR
+checks for all relevant changes the correct way to avoid inconsistencies?
+Again, returning to the coordinate system changes — there are many such changes.  It would not be practical to enforce the rule that any PR must implement all possible related changes — for example — all changes to `ij` interpretation.   To do so would be to condemn us to very large PRs that are difficult to review.   If we do not have that rule, that reduces of the value of the per-PR checks for every possible `skimage2` change.   It seems to me that the more practical route is confirming that the changes in any give PR do implement some part of the route to the new API, and note the remaining parts (as discovered and elaborated during the PR) in the porting list.
+
+I (MB) would therefore argue that the more practical route to avoid
+inconsistent behavior is to do regular (perhaps per PR) review and updating of
+the porting list, rather than attempting to enforce full implementation in
+each PR.  And that, if we do enforce full review for any possible `skimage2` in each PR, that will have the effect of slowing us down, and making it more difficult to iterate through the changes.
 
 (detailed-description)=
 
