@@ -39,7 +39,7 @@ def write_migration(in_tpl, doc_dict, out_path=None):
 
 def run_doctests(doctests):
     if not doctests:
-        return 'No doctests found'
+        return True, 'No doctests found'
     msgs = []
     success = True
     for func_name, tests in doctests.items():
