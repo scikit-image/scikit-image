@@ -137,7 +137,7 @@ class Skimage2Migration:
 
             @wraps(func)
             def decorated(*args, **kwargs):
-                from skimage._shared._warnings import warn_external
+                from _skimage2._shared._warnings import warn_external
                 from skimage.util import PendingSkimage2Change
 
                 warn_external(warn_msg, category=PendingSkimage2Change)
