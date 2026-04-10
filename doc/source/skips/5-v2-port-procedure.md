@@ -355,9 +355,9 @@ inconsistent behavior is to do regular (perhaps per PR) review and updating of
 the porting list, rather than attempting to enforce full implementation in
 each PR.  We then, of course, go back through the codebase, towards the end of
 the migration, to confirm and sign off relevant changes in the porting list.
-On the other hand, if we do enforce full review for any possible `skimage2` in
-each PR, that will have the effect of slowing us down, and making it more
-difficult to iterate through the changes.
+On the other hand, if we do enforce full review for any possible `skimage2`
+change in each PR, that will have the effect of slowing us down, and making it
+more difficult to iterate through the changes.
 
 (detailed-description)=
 
