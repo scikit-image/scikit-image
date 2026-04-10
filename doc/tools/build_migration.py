@@ -49,10 +49,12 @@ def run_doctests(doctests):
             context = {}
             title = f'Test {i}'
             try:
-                exec(test, locals=context)
+                exec(test, context)
             except Exception as e:
-                msgs.append(f'{title} ... failed\n{sep}{test}\n{sep}'
-                            f'with traceback: {e}\n{sep}')
+                msgs.append(
+                    f'{title} ... failed\n{sep}{test}\n{sep}'
+                    f'with traceback: {e}\n{sep}'
+                )
                 success = False
             else:
                 msgs.append(f'{title} ... passed')
@@ -66,8 +68,9 @@ def get_parser():
     )
     parser.add_argument('migration_tpl', help='Path to migration template file')
     parser.add_argument('--out-md', help='Path to output markdown file')
-    parser.add_argument('--doctest', action='store_true',
-                        help='Run discovered doctests')
+    parser.add_argument(
+        '--doctest', action='store_true', help='Run discovered doctests'
+    )
     return parser
 
 
