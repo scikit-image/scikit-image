@@ -206,7 +206,8 @@ def precision_recall(lines, shape, threshold, rng=None):
     out_tf, detected_tf = [img.astype(bool) for img in (out_img, detected_img)]
     tp = np.sum(detected_tf & out_tf)
     fp = np.sum(detected_tf & ~out_tf)
-    return tp / (tp + fp), tp / np.sum(out_img)
+    denom = tp + fp  # Can be 0
+    return tp / denom if denom else 0.0, tp / np.sum(out_img)
 
 
 def test_gen_lines():
@@ -245,7 +246,10 @@ def good_rand_lines(size, shape, margins, line_length, rng):
     out = np.zeros((0, 2, 2))
     lims = _get_lims(shape, margins)
     st_lims, end_lims = lims.T
-    while len(out) < size:
+    n_iters = size * 100
+    for i in range(n_iters):
+        if len(out) >= size:
+            break
         raw_lines = _raw_rand_lines(size, lims, line_length, rng)
         within = np.all(
             (raw_lines >= st_lims[None, None, :])
@@ -253,6 +257,8 @@ def good_rand_lines(size, shape, margins, line_length, rng):
             axis=(1, 2),
         )
         out = np.concatenate((out, raw_lines[within]), axis=0)
+    else:
+        raise ValueError('Too many iterations finding lines')
     return out[:size]
 
 
