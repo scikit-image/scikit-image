@@ -1,7 +1,5 @@
 """Test migration module"""
 
-from textwrap import indent
-
 import numpy as np
 
 from _skimage2.util.migration import Skimage2Migration, ski2_migration_dec
@@ -11,17 +9,22 @@ import pytest
 EXAMPLE_INPUT = """\
 Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
 
+```{code-block} python
+a = 1
+a
+```
+
 <!--- cond-start: warning -->
 Only in warning
 
 ```{python}
 print('foo')
 ```
-<!--- cond-end -->
 
+<!--- cond-end -->
   ```python
-  a = 1
-  a
+  b = 2
+  b
   ```
 
 <!--- cond-start: doc -->
@@ -29,7 +32,7 @@ Only in doc
 
 ## Examples
 
-```{python}
+```{code-block} python
 import skimage as ski1
 import _skimage2 as ski2
 res1 = ski1.somemod.somefunc(10, 11)
@@ -44,12 +47,15 @@ Some background on the changes.
 EXAMPLE_WARN = """\
 Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
 
+  a = 1
+  a
+
 Only in warning
 
   print('foo')
 
-    a = 1
-    a
+    b = 2
+    b
 
 See %(migration_url)s#%(ski1qual_anchor)s
 """.strip()
@@ -57,17 +63,21 @@ See %(migration_url)s#%(ski1qual_anchor)s
 EXAMPLE_DOC = """\
 Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
 
+```{code-block} python
+a = 1
+a
+```
 
   ```python
-  a = 1
-  a
+  b = 2
+  b
   ```
 
 Only in doc
 
 ## Examples
 
-```{python}
+```{code-block} python
 import skimage as ski1
 import _skimage2 as ski2
 res1 = ski1.somemod.somefunc(10, 11)
@@ -110,6 +120,20 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
         ski1qual_anchor=_anchor,
     ),
 )
+
+
+def test_doctest_extraction(md_dfunc):
+    migration_dec, dfunc = md_dfunc
+    assert migration_dec.doctests == {
+        _func_ski1qual: [
+            'a = 1\na',
+            '''\
+import skimage as ski1
+import _skimage2 as ski2
+res1 = ski1.somemod.somefunc(10, 11)
+res2 = ski2.somemod.somefunc(10, 11)
+assert res1 == res2'''
+        ]}
 
 
 def test_decoration_interpolation(md_dfunc):

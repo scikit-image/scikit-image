@@ -37,6 +37,22 @@ _PYTHON_RE = re.compile(
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
 )
 
+# Regex to find Python code-blocks within code-block markers.
+# This allows us to identify code that should be executed.
+_PYTHON_CB_RE = re.compile(
+    r'''
+    ^(?P<indent>[ \t]*)
+    (?P<ticks>```+)\ *
+    {\ *code-block\ *}
+    \ *[Pp]ython\ *
+    \ *\n
+    (?P<content>.*?)\n  # Code between start-end markers.
+    (?P=indent)(?P=ticks)\ *(\n|$)  # Match indentation and backtick lengths.
+    ''',
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
+)
+
+
 
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
 
@@ -69,6 +85,7 @@ class Skimage2Migration:
     def __init__(self, migration_url):
         self.migration_url = migration_url
         self.migration_docs = {}
+        self.doctests = {}
 
     def _filled_docs(self, migration_doc, params):
         w_str, m_str = self._parse_migration_doc(migration_doc)
@@ -80,7 +97,10 @@ class Skimage2Migration:
             partial(self._context_rep, ctx) for ctx in ('warning', 'doc')
         )
         warn_msg = dedent(
-            _PYTHON_RE.sub(self._pyblock_rep, _PARTS_RE.sub(warn_rep, doc))
+            _PYTHON_CB_RE.sub(
+                self._pyblock_rep,
+                _PYTHON_RE.sub(self._pyblock_rep,
+                               _PARTS_RE.sub(warn_rep, doc)))
         ).strip()
         if warn_msg:
             warn_msg += '\n\nSee %(migration_url)s#%(ski1qual_anchor)s'
@@ -111,6 +131,9 @@ class Skimage2Migration:
         doc_types = [t.strip() for t in match.group(1).split(',')]
         return '' if context not in doc_types else match.group('content') + '\n'
 
+    def _findall_code_blocks(self, doc):
+        return [m.group('content') for m in _PYTHON_CB_RE.finditer(doc)]
+
     def __call__(self, migration_doc, ski1qual=None, ski2qual=None):
         """Use `migration_doc` to specify warning and migration doc section
 
@@ -132,8 +155,12 @@ class Skimage2Migration:
         def decorator(func):
             func_params = self._get_func_params(func, ski1qual, ski2qual)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
+            key = func_params['ski1qual']
             if doc:
-                self.migration_docs[func_params['ski1qual']] = doc
+                self.migration_docs[key] = doc
+            code_blocks = self._findall_code_blocks(doc)
+            if code_blocks:
+                self.doctests[key] = code_blocks
 
             @wraps(func)
             def decorated(*args, **kwargs):
