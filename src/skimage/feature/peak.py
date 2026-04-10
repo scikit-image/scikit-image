@@ -9,8 +9,8 @@ import _skimage2 as ski2
 
 @ski2.util.ski2_migration_dec(
     """\
-`%(ski1qual)s` is deprecated in favor of
-`%(ski2qual)s` with new behavior:
+`%(qname_old)s` is deprecated in favor of
+`%(qname_new)s` with new behavior:
 
 * Parameter `p_norm` defaults to 2 (Euclidean distance),
   was `numpy.inf` (Chebyshev distance)

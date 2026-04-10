@@ -7,7 +7,7 @@ from _skimage2.util.migration import Skimage2Migration, ski2_migration_dec
 import pytest
 
 EXAMPLE_INPUT = """\
-Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
+Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
 
 ```{code-block} python
 a = 1
@@ -45,7 +45,7 @@ Some background on the changes.
 """
 
 EXAMPLE_WARN = """\
-Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
+Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
 
   a = 1
   a
@@ -57,11 +57,11 @@ Only in warning
     b = 2
     b
 
-See %(migration_url)s#%(ski1qual_anchor)s
+See %(migration_url)s#%(qname_old_anchor)s
 """.strip()
 
 EXAMPLE_DOC = """\
-Replace all calls to `%(ski1qual)s` with `%(ski2qual)s`.
+Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
 
 ```{code-block} python
 a = 1
@@ -109,15 +109,15 @@ def test_parsing(md_dfunc):
     assert doc == EXAMPLE_DOC
 
 
-_func_ski1qual = f'{func.__module__}.{func.__qualname__}'
-_anchor = _func_ski1qual.replace('.', '-').replace('_', '-')
+_func_qname_old = f'{func.__module__}.{func.__qualname__}'
+_anchor = _func_qname_old.replace('.', '-').replace('_', '-')
 warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
     EXAMPLE_INPUT,
     dict(
-        ski1qual=_func_ski1qual,
-        ski2qual=_func_ski1qual,
+        qname_old=_func_qname_old,
+        qname_new=_func_qname_old,
         migration_url=MIGRATION_URL,
-        ski1qual_anchor=_anchor,
+        qname_old_anchor=_anchor,
     ),
 )
 
@@ -125,22 +125,23 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 def test_doctest_extraction(md_dfunc):
     migration_dec, dfunc = md_dfunc
     assert migration_dec.doctests == {
-        _func_ski1qual: [
+        _func_qname_old: [
             'a = 1\na',
             '''\
 import skimage as ski1
 import _skimage2 as ski2
 res1 = ski1.somemod.somefunc(10, 11)
 res2 = ski2.somemod.somefunc(10, 11)
-assert res1 == res2'''
-        ]}
+assert res1 == res2''',
+        ]
+    }
 
 
 def test_decoration_interpolation(md_dfunc):
     migration_dec, dfunc = md_dfunc
 
     docs = migration_dec.migration_docs
-    assert docs == {_func_ski1qual: doc}
+    assert docs == {_func_qname_old: doc}
 
     from skimage.util import PendingSkimage2Change
 
@@ -169,7 +170,7 @@ def test_dedent(md_dfunc):
     from skimage.util import PendingSkimage2Change
 
     # Warning and doc nevertheless stays the same.
-    assert migration_dec.migration_docs == {_func_ski1qual: doc}
+    assert migration_dec.migration_docs == {_func_qname_old: doc}
     with pytest.warns(PendingSkimage2Change) as record:
         assert dfunc(2, 4) == 8
 

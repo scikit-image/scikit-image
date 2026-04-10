@@ -53,7 +53,6 @@ _PYTHON_CB_RE = re.compile(
 )
 
 
-
 _SKI1PREFIX_RE = re.compile(r'^skimage\.')
 
 
@@ -73,13 +72,13 @@ class Skimage2Migration:
     The text may use old-style formatting markers, with the following values
     defined:
 
-    * ``ski1qual`` : the full qualified name of the function in the ``skimage``
+    * ``qname_old`` : the full qualified name of the function in the ``skimage``
       namespace.
-    * ``ski2qual`` : the full qualified name of the function in the ``skimage2``
+    * ``qname_new`` : the full qualified name of the function in the ``skimage2``
       namespace.
 
-    Use these with old-style format specifiers such as ``%(ski1qual)s is
-    deprecated in favor of ``%(ski2qual)s``.
+    Use these with old-style format specifiers such as ``%(qname_old)s is
+    deprecated in favor of ``%(qname_new)s``.
     """
 
     def __init__(self, migration_url):
@@ -99,28 +98,30 @@ class Skimage2Migration:
         warn_msg = dedent(
             _PYTHON_CB_RE.sub(
                 self._pyblock_rep,
-                _PYTHON_RE.sub(self._pyblock_rep,
-                               _PARTS_RE.sub(warn_rep, doc)))
+                _PYTHON_RE.sub(self._pyblock_rep, _PARTS_RE.sub(warn_rep, doc)),
+            )
         ).strip()
         if warn_msg:
-            warn_msg += '\n\nSee %(migration_url)s#%(ski1qual_anchor)s'
+            warn_msg += '\n\nSee %(migration_url)s#%(qname_old_anchor)s'
         return warn_msg, dedent(_PARTS_RE.sub(doc_rep, doc)).strip()
 
     def _for_anchor(self, name):
         return name.replace('.', '-').replace('_', '-')
 
-    def _get_func_params(self, func, ski1qual=None, ski2qual=None):
+    def _get_func_params(self, func, qname_old=None, qname_new=None):
         qualname, modname = func.__qualname__, func.__module__
-        ski1qual = f'{modname}.{qualname}' if ski1qual is None else ski1qual
-        ski2qual = (
-            _SKI1PREFIX_RE.sub(r'skimage2.', ski1qual) if ski2qual is None else ski2qual
+        qname_old = f'{modname}.{qualname}' if qname_old is None else qname_old
+        qname_new = (
+            _SKI1PREFIX_RE.sub(r'skimage2.', qname_old)
+            if qname_new is None
+            else qname_new
         )
         return dict(
             qual=qualname,
             mod=modname,
-            ski1qual=ski1qual,
-            ski1qual_anchor=self._for_anchor(ski1qual),
-            ski2qual=ski2qual,
+            qname_old=qname_old,
+            qname_old_anchor=self._for_anchor(qname_old),
+            qname_new=qname_new,
             migration_url=self.migration_url,
         )
 
@@ -134,7 +135,7 @@ class Skimage2Migration:
     def _findall_code_blocks(self, doc):
         return [m.group('content') for m in _PYTHON_CB_RE.finditer(doc)]
 
-    def __call__(self, migration_doc, ski1qual=None, ski2qual=None):
+    def __call__(self, migration_doc, qname_old=None, qname_new=None):
         """Use `migration_doc` to specify warning and migration doc section
 
         Parameters
@@ -142,20 +143,20 @@ class Skimage2Migration:
         migration_doc : str
             Markdown document that may have contain conditional inclusion start
             and end markers.
-        ski1qual : None or str
+        qname_old : None or str
             The canonical full (qualified) name in the ``skimage`` namespace,
             including the ``skimage`` prefix. If None, use the functions full
             qualified name.
-        ski2qual : None or str
+        qname_new : None or str
             The matching canonical full (qualified) name in the ``skimage2``
             namespace, and including the ``skimage2`` prefix. If None, derive
-            from `ski1qual`, replacing initial ``skimage.`` with ``skimage2.``.
+            from `qname_old`, replacing initial ``skimage.`` with ``skimage2.``.
         """
 
         def decorator(func):
-            func_params = self._get_func_params(func, ski1qual, ski2qual)
+            func_params = self._get_func_params(func, qname_old, qname_new)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
-            key = func_params['ski1qual']
+            key = func_params['qname_old']
             if doc:
                 self.migration_docs[key] = doc
             code_blocks = self._findall_code_blocks(doc)
