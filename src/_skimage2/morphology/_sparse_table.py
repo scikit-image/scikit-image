@@ -64,8 +64,6 @@ def _log2(n: int) -> int:
 
 def _max_run_length_row(footprint: np.ndarray) -> int:
     """Maximum consecutive run of nonzero values in any single column."""
-    if footprint.size == 0:
-        return 0
     fp = (footprint != 0).astype(np.int8)
     # Pad sentinel rows so boundary runs are detected by np.diff
     padded = np.zeros((fp.shape[0] + 2, fp.shape[1]), dtype=np.int8)
@@ -83,8 +81,6 @@ def _max_run_length_row(footprint: np.ndarray) -> int:
 
 def _max_run_length_col(footprint: np.ndarray) -> int:
     """Maximum consecutive run of nonzero values in any single row."""
-    if footprint.size == 0:
-        return 0
     fp = (footprint != 0).astype(np.int8)
     # Pad sentinel cols so boundary runs are detected by np.diff
     padded = np.zeros((fp.shape[0], fp.shape[1] + 2), dtype=np.int8)
