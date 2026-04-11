@@ -7,7 +7,6 @@ Python/NumPy.
 
 import functools
 from dataclasses import dataclass
-from typing import Tuple
 
 import numpy as np
 
@@ -71,7 +70,7 @@ def _max_run_length_row(footprint: np.ndarray) -> int:
     # Pad sentinel rows so boundary runs are detected by np.diff
     padded = np.zeros((fp.shape[0] + 2, fp.shape[1]), dtype=np.int8)
     padded[1:-1] = fp
-    diff = np.diff(padded, axis=0)          # shape (rows+1, cols)
+    diff = np.diff(padded, axis=0)  # shape (rows+1, cols)
     starts_r, starts_c = np.nonzero(diff == 1)
     ends_r, ends_c = np.nonzero(diff == -1)
     if starts_r.size == 0:
@@ -90,7 +89,7 @@ def _max_run_length_col(footprint: np.ndarray) -> int:
     # Pad sentinel cols so boundary runs are detected by np.diff
     padded = np.zeros((fp.shape[0], fp.shape[1] + 2), dtype=np.int8)
     padded[:, 1:-1] = fp
-    diff = np.diff(padded, axis=1)          # shape (rows, cols+1)
+    diff = np.diff(padded, axis=1)  # shape (rows, cols+1)
     starts_r, starts_c = np.nonzero(diff == 1)
     ends_r, ends_c = np.nonzero(diff == -1)
     if starts_r.size == 0:
@@ -145,14 +144,14 @@ def _find_dyadic_rect_origins(
     has_right = np.zeros((n_rows, n_cols), dtype=bool)
     has_left = np.zeros((n_rows, n_cols), dtype=bool)
     if col_ofst < n_cols:
-        has_right[:, :n_cols - col_ofst] = active[:, col_ofst:]
-        has_left[:, col_ofst:] = active[:, :n_cols - col_ofst]
+        has_right[:, : n_cols - col_ofst] = active[:, col_ofst:]
+        has_left[:, col_ofst:] = active[:, : n_cols - col_ofst]
 
     has_down = np.zeros((n_rows, n_cols), dtype=bool)
     has_up = np.zeros((n_rows, n_cols), dtype=bool)
     if row_ofst < n_rows:
-        has_down[:n_rows - row_ofst, :] = active[row_ofst:, :]
-        has_up[row_ofst:, :] = active[:n_rows - row_ofst, :]
+        has_down[: n_rows - row_ofst, :] = active[row_ofst:, :]
+        has_up[row_ofst:, :] = active[: n_rows - row_ofst, :]
 
     selected = active & ~interior & ~(has_right | has_left | has_down | has_up)
     rows_idx, cols_idx = np.nonzero(selected)
@@ -181,8 +180,8 @@ def _decomp_rect_footprint(
     list of list of list of (int, int)
         Same structure as :func:`_gen_dyadic_cover`.
     """
-    rd_star = max_row_depth - 1   # floor(log2(rows))
-    cd_star = max_col_depth - 1   # floor(log2(cols))
+    rd_star = max_row_depth - 1  # floor(log2(rows))
+    cd_star = max_col_depth - 1  # floor(log2(cols))
 
     # st_node shape at (rd*, cd*): (rows - 2**rd* + 1, cols - 2**cd* + 1)
     n_rows = rows - (1 << rd_star) + 1
@@ -198,8 +197,10 @@ def _decomp_rect_footprint(
         origins.append((n_rows - 1, n_cols - 1))
 
     return [
-        [origins if (rd == rd_star and cd == cd_star) else []
-         for cd in range(max_col_depth)]
+        [
+            origins if (rd == rd_star and cd == cd_star) else []
+            for cd in range(max_col_depth)
+        ]
         for rd in range(max_row_depth)
     ]
 
@@ -233,9 +234,7 @@ def _gen_dyadic_cover(
         dyadic_rects.append(row_rects)
 
         for col_depth in range(max_col_depth):
-            row_rects.append(
-                _find_dyadic_rect_origins(st_node, row_depth, col_depth)
-            )
+            row_rects.append(_find_dyadic_rect_origins(st_node, row_depth, col_depth))
             col_step = 1 << col_depth
             if st_node.shape[1] - col_step < 0:
                 # Pad remaining col_depths with empty lists
@@ -263,7 +262,7 @@ def _gen_dyadic_cover(
     return dyadic_rects
 
 
-def _solve_rsap_greedy(initial_map: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def _solve_rsap_greedy(initial_map: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Solve the Rectilinear Steiner Arborescence Problem greedily.
 
     Finds a spanning tree over the nodes marked in ``initial_map`` that
@@ -352,7 +351,7 @@ def _plan_st_build(
     dyadic_rects: list,
     max_row_depth: int,
     max_col_depth: int,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Plan the order in which sparse table nodes are built.
 
     Constructs a map of required nodes (those with at least one dyadic
@@ -381,9 +380,7 @@ def _plan_st_build(
     return _solve_rsap_greedy(st_map)
 
 
-def _mirror_dyadic_rects(
-    dyadic_rects: list, rows: int, cols: int
-) -> list:
+def _mirror_dyadic_rects(dyadic_rects: list, rows: int, cols: int) -> list:
     """Mirror dyadic rect origins for a 180-degree footprint rotation.
 
     For a dyadic rectangle of height ``2**row_depth`` and width
@@ -409,9 +406,7 @@ def _mirror_dyadic_rects(
         mirrored_row: list = []
         for col_depth, origins in enumerate(row_rects):
             w = 1 << col_depth
-            mirrored_row.append(
-                [(rows - h - r, cols - w - c) for r, c in origins]
-            )
+            mirrored_row.append([(rows - h - r, cols - w - c) for r, c in origins])
         mirrored.append(mirrored_row)
     return mirrored
 
@@ -441,7 +436,7 @@ def _morph_op(
     plan_row: np.ndarray,
     plan_col: np.ndarray,
     max_stack_depth: np.ndarray,
-    anchor: Tuple[int, int],
+    anchor: tuple[int, int],
     mode: str,
     cval: float,
 ) -> np.ndarray:
@@ -535,7 +530,11 @@ def _morph_op(
                 if _trim_ok:
                     _rl = max(0, anchor_row - ofs_r + 1)
                     _rh = min(st.shape[0], anchor_row + h)
-                    ufunc(st[_rl:_rh, :-ofs_c], st[_rl:_rh, ofs_c:], out=st[_rl:_rh, :-ofs_c])
+                    ufunc(
+                        st[_rl:_rh, :-ofs_c],
+                        st[_rl:_rh, ofs_c:],
+                        out=st[_rl:_rh, :-ofs_c],
+                    )
                 else:
                     ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])
                 stack.append((row_st, rd + 1, cd))
@@ -545,9 +544,15 @@ def _morph_op(
                 if _trim_ok:
                     _cl = max(0, anchor_col - ofs_c + 1)
                     _ch = min(st.shape[1], anchor_col + w)
-                    ufunc(st[:-ofs_r, _cl:_ch], st[ofs_r:, _cl:_ch], out=st[:-ofs_r, _cl:_ch])
+                    ufunc(
+                        st[:-ofs_r, _cl:_ch],
+                        st[ofs_r:, _cl:_ch],
+                        out=st[:-ofs_r, _cl:_ch],
+                    )
                 else:
-                    ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
+                    ufunc(
+                        st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :]
+                    )  # see above
                 stack.append((col_st, rd, cd + 1))
                 stack.append((st[:-ofs_r, :], rd + 1, cd))
         elif has_row:
@@ -555,7 +560,9 @@ def _morph_op(
             if _trim_ok:
                 _cl = max(0, anchor_col - (1 << cd) + 1)
                 _ch = min(st.shape[1], anchor_col + w)
-                ufunc(st[:-ofs_r, _cl:_ch], st[ofs_r:, _cl:_ch], out=st[:-ofs_r, _cl:_ch])
+                ufunc(
+                    st[:-ofs_r, _cl:_ch], st[ofs_r:, _cl:_ch], out=st[:-ofs_r, _cl:_ch]
+                )
             else:
                 ufunc(st[:-ofs_r, :], st[ofs_r:, :], out=st[:-ofs_r, :])  # see above
             stack.append((st[:-ofs_r, :], rd + 1, cd))
@@ -564,7 +571,9 @@ def _morph_op(
             if _trim_ok:
                 _rl = max(0, anchor_row - (1 << rd) + 1)
                 _rh = min(st.shape[0], anchor_row + h)
-                ufunc(st[_rl:_rh, :-ofs_c], st[_rl:_rh, ofs_c:], out=st[_rl:_rh, :-ofs_c])
+                ufunc(
+                    st[_rl:_rh, :-ofs_c], st[_rl:_rh, ofs_c:], out=st[_rl:_rh, :-ofs_c]
+                )
             else:
                 ufunc(st[:, :-ofs_c], st[:, ofs_c:], out=st[:, :-ofs_c])  # see above
             stack.append((st[:, :-ofs_c], rd, cd + 1))
@@ -746,10 +755,18 @@ def erode(
     # Change here when explicit anchor support is added.
     anchor = (decomp.rows // 2, decomp.cols // 2)
     return _morph_op(
-        np.minimum, neutral, image,
-        decomp.rows, decomp.cols,
-        decomp.dyadic_rects, decomp.plan_row, decomp.plan_col, decomp.max_stack_depth,
-        anchor, mode, cval,
+        np.minimum,
+        neutral,
+        image,
+        decomp.rows,
+        decomp.cols,
+        decomp.dyadic_rects,
+        decomp.plan_row,
+        decomp.plan_col,
+        decomp.max_stack_depth,
+        anchor,
+        mode,
+        cval,
     )
 
 
@@ -784,15 +801,21 @@ def dilate(
     neutral = _neutral_cval(image.dtype, "max")
     if cval is None:
         cval = neutral
-    mirrored_rects = _mirror_dyadic_rects(
-        decomp.dyadic_rects, decomp.rows, decomp.cols
-    )
+    mirrored_rects = _mirror_dyadic_rects(decomp.dyadic_rects, decomp.rows, decomp.cols)
     # Dilation anchor: mirrored center (differs from erosion for even-size fp).
     # Change here when explicit anchor support is added.
     anchor = (decomp.rows - 1 - decomp.rows // 2, decomp.cols - 1 - decomp.cols // 2)
     return _morph_op(
-        np.maximum, neutral, image,
-        decomp.rows, decomp.cols,
-        mirrored_rects, decomp.plan_row, decomp.plan_col, decomp.max_stack_depth,
-        anchor, mode, cval,
+        np.maximum,
+        neutral,
+        image,
+        decomp.rows,
+        decomp.cols,
+        mirrored_rects,
+        decomp.plan_row,
+        decomp.plan_col,
+        decomp.max_stack_depth,
+        anchor,
+        mode,
+        cval,
     )

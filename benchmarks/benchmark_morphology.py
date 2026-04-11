@@ -253,13 +253,15 @@ class SparseTableMorphology2D:
     """
 
     # Combinations (footprint, radius, backend) estimated to take >10 s.
-    _TLE = frozenset([
-        ("diamond", 201, "default"),
-        ("diamond", 201, "sequence"),
-        ("disk",    201, "default"),
-        ("disk",    201, "sequence"),
-        ("random",  201, "default"),
-    ])
+    _TLE = frozenset(
+        [
+            ("diamond", 201, "default"),
+            ("diamond", 201, "sequence"),
+            ("disk", 201, "default"),
+            ("disk", 201, "sequence"),
+            ("random", 201, "default"),
+        ]
+    )
 
     param_names = ["footprint", "radius", "backend"]
     params = [
@@ -271,6 +273,7 @@ class SparseTableMorphology2D:
     def setup(self, footprint, radius, backend):
         try:
             import skimage2 as _ski2
+
             ski2_morph = _ski2.morphology
         except (ImportError, AttributeError):
             raise NotImplementedError("skimage2 not available")
@@ -290,7 +293,7 @@ class SparseTableMorphology2D:
         self.image = rng.integers(0, 256, (512, 512), dtype=np.uint8)
 
         if footprint == "random":
-            fp_plain = (rng.random((2 * radius + 1, 2 * radius + 1)) > 0.7)
+            fp_plain = rng.random((2 * radius + 1, 2 * radius + 1)) > 0.7
             fp_plain = fp_plain.astype(np.uint8)
         elif footprint == "square":
             fp_plain = morphology.square(2 * radius + 1)
@@ -302,6 +305,7 @@ class SparseTableMorphology2D:
 
         if backend == "st_cold":
             from _skimage2.morphology._sparse_table import _decomp_footprint_cached
+
             self._cache_clear = _decomp_footprint_cached.cache_clear
             self.fp_plain = fp_plain
             self.decomp_footprint = ski2_morph.decomp_footprint
@@ -310,10 +314,10 @@ class SparseTableMorphology2D:
         elif backend == "default":
             self.fp = fp_plain
         elif backend == "sequence":
-            self.fp = getattr(morphology, footprint)(
-                radius, decomposition="sequence"
-            ) if footprint != "square" else morphology.square(
-                2 * radius + 1, decomposition="sequence"
+            self.fp = (
+                getattr(morphology, footprint)(radius, decomposition="sequence")
+                if footprint != "square"
+                else morphology.square(2 * radius + 1, decomposition="sequence")
             )
         elif backend == "separable":
             self.fp = morphology.square(2 * radius + 1, decomposition="separable")

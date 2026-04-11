@@ -39,7 +39,11 @@ class TestSparseTableVsScipy:
     @pytest.mark.parametrize("fp_type", ["full", "sparse"])
     @pytest.mark.parametrize("mode", SCIPY_MODES)
     def test_erode_matches_scipy(self, image, fp_shape, fp_type, mode):
-        fp = np.ones(fp_shape, dtype=np.uint8) if fp_type == "full" else _make_sparse_fp(fp_shape)
+        fp = (
+            np.ones(fp_shape, dtype=np.uint8)
+            if fp_type == "full"
+            else _make_sparse_fp(fp_shape)
+        )
         decomp = decomp_footprint(fp)
 
         cval = int(np.iinfo(image.dtype).max)
@@ -52,7 +56,11 @@ class TestSparseTableVsScipy:
     @pytest.mark.parametrize("fp_type", ["full", "sparse"])
     @pytest.mark.parametrize("mode", SCIPY_MODES)
     def test_dilate_matches_scipy(self, image, fp_shape, fp_type, mode):
-        fp = np.ones(fp_shape, dtype=np.uint8) if fp_type == "full" else _make_sparse_fp(fp_shape)
+        fp = (
+            np.ones(fp_shape, dtype=np.uint8)
+            if fp_type == "full"
+            else _make_sparse_fp(fp_shape)
+        )
         decomp = decomp_footprint(fp)
 
         cval = int(np.iinfo(image.dtype).min)
