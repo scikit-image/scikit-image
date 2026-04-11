@@ -304,7 +304,9 @@ class SparseTableMorphology2D:
         self.dilate = ski2_morph.dilation
 
         if backend == "st_cold":
-            from _skimage2.morphology._sparse_table import _decomp_footprint_cached
+            from _skimage2.morphology._sparse_table_morphology import (
+                _decomp_footprint_cached,
+            )
 
             self._cache_clear = _decomp_footprint_cached.cache_clear
             self.fp_plain = fp_plain

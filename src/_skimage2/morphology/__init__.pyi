@@ -7,7 +7,7 @@ from ._grayscale_operators import (
     white_tophat,
     black_tophat,
 )
-from ._sparse_table import FootprintDecomp, decomp_footprint
+from ._sparse_table_morphology import FootprintDecomp, decomp_footprint
 
 __all__ = [
     "erosion",

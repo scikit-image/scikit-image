@@ -10,9 +10,9 @@ from ._footprints import (
     _footprint_is_sequence,
     pad_footprint,
 )
-from ._sparse_table import FootprintDecomp
-from ._sparse_table import erode as _st_erode
-from ._sparse_table import dilate as _st_dilate
+from ._sparse_table_morphology import FootprintDecomp
+from ._sparse_table_morphology import erode as _st_erode
+from ._sparse_table_morphology import dilate as _st_dilate
 
 
 def _apply_decomposed(*, operator, image, footprints, out, mode, cval):

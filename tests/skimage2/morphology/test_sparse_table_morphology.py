@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_array_equal
 from scipy import ndimage as ndi
 
-from _skimage2.morphology._sparse_table import (
+from _skimage2.morphology._sparse_table_morphology import (
     FootprintDecomp,
     _gen_dyadic_cover,
     _max_run_length_col,
@@ -118,7 +118,7 @@ class TestPrivateHelpers:
 
     def test_solve_rsap_greedy_col_path_for_max_i(self):
         """Pair (max_i, max_j) where max_i has higher col than the shared corner
-        exercises the col-path body for max_i (line 312 of _sparse_table.py).
+        exercises the col-path body for max_i (line 312 of _sparse_table_morphology.py).
 
         initial_map entries at (r=0,c=0), (r=1,c=3), (r=3,c=1): the best
         pair is (r=1,c=3)&(r=3,c=1) with max_i at col=3 > max_x=1."""
@@ -135,7 +135,7 @@ class TestPrivateHelpers:
     def test_solve_rsap_greedy_row_path_for_max_i(self):
         """After a swap-pop in round 1, pos order can invert so that max_i
         has a higher row than max_j, making the row-path body for max_i
-        execute (line 314 of _sparse_table.py).
+        execute (line 314 of _sparse_table_morphology.py).
 
         initial_map with entries at the L-shaped corners causes exactly this."""
         initial_map = np.array(
