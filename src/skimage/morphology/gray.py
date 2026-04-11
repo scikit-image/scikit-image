@@ -3,6 +3,10 @@ Grayscale morphological operations
 """
 
 from _skimage2.morphology._footprints import _default_footprint
+from _skimage2.morphology._sparse_table_morphology import (
+    FootprintDecomp,
+    _mirror_dyadic_rects,
+)
 
 from ..util import PendingSkimage2Change
 from _skimage2._shared._warnings import warn_external
@@ -90,7 +94,25 @@ def _patch_footprint_mirroring(footprint):
 
     `skimage.morphology.erosion`, `skimage.morphology.opening` and
     `skimage.morphology.white_tophat` _aren't_ affected.
+
+    For :class:`FootprintDecomp`, the dyadic rect origins are mirrored via
+    :func:`_mirror_dyadic_rects` instead of operating on an ndarray. Since the
+    sparse table backend (`skimage2`/SciPy layer) applies a second mirror
+    internally during dilation, the double-mirror cancels out and reproduces
+    the old `skimage` behaviour (effectively no net mirroring).
     """
+    if isinstance(footprint, FootprintDecomp):
+        mirrored = _mirror_dyadic_rects(
+            footprint.dyadic_rects, footprint.rows, footprint.cols
+        )
+        return FootprintDecomp(
+            rows=footprint.rows,
+            cols=footprint.cols,
+            dyadic_rects=mirrored,
+            plan_row=footprint.plan_row,
+            plan_col=footprint.plan_col,
+            max_stack_depth=footprint.max_stack_depth,
+        )
     # We need to *pad* before mirroring so that even dimension are padded
     # on the correct side.
     footprint = pad_footprint(footprint, pad_end=False)

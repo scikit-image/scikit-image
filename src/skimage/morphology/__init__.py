@@ -2,6 +2,10 @@
 
 from .binary import binary_closing, binary_dilation, binary_erosion, binary_opening
 from .gray import black_tophat, closing, dilation, erosion, opening, white_tophat
+from _skimage2.morphology._sparse_table_morphology import (
+    FootprintDecomp,
+    decomp_footprint,
+)
 from .isotropic import (
     isotropic_erosion,
     isotropic_dilation,
@@ -50,6 +54,7 @@ __all__ = [
     'convex_hull_object',
     'diameter_closing',
     'diameter_opening',
+    'decomp_footprint',
     'diamond',
     'dilation',
     'disk',
@@ -57,6 +62,7 @@ __all__ = [
     'erosion',
     'flood',
     'flood_fill',
+    'FootprintDecomp',
     'footprint_from_sequence',
     'footprint_rectangle',
     'h_maxima',

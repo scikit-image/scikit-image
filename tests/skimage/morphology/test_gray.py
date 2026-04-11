@@ -5,7 +5,13 @@ from numpy.testing import assert_allclose, assert_array_equal, assert_equal
 
 from skimage import color, data, transform
 from _skimage2._shared.testing import fetch
-from skimage.morphology import gray, footprints, footprint_rectangle
+from skimage.morphology import (
+    gray,
+    footprints,
+    footprint_rectangle,
+    decomp_footprint,
+    FootprintDecomp,
+)
 from skimage.util import img_as_uint, img_as_ubyte
 
 
@@ -476,3 +482,27 @@ def test_octahedron_decomposition(cell3d_image, function, radius, decomposition)
     expected = func(cell3d_image, footprint=footprint_ndarray)
     out = func(cell3d_image, footprint=footprint)
     assert_array_equal(expected, out)
+
+
+class TestFootprintDecomp:
+    """Tests for FootprintDecomp integration with skimage.morphology."""
+
+    def test_import(self):
+        """FootprintDecomp and decomp_footprint are importable from skimage.morphology."""
+        assert callable(decomp_footprint)
+        assert FootprintDecomp is not None
+
+    @pytest.mark.parametrize("function", ["dilation", "closing", "black_tophat"])
+    def test_asymmetric_footprint_matches_ndarray(self, function):
+        """FootprintDecomp gives same result as ndarray for asymmetric footprints.
+
+        _patch_footprint_mirroring applies _mirror_dyadic_rects to FootprintDecomp,
+        so the double-mirror (patch + sparse table internal) cancels out and
+        reproduces the skimage backwards-compatible behaviour.
+        """
+        fp = np.array([[0, 0, 1], [0, 1, 1], [0, 0, 0]], dtype=np.uint8)
+        image = np.zeros((7, 7), dtype=np.uint8)
+        image[3, 3] = 5
+        decomp = decomp_footprint(fp)
+        func = getattr(gray, function)
+        assert_array_equal(func(image, footprint=fp), func(image, footprint=decomp))
