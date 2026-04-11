@@ -237,6 +237,132 @@ class LocalMaxima:
         )
 
 
+class SparseTableMorphology2D:
+    """Benchmark sparse table erosion/dilation via FootprintDecomp.
+
+    Compares five backends across footprint shapes and radii on a 512x512
+    uint8 image:
+
+    - ``st_cold``  : FootprintDecomp via skimage2.morphology, cache cleared before each call
+    - ``st_warm``  : FootprintDecomp via skimage2.morphology, decomp_footprint cached
+    - ``default``  : plain ndarray footprint via skimage2.morphology (SciPy)
+    - ``sequence`` : footprint with decomposition="sequence" (skimage)
+    - ``separable``: footprint with decomposition="separable" (skimage, square only)
+
+    Combinations estimated to exceed 10 s are skipped (reported as n/a).
+    """
+
+    # Combinations (footprint, radius, backend) estimated to take >10 s.
+    _TLE = frozenset([
+        ("diamond", 201, "default"),
+        ("diamond", 201, "sequence"),
+        ("disk",    201, "default"),
+        ("disk",    201, "sequence"),
+        ("random",  201, "default"),
+    ])
+
+    param_names = ["footprint", "radius", "backend"]
+    params = [
+        ("square", "diamond", "disk", "random"),
+        (1, 5, 31, 71, 201),
+        ("st_cold", "st_warm", "default", "sequence", "separable"),
+    ]
+
+    def setup(self, footprint, radius, backend):
+        try:
+            import skimage2 as _ski2
+            ski2_morph = _ski2.morphology
+        except (ImportError, AttributeError):
+            raise NotImplementedError("skimage2 not available")
+
+        if (footprint, radius, backend) in self._TLE:
+            raise NotImplementedError("TLE: estimated >10 s")
+
+        # separable is only valid for square
+        if backend == "separable" and footprint != "square":
+            raise NotImplementedError("separable unavailable")
+
+        # sequence/separable require a plain footprint (skimage), not random
+        if backend in ("sequence", "separable") and footprint == "random":
+            raise NotImplementedError("decomposition unavailable for random")
+
+        rng = np.random.default_rng(123)
+        self.image = rng.integers(0, 256, (512, 512), dtype=np.uint8)
+
+        if footprint == "random":
+            fp_plain = (rng.random((2 * radius + 1, 2 * radius + 1)) > 0.7)
+            fp_plain = fp_plain.astype(np.uint8)
+        elif footprint == "square":
+            fp_plain = morphology.square(2 * radius + 1)
+        else:
+            fp_plain = getattr(morphology, footprint)(radius)
+
+        self.erode = ski2_morph.erosion
+        self.dilate = ski2_morph.dilation
+
+        if backend == "st_cold":
+            from _skimage2.morphology._sparse_table import _decomp_footprint_cached
+            self._cache_clear = _decomp_footprint_cached.cache_clear
+            self.fp_plain = fp_plain
+            self.decomp_footprint = ski2_morph.decomp_footprint
+        elif backend == "st_warm":
+            self.fp = ski2_morph.decomp_footprint(fp_plain)
+        elif backend == "default":
+            self.fp = fp_plain
+        elif backend == "sequence":
+            self.fp = getattr(morphology, footprint)(
+                radius, decomposition="sequence"
+            ) if footprint != "square" else morphology.square(
+                2 * radius + 1, decomposition="sequence"
+            )
+        elif backend == "separable":
+            self.fp = morphology.square(2 * radius + 1, decomposition="separable")
+
+    def time_erosion(self, footprint, radius, backend):
+        if backend == "st_cold":
+            self._cache_clear()
+            self.erode(self.image, self.decomp_footprint(self.fp_plain))
+        else:
+            self.erode(self.image, self.fp)
+
+    def time_dilation(self, footprint, radius, backend):
+        if backend == "st_cold":
+            self._cache_clear()
+            self.dilate(self.image, self.decomp_footprint(self.fp_plain))
+        else:
+            self.dilate(self.image, self.fp)
+
+    def peakmem_reference(self, *args):
+        """Provide reference for memory measurement with empty benchmark.
+
+        Peakmem benchmarks measure the maximum amount of RAM used by a
+        function. However, this maximum also includes the memory used
+        during the setup routine (as of asv 0.2.1; see [1]_).
+        Measuring an empty peakmem function might allow us to disambiguate
+        between the memory used by setup and the memory used by target (see
+        other ``peakmem_`` functions below).
+
+        References
+        ----------
+        .. [1]: https://asv.readthedocs.io/en/stable/writing_benchmarks.html#peak-memory
+        """
+        pass
+
+    def peakmem_erosion(self, footprint, radius, backend):
+        if backend == "st_cold":
+            self._cache_clear()
+            self.erode(self.image, self.decomp_footprint(self.fp_plain))
+        else:
+            self.erode(self.image, self.fp)
+
+    def peakmem_dilation(self, footprint, radius, backend):
+        if backend == "st_cold":
+            self._cache_clear()
+            self.dilate(self.image, self.decomp_footprint(self.fp_plain))
+        else:
+            self.dilate(self.image, self.fp)
+
+
 class RemoveObjectsByDistance:
     param_names = ["min_distance"]
     params = [5, 100]
