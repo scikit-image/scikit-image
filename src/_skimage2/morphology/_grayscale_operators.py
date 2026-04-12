@@ -340,7 +340,7 @@ def opening(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
@@ -420,7 +420,7 @@ def closing(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
@@ -499,7 +499,7 @@ def white_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints
@@ -594,7 +594,7 @@ def black_tophat(image, footprint=None, *, out=None, mode="ignore", cval=0.0):
     ----------
     image : ndarray
         Input image.
-    footprint : ndarray or tuple, optional
+    footprint : ndarray or tuple or FootprintDecomp, optional
         The neighborhood expressed as a 2-D array of 1's and 0's.
         If None, use a cross-shaped footprint (so-called *1-connectivity*).
         The footprint can also be provided as a sequence of smaller footprints

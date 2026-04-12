@@ -13,7 +13,7 @@ import numpy as np
 __all__ = ["FootprintDecomp", "decomp_footprint"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class FootprintDecomp:
     """Pre-computed decomposition of a morphological footprint.
 
@@ -258,7 +258,9 @@ def _gen_dyadic_cover(
     return dyadic_rects
 
 
-def _solve_rsap_greedy(initial_map: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _solve_rsap_greedy(
+    initial_map: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Solve the Rectilinear Steiner Arborescence Problem greedily.
 
     Finds a spanning tree over the nodes marked in ``initial_map`` that
@@ -347,7 +349,7 @@ def _plan_st_build(
     dyadic_rects: list,
     max_row_depth: int,
     max_col_depth: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Plan the order in which sparse table nodes are built.
 
     Constructs a map of required nodes (those with at least one dyadic
@@ -703,6 +705,8 @@ def decomp_footprint(footprint: np.ndarray) -> FootprintDecomp:
            [0, 0, 0, 0, 0]], dtype=uint8)
     """
     fp = np.asarray(footprint, dtype=np.uint8)
+    if fp.ndim != 2:
+        raise ValueError(f"footprint must be a 2-D array, got shape {fp.shape}")
 
     # Handle empty footprint
     if fp.size == 0:

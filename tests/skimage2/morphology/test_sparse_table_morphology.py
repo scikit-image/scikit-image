@@ -250,3 +250,9 @@ class TestDecompFootprint:
             erode(image, decomp, mode="reflect"),
             ndi.grey_erosion(image, footprint=fp, mode="reflect"),
         )
+
+
+def test_decomp_footprint_1d_raises():
+    """decomp_footprint raises ValueError for non-2D input."""
+    with pytest.raises(ValueError, match="2-D"):
+        decomp_footprint(np.ones(5, dtype=np.uint8))
