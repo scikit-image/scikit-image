@@ -256,9 +256,7 @@ class SparseTableMorphology2D:
     _TLE = frozenset(
         [
             ("diamond", 201, "default"),
-            ("diamond", 201, "sequence"),
             ("disk", 201, "default"),
-            ("disk", 201, "sequence"),
             ("random", 201, "default"),
         ]
     )
