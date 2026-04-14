@@ -284,7 +284,7 @@ We use the `pytest <https://docs.pytest.org/en/latest/>`__ testing
 framework, with tests located in the various
 ``skimage/submodule/tests`` folders.
 
-Testing requirements are listed in `requirements/test.txt`.
+Testing requirements are listed in ``requirements/test.txt``.
 Run:
 
 - **All tests**: ``spin test``
