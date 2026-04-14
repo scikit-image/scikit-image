@@ -520,12 +520,12 @@ to perform the above procedure.
 
 Adding Data
 -----------
-While code is hosted on `github <https://github.com/scikit-image/>`_,
-example datasets are on `gitlab <https://gitlab.com/scikit-image/data>`_.
+While code is hosted on `GitHub <https://github.com/scikit-image/>`_,
+example datasets are on `GitLab <https://gitlab.com/scikit-image/data>`_.
 These are fetched with `pooch <https://github.com/fatiando/pooch>`_
-when accessing `skimage.data.*`.
+when accessing ``skimage.data.*``.
 
-New datasets are submitted on gitlab and, once merged, the data
+New datasets are submitted on GitLab and, once merged, the data
 registry ``skimage/data/_registry.py`` in the main GitHub repository
 can be updated.
 
