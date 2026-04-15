@@ -9,14 +9,14 @@ import _skimage2 as ski2
 
 @ski2.util.ski2_migration_dec(
     """\
-`%(qname_old)s` is deprecated in favor of
-`%(qname_new)s` with new behavior:
+``%(qname_old)s`` is deprecated in favor of
+``%(qname_new)s`` with new behavior:
 
 * Parameter `p_norm` defaults to 2 (Euclidean distance),
   was `numpy.inf` (Chebyshev distance)
-* Parameter `exclude_border` defaults to 1, was `True`
-* Parameter `exclude_border` no longer accepts `False` and `True`,
-  pass 0 instead of `False`, or `min_distance` instead of `True`
+* Parameter `exclude_border` defaults to 1, was ``True``
+* Parameter `exclude_border` no longer accepts ``False`` and ``True``;
+  pass 0 instead of ``False``, or `min_distance` instead of ``True``
 * Parameters after `image` are keyword-only
 
 To keep the old behavior when switching to `skimage2`, update your call
@@ -31,52 +31,50 @@ according to the following cases:
 * `p_norm=<float>, --> no change necessary
 <!--- cond-end -->
 <!--- cond-start: doc -->
-:::{list-table}
-:header-rows: 1
+.. list-table::
+    :header-rows: 1
 
-- - In `skimage`
-  - In `skimage2`
+    - - In `skimage`
+      - In `skimage2`
 
-- - `exclude_border` not passed (default)
-  - Assign it the same value as `min_distance` which may be its default value `1`.
+    - - `exclude_border` not passed (default)
+      - Assign it the same value as `min_distance` which may be its default
+        value ``1``.
 
-- - `exclude_border=True`
-  - Same as above in the default case.
+    - - ``exclude_border=True``
+      - Same as above in the default case.
 
-- - `exclude_border=False`
-  - Use `min_distance=0`.
+    - - ``exclude_border=False``
+      - Use ``min_distance=0``.
 
-- - `exclude_border=<int>`
-  - No change necessary.
+    - - ``exclude_border=<int>``
+      - No change necessary.
 
-- - `p_norm` not passed (default)
-  - Pass the previous default explicitly with `p_norm=numpy.inf`.
+    - - `p_norm` not passed (default)
+      - Pass the Skimage 1 default explicitly with ``p_norm=numpy.inf``.
 
-- - `p_norm=<float>`
-  - No change necessary.
-
-:::
+    - - ``p_norm=<float>``
+      - No change necessary.
 
 Other keyword parameters can be left unchanged.
 
-```{code-block} python
-import numpy as np
+>>> import numpy as np
 
-import skimage as ski1
-import skimage2 as ski2
-image = ski1.data.camera()
-res1 = ski1.feature.peak_local_max(image)
-res2 = ski2.feature.peak_local_max(image,
-                                   exclude_border=1,
-                                   p_norm=np.inf)
-assert np.all(res1 == res2)
+>>> import skimage as ski1
+>>> import skimage2 as ski2
+>>> image = ski1.data.camera()
+>>> res1 = ski1.feature.peak_local_max(image)
+>>> res2 = ski2.feature.peak_local_max(image,
+...                                    exclude_border=1,
+...                                    p_norm=np.inf)
+>>> assert np.all(res1 == res2)
 
-res1 = ski1.feature.peak_local_max(image, min_distance=10)
-res2 = ski2.feature.peak_local_max(image,
-                                   min_distance=10,
-                                   exclude_border=10,
-                                   p_norm=np.inf)
-assert np.all(res1 == res2)
+>>> res1 = ski1.feature.peak_local_max(image, min_distance=10)
+>>> res2 = ski2.feature.peak_local_max(image,
+...                                    min_distance=10,
+...                                    exclude_border=10,
+...                                    p_norm=np.inf)
+>>> assert np.all(res1 == res2)
 ```
 
 <!--- cond-end -->

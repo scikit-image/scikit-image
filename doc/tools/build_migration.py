@@ -24,7 +24,7 @@ class TrackerDict(dict):
 
 def write_migration(in_tpl, doc_dict, out_path=None):
     in_tpl = Path(in_tpl)
-    out_path = Path(out_path) if out_path else in_tpl.with_suffix('.md')
+    out_path = Path(out_path) if out_path else in_tpl.with_suffix('.rst')
     tpl = Template(in_tpl.read_text())
     render_dict = TrackerDict(doc_dict)
     out_str = tpl.render(d=render_dict)
@@ -67,7 +67,7 @@ def get_parser():
         formatter_class=RawDescriptionHelpFormatter,
     )
     parser.add_argument('migration_tpl', help='Path to migration template file')
-    parser.add_argument('--out-md', help='Path to output markdown file')
+    parser.add_argument('--out-rst', help='Path to output ReST file')
     parser.add_argument(
         '--doctest', action='store_true', help='Run discovered doctests'
     )
@@ -86,7 +86,7 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     doc_dict, doctests = get_doc_dicts()
-    write_migration(args.migration_tpl, doc_dict, args.out_md)
+    write_migration(args.migration_tpl, doc_dict, args.out_rst)
     if args.doctest:
         success, msg = run_doctests(doctests)
         print(msg)

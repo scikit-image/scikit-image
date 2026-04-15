@@ -1026,7 +1026,8 @@ def star(a, dtype=np.uint8):
 @ski2.util.ski2_migration_dec(
     '''\
 <!--- cond-start: warning -->
-`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior
+`%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical
+behavior.
 <!--- cond-end -->
 ''',
     'skimage.morphology.mirror_footprint',

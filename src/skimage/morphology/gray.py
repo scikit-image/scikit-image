@@ -34,25 +34,23 @@ ski2_migration_dec.migration_docs['gray_funcs'] = (
 )
 
 _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR = """\
-`skimage.morphology.%(qual)s` is deprecated in favor of
-`skimage2.morphology.%(qual)s`, which changes the default value
-for parameter `mode` to 'ignore' (was 'reflect').
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s``, which changes the default value
+for parameter `mode` to ``'ignore'`` (was ``'reflect'``).
 
-To keep the old (`skimage`, v1.x) behavior, set `mode='reflect'` explicitly.
-If you set it explicitly before, the behavior is unchanged.
+To keep the old (``skimage``, v1.x) behavior, set ``mode='reflect'``
+explicitly. If you set it explicitly before, the behavior is unchanged.
 
 <!-- cond-start: doc -->
-```{code-block} python
-import numpy as np
+>>> import numpy as np
 
-import skimage as ski1
-import skimage2 as ski2
+>>> import skimage as ski1
+>>> import skimage2 as ski2
 
-image = ski1.data.camera()
-res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
-res2 = ski2.morphology.%(qual)s(image, mode='reflect')
-assert np.all(res1 == res2)
-```
+>>> image = ski1.data.camera()
+>>> res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
+>>> res2 = ski2.morphology.%(qual)s(image, mode='reflect')
+>>> assert np.all(res1 == res2)
 
 <!--- cond-end -->
 """
@@ -60,41 +58,41 @@ assert np.all(res1 == res2)
 # `dilation`, `closing`, `black_tophat` need a more specific warning.
 # See `_patch_footprint_mirroring`
 _PENDING_SKIMAGE2_TEMPLATE_MIRROR = """\
-`skimage.morphology.%(qual)s` is deprecated in favor of
-`skimage2.morphology.%(qual)s` which changes the default value for parameter
-`mode` to 'ignore' (was 'reflect'). It also mirrors the `footprint`
+``skimage.morphology.%(qual)s`` is deprecated in favor of
+``skimage2.morphology.%(qual)s`` which changes the default value for parameter
+`mode` to ``'ignore'`` (was ``'reflect'``). It also mirrors the `footprint`
 (inverts its order in each dimension), which aligns its behavior with SciPy's
 conventions.
 
-To keep the old (`skimage`, v1.x) behavior:
-- Set `mode='reflect'` explicitly. If you set it explicitly before,
-  the behavior is unchanged.
-- If you currently use an asymmetric `footprint`, modify it like this before
-  passing it to `skimage2.morphology.%(qual)s`:
+To keep the old (``skimage``, v1.x) behavior:
 
-  ```python
-  footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
-  footprint = ski2.morphology.mirror_footprint(footprint)
-  ```
+- Set ``mode='reflect'`` explicitly. If you set it explicitly before, the
+  behavior is unchanged.
+- If you currently use an asymmetric `footprint`, modify it like this before
+  passing it to ``skimage2.morphology.%(qual)s``:
+
+  .. code-block:: python
+
+    footprint = ski2.morphology.pad_footprint(footprint, pad_end=False)
+    footprint = ski2.morphology.mirror_footprint(footprint)
 
 <!--- cond-start: doc -->
 For example:
 
-```{code-block} python
-import numpy as np
+>>> import numpy as np
 
-import skimage as ski1
-import skimage2 as ski2
+>>> import skimage as ski1
+>>> import skimage2 as ski2
 
-image = ski1.data.camera()
-asym_foot = np.zeros((4, 4))
-asym_foot[2:, 2:] = 1
-res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
-pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
-mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
-res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
-assert np.all(res1 == res2)
-```
+>>> image = ski1.data.camera()
+>>> asym_foot = np.zeros((4, 4))
+>>> asym_foot[2:, 2:] = 1
+>>> res1 = ski1.morphology.%(qual)s(image, footprint=asym_foot)
+>>> pad_asym = ski2.morphology.pad_footprint(asym_foot, pad_end=False)
+>>> mirror_asym = ski2.morphology.mirror_footprint(pad_asym)
+>>> res2 = ski2.morphology.%(qual)s(image, footprint=mirror_asym, mode='reflect')
+>>> assert np.all(res1 == res2)
+
 <!--- cond-end -->
 """
 
