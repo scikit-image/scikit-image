@@ -43,10 +43,10 @@ explicitly. If you set it explicitly before, the behavior is unchanged.
 
 <!-- cond-start: doc -->
 >>> import numpy as np
-
+>>>
 >>> import skimage as ski1
 >>> import skimage2 as ski2
-
+>>>
 >>> image = ski1.data.camera()
 >>> res1 = ski1.morphology.%(qual)s(image)  # skimage default is mode='reflect'
 >>> res2 = ski2.morphology.%(qual)s(image, mode='reflect')
@@ -80,10 +80,10 @@ To keep the old (``skimage``, v1.x) behavior:
 For example:
 
 >>> import numpy as np
-
+>>>
 >>> import skimage as ski1
 >>> import skimage2 as ski2
-
+>>>
 >>> image = ski1.data.camera()
 >>> asym_foot = np.zeros((4, 4))
 >>> asym_foot[2:, 2:] = 1

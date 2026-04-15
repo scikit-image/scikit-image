@@ -59,7 +59,7 @@ according to the following cases:
 Other keyword parameters can be left unchanged.
 
 >>> import numpy as np
-
+>>>
 >>> import skimage as ski1
 >>> import skimage2 as ski2
 >>> image = ski1.data.camera()
@@ -68,7 +68,7 @@ Other keyword parameters can be left unchanged.
 ...                                    exclude_border=1,
 ...                                    p_norm=np.inf)
 >>> assert np.all(res1 == res2)
-
+>>>
 >>> res1 = ski1.feature.peak_local_max(image, min_distance=10)
 >>> res2 = ski2.feature.peak_local_max(image,
 ...                                    min_distance=10,

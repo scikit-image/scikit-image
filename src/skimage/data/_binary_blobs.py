@@ -15,10 +15,10 @@ To keep the old (``skimage``, v1.x) behavior, use:
 
 >>> import numpy as np
 >>> from numpy.random import default_rng
-
+>>>
 >>> import skimage as ski1
 >>> import skimage2 as ski2
-
+>>>
 >>> length, n_dim, blob_size_fraction = 512, 2, 0.1  # Default ski1 values.
 >>> res1 = ski1.data.binary_blobs(rng=default_rng(1939))  # Make reproducible.
 >>> res2 = ski2.data.binary_blobs(shape=(length,) * n_dim,
