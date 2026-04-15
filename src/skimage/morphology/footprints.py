@@ -9,6 +9,7 @@ from _skimage2.morphology._footprints import (
     pad_footprint as sk2_pad_footprint,
 )
 from _skimage2._shared.utils import deprecate_func
+from _skimage2.util._migration import ski2_migration_dec
 
 from .. import draw, morphology
 
@@ -1023,7 +1024,7 @@ def star(a, dtype=np.uint8):
     return footprint.astype(dtype)
 
 
-@ski2.util.ski2_migration_dec(
+@ski2_migration_dec(
     '''\
 <!--- cond-start: warning -->
 `%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical
@@ -1059,7 +1060,7 @@ def mirror_footprint(footprint):
     return sk2_mirror_footprint(footprint)
 
 
-@ski2.util.ski2_migration_dec(
+@ski2_migration_dec(
     '''\
 <!--- cond-start: warning -->
 `%(qname_old)s` is deprecated in favor of `%(qname_new)s` with identical behavior

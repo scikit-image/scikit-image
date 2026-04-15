@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from _skimage2.util.migration import Skimage2Migration, ski2_migration_dec
+from _skimage2.util._migration import Skimage2Migration, ski2_migration_dec
 
 import pytest
 
