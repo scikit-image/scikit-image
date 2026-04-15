@@ -84,6 +84,7 @@ class Skimage2Migration:
     def __init__(self, migration_url):
         self.migration_url = migration_url
         self.migration_docs = {}
+        self.extra_params = {}  # For useful extra parameters in migration doc.
         self.doctests = {}
 
     def _filled_docs(self, migration_doc, params):

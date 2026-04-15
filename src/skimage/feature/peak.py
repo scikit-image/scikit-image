@@ -75,7 +75,6 @@ Other keyword parameters can be left unchanged.
 ...                                    exclude_border=10,
 ...                                    p_norm=np.inf)
 >>> assert np.all(res1 == res2)
-```
 
 <!--- cond-end -->
 """,

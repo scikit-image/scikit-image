@@ -3,11 +3,16 @@
 
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
+import doctest
+from functools import partial
 from os import environ
 from pathlib import Path
 import sys
 
 from jinja2 import Template
+
+PARSER = doctest.DocTestParser()
+RUNNER = doctest.DocTestRunner()
 
 
 class TrackerDict(dict):
@@ -37,27 +42,31 @@ def write_migration(in_tpl, doc_dict, out_path=None):
     Path(out_path).write_text(out_str)
 
 
-def run_doctests(doctests):
-    if not doctests:
-        return True, 'No doctests found'
+def _append_msgs(msg_str, messages=[]):
+    messages.append(msg_str)
+
+
+def run_doctest(func_name, doc):
+    test = PARSER.get_doctest(doc, {}, func_name, "(unknown)", 0)
+    out_msgs = []
+    result = RUNNER.run(test, out=partial(_append_msgs, messages=out_msgs))
+    return (
+        result.failed,
+        f"Attempted: {result.attempted}\nFailed: {result.failed}"
+        + ('\n' + out_msgs[0] if result.failed else ''),
+    )
+
+
+def run_doctests(doc_dict):
     msgs = []
     success = True
-    for func_name, tests in doctests.items():
-        sep = '-' * 10 + '\n'
-        msgs.append(f'Running tests for `{func_name}`')
-        for i, test in enumerate(tests):
-            context = {}
-            title = f'Test {i}'
-            try:
-                exec(test, context)
-            except Exception as e:
-                msgs.append(
-                    f'{title} ... failed\n{sep}{test}\n{sep}'
-                    f'with traceback: {e}\n{sep}'
-                )
-                success = False
-            else:
-                msgs.append(f'{title} ... passed')
+    for func_name, doc in doc_dict.items():
+        header = f'Running tests for `{func_name}`'
+        lines = '-' * len(header)
+        msgs.append(f'{lines}\n{header}\n{lines}')
+        n_failed, msg = run_doctest(func_name, doc)
+        msgs.append(msg.strip())
+        success = success and n_failed == 0
     return success, '\n'.join(msgs)
 
 
@@ -79,16 +88,16 @@ def get_doc_dicts():
     import skimage as ski  # noqa: F401
     from _skimage2.util.migration import ski2_migration_dec as sk2md
 
-    return sk2md.migration_docs, sk2md.doctests
+    return sk2md.migration_docs, sk2md.extra_params
 
 
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    doc_dict, doctests = get_doc_dicts()
-    write_migration(args.migration_tpl, doc_dict, args.out_rst)
+    doc_dict, extra_dict = get_doc_dicts()
+    write_migration(args.migration_tpl, {**doc_dict, **extra_dict}, args.out_rst)
     if args.doctest:
-        success, msg = run_doctests(doctests)
+        success, msg = run_doctests(doc_dict)
         print(msg)
         if not success:
             sys.exit(1)

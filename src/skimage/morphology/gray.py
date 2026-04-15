@@ -24,7 +24,7 @@ _SUPPORTED_MODES = {
 }
 
 # For migration doc build.
-ski2_migration_dec.migration_docs['gray_funcs'] = (
+ski2_migration_dec.extra_params['gray_funcs'] = (
     'erosion',
     'dilation',
     'opening',
