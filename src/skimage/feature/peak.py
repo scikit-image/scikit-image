@@ -29,7 +29,7 @@ according to the following cases:
 * `exclude_border=False`, use `exclude_border=0`
 * `exclude_border=<int>`, no change necessary
 * `p_norm` not passed, use `p_norm=numpy.inf`
-* `p_norm=<float>, --> no change necessary
+* `p_norm=<float>`, no change necessary
 <!--- cond-end -->
 <!--- cond-start: doc -->
 .. list-table::
