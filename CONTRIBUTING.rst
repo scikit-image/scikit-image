@@ -25,17 +25,6 @@ shy, the team is very friendly!
 .. contents::
    :local:
 
-
-PR Checklist
-------------
-
-- Concise, descriptive title
-- `Docstrings for all functions <https://github.com/numpy/numpydoc/blob/main/doc/example.py>`_
-- `Unit tests <https://scikit-image.org/docs/dev/development/contribute.html#testing>`_
-- For new features, a gallery example in `./doc/examples`
-- Tools disclosure: in case tools other than a text editor were used
-  in creating the PR
-
 AI Policy
 ---------
 Regardless of how a PR was produced, scikit-image requires that
@@ -116,21 +105,27 @@ can be contributed to scikit-image.
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
+   * It is a good idea to read our :ref:`Guidelines` at this point.
+     While we don't require a contribution to meet every guideline from the
+     start, they will come up during review.
+
 3. To submit your contribution:
 
-   * Push your changes back to your fork on GitHub:
-
-     ::
+   * Push your changes back to your fork on GitHub::
 
        git push codemonkey transform-speedups
 
      A message will be displayed with a URL to open in your browser to create a
-     pull request (PR). Open it and click the green button.
+     pull request (PR).
 
-.. tip::
+   * Before submitting the pull request:
 
-   If you get stuck, reach out to us on
-   `our Zulip chat <https://skimage.zulipchat.com/>`__.
+     - Use a concise, descriptive title
+     - Describe and link relevant context in the description
+     - Disclose all _generative_ tools (AI, LLMs) that you used
+
+   .. tip:: If you get stuck, reach out to us on
+      `our Zulip chat <https://skimage.zulipchat.com/>`__.
 
 4. Review process:
 
@@ -211,6 +206,8 @@ to make conflict markers easier to read.
 
 An alternative to merging is to rebase your branch—but we squash and merge all
 PRs anyway, so we don't mind merge commits.
+
+.. _guidelines:
 
 Guidelines
 ----------
