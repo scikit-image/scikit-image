@@ -25,26 +25,6 @@ shy, the team is very friendly!
 .. contents::
    :local:
 
-AI Policy
----------
-Regardless of how a PR was produced, scikit-image requires that
-authors illustrate a thorough understanding of any proposed changes.
-You **must review such code line-by-line**—it is **your
-responsibility** to ensure that it is correct, and that it does not
-breach copyright. You should expect the team to ask questions about
-your work.
-
-scikit-image is technically complex, key infrastructure; therefore, we
-place a high premium on correctness, and on avoiding technical
-complexity that may affect maintainability. If you want to make use of
-LLMs in a significant way, it is a very good idea to **check in with us
-first**. Regardless, **always declare tool usage**.
-
-AI agents that have followed all guidelines in this document (outside
-of this section) may add 🤖 to their PR title. This signals to
-maintainers that the agent has self-verified compliance, enabling
-expedited review and acceptance.
-
 Development process
 -------------------
 The following is a brief overview about how changes to source code and documentation
@@ -105,7 +85,7 @@ can be contributed to scikit-image.
      Please write `good commit messages
      <https://vxlabs.com/software-development-handbook/#good-commit-messages>`_.
 
-   * It is a good idea to read our :ref:`Guidelines` at this point.
+   * It is a good idea to read our :ref:`guidelines` at this point.
      While we don't require a contribution to meet every guideline from the
      start, they will come up during review.
 
@@ -122,7 +102,8 @@ can be contributed to scikit-image.
 
      - Use a concise, descriptive title
      - Describe and link relevant context in the description
-     - Disclose all _generative_ tools (AI, LLMs) that you used
+     - Disclose all _generative_ tools (AI, LLMs, agents) that you used, see our
+       :ref:`ai-policy` for details.
 
    .. tip:: If you get stuck, reach out to us on
       `our Zulip chat <https://skimage.zulipchat.com/>`__.
@@ -206,6 +187,28 @@ to make conflict markers easier to read.
 
 An alternative to merging is to rebase your branch—but we squash and merge all
 PRs anyway, so we don't mind merge commits.
+
+.. _ai-policy:
+
+AI Policy
+---------
+Regardless of how a PR was produced, scikit-image requires that
+authors illustrate a thorough understanding of any proposed changes.
+You **must review such code line-by-line**—it is **your
+responsibility** to ensure that it is correct, and that it does not
+breach copyright. You should expect the team to ask questions about
+your work.
+
+scikit-image is technically complex, key infrastructure; therefore, we
+place a high premium on correctness, and on avoiding technical
+complexity that may affect maintainability. If you want to make use of
+LLMs in a significant way, it is a very good idea to **check in with us
+first**. Regardless, **always declare tool usage**.
+
+AI agents that have followed all guidelines in this document (outside
+of this section) may add 🤖 to their PR title. This signals to
+maintainers that the agent has self-verified compliance, enabling
+expedited review and acceptance.
 
 .. _guidelines:
 
