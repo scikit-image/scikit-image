@@ -2,7 +2,7 @@
 
 from functools import wraps, partial
 import re
-from textwrap import dedent, indent
+from textwrap import dedent
 
 
 # URL to migration page.
@@ -21,6 +21,36 @@ _PARTS_RE = re.compile(
     flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
 )
 
+_TWO_BT_RE = re.compile(
+    r'''
+    (?<!`) # Not `
+    ``     # Two ``
+    (?!`)  # Not `
+    (?P<tickstuff>.*?)
+    (?<!`) # Not `
+    ``     # Two ``
+    (?!`)  # Not `
+    ''',
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
+)
+
+_DIRECTIVE_RE = re.compile(
+    r'''
+    ^(?P<indent>[ \t]*)   # Indent
+    \.\.[ \t]+            # Up to directive name.
+    [a-zA-Z0-9_\-]+       # Directive name.
+    [ \t]*::              # up to :: delimiter.
+    [ \t].*?\n            # To end of line, including on-line params.
+    ((?P=indent)[ \t]+:   # Up to parameter name
+    [a-zA-Z0-9_\-]+       # Parameter name.
+    :.*?\n)*              # None or more parameters.
+    \s*                   # None or more spaces, including newlines.
+    (?P<content_indent>   # Group for content indent.
+    ^(?P=indent)[ \t]+    # Up to indent and more whitespace.
+    )
+    ''',
+    flags=re.DOTALL | re.MULTILINE | re.VERBOSE,
+)
 
 # Regex to find Python blocks within start-end markers.
 _PYTHON_RE = re.compile(
@@ -97,9 +127,15 @@ class Skimage2Migration:
             partial(self._context_rep, ctx) for ctx in ('warning', 'doc')
         )
         warn_msg = dedent(
-            _PYTHON_CB_RE.sub(
-                self._pyblock_rep,
-                _PYTHON_RE.sub(self._pyblock_rep, _PARTS_RE.sub(warn_rep, doc)),
+            _DIRECTIVE_RE.sub(
+                r'\g<content_indent>',  # Clear any directives, restore indent.
+                _TWO_BT_RE.sub(
+                    r'`\g<tickstuff>`',  # Double to single backticks.
+                    _PARTS_RE.sub(
+                        warn_rep,  # Remove not-matching context.
+                        doc,
+                    ),
+                ),
             )
         ).strip()
         if warn_msg:
@@ -125,9 +161,6 @@ class Skimage2Migration:
             qname_new=qname_new,
             migration_url=self.migration_url,
         )
-
-    def _pyblock_rep(self, match):
-        return indent(match.group('content') + '\n', '  ')
 
     def _context_rep(self, context, match):
         doc_types = [t.strip() for t in match.group(1).split(',')]
@@ -160,9 +193,6 @@ class Skimage2Migration:
             key = func_params['qname_old']
             if doc:
                 self.migration_docs[key] = doc
-            code_blocks = self._findall_code_blocks(doc)
-            if code_blocks:
-                self.doctests[key] = code_blocks
 
             @wraps(func)
             def decorated(*args, **kwargs):

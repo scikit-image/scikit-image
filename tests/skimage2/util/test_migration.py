@@ -7,38 +7,38 @@ from _skimage2.util.migration import Skimage2Migration, ski2_migration_dec
 import pytest
 
 EXAMPLE_INPUT = """\
-Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
+Replace all calls to ``%(qname_old)s`` with ``%(qname_new)s``.
 
-```{code-block} python
-a = 1
-a
-```
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
+
+    a = 1
+    a
 
 <!--- cond-start: warning -->
 Only in warning
 
-```{python}
-print('foo')
-```
+.. code-block:: python
+    print('foo')
 
 <!--- cond-end -->
-  ```python
-  b = 2
-  b
-  ```
+  .. code-block:: python
+
+    b = 2
+    b
 
 <!--- cond-start: doc -->
 Only in doc
 
-## Examples
+Examples
+--------
 
-```{code-block} python
-import skimage as ski1
-import _skimage2 as ski2
-res1 = ski1.somemod.somefunc(10, 11)
-res2 = ski2.somemod.somefunc(10, 11)
-assert res1 == res2
-```
+>>> import skimage as ski1
+>>> import _skimage2 as ski2
+>>> res1 = ski1.somemod.somefunc(10, 11)
+>>> res2 = ski2.somemod.somefunc(10, 11)
+>>> assert res1 == res2
 
 Some background on the changes.
 <!--- cond-end -->
@@ -47,12 +47,12 @@ Some background on the changes.
 EXAMPLE_WARN = """\
 Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
 
-  a = 1
-  a
+    a = 1
+    a
 
 Only in warning
 
-  print('foo')
+    print('foo')
 
     b = 2
     b
@@ -61,29 +61,30 @@ See %(migration_url)s#%(qname_old_anchor)s
 """.strip()
 
 EXAMPLE_DOC = """\
-Replace all calls to `%(qname_old)s` with `%(qname_new)s`.
+Replace all calls to ``%(qname_old)s`` with ``%(qname_new)s``.
 
-```{code-block} python
-a = 1
-a
-```
+.. code-block:: python
+    :linenos:
+    :emphasize-lines: 1
 
-  ```python
-  b = 2
-  b
-  ```
+    a = 1
+    a
+
+  .. code-block:: python
+
+    b = 2
+    b
 
 Only in doc
 
-## Examples
+Examples
+--------
 
-```{code-block} python
-import skimage as ski1
-import _skimage2 as ski2
-res1 = ski1.somemod.somefunc(10, 11)
-res2 = ski2.somemod.somefunc(10, 11)
-assert res1 == res2
-```
+>>> import skimage as ski1
+>>> import _skimage2 as ski2
+>>> res1 = ski1.somemod.somefunc(10, 11)
+>>> res2 = ski2.somemod.somefunc(10, 11)
+>>> assert res1 == res2
 
 Some background on the changes.
 """.strip()
@@ -122,21 +123,6 @@ warn_msg, doc = Skimage2Migration(MIGRATION_URL)._filled_docs(
 )
 
 
-def test_doctest_extraction(md_dfunc):
-    migration_dec, dfunc = md_dfunc
-    assert migration_dec.doctests == {
-        _func_qname_old: [
-            'a = 1\na',
-            '''\
-import skimage as ski1
-import _skimage2 as ski2
-res1 = ski1.somemod.somefunc(10, 11)
-res2 = ski2.somemod.somefunc(10, 11)
-assert res1 == res2''',
-        ]
-    }
-
-
 def test_decoration_interpolation(md_dfunc):
     migration_dec, dfunc = md_dfunc
 
@@ -154,12 +140,12 @@ def test_decoration_interpolation(md_dfunc):
     # Specify canonical location.
     migration_dec(EXAMPLE_INPUT, 'skimage.bar.baz')(func)
     assert docs['skimage.bar.baz'].startswith(
-        'Replace all calls to `skimage.bar.baz` with `skimage2.bar.baz`.'
+        'Replace all calls to ``skimage.bar.baz`` with ``skimage2.bar.baz``.'
     )
     # And skimage2 location.
     migration_dec(EXAMPLE_INPUT, 'skimage.bar.boo', 'skimage2.bun.biz')(func)
     assert docs['skimage.bar.boo'].startswith(
-        'Replace all calls to `skimage.bar.boo` with `skimage2.bun.biz`.'
+        'Replace all calls to ``skimage.bar.boo`` with ``skimage2.bun.biz``.'
     )
 
 
