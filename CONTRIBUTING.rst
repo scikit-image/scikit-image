@@ -102,7 +102,7 @@ can be contributed to scikit-image.
 
      - Use a concise, descriptive title
      - Describe and link relevant context in the description
-     - Disclose all _generative_ tools (AI, LLMs, agents) that you used, see our
+     - Disclose all *generative* tools (AI, LLMs, agents) that you used, see our
        :ref:`ai-policy` for details.
 
    .. tip:: If you get stuck, reach out to us on
