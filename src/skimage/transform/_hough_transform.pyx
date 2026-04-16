@@ -303,8 +303,9 @@ def _hough_line(cnp.ndarray img,
 
     offset = <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
                                    img.shape[1] * img.shape[1]))
-    max_distance = 2 * offset + 1
+    max_distance = 2 * offset + 1  # Length of d axis of accumulator.
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
+    # Distances corresponding to each element of d axis.
     bins = np.linspace(-offset, offset, max_distance)
 
     # compute the nonzero indexes
@@ -317,10 +318,12 @@ def _hough_line(cnp.ndarray img,
     nidxs = y_idxs.shape[0]  # x and y are the same shape
     nthetas = theta.shape[0]
     with nogil:
-        for i in range(nidxs):
-            x = x_idxs[i]
+        for i in range(nidxs):  # For every non-zero point in image.
+            x = x_idxs[i]  # Fetch coordinate of point.
             y = y_idxs[i]
-            for j in range(nthetas):
+            for j in range(nthetas):  # For every theta.
+                # Determine corresponding distance index for line going through
+                # point.
                 accum_idx = round((ctheta[j] * x + stheta[j] * y)) + offset
                 accum[accum_idx, j] += 1
 
@@ -369,20 +372,22 @@ def _probabilistic_hough_line(cnp.ndarray img, Py_ssize_t threshold,
 
     The algorithm (from [1]_) is the following:
 
-    1. Check the input image, if it is empty then finish.
+    1. Check the (binarized) input image `img`; if it is empty then finish.
     2. Update the accumulator with a single pixel randomly selected from the
        input image.
     3. Remove pixel from input image.
     4. Check if the highest peak in the accumulator that was modified by the
-       new pixel is higher than threshold. If not then goto 1.
-    5. Look along a corridor specified by the peak in the accumulator, and find
-       the longest segment of pixels either continuous or exhibiting a gap not
-       exceeding a given threshold.
+       new pixel is higher than `threshold`. If not then goto 1.
+    5. The peak in the accumulator from 4 corresponds to a line. Look along a
+       corridor specified by that line, and find the longest segment of pixels
+       either continuous or exhibiting a gap not exceeding a given threshold
+       (`line_gap`). (In our implementation we use the nearest pixel coordinate
+       on the line as the "corridor").
     6. Remove the pixels in the segment from input image.
     7. Unvote from the accumulator all the pixels from the line that have
        previously voted.
-    8. If the line segment is longer than the minimum length add it into the
-       output list.
+    8. If the line segment is longer than the minimum length (`line_length`)
+       add it into the output list.
     9. goto 1.
 
     The code for this function started as a port of the OpenCV `hough.cpp`_
