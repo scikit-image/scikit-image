@@ -1,6 +1,6 @@
 """Utilities for migration from ``skimage`` to ``skimage2``"""
 
-from functools import wraps, partial
+from functools import wraps
 import re
 from textwrap import dedent
 
@@ -15,7 +15,7 @@ COMMENT_MARKER = "<!--"
 # Identify sections specific to warning or doc.
 _PARTS_RE = re.compile(
     r'''
-    ^[ \t]*<!--+\ *cond-start\ *:\ *([a-z,]+)\ *--+>\ *\n
+    ^[ \t]*<!--+\ *cond-start\ *:\ *(?P<doctypes>[a-z,]+)\ *--+>\ *\n
     (?P<content>.*?)\n
     [ \t]*<!--+\ *cond-end\ *--+>\ *(\n|$)
     ''',
@@ -141,9 +141,7 @@ class Skimage2Migration:
 
     def _parse_migration_doc(self, doc, func_uri=None):
         """Parse Markdown migration string to give warning and doc fragment"""
-        warn_rep, doc_rep = (
-            partial(self._context_rep, ctx) for ctx in ('warning', 'doc')
-        )
+        warn_rep, doc_rep = (self._context_rep(ctx) for ctx in ('warning', 'doc'))
         warn_msg = dedent(
             _DIRECTIVE_RE.sub(
                 r'\g<content_indent>',  # Clear any directives, restore indent.
@@ -203,28 +201,42 @@ class Skimage2Migration:
             migration_url=self.migration_url,
         )
 
-    def _context_rep(self, context, match):
-        """Replacer func for ``re.sub`` to select blocks matching `context`
+    def _context_rep(self, context):
+        """Make replacer function to select blocks based on `context`.
 
-        `context` is a string that specifies which types of content blocks
-        should be retained from the `match`.  `match` itself contains (in group
-        1) the list of applicable contexts.  If `context` is within the `match`
-        group 1, then the relevant blocks are retained.
+        Returns replacer function for use with e.g ``re.sub``.
+
+        Replacer functions return strings given an input :class:`re.Match`
+        instance.
+
+        In this case, each ``match`` corresponds to what we will call a
+        "block".
+
+        `context` is a string that specifies which types of content blocks the
+        returned replacer function should select.
+
+        The returned replacer function assumes the ``match`` has a group
+        "doctypes" that is a comma-separated set of "contexts" corresponding to
+        this "block".  The replacer discards the block (returns ``''``) for any
+        blocks where `context` is not in the "doctypes" set of contexts, and
+        returns the "content" group of the match otherwise.
 
         Parameters
         ----------
         context : str
             `context` specifies the replacement context.
-        match : :class:`re.Match`
-            Match instance.
 
         Returns
         -------
-        proc_str : str
-            Processed string resulting from `match`.
+        replacer_func : function
+            Replacer function for use with ``re.sub`` etc.
         """
-        doc_types = [t.strip() for t in match.group(1).split(',')]
-        return '' if context not in doc_types else match.group('content') + '\n'
+
+        def rep_func(match):
+            doc_types = [t.strip() for t in match.group('doctypes').split(',')]
+            return '' if context not in doc_types else match.group('content') + '\n'
+
+        return rep_func
 
     def __call__(self, migration_doc, qname_old=None, qname_new=None):
         """Use `migration_doc` to specify warning and migration doc section
@@ -248,9 +260,8 @@ class Skimage2Migration:
             """Decorate `func`"""
             func_params = self._get_func_params(func, qname_old, qname_new)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
-            key = func_params['qname_old']
             if doc:
-                self.migration_docs[key] = doc
+                self.migration_docs[func_params['qname_old']] = doc
 
             @wraps(func)
             def decorated(*args, **kwargs):
