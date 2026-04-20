@@ -202,7 +202,7 @@ your work.
 scikit-image is technically complex, key infrastructure; therefore, we
 place a high premium on correctness, and on avoiding technical
 complexity that may affect maintainability. If you want to make use of
-LLMs in a significant way, it is a very good idea to **check in with us
+LLMs in a significant way, it is a good idea to **check in with us
 first**. Regardless, **always declare tool usage**.
 
 AI agents that have followed all guidelines in this document (outside
