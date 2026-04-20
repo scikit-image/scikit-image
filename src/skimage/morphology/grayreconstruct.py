@@ -1,6 +1,6 @@
 import numpy as np
 
-from .._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from ..filters._rank_order import rank_order
 from ._grayreconstruct import reconstruction_loop
 

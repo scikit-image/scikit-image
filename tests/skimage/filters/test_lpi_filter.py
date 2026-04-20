@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_, assert_equal, assert_array_almost_equal
 
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared.utils import _supported_float_type
 from skimage.data import camera, coins
 from skimage.filters import (
     LPIFilter2D,

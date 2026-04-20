@@ -4,7 +4,7 @@ from numpy.testing import assert_allclose
 from scipy import ndimage
 
 from skimage.filters import median, rank
-from skimage._shared.testing import assert_stacklevel
+from _skimage2._shared.testing import assert_stacklevel
 
 
 @pytest.fixture

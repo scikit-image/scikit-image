@@ -1,7 +1,7 @@
 from functools import reduce
 import numpy as np
 from ..draw import polygon
-from .._shared.version_requirements import require
+from _skimage2._shared.version_requirements import require
 
 
 LEFT_CLICK = 1

@@ -3,9 +3,9 @@ from textwrap import dedent
 import numpy as np
 
 import _skimage2 as ski2
+from _skimage2._shared._warnings import warn_external
 
 from ..util import PendingSkimage2Change
-from .._shared._warnings import warn_external
 from ..util.dtype import dtype_range
 
 __all__ = ['structural_similarity']

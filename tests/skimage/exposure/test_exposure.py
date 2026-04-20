@@ -17,8 +17,8 @@ from skimage import util
 from skimage.color import rgb2gray
 from skimage.exposure.exposure import intensity_range
 from skimage.util.dtype import dtype_range
-from skimage._shared._warnings import expected_warnings
-from skimage._shared.utils import _supported_float_type
+from _skimage2._shared._warnings import expected_warnings
+from _skimage2._shared.utils import _supported_float_type
 
 
 # Test integer histograms

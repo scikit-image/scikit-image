@@ -9,8 +9,8 @@ import numpy as np
 import scipy.ndimage as ndi
 
 from ..util.dtype import dtype_limits
-from .._shared.filters import gaussian
-from .._shared.utils import _supported_float_type, check_nD
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type, check_nD
 from ._canny_cy import _nonmaximum_suppression_bilinear
 
 

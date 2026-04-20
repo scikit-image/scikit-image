@@ -5,7 +5,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 import skimage as ski
 from skimage.morphology import footprint_rectangle, mirror_footprint, pad_footprint
-from skimage._shared.testing import fetch
+from _skimage2._shared.testing import fetch
 
 import _skimage2.morphology._grayscale_operators as gray
 

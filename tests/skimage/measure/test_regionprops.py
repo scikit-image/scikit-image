@@ -14,7 +14,7 @@ from numpy.testing import (
 )
 
 from skimage import data, draw, transform
-from skimage._shared import testing
+from _skimage2._shared import testing
 from skimage.measure._regionprops import (
     COL_DTYPES,
     OBJECT_COLUMNS,
