@@ -3,6 +3,11 @@ import functools
 import numpy as np
 from scipy.ndimage import uniform_filter
 
+from _skimage2._shared import utils
+from _skimage2._shared._warnings import warn_external
+from _skimage2._shared.filters import gaussian
+from _skimage2._shared.utils import _supported_float_type, check_shape_equality
+
 __all__ = ['structural_similarity']
 
 
@@ -102,10 +107,6 @@ def structural_similarity(
     np.float64(0.9408...)
     """
     # TODO Undo inlined imports once available in _skimage2 namespace
-    from skimage._shared import utils
-    from skimage._shared._warnings import warn_external
-    from skimage._shared.filters import gaussian
-    from skimage._shared.utils import _supported_float_type, check_shape_equality
     from skimage.util.arraycrop import crop
 
     if im1.dtype != im2.dtype:

@@ -3,9 +3,9 @@ import pytest
 from numpy.testing import assert_equal, assert_almost_equal
 
 from _skimage2.metrics import structural_similarity
+from _skimage2._shared.utils import _supported_float_type
 
 from skimage import data
-from skimage._shared.utils import _supported_float_type
 
 np.random.seed(5)
 cam = data.camera()
