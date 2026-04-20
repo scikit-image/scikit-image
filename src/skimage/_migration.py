@@ -119,6 +119,23 @@ class Skimage2Migration:
         self.doctests = {}
 
     def _filled_docs(self, migration_doc, params):
+        """Parse and do substitutions on input `migration_doc`
+
+        Parameters
+        ----------
+        migration_doc : str
+            Input migration doc.
+        params : dict
+            Dictionary of parameters to be used for substitution into the
+            parsed warning and docstring.
+
+        Returns
+        -------
+        warn_str : str
+            Parsed warning string, with any substitutions.
+        doct_str : str
+            Parsed docstring, with any substitutions.
+        """
         w_str, m_str = self._parse_migration_doc(migration_doc, params['qname_old'])
         return (s % params for s in (w_str, m_str))
 
@@ -151,9 +168,25 @@ class Skimage2Migration:
         return warn_msg, doc_rep
 
     def _for_anchor(self, name):
+        """Rewrite function URI `name` to be valid as ReST link"""
         return name.replace('.', '-').replace('_', '-')
 
     def _get_func_params(self, func, qname_old=None, qname_new=None):
+        """Compile dictionary of parameters from input `func`
+
+        Parameters
+        ----------
+        func : function
+        qname_old : None or str
+            If specified, use as the input original (pre-migration) name.
+        qname_new : None or str
+            If specified, use as the input migrated (post-migration) name.
+
+        Returns
+        -------
+        params : dict
+            Dictionary of parameters.
+        """
         qualname, modname = func.__qualname__, func.__module__
         qname_old = f'{modname}.{qualname}' if qname_old is None else qname_old
         qname_new = (
@@ -171,11 +204,27 @@ class Skimage2Migration:
         )
 
     def _context_rep(self, context, match):
+        """Replacer func for ``re.sub`` to select blocks matching `context`
+
+        `context` is a string that specifies which types of content blocks
+        should be retained from the `match`.  `match` itself contains (in group
+        1) the list of applicable contexts.  If `context` is within the `match`
+        group 1, then the relevant blocks are retained.
+
+        Parameters
+        ----------
+        context : str
+            `context` specifies the replacement context.
+        match : :class:`re.Match`
+            Match instance.
+
+        Returns
+        -------
+        proc_str : str
+            Processed string resulting from `match`.
+        """
         doc_types = [t.strip() for t in match.group(1).split(',')]
         return '' if context not in doc_types else match.group('content') + '\n'
-
-    def _findall_code_blocks(self, doc):
-        return [m.group('content') for m in _PYTHON_CB_RE.finditer(doc)]
 
     def __call__(self, migration_doc, qname_old=None, qname_new=None):
         """Use `migration_doc` to specify warning and migration doc section
@@ -196,6 +245,7 @@ class Skimage2Migration:
         """
 
         def decorator(func):
+            """Decorate `func`"""
             func_params = self._get_func_params(func, qname_old, qname_new)
             warn_msg, doc = self._filled_docs(migration_doc, func_params)
             key = func_params['qname_old']
