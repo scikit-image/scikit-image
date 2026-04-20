@@ -125,9 +125,9 @@ def structural_similarity(
 
             import numpy as np
             import skimage2 as ski2
-            data_range = np.iinfo(im1.dtype).max) - np.iinfo(im1.dtype).min
+            data_range = np.iinfo(im1.dtype).max - np.iinfo(im1.dtype).min
             ski2.metrics.structural_similarity(
-                im1, img2, data_range=data_range, ...
+                im1, im2, data_range=data_range, ...
             )
 
         For floating dtypes, setting `data_range` was already required in

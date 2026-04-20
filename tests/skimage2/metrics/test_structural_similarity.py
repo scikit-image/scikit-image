@@ -90,7 +90,7 @@ def test_structural_similarity_dtype(dtype):
     if np.dtype(dtype).kind in 'iub':
         data_range = 255.0
         X = (X * 255).astype(np.uint8)
-        Y = (X * 255).astype(np.uint8)
+        Y = (Y * 255).astype(np.uint8)
     else:
         data_range = 1.0
         X = X.astype(dtype, copy=False)
