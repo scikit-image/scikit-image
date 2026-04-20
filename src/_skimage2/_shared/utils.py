@@ -268,7 +268,7 @@ class deprecate_parameter:
 
     Examples
     --------
-    >>> from skimage._shared.utils import deprecate_parameter, DEPRECATED
+    >>> from _skimage2._shared.utils import deprecate_parameter, DEPRECATED
     >>> @deprecate_parameter(
     ...     "b", new_name="c", start_version="0.1", stop_version="0.3"
     ... )
@@ -970,7 +970,7 @@ def convert_to_float(image, preserve_range):
             image = image.astype(float)
     else:
         # Avoid circular import
-        from ..util.dtype import img_as_float
+        from skimage.util.dtype import img_as_float
 
         image = img_as_float(image)
     return image

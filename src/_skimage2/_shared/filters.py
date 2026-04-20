@@ -10,7 +10,7 @@ from collections.abc import Iterable
 import numpy as np
 from scipy import ndimage as ndi
 
-from .._shared.utils import (
+from .utils import (
     _supported_float_type,
     convert_to_float,
 )

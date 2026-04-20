@@ -1,6 +1,6 @@
 import numpy as np
 import skimage.io as io
-from skimage._shared import testing
+from _skimage2._shared import testing
 
 
 testing.pytest.importorskip('astropy')
