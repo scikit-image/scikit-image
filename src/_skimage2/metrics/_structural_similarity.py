@@ -98,13 +98,13 @@ def structural_similarity(
     Structural similarity between identical images is 1.0
     >>> im1 = ski.data.camera()
     >>> structural_similarity(im1, im1.copy(), data_range=im1.max())
-    np.float64(1.0)
+    1.0
 
     Override part of the image with 0:
     >>> im2 = im1.copy()
     >>> im2[:30, :] = 0
     >>> structural_similarity(im1, im2, data_range=im1.max())  # doctest: +ELLIPSIS
-    np.float64(0.9408...)
+    0.9408...
     """
     # TODO Undo inlined imports once available in _skimage2 namespace
     from skimage.util.arraycrop import crop
