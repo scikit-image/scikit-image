@@ -1,8 +1,8 @@
 import _skimage2 as ski2
-from skimage._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_decorator
 
 
-@ski2_migration_dec(
+@ski2_migration_decorator(
     r"""
 ``%(qname_old)s`` is deprecated in favor of
 ``%(qname_new)s``, which has a new signature. Parameters `length`

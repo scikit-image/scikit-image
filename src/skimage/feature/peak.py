@@ -5,10 +5,10 @@ from .. import measure
 import _skimage2 as ski2
 
 from _skimage2._shared._warnings import warn_external
-from skimage._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_decorator
 
 
-@ski2_migration_dec(
+@ski2_migration_decorator(
     """\
 ``%(qname_old)s`` is deprecated in favor of
 ``%(qname_new)s`` with new behavior:

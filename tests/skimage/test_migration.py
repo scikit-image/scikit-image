@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from skimage._migration import Skimage2Migration, ski2_migration_dec
+from skimage._migration import Skimage2Migration, ski2_migration_decorator
 
 import pytest
 
@@ -168,7 +168,7 @@ def test_peak_local_max():
     from skimage.feature import peak_local_max
     from skimage.util import PendingSkimage2Change
 
-    assert 'skimage.feature.peak_local_max' in ski2_migration_dec.migration_docs
+    assert 'skimage.feature.peak_local_max' in ski2_migration_decorator.migration_docs
 
     img = np.zeros((10, 10))
 

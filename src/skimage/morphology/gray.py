@@ -6,7 +6,7 @@ from _skimage2.morphology._footprints import _default_footprint
 from .footprints import mirror_footprint, pad_footprint
 
 import _skimage2 as ski2
-from skimage._migration import ski2_migration_dec
+from skimage._migration import ski2_migration_decorator
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat', 'black_tophat']
@@ -24,7 +24,7 @@ _SUPPORTED_MODES = {
 }
 
 # For migration doc build.
-ski2_migration_dec.extra_params['gray_funcs'] = (
+ski2_migration_decorator.extra_params['gray_funcs'] = (
     'erosion',
     'dilation',
     'opening',
@@ -140,7 +140,9 @@ def _patch_footprint_mirroring(footprint):
     return footprint
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.erosion')
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.erosion'
+)
 @_default_footprint
 def erosion(
     image,
@@ -232,7 +234,9 @@ def erosion(
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.dilation')
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.dilation'
+)
 @_default_footprint
 def dilation(
     image,
@@ -326,7 +330,9 @@ def dilation(
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.opening')
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.opening'
+)
 @_default_footprint
 def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological opening of an image.
@@ -404,7 +410,9 @@ def opening(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(_PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.closing')
+@ski2_migration_decorator(
+    _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.closing'
+)
 @_default_footprint
 def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     """Return grayscale morphological closing of an image.
@@ -483,7 +491,7 @@ def closing(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(
+@ski2_migration_decorator(
     _PENDING_SKIMAGE2_TEMPLATE_NO_MIRROR, 'skimage.morphology.white_tophat'
 )
 @_default_footprint
@@ -567,7 +575,7 @@ def white_tophat(image, footprint=None, out=None, *, mode="reflect", cval=0.0):
     return out
 
 
-@ski2_migration_dec(
+@ski2_migration_decorator(
     _PENDING_SKIMAGE2_TEMPLATE_MIRROR, 'skimage.morphology.black_tophat'
 )
 @_default_footprint

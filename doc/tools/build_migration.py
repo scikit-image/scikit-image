@@ -88,7 +88,7 @@ def get_parser():
 def get_doc_dicts():
     environ['EAGER_IMPORT'] = "true"  # Turn off lazy-loading
     import skimage as ski  # noqa: F401
-    from skimage._migration import ski2_migration_dec as sk2md
+    from skimage._migration import ski2_migration_decorator as sk2md
 
     return sk2md.migration_docs, sk2md.extra_params
 

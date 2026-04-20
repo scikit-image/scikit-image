@@ -267,4 +267,4 @@ class Skimage2Migration:
         return decorator
 
 
-ski2_migration_dec = Skimage2Migration(MIGRATION_URL)
+ski2_migration_decorator = Skimage2Migration(MIGRATION_URL)
